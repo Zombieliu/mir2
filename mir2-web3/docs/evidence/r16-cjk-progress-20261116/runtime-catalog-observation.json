@@ -1,0 +1,59 @@
+{
+  "runtimeBytes": 31452436,
+  "runtimeSha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+  "currentCatalogBytes": 1188489,
+  "currentCatalogSha256": "1c6f48a5e09577b4c01a1f674d990bd355e5adbb12c14b7925a16f8b74fa0c00",
+  "exactCurrentCatalogEmbeddedOffset": 18908023,
+  "portableCatalogPrefixOffset": 18908023,
+  "currentEntryCount": 2242,
+  "productionChanged": false,
+  "embeddedCatalog": {
+    "bytes": 1188488,
+    "sha256": "682e8bac7fb3537e79e79cdf93b8235a1fce6151558d2277eb355bdaa69ac72c",
+    "entryCount": 2242,
+    "keySamples": [
+      {
+        "key": "periodic.diary.tab.main",
+        "present": true,
+        "tc": "主線"
+      },
+      {
+        "key": "periodic.diary.tab.side",
+        "present": true,
+        "tc": "支線"
+      },
+      {
+        "key": "periodic.copy.0",
+        "present": true,
+        "tc": "日常任務"
+      },
+      {
+        "key": "ui.close",
+        "present": true,
+        "tc": "關閉"
+      }
+    ],
+    "sourcePins": {
+      "apps/game-client/client-bevy/src/native_i18n.rs": "a2a1d3fde571d7fdefa0cb05323c7b3d94486826e772c11db80828b27fd2f2a4",
+      "packages/game-data/data/native-i18n/common.json": "9bcf22b9f4ea1b6f7f514a7b0176cb6ab896d98c9e6ce75aba0d4d3c93d2d19d",
+      "packages/game-data/data/native-i18n/conquest.json": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c",
+      "packages/game-data/data/native-i18n/content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
+      "packages/game-data/data/native-i18n/extra/ar.json": "f57f06e88d12a35efa5d82e4ff91cfa8d7ef81242dd385ac7d4e204621ab17fd",
+      "packages/game-data/data/native-i18n/extra/hi.json": "53a5267ceda25831c616ebea8040357783c49013eb7fc100a34ea988566c6759",
+      "packages/game-data/data/native-i18n/extra/id.json": "3daf140a32aa9273e11350a647b8c5d25df2ebefa8ff367df5da064af1e75b5d",
+      "packages/game-data/data/native-i18n/extra/ru.json": "0760f45dc217f8aacf9ee0506a18407afcd50234733df0970ded8d3642662376",
+      "packages/game-data/data/native-i18n/extra/th.json": "a703fed4c3c4e6f01e760f1da7c4a2f11bc3da32f61ef3199d807410a9689f6f",
+      "packages/game-data/data/native-i18n/extra/vi.json": "c39c8c32c8374731b94e6dd0b2907f0376a44fc5c678a7dbadbdb3d3fd4d87cb",
+      "packages/game-data/data/native-i18n/extra/zh-CN.json": "33a8372065605d060590bdd433fbe4c8c7c03e7c8ce201a3107fae574c6e7097",
+      "packages/game-data/data/native-i18n/game.json": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
+      "packages/game-data/data/native-i18n/help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
+      "packages/game-data/data/native-i18n/npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
+      "packages/game-data/data/native-i18n/npc-prose.json": "f19aa36581483663d2895abc8868b6196eee34ccb57179f1fe40b693053dd894",
+      "packages/game-data/data/native-i18n/periodic.json": "a6ade91e8ae348ed47336c851faa0e9ec41900178f779572f22c6ef5a6c76757",
+      "packages/game-data/data/native-i18n/procurement.json": "ca954bb3f3a210c66371901a696c07212a310a3f19ef66f7a1466012cd5ad878",
+      "packages/game-data/data/native-i18n/quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
+      "packages/game-data/data/native-i18n/shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
+      "packages/game-data/data/native-i18n/wallet.json": "ac7bb305751c7cd82b5b14909b2c0cd4071c10e4925bfae1c8219254c236ec64"
+    }
+  }
+}

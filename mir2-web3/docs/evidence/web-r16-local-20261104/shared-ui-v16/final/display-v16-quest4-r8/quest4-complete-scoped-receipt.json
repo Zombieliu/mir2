@@ -1,0 +1,857 @@
+{
+  "schema": "r16-newcomer-v2-quest4-complete-scoped-receipt/1",
+  "passed": true,
+  "sealedAt": "2026-11-05T17:12:04.430Z",
+  "scope": {
+    "sameOwnOrdinaryQaCharacterAcrossSessions": true,
+    "singleUninterruptedJourney": false,
+    "questId": 2110004,
+    "normalUiOnly": true,
+    "modelCallsRequested": 0,
+    "ownerOrAloAccessed": false,
+    "qaOrAdminCommands": 0,
+    "saveDataEdits": false,
+    "gameOrServerRulesChanged": false,
+    "priorQuestRewardsRepeated": false
+  },
+  "release": {
+    "coordinatorReportedBuildId": "LJMP040z-kH8ldOIs5Y6V",
+    "observedRenderer": [
+      "bevy-e7afab3714b4abba"
+    ]
+  },
+  "passiveFencing": {
+    "learningProof": "../onboarding-v13-quest4-r1/onboarding-v11-browser-proof.json",
+    "learn": {
+      "normalNativeBagUse": true,
+      "bookQuantityBefore": 1,
+      "bookQuantityAfter": 0,
+      "matchingUseItemAck": true,
+      "newMagicSequence": 711,
+      "learned": true,
+      "passive": true
+    },
+    "practiceProof": "../onboarding-v13-quest4-r2/onboarding-v11-browser-proof.json",
+    "practice": [
+      {
+        "monster": "Scarecrow",
+        "objectId": 206644,
+        "normalOwnHitSequence": 681,
+        "deathSequence": null,
+        "serverQuestLog": [
+          {
+            "questId": 2110001,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Report to Assistant Jane",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110002,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Equip a weapon you can use",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110003,
+            "stage": "completed",
+            "current": 4,
+            "required": 4,
+            "objectives": [
+              {
+                "label": "Defeat 2 Scarecrow.",
+                "current": 2,
+                "required": 2,
+                "done": true
+              },
+              {
+                "label": "Defeat 2 RakingCat.",
+                "current": 2,
+                "required": 2,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110004,
+            "stage": "inProgress",
+            "current": 1,
+            "required": 3,
+            "objectives": [
+              {
+                "label": "Defeat 2 Oma.",
+                "current": 0,
+                "required": 2,
+                "done": false
+              },
+              {
+                "label": "Complete your class practice",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "knownAfterRelogin": true,
+    "activeSpellCastsRequested": 0
+  },
+  "ordinaryClothing": {
+    "proof": "../display-v16-quest4-r1/onboarding-v11-browser-proof.json",
+    "purchase": [
+      {
+        "itemName": "BaseDress(M)",
+        "bought": true,
+        "quantity": 1,
+        "observedUnitGold": 120,
+        "chargedGold": 120,
+        "goldBefore": 150,
+        "goldAfter": 30,
+        "quantityBefore": 0,
+        "quantityAfter": 1,
+        "ownedUidHashes": [
+          "31a7104f686c7bea0dd8cc6e2578a18301161d37155fefdec45d368aefe7de37"
+        ],
+        "onePurchaseCommand": true,
+        "matchingDurableReceipt": true,
+        "incomingUidHash": "31a7104f686c7bea0dd8cc6e2578a18301161d37155fefdec45d368aefe7de37",
+        "receiptSequence": 670
+      }
+    ],
+    "oneEquipCommand": true,
+    "matchingSuccessfulEquip": [
+      {
+        "sequence": 674,
+        "method": "EquipItem",
+        "phase": "fourth-quest-native-diary-and-passive-fencing",
+        "success": true,
+        "uniqueId": 43122690
+      }
+    ],
+    "retainedEquipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      },
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      }
+    ]
+  },
+  "ordinaryMedicine": {
+    "proof": "../display-v16-quest4-r2/onboarding-v11-browser-proof.json",
+    "inputs": [
+      {
+        "phase": "fourth-quest-natural-two-oma-hunt",
+        "slot": 0,
+        "chord": "Digit1",
+        "hpBefore": 28,
+        "quantityBefore": 1,
+        "visibleNpcShopWindows": 0,
+        "publicBefore": {
+          "keyboard": null,
+          "host": {
+            "shortcut": null,
+            "equipment": null
+          }
+        },
+        "publicTransitions": [
+          {
+            "at": 1793891152301,
+            "status": {
+              "keyboard": {
+                "at": 1793891152071,
+                "actions": [
+                  "Belt1"
+                ],
+                "stage": "dispatch",
+                "reason": "gameplay-action",
+                "accepted": null,
+                "handled": true,
+                "repeat": false,
+                "focused": true,
+                "visible": true,
+                "editable": false,
+                "sceneInteractionReady": true,
+                "gameplayCallbackPresent": true,
+                "defaultPrevented": false,
+                "heroActive": false,
+                "heroTransitioning": false,
+                "heroWorldBlocked": false,
+                "heroLeaseHeld": false
+              },
+              "host": {
+                "shortcut": {
+                  "stage": "use",
+                  "reason": "accepted",
+                  "slot": 0,
+                  "repeat": false,
+                  "itemPresent": true,
+                  "identityValid": true,
+                  "useAccepted": true,
+                  "gates": {
+                    "scene": true,
+                    "playerMode": true,
+                    "owner": true,
+                    "referenceWindows": true,
+                    "heroUi": true,
+                    "heroPet": true,
+                    "cashShop": true,
+                    "equipment": true,
+                    "focus": true,
+                    "visible": true
+                  }
+                },
+                "equipment": null
+              }
+            }
+          }
+        ],
+        "trustedKeyEventStart": 0,
+        "firstRejection": null,
+        "publicAfter": {
+          "keyboard": {
+            "at": 1793891152071,
+            "actions": [
+              "Belt1"
+            ],
+            "stage": "dispatch",
+            "reason": "gameplay-action",
+            "accepted": null,
+            "handled": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "host": {
+            "shortcut": {
+              "stage": "use",
+              "reason": "accepted",
+              "slot": 0,
+              "repeat": false,
+              "itemPresent": true,
+              "identityValid": true,
+              "useAccepted": true,
+              "gates": {
+                "scene": true,
+                "playerMode": true,
+                "owner": true,
+                "referenceWindows": true,
+                "heroUi": true,
+                "heroPet": true,
+                "cashShop": true,
+                "equipment": true,
+                "focus": true,
+                "visible": true
+              }
+            },
+            "equipment": null
+          }
+        },
+        "useItemRequests": 1,
+        "trustedKeyEventEnd": 2
+      }
+    ],
+    "trustedEvents": [
+      {
+        "phase": "fourth-quest-natural-two-oma-hunt",
+        "receivedAt": 1793891152298,
+        "type": "keydown",
+        "code": "Digit1",
+        "screen": "game",
+        "eventTime": 255534,
+        "trusted": true,
+        "repeat": false,
+        "defaultPreventedBefore": true,
+        "defaultPreventedAfter": true,
+        "documentFocused": true,
+        "visible": true,
+        "targetEditable": false,
+        "activeCanvas": false,
+        "alt": false,
+        "ctrl": false,
+        "shift": false,
+        "meta": false
+      },
+      {
+        "phase": "fourth-quest-natural-two-oma-hunt",
+        "receivedAt": 1793891152300,
+        "type": "keyup",
+        "code": "Digit1",
+        "screen": "game",
+        "eventTime": 255633.5,
+        "trusted": true,
+        "repeat": false,
+        "defaultPreventedBefore": false,
+        "defaultPreventedAfter": true,
+        "documentFocused": true,
+        "visible": true,
+        "targetEditable": false,
+        "activeCanvas": false,
+        "alt": false,
+        "ctrl": false,
+        "shift": false,
+        "meta": false
+      }
+    ],
+    "ackAndQuantity": [
+      {
+        "before": {
+          "hp": 28,
+          "maxHp": 60,
+          "mp": 35,
+          "maxMp": 35,
+          "dead": false,
+          "position": {
+            "x": 267,
+            "y": 532
+          }
+        },
+        "after": {
+          "hp": 28,
+          "maxHp": 60,
+          "mp": 35,
+          "maxMp": 35,
+          "dead": false,
+          "position": {
+            "x": 267,
+            "y": 532
+          }
+        },
+        "smallHpMedicineBefore": 1,
+        "smallHpMedicineAfter": 0,
+        "matchingUseItemAckSequence": 1615
+      }
+    ],
+    "hpEvents": [
+      {
+        "sequence": 1606,
+        "receivedAtMs": 1793891150214,
+        "method": "HealthChanged",
+        "hp": 28,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 267,
+          "y": 532
+        }
+      },
+      {
+        "sequence": 1620,
+        "receivedAtMs": 1793891152571,
+        "method": "HealthChanged",
+        "hp": 38,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 267,
+          "y": 532
+        }
+      },
+      {
+        "sequence": 1622,
+        "receivedAtMs": 1793891152572,
+        "method": "HealthChanged",
+        "hp": 48,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 267,
+          "y": 532
+        }
+      },
+      {
+        "sequence": 1625,
+        "receivedAtMs": 1793891152692,
+        "method": "HealthChanged",
+        "hp": 58,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 267,
+          "y": 532
+        }
+      },
+      {
+        "sequence": 1627,
+        "receivedAtMs": 1793891152928,
+        "method": "HealthChanged",
+        "hp": 52,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 267,
+          "y": 532
+        }
+      }
+    ]
+  },
+  "naturalOmaKills": [
+    {
+      "proof": "../display-v16-quest4-r5/onboarding-v11-browser-proof.json",
+      "objectId": 205637,
+      "name": "Oma",
+      "ownHitSequence": 916,
+      "deathSequence": 919,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110004,
+          "stage": "inProgress",
+          "current": 2,
+          "required": 3,
+          "objectives": [
+            {
+              "current": 1,
+              "required": 2,
+              "done": false
+            },
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "proof": "../display-v16-quest4-r7/onboarding-v11-browser-proof.json",
+      "objectId": 205626,
+      "name": "Oma",
+      "ownHitSequence": 801,
+      "deathSequence": 804,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110004,
+          "stage": "readyToTurnIn",
+          "current": null,
+          "required": null,
+          "objectives": [
+            {
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            },
+            {}
+          ]
+        }
+      ]
+    }
+  ],
+  "delivery": {
+    "proof": "../display-v16-quest4-r7/onboarding-v11-browser-proof.json",
+    "oneFinishQuest": true,
+    "matchingOperation": {
+      "questId": 2110004,
+      "operation": "finishQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 894,
+      "ackSequence": 904,
+      "completeQuestObserved": true,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110004,
+          "stage": "completed",
+          "current": 3,
+          "required": 3,
+          "objectives": [
+            {
+              "label": "Defeat 2 Oma.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Complete your class practice",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        }
+      ]
+    },
+    "goldBefore": 30,
+    "goldAfter": 180,
+    "goldDelta": 150,
+    "experience": {
+      "earned": 1200,
+      "before": {
+        "level": 7,
+        "experience": 378,
+        "maxExperience": 1200,
+        "source": "R7 read-only public HUD draw plan immediately before real finish click; own-role level from ordinary login"
+      },
+      "immediateAfter": {
+        "experience": 378,
+        "maxExperience": 1700,
+        "source": "R7 public HUD draw plan after completion snapshot"
+      },
+      "authoritativeAfter": {
+        "level": 8,
+        "experience": 378,
+        "maxExperience": 1700
+      },
+      "rolloverThresholds": [
+        1200
+      ],
+      "formula": "1200 - 378 + 378 = 1200",
+      "separateDeliveryGainExperiencePacketObserved": false,
+      "sourceExplanation": "quests.rs applies the shared progression state and discards returned packet vector; post-completion snapshot carries level/experience/HP",
+      "sourceHashes": {
+        "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+        "quests": "7fa0d7341bf5cd9a178d4e37fcfb970b3a76166baaa06fff91700e7eedb2cd7e"
+      }
+    }
+  },
+  "persistence": {
+    "proof": "onboarding-v11-browser-proof.json",
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004
+    ],
+    "progressionBeforeLogout": {
+      "level": 8,
+      "experience": 378,
+      "maxExperience": 1700
+    },
+    "progressionAfterRelogin": {
+      "level": 8,
+      "experience": 378,
+      "maxExperience": 1700
+    },
+    "exactExperienceRetained": true,
+    "learnedFencingBeforeLogout": true,
+    "learnedFencingAfterRelogin": true,
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false,
+    "finalGold": 180,
+    "smallHpMedicine": 0,
+    "fencingBooks": 0,
+    "finalProgression": {
+      "level": 8,
+      "experience": 378,
+      "maxExperience": 1700
+    },
+    "finalHealth": {
+      "hp": 69,
+      "maxHp": 69,
+      "mp": 39,
+      "maxMp": 39
+    },
+    "cleanup": {
+      "ordinaryLogout": true,
+      "browserClosed": true
+    }
+  },
+  "finalFocusedRun": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+        "passed": true
+      },
+      {
+        "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+        "passed": true
+      }
+    ],
+    "driverErrors": 0,
+    "failedNetwork": 0,
+    "httpErrors": 0,
+    "consoleErrors": 0,
+    "consoleWarnings": 10,
+    "finishQuestCommands": 0,
+    "newAccountCommands": 0,
+    "newCharacterCommands": 0
+  },
+  "retainedBoundary": {
+    "r7OriginalOverallPassed": false,
+    "r7Error": {
+      "phase": "fourth-quest-return-town-normal-delivery",
+      "name": "FOURTH_QUEST_EXACT_1200_EXPERIENCE_NOT_OBSERVED",
+      "hash": "5ff6cd6885c477e8e0223592a2181178086fa5922b5d0b0ff9867979d5884c20"
+    },
+    "explanation": "The extra helper requirement for a standalone experience packet was incorrect. R7 remains false and unchanged; its matching completion ACK, completed quest and observed reward state remain valid. R8 only verified saved completion through normal login and UI; no reward was claimed again."
+  },
+  "recommendedScreenshots": [
+    "../display-v16-quest4-r7/03-before-finishQuest-2110004.png",
+    "03-saved-progress-native-diary.png"
+  ],
+  "evidence": [
+    {
+      "path": "../onboarding-v13-quest4-r1/onboarding-v11-browser-proof.json",
+      "bytes": 61982,
+      "sha256": "2e766bcdf48119bb4472aa8709cc629cad2171d98da48060caca13ab9806fd6c"
+    },
+    {
+      "path": "../onboarding-v13-quest4-r2/onboarding-v11-browser-proof.json",
+      "bytes": 65125,
+      "sha256": "f1f14de025b55b45c1045d83ac857fedbf1afd1454a7e522bf3cbdbe78dec01d"
+    },
+    {
+      "path": "../display-v16-quest4-r1/onboarding-v11-browser-proof.json",
+      "bytes": 45835,
+      "sha256": "76af6276d09df33798339b844583e9aa35233d19782cc4f292357b3d6116abb7"
+    },
+    {
+      "path": "../display-v16-quest4-r2/onboarding-v11-browser-proof.json",
+      "bytes": 133933,
+      "sha256": "152691863299dff880c12cfd1ae2e3246e0d1f840aeccb358d9cece93a40a986"
+    },
+    {
+      "path": "../display-v16-quest4-r3/onboarding-v11-browser-proof.json",
+      "bytes": 52684,
+      "sha256": "250b6d7604595c2c3a0ffe71b4a9621d876fb5557773d04a2a76f02e2129748e"
+    },
+    {
+      "path": "../display-v16-quest4-r4/onboarding-v11-browser-proof.json",
+      "bytes": 222651,
+      "sha256": "ff9ff2903469e309cae34d6fa3dc26404449aacf6d62dc97ac76f13b2959699b"
+    },
+    {
+      "path": "../display-v16-quest4-r5/onboarding-v11-browser-proof.json",
+      "bytes": 199983,
+      "sha256": "44378fb6462f91f7bb9e35f996efe980b0e0cf4385db013846b69e8efcaf4bef"
+    },
+    {
+      "path": "../display-v16-quest4-r6/onboarding-v11-browser-proof.json",
+      "bytes": 249519,
+      "sha256": "46c783db6209ae2a96e4a1983e33db5d41c545a2d341e753edb7c2325a6e584d"
+    },
+    {
+      "path": "../display-v16-quest4-r7/onboarding-v11-browser-proof.json",
+      "bytes": 72066,
+      "sha256": "182ac85b00622ea71d4b9cf20d6969864ddd0081644376233978093df2d1f5d9"
+    },
+    {
+      "path": "../display-v16-quest4-r8/onboarding-v11-browser-proof.json",
+      "bytes": 35504,
+      "sha256": "03abfddde2dfb9263675c5762ba807fd67385af1769908aa656c11927028a1e3"
+    },
+    {
+      "path": "01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1221041,
+      "sha256": "f2fc8925465b05e1781b390cf07669ccfe30ba6cb819a0efb497ee680efb75e9"
+    },
+    {
+      "path": "02-fresh-village-native-task-card.png",
+      "bytes": 1216053,
+      "sha256": "4c3b0e1c5f212b02ea09d083a9f122cf3af98b0692e8b8546489d5ebcacfbf67"
+    },
+    {
+      "path": "03-saved-progress-native-diary.png",
+      "bytes": 1138915,
+      "sha256": "202d84735744110033e6e4d0e61e68a6b57077e9ea9d19a8c1cef115985643e0"
+    }
+  ],
+  "secretScan": {
+    "scope": "Node-only exact scan of own QA identity values and the public realm value in text artifacts; no original Owner/runtime/key files read",
+    "textFilesScanned": 29,
+    "matches": 0
+  },
+  "runner": {
+    "name": "runner.executed.mjs",
+    "sha256": "d9d1befe09e9350b3a326d8ff6a1a5f86c17019c50bdbb701c51592771e9d133"
+  }
+}

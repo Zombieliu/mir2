@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-27T21:41:24.448Z",
+  "baseCommit": "1e27cef7fb84f6d9016642111730357244d952de",
+  "scope": "Fresh storage-optimization release; does not reuse previous functional/capacity results",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 338599,
+      "sha256": "aa6194d0a7409452c2e44ed5deac9b2383ad61908ceb85f7cbea209c6199cb94"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+      "bytes": 888946,
+      "sha256": "5f6a59c8735a42e2f884d94492ed43fb36647857e5dc81b035ab74436b6ca655"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    }
+  ],
+  "testReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\verified-selected-tests-v1.json",
+    "bytes": 1169,
+    "sha256": "5d03586073d118793eea6806399660c41edcaab9b39f861337bd7331f894e8bb"
+  },
+  "release": {
+    "command": "rustup run 1.95.0 cargo build --locked --offline --release --jobs 4 -p mir2-gateway --bin mir2-gateway",
+    "rootObservedExitCode": 0,
+    "stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\gateway-release.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\gateway-release.stderr.log",
+      "bytes": 57423,
+      "sha256": "ee34a60014afc13129c4bda36558a0a3f4b9a1abbeaff5c3faf5083b890bd26d"
+    }
+  },
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\bin\\mir2-gateway.exe",
+    "bytes": 87432192,
+    "sha256": "9451e972e16281320867c2135695e942e21ae442f97e90f22f697ffa4722fb28"
+  },
+  "fullLifecyclePassed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

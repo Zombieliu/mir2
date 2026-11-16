@@ -1,0 +1,154 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-final-targeted-checker-selftest-r6.json",
+    "bytes": 5467,
+    "sha256": "465bde6e1d08d3822dee83f0ad976f206771496235c60449afb4e5b4c9cd2de0"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.final-targeted-checker-selftest.v1",
+    "passed": true,
+    "fixtureOnly": true,
+    "actualCandidateInspected": false,
+    "actualFinalTargetRun": false,
+    "processesStopped": false,
+    "sourceEdited": false,
+    "newCertificatesOrKeys": false,
+    "signingPerformed": false,
+    "truststoreChanged": false,
+    "checkerSha256": "24B82F2AC4AFD4FABAC8B40235931C646CCC1BC27DCBF5C9F9937B5EDBDFF68B",
+    "fixtureRoot": "C:\\mir2-build\\unified-20261029\\unified-final-targeted-selftest-27cc0f1cbf5c477997e959fa65d838ae",
+    "cases": [
+      {
+        "name": "exact-source-and-real-fiveclass-policy",
+        "result": "passed"
+      },
+      {
+        "name": "original-report-stageguid-and-summary-bindings",
+        "result": "passed"
+      },
+      {
+        "name": "original-report-flag-rewrite-forbidden",
+        "result": "rejected-as-required",
+        "reason": "Original false requireCurrentSource must be preserved"
+      },
+      {
+        "name": "wrong-original-stageguid-rejected",
+        "result": "rejected-as-required",
+        "reason": "Original stage GUID path changed"
+      },
+      {
+        "name": "valid-small-canonical-metadata-binding",
+        "result": "passed"
+      },
+      {
+        "name": "wrong-manifest-control-hash-rejected",
+        "result": "rejected-as-required",
+        "reason": "SHA256 pin mismatch: C:\\mir2-build\\unified-20261029\\unified-final-targeted-selftest-27cc0f1cbf5c477997e959fa65d838ae\\WN-CANDIDATE-20261029-unified-11\\PACKAGE-MANIFEST.json"
+      },
+      {
+        "name": "wrong-version-manifest-binding-rejected",
+        "result": "rejected-as-required",
+        "reason": "Final metadata differs from producer strict report"
+      },
+      {
+        "name": "wrong-canonical-control-statement-rejected",
+        "result": "rejected-as-required",
+        "reason": "Final canonical signed control binding invalid"
+      },
+      {
+        "name": "invalid-cms-is-never-admitted",
+        "result": "rejected-as-required",
+        "reason": "Independent final CMS signature/signer/EKU/validity verification failed"
+      },
+      {
+        "name": "wrong-signer-invalid-signature-fails-closed",
+        "result": "passed"
+      },
+      {
+        "name": "clean-small-tree-reparse-dual-ads-and-allowlist",
+        "result": "passed"
+      },
+      {
+        "name": "forbidden-empty-directory-rejected",
+        "result": "rejected-as-required",
+        "reason": "package directory outside strict allowlist: forbidden-empty"
+      },
+      {
+        "name": "forbidden-file-rejected",
+        "result": "rejected-as-required",
+        "reason": "package file outside strict path/extension allowlist: payload.ps1"
+      },
+      {
+        "name": "reparse-junction-rejected",
+        "result": "rejected-as-required",
+        "reason": "reparse point in package rejected: C:\\mir2-build\\unified-20261029\\unified-final-targeted-selftest-27cc0f1cbf5c477997e959fa65d838ae\\WN-CANDIDATE-20261029-unified-11\\junction"
+      },
+      {
+        "name": "file-ads-rejected-by-exact-dual-enumerator",
+        "result": "rejected-as-required",
+        "reason": "named NTFS stream rejected: C:\\mir2-build\\unified-20261029\\unified-final-targeted-selftest-27cc0f1cbf5c477997e959fa65d838ae\\WN-CANDIDATE-20261029-unified-11\\mir2-platform-windows.exe:FinalTargetedFixture"
+      },
+      {
+        "name": "directory-ads-rejected-by-exact-dual-enumerator",
+        "result": "rejected-as-required",
+        "reason": "named NTFS stream rejected: C:\\mir2-build\\unified-20261029\\unified-final-targeted-selftest-27cc0f1cbf5c477997e959fa65d838ae\\WN-CANDIDATE-20261029-unified-11:FinalTargetedFixture"
+      },
+      {
+        "name": "unreviewed-control-rejected-before-target-scan",
+        "result": "rejected-as-required",
+        "reason": "Reviewed control schema required"
+      },
+      {
+        "name": "wrong-finalroot-control-rejected-before-target-scan",
+        "result": "rejected-as-required",
+        "reason": "Only the exact reviewed final Candidate is eligible"
+      },
+      {
+        "name": "wrong-manifest-version-control-rejected-before-target-scan",
+        "result": "rejected-as-required",
+        "reason": "Exact root-reviewed VERSION/manifest pins required"
+      },
+      {
+        "name": "unchanged-python-small-fixture-fullhash-and-closure",
+        "result": "passed"
+      },
+      {
+        "name": "unchanged-python-tampered-payload-rejected",
+        "result": "rejected-as-required",
+        "reason": "Python correctly rejected tampered payload"
+      },
+      {
+        "name": "fresh-zero-byte-second-reader-log-accepted",
+        "result": "passed"
+      },
+      {
+        "name": "pre-invocation-original-report-rejected",
+        "result": "rejected-as-required",
+        "reason": "Fresh report/summary/duplicate-log chronology does not prove this invocation returned"
+      },
+      {
+        "name": "pre-report-producer-summary-rejected",
+        "result": "rejected-as-required",
+        "reason": "Fresh report/summary/duplicate-log chronology does not prove this invocation returned"
+      },
+      {
+        "name": "pre-summary-second-reader-log-rejected",
+        "result": "rejected-as-required",
+        "reason": "Fresh report/summary/duplicate-log chronology does not prove this invocation returned"
+      }
+    ],
+    "failure": null,
+    "cmsPositiveTest": "not performed; no public completed staged metadata supplied; no keys/certificates created",
+    "productionAcceptance": false,
+    "recordedUtc": "2026-10-29T16:49:55.6286265+00:00"
+  },
+  "phase": "25 synthetic cases;21baseline+4chronology; not added to oldr5",
+  "rawLog": {
+    "filename": "unified-final-targeted-checker-selftest-r6.log",
+    "bytes": 8065,
+    "sha256": "07c58afb210bf9982544d85e8157b5f8c4933dd7beef446e54f7ccbcb2cb1316"
+  }
+}

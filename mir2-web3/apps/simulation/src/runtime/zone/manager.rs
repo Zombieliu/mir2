@@ -1,43 +1,1063 @@
 use std::collections::BTreeMap;
 
+use super::online_identity::{OnlineIdentityBook, OnlinePresenceSnapshot};
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine as _;
 use bevy_tasks::{ComputeTaskPool, TaskPool};
 use mir2_protocol::{MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 /// Below this many zones, parallel ticking's task overhead outweighs the gain,
 /// so `tick_all` runs inline. Measured break-even; see the multi-zone scaling
 /// section of `examples/zone_load.rs` and docs/L2-ECS-ZONE-DESIGN.md.
 const PARALLEL_TICK_MIN_ZONES: usize = 4;
-const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 2;
+const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 4;
 
+fn with_action_boundary(mut zone: ZoneRuntime, boundary: &Option<std::sync::Arc<dyn super::ZoneActionBoundary>>) -> ZoneRuntime {
+    if let Some(boundary) = boundary { zone.set_action_boundary(boundary.clone()); }
+    zone
+}
+
+use super::contract::LogicalWorldId;
+use super::partition::{PartitionId, PartitionKey, PartitionLocation, ZonePartitionDescriptor};
 use super::runtime::ZoneRuntime;
 use super::types::{
-    GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot,
-    ZoneOutbound,
+    GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterKillAward,
+    ZoneNativeMonsterSnapshot, ZoneOutbound,
 };
+
+#[path = "npc_population.rs"]
+mod npc_population;
+pub use npc_population::ZoneNpcPopulationReadSet;
+#[path = "manager_admission.rs"]
+mod admission;
+pub use admission::ManagerAdmissionReceipt;
+use admission::ManagerMapRandomMaster;
+
+#[cfg(test)]
+#[path = "manager_presence_publication_tests.rs"]
+mod presence_publication_tests;
+#[cfg(test)]
+#[path = "manager_reconstructed_admission_tests.rs"]
+mod reconstructed_admission_tests;
 
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
 #[derive(Debug)]
 pub struct ZoneManager {
+    action_boundary: Option<std::sync::Arc<dyn super::ZoneActionBoundary>>,
     zones: BTreeMap<ZoneKey, ZoneRuntime>,
     session_zones: BTreeMap<SessionId, ZoneKey>,
+    online_identities: OnlineIdentityBook,
+    logical_world: Option<LogicalWorldId>,
+    admission_sequence: u64,
+    last_admission: Option<ManagerAdmissionReceipt>,
+    map_random_master: ManagerMapRandomMaster,
+}
+
+/// A call-local proof for the immediately following chat projection only.
+/// No command admission or runtime handler work is skipped.
+#[derive(Clone, Copy)]
+enum ChatProjectionPresenceRefresh {
+    BeforeAndAfter,
+    ExperienceProfileAlreadyRefreshed,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ZoneManagerCheckpoint {
     version: u32,
     zones: Vec<(ZoneKey, String)>,
     session_zones: BTreeMap<SessionId, ZoneKey>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    online_identities: Option<OnlineIdentityBook>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    state_root: String,
+    logical_world: Option<LogicalWorldId>,
+    admission_sequence: u64,
+    last_admission: Option<ManagerAdmissionReceipt>,
+    map_random_master: ManagerMapRandomMaster,
+}
+
+/// Exact v2/v3 shape. New admission fields are rejected before old roots are
+/// checked, rather than being silently imported outside their commitment.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LegacyZoneManagerCheckpoint {
+    version: u32,
+    zones: Vec<(ZoneKey, String)>,
+    session_zones: BTreeMap<SessionId, ZoneKey>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    online_identities: Option<OnlineIdentityBook>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    state_root: String,
+}
+
+impl LegacyZoneManagerCheckpoint {
+    fn canonical_root(&self) -> Result<String, String> {
+        let mut canonical = self.clone();
+        canonical.state_root.clear();
+        let bytes = serde_json::to_vec(&canonical)
+            .map_err(|e| format!("legacy manager commitment: {e}"))?;
+        let mut hasher = Sha256::new();
+        hasher.update(b"obelisk.mir2.zone-manager.v3\0");
+        hasher.update(bytes);
+        Ok(hasher
+            .finalize()
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect())
+    }
+}
+
+impl ZoneManagerCheckpoint {
+    fn canonical_root(&self) -> Result<String, String> {
+        let mut canonical = self.clone();
+        canonical.state_root.clear();
+        let bytes =
+            serde_json::to_vec(&canonical).map_err(|e| format!("manager commitment: {e}"))?;
+        let mut hasher = Sha256::new();
+        hasher.update(b"obelisk.mir2.zone-manager.v4\0");
+        hasher.update(bytes);
+        Ok(hasher
+            .finalize()
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect())
+    }
 }
 
 impl ZoneManager {
+    /// Trusted host dependency, never admitted or encoded by checkpoints.
+    pub fn set_action_boundary(&mut self, boundary: std::sync::Arc<dyn super::ZoneActionBoundary>) {
+        self.action_boundary = Some(boundary.clone());
+        for zone in self.zones.values_mut() { zone.set_action_boundary(boundary.clone()); }
+    }
+    /// In-process reference fork, not cold deserialization or owner admission.
+    /// Retains the same online identity namespace and next-identity counters so
+    /// execution strategies can compare full outputs and committed state.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn fork_for_deterministic_reference(&self) -> Self {
+        self.transaction_fork()
+    }
+
+    /// Stage an in-process transaction without cold-restoring serialized world
+    /// bytes. Live online, monster and pet authority remain in the same epoch.
+    pub fn transaction_fork(&self) -> Self {
+        Self {
+            action_boundary: self.action_boundary.clone(),
+            zones: self
+                .zones
+                .iter()
+                .map(|(key, runtime)| (key.clone(), runtime.transaction_fork()))
+                .collect(),
+            session_zones: self.session_zones.clone(),
+            online_identities: self.online_identities.clone(),
+            logical_world: self.logical_world.clone(),
+            admission_sequence: self.admission_sequence,
+            last_admission: self.last_admission.clone(),
+            map_random_master: self.map_random_master.clone(),
+        }
+    }
+
+    /// The initial directory has no independently mutable state: each retained
+    /// ZoneRuntime owns partition zero. All supported checkpoint schemas derive
+    /// this projection; legacy commitments are checked before schema migration.
+    pub fn partition_directory(&self) -> Vec<ZonePartitionDescriptor> {
+        self.zones
+            .keys()
+            .cloned()
+            .map(ZonePartitionDescriptor::whole_zone)
+            .collect()
+    }
+
+    pub fn partition_for_key(&self, key: &ZoneKey) -> Option<PartitionKey> {
+        self.zones
+            .contains_key(key)
+            .then(|| PartitionKey::whole_zone(key.clone()))
+    }
+
+    pub fn partition_for_session(&self, session_id: &SessionId) -> Option<PartitionKey> {
+        self.partition_for_key(self.session_zones.get(session_id)?)
+    }
+
+    pub fn partition_descriptor(&self, key: &ZoneKey) -> Option<ZonePartitionDescriptor> {
+        self.partition_for_key(key)
+            .map(|partition| ZonePartitionDescriptor::whole_zone(partition.zone))
+    }
+
+    /// Resolves geometry only; this query does not authorize a move or prove a
+    /// tile walkable. The existing Zone collision/occupancy rules still do that.
+    pub fn partition_at(&self, key: &ZoneKey, position: &Point) -> Option<PartitionLocation> {
+        Some(self.partition_descriptor(key)?.locate(position))
+    }
+
+    pub fn zone_for_partition(&self, partition: &PartitionKey) -> Option<&ZoneRuntime> {
+        if partition.partition_id != PartitionId::WHOLE_ZONE {
+            return None;
+        }
+        self.zones.get(&partition.zone)
+    }
+
+    fn online_snapshot(&self) -> OnlinePresenceSnapshot {
+        self.zones
+            .values()
+            .flat_map(|zone| zone.online_player_snapshot(&self.online_identities))
+            .collect()
+    }
+
+    fn online_presence_is_current(&self) -> bool {
+        // Count the exact source filter without allocating a dedupe map.
+        // A duplicate live session in two source Zones must use the reference
+        // last-wins snapshot path, including unusual trusted installations.
+        let mut source_count = 0usize;
+        for (session, owner) in self.online_identities.owners() {
+            let mut sources = self
+                .zones
+                .values()
+                .filter(|zone| zone.has_online_projection_player(session, owner));
+            if sources.next().is_some() {
+                if sources.next().is_some() {
+                    return false;
+                }
+                let Some(next) = source_count.checked_add(1) else {
+                    return false;
+                };
+                source_count = next;
+            }
+        }
+        self.zones.values().all(|recipient| {
+            recipient.online_presence_matches_sources(
+                self.zones.values(),
+                &self.online_identities,
+                source_count,
+            )
+        })
+    }
+
+    fn refresh_online_presence(&mut self) {
+        // Complete every borrowed comparison before any Zone is mutated.
+        // Equal projections still run the original owner pruning in order.
+        if self.online_presence_is_current() {
+            for zone in self.zones.values_mut() {
+                zone.ingest_unchanged_online_presence(true);
+            }
+            return;
+        }
+        let snapshot = self.online_snapshot();
+        let mut zones = self.zones.values_mut().peekable();
+        while let Some(zone) = zones.next() {
+            if zones.peek().is_none() {
+                zone.ingest_online_presence(snapshot, true);
+                break;
+            }
+            zone.ingest_online_presence(snapshot.clone(), true);
+        }
+    }
+    pub fn refresh_online_pets_at(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let keys = self.zones.keys().cloned().collect::<Vec<_>>();
+        if self
+            .admit_special(&keys, "online_pet_refresh", &now_ms)
+            .is_err()
+        {
+            return Vec::new();
+        }
+        self.refresh_online_pets_admitted(now_ms)
+    }
+
+    fn refresh_online_pets_admitted(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        self.refresh_online_presence();
+        let mut recalls = Vec::new();
+        let mut out = Vec::new();
+        for zone in self.zones.values_mut() {
+            let (next, packets) = zone.drain_online_pet_recalls(now_ms);
+            recalls.extend(next);
+            out.extend(packets);
+        }
+        for recall in recalls {
+            if let Some(destination) = self.zones.get_mut(recall.destination()) {
+                out.extend(destination.adopt_online_pet_recall(recall, now_ms));
+            }
+        }
+        out
+    }
+    pub fn capture_player_saved_pets(
+        &self,
+        session: &SessionId,
+        now_ms: u64,
+    ) -> super::ZoneSavedPetSnapshot {
+        let mut snapshot = super::ZoneSavedPetSnapshot::default();
+        if self.online_identities.owner(session).is_none() {
+            return snapshot;
+        }
+        for zone in self.zones.values() {
+            snapshot.append_other_zone(zone.capture_player_saved_pets(session, now_ms));
+        }
+        snapshot
+    }
+    pub fn capture_player_pet_experience(
+        &self,
+        session: &SessionId,
+        now_ms: u64,
+    ) -> Option<super::ZonePetExperienceAdmission> {
+        let current = self.session_zones.get(session)?;
+        let mut admission = self
+            .zones
+            .get(current)?
+            .capture_player_pet_experience(session, now_ms)?;
+        for (key, zone) in &self.zones {
+            if key == current {
+                continue;
+            }
+            if let Some(other) = zone.capture_player_pet_experience(session, now_ms) {
+                if !admission.append_other_zone(other) {
+                    return None;
+                }
+            }
+        }
+        Some(admission)
+    }
+    pub fn restore_player_saved_pets(
+        &mut self,
+        session: &SessionId,
+        snapshot: &super::ZoneSavedPetSnapshot,
+        now_ms: u64,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        let current = self
+            .session_zones
+            .get(session)
+            .cloned()
+            .ok_or("pet restore requires active Zone")?;
+        snapshot.validate_canonical()?;
+        self.admit_special(
+            std::slice::from_ref(&current),
+            "restore_saved_pets",
+            &(session, snapshot, now_ms),
+        )?;
+        self.zones
+            .get_mut(&current)
+            .ok_or("pet restore Zone missing")?
+            .restore_player_saved_pets(session, snapshot, now_ms)
+    }
+    pub fn mirror_player_pet_earned_steps(
+        &mut self,
+        session: &SessionId,
+        admission: &super::ZonePetExperienceAdmission,
+        steps: &[u32],
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        self.session_zones
+            .get(session)
+            .and_then(|key| self.zones.get_mut(key))
+            .map(|zone| zone.mirror_earned_steps(session, admission, steps, now_ms))
+            .unwrap_or_default()
+    }
+    /// Server-only proof: no packet handler admits or chooses its epoch.
+    pub fn online_owner_proof_is_current(&self, encoded: &str) -> bool {
+        self.online_identities.validates_encoded(encoded)
+    }
+    pub fn online_owner_proof_matches_session(
+        &self,
+        encoded: &str,
+        session_id: &SessionId,
+    ) -> bool {
+        self.online_identities
+            .validates_for_session(encoded, session_id)
+    }
+    pub fn online_owner_proof_for_session(&self, session_id: &SessionId) -> Option<String> {
+        Some(self.online_identities.owner(session_id)?.encoded())
+    }
+
+    /// The trusted Host calls this only after reconstructing an actual private
+    /// Session. A cold checkpoint itself never grants a live online identity.
+    /// This issues a fresh admission without replaying Join or resetting world,
+    /// movement, life, combat, pets, or player-drop custody.
+    pub fn readmit_restored_player(
+        &mut self,
+        identity: &crate::ActiveSessionIdentity,
+        join: &ZoneJoin,
+    ) -> Result<(), String> {
+        if identity.account_id.is_empty() || identity.character_index < 0
+            || identity.character_name.is_empty() || join.session_id.as_str().is_empty()
+            || join.object_id == 0 || join.account_id != identity.account_id
+            || join.character_index != identity.character_index || join.name != identity.character_name {
+            return Err("restored online admission private identity mismatch".into());
+        }
+        let key = self.session_zones.get(&join.session_id)
+            .ok_or("restored online admission has no retained session route")?;
+        if crate::runtime::map::normalize_map_file_name(&key.map_file_name)
+            != crate::runtime::map::normalize_map_file_name(&join.map_file_name) {
+            return Err("restored online admission retained map mismatch".into());
+        }
+        let zone = self.zones.get(key).ok_or("restored online admission retained Zone missing")?;
+        if zone.player_identity(&join.session_id)
+            != Some((join.session_id.clone(), identity.account_id.clone(), identity.character_index))
+            || zone.player_object_id(&join.session_id).map(|id| id.0) != Some(join.object_id) {
+            return Err("restored online admission retained player identity mismatch".into());
+        }
+        // Validate name through the existing exact player projection. Mint in a
+        // private candidate first so failed validation cannot advance the book.
+        let mut admitted = self.online_identities.clone();
+        admitted.admit(join, true).ok_or("restored online admission epoch exhausted")?;
+        let presence = zone.online_player_snapshot(&admitted);
+        if presence.get(&join.session_id).is_none_or(|player|
+            player.name != identity.character_name || &player.key != key) {
+            return Err("restored online admission retained character mismatch".into());
+        }
+        self.online_identities = admitted;
+        self.refresh_online_presence();
+        Ok(())
+    }
+    pub fn owner_health_cursor(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<super::ZoneOwnerHealthCursor> {
+        let cursor = self
+            .zones
+            .get(self.session_zones.get(session_id)?)?
+            .owner_health_cursor(session_id)?;
+        self.online_owner_proof_matches_session(&cursor.online_owner, session_id)
+            .then_some(cursor)
+    }
+
+    pub fn commit_owner_vitals(
+        &mut self,
+        session_id: &SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+        dead: bool,
+    ) -> Vec<ZoneOutbound> {
+        let Some(key) = self.session_zones.get(session_id).cloned() else {
+            return Vec::new();
+        };
+        if self
+            .admit_special(
+                std::slice::from_ref(&key),
+                "owner_vitals_commit",
+                &(session_id, hp, max_hp, mp, dead),
+            )
+            .is_err()
+        {
+            return Vec::new();
+        }
+        self.refresh_online_presence();
+        let out = self
+            .session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get_mut(key))
+            .map(|zone| zone.commit_owner_vitals(session_id, hp, max_hp, mp, dead))
+            .unwrap_or_default();
+        self.refresh_online_presence();
+        out
+    }
+
+    pub fn owner_health_change_is_current(&self, change: &super::ZoneOwnerHealthChange) -> bool {
+        self.owner_health_cursor(&change.cursor.session_id)
+            .is_some_and(|current| {
+                current.online_owner == change.cursor.online_owner
+                && current.object_id == change.cursor.object_id
+                && current.life_generation == change.cursor.life_generation
+                // Earlier live pool operations remain valid in this life
+                // after lethal damage. Revival advances the life generation.
+                && change.cursor.health_sequence > 0
+                && change.cursor.health_sequence <= current.health_sequence
+                && change.hp >= 0 && change.mp >= 0
+                // Crystal can refill a dead player's pools on LevelUp without
+                // reviving it. HP0 still requires Dead; positive HP is display,
+                // and a historical dead receipt cannot belong to a live life.
+                && (change.hp > 0 || change.cursor.dead)
+                && (!change.cursor.dead || current.dead)
+            })
+    }
+    /// An online Node alone cannot choose an award's source map or payload.
+    /// Only the named source Zone's retained issuance can authorize delivery.
+    pub fn issued_monster_award_is_current(
+        &self,
+        source: &ZoneKey,
+        session_id: &SessionId,
+        encoded: &str,
+        award: &ZoneMonsterKillAward,
+    ) -> bool {
+        self.online_owner_proof_matches_session(encoded, session_id)
+            && self
+                .zones
+                .get(source)
+                .is_some_and(|zone| zone.issued_monster_award_matches(session_id, encoded, award))
+    }
+    pub fn acknowledge_issued_monster_award(
+        &mut self,
+        source: &ZoneKey,
+        session_id: &SessionId,
+        award: &ZoneMonsterKillAward,
+    ) {
+        if let Some(zone) = self.zones.get_mut(source) {
+            zone.acknowledge_issued_monster_award(session_id, award);
+        }
+    }
+    pub fn reserve_player_drop_placement_for_key(
+        &mut self,
+        key: &ZoneKey,
+        session: &SessionId,
+        world_effect_id: &str,
+        kind: super::PlayerDropPlacementKind,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropPlacementReservation, String> {
+        if self.session_zones.get(session) != Some(key) {
+            return Err("player-drop reservation Zone mismatch".into());
+        }
+        // Reserve enough durable admission capacity without publishing a
+        // transient placement decision as a committed world action.
+        self.ensure_admission_capacity(1)?;
+        self.zones
+            .get_mut(key)
+            .ok_or("player-drop Zone missing")?
+            .reserve_player_drop_placement(session, world_effect_id, kind, now_ms)
+    }
+    pub fn release_player_drop_placement_for_key(
+        &mut self,
+        key: &ZoneKey,
+        reservation: &super::PlayerDropPlacementReservation,
+    ) -> Result<bool, String> {
+        if reservation.zone() != key {
+            return Err("player-drop release Zone mismatch".into());
+        }
+
+        Ok(self
+            .zones
+            .get_mut(key)
+            .is_some_and(|zone| zone.release_player_drop_placement(reservation)))
+    }
+    pub fn apply_committed_player_drop_for_key(
+        &mut self,
+        key: &ZoneKey,
+        proof: &crate::player_drop::PlayerDropCommittedEffect,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropApplyResult, String> {
+        if proof.intent().zone() != key {
+            return Err("committed player-drop Zone mismatch".into());
+        }
+        self.admit_special(
+            std::slice::from_ref(key),
+            "apply_committed_player_drop",
+            &(proof.intent(), proof.state(), now_ms),
+        )?;
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| {
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key)), &self.action_boundary)
+            })
+            .apply_committed_player_drop(proof, now_ms)
+    }
+    pub fn reconcile_committed_player_drops_for_key(
+        &mut self,
+        key: &ZoneKey,
+        proofs: &[crate::player_drop::PlayerDropCommittedEffect],
+        now_ms: u64,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        if proofs.iter().any(|proof| proof.intent().zone() != key) {
+            return Err("player-drop recovery Zone mismatch".into());
+        }
+        let evidence: Vec<_> = proofs
+            .iter()
+            .map(|proof| (proof.intent(), proof.state()))
+            .collect();
+        self.admit_special(
+            std::slice::from_ref(key),
+            "reconcile_committed_player_drops",
+            &(evidence, now_ms),
+        )?;
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| {
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key)), &self.action_boundary)
+            })
+            .reconcile_committed_player_drops(proofs, now_ms)
+    }
+    /// Trusted Host lifecycle hook. This process-local gate is never restored
+    /// from checkpoint bytes and has no ZoneCommand/client counterpart.
+    pub fn set_player_drop_replica_mode_for_key(&mut self, key: &ZoneKey, replica: bool) {
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| {
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key)), &self.action_boundary)
+            })
+            .set_player_drop_replica_mode(replica);
+    }
+    /// Install the authenticated source decision without selecting a new tile.
+    /// Reservations are transient. Only the following committed apply is admitted.
+    pub fn install_player_drop_replica_reservation_for_key(
+        &mut self,
+        key: &ZoneKey,
+        slot: &super::PlayerDropPlacementReservation,
+    ) -> Result<(), String> {
+        if slot.zone() != key
+            || self
+                .zones
+                .get(key)
+                .is_none_or(|zone| !zone.is_player_drop_replica_mode())
+        {
+            return Err("frozen placement replay requires replica Zone".into());
+        }
+
+        self.zones
+            .get_mut(key)
+            .ok_or("replica player-drop Zone missing")?
+            .install_frozen_player_drop_reservation(slot)
+    }
+    /// The caller has already authenticated the Host's frozen-result journal.
+    /// Shadow replay validates immutable source/receipt evidence without PG or a
+    /// write permit; active Zones cannot use this route to mint world assets.
+    pub fn apply_player_drop_replica_result_for_key(
+        &mut self,
+        key: &ZoneKey,
+        operation: &crate::player_drop::PlayerDropPreparedOperation,
+        receipt: &crate::player_drop::PlayerDropCommitReceipt,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropApplyResult, String> {
+        if self
+            .zones
+            .get(key)
+            .is_none_or(|zone| !zone.is_player_drop_replica_mode())
+        {
+            return Err("player-drop journal replay requires replica Zone".into());
+        }
+        let proof = crate::player_drop::PlayerDropCommittedEffect::from_replica_evidence(
+            operation.clone(),
+            receipt.clone(),
+        )?;
+        if proof.intent().zone() != key {
+            return Err("replica player-drop Zone mismatch".into());
+        }
+        self.admit_special(
+            std::slice::from_ref(key),
+            "apply_committed_player_drop",
+            &(proof.intent(), proof.state(), now_ms),
+        )?;
+        self.zones
+            .get_mut(key)
+            .ok_or("replica player-drop Zone missing")?
+            .apply_committed_player_drop(&proof, now_ms)
+    }
+    pub fn zone_keys(&self) -> Vec<ZoneKey> {
+        self.zones.keys().cloned().collect()
+    }
+
+    pub fn query_player_drop_effect_for_key(
+        &self,
+        key: &ZoneKey,
+        world_effect_id: &str,
+        intent_digest: &str,
+    ) -> Result<Option<super::PlayerDropCustodyState>, String> {
+        match self.zones.get(key) {
+            Some(zone) => zone.query_player_drop_effect(world_effect_id, intent_digest),
+            None => Ok(None),
+        }
+    }
+    pub fn retire_committed_player_drop_for_key(
+        &mut self,
+        key: &ZoneKey,
+        proof: &crate::player_drop::PlayerDropCommittedEffect,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropApplyResult, String> {
+        if proof.state() == crate::player_drop::PlayerDropEffectState::Live {
+            return Err("player-drop retirement requires terminal committed evidence".into());
+        }
+        self.apply_committed_player_drop_for_key(key, proof, now_ms)
+    }
+    pub fn player_drop_effect_state_for_key(
+        &self,
+        key: &ZoneKey,
+        world_effect_id: &str,
+    ) -> Option<super::PlayerDropCustodyState> {
+        self.zones
+            .get(key)?
+            .player_drop_effect_state(world_effect_id)
+    }
+    pub fn player_drop_custody_states_for_key(
+        &self,
+        key: &ZoneKey,
+    ) -> Vec<(String, super::PlayerDropCustodyState)> {
+        self.zones
+            .get(key)
+            .map(|zone| zone.player_drop_custody_states())
+            .unwrap_or_default()
+    }
+    pub fn ground_drop_snapshot_for_key(
+        &self,
+        key: &ZoneKey,
+        object_id: u32,
+    ) -> Option<crate::config::GroundDropSnapshot> {
+        self.zones.get(key)?.active_ground_drop_snapshot(object_id)
+    }
+    pub fn ground_drop_absolute_clocks_for_key(
+        &self,
+        key: &ZoneKey,
+        object_id: u32,
+    ) -> Option<(Option<u64>, Option<u64>)> {
+        self.zones.get(key)?.ground_drop_absolute_clocks(object_id)
+    }
+    /// Some(None) means original native protection was released. None means
+    /// this is not a source-owned native monster drop and has a different policy.
+    pub fn native_ground_drop_deadline_for_key(
+        &self,
+        key: &ZoneKey,
+        object_id: u32,
+    ) -> Option<Option<u64>> {
+        self.zones.get(key)?.native_ground_drop_deadline(object_id)
+    }
+    pub fn forget_detached_ground_custody(
+        &mut self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.zones
+            .get_mut(key)
+            .is_some_and(|zone| zone.forget_detached_ground_custody(ticket))
+    }
+    pub fn conquest_projection_ready(&self, session_id: &SessionId) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.conquest_projection_ready())
+    }
+    pub fn conquest_record_revision(&self, session_id: &SessionId) -> Option<u64> {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .and_then(|zone| zone.conquest_record_revision())
+    }
+    pub fn conquest_membership_matches(
+        &self,
+        session_id: &SessionId,
+        guild_id: Option<&str>,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.conquest_membership_matches(session_id, guild_id))
+    }
+    pub fn conquest_player_kill_is_lawful(
+        &self,
+        session_id: &SessionId,
+        attacker_object_id: u32,
+        target_object_id: u32,
+        now_ms: u64,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| {
+                zone.conquest_player_kill_is_lawful(
+                    session_id,
+                    attacker_object_id,
+                    target_object_id,
+                    now_ms,
+                )
+            })
+    }
+    pub fn conquest_player_samples(&self) -> Vec<super::ZoneConquestPlayerSample> {
+        self.zones
+            .values()
+            .flat_map(|zone| zone.conquest_player_samples())
+            .collect()
+    }
+    pub fn conquest_defense_samples(&self) -> Vec<super::ZoneConquestDefenseSample> {
+        self.zones
+            .values()
+            .flat_map(|zone| zone.conquest_defense_samples())
+            .collect()
+    }
+    pub fn apply_conquest_projection(
+        &mut self,
+        policy: &crate::conquest::ConquestPolicy,
+        record: &crate::conquest::SharedConquestRecord,
+        memberships: &[super::ZoneConquestMembership],
+        epoch_now_ms: u64,
+        zone_now_ms: u64,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        let mut outbounds = Vec::new();
+        for (key, zone) in &mut self.zones {
+            if key.shard_id != "primary" || key.channel_id != 0 || key.instance_id != "main" {
+                continue;
+            }
+            outbounds.extend(zone.apply_conquest_projection(
+                policy,
+                record,
+                memberships,
+                epoch_now_ms,
+                zone_now_ms,
+            )?);
+        }
+        Ok(outbounds)
+    }
+    pub fn next_pending_movement_deadline_ms(&self) -> Option<u64> {
+        self.zones
+            .values()
+            .filter_map(ZoneRuntime::next_pending_movement_deadline_ms)
+            .min()
+    }
+
+    pub fn tick_pending_movement(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let keys = self.zones.keys().cloned().collect::<Vec<_>>();
+        if self.admit_timers(&keys, now_ms, true).is_err() {
+            return Vec::new();
+        }
+        self.zones
+            .values_mut()
+            .flat_map(|zone| zone.tick_pending_movement(now_ms))
+            .collect()
+    }
+
+    pub fn sync_intelligent_creature(
+        &mut self,
+        session_id: &SessionId,
+        creature: Option<mir2_protocol::ClientIntelligentCreature>,
+        allowed_object_ids: std::collections::BTreeSet<u32>,
+        group_members: Vec<String>,
+        map_allows: bool,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(key) = self.session_zones.get(session_id).cloned() else {
+            return vec![];
+        };
+        if self
+            .admit_special(
+                std::slice::from_ref(&key),
+                "intelligent_creature_sync",
+                &(
+                    session_id,
+                    &creature,
+                    &allowed_object_ids,
+                    &group_members,
+                    map_allows,
+                    now_ms,
+                ),
+            )
+            .is_err()
+        {
+            return Vec::new();
+        }
+        self.zones
+            .get_mut(&key)
+            .map(|z| {
+                z.sync_intelligent_creature(
+                    session_id,
+                    creature,
+                    allowed_object_ids,
+                    group_members,
+                    map_allows,
+                    now_ms,
+                )
+            })
+            .unwrap_or_default()
+    }
+    pub fn request_intelligent_creature_pickup(
+        &mut self,
+        session_id: &SessionId,
+        mouse_mode: bool,
+        location: Point,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id).cloned() else {
+            return false;
+        };
+        if self
+            .admit_special(
+                std::slice::from_ref(&key),
+                "intelligent_creature_pickup_request",
+                &(session_id, mouse_mode, &location),
+            )
+            .is_err()
+        {
+            return false;
+        }
+        self.zones.get_mut(&key).is_some_and(|z| {
+            z.request_intelligent_creature_pickup(session_id, mouse_mode, location)
+        })
+    }
+    pub fn intelligent_creature_object_id(&self, session_id: &SessionId) -> Option<u32> {
+        self.zones
+            .get(self.session_zones.get(session_id)?)?
+            .intelligent_creature_object_id(session_id)
+    }
+
+    pub fn update_experience_profile(
+        &mut self,
+        session_id: &SessionId,
+        profile: Option<super::ZoneExperienceProfile>,
+    ) -> bool {
+        let updated = self
+            .session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get_mut(key))
+            .is_some_and(|zone| zone.update_experience_profile(session_id, profile));
+        if updated {
+            self.refresh_online_presence();
+        }
+        updated
+    }
+
+    /// Apply freshly validated source projections on one manager writer.
+    /// Returns the same update result and chat outbounds as the separate calls;
+    /// callers retain their existing delivery/discard policy for those outbounds.
+    pub fn update_experience_and_chat_profile(
+        &mut self,
+        session_id: &SessionId,
+        profile: Option<super::ZoneExperienceProfile>,
+        chat_profile: super::ZoneChatProfile,
+    ) -> (bool, Vec<ZoneOutbound>) {
+        // Snapshot pet clocks/brown state depend on the previous online owner.
+        // Certify all local players before the update: with unchanged owners,
+        // its full refresh is a fixed point until the following chat handler.
+        let refresh = if self
+            .zones
+            .values()
+            .all(|zone| zone.online_projection_owners_match(&self.online_identities))
+        {
+            ChatProjectionPresenceRefresh::ExperienceProfileAlreadyRefreshed
+        } else {
+            ChatProjectionPresenceRefresh::BeforeAndAfter
+        };
+        if !self.update_experience_profile(session_id, profile) {
+            return (false, Vec::new());
+        }
+        let Some(partition) = self.partition_for_session(session_id) else {
+            return (true, Vec::new());
+        };
+        let outbounds = self
+            .try_handle_single_partition_with_chat_presence_refresh(
+                partition,
+                ZoneCommand::UpdateChatProfile {
+                    session_id: session_id.clone(),
+                    profile: chat_profile,
+                },
+                refresh,
+            )
+            .unwrap_or_default();
+        (true, outbounds)
+    }
+
+    pub fn player_experience_profile(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<super::ZoneExperienceProfile> {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .and_then(|zone| zone.player_experience_profile(session_id))
+    }
+
+    pub fn current_social_experience_profile(
+        &self,
+        session_id: &SessionId,
+    ) -> Result<Option<super::ZoneExperienceProfile>, String> {
+        match self
+            .session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+        {
+            Some(zone) => zone.current_social_experience_profile(session_id),
+            None => Ok(None),
+        }
+    }
+
+    pub fn issued_owned_pet_kill_is_current(
+        &self,
+        receipt: &super::ZoneOwnedPetPlayerKillReceipt,
+    ) -> bool {
+        self.zones
+            .get(&receipt.zone_key)
+            .is_some_and(|zone| zone.issued_owned_pet_kill_is_current(receipt))
+    }
+
+    pub fn acknowledge_owned_pet_kill(&mut self, receipt: &super::ZoneOwnedPetPlayerKillReceipt) {
+        if let Some(zone) = self.zones.get_mut(&receipt.zone_key) {
+            zone.acknowledge_owned_pet_kill(receipt);
+        }
+    }
+    pub fn intelligent_creature_intent_is_current(
+        &self,
+        intent: &super::CreaturePickupIntent,
+    ) -> bool {
+        self.session_zones
+            .get(&intent.owner.session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|z| z.intelligent_creature_intent_is_current(intent))
+    }
+    pub fn settle_intelligent_creature_pickup(
+        &mut self,
+        session_id: &SessionId,
+        creature_object_id: u32,
+        drop_id: u32,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones.get_mut(key).is_some_and(|z| {
+            z.settle_intelligent_creature_pickup(session_id, creature_object_id, drop_id)
+        })
+    }
+    /// Search all zones because an already-started operation survives leaving its
+    /// visual actor. Preserve every other owner's entries in their original order.
+    pub fn drain_intelligent_creature_operations(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<super::CreatureOperation> {
+        self.zones
+            .values_mut()
+            .flat_map(|z| z.drain_intelligent_creature_operations_for(session_id))
+            .collect()
+    }
+    pub fn drain_intelligent_creature_pickup_intents(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<super::CreaturePickupIntent> {
+        self.zones
+            .values_mut()
+            .flat_map(|z| z.drain_intelligent_creature_pickup_intents_for(session_id))
+            .collect()
+    }
+    pub fn settle_intelligent_creature_operation(
+        &mut self,
+        session_id: &SessionId,
+        operation_id: &str,
+    ) -> bool {
+        let mut settled = false;
+        for zone in self.zones.values_mut() {
+            settled |= zone.settle_intelligent_creature_operation(session_id, operation_id);
+        }
+        settled
+    }
+    /// Internal authenticated-account recovery path. Session IDs identify the
+    /// original delivery, while account + character owns the durable receipt.
+    /// Callers must derive both arguments from their active identity, never wire
+    /// input. Ack using the returned operation's original owner.session_id.
+    pub fn peek_intelligent_creature_operations_for_identity(
+        &self,
+        account_id: &str,
+        character_index: i32,
+    ) -> Vec<super::CreatureOperation> {
+        if account_id.is_empty() {
+            return Vec::new();
+        }
+        self.zones
+            .values()
+            .flat_map(|zone| {
+                zone.peek_intelligent_creature_operations_for_identity(account_id, character_index)
+            })
+            .collect()
+    }
     pub fn new() -> Self {
         Self {
+            action_boundary: None,
             zones: BTreeMap::new(),
             session_zones: BTreeMap::new(),
+            online_identities: OnlineIdentityBook::default(),
+            logical_world: None,
+            admission_sequence: 0,
+            last_admission: None,
+            map_random_master: ManagerMapRandomMaster::fresh(),
         }
     }
 
@@ -47,12 +1067,20 @@ impl ZoneManager {
             .iter()
             .map(|(key, runtime)| Ok((key.clone(), STANDARD.encode(runtime.checkpoint_bytes()?))))
             .collect::<Result<Vec<_>, String>>()?;
-        serde_json::to_vec(&ZoneManagerCheckpoint {
+        let mut checkpoint = ZoneManagerCheckpoint {
             version: ZONE_MANAGER_CHECKPOINT_VERSION,
             zones,
             session_zones: self.session_zones.clone(),
-        })
-        .map_err(|error| format!("failed to encode zone manager checkpoint: {error}"))
+            online_identities: Some(self.online_identities.clone()),
+            state_root: String::new(),
+            logical_world: self.logical_world.clone(),
+            admission_sequence: self.admission_sequence,
+            last_admission: self.last_admission.clone(),
+            map_random_master: self.map_random_master.clone(),
+        };
+        checkpoint.state_root = checkpoint.canonical_root()?;
+        serde_json::to_vec(&checkpoint)
+            .map_err(|error| format!("failed to encode zone manager checkpoint: {error}"))
     }
 
     pub fn restore_checkpoint(bytes: &[u8]) -> Result<Self, String> {
@@ -70,14 +1098,45 @@ impl ZoneManager {
         bytes: &[u8],
         restore_runtime: impl Fn(&[u8]) -> Result<ZoneRuntime, String>,
     ) -> Result<Self, String> {
-        let checkpoint: ZoneManagerCheckpoint = serde_json::from_slice(bytes)
+        let header: serde_json::Value = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode zone manager checkpoint: {error}"))?;
-        if checkpoint.version != ZONE_MANAGER_CHECKPOINT_VERSION {
+        let checkpoint_version = header
+            .get("version")
+            .and_then(serde_json::Value::as_u64)
+            .ok_or("zone manager checkpoint has no version")?;
+        if ![2, 3, u64::from(ZONE_MANAGER_CHECKPOINT_VERSION)].contains(&checkpoint_version) {
             return Err(format!(
                 "unsupported zone manager checkpoint version {}, expected {}",
-                checkpoint.version, ZONE_MANAGER_CHECKPOINT_VERSION
+                checkpoint_version, ZONE_MANAGER_CHECKPOINT_VERSION
             ));
         }
+        let checkpoint: ZoneManagerCheckpoint =
+            if checkpoint_version == u64::from(ZONE_MANAGER_CHECKPOINT_VERSION) {
+                let checkpoint: ZoneManagerCheckpoint = serde_json::from_slice(bytes)
+                    .map_err(|e| format!("failed to decode manager v4: {e}"))?;
+                if checkpoint.state_root != checkpoint.canonical_root()? {
+                    return Err("zone manager checkpoint state root mismatch".into());
+                }
+                admission::validate_checkpoint_admission(&checkpoint)?;
+                checkpoint
+            } else {
+                let legacy: LegacyZoneManagerCheckpoint = serde_json::from_slice(bytes)
+                    .map_err(|e| format!("failed to decode legacy manager: {e}"))?;
+                if legacy.version == 3 && legacy.state_root != legacy.canonical_root()? {
+                    return Err("zone manager checkpoint state root mismatch".into());
+                }
+                ZoneManagerCheckpoint {
+                    version: ZONE_MANAGER_CHECKPOINT_VERSION,
+                    zones: legacy.zones,
+                    session_zones: legacy.session_zones,
+                    online_identities: legacy.online_identities,
+                    state_root: String::new(),
+                    logical_world: None,
+                    admission_sequence: 0,
+                    last_admission: None,
+                    map_random_master: ManagerMapRandomMaster::verification_placeholder(),
+                }
+            };
         let mut zones = BTreeMap::new();
         for (expected_key, runtime_encoded) in checkpoint.zones {
             let runtime_bytes = STANDARD
@@ -85,13 +1144,16 @@ impl ZoneManager {
                 .map_err(|error| {
                     format!("failed to decode zone manager runtime checkpoint: {error}")
                 })?;
-            let runtime = restore_runtime(&runtime_bytes)?;
+            let mut runtime = restore_runtime(&runtime_bytes)?;
             if runtime.key() != &expected_key {
                 return Err(format!(
                     "zone manager checkpoint key mismatch for map {}",
                     expected_key.map_file_name
                 ));
             }
+            // Integrity (including a verified outer checkpoint) is not live
+            // admission. A cold restore has no original spawned Nodes.
+            runtime.clear_online_authority();
             if zones.insert(expected_key.clone(), runtime).is_some() {
                 return Err(format!(
                     "zone manager checkpoint contains duplicate map {}",
@@ -113,26 +1175,45 @@ impl ZoneManager {
                 ));
             }
         }
+        // All original manager/runtime roots and route references were verified
+        // before admitting new entropy for a pre-v4 logical world.
+        let map_random_master = if checkpoint_version < u64::from(ZONE_MANAGER_CHECKPOINT_VERSION) {
+            ManagerMapRandomMaster::fresh()
+        } else {
+            checkpoint.map_random_master
+        };
         Ok(Self {
+            action_boundary: None,
             zones,
             session_zones: checkpoint.session_zones,
+            online_identities: OnlineIdentityBook::default(),
+            logical_world: checkpoint.logical_world,
+            admission_sequence: checkpoint.admission_sequence,
+            last_admission: checkpoint.last_admission,
+            map_random_master,
         })
     }
 
     pub fn join(&mut self, join: ZoneJoin) -> Vec<ZoneOutbound> {
         let key = ZoneKey::for_map(join.map_file_name.clone());
-        let mut outbounds = Vec::new();
-        if let Some(previous_key) = self.session_zones.get(&join.session_id).cloned() {
-            if previous_key != key {
-                outbounds.extend(self.handle_for_key(
-                    previous_key,
-                    ZoneCommand::Leave {
-                        session_id: join.session_id.clone(),
-                    },
-                ));
+        self.handle_for_key(key, ZoneCommand::Join(join))
+    }
+
+    /// Gateway supplies only authenticated personal equipment/cosmetics.
+    /// Calibrate the new Zone actor before its first ObjectPlayer is sent.
+    pub fn join_with_appearance(
+        &mut self,
+        join: ZoneJoin,
+        appearance: super::types::ZonePlayerAppearance,
+    ) -> Vec<ZoneOutbound> {
+        let session_id = join.session_id.clone();
+        let key = ZoneKey::for_map(&join.map_file_name);
+        let mut outbounds = self.join(join);
+        if self.session_zones.get(&session_id) == Some(&key) {
+            if let Some(zone) = self.zones.get_mut(&key) {
+                zone.calibrate_joined_player_appearance(&session_id, appearance, &mut outbounds);
             }
         }
-        outbounds.extend(self.handle_for_key(key, ZoneCommand::Join(join)));
         outbounds
     }
 
@@ -146,9 +1227,12 @@ impl ZoneManager {
             | ZoneCommand::TeleportToNpc { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+            | ZoneCommand::UpdateMentorBank { session_id, .. }
             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
+            | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
+            | ZoneCommand::SyncPlayerAppearance { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }
             | ZoneCommand::SyncSharedObjects { session_id, .. }
@@ -162,6 +1246,7 @@ impl ZoneManager {
             | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }
             | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
+            | ZoneCommand::PreparePlayerFlamingSword { session_id, .. }
             | ZoneCommand::ResolveReincarnation { session_id, .. }
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
@@ -173,10 +1258,10 @@ impl ZoneManager {
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. } => {
-                let Some(key) = self.session_zones.get(session_id).cloned() else {
+                let Some(partition) = self.partition_for_session(session_id) else {
                     return Vec::new();
                 };
-                self.handle_for_key(key, command)
+                self.handle_single_partition(partition, command)
             }
             ZoneCommand::Tick { now_ms } => self.tick_all(*now_ms),
         }
@@ -188,7 +1273,8 @@ impl ZoneManager {
     /// process restart. The Gateway owns session recovery; the Zone manager only
     /// contributes persistent map/world state to those checkpoints.
     pub fn zone_key_for_session(&self, session_id: &SessionId) -> Option<ZoneKey> {
-        self.session_zones.get(session_id).cloned()
+        self.partition_for_session(session_id)
+            .map(|partition| partition.zone)
     }
 
     pub fn detached_ground_drop_claim_ticket_is_canonical(
@@ -274,29 +1360,273 @@ impl ZoneManager {
     pub fn leave_all_sessions(&mut self) -> usize {
         let session_ids = self.session_zones.keys().cloned().collect::<Vec<_>>();
         let session_count = session_ids.len();
+        let Ok(count) = u64::try_from(session_count) else {
+            return 0;
+        };
+        if self.ensure_admission_capacity(count).is_err() {
+            return 0;
+        }
         for session_id in session_ids {
             let _ = self.handle(ZoneCommand::Leave { session_id });
         }
-        session_count
+        session_count - self.session_zones.len()
+    }
+
+    /// Cold world conversion is state cleanup, not a new live gameplay trace.
+    /// Remove checkpoint/session descriptions with the original Leave cleanup
+    /// while retaining the durable logical namespace and admission watermark.
+    /// This never authenticates or revives a session and must not be used for
+    /// live player logout; that path goes through the numbered Leave command.
+    pub fn clear_sessions_for_cold_world(&mut self) -> usize {
+        let routes = self
+            .session_zones
+            .iter()
+            .map(|(session, key)| (session.clone(), key.clone()))
+            .collect::<Vec<_>>();
+        let before = routes.len();
+        for (session_id, key) in routes {
+            let _ = self.apply_single_partition(
+                PartitionKey::whole_zone(key),
+                ZoneCommand::Leave { session_id },
+            );
+        }
+        before - self.session_zones.len()
     }
 
     pub fn handle_for_key(&mut self, key: ZoneKey, command: ZoneCommand) -> Vec<ZoneOutbound> {
-        match &command {
-            ZoneCommand::Join(join) => {
-                self.session_zones
-                    .insert(join.session_id.clone(), key.clone());
+        self.handle_single_partition(PartitionKey::whole_zone(key), command)
+    }
+
+    /// Trusted internal dispatch, never a client-selected partition. Unknown
+    /// partitions fail before creating a Zone, changing membership or emitting
+    /// packets. Partition zero preserves the existing handle_for_key behavior.
+    pub fn handle_for_partition(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        if partition.partition_id != PartitionId::WHOLE_ZONE {
+            return Err(format!(
+                "unsupported partition {} in whole-Zone topology",
+                partition.partition_id.0
+            ));
+        }
+        self.try_handle_single_partition(partition, command)
+    }
+
+    fn handle_single_partition(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+    ) -> Vec<ZoneOutbound> {
+        self.try_handle_single_partition(partition, command)
+            .unwrap_or_default()
+    }
+
+    fn try_handle_single_partition(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        self.try_handle_single_partition_with_chat_presence_refresh(
+            partition,
+            command,
+            ChatProjectionPresenceRefresh::BeforeAndAfter,
+        )
+    }
+
+    fn try_handle_single_partition_with_chat_presence_refresh(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+        refresh: ChatProjectionPresenceRefresh,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        if !matches!(&command, ZoneCommand::Join(_) | ZoneCommand::Tick { .. }) {
+            let session = command
+                .session_id()
+                .ok_or("command has no routing identity")?;
+            if self.session_zones.get(session) != Some(&partition.zone) {
+                return Err("command has no matching authoritative session route".into());
             }
+        }
+        self.admit_command(&partition.zone, &command)?;
+        Ok(self.apply_single_partition_with_chat_presence_refresh(partition, command, refresh))
+    }
+
+    fn apply_single_partition(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+    ) -> Vec<ZoneOutbound> {
+        self.apply_single_partition_with_chat_presence_refresh(
+            partition,
+            command,
+            ChatProjectionPresenceRefresh::BeforeAndAfter,
+        )
+    }
+
+    fn apply_single_partition_with_chat_presence_refresh(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+        refresh: ChatProjectionPresenceRefresh,
+    ) -> Vec<ZoneOutbound> {
+        debug_assert!(
+            matches!(refresh, ChatProjectionPresenceRefresh::BeforeAndAfter)
+                || matches!(&command, ZoneCommand::UpdateChatProfile { .. })
+        );
+        let key = partition.zone;
+        // All Join entry points share this transfer path. Carry the same online
+        // player's receipt clock before removing its old Zone incarnation;
+        // otherwise map changes restart sequences at one under the same ID.
+        if let ZoneCommand::Join(join) = command {
+            let session_id = join.session_id.clone();
+            let previous_key = self.session_zones.get(&session_id).cloned();
+            let mut outbounds = Vec::new();
+            let mut transferred_clock = None;
+            let mut transferred_action_clock = None;
+            let mut transferred_poison_clock = None;
+            let mut transferred_owned_pet_clock = None;
+            let mut transferred_owned_human_poisons = None;
+            let mut transferred_purification = None;
+            let mut transferred_five_class = None;
+            let online_map_transfer = previous_key
+                .as_ref()
+                .is_some_and(|previous| previous != &key);
+            let retain_online = online_map_transfer
+                && self
+                    .online_identities
+                    .owner(&session_id)
+                    .is_some_and(|owner| owner.matches_join(&join));
+            if !retain_online {
+                self.online_identities.revoke(&session_id);
+                for zone in self.zones.values_mut() {
+                    outbounds.extend(zone.remove_player_detached_pets(&session_id));
+                    zone.revoke_online_session(&session_id);
+                }
+            }
+            if self.online_identities.admit(&join, retain_online).is_none() {
+                return Vec::new();
+            }
+            // Retain the same trusted snapshot across the atomic map detach /
+            // attach gap. There is no global despawn in that interval.
+            let snapshot = self.online_snapshot();
+            if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                if retain_online {
+                    if let Some(zone) = self.zones.get_mut(&previous_key) {
+                        zone.prepare_player_online_pet_transfer(&session_id);
+                    }
+                    transferred_five_class = self
+                        .zones
+                        .get_mut(&previous_key)
+                        .and_then(|zone| zone.take_online_five_class_state(&session_id));
+                    transferred_purification = self
+                        .zones
+                        .get_mut(&previous_key)
+                        .and_then(|zone| zone.take_online_purification_transfer(&session_id));
+                    transferred_owned_human_poisons = self
+                        .zones
+                        .get(&previous_key)
+                        .map(|zone| zone.capture_player_owned_human_poisons(&session_id));
+                    transferred_owned_pet_clock = self
+                        .zones
+                        .get(&previous_key)
+                        .and_then(|zone| zone.player_owned_pet_clock(&session_id));
+                }
+                transferred_poison_clock = self
+                    .zones
+                    .get(&previous_key)
+                    .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
+                transferred_action_clock = self
+                    .zones
+                    .get(&previous_key)
+                    .and_then(|zone| zone.player_action_clock(&session_id));
+                transferred_clock = self
+                    .zones
+                    .get(&previous_key)
+                    .and_then(|zone| zone.player_vital_clock(&session_id));
+                // Map.Remove is not global Despawn. Preserve the Node book.
+                if let Some(zone) = self.zones.get_mut(&previous_key) {
+                    outbounds.extend(zone.handle(ZoneCommand::Leave {
+                        session_id: session_id.clone(),
+                    }));
+                }
+            }
+            self.session_zones.insert(session_id.clone(), key.clone());
+            let master = &self.map_random_master;
+            let zone = self.zones.entry(key.clone()).or_insert_with(|| {
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key)), &self.action_boundary)
+            });
+            zone.ingest_online_presence(snapshot, true);
+            let mut joined = zone.handle(ZoneCommand::Join(join));
+            if let Some(clock) = transferred_clock {
+                zone.restore_player_vital_clock(&session_id, clock);
+            }
+            if let Some(clock) = transferred_action_clock {
+                zone.restore_player_action_clock(&session_id, clock);
+            }
+            if let Some(clock) = transferred_poison_clock {
+                zone.restore_player_finite_control_poison_clock(&session_id, clock);
+            }
+            if let Some(clock) = transferred_owned_pet_clock {
+                zone.restore_player_owned_pet_clock(&session_id, clock);
+            }
+            if let Some(poisons) = transferred_owned_human_poisons {
+                zone.restore_player_owned_human_poisons(&session_id, poisons);
+            }
+            if online_map_transfer {
+                // A same-character destination needs an explicit current mask,
+                // including zero; neither missing snapshot fields nor the old
+                // viewport's last ObjectPoisoned can establish that state.
+                zone.calibrate_online_join_poison(&session_id, &mut joined);
+            }
+            self.refresh_online_presence();
+            if let Some(transfer) = transferred_purification {
+                // The retained snapshot above still names the source map.
+                // Adopt only after the actual destination life and Node have
+                // been refreshed, without blessing a new life or bare ID.
+                if let Some(zone) = self.zones.get_mut(&key) {
+                    zone.adopt_online_purification_transfer(&session_id, transfer, &mut joined);
+                }
+            }
+            if let Some(transfer) = transferred_five_class {
+                if let Some(zone) = self.zones.get_mut(&key) {
+                    joined.extend(zone.restore_online_five_class_state(&session_id, transfer));
+                }
+            }
+            outbounds.extend(joined);
+            return outbounds;
+        }
+        match &command {
             ZoneCommand::Leave { session_id } => {
                 self.session_zones.remove(session_id);
+                self.online_identities.revoke(session_id);
+                let mut pet_outbounds = Vec::new();
+                for zone in self.zones.values_mut() {
+                    pet_outbounds.extend(zone.remove_player_detached_pets(session_id));
+                    zone.revoke_online_session(session_id);
+                }
+                self.refresh_online_presence();
+                if let Some(zone) = self.zones.get_mut(&key) {
+                    pet_outbounds.extend(zone.handle(command));
+                }
+                self.refresh_online_presence();
+                return pet_outbounds;
             }
             _ => {}
         }
 
-        let zone = self
-            .zones
-            .entry(key.clone())
-            .or_insert_with(|| ZoneRuntime::new(key));
-        zone.handle(command)
+        if matches!(refresh, ChatProjectionPresenceRefresh::BeforeAndAfter) {
+            self.refresh_online_presence();
+        }
+
+        let master = &self.map_random_master;
+        let zone = self.zones.entry(key.clone()).or_insert_with(|| {
+            with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key)), &self.action_boundary)
+        });
+        let outbounds = zone.handle(command);
+        self.refresh_online_presence();
+        outbounds
     }
 
     /// Tick every zone. Zones are fully independent (each owns its own ECS
@@ -308,9 +1638,15 @@ impl ZoneManager {
     /// threshold (the common case, including today's single "primary" zone) it
     /// ticks inline to avoid task overhead.
     pub fn tick_all(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let keys = self.zones.keys().cloned().collect::<Vec<_>>();
+        if self.admit_timers(&keys, now_ms, false).is_err() {
+            return Vec::new();
+        }
+        let mut pet_outbounds = self.refresh_online_pets_admitted(now_ms);
         let zone_count = self.zones.len();
         if zone_count < PARALLEL_TICK_MIN_ZONES {
-            return self.tick_all_sequential(now_ms);
+            pet_outbounds.extend(self.tick_all_sequential_admitted(now_ms));
+            return pet_outbounds;
         }
 
         let pool = ComputeTaskPool::get_or_init(TaskPool::default);
@@ -331,21 +1667,59 @@ impl ZoneManager {
                 });
             }
         });
-        per_chunk.into_iter().flatten().collect()
+        pet_outbounds.extend(per_chunk.into_iter().flatten());
+        pet_outbounds
     }
 
     pub fn zone(&self, key: &ZoneKey) -> Option<&ZoneRuntime> {
-        self.zones.get(key)
+        self.zone_for_partition(&self.partition_for_key(key)?)
+    }
+
+    pub fn prepare_mining_swing(
+        &self,
+        session: &SessionId,
+        direction: MirDirection,
+        tool: &super::ZoneMiningTool,
+        now_ms: u64,
+    ) -> Option<super::ZoneMiningSwing> {
+        self.ensure_admission_capacity(1).ok()?;
+        let key = self.session_zones.get(session)?;
+        self.zones
+            .get(key)?
+            .prepare_mining_swing(session, direction, tool, now_ms)
+    }
+
+    pub fn commit_mining_swing(
+        &mut self,
+        session: &SessionId,
+        swing: &super::ZoneMiningSwing,
+    ) -> Option<Vec<ZoneOutbound>> {
+        let key = self.session_zones.get(session)?.clone();
+        self.admit_special(
+            std::slice::from_ref(&key),
+            "mining_swing_commit",
+            &(session, swing),
+        )
+        .ok()?;
+        self.zones.get_mut(&key)?.commit_mining_swing(swing)
+    }
+
+    pub fn player_flaming_sword_armed(&self, session_id: &SessionId, now_ms: u64) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.player_flaming_sword_armed(session_id, now_ms))
     }
 
     /// Install caller-configured policy before any session joins the Zone.
     /// Used by deterministic fixtures and trusted bootstrap configuration;
     /// replacing an active Zone is deliberately rejected.
-    pub fn install_empty_zone(&mut self, zone: ZoneRuntime) -> bool {
+    pub fn install_empty_zone(&mut self, mut zone: ZoneRuntime) -> bool {
         let key = zone.key().clone();
         if self.session_zones.values().any(|active| active == &key) {
             return false;
         }
+        if let Some(boundary) = &self.action_boundary { zone.set_action_boundary(boundary.clone()); }
         self.zones.insert(key, zone);
         true
     }
@@ -363,9 +1737,22 @@ impl ZoneManager {
         spawn: &super::types::ZoneMonsterSpawn,
         now_ms: u64,
     ) -> (bool, Vec<ZoneOutbound>) {
+        if self
+            .admit_special(
+                std::slice::from_ref(&key),
+                "world_event_monster_spawn",
+                &(spawn, now_ms),
+            )
+            .is_err()
+        {
+            return (false, Vec::new());
+        }
+        let master = &self.map_random_master;
         self.zones
             .entry(key.clone())
-            .or_insert_with(|| ZoneRuntime::new(key))
+            .or_insert_with(|| {
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key)), &self.action_boundary)
+            })
             .spawn_world_event_monster(spawn, now_ms)
     }
 
@@ -375,28 +1762,83 @@ impl ZoneManager {
         message: &str,
     ) -> Vec<ZoneOutbound> {
         self.zones
-            .entry(key.clone())
-            .or_insert_with(|| ZoneRuntime::new(key))
-            .broadcast_world_event_message(message)
+            .get(&key)
+            .map(|zone| zone.broadcast_world_event_message(message))
+            .unwrap_or_default()
     }
 
     /// Tick all zones on the current thread. Identical output to `tick_all`;
     /// used to force single-threaded execution (constrained environments) and as
     /// the benchmark baseline that proves the parallel path's speedup.
     pub fn tick_all_sequential(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        self.zones
-            .values_mut()
-            .flat_map(|zone| zone.tick(now_ms))
-            .collect()
+        let keys = self.zones.keys().cloned().collect::<Vec<_>>();
+        if self.admit_timers(&keys, now_ms, false).is_err() {
+            return Vec::new();
+        }
+        self.tick_all_sequential_admitted(now_ms)
+    }
+
+    fn tick_all_sequential_admitted(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let mut out = self.refresh_online_pets_admitted(now_ms);
+        out.extend(
+            self.zones
+                .values_mut()
+                .flat_map(|zone| zone.tick(now_ms))
+                .collect::<Vec<_>>(),
+        );
+        out
     }
 
     pub fn player_transform(&self, session_id: &SessionId) -> Option<(Point, MirDirection)> {
-        let key = self.session_zones.get(session_id)?;
-        let zone = self.zones.get(key)?;
+        let partition = self.partition_for_session(session_id)?;
+        let zone = self.zone_for_partition(&partition)?;
         Some((
             zone.player_position(session_id)?,
             zone.player_direction(session_id)?,
         ))
+    }
+
+    /// Read the current Zone's legal front-cell target before a melee dispatch.
+    /// The caller commits progression only after that same swing is accepted.
+    pub fn melee_primary_target_present(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        materialized: Option<&super::types::ZoneMonsterSpawn>,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| {
+                zone.melee_primary_target_present(session_id, direction, materialized)
+            })
+    }
+
+    pub fn player_can_attack_owned_pet(
+        &self,
+        session_id: &SessionId,
+        pet: u32,
+        now_ms: u64,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.player_can_attack_owned_pet(session_id, pet, now_ms))
+    }
+
+    pub fn melee_primary_target_present_at(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        materialized: Option<&super::types::ZoneMonsterSpawn>,
+        now_ms: u64,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| {
+                zone.melee_primary_target_present_at(session_id, direction, materialized, now_ms)
+            })
     }
 
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
@@ -404,6 +1846,29 @@ impl ZoneManager {
         self.zones.get(key)?.player_last_seen_move_seq(session_id)
     }
 
+    pub fn player_has_visible_object(
+        &self,
+        session_id: &SessionId,
+        object_id: u32,
+    ) -> Option<bool> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones
+            .get(key)?
+            .player_has_visible_object(session_id, object_id)
+    }
+
+    pub fn player_life_generation(&self, session_id: &SessionId) -> Option<u64> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_life_generation(session_id)
+    }
+
+    pub fn player_is_dead(&self, session_id: &SessionId) -> Option<bool> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_is_dead(session_id)
+    }
+
+    /// Trusted server-only Harvest admission query for the player's active
+    /// Zone. No raw client command can synchronize the predicates it reads.
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_vitals(session_id)

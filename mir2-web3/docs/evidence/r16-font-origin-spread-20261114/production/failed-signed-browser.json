@@ -1,0 +1,301 @@
+{
+  "schema": 1,
+  "revision": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "deploymentId": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu",
+  "publicOrigin": "https://numeron.obelisk.build",
+  "passed": false,
+  "failure": {
+    "phase": "one-ordinary-adjacent-walk",
+    "code": "ORDINARY_WALK_ACK_OVER_EIGHT_SECONDS"
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "returnedToSelect": true
+  },
+  "timing": {
+    "clockEpochMs": 1794639196820,
+    "authoritativeLoginSuccessMs": 64802,
+    "startIntentMs": 95678,
+    "startAckMs": 99369,
+    "authoritativeStarterMapMs": 99378,
+    "authoritativeSelfMs": 99378,
+    "firstPlayableObservedMs": 103281,
+    "terrainPaintVerifiedMs": 184602,
+    "logoutIntentMs": 371805,
+    "logoutAckMs": 372855,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 64805,
+    "starterRegionWireHeadersMs": 65624.381,
+    "starterRegionResponseEventMs": 65625,
+    "starterRegionBodyMs": 66885,
+    "starterRegionCommitMs": 99496,
+    "sceneSpritesReadyMs": 99528,
+    "localeRequestMs": 64805,
+    "localeBodyMs": 83479,
+    "localeReadyMs": 83507,
+    "firstPlayableFrameMs": 103205,
+    "rendererBodyMs": 256698
+  },
+  "movement": {
+    "attempted": true,
+    "passed": false,
+    "status": "attempted",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 20,
+      "packet": "UserInformation",
+      "atMs": 103401
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "f3f8734df7ead149be6005acab0dca69694434a39d20735e977bd9d95eb2b81f"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 103401
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 103404
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 116690
+    },
+    "ackWithinEightSeconds": false,
+    "failure": {
+      "phase": "one-ordinary-adjacent-walk",
+      "code": "ORDINARY_WALK_ACK_OVER_EIGHT_SECONDS"
+    },
+    "authorityLatencyMs": 13286
+  },
+  "firstWalkTransport": {
+    "websocketFrameMs": 13283,
+    "keepAlives": [
+      {
+        "sentRelativeToWalkMs": -27855,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": -12855,
+        "rttMs": 151
+      },
+      {
+        "sentRelativeToWalkMs": 2146,
+        "rttMs": 11137
+      },
+      {
+        "sentRelativeToWalkMs": 17148,
+        "rttMs": 141
+      },
+      {
+        "sentRelativeToWalkMs": 32145,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 47147,
+        "rttMs": 142
+      },
+      {
+        "sentRelativeToWalkMs": 62149,
+        "rttMs": 144
+      },
+      {
+        "sentRelativeToWalkMs": 77146,
+        "rttMs": 156
+      },
+      {
+        "sentRelativeToWalkMs": 92145,
+        "rttMs": 140
+      },
+      {
+        "sentRelativeToWalkMs": 107145,
+        "rttMs": 137
+      },
+      {
+        "sentRelativeToWalkMs": 122145,
+        "rttMs": 149
+      },
+      {
+        "sentRelativeToWalkMs": 137146,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 152145,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 167147,
+        "rttMs": 143
+      },
+      {
+        "sentRelativeToWalkMs": 182145,
+        "rttMs": 171
+      },
+      {
+        "sentRelativeToWalkMs": 197145,
+        "rttMs": 140
+      },
+      {
+        "sentRelativeToWalkMs": 212147,
+        "rttMs": 139
+      },
+      {
+        "sentRelativeToWalkMs": 227148,
+        "rttMs": 138
+      },
+      {
+        "sentRelativeToWalkMs": 242146,
+        "rttMs": 140
+      },
+      {
+        "sentRelativeToWalkMs": 257147,
+        "rttMs": 140
+      }
+    ],
+    "gatewayHealthBefore": {
+      "status": 200,
+      "startedAt": 95662,
+      "finishedAt": 95932,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 6266711,
+      "successes": 0,
+      "failures": 0,
+      "count": 0,
+      "sumUs": 0
+    },
+    "gatewayHealthAfter": null,
+    "admissionCounterDelta": null
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": true,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "questUi": {
+    "passed": true,
+    "scope": "Traditional Chinese fallback; common Native HUD was not ready"
+  },
+  "prewarm": {
+    "passed": true,
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    }
+  },
+  "sixFonts": {
+    "passed": false,
+    "present": 4,
+    "expected": 6
+  },
+  "original120SecondNativeQualification": false,
+  "rendererBodyAfterFirstFrameMs": 153493,
+  "workerRestart": {
+    "attempted": false,
+    "passed": false
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "errors": {
+    "console": 3,
+    "page": 0,
+    "assetHttp": 1,
+    "failedRequests": {
+      "net::ERR_ABORTED": 144
+    }
+  },
+  "walletScope": {
+    "officialWalletOrigin": "https://wallet.dubhe.obelisk.build",
+    "phoneSizedBrowser": true,
+    "physicalPhoneCamera": false,
+    "network": "Testnet",
+    "loginOnly": true,
+    "approvalCount": 1,
+    "forbiddenOperations": 0,
+    "defaultNetworkUnmodified": true
+  },
+  "ownedDesktopBrowserClosed": true,
+  "ownedWalletBrowserClosed": true,
+  "staticAuditorsAfterSignedReplay": {
+    "attempted": false,
+    "reason": "required signed browser gate failed; no signedBrowserPassed:true receipt generated"
+  },
+  "sourceReceipts": [
+    {
+      "name": "signed-public/desktop-font-origin-spread-r1/receipt.json",
+      "bytes": 74305,
+      "sha256": "b33e61426085770b204f5e583dc33d039d7e16d45d72ad8af9f5fa46575a654b",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/first-party-signed-summary.json",
+      "bytes": 53010,
+      "sha256": "6abf3597f43282b318a98afd6c31fe7c2f49d6e3f61c53d36a84b03fa5538ccb",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/browser-closed.json",
+      "bytes": 60,
+      "sha256": "0616bab6ecd63b57c09bf40cd2e7b0cdf2508e03e7f0a5e40e5ebe7b0ddb05e2",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/preparation.json",
+      "bytes": 10525,
+      "sha256": "f6d665fce6f5250cf50aca8b6e6b167545c37d241c533555d766df65064a1656",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/desktop-font-origin-spread-r1/startup-probe.json",
+      "bytes": 265710,
+      "sha256": "b969745d8e3a18824fe6212e6ff4b95c253d9deafdde9c33e41ef92386e87a2d",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/desktop-font-origin-spread-r1/worker-font-network.json",
+      "bytes": 9253,
+      "sha256": "0ccf7870f589d876b6f214f4f01a7ae8871cb4421ad5ddcc68ee88f7d95b52c8",
+      "privateOriginalPreserved": true
+    }
+  ]
+}

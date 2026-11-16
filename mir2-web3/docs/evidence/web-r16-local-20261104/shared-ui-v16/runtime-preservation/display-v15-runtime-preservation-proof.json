@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.r16.gateway-config-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "privateBackupPreserved": true,
+  "journalHistoryMovedIntact": true,
+  "backupName": "Numeron-Web-R16-20261104-before-gateway-v15",
+  "runtime": [
+    {
+      "directory": "private",
+      "transfer": "copied",
+      "files": 25,
+      "bytes": 544604,
+      "beforeTreeSha256": "34da3978ee99ee8a32b9c644b605f89b8519e4e923fcd01a014c7d15266d140b",
+      "afterTreeSha256": "34da3978ee99ee8a32b9c644b605f89b8519e4e923fcd01a014c7d15266d140b",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "transfer": "moved-intact",
+      "files": 38,
+      "bytes": 16814086049,
+      "beforeTreeSha256": "06d822cc7463e0f745acd765893a21b0c74358a740a2e4f71bdaaf1342098fe4",
+      "afterTreeSha256": "06d822cc7463e0f745acd765893a21b0c74358a740a2e4f71bdaaf1342098fe4",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

@@ -1,0 +1,297 @@
+{
+  "schema": "mir2.testnet.final-local-handoff.v1",
+  "reviewedBy": "/root",
+  "executedBy": "/root/usdc_payment_onchain_audit",
+  "recordedAtUtc": "2026-10-29T18:57:06.4643647Z",
+  "oldLocalPids": [
+    61784,
+    84280
+  ],
+  "oldPidsGone": true,
+  "journalsStable": true,
+  "pendingWork": 0,
+  "unknown": 0,
+  "unclaimed": 0,
+  "pendingRecovery": 0,
+  "backupVerified": true,
+  "actualStopMethod": "operator-process-stop-after-backup",
+  "stopWasGraceful": false,
+  "nonGraceful": true,
+  "stops": [
+    {
+      "pid": 61784,
+      "role": "procurement",
+      "stoppedAtUtc": "2026-10-29T18:57:00.6271662Z",
+      "nonGraceful": true,
+      "method": "Stop-Process on exact validated PID"
+    },
+    {
+      "pid": 84280,
+      "role": "usdc",
+      "stoppedAtUtc": "2026-10-29T18:57:00.7291711Z",
+      "nonGraceful": true,
+      "method": "Stop-Process on exact validated PID"
+    }
+  ],
+  "privateBackupRoot": "C:\\mir2-build\\unified-rollout-20261030\\runtime-transfer\\handoff-backups\\handoff-20261029T185658038Z-final-prestop",
+  "privateBackupManifestSha256": "098ff1b9f693c276ddbe1f495140b83d28631326a937eff88e543e8373059177",
+  "privateBackupFileCount": 14,
+  "procurementJournalSha256": "9f68ae55a72465fa03d7d58ffe153f60a895ce3bfb71fefb434f74330a0f984d",
+  "usdcOriginalJournalSha256": "725561216ea0f1d2bcb1f30413abfd07096ccab1d317719404f4c61b190448de",
+  "preStopProcessEvidence": [
+    {
+      "role": "procurement",
+      "pid": 61784,
+      "imagePath": "C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v5\\mir2-gateway.exe",
+      "imageSha256": "4b5bc8a10793583e0631ab9145862d86ad209c8a58f1481f1875f6892569060c",
+      "startTimeUtc": "2026-10-28T15:53:34.1404372Z",
+      "tcpPort": 17820,
+      "httpPort": 17830,
+      "healthCapacity": {
+        "maxWsConnections": 16,
+        "maxActiveSessions": 8,
+        "maxReconnectLeases": null,
+        "maxLoginInFlight": null,
+        "maxNewCharacterInFlight": null,
+        "maxStartGameInFlight": null,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "establishedConnections": 0,
+      "childProcesses": 0
+    },
+    {
+      "role": "usdc",
+      "pid": 84280,
+      "imagePath": "C:\\mir2-build\\sui-usdc-recharge-20261029\\bin-final-v4\\mir2-gateway.exe",
+      "imageSha256": "a634fb47ffa7be702953166e9860a6d375b4cd8c30d15be0b9d468f64422734f",
+      "startTimeUtc": "2026-10-28T21:26:18.7125186Z",
+      "tcpPort": 17920,
+      "httpPort": 17930,
+      "healthCapacity": {
+        "maxWsConnections": 16,
+        "maxActiveSessions": 8,
+        "maxReconnectLeases": null,
+        "maxLoginInFlight": null,
+        "maxNewCharacterInFlight": null,
+        "maxStartGameInFlight": null,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "establishedConnections": 0,
+      "childProcesses": 0
+    }
+  ],
+  "firstStableCheck": {
+    "passed": true,
+    "observedAtUtc": "2026-10-30T02:57:03.745703+08:00",
+    "roles": {
+      "procurement": {
+        "schemaVersion": 12,
+        "accountsSha256": "79f8c2483807c11a18aa9a8e14277bc71ba71194e1072b72747dfb66c0c553b1",
+        "accountsBytes": 765365,
+        "pendingWork": 0,
+        "unknown": 0,
+        "unclaimed": 0,
+        "unreleasedLocks": 0,
+        "procurementOrderStates": {
+          "Cancelled": 1,
+          "Filled": 1,
+          "Expired": 1
+        },
+        "procurementOutboxStates": {
+          "Confirmed": 8
+        },
+        "usdcOrderStates": {},
+        "journalSha256": "9f68ae55a72465fa03d7d58ffe153f60a895ce3bfb71fefb434f74330a0f984d",
+        "recoveryFiles": [
+          {
+            "path": ".mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          },
+          {
+            "path": ".mir2-recovery-exclusive.lock",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          {
+            "path": ".mir2-recovery-owner-v1.json",
+            "sha256": "78511e882e0fcbe810084d3b453492ec7081367ca18f42171e4d80257d8eda8a",
+            "bytes": 340
+          },
+          {
+            "path": "quarantine/.mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          }
+        ],
+        "recoveryDirectories": [
+          "quarantine"
+        ],
+        "pendingRecovery": 0
+      },
+      "usdc": {
+        "schemaVersion": 13,
+        "accountsSha256": "c57b83b89547e1556ea3ca03ea845eade5a22d223a26ab3d91af9b94c4f198cd",
+        "accountsBytes": 22383,
+        "pendingWork": 0,
+        "unknown": 0,
+        "unclaimed": 0,
+        "unreleasedLocks": 0,
+        "procurementOrderStates": {},
+        "procurementOutboxStates": {},
+        "usdcOrderStates": {
+          "applied": 1,
+          "prepared": 1,
+          "invoiceBound": 1
+        },
+        "journalSha256": "725561216ea0f1d2bcb1f30413abfd07096ccab1d317719404f4c61b190448de",
+        "recoveryFiles": [
+          {
+            "path": ".mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          },
+          {
+            "path": ".mir2-recovery-exclusive.lock",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          {
+            "path": ".mir2-recovery-owner-v1.json",
+            "sha256": "137c08f4cfce33bc023aeac5056f4cd523fa5f3863f69d59450e679bba9af31c",
+            "bytes": 340
+          },
+          {
+            "path": "quarantine/.mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          }
+        ],
+        "recoveryDirectories": [
+          "quarantine"
+        ],
+        "pendingRecovery": 0
+      }
+    },
+    "pendingWork": 0,
+    "unknown": 0,
+    "unclaimed": 0,
+    "pendingRecovery": 0
+  },
+  "secondStableCheck": {
+    "passed": true,
+    "observedAtUtc": "2026-10-30T02:57:05.851853+08:00",
+    "roles": {
+      "procurement": {
+        "schemaVersion": 12,
+        "accountsSha256": "79f8c2483807c11a18aa9a8e14277bc71ba71194e1072b72747dfb66c0c553b1",
+        "accountsBytes": 765365,
+        "pendingWork": 0,
+        "unknown": 0,
+        "unclaimed": 0,
+        "unreleasedLocks": 0,
+        "procurementOrderStates": {
+          "Cancelled": 1,
+          "Filled": 1,
+          "Expired": 1
+        },
+        "procurementOutboxStates": {
+          "Confirmed": 8
+        },
+        "usdcOrderStates": {},
+        "journalSha256": "9f68ae55a72465fa03d7d58ffe153f60a895ce3bfb71fefb434f74330a0f984d",
+        "recoveryFiles": [
+          {
+            "path": ".mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          },
+          {
+            "path": ".mir2-recovery-exclusive.lock",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          {
+            "path": ".mir2-recovery-owner-v1.json",
+            "sha256": "78511e882e0fcbe810084d3b453492ec7081367ca18f42171e4d80257d8eda8a",
+            "bytes": 340
+          },
+          {
+            "path": "quarantine/.mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          }
+        ],
+        "recoveryDirectories": [
+          "quarantine"
+        ],
+        "pendingRecovery": 0
+      },
+      "usdc": {
+        "schemaVersion": 13,
+        "accountsSha256": "c57b83b89547e1556ea3ca03ea845eade5a22d223a26ab3d91af9b94c4f198cd",
+        "accountsBytes": 22383,
+        "pendingWork": 0,
+        "unknown": 0,
+        "unclaimed": 0,
+        "unreleasedLocks": 0,
+        "procurementOrderStates": {},
+        "procurementOutboxStates": {},
+        "usdcOrderStates": {
+          "applied": 1,
+          "prepared": 1,
+          "invoiceBound": 1
+        },
+        "journalSha256": "725561216ea0f1d2bcb1f30413abfd07096ccab1d317719404f4c61b190448de",
+        "recoveryFiles": [
+          {
+            "path": ".mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          },
+          {
+            "path": ".mir2-recovery-exclusive.lock",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          {
+            "path": ".mir2-recovery-owner-v1.json",
+            "sha256": "137c08f4cfce33bc023aeac5056f4cd523fa5f3863f69d59450e679bba9af31c",
+            "bytes": 340
+          },
+          {
+            "path": "quarantine/.mir2-directory-durability",
+            "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+            "bytes": 29
+          }
+        ],
+        "recoveryDirectories": [
+          "quarantine"
+        ],
+        "pendingRecovery": 0
+      }
+    },
+    "pendingWork": 0,
+    "unknown": 0,
+    "unclaimed": 0,
+    "pendingRecovery": 0
+  },
+  "canonicalStoresAndRecoveryUnchanged": true,
+  "unrelatedP01Untouched": true,
+  "oldPortsGone": true,
+  "budgetExpanded": false,
+  "journalsModified": false,
+  "productionKeysOrFundsUsed": false,
+  "secretsDisclosed": false,
+  "ownershipRule": "These same TEST signers/journals are handed to one remote writer. Do not restart either old local QA runner while the remote writer owns them."
+}

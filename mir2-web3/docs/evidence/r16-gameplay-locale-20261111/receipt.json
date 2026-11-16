@@ -1,0 +1,577 @@
+{
+  "product": "f512cfbc99cdd72086452ad542405eac5ea47a4b",
+  "deploymentId": "dpl_6wuaHUzb49oStgBub5UXZAQmdTHA",
+  "stageRunId": "42917404841",
+  "promotionRunId": "42918761736",
+  "asset": {
+    "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+    "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+    "bytes": 3283113
+  },
+  "release": {
+    "signedSourceBranch": "codex/windows-player-journey",
+    "sameProtectedAndPublicBytes": true,
+    "verifiedAssetCount": 7,
+    "alias": "dpl_6wuaHUzb49oStgBub5UXZAQmdTHA",
+    "publicQrPending": true
+  },
+  "isolated": {
+    "productionBuildId": "Cfjn_ZdOePHH_5jt4ct2I",
+    "candidateReceiptSha256": "db21c0fb53688850b4c52126b3ebac04f70bc0d83ed5654b90afffa0ba466f7b",
+    "cases": [
+      {
+        "locale": "zh-CN",
+        "worldLabels": {
+          "map": "比奇省",
+          "npc": "传送员吉尔伯特",
+          "hen": "鸡"
+        },
+        "responses": [
+          {
+            "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+            "scope": "gameplay-locale",
+            "requestedAt": 1794350348214,
+            "cacheRequest": null,
+            "injected": "stalled-headers",
+            "closedAt": 1794350356210
+          },
+          {
+            "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+            "scope": "gameplay-locale",
+            "requestedAt": 1794350356412,
+            "cacheRequest": "no-cache",
+            "status": 200,
+            "originHeadersAt": 1794350356415,
+            "cacheResponse": "public, max-age=31536000, immutable",
+            "headersAt": 1794350356415,
+            "finishedAt": 1794350356486,
+            "closedAt": 1794350356486
+          }
+        ],
+        "signedInBeforeRequest": true,
+        "loadToReadyMs": 8305,
+        "mapAckToInteractionMs": 3385,
+        "ordinaryPlayerSave": {
+          "x": 290,
+          "y": 616
+        },
+        "failureUi": null
+      },
+      {
+        "locale": "zh-TW",
+        "worldLabels": {
+          "map": "比奇省",
+          "npc": "傳送員 Gilbert",
+          "hen": "雞"
+        },
+        "responses": [
+          {
+            "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+            "scope": "gameplay-locale",
+            "requestedAt": 1794350509778,
+            "cacheRequest": null,
+            "injected": "same-length-corruption",
+            "sha256": "b643b920e6b3d24423d5989b60ac47566de75292285a97e99c9ed208fbc3af3f",
+            "status": 200,
+            "closedAt": 1794350509781
+          },
+          {
+            "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+            "scope": "gameplay-locale",
+            "requestedAt": 1794350524105,
+            "cacheRequest": "no-cache",
+            "status": 200,
+            "originHeadersAt": 1794350524109,
+            "cacheResponse": "public, max-age=31536000, immutable",
+            "headersAt": 1794350524109,
+            "finishedAt": 1794350524186,
+            "closedAt": 1794350524186
+          }
+        ],
+        "signedInBeforeRequest": true,
+        "loadToReadyMs": 14467,
+        "mapAckToInteractionMs": 3375,
+        "ordinaryPlayerSave": {
+          "x": 290,
+          "y": 616
+        },
+        "failureUi": {
+          "at": 1794350523949,
+          "localized": true,
+          "visiblyBlocked": true
+        }
+      }
+    ],
+    "ordinaryQ": {
+      "shell": "任務",
+      "id": 2110001,
+      "title": "首套巡邏裝備",
+      "instruction": "前往比奇省邊境村，向助理簡（284,606）報告，領取巡邏裝備。",
+      "requestMutationObserved": false,
+      "fallbackDom": true,
+      "screenshotSha256": "1de1eb67f32e8ec7ef7fd4fd1d34a221a95d78aa8e79950ea4fd530ec0fdd443",
+      "remainingVisibleEnglish": [
+        "Journey",
+        "Chapter",
+        "Your first patrol kit is available.",
+        "Report to Assistant Jane"
+      ]
+    }
+  },
+  "publicQr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "phases": [
+        {
+          "phase": "verify-revision",
+          "atMs": 203
+        },
+        {
+          "phase": "plain-game",
+          "atMs": 2801
+        },
+        {
+          "phase": "one-qr-click",
+          "atMs": 23457
+        },
+        {
+          "phase": "same-intent-pending",
+          "atMs": 33523
+        },
+        {
+          "phase": "normal-cancel",
+          "atMs": 33525
+        },
+        {
+          "phase": "passed",
+          "atMs": 36850
+        }
+      ],
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "phases": [
+        {
+          "phase": "verify-revision",
+          "atMs": 187
+        },
+        {
+          "phase": "plain-game",
+          "atMs": 743
+        },
+        {
+          "phase": "one-qr-click",
+          "atMs": 16881
+        },
+        {
+          "phase": "same-intent-pending",
+          "atMs": 26394
+        },
+        {
+          "phase": "normal-cancel",
+          "atMs": 28316
+        },
+        {
+          "phase": "passed",
+          "atMs": 31646
+        }
+      ],
+      "browserClosed": true
+    }
+  ],
+  "publicSigned": {
+    "locale": {
+      "oldEnglishBrowser": {
+        "scope": "gameplayLocale",
+        "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+        "requestOrdinal": 3,
+        "requestedMs": 22340,
+        "decodedBytes": 3336037,
+        "encodedBytes": 753866,
+        "status": 200,
+        "ttfbMs": 51552,
+        "headersMs": 73892,
+        "responseEventMs": 73892,
+        "responseTiming": {
+          "scope": "browser-network-response",
+          "connectionReused": true,
+          "requestTimeFromRequestEventMs": 2214.518,
+          "offsetsMs": {
+            "proxyStart": null,
+            "proxyEnd": null,
+            "dnsStart": null,
+            "dnsEnd": null,
+            "connectStart": null,
+            "connectEnd": null,
+            "sslStart": null,
+            "sslEnd": null,
+            "workerStart": null,
+            "workerReady": null,
+            "workerFetchStart": null,
+            "workerRespondWithSettled": null,
+            "sendStart": 0.106,
+            "sendEnd": 0.17,
+            "receiveHeadersStart": 45289.025,
+            "receiveHeadersEnd": 45289.094
+          },
+          "firstHeadersAfterRequestMs": 47503.543,
+          "completeHeadersAfterRequestMs": 47503.612,
+          "beforeSendAfterRequestMs": 2214.624,
+          "sendToHeadersMs": 45288.855,
+          "firstHeadersMs": 69843.543,
+          "completeHeadersMs": 69843.612
+        },
+        "protocol": "h2",
+        "serviceWorker": false,
+        "diskCache": false,
+        "contentEncoding": "br",
+        "edgeCache": "MISS",
+        "functionCache": "MISS",
+        "firstDataMs": 73892,
+        "lastDataMs": 73893,
+        "transferMs": 51548,
+        "bodyCompleteMs": 73888,
+        "totalEncodedBytes": 754266
+      },
+      "currentTraditionalChineseBrowser": {
+        "scope": "gameplayLocale",
+        "queryless": true,
+        "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "requestOrdinal": 3,
+        "requestedMs": 61315,
+        "decodedBytes": 3283113,
+        "encodedBytes": 748518,
+        "status": 200,
+        "ttfbMs": 802,
+        "headersMs": 62117,
+        "responseEventMs": 62117,
+        "responseTiming": {
+          "scope": "browser-network-response",
+          "connectionReused": true,
+          "requestTimeFromRequestEventMs": 1.108,
+          "offsetsMs": {
+            "proxyStart": null,
+            "proxyEnd": null,
+            "dnsStart": null,
+            "dnsEnd": null,
+            "connectStart": null,
+            "connectEnd": null,
+            "sslStart": null,
+            "sslEnd": null,
+            "workerStart": null,
+            "workerReady": null,
+            "workerFetchStart": null,
+            "workerRespondWithSettled": null,
+            "sendStart": 623.085,
+            "sendEnd": 623.196,
+            "receiveHeadersStart": 800.543,
+            "receiveHeadersEnd": 800.605
+          },
+          "firstHeadersAfterRequestMs": 801.651,
+          "completeHeadersAfterRequestMs": 801.713,
+          "beforeSendAfterRequestMs": 624.193,
+          "sendToHeadersMs": 177.347,
+          "firstHeadersMs": 62116.651,
+          "completeHeadersMs": 62116.713
+        },
+        "protocol": "h2",
+        "serviceWorker": false,
+        "diskCache": false,
+        "contentEncoding": "br",
+        "edgeCache": "DYNAMIC",
+        "functionCache": "HIT",
+        "firstDataMs": 62128,
+        "lastDataMs": 76454,
+        "transferMs": 15131,
+        "bodyCompleteMs": 76446,
+        "totalEncodedBytes": 749009
+      },
+      "olderRequestToCompleteMs": 51548,
+      "currentRequestToCompleteMs": 15131,
+      "requestCount": 1,
+      "legacyScriptRequests": 0
+    },
+    "loginOnlyApproval": true,
+    "oneDisposableRole": true,
+    "wire": {
+      "gameSockets": 1,
+      "passkeyLogin": 1,
+      "loginSuccess": 1,
+      "newCharacter": 1,
+      "newCharacterSuccess": 1,
+      "startGame": 1,
+      "startGameResult": 4,
+      "walk": 1,
+      "logOut": 1,
+      "logOutSuccess": 1,
+      "unexpectedMutation": 0
+    },
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    },
+    "scopePassed": false,
+    "scopeFailure": {
+      "phase": "one-ordinary-adjacent-walk",
+      "code": "ORDINARY_WALK_WIRE_OR_ACK_MISSING"
+    },
+    "visualFailure": {
+      "phase": "inspect-world-paint",
+      "code": "PUBLIC_PACK_BODY_NOT_OBSERVED"
+    },
+    "optionalHud": "not-observed",
+    "timing": {
+      "clockEpochMs": 1794351523806,
+      "authoritativeLoginSuccessMs": 61311,
+      "startIntentMs": 92097,
+      "startAckMs": 98274,
+      "authoritativeStarterMapMs": 98276,
+      "authoritativeSelfMs": 98277,
+      "firstPlayableObservedMs": 101518,
+      "logoutIntentMs": 203024,
+      "logoutAckMs": 204093,
+      "manifestAttemptsBeforeStart": 1,
+      "manifestAttemptsAtOrAfterStart": 0,
+      "starterRegionRequestMs": 61315,
+      "starterRegionWireHeadersMs": 64887.895,
+      "starterRegionResponseEventMs": 64889,
+      "starterRegionBodyMs": 67561,
+      "starterRegionCommitMs": 98406,
+      "sceneSpritesReadyMs": 98432,
+      "localeRequestMs": 61315,
+      "localeBodyMs": 76446,
+      "localeReadyMs": 76467,
+      "firstPlayableFrameMs": 101441,
+      "rendererBodyMs": 171378
+    },
+    "firstInteractionAfterAckMs": 3167,
+    "movement": {
+      "attempted": true,
+      "passed": false,
+      "status": "attempted",
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "geometry": {
+        "source": "sha256-pinned-local-release-reference",
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+      },
+      "physical": {
+        "input": "trusted-playwright-keyboard-pulse",
+        "key": "ArrowRight",
+        "atMs": 101603
+      },
+      "wire": {
+        "type": "walk",
+        "direction": "Right",
+        "atMs": 101607
+      },
+      "failure": {
+        "phase": "one-ordinary-adjacent-walk",
+        "code": "ORDINARY_WALK_WIRE_OR_ACK_MISSING"
+      },
+      "ack": {
+        "x": 289,
+        "y": 616,
+        "packet": "UserLocation",
+        "atMs": 115202
+      },
+      "lateAuthoritativeAckMsAfterWire": 13595
+    },
+    "terrain": {
+      "floorPackAbortedAttempts": [
+        {
+          "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+          "kind": "entry-floor",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 61314,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 276471,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/json",
+          "headersAfterMs": 3575,
+          "fromServiceWorker": false,
+          "fromDiskCache": false,
+          "protocol": "h2",
+          "cache": "DYNAMIC",
+          "vercelCache": "MISS",
+          "cors": "wildcard",
+          "lastDataAfterMs": 11988,
+          "failAfterMs": 12004,
+          "failed": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "corsError": null
+        },
+        {
+          "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+          "kind": "entry-floor",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 91332,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 248648,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/json",
+          "headersAfterMs": 117,
+          "fromServiceWorker": false,
+          "fromDiskCache": false,
+          "protocol": "h2",
+          "cache": "DYNAMIC",
+          "vercelCache": "HIT",
+          "cors": "wildcard",
+          "lastDataAfterMs": 11645,
+          "failAfterMs": 12001,
+          "failed": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "corsError": null
+        }
+      ],
+      "samples": [
+        {
+          "label": "first-playable",
+          "afterStartAckMs": 3244,
+          "position": {
+            "x": 288,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 0,
+          "packedNpcs": 0,
+          "packedMonsters": 0
+        },
+        {
+          "label": "after-walk",
+          "afterStartAckMs": 11361,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 0,
+          "packedNpcs": 0,
+          "packedMonsters": 0
+        },
+        {
+          "label": "post-move-6000",
+          "afterStartAckMs": 18062,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 0,
+          "packedNpcs": 8,
+          "packedMonsters": 9
+        },
+        {
+          "label": "post-move-22000",
+          "afterStartAckMs": 34042,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 0,
+          "packedNpcs": 8,
+          "packedMonsters": 9
+        },
+        {
+          "label": "post-move-45000",
+          "afterStartAckMs": 56670,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 0,
+          "packedNpcs": 8,
+          "packedMonsters": 9
+        },
+        {
+          "label": "runtime-body-delivered",
+          "afterStartAckMs": 74046,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 243,
+          "packedNpcs": 8,
+          "packedMonsters": 9
+        },
+        {
+          "label": "post-move-65000",
+          "afterStartAckMs": 76816,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 243,
+          "packedNpcs": 8,
+          "packedMonsters": 9
+        },
+        {
+          "label": "terrain-window-end",
+          "afterStartAckMs": 79580,
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "packedFloor": 0,
+          "decodedFloor": 243,
+          "packedNpcs": 8,
+          "packedMonsters": 9
+        }
+      ],
+      "screenshotSha256": "211eb99ec8a6f7b8947c842159cd65fc80ef73ba9b10a9eb1c23da5a6a1a0ce5"
+    }
+  }
+}

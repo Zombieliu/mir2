@@ -1,0 +1,48 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+error[E0599]: no method named `apply_native_entity_hell_poison` found for mutable reference `&mut zone::runtime::ZoneRuntime` in the current scope
+    --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:416:37
+     |
+ 416 |                     out.extend(self.apply_native_entity_hell_poison(source, &target.reference, mask, value, 5, 2000, now));
+     |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `apply_native_entity_green_poison` with a similar name, but with different arguments
+    --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:1741:5
+     |
+1741 | /     pub(super) fn apply_native_entity_green_poison(
+1742 | |         &mut self,
+1743 | |         source: &ZoneCombatEntityRef,
+1744 | |         target: &ZoneCombatEntityRef,
+...    |
+1748 | |         now: u64,
+1749 | |     ) -> Vec<ZoneOutbound> {
+     | |__________________________^
+
+For more information about this error, try `rustc --explain E0599`.
+warning: `mir2-simulation` (lib) generated 4 warnings
+error: could not compile `mir2-simulation` (lib) due to 1 previous error; 4 warnings emitted

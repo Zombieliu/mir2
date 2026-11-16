@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<stdin>", line 96, in <module>
+  File "<stdin>", line 31, in file_record
+  File "/usr/lib/python3.12/pathlib.py", line 849, in lstat
+    return self.stat(follow_symlinks=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 842, in stat
+    return os.stat(self, follow_symlinks=follow_symlinks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/srv/.mir2-origin-r17-acceleration-20261005-01/HTTPS-FULL-VERIFICATION01.json'

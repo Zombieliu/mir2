@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v3",
+  "kind": "authoring-syntax-only",
+  "createdAt": "2026-10-26T21:10:19.619Z",
+  "node": {
+    "file": "C:\\Program Files\\nodejs\\node.exe",
+    "bytes": 85202416,
+    "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+  },
+  "checks": [
+    {
+      "name": "create-package-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\create-package-v1.mjs",
+        "bytes": 17309,
+        "sha256": "d2eea41d60f48c3e4000e9b39100da48e436f0cf22aa0583e8f4806253842336"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\create-package-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "source-lib-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\source-lib-v1.mjs",
+        "bytes": 14019,
+        "sha256": "6d28ec2e825eeec639d820fa475ffea9455ea1ff009308e74894d753fbdb5e07"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "copy-source-bank-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\copy-source-bank-v1.mjs",
+        "bytes": 10090,
+        "sha256": "b96e3b4e05fc68cd08e9b0eedb60f2db8eb463f859c15d81ac22417a7860095c"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\copy-source-bank-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "freeze-prepare-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\freeze-prepare-v1.mjs",
+        "bytes": 7723,
+        "sha256": "4d804d61d6eb5767ac577f9e7d34c1ef1bccae487c040548e5a64c2b3f0e9861"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\freeze-prepare-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "run-owned-prepare-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\run-owned-prepare-v1.mjs",
+        "bytes": 24595,
+        "sha256": "09964b5a95d87d2a0168fc8eb6b21aec19c41471be259744cc3e38233d84beef"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\run-owned-prepare-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "owned-child-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\owned-child-v1.mjs",
+        "bytes": 2201,
+        "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\owned-child-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "allSyntaxPassed": true,
+  "scope": "Parser only. No imports executed, no tests, no freeze, no bank copy, no Gateway or workload.",
+  "bankCopied": false,
+  "freezeExecuted": false,
+  "loadStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

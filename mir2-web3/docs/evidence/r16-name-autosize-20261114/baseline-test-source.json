@@ -1,0 +1,61 @@
+{
+  "source": "6e5abd6ddd",
+  "pins": [
+    {
+      "path": "mir2-web3/apps/web/scripts/test-player-frames.mjs",
+      "source": "6e5abd6ddd",
+      "sha256": "136124c8a828f9fb5fe297b91d01102b1ed217b4810a85a7648897d90c99b5f8"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs",
+      "source": "6e5abd6ddd",
+      "sha256": "e125b06ad0ca3065c47037a714c0510f698a47bbe1bf8287a40687eb1525739e"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/crystal-ui-export-manifest.json",
+      "source": "6e5abd6ddd",
+      "sha256": "3b8ceeda35955d69e0ffa428c9af46b29c7df4408c32d22e50c09413002dfb36"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-player-frames.ts",
+      "source": "6e5abd6ddd",
+      "sha256": "bf44a9ac9e9e25f04a12985ecf9aaffb9894fac56cd352d4c7ba96b1f7b53c42"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-entity-frames.ts",
+      "source": "6e5abd6ddd",
+      "sha256": "64853869965f346f86ca09d803dd648d0f5ae0beec06fd0fb3aa61a98703b89f"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/original-ui/frame-sets.generated.json",
+      "source": "6e5abd6ddd",
+      "sha256": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-overlays.tsx",
+      "source": "6e5abd6ddd",
+      "sha256": "0e49c98c1c81775a578349aa73b6aa5119db21cf9a507202c121ac7ab380d806"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-map-panels.tsx",
+      "source": "6e5abd6ddd",
+      "sha256": "712981852d4e6d779a52705c2a01a9f6a2832fd378ef77ffb457e21fae2a3be9"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-game-shop.tsx",
+      "source": "6e5abd6ddd",
+      "sha256": "23aea2995193fa1dd478f7e2c65de510ac5d902be1050947610663212b9c42a4"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-dialogs.tsx",
+      "source": "6e5abd6ddd",
+      "sha256": "13117e72b15eff7d603647477e8a9d3c543faad4aae37dc3d7a3d2ffd4877ed6"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-panels.tsx",
+      "source": "6e5abd6ddd",
+      "sha256": "9c9435097b43fe3cbdab420b3ee4dc445d7577b28c6a4eccaebe468cef730d32"
+    }
+  ],
+  "scope": "Only the exact committed inputs needed to reach the existing three failures; other late player-frame assertions are not claimed."
+}

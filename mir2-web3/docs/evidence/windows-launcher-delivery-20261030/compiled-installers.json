@@ -1,0 +1,26 @@
+[
+  {
+    "Kind": "normal",
+    "Path": "E:\\mir2-release\\windows-launcher-20261030\\artifacts\\Numeron-Legend-of-Rebirth-20261030-launcher-r12-Setup.exe",
+    "Version": "2026.10.30.12",
+    "Bytes": 1026815762,
+    "Sha256": "3B926D5EB5DD8EE1FC46B6D39FBA3EDA3EB538BA257405733ABE1DEFAE840172",
+    "PublicAuthenticode": "NotSigned"
+  },
+  {
+    "Kind": "qaBaseline",
+    "Path": "E:\\mir2-release\\windows-launcher-20261030\\qa-baseline-output\\Numeron-Legend-of-Rebirth-20261029-unified-r11-LocalValidation-Setup.exe",
+    "Version": "2026.10.29.11",
+    "Bytes": 1024372196,
+    "Sha256": "8D5C43390C01FCB461FC5B1E2B57A02CAE4C7CB8DCFD2ABAD329BFEFDC288C1F",
+    "PublicAuthenticode": "NotSigned"
+  },
+  {
+    "Kind": "qaUpgrade",
+    "Path": "E:\\mir2-release\\windows-launcher-20261030\\qa-upgrade-output\\Numeron-Legend-of-Rebirth-20261030-launcher-r12-LocalValidation-Setup.exe",
+    "Version": "2026.10.30.12",
+    "Bytes": 1026815927,
+    "Sha256": "BED07F40F727590A0AC183A4CA884AA4C839113E8AFB158DFD3FEE5C1DA72CBD",
+    "PublicAuthenticode": "NotSigned"
+  }
+]

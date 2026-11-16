@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/012-r23-locale-ru.jpg",
+  "purpose": "Russian labels visible; screen-keyboard caption wraps to two lines inside its button. No full-game or linguistic acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 318827,
+  "sha256": "754ab7e248fdc6c6a11c15ab1a2f90233d9c6d1bb8ed202f490bfc1ef5595b21",
+  "recordedUtc": "2026-10-09T18:47:27.224Z"
+}

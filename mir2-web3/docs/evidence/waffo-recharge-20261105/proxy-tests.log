@@ -1,0 +1,27 @@
+test_ambiguous_route_upgrade_remains_rejected (test_deploy.ProxyCandidateTests.test_ambiguous_route_upgrade_remains_rejected) ... ok
+test_crlf_activity_upgrade_preserves_all_existing_bytes_except_exact_routes (test_deploy.ProxyCandidateTests.test_crlf_activity_upgrade_preserves_all_existing_bytes_except_exact_routes) ... ok
+test_duplicate_authenticated_route_remains_rejected (test_deploy.ProxyCandidateTests.test_duplicate_authenticated_route_remains_rejected) ... ok
+test_duplicate_site_snippets_remain_rejected (test_deploy.ProxyCandidateTests.test_duplicate_site_snippets_remain_rejected) ... ok
+test_duplicate_snippets_with_different_endings_remain_rejected (test_deploy.ProxyCandidateTests.test_duplicate_snippets_with_different_endings_remain_rejected) ... ok
+test_exact_old_mixed_ending_upload_remains_accepted (test_deploy.ProxyCandidateTests.test_exact_old_mixed_ending_upload_remains_accepted) ... ok
+test_existing_crlf_site_accepts_both_upload_endings_without_rewriting_it (test_deploy.ProxyCandidateTests.test_existing_crlf_site_accepts_both_upload_endings_without_rewriting_it) ... ok
+test_existing_site_is_not_admitted_as_a_first_install (test_deploy.ProxyCandidateTests.test_existing_site_is_not_admitted_as_a_first_install) ... ok
+test_initial_crlf_and_lf_installations_have_identical_output (test_deploy.ProxyCandidateTests.test_initial_crlf_and_lf_installations_have_identical_output) ... ok
+test_logout_upgrade_retains_all_unrelated_bytes (test_deploy.ProxyCandidateTests.test_logout_upgrade_retains_all_unrelated_bytes) ... ok
+test_modified_site_snippet_remains_rejected (test_deploy.ProxyCandidateTests.test_modified_site_snippet_remains_rejected) ... ok
+test_static_update_does_not_rewrite_existing_configuration (test_deploy.ProxyCandidateTests.test_static_update_does_not_rewrite_existing_configuration) ... ok
+test_waffo_upgrade_rejects_ambiguous_or_unexpected_existing_routes (test_deploy.ProxyCandidateTests.test_waffo_upgrade_rejects_ambiguous_or_unexpected_existing_routes) ... ok
+test_waffo_webhook_upgrade_changes_only_exact_public_matcher (test_deploy.ProxyCandidateTests.test_waffo_webhook_upgrade_changes_only_exact_public_matcher) ... ok
+test_wrong_authenticated_route_remains_rejected (test_deploy.ProxyCandidateTests.test_wrong_authenticated_route_remains_rejected) ... ok
+test_existing_release_files_are_never_overwritten (test_deploy.VerifiedReleaseTests.test_existing_release_files_are_never_overwritten) ... ok
+test_manifest_hash_mismatch_is_rejected (test_deploy.VerifiedReleaseTests.test_manifest_hash_mismatch_is_rejected) ... ok
+test_missing_public_file_is_rejected (test_deploy.VerifiedReleaseTests.test_missing_public_file_is_rejected) ... ok
+test_missing_staging_after_validation_does_not_require_reread (test_deploy.VerifiedReleaseTests.test_missing_staging_after_validation_does_not_require_reread) ... ok
+test_non_allowlisted_file_is_rejected_even_with_matching_manifest_hash (test_deploy.VerifiedReleaseTests.test_non_allowlisted_file_is_rejected_even_with_matching_manifest_hash) ... ok
+test_staging_replacement_after_validation_cannot_change_release (test_deploy.VerifiedReleaseTests.test_staging_replacement_after_validation_cannot_change_release) ... ok
+test_tampered_public_file_is_rejected_before_publication (test_deploy.VerifiedReleaseTests.test_tampered_public_file_is_rejected_before_publication) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.088s
+
+OK

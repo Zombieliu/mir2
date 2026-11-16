@@ -1,0 +1,583 @@
+{
+  "schema": "mir2.web-r16.graduation-display.v1",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "sourcePins": {
+    "apps/game-client/client-bevy/src/quest_journey.rs": "d6b96d589386d39081d41b67db5ef6748f0c11ecff0e3489cc49f6fd9ed29b61",
+    "apps/game-client/client-bevy/src/quest_ui.rs": "a07818a33e778410c617449a1c35892da315a3c05cf617d4112d5ea6f2ed7214",
+    "packages/game-data/data/generated/portable-native-i18n.json": "6d4063f6b857958b62f57c6ad9fd5ee8217aa5cbe76b7a33ef072b98aaa120aa",
+    "apps/game-client/runtime/Cargo.lock": "fa2e7b35e5c85ef8487b472bb1e5396e90fb48823f3707463a60c4c59e8933fb",
+    "apps/web/lib/generated/bevy_runtime_version.json": "b264d14a83cf9316aaa6b08770b4ed5d975335dfbff8871d71977352cfb0a8ba",
+    "apps/game-client/client-bevy/src/graduation_tests.rs": "c095718c5ceeac064b11dec911bc9d8ad8d648223cc5a7d3dde46bb9fa0faa09",
+    "packages/tooling/scripts/generate-portable-native-localization.mjs": "b7a8808a898be47e0d2c63ef37dc3bb318a5444a6b702c9b7c705dbb53fb5688",
+    "apps/web/scripts/test-portable-native-localization.mjs": "b30fc9172f76f6218a315d0fdb2cbf4d2bfd1e1ac81738432c3dd677b3e5437a"
+  },
+  "renderer": "bevy-db5e53a91f4d11de",
+  "packages": [
+    {
+      "id": "webgpu",
+      "backend": "webgpu",
+      "packageDir": "pkg-webgpu",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false,
+      "artifacts": [
+        {
+          "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+          "sha256": "10216eafd2ddcdeb0dab62c1b4dc5b0b4896eb1ebf8b8add06985f4e817ecb58",
+          "bytes": 141118
+        },
+        {
+          "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "sha256": "ef5cdae27401f5335059ac42761ad6dc8d4b1463e29de0ef1a7641ccc539637b",
+          "bytes": 31240329,
+          "gzipBytes": 6532851
+        }
+      ]
+    },
+    {
+      "id": "webgl2",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2",
+      "questUiAbiVersion": 0,
+      "bagUiAbiVersion": 0,
+      "primarySharedUiCompiled": false,
+      "artifacts": [
+        {
+          "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+          "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+          "bytes": 117176
+        },
+        {
+          "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+          "sha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+          "bytes": 16402208,
+          "gzipBytes": 4213570
+        }
+      ]
+    },
+    {
+      "id": "webgl2-shared",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2-shared",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": true,
+      "artifacts": [
+        {
+          "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "sha256": "792e256c91e98eae6d07fe53e79f2fc1adf622ffa1a29ef90bb97fb109feb0b3",
+          "bytes": 139092
+        },
+        {
+          "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "sha256": "b8e3e375bdb286e711557b79875400c2b577481afd19c23407e9bee83dcdd61a",
+          "bytes": 32168925,
+          "gzipBytes": 6876614
+        }
+      ]
+    }
+  ],
+  "canonicalArtifactsPreserved": true,
+  "originalSavePathsReadOnlyForThisCandidate": true,
+  "originalLiveStoreBytePreservationClaimed": false,
+  "preservationScope": "Original gateways remain live and update world clocks. Candidate gateways use independent COPYFILE_EXCL replicas. Personal progression/assets are compared separately; runtime event, revision and transform differences remain explicit.",
+  "tests": {
+    "native": 7,
+    "nativeRenderCombinations": 60,
+    "node": 11,
+    "typeScript": true
+  },
+  "web": {
+    "classReadbacks": [
+      {
+        "className": "Warrior",
+        "sourceReadOnlyForThisCandidate": true,
+        "sourceMatchedAtCopy": true,
+        "sourceSha256AtCopy": "c43eabca254beaefeebd7331a137116a9e214f9352b783366d282dee5402a31c",
+        "sourceSha256AtCheck": "dda64c29d0396fb64aa139003a250d61da97dc03de5aea478be8f2afc271342a",
+        "sourceByteHashUnchanged": false,
+        "preexistingSourceGatewayPid": 126788,
+        "preexistingSourceGatewayPort": 19231,
+        "differingSaveFields": [
+          "default_npc_events",
+          "revision",
+          "position",
+          "direction"
+        ],
+        "cloneAfterSha256": "52e9c674a1d25dfa1d9abcf04878c3478de09c8138190e8006542ce7bba5d17c",
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "level": 30,
+        "completedMain": 22,
+        "completedGrowth": 4,
+        "normalLogout": true,
+        "readOnlyRecommendation": true,
+        "revisionChanged": true,
+        "transformPreserved": false
+      },
+      {
+        "className": "Wizard",
+        "sourceReadOnlyForThisCandidate": true,
+        "sourceMatchedAtCopy": true,
+        "sourceSha256AtCopy": "975b8a4a3e0b2ffd9a278bd5506b39d06f68c89778a3db2222d21dbda841ee31",
+        "sourceSha256AtCheck": "8766a85b2ffc0a1517ebec0c684e65829cedd3eeca622d5f22570def9faba4c9",
+        "sourceByteHashUnchanged": false,
+        "preexistingSourceGatewayPid": 128444,
+        "preexistingSourceGatewayPort": 19232,
+        "differingSaveFields": [
+          "default_npc_events",
+          "revision"
+        ],
+        "cloneAfterSha256": "bfe1a18798b39016c88c8dc2ead2fd85fabc40cf868616516fb3759db4dff92d",
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "level": 30,
+        "completedMain": 22,
+        "completedGrowth": 4,
+        "normalLogout": true,
+        "readOnlyRecommendation": true,
+        "revisionChanged": true,
+        "transformPreserved": true
+      },
+      {
+        "className": "Taoist",
+        "sourceReadOnlyForThisCandidate": true,
+        "sourceMatchedAtCopy": true,
+        "sourceSha256AtCopy": "fb36fa86513d997d6b54d66d33a1164f121492ae47f467e0434aab2c7a0c72ae",
+        "sourceSha256AtCheck": "1c76056b4a505d7dc8b09b3ddc7adbba9e34bba325bb12fc444cc0ae94ec8b53",
+        "sourceByteHashUnchanged": false,
+        "preexistingSourceGatewayPid": 129280,
+        "preexistingSourceGatewayPort": 19235,
+        "differingSaveFields": [
+          "default_npc_events",
+          "revision"
+        ],
+        "cloneAfterSha256": "3c811a88133120bb6c00edd820b40c20eb87901116c364eb77eb16b1fdf75d34",
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "level": 30,
+        "completedMain": 22,
+        "completedGrowth": 4,
+        "normalLogout": true,
+        "readOnlyRecommendation": true,
+        "revisionChanged": true,
+        "transformPreserved": true
+      }
+    ],
+    "locales": [
+      {
+        "locale": "zh-CN",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "裁决之杖",
+        "map": "地牢二层北部",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "en",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "Judgement Mace",
+        "map": "N 2Fof Dungeon",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "zh-TW",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "裁決權杖",
+        "map": "地牢二層北部",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "pt-BR",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "Maça de Julgamento",
+        "map": "Calabouço · 2º andar norte",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "ru",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "Судья Мейс",
+        "map": "N 2 из подземелья",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "hi",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "जजमेंट मैक",
+        "map": "N 2f of dungeon",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "id",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "Mace Penghakiman",
+        "map": "N 2 fof penjara bawah tanah",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "vi",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": " Trọng tài Mace",
+        "map": "N 2 ngục tối",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "th",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": " คํา พิพากษา เมส",
+        "map": "N 2 Food Dungeon",
+        "passed": true,
+        "networkClean": true
+      },
+      {
+        "locale": "ar",
+        "viewport": {
+          "width": 960,
+          "height": 720
+        },
+        "logicalViewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "item": "الحكم ماك",
+        "map": "N 2f of dungeon",
+        "passed": true,
+        "networkClean": true
+      }
+    ]
+  },
+  "scope": {
+    "sharedNativeAndWebPresentation": true,
+    "nativeWindowCaptured": false,
+    "threeNewJourneysRun": false,
+    "assetsOrRewardsAdded": false,
+    "localDevelopmentSourceCandidate": true,
+    "thin360MiBPassed": false,
+    "productionDeployed": false,
+    "humanAccepted": false
+  },
+  "mapResolution": {
+    "file": "D605",
+    "nativeMapIndex": 186,
+    "displayKey": "content.map.186.name",
+    "authoredChallengeTitleRetained": true
+  },
+  "retainedFailedTrials": [
+    {
+      "folder": "browser-warrior-r1",
+      "reason": "Isolated staging lacked Native key JSON and had cross-volume Next resolution errors"
+    },
+    {
+      "folder": "browser-warrior-r2",
+      "reason": "Staging omitted canonical proxy.ts; immutable renderer URL returned 404"
+    },
+    {
+      "folder": "locale-r1/ar",
+      "reason": "First ordinary Q was not acknowledged; retained for cold-input investigation, with unchanged-source retries recorded separately"
+    }
+  ],
+  "translations": "Existing Native keyed translations are reused; editorial quality remains a separate review.",
+  "files": [
+    {
+      "path": "graduation-warrior.json",
+      "bytes": 40288,
+      "sha256": "6633b4cded908e78484ad3d763c6dcfe31e7a0789add77f3c09f59940e056c26"
+    },
+    {
+      "path": "graduation-warrior-zh-CN.png",
+      "bytes": 113304,
+      "sha256": "f966a6ca57ce96bb17e914ae9f0479158dd85b64d19a95652902354332cc21f8"
+    },
+    {
+      "path": "graduation-wizard.json",
+      "bytes": 35238,
+      "sha256": "96c1e135ada454ec25c2fa9560149af05b152a930d5790d7887b26432356dae5"
+    },
+    {
+      "path": "graduation-wizard-zh-CN.png",
+      "bytes": 113255,
+      "sha256": "81a8ee52bc60331e0a5008fb2f295e6d1727b2f07dc9d04422f4ee33867c974b"
+    },
+    {
+      "path": "graduation-taoist.json",
+      "bytes": 35128,
+      "sha256": "061de834c15f99665d7acec7349e631260951668cfd3a546953e48550e12f01b"
+    },
+    {
+      "path": "graduation-taoist-zh-CN.png",
+      "bytes": 112812,
+      "sha256": "605c5c3717568cc56980145a57705a10083c4521d843b92d763cc1fbe5d5c4f3"
+    },
+    {
+      "path": "graduation-narrow-zh-CN.json",
+      "bytes": 34937,
+      "sha256": "7b563ef34aa0f6a9eed189550cab6c62537a39f5ac66bdc48386efd296aa1998"
+    },
+    {
+      "path": "graduation-narrow-zh-CN.png",
+      "bytes": 186462,
+      "sha256": "178f813dac0853e7e5d019e581835424009c4445c62d744da257bc0cc597c909"
+    },
+    {
+      "path": "graduation-narrow-en.json",
+      "bytes": 34938,
+      "sha256": "de05a059d07ba56406630ea48b08f4ff10260ccad78862259b8e3daa83780893"
+    },
+    {
+      "path": "graduation-narrow-en.png",
+      "bytes": 186994,
+      "sha256": "8450cb2d836d62d82fa429fb15e23c5b64a44fe1f16ae99301bd9da677c0a351"
+    },
+    {
+      "path": "graduation-narrow-zh-TW.json",
+      "bytes": 34937,
+      "sha256": "765985afb77b0c7f90171916cf9e1862221372a631ded5550d954595029f838a"
+    },
+    {
+      "path": "graduation-narrow-zh-TW.png",
+      "bytes": 185109,
+      "sha256": "f0ce35c9b8ecac1a00f4b36974ae8e4938b7a8ffbc482c8880efd9bc8915c160"
+    },
+    {
+      "path": "graduation-narrow-pt-BR.json",
+      "bytes": 34996,
+      "sha256": "1b670c51d15e9423a47240f8bcb524da7a5c2049f75563662799adb7c1d8c3b9"
+    },
+    {
+      "path": "graduation-narrow-pt-BR.png",
+      "bytes": 190765,
+      "sha256": "0bb071d9a3fd3572e0c21bd30523620f0f9658ecdbccb37d218348222f6a2d10"
+    },
+    {
+      "path": "graduation-narrow-ru.json",
+      "bytes": 35095,
+      "sha256": "39af237bf01902b33ba790fd1ed8fe39517de9c1e661ea18456e6fdff8b0cfc9"
+    },
+    {
+      "path": "graduation-narrow-ru.png",
+      "bytes": 190986,
+      "sha256": "729e7646d55c61521c31ca4363e3e00783744fce4e5ecb94dcaf744be3fe06f4"
+    },
+    {
+      "path": "graduation-narrow-hi.json",
+      "bytes": 35217,
+      "sha256": "77a92d2e42020dee61b340f9a7196bdc546a3277f89163dc052ae92578097053"
+    },
+    {
+      "path": "graduation-narrow-hi.png",
+      "bytes": 186181,
+      "sha256": "d79df023766d63e71b69d8735ba331ea1ee31232308e64542d943805e15a1f65"
+    },
+    {
+      "path": "graduation-narrow-id.json",
+      "bytes": 34988,
+      "sha256": "354bd495aa9ee65d9f487cee514a2b4188a531c1f09b74ad81ac7c95669931c2"
+    },
+    {
+      "path": "graduation-narrow-id.png",
+      "bytes": 188533,
+      "sha256": "b50818dcf23a23bf6ed351c596b05a9faa8621ccf8a2c075ce83f2cad1a8246d"
+    },
+    {
+      "path": "graduation-narrow-vi.json",
+      "bytes": 34993,
+      "sha256": "ce8b3da81dd95af0dcd64c8eb2cbc17c349d0a1e4f9ff95763a61a848fb916af"
+    },
+    {
+      "path": "graduation-narrow-vi.png",
+      "bytes": 189546,
+      "sha256": "cba34d033b93d47724b22b5af4c2045d67202feb7000ae1ba22cc652b9b7e675"
+    },
+    {
+      "path": "graduation-narrow-th.json",
+      "bytes": 35199,
+      "sha256": "566a81ae76f06d74dee76634af01812bf00d147aaef20fc8aa30fcefd6b63059"
+    },
+    {
+      "path": "graduation-narrow-th.png",
+      "bytes": 185662,
+      "sha256": "652b89a058b1f81dbf6f5d3be68ec109602b25a7e550a08cb68afa319e8bf795"
+    },
+    {
+      "path": "graduation-narrow-ar.json",
+      "bytes": 36470,
+      "sha256": "6c375b50732fdbb045cd71d45782c586ee1617254d8f1acc1936544cd24794d8"
+    },
+    {
+      "path": "graduation-narrow-ar.png",
+      "bytes": 183787,
+      "sha256": "ade20b9d98cd921e5c84b97494818ed68f50837956497c938f63023903eb3320"
+    },
+    {
+      "path": "graduation-ar-first.json",
+      "bytes": 37949,
+      "sha256": "a24cf94f6ce2e988ad1f48af6d5a46308ed72df1a883a4f802f3cb16e4df6195"
+    },
+    {
+      "path": "graduation-ar-second-recheck.json",
+      "bytes": 35022,
+      "sha256": "59d8036575afcd7fabb9eab43df4de7024826454ec97a611b99a94daee4582a9"
+    },
+    {
+      "path": "graduation-native.log",
+      "bytes": 33863,
+      "sha256": "e225e079eb1c57ee93d5d05e5491142f18f9c78ec64c75705eb5387ee98363ac"
+    },
+    {
+      "path": "graduation-node.log",
+      "bytes": 3287,
+      "sha256": "126b0401f20a95336e4a720a56365b3acd68ffdd4929908e098e3bfd983d785f"
+    }
+  ],
+  "createdAt": "2026-11-07T05:24:42.413Z"
+}

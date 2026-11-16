@@ -1,0 +1,65 @@
+{
+  "schema": "mir2.windows.temporary-publisher-tools-verification.v1",
+  "checkedUtc": "2026-10-28T18:52:14.3038788+00:00",
+  "nodeSecurityTestsPassed": 20,
+  "pythonCoreTransportTestsPassed": 7,
+  "nodeSyntaxPassed": true,
+  "pythonAstPassed": true,
+  "initializerParseErrors": 0,
+  "initializerPrivateAclGatePassed": true,
+  "workerdRuntimeTest": "passed_3_of_3",
+  "deployed": false,
+  "repositorySourceChanged": false,
+  "files": [
+    {
+      "file": "worker-template.mjs",
+      "sha256": "8e7a021e32e828620e9fe095650d28839fc829273e69657d7332ba7b7b2fbea0",
+      "bytes": 18581
+    },
+    {
+      "file": "generate_publisher.py",
+      "sha256": "7ce3d1117adbbdf6d69a213d7085171a8d0ae8b43e3e4f61a192aba33bbe7d97",
+      "bytes": 5201
+    },
+    {
+      "file": "worker_transport.py",
+      "sha256": "3c149e3621b26f416718b037b3d2e08b6842ca126070171f60d6ec3a8a0c1ad1",
+      "bytes": 12046
+    },
+    {
+      "file": "initialize-private.ps1",
+      "sha256": "356f8c319fda20ba2faf7149c73efb7fe908b0945fbd5ca2b41ac834a9fffac0",
+      "bytes": 3202
+    },
+    {
+      "file": "test-worker.mjs",
+      "sha256": "cb6e1271c27a17e605f6e5c1a093f7361ff1bd825fd5ed371f26ec752c307f95",
+      "bytes": 21281
+    },
+    {
+      "file": "test_worker_transport.py",
+      "sha256": "fed7302ec0f9a388e94ddfb3d7b94e80e79a9725575c6d3d18bcf199bd48cef6",
+      "bytes": 12910
+    },
+    {
+      "file": "test-workerd.mjs",
+      "sha256": "ed613d7b9aed3d300a6f64a8b222665d1871bcf75357d25e05d3e5ed6d331853",
+      "bytes": 10435
+    },
+    {
+      "file": "README.md",
+      "sha256": "dd4a80c03b0f0fb22242516814429abdeee93ea43af716bb9841a22971b55b3d",
+      "bytes": 8009
+    }
+  ],
+  "workerdRuntimeTestsPassed": 3,
+  "localWorkerdCompatibilityDate": "2026-07-30",
+  "localMiniflareVersion": "4.20260730.0",
+  "deployedCompatibilityDateTested": false,
+  "deploymentCompatibilityDate": "2026-10-28",
+  "legacyChecksumFallback": "ETag-bound actual DigestStream SHA256 and exact length; post-read same ETag and size; no custom metadata trust or overwrite",
+  "endpointOrigin": "https://assets.mir2.obelisk.build",
+  "endpointPathPrefix": "/__mir2-native-publisher-20261029",
+  "initializerPrivateAssetsAclAndCoreAdmissionPassed": true,
+  "initializerPrivateAssetsFixture": "initializer-assets-test.json"
+}

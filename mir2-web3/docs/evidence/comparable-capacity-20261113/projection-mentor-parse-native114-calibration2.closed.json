@@ -1,0 +1,144 @@
+{
+  "schema": "mir2.mentor-parse-public-native-artifact-calibration2.v1",
+  "source": {
+    "buildRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+    "canonicalIntegrationRevision": "33c75002cf6a78c1bd2005c9ace0476d34816c7a",
+    "cleanBeforeAndAfter": true,
+    "nativeBuildScopesEqualCanonical": true
+  },
+  "artifact": {
+    "platform": "windows-x64",
+    "sha256": "7d2a6c817b009d6a7e1d0a75cd6b7847fe8cbc5aa2cb57efa8c3d1032a784ff8",
+    "bytes": 99873792,
+    "normalReleaseCandidate": true,
+    "gatewayOptLevel": "3",
+    "simulationOptLevel": "3",
+    "defaultFeatures": true,
+    "packageOptOverrides": {},
+    "physicalPeRehashedForThisCompact": false,
+    "evidence": {
+      "evidence": "projection-mentor-parse-release-v1/WINDOWS-RELEASE-PROOF.json",
+      "bytes": 4514,
+      "sha256": "d78579ab53b4522367fc4deeb6e96e6433a4f8e70f77c37c02be60c7a7f20b8b"
+    }
+  },
+  "compileClosure": {
+    "actualCargoExitCode": 0,
+    "wrapperExitCode": 1,
+    "normalEnvelopePassed": false,
+    "normalDrainBudgetSeconds": 180,
+    "normalDrainDeadlineExceeded": true,
+    "exactOwnedIdleHelperCleanupWasForced": true,
+    "allOwnedCompilerMembersClosedBeforeGame": true,
+    "jobCloseKillApplied": false,
+    "separateFromNativeTestResults": true,
+    "receiptSha256": "c7ab56cb3c8910fee9cc1063658b15ddda63ac587b7d5db8d57cce05569a443c"
+  },
+  "nativeRegression": {
+    "uniquePassed": 114,
+    "simulationPassed": 84,
+    "gatewayPassed": 29,
+    "rpcPassed": 1,
+    "allActualAndWrapperExitCodesZero": true,
+    "allJobsNormallyClosedNoKill": true,
+    "profiles": [
+      {
+        "target": "mir2_simulation",
+        "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+        "packageOptLevel": 0
+      },
+      {
+        "target": "gatewayLib",
+        "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+        "packageOptLevel": 0,
+        "simulationDependencyOptLevel": 3
+      },
+      {
+        "target": "zoneRpc",
+        "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+        "packageOptLevel": 0,
+        "simulationDependencyOptLevel": 3
+      }
+    ],
+    "historicalOptimized277ComponentExcludedFrom114": true,
+    "fullWorkspaceSuiteCertified": false,
+    "evidence": {
+      "evidence": "projection-mentor-parse-release-v1/COMPLETE-NATIVE-VALIDATION.json",
+      "bytes": 15846,
+      "sha256": "51977c7c6f2938248fec31b23719d7d3cdd90c51edf924b3e48ab8459892d97c"
+    }
+  },
+  "calibration2": {
+    "outcome": "PASS",
+    "population": 2,
+    "durationMs": 60000,
+    "offered": 64,
+    "completedOnTime": 64,
+    "timeouts": 0,
+    "notSent": 0,
+    "passedActorMinuteWindows": 2,
+    "totalActorMinuteWindows": 2,
+    "equipmentActorRecords": 2,
+    "equipmentAllPassed": true,
+    "ordinaryLogoutAndCloseAll2Passed": true,
+    "freshReentryAll2Passed": true,
+    "fileAllActorSampleCount": 2,
+    "filePassed": true,
+    "enhancedPassed": true,
+    "resourceRows": 93,
+    "actualControllerDriverServerExitCodes": [
+      0,
+      0,
+      0
+    ],
+    "allJobsNormallyClosedNoKill": true,
+    "diagnosticFlagsUnset": true,
+    "measurementStartedAtUtc": "2026-11-14T20:05:26.454Z",
+    "controllerSha256": "fa33b054fd835f3d223dcbc1d883a7532f2f9e0a0dda49b060011949cce6c1e5",
+    "fileSha256": "ac5ec3bbeae6013be969bb16f43bb1cc5fe622016ac782045ec822ca0ea3cd44",
+    "enhancedSha256": "a5a3ea47c5179d13bc117c84facf254584ca44dc0e706797e4e1815b93074798",
+    "evidence": {
+      "evidence": "projection-mentor-parse-release-v1/CALIBRATION2-CLOSED-PASS.json",
+      "bytes": 1844,
+      "sha256": "1742ace2a85b7929b9cadd84060cd6f6b4f2cd2d479cb8201147e849e4c7ea5a"
+    }
+  },
+  "authenticationHistoryMetadata": {
+    "version": 33,
+    "attemptCount": 1677,
+    "sha256": "0bc03a9838237377ddf3768f01432ad4842f44d1bdcf1e1d10234feace3670e3",
+    "priorFullPrefixCount": 1665,
+    "prefixUnchanged": true,
+    "newAttempts": 12,
+    "historyContentsReadForThisCompact": false
+  },
+  "hundredActorRetest": {
+    "status": "PENDING",
+    "finalReportRead": false,
+    "activeEvidenceRead": false,
+    "rootReportedObservationAtUtc": "2026-11-14T20:22:51Z",
+    "rootReportedOsConnectionsAtThatTime": 30,
+    "connectionCountIsNotSteadyWorkloadProof": true,
+    "sameSdk7Seed5PlanAndResourceContract": true,
+    "planSha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+    "priorHundredActorFailuresRetained": true
+  },
+  "archiveMetadataOnly": {
+    "version": 14,
+    "manifestSha256": "8a4356e317db29a4a9b96ccf01302aea1768d9a85522496ca3b14bc82ef522c0",
+    "fileCount": 345,
+    "totalBytes": 635153859,
+    "metadataSource": "Root verified and spot-checked; private archive not opened here",
+    "preservationOnly": true
+  },
+  "boundaries": {
+    "qualificationLayer": "local-game-core/File/in-memory-session-cache/loopback",
+    "configuredAdmissionCap51IsHardwareMaximum": false,
+    "publicServiceDeployed": false,
+    "capacityQualified": false,
+    "productionStackQualified": false,
+    "physicalTriClientQualified": false,
+    "fullCombatQualified": false
+  },
+  "readyParagraphZh": "原版历史千人攻击与本轮百人移动、聊天属于不同工作负载，不能直接换算；51只是服务准入配置，不代表硬件上限。新候选已完成114项有界native回归和2人60秒校准，正按相同SDK7、seed5、计划与资源预算进行本地核心层100角色复测；截至本记录仍在入场，尚无最终容量结论。"
+}

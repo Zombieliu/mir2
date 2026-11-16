@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T04:42:36.889Z",
+  "state": "final-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\candidate-release-binding.json",
+      "bytes": 6272,
+      "sha256": "f7885180a04dfca1d44989e42c7948bba0de5757936610c860ea890e9c6ca737"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\collect-public.mjs",
+      "bytes": 39510,
+      "sha256": "7dbf76a98585b2312692689bd7cfefa030b0dc3affb1dff3de3f31828c3327a8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\driver-report-contract.mjs",
+      "bytes": 9234,
+      "sha256": "a038e9c186893015ed386b4140cef3927a0ad8024d85e4f6ad01d2a798eba581"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\final-inputs-approved.json",
+      "bytes": 13055,
+      "sha256": "5ee9f79eed4c19a38c3dfe82ceab40c5d588ee019ac5e826164c8384c68ef7a0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\input-lib.mjs",
+      "bytes": 14680,
+      "sha256": "05fa358a0c286cdcb3dbd879bc1049dff534bbee195810230b72b90a687caee9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\launcher-source-prepared-v1.json",
+      "bytes": 836,
+      "sha256": "023c58ee37cb11d76cd9ead9ded68d3860ac71c51344a8dcae45ba26472cfb9a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\launcher-syntax-check.log",
+      "bytes": 753,
+      "sha256": "cfef6cb34e1091b2d038ae69dbf2cf3e51db789f0d7ed13f8b06a39380bc54ef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\preparation-plan.json",
+      "bytes": 2016,
+      "sha256": "77bb644b7a7a82cd1c067ad679c9553c74a7147afb36bff421d7c12895fb5d79"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\prepare-inputs.mjs",
+      "bytes": 10969,
+      "sha256": "4a49987ce2f0c3e4f7274b9a9f6f868ff631468d331f95d8c7f04ca98eae119d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\run-options.json",
+      "bytes": 2968,
+      "sha256": "ff21cced2ca1562fb834dd45e7a3ce7be2dc6fb7f971d665085850cd221e1ea5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\run-owned.mjs",
+      "bytes": 18120,
+      "sha256": "228df5ba91a89fd96168c4c5788c12c305c8d1eacff0d9a39b8ecdbbb41ab5b5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\scenario-prefix-readiness.json",
+      "bytes": 17974,
+      "sha256": "45e32703418639fd18d61c25a39ab3915a7de38a1458eb419169563b1cf049a8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\scenario.json",
+      "bytes": 5844,
+      "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\scene-binding.json",
+      "bytes": 4346,
+      "sha256": "0b89bd5ec2b0438e562c1843c5ca28625b6530b9777064a2537d3a049d48a4eb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\scene-contract.mjs",
+      "bytes": 7883,
+      "sha256": "42842fca63f1e8cbe68f1f6c5a3bec069a8884d659383c128de68231b5559e12"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\static-preparation-verification.json",
+      "bytes": 1160,
+      "sha256": "68d467e0930654e12e3f1e487bf0447722cd66bfb51827e3de9be4c248744cd1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-feasibility-gate.mjs",
+      "bytes": 18299,
+      "sha256": "34b12a6410f145fc126801e6392489540cefe500b65718461d0390a3df5e3aaf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-public.mjs",
+      "bytes": 17110,
+      "sha256": "4c194df397eb582baafa846ae45c3e8b8f209b29a7b0745834efd99d994da0c9"
+    }
+  ],
+  "sourceSha256": "c863f001c77fdd040ca9c292cff478afd15d70914408bfd84d3dbac8a91e9822",
+  "scripts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\collect-public.mjs",
+      "bytes": 39510,
+      "sha256": "7dbf76a98585b2312692689bd7cfefa030b0dc3affb1dff3de3f31828c3327a8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\driver-report-contract.mjs",
+      "bytes": 9234,
+      "sha256": "a038e9c186893015ed386b4140cef3927a0ad8024d85e4f6ad01d2a798eba581"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\input-lib.mjs",
+      "bytes": 14680,
+      "sha256": "05fa358a0c286cdcb3dbd879bc1049dff534bbee195810230b72b90a687caee9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\prepare-inputs.mjs",
+      "bytes": 10969,
+      "sha256": "4a49987ce2f0c3e4f7274b9a9f6f868ff631468d331f95d8c7f04ca98eae119d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\run-owned.mjs",
+      "bytes": 18120,
+      "sha256": "228df5ba91a89fd96168c4c5788c12c305c8d1eacff0d9a39b8ecdbbb41ab5b5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\scene-contract.mjs",
+      "bytes": 7883,
+      "sha256": "42842fca63f1e8cbe68f1f6c5a3bec069a8884d659383c128de68231b5559e12"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-feasibility-gate.mjs",
+      "bytes": 18299,
+      "sha256": "34b12a6410f145fc126801e6392489540cefe500b65718461d0390a3df5e3aaf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-public.mjs",
+      "bytes": 17110,
+      "sha256": "4c194df397eb582baafa846ae45c3e8b8f209b29a7b0745834efd99d994da0c9"
+    }
+  ]
+}

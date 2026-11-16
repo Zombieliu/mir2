@@ -1,0 +1,235 @@
+{
+  "additions": [
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/DELIVERY.json",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/DELIVERY.p7s",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/0a685ad8d38e5bb86db4aff061a884408ea390a74170030e77cad7059509d8b0.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/112d1f77a20d0da51f62bcbc488827530f5b854f91f7d423d101caedb0109ecc.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/1e4052aa3f158a98b8d33306dda36e788662ea58e625bb7c1f7a8e7ca3153b3e.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/25fed6bdb5bba24c651b90ebabe0805dcbd1429149d61241a4d7a0ca48bb8059.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/3e8b19dfd08f94aa7eac46ef88001d199b6e6be1ba3f9382be2f9d39b5cf6bb3.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/3ff41a0e69a58faaea5b1327ac5900079a043607d94999ffc18ed312bd7f6945.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/567dfae85cc7e726e99dfe74f7c9b6a3e1ab868f6c6727f5153a1d5abeac92c1.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/792db75e22e4d9066f2529c3f117655c0ec794eb47b431b49fba6c78760f052e.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/ac4d15842886a496f093d585e02f9adcc6c3cf3cc3c763a3021b0c56e01431e3.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/d528c7149953768ed25b77f5da5d84a4f514ee7ab1e7b8c1684cab25e1823a63.m2d.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/f176d5dba713d8bd9be0de94b7a7fe1fec48493049a0218c2baa144d3312d0b5.m2b.gz",
+      "state": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/f7d89de99e3bc3f565c58e4713870d78d9b446bfee9651d30ba9d7c559a73cfe.m2b.gz",
+      "state": "absent"
+    }
+  ],
+  "candidateDirectory": "releases/game-WN-CANDIDATE-20261004-invited-17",
+  "compressionRuntime": {
+    "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+    "zlibCompiled": "1.3",
+    "zlibRuntime": "1.3"
+  },
+  "feedSequence": 12,
+  "gatewayOrCaddyRestarted": false,
+  "health": [
+    {
+      "capacity": {
+        "currentActiveSessions": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentReconnectLeases": 0,
+        "currentStartGameInFlight": 0,
+        "currentWsConnections": 0
+      },
+      "port": 7110,
+      "ready": true,
+      "revision": null
+    },
+    {
+      "capacity": {
+        "currentActiveSessions": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentReconnectLeases": 0,
+        "currentStartGameInFlight": 0,
+        "currentWsConnections": 1
+      },
+      "port": 7210,
+      "ready": true,
+      "revision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b"
+    }
+  ],
+  "passed": true,
+  "remoteFilesystemWritten": false,
+  "resources": {
+    "cpuCount": 4,
+    "diskAvailableBytes": 54756220928,
+    "loadAverage": [
+      1.0498046875,
+      1.26904296875,
+      1.24072265625
+    ],
+    "memoryAvailableBytes": 2110017536
+  },
+  "schema": "mir2.origin.acceleration-preflight.v1",
+  "services": [
+    {
+      "ActiveState": "active",
+      "MainPID": "2639318",
+      "NRestarts": "0",
+      "Result": "success",
+      "SubState": "running",
+      "unit": "mir2-playtest.service"
+    },
+    {
+      "ActiveState": "active",
+      "MainPID": "3855184",
+      "NRestarts": "0",
+      "Result": "success",
+      "SubState": "running",
+      "unit": "mir2-gateway.service"
+    },
+    {
+      "ActiveState": "active",
+      "MainPID": "2107428",
+      "NRestarts": "0",
+      "Result": "success",
+      "SubState": "running",
+      "unit": "caddy.service"
+    }
+  ],
+  "sources": [
+    {
+      "device": 64769,
+      "inode": 1143477,
+      "mode": "0o644",
+      "mtimeNs": 1791082741268430436,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/feed-current/latest.json",
+      "sha256": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88",
+      "size": 1159,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1143478,
+      "mode": "0o644",
+      "mtimeNs": 1791082741290430288,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/feed-current/latest.p7s",
+      "sha256": "7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916",
+      "size": 1614,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1141832,
+      "mode": "0o644",
+      "mtimeNs": 1791082532347836678,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/PACKAGE-MANIFEST.json",
+      "sha256": "ceae366bebca1c19c3f529eb22f016ccc80dff5b8655694e76682e31ab12cb18",
+      "size": 24360174,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1141836,
+      "mode": "0o644",
+      "mtimeNs": 1791082532349836665,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/VERSION.json",
+      "sha256": "1409e21c9f1ae7a04b71603ce1220fe38c37f222d54859af2592cdd72ce99b16",
+      "size": 1221,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1141834,
+      "mode": "0o644",
+      "mtimeNs": 1791082532349836665,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/RELEASE-STATEMENT.json",
+      "sha256": "e64a8ef4fc62e6e9f6fe16625321fc8a88a0c8c29a661aeda46025b08015da82",
+      "size": 707,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1141835,
+      "mode": "0o644",
+      "mtimeNs": 1791082532349836665,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/RELEASE-STATEMENT.p7s",
+      "sha256": "bee84b574f43f6411eb1bc3ab23a3ce0c389b853fb0f8b63f6ad9bdb1287856e",
+      "size": 1614,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1143471,
+      "mode": "0o644",
+      "mtimeNs": 1791082600179380364,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-platform-windows.exe",
+      "sha256": "d0780475efa9f9c1ecd730dfcfc11e38b9b0659f05b3b1f7d93b4f80c3d734e0",
+      "size": 111013376,
+      "uid": 0
+    },
+    {
+      "device": 64769,
+      "inode": 1141730,
+      "mode": "0o644",
+      "mtimeNs": 1791015260817404185,
+      "nlink": 1,
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261003-invited-16/mir2-platform-windows.exe",
+      "sha256": "9930c82045df5e6a25eb7201265090e690200698b18ea526ca5e66173e7c6869",
+      "size": 111005696,
+      "uid": 0
+    }
+  ],
+  "stageNamesAbsent": [
+    "/tmp/mir2-origin-input-20261005-01",
+    "/var/tmp/mir2-origin-acceleration-20261005-01"
+  ],
+  "tcpEstablishedCounts": {
+    "7100": 0,
+    "7200": 0
+  },
+  "timestampUnix": 1791144930,
+  "zeroSessionsRequiredForStaticAppend": false
+}

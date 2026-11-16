@@ -1,0 +1,37 @@
+{
+  "evidenceKind": "focused-native-tests",
+  "passed": 19,
+  "failed": 0,
+  "ignored": 1,
+  "sourcePhase": "full simplified overlay before two scoped caption additions",
+  "sourceLog": {
+    "filename": "client-native_billing-v3.log",
+    "included": false,
+    "bytes": 29960,
+    "sha256": "573574962914f4e94dc624b7867a8c7515e7d3a000df0c01b23f614bc428f8bf"
+  },
+  "testLines": [
+    "test native_billing::ui::tests::billing_windows_gpu_three_routes_and_channel_states ... ignored, explicit offline Windows GPU evidence; no server, wallet signing or chain payment",
+    "test native_billing::ui::tests::checkout_is_bound_to_current_account_character_and_request ... ok",
+    "test native_billing::ui::tests::definitive_purchase_errors_are_specific_and_require_current_correlation ... ok",
+    "test native_billing::ui::tests::hidden_pages_cannot_purchase_or_change_pagination ... ok",
+    "test native_billing::ui::tests::keyboard_page_selection_does_not_execute_old_mouse_purchase ... ok",
+    "test native_billing::ui::tests::monthly_purchase_and_owned_activation_are_independent_of_recharge_channels ... ok",
+    "test native_billing::ui::tests::panel_opening_enter_is_consumed_and_close_fences_world_input ... ok",
+    "test native_billing::ui::tests::pending_navigation_is_blocked_and_retry_returns_to_original_route ... ok",
+    "test native_billing::ui::tests::purchase_reply_refreshes_status_and_disabled_status_cannot_purchase ... ok",
+    "test native_billing::ui::tests::refresh_never_settles_an_unconfirmed_purchase ... ok",
+    "test native_billing::ui::tests::rejected_purchase_allows_an_intentional_new_offer ... ok",
+    "test native_billing::ui::tests::three_routes_remain_visible_without_sales_and_selecting_is_explicit ... ok",
+    "test native_billing::ui::tests::timeout_retry_preserves_order_and_ignores_late_original_url ... ok",
+    "test native_billing::ui::tests::uncertain_server_commit_retries_the_same_order ... ok",
+    "test native_billing::ui::tests::unique_ids_remain_canonical_strings ... ok",
+    "test native_billing::ui::tests::usdc_checkout_requires_local_origin_and_retries_the_same_order ... ok",
+    "test native_billing::ui::tests::usdc_refresh_only_reads_pending_order_status ... ok",
+    "test native_billing::ui::tests::usdc_relogin_reopens_frozen_order_when_new_sales_are_disabled ... ok",
+    "test native_billing::ui::tests::usdc_status_is_optional_for_existing_stripe_servers ... ok",
+    "test native_billing::ui::tests::usdc_wire_requires_canonical_amounts_testnet_and_known_states ... ok",
+    "test result: ok. 19 passed; 0 failed; 1 ignored; 0 measured; 1590 filtered out; finished in 0.33s"
+  ],
+  "suite": "client native_billing"
+}

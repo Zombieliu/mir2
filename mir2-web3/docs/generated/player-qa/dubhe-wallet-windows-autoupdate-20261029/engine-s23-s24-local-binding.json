@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.engine-only-origin-local-binding.v1",
+  "passed": true,
+  "checkedUtc": "2026-10-28T20:27:50.586942+00:00",
+  "preparationSha256": "E7C757B08EE830EE0BC790484A2C80103578CA0D504160DEB24699FAF36DD309",
+  "rootHelper": {
+    "local": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\operations\\engine-only-origin-s23-s24\\engine-only-origin.py",
+    "remote": "/home/ubuntu/mir2-native-upload-engine2324-ac321a8ac9cb4ecbac8027b1fb773527/engine-only-origin.py",
+    "sha256": "8F9E0B7F9842729FDC8BD7E999D2B22C5A493421D06403FFD6CE5F205D409409",
+    "size": 27874
+  },
+  "inputFilesVerified": 10,
+  "inputBytes": 3929486,
+  "engineSourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+  "engineExe": {
+    "sha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+    "size": 1959936
+  },
+  "caddy": {
+    "sha256": "F27E305C8D741DF564DF906D01FB7B98B31260208394AF01D585073D89EB1CB1",
+    "size": 6650
+  },
+  "originBaselineSequences": {
+    "legacy": 21,
+    "five-class": 22
+  },
+  "newSequences": {
+    "legacy": 23,
+    "five-class": 24
+  },
+  "gameComponentsUnchanged": true,
+  "declaredExistingGameMetadataFilesToRehashOnServer": 8,
+  "fullGamePayloadRehashed": false,
+  "remoteActionsPerformed": false
+}

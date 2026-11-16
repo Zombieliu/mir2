@@ -1,0 +1,14 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import{fileURLToPath}from'node:url';
+const B='C:/mir2-build/p01-completion-20261024',P='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3',D=path.join(B,'ordinary-capacity-bank-prepare-v16'),O=path.join(P,'docs/generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v16/continuation-and-return-supplement-v1');
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),assert=(v,m)=>{if(!v)throw Error(m)};
+const inputs=[
+ [path.join(D,'return-to-ruben-diagnostic-v1/analyze-v1.mjs'),'analyze-return-v1.mjs',10551,'8a7bca13434ff9eb54b0fc2453c5cd4baaef56294c28d4f2820a1b629c0bc348'],
+ [path.join(D,'return-to-ruben-diagnostic-v1/geometry-result-v1.json'),'return-geometry-result-v1.json',27233,'90e927fc3a479ae90fbd15d0390b7496147a9d0fcd52963d094e7b721a3f7343'],
+ [path.join(D,'history-supplement-v1/validate-actual-two-group-history.mjs'),'validate-actual-two-group-history.mjs'],
+ [path.join(D,'history-supplement-v1/actual-two-group-history-receipt-v1.json'),'actual-two-group-history-receipt-v1.json',3471,'42d81552f82d480aac085d67ff9239e3238ad353abe833475f215eedebb4966e'],
+ [path.join(B,'ordinary-capacity-bank-prepare-v16-public-continuation-review-v1.json'),'public-continuation-review-v1.json',21408,'ff964fe1a28d91ac5ca58cd022f806e9dda898550dc4d0f8b59b5aba20e90b31'],
+ [fileURLToPath(import.meta.url),'archive-supplement-v1.mjs'],
+];
+assert(!fs.existsSync(O),'never overwrite supplement');fs.mkdirSync(O);const copies=[];
+for(const[source,name,bytes,hash]of inputs){assert(!source.split(/[\\/]/).includes('private'),'public only');let c=source;while(path.resolve(c).toLowerCase()!==path.resolve(B).toLowerCase()){assert(!fs.lstatSync(c).isSymbolicLink()&&path.resolve(fs.realpathSync(c)).toLowerCase()===path.resolve(c).toLowerCase(),'redirected path');c=path.dirname(c)}const b=fs.readFileSync(source);if(bytes!==undefined)assert(bytes===b.length&&hash===sha(b),'reviewed pin');const dest=path.join(O,name);fs.copyFileSync(source,dest,fs.constants.COPYFILE_EXCL);assert(fs.readFileSync(dest).equals(b)&&fs.readFileSync(source).equals(b),'raw copy');copies.push({source,file:name,bytes:b.length,sha256:sha(b)})}
+const body={schemaVersion:1,scope:'Supplement only. Original46-file W16 archive untouched. Independent current16 public result review, pure actual two-group58/42 production preflight and offline original no-path reconstruction. No current Store/auth qualification, cache edits, new runtime, CCU or capacity claim.',sourcesUnchanged:true,copies,capacityAccepted:false,p0Accepted:false};const raw=Buffer.from(JSON.stringify(body,null,2)+'\n');fs.writeFileSync(path.join(O,'copied-evidence-manifest.json'),raw,{flag:'wx'});console.log(JSON.stringify({output:O,files:copies.length,copiedBytes:copies.reduce((s,p)=>s+p.bytes,0),manifest:{bytes:raw.length,sha256:sha(raw)}}));

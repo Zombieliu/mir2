@@ -1,0 +1,32 @@
+{
+  "run": 43811555491,
+  "controller": "2cf385ceaa1a99ad0dc472f6123d703bb4064010",
+  "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+  "artifact": 14200568148,
+  "bytes": 7388,
+  "sha256": "756684196f1eba95da6b9f10ca6bf9fedc0cf6a9baf787c7fbbf4c2eca7cfb81",
+  "passed": true,
+  "kind": "check",
+  "candidate": {
+    "id": "dpl_Hr7DU3FBC5beF6majCdsyPTMZnaV",
+    "url": "numeron-r16-mmuwh3bxi-obelisk-labs.vercel.app",
+    "readyState": null
+  },
+  "trafficBefore": {
+    "target": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "alias": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN"
+  },
+  "trafficAfter": {
+    "target": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "alias": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN"
+  },
+  "candidateChecksPassed": true,
+  "sourceClosure": {
+    "commits": 9,
+    "files": 139,
+    "segments": [
+      90,
+      59
+    ]
+  }
+}

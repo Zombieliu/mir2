@@ -1,0 +1,104 @@
+{
+  "status": "published-and-verified",
+  "sourceSha": "00858ce9b850218dd07ea96daea4bbfe6b68035b",
+  "branch": "codex/windows-player-journey",
+  "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+  "deploymentId": "dpl_4dXyLJo6QFudTXzKNS6kbuEMFJd4",
+  "deploymentUrl": "https://numeron-legend-of-rebirth-l69nevhr3-obelisk-labs.vercel.app",
+  "publicUrls": [
+    "https://mir2.obelisk.build/zh-CN/guide",
+    "https://mir2.obelisk.build/zh-CN/developers"
+  ],
+  "baseline": "dpl_5Tt9YxztUDSbFKgQQTCdkZG3myhx",
+  "preview": "dpl_FTB6QDoZGPWwbyDYVdkdRnpuT2q4",
+  "failedFirstProduction": "dpl_hWjYRfuavCfkfGaDuypf7n4sRFLs",
+  "recovery": "First attempt omitted the original per-deployment installer setting. Restored baseline, supplied the same public installer URL as an immutable build setting, validated corrected production candidate before promotion.",
+  "correctedCandidateChecks": [
+    {
+      "path": "/zh-CN/guide",
+      "status": 200,
+      "passed": true,
+      "canonicalCorrect": true
+    },
+    {
+      "path": "/zh-CN/developers",
+      "status": 200,
+      "passed": true,
+      "canonicalCorrect": true
+    },
+    {
+      "path": "/zh-CN/developers/quickstart",
+      "status": 200,
+      "passed": true,
+      "canonicalCorrect": true
+    },
+    {
+      "path": "/zh-CN/download",
+      "status": 200,
+      "passed": true,
+      "installerLinksUnchanged": true,
+      "installerCount": 1
+    },
+    {
+      "path": "/zh-CN/docs-examples/read-status.mjs",
+      "status": 200,
+      "passed": true,
+      "exactExample": true
+    },
+    {
+      "path": "/api/game-status",
+      "status": 200,
+      "passed": true,
+      "validSchema": true
+    }
+  ],
+  "finalPublicChecks": [
+    {
+      "path": "/zh-CN/guide",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "path": "/zh-CN/developers",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "path": "/zh-CN/developers/quickstart",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "path": "/zh-CN/download",
+      "status": 200,
+      "passed": true,
+      "installerUnchanged": true
+    },
+    {
+      "path": "/zh-CN/docs-examples/read-status.mjs",
+      "status": 200,
+      "passed": true,
+      "exactExample": true
+    },
+    {
+      "path": "/version",
+      "status": 200,
+      "passed": true,
+      "revision": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3"
+    }
+  ],
+  "gameRevisionBefore": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "gameRevisionAfter": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "nodePublicChecks": {
+    "passed": true,
+    "articles": 19,
+    "sections": 59,
+    "contentLinks": 40,
+    "checkedRoutes": 27,
+    "checkedAnchors": 139,
+    "publicBuildFiles": 114,
+    "receipt": "checks-public-production.json"
+  },
+  "dockerStarted": false,
+  "gameDeployed": false
+}

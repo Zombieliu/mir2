@@ -1,0 +1,2013 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793010784810-2c0311a2",
+  "analysisKind": "bounded-load-generator-clock-failure",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v5\\episode-50\\reports\\1793010784810-2c0311a2.samples.jsonl",
+    "bytes": 27037226,
+    "rows": 46754,
+    "sha256": "ff9a09f86e678d6173f57763b7276f9814e25b1479528072820c0a58775fc5b2"
+  },
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v5\\episode-50\\reports\\1793010784810-2c0311a2.report.json",
+    "bytes": 78513,
+    "sha256": "b73f3e1e4be67c7fde17462da3c2330d780e347c228fa91d5bd13504c5ca674c"
+  },
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-parse-cache-v5-clock-analysis-v1\\selected-evidence-v1.json",
+    "bytes": 655104,
+    "sha256": "b971b594590358cbdd38511018a40864164ad5e252c32616806fd917ecd2c786"
+  },
+  "selector": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-parse-cache-v5-clock-analysis-v1\\select-clock-v1.py",
+    "bytes": 6751,
+    "sha256": "70ee27f7ee0ca66134f57fb755fc18c5d419dd1214042f3a97a1f5fb429dc217"
+  },
+  "actualRawReadPasses": 1,
+  "rawStatStable": true,
+  "originalResult": {
+    "error": "Load generator event-loop lag exceeded 250ms for 3 samples; result cannot measure server capacity",
+    "safetyStopped": true,
+    "safetyReason": "Load generator event-loop lag exceeded 250ms for 3 samples; result cannot measure server capacity",
+    "stages": [],
+    "peakServerActive": 50,
+    "peakControlledActors": 50,
+    "diagnosticSteadyOnline": {
+      "samples": 14,
+      "declaredActors": 50,
+      "minimumOnlineActors": 50,
+      "maximumOnlineActors": 50,
+      "lastOnlineActors": 50
+    },
+    "cleanupErrors": []
+  },
+  "phaseWindows": [
+    {
+      "name": "bootstrap-50",
+      "kind": "bootstrap",
+      "targetActors": 50,
+      "startedAtMs": 1793010784848,
+      "endedAtMs": 1793011138734,
+      "completed": true
+    },
+    {
+      "name": "stage-50",
+      "kind": "measurement",
+      "targetActors": 50,
+      "startedAtMs": 1793011138741,
+      "endedAtMs": 1793011153044,
+      "completed": false
+    }
+  ],
+  "clockFailure": {
+    "safetyStop": {
+      "line": 46240,
+      "type": "safetyStop",
+      "at": 1793011152932,
+      "reason": "Load generator event-loop lag exceeded 250ms for 3 samples; result cannot measure server capacity"
+    },
+    "kind": "Node monitorEventLoopDelay p99 at resolution20ms; histogram reset after each nominal1s coverage sample",
+    "thresholdMs": 250,
+    "requiredConsecutiveSamples": 3,
+    "previousNormalSample": {
+      "rawLine": 45327,
+      "at": 1793011149628,
+      "phase": "stage-50",
+      "aoi": {
+        "expectedPairs": 624,
+        "observedPairs": 622,
+        "activeOwners": 50,
+        "issueCount": 0,
+        "issues": []
+      },
+      "driver": {
+        "rssBytes": 302194688,
+        "eventLoopLagP99Ms": 45.088767,
+        "eventLoopLagMaxMs": 45.088767
+      }
+    },
+    "actualOverThresholdSamples": [
+      {
+        "line": 26538,
+        "at": 1793011080264,
+        "phase": "settle",
+        "eventLoopLagP99Ms": 284.164095,
+        "consecutiveOver250": 1
+      },
+      {
+        "line": 26785,
+        "at": 1793011081266,
+        "phase": "settle",
+        "eventLoopLagP99Ms": 304.873471,
+        "consecutiveOver250": 2
+      },
+      {
+        "line": 42089,
+        "at": 1793011136536,
+        "phase": "settle",
+        "eventLoopLagP99Ms": 313.524223,
+        "consecutiveOver250": 1
+      },
+      {
+        "line": 45688,
+        "at": 1793011150693,
+        "phase": "stage-50",
+        "eventLoopLagP99Ms": 299.630591,
+        "consecutiveOver250": 1
+      },
+      {
+        "line": 45983,
+        "at": 1793011151698,
+        "phase": "stage-50",
+        "eventLoopLagP99Ms": 281.280511,
+        "consecutiveOver250": 2
+      },
+      {
+        "line": 46241,
+        "at": 1793011152934,
+        "phase": "stage-50",
+        "eventLoopLagP99Ms": 294.911999,
+        "consecutiveOver250": 3
+      }
+    ],
+    "fatalStreakSamples": [
+      {
+        "rawLine": 45688,
+        "at": 1793011150693,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 606,
+          "observedPairs": 597,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 305082368,
+          "eventLoopLagP99Ms": 299.630591,
+          "eventLoopLagMaxMs": 299.630591
+        }
+      },
+      {
+        "rawLine": 45983,
+        "at": 1793011151698,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 582,
+          "observedPairs": 580,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 331993088,
+          "eventLoopLagP99Ms": 281.280511,
+          "eventLoopLagMaxMs": 281.280511
+        }
+      },
+      {
+        "rawLine": 46241,
+        "at": 1793011152934,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 598,
+          "observedPairs": 596,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 320516096,
+          "eventLoopLagP99Ms": 294.911999,
+          "eventLoopLagMaxMs": 294.911999
+        }
+      }
+    ],
+    "clockJumpOrBackwardReasonRecorded": false,
+    "ordering": "guard.stop writes safetyStop at1793011152932 inside the sampler; that same callback then continues to AOI sampling and writes its third over-threshold coverage at1793011152934. The2ms row difference is expected from source order, not a missing third sample.",
+    "sourceEvidence": [
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v5/diagnostic-capacity.mjs",
+        "line": 1902,
+        "meaning": "monitorEventLoopDelay resolution20"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v5/diagnostic-capacity.mjs",
+        "line": 1939,
+        "meaning": "increment if p99>250, otherwise reset count to0"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v5/diagnostic-capacity.mjs",
+        "line": 1940,
+        "meaning": "stop after3 consecutive over-threshold samples"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v5/diagnostic-capacity.mjs",
+        "line": 1946,
+        "meaning": "coverage write and histogram reset"
+      }
+    ]
+  },
+  "aoiBeforeStop": {
+    "allCoverageRows": 365,
+    "allCoverageIssueRows": 0,
+    "firstPersistentAoiFailure": null,
+    "last20SecondsCoverageSamples": 19,
+    "activeOwnerValues": [
+      50
+    ],
+    "samplesWithObservedLessThanExpected": 14,
+    "maximumObservedPairDeficit": 9,
+    "coverageTimeline": [
+      {
+        "rawLine": 41267,
+        "at": 1793011133514,
+        "phase": "settle",
+        "aoi": {
+          "expectedPairs": 610,
+          "observedPairs": 610,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 319225856,
+          "eventLoopLagP99Ms": 44.957695,
+          "eventLoopLagMaxMs": 44.957695
+        }
+      },
+      {
+        "rawLine": 41488,
+        "at": 1793011134520,
+        "phase": "settle",
+        "aoi": {
+          "expectedPairs": 596,
+          "observedPairs": 589,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 305446912,
+          "eventLoopLagP99Ms": 50.692095,
+          "eventLoopLagMaxMs": 50.692095
+        }
+      },
+      {
+        "rawLine": 41931,
+        "at": 1793011135526,
+        "phase": "settle",
+        "aoi": {
+          "expectedPairs": 594,
+          "observedPairs": 594,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 295792640,
+          "eventLoopLagP99Ms": 35.848191,
+          "eventLoopLagMaxMs": 35.848191
+        }
+      },
+      {
+        "rawLine": 42089,
+        "at": 1793011136536,
+        "phase": "settle",
+        "aoi": {
+          "expectedPairs": 604,
+          "observedPairs": 598,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 328519680,
+          "eventLoopLagP99Ms": 313.524223,
+          "eventLoopLagMaxMs": 313.524223
+        }
+      },
+      {
+        "rawLine": 42352,
+        "at": 1793011137540,
+        "phase": "settle",
+        "aoi": {
+          "expectedPairs": 602,
+          "observedPairs": 595,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 308260864,
+          "eventLoopLagP99Ms": 44.335103,
+          "eventLoopLagMaxMs": 44.335103
+        }
+      },
+      {
+        "rawLine": 42606,
+        "at": 1793011138541,
+        "phase": "settle",
+        "aoi": {
+          "expectedPairs": 580,
+          "observedPairs": 574,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 325726208,
+          "eventLoopLagP99Ms": 38.273023,
+          "eventLoopLagMaxMs": 38.273023
+        }
+      },
+      {
+        "rawLine": 42960,
+        "at": 1793011139543,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 600,
+          "observedPairs": 597,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 326815744,
+          "eventLoopLagP99Ms": 33.783807,
+          "eventLoopLagMaxMs": 33.783807
+        }
+      },
+      {
+        "rawLine": 43203,
+        "at": 1793011140541,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 596,
+          "observedPairs": 596,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 336343040,
+          "eventLoopLagP99Ms": 34.766847,
+          "eventLoopLagMaxMs": 34.766847
+        }
+      },
+      {
+        "rawLine": 43332,
+        "at": 1793011141555,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 604,
+          "observedPairs": 604,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 325459968,
+          "eventLoopLagP99Ms": 51.806207,
+          "eventLoopLagMaxMs": 51.806207
+        }
+      },
+      {
+        "rawLine": 43669,
+        "at": 1793011142566,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 596,
+          "observedPairs": 587,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 326901760,
+          "eventLoopLagP99Ms": 47.382527,
+          "eventLoopLagMaxMs": 47.382527
+        }
+      },
+      {
+        "rawLine": 43895,
+        "at": 1793011143572,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 588,
+          "observedPairs": 588,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 327217152,
+          "eventLoopLagP99Ms": 34.308095,
+          "eventLoopLagMaxMs": 34.308095
+        }
+      },
+      {
+        "rawLine": 44125,
+        "at": 1793011144578,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 572,
+          "observedPairs": 571,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 321634304,
+          "eventLoopLagP99Ms": 31.195135,
+          "eventLoopLagMaxMs": 31.195135
+        }
+      },
+      {
+        "rawLine": 44400,
+        "at": 1793011145592,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 576,
+          "observedPairs": 575,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 301002752,
+          "eventLoopLagP99Ms": 39.026687,
+          "eventLoopLagMaxMs": 39.026687
+        }
+      },
+      {
+        "rawLine": 44639,
+        "at": 1793011146598,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 600,
+          "observedPairs": 598,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 320614400,
+          "eventLoopLagP99Ms": 38.371327,
+          "eventLoopLagMaxMs": 38.371327
+        }
+      },
+      {
+        "rawLine": 44828,
+        "at": 1793011147605,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 590,
+          "observedPairs": 587,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 316825600,
+          "eventLoopLagP99Ms": 38.666239,
+          "eventLoopLagMaxMs": 38.666239
+        }
+      },
+      {
+        "rawLine": 45091,
+        "at": 1793011148618,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 598,
+          "observedPairs": 593,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 308875264,
+          "eventLoopLagP99Ms": 59.867135,
+          "eventLoopLagMaxMs": 59.867135
+        }
+      },
+      {
+        "rawLine": 45327,
+        "at": 1793011149628,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 624,
+          "observedPairs": 622,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 302194688,
+          "eventLoopLagP99Ms": 45.088767,
+          "eventLoopLagMaxMs": 45.088767
+        }
+      },
+      {
+        "rawLine": 45688,
+        "at": 1793011150693,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 606,
+          "observedPairs": 597,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 305082368,
+          "eventLoopLagP99Ms": 299.630591,
+          "eventLoopLagMaxMs": 299.630591
+        }
+      },
+      {
+        "rawLine": 45983,
+        "at": 1793011151698,
+        "phase": "stage-50",
+        "aoi": {
+          "expectedPairs": 582,
+          "observedPairs": 580,
+          "activeOwners": 50,
+          "issueCount": 0,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 331993088,
+          "eventLoopLagP99Ms": 281.280511,
+          "eventLoopLagMaxMs": 281.280511
+        }
+      }
+    ],
+    "timerInterpretation": "No persistent missing/ghost/duplicate issue was emitted in365 coverage polls. Fourteen of the last19 pre-stop polls had a transient pair deficit (max9); raw does not expose missingSince/extraSince state or every clear. No claim that AOI timers were empty, or that all server visibility behavior was correct."
+  },
+  "earlierGameEvidence": {
+    "continuousFailureRows": 151,
+    "continuousFailureReasons": {
+      "Continuous activity window failed, regardless of the measured stage": 151
+    },
+    "bootstrapRecordOnlyFailures": 101,
+    "measurementFinalPartialFailures": 50,
+    "firstBootstrapRecordOnlyFailure": {
+      "line": 26019,
+      "type": "continuousFailure",
+      "at": 1793011078174,
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "diagnosticContinuityScope": "bootstrap",
+      "evidence": {
+        "actor": "L9b998811",
+        "role": "movement",
+        "seconds": 60.04126619999998,
+        "final": false,
+        "activityDurationSufficient": true,
+        "activityPassed": false,
+        "latencyPassed": false,
+        "fanoutPassed": false,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "passed": false,
+        "phases": [
+          "settle"
+        ],
+        "issues": null,
+        "activity": {
+          "plans": 78,
+          "gaps": 8,
+          "moves": 68,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1793011077183,
+          "runs": 32,
+          "cells": 100,
+          "nativeOpportunities": 78,
+          "nativeCompleted": 70,
+          "offeredDurationMs": 58500,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 8,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": false,
+          "completionRatio": 0.8974358974358975,
+          "runRatio": 0.47058823529411764,
+          "cellsPerMinute": 99.93127027024626,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 8,
+          "offeredDurationMs": 58500,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        }
+      }
+    },
+    "measurementFailureTimingRange": [
+      1793011170177,
+      1793011170184
+    ],
+    "timeoutRowsInSelectedPreStopWindow": 72,
+    "timeoutKindCounts": {
+      "fanout-run": 28,
+      "fanout-walk": 18,
+      "attack": 10,
+      "fanout-turn": 4,
+      "run": 1,
+      "turn": 1,
+      "fanout-chat": 8,
+      "walk": 1,
+      "chat": 1
+    },
+    "firstTimeoutExamples": [
+      {
+        "line": 41091,
+        "type": "action",
+        "at": 1793011133195,
+        "phase": "settle",
+        "actor": "L9b99880l",
+        "kind": "fanout-run",
+        "status": "timeout",
+        "latencyMs": 2009.0676000000094
+      },
+      {
+        "line": 41287,
+        "type": "action",
+        "at": 1793011133906,
+        "phase": "settle",
+        "actor": "L9b99880u",
+        "kind": "fanout-walk",
+        "status": "timeout",
+        "latencyMs": 2002.85480000003
+      },
+      {
+        "line": 41298,
+        "type": "action",
+        "at": 1793011133928,
+        "phase": "settle",
+        "actor": "L9b99880v",
+        "kind": "fanout-run",
+        "status": "timeout",
+        "latencyMs": 2003.892200000002
+      },
+      {
+        "line": 41350,
+        "type": "action",
+        "at": 1793011134004,
+        "phase": "settle",
+        "actor": "L9b99880w",
+        "kind": "fanout-walk",
+        "status": "timeout",
+        "latencyMs": 2013.3380999999936
+      },
+      {
+        "line": 41476,
+        "type": "action",
+        "at": 1793011134325,
+        "phase": "settle",
+        "actor": "L9b998805",
+        "kind": "attack",
+        "status": "timeout",
+        "latencyMs": 901.0124000000069,
+        "plannedLatencyMs": 936.4250000000466,
+        "error": "L9b998805 timed out waiting for attack authoritative acknowledgement",
+        "targetId": 206335
+      }
+    ],
+    "lastTimeoutExamples": [
+      {
+        "line": 45981,
+        "type": "action",
+        "at": 1793011151647,
+        "phase": "stage-50",
+        "actor": "L9b99880z",
+        "kind": "attack",
+        "status": "timeout",
+        "latencyMs": 908.0985000000219,
+        "plannedLatencyMs": 942.9934000000358,
+        "error": "L9b99880z timed out waiting for attack authoritative acknowledgement",
+        "targetId": 206625
+      },
+      {
+        "line": 46230,
+        "type": "action",
+        "at": 1793011152929,
+        "phase": "stage-50",
+        "actor": "L9b99880w",
+        "kind": "fanout-walk",
+        "status": "timeout",
+        "latencyMs": 2192.5989999999874
+      },
+      {
+        "line": 46234,
+        "type": "action",
+        "at": 1793011152930,
+        "phase": "stage-50",
+        "actor": "L9b99880u",
+        "kind": "fanout-run",
+        "status": "timeout",
+        "latencyMs": 2195.0304999999935
+      },
+      {
+        "line": 46236,
+        "type": "action",
+        "at": 1793011152930,
+        "phase": "stage-50",
+        "actor": "L9b99880v",
+        "kind": "fanout-run",
+        "status": "timeout",
+        "latencyMs": 2194.9844999999623
+      }
+    ],
+    "interpretation": "Fanout deadline expirations and attack owner-ACK deadlines were already present in settle before the final lag streak. They are receive/deadline observations; they do not independently prove dropped network packets, a server rejection or a particular bottleneck. All151 continuous failures are the permitted record-only gameplay-window reason; clock safety remains the actual stop reason."
+  },
+  "navigationCoincidence": {
+    "boundedRows": [
+      {
+        "line": 41943,
+        "type": "navigationBlocked",
+        "actor": "L9b998805",
+        "connection": 6,
+        "at": 1793011135845,
+        "monotonicMs": 367587.7191,
+        "sequence": 5291,
+        "phase": "settle",
+        "role": "combat",
+        "mapFileName": "0",
+        "targetCursor": 0,
+        "maxExpanded": 4000,
+        "attemptCount": 220,
+        "attemptsTruncated": true,
+        "nearbyOccupantCount": 13,
+        "occupantsTruncated": false
+      },
+      {
+        "line": 45537,
+        "type": "navigationBlocked",
+        "actor": "L9b998805",
+        "connection": 6,
+        "at": 1793011150636,
+        "monotonicMs": 382378.372,
+        "sequence": 5646,
+        "phase": "stage-50",
+        "role": "combat",
+        "mapFileName": "0",
+        "targetCursor": 0,
+        "maxExpanded": 4000,
+        "attemptCount": 216,
+        "attemptsTruncated": true,
+        "nearbyOccupantCount": 14,
+        "occupantsTruncated": false
+      }
+    ],
+    "firstFinalLagSampleAt": 1793011150693,
+    "lastNavigationBlockedToFirstFinalLagMs": 57,
+    "meaning": "The sampled diagnostic records actor05 attemptCount220 near a settle lag spike and attemptCount216 with maxExpanded4000,57ms before the first final over-threshold lag sample. attemptCount is a bounded diagnostic count, not a measured CPU duration or number of independent user commands. No per-call A* elapsed time, AOI hook cost, GC trace or CPU call stack exists in this raw selection; causal attribution requires the separately authorized CPU profile."
+  },
+  "controlledClientAndEventSummary": {
+    "reportOnline": {
+      "samples": 14,
+      "declaredActors": 50,
+      "minimumOnlineActors": 50,
+      "maximumOnlineActors": 50,
+      "lastOnlineActors": 50
+    },
+    "reportedPhaseLabelsInSelectionWindow": {
+      "settle": {
+        "types": {
+          "playerLifecycle": 555,
+          "selfTransform": 316,
+          "action": 443,
+          "fanoutDistribution": 302,
+          "movementCorrection": 16,
+          "coverage": 6,
+          "pendingAttackEvidence": 5,
+          "navigationBlocked": 1
+        },
+        "actionKinds": {
+          "run": 272,
+          "walk": 114,
+          "fanout-run": 15,
+          "fanout-walk": 5,
+          "attack": 6,
+          "turn": 12,
+          "refresh": 19
+        },
+        "actionStatuses": {
+          "success": 363,
+          "corrected": 21,
+          "timeout": 25,
+          "owner-ack-wait": 31,
+          "navigation-blocked": 1,
+          "plan-gap": 2
+        },
+        "actionKindStatus": {
+          "run|success": 263,
+          "walk|success": 72,
+          "walk|corrected": 13,
+          "fanout-run|timeout": 15,
+          "run|corrected": 8,
+          "walk|owner-ack-wait": 28,
+          "fanout-walk|timeout": 5,
+          "attack|timeout": 5,
+          "turn|success": 9,
+          "walk|navigation-blocked": 1,
+          "attack|plan-gap": 1,
+          "run|plan-gap": 1,
+          "turn|owner-ack-wait": 3,
+          "refresh|success": 19
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 293,
+          "ObjectPlayer": 259,
+          "worldSnapshot": 3
+        },
+        "selfSources": {
+          "UserLocation": 313,
+          "ObjectAttack": 3
+        },
+        "actors": 50,
+        "actionMaxMs": 2023.7073000000091,
+        "actionMaxPlanMs": 1648.937900000019,
+        "actionTimeouts": 25,
+        "actionCancelled": 0,
+        "actionCorrections": 21,
+        "actionInvalidStates": 0
+      },
+      "stage-50": {
+        "types": {
+          "selfTransform": 631,
+          "playerLifecycle": 989,
+          "action": 1103,
+          "movementCorrection": 11,
+          "fanoutDistribution": 554,
+          "coverage": 14,
+          "pendingAttackEvidence": 5,
+          "nativeHpRecovery": 6,
+          "navigationBlocked": 1
+        },
+        "actionKinds": {
+          "turn": 60,
+          "walk": 485,
+          "run": 322,
+          "refresh": 31,
+          "fanout-turn": 4,
+          "attack": 6,
+          "fanout-run": 13,
+          "fanout-walk": 13,
+          "chat": 62,
+          "peerChat": 46,
+          "selfChat": 3,
+          "fanout-chat": 8,
+          "rtt": 50
+        },
+        "actionStatuses": {
+          "owner-ack-wait": 194,
+          "success": 805,
+          "corrected": 17,
+          "timeout": 47,
+          "evidence-wait": 16,
+          "navigation-blocked": 4,
+          "plan-gap": 3,
+          "cancelled": 17
+        },
+        "actionKindStatus": {
+          "turn|owner-ack-wait": 15,
+          "walk|owner-ack-wait": 167,
+          "turn|success": 42,
+          "run|success": 305,
+          "refresh|success": 31,
+          "run|corrected": 6,
+          "walk|corrected": 9,
+          "walk|success": 279,
+          "fanout-turn|timeout": 4,
+          "run|timeout": 1,
+          "attack|timeout": 5,
+          "fanout-run|timeout": 13,
+          "turn|corrected": 2,
+          "fanout-walk|timeout": 13,
+          "chat|success": 49,
+          "peerChat|success": 46,
+          "chat|owner-ack-wait": 12,
+          "selfChat|success": 3,
+          "walk|evidence-wait": 15,
+          "turn|timeout": 1,
+          "fanout-chat|timeout": 8,
+          "walk|timeout": 1,
+          "attack|evidence-wait": 1,
+          "chat|timeout": 1,
+          "rtt|success": 50,
+          "walk|navigation-blocked": 4,
+          "walk|plan-gap": 3,
+          "walk|cancelled": 7,
+          "run|cancelled": 10
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 497,
+          "ObjectRemove": 473,
+          "worldSnapshot": 15,
+          "ObjectWalk": 3,
+          "ObjectRun": 1
+        },
+        "selfSources": {
+          "UserLocation": 627,
+          "ObjectAttack": 4
+        },
+        "actors": 50,
+        "actionMaxMs": 2195.0304999999935,
+        "actionMaxPlanMs": 2051.56600000005,
+        "actionTimeouts": 47,
+        "actionCancelled": 17,
+        "actionCorrections": 17,
+        "actionInvalidStates": 0
+      },
+      "drain": {
+        "types": {
+          "playerLifecycle": 15,
+          "selfTransform": 12
+        },
+        "actionKinds": {},
+        "actionStatuses": {},
+        "actionKindStatus": {},
+        "lifecycleSources": {
+          "ObjectPlayer": 8,
+          "ObjectRemove": 5,
+          "worldSnapshot": 2
+        },
+        "selfSources": {
+          "UserLocation": 11,
+          "ObjectAttack": 1
+        },
+        "actors": 17,
+        "actionMaxMs": 0,
+        "actionMaxPlanMs": 0,
+        "actionTimeouts": 0,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      }
+    },
+    "perSecondTimestampBuckets": {
+      "1793011133000": {
+        "types": {
+          "playerLifecycle": 94,
+          "selfTransform": 60,
+          "action": 68,
+          "fanoutDistribution": 47,
+          "movementCorrection": 5,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 44,
+          "walk": 21,
+          "fanout-run": 2,
+          "fanout-walk": 1
+        },
+        "actionStatuses": {
+          "success": 55,
+          "corrected": 7,
+          "timeout": 3,
+          "owner-ack-wait": 3
+        },
+        "actionKindStatus": {
+          "run|success": 40,
+          "walk|success": 15,
+          "walk|corrected": 3,
+          "fanout-run|timeout": 2,
+          "run|corrected": 4,
+          "walk|owner-ack-wait": 3,
+          "fanout-walk|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 51,
+          "ObjectPlayer": 42,
+          "worldSnapshot": 1
+        },
+        "selfSources": {
+          "UserLocation": 59,
+          "ObjectAttack": 1
+        },
+        "actors": 50,
+        "actionMaxMs": 2009.0676000000094,
+        "actionMaxPlanMs": 1003.6367000000319,
+        "actionTimeouts": 3,
+        "actionCancelled": 0,
+        "actionCorrections": 7,
+        "actionInvalidStates": 0
+      },
+      "1793011134000": {
+        "types": {
+          "action": 78,
+          "fanoutDistribution": 62,
+          "selfTransform": 67,
+          "playerLifecycle": 148,
+          "movementCorrection": 3,
+          "pendingAttackEvidence": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 57,
+          "fanout-walk": 1,
+          "walk": 19,
+          "attack": 1
+        },
+        "actionStatuses": {
+          "success": 65,
+          "timeout": 2,
+          "corrected": 5,
+          "owner-ack-wait": 6
+        },
+        "actionKindStatus": {
+          "run|success": 55,
+          "fanout-walk|timeout": 1,
+          "run|corrected": 2,
+          "walk|success": 10,
+          "walk|corrected": 3,
+          "walk|owner-ack-wait": 6,
+          "attack|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 67,
+          "ObjectRemove": 80,
+          "worldSnapshot": 1
+        },
+        "selfSources": {
+          "UserLocation": 66,
+          "ObjectAttack": 1
+        },
+        "actors": 50,
+        "actionMaxMs": 2013.3380999999936,
+        "actionMaxPlanMs": 1276.506800000032,
+        "actionTimeouts": 2,
+        "actionCancelled": 0,
+        "actionCorrections": 5,
+        "actionInvalidStates": 0
+      },
+      "1793011135000": {
+        "types": {
+          "playerLifecycle": 104,
+          "selfTransform": 69,
+          "action": 79,
+          "fanoutDistribution": 64,
+          "movementCorrection": 3,
+          "coverage": 1,
+          "navigationBlocked": 1
+        },
+        "actionKinds": {
+          "run": 56,
+          "walk": 20,
+          "turn": 2,
+          "attack": 1
+        },
+        "actionStatuses": {
+          "success": 68,
+          "owner-ack-wait": 5,
+          "corrected": 3,
+          "navigation-blocked": 1,
+          "plan-gap": 2
+        },
+        "actionKindStatus": {
+          "run|success": 54,
+          "walk|owner-ack-wait": 5,
+          "walk|success": 12,
+          "walk|corrected": 2,
+          "turn|success": 2,
+          "run|corrected": 1,
+          "walk|navigation-blocked": 1,
+          "attack|plan-gap": 1,
+          "run|plan-gap": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 56,
+          "ObjectRemove": 48
+        },
+        "selfSources": {
+          "UserLocation": 68,
+          "ObjectAttack": 1
+        },
+        "actors": 50,
+        "actionMaxMs": 995.3430999999982,
+        "actionMaxPlanMs": 1021.3637000000454,
+        "actionTimeouts": 0,
+        "actionCancelled": 0,
+        "actionCorrections": 3,
+        "actionInvalidStates": 0
+      },
+      "1793011136000": {
+        "types": {
+          "action": 50,
+          "playerLifecycle": 78,
+          "selfTransform": 47,
+          "fanoutDistribution": 40,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 36,
+          "walk": 14
+        },
+        "actionStatuses": {
+          "success": 47,
+          "owner-ack-wait": 2,
+          "corrected": 1
+        },
+        "actionKindStatus": {
+          "run|success": 36,
+          "walk|success": 11,
+          "walk|owner-ack-wait": 2,
+          "walk|corrected": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 36,
+          "ObjectRemove": 42
+        },
+        "selfSources": {
+          "UserLocation": 47
+        },
+        "actors": 48,
+        "actionMaxMs": 741.0446999999695,
+        "actionMaxPlanMs": 874.117200000037,
+        "actionTimeouts": 0,
+        "actionCancelled": 0,
+        "actionCorrections": 1,
+        "actionInvalidStates": 0
+      },
+      "1793011137000": {
+        "types": {
+          "playerLifecycle": 104,
+          "fanoutDistribution": 34,
+          "selfTransform": 55,
+          "action": 67,
+          "pendingAttackEvidence": 3,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 42,
+          "walk": 21,
+          "attack": 3,
+          "turn": 1
+        },
+        "actionStatuses": {
+          "success": 56,
+          "timeout": 3,
+          "owner-ack-wait": 8
+        },
+        "actionKindStatus": {
+          "run|success": 42,
+          "walk|success": 13,
+          "attack|timeout": 3,
+          "walk|owner-ack-wait": 8,
+          "turn|success": 1
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 58,
+          "ObjectPlayer": 45,
+          "worldSnapshot": 1
+        },
+        "selfSources": {
+          "UserLocation": 55
+        },
+        "actors": 50,
+        "actionMaxMs": 1123.5175000000163,
+        "actionMaxPlanMs": 1130.3916000000318,
+        "actionTimeouts": 3,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011138000": {
+        "types": {
+          "selfTransform": 39,
+          "playerLifecycle": 53,
+          "action": 70,
+          "fanoutDistribution": 24,
+          "continuousWindow": 70,
+          "continuousFailure": 52,
+          "coverage": 1,
+          "phaseEnded": 1,
+          "diagnosticBootstrapContinuousSummary": 1,
+          "phaseStarted": 1,
+          "movementCorrection": 3,
+          "pendingAttackEvidence": 1
+        },
+        "actionKinds": {
+          "run": 31,
+          "fanout-walk": 1,
+          "walk": 22,
+          "fanout-run": 6,
+          "turn": 6,
+          "refresh": 3,
+          "attack": 1
+        },
+        "actionStatuses": {
+          "success": 40,
+          "timeout": 8,
+          "owner-ack-wait": 19,
+          "corrected": 3
+        },
+        "actionKindStatus": {
+          "run|success": 30,
+          "fanout-walk|timeout": 1,
+          "walk|owner-ack-wait": 13,
+          "walk|success": 7,
+          "fanout-run|timeout": 6,
+          "turn|owner-ack-wait": 6,
+          "walk|corrected": 2,
+          "run|corrected": 1,
+          "refresh|success": 3,
+          "attack|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 30,
+          "ObjectRemove": 22,
+          "worldSnapshot": 1
+        },
+        "selfSources": {
+          "UserLocation": 38,
+          "ObjectAttack": 1
+        },
+        "actors": 50,
+        "actionMaxMs": 2023.3274000000092,
+        "actionMaxPlanMs": 1252.5075000000652,
+        "actionTimeouts": 8,
+        "actionCancelled": 0,
+        "actionCorrections": 3,
+        "actionInvalidStates": 0
+      },
+      "1793011139000": {
+        "types": {
+          "action": 110,
+          "fanoutDistribution": 30,
+          "selfTransform": 25,
+          "playerLifecycle": 34,
+          "movementCorrection": 3,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "walk": 30,
+          "fanout-run": 5,
+          "turn": 22,
+          "refresh": 40,
+          "run": 13
+        },
+        "actionStatuses": {
+          "owner-ack-wait": 20,
+          "timeout": 5,
+          "success": 81,
+          "corrected": 4
+        },
+        "actionKindStatus": {
+          "walk|owner-ack-wait": 17,
+          "fanout-run|timeout": 5,
+          "turn|success": 19,
+          "refresh|success": 40,
+          "run|success": 12,
+          "run|corrected": 1,
+          "walk|corrected": 3,
+          "walk|success": 10,
+          "turn|owner-ack-wait": 3
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 18,
+          "worldSnapshot": 6,
+          "ObjectRemove": 10
+        },
+        "selfSources": {
+          "UserLocation": 24,
+          "ObjectAttack": 1
+        },
+        "actors": 50,
+        "actionMaxMs": 2023.7073000000091,
+        "actionMaxPlanMs": 1495.235800000024,
+        "actionTimeouts": 5,
+        "actionCancelled": 0,
+        "actionCorrections": 4,
+        "actionInvalidStates": 0
+      },
+      "1793011140000": {
+        "types": {
+          "selfTransform": 30,
+          "action": 76,
+          "fanoutDistribution": 44,
+          "playerLifecycle": 36,
+          "movementCorrection": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "walk": 42,
+          "fanout-run": 2,
+          "turn": 19,
+          "fanout-walk": 2,
+          "refresh": 7,
+          "run": 2,
+          "fanout-turn": 2
+        },
+        "actionStatuses": {
+          "success": 51,
+          "owner-ack-wait": 16,
+          "timeout": 7,
+          "corrected": 2
+        },
+        "actionKindStatus": {
+          "walk|success": 28,
+          "walk|owner-ack-wait": 12,
+          "fanout-run|timeout": 2,
+          "turn|success": 15,
+          "turn|owner-ack-wait": 4,
+          "fanout-walk|timeout": 2,
+          "refresh|success": 7,
+          "walk|corrected": 2,
+          "run|success": 1,
+          "fanout-turn|timeout": 2,
+          "run|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 18,
+          "worldSnapshot": 3,
+          "ObjectRemove": 15
+        },
+        "selfSources": {
+          "UserLocation": 30
+        },
+        "actors": 48,
+        "actionMaxMs": 2023.1283999999869,
+        "actionMaxPlanMs": 2014.0504000000656,
+        "actionTimeouts": 7,
+        "actionCancelled": 0,
+        "actionCorrections": 2,
+        "actionInvalidStates": 0
+      },
+      "1793011141000": {
+        "types": {
+          "action": 82,
+          "playerLifecycle": 73,
+          "selfTransform": 58,
+          "fanoutDistribution": 68,
+          "movementCorrection": 2,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "walk": 49,
+          "turn": 12,
+          "run": 19,
+          "fanout-turn": 2
+        },
+        "actionStatuses": {
+          "owner-ack-wait": 12,
+          "success": 65,
+          "corrected": 3,
+          "timeout": 2
+        },
+        "actionKindStatus": {
+          "walk|owner-ack-wait": 11,
+          "turn|owner-ack-wait": 1,
+          "walk|success": 35,
+          "turn|success": 11,
+          "run|success": 19,
+          "walk|corrected": 3,
+          "fanout-turn|timeout": 2
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 37,
+          "ObjectRemove": 36
+        },
+        "selfSources": {
+          "UserLocation": 57,
+          "ObjectAttack": 1
+        },
+        "actors": 50,
+        "actionMaxMs": 2018.2232999999542,
+        "actionMaxPlanMs": 1584.5104000000283,
+        "actionTimeouts": 2,
+        "actionCancelled": 0,
+        "actionCorrections": 3,
+        "actionInvalidStates": 0
+      },
+      "1793011142000": {
+        "types": {
+          "action": 45,
+          "fanoutDistribution": 15,
+          "selfTransform": 35,
+          "playerLifecycle": 57,
+          "pendingAttackEvidence": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 19,
+          "walk": 24,
+          "attack": 1,
+          "turn": 1
+        },
+        "actionStatuses": {
+          "success": 37,
+          "owner-ack-wait": 7,
+          "timeout": 1
+        },
+        "actionKindStatus": {
+          "run|success": 19,
+          "walk|owner-ack-wait": 7,
+          "walk|success": 17,
+          "attack|timeout": 1,
+          "turn|success": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 27,
+          "ObjectRemove": 30
+        },
+        "selfSources": {
+          "UserLocation": 35
+        },
+        "actors": 43,
+        "actionMaxMs": 917.805100000056,
+        "actionMaxPlanMs": 938.5641000000178,
+        "actionTimeouts": 1,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011143000": {
+        "types": {
+          "selfTransform": 71,
+          "playerLifecycle": 126,
+          "fanoutDistribution": 59,
+          "action": 96,
+          "movementCorrection": 2,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 47,
+          "walk": 43,
+          "turn": 3,
+          "fanout-run": 2,
+          "fanout-walk": 1
+        },
+        "actionStatuses": {
+          "success": 70,
+          "owner-ack-wait": 20,
+          "corrected": 3,
+          "timeout": 3
+        },
+        "actionKindStatus": {
+          "run|success": 46,
+          "walk|success": 23,
+          "walk|owner-ack-wait": 19,
+          "run|corrected": 1,
+          "turn|success": 1,
+          "fanout-run|timeout": 2,
+          "turn|owner-ack-wait": 1,
+          "turn|corrected": 1,
+          "fanout-walk|timeout": 1,
+          "walk|corrected": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 55,
+          "ObjectRemove": 70,
+          "worldSnapshot": 1
+        },
+        "selfSources": {
+          "UserLocation": 71
+        },
+        "actors": 50,
+        "actionMaxMs": 2015.0387999999803,
+        "actionMaxPlanMs": 1247.3285000000615,
+        "actionTimeouts": 3,
+        "actionCancelled": 0,
+        "actionCorrections": 3,
+        "actionInvalidStates": 0
+      },
+      "1793011144000": {
+        "types": {
+          "action": 45,
+          "fanoutDistribution": 33,
+          "nativeHpRecovery": 2,
+          "playerLifecycle": 53,
+          "selfTransform": 29,
+          "coverage": 1,
+          "pendingAttackEvidence": 2
+        },
+        "actionKinds": {
+          "walk": 17,
+          "run": 22,
+          "fanout-walk": 1,
+          "chat": 2,
+          "peerChat": 1,
+          "attack": 2
+        },
+        "actionStatuses": {
+          "success": 31,
+          "owner-ack-wait": 11,
+          "timeout": 3
+        },
+        "actionKindStatus": {
+          "walk|success": 7,
+          "walk|owner-ack-wait": 10,
+          "run|success": 22,
+          "fanout-walk|timeout": 1,
+          "chat|success": 1,
+          "peerChat|success": 1,
+          "attack|timeout": 2,
+          "chat|owner-ack-wait": 1
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 34,
+          "ObjectPlayer": 19
+        },
+        "selfSources": {
+          "UserLocation": 29
+        },
+        "actors": 45,
+        "actionMaxMs": 2015.8464000000386,
+        "actionMaxPlanMs": 933.1050000000396,
+        "actionTimeouts": 3,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011145000": {
+        "types": {
+          "action": 98,
+          "fanoutDistribution": 38,
+          "selfTransform": 44,
+          "playerLifecycle": 70,
+          "coverage": 1,
+          "movementCorrection": 1
+        },
+        "actionKinds": {
+          "run": 29,
+          "walk": 25,
+          "chat": 23,
+          "peerChat": 14,
+          "turn": 1,
+          "fanout-walk": 1,
+          "selfChat": 2,
+          "fanout-run": 3
+        },
+        "actionStatuses": {
+          "success": 78,
+          "owner-ack-wait": 15,
+          "timeout": 4,
+          "corrected": 1
+        },
+        "actionKindStatus": {
+          "run|success": 28,
+          "walk|success": 18,
+          "chat|owner-ack-wait": 7,
+          "chat|success": 16,
+          "peerChat|success": 14,
+          "turn|owner-ack-wait": 1,
+          "fanout-walk|timeout": 1,
+          "walk|owner-ack-wait": 7,
+          "run|corrected": 1,
+          "selfChat|success": 2,
+          "fanout-run|timeout": 3
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 47,
+          "ObjectRemove": 21,
+          "worldSnapshot": 2
+        },
+        "selfSources": {
+          "UserLocation": 44
+        },
+        "actors": 50,
+        "actionMaxMs": 2026.2221000000136,
+        "actionMaxPlanMs": 1134.6999999999534,
+        "actionTimeouts": 4,
+        "actionCancelled": 0,
+        "actionCorrections": 1,
+        "actionInvalidStates": 0
+      },
+      "1793011146000": {
+        "types": {
+          "action": 85,
+          "nativeHpRecovery": 3,
+          "fanoutDistribution": 41,
+          "selfTransform": 27,
+          "playerLifecycle": 40,
+          "movementCorrection": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "turn": 3,
+          "chat": 18,
+          "fanout-walk": 4,
+          "walk": 33,
+          "fanout-run": 5,
+          "peerChat": 13,
+          "run": 5,
+          "selfChat": 1,
+          "fanout-chat": 3
+        },
+        "actionStatuses": {
+          "owner-ack-wait": 12,
+          "timeout": 14,
+          "success": 53,
+          "evidence-wait": 4,
+          "corrected": 2
+        },
+        "actionKindStatus": {
+          "turn|owner-ack-wait": 1,
+          "chat|owner-ack-wait": 4,
+          "fanout-walk|timeout": 4,
+          "walk|success": 20,
+          "fanout-run|timeout": 5,
+          "chat|success": 14,
+          "peerChat|success": 13,
+          "walk|owner-ack-wait": 7,
+          "walk|evidence-wait": 4,
+          "turn|corrected": 1,
+          "walk|corrected": 1,
+          "run|success": 5,
+          "selfChat|success": 1,
+          "turn|timeout": 1,
+          "fanout-chat|timeout": 3,
+          "walk|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 17,
+          "ObjectRemove": 19,
+          "ObjectWalk": 3,
+          "worldSnapshot": 1
+        },
+        "selfSources": {
+          "UserLocation": 26,
+          "ObjectAttack": 1
+        },
+        "actors": 44,
+        "actionMaxMs": 2026.5218999999925,
+        "actionMaxPlanMs": 2040.101100000029,
+        "actionTimeouts": 14,
+        "actionCancelled": 0,
+        "actionCorrections": 2,
+        "actionInvalidStates": 0
+      },
+      "1793011147000": {
+        "types": {
+          "selfTransform": 29,
+          "playerLifecycle": 36,
+          "action": 90,
+          "fanoutDistribution": 27,
+          "movementCorrection": 1,
+          "coverage": 1,
+          "nativeHpRecovery": 1
+        },
+        "actionKinds": {
+          "walk": 50,
+          "fanout-chat": 4,
+          "chat": 12,
+          "peerChat": 11,
+          "run": 6,
+          "fanout-walk": 5,
+          "attack": 1,
+          "fanout-run": 1
+        },
+        "actionStatuses": {
+          "success": 49,
+          "timeout": 11,
+          "corrected": 2,
+          "evidence-wait": 11,
+          "owner-ack-wait": 17
+        },
+        "actionKindStatus": {
+          "walk|success": 22,
+          "fanout-chat|timeout": 4,
+          "walk|corrected": 1,
+          "walk|evidence-wait": 10,
+          "walk|owner-ack-wait": 17,
+          "chat|success": 11,
+          "peerChat|success": 11,
+          "run|corrected": 1,
+          "fanout-walk|timeout": 5,
+          "attack|evidence-wait": 1,
+          "run|success": 5,
+          "chat|timeout": 1,
+          "fanout-run|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 21,
+          "ObjectRemove": 15
+        },
+        "selfSources": {
+          "UserLocation": 29
+        },
+        "actors": 50,
+        "actionMaxMs": 2024.5513999999966,
+        "actionMaxPlanMs": 2051.56600000005,
+        "actionTimeouts": 11,
+        "actionCancelled": 0,
+        "actionCorrections": 2,
+        "actionInvalidStates": 0
+      },
+      "1793011148000": {
+        "types": {
+          "playerLifecycle": 64,
+          "selfTransform": 41,
+          "action": 87,
+          "fanoutDistribution": 62,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "walk": 35,
+          "chat": 6,
+          "peerChat": 6,
+          "run": 15,
+          "rtt": 22,
+          "turn": 2,
+          "fanout-chat": 1
+        },
+        "actionStatuses": {
+          "success": 76,
+          "owner-ack-wait": 9,
+          "timeout": 1,
+          "evidence-wait": 1
+        },
+        "actionKindStatus": {
+          "walk|success": 26,
+          "chat|success": 6,
+          "peerChat|success": 6,
+          "run|success": 15,
+          "rtt|success": 22,
+          "turn|owner-ack-wait": 1,
+          "fanout-chat|timeout": 1,
+          "walk|owner-ack-wait": 8,
+          "turn|success": 1,
+          "walk|evidence-wait": 1
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 28,
+          "ObjectPlayer": 36
+        },
+        "selfSources": {
+          "UserLocation": 41
+        },
+        "actors": 50,
+        "actionMaxMs": 2011.4786000000313,
+        "actionMaxPlanMs": 1735.4198000000324,
+        "actionTimeouts": 1,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011149000": {
+        "types": {
+          "selfTransform": 61,
+          "action": 98,
+          "playerLifecycle": 89,
+          "fanoutDistribution": 31,
+          "coverage": 1,
+          "movementCorrection": 1,
+          "pendingAttackEvidence": 1
+        },
+        "actionKinds": {
+          "walk": 40,
+          "rtt": 24,
+          "run": 31,
+          "chat": 1,
+          "peerChat": 1,
+          "attack": 1
+        },
+        "actionStatuses": {
+          "success": 87,
+          "owner-ack-wait": 9,
+          "corrected": 1,
+          "timeout": 1
+        },
+        "actionKindStatus": {
+          "walk|success": 31,
+          "rtt|success": 24,
+          "run|success": 30,
+          "chat|success": 1,
+          "peerChat|success": 1,
+          "walk|owner-ack-wait": 9,
+          "run|corrected": 1,
+          "attack|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 51,
+          "ObjectRemove": 38
+        },
+        "selfSources": {
+          "UserLocation": 61
+        },
+        "actors": 50,
+        "actionMaxMs": 1159.8757000000332,
+        "actionMaxPlanMs": 1182.6414000000223,
+        "actionTimeouts": 1,
+        "actionCancelled": 0,
+        "actionCorrections": 1,
+        "actionInvalidStates": 0
+      },
+      "1793011150000": {
+        "types": {
+          "selfTransform": 61,
+          "playerLifecycle": 118,
+          "action": 75,
+          "fanoutDistribution": 67,
+          "navigationBlocked": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "walk": 31,
+          "run": 40,
+          "rtt": 4
+        },
+        "actionStatuses": {
+          "success": 64,
+          "owner-ack-wait": 10,
+          "navigation-blocked": 1
+        },
+        "actionKindStatus": {
+          "walk|success": 20,
+          "run|success": 40,
+          "rtt|success": 4,
+          "walk|owner-ack-wait": 10,
+          "walk|navigation-blocked": 1
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 68,
+          "ObjectPlayer": 48,
+          "worldSnapshot": 1,
+          "ObjectRun": 1
+        },
+        "selfSources": {
+          "UserLocation": 61
+        },
+        "actors": 50,
+        "actionMaxMs": 1445.2692999999854,
+        "actionMaxPlanMs": 1459.5007000000332,
+        "actionTimeouts": 0,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011151000": {
+        "types": {
+          "playerLifecycle": 92,
+          "selfTransform": 45,
+          "action": 58,
+          "fanoutDistribution": 33,
+          "pendingAttackEvidence": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "run": 32,
+          "walk": 25,
+          "attack": 1
+        },
+        "actionStatuses": {
+          "success": 46,
+          "navigation-blocked": 1,
+          "plan-gap": 1,
+          "owner-ack-wait": 9,
+          "timeout": 1
+        },
+        "actionKindStatus": {
+          "run|success": 32,
+          "walk|success": 14,
+          "walk|navigation-blocked": 1,
+          "walk|plan-gap": 1,
+          "walk|owner-ack-wait": 9,
+          "attack|timeout": 1
+        },
+        "lifecycleSources": {
+          "ObjectRemove": 55,
+          "ObjectPlayer": 37
+        },
+        "selfSources": {
+          "UserLocation": 45
+        },
+        "actors": 49,
+        "actionMaxMs": 934.1269999999786,
+        "actionMaxPlanMs": 942.9934000000358,
+        "actionTimeouts": 1,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011152000": {
+        "types": {
+          "action": 89,
+          "playerLifecycle": 75,
+          "selfTransform": 54,
+          "fanoutDistribution": 37,
+          "movementCorrection": 1,
+          "safetyStop": 1,
+          "coverage": 1
+        },
+        "actionKinds": {
+          "walk": 38,
+          "run": 48,
+          "fanout-walk": 1,
+          "fanout-run": 2
+        },
+        "actionStatuses": {
+          "navigation-blocked": 2,
+          "plan-gap": 2,
+          "success": 49,
+          "owner-ack-wait": 15,
+          "corrected": 1,
+          "timeout": 3,
+          "cancelled": 17
+        },
+        "actionKindStatus": {
+          "walk|navigation-blocked": 2,
+          "walk|plan-gap": 2,
+          "walk|success": 12,
+          "run|success": 37,
+          "walk|owner-ack-wait": 15,
+          "run|corrected": 1,
+          "fanout-walk|timeout": 1,
+          "fanout-run|timeout": 2,
+          "walk|cancelled": 7,
+          "run|cancelled": 10
+        },
+        "lifecycleSources": {
+          "ObjectPlayer": 49,
+          "ObjectRemove": 26
+        },
+        "selfSources": {
+          "UserLocation": 54
+        },
+        "actors": 50,
+        "actionMaxMs": 2195.0304999999935,
+        "actionMaxPlanMs": 1470.5380000000005,
+        "actionTimeouts": 3,
+        "actionCancelled": 17,
+        "actionCorrections": 1,
+        "actionInvalidStates": 0
+      },
+      "1793011153000": {
+        "types": {
+          "phaseEnded": 1,
+          "playerLifecycle": 10,
+          "selfTransform": 10
+        },
+        "actionKinds": {},
+        "actionStatuses": {},
+        "actionKindStatus": {},
+        "lifecycleSources": {
+          "ObjectPlayer": 5,
+          "ObjectRemove": 5
+        },
+        "selfSources": {
+          "UserLocation": 10
+        },
+        "actors": 13,
+        "actionMaxMs": 0,
+        "actionMaxPlanMs": 0,
+        "actionTimeouts": 0,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      },
+      "1793011154000": {
+        "types": {
+          "selfTransform": 2,
+          "playerLifecycle": 5
+        },
+        "actionKinds": {},
+        "actionStatuses": {},
+        "actionKindStatus": {},
+        "lifecycleSources": {
+          "ObjectPlayer": 3,
+          "worldSnapshot": 2
+        },
+        "selfSources": {
+          "UserLocation": 1,
+          "ObjectAttack": 1
+        },
+        "actors": 4,
+        "actionMaxMs": 0,
+        "actionMaxPlanMs": 0,
+        "actionTimeouts": 0,
+        "actionCancelled": 0,
+        "actionCorrections": 0,
+        "actionInvalidStates": 0
+      }
+    },
+    "scope": "Counters use recorded event phase labels, which can retain settle for an in-flight action completed after measurement starts. Timestamp buckets include selected after-stop cancellations/drain where labeled. They are diagnostic event counts, not a completed stage score."
+  },
+  "limitations": [
+    "The selector used report phase end minus20s before the exact safetyStop timestamp was known. Therefore actor/event aggregation begins1793011133044,112ms later than the exact fatal-minus20s point1793011132932; its pre-stop span is19.888s. All coverage/clock/phase/stop rows for the entire raw are retained, so the lag streak and all sampled AOI issue checks are complete. No second raw pass was taken to fill that112ms summary edge.",
+    "No per-packet wire or server-send replay, kernel/network loss measurement, CPU profile or GC trace was produced by this analysis. Timeout is not a packet-loss proof.",
+    "The AOI timer maps, received-state clear hooks and per-navigation execution duration are not logged; their internal cost or individual transitions cannot be derived from a lack of emitted AOI issue.",
+    "The14.303s incomplete measured phase and14 online samples with50 online actors are preserved; this is not a300s50-user stage,100-user result or capacity acceptance.",
+    "Source, thresholds, original failure and cleanup verdicts are unchanged. No tests, gateway, source import or additional load was executed."
+  ],
+  "conclusion": {
+    "specificStopEstablished": true,
+    "persistentAoiIssueBeforeStopObserved": false,
+    "networkPacketLossEstablished": false,
+    "uniqueCpuFunctionCauseEstablished": false,
+    "nextUsefulEvidence": "Inspect the already-authorized same-process CPU profile across the final three lag windows; compare synchronous navigation work, received-event/AOI reconciliation, serialization and GC without preselecting a culprit.",
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "previousAnalysisPreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-parse-cache-v5-clock-analysis-v1\\findings-v1.json",
+    "bytes": 56880,
+    "sha256": "49879bd4279aba2b98b4f84b0ab8db0fffa2ce718f60f0dd2004e609ac6a8ec3"
+  },
+  "counterFieldCorrection": "Selector auxiliary actionCorrections counted the nonexistent status correction; actual status is corrected. This v2 corrects only that derived counter from the already saved actionStatuses dictionaries. Raw/selected evidence and all original outcomes are unchanged; no raw reread."
+}

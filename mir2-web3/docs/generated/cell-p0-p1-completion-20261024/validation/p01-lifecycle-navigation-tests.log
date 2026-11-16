@@ -1,0 +1,262 @@
+TAP version 13
+# Subtest: lifecycle wire shape accepts only ordinary pickup u32 and empty town revival
+ok 1 - lifecycle wire shape accepts only ordinary pickup u32 and empty town revival
+  ---
+  duration_ms: 1.7708
+  type: 'test'
+  ...
+# Subtest: exposure selects only current live wild cats and never historical IDs, guards or owned pets
+ok 2 - exposure selects only current live wild cats and never historical IDs, guards or owned pets
+  ---
+  duration_ms: 1.8201
+  type: 'test'
+  ...
+# Subtest: ordinary approach plans around current occupancy, refuses transfer tiles and only guides map zero
+ok 3 - ordinary approach plans around current occupancy, refuses transfer tiles and only guides map zero
+  ---
+  duration_ms: 44.1615
+  type: 'test'
+  ...
+# Subtest: observer stays in AOI outside both acquisition rectangles, including every planned retreat step
+ok 4 - observer stays in AOI outside both acquisition rectangles, including every planned retreat step
+  ---
+  duration_ms: 0.9004
+  type: 'test'
+  ...
+# Subtest: approach recovery uses an already-held exact small HP UID with a fresh receipt and inventory consumption
+ok 5 - approach recovery uses an already-held exact small HP UID with a fresh receipt and inventory consumption
+  ---
+  duration_ms: 0.6797
+  type: 'test'
+  ...
+# Subtest: ordinary exposure unequips the exact live armour into a real empty slot and requires receipt plus fresh state
+ok 6 - ordinary exposure unequips the exact live armour into a real empty slot and requires receipt plus fresh state
+  ---
+  duration_ms: 3.0395
+  type: 'test'
+  ...
+# Subtest: post-revival armour recovery restores the original held UID only with fresh exact receipt and state
+ok 7 - post-revival armour recovery restores the original held UID only with fresh exact receipt and state
+  ---
+  duration_ms: 0.8089
+  type: 'test'
+  ...
+# Subtest: pickup lifecycle targets ordinary non-harvest monsters without treating animal corpses or guards as loot
+ok 8 - pickup lifecycle targets ordinary non-harvest monsters without treating animal corpses or guards as loot
+  ---
+  duration_ms: 0.1507
+  type: 'test'
+  ...
+# Subtest: shared kill requires both attackers and fresh matching same-life death receipts
+ok 9 - shared kill requires both attackers and fresh matching same-life death receipts
+  ---
+  duration_ms: 0.8065
+  type: 'test'
+  ...
+# Subtest: a shared drop needs fresh matching public spawns and both current source-name snapshots
+ok 10 - a shared drop needs fresh matching public spawns and both current source-name snapshots
+  ---
+  duration_ms: 1.0919
+  type: 'test'
+  ...
+# Subtest: contested gold pickup requires one award, both removals and exact two-player conservation
+ok 11 - contested gold pickup requires one award, both removals and exact two-player conservation
+  ---
+  duration_ms: 0.9839
+  type: 'test'
+  ...
+# Subtest: item pickup preserves one safe exact UID and rejects merges, invented identity and unrelated inventory changes
+ok 12 - item pickup preserves one safe exact UID and rejects merges, invented identity and unrelated inventory changes
+  ---
+  duration_ms: 7.1004
+  type: 'test'
+  ...
+# Subtest: pickup replay cannot pass without fresh snapshots or after any repeated gain
+ok 13 - pickup replay cannot pass without fresh snapshots or after any repeated gain
+  ---
+  duration_ms: 0.3436
+  type: 'test'
+  ...
+# Subtest: player death needs exact owner death and the same observer actor, not rounded zero health
+ok 14 - player death needs exact owner death and the same observer actor, not rounded zero health
+  ---
+  duration_ms: 0.4148
+  type: 'test'
+  ...
+# Subtest: town revival needs a new alive snapshot plus source-map observer revival or departure
+ok 15 - town revival needs a new alive snapshot plus source-map observer revival or departure
+  ---
+  duration_ms: 0.3058
+  type: 'test'
+  ...
+# Subtest: runner records real-shaped lifecycle receipts and never sends revival without witnessed death
+ok 16 - runner records real-shaped lifecycle receipts and never sends revival without witnessed death
+  ---
+  duration_ms: 508.5065
+  type: 'test'
+  ...
+# Subtest: runner full packet fixture joins pickup, owner death and normal town revival without privileged actions
+ok 17 - runner full packet fixture joins pickup, owner death and normal town revival without privileged actions
+  ---
+  duration_ms: 3149.2328
+  type: 'test'
+  ...
+# Subtest: missing combat prerequisites produce explicit not_run and no action or pass
+ok 18 - missing combat prerequisites produce explicit not_run and no action or pass
+  ---
+  duration_ms: 0.3113
+  type: 'test'
+  ...
+# Subtest: bounded ordinary loot recovery retains the failed attempt and a failed next-target search
+ok 19 - bounded ordinary loot recovery retains the failed attempt and a failed next-target search
+  ---
+  duration_ms: 1.024
+  type: 'test'
+  ...
+# Subtest: external endpoints require TLS and cannot leak credentials in trace URLs
+ok 20 - external endpoints require TLS and cannot leak credentials in trace URLs
+  ---
+  duration_ms: 1.6775
+  type: 'test'
+  ...
+# Subtest: Origin uses the endpoint scheme and authority without copying its WebSocket path
+ok 21 - Origin uses the endpoint scheme and authority without copying its WebSocket path
+  ---
+  duration_ms: 0.4058
+  type: 'test'
+  ...
+# Subtest: the actual WebSocket handshake sends the derived Origin without weakening the server guard
+ok 22 - the actual WebSocket handshake sends the derived Origin without weakening the server guard
+  ---
+  duration_ms: 120.2725
+  type: 'test'
+  ...
+# Subtest: the runner refuses unspecified realms before writing credentials or making connections
+ok 23 - the runner refuses unspecified realms before writing credentials or making connections
+  ---
+  duration_ms: 0.6674
+  type: 'test'
+  ...
+# Subtest: credentials cannot be created in the project or its enclosing Git checkout
+ok 24 - credentials cannot be created in the project or its enclosing Git checkout
+  ---
+  duration_ms: 0.308
+  type: 'test'
+  ...
+# Subtest: each run requires two distinct strong private account identities
+ok 25 - each run requires two distinct strong private account identities
+  ---
+  duration_ms: 0.4846
+  type: 'test'
+  ...
+# Subtest: resuming a bounded QA run cannot reuse credentials from a different realm or account pair
+ok 26 - resuming a bounded QA run cannot reuse credentials from a different realm or account pair
+  ---
+  duration_ms: 4.7156
+  type: 'test'
+  ...
+# Subtest: recursive credential fields and echoed secret values never survive report redaction
+ok 27 - recursive credential fields and echoed secret values never survive report redaction
+  ---
+  duration_ms: 0.7893
+  type: 'test'
+  ...
+# Subtest: failed login or absent character is not proof of an authentication guard
+ok 28 - failed login or absent character is not proof of an authentication guard
+  ---
+  duration_ms: 0.5865
+  type: 'test'
+  ...
+# Subtest: a delayed public login shell cannot be confused with an owned character bootstrap
+ok 29 - a delayed public login shell cannot be confused with an owned character bootstrap
+  ---
+  duration_ms: 0.3369
+  type: 'test'
+  ...
+# Subtest: ObjectChat uses the real wire text field and checks the sender identity
+ok 30 - ObjectChat uses the real wire text field and checks the sender identity
+  ---
+  duration_ms: 0.127
+  type: 'test'
+  ...
+# Subtest: delivered chat still fails acceptance if a stationary observer waits over one second
+ok 31 - delivered chat still fails acceptance if a stationary observer waits over one second
+  ---
+  duration_ms: 0.1039
+  type: 'test'
+  ...
+# Subtest: save comparison detects lost stacks, gold, character inventory or equipment identities
+ok 32 - save comparison detects lost stacks, gold, character inventory or equipment identities
+  ---
+  duration_ms: 7.766
+  type: 'test'
+  ...
+# Subtest: a combat pass requires fresh attacker-attributed strike, positive damage and matching observer health
+ok 33 - a combat pass requires fresh attacker-attributed strike, positive damage and matching observer health
+  ---
+  duration_ms: 0.736
+  type: 'test'
+  ...
+# Subtest: shared player evidence respects normalized owner versus observer object IDs
+ok 34 - shared player evidence respects normalized owner versus observer object IDs
+  ---
+  duration_ms: 0.399
+  type: 'test'
+  ...
+# Subtest: both observers receiving the same attributed death is accepted without a rounded health packet
+ok 35 - both observers receiving the same attributed death is accepted without a rounded health packet
+  ---
+  duration_ms: 0.2119
+  type: 'test'
+  ...
+# Subtest: skipped or failed map/combat/persistence checks can never create an overall pass
+ok 36 - skipped or failed map/combat/persistence checks can never create an overall pass
+  ---
+  duration_ms: 0.7694
+  type: 'test'
+  ...
+# Subtest: full lifecycle is explicit and requires every new real-event check as well as the existing core
+ok 37 - full lifecycle is explicit and requires every new real-event check as well as the existing core
+  ---
+  duration_ms: 1.309
+  type: 'test'
+  ...
+# Subtest: added lifecycle commands reach the wire only with their exact ordinary parameter shape
+ok 38 - added lifecycle commands reach the wire only with their exact ordinary parameter shape
+  ---
+  duration_ms: 6.5176
+  type: 'test'
+  ...
+# Subtest: wire allowlist blocks teleport, grants, passkey impersonation and raw world mutation
+ok 39 - wire allowlist blocks teleport, grants, passkey impersonation and raw world mutation
+  ---
+  duration_ms: 3.6119
+  type: 'test'
+  ...
+# Subtest: command rejection terminates the wait immediately, and late receipts from prior requests cannot satisfy it
+ok 40 - command rejection terminates the wait immediately, and late receipts from prior requests cannot satisfy it
+  ---
+  duration_ms: 1.7243
+  type: 'test'
+  ...
+# Subtest: a rejected StartGame is reported directly and does not attempt an in-game logout
+ok 41 - a rejected StartGame is reported directly and does not attempt an in-game logout
+  ---
+  duration_ms: 3.9738
+  type: 'test'
+  ...
+# Subtest: cleanup failure cannot replace the initial command failure
+ok 42 - cleanup failure cannot replace the initial command failure
+  ---
+  duration_ms: 0.4125
+  type: 'test'
+  ...
+1..42
+# tests 42
+# suites 0
+# pass 42
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3802.6241

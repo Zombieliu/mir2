@@ -1,0 +1,24 @@
+{
+  "owner": "Root",
+  "kind": "DATA-only original display-case restored in own Source78 input; failed Thin retained outside execution sources",
+  "public": {
+    "files": 18212,
+    "bytes": 894362670,
+    "copiedExclusive": true,
+    "beforeAfterStagedAndFinalHashDifferences": 0,
+    "originalDisplayCaseRestored": true,
+    "oldFoldedCasePublicRetainedAt": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\source-input-case-backup01\\public"
+  },
+  "failedThin": {
+    "files": 5064,
+    "bytes": 288227998,
+    "retainedAt": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\thin-failed-output-retained01\\.mir2-thin-client-web-windows-catchup-source78-01",
+    "hashDifferences": 0
+  },
+  "allResolvedMovesWithinExplicitSource78Workspace": true,
+  "noDeletionOrCompression": true,
+  "mainWorkspaceUntouched": true,
+  "noProductSourceChanged": true,
+  "originalNftUntouched": true,
+  "goalComplete": false
+}

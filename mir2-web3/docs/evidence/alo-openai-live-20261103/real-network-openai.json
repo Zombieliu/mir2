@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "passed": true,
+  "provider": "openai-real-http",
+  "liveModelValidated": true,
+  "model": "gpt-6-luna",
+  "acknowledgementMs": 20,
+  "modelCall": {
+    "taskStatus": "running",
+    "call": {
+      "inputTokens": 1317,
+      "model": "gpt-6-luna",
+      "outputTokens": 112,
+      "providerModel": "gpt-6-luna",
+      "requestId": "req_bd307daba9ff4ed2a00f7634e09ead14",
+      "responseId": "resp_00b445a28e41eb46016ae98a00f93c87d2a3170c386d1c1ee8",
+      "status": "completed"
+    },
+    "error": null
+  },
+  "actualModelCalls": 1,
+  "mockProviderCalls": 0,
+  "gatewaySha256": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+  "contentProfile": "platinum_fiveclass",
+  "checks": [
+    "real authenticated owner invitation and shared-zone membership; policy version 2",
+    "private natural instruction acknowledged before execution, producing one constrained model goal",
+    "model-selected ordinary attack, own-strike then death progress 2/2, no pickup, real return within two tiles",
+    "observed objectives and source hashes committed in the durable character archive before ordinary logout"
+  ],
+  "commands": {
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "changeAMode": 1,
+    "equipItem": 2,
+    "switchGroup": 1,
+    "companionRuntimeRegister": 1,
+    "keepAlive": 3,
+    "companionRuntimeReply": 53,
+    "groupInvite": 1,
+    "dropItem": 1,
+    "attackDirection": 9,
+    "walk": 3,
+    "logOut": 1
+  },
+  "archiveIdentityHash": "5d4767790e4b8252320e123c9e011890e1db9a947a1dd95f7e62597f7aac9f64",
+  "remembered": [
+    {
+      "episodeId": "goal:680f65b56dbeddb738bd5243a13ba1e7e34230e460360c516965ad1795ff56e4:kill:1",
+      "payloadHash": "c2e6719231576a1733342075df0e5f0b43d8db83201fd3d0ecbf13b45a46829f"
+    },
+    {
+      "episodeId": "goal:680f65b56dbeddb738bd5243a13ba1e7e34230e460360c516965ad1795ff56e4:kill:2",
+      "payloadHash": "e38f69fb3dfc663b472f039c563d97f18d03b344a9feb6a4cad55aabf5c375cb"
+    },
+    {
+      "episodeId": "goal:680f65b56dbeddb738bd5243a13ba1e7e34230e460360c516965ad1795ff56e4:completed",
+      "payloadHash": "a560b975e12e79ee8be4856dfcdeb9372ddf3ae1a57b8073ba536e0008d1ba23"
+    }
+  ],
+  "evidence": [
+    {
+      "at": 1793690117321,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690118008,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690118708,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690119409,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690120108,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690120809,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690121512,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690121514,
+      "packet": "ObjectDied",
+      "objectId": 206641
+    },
+    {
+      "at": 1793690123711,
+      "packet": "ObjectStruck",
+      "objectId": 271801,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690124412,
+      "packet": "ObjectStruck",
+      "objectId": 271801,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793690124413,
+      "packet": "ObjectDied",
+      "objectId": 271801
+    }
+  ],
+  "humanTrial": false
+}

@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: the explicit current R16 configuration has seven distinct bounded observation sources
+ok 1 - the explicit current R16 configuration has seven distinct bounded observation sources
+  ---
+  duration_ms: 0.9221
+  type: 'test'
+  ...
+# Subtest: all seven prefixes retain image, font and map observations, including hotlink and inherited R2
+ok 2 - all seven prefixes retain image, font and map observations, including hotlink and inherited R2
+  ---
+  duration_ms: 0.5092
+  type: 'test'
+  ...
+# Subtest: the five prefixes absent from the old upstream selector are now explicit rather than inferred
+ok 3 - the five prefixes absent from the old upstream selector are now explicit rather than inferred
+  ---
+  duration_ms: 0.1469
+  type: 'test'
+  ...
+# Subtest: auth, signing, unconfigured releases and unrelated origins stay outside the static capture
+ok 4 - auth, signing, unconfigured releases and unrelated origins stay outside the static capture
+  ---
+  duration_ms: 0.1011
+  type: 'test'
+  ...
+# Subtest: allowed static observation still strips queries and refuses URL credentials
+ok 5 - allowed static observation still strips queries and refuses URL credentials
+  ---
+  duration_ms: 0.0864
+  type: 'test'
+  ...
+# Subtest: cache audit reads exact complete bytes only in the current static namespace
+ok 6 - cache audit reads exact complete bytes only in the current static namespace
+  ---
+  duration_ms: 17.1597
+  type: 'test'
+  ...
+# Subtest: an older namespace cannot substitute for the missing current body
+ok 7 - an older namespace cannot substitute for the missing current body
+  ---
+  duration_ms: 0.756
+  type: 'test'
+  ...
+# Subtest: an existing current cache with no matching body reports an observed missing entry
+ok 8 - an existing current cache with no matching body reports an observed missing entry
+  ---
+  duration_ms: 1.0229
+  type: 'test'
+  ...
+# Subtest: a prior cache schema with the same namespace cannot satisfy the current Worker
+ok 9 - a prior cache schema with the same namespace cannot satisfy the current Worker
+  ---
+  duration_ms: 0.2064
+  type: 'test'
+  ...
+# Subtest: a 2-byte truncated, corrupt or oversized cache entry cannot pass
+ok 10 - a 2-byte truncated, corrupt or oversized cache entry cannot pass
+  ---
+  duration_ms: 2.0317
+  type: 'test'
+  ...
+# Subtest: a 3-byte truncated, corrupt or oversized cache entry cannot pass
+ok 11 - a 3-byte truncated, corrupt or oversized cache entry cannot pass
+  ---
+  duration_ms: 1.8301
+  type: 'test'
+  ...
+# Subtest: a 4-byte truncated, corrupt or oversized cache entry cannot pass
+ok 12 - a 4-byte truncated, corrupt or oversized cache entry cannot pass
+  ---
+  duration_ms: 1.1403
+  type: 'test'
+  ...
+# Subtest: auth URLs, arbitrary paths, duplicate pins and excessive bodies reject before browser work
+ok 13 - auth URLs, arbitrary paths, duplicate pins and excessive bodies reject before browser work
+  ---
+  duration_ms: 0.4161
+  type: 'test'
+  ...
+# Subtest: a missing namespace and an unavailable page are explicit observations, never matches
+ok 14 - a missing namespace and an unavailable page are explicit observations, never matches
+  ---
+  duration_ms: 0.2838
+  type: 'test'
+  ...
+# Subtest: a bounded observation timeout does not report a missing asset or perform a fetch
+ok 15 - a bounded observation timeout does not report a missing asset or perform a fetch
+  ---
+  duration_ms: 26.3372
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 109.4582

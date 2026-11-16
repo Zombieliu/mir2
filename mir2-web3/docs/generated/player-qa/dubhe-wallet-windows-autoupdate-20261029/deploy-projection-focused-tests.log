@@ -1,0 +1,30 @@
+test_caddy_addition_preserves_every_original_byte (__main__.DeployTests.test_caddy_addition_preserves_every_original_byte) ... ok
+test_deployed_cdn_route_preserves_immutable_discovery_and_surrounding_sites (__main__.DeployTests.test_deployed_cdn_route_preserves_immutable_discovery_and_surrounding_sites) ... ok
+test_exact_archive_extracts_and_binds_both_components (__main__.DeployTests.test_exact_archive_extracts_and_binds_both_components) ... ok
+test_exact_published_35_file_projection_is_read_only_and_full_forms_still_match (__main__.DeployTests.test_exact_published_35_file_projection_is_read_only_and_full_forms_still_match) ... ok
+test_extracted_hash_mismatch_rejected (__main__.DeployTests.test_extracted_hash_mismatch_rejected) ... ok
+test_feed_identity_and_metadata_binding_rejected (__main__.DeployTests.test_feed_identity_and_metadata_binding_rejected) ... ok
+test_fixed_scope_extraction_and_release_promotion_preserve_legacy_tree (__main__.DeployTests.test_fixed_scope_extraction_and_release_promotion_preserve_legacy_tree) ... ok
+test_missing_files_rejected (__main__.DeployTests.test_missing_files_rejected) ... ok
+test_modern_origin_readback_never_uses_legacy_alias_or_hidden_directory (__main__.DeployTests.test_modern_origin_readback_never_uses_legacy_alias_or_hidden_directory) ... ok
+test_modern_plan_passes_only_fixed_scope_to_sha_guarded_root_helper (__main__.DeployTests.test_modern_plan_passes_only_fixed_scope_to_sha_guarded_root_helper) ... ok
+test_network_verifier_covers_head_method_and_directory_isolation (__main__.DeployTests.test_network_verifier_covers_head_method_and_directory_isolation) ... ok
+test_only_exact_published_legacy_delivery_extras_are_preserved (__main__.DeployTests.test_only_exact_published_legacy_delivery_extras_are_preserved) ... ok
+test_original_exact_route_upgrades_without_changing_surrounding_config (__main__.DeployTests.test_original_exact_route_upgrades_without_changing_surrounding_config) ... ok
+test_plan_cli_emits_sha_pinned_external_fresh_output_without_connection (__main__.DeployTests.test_plan_cli_emits_sha_pinned_external_fresh_output_without_connection) ... ok
+test_plan_cli_preserves_existing_output (__main__.DeployTests.test_plan_cli_preserves_existing_output) ... ok
+test_plan_cli_rejects_linked_output_parent (__main__.DeployTests.test_plan_cli_rejects_linked_output_parent) ... ok
+test_projection_is_rejected_for_other_release_components_and_five_class_scope (__main__.DeployTests.test_projection_is_rejected_for_other_release_components_and_five_class_scope) ... ok
+test_projection_rejects_every_missing_or_changed_file_unknown_and_other_partial_trees (__main__.DeployTests.test_projection_rejects_every_missing_or_changed_file_unknown_and_other_partial_trees) ... ok
+test_receipt_alias_and_byte_count_rejected (__main__.DeployTests.test_receipt_alias_and_byte_count_rejected) ... ok
+test_root_ownership_guard_rejects_shared_or_unowned_paths (__main__.DeployTests.test_root_ownership_guard_rejects_shared_or_unowned_paths) ... ok
+test_tar_links_and_special_types_rejected (__main__.DeployTests.test_tar_links_and_special_types_rejected) ... ok
+test_tar_traversal_and_unlisted_paths_rejected (__main__.DeployTests.test_tar_traversal_and_unlisted_paths_rejected) ... ok
+test_unreviewed_caddy_configuration_rejected (__main__.DeployTests.test_unreviewed_caddy_configuration_rejected) ... ok
+test_validation_environment_missing_empty_or_duplicate_stops (__main__.DeployTests.test_validation_environment_missing_empty_or_duplicate_stops) ... ok
+test_validation_environment_uses_only_referenced_service_names (__main__.DeployTests.test_validation_environment_uses_only_referenced_service_names) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 6.208s
+
+OK

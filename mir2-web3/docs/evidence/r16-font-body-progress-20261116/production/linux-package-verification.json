@@ -1,0 +1,22 @@
+{
+  "source": "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+  "workflowRun": 43795056603,
+  "artifact": 14194778566,
+  "downloadCompleted": true,
+  "artifactZipBytes": 95700080,
+  "artifactZipSha256LocallyComputed": "4f3f294faed5b12e5a5580117bcbd854c28e5fa35d64eb501dd837ca7cee51f0",
+  "allPackageFilesShaVerified": 1841,
+  "sharedZoneTests": 310,
+  "gatewaySharedZoneTests": 40,
+  "backgroundExecutionTestsRequiredAndObserved": 7,
+  "nativePostgresTests": 216,
+  "docker": false,
+  "gateway": {
+    "path": "F:\\mir2-builds\\r16-font-body-progress-20261116\\release\\linux-package-r1\\mir2-gateway",
+    "bytes": 93576560,
+    "sha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+    "elf": "64-bit little-endian x86_64"
+  },
+  "productionInstalled": false,
+  "publicBrowserAcceptance": false
+}

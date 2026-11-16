@@ -1,0 +1,5 @@
+# Preserve the recorded bytes of protocol and browser receipts.
+* -text
+** -text
+*.log -whitespace
+*.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T08:03:27.067Z",
+  "sourceScope": "formal10-preseal-history-only",
+  "publicChild": "capacity-formal10-preseal-history-v1",
+  "files": [
+    {
+      "source": "compact-wire-formal10-execution-prerequisites-v5.json",
+      "target": "sources/compact-wire-formal10-execution-prerequisites-v5.json",
+      "bytes": 9818,
+      "sha256": "77c4ffa11dba05e93a8e4ec3df397d6d723bbb06451680b0e67b1c5fc1445073"
+    },
+    {
+      "source": "compact-wire-formal10-executor-normalization-v6.json",
+      "target": "sources/compact-wire-formal10-executor-normalization-v6.json",
+      "bytes": 1208,
+      "sha256": "d549df6acb154a8d311390cf8d694c0efacb3c80b5a98755437dcfbfd1265f9a"
+    },
+    {
+      "source": "compact-wire-formal10-hp-schema-synthetic-v3.json",
+      "target": "sources/compact-wire-formal10-hp-schema-synthetic-v3.json",
+      "bytes": 2445,
+      "sha256": "7940f236b3f847af5d1e97da125247843b1aba679d59842278f6a88ee4e7a58e"
+    },
+    {
+      "source": "compact-wire-formal10-hp-schema-synthetic-v3.log",
+      "target": "sources/compact-wire-formal10-hp-schema-synthetic-v3.log",
+      "bytes": 2539,
+      "sha256": "f2b936252f3fcebb17751d7169bda39156f0334ce44f5b0719095ccdab9dcb90"
+    },
+    {
+      "source": "compact-wire-formal10-hp-schema-synthetic-v4.json",
+      "target": "sources/compact-wire-formal10-hp-schema-synthetic-v4.json",
+      "bytes": 2445,
+      "sha256": "93e2f29f6a066b1b41966a6187da4cb9804757d156047e774242963b06efb040"
+    },
+    {
+      "source": "compact-wire-formal10-hp-schema-synthetic-v4.log",
+      "target": "sources/compact-wire-formal10-hp-schema-synthetic-v4.log",
+      "bytes": 2540,
+      "sha256": "0c8c972ae009c4c50c50777fc08e48f5a66704cd00e9f517159c1ddc24f8edf5"
+    },
+    {
+      "source": "compact-wire-formal10-hp-status-schema.test.mjs",
+      "target": "sources/compact-wire-formal10-hp-status-schema.test.mjs",
+      "bytes": 4621,
+      "sha256": "6ee740d98b171f1080dbceebf400ccd1002bd1212df73dd7aeb95413d6b339fa"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-helper-v1.mjs.txt",
+      "target": "sources/compact-wire-formal10-preseal-helper-v1.mjs.txt",
+      "bytes": 12722,
+      "sha256": "ec35d95b35565f0082434e1c76e4b795c356264f43dde1978c4272cc8b96caf1"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-helper-v2.mjs.txt",
+      "target": "sources/compact-wire-formal10-preseal-helper-v2.mjs.txt",
+      "bytes": 12790,
+      "sha256": "d3deb53c016ddf206f6f003d31be83ce6f9970d67c359c3915841dddb0855f11"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-helper-v3.mjs.txt",
+      "target": "sources/compact-wire-formal10-preseal-helper-v3.mjs.txt",
+      "bytes": 12808,
+      "sha256": "724036a7f52f6c223519e5af7e4695df6586db846bc3097a2d0d41042e55c8ae"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-input-check-v1.json",
+      "target": "sources/compact-wire-formal10-preseal-input-check-v1.json",
+      "bytes": 23162,
+      "sha256": "32e2bf8096c8375ad83ebadad032cd27145123ab08ae2cd210b86364bab6ec29"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-input-check-v2.json",
+      "target": "sources/compact-wire-formal10-preseal-input-check-v2.json",
+      "bytes": 23401,
+      "sha256": "e8a7844e1c8dcf7279ebf464dd85c01372784e0919a0094d9a969399363a8c01"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-input-check-v3.json",
+      "target": "sources/compact-wire-formal10-preseal-input-check-v3.json",
+      "bytes": 24252,
+      "sha256": "f4731f2f93b3eaec9a41d858896f64f70a7cae4179dce974e2e6273c117bd1f7"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-input-check-v4.json",
+      "target": "sources/compact-wire-formal10-preseal-input-check-v4.json",
+      "bytes": 24832,
+      "sha256": "902eaaca85a006f6831fed9854199abb64c301b2ad87e89e2b0c6e27a4d76c17"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-input-check-v5.json",
+      "target": "sources/compact-wire-formal10-preseal-input-check-v5.json",
+      "bytes": 26092,
+      "sha256": "ab2d31ce14e615981cf4925e0bb72d877c5b343925422c5b38e9b24fd0a3a06e"
+    },
+    {
+      "source": "compact-wire-formal10-preseal-input-check-v6.json",
+      "target": "sources/compact-wire-formal10-preseal-input-check-v6.json",
+      "bytes": 26339,
+      "sha256": "de146199a73f1be24c5c1a7ce241fead3b92126455d7096c0f5fcd6c02376163"
+    },
+    {
+      "source": "compact-wire-formal10-schema-normalization-v2.json",
+      "target": "sources/compact-wire-formal10-schema-normalization-v2.json",
+      "bytes": 2294,
+      "sha256": "f11264385096e5029e4460d71be2546c910010b654c20a91dd625425a6898808"
+    },
+    {
+      "source": "compact-wire-formal10-schema-normalization-v3.json",
+      "target": "sources/compact-wire-formal10-schema-normalization-v3.json",
+      "bytes": 2717,
+      "sha256": "f50c8a24c7868eb99d67ec3c0be7ad76a6ab689194e687866256e6725a38f811"
+    },
+    {
+      "source": "compact-wire-formal10-schema-normalization-v4.json",
+      "target": "sources/compact-wire-formal10-schema-normalization-v4.json",
+      "bytes": 4365,
+      "sha256": "53292bee2b108a80bd5451c3648e17da8dd414efe7d8800abfd70dc8b4f77007"
+    },
+    {
+      "source": "compact-wire-formal10-v4-collect-public.mjs.txt",
+      "target": "sources/compact-wire-formal10-v4-collect-public.mjs.txt",
+      "bytes": 41612,
+      "sha256": "ad73316fe4a43c8605c208d08f5d3d138849e3c345513aa8a5e303e54ff3a015"
+    },
+    {
+      "source": "compact-wire-formal10-v4-verify-feasibility-gate.mjs.txt",
+      "target": "sources/compact-wire-formal10-v4-verify-feasibility-gate.mjs.txt",
+      "bytes": 19368,
+      "sha256": "d2ab9d0698027dc24d678098514dc927331859ba13c11a9abc90d6b9b39a6539"
+    },
+    {
+      "source": "compact-wire-formal10-v4-verify-public.mjs.txt",
+      "target": "sources/compact-wire-formal10-v4-verify-public.mjs.txt",
+      "bytes": 18506,
+      "sha256": "b1df0ddb0704f8e3ac78efd890175253d747191d5df0acaa5796865fa5bb2554"
+    },
+    {
+      "source": "compact-wire-formal10-window-contract.test.mjs",
+      "target": "sources/compact-wire-formal10-window-contract.test.mjs",
+      "bytes": 4892,
+      "sha256": "a794d24f8fa5e3644069c2ad8e3c37962374f43a564e1b6d178b4e76066470ff"
+    },
+    {
+      "source": "compact-wire-formal10-window-normalization-v5.json",
+      "target": "sources/compact-wire-formal10-window-normalization-v5.json",
+      "bytes": 8427,
+      "sha256": "78a3ff0f0e6eed21958b896c1b1eb3e57981d04f6efe1d58caffa57bca577941"
+    },
+    {
+      "source": "compact-wire-formal10-window-synthetic-v5.json",
+      "target": "sources/compact-wire-formal10-window-synthetic-v5.json",
+      "bytes": 2983,
+      "sha256": "75ba15ebc4f32f86f639b19123a751f75978214d78dbc530a5ff8e9f1192f042"
+    },
+    {
+      "source": "compact-wire-formal10-window-synthetic-v5.log",
+      "target": "sources/compact-wire-formal10-window-synthetic-v5.log",
+      "bytes": 2316,
+      "sha256": "28a9607ed078b12b5f8f3b45fb966863503e636ecd04a68e8973c3b1f8444210"
+    },
+    {
+      "source": "check-compact-wire-formal10-preseal-v1.mjs",
+      "target": "sources/check-compact-wire-formal10-preseal-v1.mjs",
+      "bytes": 6495,
+      "sha256": "e4685ce1d797484b5772ca9dbe489b7ddf5336d0d569c1e9ea9994ee15d9529f"
+    },
+    {
+      "source": "check-compact-wire-formal10-preseal-v2.mjs",
+      "target": "sources/check-compact-wire-formal10-preseal-v2.mjs",
+      "bytes": 6602,
+      "sha256": "61ff077481436f9a20799a673bd24f0e1a7392e590425688647f5f7aa471e0c0"
+    },
+    {
+      "source": "check-compact-wire-formal10-preseal-v3.mjs",
+      "target": "sources/check-compact-wire-formal10-preseal-v3.mjs",
+      "bytes": 6972,
+      "sha256": "6882444b30c5a228f6e77e2cb179f670f02934a611604b1cd72894143532fc39"
+    },
+    {
+      "source": "check-compact-wire-formal10-preseal-v4.mjs",
+      "target": "sources/check-compact-wire-formal10-preseal-v4.mjs",
+      "bytes": 7441,
+      "sha256": "bec36bb78f331a014f719864f135b529d4545625e39a5458e2fd753d5b38f464"
+    },
+    {
+      "source": "check-compact-wire-formal10-preseal-v5.mjs",
+      "target": "sources/check-compact-wire-formal10-preseal-v5.mjs",
+      "bytes": 7897,
+      "sha256": "cac57b056c968c0ed9afbee62df640827db1a07ab076e3bc87b256172c51a23a"
+    },
+    {
+      "source": "check-compact-wire-formal10-preseal-v6.mjs",
+      "target": "sources/check-compact-wire-formal10-preseal-v6.mjs",
+      "bytes": 8012,
+      "sha256": "d19d757d19209bdf35cd2d3d269545d99e6e5be9db943686c97c744a6e7d5d12"
+    },
+    {
+      "source": "normalize-compact-wire-formal10-schema-v2.mjs",
+      "target": "sources/normalize-compact-wire-formal10-schema-v2.mjs",
+      "bytes": 3964,
+      "sha256": "0028d6067589408f1e24fb046678ba0d688597af44431767e09240c349a88d59"
+    },
+    {
+      "source": "normalize-compact-wire-formal10-schema-v3.mjs",
+      "target": "sources/normalize-compact-wire-formal10-schema-v3.mjs",
+      "bytes": 2973,
+      "sha256": "ed28d8157ce86238df62c4e711660e2b35ec028bd67da0ba6318bb39955bca69"
+    },
+    {
+      "source": "normalize-compact-wire-formal10-schema-v4.mjs",
+      "target": "sources/normalize-compact-wire-formal10-schema-v4.mjs",
+      "bytes": 6193,
+      "sha256": "bfffc307c3792d38ece0a6390d4bfe0de6ded4c5f9209f91a2fe8308fc2edd60"
+    },
+    {
+      "source": "normalize-compact-wire-formal10-windows-v5.mjs",
+      "target": "sources/normalize-compact-wire-formal10-windows-v5.mjs",
+      "bytes": 7653,
+      "sha256": "d5144cb3ca3d6ec1cce78dbb66271ba3ce9182cee98a04c7b7a2b315e82dfb81"
+    },
+    {
+      "source": "run-compact-wire-formal10-hp-schema-synthetic-v3.mjs",
+      "target": "sources/run-compact-wire-formal10-hp-schema-synthetic-v3.mjs",
+      "bytes": 2247,
+      "sha256": "de9594772c36d041757cbffc6b98c52fc71437265a436e2b6ac7a56107e99f25"
+    },
+    {
+      "source": "run-compact-wire-formal10-hp-schema-synthetic-v4.mjs",
+      "target": "sources/run-compact-wire-formal10-hp-schema-synthetic-v4.mjs",
+      "bytes": 2247,
+      "sha256": "476e74cf5b1d2e7e2c441ebf74cd8584e09d42e93bbf061f3ee4275d62bd2c65"
+    },
+    {
+      "source": "run-compact-wire-formal10-window-synthetic-v5.mjs",
+      "target": "sources/run-compact-wire-formal10-window-synthetic-v5.mjs",
+      "bytes": 1974,
+      "sha256": "36cd67f6cbe63120aeae20ec9e32be884af85b4dff99f487d844b1c8fd402628"
+    },
+    {
+      "source": "create-compact-wire-formal10-preseal-checker-v3.mjs",
+      "target": "sources/create-compact-wire-formal10-preseal-checker-v3.mjs",
+      "bytes": 1227,
+      "sha256": "efcb2903dad3284bd9a43d8ec6e9d66dcb52e8cf887e966dc05408689d63250a"
+    },
+    {
+      "source": "prepare-compact-wire-formal10-preseal-v5.mjs",
+      "target": "sources/prepare-compact-wire-formal10-preseal-v5.mjs",
+      "bytes": 4917,
+      "sha256": "3aa87c512e0fe4d5d56f70f67043aab41b33db5c34c8dc0e07529ea72c2697db"
+    },
+    {
+      "source": "finalize-compact-wire-formal10-executor-v6.mjs",
+      "target": "sources/finalize-compact-wire-formal10-executor-v6.mjs",
+      "bytes": 2566,
+      "sha256": "5d303ee654060b2e794a89e5acdeb5b0f5ee13586951c8ce14b704d3cb1cbe14"
+    },
+    {
+      "source": "seal-compact-wire-formal10-v5.mjs",
+      "target": "sources/seal-compact-wire-formal10-v5.mjs",
+      "bytes": 8034,
+      "sha256": "ee9245233a3640851afb5f2783ea48003c49b9d05599620aa86a34ae38302f0a"
+    },
+    {
+      "source": "seal-compact-wire-formal10-v6.mjs",
+      "target": "sources/seal-compact-wire-formal10-v6.mjs",
+      "bytes": 8008,
+      "sha256": "f41409bf89547f8d7500f9ac2eb34a85e8a2d075419361fe1d24e0b7fcd9e471"
+    },
+    {
+      "source": "compact-formal10-independent-review-v1/preseal-independent-review-v2.json",
+      "target": "sources/compact-formal10-independent-review-v1/preseal-independent-review-v2.json",
+      "bytes": 7865,
+      "sha256": "2da7ef2b4c7b1969c0bd4dbd475d26e526a20e50bdb32d3d99a5cad24a75fa0b"
+    },
+    {
+      "source": "compact-formal10-independent-review-v1/preseal-independent-review-v6.json",
+      "target": "sources/compact-formal10-independent-review-v1/preseal-independent-review-v6.json",
+      "bytes": 13622,
+      "sha256": "7ffcc26c9f16d8cfac313c1742db39bd1c1f5c4342364ff5462323c927a1c8b8"
+    },
+    {
+      "source": "compact-formal10-independent-review-v1/preseal-review-checklist-v1.json",
+      "target": "sources/compact-formal10-independent-review-v1/preseal-review-checklist-v1.json",
+      "bytes": 8915,
+      "sha256": "c303e843cc61f2e8065202a2cecc9cb5f33fdf98e3f133c1d7b34c8f1e348a9b"
+    },
+    {
+      "source": "formal10-preseal-public-archive-v1/README-prepared.md",
+      "target": "README.md",
+      "bytes": 1285,
+      "sha256": "92097a2e3dd7fb56f9528e9dfe2c8bd81138da09f7091175691fa99f5afa5f7f"
+    },
+    {
+      "source": "formal10-preseal-public-archive-v1/prepare-whitelist.mjs",
+      "target": "sources/formal10-preseal-public-archive-v1/prepare-whitelist.mjs",
+      "bytes": 5257,
+      "sha256": "fc4b141e605888b1eb641d30723733ebe3a920ce4cb209b9d04a6ae6fd89fd0c"
+    },
+    {
+      "source": "formal10-preseal-public-archive-v1/copy-public.mjs",
+      "target": "sources/formal10-preseal-public-archive-v1/copy-public.mjs",
+      "bytes": 5483,
+      "sha256": "0a2fa0e059dd033762be0f658bd39fcfaa1e9210759894aa17355eb7ed871773"
+    }
+  ],
+  "fileCount": 50,
+  "totalBytes": 457343,
+  "filesSha256": "01d849f5d8c92e899efae5fc104b433340a45fadefe07fb0c0256bc35c034ff1",
+  "existingPublicEvidence": [
+    {
+      "path": "capacity-native10-v2-compact-wire-followup-13-diagnostics/public-verification.json",
+      "bytes": 7105,
+      "sha256": "3262726320069fb1795ef1e9136bcdd29203ffc22838d8b9ab56cd6afb3cb9fb",
+      "copyAgain": false
+    },
+    {
+      "path": "capacity-native10-v2-compact-wire-followup-13-diagnostics/raw-artifact-manifest.json",
+      "bytes": 705,
+      "sha256": "57f81017e6366c495fc97913e6f197ab13dd29f5e7230e89a9d1efbeafb8c552",
+      "copyAgain": false
+    },
+    {
+      "path": "capacity-native10-v2-compact-wire-followup-13-analysis/probe13-independent-verification-v1/final-verification.json",
+      "bytes": 359693,
+      "sha256": "c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c",
+      "copyAgain": false
+    },
+    {
+      "path": "capacity-native10-v2-compact-wire-followup-13-analysis/posthoc13-collection-v2/posthoc-source-frozen-v2.json",
+      "bytes": 3980,
+      "sha256": "2efbafd38a518da087384a5680ca269ed7213df664fd586da81ab06b496de3f4",
+      "copyAgain": false
+    },
+    {
+      "path": "capacity-native10-v2-compact-wire-followup-13-analysis/probe13-root-independent-cleanup-v1.json",
+      "bytes": 325,
+      "sha256": "65d12c6cc75ef1e0b774597100ef203145e9cab55526754eb45b97fedfcc9420",
+      "copyAgain": false
+    }
+  ],
+  "plannedRuntimeCollectionReferences": [
+    {
+      "externalFile": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\launcher-source-frozen-v1.json",
+      "bytes": 23133,
+      "sha256": "c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724",
+      "plannedPublicPath": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/launcher-source-frozen-v1.json",
+      "publicCopyAlreadyExists": false,
+      "copyInThisPackage": false
+    },
+    {
+      "externalFile": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\source-guard-readonly-verification.json",
+      "bytes": 3985,
+      "sha256": "b43ec523e8fc1a443cd27a054da3db63448c78923a23ff6b20ddb0c4127e184e",
+      "plannedPublicPath": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/source-guard-readonly-verification.json",
+      "publicCopyAlreadyExists": false,
+      "copyInThisPackage": false
+    }
+  ],
+  "currentFrozenRuntimeSourceCount": 51,
+  "currentRuntimeFilesCopiedByThisPackage": 0,
+  "containsOriginalHistoryVersions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "oldBlockedReviewPreserved": true,
+  "currentReviewVersion": 6,
+  "actualFormalCapacityAccepted": false,
+  "archiveCopyExecuted": false,
+  "formalGateOrRealmExecuted": false,
+  "privateDataRead": false,
+  "rawOrRecordingPayloadRead": false
+}

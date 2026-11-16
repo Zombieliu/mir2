@@ -1,0 +1,69 @@
+{
+  "kind": "retained-supplementary-e0-public-observations",
+  "application": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "acceptedOriginalHelperRun": {
+    "kind": "r16-original-public-acceptance",
+    "accepted": true,
+    "checks": {
+      "exactSource": true,
+      "completeFunctionalRun": true,
+      "walletLoginOnly": true,
+      "movementOriginalEightSeconds": true,
+      "sixCompleteFonts": true,
+      "complete113": true,
+      "sharedNativeQuest": true,
+      "originalNative120": true,
+      "originalRuntimeBody120": true,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true
+    },
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "originalMoveBudgetMs": 8000,
+    "originalNativeBudgetMs": 120000,
+    "nativeAfterFirstFrameMs": 62951,
+    "runtimeBodyAfterFirstFrameMs": 16763,
+    "supplementary180ObservationChangesOriginalBudget": false,
+    "wholeParityAccepted": false
+  },
+  "failedFixedFlagSupplement": {
+    "kind": "r16-original-public-acceptance",
+    "accepted": false,
+    "checks": {
+      "exactSource": true,
+      "completeFunctionalRun": true,
+      "walletLoginOnly": true,
+      "movementOriginalEightSeconds": true,
+      "sixCompleteFonts": true,
+      "complete113": true,
+      "sharedNativeQuest": true,
+      "originalNative120": false,
+      "originalRuntimeBody120": true,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true
+    },
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "originalMoveBudgetMs": 8000,
+    "originalNativeBudgetMs": 120000,
+    "nativeAfterFirstFrameMs": 210624,
+    "runtimeBodyAfterFirstFrameMs": 69302,
+    "supplementary180ObservationChangesOriginalBudget": false,
+    "wholeParityAccepted": false
+  },
+  "firstQCapture": "Both clipped capture options generate temporary1024x768 screencast device dimensions. Device dimensions are composited-output metadata, not yet proof of CSS viewport resize. The fixedflag case is nonblack but runtime methods were absent; it is NOT phase-matched causal proof. Original partial-runtime case has2blackframes. Need full-viewport (no clip) capture with direct geometry/frame-resize telemetry and actual running Native frame, preserve original raw results.",
+  "rawBlackPng": {
+    "bytes": 3938,
+    "sha256": "bb718d72b13af61c5740dc9d8fb3fb1216b626215a1b54b5a761a4a5d63c62c4"
+  },
+  "screencast": {
+    "frames": 22,
+    "blackFrames": 2,
+    "dropped": 0,
+    "sourceSha256": "fe71f7bcdb8b826267396d86b4de3f1f965aa10b2bb0bfd905a2ef3ecf68b237"
+  },
+  "limitation": "These are additional observations of the existing e0 deployment. They do not rewrite its two original release cohorts or prove that one capture option caused loading time. Device output metadata is not proof of CSS viewport resize. No production deployment occurred this round."
+}

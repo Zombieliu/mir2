@@ -1,0 +1,1147 @@
+{
+  "schemaVersion": 1,
+  "sourceRealmEvidence": "1792934538996-4d1caf58.realm-evidence.json",
+  "capturedHealthBeforeShutdown": true,
+  "baseline": {
+    "version": 2,
+    "scope": "gateway shared-owner transaction, may contain multiple maps",
+    "sinceInitializationMs": 0,
+    "budgetUs": 50000,
+    "immediateRequests": {
+      "duration": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ],
+        "p50UpperUs": null,
+        "p95UpperUs": null,
+        "p99UpperUs": null,
+        "p999UpperUs": null,
+        "saturated": false,
+        "discardedSamples": 0
+      },
+      "successCount": 0,
+      "failureCount": 0
+    },
+    "lifecycleRequests": {
+      "duration": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ],
+        "p50UpperUs": null,
+        "p95UpperUs": null,
+        "p99UpperUs": null,
+        "p999UpperUs": null,
+        "saturated": false,
+        "discardedSamples": 0
+      },
+      "successCount": 0,
+      "failureCount": 0
+    },
+    "movementAdmissions": {
+      "duration": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ],
+        "p50UpperUs": null,
+        "p95UpperUs": null,
+        "p99UpperUs": null,
+        "p999UpperUs": null,
+        "saturated": false,
+        "discardedSamples": 0
+      },
+      "successCount": 0,
+      "failureCount": 0
+    },
+    "zoneWork": {
+      "count": 0,
+      "sumUs": 0,
+      "maxUs": 0,
+      "overBudgetCount": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ],
+      "p50UpperUs": null,
+      "p95UpperUs": null,
+      "p99UpperUs": null,
+      "p999UpperUs": null,
+      "saturated": false,
+      "discardedSamples": 0
+    },
+    "ownerTickDeadlineLag": {
+      "count": 0,
+      "sumUs": 0,
+      "maxUs": 0,
+      "overBudgetCount": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ],
+      "p50UpperUs": null,
+      "p95UpperUs": null,
+      "p99UpperUs": null,
+      "p999UpperUs": null,
+      "saturated": false,
+      "discardedSamples": 0
+    },
+    "pendingMovementDeadlineLag": {
+      "count": 0,
+      "sumUs": 0,
+      "maxUs": 0,
+      "overBudgetCount": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ],
+      "p50UpperUs": null,
+      "p95UpperUs": null,
+      "p99UpperUs": null,
+      "p999UpperUs": null,
+      "saturated": false,
+      "discardedSamples": 0
+    },
+    "complete": true
+  },
+  "after": {
+    "version": 2,
+    "scope": "gateway shared-owner transaction, may contain multiple maps",
+    "sinceInitializationMs": 91951,
+    "budgetUs": 50000,
+    "immediateRequests": {
+      "duration": {
+        "count": 146,
+        "sumUs": 430396,
+        "maxUs": 18119,
+        "overBudgetCount": 0,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 5
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 65
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 38
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 5
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 23
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 8
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ],
+        "p50UpperUs": 2000,
+        "p95UpperUs": 20000,
+        "p99UpperUs": 20000,
+        "p999UpperUs": 20000,
+        "saturated": false,
+        "discardedSamples": 0
+      },
+      "successCount": 146,
+      "failureCount": 0
+    },
+    "lifecycleRequests": {
+      "duration": {
+        "count": 18,
+        "sumUs": 5384092,
+        "maxUs": 1006181,
+        "overBudgetCount": 10,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 4
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 3
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ],
+        "p50UpperUs": 75000,
+        "p95UpperUs": 5000000,
+        "p99UpperUs": 5000000,
+        "p999UpperUs": 5000000,
+        "saturated": false,
+        "discardedSamples": 0
+      },
+      "successCount": 16,
+      "failureCount": 2
+    },
+    "movementAdmissions": {
+      "duration": {
+        "count": 108,
+        "sumUs": 732668,
+        "maxUs": 287680,
+        "overBudgetCount": 2,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 61
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 18
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 3
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 20
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ],
+        "p50UpperUs": 250,
+        "p95UpperUs": 10000,
+        "p99UpperUs": 500000,
+        "p999UpperUs": 500000,
+        "saturated": false,
+        "discardedSamples": 0
+      },
+      "successCount": 108,
+      "failureCount": 0
+    },
+    "zoneWork": {
+      "count": 908,
+      "sumUs": 249916,
+      "maxUs": 2220,
+      "overBudgetCount": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 26
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 336
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 527
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 17
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ],
+      "p50UpperUs": 500,
+      "p95UpperUs": 500,
+      "p99UpperUs": 1000,
+      "p999UpperUs": 5000,
+      "saturated": false,
+      "discardedSamples": 0
+    },
+    "ownerTickDeadlineLag": {
+      "count": 905,
+      "sumUs": 7580222,
+      "maxUs": 23798,
+      "overBudgetCount": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 9
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 23
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 50
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 163
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 302
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 356
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ],
+      "p50UpperUs": 10000,
+      "p95UpperUs": 20000,
+      "p99UpperUs": 20000,
+      "p999UpperUs": 35000,
+      "saturated": false,
+      "discardedSamples": 0
+    },
+    "pendingMovementDeadlineLag": {
+      "count": 3,
+      "sumUs": 26000,
+      "maxUs": 13000,
+      "overBudgetCount": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 2
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ],
+      "p50UpperUs": 10000,
+      "p95UpperUs": 20000,
+      "p99UpperUs": 20000,
+      "p999UpperUs": 20000,
+      "saturated": false,
+      "discardedSamples": 0
+    },
+    "complete": true
+  },
+  "classDeltas": {
+    "movementAdmissions": {
+      "count": 108,
+      "successCount": 108,
+      "failureCount": 0,
+      "sumUs": 732668,
+      "overBudgetCount": 2
+    },
+    "immediateRequests": {
+      "count": 146,
+      "successCount": 146,
+      "failureCount": 0,
+      "sumUs": 430396,
+      "overBudgetCount": 0
+    },
+    "lifecycleRequests": {
+      "count": 18,
+      "successCount": 16,
+      "failureCount": 2,
+      "sumUs": 5384092,
+      "overBudgetCount": 10
+    }
+  },
+  "scope": "functional two-socket release profile; cumulative bucket snapshots. MovementAdmissions excludes pending authoritative outbound completion. No capacity or latency SLO acceptance is inferred."
+}

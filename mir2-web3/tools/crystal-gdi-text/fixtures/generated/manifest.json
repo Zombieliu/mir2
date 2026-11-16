@@ -7,11 +7,11 @@
                       "sourceBehaviour":  "Crystal Client MirLabel"
                   },
     "source":  {
-                   "inputSha256":  "3719cbb9987dcf714a62a6e86053d8239948af980e58e30f4f9f108dd7933679",
-                   "itemCount":  8
+                   "inputSha256":  "0a1347783b915a39143dae0dc0bf8c9a2c5b686c682bd88fc14416713a1b42c5",
+                   "itemCount":  11
                },
     "environment":  {
-                        "windowsBuild":  "26200.8875",
+                        "windowsBuild":  "26200.9974",
                         "clrVersion":  "4.0.30319.42000",
                         "processArchitecture":  "X64"
                     },
@@ -22,7 +22,7 @@
                  "sizePoints":  8,
                  "dpi":  96,
                  "fileName":  "arial.ttf",
-                 "fileSha256":  "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a"
+                 "fileSha256":  "edfbd22a3d088fc2f5d7c79b8c9c732df6dc878a60f0a80be0f92a3c7a634404"
              },
     "texture":  {
                     "pixelFormat":  "Format32bppArgb",
@@ -37,6 +37,210 @@
                                  }
                 },
     "assets":  [
+                   {
+                       "key":  "entity-assistant-jane-auto",
+                       "output":  "images/entity-assistant-jane-auto.png",
+                       "text":  "Assistant Jane",
+                       "foreground":  "#FF00FF00",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "HorizontalCenter"
+                                                    ],
+                                          "value":  1
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  79,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  81,
+                                                   "height":  16
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c",
+                                    "argb":  "f293408510eeb5cf404892cd189487700e12dd06985e53735519c630a6bd6a50"
+                                },
+                       "alpha":  {
+                                     "transparent":  823,
+                                     "translucent":  0,
+                                     "opaque":  473,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "entity-merchant-auto",
+                       "output":  "images/entity-merchant-auto.png",
+                       "text":  "Merchant",
+                       "foreground":  "#FF00FF00",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "HorizontalCenter"
+                                                    ],
+                                          "value":  1
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  52,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  54,
+                                                   "height":  16
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295",
+                                    "argb":  "9fe85e63f6e2ea08809bdb3021d2f783b612fe652ed0baced9a78fb3df447c25"
+                                },
+                       "alpha":  {
+                                     "transparent":  545,
+                                     "translucent":  0,
+                                     "opaque":  319,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
+                   {
+                       "key":  "entity-ruben-auto",
+                       "output":  "images/entity-ruben-auto.png",
+                       "text":  "Ruben",
+                       "foreground":  "#FFFFFFFF",
+                       "background":  "#00000000",
+                       "outline":  {
+                                       "enabled":  true,
+                                       "colour":  "#FF000000",
+                                       "offsets":  [
+                                                       {
+                                                           "x":  1,
+                                                           "y":  0
+                                                       },
+                                                       {
+                                                           "x":  0,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  2,
+                                                           "y":  1
+                                                       },
+                                                       {
+                                                           "x":  1,
+                                                           "y":  2
+                                                       }
+                                                   ],
+                                       "foregroundOffset":  {
+                                                                "x":  1,
+                                                                "y":  1
+                                                            }
+                                   },
+                       "drawFormat":  {
+                                          "names":  [
+                                                        "HorizontalCenter"
+                                                    ],
+                                          "value":  1
+                                      },
+                       "size":  {
+                                    "mode":  "auto",
+                                    "requested":  null,
+                                    "measured":  {
+                                                     "width":  38,
+                                                     "height":  14
+                                                 },
+                                    "output":  {
+                                                   "width":  40,
+                                                   "height":  16
+                                               }
+                                },
+                       "pixelFormat":  "Format32bppArgb",
+                       "dpi":  {
+                                   "x":  96,
+                                   "y":  96
+                               },
+                       "hash":  {
+                                    "algorithm":  "SHA-256",
+                                    "png":  "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c",
+                                    "argb":  "e5024ccc77ff0b22504f7abfae72689055ae2e25f1b88f2d4956b1ca74abb5c4"
+                                },
+                       "alpha":  {
+                                     "transparent":  415,
+                                     "translucent":  0,
+                                     "opaque":  225,
+                                     "min":  0,
+                                     "max":  255
+                                 }
+                   },
                    {
                        "key":  "entity-assistant-jane",
                        "output":  "images/entity-assistant-jane.png",

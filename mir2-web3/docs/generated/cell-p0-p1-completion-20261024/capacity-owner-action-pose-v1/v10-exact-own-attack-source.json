@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "scope": "One positioned2MiB tail read to recover exact fixed packet source discarded as other by first anonymous analyzer; no full samples reread and no actor/account/raw payload publication",
+  "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v10\\episode-50\\reports\\1793026504545-0f00d2eb.samples.jsonl",
+  "fullFileBytes": 25334243,
+  "offset": 23237091,
+  "bytesRead": 2097152,
+  "chunkSha256": "ded454582b5c29a158f7021188fa0091dc748f8992f74bc3292dd7e365d3d7c3",
+  "matches": [
+    {
+      "type": "selfTransform",
+      "at": 1793026896106,
+      "connection": 16,
+      "source": "ObjectAttack",
+      "monotonicMs": 410508.8761,
+      "sequence": 5688,
+      "wireObjectId": 1000,
+      "wirePosition": {
+        "x": 236,
+        "y": 601
+      },
+      "beforePosition": {
+        "x": 235,
+        "y": 602
+      },
+      "afterPosition": {
+        "x": 236,
+        "y": 601
+      }
+    }
+  ]
+}

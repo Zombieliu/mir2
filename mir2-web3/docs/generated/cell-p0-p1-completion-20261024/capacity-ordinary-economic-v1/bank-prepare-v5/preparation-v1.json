@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v5",
+  "state": "PENDING_ROOT_NEW_HELPER_COMMIT_AND_JS_QUALIFICATION",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\source-lib-v1.mjs",
+      "bytes": 18426,
+      "sha256": "47587d1d29816a81e1a8a4a5b53156665685ffb0e46263e5edbc8169ab623efa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\copy-source-bank-v1.mjs",
+      "bytes": 10996,
+      "sha256": "f1609f6f127a529cfac6499244131b2b3a72536a0d00655e7b556ebae84445f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\freeze-prepare-v1.mjs",
+      "bytes": 8143,
+      "sha256": "4023b3c5fb225f9217c763ce45420eafa50588e6e045d879b8644dbeefc50f63"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\run-owned-prepare-v1.mjs",
+      "bytes": 25124,
+      "sha256": "3b157e1437a06c3507ae90e910659be20e22ed4105401d9b57d92e3594b144b5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\prepare-config-pending-v1.json",
+      "bytes": 6591,
+      "sha256": "1828647ff9f4d1244199cf1e77b0e82acb5949214c5de5f6f6bca3c086fc43dc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\source-bank-plan-pending-v1.json",
+      "bytes": 10695,
+      "sha256": "2fb5fc938a08d48f5916d014e595badee354127d450de4022f608cea0741aef5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\backend-release-binding-pending-v1.json",
+      "bytes": 1216,
+      "sha256": "146673ad91e09eb7e22951313e998b0b06c2c6ff41447b34a3bc4378bd37ee46"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\derivation-v1.json",
+      "bytes": 59793,
+      "sha256": "a63ae2b6e8fe8a11af8a6ed7992d04e06a5d969326ccd7325467a240e0901281"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\syntax-checks-v1.json",
+      "bytes": 3621,
+      "sha256": "2aae32b31455d57425c3958cd70f689a41fbcfeea2f8ebd190e8937931272e77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\README-pending-v1.md",
+      "bytes": 2898,
+      "sha256": "439c6505129f0bf124cc6d6bb6e73ed3b676254940373cd02baf8b9d53478483"
+    }
+  ],
+  "sourceSha256": "eddbceab3d91448fc559345dd03b561915a27a5f9aa51e7af932bfc8cb0610e4",
+  "actualSourceV4Bank": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\reports\\1793052124616-e760d348.preparation-report.json",
+      "bytes": 18120,
+      "sha256": "d39fa7b6dba73518b7e9d0d1dddca48742d045b47911ef8d4f657d07d1839a62"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\cleanup-v1.json",
+      "bytes": 1036,
+      "sha256": "ef140703a94a2f0b50c322bea0e8d241c905655d8d6e2ede4fca314d8c6326d0"
+    },
+    "independentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\root-independent-cleanup-v1.json",
+      "bytes": 225,
+      "sha256": "1026eba9ce43ab87e45cfb3a93461474e8dbb8f70d8619ede0cab65e79455898"
+    },
+    "files": 11,
+    "bytes": 147515,
+    "readyCharacters": 5,
+    "preparedCount": 4,
+    "sourcePreparedEligibilityInherited": false,
+    "sourceFailureRetained": {
+      "ok": false,
+      "error": "No walk path on 0 from 304,613 to 289,617",
+      "preparedCount": 4,
+      "ordinaryPreparationEvidenceEligible": false
+    }
+  },
+  "actualBackendReused": {
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "backendBuildCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "release": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    "immutableExecutable": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+      "bytes": 87456256,
+      "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+    },
+    "reusedRustReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    "reusedRustTestsPassed": 32,
+    "newBackendBuildPerformed": false,
+    "freshRustTestsPerformed": false
+  },
+  "pending": {
+    "executionSourceCommit": null,
+    "currentDriverSourceCommit": null,
+    "currentRootJsReceipt": null,
+    "RootFinalApproval": null,
+    "actualSourceFreeze": null,
+    "actualSourceBankCopy": null,
+    "actualLoad": null
+  },
+  "actualChecks": {
+    "nodeSyntaxChecks": 5,
+    "nodeSyntaxPassed": 5,
+    "nodeSyntaxFailed": 0,
+    "modulesImported": false,
+    "guardExecuted": false,
+    "freezeExecuted": false,
+    "bankCopied": false,
+    "CargoOrTestsExecuted": false,
+    "loadStarted": false
+  },
+  "verdict": {
+    "preparedCandidateOnly": true,
+    "eligibleForSourceFreezeNow": false,
+    "eligibleForOwnedRunNow": false,
+    "blockingReasons": [
+      "Actual new helper/driver commit and actual Root current-source JS receipt are not yet bound",
+      "Root final approval and source freeze have not occurred"
+    ],
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "scope": "No copied account/Store/ledger/secrets values in this receipt. Hashes describe private byte-copy inputs; actual copy is only a later Root-owned guarded action. No repo production or old V4/V6 source writes."
+}

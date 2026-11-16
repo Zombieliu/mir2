@@ -1,0 +1,65 @@
+{
+  "owner": "Root",
+  "kind": "Root independent actual Source78 Next02 full byte/membership/NFT acceptance after authenticated bootstrap repair",
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-code-review03.json",
+    "bytes": 12754,
+    "sha256": "9cb2a7d64e108fcd51e8f32483b214e2df24218e45fe62fa4132d83b33a35df0"
+  },
+  "actualNode": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-actual03.json",
+    "bytes": 3332,
+    "sha256": "91be454659a13e81ff6f5c563264be9ee5d66732b65624e82334c2e7fd8dabd7"
+  },
+  "actualNext": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-next-actual02.json",
+    "bytes": 2632,
+    "sha256": "16455ab926a82e5aa1e765a7862aad3cda907250d281d61b34e5841fc7abdb6b"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-full-snapshot03.json",
+    "bytes": 44876550,
+    "sha256": "5f83771b96dd301fa13c16e997f6515bfebcb2b6bde38ab3d722d10fa7d11dc0"
+  },
+  "ordinarySupplement": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-standalone-ordinary-dependencies02.json",
+    "bytes": 428,
+    "sha256": "b049dcd6f25a327b9f8c626f6683df2fda4d31606a82f9e5672777ec05de0501"
+  },
+  "counts": {
+    "all": 71889,
+    "internal": 71887,
+    "external": 2,
+    "strict": 37592,
+    "ownActualNextOutput": 21036,
+    "ordinarySupplement": 13261
+  },
+  "hashAndMembershipDifferences": 0,
+  "nft": {
+    "files": 61,
+    "bytes": 9011653,
+    "references": 130518,
+    "unknownSources": 0,
+    "rawBeforeAndAfterUnchanged": true
+  },
+  "oldApplicationOutputCopied": false,
+  "originalPackageCapBytes": 377487360,
+  "productExecuted": false,
+  "goalComplete": false,
+  "caseRepair": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-input-display-case-repair01.json",
+    "bytes": 986,
+    "sha256": "e04e90cc70dcbb561a7d76056180d86ff4a2aecaba02d633eeddbf6854f32404"
+  },
+  "firstThinFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-failure01.json",
+    "bytes": 1882,
+    "sha256": "d6337fa44eb51aedb942ce2e27b1b0806329be788288950e97d7db9c3cfe0031"
+  },
+  "originalPublicDisplayCaseMatchedAcceptedSource77": true,
+  "failedOutputOutsideInputRetained": true,
+  "excludedKnownPriorArtifacts": [
+    "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/.next-web-windows-catchup-source78-20261012-01",
+    "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-source78-02"
+  ]
+}

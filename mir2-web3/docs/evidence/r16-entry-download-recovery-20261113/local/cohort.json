@@ -1,0 +1,77 @@
+{
+  "source": "9dc7294c0269eee93086e88ac83d2bc9d93d387e",
+  "parent": "31e9b6a74661c31d6515dd7322b466285f975d71",
+  "candidate": "31e9b6a74661-entry-recovery-2bfdd3ba",
+  "runtime": "bevy-0c553a754308e5b8",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "passingRuns": [
+    "quest-after-r2",
+    "quest-after-r3"
+  ],
+  "passingColdAndClosedBrowserWarmSessions": 4,
+  "baselineFailedRun": "quest-before-r3",
+  "retainedOtherFailures": [
+    "quest-before-r1",
+    "quest-before-r2",
+    "quest-after-r1"
+  ],
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "noPublicNetworkClaim": true,
+  "noCompleteLevelRouteClaim": true,
+  "scripts": {
+    "entry-player-probe.mjs": "7440b8191578dda59a3f0e2a09027a4ef9a6c642284ed5f7033a8ac34b0a4b46",
+    "invoke.mjs": "e5ce4282fc55e21c3e22e5b7df148fa509a48ef100bff6dfc0cbf1338f43354f",
+    "profile.mjs": "3c40d2cb928b0799a4f59b7d621997f2e906572473591a45fe990a5f88b32930",
+    "run.mjs": "9809c10ed034cf8552ee0839f8c702884a1c7b3f0fdc2b7dfaedfb931bc2d434",
+    "standing-faces.mjs": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+    "ui-asset-fault.mjs": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "67a8fc372c7a24ff37e84f33eec0922cba67bbd46fceff63aafded79d2393a1c"
+  },
+  "runs": [
+    {
+      "run": "quest-before-r1",
+      "passed": false,
+      "originalReceiptSha256": "357f1a8ff213ac1fbeabd49543fc3f0e230ff60ebd6b1b77121b4934e8bc7de1",
+      "detail": "local/quest-before-r1.json",
+      "classification": "Source guard stopped before fixture; no product outcome."
+    },
+    {
+      "run": "quest-before-r2",
+      "passed": false,
+      "receiptWritten": false,
+      "classification": "Harness setup failed: Playwright forbids HTTPS-to-HTTP route.continue; no product outcome. Owned Chrome/listening ports subsequently checked closed.",
+      "rawLogSha256": "b55a52a552f89ef105dd8cd2352ae74b82457083214f5a2552e21686b8752b52"
+    },
+    {
+      "run": "quest-before-r3",
+      "passed": false,
+      "originalReceiptSha256": "22c09ab0c40a18648f0b913640ffe6225fe2fd2d9a6465e799a8cf241a284186",
+      "detail": "local/quest-before-r3.json",
+      "classification": "Valid predecessor baseline: original 120s Native gate failed; no manual reentry rescue."
+    },
+    {
+      "run": "quest-after-r1",
+      "passed": false,
+      "originalReceiptSha256": "6fd2dc867051d473992c96dd34e70750a87353793023314c0ad52f7049d2aed8",
+      "detail": "local/quest-after-r1.json",
+      "classification": "Resources recovered but exact-byte observer omitted the owned mirror path; retained instrumentation failure."
+    },
+    {
+      "run": "quest-after-r2",
+      "passed": true,
+      "originalReceiptSha256": "c689444412d6e881e49833659cfc014faa75a0695d4daf1a59cf1591249a429a",
+      "detail": "local/quest-after-r2.json",
+      "classification": "Controlled original gates; same-entry fault recovery, ordinary logout, full browser process close, then same-profile normal relogin. Not a current 1-30 route or WAN benchmark."
+    },
+    {
+      "run": "quest-after-r3",
+      "passed": true,
+      "originalReceiptSha256": "8a6c07d602e36968268524e12ba6b52bf2f0e5d9263d7bb8b99cf1450c07bead",
+      "detail": "local/quest-after-r3.json",
+      "classification": "Controlled original gates; same-entry fault recovery, ordinary logout, full browser process close, then same-profile normal relogin. Not a current 1-30 route or WAN benchmark."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Preserve the measured receipts and test output across hosts.
+* -text
+*.log -whitespace
+*.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

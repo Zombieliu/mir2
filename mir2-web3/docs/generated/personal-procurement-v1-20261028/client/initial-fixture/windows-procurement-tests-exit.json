@@ -1,0 +1,6 @@
+{
+  "exitCode": 0,
+  "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows procurement --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native -- --nocapture --test-threads=1",
+  "startedAtUtc": "2026-10-28T12:46:53.3547298Z",
+  "finishedAtUtc": "2026-10-28T12:50:49.8693287Z"
+}

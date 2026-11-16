@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-08T11:50:44.286Z",
+  "branch": "codex/windows-player-journey",
+  "parent": "91fc453b70f3e28adc0a49ecdd3695963b160a1f",
+  "scope": "Shared Native/Web guild geometry, selected rank editing and creation, local keyboard ownership, server-owned statistics and storage entry visibility.",
+  "runtime": "bevy-a46905128c316656",
+  "sourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "sha256": "8a7c5d881a4cdb960438a223f677b9ee9bf2dd6e835b2c34d418d4fdfb2c8c86",
+      "gitBlob": "eaac915247ba8400bb827c3c6a0b76952dc6cd75"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "sha256": "2f7956f871b96915eb6fdeaae4ecee42c476b34298fcf5e936a81ac1872734c3",
+      "gitBlob": "7f488101e8c199fe244252e4e7068248a584eab3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "29186002f958ffc084691aafa2594cf895792262f7c7f7e21015414a33f6eb07",
+      "gitBlob": "f99cab44357811f7fe34efda5ea266630efe4d11"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/r16_guild_layout.rs",
+      "sha256": "ae51ef161541a7943bb47fe878729c376a6734b36069ba25b545677cf95de78e",
+      "gitBlob": "dc05979b5a3fa57063f841064bc91ce741f1c8ba"
+    },
+    {
+      "path": "apps/web/app/components/original-client-extra-windows.tsx",
+      "sha256": "4c54b4b0b2b0d0fe5d10e32e49b36ee6fd907f9165d3f6aa42a3febcbc697378",
+      "gitBlob": "78bf02a8c478231c56e8efa0b6a52c35357edec5"
+    },
+    {
+      "path": "apps/web/app/components/original-client-guild-window.tsx",
+      "sha256": "8d85f18a7b08e3b08049db48ad2e5c53a87b54c1020a37bde1fbac29f9c54262",
+      "gitBlob": "5881b38dd0472b1376a29dae439aa10f449e8e62"
+    },
+    {
+      "path": "apps/web/app/components/original-client-guild-controls.tsx",
+      "sha256": "7735810a7e829e4934fd5460573876cf8683486a969e4b01631ef935bc10eed0",
+      "gitBlob": "19dbeecac297f025f0b8da5bfa3e9b1eaa413a90"
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "sha256": "dfc1d63852ab67dfb779095e6a1915e8f5d976a02775dfe9c55f697156cb3d6f",
+      "gitBlob": "80f438fff0d80b31555f5ba434b44df59b1b85f2"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "sha256": "8a3f299fa0c89c5ee839d5687096fbe4298c72ee51d8a9a0b0483618f6bea236",
+      "gitBlob": "2dcd57f84e33dc7b01c58de9f9d0957b80fe284b"
+    },
+    {
+      "path": "apps/web/lib/r16-guild-layout.ts",
+      "sha256": "1e732880c64dcc42cac4d32e1abaf9a195349ea3fa8101acae51f3158e01e3f0",
+      "gitBlob": "b9cdd5ee1ad8550d73f1ed6694d58be432a3a2c0"
+    },
+    {
+      "path": "apps/web/lib/r16-guild-keyboard.ts",
+      "sha256": "5c49bd5a26c947b1bddfdd89707db3f0698545c40771f0c997dd94b57bffc735",
+      "gitBlob": "52aabf5832340d3e876633fba0417f3959c9096b"
+    },
+    {
+      "path": "apps/web/lib/guild-rank-operations.ts",
+      "sha256": "172ba45b0f074657cb6f416d0a6337fe38baf2e7b93f87d902bf849edec304ee",
+      "gitBlob": "cca76d02851e5cc993bffa92d794dbccc3331249"
+    },
+    {
+      "path": "apps/web/lib/social-parity-actions.ts",
+      "sha256": "5acb357f9df207a9ad5ddf852799ab2f6f8e7aa7eff18d8bb733db00959c016d",
+      "gitBlob": "7c4a2e347ca5e840df3a308af8668c1a360a5a8b"
+    },
+    {
+      "path": "apps/web/lib/guild-status-presentation.ts",
+      "sha256": "265a0fcc8b00e3ccccb456148d3b3b8beb2b8283ae23b61d7a817fa47f1c4c5a",
+      "gitBlob": "181689f36545573fa91d7fc71db3a7a089f84981"
+    },
+    {
+      "path": "apps/web/lib/world-model/types.ts",
+      "sha256": "12c4833c19b6df6a1d79e88348c0628f74c9d9ee32df289ef9ee4bcda25562cb",
+      "gitBlob": "78062d47bbf394be3cf43017bf6d5c33b423da70"
+    },
+    {
+      "path": "apps/web/lib/generated/r16-native-localization.json",
+      "sha256": "944f1639e3ac7822ddba4c81a6b2bd5416aef3ded46be35a9e5f75a2f37271ea",
+      "gitBlob": "4fb9bd0a53338a33d35d49e51da2fde87329073f"
+    },
+    {
+      "path": "apps/web/scripts/test-r16-guild-controls.mjs",
+      "sha256": "9fcd69d434c9dc9e0fef36dd7d4295dfbd2319dab55f86f349229a4bdfcfa45d",
+      "gitBlob": "4af37a2e32b36e7453a54129fdaba67401597081"
+    },
+    {
+      "path": "apps/web/scripts/test-guild-status-presentation.mjs",
+      "sha256": "b0360ef0854576077f678dd3965e83d8a5bb6aca4842a1cc2b2ffd706236a837",
+      "gitBlob": "2c653ad3687601c2097cb69d3cecec485f8e035c"
+    },
+    {
+      "path": "apps/web/scripts/test-guild-rank-create.mjs",
+      "sha256": "8c54e88d106ca58018f0e689c22ebd2c31e97fd9695006f2356e34e1f7aba3b1",
+      "gitBlob": "11e157e00c22562abf69c2b5d33b533be3c0aacd"
+    },
+    {
+      "path": "apps/web/scripts/test-social-parity-actions.mjs",
+      "sha256": "d9e7a2327b493860bf88d707835f1626ef42a42f2718f311ece8c87846fb246c",
+      "gitBlob": "4f8b70dcb52645efa5d70b89dd3d51d2b858db49"
+    },
+    {
+      "path": "apps/web/scripts/test-portable-native-localization.mjs",
+      "sha256": "9823d47ff3eafa9dd579125aa17fd410578962630c4abcafd90385e151cf6086",
+      "gitBlob": "7826906082b43de51e69f0d65e8b005249e7a388"
+    },
+    {
+      "path": "apps/web/scripts/test-r16-native-localization.mjs",
+      "sha256": "71920d5384bc7f2334106f89cfb6639359305c56300100058e456393989252a6",
+      "gitBlob": "98142cff2f7c468dc2f721664527411683988d1d"
+    },
+    {
+      "path": "packages/game-data/data/r16-guild-layout.json",
+      "sha256": "f9047ceb849fde263730f1a0a0fef9b08f3891d7343ec1c79743adfa4d3f9ae7",
+      "gitBlob": "d293f6d2f9eaf6b8bef9a948a80db525e4a09fd3"
+    },
+    {
+      "path": "packages/tooling/scripts/generate-r16-guild-layout.mjs",
+      "sha256": "ff39a6d71c24d6c62009ee5c7dc52d0d903a3bcf0d81cfc38dd6d5763e798bb3",
+      "gitBlob": "dd6b9465a676cb816813952966d74b491d5c7273"
+    },
+    {
+      "path": "packages/game-data/data/generated/portable-native-i18n.json",
+      "sha256": "1c6f48a5e09577b4c01a1f674d990bd355e5adbb12c14b7925a16f8b74fa0c00",
+      "gitBlob": "f54cac10fc7c978b1bc309e5ea7127e42ba08101"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/game.json",
+      "sha256": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
+      "gitBlob": "91a121c69cc400b9e04e428b2ccaf908de8f007a"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ar.json",
+      "sha256": "f57f06e88d12a35efa5d82e4ff91cfa8d7ef81242dd385ac7d4e204621ab17fd",
+      "gitBlob": "ff0f4d189b2f61ed193a5f2720a1fd41b69252be"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/hi.json",
+      "sha256": "53a5267ceda25831c616ebea8040357783c49013eb7fc100a34ea988566c6759",
+      "gitBlob": "ea893f69ae2a83b5f999962113beb9904e28844e"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/id.json",
+      "sha256": "3daf140a32aa9273e11350a647b8c5d25df2ebefa8ff367df5da064af1e75b5d",
+      "gitBlob": "b023bbe6e26571f20e435bd8cc0c3bf5b64e3a81"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ru.json",
+      "sha256": "0760f45dc217f8aacf9ee0506a18407afcd50234733df0970ded8d3642662376",
+      "gitBlob": "e7ad24087be8d147a7cf03b3b4e122c59f550bc2"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/th.json",
+      "sha256": "a703fed4c3c4e6f01e760f1da7c4a2f11bc3da32f61ef3199d807410a9689f6f",
+      "gitBlob": "287ec59bdf3e3f1e1d1dc02c23453c837096892e"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/vi.json",
+      "sha256": "c39c8c32c8374731b94e6dd0b2907f0376a44fc5c678a7dbadbdb3d3fd4d87cb",
+      "gitBlob": "e31b66f2690cf1bf58bf6b620d914ccc432e9230"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "sha256": "33a8372065605d060590bdd433fbe4c8c7c03e7c8ce201a3107fae574c6e7097",
+      "gitBlob": "ad37fb54de9181160dfb39a98bb73e514a146929"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/provenance.json",
+      "sha256": "fa189ab99ff7a71dcd2c21d4fdbd0221b498b2b6f56a7e2ce190a01dbd901d5f",
+      "gitBlob": "6c93bb57ff6b36d888ab98a71a7a5886be51fbb9"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "sha256": "5c9a4cbd1609fdadddc0979dbecdb466848bc670f05f4fc16d433d52394cfd3e",
+      "gitBlob": "9f1b7134cfacf8876f7e532634795d144f9cf262"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/validation-report.json",
+      "sha256": "300c08f6b26beb69c4d4be91cbad60929720c5798131d4f9cfc4527d5470a106",
+      "gitBlob": "26c4f533fc726d75f846a84fb913f89ba06f93dd"
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/expansion/ui-overrides.json",
+      "sha256": "704d32ec417845c02e4060d35e8029f9de1eb59ef295ccd7f321a6f3a504235e",
+      "gitBlob": "e3e573da4cd59b74fd6f4ec6de4522ae691ade02"
+    },
+    {
+      "path": "packages/tooling/scripts/native-i18n.test.mjs",
+      "sha256": "9cb81f7eab3670b7d510d302c8faac5fb5f483136f095523b3eb4228218fbf01",
+      "gitBlob": "b58ecd26eb1fa04a865db9e3fec9f0f2a913e05a"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "qualified-scope-receipt.json",
+      "sha256": "fde06a6e0044c678cfc88226f47d7588e50cda82cf9a51aec6eb9ddc5336b58c",
+      "bytes": 9369
+    },
+    {
+      "path": "stats-final-receipt.json",
+      "sha256": "ed248f0781b992bc3be4f8c9ebfa2b9218459f86137becaf874bc9ea5b30b873",
+      "bytes": 4446
+    },
+    {
+      "path": "stats-action-preservation.json",
+      "sha256": "d0f37e0caa00e07214537b707f8486eaa2d8e57ef7e3a0c7521f09570ff6439a",
+      "bytes": 384
+    },
+    {
+      "path": "storage-final-receipt.json",
+      "sha256": "26c0076efc700560e6b276d3ce874c2067c7079e277b43a44b1f87840dcd4700",
+      "bytes": 3248
+    },
+    {
+      "path": "i18n-preservation-proof.json",
+      "sha256": "e82e6a520c0fedea719e355561c22ed046399362ea4862942eda94b8fcd80f47",
+      "bytes": 3333
+    },
+    {
+      "path": "i18n-complete-receipt.json",
+      "sha256": "8c2ca784d5f1cf89a7c11771420e705272a90a62191c5a93c3befeabf73cc2f7",
+      "bytes": 6042
+    },
+    {
+      "path": "gpu-real-create-readback.png",
+      "sha256": "8ba59509d096eb1a8d1d6e84f5fb1c9648c5111bbc36318372bf82d99cfc6f1e",
+      "bytes": 72217
+    },
+    {
+      "path": "gpu-zh-CN-narrow.png",
+      "sha256": "1cc38e8efb8d8d24cddad96b0e5a2e409b903a4130c8ebaeee83d19e515af7ae",
+      "bytes": 39172
+    },
+    {
+      "path": "gpu-ar-narrow.png",
+      "sha256": "c4d71ca1c73bfc5199fd5ee39cbe8a72535e7eb0449b27ef073f8ad55efbf641",
+      "bytes": 37831
+    },
+    {
+      "path": "gl-stats-authority.png",
+      "sha256": "446a91703beeb4b7f832fe890232d233986cb3efbcf7756e070e86afc1499a49",
+      "bytes": 66253
+    },
+    {
+      "path": "gpu-stats-authority.png",
+      "sha256": "446a91703beeb4b7f832fe890232d233986cb3efbcf7756e070e86afc1499a49",
+      "bytes": 66253
+    },
+    {
+      "path": "storage-readonly-refresh.png",
+      "sha256": "4fafe21123d4ed67b46b5960b403d490db757a8023fcfb7772ade06882d40536",
+      "bytes": 61348
+    }
+  ],
+  "checks": {
+    "rootFreshSelectedNodeTests": 28,
+    "rootFreshSelectedNodeFailed": 0,
+    "nativeGeometryExisting": 1,
+    "nativeGuildEarlier": 144,
+    "nativeGuildExplicitVisualIgnored": 2,
+    "nativeLocalization": 23,
+    "nativeLocalizationExplicitVisualIgnored": 4,
+    "nativeRankAfterLocalization": 20,
+    "localizationNode": 28,
+    "guildCreateEarlierSelected": 53,
+    "earlierAdjacentNode": 99,
+    "earlierStage5Groups": 507,
+    "webgpuFunctionalChecks": 26,
+    "webglFunctionalChecksBeforeDriverFailure": 14,
+    "webglVisualContinuationChecks": 10,
+    "statisticsNode": 12,
+    "statisticsWebglChecks": 3,
+    "statisticsWebgpuChecks": 3,
+    "storageControlsNode": 16,
+    "storageBrowserChecks": 5
+  },
+  "sourceBoundaries": [
+    "Earlier mutation/locale receipts pin their original source. Later statistics and storage changes have separate current-source receipts; source hashes must not be conflated.",
+    "Root reran current controls/statistics selection:28 passed. No new Native EXE or Windows window qualification.",
+    "Earlier Native guild144/geometry1 preceded the five-label translation addition; native localization23 and rank20 were run afterward. Explicit visual skips remain skips.",
+    "WebGL driver language-menu failures and one editor disappearance remain in the scope receipt; the latter is not explained by an always-reset focus theory.",
+    "Statistics display fix has no financial or action authority. Storage entry visibility follows rank permission;112 item action gates remain authoritative.",
+    "No all-map/all-skill/Hero/Native cross-client/global Candidate100/human Accepted claim.",
+    "This feature verification is separate from the authorized deployment task. No production game/database write is claimed by these browser fixtures."
+  ]
+}

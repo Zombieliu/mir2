@@ -16,8 +16,8 @@ import type { DisplaySceneEffect } from "../app/components/original-client-types
 // direct bounded equivalent once additive source texels are alpha-normalized.
 export const CRYSTAL_ADDITIVE_MIX_BLEND_MODE = "plus-lighter" as const;
 
-const CRYSTAL_GROUND_EFFECT_LAYER_OFFSET = 48;
-const CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET = 90;
+const CRYSTAL_GROUND_EFFECT_LAYER_OFFSET = 3;
+const CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET = 10;
 export const FLAMING_SWORD_SPELL_ID = 8;
 export const FLAMING_SWORD_ATTACK_DURATION_MS = 600;
 
@@ -35,7 +35,7 @@ const CRYSTAL_ATTACK_DIRECTIONS = [
 /**
  * Crystal sorts persistent ObjectSpell instances before actors in each map
  * cell. Keep their optional mask adjacent to the body without lifting either
- * above the entity layer (64).
+ * above the entity body layer (5). All offsets stay within the 20-unit column.
  */
 export function crystalSceneEffectLayerOffset(
   source: DisplaySceneEffect["source"],
@@ -191,6 +191,26 @@ export type ObjectAttackSceneEntity = {
   attackUntil?: number;
 };
 
+/**
+ * Action locations are snapshots, not owner movement acknowledgements. The
+ * owner's current position may already include a newer UserLocation packet.
+ * Call only for ObjectAttack, ObjectRangeAttack and ObjectMagic poses.
+ */
+export function applyObjectActionScenePose<T extends ObjectAttackSceneEntity>(
+  entity: T,
+  payload: Record<string, unknown>,
+  ownerObjectId?: string | null,
+): T {
+  const location = payload.location as { x?: unknown; y?: unknown } | undefined;
+  const preserveOwnerPosition = entity.objectId === ownerObjectId;
+  return {
+    ...entity,
+    x: !preserveOwnerPosition && typeof location?.x === "number" ? location.x : entity.x,
+    y: !preserveOwnerPosition && typeof location?.y === "number" ? location.y : entity.y,
+    direction: typeof payload.direction === "string" ? payload.direction : entity.direction,
+  };
+}
+
 function objectAttackAnimation(payload: Record<string, unknown>): ObjectAttackAnimation {
   if (typeof payload.spell === "string") return "range";
   switch (packetNumber(payload.attackType)) {
@@ -215,19 +235,16 @@ export function applyObjectAttackSceneState<T extends ObjectAttackSceneEntity>(
   payload: Record<string, unknown>,
   now: number,
   actionDurationMs: (entity: T, animation: ObjectAttackAnimation) => number,
+  ownerObjectId?: string | null,
 ): { entities: T[]; effects: DisplaySceneEffect[] } {
   const objectId = packetObjectId(payload.objectId);
   if (!objectId) return { entities, effects };
-  const location = payload.location as { x?: unknown; y?: unknown } | undefined;
   const anchor = entities.find((entity) => entity.objectId === objectId) ?? null;
   const animation = objectAttackAnimation(payload);
   const nextEntities = entities.map((entity) =>
     entity.objectId === objectId
       ? {
-          ...entity,
-          x: typeof location?.x === "number" ? location.x : entity.x,
-          y: typeof location?.y === "number" ? location.y : entity.y,
-          direction: typeof payload.direction === "string" ? payload.direction : entity.direction,
+          ...applyObjectActionScenePose(entity, payload, ownerObjectId),
           attackAnimation: animation,
           attackStartedAt: now,
           attackUntil: now + actionDurationMs(entity, animation),

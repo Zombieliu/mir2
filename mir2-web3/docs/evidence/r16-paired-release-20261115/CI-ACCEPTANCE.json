@@ -1,0 +1,228 @@
+{
+  "schema": "mir2.windows-promotion-native-pg.v1",
+  "sourceSha": "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+  "workflowRunId": "43677385790",
+  "jobName": "backend",
+  "stepName": "Run native PostgreSQL promotion and billing regressions",
+  "environment": "test",
+  "postgresBackend": "native",
+  "docker": false,
+  "passed": true,
+  "testsExecuted": 216,
+  "skipped": 0,
+  "checks": {
+    "idempotentPaymentAttribution": {
+      "passed": true,
+      "testsExecuted": 58,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": true,
+      "testBinaries": 10,
+      "logSha256": "f95a7cd84f8a6370646304c3663ee4fc56fb9dfbf9c93c912c6f17f1baacec0d"
+    },
+    "noHistoricalRevenueInferred": {
+      "passed": true,
+      "testsExecuted": 58,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": true,
+      "testBinaries": 10,
+      "logSha256": "f95a7cd84f8a6370646304c3663ee4fc56fb9dfbf9c93c912c6f17f1baacec0d"
+    },
+    "walletIdentityRegression": {
+      "passed": true,
+      "testsExecuted": 10,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1849,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "e84ed189f96bad1171d62ddad661de143c3bbb0e1576353b817e02bf404f0ce3"
+    },
+    "cloneAudit": {
+      "passed": true,
+      "testsExecuted": 14,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": true,
+      "testBinaries": 4,
+      "logSha256": "9a799401c68c559b3325a00e7db95931930424c1227f8fbdb809af70144b8f95"
+    },
+    "promotionGameSource": {
+      "passed": true,
+      "testsExecuted": 46,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 3406,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "673650156651877143b3bd4001eb39bbf326f98a6756e140dc84316e4dc2a4d1"
+    },
+    "walletPostgres": {
+      "passed": true,
+      "testsExecuted": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "297a572930ad2275deb15cd2a48329b2089ce1c5d402506d321c49a083ee79e2"
+    },
+    "simulationZoneSave": {
+      "passed": true,
+      "testsExecuted": 37,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 3415,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "4a734fae2ad97a63adc10ec227ccd15aea063cf2573a85172e90902125e3f303"
+    },
+    "gatewayZoneSave": {
+      "passed": true,
+      "testsExecuted": 28,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1831,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "a4ccf3c165f36309ec4d546de5fc92081b0cef1a5089841cd7dc2962af39d28a"
+    },
+    "mailTransfer": {
+      "passed": true,
+      "testsExecuted": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1855,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "baeba01aba2ecf507b656f8740ee93aa7095167f7272cf2ae56ba8f2a4132def"
+    },
+    "sharedUid": {
+      "passed": true,
+      "testsExecuted": 11,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1848,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "7337d82a15344d336beacaef0d0ec9c70f0d3be9393049d0a1f8e14a03af0b2d"
+    },
+    "preparedKill": {
+      "passed": true,
+      "testsExecuted": 7,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1852,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "7c8903ad9eb23858c1765f262b80017eb5982a7921669c1646ab2ad270df0f07"
+    }
+  },
+  "logs": {
+    "NATIVE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 58,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": true,
+      "testBinaries": 10,
+      "logSha256": "f95a7cd84f8a6370646304c3663ee4fc56fb9dfbf9c93c912c6f17f1baacec0d"
+    },
+    "CLONE-CLI-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 14,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": true,
+      "testBinaries": 4,
+      "logSha256": "9a799401c68c559b3325a00e7db95931930424c1227f8fbdb809af70144b8f95"
+    },
+    "WALLET-IDENTITY-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 10,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1849,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "e84ed189f96bad1171d62ddad661de143c3bbb0e1576353b817e02bf404f0ce3"
+    },
+    "PROMOTION-GAME-SOURCE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 46,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 3406,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "673650156651877143b3bd4001eb39bbf326f98a6756e140dc84316e4dc2a4d1"
+    },
+    "WALLET-POSTGRES-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "297a572930ad2275deb15cd2a48329b2089ce1c5d402506d321c49a083ee79e2"
+    },
+    "SIMULATION-ZONE-SAVE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 37,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 3415,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "4a734fae2ad97a63adc10ec227ccd15aea063cf2573a85172e90902125e3f303"
+    },
+    "GATEWAY-ZONE-SAVE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 28,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1831,
+      "includesUnitTests": true,
+      "testBinaries": 1,
+      "logSha256": "a4ccf3c165f36309ec4d546de5fc92081b0cef1a5089841cd7dc2962af39d28a"
+    },
+    "MAIL-TRANSFER-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1855,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "baeba01aba2ecf507b656f8740ee93aa7095167f7272cf2ae56ba8f2a4132def"
+    },
+    "SHARED-UID-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 11,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1848,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "7337d82a15344d336beacaef0d0ec9c70f0d3be9393049d0a1f8e14a03af0b2d"
+    },
+    "PREPARED-KILL-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 7,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 1852,
+      "includesUnitTests": false,
+      "testBinaries": 1,
+      "logSha256": "7c8903ad9eb23858c1765f262b80017eb5982a7921669c1646ab2ad270df0f07"
+    }
+  },
+  "realMobileSignature": false
+}

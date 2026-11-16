@@ -1,0 +1,48 @@
+{
+  "name": "admission-lock-order",
+  "command": [
+    "C:/Users/Administrator/.cargo/bin/rustup.exe",
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "durationMs": 97217.337,
+  "totals": [
+    {
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 1252
+    }
+  ],
+  "passed": true,
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "130db78452259019a5ac6a1a4d6b31ba90e6e633885b1f9947e295ec20713426"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\admission-lock-order-stderr-v1.log",
+      "bytes": 53869,
+      "sha256": "3e64ca77e9e66c0e026e0c583948de08c6d053f9951cf790e8fa76dc28286e73"
+    }
+  ]
+}

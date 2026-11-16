@@ -1,0 +1,134 @@
+{
+  "owner": "Root",
+  "kind": "Source34 actual initial WebGPU compilation failure; retained",
+  "source": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-source01-snapshot.json",
+    "bytes": 273021,
+    "sha256": "e0ed108f15f198b20e86eb6aad3c3c1773793ed3c0396717d6431c2eb9f20b78"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.config.json",
+    "bytes": 4256,
+    "sha256": "3cbca65c83b8ce98629ad5f09c266bbb0484955c696d5af15df37dfbe8142053"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.policy.json",
+    "bytes": 2352,
+    "sha256": "5c8c59bae8be1625747ad12cbd8897f109768f71b7cfc0c8378227872b5bc98e"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.stderr.log",
+    "bytes": 11996,
+    "sha256": "66fea0f57e94e57dcc8b809ec4591cbc48d2ea2d9155e489689729887f7e63bd"
+  },
+  "outerPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.outer.json",
+    "bytes": 458,
+    "sha256": "f01d59d27ac5e4b7e7e68f03c3729221bd6347f77678616ce5287987b092d5a9"
+  },
+  "before": {
+    "schemaVersion": 1,
+    "mode": "real-cargo",
+    "nonce": "17cdf11843074fff939293538ebf440f",
+    "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.policy.json",
+    "policySha": "5c8c59bae8be1625747ad12cbd8897f109768f71b7cfc0c8378227872b5bc98e",
+    "args": [
+      "build",
+      "--locked",
+      "--target",
+      "wasm32-unknown-unknown",
+      "--profile",
+      "wasm-release",
+      "--no-default-features",
+      "--features",
+      "webgpu,web-quest-ui"
+    ],
+    "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime",
+    "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+    "sample": {
+      "schemaVersion": "1",
+      "driveLetter": "C",
+      "sampleBeginUtc": "2026-10-07T22:11:43.4207297Z",
+      "sampleEndUtc": "2026-10-07T22:11:44.0910242Z",
+      "remainingBytes": "334224695296",
+      "requiredBytes": "53687091200"
+    },
+    "probePid": 155340,
+    "probeLaunchMs": 86.2632,
+    "probeEndMs": 949.4365,
+    "decision": "FORWARD",
+    "thresholdBytes": "53687091200",
+    "sampleProof": "actualGetVolumeC"
+  },
+  "after": {
+    "childPid": 149268,
+    "childStartedUtc": "/Date(1791411104153)/",
+    "childStartMs": 970.4369,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 101,
+    "exitBits": "101",
+    "completedUtc": "/Date(1791411176081)/",
+    "completionMs": 72897.57430000001,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 101,
+    "guardPid": 156744,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 72939,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "receiptPins": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01-cargo-receipts\\17cdf11843074fff939293538ebf440f\\after.json",
+      "bytes": 331,
+      "sha256": "b4350c519ab4adb4914de3254e24b4c19b65b107b654020964312fe7d1dff695"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01-cargo-receipts\\17cdf11843074fff939293538ebf440f\\before.json",
+      "bytes": 1024,
+      "sha256": "7f12e107888497473709a47f8fb7bd0c72b744b6cc40e387b689510d2e892067"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01-cargo-receipts\\17cdf11843074fff939293538ebf440f\\probe-process.json",
+      "bytes": 431,
+      "sha256": "5341a461e3eab449c167f180477248cb3c449cd6239d584b972d6831113f7d36"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01-cargo-receipts\\17cdf11843074fff939293538ebf440f\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-webgpu-build01-cargo-receipts\\17cdf11843074fff939293538ebf440f\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "f3acc5d0a043de1485da13e960d0892114dba9c81cabbb78361610c2809b453f"
+    }
+  ],
+  "freshnessUpperMs": 63,
+  "reason": "Four actual wasm target compiler errors: HeroOwnerSnapshot exists only in native adapter; native-only npc_purchase_economy referenced in common ingest_pending_hero_model. No latest raw output accepted. Fix compile wiring while preserving real Web TLS Hero ingestion and exact native checkpoint/receipts.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

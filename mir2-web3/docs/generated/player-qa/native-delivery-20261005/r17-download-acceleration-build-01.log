@@ -1,0 +1,12 @@
+{"stage": "bundle", "index": 0, "files": 1667, "bytes": 60853297}
+{"stage": "bundle", "index": 1, "files": 3564, "bytes": 58054864}
+{"stage": "bundle", "index": 2, "files": 11380, "bytes": 65945319}
+{"stage": "bundle", "index": 3, "files": 9780, "bytes": 65515198}
+{"stage": "bundle", "index": 4, "files": 23081, "bytes": 58094559}
+{"stage": "bundle", "index": 5, "files": 33996, "bytes": 49934822}
+{"stage": "bundle", "index": 6, "files": 6859, "bytes": 63353851}
+{"stage": "bundle", "index": 7, "files": 14111, "bytes": 60629129}
+{"stage": "bundle", "index": 8, "files": 17248, "bytes": 59469514}
+{"stage": "bundle", "index": 9, "files": 4278, "bytes": 42095227}
+{"stage": "bundle", "index": 10, "files": 1, "bytes": 36243793}
+delivery build failed: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���: 'C:\\Users\\Administrator\\.codex\\worktrees\\r16'

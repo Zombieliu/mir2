@@ -1,0 +1,27 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const base='C:/mir2-build/p01-completion-20261024';
+const repo='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey';
+const expected='5c2e713863d3e9556a92f856b11df2396c73b137';
+const git=args=>execFileSync('git.exe',['-c','gc.auto=0','-c','maintenance.auto=false',...args],{cwd:repo,encoding:'utf8',windowsHide:true,env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const pin=async file=>{const b=await fs.readFile(file);return{path:file,bytes:b.length,sha256:sha(b)}};
+if(git(['rev-parse','HEAD'])!==expected||git(['status','--porcelain']))throw Error('Expected committed clean source required');
+const summaryFile=path.join(base,'root-personal-projection-functional-validation-v1.json');
+const summaryPin=await pin(summaryFile);
+if(summaryPin.bytes!==13454||summaryPin.sha256!=='94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8')throw Error('Root functional summary differs');
+const summary=JSON.parse(await fs.readFile(summaryFile,'utf8'));
+if(summary.sourcePins.length!==5||Object.values(summary.checks).some(v=>v!==true)||summary.distinctRust.passed!==203||summary.distinctRust.failed!==0||summary.distinctRust.remainingIgnored!==2)throw Error('Actual functional evidence incomplete');
+for(const p of summary.sourcePins){const actual=await pin(path.join(repo,p.path));if(actual.bytes!==p.bytes||actual.sha256!==p.sha256)throw Error('Tested source changed');}
+const bindingFile=path.join(base,'personal-monster-projection-release-v1/final-source-binding-v3.json');
+const pendingBytes=await fs.readFile(bindingFile),pending=JSON.parse(pendingBytes);
+if(pending.state==='FINAL_COMMITTED_BACKEND_SOURCE'||pending.sourceCommit!==null)throw Error('Expected pending binding required');
+await fs.writeFile(path.join(base,'personal-monster-projection-release-v1/final-source-binding-v3-pending-preimage.json'),pendingBytes,{flag:'wx'});
+const binding={schemaVersion:1,state:'FINAL_COMMITTED_BACKEND_SOURCE',sourceCommit:expected,sourcePins:summary.sourcePins,rootFunctionalValidation:summaryPin};
+await fs.writeFile(bindingFile,JSON.stringify(binding,null,2)+'\n');
+const receipt={schemaVersion:1,boundAt:new Date().toISOString(),head:expected,cleanCommittedSource:true,sourcePins:summary.sourcePins,rootFunctionalValidation:summaryPin,binding:await pin(bindingFile),pendingBindingPreserved:true,newReleaseBuilt:false,capacityAccepted:false};
+const receiptFile=path.join(base,'root-personal-projection-source-binding-execution-v3.json');
+await fs.writeFile(receiptFile,JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({binding:receipt.binding,receipt:await pin(receiptFile)}));

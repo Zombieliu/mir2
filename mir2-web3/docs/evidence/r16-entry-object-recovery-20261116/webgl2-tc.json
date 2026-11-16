@@ -1,0 +1,641 @@
+{
+  "passed": false,
+  "source": "r16-objects-668e8e04",
+  "language": "zh-TW",
+  "actualBackend": {
+    "selectedBackend": "webgl2",
+    "packageId": "webgl2-shared"
+  },
+  "scope": "Fresh ordinary Warrior in Bichon, complete original standing/walking body verification and a natural DOM walking frame; local shared Zone AI1/2 idle-roam candidate Gateway, reused real asset CacheStorage and cleared browser HTTP cache. Not public-network, pure-GPU/all-directions or complete1:1 acceptance.",
+  "movement": {
+    "passed": true,
+    "ackMs": 131,
+    "from": {
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "interactive": true,
+      "first": 1794817661291
+    },
+    "to": {
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "interactive": true,
+      "first": 1794817661291
+    }
+  },
+  "nativeMs": 28933,
+  "objects": {
+    "passed": true,
+    "originalBudgetMs": 65000,
+    "clockEpochMs": 1794817646504,
+    "allThreeOriginalBodyShaVerified": true,
+    "parts": [
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "requestMs": 13554,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 395320,
+        "status": 200,
+        "headersMs": 13557,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "finishedMs": 13565,
+        "bytes": 395320,
+        "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+        "pinMatches": true,
+        "originalImages": 30,
+        "verifiedAtEpochMs": 1794817660076
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "requestMs": 13553,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 395412,
+        "status": 200,
+        "headersMs": 13557,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "finishedMs": 13566,
+        "bytes": 395412,
+        "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+        "pinMatches": true,
+        "originalImages": 30,
+        "verifiedAtEpochMs": 1794817660077
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "requestMs": 13554,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 395216,
+        "status": 200,
+        "headersMs": 13558,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "finishedMs": 13567,
+        "bytes": 395216,
+        "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+        "pinMatches": true,
+        "originalImages": 30,
+        "verifiedAtEpochMs": 1794817660078
+      }
+    ],
+    "rows": [
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "requestMs": 4344,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 8192,
+        "status": 200,
+        "headersMs": 4349,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 12348
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "requestMs": 4344,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 8192,
+        "status": 200,
+        "headersMs": 4350,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 12348
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "requestMs": 4345,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 8192,
+        "status": 200,
+        "headersMs": 4350,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 12348
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "requestMs": 12549,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 0,
+        "status": 503,
+        "headersMs": 12551,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 12551
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "requestMs": 12549,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 0,
+        "status": 503,
+        "headersMs": 12551,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 12551
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "requestMs": 12549,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 0,
+        "status": 503,
+        "headersMs": 12551,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 12551
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "requestMs": 13553,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 395412,
+        "status": 200,
+        "headersMs": 13557,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "finishedMs": 13566,
+        "bytes": 395412,
+        "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+        "pinMatches": true,
+        "originalImages": 30
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "requestMs": 13554,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 395320,
+        "status": 200,
+        "headersMs": 13557,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "finishedMs": 13565,
+        "bytes": 395320,
+        "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+        "pinMatches": true,
+        "originalImages": 30
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "requestMs": 13554,
+        "priority": "High",
+        "redirected": false,
+        "bytesObserved": 395216,
+        "status": 200,
+        "headersMs": 13558,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "finishedMs": 13567,
+        "bytes": 395216,
+        "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+        "pinMatches": true,
+        "originalImages": 30
+      }
+    ],
+    "scope": "Actual browser responses to original canonical object JSONs. No valid response body injection, no changed pins, no WebSocket interception. Original local65s observer budget unchanged."
+  },
+  "objectsCompleteAfterFirstFrameMs": -1213,
+  "controlledResources": {
+    "walkingCase": "partial-then-silent",
+    "walkingAttempts": [
+      {
+        "ordinal": 1,
+        "at": 1794817661286,
+        "kind": "original-prefix-then-idle",
+        "prefixBytes": 530467,
+        "closedAt": 1794817669297
+      },
+      {
+        "ordinal": 2,
+        "at": 1794817669499,
+        "kind": "headers-held",
+        "closedAt": 1794817677501
+      }
+    ],
+    "objectCase": "prefix-idle-then503",
+    "objectAttempts": [
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "ordinal": 1,
+        "at": 1794817650847,
+        "kind": "original-prefix-then-idle",
+        "prefixBytes": 8192,
+        "closedAt": 1794817658852
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "ordinal": 1,
+        "at": 1794817650848,
+        "kind": "original-prefix-then-idle",
+        "prefixBytes": 8192,
+        "closedAt": 1794817658852
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "ordinal": 1,
+        "at": 1794817650849,
+        "kind": "original-prefix-then-idle",
+        "prefixBytes": 8192,
+        "closedAt": 1794817658852
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "ordinal": 2,
+        "at": 1794817659054,
+        "kind": "temporary503",
+        "closedAt": 1794817659054
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "ordinal": 2,
+        "at": 1794817659054,
+        "kind": "temporary503",
+        "closedAt": 1794817659054
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "ordinal": 2,
+        "at": 1794817659054,
+        "kind": "temporary503",
+        "closedAt": 1794817659054
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "ordinal": 3,
+        "at": 1794817660057,
+        "kind": "forwarded-origin",
+        "originStatus": 200,
+        "closedAt": 1794817660068
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "ordinal": 3,
+        "at": 1794817660057,
+        "kind": "forwarded-origin",
+        "originStatus": 200,
+        "closedAt": 1794817660068
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "ordinal": 3,
+        "at": 1794817660058,
+        "kind": "forwarded-origin",
+        "originStatus": 200,
+        "closedAt": 1794817660069
+      }
+    ],
+    "nativeHeadersHeld": 0,
+    "nativeFirstHoldMs": 0,
+    "scope": "Controlled loopback failures only. Each original object pack first2requests fail by noheaders or original prefix then503; successful requests forward actual Next responses unchanged. Walking original failures unchanged; no WebSocket interception."
+  },
+  "walking": {
+    "passed": true,
+    "bodyPassed": true,
+    "framePassed": true,
+    "failure": null,
+    "clockEpochMs": 1794817646502,
+    "originalVisualBudgetMs": 65000,
+    "browserHttpCacheClearedBeforeLogin": true,
+    "rows": [
+      {
+        "kind": "runtime",
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "requestMs": 6572,
+        "priority": "High",
+        "bytesObserved": 32378001,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/wasm",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 6660,
+        "finishedMs": 7020
+      },
+      {
+        "kind": "standing",
+        "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+        "requestMs": 14784,
+        "priority": "High",
+        "bytesObserved": 513566,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 14791,
+        "finishedMs": 14798,
+        "bytes": 513566,
+        "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+        "pinMatches": true,
+        "verifiedMs": 14809
+      },
+      {
+        "kind": "walking",
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "requestMs": 14784,
+        "priority": "High",
+        "bytesObserved": 530467,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 14790,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 22796
+      },
+      {
+        "kind": "walking",
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "requestMs": 22997,
+        "priority": "High",
+        "bytesObserved": 0,
+        "redirected": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 31000
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-000-fallback.7a8d33b38b946008.js",
+        "requestMs": 30999,
+        "priority": "Low",
+        "bytesObserved": 210772,
+        "redirected": false,
+        "libraryKey": "Monster/000",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 31014,
+        "finishedMs": 31014,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/000",
+          "scriptBytes": 210772,
+          "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+          "payloadBytes": 210658,
+          "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+          "imageCount": 48
+        },
+        "verifiedMs": 31022
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-003-fallback.5afec1e37d86cb60.js",
+        "requestMs": 30999,
+        "priority": "Low",
+        "bytesObserved": 60903,
+        "redirected": false,
+        "libraryKey": "Monster/003",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 31004,
+        "finishedMs": 31004,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/003",
+          "scriptBytes": 60903,
+          "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+          "payloadBytes": 60788,
+          "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+          "imageCount": 48
+        },
+        "verifiedMs": 31012
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-004-fallback.50fc51be1c8a9cad.js",
+        "requestMs": 31006,
+        "priority": "Low",
+        "bytesObserved": 151295,
+        "redirected": false,
+        "libraryKey": "Monster/004",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 31022,
+        "finishedMs": 31022,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/004",
+          "scriptBytes": 151295,
+          "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+          "payloadBytes": 151180,
+          "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+          "imageCount": 48
+        },
+        "verifiedMs": 31029
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-005-fallback.817e924c658656f8.js",
+        "requestMs": 31011,
+        "priority": "Low",
+        "bytesObserved": 176960,
+        "redirected": false,
+        "libraryKey": "Monster/005",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 31023,
+        "finishedMs": 31023,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/005",
+          "scriptBytes": 176960,
+          "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+          "payloadBytes": 176845,
+          "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+          "imageCount": 48
+        },
+        "verifiedMs": 31030
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-139-fallback.c2cedcc45ee3e622.js",
+        "requestMs": 31021,
+        "priority": "Low",
+        "bytesObserved": 165475,
+        "redirected": false,
+        "libraryKey": "Monster/139",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 31035,
+        "finishedMs": 31035,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/139",
+          "scriptBytes": 165475,
+          "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+          "payloadBytes": 165361,
+          "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+          "imageCount": 48
+        },
+        "verifiedMs": 31043
+      }
+    ],
+    "compiled": {
+      "passed": true,
+      "parts": [
+        {
+          "passed": true,
+          "libraryKey": "Monster/000",
+          "scriptBytes": 210772,
+          "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+          "payloadBytes": 210658,
+          "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/003",
+          "scriptBytes": 60903,
+          "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+          "payloadBytes": 60788,
+          "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/004",
+          "scriptBytes": 151295,
+          "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+          "payloadBytes": 151180,
+          "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/005",
+          "scriptBytes": 176960,
+          "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+          "payloadBytes": 176845,
+          "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/139",
+          "scriptBytes": 165475,
+          "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+          "payloadBytes": 165361,
+          "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+          "imageCount": 48
+        }
+      ],
+      "payloadBytes": 764724,
+      "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "pngs": 240,
+      "libraries": 5,
+      "directions": 8,
+      "framesPerDirection": 6,
+      "scope": "Complete AST/JSON extraction from observed scripts, exact aggregate digest and PNG decoding; no module execution or resource prefill.",
+      "verifiedMs": 31083,
+      "source": "compiled-parts"
+    },
+    "visibleFrame": {
+      "atMs": 33883,
+      "verifiedMs": 33883,
+      "objectId": "206339",
+      "path": "/original-ui/Monster/004/50.png",
+      "index": 50,
+      "direction": 3,
+      "decoded": true,
+      "packed": true,
+      "visible": true,
+      "naturalWidth": 72,
+      "naturalHeight": 64,
+      "pngBytes": 2290,
+      "pngSha256": "013a29b52066bf33c57f330dd3582e3f95bc35ef4e897336b21fcf5c5d25dbb1",
+      "pixelSha256": "0f096d11d4492512255da7871981b0c9b3889dbefbea2602706ecf44e6b331d4",
+      "rect": {
+        "x": 286,
+        "y": 198,
+        "width": 72,
+        "height": 64
+      },
+      "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+    },
+    "expectedJsonBytes": 764724,
+    "expectedJsonSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "pngCount": 240,
+    "scope": "Controlled local transport failures, original full payload and visible exact-PNG natural frame. No valid body prefill, forced actor motion, WebSocket interception or pure-GPU/all-directions acceptance."
+  },
+  "originalPublicDiary": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-shared-native",
+    "questOpened": true,
+    "qClosed": true,
+    "owner": "bevy",
+    "package": {
+      "backend": "webgl2",
+      "packageId": "webgl2-shared"
+    },
+    "navigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": true
+    },
+    "zeroWorldCommands": true,
+    "screenshot": "quest-shared-zh-TW.png"
+  },
+  "firstDiary": {
+    "executed": true,
+    "passed": false,
+    "failure": "configured Q opens actual diary"
+  },
+  "reopenedDiary": {
+    "executed": false
+  },
+  "fonts": {
+    "executed": false
+  },
+  "prewarm": {
+    "executed": false
+  },
+  "normalSave": {
+    "normalLogoutAttempted": false,
+    "executed": false
+  },
+  "failure": {
+    "stage": "first-entry-independent-diary-Q-open-and-close",
+    "message": "configured Q opens actual diary"
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "originalSourceSnapshotUnchanged": true,
+  "publicColdQualified": false,
+  "physicalPhone": false
+}

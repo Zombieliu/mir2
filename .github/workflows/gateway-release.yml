@@ -12,27 +12,336 @@ on:
         required: false
         default: false
         type: boolean
+      playtest_wallet_no_docker:
+        description: Build isolated playtest Gateway and wallet login packages without Docker or R2 publishing
+        required: false
+        default: false
+        type: boolean
+      numeron_operation:
+        description: Isolated Numeron website operation; off preserves the existing Gateway jobs
+        required: false
+        default: 'off'
+        type: choice
+        options: ['off', numeron-context, numeron-stage, numeron-promote, numeron-domain-move, numeron-ingress-inspect, numeron-ingress-proxy, numeron-ingress-restore, numeron-qr-stage, numeron-qr-check, numeron-qr-promote, numeron-qr-rollback]
+      numeron_ingress_guard:
+        description: Current inspected DNS revision and original TTL, joined by a colon, for a Numeron ingress write
+        required: false
+        type: string
+      unified_source_sha:
+        description: Existing immutable Numeron candidate source; stage must equal the workflow commit
+        required: false
+        type: string
+      asset_run_id:
+        description: Exact successful fixed R16 asset run for Numeron stage or promote
+        required: false
+        type: string
+      deployment_id:
+        description: Exact Numeron game candidate for promote, domain move, or QR rollback
+        required: false
+        type: string
+      main_deployment_id:
+        description: Exact paired marketing candidate for promote or domain move
+        required: false
+        type: string
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
+  validate-numeron-entry:
+    if: ${{ (inputs.numeron_operation != '' && inputs.numeron_operation != 'off') || inputs.unified_source_sha != '' || inputs.asset_run_id != '' || inputs.deployment_id != '' || inputs.main_deployment_id != '' || inputs.numeron_ingress_guard != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Validate the isolated Numeron dispatch without credentials
+        env:
+          NUMERON_OPERATION: ${{ inputs.numeron_operation || 'off' }}
+          NUMERON_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          NUMERON_ASSET_RUN_ID: ${{ inputs.asset_run_id }}
+          NUMERON_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          NUMERON_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          NUMERON_INGRESS_GUARD: ${{ inputs.numeron_ingress_guard }}
+          LEGACY_RELEASE_TAG: ${{ inputs.release_tag }}
+          LEGACY_PUBLISH_R2: ${{ inputs.publish_r2 }}
+          LEGACY_PLAYTEST_WALLET: ${{ inputs.playtest_wallet_no_docker }}
+        run: |
+          node --input-type=module <<'NODE'
+          const env = process.env, operation = env.NUMERON_OPERATION;
+          const fail = code => { throw Error(code); };
+          const ingress = ['numeron-ingress-inspect', 'numeron-ingress-proxy', 'numeron-ingress-restore'].includes(operation);
+          const qr = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'].includes(operation);
+          if (!ingress && !qr && !['numeron-context', 'numeron-stage', 'numeron-promote', 'numeron-domain-move'].includes(operation)) fail('explicitNumeronOperationRequired');
+          if (env.LEGACY_RELEASE_TAG || env.LEGACY_PUBLISH_R2 === 'true' || env.LEGACY_PLAYTEST_WALLET === 'true') fail('mixedReleaseModes');
+          if (env.GITHUB_REPOSITORY !== 'Zombieliu/mir2' || env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey' || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || '')) fail('sourceIdentityInvalid');
+          if ((ingress || qr) && env.NUMERON_SOURCE_SHA) fail('sourceInputInvalid');
+          const ingressWrite = operation === 'numeron-ingress-proxy' || operation === 'numeron-ingress-restore';
+          if (ingressWrite ? !/^[a-f0-9]{64}:[1-9][0-9]{0,4}$/.test(env.NUMERON_INGRESS_GUARD || '') : Boolean(env.NUMERON_INGRESS_GUARD)) fail('ingressGuardInvalid');
+          const source = env.NUMERON_SOURCE_SHA || env.GITHUB_SHA;
+          if (!/^[a-f0-9]{40}$/.test(source) || (operation === 'numeron-stage' && source !== env.GITHUB_SHA)) fail('sourceInputInvalid');
+          const paired = operation === 'numeron-promote' || operation === 'numeron-domain-move';
+          const gameOnly = operation === 'numeron-qr-check' || operation === 'numeron-qr-promote' || operation === 'numeron-qr-rollback';
+          if ((paired || gameOnly) ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_DEPLOYMENT_ID || '') : Boolean(env.NUMERON_DEPLOYMENT_ID)) fail('candidateInputInvalid');
+          if (paired ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_MAIN_DEPLOYMENT_ID || '') || env.NUMERON_DEPLOYMENT_ID === env.NUMERON_MAIN_DEPLOYMENT_ID : Boolean(env.NUMERON_MAIN_DEPLOYMENT_ID)) fail('candidateInputInvalid');
+          const assets = operation === 'numeron-stage' || operation === 'numeron-promote';
+          if (assets ? !/^[1-9][0-9]*$/.test(env.NUMERON_ASSET_RUN_ID || '') : Boolean(env.NUMERON_ASSET_RUN_ID)) fail('assetRunInputInvalid');
+          NODE
+
+  numeron-website:
+    needs: validate-numeron-entry
+    if: ${{ inputs.numeron_operation == 'numeron-context' || inputs.numeron_operation == 'numeron-stage' || inputs.numeron_operation == 'numeron-promote' || inputs.numeron_operation == 'numeron-domain-move' || inputs.numeron_operation == 'numeron-qr-stage' || inputs.numeron_operation == 'numeron-qr-check' || inputs.numeron_operation == 'numeron-qr-promote' || inputs.numeron_operation == 'numeron-qr-rollback' }}
+    uses: ./.github/workflows/promotion-website-release.yml
+    with:
+      operation: ${{ inputs.numeron_operation }}
+      unified_source_sha: ${{ inputs.unified_source_sha }}
+      asset_run_id: ${{ inputs.asset_run_id }}
+      deployment_id: ${{ inputs.deployment_id }}
+      main_deployment_id: ${{ inputs.main_deployment_id }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      MIR2_R16_PASSKEY_AUTH_SECRET: ${{ (inputs.numeron_operation == 'numeron-stage' || inputs.numeron_operation == 'numeron-qr-stage') && secrets.MIR2_R16_PASSKEY_AUTH_SECRET || '' }}
+
+  numeron-ingress:
+    needs: validate-numeron-entry
+    if: ${{ inputs.numeron_operation == 'numeron-ingress-inspect' || inputs.numeron_operation == 'numeron-ingress-proxy' || inputs.numeron_operation == 'numeron-ingress-restore' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: numeron-production-ingress
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the unified branch and ingress guards
+        run: |
+          python3 mir2-web3/scripts/verify_unified_codeline.py --require-clean
+          node --test .github/scripts/test-numeron-release-entry.mjs .github/scripts/test-numeron-ingress.mjs
+      - name: Inspect or update the single Numeron DNS record
+        env:
+          NUMERON_OPERATION: ${{ inputs.numeron_operation }}
+          NUMERON_INGRESS_GUARD: ${{ inputs.numeron_ingress_guard }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node .github/scripts/numeron-ingress.mjs
+
+  build-playtest-promotion-backend:
+    if: ${{ inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' && inputs.numeron_ingress_guard == '' }}
+    uses: ./.github/workflows/promotion-website-release.yml
+    with:
+      operation: backend-build
+      backend_source_sha: ${{ github.sha }}
+
+  activities-acceptance:
+    if: ${{ !inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' && inputs.numeron_ingress_guard == '' }}
+    uses: ./.github/workflows/activities-acceptance.yml
+
+  siege-acceptance:
+    if: ${{ !inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' && inputs.numeron_ingress_guard == '' }}
+    uses: ./.github/workflows/sabuk-acceptance.yml
+
   build-linux-x64:
+    if: ${{ !inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' && inputs.numeron_ingress_guard == '' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 105
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Install Rust 1.89
         run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Verify shared player appearance and equipment ingress
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_player_appearance -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib shared_player_appearance_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib world_checkpoint_removes_sessions_players_and_pending_packets -- --test-threads=1
+
+      - name: Verify disconnect cancellation and trusted journal recovery
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib runtime::recovery:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 web:: abnormal_teardown_ rpc_zone_owner_command_client save_recovery::tests
+
+      - name: Verify Linux release and save-recovery boundary
+        working-directory: mir2-web3
+        env:
+          MIR2_REQUIRE_LINUX_SECURITY_GATE: "1"
+        run: bash scripts/selftest-gateway-save-recovery.sh
+
+      - name: Verify rejected combat targets acknowledge and retire old movement
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib movement_deadline_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 unavailable_combat_target owner_location_order owner_attack_animation movement_deadline crowded_escape_tests
+
+      - name: Verify SnakeTotem immediate master and corpse permissions
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_snake_master_lifecycle -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib owned_pet_immediate_master_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib owned_pet_combat::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib experience_ownership -- --test-threads=1
+
+      - name: Verify consumption-time Source CanMove and Turn delay
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib source_can_move_tests:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib session_zone_buff_clock_tests:: -- --test-threads=1
+
+      - name: Verify merged owner health and native shop capabilities
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 health_zero_authority_tests:: health_display_source_tests:: owner_health_tests::
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --test shared_monster_health_lifecycle --test game_shop_gift --test billing_monthly_card --test billing_recharge -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 health_zero_authority_tests:: owner_health_sync_tests:: game_shop_gift billing
+          cargo +1.89.0 test --locked -p mir2-gateway --test billing_monthly_card --test mentor_shared_lifecycle -- --test-threads=1
+
+      - name: Verify lightweight outcome clock and exact respawn geometry
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 outcome_tick_tests:: respawn_geometry_cache_tests::
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 outcome_tick_tests:: shared_session_hot_path_tests:: typed_game_shop_outcome
+
+      - name: Verify original Purification completion and status cleanup
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib purification -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_zone level50_taoist_purification_clears_shared_poison_and_curse_state -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_monster_hell_ai -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_purification_map_transfer -- --test-threads=1
+          # Match the optimized shipped Gateway for the real500ms TownTeleport
+          # story; no synthetic deadline or ignored debug result substitutes it.
+          cargo +1.89.0 test --locked --release -p mir2-gateway --test shared_purification_map_transfer -- --test-threads=1
+
+      - name: Verify bounded Source terrain and ordinary map collision
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib source_map_loading::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib source_map_io::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 map::map_collision_source_tests:: deadmine_entrance_collision_parses_from_pack crystal_map_v0_
+
+      - name: Verify unavailable map collision rejects ordinary movement
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_missing_map_collision -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 unavailable_collision_tests:: zone::runtime::door_tests:: zone::runtime::checkpoint::tests::
+
+      - name: Verify classic shared gameplay and durable source receipts
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --lib mentor_reward_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --lib default_npc_events_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --lib refine_durable_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --lib shared_player_kill_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --test shared_pet_pvp --test shared_original_party_experience --test shared_guild_normal_kill --test shared_crowded_escape --test market_refine_custody --test refine_oven_custody -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --test shared_guild_management --test shared_guild_rank_management --test shared_guild_rank_terminal --test shared_guild_wars -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib owner_packet_normalization_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib live_owner_wire_ids_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib shared_player_kill_source_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --test shared_pet_source_transport --test shared_mentor_source_transport -- --test-threads=1
+          node --test tools/generate-crystal-default-npc-scripts.test.mjs
+
+      - name: Verify complete NPC Source acknowledgement and ordered pet interpretation
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 npc_dialog_admission_tests:: crystal_label_compat_tests:: actual_default_accept_quest_short_checkhum_keeps_original_omission crystal_npc_buy_item_dead_player_is_silent_and_preserves_state crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execute
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_source_guard_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_random_source_guard_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_world_plan::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_parser_omission_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_buff_action_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_catalog_lookup_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_spawn_action_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 journey_events:: vampire_ai::death_tests:: yimoogi_final_teleport_spawns_white_serpents_at_old_location
+          cargo +1.89.0 test --locked -p mir2-gateway --lib zone_journey_event_bridge_tests:: -- --test-threads=1
+          MIR2_QUEST_CADENCE=newcomer-v2 cargo +1.89.0 test --locked -p mir2-gateway --lib zone_journey_event_bridge_tests:: -- --ignored --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib buff_duration::tests -- --test-threads=1
+          # Pure CHECKHUM selection and real Manager census are foundations;
+          # this gate does not attest the pending Gateway/Source invocation.
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_population:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib zone::manager:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib online_epoch_exhaustion -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib npc_population_binding::tests -- --test-threads=1
+
+      - name: Set up Node for five-class resource checks
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: mir2-web3/.nvmrc
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+
+      - name: Install locked resource-check dependencies
+        working-directory: mir2-web3/apps/web
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify bounded five-class profile and authoritative combat
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-game-data --lib fiveclass -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib five_class -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib five_class -- --test-threads=1
+          node --test apps/web/scripts/asset-pipeline/five-class-skill-closure.test.mjs apps/web/scripts/asset-pipeline/five-class-sprite-closure.test.mjs
+
+      - name: Verify deployed owner-health, billing and mail compatibility
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 owner_health_tests health_zero_authority_tests health_display_source_tests
+          cargo +1.89.0 test --locked -p mir2-simulation --test billing_recharge --test billing_monthly_card --test game_shop_gift --test shared_monster_health_lifecycle --test security_lifecycle -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 owner_health_sync_tests health_zero_authority_tests zone_skill_cadence_tests web_billing_tests stripe_billing_tests game_shop_gift_tests zone_rpc_billing_tests
+          cargo +1.89.0 test --locked -p mir2-gateway --test billing_monthly_card --test mentor_shared_lifecycle -- --test-threads=1
+
+      - name: Verify ordinary NPC menus and native quest lifecycle
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 quest_dialog_operation_link_tests:: diary_quest_tests:: periodic_quest_rules_tests::
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --test periodic_quests --test quest_icons --test quest_agent_special_scripts --test security_lifecycle -- --test-threads=1
+
+      - name: Verify merged receipts, isolated bootstrap and character handoff
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --lib -- --test-threads=1 npc_purchase npc_conquest_trade::purchase_integration_tests character_handoff refine_oven::clock_tests
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib -- --test-threads=1 npc_purchase base_snapshot handoff map_zone_transfer
+
+      - name: Verify terrain-backed map transfer observation
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib map_transfer_availability_tests:: -- --test-threads=1
+          cargo +1.89.0 test --locked --release -p mir2-gateway --lib map_transfer_availability_tests:: -- --test-threads=1
 
       - name: Package Gateway
         working-directory: mir2-web3
         env:
           INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
+          set -euo pipefail
+          # This dedicated ephemeral runner is the package publisher. The
+          # packager verifies the effective non-root UID; it has no default.
+          export MIR2_RELEASE_PUBLISHER_UID="$(id -u)"
           if [ -n "$INPUT_RELEASE_TAG" ]; then
             export MIR2_RELEASE_TAG="$INPUT_RELEASE_TAG"
           else
@@ -41,7 +350,7 @@ jobs:
           bash scripts/package-gateway-release.sh
 
       - name: Publish Gateway package to R2
-        if: ${{ inputs.publish_r2 }}
+        if: ${{ inputs.publish_r2 && !inputs.playtest_wallet_no_docker }}
         working-directory: mir2-web3
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -65,11 +374,220 @@ jobs:
           npx wrangler@4.112.0 r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/latest-mir2-gateway-release.json" --file "$meta"
 
       - name: Upload Gateway package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mir2-gateway-linux-x64
           path: |
             mir2-web3/dist/gateway-releases/*.tar.gz
             mir2-web3/dist/gateway-releases/*.sha256
             mir2-web3/dist/gateway-releases/latest-mir2-gateway-release.json
+          if-no-files-found: error
+
+  build-playtest-wallet-gateway:
+    if: ${{ inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' && inputs.numeron_ingress_guard == '' }}
+    # Match the playtest host's glibc baseline; ubuntu-latest can advance.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      CARGO_BUILD_JOBS: "2"
+      RUSTUP_TOOLCHAIN: "1.95.0"
+    defaults:
+      run:
+        working-directory: mir2-web3
+        shell: bash
+    steps:
+      - name: Checkout exact playtest candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install Rust 1.95
+        run: rustup toolchain install 1.95.0 --profile minimal
+
+      - name: Reuse native Rust dependencies and build outputs
+        id: rust-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            mir2-web3/target
+          key: playtest-wallet-ubuntu24-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            playtest-wallet-ubuntu24-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
+
+      - name: Locate native PostgreSQL tools
+        run: |
+          set -euo pipefail
+          if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y postgresql postgresql-client
+          fi
+
+      - name: Verify isolated persistence and package Gateway with matching maps
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/playtest-wallet-release/evidence
+          # Install the native prerequisite before build.log's tee. A quiet apt
+          # update after packaging must not occupy the whole job timeout.
+          echo 'BEGIN: native Redis prerequisite'
+          if ! command -v redis-server >/dev/null 2>&1; then
+            redis_install_log=dist/playtest-wallet-release/evidence/native-redis-install.log
+            echo 'BEGIN: bounded native Redis apt update/install'
+            sudo -n timeout --signal=TERM --kill-after=15s 180s apt-get \
+              -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 \
+              update -q >"$redis_install_log" 2>&1
+            sudo -n timeout --signal=TERM --kill-after=15s 180s env DEBIAN_FRONTEND=noninteractive apt-get \
+              -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 \
+              -o Dpkg::Lock::Timeout=30 install --no-install-recommends -y redis-server >>"$redis_install_log" 2>&1
+            echo 'END: bounded native Redis apt update/install'
+          fi
+          command -v redis-server >/dev/null
+          echo 'END: native Redis prerequisite ready'
+          echo 'BEGIN: unchanged isolated PG, security, package, async startup and map gates'
+          bash scripts/build-playtest-wallet-release.sh 2>&1 | tee dist/playtest-wallet-release/evidence/build.log
+          echo 'END: isolated playtest release gates'
+
+      - name: Upload verified playtest Gateway and maps
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-playtest-wallet-gateway-linux-x64-${{ github.sha }}
+          path: |
+            mir2-web3/dist/gateway-releases/*.tar.gz
+            mir2-web3/dist/gateway-releases/*.sha256
+            mir2-web3/dist/gateway-releases/latest-mir2-gateway-release.json
+            mir2-web3/dist/playtest-wallet-release/*.tar.gz
+            mir2-web3/dist/playtest-wallet-release/*.sha256
+            mir2-web3/dist/playtest-wallet-release/*.json
+          if-no-files-found: error
+
+      - name: Retain native compiler cache after package diagnostics
+        if: ${{ always() && !cancelled() && steps.rust-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            mir2-web3/target
+          key: playtest-wallet-ubuntu24-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
+
+      - name: Upload playtest verification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-playtest-wallet-build-evidence-${{ github.sha }}
+          path: mir2-web3/dist/playtest-wallet-release/evidence/
+          if-no-files-found: warn
+
+  build-playtest-wallet-login:
+    if: ${{ inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' && inputs.numeron_ingress_guard == '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mir2-web3
+        shell: bash
+    steps:
+      - name: Checkout exact wallet login candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/wallet-login/package-lock.json
+
+      - name: Install locked wallet login dependencies
+        working-directory: mir2-web3/apps/wallet-login
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify wallet login isolation and request boundaries
+        working-directory: mir2-web3/apps/wallet-login
+        run: |
+          npm test
+          node --test scripts/test-route-auth-context.mjs
+
+      - name: Package wallet login from the same source revision
+        run: node scripts/package-wallet-login-release.mjs --revision "$GITHUB_SHA"
+
+      - name: Verify the built standalone HTTP service
+        working-directory: mir2-web3/apps/wallet-login
+        env:
+          MIR2_WALLET_LOGIN_SMOKE_STANDALONE: "1"
+        run: npm test
+
+      - name: Package the exact Node 22 Linux runtime
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import stat
+          import subprocess
+          import tarfile
+
+          revision = os.environ['GITHUB_SHA']
+          checked_out = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          if revision != checked_out or len(revision) != 40:
+              raise SystemExit('Node runtime source revision does not match the checkout')
+          node = json.loads(subprocess.check_output(['node', '-p', 'JSON.stringify({path:process.execPath,version:process.version,platform:process.platform,arch:process.arch})'], text=True))
+          if node['platform'] != 'linux' or node['arch'] != 'x64' or not node['version'].startswith('v22.'):
+              raise SystemExit('Node runtime must be the selected Linux x64 Node 22 binary')
+          binary = pathlib.Path(node['path']).resolve(strict=True)
+          output = pathlib.Path('dist/wallet-login-releases')
+          output.mkdir(parents=True, exist_ok=True)
+          archive = output / f'node-runtime-{revision}.tar.gz'
+          with binary.open('rb') as source:
+              details = os.fstat(source.fileno())
+              if not stat.S_ISREG(details.st_mode) or details.st_size <= 0 or details.st_size > 268435456:
+                  raise SystemExit('Node runtime is not a bounded regular executable')
+              node_hash = hashlib.file_digest(source, 'sha256').hexdigest()
+              source.seek(0)
+              with tarfile.open(archive, 'w:gz', format=tarfile.USTAR_FORMAT) as bundle:
+                  entry = tarfile.TarInfo('runtime/node')
+                  entry.mode = 0o755
+                  entry.size = details.st_size
+                  bundle.addfile(entry, source)
+          with tarfile.open(archive, 'r:gz') as bundle:
+              members = bundle.getmembers()
+              if len(members) != 1 or members[0].name != 'runtime/node' or not members[0].isfile():
+                  raise SystemExit('Node runtime archive must have exactly one regular member')
+              if hashlib.file_digest(bundle.extractfile(members[0]), 'sha256').hexdigest() != node_hash:
+                  raise SystemExit('Node runtime archive does not match the selected binary')
+          with archive.open('rb') as packaged:
+              archive_hash = hashlib.file_digest(packaged, 'sha256').hexdigest()
+          archive.with_name(archive.name + '.sha256').write_text(f'{archive_hash}  {archive.name}\n', encoding='utf-8')
+          manifest = {
+              'sourceRevision': revision,
+              'nodeVersion': node['version'],
+              'platform': node['platform'],
+              'architecture': node['arch'],
+              'nodeSha256': node_hash,
+              'nodeBytes': details.st_size,
+              'archive': archive.name,
+              'archiveSha256': archive_hash,
+              'archiveBytes': archive.stat().st_size,
+              'files': [{'path': 'runtime/node', 'bytes': details.st_size, 'sha256': node_hash}],
+          }
+          (output / f'node-runtime-{revision}.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+          print(f'PASS: packaged {node["version"]} Linux x64 runtime with one regular member')
+          PY
+
+      - name: Upload playtest wallet login service
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-playtest-wallet-login-${{ github.sha }}
+          path: |
+            mir2-web3/dist/wallet-login-releases/*.tar.gz
+            mir2-web3/dist/wallet-login-releases/*.sha256
+            mir2-web3/dist/wallet-login-releases/latest-wallet-login-release.json
+            mir2-web3/dist/wallet-login-releases/node-runtime-*.json
           if-no-files-found: error

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-26T13:57:39.7040782Z",
+  "ownedPid": 67288,
+  "expectedExecutable": "C:\\mir2-build\\p01-completion-20261024\\zone-outbound-batch-release-v1\\bin\\mir2-gateway.exe",
+  "observedPid": null,
+  "ownedProcessAbsent": true,
+  "portsFree": true,
+  "listeners": [],
+  "cleanupChecks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorExit": {
+    "code": 0,
+    "signal": null
+  },
+  "originalFailure": "Persistent AOI loss, ghost or duplicate during active load",
+  "eligible100": false,
+  "capacityAccepted": false
+}

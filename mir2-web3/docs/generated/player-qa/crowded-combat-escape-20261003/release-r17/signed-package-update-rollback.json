@@ -1,0 +1,30 @@
+{
+  "allNewPayloadHashesVerified": true,
+  "engineRollbackVerified": true,
+  "engineUpdated": false,
+  "failedReleaseQuarantined": true,
+  "gameLaunched": false,
+  "passed": true,
+  "pendingFirstLaunchRetained": true,
+  "requests": [
+    "releases/game-WN-CANDIDATE-20261004-invited-17/BUILD-ATTESTATION.json",
+    "releases/game-WN-CANDIDATE-20261004-invited-17/README-START.txt",
+    "releases/game-WN-CANDIDATE-20261004-invited-17/mir2-platform-windows.exe"
+  ],
+  "result": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261004-invited-17",
+    "changedGameFiles": 3,
+    "delivery": {
+      "bundles": 0,
+      "fallbacks": 0,
+      "patches": 0
+    },
+    "downloadedBytes": 111064197,
+    "downloadedFiles": 3,
+    "sequence": 12,
+    "wireBytes": 135432721
+  },
+  "rollback": "WN-CANDIDATE-20261003-invited-16",
+  "unchangedPayloadFiles": 125962
+}

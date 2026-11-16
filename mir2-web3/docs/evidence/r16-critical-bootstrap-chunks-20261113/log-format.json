@@ -1,0 +1,31 @@
+{
+  "files": [
+    {
+      "from": "scene-suite-r1.log",
+      "to": "checks.log",
+      "rawBytes": 28119,
+      "rawSha256": "5e921d023142cde93255113e6b68b684e69656ad40f054f02c0ab48231642884",
+      "publishedBytes": 27424,
+      "publishedSha256": "c2adda339b21a59d605b28b3a41bd774c7d45f6df57b36c2bdd7fcc9297f03a0"
+    },
+    {
+      "from": "release/guard-tests.log",
+      "to": "release-guards.log",
+      "rawBytes": 17392,
+      "rawSha256": "ec6ce2ffb79f4dcc34cc10a2e2fff775cbb85ce1e98095ba6abb86e423cd9860",
+      "publishedBytes": 16962,
+      "publishedSha256": "28d095cdfbc9408ebc4b713c0617ef626d3e13783b08967d7c30327b2792e928"
+    },
+    {
+      "from": "build.log",
+      "to": "build.log",
+      "rawBytes": 2456,
+      "rawSha256": "3c790e2f346545ad9da206fa540945da1d4f8be2e97c945a111daa456305ea31",
+      "publishedBytes": 2451,
+      "publishedSha256": "b51b677e22ddb1665a8b9b28e084536ca0b124c1ac43cd8ee438db2d5357635a"
+    }
+  ],
+  "checks": 111,
+  "releaseGuards": 70,
+  "scope": "Only tabs, trailing whitespace and line endings normalized. Raw logs retained privately."
+}

@@ -1,0 +1,9 @@
+{
+  "deploymentId": "dpl_EsA9a7nDuU7ggAC2xBUqtdmCCasj",
+  "from": "2026-11-16T10:35:00Z",
+  "to": "2026-11-16T10:38:30Z",
+  "queryLimit": 100,
+  "result": "no logs",
+  "recordsObtained": 0,
+  "inference": "No server trace obtained. This is not evidence that requests never reached the service; the original failed receipt lacks retained per-poll request/trace IDs."
+}

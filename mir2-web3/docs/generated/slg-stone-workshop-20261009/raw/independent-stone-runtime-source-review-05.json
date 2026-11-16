@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/production_review",
+  "reviewedAtUtc": "2026-10-09T15:02:07.7374641+00:00",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-07.json",
+  "authoredSourceSha256": "af2f82ce7da3a209ca08e3958ccbb1712333b7027f52b54f90884c3c9bd6ac2e",
+  "authoredFiles": [
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "length": 1815,
+      "sha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a"
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "length": 40474,
+      "sha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d"
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones_tests.rs",
+      "length": 35603,
+      "sha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "length": 167647,
+      "sha256": "56266851a23632b1844bea8cd9a9cd5781f2a9bed308988b39f22d74c485f614"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "length": 1411,
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "length": 5688,
+      "sha256": "78608bfa1a62ac948c7c95917b74484cf1049664fc0a1c4fb8a557817beedeb4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "length": 307328,
+      "sha256": "17973453ceead087130818235cc9b4b14f7902ba941ca904f3cb9c029c794b51"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_stones.rs",
+      "length": 7482,
+      "sha256": "b49f9e962c1ba49da61ee7ca6fccef562bc2839d98e6a0adec35c84388e4d55f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_refresh_fail_closed_tests.rs",
+      "length": 66456,
+      "sha256": "8ac35adc4b806ac325452c85b15dbc3f0c6057412b64b69f8f581881f53f995f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "length": 33102,
+      "sha256": "f529ff63f9d924cac8dded9c313c78075d0aa47ebf905b706f80c3e43941fc73"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "length": 7304,
+      "sha256": "d4453339a478199834c134a51f4a6af92e296fb6ec15de1bf5cd1ff625db3cc5"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stones.rs",
+      "length": 19017,
+      "sha256": "c3e130b2e20219be4d52460af9354889a1492ce5d45ae848cff0e3af4aeec42b"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stones_tests.rs",
+      "length": 16214,
+      "sha256": "29e20254e102d26c494f8a84d98d8ec81b8b4c520e278a388750762fd51a7ec7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs",
+      "length": 45943,
+      "sha256": "1189f2fe3816cb4247db0f193b29b12183764f132f771dc7ab5f5c6147793c95"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "length": 166344,
+      "sha256": "2f146768fe307ee7b193dee488e97e72c2d4efa6c168b1c0cced128d2bff8abe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/equipment.rs",
+      "length": 109625,
+      "sha256": "d8eca2841cdee48d96827b24bcdaf0b11caf898c4cc8ade61070530f6a0711a4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "length": 194505,
+      "sha256": "ec310e2dfe6e48044b889703b1f99077b863205a3b2ac463cd8fb915a64eb2c8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "length": 225907,
+      "sha256": "668756cdb0286bdf83a48cdb3937806677121cc22de8a8480681e99bd2eff1aa"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "length": 2432828,
+      "sha256": "256efb20539d3e77401c45264eaaa66babd879b48fd507030206994be4abc3a0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "length": 52162,
+      "sha256": "4f47ab5221c03121cd9f1e32508bd94da1f6f383c16a70651708852c4d40b7b5"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_script.rs",
+      "length": 126077,
+      "sha256": "413ae3e944405a249766840333dc40cbb89d754f68b23e44395a20b554b90aeb"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "length": 90601,
+      "sha256": "c9421eae5f30dbc86e7267adba18ed2be20b7bbaea4071d9a1c6d81b25075e97"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/drops.rs",
+      "length": 173645,
+      "sha256": "a5774df3c52ef4ceabbde9d9b16b04ccadd8c0d37d1ce50834c9550ea49bdfcc"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0015_sealed_stone_authority.sql",
+      "length": 518,
+      "sha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62"
+    }
+  ],
+  "declaredAuthoredPathCount": 24,
+  "confirmedP0P1Blockers": [],
+  "noCargoRun": true,
+  "noGuardRun": true,
+  "noProbeRun": true,
+  "noUiRun": true,
+  "noProductEdits": true,
+  "rawFinal": "Source07 accepted only for serial original CargoGuard focused runtime stone/NPC/config and adjacent tests. All24 hashes and lengths match; exactly one existing reload test is strengthened, every other function and product path is unchanged. Reconstructing its original nine-line body restores Source06 test bytes exactly, proving old assertions remain. It drops every old File authority handle, loads fresh config from disk, checks cut against the originally frozen result, drops the second authority and reopens again, then checks exact replay has no packet or disk mutation. This is in-process File reopening, not external process restart, PG, client/sidebar or public acceptance.",
+  "acceptedChecks": [
+    "Direct runtime::stones::tests:: (13 authored, includes normal lib and cfg(test) compilation)",
+    "runtime::stone_npc::tests:: (10 authored)",
+    "config::stone_authority::tests:: (2 new authored)",
+    "bounded adjacent config/inventory/drops/trade/save/game-data regressions"
+  ],
+  "originalTools": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+      "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/LICENSE.0BSD.txt",
+      "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/rustup.exe",
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+    },
+    {
+      "path": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "sha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.exe",
+      "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+    }
+  ],
+  "helper": {
+    "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\run-runtime-check.ps1",
+    "currentSha256": "da6e74ce34e9624136f0d5c12b80ea6b51cfd9d630128fc0b6de87bea41f8c76",
+    "currentReviewReference": "independent-stone-runtime-source-review-04.json",
+    "requiredReviewReference": "independent-stone-runtime-source-review-05.json",
+    "expectedShaAfterOnlyReviewPathSwap": "cd0d4a31c3650fcffbe22e17e3272b3cec62960e5931e515daeb17b3737a3ad5",
+    "originalHelperSha256": "560cbcf8924357deca58c72e82d12063698dff4254148df892a93546d88aeb3d",
+    "allowedDelta": "Only source review04 to05 path swap is authorized; all original helper bytes including CRLF must otherwise remain. Observed one-LF helper issue was corrected by Root; verified exact original inverse now matches."
+  },
+  "originalPolicy": {
+    "templatePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-transport-source37-native-transport-test01.policy.json",
+    "templateSha256": "0510be32e885c39302f7d4f278b651c7c949eddcff40b7a4e5a797833eb92ca9",
+    "mode": "real-cargo",
+    "probeMode": "actual",
+    "thresholdBytes": "53687091200",
+    "freshnessMs": "2000",
+    "probeTimeoutMs": "15000",
+    "postChildPolicy": "B"
+  },
+  "reviewedInvariants": [
+    "Authenticated live character uses durable NPC journal actor incarnation; current holder possession drives transferred stones; exact replay is tied to original account/incarnation/request/action.",
+    "UID retained in strict one-instance reclassification, immutable serial and result history; no fresh item allocator bypass.",
+    "Staged inventory/gold/checkpoint and global next registry have one File or SourceOfTruth account transaction; both registry and character revision/actor checked before publication.",
+    "PG singleton stone row and character changes use the same transaction, exact durable version receipts are checked and unauthorized stone receipts are rejected.",
+    "Unknown File/PG outcomes reuse shared write freeze; known pre-commit errors leave live inventory/gold and disk checkpoint untouched.",
+    "FullRestore keeps locked stone repository version and cannot change the sealed or spent registry; normal account scopes cannot mutate it.",
+    "Fresh mint must name the one exact serial and an account in fixed scope; mint owner is not retained as permanent transferred-item owner.",
+    "Original carrier validation remains intact, raw stones preserve bind/soul/shop/GM provenance, packets are prepared before commit.",
+    "Raw stones cannot be manually/death/shared-ground dropped; legacy trade UID collision repair refuses to publish a different raw carrier identity.",
+    "Only actual allowed NPC scripts/maps/coordinates and normal live-link/DataRange path dispatch raw exact opaque targets; stale quotes reject without second debit.",
+    "Private result stays in server registry; physical item carries only serial reference and explicit UserItem wire excludes the private registry.",
+    "Existing tests changed only mechanical stone None/default fields and the separately previously accepted scroll fixture; old business assertions remain."
+  ],
+  "limitations": [
+    "No actual tests, compilation, probe, PostgreSQL database or gateway/client execution performed by reviewer.",
+    "Root-reported pure rules check success is not independently accepted by this source permit; actual results require a separate log/nonce audit.",
+    "File tests use isolated ordinary SimulationSession and actual File saves, not deployed multiplayer or human/UI acceptance.",
+    "Same-account cross-character and cross-account simultaneous trade are not yet proven by the13 runtime tests; pure holder tests and adjacent regressions do not replace an actual integration flow.",
+    "NPC stale quote rejection is deliberate; Unknown original-request query/reconciliation and sidebar delivery are not implemented or accepted.",
+    "Default workshop binding stays off; public all-issuer UID authority/census remains unresolved, and PG actual transaction/migration execution has not been tested.",
+    "Global registry caps1024 records and retained spent history require durable archival for sustained public use.",
+    "Current language support in NPC module is four actual repo enum languages; no nine-language acceptance.",
+    "Original Guard must independently sample actual C>=50GiB and freshness<=2000ms on each call, preserve refusals/failures and finish PolicyB lifecycle before accepting actual results.",
+    "NewItemInfo sender order does not prove actual old Windows client dynamic catalog application, assets, rendering or sidebar integration."
+  ],
+  "preservedHistory": [
+    "independent-stone-runtime-source-rejection-01.json",
+    "stone-runtime-authored-source-01.json",
+    "stone-runtime-authored-source-02.json",
+    "Original pure01 probe/refusal nonce and raw files are preserved; no Cargo/test runs are invented.",
+    "independent-stone-runtime-source-review-01.json",
+    "stone-runtime-authored-source-03.json",
+    "stone-simulation-check-01 actual compile failure/nonce/source/log/result",
+    "independent-stone-runtime-source-review-02.json",
+    "stone-runtime-authored-source-04.json",
+    "Source04 had no new Cargo execution before this Source05 source permit; earlier actual failure evidence remains unchanged.",
+    "independent-stone-runtime-source-review-03.json",
+    "stone-runtime-authored-source-05.json",
+    "stone-session-tests-01 actual exit101/E0599/0-test failure and original nonce/log/source/result",
+    "independent-stone-runtime-source-review-04.json",
+    "stone-runtime-authored-source-06.json",
+    "stone-session-tests-02 Source06 actual13-pass log/result is historical evidence only forSource07",
+    "Original NPC01 C-free refusal and subsequent non-destructive PDB operation evidence remain preserved; no reviewer execution or relaxed caps."
+  ],
+  "deltaReview": [
+    "Only one existing reload test changes; its original nine-line reconstruction hashes toSource06 exactly. Other12 runtime test bodies and every old assertion remain.",
+    "Fixture contains the config and session authority handles. drop(f) retires all original strong handles; FileAuthority static registry uses Weak, retain/upgrade only live strong_count and acquire loads disk when none remain.",
+    "After first reopen, physical serial, original server record equality and absence of privateOutput/roll/history are still asserted. Cut now checks output template against frozen private_output.",
+    "After cut, both fresh session and config are dropped; a third fresh config loads the file. Original exact cut command replay must be replayed, packetless and leave disk bytes unchanged.",
+    "This exercises in-process release/reopen, not external process restart or deployed service recovery. Unknown reconciliation, PG and client/sidebar/public scope remain unaccepted.",
+    "Root restored one mixed-line-ending helper delta; current04 SHA and inverse original helper are now exact, and source07 requires only review05 path swap."
+  ],
+  "actualHistoricalCompile": {
+    "checkPath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01",
+    "resultSha256": "531a96dc76ec13abd0c6930d0b819561286dcc2cc5b8e51caead53678a0f300e",
+    "cargoLogSha256": "1b6f9fd60c9dfe6eec4232b650e336035bbc9406417c48a46c0e87f6231a6501",
+    "exitCode": 101,
+    "compilerErrors": 5,
+    "executedTests": 0,
+    "declaredInputs": 470,
+    "sourceDrift": [],
+    "evidenceStatus": "Actual log/result read; original Guard nonce/lifecycle remains for later independent result audit; no historical result overwritten."
+  },
+  "actualHistoricalSource05Compile": {
+    "checkPath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01",
+    "resultSha256": "ff3792e6cdeeaf8d01314cbe2f2e7731d66377804914692e2f9d64b096e64ce7",
+    "cargoLogSha256": "0a98e1d294a70c5d3c162bb9fb388800d062ae0cff789cfdd8159178e619df54",
+    "sourceSnapshotSha256": "1c7588d96d79704a7666d3f08695a4d19d0b080cc751b191f8c2d5d1705910c3",
+    "exitCode": 101,
+    "compilerErrors": 1,
+    "executedTests": 0,
+    "declaredInputs": 470,
+    "sourceDrift": [],
+    "evidenceStatus": "Actual result/log/snapshot read and hashes verified. Original nonce lifecycle is reserved for separate result qualification; no history overwritten."
+  },
+  "source06To07ChangedPaths": [
+    "mir2-web3/apps/simulation/src/runtime/stones_tests.rs"
+  ],
+  "source07CurrentHashAndLengthMismatches": [],
+  "actualSource07TestResultAccepted": false,
+  "inverseOriginalReloadBody": {
+    "source06TestSha256": "269253dbd08d65ffab71dbc85c1ffbc710baa796a3e0b8425cb1301bab7f2062",
+    "source06TestLength": 14773,
+    "allOtherFunctionsByteIdentical": true,
+    "oldAssertionsRetained": true
+  }
+}

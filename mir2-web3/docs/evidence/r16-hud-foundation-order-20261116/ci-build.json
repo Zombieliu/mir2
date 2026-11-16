@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-11-15T17:08:17.481Z",
+  "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+  "workflow": "gateway-release.yml",
+  "id": 43739146537,
+  "status": "in_progress",
+  "conclusion": null,
+  "url": "https://github.com/Zombieliu/mir2/actions/runs/43739146537",
+  "request": {
+    "playtest_wallet_no_docker": true,
+    "publish_r2": false,
+    "numeron_operation": "off"
+  },
+  "operation": "build and verification only",
+  "productionDeploy": false,
+  "note": "A run snapshot, not proof that packaging passed. Artifact and matched release qualification remain required."
+}

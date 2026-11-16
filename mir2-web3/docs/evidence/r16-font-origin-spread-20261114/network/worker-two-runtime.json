@@ -1,0 +1,4615 @@
+{
+  "kind": "isolated-public-font-reads-with-published-worker-and-fixed-runtime-transfer-without-game",
+  "startedAt": "2026-11-14T05:26:28.543Z",
+  "passed": true,
+  "measurementCompleted": true,
+  "origin": "https://numeron.obelisk.build",
+  "expectedRevision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "cacheMode": "reload",
+  "serviceWorkers": "allow",
+  "gameLogin": false,
+  "runtimeInstantiated": false,
+  "networkInterception": false,
+  "limits": {
+    "totalPerResourceMs": 120000,
+    "maxDecodedBytes": 33554432,
+    "observedOriginalHeaderMs": 7000,
+    "observedOriginalPositiveByteIdleMs": 15000
+  },
+  "pins": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "bytes": 31452436,
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e"
+    }
+  ],
+  "network": [
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 2,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 64636,
+          "decodedTotal": 65536,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64636,
+          "decodedTotal": 196608,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64636,
+          "decodedTotal": 393216,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 655360,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 917504,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 1245184,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 1572864,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 1900544,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 2097152,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 3997696,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 4194304,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 5636096,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 6291456,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 7733248,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 8388608,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 9830400,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 10485760,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 11927552,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 64637,
+          "decodedTotal": 11941968,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 64619,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "11941968",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+        "age": "14490",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 182385.912023,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.152,
+        "sendEnd": 0.152,
+        "receiveHeadersStart": 64617.115,
+        "receiveHeadersEnd": 64617.115
+      },
+      "decodedObserved": 11941968,
+      "encodedObserved": 0,
+      "finishedAtMs": 64661,
+      "completeEncodedBytes": 0
+    },
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 2,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 13207,
+          "decodedTotal": 65536,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 13207,
+          "decodedTotal": 196608,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 13207,
+          "decodedTotal": 327680,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 13207,
+          "decodedTotal": 524288,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 13207,
+          "decodedTotal": 621572,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 13207,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "621572",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"f53b83ff53f1d2632bf4d26382469b44\"",
+        "age": "14441",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 182385.912089,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.326,
+        "sendEnd": 0.326,
+        "receiveHeadersStart": 13203.987,
+        "receiveHeadersEnd": 13203.987
+      },
+      "decodedObserved": 621572,
+      "encodedObserved": 0,
+      "finishedAtMs": 13209,
+      "completeEncodedBytes": 0
+    },
+    {
+      "origin": "https://assets.mir2.obelisk.build",
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestAtMs": 2,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 632,
+          "decodedTotal": 12704,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 647,
+          "decodedTotal": 22392,
+          "encodedTotal": 4107
+        },
+        {
+          "atMs": 678,
+          "decodedTotal": 69832,
+          "encodedTotal": 6845
+        },
+        {
+          "atMs": 696,
+          "decodedTotal": 104668,
+          "encodedTotal": 23273
+        },
+        {
+          "atMs": 724,
+          "decodedTotal": 172288,
+          "encodedTotal": 31487
+        },
+        {
+          "atMs": 737,
+          "decodedTotal": 185333,
+          "encodedTotal": 45177
+        },
+        {
+          "atMs": 744,
+          "decodedTotal": 190584,
+          "encodedTotal": 53391
+        },
+        {
+          "atMs": 748,
+          "decodedTotal": 196061,
+          "encodedTotal": 57620
+        },
+        {
+          "atMs": 754,
+          "decodedTotal": 201818,
+          "encodedTotal": 61849
+        },
+        {
+          "atMs": 756,
+          "decodedTotal": 207109,
+          "encodedTotal": 66078
+        },
+        {
+          "atMs": 763,
+          "decodedTotal": 219554,
+          "encodedTotal": 70307
+        },
+        {
+          "atMs": 769,
+          "decodedTotal": 231180,
+          "encodedTotal": 78765
+        },
+        {
+          "atMs": 774,
+          "decodedTotal": 237381,
+          "encodedTotal": 87223
+        },
+        {
+          "atMs": 776,
+          "decodedTotal": 243216,
+          "encodedTotal": 91452
+        },
+        {
+          "atMs": 780,
+          "decodedTotal": 249486,
+          "encodedTotal": 95681
+        },
+        {
+          "atMs": 782,
+          "decodedTotal": 255106,
+          "encodedTotal": 99910
+        },
+        {
+          "atMs": 786,
+          "decodedTotal": 260695,
+          "encodedTotal": 104139
+        },
+        {
+          "atMs": 789,
+          "decodedTotal": 266910,
+          "encodedTotal": 108368
+        },
+        {
+          "atMs": 793,
+          "decodedTotal": 272272,
+          "encodedTotal": 112597
+        },
+        {
+          "atMs": 796,
+          "decodedTotal": 278266,
+          "encodedTotal": 116826
+        },
+        {
+          "atMs": 802,
+          "decodedTotal": 290358,
+          "encodedTotal": 121055
+        },
+        {
+          "atMs": 805,
+          "decodedTotal": 296249,
+          "encodedTotal": 130009
+        },
+        {
+          "atMs": 818,
+          "decodedTotal": 302189,
+          "encodedTotal": 134238
+        },
+        {
+          "atMs": 909,
+          "decodedTotal": 308574,
+          "encodedTotal": 138467
+        },
+        {
+          "atMs": 959,
+          "decodedTotal": 314588,
+          "encodedTotal": 142696
+        },
+        {
+          "atMs": 1039,
+          "decodedTotal": 326893,
+          "encodedTotal": 146925
+        },
+        {
+          "atMs": 1074,
+          "decodedTotal": 338743,
+          "encodedTotal": 155383
+        },
+        {
+          "atMs": 1191,
+          "decodedTotal": 344998,
+          "encodedTotal": 163841
+        },
+        {
+          "atMs": 1209,
+          "decodedTotal": 350638,
+          "encodedTotal": 168070
+        },
+        {
+          "atMs": 1411,
+          "decodedTotal": 380275,
+          "encodedTotal": 172299
+        },
+        {
+          "atMs": 1474,
+          "decodedTotal": 385925,
+          "encodedTotal": 193444
+        },
+        {
+          "atMs": 1522,
+          "decodedTotal": 393228,
+          "encodedTotal": 197673
+        },
+        {
+          "atMs": 1554,
+          "decodedTotal": 408983,
+          "encodedTotal": 202802
+        },
+        {
+          "atMs": 1674,
+          "decodedTotal": 430024,
+          "encodedTotal": 211260
+        },
+        {
+          "atMs": 1895,
+          "decodedTotal": 503441,
+          "encodedTotal": 215489
+        },
+        {
+          "atMs": 2070,
+          "decodedTotal": 573222,
+          "encodedTotal": 239314
+        },
+        {
+          "atMs": 2117,
+          "decodedTotal": 632543,
+          "encodedTotal": 255698
+        },
+        {
+          "atMs": 2163,
+          "decodedTotal": 655360,
+          "encodedTotal": 272082
+        },
+        {
+          "atMs": 2311,
+          "decodedTotal": 715261,
+          "encodedTotal": 280736
+        },
+        {
+          "atMs": 2530,
+          "decodedTotal": 759069,
+          "encodedTotal": 297120
+        },
+        {
+          "atMs": 2559,
+          "decodedTotal": 799782,
+          "encodedTotal": 313504
+        },
+        {
+          "atMs": 2704,
+          "decodedTotal": 851848,
+          "encodedTotal": 329888
+        },
+        {
+          "atMs": 2875,
+          "decodedTotal": 895836,
+          "encodedTotal": 346197
+        },
+        {
+          "atMs": 2921,
+          "decodedTotal": 917528,
+          "encodedTotal": 362581
+        },
+        {
+          "atMs": 3091,
+          "decodedTotal": 965396,
+          "encodedTotal": 371093
+        },
+        {
+          "atMs": 3137,
+          "decodedTotal": 1010824,
+          "encodedTotal": 387477
+        },
+        {
+          "atMs": 3277,
+          "decodedTotal": 1057727,
+          "encodedTotal": 403861
+        },
+        {
+          "atMs": 3576,
+          "decodedTotal": 1106084,
+          "encodedTotal": 420245
+        },
+        {
+          "atMs": 3741,
+          "decodedTotal": 1167363,
+          "encodedTotal": 436629
+        },
+        {
+          "atMs": 3830,
+          "decodedTotal": 1205761,
+          "encodedTotal": 453013
+        },
+        {
+          "atMs": 4147,
+          "decodedTotal": 1250928,
+          "encodedTotal": 469397
+        },
+        {
+          "atMs": 4233,
+          "decodedTotal": 1293352,
+          "encodedTotal": 485781
+        },
+        {
+          "atMs": 4457,
+          "decodedTotal": 1335829,
+          "encodedTotal": 502048
+        },
+        {
+          "atMs": 4589,
+          "decodedTotal": 1394872,
+          "encodedTotal": 518432
+        },
+        {
+          "atMs": 4919,
+          "decodedTotal": 1443389,
+          "encodedTotal": 534816
+        },
+        {
+          "atMs": 5172,
+          "decodedTotal": 1488147,
+          "encodedTotal": 551200
+        },
+        {
+          "atMs": 5321,
+          "decodedTotal": 1533553,
+          "encodedTotal": 567584
+        },
+        {
+          "atMs": 5402,
+          "decodedTotal": 1585782,
+          "encodedTotal": 583968
+        },
+        {
+          "atMs": 5414,
+          "decodedTotal": 1594425,
+          "encodedTotal": 600352
+        },
+        {
+          "atMs": 5559,
+          "decodedTotal": 1644752,
+          "encodedTotal": 620396
+        },
+        {
+          "atMs": 5688,
+          "decodedTotal": 1691777,
+          "encodedTotal": 620396
+        },
+        {
+          "atMs": 5830,
+          "decodedTotal": 1729128,
+          "encodedTotal": 636780
+        },
+        {
+          "atMs": 6049,
+          "decodedTotal": 1770862,
+          "encodedTotal": 653164
+        },
+        {
+          "atMs": 6128,
+          "decodedTotal": 1816299,
+          "encodedTotal": 669548
+        },
+        {
+          "atMs": 6233,
+          "decodedTotal": 1853982,
+          "encodedTotal": 685932
+        },
+        {
+          "atMs": 6361,
+          "decodedTotal": 1896387,
+          "encodedTotal": 698482
+        },
+        {
+          "atMs": 6534,
+          "decodedTotal": 1939444,
+          "encodedTotal": 714866
+        },
+        {
+          "atMs": 6738,
+          "decodedTotal": 2012120,
+          "encodedTotal": 731250
+        },
+        {
+          "atMs": 6941,
+          "decodedTotal": 2054753,
+          "encodedTotal": 747634
+        },
+        {
+          "atMs": 7053,
+          "decodedTotal": 2097152,
+          "encodedTotal": 780337
+        },
+        {
+          "atMs": 7053,
+          "decodedTotal": 2099431,
+          "encodedTotal": 780337
+        },
+        {
+          "atMs": 7239,
+          "decodedTotal": 2162782,
+          "encodedTotal": 780337
+        },
+        {
+          "atMs": 7397,
+          "decodedTotal": 2207761,
+          "encodedTotal": 796721
+        },
+        {
+          "atMs": 7569,
+          "decodedTotal": 2251376,
+          "encodedTotal": 824190
+        },
+        {
+          "atMs": 7725,
+          "decodedTotal": 2292978,
+          "encodedTotal": 824190
+        },
+        {
+          "atMs": 7834,
+          "decodedTotal": 2330998,
+          "encodedTotal": 840574
+        },
+        {
+          "atMs": 8079,
+          "decodedTotal": 2375646,
+          "encodedTotal": 856958
+        },
+        {
+          "atMs": 8144,
+          "decodedTotal": 2417239,
+          "encodedTotal": 873273
+        },
+        {
+          "atMs": 8287,
+          "decodedTotal": 2458853,
+          "encodedTotal": 889657
+        },
+        {
+          "atMs": 8601,
+          "decodedTotal": 2502680,
+          "encodedTotal": 906041
+        },
+        {
+          "atMs": 8666,
+          "decodedTotal": 2543827,
+          "encodedTotal": 923381
+        },
+        {
+          "atMs": 8729,
+          "decodedTotal": 2555897,
+          "encodedTotal": 939765
+        },
+        {
+          "atMs": 8883,
+          "decodedTotal": 2601521,
+          "encodedTotal": 944938
+        },
+        {
+          "atMs": 9073,
+          "decodedTotal": 2640303,
+          "encodedTotal": 961322
+        },
+        {
+          "atMs": 9290,
+          "decodedTotal": 2681323,
+          "encodedTotal": 977706
+        },
+        {
+          "atMs": 9369,
+          "decodedTotal": 2721157,
+          "encodedTotal": 994090
+        },
+        {
+          "atMs": 9635,
+          "decodedTotal": 2752536,
+          "encodedTotal": 1010398
+        },
+        {
+          "atMs": 9681,
+          "decodedTotal": 2791893,
+          "encodedTotal": 1022765
+        },
+        {
+          "atMs": 9870,
+          "decodedTotal": 2844353,
+          "encodedTotal": 1039149
+        },
+        {
+          "atMs": 10182,
+          "decodedTotal": 2885187,
+          "encodedTotal": 1055533
+        },
+        {
+          "atMs": 10289,
+          "decodedTotal": 2927848,
+          "encodedTotal": 1071917
+        },
+        {
+          "atMs": 10546,
+          "decodedTotal": 2969050,
+          "encodedTotal": 1088231
+        },
+        {
+          "atMs": 10681,
+          "decodedTotal": 3013029,
+          "encodedTotal": 1120999
+        },
+        {
+          "atMs": 10792,
+          "decodedTotal": 3055858,
+          "encodedTotal": 1120999
+        },
+        {
+          "atMs": 11040,
+          "decodedTotal": 3105616,
+          "encodedTotal": 1137383
+        },
+        {
+          "atMs": 11149,
+          "decodedTotal": 3148578,
+          "encodedTotal": 1153767
+        },
+        {
+          "atMs": 11708,
+          "decodedTotal": 3178513,
+          "encodedTotal": 1170151
+        },
+        {
+          "atMs": 11833,
+          "decodedTotal": 3219690,
+          "encodedTotal": 1180283
+        },
+        {
+          "atMs": 11993,
+          "decodedTotal": 3266337,
+          "encodedTotal": 1196667
+        },
+        {
+          "atMs": 12064,
+          "decodedTotal": 3280920,
+          "encodedTotal": 1213051
+        },
+        {
+          "atMs": 12211,
+          "decodedTotal": 3325586,
+          "encodedTotal": 1219409
+        },
+        {
+          "atMs": 12681,
+          "decodedTotal": 3370291,
+          "encodedTotal": 1235793
+        },
+        {
+          "atMs": 12790,
+          "decodedTotal": 3409179,
+          "encodedTotal": 1252177
+        },
+        {
+          "atMs": 12948,
+          "decodedTotal": 3449210,
+          "encodedTotal": 1268561
+        },
+        {
+          "atMs": 13135,
+          "decodedTotal": 3491220,
+          "encodedTotal": 1284875
+        },
+        {
+          "atMs": 13309,
+          "decodedTotal": 3536029,
+          "encodedTotal": 1301259
+        },
+        {
+          "atMs": 13468,
+          "decodedTotal": 3581542,
+          "encodedTotal": 1317643
+        },
+        {
+          "atMs": 13645,
+          "decodedTotal": 3624251,
+          "encodedTotal": 1334027
+        },
+        {
+          "atMs": 13852,
+          "decodedTotal": 3665708,
+          "encodedTotal": 1350346
+        },
+        {
+          "atMs": 14012,
+          "decodedTotal": 3725481,
+          "encodedTotal": 1366730
+        },
+        {
+          "atMs": 14171,
+          "decodedTotal": 3806536,
+          "encodedTotal": 1383114
+        },
+        {
+          "atMs": 14469,
+          "decodedTotal": 3881713,
+          "encodedTotal": 1399498
+        },
+        {
+          "atMs": 14652,
+          "decodedTotal": 3981022,
+          "encodedTotal": 1415882
+        },
+        {
+          "atMs": 14664,
+          "decodedTotal": 4068072,
+          "encodedTotal": 1448650
+        },
+        {
+          "atMs": 14841,
+          "decodedTotal": 4194304,
+          "encodedTotal": 1448650
+        },
+        {
+          "atMs": 14841,
+          "decodedTotal": 4209571,
+          "encodedTotal": 1448650
+        },
+        {
+          "atMs": 14980,
+          "decodedTotal": 4304913,
+          "encodedTotal": 1465034
+        },
+        {
+          "atMs": 15022,
+          "decodedTotal": 4387573,
+          "encodedTotal": 1466753
+        },
+        {
+          "atMs": 15039,
+          "decodedTotal": 4407313,
+          "encodedTotal": 1483137
+        },
+        {
+          "atMs": 15156,
+          "decodedTotal": 4509713,
+          "encodedTotal": 1484617
+        },
+        {
+          "atMs": 15326,
+          "decodedTotal": 4587544,
+          "encodedTotal": 1493304
+        },
+        {
+          "atMs": 15509,
+          "decodedTotal": 4771857,
+          "encodedTotal": 1527329
+        },
+        {
+          "atMs": 15741,
+          "decodedTotal": 4914698,
+          "encodedTotal": 1543713
+        },
+        {
+          "atMs": 15885,
+          "decodedTotal": 4980234,
+          "encodedTotal": 1543713
+        },
+        {
+          "atMs": 15885,
+          "decodedTotal": 5009041,
+          "encodedTotal": 1543713
+        },
+        {
+          "atMs": 16075,
+          "decodedTotal": 5086149,
+          "encodedTotal": 1560097
+        },
+        {
+          "atMs": 16262,
+          "decodedTotal": 5145826,
+          "encodedTotal": 1576481
+        },
+        {
+          "atMs": 16365,
+          "decodedTotal": 5184015,
+          "encodedTotal": 1592784
+        },
+        {
+          "atMs": 16582,
+          "decodedTotal": 5223016,
+          "encodedTotal": 1609168
+        },
+        {
+          "atMs": 16666,
+          "decodedTotal": 5274929,
+          "encodedTotal": 1625552
+        },
+        {
+          "atMs": 16800,
+          "decodedTotal": 5314077,
+          "encodedTotal": 1641936
+        },
+        {
+          "atMs": 16962,
+          "decodedTotal": 5366890,
+          "encodedTotal": 1658320
+        },
+        {
+          "atMs": 17134,
+          "decodedTotal": 5447024,
+          "encodedTotal": 1674704
+        },
+        {
+          "atMs": 17167,
+          "decodedTotal": 5513233,
+          "encodedTotal": 1691088
+        },
+        {
+          "atMs": 17177,
+          "decodedTotal": 5640216,
+          "encodedTotal": 1698279
+        },
+        {
+          "atMs": 17394,
+          "decodedTotal": 5725985,
+          "encodedTotal": 1716140
+        },
+        {
+          "atMs": 17554,
+          "decodedTotal": 5800887,
+          "encodedTotal": 1716140
+        },
+        {
+          "atMs": 17709,
+          "decodedTotal": 5840482,
+          "encodedTotal": 1732524
+        },
+        {
+          "atMs": 17803,
+          "decodedTotal": 5879002,
+          "encodedTotal": 1748908
+        },
+        {
+          "atMs": 17946,
+          "decodedTotal": 5917423,
+          "encodedTotal": 1765292
+        },
+        {
+          "atMs": 18167,
+          "decodedTotal": 5960933,
+          "encodedTotal": 1781676
+        },
+        {
+          "atMs": 18274,
+          "decodedTotal": 6024581,
+          "encodedTotal": 1798060
+        },
+        {
+          "atMs": 18437,
+          "decodedTotal": 6062286,
+          "encodedTotal": 1830699
+        },
+        {
+          "atMs": 18479,
+          "decodedTotal": 6086673,
+          "encodedTotal": 1830699
+        },
+        {
+          "atMs": 18684,
+          "decodedTotal": 6138177,
+          "encodedTotal": 1835625
+        },
+        {
+          "atMs": 18927,
+          "decodedTotal": 6179365,
+          "encodedTotal": 1852009
+        },
+        {
+          "atMs": 18993,
+          "decodedTotal": 6225614,
+          "encodedTotal": 1868393
+        },
+        {
+          "atMs": 19275,
+          "decodedTotal": 6279365,
+          "encodedTotal": 1884777
+        },
+        {
+          "atMs": 19381,
+          "decodedTotal": 6291456,
+          "encodedTotal": 1919580
+        },
+        {
+          "atMs": 19381,
+          "decodedTotal": 6331646,
+          "encodedTotal": 1919580
+        },
+        {
+          "atMs": 19537,
+          "decodedTotal": 6372737,
+          "encodedTotal": 1919580
+        },
+        {
+          "atMs": 19845,
+          "decodedTotal": 6418548,
+          "encodedTotal": 1935964
+        },
+        {
+          "atMs": 19932,
+          "decodedTotal": 6468608,
+          "encodedTotal": 1952278
+        },
+        {
+          "atMs": 20136,
+          "decodedTotal": 6513011,
+          "encodedTotal": 1968662
+        },
+        {
+          "atMs": 20221,
+          "decodedTotal": 6560809,
+          "encodedTotal": 1985046
+        },
+        {
+          "atMs": 20562,
+          "decodedTotal": 6635537,
+          "encodedTotal": 2001430
+        },
+        {
+          "atMs": 20599,
+          "decodedTotal": 6691478,
+          "encodedTotal": 2025038
+        },
+        {
+          "atMs": 20849,
+          "decodedTotal": 6753276,
+          "encodedTotal": 2057806
+        },
+        {
+          "atMs": 21062,
+          "decodedTotal": 6823471,
+          "encodedTotal": 2057806
+        },
+        {
+          "atMs": 21237,
+          "decodedTotal": 6946840,
+          "encodedTotal": 2102169
+        },
+        {
+          "atMs": 21393,
+          "decodedTotal": 6995992,
+          "encodedTotal": 2102169
+        },
+        {
+          "atMs": 21487,
+          "decodedTotal": 7073444,
+          "encodedTotal": 2109224
+        },
+        {
+          "atMs": 21640,
+          "decodedTotal": 7131509,
+          "encodedTotal": 2125608
+        },
+        {
+          "atMs": 21887,
+          "decodedTotal": 7248821,
+          "encodedTotal": 2163986
+        },
+        {
+          "atMs": 22048,
+          "decodedTotal": 7291856,
+          "encodedTotal": 2163986
+        },
+        {
+          "atMs": 22411,
+          "decodedTotal": 7372793,
+          "encodedTotal": 2180370
+        },
+        {
+          "atMs": 22529,
+          "decodedTotal": 7417996,
+          "encodedTotal": 2209519
+        },
+        {
+          "atMs": 22752,
+          "decodedTotal": 7456995,
+          "encodedTotal": 2225903
+        },
+        {
+          "atMs": 23071,
+          "decodedTotal": 7651345,
+          "encodedTotal": 2276052
+        },
+        {
+          "atMs": 23160,
+          "decodedTotal": 7741464,
+          "encodedTotal": 2276052
+        },
+        {
+          "atMs": 23322,
+          "decodedTotal": 7823759,
+          "encodedTotal": 2278852
+        },
+        {
+          "atMs": 23456,
+          "decodedTotal": 7865337,
+          "encodedTotal": 2295236
+        },
+        {
+          "atMs": 23636,
+          "decodedTotal": 7907971,
+          "encodedTotal": 2311620
+        },
+        {
+          "atMs": 23821,
+          "decodedTotal": 7961386,
+          "encodedTotal": 2328004
+        },
+        {
+          "atMs": 23971,
+          "decodedTotal": 8022455,
+          "encodedTotal": 2344307
+        },
+        {
+          "atMs": 24144,
+          "decodedTotal": 8092411,
+          "encodedTotal": 2360691
+        },
+        {
+          "atMs": 24314,
+          "decodedTotal": 8135122,
+          "encodedTotal": 2377075
+        },
+        {
+          "atMs": 24563,
+          "decodedTotal": 8185396,
+          "encodedTotal": 2393459
+        },
+        {
+          "atMs": 24757,
+          "decodedTotal": 8237531,
+          "encodedTotal": 2409843
+        },
+        {
+          "atMs": 24852,
+          "decodedTotal": 8277360,
+          "encodedTotal": 2442611
+        },
+        {
+          "atMs": 24861,
+          "decodedTotal": 8286232,
+          "encodedTotal": 2442611
+        },
+        {
+          "atMs": 25091,
+          "decodedTotal": 8371937,
+          "encodedTotal": 2461013
+        },
+        {
+          "atMs": 25215,
+          "decodedTotal": 8388608,
+          "encodedTotal": 2461013
+        },
+        {
+          "atMs": 25215,
+          "decodedTotal": 8441873,
+          "encodedTotal": 2461013
+        },
+        {
+          "atMs": 25279,
+          "decodedTotal": 8496841,
+          "encodedTotal": 2467988
+        },
+        {
+          "atMs": 25513,
+          "decodedTotal": 8548731,
+          "encodedTotal": 2484372
+        },
+        {
+          "atMs": 25652,
+          "decodedTotal": 8608081,
+          "encodedTotal": 2504500
+        },
+        {
+          "atMs": 25809,
+          "decodedTotal": 8653193,
+          "encodedTotal": 2537268
+        },
+        {
+          "atMs": 25981,
+          "decodedTotal": 8697202,
+          "encodedTotal": 2553652
+        },
+        {
+          "atMs": 26169,
+          "decodedTotal": 8752811,
+          "encodedTotal": 2553652
+        },
+        {
+          "atMs": 26389,
+          "decodedTotal": 8798832,
+          "encodedTotal": 2570036
+        },
+        {
+          "atMs": 26469,
+          "decodedTotal": 8840956,
+          "encodedTotal": 2586420
+        },
+        {
+          "atMs": 26653,
+          "decodedTotal": 8882691,
+          "encodedTotal": 2598934
+        },
+        {
+          "atMs": 26828,
+          "decodedTotal": 8928584,
+          "encodedTotal": 2615318
+        },
+        {
+          "atMs": 27071,
+          "decodedTotal": 8969652,
+          "encodedTotal": 2631702
+        },
+        {
+          "atMs": 27154,
+          "decodedTotal": 9013861,
+          "encodedTotal": 2648086
+        },
+        {
+          "atMs": 27446,
+          "decodedTotal": 9058593,
+          "encodedTotal": 2664470
+        },
+        {
+          "atMs": 27528,
+          "decodedTotal": 9109796,
+          "encodedTotal": 2680854
+        },
+        {
+          "atMs": 27858,
+          "decodedTotal": 9155633,
+          "encodedTotal": 2697238
+        },
+        {
+          "atMs": 28013,
+          "decodedTotal": 9207825,
+          "encodedTotal": 2713622
+        },
+        {
+          "atMs": 28186,
+          "decodedTotal": 9256558,
+          "encodedTotal": 2729764
+        },
+        {
+          "atMs": 28404,
+          "decodedTotal": 9301829,
+          "encodedTotal": 2746148
+        },
+        {
+          "atMs": 28513,
+          "decodedTotal": 9367262,
+          "encodedTotal": 2762532
+        },
+        {
+          "atMs": 28697,
+          "decodedTotal": 9408169,
+          "encodedTotal": 2778916
+        },
+        {
+          "atMs": 28852,
+          "decodedTotal": 9453981,
+          "encodedTotal": 2795230
+        },
+        {
+          "atMs": 29236,
+          "decodedTotal": 9494678,
+          "encodedTotal": 2811614
+        },
+        {
+          "atMs": 29288,
+          "decodedTotal": 9536887,
+          "encodedTotal": 2827998
+        },
+        {
+          "atMs": 29454,
+          "decodedTotal": 9583697,
+          "encodedTotal": 2844382
+        },
+        {
+          "atMs": 29604,
+          "decodedTotal": 9634670,
+          "encodedTotal": 2860701
+        },
+        {
+          "atMs": 29775,
+          "decodedTotal": 9678949,
+          "encodedTotal": 2877085
+        },
+        {
+          "atMs": 30071,
+          "decodedTotal": 9729939,
+          "encodedTotal": 2893469
+        },
+        {
+          "atMs": 30294,
+          "decodedTotal": 9781059,
+          "encodedTotal": 2909853
+        },
+        {
+          "atMs": 30666,
+          "decodedTotal": 9927480,
+          "encodedTotal": 2967132
+        },
+        {
+          "atMs": 30796,
+          "decodedTotal": 9969800,
+          "encodedTotal": 2975324
+        },
+        {
+          "atMs": 31027,
+          "decodedTotal": 10025013,
+          "encodedTotal": 3008063
+        },
+        {
+          "atMs": 31219,
+          "decodedTotal": 10069126,
+          "encodedTotal": 3024447
+        },
+        {
+          "atMs": 31449,
+          "decodedTotal": 10133369,
+          "encodedTotal": 3024447
+        },
+        {
+          "atMs": 31532,
+          "decodedTotal": 10184220,
+          "encodedTotal": 3040831
+        },
+        {
+          "atMs": 31677,
+          "decodedTotal": 10232173,
+          "encodedTotal": 3057150
+        },
+        {
+          "atMs": 31870,
+          "decodedTotal": 10288217,
+          "encodedTotal": 3073534
+        },
+        {
+          "atMs": 32097,
+          "decodedTotal": 10365307,
+          "encodedTotal": 3089918
+        },
+        {
+          "atMs": 32175,
+          "decodedTotal": 10433114,
+          "encodedTotal": 3106302
+        },
+        {
+          "atMs": 32284,
+          "decodedTotal": 10485760,
+          "encodedTotal": 3122686
+        },
+        {
+          "atMs": 32284,
+          "decodedTotal": 10535734,
+          "encodedTotal": 3122686
+        },
+        {
+          "atMs": 32438,
+          "decodedTotal": 10572542,
+          "encodedTotal": 3139070
+        },
+        {
+          "atMs": 32525,
+          "decodedTotal": 10660095,
+          "encodedTotal": 3149472
+        },
+        {
+          "atMs": 32716,
+          "decodedTotal": 10715690,
+          "encodedTotal": 3165856
+        },
+        {
+          "atMs": 32820,
+          "decodedTotal": 10781821,
+          "encodedTotal": 3182240
+        },
+        {
+          "atMs": 32953,
+          "decodedTotal": 10847902,
+          "encodedTotal": 3198624
+        },
+        {
+          "atMs": 33110,
+          "decodedTotal": 10923128,
+          "encodedTotal": 3215008
+        },
+        {
+          "atMs": 33380,
+          "decodedTotal": 10988664,
+          "encodedTotal": 3253590
+        },
+        {
+          "atMs": 33380,
+          "decodedTotal": 11000434,
+          "encodedTotal": 3253590
+        },
+        {
+          "atMs": 33506,
+          "decodedTotal": 11051427,
+          "encodedTotal": 3253590
+        },
+        {
+          "atMs": 33734,
+          "decodedTotal": 11105101,
+          "encodedTotal": 3269974
+        },
+        {
+          "atMs": 33785,
+          "decodedTotal": 11141144,
+          "encodedTotal": 3286358
+        },
+        {
+          "atMs": 34057,
+          "decodedTotal": 11195234,
+          "encodedTotal": 3295166
+        },
+        {
+          "atMs": 34183,
+          "decodedTotal": 11251243,
+          "encodedTotal": 3311550
+        },
+        {
+          "atMs": 34377,
+          "decodedTotal": 11290726,
+          "encodedTotal": 3327934
+        },
+        {
+          "atMs": 34738,
+          "decodedTotal": 11420229,
+          "encodedTotal": 3377010
+        },
+        {
+          "atMs": 34821,
+          "decodedTotal": 11477184,
+          "encodedTotal": 3377010
+        },
+        {
+          "atMs": 34940,
+          "decodedTotal": 11537094,
+          "encodedTotal": 3393394
+        },
+        {
+          "atMs": 35016,
+          "decodedTotal": 11601325,
+          "encodedTotal": 3409778
+        },
+        {
+          "atMs": 35253,
+          "decodedTotal": 11664997,
+          "encodedTotal": 3426162
+        },
+        {
+          "atMs": 35421,
+          "decodedTotal": 11783572,
+          "encodedTotal": 3442546
+        },
+        {
+          "atMs": 35914,
+          "decodedTotal": 11972281,
+          "encodedTotal": 3496770
+        },
+        {
+          "atMs": 36087,
+          "decodedTotal": 12023312,
+          "encodedTotal": 3513154
+        },
+        {
+          "atMs": 36244,
+          "decodedTotal": 12088904,
+          "encodedTotal": 3513154
+        },
+        {
+          "atMs": 36527,
+          "decodedTotal": 12209078,
+          "encodedTotal": 3562236
+        },
+        {
+          "atMs": 36707,
+          "decodedTotal": 12293518,
+          "encodedTotal": 3562236
+        },
+        {
+          "atMs": 36886,
+          "decodedTotal": 12351887,
+          "encodedTotal": 3578620
+        },
+        {
+          "atMs": 37088,
+          "decodedTotal": 12425242,
+          "encodedTotal": 3594939
+        },
+        {
+          "atMs": 37251,
+          "decodedTotal": 12497516,
+          "encodedTotal": 3611323
+        },
+        {
+          "atMs": 37440,
+          "decodedTotal": 12582912,
+          "encodedTotal": 3644091
+        },
+        {
+          "atMs": 37440,
+          "decodedTotal": 12610481,
+          "encodedTotal": 3644091
+        },
+        {
+          "atMs": 37600,
+          "decodedTotal": 12696022,
+          "encodedTotal": 3644091
+        },
+        {
+          "atMs": 37775,
+          "decodedTotal": 12769241,
+          "encodedTotal": 3660475
+        },
+        {
+          "atMs": 37931,
+          "decodedTotal": 12828473,
+          "encodedTotal": 3676859
+        },
+        {
+          "atMs": 37991,
+          "decodedTotal": 12886033,
+          "encodedTotal": 3693243
+        },
+        {
+          "atMs": 38239,
+          "decodedTotal": 13008558,
+          "encodedTotal": 3714887
+        },
+        {
+          "atMs": 38384,
+          "decodedTotal": 13092268,
+          "encodedTotal": 3714887
+        },
+        {
+          "atMs": 38638,
+          "decodedTotal": 13146573,
+          "encodedTotal": 3735003
+        },
+        {
+          "atMs": 38694,
+          "decodedTotal": 13219071,
+          "encodedTotal": 3751387
+        },
+        {
+          "atMs": 38944,
+          "decodedTotal": 13277769,
+          "encodedTotal": 3767771
+        },
+        {
+          "atMs": 39029,
+          "decodedTotal": 13339178,
+          "encodedTotal": 3784155
+        },
+        {
+          "atMs": 39201,
+          "decodedTotal": 13352977,
+          "encodedTotal": 3800539
+        },
+        {
+          "atMs": 39448,
+          "decodedTotal": 13415561,
+          "encodedTotal": 3805239
+        },
+        {
+          "atMs": 39574,
+          "decodedTotal": 13481394,
+          "encodedTotal": 3821623
+        },
+        {
+          "atMs": 39713,
+          "decodedTotal": 13545603,
+          "encodedTotal": 3838007
+        },
+        {
+          "atMs": 40024,
+          "decodedTotal": 13607719,
+          "encodedTotal": 3854391
+        },
+        {
+          "atMs": 40051,
+          "decodedTotal": 13661356,
+          "encodedTotal": 3870705
+        },
+        {
+          "atMs": 40166,
+          "decodedTotal": 13723024,
+          "encodedTotal": 3887089
+        },
+        {
+          "atMs": 40437,
+          "decodedTotal": 13805813,
+          "encodedTotal": 3903473
+        },
+        {
+          "atMs": 40568,
+          "decodedTotal": 13882749,
+          "encodedTotal": 3919857
+        },
+        {
+          "atMs": 40735,
+          "decodedTotal": 13954251,
+          "encodedTotal": 3936241
+        },
+        {
+          "atMs": 40901,
+          "decodedTotal": 14083054,
+          "encodedTotal": 3952625
+        },
+        {
+          "atMs": 41021,
+          "decodedTotal": 14183969,
+          "encodedTotal": 3969009
+        },
+        {
+          "atMs": 41224,
+          "decodedTotal": 14266063,
+          "encodedTotal": 4001647
+        },
+        {
+          "atMs": 41383,
+          "decodedTotal": 14353260,
+          "encodedTotal": 4018031
+        },
+        {
+          "atMs": 41554,
+          "decodedTotal": 14415745,
+          "encodedTotal": 4018031
+        },
+        {
+          "atMs": 41741,
+          "decodedTotal": 14512918,
+          "encodedTotal": 4034415
+        },
+        {
+          "atMs": 41802,
+          "decodedTotal": 14569496,
+          "encodedTotal": 4050799
+        },
+        {
+          "atMs": 41989,
+          "decodedTotal": 14668011,
+          "encodedTotal": 4060493
+        },
+        {
+          "atMs": 42163,
+          "decodedTotal": 14680064,
+          "encodedTotal": 4076877
+        },
+        {
+          "atMs": 42163,
+          "decodedTotal": 14756410,
+          "encodedTotal": 4076877
+        },
+        {
+          "atMs": 42238,
+          "decodedTotal": 14856258,
+          "encodedTotal": 4093261
+        },
+        {
+          "atMs": 42447,
+          "decodedTotal": 14925841,
+          "encodedTotal": 4109645
+        },
+        {
+          "atMs": 42589,
+          "decodedTotal": 15016447,
+          "encodedTotal": 4126447
+        },
+        {
+          "atMs": 42602,
+          "decodedTotal": 15024145,
+          "encodedTotal": 4142831
+        },
+        {
+          "atMs": 42856,
+          "decodedTotal": 15109414,
+          "encodedTotal": 4144031
+        },
+        {
+          "atMs": 42941,
+          "decodedTotal": 15200300,
+          "encodedTotal": 4160415
+        },
+        {
+          "atMs": 43103,
+          "decodedTotal": 15270766,
+          "encodedTotal": 4176799
+        },
+        {
+          "atMs": 43141,
+          "decodedTotal": 15286289,
+          "encodedTotal": 4193183
+        },
+        {
+          "atMs": 43369,
+          "decodedTotal": 15346049,
+          "encodedTotal": 4214128
+        },
+        {
+          "atMs": 43536,
+          "decodedTotal": 15422449,
+          "encodedTotal": 4234256
+        },
+        {
+          "atMs": 43682,
+          "decodedTotal": 15487786,
+          "encodedTotal": 4234256
+        },
+        {
+          "atMs": 43929,
+          "decodedTotal": 15576969,
+          "encodedTotal": 4250640
+        },
+        {
+          "atMs": 44127,
+          "decodedTotal": 15663708,
+          "encodedTotal": 4283408
+        },
+        {
+          "atMs": 44211,
+          "decodedTotal": 15801004,
+          "encodedTotal": 4299792
+        },
+        {
+          "atMs": 44289,
+          "decodedTotal": 15859736,
+          "encodedTotal": 4299792
+        },
+        {
+          "atMs": 44402,
+          "decodedTotal": 15925265,
+          "encodedTotal": 4307291
+        },
+        {
+          "atMs": 44684,
+          "decodedTotal": 16007998,
+          "encodedTotal": 4320482
+        },
+        {
+          "atMs": 44841,
+          "decodedTotal": 16109259,
+          "encodedTotal": 4356994
+        },
+        {
+          "atMs": 44956,
+          "decodedTotal": 16195960,
+          "encodedTotal": 4356994
+        },
+        {
+          "atMs": 45122,
+          "decodedTotal": 16267470,
+          "encodedTotal": 4373378
+        },
+        {
+          "atMs": 45338,
+          "decodedTotal": 16338537,
+          "encodedTotal": 4389762
+        },
+        {
+          "atMs": 45466,
+          "decodedTotal": 16406583,
+          "encodedTotal": 4406146
+        },
+        {
+          "atMs": 45666,
+          "decodedTotal": 16453964,
+          "encodedTotal": 4422530
+        },
+        {
+          "atMs": 45843,
+          "decodedTotal": 16502518,
+          "encodedTotal": 4438914
+        },
+        {
+          "atMs": 45914,
+          "decodedTotal": 16575790,
+          "encodedTotal": 4451428
+        },
+        {
+          "atMs": 46274,
+          "decodedTotal": 16699747,
+          "encodedTotal": 4500580
+        },
+        {
+          "atMs": 46430,
+          "decodedTotal": 16777216,
+          "encodedTotal": 4500580
+        },
+        {
+          "atMs": 46430,
+          "decodedTotal": 16789899,
+          "encodedTotal": 4500580
+        },
+        {
+          "atMs": 46715,
+          "decodedTotal": 16928792,
+          "encodedTotal": 4538844
+        },
+        {
+          "atMs": 46826,
+          "decodedTotal": 17027437,
+          "encodedTotal": 4538844
+        },
+        {
+          "atMs": 46980,
+          "decodedTotal": 17093048,
+          "encodedTotal": 4555228
+        },
+        {
+          "atMs": 47180,
+          "decodedTotal": 17157749,
+          "encodedTotal": 4571612
+        },
+        {
+          "atMs": 47376,
+          "decodedTotal": 17231303,
+          "encodedTotal": 4587996
+        },
+        {
+          "atMs": 47558,
+          "decodedTotal": 17291255,
+          "encodedTotal": 4604310
+        },
+        {
+          "atMs": 47737,
+          "decodedTotal": 17347575,
+          "encodedTotal": 4620694
+        },
+        {
+          "atMs": 47937,
+          "decodedTotal": 17408315,
+          "encodedTotal": 4637078
+        },
+        {
+          "atMs": 48053,
+          "decodedTotal": 17462773,
+          "encodedTotal": 4653462
+        },
+        {
+          "atMs": 48267,
+          "decodedTotal": 17520233,
+          "encodedTotal": 4669846
+        },
+        {
+          "atMs": 48322,
+          "decodedTotal": 17580680,
+          "encodedTotal": 4686230
+        },
+        {
+          "atMs": 48381,
+          "decodedTotal": 17601780,
+          "encodedTotal": 4702614
+        },
+        {
+          "atMs": 48525,
+          "decodedTotal": 17690189,
+          "encodedTotal": 4706292
+        },
+        {
+          "atMs": 48784,
+          "decodedTotal": 17764487,
+          "encodedTotal": 4722676
+        },
+        {
+          "atMs": 48909,
+          "decodedTotal": 17845407,
+          "encodedTotal": 4739060
+        },
+        {
+          "atMs": 49123,
+          "decodedTotal": 17921024,
+          "encodedTotal": 4755444
+        },
+        {
+          "atMs": 49151,
+          "decodedTotal": 17999895,
+          "encodedTotal": 4771828
+        },
+        {
+          "atMs": 49243,
+          "decodedTotal": 18057222,
+          "encodedTotal": 4788212
+        },
+        {
+          "atMs": 49514,
+          "decodedTotal": 18117945,
+          "encodedTotal": 4800757
+        },
+        {
+          "atMs": 49710,
+          "decodedTotal": 18166482,
+          "encodedTotal": 4817141
+        },
+        {
+          "atMs": 49897,
+          "decodedTotal": 18219032,
+          "encodedTotal": 4833525
+        },
+        {
+          "atMs": 50081,
+          "decodedTotal": 18278997,
+          "encodedTotal": 4849909
+        },
+        {
+          "atMs": 50116,
+          "decodedTotal": 18340686,
+          "encodedTotal": 4866293
+        },
+        {
+          "atMs": 50205,
+          "decodedTotal": 18393113,
+          "encodedTotal": 4882677
+        },
+        {
+          "atMs": 50394,
+          "decodedTotal": 18455094,
+          "encodedTotal": 4899061
+        },
+        {
+          "atMs": 50498,
+          "decodedTotal": 18513576,
+          "encodedTotal": 4915445
+        },
+        {
+          "atMs": 51034,
+          "decodedTotal": 18608669,
+          "encodedTotal": 4931717
+        },
+        {
+          "atMs": 51765,
+          "decodedTotal": 18738663,
+          "encodedTotal": 4964485
+        },
+        {
+          "atMs": 51849,
+          "decodedTotal": 18782402,
+          "encodedTotal": 4980869
+        },
+        {
+          "atMs": 52021,
+          "decodedTotal": 18826827,
+          "encodedTotal": 5013637
+        },
+        {
+          "atMs": 52147,
+          "decodedTotal": 18856390,
+          "encodedTotal": 5013637
+        },
+        {
+          "atMs": 52304,
+          "decodedTotal": 18874368,
+          "encodedTotal": 5046405
+        },
+        {
+          "atMs": 52304,
+          "decodedTotal": 18904158,
+          "encodedTotal": 5046405
+        },
+        {
+          "atMs": 52445,
+          "decodedTotal": 18951149,
+          "encodedTotal": 5046405
+        },
+        {
+          "atMs": 52584,
+          "decodedTotal": 19029597,
+          "encodedTotal": 5062666
+        },
+        {
+          "atMs": 52740,
+          "decodedTotal": 19112426,
+          "encodedTotal": 5079050
+        },
+        {
+          "atMs": 52899,
+          "decodedTotal": 19193145,
+          "encodedTotal": 5095434
+        },
+        {
+          "atMs": 53164,
+          "decodedTotal": 19267188,
+          "encodedTotal": 5111818
+        },
+        {
+          "atMs": 53354,
+          "decodedTotal": 19333137,
+          "encodedTotal": 5128202
+        },
+        {
+          "atMs": 53419,
+          "decodedTotal": 19393465,
+          "encodedTotal": 5144315
+        },
+        {
+          "atMs": 53574,
+          "decodedTotal": 19468849,
+          "encodedTotal": 5160699
+        },
+        {
+          "atMs": 53852,
+          "decodedTotal": 19540436,
+          "encodedTotal": 5177083
+        },
+        {
+          "atMs": 54057,
+          "decodedTotal": 19593675,
+          "encodedTotal": 5193467
+        },
+        {
+          "atMs": 54128,
+          "decodedTotal": 19666212,
+          "encodedTotal": 5209781
+        },
+        {
+          "atMs": 54529,
+          "decodedTotal": 19803262,
+          "encodedTotal": 5226165
+        },
+        {
+          "atMs": 54669,
+          "decodedTotal": 19862553,
+          "encodedTotal": 5258933
+        },
+        {
+          "atMs": 54825,
+          "decodedTotal": 19927522,
+          "encodedTotal": 5275317
+        },
+        {
+          "atMs": 55187,
+          "decodedTotal": 19984031,
+          "encodedTotal": 5291701
+        },
+        {
+          "atMs": 55328,
+          "decodedTotal": 20045696,
+          "encodedTotal": 5308085
+        },
+        {
+          "atMs": 55465,
+          "decodedTotal": 20097406,
+          "encodedTotal": 5324580
+        },
+        {
+          "atMs": 55623,
+          "decodedTotal": 20192420,
+          "encodedTotal": 5357348
+        },
+        {
+          "atMs": 55783,
+          "decodedTotal": 20272532,
+          "encodedTotal": 5357348
+        },
+        {
+          "atMs": 55963,
+          "decodedTotal": 20300774,
+          "encodedTotal": 5373732
+        },
+        {
+          "atMs": 56107,
+          "decodedTotal": 20451345,
+          "encodedTotal": 5390116
+        },
+        {
+          "atMs": 56150,
+          "decodedTotal": 20639768,
+          "encodedTotal": 5406063
+        },
+        {
+          "atMs": 56278,
+          "decodedTotal": 20824081,
+          "encodedTotal": 5411615
+        },
+        {
+          "atMs": 56310,
+          "decodedTotal": 20971520,
+          "encodedTotal": 5417019
+        },
+        {
+          "atMs": 56310,
+          "decodedTotal": 21016595,
+          "encodedTotal": 5417019
+        },
+        {
+          "atMs": 56344,
+          "decodedTotal": 21192721,
+          "encodedTotal": 5428351
+        },
+        {
+          "atMs": 56385,
+          "decodedTotal": 21364760,
+          "encodedTotal": 5434849
+        },
+        {
+          "atMs": 56512,
+          "decodedTotal": 21557265,
+          "encodedTotal": 5441320
+        },
+        {
+          "atMs": 56568,
+          "decodedTotal": 21741561,
+          "encodedTotal": 5448225
+        },
+        {
+          "atMs": 56579,
+          "decodedTotal": 21921816,
+          "encodedTotal": 5448225
+        },
+        {
+          "atMs": 56685,
+          "decodedTotal": 22102033,
+          "encodedTotal": 5467053
+        },
+        {
+          "atMs": 56758,
+          "decodedTotal": 22478865,
+          "encodedTotal": 5476041
+        },
+        {
+          "atMs": 56992,
+          "decodedTotal": 22662835,
+          "encodedTotal": 5481314
+        },
+        {
+          "atMs": 57097,
+          "decodedTotal": 22839313,
+          "encodedTotal": 5486106
+        },
+        {
+          "atMs": 57119,
+          "decodedTotal": 23068672,
+          "encodedTotal": 5486106
+        },
+        {
+          "atMs": 57119,
+          "decodedTotal": 23101457,
+          "encodedTotal": 5486106
+        },
+        {
+          "atMs": 57134,
+          "decodedTotal": 23298065,
+          "encodedTotal": 5510050
+        },
+        {
+          "atMs": 57134,
+          "decodedTotal": 23724056,
+          "encodedTotal": 5510050
+        },
+        {
+          "atMs": 57163,
+          "decodedTotal": 23846929,
+          "encodedTotal": 5510050
+        },
+        {
+          "atMs": 57195,
+          "decodedTotal": 24117265,
+          "encodedTotal": 5519852
+        },
+        {
+          "atMs": 57367,
+          "decodedTotal": 24670225,
+          "encodedTotal": 5535309
+        },
+        {
+          "atMs": 57456,
+          "decodedTotal": 25071640,
+          "encodedTotal": 5544526
+        },
+        {
+          "atMs": 57506,
+          "decodedTotal": 25165824,
+          "encodedTotal": 5544526
+        },
+        {
+          "atMs": 57506,
+          "decodedTotal": 25255953,
+          "encodedTotal": 5544526
+        },
+        {
+          "atMs": 57595,
+          "decodedTotal": 25800721,
+          "encodedTotal": 5559789
+        },
+        {
+          "atMs": 57739,
+          "decodedTotal": 26353688,
+          "encodedTotal": 5559789
+        },
+        {
+          "atMs": 57803,
+          "decodedTotal": 26783761,
+          "encodedTotal": 5583749
+        },
+        {
+          "atMs": 57917,
+          "decodedTotal": 27082745,
+          "encodedTotal": 5583749
+        },
+        {
+          "atMs": 57961,
+          "decodedTotal": 27262976,
+          "encodedTotal": 5600027
+        },
+        {
+          "atMs": 57961,
+          "decodedTotal": 27459601,
+          "encodedTotal": 5600027
+        },
+        {
+          "atMs": 58011,
+          "decodedTotal": 27631633,
+          "encodedTotal": 5600027
+        },
+        {
+          "atMs": 58057,
+          "decodedTotal": 27836433,
+          "encodedTotal": 5604526
+        },
+        {
+          "atMs": 58078,
+          "decodedTotal": 28012561,
+          "encodedTotal": 5609163
+        },
+        {
+          "atMs": 58089,
+          "decodedTotal": 28082193,
+          "encodedTotal": 5612251
+        },
+        {
+          "atMs": 58216,
+          "decodedTotal": 28213265,
+          "encodedTotal": 5613714
+        },
+        {
+          "atMs": 58216,
+          "decodedTotal": 28266513,
+          "encodedTotal": 5613714
+        },
+        {
+          "atMs": 58255,
+          "decodedTotal": 28655633,
+          "encodedTotal": 5628552
+        },
+        {
+          "atMs": 58293,
+          "decodedTotal": 28741306,
+          "encodedTotal": 5628552
+        },
+        {
+          "atMs": 58417,
+          "decodedTotal": 28917777,
+          "encodedTotal": 5631521
+        },
+        {
+          "atMs": 58432,
+          "decodedTotal": 29110289,
+          "encodedTotal": 5637045
+        },
+        {
+          "atMs": 58617,
+          "decodedTotal": 29212605,
+          "encodedTotal": 5662690
+        },
+        {
+          "atMs": 58881,
+          "decodedTotal": 29249125,
+          "encodedTotal": 5662690
+        },
+        {
+          "atMs": 59063,
+          "decodedTotal": 29298705,
+          "encodedTotal": 5679074
+        },
+        {
+          "atMs": 59225,
+          "decodedTotal": 29346029,
+          "encodedTotal": 5697290
+        },
+        {
+          "atMs": 59443,
+          "decodedTotal": 29360128,
+          "encodedTotal": 5730058
+        },
+        {
+          "atMs": 59443,
+          "decodedTotal": 29402694,
+          "encodedTotal": 5730058
+        },
+        {
+          "atMs": 59627,
+          "decodedTotal": 29440819,
+          "encodedTotal": 5730058
+        },
+        {
+          "atMs": 59852,
+          "decodedTotal": 29487628,
+          "encodedTotal": 5746442
+        },
+        {
+          "atMs": 59899,
+          "decodedTotal": 29543634,
+          "encodedTotal": 5762756
+        },
+        {
+          "atMs": 60190,
+          "decodedTotal": 29596003,
+          "encodedTotal": 5779140
+        },
+        {
+          "atMs": 60233,
+          "decodedTotal": 29641964,
+          "encodedTotal": 5795524
+        },
+        {
+          "atMs": 60380,
+          "decodedTotal": 29689726,
+          "encodedTotal": 5811908
+        },
+        {
+          "atMs": 60584,
+          "decodedTotal": 29729720,
+          "encodedTotal": 5828292
+        },
+        {
+          "atMs": 60806,
+          "decodedTotal": 29771121,
+          "encodedTotal": 5844676
+        },
+        {
+          "atMs": 60881,
+          "decodedTotal": 29803329,
+          "encodedTotal": 5861060
+        },
+        {
+          "atMs": 61179,
+          "decodedTotal": 29846510,
+          "encodedTotal": 5877444
+        },
+        {
+          "atMs": 61242,
+          "decodedTotal": 29884339,
+          "encodedTotal": 5893698
+        },
+        {
+          "atMs": 61489,
+          "decodedTotal": 29921515,
+          "encodedTotal": 5910082
+        },
+        {
+          "atMs": 61602,
+          "decodedTotal": 29987347,
+          "encodedTotal": 5926466
+        },
+        {
+          "atMs": 61770,
+          "decodedTotal": 30026796,
+          "encodedTotal": 5942850
+        },
+        {
+          "atMs": 61942,
+          "decodedTotal": 30080254,
+          "encodedTotal": 5959205
+        },
+        {
+          "atMs": 62160,
+          "decodedTotal": 30128072,
+          "encodedTotal": 5975589
+        },
+        {
+          "atMs": 62253,
+          "decodedTotal": 30177592,
+          "encodedTotal": 5991973
+        },
+        {
+          "atMs": 62441,
+          "decodedTotal": 30218031,
+          "encodedTotal": 6008357
+        },
+        {
+          "atMs": 62574,
+          "decodedTotal": 30267431,
+          "encodedTotal": 6024676
+        },
+        {
+          "atMs": 62805,
+          "decodedTotal": 30318560,
+          "encodedTotal": 6041060
+        },
+        {
+          "atMs": 62990,
+          "decodedTotal": 30389224,
+          "encodedTotal": 6057444
+        },
+        {
+          "atMs": 63162,
+          "decodedTotal": 30438494,
+          "encodedTotal": 6073828
+        },
+        {
+          "atMs": 63303,
+          "decodedTotal": 30484737,
+          "encodedTotal": 6090212
+        },
+        {
+          "atMs": 63364,
+          "decodedTotal": 30508232,
+          "encodedTotal": 6114822
+        },
+        {
+          "atMs": 63508,
+          "decodedTotal": 30571101,
+          "encodedTotal": 6114822
+        },
+        {
+          "atMs": 63713,
+          "decodedTotal": 30627543,
+          "encodedTotal": 6131206
+        },
+        {
+          "atMs": 64036,
+          "decodedTotal": 30676220,
+          "encodedTotal": 6147590
+        },
+        {
+          "atMs": 64123,
+          "decodedTotal": 30721659,
+          "encodedTotal": 6163974
+        },
+        {
+          "atMs": 64337,
+          "decodedTotal": 30774010,
+          "encodedTotal": 6180289
+        },
+        {
+          "atMs": 64498,
+          "decodedTotal": 30819959,
+          "encodedTotal": 6196673
+        },
+        {
+          "atMs": 64578,
+          "decodedTotal": 30867473,
+          "encodedTotal": 6213057
+        },
+        {
+          "atMs": 64733,
+          "decodedTotal": 30922080,
+          "encodedTotal": 6227265
+        },
+        {
+          "atMs": 64843,
+          "decodedTotal": 30971538,
+          "encodedTotal": 6243649
+        },
+        {
+          "atMs": 65463,
+          "decodedTotal": 31019971,
+          "encodedTotal": 6260033
+        },
+        {
+          "atMs": 65634,
+          "decodedTotal": 31067721,
+          "encodedTotal": 6276417
+        },
+        {
+          "atMs": 65681,
+          "decodedTotal": 31074321,
+          "encodedTotal": 6292731
+        },
+        {
+          "atMs": 65980,
+          "decodedTotal": 31105792,
+          "encodedTotal": 6299349
+        },
+        {
+          "atMs": 66460,
+          "decodedTotal": 31153664,
+          "encodedTotal": 6315733
+        },
+        {
+          "atMs": 66529,
+          "decodedTotal": 31207457,
+          "encodedTotal": 6332117
+        },
+        {
+          "atMs": 66624,
+          "decodedTotal": 31259748,
+          "encodedTotal": 6348501
+        },
+        {
+          "atMs": 66700,
+          "decodedTotal": 31307769,
+          "encodedTotal": 6364885
+        },
+        {
+          "atMs": 66871,
+          "decodedTotal": 31359402,
+          "encodedTotal": 6381269
+        },
+        {
+          "atMs": 67012,
+          "decodedTotal": 31392962,
+          "encodedTotal": 6397653
+        },
+        {
+          "atMs": 67074,
+          "decodedTotal": 31403578,
+          "encodedTotal": 6414037
+        },
+        {
+          "atMs": 67198,
+          "decodedTotal": 31452436,
+          "encodedTotal": 6445128
+        }
+      ],
+      "headersAtMs": 630,
+      "status": 200,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "remoteIsLoopback": true,
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "gzip",
+        "cache-control": "public, max-age=31536000",
+        "etag": "W/\"598eeb7815459920e9deb3fccb410e9e\"",
+        "age": "101355",
+        "cf-cache-status": "HIT"
+      },
+      "timing": {
+        "requestTime": 182385.912625,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": 0.061,
+        "connectEnd": 420.775,
+        "sslStart": 0.777,
+        "sslEnd": 420.771,
+        "sendStart": 420.857,
+        "sendEnd": 420.912,
+        "receiveHeadersStart": 626.466,
+        "receiveHeadersEnd": 626.542
+      },
+      "decodedObserved": 31452436,
+      "encodedObserved": 6445128,
+      "finishedAtMs": 67234,
+      "completeEncodedBytes": 6445612
+    }
+  ],
+  "browserClosed": true,
+  "chromeVersion": "157.0.8103.78",
+  "versionBefore": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "workerBody": {
+    "status": 200,
+    "bytes": 41492,
+    "sha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800"
+  },
+  "workerConfiguration": {
+    "type": "MIR2_ASSET_CACHE_CONFIGURED",
+    "deletedCaches": [],
+    "version": "isolated-font-read",
+    "assetVersion": "20261108-r16-08ec86d5105c",
+    "cacheNamespace": "isolated-font-read",
+    "remoteAssetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+    "remoteAssetBaseUrls": [
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+      "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c"
+    ],
+    "fontMirrorFirst": false,
+    "staticAssetTiers": {
+      "critical": 0,
+      "background": 0,
+      "runtime": 0
+    },
+    "configurationPersisted": true
+  },
+  "transfers": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 64632.59999999404,
+          "bytes": 65536
+        },
+        {
+          "atMs": 64632.69999998808,
+          "bytes": 196608
+        },
+        {
+          "atMs": 64632.80000001192,
+          "bytes": 393216
+        },
+        {
+          "atMs": 64632.80000001192,
+          "bytes": 655360
+        },
+        {
+          "atMs": 64632.90000000596,
+          "bytes": 917504
+        },
+        {
+          "atMs": 64632.90000000596,
+          "bytes": 1245184
+        },
+        {
+          "atMs": 64633,
+          "bytes": 1572864
+        },
+        {
+          "atMs": 64633.09999999404,
+          "bytes": 1900544
+        },
+        {
+          "atMs": 64633.09999999404,
+          "bytes": 2097152
+        },
+        {
+          "atMs": 64633.40000000596,
+          "bytes": 3997696
+        },
+        {
+          "atMs": 64633.40000000596,
+          "bytes": 4194304
+        },
+        {
+          "atMs": 64633.69999998808,
+          "bytes": 5636096
+        },
+        {
+          "atMs": 64633.80000001192,
+          "bytes": 6291456
+        },
+        {
+          "atMs": 64634.09999999404,
+          "bytes": 7733248
+        },
+        {
+          "atMs": 64634.30000001192,
+          "bytes": 8388608
+        },
+        {
+          "atMs": 64634.59999999404,
+          "bytes": 9830400
+        },
+        {
+          "atMs": 64634.69999998808,
+          "bytes": 10485760
+        },
+        {
+          "atMs": 64634.90000000596,
+          "bytes": 11927552
+        },
+        {
+          "atMs": 64634.90000000596,
+          "bytes": 11941968
+        }
+      ],
+      "headersMs": 64617.90000000596,
+      "contentEncoding": null,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "bytes": 11941968,
+      "totalMs": 64659.90000000596,
+      "maxDecodedGapMs": 25
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 13205.59999999404,
+          "bytes": 65536
+        },
+        {
+          "atMs": 13205.59999999404,
+          "bytes": 196608
+        },
+        {
+          "atMs": 13205.59999999404,
+          "bytes": 327680
+        },
+        {
+          "atMs": 13205.799999982119,
+          "bytes": 524288
+        },
+        {
+          "atMs": 13205.799999982119,
+          "bytes": 621572
+        }
+      ],
+      "headersMs": 13204.5,
+      "contentEncoding": null,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+      "bytes": 621572,
+      "totalMs": 13207.299999982119,
+      "maxDecodedGapMs": 1.5
+    },
+    {
+      "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 629.8000000119209,
+          "bytes": 12704
+        },
+        {
+          "atMs": 645.3000000119209,
+          "bytes": 22392
+        },
+        {
+          "atMs": 676,
+          "bytes": 69832
+        },
+        {
+          "atMs": 694.3000000119209,
+          "bytes": 104668
+        },
+        {
+          "atMs": 721.9000000059605,
+          "bytes": 172288
+        },
+        {
+          "atMs": 734.5999999940395,
+          "bytes": 185333
+        },
+        {
+          "atMs": 742.1999999880791,
+          "bytes": 190584
+        },
+        {
+          "atMs": 746.0999999940395,
+          "bytes": 196061
+        },
+        {
+          "atMs": 752,
+          "bytes": 201818
+        },
+        {
+          "atMs": 754.3000000119209,
+          "bytes": 207109
+        },
+        {
+          "atMs": 760.8000000119209,
+          "bytes": 219554
+        },
+        {
+          "atMs": 767.4000000059605,
+          "bytes": 231180
+        },
+        {
+          "atMs": 771.6999999880791,
+          "bytes": 237381
+        },
+        {
+          "atMs": 773.9000000059605,
+          "bytes": 243216
+        },
+        {
+          "atMs": 778.1999999880791,
+          "bytes": 249486
+        },
+        {
+          "atMs": 780.4000000059605,
+          "bytes": 255106
+        },
+        {
+          "atMs": 784.5,
+          "bytes": 260695
+        },
+        {
+          "atMs": 786.8000000119209,
+          "bytes": 266910
+        },
+        {
+          "atMs": 791,
+          "bytes": 272272
+        },
+        {
+          "atMs": 794,
+          "bytes": 278266
+        },
+        {
+          "atMs": 799.8000000119209,
+          "bytes": 290358
+        },
+        {
+          "atMs": 803.6999999880791,
+          "bytes": 296249
+        },
+        {
+          "atMs": 816.1999999880791,
+          "bytes": 302189
+        },
+        {
+          "atMs": 907.3000000119209,
+          "bytes": 308574
+        },
+        {
+          "atMs": 956.9000000059605,
+          "bytes": 314588
+        },
+        {
+          "atMs": 1036.4000000059605,
+          "bytes": 326893
+        },
+        {
+          "atMs": 1071.9000000059605,
+          "bytes": 338743
+        },
+        {
+          "atMs": 1189.4000000059605,
+          "bytes": 344998
+        },
+        {
+          "atMs": 1206.5999999940395,
+          "bytes": 350638
+        },
+        {
+          "atMs": 1409.199999988079,
+          "bytes": 380275
+        },
+        {
+          "atMs": 1472,
+          "bytes": 385925
+        },
+        {
+          "atMs": 1520.199999988079,
+          "bytes": 393228
+        },
+        {
+          "atMs": 1551.9000000059605,
+          "bytes": 408983
+        },
+        {
+          "atMs": 1671.5999999940395,
+          "bytes": 430024
+        },
+        {
+          "atMs": 1892.800000011921,
+          "bytes": 503441
+        },
+        {
+          "atMs": 2068.300000011921,
+          "bytes": 573222
+        },
+        {
+          "atMs": 2115.0999999940395,
+          "bytes": 632543
+        },
+        {
+          "atMs": 2161,
+          "bytes": 655360
+        },
+        {
+          "atMs": 2308.800000011921,
+          "bytes": 715261
+        },
+        {
+          "atMs": 2528.0999999940395,
+          "bytes": 759069
+        },
+        {
+          "atMs": 2557.5,
+          "bytes": 799782
+        },
+        {
+          "atMs": 2702.300000011921,
+          "bytes": 851848
+        },
+        {
+          "atMs": 2872.800000011921,
+          "bytes": 895836
+        },
+        {
+          "atMs": 2919.0999999940395,
+          "bytes": 917528
+        },
+        {
+          "atMs": 3088.9000000059605,
+          "bytes": 965396
+        },
+        {
+          "atMs": 3135.199999988079,
+          "bytes": 1010824
+        },
+        {
+          "atMs": 3274.699999988079,
+          "bytes": 1057727
+        },
+        {
+          "atMs": 3574,
+          "bytes": 1106084
+        },
+        {
+          "atMs": 3739.0999999940395,
+          "bytes": 1167363
+        },
+        {
+          "atMs": 3828.4000000059605,
+          "bytes": 1205761
+        },
+        {
+          "atMs": 4145.199999988079,
+          "bytes": 1250928
+        },
+        {
+          "atMs": 4231.300000011921,
+          "bytes": 1293352
+        },
+        {
+          "atMs": 4454.699999988079,
+          "bytes": 1335829
+        },
+        {
+          "atMs": 4587.4000000059605,
+          "bytes": 1394872
+        },
+        {
+          "atMs": 4917.199999988079,
+          "bytes": 1443389
+        },
+        {
+          "atMs": 5170,
+          "bytes": 1488147
+        },
+        {
+          "atMs": 5318.699999988079,
+          "bytes": 1533553
+        },
+        {
+          "atMs": 5399.699999988079,
+          "bytes": 1585782
+        },
+        {
+          "atMs": 5411.9000000059605,
+          "bytes": 1594425
+        },
+        {
+          "atMs": 5557.0999999940395,
+          "bytes": 1644752
+        },
+        {
+          "atMs": 5686.5,
+          "bytes": 1691777
+        },
+        {
+          "atMs": 5827.800000011921,
+          "bytes": 1729128
+        },
+        {
+          "atMs": 6047,
+          "bytes": 1770862
+        },
+        {
+          "atMs": 6126.199999988079,
+          "bytes": 1816299
+        },
+        {
+          "atMs": 6230.9000000059605,
+          "bytes": 1853982
+        },
+        {
+          "atMs": 6359,
+          "bytes": 1896387
+        },
+        {
+          "atMs": 6532.300000011921,
+          "bytes": 1939444
+        },
+        {
+          "atMs": 6735.699999988079,
+          "bytes": 2012120
+        },
+        {
+          "atMs": 6938.800000011921,
+          "bytes": 2054753
+        },
+        {
+          "atMs": 7050.9000000059605,
+          "bytes": 2097152
+        },
+        {
+          "atMs": 7050.9000000059605,
+          "bytes": 2099431
+        },
+        {
+          "atMs": 7236.5999999940395,
+          "bytes": 2162782
+        },
+        {
+          "atMs": 7395.0999999940395,
+          "bytes": 2207761
+        },
+        {
+          "atMs": 7567,
+          "bytes": 2251376
+        },
+        {
+          "atMs": 7723.0999999940395,
+          "bytes": 2292978
+        },
+        {
+          "atMs": 7831.5,
+          "bytes": 2330998
+        },
+        {
+          "atMs": 8077.4000000059605,
+          "bytes": 2375646
+        },
+        {
+          "atMs": 8142.0999999940395,
+          "bytes": 2417239
+        },
+        {
+          "atMs": 8285,
+          "bytes": 2458853
+        },
+        {
+          "atMs": 8599.09999999404,
+          "bytes": 2502680
+        },
+        {
+          "atMs": 8663.699999988079,
+          "bytes": 2543827
+        },
+        {
+          "atMs": 8726.699999988079,
+          "bytes": 2555897
+        },
+        {
+          "atMs": 8881.5,
+          "bytes": 2601521
+        },
+        {
+          "atMs": 9071.59999999404,
+          "bytes": 2640303
+        },
+        {
+          "atMs": 9288.300000011921,
+          "bytes": 2681323
+        },
+        {
+          "atMs": 9367.09999999404,
+          "bytes": 2721157
+        },
+        {
+          "atMs": 9632.59999999404,
+          "bytes": 2752536
+        },
+        {
+          "atMs": 9678.90000000596,
+          "bytes": 2791893
+        },
+        {
+          "atMs": 9868.199999988079,
+          "bytes": 2844353
+        },
+        {
+          "atMs": 10179.90000000596,
+          "bytes": 2885187
+        },
+        {
+          "atMs": 10287.09999999404,
+          "bytes": 2927848
+        },
+        {
+          "atMs": 10544.09999999404,
+          "bytes": 2969050
+        },
+        {
+          "atMs": 10679,
+          "bytes": 3013029
+        },
+        {
+          "atMs": 10789.90000000596,
+          "bytes": 3055858
+        },
+        {
+          "atMs": 11038,
+          "bytes": 3105616
+        },
+        {
+          "atMs": 11146.90000000596,
+          "bytes": 3148578
+        },
+        {
+          "atMs": 11706.199999988079,
+          "bytes": 3178513
+        },
+        {
+          "atMs": 11831.300000011921,
+          "bytes": 3219690
+        },
+        {
+          "atMs": 11991.09999999404,
+          "bytes": 3266337
+        },
+        {
+          "atMs": 12061.90000000596,
+          "bytes": 3280920
+        },
+        {
+          "atMs": 12208.800000011921,
+          "bytes": 3325586
+        },
+        {
+          "atMs": 12679.300000011921,
+          "bytes": 3370291
+        },
+        {
+          "atMs": 12787.699999988079,
+          "bytes": 3409179
+        },
+        {
+          "atMs": 12946.199999988079,
+          "bytes": 3449210
+        },
+        {
+          "atMs": 13133.300000011921,
+          "bytes": 3491220
+        },
+        {
+          "atMs": 13307.300000011921,
+          "bytes": 3536029
+        },
+        {
+          "atMs": 13466.199999988079,
+          "bytes": 3581542
+        },
+        {
+          "atMs": 13642.800000011921,
+          "bytes": 3624251
+        },
+        {
+          "atMs": 13850.199999988079,
+          "bytes": 3665708
+        },
+        {
+          "atMs": 14010.199999988079,
+          "bytes": 3725481
+        },
+        {
+          "atMs": 14169.40000000596,
+          "bytes": 3806536
+        },
+        {
+          "atMs": 14466.699999988079,
+          "bytes": 3881713
+        },
+        {
+          "atMs": 14650.199999988079,
+          "bytes": 3981022
+        },
+        {
+          "atMs": 14662.09999999404,
+          "bytes": 4068072
+        },
+        {
+          "atMs": 14838.59999999404,
+          "bytes": 4194304
+        },
+        {
+          "atMs": 14838.59999999404,
+          "bytes": 4209571
+        },
+        {
+          "atMs": 14977.699999988079,
+          "bytes": 4304913
+        },
+        {
+          "atMs": 15019.59999999404,
+          "bytes": 4387573
+        },
+        {
+          "atMs": 15037.09999999404,
+          "bytes": 4407313
+        },
+        {
+          "atMs": 15154.59999999404,
+          "bytes": 4509713
+        },
+        {
+          "atMs": 15323.90000000596,
+          "bytes": 4587544
+        },
+        {
+          "atMs": 15507.5,
+          "bytes": 4771857
+        },
+        {
+          "atMs": 15738.800000011921,
+          "bytes": 4914698
+        },
+        {
+          "atMs": 15883.40000000596,
+          "bytes": 4980234
+        },
+        {
+          "atMs": 15883.5,
+          "bytes": 5009041
+        },
+        {
+          "atMs": 16073.300000011921,
+          "bytes": 5086149
+        },
+        {
+          "atMs": 16260.199999988079,
+          "bytes": 5145826
+        },
+        {
+          "atMs": 16363,
+          "bytes": 5184015
+        },
+        {
+          "atMs": 16580,
+          "bytes": 5223016
+        },
+        {
+          "atMs": 16663.59999999404,
+          "bytes": 5274929
+        },
+        {
+          "atMs": 16797.80000001192,
+          "bytes": 5314077
+        },
+        {
+          "atMs": 16960.40000000596,
+          "bytes": 5366890
+        },
+        {
+          "atMs": 17131.59999999404,
+          "bytes": 5447024
+        },
+        {
+          "atMs": 17164.90000000596,
+          "bytes": 5513233
+        },
+        {
+          "atMs": 17175.30000001192,
+          "bytes": 5640216
+        },
+        {
+          "atMs": 17392.40000000596,
+          "bytes": 5725985
+        },
+        {
+          "atMs": 17551.90000000596,
+          "bytes": 5800887
+        },
+        {
+          "atMs": 17706.69999998808,
+          "bytes": 5840482
+        },
+        {
+          "atMs": 17801.5,
+          "bytes": 5879002
+        },
+        {
+          "atMs": 17943.80000001192,
+          "bytes": 5917423
+        },
+        {
+          "atMs": 18165.5,
+          "bytes": 5960933
+        },
+        {
+          "atMs": 18272.5,
+          "bytes": 6024581
+        },
+        {
+          "atMs": 18434.80000001192,
+          "bytes": 6062286
+        },
+        {
+          "atMs": 18476.69999998808,
+          "bytes": 6086673
+        },
+        {
+          "atMs": 18682,
+          "bytes": 6138177
+        },
+        {
+          "atMs": 18924.69999998808,
+          "bytes": 6179365
+        },
+        {
+          "atMs": 18991,
+          "bytes": 6225614
+        },
+        {
+          "atMs": 19272.90000000596,
+          "bytes": 6279365
+        },
+        {
+          "atMs": 19379,
+          "bytes": 6291456
+        },
+        {
+          "atMs": 19379,
+          "bytes": 6331646
+        },
+        {
+          "atMs": 19535.5,
+          "bytes": 6372737
+        },
+        {
+          "atMs": 19842.59999999404,
+          "bytes": 6418548
+        },
+        {
+          "atMs": 19930.19999998808,
+          "bytes": 6468608
+        },
+        {
+          "atMs": 20134.40000000596,
+          "bytes": 6513011
+        },
+        {
+          "atMs": 20219.09999999404,
+          "bytes": 6560809
+        },
+        {
+          "atMs": 20559.80000001192,
+          "bytes": 6635537
+        },
+        {
+          "atMs": 20596.69999998808,
+          "bytes": 6691478
+        },
+        {
+          "atMs": 20847.09999999404,
+          "bytes": 6753276
+        },
+        {
+          "atMs": 21059.59999999404,
+          "bytes": 6823471
+        },
+        {
+          "atMs": 21235.40000000596,
+          "bytes": 6946840
+        },
+        {
+          "atMs": 21391.19999998808,
+          "bytes": 6995992
+        },
+        {
+          "atMs": 21484.69999998808,
+          "bytes": 7073444
+        },
+        {
+          "atMs": 21638.40000000596,
+          "bytes": 7131509
+        },
+        {
+          "atMs": 21884.80000001192,
+          "bytes": 7248821
+        },
+        {
+          "atMs": 22046,
+          "bytes": 7291856
+        },
+        {
+          "atMs": 22408.80000001192,
+          "bytes": 7372793
+        },
+        {
+          "atMs": 22527,
+          "bytes": 7417996
+        },
+        {
+          "atMs": 22750.19999998808,
+          "bytes": 7456995
+        },
+        {
+          "atMs": 23069.30000001192,
+          "bytes": 7651345
+        },
+        {
+          "atMs": 23158.09999999404,
+          "bytes": 7741464
+        },
+        {
+          "atMs": 23320,
+          "bytes": 7823759
+        },
+        {
+          "atMs": 23454.40000000596,
+          "bytes": 7865337
+        },
+        {
+          "atMs": 23633.69999998808,
+          "bytes": 7907971
+        },
+        {
+          "atMs": 23819.30000001192,
+          "bytes": 7961386
+        },
+        {
+          "atMs": 23968.5,
+          "bytes": 8022455
+        },
+        {
+          "atMs": 24142.30000001192,
+          "bytes": 8092411
+        },
+        {
+          "atMs": 24312.19999998808,
+          "bytes": 8135122
+        },
+        {
+          "atMs": 24561,
+          "bytes": 8185396
+        },
+        {
+          "atMs": 24755,
+          "bytes": 8237531
+        },
+        {
+          "atMs": 24849.69999998808,
+          "bytes": 8277360
+        },
+        {
+          "atMs": 24858.80000001192,
+          "bytes": 8286232
+        },
+        {
+          "atMs": 25089.19999998808,
+          "bytes": 8371937
+        },
+        {
+          "atMs": 25213,
+          "bytes": 8388608
+        },
+        {
+          "atMs": 25213,
+          "bytes": 8441873
+        },
+        {
+          "atMs": 25276.90000000596,
+          "bytes": 8496841
+        },
+        {
+          "atMs": 25511.30000001192,
+          "bytes": 8548731
+        },
+        {
+          "atMs": 25649.69999998808,
+          "bytes": 8608081
+        },
+        {
+          "atMs": 25807.09999999404,
+          "bytes": 8653193
+        },
+        {
+          "atMs": 25978.59999999404,
+          "bytes": 8697202
+        },
+        {
+          "atMs": 26167,
+          "bytes": 8752811
+        },
+        {
+          "atMs": 26387.5,
+          "bytes": 8798832
+        },
+        {
+          "atMs": 26467.40000000596,
+          "bytes": 8840956
+        },
+        {
+          "atMs": 26651,
+          "bytes": 8882691
+        },
+        {
+          "atMs": 26826.40000000596,
+          "bytes": 8928584
+        },
+        {
+          "atMs": 27069.19999998808,
+          "bytes": 8969652
+        },
+        {
+          "atMs": 27151.80000001192,
+          "bytes": 9013861
+        },
+        {
+          "atMs": 27443.90000000596,
+          "bytes": 9058593
+        },
+        {
+          "atMs": 27526.59999999404,
+          "bytes": 9109796
+        },
+        {
+          "atMs": 27856.40000000596,
+          "bytes": 9155633
+        },
+        {
+          "atMs": 28010.69999998808,
+          "bytes": 9207825
+        },
+        {
+          "atMs": 28183.80000001192,
+          "bytes": 9256558
+        },
+        {
+          "atMs": 28402,
+          "bytes": 9301829
+        },
+        {
+          "atMs": 28511.40000000596,
+          "bytes": 9367262
+        },
+        {
+          "atMs": 28694.90000000596,
+          "bytes": 9408169
+        },
+        {
+          "atMs": 28850.30000001192,
+          "bytes": 9453981
+        },
+        {
+          "atMs": 29233.80000001192,
+          "bytes": 9494678
+        },
+        {
+          "atMs": 29286.40000000596,
+          "bytes": 9536887
+        },
+        {
+          "atMs": 29452.09999999404,
+          "bytes": 9583697
+        },
+        {
+          "atMs": 29601.59999999404,
+          "bytes": 9634670
+        },
+        {
+          "atMs": 29772.59999999404,
+          "bytes": 9678949
+        },
+        {
+          "atMs": 30069.5,
+          "bytes": 9729939
+        },
+        {
+          "atMs": 30291.80000001192,
+          "bytes": 9781059
+        },
+        {
+          "atMs": 30664.19999998808,
+          "bytes": 9927480
+        },
+        {
+          "atMs": 30793.59999999404,
+          "bytes": 9969800
+        },
+        {
+          "atMs": 31024.80000001192,
+          "bytes": 10025013
+        },
+        {
+          "atMs": 31217.09999999404,
+          "bytes": 10069126
+        },
+        {
+          "atMs": 31446.80000001192,
+          "bytes": 10133369
+        },
+        {
+          "atMs": 31529.59999999404,
+          "bytes": 10184220
+        },
+        {
+          "atMs": 31675.09999999404,
+          "bytes": 10232173
+        },
+        {
+          "atMs": 31868.5,
+          "bytes": 10288217
+        },
+        {
+          "atMs": 32095.09999999404,
+          "bytes": 10365307
+        },
+        {
+          "atMs": 32172.69999998808,
+          "bytes": 10433114
+        },
+        {
+          "atMs": 32282,
+          "bytes": 10485760
+        },
+        {
+          "atMs": 32282,
+          "bytes": 10535734
+        },
+        {
+          "atMs": 32436.30000001192,
+          "bytes": 10572542
+        },
+        {
+          "atMs": 32523,
+          "bytes": 10660095
+        },
+        {
+          "atMs": 32714.09999999404,
+          "bytes": 10715690
+        },
+        {
+          "atMs": 32818.19999998808,
+          "bytes": 10781821
+        },
+        {
+          "atMs": 32951.59999999404,
+          "bytes": 10847902
+        },
+        {
+          "atMs": 33108.30000001192,
+          "bytes": 10923128
+        },
+        {
+          "atMs": 33378.40000000596,
+          "bytes": 10988664
+        },
+        {
+          "atMs": 33378.40000000596,
+          "bytes": 11000434
+        },
+        {
+          "atMs": 33503.69999998808,
+          "bytes": 11051427
+        },
+        {
+          "atMs": 33731.90000000596,
+          "bytes": 11105101
+        },
+        {
+          "atMs": 33783.30000001192,
+          "bytes": 11141144
+        },
+        {
+          "atMs": 34054.80000001192,
+          "bytes": 11195234
+        },
+        {
+          "atMs": 34181.19999998808,
+          "bytes": 11251243
+        },
+        {
+          "atMs": 34375.09999999404,
+          "bytes": 11290726
+        },
+        {
+          "atMs": 34736.30000001192,
+          "bytes": 11420229
+        },
+        {
+          "atMs": 34819.40000000596,
+          "bytes": 11477184
+        },
+        {
+          "atMs": 34937.90000000596,
+          "bytes": 11537094
+        },
+        {
+          "atMs": 35014,
+          "bytes": 11601325
+        },
+        {
+          "atMs": 35251.30000001192,
+          "bytes": 11664997
+        },
+        {
+          "atMs": 35418.90000000596,
+          "bytes": 11783572
+        },
+        {
+          "atMs": 35912,
+          "bytes": 11972281
+        },
+        {
+          "atMs": 36085.30000001192,
+          "bytes": 12023312
+        },
+        {
+          "atMs": 36242.30000001192,
+          "bytes": 12088904
+        },
+        {
+          "atMs": 36524.90000000596,
+          "bytes": 12209078
+        },
+        {
+          "atMs": 36705.59999999404,
+          "bytes": 12293518
+        },
+        {
+          "atMs": 36884.5,
+          "bytes": 12351887
+        },
+        {
+          "atMs": 37086.30000001192,
+          "bytes": 12425242
+        },
+        {
+          "atMs": 37248.90000000596,
+          "bytes": 12497516
+        },
+        {
+          "atMs": 37438.5,
+          "bytes": 12582912
+        },
+        {
+          "atMs": 37438.5,
+          "bytes": 12610481
+        },
+        {
+          "atMs": 37598.09999999404,
+          "bytes": 12696022
+        },
+        {
+          "atMs": 37773.30000001192,
+          "bytes": 12769241
+        },
+        {
+          "atMs": 37929.09999999404,
+          "bytes": 12828473
+        },
+        {
+          "atMs": 37989.40000000596,
+          "bytes": 12886033
+        },
+        {
+          "atMs": 38236.69999998808,
+          "bytes": 13008558
+        },
+        {
+          "atMs": 38382.30000001192,
+          "bytes": 13092268
+        },
+        {
+          "atMs": 38636,
+          "bytes": 13146573
+        },
+        {
+          "atMs": 38691.80000001192,
+          "bytes": 13219071
+        },
+        {
+          "atMs": 38942,
+          "bytes": 13277769
+        },
+        {
+          "atMs": 39026.80000001192,
+          "bytes": 13339178
+        },
+        {
+          "atMs": 39199,
+          "bytes": 13352977
+        },
+        {
+          "atMs": 39445.90000000596,
+          "bytes": 13415561
+        },
+        {
+          "atMs": 39571.69999998808,
+          "bytes": 13481394
+        },
+        {
+          "atMs": 39711.5,
+          "bytes": 13545603
+        },
+        {
+          "atMs": 40022.59999999404,
+          "bytes": 13607719
+        },
+        {
+          "atMs": 40049.19999998808,
+          "bytes": 13661356
+        },
+        {
+          "atMs": 40163.69999998808,
+          "bytes": 13723024
+        },
+        {
+          "atMs": 40434.69999998808,
+          "bytes": 13805813
+        },
+        {
+          "atMs": 40566.40000000596,
+          "bytes": 13882749
+        },
+        {
+          "atMs": 40732.90000000596,
+          "bytes": 13954251
+        },
+        {
+          "atMs": 40898.90000000596,
+          "bytes": 14083054
+        },
+        {
+          "atMs": 41019.30000001192,
+          "bytes": 14183969
+        },
+        {
+          "atMs": 41221.80000001192,
+          "bytes": 14266063
+        },
+        {
+          "atMs": 41381.5,
+          "bytes": 14353260
+        },
+        {
+          "atMs": 41551.69999998808,
+          "bytes": 14415745
+        },
+        {
+          "atMs": 41738.90000000596,
+          "bytes": 14512918
+        },
+        {
+          "atMs": 41800.59999999404,
+          "bytes": 14569496
+        },
+        {
+          "atMs": 41987,
+          "bytes": 14668011
+        },
+        {
+          "atMs": 42161.09999999404,
+          "bytes": 14680064
+        },
+        {
+          "atMs": 42161.19999998808,
+          "bytes": 14756410
+        },
+        {
+          "atMs": 42236.40000000596,
+          "bytes": 14856258
+        },
+        {
+          "atMs": 42444.90000000596,
+          "bytes": 14925841
+        },
+        {
+          "atMs": 42587,
+          "bytes": 15016447
+        },
+        {
+          "atMs": 42600,
+          "bytes": 15024145
+        },
+        {
+          "atMs": 42854,
+          "bytes": 15109414
+        },
+        {
+          "atMs": 42938.59999999404,
+          "bytes": 15200300
+        },
+        {
+          "atMs": 43100.69999998808,
+          "bytes": 15270766
+        },
+        {
+          "atMs": 43139.59999999404,
+          "bytes": 15286289
+        },
+        {
+          "atMs": 43367.19999998808,
+          "bytes": 15346049
+        },
+        {
+          "atMs": 43534.30000001192,
+          "bytes": 15422449
+        },
+        {
+          "atMs": 43679.80000001192,
+          "bytes": 15487786
+        },
+        {
+          "atMs": 43927.09999999404,
+          "bytes": 15576969
+        },
+        {
+          "atMs": 44125.19999998808,
+          "bytes": 15663708
+        },
+        {
+          "atMs": 44209,
+          "bytes": 15801004
+        },
+        {
+          "atMs": 44286.80000001192,
+          "bytes": 15859736
+        },
+        {
+          "atMs": 44399.69999998808,
+          "bytes": 15925265
+        },
+        {
+          "atMs": 44681.59999999404,
+          "bytes": 16007998
+        },
+        {
+          "atMs": 44838.80000001192,
+          "bytes": 16109259
+        },
+        {
+          "atMs": 44954.09999999404,
+          "bytes": 16195960
+        },
+        {
+          "atMs": 45120.59999999404,
+          "bytes": 16267470
+        },
+        {
+          "atMs": 45336.19999998808,
+          "bytes": 16338537
+        },
+        {
+          "atMs": 45464.19999998808,
+          "bytes": 16406583
+        },
+        {
+          "atMs": 45664.40000000596,
+          "bytes": 16453964
+        },
+        {
+          "atMs": 45840.90000000596,
+          "bytes": 16502518
+        },
+        {
+          "atMs": 45911.90000000596,
+          "bytes": 16575790
+        },
+        {
+          "atMs": 46272.09999999404,
+          "bytes": 16699747
+        },
+        {
+          "atMs": 46428.40000000596,
+          "bytes": 16777216
+        },
+        {
+          "atMs": 46428.40000000596,
+          "bytes": 16789899
+        },
+        {
+          "atMs": 46713.59999999404,
+          "bytes": 16928792
+        },
+        {
+          "atMs": 46823.80000001192,
+          "bytes": 17027437
+        },
+        {
+          "atMs": 46978.09999999404,
+          "bytes": 17093048
+        },
+        {
+          "atMs": 47178.5,
+          "bytes": 17157749
+        },
+        {
+          "atMs": 47373.59999999404,
+          "bytes": 17231303
+        },
+        {
+          "atMs": 47555.59999999404,
+          "bytes": 17291255
+        },
+        {
+          "atMs": 47734.69999998808,
+          "bytes": 17347575
+        },
+        {
+          "atMs": 47934.59999999404,
+          "bytes": 17408315
+        },
+        {
+          "atMs": 48051.30000001192,
+          "bytes": 17462773
+        },
+        {
+          "atMs": 48265.5,
+          "bytes": 17520233
+        },
+        {
+          "atMs": 48320.30000001192,
+          "bytes": 17580680
+        },
+        {
+          "atMs": 48378.59999999404,
+          "bytes": 17601780
+        },
+        {
+          "atMs": 48523.40000000596,
+          "bytes": 17690189
+        },
+        {
+          "atMs": 48782,
+          "bytes": 17764487
+        },
+        {
+          "atMs": 48907,
+          "bytes": 17845407
+        },
+        {
+          "atMs": 49120.80000001192,
+          "bytes": 17921024
+        },
+        {
+          "atMs": 49148.80000001192,
+          "bytes": 17999895
+        },
+        {
+          "atMs": 49241.40000000596,
+          "bytes": 18057222
+        },
+        {
+          "atMs": 49510.90000000596,
+          "bytes": 18117945
+        },
+        {
+          "atMs": 49707.59999999404,
+          "bytes": 18166482
+        },
+        {
+          "atMs": 49894.80000001192,
+          "bytes": 18219032
+        },
+        {
+          "atMs": 50078.80000001192,
+          "bytes": 18278997
+        },
+        {
+          "atMs": 50114.40000000596,
+          "bytes": 18340686
+        },
+        {
+          "atMs": 50203.19999998808,
+          "bytes": 18393113
+        },
+        {
+          "atMs": 50391.59999999404,
+          "bytes": 18455094
+        },
+        {
+          "atMs": 50495.59999999404,
+          "bytes": 18513576
+        },
+        {
+          "atMs": 51032.40000000596,
+          "bytes": 18608669
+        },
+        {
+          "atMs": 51763,
+          "bytes": 18738663
+        },
+        {
+          "atMs": 51846.90000000596,
+          "bytes": 18782402
+        },
+        {
+          "atMs": 52018.80000001192,
+          "bytes": 18826827
+        },
+        {
+          "atMs": 52145.09999999404,
+          "bytes": 18856390
+        },
+        {
+          "atMs": 52301.69999998808,
+          "bytes": 18874368
+        },
+        {
+          "atMs": 52301.80000001192,
+          "bytes": 18904158
+        },
+        {
+          "atMs": 52443.19999998808,
+          "bytes": 18951149
+        },
+        {
+          "atMs": 52582.19999998808,
+          "bytes": 19029597
+        },
+        {
+          "atMs": 52738.40000000596,
+          "bytes": 19112426
+        },
+        {
+          "atMs": 52896.69999998808,
+          "bytes": 19193145
+        },
+        {
+          "atMs": 53162,
+          "bytes": 19267188
+        },
+        {
+          "atMs": 53352.19999998808,
+          "bytes": 19333137
+        },
+        {
+          "atMs": 53417.19999998808,
+          "bytes": 19393465
+        },
+        {
+          "atMs": 53572,
+          "bytes": 19468849
+        },
+        {
+          "atMs": 53850.59999999404,
+          "bytes": 19540436
+        },
+        {
+          "atMs": 54055.40000000596,
+          "bytes": 19593675
+        },
+        {
+          "atMs": 54126.19999998808,
+          "bytes": 19666212
+        },
+        {
+          "atMs": 54527.09999999404,
+          "bytes": 19803262
+        },
+        {
+          "atMs": 54667.59999999404,
+          "bytes": 19862553
+        },
+        {
+          "atMs": 54823.30000001192,
+          "bytes": 19927522
+        },
+        {
+          "atMs": 55185.40000000596,
+          "bytes": 19984031
+        },
+        {
+          "atMs": 55326.40000000596,
+          "bytes": 20045696
+        },
+        {
+          "atMs": 55463.19999998808,
+          "bytes": 20097406
+        },
+        {
+          "atMs": 55621.30000001192,
+          "bytes": 20192420
+        },
+        {
+          "atMs": 55781.40000000596,
+          "bytes": 20272532
+        },
+        {
+          "atMs": 55961.19999998808,
+          "bytes": 20300774
+        },
+        {
+          "atMs": 56105.19999998808,
+          "bytes": 20451345
+        },
+        {
+          "atMs": 56148.59999999404,
+          "bytes": 20639768
+        },
+        {
+          "atMs": 56275.69999998808,
+          "bytes": 20824081
+        },
+        {
+          "atMs": 56307.69999998808,
+          "bytes": 20971520
+        },
+        {
+          "atMs": 56307.80000001192,
+          "bytes": 21016595
+        },
+        {
+          "atMs": 56341.59999999404,
+          "bytes": 21192721
+        },
+        {
+          "atMs": 56383,
+          "bytes": 21364760
+        },
+        {
+          "atMs": 56510.59999999404,
+          "bytes": 21557265
+        },
+        {
+          "atMs": 56565.90000000596,
+          "bytes": 21741561
+        },
+        {
+          "atMs": 56576.59999999404,
+          "bytes": 21921816
+        },
+        {
+          "atMs": 56683.40000000596,
+          "bytes": 22102033
+        },
+        {
+          "atMs": 56756.19999998808,
+          "bytes": 22478865
+        },
+        {
+          "atMs": 56990.5,
+          "bytes": 22662835
+        },
+        {
+          "atMs": 57095.5,
+          "bytes": 22839313
+        },
+        {
+          "atMs": 57116.90000000596,
+          "bytes": 23068672
+        },
+        {
+          "atMs": 57116.90000000596,
+          "bytes": 23101457
+        },
+        {
+          "atMs": 57132.09999999404,
+          "bytes": 23298065
+        },
+        {
+          "atMs": 57132.19999998808,
+          "bytes": 23724056
+        },
+        {
+          "atMs": 57161.5,
+          "bytes": 23846929
+        },
+        {
+          "atMs": 57193.59999999404,
+          "bytes": 24117265
+        },
+        {
+          "atMs": 57364.59999999404,
+          "bytes": 24670225
+        },
+        {
+          "atMs": 57454.40000000596,
+          "bytes": 25071640
+        },
+        {
+          "atMs": 57503.80000001192,
+          "bytes": 25165824
+        },
+        {
+          "atMs": 57503.80000001192,
+          "bytes": 25255953
+        },
+        {
+          "atMs": 57593.19999998808,
+          "bytes": 25800721
+        },
+        {
+          "atMs": 57737.30000001192,
+          "bytes": 26353688
+        },
+        {
+          "atMs": 57801.30000001192,
+          "bytes": 26783761
+        },
+        {
+          "atMs": 57914.90000000596,
+          "bytes": 27082745
+        },
+        {
+          "atMs": 57958.69999998808,
+          "bytes": 27262976
+        },
+        {
+          "atMs": 57958.90000000596,
+          "bytes": 27459601
+        },
+        {
+          "atMs": 58009,
+          "bytes": 27631633
+        },
+        {
+          "atMs": 58055.09999999404,
+          "bytes": 27836433
+        },
+        {
+          "atMs": 58076.19999998808,
+          "bytes": 28012561
+        },
+        {
+          "atMs": 58086.80000001192,
+          "bytes": 28082193
+        },
+        {
+          "atMs": 58213.80000001192,
+          "bytes": 28213265
+        },
+        {
+          "atMs": 58213.80000001192,
+          "bytes": 28266513
+        },
+        {
+          "atMs": 58252.90000000596,
+          "bytes": 28655633
+        },
+        {
+          "atMs": 58291.19999998808,
+          "bytes": 28741306
+        },
+        {
+          "atMs": 58415,
+          "bytes": 28917777
+        },
+        {
+          "atMs": 58430.30000001192,
+          "bytes": 29110289
+        },
+        {
+          "atMs": 58615.30000001192,
+          "bytes": 29212605
+        },
+        {
+          "atMs": 58879.09999999404,
+          "bytes": 29249125
+        },
+        {
+          "atMs": 59060.59999999404,
+          "bytes": 29298705
+        },
+        {
+          "atMs": 59223.5,
+          "bytes": 29346029
+        },
+        {
+          "atMs": 59441.5,
+          "bytes": 29360128
+        },
+        {
+          "atMs": 59441.5,
+          "bytes": 29402694
+        },
+        {
+          "atMs": 59625.30000001192,
+          "bytes": 29440819
+        },
+        {
+          "atMs": 59850,
+          "bytes": 29487628
+        },
+        {
+          "atMs": 59896.59999999404,
+          "bytes": 29543634
+        },
+        {
+          "atMs": 60188.5,
+          "bytes": 29596003
+        },
+        {
+          "atMs": 60231.19999998808,
+          "bytes": 29641964
+        },
+        {
+          "atMs": 60378.5,
+          "bytes": 29689726
+        },
+        {
+          "atMs": 60581.90000000596,
+          "bytes": 29729720
+        },
+        {
+          "atMs": 60803.80000001192,
+          "bytes": 29771121
+        },
+        {
+          "atMs": 60878.90000000596,
+          "bytes": 29803329
+        },
+        {
+          "atMs": 61177,
+          "bytes": 29846510
+        },
+        {
+          "atMs": 61240.19999998808,
+          "bytes": 29884339
+        },
+        {
+          "atMs": 61486.80000001192,
+          "bytes": 29921515
+        },
+        {
+          "atMs": 61600.30000001192,
+          "bytes": 29987347
+        },
+        {
+          "atMs": 61768.19999998808,
+          "bytes": 30026796
+        },
+        {
+          "atMs": 61940.19999998808,
+          "bytes": 30080254
+        },
+        {
+          "atMs": 62158.30000001192,
+          "bytes": 30128072
+        },
+        {
+          "atMs": 62251.59999999404,
+          "bytes": 30177592
+        },
+        {
+          "atMs": 62438.80000001192,
+          "bytes": 30218031
+        },
+        {
+          "atMs": 62572.5,
+          "bytes": 30267431
+        },
+        {
+          "atMs": 62803.40000000596,
+          "bytes": 30318560
+        },
+        {
+          "atMs": 62988.09999999404,
+          "bytes": 30389224
+        },
+        {
+          "atMs": 63160.09999999404,
+          "bytes": 30438494
+        },
+        {
+          "atMs": 63301.30000001192,
+          "bytes": 30484737
+        },
+        {
+          "atMs": 63362.30000001192,
+          "bytes": 30508232
+        },
+        {
+          "atMs": 63506.40000000596,
+          "bytes": 30571101
+        },
+        {
+          "atMs": 63711.30000001192,
+          "bytes": 30627543
+        },
+        {
+          "atMs": 64034.09999999404,
+          "bytes": 30676220
+        },
+        {
+          "atMs": 64120.90000000596,
+          "bytes": 30721659
+        },
+        {
+          "atMs": 64335.5,
+          "bytes": 30774010
+        },
+        {
+          "atMs": 64496.30000001192,
+          "bytes": 30819959
+        },
+        {
+          "atMs": 64575.69999998808,
+          "bytes": 30867473
+        },
+        {
+          "atMs": 64731.19999998808,
+          "bytes": 30922080
+        },
+        {
+          "atMs": 64841.09999999404,
+          "bytes": 30971538
+        },
+        {
+          "atMs": 65461.5,
+          "bytes": 31019971
+        },
+        {
+          "atMs": 65631.69999998808,
+          "bytes": 31067721
+        },
+        {
+          "atMs": 65679.40000000596,
+          "bytes": 31074321
+        },
+        {
+          "atMs": 65978.5,
+          "bytes": 31105792
+        },
+        {
+          "atMs": 66458.09999999404,
+          "bytes": 31153664
+        },
+        {
+          "atMs": 66526.59999999404,
+          "bytes": 31207457
+        },
+        {
+          "atMs": 66622,
+          "bytes": 31259748
+        },
+        {
+          "atMs": 66698.09999999404,
+          "bytes": 31307769
+        },
+        {
+          "atMs": 66868.80000001192,
+          "bytes": 31359402
+        },
+        {
+          "atMs": 67009.5,
+          "bytes": 31392962
+        },
+        {
+          "atMs": 67071.59999999404,
+          "bytes": 31403578
+        },
+        {
+          "atMs": 67195.90000000596,
+          "bytes": 31452436
+        }
+      ],
+      "headersMs": 627.5999999940395,
+      "contentEncoding": "gzip",
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "bytes": 31452436,
+      "totalMs": 67221.19999998808,
+      "maxDecodedGapMs": 730.5999999940395
+    }
+  ],
+  "versionAfter": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "allOriginalBudgetsMet": null,
+  "consumerTimingNote": "Worker intentionally returns full-font headers after body validation; consumer headers are not the upstream7s budget. Network-only observer is separate; it does not observe Worker decoded-reader idle directly.",
+  "workerNetwork": {
+    "kind": "r16-passive-worker-font-network-v1",
+    "workerUrl": "https://numeron.obelisk.build/mir2-asset-worker.js",
+    "contextScoped": true,
+    "source": "service-worker-upstream-cdp",
+    "setupMs": 5,
+    "finishMs": 39,
+    "workersAttached": 1,
+    "otherContextWorkersIgnored": 0,
+    "droppedRequests": 0,
+    "cleanupComplete": true,
+    "observerErrors": [],
+    "rows": [
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 10,
+        "observedAtMs": 4,
+        "encodedBodyBytes": 7671510,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 265,
+        "encodedBytes": 7671725,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 64607,
+        "durationMs": 64597
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+        "requestAtMs": 10,
+        "observedAtMs": 4,
+        "encodedBodyBytes": 305319,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 360,
+        "encodedBytes": 305522,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 13211,
+        "durationMs": 13201
+      }
+    ],
+    "limits": [
+      "future-worker requests made before Network.enable may be unobserved; no target is paused",
+      "encodedBytes from loadingFinished includes protocol overhead; failed rows only expose observed encoded body counts",
+      "only exact Worker URL in the supplied browser context is observed; no headers or payloads are accessed"
+    ]
+  },
+  "workerObserverSha256": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+  "finishedAt": "2026-11-14T05:27:43.724Z",
+  "producerSha256": "ece7900e4196d0d7d4605bb25f1f3c55c1f307aec3eaecdd17e43a480f67941d"
+}

@@ -1,0 +1,156 @@
+{
+  "owner": "Root",
+  "kind": "Source26-independent-actual-finite-review",
+  "reviewer": "/root/source24_buy_chain_review",
+  "generatedAtUtc": "2026-10-07T08:41:03.153Z",
+  "result": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-finite-result01.json",
+    "bytes": 57945,
+    "sha256": "41f3fbc7b95efb48a0680d5b79ce98b8b261764f7a22e24802e08c9102079958"
+  },
+  "qaResult": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source26-finite-result01.json",
+    "bytes": 57945,
+    "sha256": "41f3fbc7b95efb48a0680d5b79ce98b8b261764f7a22e24802e08c9102079958"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source26-rust04-snapshot.json",
+    "bytes": 275876,
+    "sha256": "f185703676e239d6d1e11dde301c94e39ebd2e5a100d98a629336c94c0f87f7a"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source26-rust04-review.json",
+    "bytes": 1853,
+    "sha256": "038b5de4e2c00ce6befe2855182f8dda698fe16a6f16c07e40c73558bd4c6525"
+  },
+  "actualFiniteAccepted": true,
+  "confirmedBlockers": 0,
+  "reviewedResultPinRefs": 90,
+  "expandedConfigPinRefs": 118,
+  "expandedUniquePaths": 81,
+  "policyPathShaRefs": 63,
+  "currentSourceRegularInputs": 881,
+  "currentSourceDrift": 0,
+  "acceptedSuccessfulTestExecutions": 222,
+  "newDistinctTestDeclarationsExecuted": 33,
+  "successfulGroups": [
+    {
+      "name": "core01",
+      "passed": 173
+    },
+    {
+      "name": "simulation-purchase03",
+      "passed": 12
+    },
+    {
+      "name": "simulation-gold03",
+      "passed": 15
+    },
+    {
+      "name": "simulation-pearl03",
+      "passed": 6
+    },
+    {
+      "name": "gateway-gold02",
+      "passed": 16
+    }
+  ],
+  "retainedFailures": [
+    {
+      "run": "simulation-purchase01",
+      "exitCode": 101,
+      "executedTests": 0,
+      "reason": "Fixture count u32 vs actual UserItem u16; only two test type usages corrected."
+    },
+    {
+      "run": "simulation-purchase02",
+      "exitCode": 101,
+      "passed": 11,
+      "failed": 1,
+      "reason": "Invalid nonzeroUID assertion in old resale oracle; legalUID0 retained and actualcarrier/liveidentity assertions added, completeold/newcarrier equality retained."
+    }
+  ],
+  "guardActualCalls": 7,
+  "guardSerial": true,
+  "actualGetVolumeC": true,
+  "thresholdBytes": "53687091200",
+  "freshnessMs": "2000",
+  "postChildPolicy": "B",
+  "allExitedDisposed": true,
+  "conservativeSampleEndToChildStartUpperMs": [
+    81,
+    78,
+    81,
+    75,
+    83,
+    90,
+    74
+  ],
+  "coreCarryQualification": "Five selected successful calls,222total. Core173 executed onRust02; finalRust04 changed only unrelatedSimulationtest fixture, allCoreeffectiveinputs unchanged so boundedcarry. Other49 freshRust04. Failed11passes not added; no wholeworkspace/currentplayer acceptance.",
+  "documentationPins": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "bytes": 240446,
+      "sha256": "46613f2d6596e021f7a19f83429d625c1859b650f36ce0f0871469828aa96ab2"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "bytes": 858566,
+      "sha256": "9c2674792f01a5afe52425bbc82d3a0d71376fc4a60345f504503ee961f005f5"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 978332,
+      "sha256": "117c85db2ae74394879bf476fc19bdb678134e8a4abb468748e8b113908f0570"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "bytes": 521284,
+      "sha256": "99f5b9f8e14a06eb7fa013e0249282478e22852370b5eaaf991dcbba1ce4622d"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "bytes": 463813,
+      "sha256": "7371299901b6102160ed235ab884ba4c00bb677f6604d6593497f28a3642390e"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "bytes": 600091,
+      "sha256": "91fcb0be738e169195e1e42939afa83db46ef2d8c2263796af5c1f90cdea1b58"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 179972,
+      "sha256": "081abc196fe26083f5d7f77a2f5ad39c0b87a22f9c1f07d5255e98fc17b990ce"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 53462,
+      "sha256": "59a12f11c777be1504e0f6445bf81dd21a002dcac114ce3cc16a6b18c064c101"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "bytes": 47884,
+      "sha256": "22aafda9e9ebe20a2d1a18ec536ec8cdd98bcba475e715b9b51634364fcaf953"
+    }
+  ],
+  "documentHistoricalTextPreserved": true,
+  "reviewActions": "Independent readonly builtin FS/crypto/data/source only; no test/build/helper/product execution by reviewer.",
+  "limitations": [
+    "Durable journal + complete character checkpoint + receipt/revision atomic transaction and cross-restart dedup.",
+    "Actual owner route/remote versioned result/query plus capability acceptance; unsupported no fallback.",
+    "Strict wire/ABI and Native-Web actual dispatcher/receiver/fullsnapshot integration.",
+    "Updated matching production bundle, asset runtime verification, actual login/combat/save/relogin/mobile/frontend acceptance."
+  ],
+  "source26ProductionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "playerAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "documentHistoryVerifier": "Root",
+  "documentationReviewQualification": "Root checked exact removal of newly inserted Source26 section restores each original document. Independent reviewer accepted actual finite record and current881 source pins; no separate frontend/player/doc acceptance inferred."
+}

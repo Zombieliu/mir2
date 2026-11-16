@@ -1,0 +1,42 @@
+{
+  "evidenceKind": "read-only-linguistic-source-review",
+  "scope": "all assigned content noun classes across native-i18n source files; includes every name and description, excludes content.quest and writer-owned NPC prose",
+  "sourceOverlaySha256": "6c64f1791f8743831f13b3d89aea298c629f0ae0b18722fc4b80f274a9506310",
+  "reviewedKeys": 3545,
+  "uniqueChineseTexts": 3068,
+  "uniqueEnglishChinesePairs": 3101,
+  "categoryKeyCounts": {
+    "buff": 2,
+    "entity": 21,
+    "equipment": 14,
+    "item": 1896,
+    "map": 464,
+    "monster": 557,
+    "npc": 376,
+    "skill": 4,
+    "magic": 211
+  },
+  "categoryUniqueChineseTexts": {
+    "buff": 2,
+    "entity": 21,
+    "equipment": 14,
+    "item": 1820,
+    "map": 296,
+    "monster": 552,
+    "npc": 271,
+    "skill": 4,
+    "magic": 211
+  },
+  "suggestions": 167,
+  "latinOrProperNameKeys": 382,
+  "placeholderCommandAndNumberPreservation": "asserted for every proposed replacement",
+  "repositoryChanges": false,
+  "limitations": [
+    "Text review is not gameplay mechanics verification or human frontend acceptance.",
+    "Original Korean romanized proper names without an existing official/shared Chinese source are recorded separately; no fabricated canonical translation.",
+    "Lightning/different spell ThunderBolt must not be merged by broad English alias lookup."
+  ],
+  "reviewComplete": true,
+  "pendingWriterIntegration": true,
+  "humanCanonicalNameAcceptance": false
+}

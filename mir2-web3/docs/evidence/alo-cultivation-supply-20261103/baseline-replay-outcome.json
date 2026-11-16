@@ -1,0 +1,820 @@
+{
+  "schema": "mir2-windows-cultivation-baseline/1",
+  "result": "passed-for-frozen-r16-preset-cultivation-baseline",
+  "reviewedAtUtc": "2026-11-03T10:02:58.584Z",
+  "scope": {
+    "client": "installed Windows R16 native executable, frozen baseline before new UI integration",
+    "operatorGuiFlow": true,
+    "externalHumanAcceptance": false,
+    "newNaturalLanguageUiAccepted": false,
+    "newSupplyUiAccepted": false,
+    "decisionEngine": "rules",
+    "modelCalls": 0,
+    "nativeSha256": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+    "conclusion": "Ordinary Windows party, preset teaching, changed action priority, same-character process restart and GUI archive export are evidenced. This is not acceptance of the newly implemented natural-language or supply UI."
+  },
+  "identity": {
+    "ownerName": "Ownere7414e",
+    "actorName": "Alod5cc2b",
+    "archiveId": "e6a5520c-c9f8-4192-9ca4-89817e85598f",
+    "worldEpoch": "2203fd75-cf6e-4911-9b4a-15ff52153412",
+    "observedActorAttackerId": 1000,
+    "observedOwnerAttackerId": 50003
+  },
+  "sources": {
+    "eventLog": {
+      "file": "windows-replay-events.jsonl",
+      "sha256": "ed0d1ecd510fbb23360cdc01f51b71b8901e05132f0d74ca0d40ac580fc71613",
+      "bytes": 473160,
+      "records": 2965,
+      "phaseCounts": [
+        {
+          "name": "after-teaching-combat",
+          "count": 403
+        },
+        {
+          "name": "before-teaching",
+          "count": 295
+        },
+        {
+          "name": "bootstrap",
+          "count": 20
+        },
+        {
+          "name": "invite-and-follow",
+          "count": 1829
+        },
+        {
+          "name": "preset-teaching",
+          "count": 17
+        },
+        {
+          "name": "process-restart",
+          "count": 61
+        },
+        {
+          "name": "restarted-combat",
+          "count": 340
+        }
+      ],
+      "packetCounts": [
+        {
+          "name": "GainedItem",
+          "count": 3
+        },
+        {
+          "name": "GroupMemberInfo",
+          "count": 3
+        },
+        {
+          "name": "HealthChanged",
+          "count": 2
+        },
+        {
+          "name": "ObjectAttack",
+          "count": 70
+        },
+        {
+          "name": "ObjectDied",
+          "count": 5
+        },
+        {
+          "name": "ObjectItem",
+          "count": 7
+        },
+        {
+          "name": "ObjectStruck",
+          "count": 70
+        },
+        {
+          "name": "ObjectWalk",
+          "count": 22
+        },
+        {
+          "name": "SendMemberLocation",
+          "count": 6
+        },
+        {
+          "name": "UserLocation",
+          "count": 42
+        }
+      ]
+    },
+    "screenshots": [
+      {
+        "file": "01-baseline-untrained.jpg",
+        "bytes": 171429,
+        "sha256": "8e2bb2eafb83e1f16f85ec506e30d772b82f13bada6fc254c458abdb1ab5b061",
+        "lastWrittenAtUtc": "2026-11-03T09:04:00.572Z"
+      },
+      {
+        "file": "02-before-teaching-loot-during-combat.jpg",
+        "bytes": 313342,
+        "sha256": "66e159c8197938c7512486149e4c8c58cb2a2b5d4261815b318041bf82c534db",
+        "lastWrittenAtUtc": "2026-11-03T09:38:25.626Z"
+      },
+      {
+        "file": "03-preset-teaching-saved-v2.jpg",
+        "bytes": 172915,
+        "sha256": "7ab8d573cba39ceeecbfcedb0cf12972c45b7f0a3aff0186c5b3d85c1c3e76df",
+        "lastWrittenAtUtc": "2026-11-03T09:38:53.411Z"
+      },
+      {
+        "file": "04-after-teaching-support.jpg",
+        "bytes": 314888,
+        "sha256": "131d99ceb203ca7d780a695ada14e01972acfcfddf9301a5324c2f144416c5ee",
+        "lastWrittenAtUtc": "2026-11-03T09:40:41.029Z"
+      },
+      {
+        "file": "05-after-combat-loot.jpg",
+        "bytes": 315014,
+        "sha256": "868dccd7833c8c314b56d62b34feea679d9809200b92a30d654b07b32f87e220",
+        "lastWrittenAtUtc": "2026-11-03T09:43:44.614Z"
+      },
+      {
+        "file": "06-restarted-same-archive-v2.jpg",
+        "bytes": 172913,
+        "sha256": "8ef0f37362150d0dc75f14cea344518dffc821f1ce832e17262ebd3b6e9248ff",
+        "lastWrittenAtUtc": "2026-11-03T09:47:41.206Z"
+      },
+      {
+        "file": "07-restarted-adventure.jpg",
+        "bytes": 312469,
+        "sha256": "55c57cfc8eb5cb95c5f57adfa3a67376a0323331d3f42a18b6b962c11ffbc1a9",
+        "lastWrittenAtUtc": "2026-11-03T09:51:14.411Z"
+      }
+    ],
+    "metadataFile": "baseline-private-2.json",
+    "export": {
+      "file": "exports/companion-growth-ab987e2a-64bf-4984-b2bc-c04e0026e862.json",
+      "bytes": 8826,
+      "sha256": "89d8609002ec582e2d257d182550a6eab668a13c0a95e2dec70747be9566df88"
+    }
+  },
+  "guiFlow": {
+    "basis": "Operator performed the ordinary invitation, preset-teach, re-entry and export controls in the native GUI; screenshots, authoritative party packets and the actual export corroborate the resulting states. This is not an independent human retention test.",
+    "untrainedScreenshot": "01-baseline-untrained.jpg",
+    "savedTeachingScreenshot": "03-preset-teaching-saved-v2.jpg",
+    "reentryScreenshot": "06-restarted-same-archive-v2.jpg",
+    "partyEvidence": [
+      {
+        "sourceLine": 1272,
+        "atUnixMs": 1793696640836,
+        "atUtc": "2026-11-03T09:04:00.836Z",
+        "phase": "invite-and-follow",
+        "leaderName": "Ownere7414e",
+        "members": [
+          {
+            "name": "Ownere7414e",
+            "online": true
+          },
+          {
+            "name": "Alod5cc2b",
+            "online": true
+          }
+        ]
+      },
+      {
+        "sourceLine": 2061,
+        "atUnixMs": 1793698561799,
+        "atUtc": "2026-11-03T09:36:01.799Z",
+        "phase": "before-teaching",
+        "leaderName": "Ownere7414e",
+        "members": [
+          {
+            "name": "Ownere7414e",
+            "online": true
+          },
+          {
+            "name": "Alod5cc2b",
+            "online": true
+          }
+        ]
+      },
+      {
+        "sourceLine": 2615,
+        "atUnixMs": 1793699292729,
+        "atUtc": "2026-11-03T09:48:12.729Z",
+        "phase": "process-restart",
+        "leaderName": "Ownere7414e",
+        "members": [
+          {
+            "name": "Ownere7414e",
+            "online": true
+          },
+          {
+            "name": "Alod5cc2b",
+            "online": true
+          }
+        ]
+      }
+    ],
+    "before": {
+      "policyVersion": 1,
+      "assistBeforeLoot": false,
+      "lootOnlyAfterCombat": false,
+      "askBeforeLeaving": false
+    },
+    "after": {
+      "policyVersion": 2,
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true,
+      "askBeforeLeaving": true
+    }
+  },
+  "beforeTeaching": {
+    "policyVersion": 1,
+    "drop": {
+      "sourceLine": 2070,
+      "atUnixMs": 1793698620164,
+      "atUtc": "2026-11-03T09:37:00.164Z",
+      "phase": "before-teaching",
+      "packet": "ObjectItem",
+      "objectId": 50004,
+      "position": {
+        "x": 287,
+        "y": 613
+      },
+      "itemName": "Candle"
+    },
+    "pickup": {
+      "sourceLine": 2132,
+      "atUnixMs": 1793698680425,
+      "atUtc": "2026-11-03T09:38:00.425Z",
+      "phase": "before-teaching",
+      "action": {
+        "kind": "loot",
+        "policyVersion": 1,
+        "targetId": 50004,
+        "target": {
+          "x": 287,
+          "y": 613
+        },
+        "performed": true,
+        "changed": true
+      }
+    },
+    "gainedItem": {
+      "sourceLine": 2130,
+      "atUnixMs": 1793698680408,
+      "atUtc": "2026-11-03T09:38:00.408Z",
+      "phase": "before-teaching",
+      "packet": "GainedItem",
+      "itemTemplateIndex": 722,
+      "quantity": 1
+    },
+    "liveTargetId": 206641,
+    "targetDeath": {
+      "sourceLine": 2139,
+      "atUnixMs": 1793698684056,
+      "atUtc": "2026-11-03T09:38:04.056Z",
+      "phase": "before-teaching",
+      "packet": "ObjectDied",
+      "objectId": 206641,
+      "position": {
+        "x": 286,
+        "y": 615
+      }
+    },
+    "ownerHitCountBeforePickup": 17,
+    "ownerHitsAfterPickupBeforeDeath": [
+      {
+        "sourceLine": 2134,
+        "atUnixMs": 1793698681259,
+        "atUtc": "2026-11-03T09:38:01.259Z",
+        "phase": "before-teaching",
+        "packet": "ObjectStruck",
+        "objectId": 206641,
+        "attackerId": 50003,
+        "position": {
+          "x": 286,
+          "y": 615
+        }
+      },
+      {
+        "sourceLine": 2136,
+        "atUnixMs": 1793698682656,
+        "atUtc": "2026-11-03T09:38:02.656Z",
+        "phase": "before-teaching",
+        "packet": "ObjectStruck",
+        "objectId": 206641,
+        "attackerId": 50003,
+        "position": {
+          "x": 286,
+          "y": 615
+        }
+      },
+      {
+        "sourceLine": 2138,
+        "atUnixMs": 1793698684055,
+        "atUtc": "2026-11-03T09:38:04.055Z",
+        "phase": "before-teaching",
+        "packet": "ObjectStruck",
+        "objectId": 206641,
+        "attackerId": 50003,
+        "position": {
+          "x": 286,
+          "y": 615
+        }
+      }
+    ],
+    "pickupPrecededDeathByMs": 3631,
+    "conclusion": "Alo actually gained Candle 50004 while the owner was still fighting target 206641; continued owner strikes and the later death corroborate that it was alive at pickup."
+  },
+  "afterTeaching": {
+    "policyVersion": 2,
+    "targetId": 206644,
+    "dropPresentDuringCombat": {
+      "sourceLine": 2150,
+      "atUnixMs": 1793698733698,
+      "atUtc": "2026-11-03T09:38:53.698Z",
+      "phase": "preset-teaching",
+      "packet": "ObjectItem",
+      "objectId": 50005,
+      "position": {
+        "x": 286,
+        "y": 612
+      },
+      "itemName": "Candle"
+    },
+    "actorObjectAttackCount": 5,
+    "actorObjectStruckHitCount": 5,
+    "actualHits": [
+      {
+        "sourceLine": 2204,
+        "atUnixMs": 1793698764569,
+        "atUtc": "2026-11-03T09:39:24.569Z",
+        "phase": "after-teaching-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206644,
+        "attackerId": 1000,
+        "position": {
+          "x": 293,
+          "y": 614
+        }
+      },
+      {
+        "sourceLine": 2212,
+        "atUnixMs": 1793698765186,
+        "atUtc": "2026-11-03T09:39:25.186Z",
+        "phase": "after-teaching-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206644,
+        "attackerId": 1000,
+        "position": {
+          "x": 293,
+          "y": 614
+        }
+      },
+      {
+        "sourceLine": 2219,
+        "atUnixMs": 1793698765863,
+        "atUtc": "2026-11-03T09:39:25.863Z",
+        "phase": "after-teaching-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206644,
+        "attackerId": 1000,
+        "position": {
+          "x": 293,
+          "y": 614
+        }
+      },
+      {
+        "sourceLine": 2227,
+        "atUnixMs": 1793698766567,
+        "atUtc": "2026-11-03T09:39:26.567Z",
+        "phase": "after-teaching-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206644,
+        "attackerId": 1000,
+        "position": {
+          "x": 293,
+          "y": 614
+        }
+      },
+      {
+        "sourceLine": 2233,
+        "atUnixMs": 1793698767166,
+        "atUtc": "2026-11-03T09:39:27.166Z",
+        "phase": "after-teaching-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206644,
+        "attackerId": 1000,
+        "position": {
+          "x": 293,
+          "y": 614
+        }
+      }
+    ],
+    "targetDeath": {
+      "sourceLine": 2234,
+      "atUnixMs": 1793698767167,
+      "atUtc": "2026-11-03T09:39:27.167Z",
+      "phase": "after-teaching-combat",
+      "packet": "ObjectDied",
+      "objectId": 206644,
+      "position": {
+        "x": 293,
+        "y": 614
+      }
+    },
+    "attackTickConfirmedFalseCount": 5,
+    "confirmedFieldRewritten": false,
+    "attackProofInterpretation": "The five ObjectStruck packets with attackerId 1000 establish real hits independently. The raw policy ticks remain confirmed:false; they were neither changed to true nor treated as proof of failed damage.",
+    "candle50005CombatLootTickCount": 0,
+    "followStepCount": 5,
+    "followSteps": [
+      {
+        "sourceLine": 2321,
+        "atUnixMs": 1793698852322,
+        "atUtc": "2026-11-03T09:40:52.322Z",
+        "phase": "after-teaching-combat",
+        "from": {
+          "x": 293,
+          "y": 613
+        },
+        "target": {
+          "x": 290,
+          "y": 612
+        }
+      },
+      {
+        "sourceLine": 2325,
+        "atUnixMs": 1793698852972,
+        "atUtc": "2026-11-03T09:40:52.972Z",
+        "phase": "after-teaching-combat",
+        "from": {
+          "x": 293,
+          "y": 612
+        },
+        "target": {
+          "x": 290,
+          "y": 612
+        }
+      },
+      {
+        "sourceLine": 2345,
+        "atUnixMs": 1793698861465,
+        "atUtc": "2026-11-03T09:41:01.465Z",
+        "phase": "after-teaching-combat",
+        "from": {
+          "x": 292,
+          "y": 612
+        },
+        "target": {
+          "x": 289,
+          "y": 612
+        }
+      },
+      {
+        "sourceLine": 2524,
+        "atUnixMs": 1793698967537,
+        "atUtc": "2026-11-03T09:42:47.537Z",
+        "phase": "after-teaching-combat",
+        "from": {
+          "x": 291,
+          "y": 612
+        },
+        "target": {
+          "x": 288,
+          "y": 612
+        }
+      },
+      {
+        "sourceLine": 2539,
+        "atUnixMs": 1793699008871,
+        "atUtc": "2026-11-03T09:43:28.871Z",
+        "phase": "after-teaching-combat",
+        "from": {
+          "x": 290,
+          "y": 612
+        },
+        "target": {
+          "x": 287,
+          "y": 612
+        }
+      }
+    ],
+    "firstPostCombatLootStep": {
+      "sourceLine": 2544,
+      "atUnixMs": 1793699009533,
+      "atUtc": "2026-11-03T09:43:29.533Z",
+      "phase": "after-teaching-combat",
+      "from": {
+        "x": 289,
+        "y": 612
+      },
+      "target": {
+        "x": 286,
+        "y": 612
+      }
+    },
+    "postCombatPickup": {
+      "sourceLine": 2564,
+      "atUnixMs": 1793699024166,
+      "atUtc": "2026-11-03T09:43:44.166Z",
+      "phase": "after-teaching-combat",
+      "action": {
+        "kind": "loot",
+        "policyVersion": 2,
+        "targetId": 50005,
+        "target": {
+          "x": 286,
+          "y": 612
+        },
+        "performed": true,
+        "changed": true
+      }
+    },
+    "gainedItem": {
+      "sourceLine": 2562,
+      "atUnixMs": 1793699024141,
+      "atUtc": "2026-11-03T09:43:44.141Z",
+      "phase": "after-teaching-combat",
+      "packet": "GainedItem",
+      "itemTemplateIndex": 722,
+      "quantity": 1
+    },
+    "pickupAfterDeathByMs": 256999,
+    "conclusion": "The same trained role supported the party fight first, left Candle 50005 untouched during combat, then followed the returning owner into range and actually picked it up afterwards."
+  },
+  "restart": {
+    "sourceLine": 2586,
+    "atUnixMs": 1793699076208,
+    "atUtc": "2026-11-03T09:44:36.208Z",
+    "phase": "process-restart",
+    "oldPid": 57948,
+    "newPid": 12012,
+    "sameArchiveId": "e6a5520c-c9f8-4192-9ca4-89817e85598f",
+    "controlReadyEvidence": [
+      {
+        "sourceLine": 691,
+        "atUnixMs": 1793696053054,
+        "atUtc": "2026-11-03T08:54:13.054Z",
+        "phase": "bootstrap",
+        "archiveId": "e6a5520c-c9f8-4192-9ca4-89817e85598f",
+        "modelEnabled": false
+      },
+      {
+        "sourceLine": 2583,
+        "atUnixMs": 1793699076200,
+        "atUtc": "2026-11-03T09:44:36.200Z",
+        "phase": "process-restart",
+        "archiveId": "e6a5520c-c9f8-4192-9ca4-89817e85598f",
+        "modelEnabled": false
+      }
+    ],
+    "retainedPolicyVersion": 2,
+    "retainedHabits": {
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true,
+      "askBeforeLeaving": true
+    },
+    "snapshotGuiEvidence": "06-restarted-same-archive-v2.jpg",
+    "targetId": 206302,
+    "actualActorHitCount": 7,
+    "actualHits": [
+      {
+        "sourceLine": 2633,
+        "atUnixMs": 1793699316868,
+        "atUtc": "2026-11-03T09:48:36.868Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      },
+      {
+        "sourceLine": 2639,
+        "atUnixMs": 1793699317486,
+        "atUtc": "2026-11-03T09:48:37.486Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      },
+      {
+        "sourceLine": 2647,
+        "atUnixMs": 1793699318165,
+        "atUtc": "2026-11-03T09:48:38.165Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      },
+      {
+        "sourceLine": 2653,
+        "atUnixMs": 1793699318827,
+        "atUtc": "2026-11-03T09:48:38.827Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      },
+      {
+        "sourceLine": 2661,
+        "atUnixMs": 1793699319475,
+        "atUtc": "2026-11-03T09:48:39.475Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      },
+      {
+        "sourceLine": 2667,
+        "atUnixMs": 1793699320164,
+        "atUtc": "2026-11-03T09:48:40.164Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      },
+      {
+        "sourceLine": 2675,
+        "atUnixMs": 1793699320789,
+        "atUtc": "2026-11-03T09:48:40.789Z",
+        "phase": "restarted-combat",
+        "packet": "ObjectStruck",
+        "objectId": 206302,
+        "attackerId": 1000,
+        "position": {
+          "x": 287,
+          "y": 611
+        }
+      }
+    ],
+    "targetDeath": {
+      "sourceLine": 2676,
+      "atUnixMs": 1793699320790,
+      "atUtc": "2026-11-03T09:48:40.790Z",
+      "phase": "restarted-combat",
+      "packet": "ObjectDied",
+      "objectId": 206302,
+      "position": {
+        "x": 287,
+        "y": 611
+      }
+    },
+    "drop": {
+      "sourceLine": 2621,
+      "atUnixMs": 1793699304674,
+      "atUtc": "2026-11-03T09:48:24.674Z",
+      "phase": "process-restart",
+      "packet": "ObjectItem",
+      "objectId": 50007,
+      "position": {
+        "x": 285,
+        "y": 611
+      },
+      "itemName": "Candle"
+    },
+    "postDeathGainedItem": {
+      "sourceLine": 2687,
+      "atUnixMs": 1793699322083,
+      "atUtc": "2026-11-03T09:48:42.083Z",
+      "phase": "restarted-combat",
+      "packet": "GainedItem",
+      "itemTemplateIndex": 722,
+      "quantity": 1
+    },
+    "postDeathPickup": {
+      "sourceLine": 2689,
+      "atUnixMs": 1793699322096,
+      "atUtc": "2026-11-03T09:48:42.096Z",
+      "phase": "restarted-combat",
+      "action": {
+        "kind": "loot",
+        "policyVersion": 2,
+        "targetId": 50007,
+        "target": {
+          "x": 285,
+          "y": 611
+        },
+        "performed": true,
+        "changed": true
+      }
+    },
+    "attackTickConfirmedFalseCount": 7,
+    "confirmedFieldRewritten": false,
+    "conclusion": "A different Node process retained the same archive, policy v2 and all three habits. Its next adventure had seven real hits on 206302; Candle 50007 was gained and marked changed only after the monster death."
+  },
+  "exportedArchive": {
+    "schema": "mir2-companion-archive/1",
+    "version": 1,
+    "exportId": "117a833b-1a37-4f92-beb0-395a2b70379a",
+    "exportedAtUnixMs": 1793699261293,
+    "exportedAtUtc": "2026-11-03T09:47:41.293Z",
+    "archiveId": "e6a5520c-c9f8-4192-9ca4-89817e85598f",
+    "characterName": "Alod5cc2b",
+    "policyVersion": 2,
+    "growthRevision": 19,
+    "habits": {
+      "askBeforeLeaving": true,
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true
+    },
+    "feedbackCount": 1,
+    "episodeCount": 19,
+    "relationCount": 0,
+    "operationCount": 1,
+    "declaredIntegrityAlgorithm": "HMAC-SHA256",
+    "signatureVerificationPerformed": false,
+    "conclusion": "A real GUI-created export exists and retains the trained identity and habits. It was exported after process restart and before the final 206302 adventure; that last fight is not claimed to be in this file. No signing key or signature is copied into this summary.",
+    "includesFinalRestartedCombat": false
+  },
+  "exclusions": [
+    {
+      "id": "early-first-attempt",
+      "targetDeath": {
+        "sourceLine": 1923,
+        "atUnixMs": 1793697320746,
+        "atUtc": "2026-11-03T09:15:20.746Z",
+        "phase": "before-teaching",
+        "packet": "ObjectDied",
+        "objectId": 206644,
+        "position": {
+          "x": 293,
+          "y": 614
+        }
+      },
+      "conclusion": "The first before-teaching target died too early to demonstrate the intended concurrent-loot contrast; this attempt is not counted as a passed contrast."
+    },
+    {
+      "id": "old-candle-50002",
+      "drop": {
+        "sourceLine": 1852,
+        "atUnixMs": 1793697053396,
+        "atUtc": "2026-11-03T09:10:53.396Z",
+        "phase": "before-teaching",
+        "packet": "ObjectItem",
+        "objectId": 50002,
+        "position": {
+          "x": 288,
+          "y": 615
+        },
+        "itemName": "Candle"
+      },
+      "successfulPickupRecords": 0,
+      "conclusion": "The operator recorded expiry of the old Candle 50002; no successful pickup receipt for that drop appears here. It is not counted as a successful pickup."
+    },
+    {
+      "id": "new-ui-and-unexercised-actions",
+      "conclusion": "This frozen baseline does not validate the new natural-language teaching or bounded-supply UI. It also does not establish potion consumption or a dangerous retreat in this replay."
+    }
+  ],
+  "shutdown": {
+    "residentStopped": [
+      {
+        "sourceLine": 2569,
+        "atUnixMs": 1793699027149,
+        "atUtc": "2026-11-03T09:43:47.149Z",
+        "phase": "process-restart",
+        "saved": true
+      },
+      {
+        "sourceLine": 2965,
+        "atUnixMs": 1793699719600,
+        "atUtc": "2026-11-03T09:55:19.600Z",
+        "phase": "restarted-combat",
+        "saved": true
+      }
+    ],
+    "actorProcessPresence": [
+      {
+        "pid": 57948,
+        "running": false,
+        "checkedAtUtc": "2026-11-03T09:58:51.6772738Z"
+      },
+      {
+        "pid": 12012,
+        "running": false,
+        "checkedAtUtc": "2026-11-03T09:58:51.6835303Z"
+      }
+    ],
+    "gatewayOrNativeProcessAbsenceChecked": false
+  },
+  "evidencePolicy": "Whitelisted public actor names, positions, object/archive/export IDs, hashes, counts, timestamps and conclusions only. No profile credentials, original user state, local key, server MAC key or archive signature is copied."
+}

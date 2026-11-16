@@ -1,0 +1,20 @@
+{
+  "kind": "joint-firstparty-runtime-font-read",
+  "startedAt": "2026-11-13T10:30:56.828Z",
+  "origin": "https://numeron.obelisk.build",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "passed": false,
+  "requests": [],
+  "browserClosed": true,
+  "budgets": {
+    "perReadTotalMs": 120000,
+    "positiveByteIdleMs": 15000,
+    "maxBytes": 33554432
+  },
+  "scope": "Exactly one concurrent WASM GET and one TC GET in a fresh ordinary Chrome context; font uses reload like Worker, binary force-cache. No game, fonts registration, Worker, compile/App or protocol overrides. Resource-only diagnostic, not full-game qualification or causal proof.",
+  "failure": {
+    "name": "Error",
+    "message": "page.goto: net::ERR_CONNECTION_CLOSED at https://numeron.obelisk.build/version\nCall log:\n\u001b[2m  - navigating to \"https://numeron.obelisk.build/version\", waiting "
+  },
+  "finishedAt": "2026-11-13T10:31:07.250Z"
+}

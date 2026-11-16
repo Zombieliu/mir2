@@ -1,0 +1,1083 @@
+TAP version 13
+# Subtest: full anchor includes stage and HUD scaling, without a DPR multiplier
+ok 1 - full anchor includes stage and HUD scaling, without a DPR multiplier
+  ---
+  duration_ms: 2.0405
+  type: 'test'
+  ...
+# Subtest: safe values and optional support preserve old runtimes
+ok 2 - safe values and optional support preserve old runtimes
+  ---
+  duration_ms: 0.393
+  type: 'test'
+  ...
+# Subtest: packet provenance handles real max one, partial updates and generation changes
+ok 3 - packet provenance handles real max one, partial updates and generation changes
+  ---
+  duration_ms: 0.3398
+  type: 'test'
+  ...
+# Subtest: ownership requires current generation, revision, model, asset and post-layout crop
+ok 4 - ownership requires current generation, revision, model, asset and post-layout crop
+  ---
+  duration_ms: 0.7353
+  type: 'test'
+  ...
+# Subtest: known empty and over-maximum crops remain valid, including genuine max one
+ok 5 - known empty and over-maximum crops remain valid, including genuine max one
+  ---
+  duration_ms: 0.1978
+  type: 'test'
+  ...
+# Subtest: hook strips old DTO fields and leases only current painted frames across loss, reset and cleanup
+not ok 6 - hook strips old DTO fields and leases only current painted frames across loss, reset and cleanup
+  ---
+  duration_ms: 50.2984
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-experience-bar.mjs:116:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected runtime dependency ./bevy-quest-world-context'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:14:11
+    eval (eval at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:12:3), <anonymous>:20:36)
+    load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:12:53)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:129:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:14
+#     throw new Error(`Unexpected dependency ${name}`);
+#           ^
+# Error: Unexpected dependency ./bevy-quest-world-context
+#     at file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:14:11
+#     at eval (eval at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:12:3), <anonymous>:20:36)
+#     at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:12:53)
+#     at file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:20:14
+#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26)
+#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+# Node.js v22.18.0
+# Subtest: scripts\\test-bevy-hp-orb-ui.mjs
+not ok 2 - scripts\\test-bevy-hp-orb-ui.mjs
+  ---
+  duration_ms: 575.8372
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-hp-orb-ui.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: exact capability, bounded records, and independent applied tokens
+ok 8 - exact capability, bounded records, and independent applied tokens
+  ---
+  duration_ms: 2.9801
+  type: 'test'
+  ...
+# Subtest: known zero and floored-positive empty own a cleared native backing without an asset
+ok 9 - known zero and floored-positive empty own a cleared native backing without an asset
+  ---
+  duration_ms: 1.2794
+  type: 'test'
+  ...
+# Subtest: a Canvas2D acquisition exception withdraws only the affected output
+ok 10 - a Canvas2D acquisition exception withdraws only the affected output
+  ---
+  duration_ms: 0.4568
+  type: 'test'
+  ...
+# Subtest: precommit withdrawal retires an in-flight decode until a new own token arrives
+ok 11 - precommit withdrawal retires an in-flight decode until a new own token arrives
+  ---
+  duration_ms: 0.7947
+  type: 'test'
+  ...
+# Subtest: actual hook sends raw fields only behind exact plan capability and keeps sibling plan through movement
+not ok 12 - actual hook sends raw fields only behind exact plan capability and keeps sibling plan through movement
+  ---
+  duration_ms: 28.2832
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-bar-draw-plan.mjs:187:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected dependency ./r16-native-localization'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:22:11
+    eval (eval at loadTs (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:3), <anonymous>:21:35)
+    loadTs (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:57)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:199:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: decode, sibling change, multiple moves, failure reuse and stale generation cleanup
+ok 13 - decode, sibling change, multiple moves, failure reuse and stale generation cleanup
+  ---
+  duration_ms: 2.3673
+  type: 'test'
+  ...
+# Subtest: production shell update retains same-identity successful and failed asset attempts across a modal gap
+ok 14 - production shell update retains same-identity successful and failed asset attempts across a modal gap
+  ---
+  duration_ms: 359.1411
+  type: 'test'
+  ...
+# Subtest: production shell identity edges abort old loads and reject their late result
+ok 15 - production shell identity edges abort old loads and reject their late result
+  ---
+  duration_ms: 171.5793
+  type: 'test'
+  ...
+# Subtest: production source geometry needs a current full HUD plan and yields raw weight differences to its Rust sprite fallback
+ok 16 - production source geometry needs a current full HUD plan and yields raw weight differences to its Rust sprite fallback
+  ---
+  duration_ms: 56.19
+  type: 'test'
+  ...
+# Subtest: raw-edge retirement survives a same-lifetime null-plan gap and pending old decode
+ok 17 - raw-edge retirement survives a same-lifetime null-plan gap and pending old decode
+  ---
+  duration_ms: 0.7997
+  type: 'test'
+  ...
+# Subtest: actual progression packet clauses withdraw synchronously, only for affected bars
+ok 18 - actual progression packet clauses withdraw synchronously, only for affected bars
+  ---
+  duration_ms: 333.2813
+  type: 'test'
+  ...
+# Subtest: actual direct packet clauses preserve unchanged bars and retire partial or shrinking EXP
+ok 19 - actual direct packet clauses preserve unchanged bars and retire partial or shrinking EXP
+  ---
+  duration_ms: 598.891
+  type: 'test'
+  ...
+# Subtest: real hook, shell mapping and controller validate host freshness and live own commit before late take
+not ok 20 - real hook, shell mapping and controller validate host freshness and live own commit before late take
+  ---
+  duration_ms: 8.5598
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-bar-draw-plan.mjs:543:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected dependency ./r16-native-localization'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:22:11
+    eval (eval at loadTs (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:3), <anonymous>:21:35)
+    loadTs (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:57)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:564:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: an old hook cleanup cannot erase the successor's live plan reader
+not ok 21 - an old hook cleanup cannot erase the successor's live plan reader
+  ---
+  duration_ms: 8.6564
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-bar-draw-plan.mjs:639:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected dependency ./r16-native-localization'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:22:11
+    eval (eval at loadTs (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:3), <anonymous>:21:35)
+    loadTs (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:57)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:652:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: independent capability is exact, old bundle and lean retain compatibility
+ok 22 - independent capability is exact, old bundle and lean retain compatibility
+  ---
+  duration_ms: 42.6006
+  type: 'test'
+  ...
+# Subtest: HUD geometry chooses owner before movement, foreground priority and crossing drags
+ok 23 - HUD geometry chooses owner before movement, foreground priority and crossing drags
+  ---
+  duration_ms: 3.896
+  type: 'test'
+  ...
+# Subtest: hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+ok 24 - hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+  ---
+  duration_ms: 49.3967
+  type: 'test'
+  ...
+# Subtest: cold Page Q diary survives a HUD tick before React commits and the first Native projection
+ok 25 - cold Page Q diary survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 364.4199
+  type: 'test'
+  ...
+# Subtest: cold Page Bag survives a HUD tick before React commits and the first Native projection
+ok 26 - cold Page Bag survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 138.9224
+  type: 'test'
+  ...
+# Subtest: cold Page Character survives a HUD tick before React commits and the first Native projection
+ok 27 - cold Page Character survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 110.8676
+  type: 'test'
+  ...
+# Subtest: cold Page Character Skills tab survives a HUD tick before React commits and the first Native projection
+ok 28 - cold Page Character Skills tab survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 115.3994
+  type: 'test'
+  ...
+# Subtest: actual hook opens Bag once during dirty HP and again during a pending cosmetic ingest without relaxing readCurrent
+ok 29 - actual hook opens Bag once during dirty HP and again during a pending cosmetic ingest without relaxing readCurrent
+  ---
+  duration_ms: 7.2782
+  type: 'test'
+  ...
+# Subtest: a native ready baseline must first be fully ingested for this hook owner
+ok 30 - a native ready baseline must first be fully ingested for this hook owner
+  ---
+  duration_ms: 9.5568
+  type: 'test'
+  ...
+# Subtest: a new runtime generation cannot inherit its predecessor's ready baseline before its fresh ingest
+ok 31 - a new runtime generation cannot inherit its predecessor's ready baseline before its fresh ingest
+  ---
+  duration_ms: 12.7137
+  type: 'test'
+  ...
+# Subtest: pending source identity/realm/world/context/scene must ingest a new revision even with the same HUD projection
+ok 32 - pending source identity/realm/world/context/scene must ingest a new revision even with the same HUD projection
+  ---
+  duration_ms: 57.2926
+  type: 'test'
+  ...
+# Subtest: pending layout, explicit navigation and player identity changes cannot borrow the cosmetic baseline
+ok 33 - pending layout, explicit navigation and player identity changes cannot borrow the cosmetic baseline
+  ---
+  duration_ms: 70.3898
+  type: 'test'
+  ...
+# Subtest: hidden, inactive, absent player/source, unknown capability, native loss/error and expired/regressed frame reject
+ok 34 - hidden, inactive, absent player/source, unknown capability, native loss/error and expired/regressed frame reject
+  ---
+  duration_ms: 104.4602
+  type: 'test'
+  ...
+# Subtest: Native false/throw is final, diagnostics stay bounded and cleanup cannot authorize or replay
+ok 35 - Native false/throw is final, diagnostics stay bounded and cleanup cannot authorize or replay
+  ---
+  duration_ms: 11.2474
+  type: 'test'
+  ...
+# Subtest: source/runtime/visibility/capability or cleanup changes while reading Native are rechecked before the single dispatch
+ok 36 - source/runtime/visibility/capability or cleanup changes while reading Native are rechecked before the single dispatch
+  ---
+  duration_ms: 57.066
+  type: 'test'
+  ...
+# Subtest: actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+ok 37 - actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+  ---
+  duration_ms: 38.6996
+  type: 'test'
+  ...
+# {"fixture":"actual-source TypeScript transpile + controlled hook seams","compilerPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\node_modules\\\\typescript\\\\lib\\\\typescript.js","compilerRealPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\node_modules\\\\typescript\\\\lib\\\\typescript.js","bytes":9112572,"sha256":"3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675","version":"5.9.3"}
+# {"actualUsedSources":[{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/quest-action-policy.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\quest-action-policy.ts","bytes":5467,"sha256":"5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/world-model/item-identity.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\world-model\\\\item-identity.ts","bytes":8874,"sha256":"955d61e3f08d0d5a512bd50ca31dec6238ee0b0c21dde450ddfda794c20ac431"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-bag-model.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-bag-model.ts","bytes":17534,"sha256":"7d9df5bd7c8161f2080e782f2a9d10c4fd853107c1578562dd1810d69112db47"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-world-context.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-context.ts","bytes":14646,"sha256":"ab8e5ee6c040d401557f96ef0d9816b083bfafaa75d5f96466c73e28e0a860d5"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/first-crystal-scene-request.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\first-crystal-scene-request.ts","bytes":5353,"sha256":"48b852251d28cd592dec31706c4f8309ae284cd21626b220d2d65fcef994e691"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\pinned-bootstrap-chunk.ts","bytes":1860,"sha256":"03d1360370f6064c23a3d2078659c42dd7708fdbb947c0d82fc38ea6b457b421"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/r16-native-localization.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\r16-native-localization.ts","bytes":16751,"sha256":"97b84013a21157a310e48c4d8a9475ebf2b69ef357c72b4df393e431253f1909"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-ui.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-ui.ts","bytes":16324,"sha256":"1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hp-orb.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-hp-orb.ts","bytes":8881,"sha256":"12ccf1c06876e8edc964f60500c36992916f6b4aeec113020aabe84980bcb149"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-experience-bar.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-experience-bar.ts","bytes":8912,"sha256":"ecbdce984cd9a2bab67e702052de22ca4cb5d7585f6981c73874d38a6456b687"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-weight-bar.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-weight-bar.ts","bytes":9645,"sha256":"60b356b14ebf720c7496d6c9a73e22050b67d648e57edd72da13e508f2732576"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hud-bar-draw-plan.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-hud-bar-draw-plan.ts","bytes":20639,"sha256":"1edbebaa847964a2d7b182f257debb9a12f940334a95d7c14b8de834df44083f"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-world-actions.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-actions.ts","bytes":4179,"sha256":"9c3c33b42efda96d1b9cc8704f489c648ed6a9b604d7aff9cd6966ad5748f554"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-world-controls.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-controls.ts","bytes":3105,"sha256":"ce741529785c995c3d70fe142d78972c64478b5e9b25290ec3432e969a31057a"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/use-bevy-quest-ui.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\use-bevy-quest-ui.ts","bytes":28084,"sha256":"2fad5a73b99ddc8d47452c239ad0b2bf2c602cbe98f542ce76a0e2b9c3162db5"}]}
+# Subtest: exact capability probes independently of initial readiness; malformed v1 status fails closed
+ok 38 - exact capability probes independently of initial readiness; malformed v1 status fails closed
+  ---
+  duration_ms: 1.1888
+  type: 'test'
+  ...
+# Subtest: real hook requires live language and its newest revision before polling or input acknowledgement
+ok 39 - real hook requires live language and its newest revision before polling or input acknowledgement
+  ---
+  duration_ms: 257.4387
+  type: 'test'
+  ...
+# Subtest: older and unknown capability keep omitted DTO and their existing readiness shape
+ok 40 - older and unknown capability keep omitted DTO and their existing readiness shape
+  ---
+  duration_ms: 522.9102
+  type: 'test'
+  ...
+# Subtest: actual used source bindings are disclosed
+ok 41 - actual used source bindings are disclosed
+  ---
+  duration_ms: 0.3188
+  type: 'test'
+  ...
+# Subtest: optional Native display locales are independent of four-language wire and require an exact capability
+ok 42 - optional Native display locales are independent of four-language wire and require an exact capability
+  ---
+  duration_ms: 1.2662
+  type: 'test'
+  ...
+# Subtest: NPC display defers Native prose while target, input, name and disabled state remain opaque
+ok 43 - NPC display defers Native prose while target, input, name and disabled state remain opaque
+  ---
+  duration_ms: 27.6845
+  type: 'test'
+  ...
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 44 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 0.5223
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 45 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.1583
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 46 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.3631
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 47 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.1964
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 48 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.2586
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 49 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 3.94
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 50 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.2772
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 51 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 37.0714
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 52 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.3273
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 53 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 1.056
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 54 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 152.0469
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 55 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 134.5201
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 56 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 0.7261
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 57 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 0.8519
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 58 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 0.2029
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 59 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.4366
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 60 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 2.0419
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 61 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 1.5571
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 62 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.5747
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 63 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 4.1808
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 64 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.9382
+  type: 'test'
+  ...
+# Subtest: Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+ok 65 - Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+  ---
+  duration_ms: 0.5232
+  type: 'test'
+  ...
+# Subtest: questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+ok 66 - questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+  ---
+  duration_ms: 123.7904
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 67 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 105.7052
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 68 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 103.3792
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 69 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 12.9364
+  type: 'test'
+  ...
+# Subtest: raw u16 pair grants legitimate zero and rejects absent/default-like maxima
+ok 70 - raw u16 pair grants legitimate zero and rejects absent/default-like maxima
+  ---
+  duration_ms: 2.1007
+  type: 'test'
+  ...
+# Subtest: real movement shortcut guard fails for weight-only and max-only snapshots
+ok 71 - real movement shortcut guard fails for weight-only and max-only snapshots
+  ---
+  duration_ms: 0.4151
+  type: 'test'
+  ...
+# Subtest: raw packet projection preserves only a proven same-player pair through world and host
+ok 72 - raw packet projection preserves only a proven same-player pair through world and host
+  ---
+  duration_ms: 0.6121
+  type: 'test'
+  ...
+# Subtest: legacy capability strips both nested fields and the slot
+ok 73 - legacy capability strips both nested fields and the slot
+  ---
+  duration_ms: 0.588
+  type: 'test'
+  ...
+# Subtest: full DOM slot is measured once through stage scale, including y 721
+ok 74 - full DOM slot is measured once through stage scale, including y 721
+  ---
+  duration_ms: 0.45
+  type: 'test'
+  ...
+# Subtest: current image, crop, layout and live DOM pair gate ownership
+ok 75 - current image, crop, layout and live DOM pair gate ownership
+  ---
+  duration_ms: 0.525
+  type: 'test'
+  ...
+# Subtest: threshold image and f32 crop validation cover zero, boundaries and overmax
+ok 76 - threshold image and f32 crop validation cover zero, boundaries and overmax
+  ---
+  duration_ms: 0.3584
+  type: 'test'
+  ...
+# Subtest: hook keeps old runtimes clean and retires a stale selected sprite
+not ok 77 - hook keeps old runtimes clean and retires a stale selected sprite
+  ---
+  duration_ms: 55.6485
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-weight-bar.mjs:147:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected runtime dependency ./bevy-quest-world-context'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:14:11
+    eval (eval at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:12:3), <anonymous>:20:36)
+    load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:12:53)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:160:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page map click shows the selected coordinates while waiting for complete collision
+ok 78 - actual Page map click shows the selected coordinates while waiting for complete collision
+  ---
+  duration_ms: 2.4167
+  type: 'test'
+  ...
+# Subtest: actual Page hung map collision stops at30s and a late body cannot start walking
+ok 79 - actual Page hung map collision stops at30s and a late body cannot start walking
+  ---
+  duration_ms: 0.7426
+  type: 'test'
+  ...
+# Subtest: actual Page delayed timer delivery cannot accept geometry after the same30s deadline
+ok 80 - actual Page delayed timer delivery cannot accept geometry after the same30s deadline
+  ---
+  duration_ms: 0.3014
+  type: 'test'
+  ...
+# Subtest: actual Page initial edge construction shares the deadline with collision download
+ok 81 - actual Page initial edge construction shares the deadline with collision download
+  ---
+  duration_ms: 0.3839
+  type: 'test'
+  ...
+# Subtest: actual Page complete map route before the deadline cancels its timer and moves to its exact endpoint
+ok 82 - actual Page complete map route before the deadline cancels its timer and moves to its exact endpoint
+  ---
+  duration_ms: 0.6019
+  type: 'test'
+  ...
+# Subtest: actual Page replaced map resolve and old timer cannot affect a newer click
+ok 83 - actual Page replaced map resolve and old timer cannot affect a newer click
+  ---
+  duration_ms: 0.2645
+  type: 'test'
+  ...
+# Subtest: actual Page replaced map reject and old timer cannot affect a newer click
+ok 84 - actual Page replaced map reject and old timer cannot affect a newer click
+  ---
+  duration_ms: 0.3193
+  type: 'test'
+  ...
+# Subtest: actual Page map retires map work without stale timeout or movement
+ok 85 - actual Page map retires map work without stale timeout or movement
+  ---
+  duration_ms: 0.2396
+  type: 'test'
+  ...
+# Subtest: actual Page blocked retires map work without stale timeout or movement
+ok 86 - actual Page blocked retires map work without stale timeout or movement
+  ---
+  duration_ms: 0.3753
+  type: 'test'
+  ...
+# Subtest: actual Page cancel retires map work without stale timeout or movement
+ok 87 - actual Page cancel retires map work without stale timeout or movement
+  ---
+  duration_ms: 0.3675
+  type: 'test'
+  ...
+# Subtest: actual Page zero-step map click reports only authoritative arrival without movement
+ok 88 - actual Page zero-step map click reports only authoritative arrival without movement
+  ---
+  duration_ms: 0.3107
+  type: 'test'
+  ...
+# Subtest: actual Page complete unreachable map search reports once and never queues partial progress
+ok 89 - actual Page complete unreachable map search reports once and never queues partial progress
+  ---
+  duration_ms: 0.211
+  type: 'test'
+  ...
+# Subtest: map read waits for projection, then stops when a complete new-scene baseline arrives
+ok 90 - map read waits for projection, then stops when a complete new-scene baseline arrives
+  ---
+  duration_ms: 0.9637
+  type: 'test'
+  ...
+# Subtest: an already complete new-scene baseline requires no duplicate request
+ok 91 - an already complete new-scene baseline requires no duplicate request
+  ---
+  duration_ms: 0.536
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after socket
+ok 92 - pending map read is retired after socket
+  ---
+  duration_ms: 0.1434
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after connection
+ok 93 - pending map read is retired after connection
+  ---
+  duration_ms: 0.1234
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after session
+ok 94 - pending map read is retired after session
+  ---
+  duration_ms: 0.0803
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after scene
+ok 95 - pending map read is retired after scene
+  ---
+  duration_ms: 0.1252
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after map
+ok 96 - pending map read is retired after map
+  ---
+  duration_ms: 0.0632
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after player
+ok 97 - pending map read is retired after player
+  ---
+  duration_ms: 0.0558
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after logout
+ok 98 - pending map read is retired after logout
+  ---
+  duration_ms: 0.2295
+  type: 'test'
+  ...
+# Subtest: missing or incomplete snapshots have at most three read-only attempts
+ok 99 - missing or incomplete snapshots have at most three read-only attempts
+  ---
+  duration_ms: 0.3832
+  type: 'test'
+  ...
+# Subtest: transport throws are bounded and disposing a pending read cancels its timer
+ok 100 - transport throws are bounded and disposing a pending read cancels its timer
+  ---
+  duration_ms: 0.338
+  type: 'test'
+  ...
+# Subtest: a newer map replaces every pending read of the old scene
+ok 101 - a newer map replaces every pending read of the old scene
+  ---
+  duration_ms: 0.3036
+  type: 'test'
+  ...
+# Subtest: actual Page: ordinary map transfer retires navigation and requests its missing personal baseline
+ok 102 - actual Page: ordinary map transfer retires navigation and requests its missing personal baseline
+  ---
+  duration_ms: 7.0275
+  type: 'test'
+  ...
+# Subtest: actual Page: initial StartGame map does not request another bootstrap
+ok 103 - actual Page: initial StartGame map does not request another bootstrap
+  ---
+  duration_ms: 4.2296
+  type: 'test'
+  ...
+# Subtest: actual Page: unchanged MapInformation preserves the current goal without a refresh
+ok 104 - actual Page: unchanged MapInformation preserves the current goal without a refresh
+  ---
+  duration_ms: 2.4409
+  type: 'test'
+  ...
+# Subtest: actual Page: same-map MapChanged still retires the scene and reads a fresh baseline
+ok 105 - actual Page: same-map MapChanged still retires the scene and reads a fresh baseline
+  ---
+  duration_ms: 3.0908
+  type: 'test'
+  ...
+# Subtest: actual Page: a second map replaces pending refresh before the first read
+ok 106 - actual Page: a second map replaces pending refresh before the first read
+  ---
+  duration_ms: 5.4961
+  type: 'test'
+  ...
+# Subtest: actual Page: an old connection map packet cannot request a new baseline
+ok 107 - actual Page: an old connection map packet cannot request a new baseline
+  ---
+  duration_ms: 2.9289
+  type: 'test'
+  ...
+# Subtest: actual Page: logout before dispatch sends no read on the selection screen
+ok 108 - actual Page: logout before dispatch sends no read on the selection screen
+  ---
+  duration_ms: 3.5672
+  type: 'test'
+  ...
+# Subtest: actual Page: StartGame disposes the previous map read immediately
+ok 109 - actual Page: StartGame disposes the previous map read immediately
+  ---
+  duration_ms: 3.699
+  type: 'test'
+  ...
+# Subtest: actual Page: LogOutSuccess disposes the previous map read immediately
+ok 110 - actual Page: LogOutSuccess disposes the previous map read immediately
+  ---
+  duration_ms: 3.2667
+  type: 'test'
+  ...
+# Subtest: actual Page: ReturnToLogin disposes the previous map read immediately
+ok 111 - actual Page: ReturnToLogin disposes the previous map read immediately
+  ---
+  duration_ms: 3.2654
+  type: 'test'
+  ...
+# Subtest: actual Page: another character starts without inheriting a pending map refresh
+ok 112 - actual Page: another character starts without inheriting a pending map refresh
+  ---
+  duration_ms: 3.2308
+  type: 'test'
+  ...
+# Subtest: the deployment profile is explicit and defaults to Crystal
+ok 113 - the deployment profile is explicit and defaults to Crystal
+  ---
+  duration_ms: 0.977
+  type: 'test'
+  ...
+# Subtest: wire endpoints preserve explicit zero and reject missing or malformed values
+ok 114 - wire endpoints preserve explicit zero and reject missing or malformed values
+  ---
+  duration_ms: 0.1893
+  type: 'test'
+  ...
+# Subtest: host projection passes endpoint, reward, stage, dialog and pending facts into shared Rust
+ok 115 - host projection passes endpoint, reward, stage, dialog and pending facts into shared Rust
+  ---
+  duration_ms: 0.6322
+  type: 'test'
+  ...
+# Subtest: absent metadata remains absent even with a matching NPC dialog link
+ok 116 - absent metadata remains absent even with a matching NPC dialog link
+  ---
+  duration_ms: 0.1678
+  type: 'test'
+  ...
+# Subtest: NPC offer requires an exact active link and positive numeric object id
+ok 117 - NPC offer requires an exact active link and positive numeric object id
+  ---
+  duration_ms: 0.201
+  type: 'test'
+  ...
+# Subtest: malformed reward selection fails at the wire boundary instead of becoming no-choice
+ok 118 - malformed reward selection fails at the wire boundary instead of becoming no-choice
+  ---
+  duration_ms: 0.1951
+  type: 'test'
+  ...
+# Subtest: only the exact request and operation receipt releases pending transport state
+ok 119 - only the exact request and operation receipt releases pending transport state
+  ---
+  duration_ms: 0.2296
+  type: 'test'
+  ...
+# Subtest: changing the selected reward cannot submit another finish while the quest is pending
+ok 120 - changing the selected reward cannot submit another finish while the quest is pending
+  ---
+  duration_ms: 0.2629
+  type: 'test'
+  ...
+# Subtest: a synchronous shared runtime failure cannot escape the host adapter
+ok 121 - a synchronous shared runtime failure cannot escape the host adapter
+  ---
+  duration_ms: 0.3217
+  type: 'test'
+  ...
+# Subtest: current shared diary closes through its configured key and its own live owner
+ok 122 - current shared diary closes through its configured key and its own live owner
+  ---
+  duration_ms: 88.677
+  type: 'test'
+  ...
+# Subtest: remapped Native binding works and its former key stays blocked by the modal
+ok 123 - remapped Native binding works and its former key stays blocked by the modal
+  ---
+  duration_ms: 1.236
+  type: 'test'
+  ...
+# Subtest: repeats and declined navigation cannot toggle or fall through to the world
+ok 124 - repeats and declined navigation cannot toggle or fall through to the world
+  ---
+  duration_ms: 0.5699
+  type: 'test'
+  ...
+# Subtest: typing, another modal, stale diary authority and non-quest keys retain their input owner
+ok 125 - typing, another modal, stale diary authority and non-quest keys retain their input owner
+  ---
+  duration_ms: 2.6373
+  type: 'test'
+  ...
+# Subtest: withdrawing the current diary before dispatch blocks a captured old modal handler
+ok 126 - withdrawing the current diary before dispatch blocks a captured old modal handler
+  ---
+  duration_ms: 0.2809
+  type: 'test'
+  ...
+# Subtest: a ready diary closes before the independent main HUD is ready
+ok 127 - a ready diary closes before the independent main HUD is ready
+  ---
+  duration_ms: 0.5417
+  type: 'test'
+  ...
+# Subtest: missing or throwing diary owner never borrows the main HUD or falls through to gameplay
+ok 128 - missing or throwing diary owner never borrows the main HUD or falls through to gameplay
+  ---
+  duration_ms: 0.661
+  type: 'test'
+  ...
+# Subtest: route lookahead: 1-tile movement replans before any of the next three edges becomes blocked
+ok 129 - route lookahead: 1-tile movement replans before any of the next three edges becomes blocked
+  ---
+  duration_ms: 1.846
+  type: 'test'
+  ...
+# Subtest: route lookahead: 2-tile movement replans before any of the next three edges becomes blocked
+ok 130 - route lookahead: 2-tile movement replans before any of the next three edges becomes blocked
+  ---
+  duration_ms: 0.3544
+  type: 'test'
+  ...
+# Subtest: route lookahead: 3-tile movement replans before any of the next three edges becomes blocked
+ok 131 - route lookahead: 3-tile movement replans before any of the next three edges becomes blocked
+  ---
+  duration_ms: 0.2091
+  type: 'test'
+  ...
+# Subtest: actual Page: blocker at upcoming edge 2 reroutes while retaining the same quest destination
+ok 132 - actual Page: blocker at upcoming edge 2 reroutes while retaining the same quest destination
+  ---
+  duration_ms: 2.1775
+  type: 'test'
+  ...
+# Subtest: actual Page: blocker at upcoming edge 3 reroutes while retaining the same quest destination
+ok 133 - actual Page: blocker at upcoming edge 3 reroutes while retaining the same quest destination
+  ---
+  duration_ms: 1.1954
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step huntRegion arrival explains what to do without sending movement
+ok 134 - actual Page: zero-step huntRegion arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.7762
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step taskNpc arrival explains what to do without sending movement
+ok 135 - actual Page: zero-step taskNpc arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.3587
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step mapNpc arrival explains what to do without sending movement
+ok 136 - actual Page: zero-step mapNpc arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.3106
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step supply arrival explains what to do without sending movement
+ok 137 - actual Page: zero-step supply arrival explains what to do without sending movement
+  ---
+  duration_ms: 1.0104
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step entrance arrival explains what to do without sending movement
+ok 138 - actual Page: zero-step entrance arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.4613
+  type: 'test'
+  ...
+# Subtest: actual Page: a complete route keeps moving until authoritative endpoint arrival, then reports once
+ok 139 - actual Page: a complete route keeps moving until authoritative endpoint arrival, then reports once
+  ---
+  duration_ms: 0.4815
+  type: 'test'
+  ...
+# Subtest: actual Page: entrance entrance never claims that the distant NPC has been reached
+ok 140 - actual Page: entrance entrance never claims that the distant NPC has been reached
+  ---
+  duration_ms: 0.26
+  type: 'test'
+  ...
+# Subtest: actual Page: supply entrance never claims that the distant NPC has been reached
+ok 141 - actual Page: supply entrance never claims that the distant NPC has been reached
+  ---
+  duration_ms: 0.2286
+  type: 'test'
+  ...
+# Subtest: actual Page: occupied next step replans original hunt area and unavailable
+ok 142 - actual Page: occupied next step replans original hunt area and unavailable
+  ---
+  duration_ms: 0.2862
+  type: 'test'
+  ...
+# Subtest: actual Page: occupied next step replans original hunt area and arrived
+ok 143 - actual Page: occupied next step replans original hunt area and arrived
+  ---
+  duration_ms: 0.1587
+  type: 'test'
+  ...
+# Subtest: actual Page: occupied next step replans original hunt area and detour
+ok 144 - actual Page: occupied next step replans original hunt area and detour
+  ---
+  duration_ms: 0.139
+  type: 'test'
+  ...
+# Subtest: actual Page: loading deadline is active while I/O hangs and late geometry cannot resume the action
+ok 145 - actual Page: loading deadline is active while I/O hangs and late geometry cannot resume the action
+  ---
+  duration_ms: 0.2159
+  type: 'test'
+  ...
+# Subtest: actual Page: delayed timer delivery still enforces the original collision deadline
+ok 146 - actual Page: delayed timer delivery still enforces the original collision deadline
+  ---
+  duration_ms: 0.1567
+  type: 'test'
+  ...
+# Subtest: actual Page: replaced resolve callback cannot clear another route or report a stale error
+ok 147 - actual Page: replaced resolve callback cannot clear another route or report a stale error
+  ---
+  duration_ms: 0.1985
+  type: 'test'
+  ...
+# Subtest: actual Page: replaced reject callback cannot clear another route or report a stale error
+ok 148 - actual Page: replaced reject callback cannot clear another route or report a stale error
+  ---
+  duration_ms: 0.1546
+  type: 'test'
+  ...
+# Subtest: actual Page: quest change during map loading retires the old objective
+ok 149 - actual Page: quest change during map loading retires the old objective
+  ---
+  duration_ms: 0.1618
+  type: 'test'
+  ...
+# Subtest: actual Page: socket change during map loading retires the old objective
+ok 150 - actual Page: socket change during map loading retires the old objective
+  ---
+  duration_ms: 0.129
+  type: 'test'
+  ...
+# Subtest: actual Page: scene change during map loading retires the old objective
+ok 151 - actual Page: scene change during map loading retires the old objective
+  ---
+  duration_ms: 0.1323
+  type: 'test'
+  ...
+# Subtest: actual Page: blocked change during map loading retires the old objective
+ok 152 - actual Page: blocked change during map loading retires the old objective
+  ---
+  duration_ms: 0.1004
+  type: 'test'
+  ...
+# Subtest: actual Page: initial route failure and current loading error both explain unavailability
+ok 153 - actual Page: initial route failure and current loading error both explain unavailability
+  ---
+  duration_ms: 0.2353
+  type: 'test'
+  ...
+# Subtest: collision geometry: at most four concurrent validated readers publish only all nine complete regions
+ok 154 - collision geometry: at most four concurrent validated readers publish only all nine complete regions
+  ---
+  duration_ms: 16.8061
+  type: 'test'
+  ...
+# Subtest: collision geometry: hung headers aborts at15s, evicts pending and permits a fresh retry
+ok 155 - collision geometry: hung headers aborts at15s, evicts pending and permits a fresh retry
+  ---
+  duration_ms: 12.451
+  type: 'test'
+  ...
+# Subtest: collision geometry: hung body aborts at15s, evicts pending and permits a fresh retry
+ok 156 - collision geometry: hung body aborts at15s, evicts pending and permits a fresh retry
+  ---
+  duration_ms: 20.5245
+  type: 'test'
+  ...
+# Subtest: collision geometry: a bad parallel region leaves no partial cache and retry validates the entire map
+ok 157 - collision geometry: a bad parallel region leaves no partial cache and retry validates the entire map
+  ---
+  duration_ms: 10.549
+  type: 'test'
+  ...
+# Subtest: the actual hook exposes only committed handlers across pending and abandoned renders
+ok 158 - the actual hook exposes only committed handlers across pending and abandoned renders
+  ---
+  duration_ms: 4.726
+  type: 'test'
+  ...
+# Subtest: initial null, entry and leaving keep one capture subscription and null dispatches nothing
+ok 159 - initial null, entry and leaving keep one capture subscription and null dispatches nothing
+  ---
+  duration_ms: 1.1866
+  type: 'test'
+  ...
+# Subtest: unmount removes the exact capture listener and clears an abandoned next handler
+ok 160 - unmount removes the exact capture listener and clears an abandoned next handler
+  ---
+  duration_ms: 0.8712
+  type: 'test'
+  ...
+# Subtest: negative control: rebinding an effect during an earlier listener loses that same dispatch
+ok 161 - negative control: rebinding an effect during an earlier listener loses that same dispatch
+  ---
+  duration_ms: 1.8975
+  type: 'test'
+  ...
+# Subtest: the actual stable listener forwards once after a preceding same-target listener commits a new handler
+ok 162 - the actual stable listener forwards once after a preceding same-target listener commits a new handler
+  ---
+  duration_ms: 0.4047
+  type: 'test'
+  ...
+# Subtest: the actual hook forwards the original key and modifiers without consuming or filtering it
+ok 163 - the actual hook forwards the original key and modifiers without consuming or filtering it
+  ---
+  duration_ms: 0.4676
+  type: 'test'
+  ...
+1..163
+# tests 163
+# suites 0
+# pass 157
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2310.1685

@@ -1,0 +1,1310 @@
+[
+  {
+    "baseSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "source": "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+    "sourceCommits": [
+      "2dd2d1ef3c3ca899e1a488caa7d7873be97fddb8",
+      "7de1b38dd26d969bc5daf7cae64261ab70e3285c",
+      "306066f29590d1e2e14155d83644fbc19f11a4c3",
+      "b87aa402a38aeb70f30e5afe285862cd8ecf7a46",
+      "2b7b5d7079300f45315e172d4c58784aaed6fb5c"
+    ],
+    "changedFiles": [
+      {
+        "filename": ".github/scripts/numeron-r16-release.mjs",
+        "sha": "98aa427e070442814c620e9c358509c22d8be797",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+        "sha": "504f0864c2dd73c9cdc7087ed954577361847f5e",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/test-numeron-r16-release.mjs",
+        "sha": "03087980a591b2c4e01f3c6c97855cdec1a24c9a",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/package.json",
+        "sha": "5fa6bdabd4ad0a47bb5c382a41fdf6eb43c6e451",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha": "e09f2575d6c174958484579f0b52a625b8b3ad11",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/generate-font-range-pins.mjs",
+        "sha": "e08765e1c1db23cb8e6b74f91606e3c64bdda0c1",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+        "sha": "53ec5db2a2b1fe57a729600ea4ed40e5cd715367",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs",
+        "sha": "2fd63456a4d7f099add042250b7a56c3bfdc7b84",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+        "sha": "80122f6bd65b716d0255044ee80db486eca75d6b",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "30e25f4c5c716bae343e01761193ad11f469343a",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "0376ff13c4a3f5e4f0fba3a9a01e3ea7b39e8d72",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "7ea1974bee267d67efc72d9f0dd4b4b1188e8262",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "b2183328078e0e4a48b4c56202e5123bfe4f5520",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/.gitattributes",
+        "sha": "905813169aade6a5340ca6b9122430f60e17b380",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/README.md",
+        "sha": "206db3ad8d471ff0f233cec0c4f5e8ba684963cb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/adjacent-regression.log",
+        "sha": "35f61105c8ef55ca9dba02be103da14f1123b563",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-sc-prefix-adjacent.json",
+        "sha": "77717d3617722b4541b4000822a2f3067bb08908",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-sc-progress.json",
+        "sha": "41788d9367fb8ee9957660f00e7774528ccd64c1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-baseline.json",
+        "sha": "364af58f4b59f2ffb5f105a45304a4ceda7132bc",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-prefix.json",
+        "sha": "ba0f83ce996f8a40ebfafa8f0b6e412d54cdb9c7",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-progress.json",
+        "sha": "7b5fc25f8edd01436fa7abe2e0148baaa95fabd9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-range-stall.json",
+        "sha": "fc7a7dcff54a2095521f3841010170ca5b2a6374",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/english-native-quest.png",
+        "sha": "b2e54ec6d780f455302f737033a7cf072f4ce5cd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/evidence-manifest.json",
+        "sha": "d4c283b4a7f7ca6e565c8787b9d8a8f587a5dd77",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/focused-regression.log",
+        "sha": "c64ee86e99eabeac6ec67416f68d901c1aa3bc95",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/old-worker-expected-failure.log",
+        "sha": "a9372605efa1f06252ba43a7a864af1445f6e622",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/preceding-public-observations.json",
+        "sha": "5b9e2865f54abb711d2988f3c5f97344457c258a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/.gitattributes",
+        "sha": "b87185bfcf6b78d8e740d29f3fa1ff92f595c2c6",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/README.md",
+        "sha": "35a0e47881744b7abbe0f4c96c6073dc0240b1c5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/alias-final.json",
+        "sha": "6fcde2bfabd3a568d20baac1363035195a4b3b54",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/backend-artifact.json",
+        "sha": "c788f331247e8cf8010f48296a3aba5d692c39bb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/backend-rollback.json",
+        "sha": "a8bbd5ebd6f65a047fb6558e59b9132ae9b78e82",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/backend-rollout.json",
+        "sha": "414862b27e0a36b159608c217a91de3095b284c6",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/canary-protocol.json",
+        "sha": "912eaa1d7fde2a3d5ba854d891f5f234fff2afc3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/evidence-index.json",
+        "sha": "1e7454da702b92adc92aa70a5cc4eba431ce196d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/font-tail-diagnosis.json",
+        "sha": "28d952a7fa787dda36c1ba471c5fc05c0d2bcbcd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/independent-candidate.json",
+        "sha": "d54ba54d0dbb0eb413f00640c261ce07d8365f93",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/outcome.json",
+        "sha": "54570e1c1b9063be23ecd265ef40b02efcfc4918",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/preservation.json",
+        "sha": "fea2fd22a906997bbe29afd2543b93ef262b2445",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/public-q-pixels.json",
+        "sha": "eadb9e0ae5f879ae1af6bd7903c6edc49e0e859e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/public-r1-acceptance.json",
+        "sha": "cd57c5abc6870ef4381c344be786e43ffc11287c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/public-r2-acceptance.json",
+        "sha": "d251f3e63e7db72e16c9f2c61cbefb436aa65dc8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r1-first-q-black.png",
+        "sha": "1426a70f48edb42d3855d4b90850f46ff2faf180",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r1-native-q.png",
+        "sha": "5fd0f428929ee15689b5637073d0db2faa424cfd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r2-first-q-fallback.png",
+        "sha": "398b88f665cfd62e0522ba34f2d144e747c2f01e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r2-native-q.png",
+        "sha": "557c9999bdf5367bc13acca243198f79c9b1ae40",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-check.json",
+        "sha": "674faa9543797bfa9f8c59a5372f6b3adc9a4743",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-promote.json",
+        "sha": "d932045de196d92462a07c31748a34b3819ffc2c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-rollback.json",
+        "sha": "a29de3ed43bc9e1be8847ca584830161ed44fda6",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-stage.json",
+        "sha": "01ddcbe5b31209ffa9c2837831aff38de7f6ac1e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/public-e0-failed-font-trace.json",
+        "sha": "06c344828ab7aa5baf5cfb12e43a1f11c9535af5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/baseline-readback.json",
+        "sha": "130cb2d5d6a51ab94e825312b97c0f91b2118672",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/manifest.json",
+        "sha": "4dc4236bdd17d87cec2ced4a849c4a69ffb1f16e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/release-guards.log",
+        "sha": "5dc69b0d8390b20581d028df54f50e41822065f8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/release-pin.json",
+        "sha": "2e2989660a855e384a390242e3fcc32926f4d464",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/source-closure.json",
+        "sha": "48aa1d134f840ab9b32c8e6e45e4d81d8d99278f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/runtime-catalog-observation.json",
+        "sha": "168afb6ab817a93939f6bbf8d580b6b256e608d7",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/six-original-fonts.png",
+        "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/traditional-native-quest-supplement.png",
+        "sha": "866b1417e0262b8b2cb7fee6366a6dd52fcdb066",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/validation.json",
+        "sha": "ae38c0edf2cfb95cc6d80b0ffeb13ddfffd0f372",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/README.md",
+        "sha": "929d1ef4380ebbe0d84925a6bc8f4f40e24dcde6",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/.gitattributes",
+        "sha": "fcbe398c597b2d35bdc16c529d6bd56d4985159a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/README.md",
+        "sha": "28e075055066dbf29a03e9288d6aa2e4e7f482fd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/alias-final.json",
+        "sha": "0bb1e38b60705e00fda70def0c72dd0847ae78a2",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/backend-artifact.json",
+        "sha": "192b620d1b027941507796ddea8c3e484bea55ea",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/backend-rollout.json",
+        "sha": "3514463cfbc80038866d3bde3a48cda6ad62db55",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/evidence-index.json",
+        "sha": "f4018aa4039923b3dfacbaff4ecfdc68a6760303",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/final-public-readback.json",
+        "sha": "f047b7590b1d7186e8763b396bcabf19ea049b4e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/independent-candidate.json",
+        "sha": "d73b9584b8ca0b5225031b7884c2b3cc93e13755",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/independent-preswitch.json",
+        "sha": "67900982421ea1469eb9da10f2cd78fcdd5b3b0d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/preservation.json",
+        "sha": "64b97e30fff58c28ca6fef944b66dae5684d60a7",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-q-phases.json",
+        "sha": "7a21a1ef215e41a5599b6bec31baadad9446bceb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-q-pixels.json",
+        "sha": "e25ce1bb2277ba9df9cdb63c9abf9d463de7408b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-qr.json",
+        "sha": "c8c15735a8af53213a5a035c274fa879709a8239",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-r1-acceptance.json",
+        "sha": "e77c482633c2478a633f1178ad677dfb3cc96bf8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-r2-acceptance.json",
+        "sha": "23c1d72e9d2a2d18a4c7a70e8918c7a25e2212e9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-summaries.json",
+        "sha": "92acfd61c5291835c88084a71f61c3c39f268585",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r1-first-q-black.png",
+        "sha": "1426a70f48edb42d3855d4b90850f46ff2faf180",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r1-native-q.png",
+        "sha": "de1ca5bb248386631939713d39835673fe261d9d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r2-after-worker-restart.png",
+        "sha": "cdc636c1ad7947d319bdc494dd3149233da4850e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r2-first-q-fallback.png",
+        "sha": "cbb41f498f75f6815237e9b7a45bffa1b2b9af1e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r2-native-q.png",
+        "sha": "efc25618c8664dc28c2ecff3d9dff89b69b48814",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/server-canary-qualification.json",
+        "sha": "ee06d14463ff3252c7b04e2b8de8091dbb4e34b9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/web-check.json",
+        "sha": "d6cd1a9aede3e403a5202e8b40c88d212e3d921a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/web-promote.json",
+        "sha": "2af7033d8e5afb28e89a03c11f4a37327abf1bb1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/web-stage.json",
+        "sha": "01a3efbc1d2d530d031405d8ce46acd875b981cb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/README.md",
+        "sha": "7730f27f0089ba7a4c095d2c86e51dbcff3f36b4",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/release-guards.log",
+        "sha": "f9a296d7eac51ecb83b9baf2097b5d2282e090cb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/release-pin.json",
+        "sha": "5c1c8b6dd32b11dbacc7095c11c0c664754ea1fe",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/source-closure.json",
+        "sha": "dfb1adcfa677426df57ac2e5418cdec51a2ef5f6",
+        "status": "added"
+      }
+    ]
+  },
+  {
+    "baseSource": "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+    "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+    "sourceCommits": [
+      "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+      "133d1c790d2069a31ac8698d418034fa609b1176",
+      "7c50e19e8152ef172bf877073657356eaa0a0efe",
+      "fea64484b6a25ccd59a22d8f52a5718aa6e57df6"
+    ],
+    "changedFiles": [
+      {
+        "filename": ".github/scripts/numeron-r16-release.mjs",
+        "sha": "f900319c90ce145bc29ad3dbab105297e992a7ab",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+        "sha": "679d7564b2f8b201a91a14621a9a9efca74e7ade",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/test-numeron-r16-release.mjs",
+        "sha": "deaf2d376927c798c92c5c53108b594a6704b676",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/dubhe-wallet-login.ts",
+        "sha": "aead9ca323d34f139811d1ca08dd9ffdb22d5bea",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/server/dubhe-connect-auth.ts",
+        "sha": "9f5ff78fb8fa33cbfe812dc4e965f798f06f59f3",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha": "9e9c23eaebd462ff7f51d0a103670834e032e36b",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+        "sha": "fb165c94f919f1d52b4c037a226df80955f77e19",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs",
+        "sha": "6b2f1f8a48cccdf59473e5ed1d9d2718c8ec9275",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-dubhe-connect-auth.mjs",
+        "sha": "d84c38c6b90d5b5d78dd5bf336a9e5b178a74f81",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-dubhe-wallet-login.mjs",
+        "sha": "d277501614ece5d9270e4ad679ac87aa2b2dfe7d",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "b9d572bba1705231d83621e02b26e4af052be36d",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "039c3178e39d72c358149e5f2c5c073665b31d35",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "9d3627b038cb53d88019e0811d4047fec139cb7f",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "4a909b2f912b2b04c65c9dccb4b341264c97045c",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/README.md",
+        "sha": "76b370fdd66e56b646eddb67dde7efd556db5a23",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/cleanup-confirmation.json",
+        "sha": "65ea12bd84226596e40d7dc87312239d4824c392",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-api-probe.json",
+        "sha": "89f6abff24061a5967745740b51a28797916851f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-findings.json",
+        "sha": "f8040a0e28280d296c7167ca5813e6f47fb03c47",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-loaded-auth.json",
+        "sha": "afe9723c310ec908cbaf63f2f654e1765a186f7d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-loaded-summary.json",
+        "sha": "bf7027e463ea3e935b48593308ef3a02790bf2de",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/isolated-build.json",
+        "sha": "995701d86279e1cd7dd0f4c558b7732041fa6b51",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/local-auth-r1.json",
+        "sha": "654c14d72fd7e9a2eec43f6a335059df8572161c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/local-auth-r2.json",
+        "sha": "875a3adde5a4b77b318ec337f3ecdcea1beff387",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/pending.png",
+        "sha": "fdc9a70dc42c5323b669a9275beed7d93e1d4984",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/restoration.json",
+        "sha": "ee9ccad139605b271184b5532ebc6c6ec50dfe97",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/select-raw-cdp.png",
+        "sha": "45ee9ee5499cf66cf48d7501c85edf0e3b13111c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/validation.json",
+        "sha": "19490438172abb88d5b21eff4d95286cb3c4b38e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/README.md",
+        "sha": "91bb62161dfcbbf53a42a66d0698b9c348c0c9ee",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/adjacent-final.log",
+        "sha": "edc91b80584b7ec4d2590b940a95f12699c0cb33",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/before-regressions.log",
+        "sha": "b06bb6b73f457f0eb1dc40faa6f4bed70fc945f0",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-baseline-chunks.json",
+        "sha": "7575d294f9ac9679ec582c52102c5f0913b00663",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-header-failover-body-observer.json",
+        "sha": "4f8db8197fac5f3ba2bff3ee6f14bb19e7b731ab",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-header-failover.json",
+        "sha": "882b8fe45579ea7be1d8d451ff03b53c8cc25130",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-sc-chunks.json",
+        "sha": "2e65588b05d81f6546777e5473a8589a625925b3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-tc-chunks.json",
+        "sha": "c0fd8c250fd6a1f06f51bb4721e68ab23bca30b4",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/disk-preflight-failure.json",
+        "sha": "61c3446ad10fc5b6ab48d86d6e3d65b8fd0f02f9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/english-native-quest.png",
+        "sha": "24ca7454e3322df23d7c211b2d46f793e8654889",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/evidence-manifest.json",
+        "sha": "1a3f187c639954b9105de6eafd22f74eb094f4e7",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/focused-final.log",
+        "sha": "da0e1071c25d73c36d0c08b9eb6021a09c44908b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/preceding-public-failure.json",
+        "sha": "28d952a7fa787dda36c1ba471c5fc05c0d2bcbcd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/README.md",
+        "sha": "2f8fac6555e6ad2cecec43c8eebf6e97c7deb1ff",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/artifact-transfer.json",
+        "sha": "2da84d5443e7b688790c30bebc02d37e071fb115",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/auth-handoff-diagnosis.json",
+        "sha": "e0b47e8fd334491337612f04bda06d5161516525",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/candidate-asset-readback.json",
+        "sha": "ee81e80a74a7493e62659a84e0e329a9d0b51830",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/evidence-index.json",
+        "sha": "eb93cf9cf7f440dd1d7af59508a26377f16c2342",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/linux-package-verification.json",
+        "sha": "f198d52c1ca8f397bd0b0eb9b3677891a6f8ab05",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/ordinary-canary.json",
+        "sha": "1e116c4a441a0d9bef53b7916b13562535df23a9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/original-r1-gates.json",
+        "sha": "53f6ea9e901f172cc7c2b8da986d26c20d0b1382",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/outcome.json",
+        "sha": "722345db694100527356069a269d57cba901a3ee",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/postrollback-qr.json",
+        "sha": "29c66a0196eb2a0278339fa8d909165f0dca7dc1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/web-jobs.json",
+        "sha": "85cb880120352207537109250f9f42327622d560",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/baseline-readback.json",
+        "sha": "df9df593d7aecaa72efa77088dda77cd05e19643",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/evidence-manifest.json",
+        "sha": "e4f7a0355dcf39d6c421d49edc123ba5efa4e4d9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/release-guards.log",
+        "sha": "ca2c10c85cc884bd6ec3ca2cfb1138dc2210438d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/release-pin.json",
+        "sha": "bc7e33043e01f9dfc7b112ffa0a4fa293e8b802a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/source-closure.json",
+        "sha": "2d749fc067eca5950a5f9608b4e662b93ba58c2e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/six-original-fonts.png",
+        "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/traditional-native-quest-supplement.png",
+        "sha": "0f98d3a64269c74a32aaf879c97f0a457925d1ff",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/validation.json",
+        "sha": "3d2531cb5ce31c29aa82a9f815b7bd1f9efeece8",
+        "status": "added"
+      }
+    ]
+  },
+  {
+    "baseSource": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+    "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+    "sourceCommits": [
+      "2cf385ceaa1a99ad0dc472f6123d703bb4064010",
+      "bf97cdd479c25d71bcb7f51438740fc5d3ee95c8",
+      "8ebc4f2c2eb06dbe7a6d3455effcebb693623041",
+      "c4b2e44c5ed2ca59050f092dbeb8ec7702b7a8a5",
+      "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b"
+    ],
+    "changedFiles": [
+      {
+        "filename": ".github/scripts/numeron-r16-release.mjs",
+        "sha": "b3d224c561b45b44aca129811e909e4df5899af9",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+        "sha": "c027289256cc7fdd98975ed6e31649324b59e3b6",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/test-numeron-r16-release.mjs",
+        "sha": "4443c1dc66bfa968920c96483bc7b9c513a6371b",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+        "sha": "3af5a0817b3a03416f23097e31bda930456fea59",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha": "a880dc7691861a26a426761d363f1dff599408a4",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha": "52499fb2a833d4fec606c74b2b1405a0f9ec8aa2",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+        "sha": "6503b69c193613481f5d2ab588e22308a61d9828",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+        "sha": "b75c7c97f0b4e22f9d8e89585a4b7d412645eb58",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+        "sha": "b05adf25a71d8c8e18b6bd3805e0f0206c008945",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-entry-npc-recovery.mjs",
+        "sha": "8a4be83a43aae4ecac8213e6f676380259faf8b0",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-entry-object-recovery.mjs",
+        "sha": "09b4c4716a5f4a03ca55cea319c0481f70299d9a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+        "sha": "b3b2d13e8a5f904589cd58db8bf2172b15df65aa",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation-handoff.mjs",
+        "sha": "ca4327bac6c3d8c5b32da284d122cb4a1bc75f6d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "33032ed51981c2748a694eafbf33d0da65c5d761",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "9a27335079d1ac7ccd065452dc1761fb1b3f3f97",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+        "sha": "3886dcb85bc359481e2815ed700d2fd635ea1a2b",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+        "sha": "ae11c04a54014e18aa2cef6ae627c03f26f3f906",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+        "sha": "d7f4e5234557312bda8464bd7725dc9963daada7",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "223ecf351faffda6cb6f091e55362a0ff00b00de",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/README.md",
+        "sha": "ad860a54962f38c9f7d069de16ff6cf991bec21e",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/README.md",
+        "sha": "98c7cc3f3c1445c3b8254490dfc6a487eccfedb3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/alias-after-rollback.json",
+        "sha": "1edceab6966125619bd196afc7b7dfd011085a9b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/artifact-transfer.json",
+        "sha": "9d9148f612550ed05d424f773faf1d096e19cccb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/backend-rollback.json",
+        "sha": "e2200bb8fde41c167cca5756ac4f80140f5c5a63",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/backend-rollout.json",
+        "sha": "e5d126a8157335eb847a6d7d424fa84ca7f70e21",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/evidence-manifest.json",
+        "sha": "243176cab05d194f40df74d8915d1d87620c8a82",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/first-playable-terrain.png",
+        "sha": "ce51926072fdb1cdc8f8f0297acf3814fd6161ce",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/linux-package-verification.json",
+        "sha": "d487cf2ae17447ab96a428345670017a769ca661",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/mobile-browser-closed.json",
+        "sha": "1078ac49091e495b209aade464a5cdbcb6af58de",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/owned-ssh-closed-after-rollback.json",
+        "sha": "ab11460ee4e66c3fffda0a568c2939a6e3b77ddc",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/passive-failure-analysis.json",
+        "sha": "2f4ac973a02548ab1d2979bcc2eac1678d73f016",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/phone-approval.json",
+        "sha": "bec2a1033c4816cf0cbf9844372d74badd32e10c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/postrollback-independent-http.json",
+        "sha": "afbd3593a620b3d66f290695661b5d0b14096950",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/postrollback-preservation.json",
+        "sha": "1c71283caf84e3618f9e3e2372714f765306cbf3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/public-r1-original-acceptance.json",
+        "sha": "3545bfc5260787c06555a756835299d93458b121",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/public-r1-result.json",
+        "sha": "5809c5cef14c3b2f93f8cee4cfbdd8e06fb6aca8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/quest-failure-stage.json",
+        "sha": "844d8ec51fdd4ecfe2e90c2e8d12aadc4e2b2daf",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/quest-key-observations.json",
+        "sha": "e4148a51cf941d7d761e3ad52bd81207a5199c32",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/quest-left-open.png",
+        "sha": "4fe06fce6ea81805b44fa10f47b8767166a563dd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/restored-qr-zh-cn.json",
+        "sha": "8fc2142174044365bdd7a301f5cdcc08624d4c44",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/restored-qr-zh-tw.json",
+        "sha": "695a3d5c0ae6621bc8cae9db40ebdf4e907f0b47",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/same-source-local-results.json",
+        "sha": "6dc7c146fa3ab7f2520a7fee7633517310ce8df4",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/server-backup-summary.json",
+        "sha": "a2c09a9164a3adecc8251b793a55dac9a8e346af",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/server-canary.json",
+        "sha": "33ea42f330edce679f463b9fddc95ef8ce0fd97c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/status.json",
+        "sha": "048f969ff74d6b2a3797ccd0ac4ae84404c021c9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/wallet-network-guard.json",
+        "sha": "91ceac0c156246faef0cda440db0971279047753",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/web-check-summary.json",
+        "sha": "e6a9041e68287ccdb96da86fef0c73f655d2d622",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/web-promote-summary.json",
+        "sha": "59a183f23e4cbe7f55717fa914aa4ef727b27b91",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/web-rollback-summary.json",
+        "sha": "cec8b130a7250ed4761f986199f6fe5b59a33eb8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/production/web-stage-summary.json",
+        "sha": "443c14ad998ee16db5b5af0c5fa2edb56999438b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/release/README.md",
+        "sha": "093f00d82d319a6e9849ae5424bf77d43539f286",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/release/baseline-readback.json",
+        "sha": "24bc80d11ae4a0b87982525ad93ed969aac3631e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/release/evidence-manifest.json",
+        "sha": "a9cfb2a7622cb8cb1b5f91e4919ea58e9790d371",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/release/release-guards.log",
+        "sha": "ea2a138a107032b00d97307affa3abdac8c85d4c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/release/release-pin.json",
+        "sha": "02b9ff197066869e89f0981a9196a63cf7f3fa2b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/release/source-closure.json",
+        "sha": "ebed5dfaec95161bba82586a84a24081818ddecd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/README.md",
+        "sha": "4daa20bdea9f156ed664a7c308325d7fa1b9e9bc",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/alias-readback.json",
+        "sha": "ec9a32efb4137cb9c3b774180a5d4de02bb6a5c2",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/evidence-manifest.json",
+        "sha": "7b378c068d21f11a418f8199124d46956e5bc64e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/isolated-build.json",
+        "sha": "f6a32423e98ef0f591aebfbb9fed4798f62f9cf5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/public-readback.json",
+        "sha": "7352f71813c5ff778bf3e5925a3b5eabaa9c42ce",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/restoration.json",
+        "sha": "d52f04090ee49238c2bc5977eb0e4bdd1db22768",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/source-ownership.json",
+        "sha": "ffc4ec286e7f90a5d741cd8542b0d308bfd0bea6",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/status.json",
+        "sha": "8718f0145e2d1ac68375dc51a6dd089caa01b274",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/unchanged-control-diary-observations.json",
+        "sha": "cfa29d849116744236de095afe0a43058c41965c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/unchanged-control-summary.json",
+        "sha": "9465a364d35b16488fa631bc28f6bacc6e168fe1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/validation.json",
+        "sha": "8bc554eb92b9e754a51762db358c80bf137b3ab9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/webgl2-tc-diary-closed.png",
+        "sha": "18d93da1ddd25d014ac571c311f7d4cbfd0a8ad8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/webgl2-tc-diary-open.png",
+        "sha": "fea95c1b6fd4456539ad5272a5fa54db51a32455",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/webgl2-tc.json",
+        "sha": "501435515c47b9a509f7e3d1a05859aeaefdb7e9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/webgpu-tc-diary-closed.png",
+        "sha": "183f161196920c84aba31b93df35bab5fd9a83e4",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/webgpu-tc-diary-open.png",
+        "sha": "e716b0402ac4075685e7ecdfdde3330d3b5ccd3a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-nav-handoff-20261116/webgpu-tc.json",
+        "sha": "01cde1eb5bcaa7e1630c87b5eeb31356a73eb926",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/README.md",
+        "sha": "a6846aba9e5dfc0330b2d32b78b43e1c2b1f683a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/alias-readback.json",
+        "sha": "86fa840f3d3449582ea98edccb979e10202403be",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/evidence-manifest.json",
+        "sha": "9d4425948b43475cbdaefb3dd708787eac6a5351",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/isolated-build.json",
+        "sha": "8aa8830c3527bc49bedfe201c27f7b312d11e855",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/prior-coverage-correction.json",
+        "sha": "0765d06bb8278726004bf350388e2286dd91ef95",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/public-readback.json",
+        "sha": "63c188211b496b17896a1807072b12d8a0707f9a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/r1-original-capture-failure.json",
+        "sha": "05e0050a7af6f596c210f1e9228b386593573f20",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/red-regression.json",
+        "sha": "d95785e7ece0c0ba642b7cee5241f7fb80d61f4e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/restoration.json",
+        "sha": "a7687f3efc2dbd18fb511a03a40696ed8e043f32",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/status.json",
+        "sha": "ea56b6e1dc36d1093ad9a2ea9502f3059636769f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/validation.json",
+        "sha": "a5b55d5c35f2381ecc5f0a2211a89804a6b01876",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/webgl2-tc-diary-closed.png",
+        "sha": "e98db90d6fbb5b78f0226e707a37ce8be9e7d75c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/webgl2-tc-diary-open.png",
+        "sha": "9146611369675571958c4ec97440e9b180081f3e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/webgl2-tc.json",
+        "sha": "095f292a379840fa8d72e1ae2358bd5189aba888",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/webgpu-tc-diary-closed.png",
+        "sha": "27047fdfc79a57864b70df602a8d107adb6c0ca3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/webgpu-tc-diary-open.png",
+        "sha": "38567ebc8ca99e2e68b0830bdb8f490296877814",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-diary-world-churn-20261116/webgpu-tc.json",
+        "sha": "948780a3dba497b3678617795eb3ff898de63289",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/README.md",
+        "sha": "211cc31184d5d462431fdcc0c2bf4f80533cf0ce",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/alias-readback.json",
+        "sha": "45afe8bb0c1664c3389bf499eba66a1a498b96a2",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/evidence-manifest.json",
+        "sha": "8d4bafce95d4c90839894c2648491561eeef6e13",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/isolated-build.json",
+        "sha": "2e5be4bf4813977215294b66d03749ae82dd13fd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/next-Q-investigation.json",
+        "sha": "ecac6ed126538c4fddc4b1cdc5aa262202579c0b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/public-readback.json",
+        "sha": "36b6527b19efb8855a075f988eb91081ccff56bd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/restoration.json",
+        "sha": "d8c52a896c435cd8f4b8dd7df2756c4eed706d7b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/source-ownership.json",
+        "sha": "50bafdb4e785a2b675acc27be460700b4420f868",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/status.json",
+        "sha": "263c9635a5e0f3fa729c0221ad21863c9f3ce7f3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/validation.json",
+        "sha": "31e1caae010b71e8bef7dbec257216038951c44f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/webgl2-original-Q-observations.json",
+        "sha": "14315ccd23aa3fd9f37b15af0ace55605445a462",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/webgl2-tc-objects-recovered.png",
+        "sha": "a03da6e4a1827968e7c678fde71497c5654b691b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/webgl2-tc.json",
+        "sha": "77b6a5475086436751eb231c6d883e42143f69f4",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/webgpu-tc-objects-recovered.png",
+        "sha": "4884bcb30ab18c349b5aa25c987f96b9684439de",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-entry-object-recovery-20261116/webgpu-tc.json",
+        "sha": "f971c04e10c7dbc3d100de076ffcb5b5add4c215",
+        "status": "added"
+      }
+    ]
+  }
+]

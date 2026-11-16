@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-09T01:55:31.5823359Z",
+  "scope": "isolated headless round only",
+  "ownedProcessesAbsent": true,
+  "listenersAbsent": true,
+  "sourceFixtureUnchanged": true,
+  "originalFileFixtureSha256": "ea4a79a1867847544a9682f581c550b7a2416f2b0b9a7500643271a8b56a8ef0",
+  "checkedPorts": [
+    19581,
+    19582,
+    19583
+  ],
+  "checkedStartupPids": [
+    161160,
+    176772
+  ],
+  "scopedProcesses": [],
+  "listeners": []
+}

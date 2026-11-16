@@ -1,0 +1,8 @@
+{
+  "command": "cargo +1.95.0 build --locked --offline --release --manifest-path apps/game-client/platform-windows/Cargo.toml --target-dir F:/mir2-builds/canonical-companion-native --bin mir2-platform-windows",
+  "startedAt": "2026-11-08T02:01:03.4865692Z",
+  "completedAt": "2026-11-08T02:02:35.5276109Z",
+  "exitCode": 0,
+  "nativeExecuted": false,
+  "log": "native-build-final.log"
+}

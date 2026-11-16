@@ -1,0 +1,15 @@
+{
+  "role": "issuer",
+  "recipient": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+  "observedAt": "2026-10-28T19:06:45.241Z",
+  "network": "testnet",
+  "officialPoW": true,
+  "maximumMist": "1000000000",
+  "result": {
+    "status": "success",
+    "digest": "DDEtqoV944rWtXnMwWP4MQGhNswbAkzAw4pfm7LX9t16",
+    "recipient": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+    "amountMist": "1000000000",
+    "difficulty": "3000"
+  }
+}

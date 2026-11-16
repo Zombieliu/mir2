@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792959622496-365f0175",
+      "report": "capacity-formal-native-v2-account-store-wait-ladder-13/release-native-v2-account-store-wait-ladder-13/reports/1792959622496-365f0175.report.json",
+      "path": "release-native-v2-account-store-wait-ladder-13/reports/1792959622496-365f0175.samples.jsonl",
+      "bytes": 50578926,
+      "sha256": "1aaa687e95642e46a5db8acbbf7a8ffb571293b63f3c07b965c70ff454de8cd4",
+      "projection": "capacity-formal-native-v2-account-store-wait-ladder-13/release-native-v2-account-store-wait-ladder-13/reports/1792959622496-365f0175.raw-projection.json"
+    }
+  ]
+}

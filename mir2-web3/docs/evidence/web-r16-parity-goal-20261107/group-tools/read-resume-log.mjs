@@ -1,0 +1,11 @@
+import {readFile,writeFile} from 'node:fs/promises';
+const base=import.meta.dirname;
+const store=JSON.parse(await readFile(base+'/private-data/accounts.json','utf8'));
+const state=JSON.parse(await readFile(base+'/private-qa/realm-state.local.json','utf8'));
+const identity=JSON.parse(await readFile(base+'/private-qa/identity.local.json','utf8'));
+const peers=JSON.parse(await readFile(base+'/private-qa/peers.local.json','utf8'));
+const sensitive=new Set([...Object.keys(store.accounts),...Object.values(store.accounts).flatMap(a=>[a.password,a.storage_password,...a.characters.map(c=>c.name)]),...Object.values(state.world),...Object.values(state.keys),...Object.values(identity).filter(x=>typeof x==='string'),...peers.flatMap(x=>Object.values(x).filter(v=>typeof v==='string'))].filter(x=>typeof x==='string'&&x.length>=4));
+let log=await readFile(base+'/gateway.private.log','utf8');for(const value of [...sensitive].sort((a,b)=>b.length-a.length))log=log.replaceAll(value,'[private]');
+const lines=log.split(/\r?\n/).filter(line=>/resume|lease|disconnect|transport|persist|character.*online/i.test(line));
+if(process.argv.includes('--save'))await writeFile(base+'/resume-sanitized-log.json',JSON.stringify({schema:'mir2.r16.group.resume.observation.v1',accountNamesAndCredentialsRedacted:true,lines},null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({totalMatchingLines:lines.length,lastLines:lines.slice(-50)},null,2));

@@ -1,0 +1,469 @@
+{
+  "schema": "r16-v15-quest4-ordinary-clothing-quote-boundary/1",
+  "passed": false,
+  "sourceProof": "onboarding-v11-browser-proof.json",
+  "sourceProofSha256": "99f9d200bcc3b9610876568446658a3d763065d22be2ffabd16953df738575b5",
+  "positive": {
+    "normalUiLogin": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003
+    ],
+    "passiveFencingLearnedOnResume": true,
+    "renderer": {
+      "expected": "bevy-e7afab3714b4abba",
+      "observedPublicReleases": [
+        "bevy-e7afab3714b4abba"
+      ]
+    },
+    "webSockets": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "endpoint": "ws://127.0.0.1:19040/ws",
+        "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+        "loopback": true,
+        "hasQuery": false,
+        "handshakeStatus": 101,
+        "closed": false,
+        "closeCode": null,
+        "closeFrames": []
+      }
+    ]
+  },
+  "clothingPurchase": {
+    "itemName": "BaseDress(M)",
+    "selectedQuantity": 1,
+    "displayedUnitGold": 120,
+    "initialAuthoritativeGold": 150,
+    "physicalInput": {
+      "phase": "fourth-quest-native-diary-and-passive-fencing",
+      "logical": {
+        "x": 337,
+        "y": 533
+      },
+      "css": {
+        "x": 465,
+        "y": 629
+      },
+      "clickCount": 1,
+      "delayMs": 80,
+      "quest": {
+        "questLocaleVersion": 1,
+        "language": "zh-CN",
+        "displayLocaleVersion": 1,
+        "displayLanguage": "zh-CN",
+        "ready": true,
+        "error": null,
+        "capturesPointer": false,
+        "questLogOpen": false,
+        "frame": 194,
+        "generation": 2,
+        "revision": 14,
+        "openRevision": 1,
+        "hpOrb": {
+          "supported": true,
+          "ready": false,
+          "generation": 2,
+          "revision": 14,
+          "hp": null,
+          "maxHp": null,
+          "hpOnly": null,
+          "slot": null,
+          "image": null,
+          "source": null,
+          "destination": null,
+          "layout": null
+        },
+        "mpOrb": {
+          "supported": true,
+          "ready": false,
+          "generation": 2,
+          "revision": 14,
+          "mp": null,
+          "maxMp": null,
+          "hpOnly": null,
+          "slot": null,
+          "image": null,
+          "source": null,
+          "destination": null,
+          "layout": null
+        },
+        "experienceBar": {
+          "supported": false,
+          "ready": false,
+          "generation": 2,
+          "revision": 14,
+          "experience": null,
+          "maxExperience": null,
+          "slot": null,
+          "image": null,
+          "source": null,
+          "destination": null,
+          "layout": null
+        },
+        "weightBar": {
+          "supported": false,
+          "ready": false,
+          "generation": 2,
+          "revision": 14,
+          "currentWeight": null,
+          "maxWeight": null,
+          "slot": null,
+          "image": null,
+          "source": null,
+          "destination": null,
+          "layout": null
+        },
+        "hudBarDrawPlan": {
+          "version": 1,
+          "generation": 2,
+          "revision": 14,
+          "lifetime": "r1-g2-p1000",
+          "experience": {
+            "token": "e-3",
+            "sequence": 3,
+            "state": "draw",
+            "current": 198,
+            "maximum": 1200,
+            "slot": {
+              "left": 9,
+              "top": 759,
+              "width": 1004,
+              "height": 8
+            },
+            "image": "original-ui/Prguse/8.png",
+            "source": {
+              "left": 0,
+              "top": 0,
+              "width": 165,
+              "height": 8
+            },
+            "destination": {
+              "left": 9,
+              "top": 759,
+              "width": 165,
+              "height": 8
+            }
+          },
+          "weight": {
+            "token": "w-3",
+            "sequence": 3,
+            "state": "draw",
+            "current": 1,
+            "maximum": 66,
+            "slot": {
+              "left": 919,
+              "top": 719,
+              "width": 76,
+              "height": 12
+            },
+            "image": "original-ui/Prguse/76.png",
+            "source": {
+              "left": 0,
+              "top": 0,
+              "width": 1,
+              "height": 12
+            },
+            "destination": {
+              "left": 919,
+              "top": 719,
+              "width": 1,
+              "height": 12
+            }
+          }
+        }
+      },
+      "receivedSequenceBefore": 694
+    },
+    "actualWire": [
+      {
+        "sequence": 653,
+        "action": "begin",
+        "reply": "producer",
+        "completeSnapshot": true,
+        "matchingRequestAndOperation": true,
+        "bootstrapObserverNotGated": true
+      },
+      {
+        "sequence": 690,
+        "action": "begin",
+        "reply": "producer",
+        "completeSnapshot": true,
+        "matchingRequestAndOperation": true,
+        "bootstrapObserverNotGated": true
+      },
+      {
+        "sequence": 697,
+        "action": "quote",
+        "reply": "quote",
+        "completeSnapshot": true,
+        "matchingRequestAndOperation": true
+      }
+    ],
+    "quoteReplies": 1,
+    "purchaseRequestsObserved": 0,
+    "ordinarySecondClick": false,
+    "commitReceiptObserved": false,
+    "publicBefore": {
+      "host": {
+        "active": true,
+        "transitioning": false,
+        "blocksInput": true,
+        "errorPresent": false
+      },
+      "diagnostic": {
+        "source": null,
+        "preview": null,
+        "renderServiceCurrent": true,
+        "plannerPresent": true,
+        "corePresent": true,
+        "host": {
+          "active": true,
+          "transitioning": false,
+          "blocksInput": true,
+          "errorPresent": false
+        }
+      },
+      "action": {
+        "route": "none",
+        "stage": "idle",
+        "reason": null
+      },
+      "status": {
+        "runGeneration": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "ownerRevision": 1,
+        "playerObjectId": 1000,
+        "frame": 170,
+        "ready": true,
+        "inputEnabled": true,
+        "appliedRevision": 4,
+        "appliedModelRevision": 2,
+        "appliedPresentationRevision": 1,
+        "appliedServiceRevision": 13,
+        "appliedCatalogRevision": 2,
+        "coreAuthorityRevision": "4",
+        "controlRevision": "9",
+        "selectedId": 20774912,
+        "quantity": 1,
+        "startIndex": 0,
+        "feedback": {
+          "phase": null,
+          "pending": false,
+          "canReserve": true,
+          "previousUnknown": 0
+        },
+        "inputRegions": [
+          {
+            "left": 220,
+            "top": 217,
+            "width": 244,
+            "height": 334
+          },
+          {
+            "left": 474,
+            "top": 251,
+            "width": 330,
+            "height": 80
+          }
+        ],
+        "error": null
+      }
+    },
+    "publicFailure": {
+      "host": {
+        "active": false,
+        "transitioning": false,
+        "blocksInput": false,
+        "errorPresent": true
+      },
+      "diagnostic": {
+        "source": null,
+        "preview": null,
+        "renderServiceCurrent": true,
+        "plannerPresent": true,
+        "corePresent": true,
+        "host": {
+          "active": false,
+          "transitioning": false,
+          "blocksInput": false,
+          "errorPresent": true
+        }
+      },
+      "action": {
+        "route": "durable",
+        "stage": "quoteSent",
+        "reason": null
+      },
+      "status": {
+        "runGeneration": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "ownerRevision": 1,
+        "playerObjectId": 1000,
+        "frame": 346,
+        "ready": true,
+        "inputEnabled": true,
+        "appliedRevision": 18,
+        "appliedModelRevision": 9,
+        "appliedPresentationRevision": 1,
+        "appliedServiceRevision": 13,
+        "appliedCatalogRevision": 2,
+        "coreAuthorityRevision": "4",
+        "controlRevision": "23",
+        "selectedId": 20774912,
+        "quantity": 1,
+        "startIndex": 0,
+        "feedback": {
+          "phase": null,
+          "pending": false,
+          "canReserve": true,
+          "previousUnknown": 0
+        },
+        "inputRegions": [
+          {
+            "left": 220,
+            "top": 217,
+            "width": 244,
+            "height": 334
+          },
+          {
+            "left": 474,
+            "top": 251,
+            "width": 330,
+            "height": 80
+          }
+        ],
+        "error": null
+      }
+    },
+    "limitation": "A matching complete quote response was observed. The host subsequently reported an error; its public status exposes no exception cause. There was no purchase command to retry or commit receipt to claim."
+  },
+  "medicine": {
+    "physicalBeltKeys": [],
+    "trustedKeyEvents": [],
+    "diagnostic": {
+      "keyboard": null,
+      "host": {
+        "shortcut": null,
+        "equipment": null
+      }
+    },
+    "verified": false,
+    "reason": "The clothing quote failure occurred before the medicine step."
+  },
+  "finalQuest4": {
+    "questId": 2110004,
+    "stage": "inProgress",
+    "current": 1,
+    "required": 3,
+    "objectives": [
+      {
+        "label": "Defeat 2 Oma.",
+        "current": 0,
+        "required": 2,
+        "done": false
+      },
+      {
+        "label": "Complete your class practice",
+        "current": 1,
+        "required": 1,
+        "done": true
+      }
+    ]
+  },
+  "finalObservedVitals": {
+    "hp": 59,
+    "maxHp": 60,
+    "mp": 35,
+    "maxMp": 35,
+    "dead": false,
+    "position": {
+      "x": 304,
+      "y": 609
+    }
+  },
+  "errors": [
+    {
+      "phase": "fourth-quest-native-diary-and-passive-fencing",
+      "name": "EXACTLY_ONE_NATIVE_DURABLE_PURCHASE_NOT_SENT",
+      "hash": "db7820aab093f567d3478d2113683a316d73dccd5886528df695180bd04e5816"
+    }
+  ],
+  "network": {
+    "httpErrors": 0,
+    "failed": 0
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7
+  },
+  "cleanup": {
+    "ordinaryLogout": false,
+    "browserClosed": true
+  },
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-keydown-up-only",
+    "stageFourOnly": true
+  },
+  "evidence": [
+    {
+      "name": "onboarding-v11-browser-proof.json",
+      "bytes": 53026,
+      "sha256": "99f9d200bcc3b9610876568446658a3d763065d22be2ffabd16953df738575b5"
+    },
+    {
+      "name": "01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1331378,
+      "sha256": "5d1353b8b3efce6266205b743f5ea063de6c17510ce0477bcbca6207b35be734"
+    },
+    {
+      "name": "02-fresh-village-native-task-card.png",
+      "bytes": 1330448,
+      "sha256": "354a71bf5d630d2aefb5a9e0bdee8007a0c4d5e7568350e56be2118e32ce3c52"
+    },
+    {
+      "name": "03-ordinary-merchant-before-buy-link.png",
+      "bytes": 1174007,
+      "sha256": "78920a0db44874de7fe253e7c12e74cb81a326e18198fdef8a18ea131abe24dc"
+    },
+    {
+      "name": "04-ordinary-merchant-before-real-gold-purchase.png",
+      "bytes": 1233931,
+      "sha256": "8e889cea25dd6acda28704ecc3836d403b94c054d70750333dec1e75186ce1b0"
+    },
+    {
+      "name": "05-failure-safe-masked.png",
+      "bytes": 1233715,
+      "sha256": "743631fdc7235c31255caf9b297ffccb3e186702a2b31cbd23c82c0a01483974"
+    }
+  ],
+  "secretScan": {
+    "ownQaAndRealmExactMatches": 0,
+    "privateRuntimeOrOwnerFilesRead": false
+  },
+  "runner": {
+    "name": "runner.executed.mjs",
+    "sha256": "30feeb0c24102ccc4c469726e8e6af6df1df3cb3e99df4a70ba65dfb66c6f22a"
+  }
+}

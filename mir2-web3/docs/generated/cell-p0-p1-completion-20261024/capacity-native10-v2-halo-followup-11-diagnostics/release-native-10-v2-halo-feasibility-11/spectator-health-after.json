@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "phase": "after",
+  "observedAtMs": 1792903620063,
+  "gatewayPid": 64756,
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "dataDir": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\recordings",
+  "dataDirMatches": true,
+  "metrics": {
+    "recordingEnabled": true,
+    "activeViewers": 0,
+    "activeMaps": 1,
+    "bufferedFrames": 2400,
+    "publishedFramesTotal": 2630,
+    "persistedFramesTotal": 2630,
+    "droppedFramesTotal": 0,
+    "recordingErrorsTotal": 0
+  },
+  "scope": "Whitelisted owned public health counts only; no recording/entity payload and no capacity acceptance"
+}

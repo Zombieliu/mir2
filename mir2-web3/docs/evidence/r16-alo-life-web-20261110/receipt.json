@@ -1,0 +1,166 @@
+{
+  "schema": "mir2-r16-alo-life-tab/1",
+  "localOnly": true,
+  "modelProvider": "rules",
+  "baseCommit": "2b5a0461a8ae85b6687f0ed68fa1b265b3bcac2d",
+  "gatewaySourceCommit": "8a2c47b44ec5b82f3866cfd84b93a271fd9b1f8a",
+  "gatewaySourceFiles": {
+    "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+    "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+    "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+    "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+  },
+  "gatewaySha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "source": {
+    "apps/web/lib/r16-companion-client.ts": "108ae5fa740d7f22b1e0fed1194ad2c3bf9c8a07c11c9d63842d31c11cd45ec5",
+    "apps/web/app/components/r16-companion-window.tsx": "6d8f0322c406e563110ecab03ab3853876af10f3ed9280195bfeff9aee710246",
+    "apps/web/app/page.tsx": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba"
+  },
+  "phases": [
+    "reserve-own-loopback",
+    "prepare-independent-next-source",
+    "ordinary-new-file-store-provisioning",
+    "actual-headless-web-start",
+    "owner-browser-login-select-enter",
+    "open-life-tab-and-check-ordinary-idle",
+    "real-grant-and-process-restart",
+    "resume-same-grant-with-explicit-confirmation",
+    "stop-real-life-and-logout"
+  ],
+  "events": [
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "authorizeLife",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "resumeLife",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "cancelLife",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    }
+  ],
+  "pageErrors": [],
+  "startGameAcks": [
+    4
+  ],
+  "logoutAcks": 1,
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "readback": {
+    "paused": "paused",
+    "active": "running",
+    "stopped": "cancelled",
+    "sameArchive": true,
+    "sameGrant": true,
+    "sameExpiry": true,
+    "purchaseLimit": 1,
+    "budgetGold": 50,
+    "spentGold": 0,
+    "originalRequestCount": 1,
+    "resumeRequestCount": 1,
+    "processRestart": true,
+    "worldAuth": "ordinary File",
+    "modelCalls": 0
+  },
+  "result": "pass",
+  "partyTrace": [
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    }
+  ],
+  "browserAttackCommands": []
+}

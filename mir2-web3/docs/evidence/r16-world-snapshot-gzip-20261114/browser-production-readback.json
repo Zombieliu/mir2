@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-14T10:36:32.711Z",
+  "publicAlias": "numeron.obelisk.build",
+  "aliasDeploymentId": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "deploymentId": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "target": "production",
+  "readyState": "READY",
+  "revision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "ref": "codex/windows-player-journey",
+  "thisRoundDeploymentPerformed": false
+}

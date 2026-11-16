@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T13:29:07.7728087Z",
+  "scope": "Read-only actual44 source/Release/build and full16 pre-execution binding review; no gameplay result or terminal status reviewed.",
+  "verdict": {
+    "full16ActualBindingConsistent": true,
+    "fixedCellStarted": false,
+    "capacityAccepted": false,
+    "freshFull16Passed": false,
+    "blockingFindingIds": [],
+    "actualSourceReleaseBuildBindingConsistent": true,
+    "freshFull16ResultReviewed": false
+  },
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendInputCount": 44,
+  "sourceManifestAggregate": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+  "sourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+    "bytes": 32926,
+    "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+    "bytes": 2376,
+    "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+  },
+  "immutableBinary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87363072,
+    "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+  },
+  "buildReceipt": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-v1-build-receipt.json",
+    "bytes": 2373,
+    "sha256": "80e8f27189012cff6d4d594fc0f9af9dd4e194a6145559d3856e0e7f397d1f05"
+  },
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-personal-monster-projection-v1-release-build.log",
+    "bytes": 55865,
+    "sha256": "065a9fa0ad55a19fa38f846fb152b06c4a2053b819f2192ac930529fbb782eaa"
+  },
+  "rootSourceBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-source-binding-execution-v3.json",
+    "bytes": 1740,
+    "sha256": "a6935b8ce3bdcbebe25a95a12eef33a1082c68c6909749da07be153d1316e603"
+  },
+  "rootFull16Binding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-full16-actual-binding-v1.json",
+    "bytes": 2240,
+    "sha256": "429a81af6a97b7a8f50b052805f31fa48d0a24d2ba25ca99820b4d836afdb647"
+  },
+  "launcherBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\launcher-final-binding-v1.json",
+    "bytes": 1681,
+    "sha256": "b1f15c7210c131e58078db68fc010e3a22db925a7e86530dada138588ebc3afc"
+  },
+  "candidateBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\candidate-release-binding-v1.json",
+    "bytes": 1594,
+    "sha256": "8888917e353f0484779f21039d04d6747df99f8aa1f706f01e309652a59f6cfe"
+  },
+  "profile": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\full-lifecycle-profile.json",
+    "bytes": 4369,
+    "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+  },
+  "matched": {
+    "current44SourceRawPins": true,
+    "actualImmutableBinaryRawHash": true,
+    "candidateSixReferences": true,
+    "rootAndLauncherReferences": true,
+    "preparedToolPins": 7,
+    "originalDriverPins": 6,
+    "sourceLibraryPinnedBeforeImportByReviewedCode": true,
+    "buildExitCode": 0,
+    "buildSourceBeforeAfterRecordUnchanged": true,
+    "buildArguments": [
+      "+1.95.0",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--jobs",
+      "4",
+      "-p",
+      "mir2-gateway",
+      "--bin",
+      "mir2-gateway"
+    ],
+    "buildLogHasFinishedReleaseAndNoErrorLine": true
+  },
+  "preparedPreservation": {
+    "preparedReceipt": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\template-prepared-v1.json",
+      "bytes": 5941,
+      "sha256": "bd3d59f920a34c650c073277e0ff0f7a5f1106e9b42113f867994b543839a432"
+    },
+    "pendingCandidatePreimage": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\candidate-release-binding-v1-pending-preimage.json",
+      "bytes": 534,
+      "sha256": "da14ec989b21981c87739190788f767de18e7d8a9c857d3b2d1add954cbff3f0"
+    },
+    "pendingProfilePreimage": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\full-lifecycle-profile-pending-preimage-v1.json",
+      "bytes": 4294,
+      "sha256": "ba6481b8798765c1ea2bc604b7da4b803af150196c41fa9e9ac6df21a97229c6"
+    },
+    "bothPreimagesMatchOriginalPreparedRaw": true,
+    "otherPreparedFilesUnchanged": 9,
+    "actualProfileChangedKeys": [
+      "intendedBackendSourceCommit",
+      "intendedBinarySha256",
+      "intendedSourceManifestFileSha256",
+      "intendedSourceManifestSha256",
+      "scope",
+      "templateOnly"
+    ],
+    "originalProfileWorkloadPortThresholdCleanupFieldsUnchanged": true
+  },
+  "actionsNotTaken": [
+    "No source entrypoint or gate imported/executed.",
+    "No Cargo, source test, service, account or launcher execution.",
+    "No private files, live protocol raw, recordings or current full16 result read.",
+    "No tracked or frozen input edited."
+  ],
+  "limitations": [
+    "The new Release was actually built by root. This reviewer verifies its source/build/raw artifact bindings and original log, not a new build.",
+    "The full16 binding was authored before execution. Its realmStarted/accountsCreated false values describe that binding event, not the current runtime. Root reported an in-progress full16; this receipt does not assign its result.",
+    "Probe15 complete prepared receipt is still awaited; no probe15 seal/prepare/run approval is given here."
+  ]
+}

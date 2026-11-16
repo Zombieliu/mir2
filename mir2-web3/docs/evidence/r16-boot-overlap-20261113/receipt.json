@@ -1,0 +1,581 @@
+{
+  "scope": "Overlap full HUD prewarm with independent original fonts and pinned runtime after first playable; no asset or timing-gate reduction",
+  "candidate": "31a1de5de2ba-boot-overlap-1a406317",
+  "status": "local candidate; not yet published",
+  "liveSourceAtRecording": "491819b20efd53d4cc8442cb87e8c6fc1e1a80e8",
+  "unit": {
+    "red": {
+      "tests": 13,
+      "pass": 10,
+      "fail": 3,
+      "sha256": "40e4a3bd0b4c08551ad85debd65e0f21c46a4b23796737e6e4af20c4686dc91c"
+    },
+    "green": {
+      "tests": 88,
+      "pass": 88,
+      "fail": 0,
+      "skip": 0,
+      "sha256": "ae4abb7d59092f631d4efe43d1a2b87b556e98576bad221ef606993bbb61c39a"
+    }
+  },
+  "build": {
+    "passed": true,
+    "rawSha256": "c3e25d5e9478ce180c8bf28854f66727b94bca1d38abc94d21be85f9062c2d89",
+    "id": "NeXNvoHJGNfKYoXLZ6ich",
+    "sourceFiles": 58
+  },
+  "runs": [
+    {
+      "mode": "default",
+      "passed": true,
+      "rawReceiptSha256": "41fd680002759efcd09735e472a57831f25e6d018e2d79a7273fddcf96f08535",
+      "scope": "cold gate starts at actual committed first-playable metric and includes early physical walks",
+      "nativeReadyWaitMs": 34313,
+      "warmReadyWaitMs": 1385,
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794510654748,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794510654777,
+            "wireAt": 1794510654805,
+            "ackAt": 1794510654833,
+            "renderedAt": 1794510654862,
+            "ackMs": 28,
+            "inputToRenderedMs": 85,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794510654882,
+            "wireAt": 1794510655406,
+            "ackAt": 1794510655408,
+            "renderedAt": 1794510655436,
+            "ackMs": 2,
+            "inputToRenderedMs": 554,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "pendingRuntimeReentry": null,
+      "hudReady": true,
+      "questReady": true,
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarmPassed": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "normalLogoutAndFileReadbackPassed": true,
+      "fullyClosedBrowserReopenPassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "mode": "shared-webgl2",
+      "passed": true,
+      "rawReceiptSha256": "8ede1d7e605841c06a013c54dba765fd4aecbdedbc46f7a2d1ccaae83e24957e",
+      "scope": "cold gate starts at actual committed first-playable metric and includes early physical walks",
+      "nativeReadyWaitMs": 34373,
+      "warmReadyWaitMs": 1337,
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794510843746,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794510843768,
+            "wireAt": 1794510843809,
+            "ackAt": 1794510843871,
+            "renderedAt": 1794510843914,
+            "ackMs": 62,
+            "inputToRenderedMs": 146,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794510843946,
+            "wireAt": 1794510844414,
+            "ackAt": 1794510844434,
+            "renderedAt": 1794510844449,
+            "ackMs": 20,
+            "inputToRenderedMs": 503,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "pendingRuntimeReentry": null,
+      "hudReady": true,
+      "questReady": true,
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarmPassed": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgl2",
+          "packageId": "webgl2-shared"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "normalLogoutAndFileReadbackPassed": true,
+      "fullyClosedBrowserReopenPassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "mode": "early-leave-reentry",
+      "passed": true,
+      "rawReceiptSha256": "f33069e651c5c1d713505b5d12ca867891474118da92434cbcdad3762cf41cbe",
+      "scope": "lifecycle case; gate starts before trusted reentry Start input, not a cold benchmark",
+      "nativeReadyWaitMs": 31136,
+      "warmReadyWaitMs": 1339,
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794511416518,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794511416550,
+            "wireAt": 1794511416574,
+            "ackAt": 1794511416597,
+            "renderedAt": 1794511416643,
+            "ackMs": 23,
+            "inputToRenderedMs": 93,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794511416659,
+            "wireAt": 1794511417176,
+            "ackAt": 1794511417178,
+            "renderedAt": 1794511417208,
+            "ackMs": 2,
+            "inputToRenderedMs": 549,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "pendingRuntimeReentry": {
+        "passed": true,
+        "scope": "separate early-leave lifecycle case; not a first-session cold timing qualification",
+        "originalFirstPlayableAt": 1794511416518,
+        "beforeFlags": {
+          "booted": false,
+          "attempted": false
+        },
+        "logoutAt": 1794511417300,
+        "logoutAckAt": 1794511419661,
+        "savedPosition": {
+          "x": 288,
+          "y": 616
+        },
+        "gutter": {
+          "x": 64,
+          "y": 480
+        },
+        "reentryInputAt": 1794511419702,
+        "reentryAckAt": 1794511427949,
+        "reentryWorldAt": 1794511428159,
+        "nativeGateStartAt": 1794511419702,
+        "nativeGateStartReason": "before trusted reentry Start input; stricter than first playable",
+        "sceneObservedAt": 1794511428194,
+        "readyEvents": [
+          {
+            "name": "bevyRuntimeReady",
+            "reused": false,
+            "backend": "webgpu"
+          }
+        ],
+        "readyEventsAreDocumentScoped": true
+      },
+      "hudReady": true,
+      "questReady": true,
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarmPassed": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "normalLogoutAndFileReadbackPassed": true,
+      "fullyClosedBrowserReopenPassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    }
+  ],
+  "retainedVerifierFailure": {
+    "rawReceiptSha256": "320a4b6f4d617e73b4b6496cc43abad781c7db0095c2d1000b815548c509aebe",
+    "run": "reentry-r3",
+    "passed": false,
+    "reason": "Verifier incorrectly required document-deduplicated firstPlayableFrame milestone to repeat on same-document reentry; R4 uses a fresh authoritative world and current rendered scene, with its gate starting before trusted Start input.",
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    }
+  },
+  "preservation": {
+    "pendingFiles": 134,
+    "unchanged": true
+  },
+  "limits": [
+    "Controlled fixed-byte failure/delay fixtures are not WAN measurements.",
+    "Live491 original120-second Native cold gate remains failed at158.084 seconds until a new production replay qualifies it.",
+    "Document-scoped bevyRuntimeReady markers are not independent boot-call counters.",
+    "No new full three-class1-to30 run, physical phone, Hosted, Windows window, or global1:1 acceptance by this round."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.native-r17-ci-root-integration.v1",
+  "passed": true,
+  "workerFreezeSha256": "2b4486122140eef2fc05c69fdfc6d1a7706c0e6ea1f1fa40ceb00716dd2df8d9",
+  "regularArtifactsRehashed": 192,
+  "negativeFixtureLinksRecheckedWithoutFollowing": 18,
+  "productionFiles": [
+    {
+      "path": "scripts/native_r17_r2_delivery.py",
+      "size": 42140,
+      "sha256": "8fcb1f581fafe0cf254b256e66394397be436facec03d53d6fdb8d7bf83c601f",
+      "nlink": 1,
+      "type": "regular"
+    },
+    {
+      "path": "scripts/test_native_r17_r2_delivery.py",
+      "size": 54894,
+      "sha256": "a6617cfb25309cf6df78cbb8a28bf6c1259ec744a127b4e67f2b9b41fc11a046",
+      "nlink": 1,
+      "type": "regular"
+    }
+  ],
+  "actualNetworkRequests": 0,
+  "credentialsRead": false,
+  "deployed": false
+}

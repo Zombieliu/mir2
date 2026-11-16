@@ -1,0 +1,13 @@
+
+running 1 test
+mir2-gateway web listening on http://127.0.0.1:50354
+web session state flush failed; internal detail: WebSocket protocol error: Sending after closing is not allowed
+test routing::tests::crowded_fixture_transport_tests::crowded_fixture_normal_websocket_three_class_attack_escape_cohort ... Warrior: qualification="inconclusive", attackEscape="inconclusive", quiet=null (prepared geometry; native acceptance false)
+mir2-gateway web listening on http://127.0.0.1:64800
+Wizard: qualification="qualified", attackEscape="passed", quiet="passed" (prepared geometry; native acceptance false)
+mir2-gateway web listening on http://127.0.0.1:60719
+Taoist: qualification="qualified", attackEscape="passed", quiet="passed" (prepared geometry; native acceptance false)
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 920 filtered out; finished in 142.85s
+

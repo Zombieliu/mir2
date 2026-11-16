@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T09:07:31.3988841Z",
+  "scope": "Read-only test quality review of the13 appended chase-preference cases at this exact candidate. No test execution, product imports, raw scans, source modifications or capacity inference.",
+  "testSource": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "bytes": 238437,
+    "sha256": "2c95cccec9d2aadf3b4a59bc5e48894ade2951fc50c8c26a1ddd48b903ad24b5"
+  },
+  "original187RawPrefix": {
+    "bytes": 224817,
+    "actualPrefixSha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+    "expectedOriginalSha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+    "expectedPinSource": "Root-provided original187 raw pin",
+    "exactSha256Match": true,
+    "normalizationPerformed": false,
+    "newlyAppendedBytes": 13620,
+    "newTestCount": 13,
+    "oldTestsModified": false
+  },
+  "sourceReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-independent-review-v1/source-review-v1.json",
+    "bytes": 7006,
+    "sha256": "62bade1cc1a842453274f19371adf7b7ca6cb197405560cabedb66253c8f67bd"
+  },
+  "mainSourceInverseReviewed": {
+    "newBytes": 148409,
+    "newSha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f",
+    "ruleCount": 8,
+    "eachInversePatternUnique": true,
+    "originalRawBytes": 144416,
+    "originalRawSha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42",
+    "exactRawRestored": true,
+    "note": "Already independently executed in-memory inverse during the frozen main source review; no second source read during root red/green source swapping."
+  },
+  "coverage": [
+    {
+      "cases": [
+        1
+      ],
+      "behavior": "Real matching chase ACK makes the other fighter prefer another target despite per-connection owner1000 reuse",
+      "meaningfulAssertions": "Selected target changes to901 while original pursuit900, hard targetClaims, failure and deferral maps stay untouched."
+    },
+    {
+      "cases": [
+        2,
+        3
+      ],
+      "behavior": "Original four candidates retained under pathless preferred alternatives; sole approach and witnessed adjacent attack remain available",
+      "meaningfulAssertions": "Three genuinely blocked candidate neighborhoods force fallback to900; target904 cannot expand path budget. No-alternative still chooses900. Adjacent actual-witness900 remains attack rather than movement."
+    },
+    {
+      "cases": [
+        4,
+        5
+      ],
+      "behavior": "Symmetric leader selection with self included; earlier receipt beats actor label, exact ties use label",
+      "meaningfulAssertions": "Reverse context iteration order does not change which fighter retains900 versus switches901. Two prepared same-target plans receive separate matching ACKs, avoiding a pure fabricated first/last state."
+    },
+    {
+      "cases": [
+        6,
+        7
+      ],
+      "behavior": "Expiry and new streak keep spent movement budget; duplicate processing does not refresh priority",
+      "meaningfulAssertions": "At4001 a1000 receipt has expired; actual4100 second ACK resets first/last but confirmedMoves becomes2, not1. Fractional mono clock1000.125 is preserved; repeated sequence cannot change TTL or ACK count."
+    },
+    {
+      "cases": [
+        8,
+        9,
+        10
+      ],
+      "behavior": "Wrong packet/sequence/location/target, zero/corrected/missing or malformed/backward mono, pure plans and actual send throw cannot gain preference",
+      "meaningfulAssertions": "Both fields stay or become null and the other fighter retains original target selection. Repeating plans20times grants no preference. Throwing the ordinary send uses action and the existing error status."
+    },
+    {
+      "cases": [
+        11
+      ],
+      "behavior": "Inactive, old role/map, death, missing/dead/name-mismatched target and attackSent peers cannot influence selection",
+      "meaningfulAssertions": "Separate fresh fixtures cover ready/inGame/closed/paused/draining/navigationClosing/role/map/dead/attackSent and live target identity conditions."
+    },
+    {
+      "cases": [
+        12
+      ],
+      "behavior": "Resume clears only coordination priority while retaining original spent chase evidence",
+      "meaningfulAssertions": "39confirmedMoves,4000activeElapsedMs and2visited count remain, visited Map is copied, first/last are null. Original quarantine is asserted untouched; this local restore helper case alone does not prove the full session resume-copy pipeline."
+    },
+    {
+      "cases": [
+        13
+      ],
+      "behavior": "Legacy candidate behavior and selected existing gameplay thresholds remain unchanged",
+      "meaningfulAssertions": "Baseline chooses ordinary Deer without native chaseTargetId. Existing18/12,Run/completion/correction/latency/driver-lag fields match prior policy. Complete no-new-status/count claim is supported by the main-source exact inverse, not this subset field comparison alone."
+    }
+  ],
+  "nonBlockingCoverageFollowups": [
+    {
+      "id": "N1",
+      "description": "No explicit finite future receipt last>now case is present in this exact13-case candidate. NaN/Infinity/negative/backward coverage does not exercise the separate reader last>now branch.",
+      "sourceStatus": "Source reader already explicitly rejects last>now, so this is test coverage rather than an implementation defect.",
+      "suggestedNarrowAddition": "Add a finite future first/last=2000 fixture while planning at1500, or a1501 last with1500 now, within a newly added case only. Preserve original187 prefix and keep failure history if the test candidate changes."
+    }
+  ],
+  "verdict": {
+    "staticTestQualityReviewed": true,
+    "blockingFindingIds": [],
+    "sourceContractPassed": true,
+    "testRunByReviewer": false,
+    "focusedOrFullRegressionClaimed": false,
+    "newCapacityRunPerformed": false,
+    "capacityAccepted": false,
+    "p2ImplementationPermitted": false
+  },
+  "validationBoundary": "Root owns focused green, exact-old-main red, finally restore, green and complete200 integration. This receipt does not claim those results or cover future edited candidates."
+}

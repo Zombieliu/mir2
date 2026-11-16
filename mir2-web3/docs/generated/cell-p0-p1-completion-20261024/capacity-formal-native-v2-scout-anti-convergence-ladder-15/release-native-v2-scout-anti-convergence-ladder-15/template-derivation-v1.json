@@ -1,0 +1,1377 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T23:27:02.425231+00:00",
+  "scope": "Bounded static Formal15 thin derivation only; no old execution data, no target module import or mode. All line hunks preserve original bytes in both directions.",
+  "rows": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\input-lib.mjs",
+        "bytes": 17164,
+        "sha256": "60342898fe76d6116f71661aba2cafac815b8aa617230200747df41c714382ef"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\input-lib.mjs",
+        "bytes": 17164,
+        "sha256": "e37a744dce7ee3bd88067063721e7ab610544c61ea2de6df2de9ae03c9773f9b"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 37,
+          "newLine": 37,
+          "before": "  const formal=await import('./formal-template-contract.mjs');formal.assertFormal14Configured();\n",
+          "after": "  const formal=await import('./formal-template-contract.mjs');formal.assertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 73,
+          "newLine": 73,
+          "before": "  const formal=await import('./formal-template-contract.mjs');formal.assertFormal14Configured();\n",
+          "after": "  const formal=await import('./formal-template-contract.mjs');formal.assertFormal15Configured();\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\prepare-inputs.mjs",
+        "bytes": 14302,
+        "sha256": "c5979823e19172d1c2df7d28086036580c7d3337168750b64abea15265a2fbee"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\prepare-inputs.mjs",
+        "bytes": 14299,
+        "sha256": "e6cf96c9a327dfbf4df995566b9500e2d5ae7c11be0f8d55ae574e31c94eceb3"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 78,
+          "newLine": 78,
+          "before": "  path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','synthetic-tests-v1.log'),path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','slow-stage-helper-freeze-v1.json'),path.join(root,'slow-stage-schema-contract.json'),path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','legacy14-original.mjs.txt'),path.join(root,'candidate-release-binding.json'), path.join(root,'backend-library-binding.json'), path.join(base,'scout-observer-preference-runtime-v1/source-lib-v1.mjs'), path.join(root, 'launcher-syntax-check.log'), releaseBinding.releasePin.file, releaseBinding.manifestPin.file, path.join(base,'account-store-wait-diagnostics-v1-build-receipt.json'),\n",
+          "after": "  path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','synthetic-tests-v1.log'),path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','slow-stage-helper-freeze-v1.json'),path.join(root,'slow-stage-schema-contract.json'),path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','legacy14-original.mjs.txt'),path.join(root,'candidate-release-binding.json'), path.join(root,'backend-library-binding.json'), path.join(base,'scout-anti-convergence-runtime-v1/source-lib-v1.mjs'), path.join(root, 'launcher-syntax-check.log'), releaseBinding.releasePin.file, releaseBinding.manifestPin.file, path.join(base,'account-store-wait-diagnostics-v1-build-receipt.json'),\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-owned.mjs",
+        "bytes": 21597,
+        "sha256": "97eb3ada45e6615c4702a8b9a608bc7c78286b6f5824db048eb0d20279a685dc"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\run-owned.mjs",
+        "bytes": 21605,
+        "sha256": "3eced1a20d2e0e91b22a88a5ef23b09eaa88357cdedfd78a645f924fc20223ab"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 43,
+          "newLine": 43,
+          "before": "  MIR2_GATEWAY_ID: 'p01-release-native-v2-scout-observer-ladder-14', MIR2_ZONE_ROUTING_MODE: 'single', MIR2_CONTENT_PROFILE: 'platinum_176', MIR2_MONTHLY_CARD_REQUIRED: '0', MIR2_RUNTIME_ENV: 'development',\n",
+          "after": "  MIR2_GATEWAY_ID: 'p01-release-native-v2-scout-anti-convergence-ladder-15', MIR2_ZONE_ROUTING_MODE: 'single', MIR2_CONTENT_PROFILE: 'platinum_176', MIR2_MONTHLY_CARD_REQUIRED: '0', MIR2_RUNTIME_ENV: 'development',\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\monitor-owned.mjs",
+        "bytes": 1283,
+        "sha256": "813676ce7833dc483676e0f66a0c28b81587b52b846e6f1e7c1b7c6570750387"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\monitor-owned.mjs",
+        "bytes": 1283,
+        "sha256": "b70111c0110f4f814ce18cbb464567f036f074f10bea5530c1628bb26e19f676"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\request-stop.mjs",
+        "bytes": 1016,
+        "sha256": "45609865bb52e7777634d2259154c64d2327a4e59ecd925ab9902624a32c73f6"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\request-stop.mjs",
+        "bytes": 1016,
+        "sha256": "2d2fc309c46b2e850035d100e9da1908a86c3c56c1a17fc1663776d2087192ab"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\initialize-private.ps1",
+        "bytes": 2677,
+        "sha256": "5f04ec6b8379b941cac75ef66b31b94039500483f29c587224730b8e9f23418a"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\initialize-private.ps1",
+        "bytes": 2677,
+        "sha256": "014ca9a87a3f4b5942a72babf53b1e6e79aeef596fe873876fe52358d251b369"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 3,
+          "newLine": 3,
+          "before": "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal14-binding-v1.json'\nif(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal14-binding-v1.json'}\n",
+          "after": "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal15-binding-v1.json'\nif(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal15-binding-v1.json'}\n"
+        },
+        {
+          "oldLine": 6,
+          "newLine": 6,
+          "before": "if($taskFormal.state -ne 'FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL14_FRESH_PROBE18'}\n",
+          "after": "if($taskFormal.state -ne 'FINAL_FRESH_PROBE19_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL15_FRESH_PROBE19'}\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\recover-drained-owned.ps1",
+        "bytes": 3646,
+        "sha256": "6b92d828d6bccb733d19420f10056672dbe4f185fa3d1514b2b3f5fe73e50aa7"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\recover-drained-owned.ps1",
+        "bytes": 3646,
+        "sha256": "0d077bd596ae7cd6f16d64ac099888cb5d3d22c5c25227b99d2550556fc6c94d"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 3,
+          "newLine": 3,
+          "before": "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal14-binding-v1.json'\nif(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal14-binding-v1.json'}\n",
+          "after": "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal15-binding-v1.json'\nif(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal15-binding-v1.json'}\n"
+        },
+        {
+          "oldLine": 6,
+          "newLine": 6,
+          "before": "if($taskFormal.state -ne 'FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL14_FRESH_PROBE18'}\n",
+          "after": "if($taskFormal.state -ne 'FINAL_FRESH_PROBE19_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL15_FRESH_PROBE19'}\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-feasibility-gate.mjs",
+        "bytes": 19741,
+        "sha256": "7582c7ea7e6a3e7502c8cb4406fc3208d4bbb1af63c9dec8c2fc032406f4f40e"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-feasibility-gate.mjs",
+        "bytes": 19749,
+        "sha256": "c6800c8549be9ecde914a78de4eb018a14288c5ede9c32a940daddf46fbf65ed"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {FORMAL14_BINDING,assertFormal14Configured} from './formal-template-contract.mjs';\n",
+          "after": "import {FORMAL15_BINDING,assertFormal15Configured} from './formal-template-contract.mjs';\n"
+        },
+        {
+          "oldLine": 3,
+          "newLine": 3,
+          "before": "import {verifyProbe18CollectedEvidence,REQUIRED_PROBE18_RUN_ID} from './verify-probe18-collected-evidence.mjs';\n",
+          "after": "import {verifyProbe19CollectedEvidence,REQUIRED_PROBE19_RUN_ID} from './verify-probe19-collected-evidence.mjs';\n"
+        },
+        {
+          "oldLine": 19,
+          "newLine": 19,
+          "before": "  assertFormal14Configured();\n",
+          "after": "  assertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 22,
+          "newLine": 22,
+          "before": "  const probeRoot = path.join(base, 'release-native-10-v2-scout-observer-feasibility-18');\n  if (!samePath(await fs.realpath(probeRoot), probeRoot)) throw new Error('Probe18 root must be a real owned directory');\n  const owned = async name => { const file = path.join(probeRoot, name); if (!samePath(await fs.realpath(file), file)) throw new Error('Redirected probe18 evidence is forbidden'); return file; };\n",
+          "after": "  const probeRoot = path.join(base, 'release-native-10-v2-scout-anti-convergence-feasibility-19');\n  if (!samePath(await fs.realpath(probeRoot), probeRoot)) throw new Error('Probe19 root must be a real owned directory');\n  const owned = async name => { const file = path.join(probeRoot, name); if (!samePath(await fs.realpath(file), file)) throw new Error('Redirected probe19 evidence is forbidden'); return file; };\n"
+        },
+        {
+          "oldLine": 28,
+          "newLine": 28,
+          "before": "  if(JSON.stringify(probeProcess.explicitAdmissionCaps)!=='[24,10,10,4,1,2]'||probeProcess.tokioWorkers!==4||probeProcess.content!=='platinum_176'||probeProcess.routing!=='single'||probeProcess.accountBackend!=='file'||probeProcess.slowStageThresholdMs!==50||probeProcess.slowStagePublicSchema!=='socket-context-v1'||probeProcess.slowStageHelperSha256!=='8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c')throw Error('Probe18 original06 launcher caps or baseline runtime configuration differs');\n",
+          "after": "  if(JSON.stringify(probeProcess.explicitAdmissionCaps)!=='[24,10,10,4,1,2]'||probeProcess.tokioWorkers!==4||probeProcess.content!=='platinum_176'||probeProcess.routing!=='single'||probeProcess.accountBackend!=='file'||probeProcess.slowStageThresholdMs!==50||probeProcess.slowStagePublicSchema!=='socket-context-v1'||probeProcess.slowStageHelperSha256!=='8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c')throw Error('Probe19 original06 launcher caps or baseline runtime configuration differs');\n"
+        },
+        {
+          "oldLine": 31,
+          "newLine": 31,
+          "before": "      JSON.stringify(build.releaseRecord) !== JSON.stringify(binding.releasePin) || build.sourceManifest?.inputs !== 50) throw new Error('Formal admission requires the fresh samec743/dae1/50 backend from real probe18');\n",
+          "after": "      JSON.stringify(build.releaseRecord) !== JSON.stringify(binding.releasePin) || build.sourceManifest?.inputs !== 50) throw new Error('Formal admission requires the fresh samec743/dae1/50 backend from real probe19');\n"
+        },
+        {
+          "oldLine": 33,
+          "newLine": 33,
+          "before": "      cleanup.sha256 !== build.sha256 || cleanup.formalStarted !== false || cleanup.capacityAccepted !== false) throw new Error('Probe18 cleanup provenance differs');\n",
+          "after": "      cleanup.sha256 !== build.sha256 || cleanup.formalStarted !== false || cleanup.capacityAccepted !== false) throw new Error('Probe19 cleanup provenance differs');\n"
+        },
+        {
+          "oldLine": 41,
+          "newLine": 41,
+          "before": "      !Array.isArray(sources.files) || sha(JSON.stringify(sources.files)) !== sources.sourceConfigSha256) throw new Error('Probe18 exact coordinated-driver input binding is incomplete');\n",
+          "after": "      !Array.isArray(sources.files) || sha(JSON.stringify(sources.files)) !== sources.sourceConfigSha256) throw new Error('Probe19 exact coordinated-driver input binding is incomplete');\n"
+        },
+        {
+          "oldLine": 44,
+          "newLine": 44,
+          "before": "      !Array.isArray(preparedSources.files) || sha(JSON.stringify(preparedSources.files)) !== preparedSources.sourceConfigSha256) throw new Error('Probe18 prepared source closure is not bound into admitted evidence');\n",
+          "after": "      !Array.isArray(preparedSources.files) || sha(JSON.stringify(preparedSources.files)) !== preparedSources.sourceConfigSha256) throw new Error('Probe19 prepared source closure is not bound into admitted evidence');\n"
+        },
+        {
+          "oldLine": 48,
+          "newLine": 48,
+          "before": "    if (!matched || matched.bytes !== input.bytes || matched.sha256 !== input.sha256) throw new Error('Probe18 driver/import/data/transport differs from the current exact frozen closure');\n",
+          "after": "    if (!matched || matched.bytes !== input.bytes || matched.sha256 !== input.sha256) throw new Error('Probe19 driver/import/data/transport differs from the current exact frozen closure');\n"
+        },
+        {
+          "oldLine": 52,
+          "newLine": 52,
+          "before": "    if (sha(Buffer.from(bytes.toString('utf8').replace(/\\r\\n/g, '\\n'))) !== sha(git(['show', build.driverSourceCommit + ':mir2-web3/' + input.file]))) throw new Error('Probe18 driver commit does not contain the exact same frozen nine inputs');\n",
+          "after": "    if (sha(Buffer.from(bytes.toString('utf8').replace(/\\r\\n/g, '\\n'))) !== sha(git(['show', build.driverSourceCommit + ':mir2-web3/' + input.file]))) throw new Error('Probe19 driver commit does not contain the exact same frozen nine inputs');\n"
+        },
+        {
+          "oldLine": 63,
+          "newLine": 63,
+          "before": "      cleanup.gatewayExit?.code !== 0 || cleanup.monitorExit?.code !== 0 || cleanup.inputsChangedWhileRunning || cleanup.error) throw new Error('Probe18 owned cleanup did not pass');\n",
+          "after": "      cleanup.gatewayExit?.code !== 0 || cleanup.monitorExit?.code !== 0 || cleanup.inputsChangedWhileRunning || cleanup.error) throw new Error('Probe19 owned cleanup did not pass');\n"
+        },
+        {
+          "oldLine": 66,
+          "newLine": 66,
+          "before": "      !samePath(await fs.realpath(reportFile), reportFile)) throw new Error('Probe18 report must be an explicit owned real file');\n",
+          "after": "      !samePath(await fs.realpath(reportFile), reportFile)) throw new Error('Probe19 report must be an explicit owned real file');\n"
+        },
+        {
+          "oldLine": 71,
+          "newLine": 71,
+          "before": "      JSON.stringify(provenance.report) !== JSON.stringify(reportPin)) throw new Error('Probe18 original report bytes are not bound to the backend/driver identity sidecar');\n",
+          "after": "      JSON.stringify(provenance.report) !== JSON.stringify(reportPin)) throw new Error('Probe19 original report bytes are not bound to the backend/driver identity sidecar');\n"
+        },
+        {
+          "oldLine": 73,
+          "newLine": 73,
+          "before": "  if(report.runId!==REQUIRED_PROBE18_RUN_ID)throw Error('Formal14 only recognizes the exact future root-bound successful Probe18; no old13 or other-run substitution');\n  if(preparedSources.sourceConfigSha256!==FORMAL14_BINDING.probe18.preparedSourceConfigSha256)throw Error('Fresh16 original prepared source aggregate differs');\n",
+          "after": "  if(report.runId!==REQUIRED_PROBE19_RUN_ID)throw Error('Formal15 only recognizes the exact future root-bound successful Probe19; no old13 or other-run substitution');\n  if(preparedSources.sourceConfigSha256!==FORMAL15_BINDING.probe19.preparedSourceConfigSha256)throw Error('Fresh16 original prepared source aggregate differs');\n"
+        },
+        {
+          "oldLine": 76,
+          "newLine": 76,
+          "before": "  for(const key of ['nativeHpMaintenance','nativeAttackWitness'])if(JSON.stringify(provenance[key])!==JSON.stringify(report[key]))throw Error('Probe18 immutable HP/witness metadata is not preserved');\n  if (JSON.stringify(provenance.nativePatrolPlanning) !== JSON.stringify(report.nativePatrolPlanning)) throw Error('Probe18 native patrol planning declaration is not preserved by the original result sidecar');\n",
+          "after": "  for(const key of ['nativeHpMaintenance','nativeAttackWitness'])if(JSON.stringify(provenance[key])!==JSON.stringify(report[key]))throw Error('Probe19 immutable HP/witness metadata is not preserved');\n  if (JSON.stringify(provenance.nativePatrolPlanning) !== JSON.stringify(report.nativePatrolPlanning)) throw Error('Probe19 native patrol planning declaration is not preserved by the original result sidecar');\n"
+        },
+        {
+          "oldLine": 79,
+          "newLine": 79,
+          "before": "  if(JSON.stringify(provenance.measurementClock)!==JSON.stringify(report.measurementClock))throw Error('Probe18 measurement-clock declaration is not preserved in its result sidecar');\n",
+          "after": "  if(JSON.stringify(provenance.measurementClock)!==JSON.stringify(report.measurementClock))throw Error('Probe19 measurement-clock declaration is not preserved in its result sidecar');\n"
+        },
+        {
+          "oldLine": 81,
+          "newLine": 81,
+          "before": "  if(scene.sourceSha256!==probeScene.sourceSha256||probeProcess.sceneProfile!==scene.profile||probeProcess.sceneSourceSha256!==scene.sourceSha256||probeProcess.scene10Sha256!==scene.probeScene.sha256||probeProcess.scene100Sha256!==scene.formalScene.sha256||probeProcess.sceneAnalysisSha256!==scene.analysis.sha256||probeProcess.patrolSpan!==2||preparedSources.sceneSourceSha256!==scene.sourceSha256||provenance.sceneSourceSha256!==scene.sourceSha256)throw Error('Fresh probe18 exact halo scene/static source identity differs from formal first10');\n",
+          "after": "  if(scene.sourceSha256!==probeScene.sourceSha256||probeProcess.sceneProfile!==scene.profile||probeProcess.sceneSourceSha256!==scene.sourceSha256||probeProcess.scene10Sha256!==scene.probeScene.sha256||probeProcess.scene100Sha256!==scene.formalScene.sha256||probeProcess.sceneAnalysisSha256!==scene.analysis.sha256||probeProcess.patrolSpan!==2||preparedSources.sceneSourceSha256!==scene.sourceSha256||provenance.sceneSourceSha256!==scene.sourceSha256)throw Error('Fresh probe19 exact halo scene/static source identity differs from formal first10');\n"
+        },
+        {
+          "oldLine": 83,
+          "newLine": 83,
+          "before": "  if(slowBefore.size>MAX_PUBLIC_BYTES) throw Error('Probe18 public diagnostic total exceeds fixed32MiB');\n",
+          "after": "  if(slowBefore.size>MAX_PUBLIC_BYTES) throw Error('Probe19 public diagnostic total exceeds fixed32MiB');\n"
+        },
+        {
+          "oldLine": 87,
+          "newLine": 87,
+          "before": "    if(Buffer.byteLength(line)>MAX_LINE_BYTES || !line) throw Error('Probe18 public diagnostic line is invalid');\n",
+          "after": "    if(Buffer.byteLength(line)>MAX_LINE_BYTES || !line) throw Error('Probe19 public diagnostic line is invalid');\n"
+        },
+        {
+          "oldLine": 96,
+          "newLine": 96,
+          "before": "    JSON.stringify(runtimeSlowStatus)!==JSON.stringify(cleanup.slowStageDiagnostics)) throw Error('Probe18 diagnostic completeness/limits/cleanup binding differs');\n",
+          "after": "    JSON.stringify(runtimeSlowStatus)!==JSON.stringify(cleanup.slowStageDiagnostics)) throw Error('Probe19 diagnostic completeness/limits/cleanup binding differs');\n"
+        },
+        {
+          "oldLine": 99,
+          "newLine": 99,
+          "before": "      cleanup.report?.driverSourceCommit !== build.driverSourceCommit || JSON.stringify(report.navigationCoordination) !== JSON.stringify(expectedCoordination)) throw new Error('Probe18 report navigation declaration/provenance differs from exact pinned source');\n",
+          "after": "      cleanup.report?.driverSourceCommit !== build.driverSourceCommit || JSON.stringify(report.navigationCoordination) !== JSON.stringify(expectedCoordination)) throw new Error('Probe19 report navigation declaration/provenance differs from exact pinned source');\n"
+        },
+        {
+          "oldLine": 102,
+          "newLine": 102,
+          "before": "  if (JSON.stringify(p) !== JSON.stringify(expectedPolicy)) throw new Error('Probe18 must retain the entire original probe policy');\n",
+          "after": "  if (JSON.stringify(p) !== JSON.stringify(expectedPolicy)) throw new Error('Probe19 must retain the entire original probe policy');\n"
+        },
+        {
+          "oldLine": 107,
+          "newLine": 107,
+          "before": "      report.continuousAcceptance?.passed !== true || report.continuousAcceptance.failureCount !== 0) throw new Error('The exact fresh personal-projection Probe18 has not passed; a probe remains ineligible for capacity acceptance');\n",
+          "after": "      report.continuousAcceptance?.passed !== true || report.continuousAcceptance.failureCount !== 0) throw new Error('The exact fresh personal-projection Probe19 has not passed; a probe remains ineligible for capacity acceptance');\n"
+        },
+        {
+          "oldLine": 110,
+          "newLine": 110,
+          "before": "  if (Object.entries(strict).some(([key, value]) => p[key] !== value)) throw new Error('Probe18 policy differs from fixed ordinary thresholds');\n",
+          "after": "  if (Object.entries(strict).some(([key, value]) => p[key] !== value)) throw new Error('Probe19 policy differs from fixed ordinary thresholds');\n"
+        },
+        {
+          "oldLine": 112,
+          "newLine": 112,
+          "before": "  if(JSON.stringify(report.stages?.map(p=>p.name))!==JSON.stringify(expectedPhases.map(p=>p[0]))) throw Error('Probe18 requires exactly the original measured2/10/soak order');\n",
+          "after": "  if(JSON.stringify(report.stages?.map(p=>p.name))!==JSON.stringify(expectedPhases.map(p=>p[0]))) throw Error('Probe19 requires exactly the original measured2/10/soak order');\n"
+        },
+        {
+          "oldLine": 117,
+          "newLine": 117,
+          "before": "      (count===10&&phase.combatCoverage!=='shared-positive-damage')) throw Error('Probe18 requires real300/300/360 clock and complete passing5/5/6 windows'); return phase;\n",
+          "after": "      (count===10&&phase.combatCoverage!=='shared-positive-damage')) throw Error('Probe19 requires real300/300/360 clock and complete passing5/5/6 windows'); return phase;\n"
+        },
+        {
+          "oldLine": 120,
+          "newLine": 120,
+          "before": "  if (!samePath(await fs.realpath(rawFile), rawFile)) throw new Error('Redirected raw probe18 evidence is forbidden');\n",
+          "after": "  if (!samePath(await fs.realpath(rawFile), rawFile)) throw new Error('Redirected raw probe19 evidence is forbidden');\n"
+        },
+        {
+          "oldLine": 129,
+          "newLine": 129,
+          "before": "  if (verifyCapacityStatus(report, streamed.selected, streamed.monitorSummary) !== false) throw new Error('Probe18 was incorrectly promoted to formal capacity acceptance');\n",
+          "after": "  if (verifyCapacityStatus(report, streamed.selected, streamed.monitorSummary) !== false) throw new Error('Probe19 was incorrectly promoted to formal capacity acceptance');\n"
+        },
+        {
+          "oldLine": 132,
+          "newLine": 132,
+          "before": "      streamed.selected.some(row => ['continuousFailure', 'safetyStop'].includes(row.type))) throw new Error('Probe18 raw/monitor continuity is incomplete');\n",
+          "after": "      streamed.selected.some(row => ['continuousFailure', 'safetyStop'].includes(row.type))) throw new Error('Probe19 raw/monitor continuity is incomplete');\n"
+        },
+        {
+          "oldLine": 135,
+          "newLine": 135,
+          "before": "    if(rows.length!==windows||rows.some(row=>row.assessment?.passed!==true||row.assessment.seconds<60)) throw Error('Probe18 raw measured windows do not match exact5/5/6 complete counts');\n",
+          "after": "    if(rows.length!==windows||rows.some(row=>row.assessment?.passed!==true||row.assessment.seconds<60)) throw Error('Probe19 raw measured windows do not match exact5/5/6 complete counts');\n"
+        },
+        {
+          "oldLine": 139,
+          "newLine": 139,
+          "before": "    if (!bracket?.beforeStart || !bracket.afterStart || !bracket.beforeEnd || [bracket.startBeforeGapMs, bracket.startAfterGapMs, bracket.endBeforeGapMs].some(gap => gap < 0 || gap > 15000)) throw new Error('Probe18 raw monitor does not cover its true phase interval');\n",
+          "after": "    if (!bracket?.beforeStart || !bracket.afterStart || !bracket.beforeEnd || [bracket.startBeforeGapMs, bracket.startAfterGapMs, bracket.endBeforeGapMs].some(gap => gap < 0 || gap > 15000)) throw new Error('Probe19 raw monitor does not cover its true phase interval');\n"
+        },
+        {
+          "oldLine": 141,
+          "newLine": 141,
+          "before": "  const collectedEvidence=await verifyProbe18CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw:wireCounter.summary()});\n",
+          "after": "  const collectedEvidence=await verifyProbe19CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw:wireCounter.summary()});\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-public.mjs",
+        "bytes": 19038,
+        "sha256": "4a7ddd53afc9194b50e6aaac52b9b832c6f16e1496330d1e49768e36bec5979a"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-public.mjs",
+        "bytes": 19070,
+        "sha256": "03149514bc46ba8bd151ce6ca50c4188925d9e731a8f8848b8154596eb031d93"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 23,
+          "newLine": 23,
+          "before": "const realm = 'release-native-v2-scout-observer-ladder-14';\n",
+          "after": "const realm = 'release-native-v2-scout-anti-convergence-ladder-15';\n"
+        },
+        {
+          "oldLine": 68,
+          "newLine": 68,
+          "before": "const child = 'capacity-formal-native-v2-scout-observer-ladder-14', directory = path.join(topic, child), sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');\n",
+          "after": "const child = 'capacity-formal-native-v2-scout-anti-convergence-ladder-15', directory = path.join(topic, child), sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');\n"
+        },
+        {
+          "oldLine": 139,
+          "newLine": 139,
+          "before": "const catalog = await readAt(directory, 'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json');\n",
+          "after": "const catalog = await readAt(directory, 'collect-formal-native-v2-scout-anti-convergence-ladder-15-public-artifact-catalog.json');\n"
+        },
+        {
+          "oldLine": 224,
+          "newLine": 224,
+          "before": "await writeNewAt(base, 'collect-formal-native-v2-scout-observer-ladder-14-public-verification-result.json', result);\n",
+          "after": "await writeNewAt(base, 'collect-formal-native-v2-scout-anti-convergence-ladder-15-public-verification-result.json', result);\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-store-public.mjs",
+        "bytes": 4737,
+        "sha256": "0a462f723703c9daf43e86388558cf9b8765554bbc451f1bb6d83f7b562274b7"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-store-public.mjs",
+        "bytes": 4761,
+        "sha256": "50ae5dd65f3c2a8b34bb27bcf6a1448ac2a2c5c8930edd6c78c23aab7e007d51"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 7,
+          "newLine": 7,
+          "before": "const directory='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal-native-v2-scout-observer-ladder-14-store-diagnostics';\n",
+          "after": "const directory='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal-native-v2-scout-anti-convergence-ladder-15-store-diagnostics';\n"
+        },
+        {
+          "oldLine": 11,
+          "newLine": 11,
+          "before": "const gameDirectory=path.join(path.dirname(directory),'capacity-formal-native-v2-scout-observer-ladder-14');assert.ok(samePath(catalog.baseCatalog?.file??'',path.join(gameDirectory,'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json')));assert.ok(samePath(catalog.baseVerification?.file??'',path.join(gameDirectory,'public-verification.json')));for(const p of[catalog.baseCatalog,catalog.baseVerification]){const s=await fs.lstat(p.file);assert.ok(s.isFile()&&!s.isSymbolicLink());assert.ok(samePath(await fs.realpath(p.file),p.file));}await assertPin(catalog.baseCatalog);await assertPin(catalog.baseVerification);const game=await read(catalog.baseVerification.file);assert.equal(game.runId,catalog.runId);assert.equal(game.reportOk,catalog.originalReportOk);assert.equal(game.capacityAccepted,catalog.originalCapacityAccepted);\n",
+          "after": "const gameDirectory=path.join(path.dirname(directory),'capacity-formal-native-v2-scout-anti-convergence-ladder-15');assert.ok(samePath(catalog.baseCatalog?.file??'',path.join(gameDirectory,'collect-formal-native-v2-scout-anti-convergence-ladder-15-public-artifact-catalog.json')));assert.ok(samePath(catalog.baseVerification?.file??'',path.join(gameDirectory,'public-verification.json')));for(const p of[catalog.baseCatalog,catalog.baseVerification]){const s=await fs.lstat(p.file);assert.ok(s.isFile()&&!s.isSymbolicLink());assert.ok(samePath(await fs.realpath(p.file),p.file));}await assertPin(catalog.baseCatalog);await assertPin(catalog.baseVerification);const game=await read(catalog.baseVerification.file);assert.equal(game.runId,catalog.runId);assert.equal(game.reportOk,catalog.originalReportOk);assert.equal(game.capacityAccepted,catalog.originalCapacityAccepted);\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-store-public.mjs",
+        "bytes": 4915,
+        "sha256": "ac763933fbfd0e9f8619caa101013b463fa1a6915bcf2da07a43f0edf8342664"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\collect-store-public.mjs",
+        "bytes": 4939,
+        "sha256": "a8636e2bcf92ae066f5eba92966c684d5aa95777c355159722cfbe3d3f5959da"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 11,
+          "newLine": 11,
+          "before": "const child='capacity-formal-native-v2-scout-observer-ladder-14-store-diagnostics',directory=path.join(topic,child),gameDirectory=path.join(topic,'capacity-formal-native-v2-scout-observer-ladder-14');\n",
+          "after": "const child='capacity-formal-native-v2-scout-anti-convergence-ladder-15-store-diagnostics',directory=path.join(topic,child),gameDirectory=path.join(topic,'capacity-formal-native-v2-scout-anti-convergence-ladder-15');\n"
+        },
+        {
+          "oldLine": 16,
+          "newLine": 16,
+          "before": "const baseCatalogFile=path.join(gameDirectory,'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json'),baseVerificationFile=path.join(gameDirectory,'public-verification.json');\n",
+          "after": "const baseCatalogFile=path.join(gameDirectory,'collect-formal-native-v2-scout-anti-convergence-ladder-15-public-artifact-catalog.json'),baseVerificationFile=path.join(gameDirectory,'public-verification.json');\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-report-contract.mjs",
+        "bytes": 9785,
+        "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\driver-report-contract.mjs",
+        "bytes": 9785,
+        "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\resource-profile.json",
+        "bytes": 1630,
+        "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\resource-profile.json",
+        "bytes": 1630,
+        "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scenario.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scenario.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-diagnostics-config.json",
+        "bytes": 4445,
+        "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-diagnostics-config.json",
+        "bytes": 4445,
+        "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "rawCopied": true,
+      "lineHunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-probe18-collected-evidence.mjs",
+        "bytes": 17320,
+        "sha256": "cb83a51d5fcd901d3b56458fd8463cbaaee6cdfc5a8f5c77a6cee9604599bc5d"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-probe19-collected-evidence.mjs",
+        "bytes": 17328,
+        "sha256": "ccce12c4eb3c9a708b22fd694830373f5f4b9b2eb1e58819ae4b577630176897"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {FORMAL14_BINDING,assertFormal14Configured} from './formal-template-contract.mjs';\n",
+          "after": "import {FORMAL15_BINDING,assertFormal15Configured} from './formal-template-contract.mjs';\n"
+        },
+        {
+          "oldLine": 12,
+          "newLine": 12,
+          "before": "export const REQUIRED_PROBE18_RUN_ID=FORMAL14_BINDING.probe18.runId;\nexport const REQUIRED_PROBE18_CHILD='capacity-native10-v2-scout-observer-followup-18-diagnostics';\nconst realm='release-native-10-v2-scout-observer-feasibility-18';\nconst INDEPENDENT_VERIFIER_SOURCES=FORMAL14_BINDING.probe18.independentVerifierSources;\n",
+          "after": "export const REQUIRED_PROBE19_RUN_ID=FORMAL15_BINDING.probe19.runId;\nexport const REQUIRED_PROBE19_CHILD='capacity-native10-v2-scout-observer-followup-18-diagnostics';\nconst realm='release-native-10-v2-scout-anti-convergence-feasibility-19';\nconst INDEPENDENT_VERIFIER_SOURCES=FORMAL15_BINDING.probe19.independentVerifierSources;\n"
+        },
+        {
+          "oldLine": 24,
+          "newLine": 24,
+          "before": " const paths={report:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.report.json`,raw:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.samples.jsonl`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${REQUIRED_PROBE18_CHILD}/${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.raw-projection.json`,monitor:`${realm}/monitor-history.jsonl`,'root-cleanup':'probe18-root-independent-cleanup-v1.json'};\n",
+          "after": " const paths={report:`${realm}/reports/${REQUIRED_PROBE19_RUN_ID}.report.json`,raw:`${realm}/reports/${REQUIRED_PROBE19_RUN_ID}.samples.jsonl`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${REQUIRED_PROBE19_CHILD}/${realm}/reports/${REQUIRED_PROBE19_RUN_ID}.raw-projection.json`,monitor:`${realm}/monitor-history.jsonl`,'root-cleanup':'probe19-root-independent-cleanup-v1.json'};\n"
+        },
+        {
+          "oldLine": 26,
+          "newLine": 26,
+          "before": " if(!actual||!expected||!Number.isSafeInteger(expected.bytes)||expected.bytes<0||!hex(expected.sha256)||!locationMatches||actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Independent probe18 '+label+' raw pin differs');\n",
+          "after": " if(!actual||!expected||!Number.isSafeInteger(expected.bytes)||expected.bytes<0||!hex(expected.sha256)||!locationMatches||actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Independent probe19 '+label+' raw pin differs');\n"
+        },
+        {
+          "oldLine": 30,
+          "newLine": 30,
+          "before": "export async function verifyProbe18CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw}){\n assertFormal14Configured();\n if(report.runId!==REQUIRED_PROBE18_RUN_ID||report.ok!==true)throw Error('Only the exact successful attack-deadline16 run is eligible; failed13 or later probes cannot substitute');\n const directory=await under(topic,REQUIRED_PROBE18_CHILD+'/public-verification.json').then(f=>path.dirname(f));\n const names={report:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.report.json`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.raw-projection.json`,wireTerminal:`${realm}/${WIRE_TERMINAL}`};\n",
+          "after": "export async function verifyProbe19CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw}){\n assertFormal15Configured();\n if(report.runId!==REQUIRED_PROBE19_RUN_ID||report.ok!==true)throw Error('Only the exact successful attack-deadline16 run is eligible; failed13 or later probes cannot substitute');\n const directory=await under(topic,REQUIRED_PROBE19_CHILD+'/public-verification.json').then(f=>path.dirname(f));\n const names={report:`${realm}/reports/${REQUIRED_PROBE19_RUN_ID}.report.json`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${realm}/reports/${REQUIRED_PROBE19_RUN_ID}.raw-projection.json`,wireTerminal:`${realm}/${WIRE_TERMINAL}`};\n"
+        },
+        {
+          "oldLine": 40,
+          "newLine": 40,
+          "before": " for(const row of copy.files){const prefixed=relative(row.path);if(!prefixed.startsWith(REQUIRED_PROBE18_CHILD+'/'))throw Error('Wrong attack-deadline16 public child');const destination=await under(directory,prefixed.slice(REQUIRED_PROBE18_CHILD.length+1)),source=await under(base,row.source),expected={file:source,bytes:row.bytes,sha256:row.sha256};eqPin({...await pin(destination),file:source},expected,'public-copy');eqPin(await pin(source),expected,'public-copy');}\n",
+          "after": " for(const row of copy.files){const prefixed=relative(row.path);if(!prefixed.startsWith(REQUIRED_PROBE19_CHILD+'/'))throw Error('Wrong attack-deadline16 public child');const destination=await under(directory,prefixed.slice(REQUIRED_PROBE19_CHILD.length+1)),source=await under(base,row.source),expected={file:source,bytes:row.bytes,sha256:row.sha256};eqPin({...await pin(destination),file:source},expected,'public-copy');eqPin(await pin(source),expected,'public-copy');}\n"
+        },
+        {
+          "oldLine": 44,
+          "newLine": 44,
+          "before": " if(manifest.schemaVersion!==1||manifest.files?.length!==1||entry.runId!==report.runId||entry.report!==REQUIRED_PROBE18_CHILD+'/'+names.report||entry.projection!==REQUIRED_PROBE18_CHILD+'/'+names.projection||entry.path!==`${realm}/reports/${report.runId}.samples.jsonl`||entry.bytes!==rawPin.bytes||entry.sha256!==rawPin.sha256)throw Error('Compact12 raw manifest/projection/report linkage differs');\n",
+          "after": " if(manifest.schemaVersion!==1||manifest.files?.length!==1||entry.runId!==report.runId||entry.report!==REQUIRED_PROBE19_CHILD+'/'+names.report||entry.projection!==REQUIRED_PROBE19_CHILD+'/'+names.projection||entry.path!==`${realm}/reports/${report.runId}.samples.jsonl`||entry.bytes!==rawPin.bytes||entry.sha256!==rawPin.sha256)throw Error('Compact12 raw manifest/projection/report linkage differs');\n"
+        },
+        {
+          "oldLine": 46,
+          "newLine": 46,
+          "before": " const closureRef=FORMAL14_BINDING.probe18.independentSourceClosureManifest,closureFile=await under(base,closureRef.path),closurePin=await pin(closureFile);if(closurePin.bytes!==closureRef.bytes||closurePin.sha256!==closureRef.sha256)throw Error('Actual Ended16 full source manifest differs');const closure=await json(closureFile);if(!Array.isArray(closure.files)||closure.files.length<2||closure.files.length>128||closure.sourceSha256!==sha(JSON.stringify(closure.files)))throw Error('Actual Ended16 source closure is incomplete or invalid');const mapped=closure.files.map(p=>({path:path.posix.join('probe18-independent-verification-v1',relative(p.path)),bytes:p.bytes,sha256:p.sha256}));if(JSON.stringify(mapped)!==JSON.stringify(INDEPENDENT_VERIFIER_SOURCES))throw Error('Every actual Ended16 source must be bound, without an assumed two-source subset');\n const independentVerifierPins=[];for(const expected of INDEPENDENT_VERIFIER_SOURCES){const file=await under(base,expected.path),actual=await pin(file);if(actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Corrected probe18 independent verifier source raw pin differs');independentVerifierPins.push(actual);}\n const receiptFile=await under(base,'probe18-independent-verification-v1/final-verification.json'),receipt=await json(receiptFile);\n if(receipt.schemaVersion!==1||receipt.verifierRevision!==FORMAL14_BINDING.probe18.independentVerifierRevision||receipt.runId!==report.runId||!allTrue([receipt.independentVerificationPassed,receipt.probePassed,receipt.formalPreconditionOnly])||receipt.capacityAccepted!==false||receipt.rawVerifierAccepted!==false)throw Error('Independent attack-deadline16 receipt must verify a successful probe without promoting capacity');\n const execRef=FORMAL14_BINDING.probe18.actualExecutionReceipt,execFile=await under(base,execRef.path),execPin=await pin(execFile);if(execPin.bytes!==execRef.bytes||execPin.sha256!==execRef.sha256)throw Error('Actual Ended16 execution receipt differs');const actualExecution=await json(execFile),actualFinalPin=await pin(receiptFile);if(actualExecution.runId!==report.runId||actualExecution.exitCode!==0||actualExecution.signal!==null||actualExecution.sourceBeforeAfterIdentical!==true||actualExecution.checkedInputs!==closure.files.length||actualExecution.actualVerificationExitedSuccessfully!==true||actualExecution.originalGameVerdictChanged!==false||actualExecution.seal?.path!=='tool-source-frozen-v1.json'||actualExecution.seal.bytes!==closurePin.bytes||actualExecution.seal.sha256!==closurePin.sha256||actualExecution.finalVerification?.path!=='final-verification.json'||actualExecution.finalVerification.bytes!==actualFinalPin.bytes||actualExecution.finalVerification.sha256!==actualFinalPin.sha256||actualExecution.log?.path!=='actual-verification.log')throw Error('Actual Ended16 runner/source-before-after/final proof differs');const execLogFile=await under(base,'probe18-independent-verification-v1/actual-verification.log'),execLogPin=await pin(execLogFile);if(execLogPin.bytes!==actualExecution.log.bytes||execLogPin.sha256!==actualExecution.log.sha256)throw Error('Actual Ended16 execution log differs');\n",
+          "after": " const closureRef=FORMAL15_BINDING.probe19.independentSourceClosureManifest,closureFile=await under(base,closureRef.path),closurePin=await pin(closureFile);if(closurePin.bytes!==closureRef.bytes||closurePin.sha256!==closureRef.sha256)throw Error('Actual Ended16 full source manifest differs');const closure=await json(closureFile);if(!Array.isArray(closure.files)||closure.files.length<2||closure.files.length>128||closure.sourceSha256!==sha(JSON.stringify(closure.files)))throw Error('Actual Ended16 source closure is incomplete or invalid');const mapped=closure.files.map(p=>({path:path.posix.join('probe19-independent-verification-v1',relative(p.path)),bytes:p.bytes,sha256:p.sha256}));if(JSON.stringify(mapped)!==JSON.stringify(INDEPENDENT_VERIFIER_SOURCES))throw Error('Every actual Ended16 source must be bound, without an assumed two-source subset');\n const independentVerifierPins=[];for(const expected of INDEPENDENT_VERIFIER_SOURCES){const file=await under(base,expected.path),actual=await pin(file);if(actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Corrected probe19 independent verifier source raw pin differs');independentVerifierPins.push(actual);}\n const receiptFile=await under(base,'probe19-independent-verification-v1/final-verification.json'),receipt=await json(receiptFile);\n if(receipt.schemaVersion!==1||receipt.verifierRevision!==FORMAL15_BINDING.probe19.independentVerifierRevision||receipt.runId!==report.runId||!allTrue([receipt.independentVerificationPassed,receipt.probePassed,receipt.formalPreconditionOnly])||receipt.capacityAccepted!==false||receipt.rawVerifierAccepted!==false)throw Error('Independent attack-deadline16 receipt must verify a successful probe without promoting capacity');\n const execRef=FORMAL15_BINDING.probe19.actualExecutionReceipt,execFile=await under(base,execRef.path),execPin=await pin(execFile);if(execPin.bytes!==execRef.bytes||execPin.sha256!==execRef.sha256)throw Error('Actual Ended16 execution receipt differs');const actualExecution=await json(execFile),actualFinalPin=await pin(receiptFile);if(actualExecution.runId!==report.runId||actualExecution.exitCode!==0||actualExecution.signal!==null||actualExecution.sourceBeforeAfterIdentical!==true||actualExecution.checkedInputs!==closure.files.length||actualExecution.actualVerificationExitedSuccessfully!==true||actualExecution.originalGameVerdictChanged!==false||actualExecution.seal?.path!=='tool-source-frozen-v1.json'||actualExecution.seal.bytes!==closurePin.bytes||actualExecution.seal.sha256!==closurePin.sha256||actualExecution.finalVerification?.path!=='final-verification.json'||actualExecution.finalVerification.bytes!==actualFinalPin.bytes||actualExecution.finalVerification.sha256!==actualFinalPin.sha256||actualExecution.log?.path!=='actual-verification.log')throw Error('Actual Ended16 runner/source-before-after/final proof differs');const execLogFile=await under(base,'probe19-independent-verification-v1/actual-verification.log'),execLogPin=await pin(execLogFile);if(execLogPin.bytes!==actualExecution.log.bytes||execLogPin.sha256!==actualExecution.log.sha256)throw Error('Actual Ended16 execution log differs');\n"
+        },
+        {
+          "oldLine": 56,
+          "newLine": 56,
+          "before": " const rootCleanupFile=await under(base,'probe18-root-independent-cleanup-v1.json'),rootCleanupPin=await pin(rootCleanupFile);eqPin(rootCleanupPin,receipt.pins?.rootCleanup,'root-cleanup');\n",
+          "after": " const rootCleanupFile=await under(base,'probe19-root-independent-cleanup-v1.json'),rootCleanupPin=await pin(rootCleanupFile);eqPin(rootCleanupPin,receipt.pins?.rootCleanup,'root-cleanup');\n"
+        },
+        {
+          "oldLine": 72,
+          "newLine": 72,
+          "before": " const storeDiagnostics=receipt.storeDiagnostics,storeBound=FORMAL14_BINDING.probe18.storeDiagnostics;\n",
+          "after": " const storeDiagnostics=receipt.storeDiagnostics,storeBound=FORMAL15_BINDING.probe19.storeDiagnostics;\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-full16-gate.mjs",
+        "bytes": 5649,
+        "sha256": "cad6f1112466b41e65b4415d7c28bbf679f1f838be86af135e5a7c2fb6ae9c4d"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-full16-gate.mjs",
+        "bytes": 5646,
+        "sha256": "4ba3b1bc6eacc1b0f4728c2a202b94024b7dd079c6788c142d27b6e61531ac8b"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 5,
+          "newLine": 5,
+          "before": "const base='C:/mir2-build/p01-completion-20261024',directory=path.join(base,'full-lifecycle-scout-observer-preference-v1/public');\n",
+          "after": "const base='C:/mir2-build/p01-completion-20261024',directory=path.join(base,'full-lifecycle-scout-anti-convergence-v1/public');\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\backend-driver-source-guard.mjs",
+        "bytes": 2675,
+        "sha256": "1d6cb996f88de6a47be1b0bedae3e1f57dd82c3aaa66eeb82dc18196061d8db5"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\backend-driver-source-guard.mjs",
+        "bytes": 2669,
+        "sha256": "871a8fb73d3e0c0ed506fa44106554dcea84d415e718bd952dde4a2bc1795b11"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 3,
+          "newLine": 3,
+          "before": "const root=path.dirname(fileURLToPath(import.meta.url)),library=path.resolve(root,'../scout-observer-preference-runtime-v1/source-lib-v1.mjs'),sha=b=>crypto.createHash('sha256').update(b).digest('hex');\n",
+          "after": "const root=path.dirname(fileURLToPath(import.meta.url)),library=path.resolve(root,'../scout-anti-convergence-runtime-v1/source-lib-v1.mjs'),sha=b=>crypto.createHash('sha256').update(b).digest('hex');\n"
+        },
+        {
+          "oldLine": 10,
+          "newLine": 10,
+          "before": " const runtimeRef=binding.runtimeBinding,expectedBinding=path.resolve(root,'../scout-observer-preference-runtime-v1/current-execution-binding-v1.json');\n",
+          "after": " const runtimeRef=binding.runtimeBinding,expectedBinding=path.resolve(root,'../scout-anti-convergence-runtime-v1/current-execution-binding-v1.json');\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\projection-build-source-lib.mjs",
+        "bytes": 172,
+        "sha256": "2ef575db3c6c67eb01bf743ccb178cf648d3968ed90592fa70073efbb572769a"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\projection-build-source-lib.mjs",
+        "bytes": 169,
+        "sha256": "ea94225faa35e024caeb210c52de21ca5328936d638f4e44fc671273f5c1e302"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 2,
+          "newLine": 2,
+          "before": "export * from '../scout-observer-preference-runtime-v1/source-lib-v1.mjs';\n",
+          "after": "export * from '../scout-anti-convergence-runtime-v1/source-lib-v1.mjs';\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-binding-contract.mjs",
+        "bytes": 1623,
+        "sha256": "b54e5ffd89da0f048632f8d3ee7257880f00d73b44a8cc4a7b36a21fce833f72"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\driver-binding-contract.mjs",
+        "bytes": 1638,
+        "sha256": "da5a172e76b38f4d1ce753c2c24db9dfad3ea3fd5030ff0ab585bd7f196eeabf"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 8,
+          "newLine": 8,
+          "before": " b.backendSourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||b.backendBuildCommit!==b.backendSourceCommit||b.driverSourceSha256!=='445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634'||\n",
+          "after": " b.backendSourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||b.backendBuildCommit!==b.backendSourceCommit||b.driverSourceSha256!=='3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8'||\n"
+        },
+        {
+          "oldLine": 10,
+          "newLine": 10,
+          "before": " !b.driverFrozenFile||!Number.isSafeInteger(b.driverManifestBytes)||b.driverManifestBytes<1||!sha(b.driverManifestSha256)||!Array.isArray(b.currentEvidence)||b.currentEvidence.length!==1||b.currentEvidence[0].tests!==219||!b.staticGeometryCompatibilityProof)\n throw Error('PENDING_PROBE18_CURRENT_EXECUTION_HEAD_DRIVER219_AND_FRESH_FULL16: Root actual binding, full16 and approved source are required before any mode');\n",
+          "after": " !b.driverFrozenFile||!Number.isSafeInteger(b.driverManifestBytes)||b.driverManifestBytes<1||!sha(b.driverManifestSha256)||!Array.isArray(b.currentEvidence)||b.currentEvidence.length!==1||b.currentEvidence[0].tests!==226||!b.staticGeometryCompatibilityProof)\n throw Error('PENDING_FORMAL15_CURRENT_EXECUTION_HEAD_DRIVER226_SHARED_SOURCE_AND_FRESH_FULL16: Root actual binding, full16 and approved source are required before any mode');\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\formal-template-contract.mjs",
+        "bytes": 1496,
+        "sha256": "74463f0fe4ad40d1f5c6809cbb36bed785797ee5d800196eb0c2aa25a4421c65"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\formal-template-contract.mjs",
+        "bytes": 1595,
+        "sha256": "a4a4d9a2c2aa4ebcc6cefc63fc6e1675627772c213ad5d6a418ce6babff5bb8b"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "",
+          "after": "import {DRIVER_BINDING,assertFinalDriverBinding} from './driver-binding-contract.mjs';\n"
+        },
+        {
+          "oldLine": 2,
+          "newLine": 3,
+          "before": "const finalFile=new URL('./bound-formal14-binding-v1.json',import.meta.url);\nexport const FORMAL14_BINDING=Object.freeze(JSON.parse(fs.readFileSync(fs.existsSync(finalFile)?finalFile:new URL('./pending-formal14-binding-v1.json',import.meta.url),'utf8')));\nexport function assertFormal14Configured(){const b=FORMAL14_BINDING,p=b.probe18;if(b.state!=='FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED'||b.finalized!==true||b.backendInputCount!==50||b.backendSourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||b.driverSourceCommit!=='3a6d8c862d03ded3133605472a8f38bc6258af52'||b.executionSourceCommit!=='3a6d8c862d03ded3133605472a8f38bc6258af52'||!/^\\d{13}-[a-f0-9]{8}$/.test(p?.runId??'')||!p.report||!p.raw||!p.collectedEvidence||!p.independentVerification||!Array.isArray(p.independentVerifierSources)||(p.independentVerifierSources.length<2||p.independentVerifierSources.length>128)||!p.independentSourceClosureManifest||!p.actualExecutionReceipt||!Number.isSafeInteger(p.independentVerifierRevision)||p.independentVerifierRevision<1||!/^[a-f0-9]{64}$/.test(p.preparedSourceConfigSha256??'')||JSON.stringify(p.completePhaseSeconds)!=='[300,300,360]'||JSON.stringify(p.completePhaseWindows)!=='[5,5,6]'||p.capacityAccepted!==false)throw Error('PENDING_FORMAL14: matching fresh Probe18 actual300/300/360,5/5/6>=60s PASS plus complete raw/public/independent tool-seal/executor source closure is required. Known Release/full16 are not a substitute for Probe18.');}\n",
+          "after": "const finalFile=new URL('./bound-formal15-binding-v1.json',import.meta.url);\nexport const FORMAL15_BINDING=Object.freeze(JSON.parse(fs.readFileSync(fs.existsSync(finalFile)?finalFile:new URL('./pending-formal15-binding-v1.json',import.meta.url),'utf8')));\nexport function assertFormal15Configured(){assertFinalDriverBinding();const b=FORMAL15_BINDING,p=b.probe19;if(b.state!=='FINAL_FRESH_PROBE19_AND_NEW50_BOUND_NOT_EXECUTED'||b.finalized!==true||b.backendInputCount!==50||b.backendSourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||b.driverSourceCommit!==DRIVER_BINDING.driverSourceCommit||b.executionSourceCommit!==DRIVER_BINDING.executionSourceCommit||!/^\\d{13}-[a-f0-9]{8}$/.test(p?.runId??'')||!p.report||!p.raw||!p.collectedEvidence||!p.independentVerification||!Array.isArray(p.independentVerifierSources)||(p.independentVerifierSources.length<2||p.independentVerifierSources.length>128)||!p.independentSourceClosureManifest||!p.actualExecutionReceipt||!Number.isSafeInteger(p.independentVerifierRevision)||p.independentVerifierRevision<1||!/^[a-f0-9]{64}$/.test(p.preparedSourceConfigSha256??'')||JSON.stringify(p.completePhaseSeconds)!=='[300,300,360]'||JSON.stringify(p.completePhaseWindows)!=='[5,5,6]'||p.capacityAccepted!==false)throw Error('PENDING_FORMAL15: matching fresh Probe19 actual300/300/360,5/5/6>=60s PASS plus complete raw/public/independent tool-seal/executor source closure is required. Known Release/full16 are not a substitute for Probe19.');}\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-evidence-contract.mjs",
+        "bytes": 5863,
+        "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\driver-evidence-contract.mjs",
+        "bytes": 1599,
+        "sha256": "bd10ee6cf1883b03953de2eabadfc580267627fe9dfdcb46dde8ddfc534f9558"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import fs from 'node:fs/promises';import path from 'node:path';import assert from 'node:assert/strict';\nimport {base,read,sha,samePath} from './input-lib.mjs';import {DRIVER_BINDING,assertFinalDriverBinding} from './driver-binding-contract.mjs';\nconst normalize=p=>({file:p?.file??p?.path,bytes:p?.bytes,sha256:p?.sha256});\nconst prior219=()=>({file:path.join(base,'capacity-attack-deadline-driver-frozen-v1.json'),bytes:6759,sha256:'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b'});\nconst metadataBasis=()=>({file:path.join(base,'capacity-native-chase-preference-driver-frozen-v1.json'),bytes:19099,sha256:'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef'});\nasync function exact(ref,expected){const p=normalize(ref);assert.ok(samePath(p.file,expected.file));assert.equal(p.bytes,expected.bytes);assert.equal(p.sha256,expected.sha256);const b=await fs.readFile(p.file);assert.equal(b.length,p.bytes);assert.equal(sha(b),p.sha256);return JSON.parse(b);}\nexport async function getDriverDeclarationBasis(frozen){\n const prior=await exact(frozen.priorFreeze,prior219());assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');\n const basis=await exact(prior.priorFreeze,metadataBasis());assert.equal(basis.actualCodeCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');\n for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference'])assert.ok(basis[key]&&typeof basis[key]==='object');return basis;\n",
+          "after": "import fs from 'node:fs/promises';\nimport path from 'node:path';\nimport crypto from 'node:crypto';\nimport {pathToFileURL,fileURLToPath} from 'node:url';\nimport {DRIVER_BINDING,assertFinalDriverBinding} from './driver-binding-contract.mjs';\nconst expected=path.resolve(fileURLToPath(new URL('../release-native-10-v2-scout-anti-convergence-feasibility-19/driver-evidence-contract.mjs',import.meta.url)));\nasync function shared(){\n assertFinalDriverBinding();\n const ref=DRIVER_BINDING.sharedDriverEvidence;\n if(!ref||path.resolve(ref.file??'').toLowerCase()!==expected.toLowerCase()||!Number.isSafeInteger(ref.bytes)||ref.bytes<1||!/^[a-f0-9]{64}$/.test(ref.sha256??''))throw Error('PENDING_FORMAL15_SHARED_PROBE19_NODE226_EVIDENCE: original-location module pin required');\n const stat=await fs.lstat(expected),real=await fs.realpath(expected),bytes=await fs.readFile(expected);\n if(!stat.isFile()||stat.isSymbolicLink()||path.resolve(real).toLowerCase()!==expected.toLowerCase()||bytes.length!==ref.bytes||crypto.createHash('sha256').update(bytes).digest('hex')!==ref.sha256)throw Error('Shared Probe19 evidence module differs');\n return{module:await import(pathToFileURL(expected)),pin:{file:expected,bytes:ref.bytes,sha256:ref.sha256}};\n"
+        },
+        {
+          "oldLine": 12,
+          "newLine": 15,
+          "before": "export async function verifyDriverEvidenceBasis(frozen,assertPin){\n assertFinalDriverBinding();assert.equal(frozen.schemaVersion,1);assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');\n for(const key of ['actualCodeCommit','driverSourceCommit','executionSourceCommit'])assert.equal(frozen[key],DRIVER_BINDING.executionSourceCommit);\n for(const key of ['backendSourceCommit','backendBuildCommit'])assert.equal(frozen[key],DRIVER_BINDING.backendSourceCommit);\n assert.equal(frozen.files?.length,9);assert.equal(frozen.sourceSha256,DRIVER_BINDING.driverSourceSha256);assert.equal(sha(JSON.stringify(frozen.files)),frozen.sourceSha256);assert.equal(frozen.capacityAccepted,false);assert.equal(frozen.otherSevenInputsUnchanged,true);\n const pins=[],seen=new Set(),add=async ref=>{const p=normalize(ref);assert.ok(p&&typeof p.file==='string'&&path.isAbsolute(p.file));const real=await fs.realpath(p.file),relative=path.relative(await fs.realpath(base),real);assert.ok(relative&&!path.isAbsolute(relative)&&!relative.split(/[\\\\/]/).some(x=>x==='..'||/^(private|store|recordings|bin)$/i.test(x))&&samePath(real,p.file));await assertPin(p);if(!seen.has(real.toLowerCase())){seen.add(real.toLowerCase());pins.push(p);}return p;};\n const full=frozen.fullRegression;for(const [key,value] of Object.entries({passed:219,failed:0,cancelled:0,skipped:0,todo:0,finalSourceFullRegressionPerformed:true,sourcePinsUnchangedAfterRun:true,exactSourceSha256:frozen.sourceSha256}))assert.equal(full[key],value);\n assert.deepEqual(DRIVER_BINDING.currentEvidence,[{tests:219,receipt:normalize(full.receipt),log:normalize(full.log),stderr:normalize(full.stderr)}]);\n for(const key of ['receipt','log','stderr'])await add(full[key]);const actual=await read(normalize(full.receipt).file);\n assert.equal(actual.exitCode,0);assert.equal(actual.signal,null);assert.equal(actual.sourcePinsUnchangedAfterRun,true);assert.equal(actual.sourceSha256,frozen.sourceSha256);\n assert.deepEqual(actual.counts,{tests:219,passed:219,failed:0,cancelled:0,skipped:0,todo:0});\n for(const s of [actual.sourceBefore,actual.sourceAfter]){assert.deepEqual(s,frozen.files);assert.equal(sha(JSON.stringify(s)),frozen.sourceSha256);}assert.deepEqual(actual.sourceBefore,actual.sourceAfter);\n assert.deepEqual(normalize(actual.log),normalize(full.log));assert.deepEqual(normalize(actual.stderr),normalize(full.stderr));assert.equal(normalize(full.stderr).bytes,0);\n const text=await fs.readFile(normalize(full.log).file,'utf8');for(const [k,n] of [['tests',219],['pass',219],['fail',0],['cancelled',0],['skipped',0],['todo',0]])assert.ok(new RegExp('^# '+k+' '+n+'\\\\r?$','m').test(text));\n await add(prior219());await add(metadataBasis());await getDriverDeclarationBasis(frozen);\n const proof={file:path.join(base,'scout-observer-preference-v1/source-preservation-and-focused-receipt-v1.json'),bytes:21049,sha256:'5177c156deabecce26c37cc4104e36ff7b22352ebf26c6b77478a4bb23fa5684'};\n await add(proof);const preservation=await read(proof.file);assert.deepEqual(preservation.files,frozen.files);assert.equal(preservation.otherSevenInputsUnchanged,true);assert.equal(preservation.tests.oldPrefixRawExact,true);assert.equal(preservation.tests.oldPrefixBytes,243920);assert.equal(preservation.tests.addedTestCount,9);assert.equal(preservation.inverse.mainRawExact,true);\n for(const p of preservation.preimages.files)await add({file:p.preimage,bytes:p.bytes,sha256:p.sha256});\n await add({file:path.join(base,'scout-observer-preference-independent-review-v1/review-v1.json'),bytes:7980,sha256:'2ff103a69374fa6860616d566d3a22b488c3e5ebe77b000cd019b8cff9afbfbc'});\n await add({file:path.join(base,'scout-observer-preference-independent-review-v1/full-regression-addendum-v1.json'),bytes:3152,sha256:'281d5faacadc10c0df2f476b9c5ed2b9ce50ddfaf4dc5e37979c4624dc08af6a'});\n return {schemaVersion:1,scope:'Actual current Node219 exact raw nine sources and before/after arrays/log/receipt; nine new focused cases are included in219. Historical Node210/d240 is a prior basis, not a new execution or Rust validation.',exactSourceSha256:frozen.sourceSha256,fullRegressionPerformedOnFinalSource:true,fullPassed:219,original900msBoundaryPreserved:true,capacityAccepted:false,pins};\n}",
+          "after": "export async function getDriverDeclarationBasis(frozen){const source=await shared();return source.module.getDriverDeclarationBasis(frozen);}\nexport async function verifyDriverEvidenceBasis(frozen,assertPin){const source=await shared(),result=await source.module.verifyDriverEvidenceBasis(frozen,assertPin);return{...result,pins:[source.pin,...result.pins]};}\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public-current219-v2.mjs",
+        "bytes": 43255,
+        "sha256": "9a159c251035593be4293ea2e3f3c6bf58c118db075f8572cba5f6104a071713"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\collect-public.mjs",
+        "bytes": 43215,
+        "sha256": "789b3d4f7f1873d33d31141818894b02a2597dfd95cdf0dc31ad1b8a06e4d064"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 3,
+          "newLine": 3,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 22,
+          "newLine": 22,
+          "before": "const child = 'capacity-formal-native-v2-scout-observer-ladder-14', dest = path.join(topic, child);\nconst realm = 'release-native-v2-scout-observer-ladder-14';\n",
+          "after": "const child = 'capacity-formal-native-v2-scout-anti-convergence-ladder-15', dest = path.join(topic, child);\nconst realm = 'release-native-v2-scout-anti-convergence-ladder-15';\n"
+        },
+        {
+          "oldLine": 191,
+          "newLine": 191,
+          "before": "const driverFreezeFile = path.join(base, 'capacity-scout-observer-preference-driver-frozen-v1.json'), driverFreeze = await read(driverFreezeFile);\n",
+          "after": "const driverFreezeFile = DRIVER_BINDING.driverFrozenFile, driverFreeze = await read(driverFreezeFile);\n"
+        },
+        {
+          "oldLine": 321,
+          "newLine": 321,
+          "before": "const recordingSummaryFile = path.join(base, 'collect-formal-native-v2-scout-observer-ladder-14-recordings-metadata.json');\n",
+          "after": "const recordingSummaryFile = path.join(base, 'collect-formal-native-v2-scout-anti-convergence-ladder-15-recordings-metadata.json');\n"
+        },
+        {
+          "oldLine": 323,
+          "newLine": 323,
+          "before": "const monitorEndpointsFile = path.join(base, 'collect-formal-native-v2-scout-observer-ladder-14-monitor-endpoints.json');\n",
+          "after": "const monitorEndpointsFile = path.join(base, 'collect-formal-native-v2-scout-anti-convergence-ladder-15-monitor-endpoints.json');\n"
+        },
+        {
+          "oldLine": 335,
+          "newLine": 335,
+          "before": "realmFiles.push('phase-window-contract.mjs','hp-maintenance-status-schema.mjs','formal-template-contract.mjs','pending-formal14-binding-v1.json','wire-diagnostics-contract.mjs','wire-diagnostics-adapter.mjs','verify-probe18-collected-evidence.mjs','driver-binding-contract.mjs','current-driver-binding.json','native-chase-report-contract.mjs','backend-library-binding.json','scene-driver-compatibility.mjs','scene-driver-compatibility-proof-v1.json');if(wireTerminalPin)realmFiles.push(WIRE_TERMINAL);\n",
+          "after": "realmFiles.push('phase-window-contract.mjs','hp-maintenance-status-schema.mjs','formal-template-contract.mjs','pending-formal15-binding-v1.json','wire-diagnostics-contract.mjs','wire-diagnostics-adapter.mjs','verify-probe19-collected-evidence.mjs','driver-binding-contract.mjs','current-driver-binding.json','native-chase-report-contract.mjs','backend-library-binding.json','scene-driver-compatibility.mjs');if(wireTerminalPin)realmFiles.push(WIRE_TERMINAL);\n"
+        },
+        {
+          "oldLine": 337,
+          "newLine": 337,
+          "before": "  'capacity-scout-observer-preference-driver-frozen-v1.json',\n",
+          "after": "  'capacity-scout-anti-convergence-driver-frozen-v1.json',\n"
+        },
+        {
+          "oldLine": 339,
+          "newLine": 339,
+          "before": "  'collect-formal-native-v2-scout-observer-ladder-14-recordings-metadata.json', 'collect-formal-native-v2-scout-observer-ladder-14-monitor-endpoints.json',\n  'release-native-v2-scout-observer-ladder-14/collect-public.mjs', 'release-native-v2-scout-observer-ladder-14/verify-public.mjs'];\nsourcePaths.push(`${realm}/collect-public-current219-v2.mjs`, `${realm}/postcollector-current219-derivation-v1.json`);\n",
+          "after": "  'collect-formal-native-v2-scout-anti-convergence-ladder-15-recordings-metadata.json', 'collect-formal-native-v2-scout-anti-convergence-ladder-15-monitor-endpoints.json',\n  'release-native-v2-scout-anti-convergence-ladder-15/collect-public.mjs', 'release-native-v2-scout-anti-convergence-ladder-15/verify-public.mjs'];\nsourcePaths.push(`${realm}/collect-public.mjs`, `${realm}/template-derivation-v1.json`);\n"
+        },
+        {
+          "oldLine": 374,
+          "newLine": 374,
+          "before": "const catalogName = 'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json';\n",
+          "after": "const catalogName = 'collect-formal-native-v2-scout-anti-convergence-ladder-15-public-artifact-catalog.json';\n"
+        },
+        {
+          "oldLine": 408,
+          "newLine": 408,
+          "before": "await writeNew(path.join(base, 'collect-formal-native-v2-scout-observer-ladder-14-collection-result.json'), { destination: dest, summary, manifest: entry });\n",
+          "after": "await writeNew(path.join(base, 'collect-formal-native-v2-scout-anti-convergence-ladder-15-collection-result.json'), { destination: dest, summary, manifest: entry });\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+        "bytes": 16503,
+        "sha256": "b4440acd5a721719f064499cc67d2b135a49283b02ee965100a885f8f8e5115b"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-seal-and-guard-v1.mjs",
+        "bytes": 16520,
+        "sha256": "656b9d822ee22e8f68aace6c83238891a9144c655257d263182cfa003192de8d"
+      },
+      "rawCopied": false,
+      "lineHunks": [
+        {
+          "oldLine": 1,
+          "newLine": 1,
+          "before": "import {assertFormal14Configured} from './formal-template-contract.mjs';\nassertFormal14Configured();\n",
+          "after": "import {DRIVER_BINDING} from './driver-binding-contract.mjs';\nimport {assertFormal15Configured} from './formal-template-contract.mjs';\nassertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 9,
+          "newLine": 10,
+          "before": "const HEAD='c743122af05faca43d9535d8c6c2a4bfb01b924f',CORE='3a6d8c862d03ded3133605472a8f38bc6258af52',DRIVER='445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634';\nconst FULL16=path.join(BASE,'full-lifecycle-scout-observer-preference-v1');\n",
+          "after": "const HEAD='c743122af05faca43d9535d8c6c2a4bfb01b924f',CORE=DRIVER_BINDING.driverSourceCommit,DRIVER=DRIVER_BINDING.driverSourceSha256;\nconst FULL16=path.join(BASE,'full-lifecycle-scout-anti-convergence-v1');\n"
+        },
+        {
+          "oldLine": 56,
+          "newLine": 57,
+          "before": " const formal=await import(pathToFileURL(path.join(ROOT,'formal-template-contract.mjs')));formal.assertFormal14Configured();\n",
+          "after": " const formal=await import(pathToFileURL(path.join(ROOT,'formal-template-contract.mjs')));formal.assertFormal15Configured();\n"
+        },
+        {
+          "oldLine": 78,
+          "newLine": 79,
+          "before": " assert.equal(feasibilityGate.feasibilityPassed,true);assert.equal(feasibilityGate.capacityAccepted,false);assert.equal(feasibilityGate.runId,formal.FORMAL14_BINDING.probe18.runId);\n",
+          "after": " assert.equal(feasibilityGate.feasibilityPassed,true);assert.equal(feasibilityGate.capacityAccepted,false);assert.equal(feasibilityGate.runId,formal.FORMAL15_BINDING.probe19.runId);\n"
+        },
+        {
+          "oldLine": 88,
+          "newLine": 89,
+          "before": " const generatedCommon={schemaVersion:1,state:'reviewed-formal14-fresh18-bound-not-executed',preparedReceipt:pre.ref,independentReview:reviewPin,backendSourceCommit:HEAD,executionSourceCommit:CORE,driverSourceCommit:CORE,backendInputCount:50,freshProbe18RunId:feasibilityGate.runId,freshProbe18Passed:true,formalCompleteMinuteWindows:146,accountsProvisioned:false,realmStarted:false,capacityAccepted:false};\n",
+          "after": " const generatedCommon={schemaVersion:1,state:'reviewed-formal15-fresh19-bound-not-executed',preparedReceipt:pre.ref,independentReview:reviewPin,backendSourceCommit:HEAD,executionSourceCommit:CORE,driverSourceCommit:CORE,backendInputCount:50,freshProbe19RunId:feasibilityGate.runId,freshProbe19Passed:true,formalCompleteMinuteWindows:146,accountsProvisioned:false,realmStarted:false,capacityAccepted:false};\n"
+        },
+        {
+          "oldLine": 94,
+          "newLine": 95,
+          "before": " const metadata={schemaVersion:1,state:'final-source-bound-not-executed',frozenAt:new Date().toISOString(),root:ROOT,backendSourceCommit:HEAD,executionSourceCommit:CORE,backendInputCount:50,backendRebuilt:false,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,binarySha256:binding.release.binary.sha256,backendSourceAggregate:binding.manifest.sourceManifestSha256,sceneProfile:scene.profile,sceneSourceSha256:scene.sourceSha256,patrolSpan:2,storeDiagnostics:storeIdentity,ordinaryAccountPoolSize:100,maximumControlledActors:100,wireDiagnostics:wireIdentity,wireSourceFiles:wireSource.files,coreFunctionalEvidenceCoversWrapper:false,nodeCodeFullTests:219,wrapperUnitTests:28,adapterUnitTests:8,actualAdmissionCaps:[128,100,100,4,1,2],tokioWorkers:4,slowStageThresholdMs:50,full16RunId:binding.full16Gate.runId,preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,rootControllerPreparation:pre.controllerPrepPin,reviewedRuntimeLocalFiles:pre.value.files.length,reviewedExternalStableInputs:pre.value.externalStableInputs.length,driverClosurePins:drivers.pins.length,formalCompleteMinuteWindows:146,freshProbe18RunId:feasibilityGate.runId,freshProbe18Passed:true,generatedPreparationFiles,sourceConfigNotYet:true,accountsProvisioned:false,realmStarted:false,capacityAccepted:false,files,sourceSha256:sha(JSON.stringify(files)),scripts:files.filter(entry=>/\\.(mjs|ps1)$/.test(entry.file))};\n",
+          "after": " const metadata={schemaVersion:1,state:'final-source-bound-not-executed',frozenAt:new Date().toISOString(),root:ROOT,backendSourceCommit:HEAD,executionSourceCommit:CORE,backendInputCount:50,backendRebuilt:false,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,binarySha256:binding.release.binary.sha256,backendSourceAggregate:binding.manifest.sourceManifestSha256,sceneProfile:scene.profile,sceneSourceSha256:scene.sourceSha256,patrolSpan:2,storeDiagnostics:storeIdentity,ordinaryAccountPoolSize:100,maximumControlledActors:100,wireDiagnostics:wireIdentity,wireSourceFiles:wireSource.files,coreFunctionalEvidenceCoversWrapper:false,nodeCodeFullTests:226,wrapperUnitTests:28,adapterUnitTests:8,actualAdmissionCaps:[128,100,100,4,1,2],tokioWorkers:4,slowStageThresholdMs:50,full16RunId:binding.full16Gate.runId,preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,rootControllerPreparation:pre.controllerPrepPin,reviewedRuntimeLocalFiles:pre.value.files.length,reviewedExternalStableInputs:pre.value.externalStableInputs.length,driverClosurePins:drivers.pins.length,formalCompleteMinuteWindows:146,freshProbe19RunId:feasibilityGate.runId,freshProbe19Passed:true,generatedPreparationFiles,sourceConfigNotYet:true,accountsProvisioned:false,realmStarted:false,capacityAccepted:false,files,sourceSha256:sha(JSON.stringify(files)),scripts:files.filter(entry=>/\\.(mjs|ps1)$/.test(entry.file))};\n"
+        },
+        {
+          "oldLine": 99,
+          "newLine": 100,
+          "before": " const pre=await prepared(frozen.preparedReceipt.file,frozen.preparedReceipt.sha256),reviewPin=await reviewed(pre,frozen.independentReview.file,frozen.independentReview.sha256);assert.deepEqual(frozen.preparedReceipt,pre.ref);assert.deepEqual(frozen.independentReview,reviewPin);assert.ok(Array.isArray(frozen.generatedPreparationFiles)&&frozen.generatedPreparationFiles.length===3);for(let i=0;i<GENERATED.length;i++){const entry=frozen.generatedPreparationFiles[i];assert.ok(same(entry.file,path.join(ROOT,GENERATED[i])));await expectedPin(entry);const data=await read(entry.file);assert.deepEqual(data.preparedReceipt,pre.ref);assert.deepEqual(data.independentReview,reviewPin);assert.equal(data.freshProbe18RunId,frozen.freshProbe18RunId);assert.equal(data.freshProbe18Passed,true);}\n",
+          "after": " const pre=await prepared(frozen.preparedReceipt.file,frozen.preparedReceipt.sha256),reviewPin=await reviewed(pre,frozen.independentReview.file,frozen.independentReview.sha256);assert.deepEqual(frozen.preparedReceipt,pre.ref);assert.deepEqual(frozen.independentReview,reviewPin);assert.ok(Array.isArray(frozen.generatedPreparationFiles)&&frozen.generatedPreparationFiles.length===3);for(let i=0;i<GENERATED.length;i++){const entry=frozen.generatedPreparationFiles[i];assert.ok(same(entry.file,path.join(ROOT,GENERATED[i])));await expectedPin(entry);const data=await read(entry.file);assert.deepEqual(data.preparedReceipt,pre.ref);assert.deepEqual(data.independentReview,reviewPin);assert.equal(data.freshProbe19RunId,frozen.freshProbe19RunId);assert.equal(data.freshProbe19Passed,true);}\n"
+        },
+        {
+          "oldLine": 101,
+          "newLine": 102,
+          "before": " const {binding,drivers,scene,wireSource,wireIdentity,feasibilityGate}=await checkContracts({preSeal:false});assert.equal(feasibilityGate.runId,frozen.freshProbe18RunId);assert.deepEqual(wireSource.files,frozen.wireSourceFiles);assert.deepEqual(wireIdentity,frozen.wireDiagnostics);assert.equal(scene.sourceSha256,frozen.sceneSourceSha256);await absent(runtime);\n",
+          "after": " const {binding,drivers,scene,wireSource,wireIdentity,feasibilityGate}=await checkContracts({preSeal:false});assert.equal(feasibilityGate.runId,frozen.freshProbe19RunId);assert.deepEqual(wireSource.files,frozen.wireSourceFiles);assert.deepEqual(wireIdentity,frozen.wireDiagnostics);assert.equal(scene.sourceSha256,frozen.sceneSourceSha256);await absent(runtime);\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "rawCopies": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-diagnostics-config.json",
+      "bytes": 4445,
+      "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+    }
+  ],
+  "knownBackend": {
+    "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "inputCount": 50,
+    "aggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "actualCurrentDriver": {
+    "commit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "freeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+      "bytes": 9472,
+      "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+    },
+    "sourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+    "tests": 226
+  },
+  "metadataAuthored": [
+    "current-driver-binding.json",
+    "backend-library-binding.json",
+    "candidate-release-binding.json",
+    "scene-binding.json",
+    "pending-formal15-binding-v1.json",
+    "run-options.json",
+    "preparation-plan.json",
+    "copied-baseline-inputs.json"
+  ],
+  "policyRawJsonEqual": true,
+  "policyScenarioResourceUnchanged": true,
+  "futureProbe19ConsumerSchemaValidated": false,
+  "actualFull16Passed": null,
+  "actualProbe19Passed": null,
+  "eligibleForSealNow": false,
+  "oldExecutionResultsCopied": false,
+  "metadataBaselinePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\current-driver-binding.json",
+      "bytes": 2756,
+      "sha256": "8702d54a12dbbf2a57e841a2fab66f4ab25b884407fb13ee863c412d759817d1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\backend-library-binding.json",
+      "bytes": 1047,
+      "sha256": "0a4ae571314cd97de54d2410f2b24bdf4e88b36134f7324702555df78d3a6044"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\candidate-release-binding.json",
+      "bytes": 7448,
+      "sha256": "8362712a2cd1f81148dc8485caa4e168fc7c9958e6149008f666e5fccc08a75d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\pending-formal14-binding-v1.json",
+      "bytes": 1060,
+      "sha256": "84c7282c84301f2339f52142a8343db7efa41d317e7b5ed58d628ee6a8262f9b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-options.json",
+      "bytes": 2887,
+      "sha256": "953c0fba5b00e2a2c2ffc01fd24beccf7c452eb91259bf8033c0361c3d5f9421"
+    }
+  ],
+  "metadataCurrentPins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\current-driver-binding.json",
+      "bytes": 2982,
+      "sha256": "cca15f47f7debe77fe8d0e4dff5741d46b8aaf4c239022fc0a2fc2742dc67933"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\backend-library-binding.json",
+      "bytes": 746,
+      "sha256": "65eb7d29aa2a1f1a23a15f503723e8a546d80da1612b6f790830735d6209fe55"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\candidate-release-binding.json",
+      "bytes": 2422,
+      "sha256": "faddb3e7295f2119c0a787f3d920243d414168b95efea8fa35605a3b1e3999fb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "52db0b3c6a0bf27156ceb300d121b4ae8b74808e2a01ace7cfb2451e81d141b6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\pending-formal15-binding-v1.json",
+      "bytes": 1060,
+      "sha256": "6a93e19472e7d014552c779d96ee1eeca95a0bacbe08da9f5166a6f07c7e899f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\run-options.json",
+      "bytes": 2913,
+      "sha256": "294c2d6a897b933589552af1280316928ea11fd0b7d4dfc6f89d1810b9a98d08"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\preparation-plan.json",
+      "bytes": 1956,
+      "sha256": "61bc5b6d908fdf6198e428c3ed18c891d31e3ea0ba55b7fa2919c6f5dd03c676"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\copied-baseline-inputs.json",
+      "bytes": 594,
+      "sha256": "cb6afecc76fc09a264e4dfbe6bc8d5c8c0a067e142b5a2270c4228705fa635f5"
+    }
+  ]
+}

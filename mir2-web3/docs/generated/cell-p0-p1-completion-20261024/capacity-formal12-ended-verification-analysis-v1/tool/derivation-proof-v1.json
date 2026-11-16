@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_ONLY_MECHANICAL_DERIVATION_NOT_EXECUTED",
+  "createdAt": "2026-10-25T18:00:15.090Z",
+  "fromRoot": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2",
+  "toRoot": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1",
+  "sourceDescription": "Actual used Formal11 revision2 consistency verifier; full/failure behavior retained",
+  "replacements": [
+    {
+      "label": "current freeze9 + historical declaration basis + actual210 evidence",
+      "count": 1,
+      "from": " const freezeName='capacity-native-chase-preference-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,19099);assert.equal(freezePin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');const frozen=await read(BASE,freezeName);\r\n assert.equal(frozen.driverSourceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');assert.equal(frozen.sourceSha256,'db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7');\r\n const metadata={};for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference']){assert.ok(frozen[key]&&typeof frozen[key]==='object');for(const value of[report,catalog.run,sidecar])assert.deepEqual(value[key],frozen[key],key);metadata[key]=frozen[key];}\r\n",
+      "to": " const freezeName='capacity-attack-deadline-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,6759);assert.equal(freezePin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');const frozen=await read(BASE,freezeName);\n assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');assert.equal(frozen.driverSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(frozen.backendSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(frozen.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');assert.equal(frozen.files.length,9);assert.equal(crypto.createHash('sha256').update(JSON.stringify(frozen.files)).digest('hex'),frozen.sourceSha256);\n const declarationBasisName='capacity-native-chase-preference-driver-frozen-v1.json',declarationBasisPin=await pin(BASE,declarationBasisName);assert.equal(declarationBasisPin.bytes,19099);assert.equal(declarationBasisPin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');assert.equal(frozen.priorFreeze.bytes,declarationBasisPin.bytes);assert.equal(frozen.priorFreeze.sha256,declarationBasisPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,declarationBasisName)));const declarationBasis=await read(BASE,declarationBasisName);\n const regressionName='attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,4758);assert.equal(regressionPin.sha256,'c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4');assert.equal(frozen.fullRegression.receipt.bytes,regressionPin.bytes);assert.equal(frozen.fullRegression.receipt.sha256,regressionPin.sha256);assert.ok(samePath(frozen.fullRegression.receipt.path,path.join(BASE,regressionName)));const regression=await read(BASE,regressionName);assert.equal(regression.exitCode,0);assert.equal(regression.signal,null);assert.equal(regression.sourcePinsUnchangedAfterRun,true);assert.deepEqual(regression.sourceBefore,regression.sourceAfter);assert.deepEqual(regression.sourceBefore.files,frozen.files);assert.equal(regression.sourceBefore.sourceSha256,frozen.sourceSha256);assert.deepEqual(regression.counts,{tests:210,pass:210,fail:0,cancelled:0,skipped:0,todo:0});assert.equal(frozen.fullRegression.finalSourceFullRegressionPerformed,true);assert.equal(frozen.fullRegression.sourcePinsUnchangedAfterRun,true);assert.equal(frozen.fullRegression.exactSourceSha256,frozen.sourceSha256);\n const metadata={};for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference']){assert.ok(declarationBasis[key]&&typeof declarationBasis[key]==='object');for(const value of[report,catalog.run,sidecar])assert.deepEqual(value[key],declarationBasis[key],key);metadata[key]=declarationBasis[key];}\n"
+    },
+    {
+      "label": "runtime identity",
+      "count": 1,
+      "from": "release-native-v2-personal-projection-ladder-11",
+      "to": "release-native-v2-attack-deadline-ladder-12"
+    },
+    {
+      "label": "public child",
+      "count": 1,
+      "from": "capacity-formal-native-v2-personal-projection-ladder-11",
+      "to": "capacity-formal-native-v2-attack-deadline-ladder-12"
+    },
+    {
+      "label": "new verifier output",
+      "count": 1,
+      "from": "formal11-independent-verification-v2",
+      "to": "formal12-independent-verification-v1"
+    },
+    {
+      "label": "exact actual collector catalog identity",
+      "count": 1,
+      "from": "collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json",
+      "to": "collect-formal-native-v2-attack-deadline-ladder-12-public-artifact-catalog.json"
+    },
+    {
+      "label": "actual Root run filename metadata",
+      "count": 1,
+      "from": "1792942371568-1e322224",
+      "to": "1792951023370-34757a8d"
+    },
+    {
+      "label": "new Root cleanup",
+      "count": 2,
+      "from": "formal11-root-independent-cleanup-v1.json",
+      "to": "formal12-root-independent-cleanup-v1.json"
+    },
+    {
+      "label": "new backend and actual driver commit",
+      "count": 2,
+      "from": "5c2e713863d3e9556a92f856b11df2396c73b137",
+      "to": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16"
+    },
+    {
+      "label": "top-level core evidence commit",
+      "count": 1,
+      "from": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+      "to": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16"
+    },
+    {
+      "label": "new9 source aggregate",
+      "count": 1,
+      "from": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+      "to": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9"
+    },
+    {
+      "label": "new44 Release binary identity",
+      "count": 1,
+      "from": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+      "to": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+    },
+    {
+      "label": "actual sourceConfig",
+      "count": 1,
+      "from": "edab91a9dd170c19c601ea6c260480657a85f51a7929d09f7a6df7208b6343dd",
+      "to": "0e8cd1d740ac7705aae678ebb5edabc274e2957562754455fdb5182ba5c72336"
+    },
+    {
+      "label": "new108 launcher closure",
+      "count": 1,
+      "from": "launcher.files.length,79",
+      "to": "launcher.files.length,108"
+    },
+    {
+      "label": "new launcher raw bytes",
+      "count": 1,
+      "from": "bytes:35724",
+      "to": "bytes:43855"
+    },
+    {
+      "label": "new launcher raw SHA",
+      "count": 1,
+      "from": "7e78691a3dcb22fdb053e3b028cadeb0aef1b03c7af06f31981e2cd58c09b048",
+      "to": "5e7aff7fe51751094bcd6c699c32ec8986bd80b8212561e0edb5811e5060face"
+    },
+    {
+      "label": "new launcher file aggregate",
+      "count": 1,
+      "from": "e82cfbdc8b5bf9c240b343d2c04b6a99d7fa90b9377056df7a8430d5f56da4df",
+      "to": "50fd3d8fdf5524af43e1aa57920c879836010c39d998f227d22710e349169a1d"
+    },
+    {
+      "label": "explicit declaration and210 roles",
+      "count": 1,
+      "from": "phaseChecks,metadata,wireDiagnostics",
+      "to": "phaseChecks,metadata,driverDeclarationEvidence:{currentFreeze:freezePin,historicalDeclarationBasis:declarationBasisPin,actualFull210Regression:regressionPin,onlySixHistoricalDeclarationsReused:true,currentNineSourceIdentity:frozen.sourceSha256},wireDiagnostics"
+    },
+    {
+      "label": "contract CLI identity",
+      "count": 2,
+      "from": "formal11",
+      "to": "formal12"
+    },
+    {
+      "label": "actual gateway PID",
+      "count": 1,
+      "from": "value.gatewayPid,58172",
+      "to": "value.gatewayPid,68516"
+    },
+    {
+      "label": "actual monitor PID",
+      "count": 1,
+      "from": "value.monitorPid,69080",
+      "to": "value.monitorPid,64004"
+    },
+    {
+      "label": "runner CLI/main identity",
+      "count": 2,
+      "from": "formal11",
+      "to": "formal12"
+    }
+  ],
+  "fileProofs": [
+    {
+      "from": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\verify-ended-formal11-v1.mjs",
+        "bytes": 29070,
+        "sha256": "cb7b98b25e01d61708b79f7c0df1197e161e78ee27a33109f73c4087f5cf0010"
+      },
+      "to": {
+        "path": "verify-ended-formal12-v1.mjs",
+        "bytes": 31367,
+        "sha256": "1fd990313efba763df9ceb233071adc8e5f65b4172e7981c822a42220d098ef0"
+      },
+      "hunks": [
+        {
+          "beforeStartByte": 681,
+          "afterStartByte": 681,
+          "from": "const REALM='release-native-v2-personal-projection-ladder-11';\n",
+          "to": "const REALM='release-native-v2-attack-deadline-ladder-12';\n"
+        },
+        {
+          "beforeStartByte": 914,
+          "afterStartByte": 910,
+          "from": "const CHILD='capacity-formal-native-v2-personal-projection-ladder-11';\nconst OUT=path.join(BASE,'formal11-independent-verification-v2');\n",
+          "to": "const CHILD='capacity-formal-native-v2-attack-deadline-ladder-12';\nconst OUT=path.join(BASE,'formal12-independent-verification-v1');\n"
+        },
+        {
+          "beforeStartByte": 9868,
+          "afterStartByte": 9860,
+          "from": " const dir=path.join(TOPIC,CHILD),rp=`${REALM}/reports/${RUN}.report.json`,report=await read(dir,rp),cleanup=await read(dir,`${REALM}/realm-cleanup.json`),catalogName='collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json',catalog=await read(dir,catalogName),provenance=await read(dir,'public-copy-provenance.json'),publicVerification=await read(dir,'public-verification.json'),collection=await read(dir,'collection-verification.json'),sidecar=await read(dir,`${REALM}/report-provenance.json`),manifest=await read(dir,'raw-artifact-manifest.json');\n assert.equal(RUN,'1792942371568-1e322224');assert.equal(report.runId,RUN);assertRootCleanup(await read(BASE,'formal11-root-independent-cleanup-v1.json'),RUN);assertPolicy(report.policy);assert.equal(report.attackResults.mode,'v2');\n const freezeName='capacity-native-chase-preference-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,19099);assert.equal(freezePin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');const frozen=await read(BASE,freezeName);\r\n assert.equal(frozen.driverSourceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');assert.equal(frozen.sourceSha256,'db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7');\r\n const metadata={};for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference']){assert.ok(frozen[key]&&typeof frozen[key]==='object');for(const value of[report,catalog.run,sidecar])assert.deepEqual(value[key],frozen[key],key);metadata[key]=frozen[key];}\r\n",
+          "to": " const dir=path.join(TOPIC,CHILD),rp=`${REALM}/reports/${RUN}.report.json`,report=await read(dir,rp),cleanup=await read(dir,`${REALM}/realm-cleanup.json`),catalogName='collect-formal-native-v2-attack-deadline-ladder-12-public-artifact-catalog.json',catalog=await read(dir,catalogName),provenance=await read(dir,'public-copy-provenance.json'),publicVerification=await read(dir,'public-verification.json'),collection=await read(dir,'collection-verification.json'),sidecar=await read(dir,`${REALM}/report-provenance.json`),manifest=await read(dir,'raw-artifact-manifest.json');\n assert.equal(RUN,'1792951023370-34757a8d');assert.equal(report.runId,RUN);assertRootCleanup(await read(BASE,'formal12-root-independent-cleanup-v1.json'),RUN);assertPolicy(report.policy);assert.equal(report.attackResults.mode,'v2');\n const freezeName='capacity-attack-deadline-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,6759);assert.equal(freezePin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');const frozen=await read(BASE,freezeName);\n assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');assert.equal(frozen.driverSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(frozen.backendSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(frozen.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');assert.equal(frozen.files.length,9);assert.equal(crypto.createHash('sha256').update(JSON.stringify(frozen.files)).digest('hex'),frozen.sourceSha256);\n const declarationBasisName='capacity-native-chase-preference-driver-frozen-v1.json',declarationBasisPin=await pin(BASE,declarationBasisName);assert.equal(declarationBasisPin.bytes,19099);assert.equal(declarationBasisPin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');assert.equal(frozen.priorFreeze.bytes,declarationBasisPin.bytes);assert.equal(frozen.priorFreeze.sha256,declarationBasisPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,declarationBasisName)));const declarationBasis=await read(BASE,declarationBasisName);\n const regressionName='attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,4758);assert.equal(regressionPin.sha256,'c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4');assert.equal(frozen.fullRegression.receipt.bytes,regressionPin.bytes);assert.equal(frozen.fullRegression.receipt.sha256,regressionPin.sha256);assert.ok(samePath(frozen.fullRegression.receipt.path,path.join(BASE,regressionName)));const regression=await read(BASE,regressionName);assert.equal(regression.exitCode,0);assert.equal(regression.signal,null);assert.equal(regression.sourcePinsUnchangedAfterRun,true);assert.deepEqual(regression.sourceBefore,regression.sourceAfter);assert.deepEqual(regression.sourceBefore.files,frozen.files);assert.equal(regression.sourceBefore.sourceSha256,frozen.sourceSha256);assert.deepEqual(regression.counts,{tests:210,pass:210,fail:0,cancelled:0,skipped:0,todo:0});assert.equal(frozen.fullRegression.finalSourceFullRegressionPerformed,true);assert.equal(frozen.fullRegression.sourcePinsUnchangedAfterRun,true);assert.equal(frozen.fullRegression.exactSourceSha256,frozen.sourceSha256);\n const metadata={};for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference']){assert.ok(declarationBasis[key]&&typeof declarationBasis[key]==='object');for(const value of[report,catalog.run,sidecar])assert.deepEqual(value[key],declarationBasis[key],key);metadata[key]=declarationBasis[key];}\n"
+        },
+        {
+          "beforeStartByte": 11812,
+          "afterStartByte": 13884,
+          "from": " const pins={nodeDriverEvidence:freezePin,report:await pin(dir,rp),realmCleanup:await pin(dir,`${REALM}/realm-cleanup.json`),rootCleanup:await pin(BASE,'formal11-root-independent-cleanup-v1.json'),reportProvenance:await pin(dir,`${REALM}/report-provenance.json`),catalog:await pin(dir,catalogName),publicCopy:await pin(dir,'public-copy-provenance.json'),publicVerification:await pin(dir,'public-verification.json'),collectionVerification:await pin(dir,'collection-verification.json')};\n",
+          "to": " const pins={nodeDriverEvidence:freezePin,report:await pin(dir,rp),realmCleanup:await pin(dir,`${REALM}/realm-cleanup.json`),rootCleanup:await pin(BASE,'formal12-root-independent-cleanup-v1.json'),reportProvenance:await pin(dir,`${REALM}/report-provenance.json`),catalog:await pin(dir,catalogName),publicCopy:await pin(dir,'public-copy-provenance.json'),publicVerification:await pin(dir,'public-verification.json'),collectionVerification:await pin(dir,'collection-verification.json')};\n"
+        },
+        {
+          "beforeStartByte": 12553,
+          "afterStartByte": 14625,
+          "from": " assert.equal(catalog.run.backendSourceCommit,'5c2e713863d3e9556a92f856b11df2396c73b137');assert.equal(catalog.run.driverSourceCommit,'5c2e713863d3e9556a92f856b11df2396c73b137');assert.equal(catalog.run.coreCodeEvidenceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');assert.equal(catalog.run.driverSourceSha256,'db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7');assert.equal(catalog.run.gatewaySha256,'d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756');assert.equal(catalog.run.backendInputCount,44);assert.equal(catalog.run.scene10Sha256,'a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba');assert.equal(catalog.run.scene100Sha256,'f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205');\n",
+          "to": " assert.equal(catalog.run.backendSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(catalog.run.driverSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(catalog.run.coreCodeEvidenceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(catalog.run.driverSourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');assert.equal(catalog.run.gatewaySha256,'1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318');assert.equal(catalog.run.backendInputCount,44);assert.equal(catalog.run.scene10Sha256,'a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba');assert.equal(catalog.run.scene100Sha256,'f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205');\n"
+        },
+        {
+          "beforeStartByte": 23118,
+          "afterStartByte": 25190,
+          "from": " const source=await read(dir,`${REALM}/source-pins.json`);assert.equal(crypto.createHash('sha256').update(JSON.stringify(source.files)).digest('hex'),source.sourceConfigSha256);assert.equal(source.sourceConfigSha256,'edab91a9dd170c19c601ea6c260480657a85f51a7929d09f7a6df7208b6343dd');\n",
+          "to": " const source=await read(dir,`${REALM}/source-pins.json`);assert.equal(crypto.createHash('sha256').update(JSON.stringify(source.files)).digest('hex'),source.sourceConfigSha256);assert.equal(source.sourceConfigSha256,'0e8cd1d740ac7705aae678ebb5edabc274e2957562754455fdb5182ba5c72336');\n"
+        },
+        {
+          "beforeStartByte": 23599,
+          "afterStartByte": 25671,
+          "from": " const launcher=await read(dir,`${REALM}/launcher-source-frozen-v1.json`);assert.equal(launcher.files.length,79);assert.deepEqual(await pin(dir,`${REALM}/launcher-source-frozen-v1.json`),{path:`${REALM}/launcher-source-frozen-v1.json`,bytes:35724,sha256:'7e78691a3dcb22fdb053e3b028cadeb0aef1b03c7af06f31981e2cd58c09b048'});assert.equal(crypto.createHash('sha256').update(JSON.stringify(launcher.files)).digest('hex'),launcher.sourceSha256);assert.equal(launcher.sourceSha256,'e82cfbdc8b5bf9c240b343d2c04b6a99d7fa90b9377056df7a8430d5f56da4df');\n",
+          "to": " const launcher=await read(dir,`${REALM}/launcher-source-frozen-v1.json`);assert.equal(launcher.files.length,108);assert.deepEqual(await pin(dir,`${REALM}/launcher-source-frozen-v1.json`),{path:`${REALM}/launcher-source-frozen-v1.json`,bytes:43855,sha256:'5e7aff7fe51751094bcd6c699c32ec8986bd80b8212561e0edb5811e5060face'});assert.equal(crypto.createHash('sha256').update(JSON.stringify(launcher.files)).digest('hex'),launcher.sourceSha256);assert.equal(launcher.sourceSha256,'50fd3d8fdf5524af43e1aa57920c879836010c39d998f227d22710e349169a1d');\n"
+        },
+        {
+          "beforeStartByte": 25492,
+          "afterStartByte": 27565,
+          "from": " const result={schemaVersion:1,verifierRevision:2,verifiedAt:new Date().toISOString(),runId:RUN,independentVerificationPassed:true,formalRunPassed:formalPassed,capacityAccepted,rawVerifierAccepted,formalPreconditionOnly:false,rootP0AcceptanceAdjudicated:false,productionAccepted:false,pins,identities:{backendSourceCommit:catalog.run.backendSourceCommit,backendInputs:44,gatewaySha256:catalog.run.gatewaySha256,driverSourceCommit:catalog.run.driverSourceCommit,coreCodeEvidenceCommit:catalog.run.coreCodeEvidenceCommit,driverSourceSha256:catalog.run.driverSourceSha256,scene10Sha256:catalog.run.scene10Sha256,scene100Sha256:catalog.run.scene100Sha256,sceneSourceSha256:catalog.run.sceneSourceSha256,sourceConfigSha256:source.sourceConfigSha256},phaseChecks,metadata,wireDiagnostics,telemetryDeltas,replayedMemory,memoryReplayRule:\"Original bounded1201x3s monitor history atsoakend; report memory suffix arithmetic replayed exactly, initialMemoryAt cutoff not recorded; originalminimum1800s and32MiB/hr retained.\",rawResumeReportExact:true,continuous:{rawWindows:continuousChecks.length,failureCount:continuousFailureCount,windows:continuousChecks},cleanup:{allSevenTrue:true,gatewayExit0:true,monitorExit0:true,rootIndependentCleanupSchemaChecked:true,rootCleanupSha256:pins.rootCleanup.sha256},monitor:{rawStreamValidated:true,standaloneHistorySHA:pins.monitor.sha256,complete:streamed.monitorSummary.complete,noStops:streamed.monitorSummary.stoppedCount===0,invalidCount:streamed.monitorSummary.invalidCount,maxGapMs:streamed.monitorSummary.maxGapMs,phaseBrackets:streamed.monitorSummary.phaseBrackets},hp:hpProof.summary(),raw:{rows,bytes:pins.raw.bytes,sha256:pins.raw.sha256,typeCounts,wholeRunCorrectedMovementActions:correctionTotal,correctedActions:corrections,correctedActionsTruncated:correctionTotal>corrections.length},publicCopiesVerified:copies,reportOk:report.ok,originalVerdictPreserved:true,notes:['Every completed2/10/25/50/100 stage requires5 actual complete>=60s windows;7200s soak120;60s post-resume1, total146. Failed and partial phases are never promoted.','Complete original raw and report bytes are SHA-bound; previous failure packages and current originals are never changed.','Raw actor counters and measured-window metric status counts are independently replayed. Frozen verifier additionally validates monitorhistograms and status/projection consistency.','The packettrace is diagnostic and not a new source of damage credit. A future positive probe still needs every original driver two-endpoint900ms evidence gate.','Archive recordings are hash-bound by the frozen collector/public verifier; this tool does not parse recording payloads.','This independent result applies only to the original formal profile and its actual pass/failure. Root separately adjudicates P0, proposedserverSLOs andproductionacceptance; no automaticP2authorization.'],privateDataRead:false,sourceOrSceneChanged:false,previousFailedEvidenceChanged:false};\n",
+          "to": " const result={schemaVersion:1,verifierRevision:2,verifiedAt:new Date().toISOString(),runId:RUN,independentVerificationPassed:true,formalRunPassed:formalPassed,capacityAccepted,rawVerifierAccepted,formalPreconditionOnly:false,rootP0AcceptanceAdjudicated:false,productionAccepted:false,pins,identities:{backendSourceCommit:catalog.run.backendSourceCommit,backendInputs:44,gatewaySha256:catalog.run.gatewaySha256,driverSourceCommit:catalog.run.driverSourceCommit,coreCodeEvidenceCommit:catalog.run.coreCodeEvidenceCommit,driverSourceSha256:catalog.run.driverSourceSha256,scene10Sha256:catalog.run.scene10Sha256,scene100Sha256:catalog.run.scene100Sha256,sceneSourceSha256:catalog.run.sceneSourceSha256,sourceConfigSha256:source.sourceConfigSha256},phaseChecks,metadata,driverDeclarationEvidence:{currentFreeze:freezePin,historicalDeclarationBasis:declarationBasisPin,actualFull210Regression:regressionPin,onlySixHistoricalDeclarationsReused:true,currentNineSourceIdentity:frozen.sourceSha256},wireDiagnostics,telemetryDeltas,replayedMemory,memoryReplayRule:\"Original bounded1201x3s monitor history atsoakend; report memory suffix arithmetic replayed exactly, initialMemoryAt cutoff not recorded; originalminimum1800s and32MiB/hr retained.\",rawResumeReportExact:true,continuous:{rawWindows:continuousChecks.length,failureCount:continuousFailureCount,windows:continuousChecks},cleanup:{allSevenTrue:true,gatewayExit0:true,monitorExit0:true,rootIndependentCleanupSchemaChecked:true,rootCleanupSha256:pins.rootCleanup.sha256},monitor:{rawStreamValidated:true,standaloneHistorySHA:pins.monitor.sha256,complete:streamed.monitorSummary.complete,noStops:streamed.monitorSummary.stoppedCount===0,invalidCount:streamed.monitorSummary.invalidCount,maxGapMs:streamed.monitorSummary.maxGapMs,phaseBrackets:streamed.monitorSummary.phaseBrackets},hp:hpProof.summary(),raw:{rows,bytes:pins.raw.bytes,sha256:pins.raw.sha256,typeCounts,wholeRunCorrectedMovementActions:correctionTotal,correctedActions:corrections,correctedActionsTruncated:correctionTotal>corrections.length},publicCopiesVerified:copies,reportOk:report.ok,originalVerdictPreserved:true,notes:['Every completed2/10/25/50/100 stage requires5 actual complete>=60s windows;7200s soak120;60s post-resume1, total146. Failed and partial phases are never promoted.','Complete original raw and report bytes are SHA-bound; previous failure packages and current originals are never changed.','Raw actor counters and measured-window metric status counts are independently replayed. Frozen verifier additionally validates monitorhistograms and status/projection consistency.','The packettrace is diagnostic and not a new source of damage credit. A future positive probe still needs every original driver two-endpoint900ms evidence gate.','Archive recordings are hash-bound by the frozen collector/public verifier; this tool does not parse recording payloads.','This independent result applies only to the original formal profile and its actual pass/failure. Root separately adjudicates P0, proposedserverSLOs andproductionacceptance; no automaticP2authorization.'],privateDataRead:false,sourceOrSceneChanged:false,previousFailedEvidenceChanged:false};\n"
+        }
+      ],
+      "exactForwardVerified": true,
+      "exactInverseVerified": true
+    },
+    {
+      "from": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      "to": {
+        "path": "formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "10be94d3fc062f442caa9b46f00f4d5eebaeafd0200f39273a2a1881a19e3361"
+      },
+      "hunks": [
+        {
+          "beforeStartByte": 615,
+          "afterStartByte": 615,
+          "from": "export function parseFormalInvocation(args){if(args.length===1&&args[0]==='--self-check')return{selfCheck:true,runId:null};assert.ok(args.length===2&&args[0]==='--verify-ended-formal11'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[1]),'Explicit ended-formal11 flag and originalrunID required');return{selfCheck:false,runId:args[1].slice(6)};}\n",
+          "to": "export function parseFormalInvocation(args){if(args.length===1&&args[0]==='--self-check')return{selfCheck:true,runId:null};assert.ok(args.length===2&&args[0]==='--verify-ended-formal12'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[1]),'Explicit ended-formal12 flag and originalrunID required');return{selfCheck:false,runId:args[1].slice(6)};}\n"
+        },
+        {
+          "beforeStartByte": 5571,
+          "afterStartByte": 5571,
+          "from": "export function assertRootCleanup(value,runId){assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.equal(value.gatewayPid,58172);assert.equal(value.monitorPid,69080);assert.equal(value.processesAbsent,true);assert.equal(value.portsFree,true);assert.equal(value.readOnlyIndependentCheck,true);assert.equal(value.capacityAccepted,false);assert.deepEqual(value.processes,[]);assert.deepEqual(value.listeningPorts,[]);assert.ok(typeof value.verifiedAt==='string'&&Number.isFinite(Date.parse(value.verifiedAt)));}\n",
+          "to": "export function assertRootCleanup(value,runId){assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.equal(value.gatewayPid,68516);assert.equal(value.monitorPid,64004);assert.equal(value.processesAbsent,true);assert.equal(value.portsFree,true);assert.equal(value.readOnlyIndependentCheck,true);assert.equal(value.capacityAccepted,false);assert.deepEqual(value.processes,[]);assert.deepEqual(value.listeningPorts,[]);assert.ok(typeof value.verifiedAt==='string'&&Number.isFinite(Date.parse(value.verifiedAt)));}\n"
+        }
+      ],
+      "exactForwardVerified": true,
+      "exactInverseVerified": true
+    },
+    {
+      "from": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "to": {
+        "path": "hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "hunks": [],
+      "exactForwardVerified": true,
+      "exactInverseVerified": true
+    },
+    {
+      "from": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "to": {
+        "path": "expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "hunks": [],
+      "exactForwardVerified": true,
+      "exactInverseVerified": true
+    },
+    {
+      "from": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      "to": {
+        "path": "run-ended-formal12-v1.mjs",
+        "bytes": 2259,
+        "sha256": "9412fe9f12c8433677b81494a984333f8a1248860c7844e6222b8dce6e3ee728"
+      },
+      "hunks": [
+        {
+          "beforeStartByte": 238,
+          "afterStartByte": 238,
+          "from": "const ROOT=import.meta.dirname,args=process.argv.slice(2),hash=b=>crypto.createHash('sha256').update(b).digest('hex');assert.ok(args.length===3&&/^--seal-sha256=[a-f0-9]{64}$/.test(args[0])&&args[1]==='--verify-ended-formal11'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[2]));const sealBytes=fs.readFileSync(ROOT+'/tool-source-frozen-v1.json');assert.equal(hash(sealBytes),args[0].slice(14));const seal=JSON.parse(sealBytes);function check(){for(const p of seal.files){assert.ok(typeof p.path==='string'&&!path.isAbsolute(p.path)&&!p.path.split(/[\\\\/]/).some(s=>s==='..'||s==='private'));const f=ROOT+'/'+p.path,s=fs.lstatSync(f);assert.ok(s.isFile()&&!s.isSymbolicLink());assert.equal(fs.realpathSync(f).toLowerCase(),path.resolve(f).toLowerCase());const b=fs.readFileSync(f);assert.equal(b.length,p.bytes);assert.equal(hash(b),p.sha256);}return seal.files.length;}const checkedInputs=check(),startedAt=new Date().toISOString(),r=spawnSync(process.execPath,[ROOT+'/verify-ended-formal11-v1.mjs',...args.slice(1)],{encoding:'utf8',timeout:3600000,maxBuffer:1024*1024}),log=(r.stdout??'')+(r.stderr??'');fs.writeFileSync(ROOT+'/actual-verification.log',log,{flag:'wx'});check();const exists=fs.existsSync(ROOT+'/final-verification.json'),b=exists?fs.readFileSync(ROOT+'/final-verification.json'):null,receipt={schemaVersion:1,startedAt,endedAt:new Date().toISOString(),runId:args[2].slice(6),exitCode:r.status,signal:r.signal??null,checkedInputs,sourceBeforeAfterIdentical:true,seal:{path:'tool-source-frozen-v1.json',bytes:sealBytes.length,sha256:hash(sealBytes)},log:{path:'actual-verification.log',bytes:Buffer.byteLength(log),sha256:hash(log)},finalVerification:b?{path:'final-verification.json',bytes:b.length,sha256:hash(b)}:null,actualVerificationExitedSuccessfully:r.status===0,originalGameVerdictChanged:false};fs.writeFileSync(ROOT+'/actual-verification-execution-receipt-v1.json',JSON.stringify(receipt,null,2)+'\\n',{flag:'wx'});console.log(JSON.stringify(receipt));if(r.status!==0)process.exitCode=r.status??1;\n",
+          "to": "const ROOT=import.meta.dirname,args=process.argv.slice(2),hash=b=>crypto.createHash('sha256').update(b).digest('hex');assert.ok(args.length===3&&/^--seal-sha256=[a-f0-9]{64}$/.test(args[0])&&args[1]==='--verify-ended-formal12'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[2]));const sealBytes=fs.readFileSync(ROOT+'/tool-source-frozen-v1.json');assert.equal(hash(sealBytes),args[0].slice(14));const seal=JSON.parse(sealBytes);function check(){for(const p of seal.files){assert.ok(typeof p.path==='string'&&!path.isAbsolute(p.path)&&!p.path.split(/[\\\\/]/).some(s=>s==='..'||s==='private'));const f=ROOT+'/'+p.path,s=fs.lstatSync(f);assert.ok(s.isFile()&&!s.isSymbolicLink());assert.equal(fs.realpathSync(f).toLowerCase(),path.resolve(f).toLowerCase());const b=fs.readFileSync(f);assert.equal(b.length,p.bytes);assert.equal(hash(b),p.sha256);}return seal.files.length;}const checkedInputs=check(),startedAt=new Date().toISOString(),r=spawnSync(process.execPath,[ROOT+'/verify-ended-formal12-v1.mjs',...args.slice(1)],{encoding:'utf8',timeout:3600000,maxBuffer:1024*1024}),log=(r.stdout??'')+(r.stderr??'');fs.writeFileSync(ROOT+'/actual-verification.log',log,{flag:'wx'});check();const exists=fs.existsSync(ROOT+'/final-verification.json'),b=exists?fs.readFileSync(ROOT+'/final-verification.json'):null,receipt={schemaVersion:1,startedAt,endedAt:new Date().toISOString(),runId:args[2].slice(6),exitCode:r.status,signal:r.signal??null,checkedInputs,sourceBeforeAfterIdentical:true,seal:{path:'tool-source-frozen-v1.json',bytes:sealBytes.length,sha256:hash(sealBytes)},log:{path:'actual-verification.log',bytes:Buffer.byteLength(log),sha256:hash(log)},finalVerification:b?{path:'final-verification.json',bytes:b.length,sha256:hash(b)}:null,actualVerificationExitedSuccessfully:r.status===0,originalGameVerdictChanged:false};fs.writeFileSync(ROOT+'/actual-verification-execution-receipt-v1.json',JSON.stringify(receipt,null,2)+'\\n',{flag:'wx'});console.log(JSON.stringify(receipt));if(r.status!==0)process.exitCode=r.status??1;\n"
+        }
+      ],
+      "exactForwardVerified": true,
+      "exactInverseVerified": true
+    },
+    {
+      "from": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "to": {
+        "path": "seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "hunks": [],
+      "exactForwardVerified": true,
+      "exactInverseVerified": true
+    }
+  ],
+  "currentFreezeAdaptationReusedFrom": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe16-independent-verification-v1/verify-ended-probe16-v1.mjs",
+    "bytes": 30334,
+    "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+  },
+  "unchangedRawFiles": [
+    "hp-proof-contract-v2.mjs",
+    "expected-formal-policy-v1.json",
+    "seal-tool-source-v1.mjs"
+  ],
+  "acceptanceEvaluatorBodyOtherwiseUnchanged": true,
+  "fullPassRequiresOriginalSevenPhasesAnd146TrueWindows": true,
+  "partialFailureNotPromoted": true,
+  "actualClosedRawRead": false,
+  "actualVerificationExecuted": false,
+  "toolSealed": false,
+  "sourceOrSceneChanged": false
+}

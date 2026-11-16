@@ -1,0 +1,97 @@
+{
+  "schema": "mir2.native-transfer-diagnostic-before.v1",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "workflowRunId": "41093332871",
+  "diagnosticDatabase": "mir2_promotion_windows_acceptance_d1868ef2d2b2",
+  "failedAppliedCloneDatabase": "mir2_promotion_windows_acceptance_868ef2d2b24d",
+  "passed": true,
+  "originalBackupSha256": "b501df69eaf6273b0488f8ea8023300ddb5d1c455cd4d4b4585e4f638a4c16b1",
+  "exactRestoreRetention": true,
+  "migratedBaselineMatchesFailedCloneBefore": true,
+  "allOriginalMigrationRowsPreserved": true,
+  "newMigrationMetadataOnlyAllowedField": "applied_at",
+  "newMigrationVersion": "0024_sui_usdc_native_transfer_authority",
+  "audit": {
+    "accounts": 125,
+    "accountsSeeded": 0,
+    "allPersistedFieldsRetained": true,
+    "characterSaves": 38,
+    "characters": 38,
+    "cloneOnly": true,
+    "expectedMigrations": 27,
+    "financialRowsWritten": 0,
+    "migrationsAppliedTwice": true,
+    "originalRowsPreserved": true,
+    "originalRowsSha256": "76b4bd5220d96317aee96025638a65b7610150a0c6653c48683210a5963fac61",
+    "typedRowsWithEmptyDefaultNormalization": 0,
+    "walletProofHttpReplayRequired": true
+  },
+  "targetGuard": {
+    "immutableOrderTermsPreserved": true,
+    "existingFieldsPreserved": true,
+    "exactCreditDelta": true,
+    "credits": 100
+  },
+  "extraChangedTables": [
+    "character_items",
+    "character_state"
+  ],
+  "targetProjection": {
+    "stateAllowedFields": [
+      "credit",
+      "save_version",
+      "updated_at",
+      "updated_at_ms"
+    ],
+    "creditDelta": 100,
+    "saveVersionDelta": 3,
+    "saveVersionMatchesAuthoritative": true,
+    "itemsCount": 4,
+    "itemsAllowedFields": [
+      "updated_at_ms"
+    ],
+    "itemsAllBusinessAndUnknownFieldsPreserved": true,
+    "allProjectionTimesMonotonicAndNotFuture": true,
+    "itemTimesMatchSameStateTransaction": true
+  },
+  "nonTargetProjectionRows": {
+    "character_state": {
+      "count": 37,
+      "sha256": "ff69c2a748b9cbd4c33487893253d1bf41d052f9b0adcff2da49e5ab15bad1a4"
+    },
+    "character_items": {
+      "count": 219,
+      "sha256": "255fd44b571ee35b8073a498c57ed7420d444eae60bc99b7664c8cf2bf7f59ab"
+    }
+  },
+  "emptyTargetViews": {
+    "character_mail": {
+      "before": 0,
+      "after": 0
+    },
+    "character_npc_state": {
+      "before": 0,
+      "after": 0
+    },
+    "auction_listings": {
+      "before": 0,
+      "after": 0
+    }
+  },
+  "allOtherNonTargetRowsPreserved": true,
+  "allOtherNonTargetRowsSha256": "ca17d9367d4e8c82811616177d7bf5c00bad9a02a6342a0778a1ca98faf1220b",
+  "beforeDatasetSha256": "5b192e2c94a3a3e9a1072d639f21c0c3717c73ffea2e9429d942b1c7b14720c3",
+  "afterDatasetSha256": "9f30c82d53605996b273864313a00f82496018ea756a95e328c1e7623efd6cdf",
+  "originalServicesChanged": false,
+  "appliedCloneStateChanged": false,
+  "operatorInvoked": false,
+  "gatewayRedisNodeOrIssuerStarted": false,
+  "externalTransactionOrRPCPerformed": false,
+  "observedAtUtc": "2026-10-30T17:45:24.666243+00:00",
+  "verificationMode": "existing-diagnostic-select-only",
+  "restoreAndAuditCompletedBeforeThisInvocation": true,
+  "typedAuditInvokedThisInvocation": false,
+  "previousExactSourceAuditBoundByCurrentPostgresRetentionSha256": "8316ab946ad74bb2ed454997bfddfbf6d762f57b5761c9b2aed6246bd73bbdf4",
+  "crossLanguageSerializedSnapshotHashNotUsed": true,
+  "originalMigrationRowsMatchExportedSnapshot": true
+}

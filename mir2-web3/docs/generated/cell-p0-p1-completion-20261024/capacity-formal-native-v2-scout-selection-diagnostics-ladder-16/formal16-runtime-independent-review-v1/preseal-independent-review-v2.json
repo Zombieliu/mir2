@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T02:26:40.131Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\runtime-prepared-v2.json",
+    "bytes": 54142,
+    "sha256": "c6340f21e49879896db88e59c2fe1c109dedd59eb955021ea621f99f0775ce7f"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-seal-and-guard-v1.mjs",
+    "bytes": 16525,
+    "sha256": "f9a7c26ccde23894bcca03213fdef587df323d4243c867db2eb72a3e9ddc7186"
+  },
+  "evidence": {
+    "controllerPreparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-controller-preparation-v1.json",
+      "bytes": 1562,
+      "sha256": "d507274488465d48f970e44a7a859faabd811351edfb6692c595347f007da36b"
+    },
+    "combinedAuthoringProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\template-derivation-v1.json",
+      "bytes": 99163,
+      "sha256": "00a9c3406c961b6f79b0f646985db9124fb831201251b04f1c9f3a65b73a71ff"
+    },
+    "actualBindingProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\actual20-binding-proof-v2.json",
+      "bytes": 6501,
+      "sha256": "171d828d0502ae11c9f6beeef0c14dba53b2337fe22bb102432b7a1a487e90fb"
+    },
+    "boundFormalBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\bound-formal16-binding-v1.json",
+      "bytes": 14871,
+      "sha256": "731fb797fa4a902b7d62271f4bd6915810e241811b8c21d5ad2325ff643ffdaf"
+    },
+    "actualProbe20Completion": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-actual-independent-completion-v1.json",
+      "bytes": 3783,
+      "sha256": "d61feacbb33e31403d37c2286ea32274fbfff6c29e6277f5685ceec6402d665e"
+    }
+  },
+  "sourceClosure": {
+    "localPinsChecked": 52,
+    "externalStablePinsChecked": 71,
+    "currentRawPinsMatched": 123,
+    "localAggregate": "eba0647aade264093d8cb6f41fd596ebce4af53e520b6fc5b22c18ddc0b8fb09",
+    "externalAggregate": "641ba051c97feb6058e070f2945ffd096f4c325974c85a8081669ad66c714a73",
+    "allRegularCanonicalWithinBase": true,
+    "noRawMonitorTracePrivateOrBinaryInputIncluded": true,
+    "currentPreparedUnionBeforeFutureReviewAndGenerated": 124,
+    "futureIndependentReviewInputs": 1,
+    "futureGeneratedPreparationInputs": 3,
+    "expectedFinalUniqueSourceCount": 128,
+    "sourceInputLimit": 128,
+    "controllerSupportAlreadyPresentAndDeduplicated": true
+  },
+  "checks": {
+    "combinedOriginalProofUtf8BytePinsMatched": true,
+    "authoringRowsForwardAndInverseExact": 39,
+    "exactLineHunks": 86,
+    "globalIdentityReplacementRules": 6,
+    "rawCopyRows": 23,
+    "mechanicalActiveExecutableRowsCurrentExact": 31,
+    "remainingLazyOriginalLocationEvidenceBridgeReadAndPinned": true,
+    "allThirtyMjsAndTwoPsSourcesCovered": true,
+    "metadataBeforeImagesRawPinsMatched": 5,
+    "metadataChangedUnionKeysMatchDeclaredAllowlist": true,
+    "jsonReserializationNotMisrepresentedAsRawInverse": true,
+    "originalFormalPolicySemanticExact": true,
+    "originalResourceProfileAndOneHundredSceneRawExact": true,
+    "original146WindowAndMeasuredPhaseAndHpSchemaBodiesRawExact": true,
+    "originalFive300StagesAnd7200SoakResume5Save5Post60Preserved": true,
+    "original18Launch12Hit900msAndOtherGameGatesNotWeakened": true,
+    "backendBuildC743FiftyAndImmutableDae1Retained": true,
+    "currentDriverExecutionK232AndSixOrdinary343Separate": true,
+    "historicalJ226H219D210Wire187NotCurrentCoverage": true,
+    "actualProbe20SuccessAndCompleteFiveFiveSixBound": true,
+    "allActualElevenEndedSourcePinsMappedInOrder": true,
+    "actualEndedSealExecutorLogAndFinalPinsMatched": true,
+    "actualPrepared201AndAdmitted206SourceAggregatesDistinct": true,
+    "rootOs17500And17510AndSevenCleanupChecksBound": true,
+    "canonicalGeometryProofOriginalRoot20FilePinnedAndIncluded": true,
+    "formalSceneModuleOriginal20RawExactAndStrictAggregateEqualityRetained": true,
+    "newScoutAppendixOnlyPinnedAsDiagnosticNotGameAnd": true,
+    "storeSeparateDatasetNotGameAnd": true,
+    "controllerProjectArgumentAndReleasePinPreflightCorrect": true,
+    "noOwnSourceFreezeRequiredBeforeSeal": true,
+    "dynamicExplicitPreparedAndReviewNoHashCycle": true,
+    "reviewPinSchemaExactAndWxModesSeparated": true,
+    "syntaxFactsThirtyTwoActualZeroConsumedWithoutRerun": true,
+    "fifteenRuntimeGeneratedStatesAbsentAtReview": true
+  },
+  "limitations": [
+    "Read-only source, exact text transformation and bounded metadata review. No target import, guard, source capture, mode, account registration, service, behavioral test, raw/monitor/recording/trace or binary read was executed here.",
+    "The original soft resource profile is not a hard quota or host capacity certificate. Formal50/100 and7200-second behavior remain unexecuted by this preparation.",
+    "Actual Probe20 and K ordinary full16 are prerequisites only. Independent per-request900ms packet replay, HP dose proof, capacity/P0/production acceptance or P2 permission is not added.",
+    "Historical PENDING files and producer facts remain unchanged; actual binding is supplied separately by the pinned new bound-formal16 object."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "sourceModeExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

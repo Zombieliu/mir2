@@ -1,0 +1,6 @@
+{
+  "startedAtUtc": "2026-10-28T12:55:13.7031733Z",
+  "finishedAtUtc": "2026-10-28T12:55:21.4214380Z",
+  "command": "cargo +1.95.0 test --locked --offline --manifest-path packages/protocol/Cargo.toml procurement --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "exitCode": 0
+}

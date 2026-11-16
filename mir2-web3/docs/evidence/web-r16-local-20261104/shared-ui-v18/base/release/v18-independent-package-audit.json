@@ -1,0 +1,223 @@
+{
+  "schema": "mir2.web-r16-independent-package-audit/1",
+  "passed": true,
+  "startedAt": "2026-11-06T00:10:25.261Z",
+  "finishedAt": "2026-11-06T00:10:29.112Z",
+  "artifactRoot": "F:/mir2-builds/Numeron-Web-R16-20261104-v18",
+  "previousRoot": "F:/mir2-builds/Numeron-Web-R16-20261104",
+  "buildId": "-WCOg-GmVTGJ9mSZugKL0",
+  "scope": "Read-only staging package verification; no launch, install or player actions.",
+  "manifest": {
+    "sha256": "5ea5d4fe9e120c1a1f6e71539c54e5f0648e8609c6797843db6c2bf0ebb9a3db",
+    "bytes": 7376087,
+    "checkedFiles": 31911,
+    "checkedBytes": 929004105,
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "completeOnDiskSet": true,
+    "checkedDirectories": 994,
+    "unchangedDuringAudit": true
+  },
+  "comparison": {
+    "v17ManifestSha256": "6b6f751bb330a6eaf29e60013539baf03917f48c13f0f08bcca39b4be6fea770",
+    "unchanged": 31792,
+    "changed": 109,
+    "added": 10,
+    "removed": 10,
+    "allDeltaWithinNextRendererAndIsolatedGateway": true,
+    "externalRuntimeFilesUnchangedExceptGateway": 164,
+    "soleExternalDelta": {
+      "path": "bin/mir2-gateway.exe",
+      "kind": "gateway",
+      "bytes": 143645696,
+      "sha256": "7fe8beb407429d3bee04f98d099d659144abe6f680cb08994bb99db59decc4c5"
+    },
+    "deltaSha256": "059d70a4b4280eece48932e7cf0f2b84d2d6ff41f4de4838d06e1895b1f4ef85"
+  },
+  "privateBoundary": {
+    "stagingPrivateEmpty": true,
+    "stagingPrivateFiles": 0,
+    "privateFileBodiesRead": 0,
+    "livePrivateDirectoriesRead": 0,
+    "knownSecretPatternsMatched": 0,
+    "textFilesScanned": 2694
+  },
+  "finiteAssets": {
+    "sha256": "4c6837f63275261d78340213c51ebd6e9a03f3b020bdabd4108bb55e7953adb3",
+    "files": 23286,
+    "bytes": 285908524,
+    "allPinsEqualV17": true,
+    "localAssetBudgetUnchanged": true
+  },
+  "coreBundles": {
+    "allEqualV17": true,
+    "bundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web_bg.wasm",
+            "bytes": 250136,
+            "sha256": "c8f6c8e30166807aadab41321efdcb9bc86e13a657ffa14b5adf6889f6913bc0"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          }
+        ]
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web_bg.wasm",
+            "bytes": 261983,
+            "sha256": "a65ce72e278cbb31999922dafe629c0b1c57ce0e9be3bc8c859de7012798e0da"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web.js",
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          }
+        ]
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web_bg.wasm",
+            "bytes": 165791,
+            "sha256": "cdf685efc345dc45b389463947a1685c9632888e85f062d3fe14dba4f0c973dc"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web.js",
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "version": "bevy-a46905128c316656",
+    "immutableVersionDigestVerified": true,
+    "aliasAndSavedManifestExact": true,
+    "originalBudgets": {
+      "wasmBytes": 32505856,
+      "gzipBytes": 7340032,
+      "jsBytes": 204800
+    },
+    "gzipLevel": 6,
+    "packages": [
+      {
+        "id": "webgpu",
+        "wasmBytes": 31237649,
+        "gzipBytes": 6530493,
+        "jsBytes": 141118,
+        "wasmSha256": "2ae03a75e72d96412dc25fbbe054c9405bcedc8ce020dbfc06d0aaa3adee249d",
+        "jsSha256": "10216eafd2ddcdeb0dab62c1b4dc5b0b4896eb1ebf8b8add06985f4e817ecb58",
+        "sameWasm": false,
+        "sameJs": true,
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "unchangedV17AbiReused": false,
+        "importCount": 491,
+        "exportCount": 151,
+        "exactImportMetadata": true,
+        "exactExportMetadata": true,
+        "allV17ExportsPreserved": true,
+        "glueContainsAllFunctionImports": true,
+        "abiSha256": "6f1ed4ee20edc75d3a883dc4f973b0c57a29b7bd3548907a6c2b6dbddf1410fd"
+      },
+      {
+        "id": "webgl2",
+        "wasmBytes": 16402208,
+        "gzipBytes": 4213570,
+        "jsBytes": 117176,
+        "wasmSha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+        "jsSha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+        "sameWasm": true,
+        "sameJs": true,
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false,
+        "unchangedV17AbiReused": true,
+        "importCount": 445,
+        "exportCount": 79
+      },
+      {
+        "id": "webgl2-shared",
+        "wasmBytes": 32166227,
+        "gzipBytes": 6874702,
+        "jsBytes": 139092,
+        "wasmSha256": "c591c3ef00c758ed7915e4f9490540baf8d531e49dc481831ef8caa1ac28caf2",
+        "jsSha256": "792e256c91e98eae6d07fe53e79f2fc1adf622ffa1a29ef90bb97fb109feb0b3",
+        "sameWasm": false,
+        "sameJs": true,
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true,
+        "unchangedV17AbiReused": false,
+        "importCount": 450,
+        "exportCount": 149,
+        "exactImportMetadata": true,
+        "exactExportMetadata": true,
+        "allV17ExportsPreserved": true,
+        "glueContainsAllFunctionImports": true,
+        "abiSha256": "af6e96773ae50f98815d31ff389e45744d6a44c12885d1bb087d6e88e34d0a3d"
+      }
+    ],
+    "wasmModulesCompiledOnlyForAbiInspection": 4,
+    "wasmInstantiations": 0
+  },
+  "gatewayBuildBinding": {
+    "passed": true,
+    "ordinaryDefault": "ws://127.0.0.1:19040/ws",
+    "packagerGuard": "assertPreparedNextGateway",
+    "standaloneAndRequiredConfigExactExceptDistDir": true,
+    "compiledClient": {
+      "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-6fedab54dd63f767.js",
+      "sha256": "5db045a378b2c95571d9139d896898c613e1d8b7120814c7335c5af9ad21a6a6",
+      "constant": "f9",
+      "resolver": "du",
+      "consumer": "new WebSocket(a)",
+      "controlFlowRegionByteIdenticalToSealedV17": true,
+      "regionSha256": "ff2c1eb01d4771de21903699932b143433c89f076bd40a90a01eeebfe2f7e8c1",
+      "queryOrPromotionOverrideUsed": false
+    },
+    "compiledRendererLiteralExact": true,
+    "compiledCoreManifestEqualV17": true,
+    "executedNextModule": false
+  },
+  "thinGate": {
+    "passed": false,
+    "preparedBytes": 691022284,
+    "limitBytes": 377487360,
+    "limitUnchanged": true,
+    "distinctFromFiniteAssetBudget": true
+  },
+  "thin360MiBGatePassed": false,
+  "operations": {
+    "artifactChanged": false,
+    "sourceChanged": false,
+    "privateRead": false,
+    "servicesStartedOrStopped": false,
+    "networkRequests": 0,
+    "webSocketSessions": 0,
+    "browserSessions": 0,
+    "gameActions": 0,
+    "modelCalls": 0
+  },
+  "failures": [],
+  "limitations": [
+    "Package verification does not establish playable UI, save preservation during cutover, or human acceptance.",
+    "The finite assets are unchanged from v17. The separate 360 MiB thin package gate still fails.",
+    "Gateway binary exact pin establishes package inclusion of the isolated build, not reconstruction of the old binary source."
+  ]
+}

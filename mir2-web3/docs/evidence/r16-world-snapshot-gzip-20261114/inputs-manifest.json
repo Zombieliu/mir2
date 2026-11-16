@@ -1,0 +1,45 @@
+{
+  "privateRawLogDigests": [
+    {
+      "label": "source-snapshot-r5.json",
+      "bytes": 13349,
+      "sha256": "3282dab684009b3ed4d70ec9c67cb67dc485f8a16d486285c430a91bfbd31dfe"
+    },
+    {
+      "label": "gateway-adjacent-r4.log",
+      "bytes": 71070,
+      "sha256": "3a65bba540fdc8432ed5ad1cbd92acc0a01c49bde5e468047f317e07b0ba5689"
+    },
+    {
+      "label": "protocol-all-r2.log",
+      "bytes": 8847,
+      "sha256": "b4140f146efe11081af3b0de94cca3c379ffe37cd4220b30535dd2fb3437f641"
+    },
+    {
+      "label": "web-core-adjacent-r2.log",
+      "bytes": 14605,
+      "sha256": "3266b1598c36a82f708ba6e5e664f42c945d70584bac7e61501816576b655d48"
+    },
+    {
+      "label": "client-core-build-r2.log",
+      "bytes": 7559,
+      "sha256": "b5d5079bc55c7ff32ba5c00c53373f617613acc203859a10a34634d23a959e5f"
+    },
+    {
+      "label": "next-build-r1.log",
+      "bytes": 709,
+      "sha256": "575b3e5e8bfc37387d963abf0004479a216b5d3a3855e8236d15edfb2a3c4e90"
+    },
+    {
+      "label": "next-build-r2.log",
+      "bytes": 2497,
+      "sha256": "141640e61e7e9d83f20cb56e4f1b7e7ae4966fd8e3f296aaf98e1310e370ac1a"
+    },
+    {
+      "label": "gateway-debug-build-r1.log",
+      "bytes": 61829,
+      "sha256": "09cc62452f716e26142dd458a45c77e987f94110963fc494271b2fda72ec4f12"
+    }
+  ],
+  "rawGameSnapshotsOrCredentialsExported": false
+}

@@ -1,0 +1,268 @@
+{
+  "owner": "Root",
+  "kind": "Source37 actual scoped commit, normal nonforced same-repository HTTPS push and independent remote read",
+  "createdAtUtc": "2026-10-08T01:37:02.743Z",
+  "commit": "6116c2e640227b2408b98682a66ebdafa092ea18",
+  "parent": "04d8780054e0fdfb66a5783679953ccc11c342b1",
+  "title": "Bound native gateway transport writes",
+  "commitResult": {
+    "chunk_id": "a784b7",
+    "wall_time_seconds": 0.3555717,
+    "exit_code": 0,
+    "original_token_count": 181,
+    "output": "[codex/windows-player-journey 6116c2e640] Bound native gateway transport writes\n 14 files changed, 2248 insertions(+), 81 deletions(-)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json\n"
+  },
+  "commitLog": {
+    "chunk_id": "1970bd",
+    "wall_time_seconds": 0.1846637,
+    "exit_code": 0,
+    "original_token_count": 30,
+    "output": "6116c2e640227b2408b98682a66ebdafa092ea18\n04d8780054e0fdfb66a5783679953ccc11c342b1\nBound native gateway transport writes\n"
+  },
+  "treeResult": {
+    "chunk_id": "53d90b",
+    "wall_time_seconds": 0.1806002,
+    "exit_code": 0,
+    "original_token_count": 585,
+    "output": ":100644 100644 5c0a53b9e20456e35c8f291079b041b38478df16 80919c2458f0947f6fb4061dd6074f2e510eb106 M\tmir2-web3/apps/game-client/platform-windows/src/gateway.rs\n:100644 100644 e4009c9b3e6ebcf9df1290b431d2c8cfbb897ce5 3f39dd945c89915932028f6c523ce5cd5b1c138f M\tmir2-web3/apps/game-client/platform-windows/src/npc_purchase_gateway.rs\n:100644 100644 7109ecea294ed99ed4bf488bd0686bb7f0db01c9 0214bec72bd7006012563e2585e3512c28ba4daf M\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n:100644 100644 2d9d229bece75f97bd6b81248467578fd87f9eb4 c9ff3ac7ec40472934f1d4d87596aaff4134df8c M\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n:100644 100644 ac65df3de8180ed464f99f4c2526e980e4ab0098 b366904ab84b032f1922e7301e075bce2816ae2e M\tmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n:100644 100644 8e4c824dcf88697a3c0a0f828172030313ae34fc f8026d18555fc0db70262e9a41057dc509fcd385 M\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n:100644 100644 d1f2f704fa8f762183e449e7fdc89bb9e06f15c7 ee89d6a1a49417c75118693de23032501bd5f0ee M\tmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n:100644 100644 2df5694c8e752ba97b144b25ad303145a3c598c6 9b09eefdd42da205390ee7c06f9a306f6aad2b04 M\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n:100644 100644 639d79529dc402c48ae7e989500e2e41965c1302 1eb0048b5a751b16c4f61fbde5218cc66afb8c47 M\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n:100644 100644 1d059825ca16a64c575887c4903bc20bf8e451e5 8e8d912324f962de3686fd73fdb16623d314a30d M\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n:000000 100644 0000000000000000000000000000000000000000 c77ce9c4fb70369fd5e1888270fc0f79496668bf A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json\n:000000 100644 0000000000000000000000000000000000000000 9248909b77fe2b25ccfb48353201568bff44f23a A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result01.json\n:000000 100644 0000000000000000000000000000000000000000 98c2b0eb676302ff48cb0d76235ccfd11c04bb6e A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json\n:000000 100644 0000000000000000000000000000000000000000 1659a32bafa4603312af033259b6e7b500e3edab A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json\n"
+  },
+  "httpsBeforePush": {
+    "chunk_id": "992465",
+    "wall_time_seconds": 0.0000077,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "04d8780054e0fdfb66a5783679953ccc11c342b1\trefs/heads/codex/windows-player-journey\n"
+  },
+  "pushResult": {
+    "chunk_id": "e94a27",
+    "wall_time_seconds": 0.0000066,
+    "exit_code": 0,
+    "original_token_count": 27,
+    "output": "To https://github.com/Zombieliu/mir2.git\n   04d8780054..6116c2e640  HEAD -> codex/windows-player-journey\n"
+  },
+  "httpsRemote": {
+    "chunk_id": "4781ab",
+    "wall_time_seconds": 1.2070431,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "6116c2e640227b2408b98682a66ebdafa092ea18\trefs/heads/codex/windows-player-journey\n"
+  },
+  "worktree": {
+    "chunk_id": "61cc1f",
+    "wall_time_seconds": 0.1998204,
+    "exit_code": 0,
+    "original_token_count": 7,
+    "output": " M apps/web/tsconfig.json\n"
+  },
+  "origin": {
+    "chunk_id": "e46e5e",
+    "wall_time_seconds": 0.1077766,
+    "exit_code": 0,
+    "original_token_count": 9,
+    "output": "git@github.com:Zombieliu/mir2.git\n"
+  },
+  "sameRepositoryHttps": "https://github.com/Zombieliu/mir2.git",
+  "branch": "codex/windows-player-journey",
+  "actualScopedBlobCount": 14,
+  "sshOriginConfigUnchanged": true,
+  "noForceOrRewrite": true,
+  "gitNetworkUsed": true,
+  "gameNetworkUsed": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "fullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "goalStatus": "active",
+  "actualScopedBlobs": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "blob": "80919c2458f0947f6fb4061dd6074f2e510eb106"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "blob": "3f39dd945c89915932028f6c523ce5cd5b1c138f"
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "blob": "0214bec72bd7006012563e2585e3512c28ba4daf"
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "blob": "c9ff3ac7ec40472934f1d4d87596aaff4134df8c"
+    },
+    {
+      "path": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "blob": "b366904ab84b032f1922e7301e075bce2816ae2e"
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "blob": "f8026d18555fc0db70262e9a41057dc509fcd385"
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "blob": "ee89d6a1a49417c75118693de23032501bd5f0ee"
+    },
+    {
+      "path": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "blob": "9b09eefdd42da205390ee7c06f9a306f6aad2b04"
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "blob": "1eb0048b5a751b16c4f61fbde5218cc66afb8c47"
+    },
+    {
+      "path": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+      "blob": "8e8d912324f962de3686fd73fdb16623d314a30d"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json",
+      "blob": "c77ce9c4fb70369fd5e1888270fc0f79496668bf"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result01.json",
+      "blob": "9248909b77fe2b25ccfb48353201568bff44f23a"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json",
+      "blob": "98c2b0eb676302ff48cb0d76235ccfd11c04bb6e"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json",
+      "blob": "1659a32bafa4603312af033259b6e7b500e3edab"
+    }
+  ],
+  "expectedWorkingTreePins": [
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+        "bytes": 705092,
+        "sha256": "b2be25d36a894634119c7186fea154001b61e3ff1a7efa93fca72a6440b9f5c3"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\npc_purchase_gateway.rs",
+        "bytes": 76134,
+        "sha256": "85df7e8ed15bbd4597e717140e4831b8a1ee4c182978891528c2b9e3e6f3df16"
+      }
+    },
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 281785,
+        "sha256": "0a5d34b90b3b279fdf583b679662f3c25d7a7c2c4e93e30ef237e3aad07ec9e9"
+      }
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 899905,
+        "sha256": "bde09b532f15ef78bbd8ed17ab685080507a20996db8de5e2d9c9ca8dea85174"
+      }
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1019671,
+        "sha256": "df3c63ad129846547a79c016ad6cd2c2a85f39d237cfdfaf9ff2c8e0cd7d788a"
+      }
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 641430,
+        "sha256": "f950ec0680511a5c64184cfe1b2b3998a7d9564899f321803a06ff50afeaf05a"
+      }
+    },
+    {
+      "relativePath": "docs/PLAYER-QA-PLAYTHROUGH.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 36758,
+        "sha256": "98676b6762cf2919a670bf5e334c5f3a250b15f247e588c1c57f5ff5048ebde9"
+      }
+    },
+    {
+      "relativePath": "docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 55782,
+        "sha256": "59bf6a5ca44f2b5466de393c7cb2e8573cb408da1ebc9f30dfd66678e018cc54"
+      }
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 557907,
+        "sha256": "f0a29f3d8a816a1cea762c812fabcc125a44d4b70ec04d795183d356d63bcf9c"
+      }
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 500436,
+        "sha256": "03270cd343b1a394eb51e4ecd8a6bde5da985397022de85eb1e7fc232b542b9f"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result01.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-transport-source37-finite-result01.json",
+        "bytes": 34643,
+        "sha256": "c04a92e6376eddf35ab38f25991f1a687e6544267775f423612d477c9fde8059"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-transport-source37-finite-result02.json",
+        "bytes": 35220,
+        "sha256": "a35a155982ec872723c84be40d09fb468c3d36160e5339d038d1a6856f0ee40b"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-transport-source37-raw-evidence01.json",
+        "bytes": 5168637,
+        "sha256": "dadde988706550eea7f7b5a67ca13ffecb0476738480880e790b7d6e4daad1b4"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-skill-source36-publication01.json",
+        "bytes": 15801,
+        "sha256": "c2d12db7cbb5756e5d60606cece93d69be4820772e69d59c85434a2229ef9961"
+      }
+    }
+  ],
+  "finiteResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-transport-source37-finite-result02.json",
+    "bytes": 35220,
+    "sha256": "a35a155982ec872723c84be40d09fb468c3d36160e5339d038d1a6856f0ee40b"
+  },
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-transport-source37-raw-evidence01.json",
+    "bytes": 5168637,
+    "sha256": "dadde988706550eea7f7b5a67ca13ffecb0476738480880e790b7d6e4daad1b4"
+  },
+  "userTsconfigExcludedAndPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "transportQualification": "Same verified GitHub repository over HTTPS, temporary terminal/GCM interactive disabled and restored. SSH origin unchanged; no force/rewrite/global config or game-network operation."
+}

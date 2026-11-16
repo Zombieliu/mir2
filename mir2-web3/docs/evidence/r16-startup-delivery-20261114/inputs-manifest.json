@@ -1,0 +1,46 @@
+{
+  "kind": "private-input-digests-only",
+  "files": [
+    {
+      "label": "public-receipt",
+      "bytes": 76608,
+      "sha256": "ddac561bf296da91c41026828aac4e3887883bda456e4e1cfb8b4b1db0be540e"
+    },
+    {
+      "label": "startup-probe",
+      "bytes": 144952,
+      "sha256": "5ae696a0d2aade35b1083d8982d8e388f2181accc169798c8e19b9363db0f7de"
+    },
+    {
+      "label": "raw-tcp-history",
+      "bytes": 572056,
+      "sha256": "e99242a8a1c02d35fc7f0b4fe8b1cdc40743b18cd6f06804e87cfd82d2e6f9cd"
+    },
+    {
+      "label": "approval-receipt",
+      "bytes": 1821,
+      "sha256": "7f2e6ac581d787b3919bed6acfb27609ee0b426c2eb23fd9104e17e010faa154"
+    },
+    {
+      "label": "onboarding-receipt",
+      "bytes": 842,
+      "sha256": "1f566c47b17064d105a382f26c135726e5ee48dbb67bda5a388c2ed23a27880e"
+    },
+    {
+      "label": "wallet-guard",
+      "bytes": 228,
+      "sha256": "b18f78410a1b3260ba310c2e513ee4d642fd216a4029fce1e9baf2389082ee75"
+    },
+    {
+      "label": "browser-closed",
+      "bytes": 60,
+      "sha256": "980c2e8499f15732c68f06b1e31bcf9b6bf0e0b565447b611f34b9225182102c"
+    },
+    {
+      "label": "local-observer-producer",
+      "bytes": 4300,
+      "sha256": "b317763af31706ef585ecabd1c38d724729baa04f90d8587fd2b856dfc582c48"
+    }
+  ],
+  "privateAuthPayloadsExported": false
+}

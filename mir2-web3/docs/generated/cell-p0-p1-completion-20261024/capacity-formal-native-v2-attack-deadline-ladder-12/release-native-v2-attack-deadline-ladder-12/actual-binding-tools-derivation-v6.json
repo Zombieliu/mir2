@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-draft-v1.mjs",
+        "bytes": 13423,
+        "sha256": "891a68922f0b6d1b0e44bb898aa7a880431e66fe05e15f7ad8c3b7cf0a362409"
+      },
+      "output": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-v1.mjs",
+        "bytes": 13747,
+        "sha256": "47ea96e1cb5b2eabe85ce86c5565adaeda4ae56701d5f326fe410c0ef69dc3fc"
+      },
+      "steps": [
+        {
+          "atByte": 8729,
+          "from": "await expectedPin(await pin(script));execFileSync(process.execPath,['--check',script],{windowsHide:true,stdio:'pipe'});syntaxNow.push({file:script,exitCode:0});",
+          "to": "const reference=pre.value.files.find(p=>path.resolve(p.file).toLowerCase()===path.resolve(script).toLowerCase())??(path.resolve(script).toLowerCase()===path.resolve(fileURLToPath(import.meta.url)).toLowerCase()?pre.value.rootSealExecutor:null);assert.ok(reference,'Script absent from reviewed preseal');await expectedPin(reference);execFileSync(process.execPath,['--check',script],{windowsHide:true,stdio:'pipe'});await expectedPin(reference);syntaxNow.push({file:script,exitCode:0});"
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\bind-actual-ended15-v1.mjs",
+        "bytes": 10063,
+        "sha256": "c1db2445e026d376c90235fd518cae992f9e97f8f8a00b5b133fbb68626ce299"
+      },
+      "output": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v1.mjs",
+        "bytes": 10118,
+        "sha256": "bfc5e6d29bafdf5fe3537fc0f1446c45213faf9d5230c0284b8a96dfaccd916d"
+      },
+      "steps": [
+        {
+          "atByte": 610,
+          "from": "release-native-10-v2-personal-projection-feasibility-15",
+          "to": "release-native-10-v2-attack-deadline-feasibility-16"
+        },
+        {
+          "atByte": 670,
+          "from": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+          "to": "capacity-native10-v2-attack-deadline-followup-16-diagnostics"
+        },
+        {
+          "atByte": 796,
+          "from": "1792937158876-b61ec943",
+          "to": "1792949214664-bea1433d"
+        },
+        {
+          "atByte": 826,
+          "from": "5c2e713863d3e9556a92f856b11df2396c73b137",
+          "to": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16"
+        },
+        {
+          "atByte": 874,
+          "from": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+          "to": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16"
+        },
+        {
+          "atByte": 921,
+          "from": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+          "to": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9"
+        },
+        {
+          "atByte": 3982,
+          "from": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+          "to": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+        },
+        {
+          "atByte": 4391,
+          "from": "7bb9aeaaf29fbf0aa0f051b70a3388fa06877cf65ed3b2f64957a77a1e595022",
+          "to": "5cc5e733fb47b05694e53de6caace2cff4c519eacbbd8feae3d6dfe2f12239d2"
+        },
+        {
+          "atByte": 6441,
+          "from": "PROBE15",
+          "to": "PROBE16"
+        },
+        {
+          "atByte": 9288,
+          "from": "Probe15",
+          "to": "Probe16"
+        },
+        {
+          "atByte": 9311,
+          "from": "Probe15",
+          "to": "Probe16"
+        },
+        {
+          "atByte": 9345,
+          "from": "Probe15",
+          "to": "Probe16"
+        },
+        {
+          "atByte": 9377,
+          "from": "Probe15",
+          "to": "Probe16"
+        },
+        {
+          "atByte": 753,
+          "from": "probe15",
+          "to": "probe16"
+        },
+        {
+          "atByte": 3304,
+          "from": "probe15",
+          "to": "probe16"
+        },
+        {
+          "atByte": 6580,
+          "from": "probe15",
+          "to": "probe16"
+        },
+        {
+          "atByte": 6596,
+          "from": "probe15",
+          "to": "probe16"
+        },
+        {
+          "atByte": 6994,
+          "from": "probe15",
+          "to": "probe16"
+        },
+        {
+          "atByte": 7131,
+          "from": "probe15",
+          "to": "probe16"
+        },
+        {
+          "atByte": 6374,
+          "from": "formal11",
+          "to": "formal12"
+        },
+        {
+          "atByte": 7608,
+          "from": "formal11",
+          "to": "formal12"
+        },
+        {
+          "atByte": 8315,
+          "from": "formal11",
+          "to": "formal12"
+        },
+        {
+          "atByte": 9029,
+          "from": "formal11",
+          "to": "formal12"
+        },
+        {
+          "atByte": 9842,
+          "from": "formal11",
+          "to": "formal12"
+        },
+        {
+          "atByte": 7330,
+          "from": "actual15",
+          "to": "actual16"
+        },
+        {
+          "atByte": 7360,
+          "from": "actual15",
+          "to": "actual16"
+        },
+        {
+          "atByte": 9413,
+          "from": "Fresh15",
+          "to": "Fresh16"
+        },
+        {
+          "atByte": 6366,
+          "from": "pending-formal12-binding-v2.json",
+          "to": "pending-formal12-binding-v1.json"
+        },
+        {
+          "atByte": 6604,
+          "from": "runId:RUN,report:evidence.find",
+          "to": "runId:RUN,preparedSourceConfigSha256:expectedIdentity.sourceConfigSha256,report:evidence.find"
+        }
+      ],
+      "inverseRawExact": true
+    }
+  ],
+  "runOptionsBefore": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-options.json.before-actual-v6.txt",
+    "bytes": 2831,
+    "sha256": "effaa5c49c676d950b70e2f65d6a7dc0f224b9a5280c4c596faa4d040c18ae73"
+  },
+  "runOptionsAfter": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-options.json",
+    "bytes": 2915,
+    "sha256": "391d142894828f7232ef038b6e5a63222067ec403bcb31f0253ce89e1578aaaf"
+  },
+  "runOptionsPolicyUnchanged": true,
+  "actualProbe16Facts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-actual-terminal-independent-facts-v1.json",
+    "bytes": 8296,
+    "sha256": "ad8f4f4567238d87e317e7578e27ac20e08986c68f2e273b4ae9ba0a69846c82"
+  },
+  "scope": "Only metadata binding tools and final Root controller source preparation. Sealing/guard/prepare/realm remain Root-only and have not executed here.",
+  "actualGatesExecuted": false,
+  "capacityAccepted": false
+}

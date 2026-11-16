@@ -1,0 +1,108 @@
+TAP version 13
+# Subtest: Page prewarm delegation returns the real shared stage promise
+not ok 1 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 161.3476
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:54:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - Promise {
+    -   [Symbol(async_id_symbol)]: 74,
+    -   [Symbol(trigger_async_id_symbol)]: 12,
+    -   undefined
+    - }
+    
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: actual Page settles current HUD attempts before allocating runtime download bandwidth
+not ok 2 - actual Page settles current HUD attempts before allocating runtime download bandwidth
+  ---
+  duration_ms: 113.4271
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:63:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert(run.events.some(e=>e.name==='critical-assets'&&e.stage==='game'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:64:64)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page reserves runtime download bandwidth, then starts fonts before Native boot
+ok 3 - actual Page reserves runtime download bandwidth, then starts fonts before Native boot
+  ---
+  duration_ms: 89.9231
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 4 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 431.638
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure starts no speculative font work and keeps the retry boundary
+ok 5 - actual retryable module failure starts no speculative font work and keeps the retry boundary
+  ---
+  duration_ms: 80.1571
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads cannot start late font reads
+ok 6 - leaving while the runtime downloads cannot start late font reads
+  ---
+  duration_ms: 83.1642
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 7 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.4821
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 8 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 12.2654
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 9 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.8566
+  type: 'test'
+  ...
+# (node:32536) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 10 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 464.4622
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 11 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.5799
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 9
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1762.6426

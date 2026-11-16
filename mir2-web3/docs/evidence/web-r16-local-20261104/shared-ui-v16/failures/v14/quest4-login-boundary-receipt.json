@@ -1,0 +1,86 @@
+{
+  "schema": "r16-v14-quest4-browser-login-boundary/1",
+  "passed": false,
+  "sourceProof": "onboarding-v11-browser-proof.json",
+  "sourceProofSha256": "930d9e7784afe6e23f1cf2f72b62f26f6dde9030858cc28fb5f8717b4ee979c3",
+  "conclusion": "The normal login UI displayed a closed connection before any expected Gateway wire command or LoginSuccess was observed. Quest4 gameplay was not entered.",
+  "firstFailure": {
+    "phase": "ordinary-owned-qa-character-relogin",
+    "name": "ORDINARY_LOGIN_NOT_ACKNOWLEDGED",
+    "hash": "a86d10878fe4a102dbbfe798aaaf005871813725461cf90bfdb6f64574ddddfe"
+  },
+  "additionalErrors": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "name": "TimeoutError",
+      "hash": "23f1d7105ec15158c4ad9db196f11b95708ad3b1b55db5823a67d40b4c2003c5"
+    }
+  ],
+  "expectedGatewayObservedCommandCounts": {},
+  "observedPacketCount": 0,
+  "socketPublicState": {
+    "suspended": "socketClosed",
+    "connectionGeneration": 1,
+    "sessionGeneration": 0
+  },
+  "limitation": "This run did not record all browser WebSocket URLs or close details. An unexpected UI endpoint cannot be distinguished from an expected Gateway handshake failure using its empty matched-wire log.",
+  "network": {
+    "httpErrors": 0,
+    "failed": 0
+  },
+  "console": {
+    "errorCount": 1,
+    "warningCount": 0,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "error",
+        "hash": "afe646fc15f1c91b25a8d309ba3ee26f6a9afe2a1777ad299105fbfd02744aec"
+      }
+    ]
+  },
+  "cleanup": {
+    "ordinaryLogout": false,
+    "browserClosed": true
+  },
+  "screenshots": [
+    "01-failure-safe-masked.png"
+  ],
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-keydown-up-only"
+  },
+  "secretScan": {
+    "exactOwnQaAndRealmValueMatches": 0,
+    "privateRuntimeOrOwnerFilesRead": false
+  },
+  "evidence": [
+    {
+      "name": "onboarding-v11-browser-proof.json",
+      "bytes": 6597,
+      "sha256": "930d9e7784afe6e23f1cf2f72b62f26f6dde9030858cc28fb5f8717b4ee979c3"
+    },
+    {
+      "name": "01-failure-safe-masked.png",
+      "bytes": 1722763,
+      "sha256": "8c05ab7d54ea62ab15d944d4e043534ca283ba0f3257bb1b9e7bfcb268f6ef40"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-27T21:37:04.592Z",
+  "source": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+    "bytes": 338599,
+    "sha256": "aa6194d0a7409452c2e44ed5deac9b2383ad61908ceb85f7cbea209c6199cb94"
+  },
+  "results": [
+    {
+      "logPrefix": "test-0",
+      "passed": 36,
+      "failed": 0,
+      "ignored": 0,
+      "actualDedicatedPostgres": false
+    },
+    {
+      "logPrefix": "test-1",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "actualDedicatedPostgres": false
+    },
+    {
+      "logPrefix": "test-2",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "actualDedicatedPostgres": true
+    },
+    {
+      "logPrefix": "test-3",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "actualDedicatedPostgres": true
+    },
+    {
+      "logPrefix": "test-5",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "actualDedicatedPostgres": true
+    }
+  ],
+  "initialTest4": {
+    "passed": 0,
+    "ignored": 1,
+    "replacedByActualExplicitIgnoredRun": "test-5"
+  },
+  "allRequiredSuitesPassed": true
+}

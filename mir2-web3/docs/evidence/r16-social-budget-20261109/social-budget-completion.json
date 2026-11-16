@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "kind": "r16-native-social-budget-implementation",
+  "passed": true,
+  "initialHead": "8a8fd7a8a3028a467e447c1d0af72b863ce453a7",
+  "testedHead": "9e76c17bc34e3bf49a8f015aa0e403870dd9e4b0",
+  "sourceStableThroughFinalTests": true,
+  "sourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 5728,
+      "sha256": "aa1c28d0ed01e4813c0c0766bc52afb7ad4b95e3e92fa74a9789efcd55510dba"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_operation_budget.rs",
+      "bytes": 21145,
+      "sha256": "e048ee2e0844fca7923c7de7dce1808aca4f71e38d944cca126c22143811d752"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_operation_budget_tests.rs",
+      "bytes": 20208,
+      "sha256": "b4a8fc2c3f48eabfb4967837a811f1966d9f154bd06baf9475bdd08b96b2813e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_trade_projection.rs",
+      "bytes": 4725,
+      "sha256": "8e27076a37ca363844f5e0c252328c785dea27b42944a34346db7b64b19b7659"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "bytes": 442961,
+      "sha256": "30c4a6c4c5ba43167e0dd9da142d2e53aa23b4c213c8912e06986d698d9e3905"
+    },
+    {
+      "path": "apps/game-client/runtime/src/social_budget_host.rs",
+      "bytes": 6382,
+      "sha256": "92cfc40408b96b11be16ce7f3dc0b20f82d79859357847cd1315c1ef33e50962"
+    },
+    {
+      "path": "apps/game-client/runtime/src/social_budget_host_tests.rs",
+      "bytes": 17100,
+      "sha256": "5dca5e3f9fb27867cfe513ec877a22af89f3b61f421b867ce67381731ecb921f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/trade_projection.rs",
+      "bytes": 8067,
+      "sha256": "c6c76eaba221f64bef51030bf5cb4cac3f88318a90968f52ad9d08732aa6e0c9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "bytes": 91803,
+      "sha256": "17dd0a98c36f2cae7a1c6a8ee5d81cc3470adb6530e287820b247764cfc7cf2b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 969596,
+      "sha256": "55993e9e2ac3ac2908da32974facdfd93677f45c9ef3a5f39385f02868838cb6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "bytes": 26798,
+      "sha256": "d2e9fab18f2c07d848b6fba0cd2ea2b7216f7e3734d2ddc512af9452feec2a3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "bytes": 1725,
+      "sha256": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "bytes": 133231,
+      "sha256": "3de2eb07fad487338b0a05042b34c1151bbf652531051416b62074ff7ab6b263"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "bytes": 1649,
+      "sha256": "8aa5dc760d2ed6d142e586d250d1e107a455ece5a528950dfea910a65e70b749"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "bytes": 130580,
+      "sha256": "fa2e7b35e5c85ef8487b472bb1e5396e90fb48823f3707463a60c4c59e8933fb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2565,
+      "sha256": "0fc36f1e117040950ae7feb986bf63f6ef421a45fb2e6e419a32f783c4c61139"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 158883,
+      "sha256": "1e9b8d4c7d4caf951b7b16bef72b2851b3443684fcbc66a2e905faed6825673d"
+    },
+    {
+      "path": "apps/web/scripts/fixtures/social-budget-command-mapping.json",
+      "bytes": 21339,
+      "sha256": "53bf006916c8e5dc78070a2b383c1ec0061e49c9a0e16afcc1e81d37e05e7693"
+    },
+    {
+      "path": "rust-toolchain.toml",
+      "bytes": 113,
+      "sha256": "08d0bbe28ff9055f31501c6232ce50c3ae19a59cc50f99cd7e6435f49e797bc6"
+    }
+  ],
+  "workerWriteSet": [
+    "apps/game-client/client-bevy/src/lib.rs",
+    "apps/game-client/client-bevy/src/social_operation_budget.rs",
+    "apps/game-client/client-bevy/src/social_operation_budget_tests.rs",
+    "apps/game-client/client-bevy/src/social_trade_projection.rs",
+    "apps/game-client/runtime/src/lib.rs",
+    "apps/game-client/runtime/src/social_budget_host.rs",
+    "apps/game-client/runtime/src/social_budget_host_tests.rs",
+    "apps/game-client/platform-windows/src/trade_projection.rs"
+  ],
+  "results": {
+    "nativeSocial": {
+      "passed": 108,
+      "failed": 0,
+      "includesNewBudgetTests": 13,
+      "log": "native-social-final.log"
+    },
+    "runtimeHost": {
+      "passed": 9,
+      "failed": 0,
+      "includes43MappingCases": true,
+      "includesFourOwnOfferNegativeControls": true,
+      "includesMixedEightCapacity": true,
+      "log": "runtime-host-final.log"
+    },
+    "platformOriginalProjection": {
+      "passed": 5,
+      "failed": 0,
+      "log": "platform-trade-projection-tests-r1.log",
+      "scope": "unchanged original test body and exact shared own-offer function; no Native GUI or release executable build"
+    },
+    "mechanicalExtraction": {
+      "passed": true,
+      "receipt": "mechanical-extraction-proof.json"
+    },
+    "rustfmtCheck": 0,
+    "diffCheck": 0
+  },
+  "scope": {
+    "nativeSocialRulesChanged": false,
+    "cargoManifestOrLockChanged": false,
+    "wasmThreeProfilesBuilt": false,
+    "serviceOrGuiStarted": false,
+    "pageIntegratedByThisWorker": false,
+    "budgetIsAuthority": false,
+    "genericTimeout": false,
+    "nativeRenameStrictDeadlineOnly": true,
+    "productionEntrypointsMustKeepNativeTransientPolicy": true,
+    "validationCountsOverlap": true
+  },
+  "artifacts": [
+    {
+      "path": "native-budget-tests-r1.log",
+      "bytes": 30008,
+      "sha256": "7fab7facb95d3337bd4ad2b5a31377d7117622cdc3761a712e5fba3e4d0691f3"
+    },
+    {
+      "path": "runtime-host-tests-r1.log",
+      "bytes": 31023,
+      "sha256": "68161bd890808b08eced6d8e2f03a7fa7fe09b0404c17880ee7c6093ad673291"
+    },
+    {
+      "path": "native-social-regression-r1.log",
+      "bytes": 41188,
+      "sha256": "a77679cb300bb07bbd0c53f7b284c0451bc465090d2aebd5d20ff9e89b7a953f"
+    },
+    {
+      "path": "platform-trade-projection-tests-r1.log",
+      "bytes": 61857,
+      "sha256": "46191d4a7afbda5ee7efe8b29d1c6e7e292ed4685d5a448171a876ad32abb242"
+    },
+    {
+      "path": "native-social-final.log",
+      "bytes": 41300,
+      "sha256": "01d84fac4f06714823b6f30182c56bf3adf6c8f6a75a5e665faaaed1ba94c556"
+    },
+    {
+      "path": "runtime-host-final.log",
+      "bytes": 23965,
+      "sha256": "f86c69318cb0c9730e7844d9a9a0758d015fbabaa543f85ffb735afe3b4f57ad"
+    },
+    {
+      "path": "mechanical-extraction-proof.json",
+      "bytes": 581,
+      "sha256": "0ab4a05ccaf022c851238ba30878b4fcf6dbb86416f5c83cc9ee24cbd423c0d2"
+    },
+    {
+      "path": "social-budget-contract.json",
+      "bytes": 5386,
+      "sha256": "7a8b69fb9fcce5b5fa1de36182301e35190a45c758c2319cfd1e3680b455bc4d"
+    }
+  ]
+}

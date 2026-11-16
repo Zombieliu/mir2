@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "attack-deadline-diagnostics-v1-owned-cargo-build",
+  "startedAtMs": 1792946271810,
+  "finishedAtMs": 1792946389957,
+  "durationMs": 118147,
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+  "sourceManifestFileSha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e",
+  "sourceManifestSha256": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "backendInputCount": 44,
+  "command": "cargo",
+  "arguments": [
+    "+1.95.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "targetDirectory": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target",
+  "toolchain": {
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)"
+  },
+  "visualStudio": {
+    "targetArch": "x64",
+    "linkExecutable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe"
+  },
+  "buildJobs": 4,
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "error": null,
+  "postSourceFailure": null,
+  "sourceUnchangedBeforeAfter": true,
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-attack-deadline-diagnostics-v1-release-build.log",
+    "bytes": 55560,
+    "sha256": "e11129d2b8e266549a504fb3ee11994aec834518c7808a6665319c2a45c6ee29"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\release\\mir2-gateway.exe",
+    "bytes": 87371264,
+    "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+  },
+  "immutableBinary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87371264,
+    "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+  },
+  "success": true,
+  "scope": "Complete merged stdout/stderr log and actual Cargo exit tied to exact before/after committed44-input source and fresh immutable executable; no lifecycle/capacity acceptance."
+}

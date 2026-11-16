@@ -1,0 +1,64 @@
+{
+  "source": "Source60",
+  "observedAt": "2026-10-11T04:48:06.633Z",
+  "callerExitCode": 0,
+  "owner": "Root",
+  "exitCode": 0,
+  "builderPid": 57196,
+  "kind": "Source60 original full Thin after current completed strict Next",
+  "exited": true,
+  "disposed": true,
+  "elapsedMs": 20512,
+  "configPath": "C:/mir2-cross-platform-storage-20261002/web-source60-bag-belt-arbitration-20261011-01/root-approved01/thin-build01-config01.json",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "productionBuildAccepted": true,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\root-approved01\\thin-build01-config01.json",
+    "bytes": 5394,
+    "sha256": "f4c0b9449b10ac221e8eafc1fc6c9a1917b724464e3bac1a984dc31a5db5e044"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\thin-preparation01\\full-snapshot.json",
+    "bytes": 14835310,
+    "sha256": "285845c24b8e17e218605ce971b442ad7c9a215d7242eae72932aa2bdd6a3cc0"
+  },
+  "rootVerifiedInputs": 55329,
+  "inputDifferences": 0,
+  "prePostVerifiedByOriginalCaller": true,
+  "report": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source60-bag-belt-arbitration-20261011-01/thin-build01/size-report.json",
+    "bytes": 27894,
+    "sha256": "4da3c903089d668ff56a4a1f9af3a95e08cbc1d5d68cef183491e23b19b31c01"
+  },
+  "files": 7331,
+  "dirs": 778,
+  "links": 0,
+  "packageBytes": 374002944,
+  "originalCapBytes": 377487360,
+  "headroomBytes": 3484416,
+  "packagePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-source60-20261011-01",
+  "runtimeCopy": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\web-runtime01",
+  "runtimeCopyFiles": 7331,
+  "runtimeCopyDifferences": 0,
+  "jsonCompactionFiles": 231,
+  "nftWarningCount": null,
+  "coreVersions": [
+    "8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953",
+    "95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e",
+    "93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450"
+  ],
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\thin-build01\\stdout.log",
+    "bytes": 27894,
+    "sha256": "4da3c903089d668ff56a4a1f9af3a95e08cbc1d5d68cef183491e23b19b31c01"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\thin-build01\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

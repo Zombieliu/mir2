@@ -1,0 +1,229 @@
+{
+  "status": "local-candidate",
+  "base": "811260f077ca2fd3eca17f5c67f1d5cd5972f0c7",
+  "scope": "The old and new ordinary Gateway comparison uses two isolated File roles in the same Bichon scene. Both ordinary production-mode browser renderers use the exact candidate Gateway with default R16 maintenance. Windows proof uses an optimized offscreen GPU fixture and the real typed Native UI host intent; physical Windows window remains open.",
+  "server": {
+    "baseline": {
+      "receiptSha256": "565cc4c417eae78664b74f54f52db151c677f577c318bbdb1cd9a328021fcd06",
+      "privateObserverPackets": 44,
+      "biteStillTrueAtMs": 3747,
+      "manualRecast": false
+    },
+    "candidate": {
+      "receiptSha256": "8ab4c4b0e1ca2973dc5ed7dc1424f1c2c7c5362aad0c9613afb4b3f5ab0b385f",
+      "binarySha256": "4154ce25bf6e29017eda8f37f1612fcdc1602504786db8f43caa348817109a41",
+      "productSourcePinsSha256": "3f32208d6213f21b765e4c9d0d8329a620497d1d1716ef42870233153ffa8a23",
+      "privateObserverPackets": 0,
+      "biteClearAtMs": 3087,
+      "ownerReentry": {
+        "initialNoCast": true,
+        "nextManualReelNoAutoCast": true
+      },
+      "normalLogoutAndSave": true,
+      "orderedManualRecast": true
+    },
+    "testSealSha256": "f4d8f683585f3807580cfa4d9597b86069adf360e5d6ca7f2737fc0479f0be43"
+  },
+  "web": {
+    "webgpu": {
+      "receiptSha256": "154f2f1bf776b340bc00b1f8161d475d1807c58a2081734baaeb6024458f8bb1",
+      "buildSha256": "f456bae392aa23967a83a37089073b038b18e98841f9e6b3f04312bc0a5440f2",
+      "gatewaySha256": "4154ce25bf6e29017eda8f37f1612fcdc1602504786db8f43caa348817109a41",
+      "ordinaryButton": {
+        "relative": [
+          47,
+          95,
+          60,
+          25
+        ],
+        "startingFrame": 172,
+        "advancedFrame": 173,
+        "pressedFrame": 142,
+        "usedPointer": true
+      },
+      "manualReelSequence": 648,
+      "manualReelAckSequence": 652,
+      "expiredMs": 3085.204,
+      "staleReleaseSent": false,
+      "rewardOrReelCharge": false,
+      "automatic": {
+        "packets": [
+          {
+            "seq": 715,
+            "fishing": false,
+            "progress": 100
+          },
+          {
+            "seq": 719,
+            "fishing": true,
+            "progress": 0
+          }
+        ],
+        "charges": [
+          "DuraChanged",
+          "DeleteItem",
+          "DuraChanged"
+        ],
+        "orderedPlaybackGapMs": 813
+      },
+      "stored": {
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "bait": 11,
+        "hook": 7996,
+        "rod": 9996,
+        "reel": 5998
+      },
+      "sourceFixturePreserved": true,
+      "isolatedProcessesClosed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    "webgl2": {
+      "receiptSha256": "288fb562b724a8e71792a5dde04325afde547f210db33502530e28399def4656",
+      "buildSha256": "f456bae392aa23967a83a37089073b038b18e98841f9e6b3f04312bc0a5440f2",
+      "gatewaySha256": "4154ce25bf6e29017eda8f37f1612fcdc1602504786db8f43caa348817109a41",
+      "ordinaryButton": {
+        "relative": [
+          47,
+          95,
+          60,
+          25
+        ],
+        "startingFrame": 170,
+        "advancedFrame": 171,
+        "pressedFrame": 142,
+        "usedPointer": true
+      },
+      "manualReelSequence": 638,
+      "manualReelAckSequence": 640,
+      "expiredMs": 3075.14,
+      "staleReleaseSent": false,
+      "rewardOrReelCharge": false,
+      "automatic": {
+        "packets": [
+          {
+            "seq": 703,
+            "fishing": false,
+            "progress": 100
+          },
+          {
+            "seq": 707,
+            "fishing": true,
+            "progress": 0
+          }
+        ],
+        "charges": [
+          "DuraChanged",
+          "DeleteItem",
+          "DuraChanged"
+        ],
+        "orderedPlaybackGapMs": 763
+      },
+      "stored": {
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "bait": 11,
+        "hook": 7996,
+        "rod": 9996,
+        "reel": 5998
+      },
+      "sourceFixturePreserved": true,
+      "isolatedProcessesClosed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  },
+  "windows": {
+    "sourceSealSha256": "46fc613a6a8b25cd943e6476bf88c20e2fef11c38e3ad881f1cf52204724ec4b",
+    "optimizedModelLogSha256": "865228a91eeda0451a1a6487bf726f50c5f386b053603610aff57208b64b5e4f",
+    "gpuOffscreenLogSha256": "a7f0fdbfeb08334996bded0b715c0f92a324aa6823e512c991f589d23b2037b8",
+    "adjacentLogSha256": "2f9d07280c540887599bede6d8565190b4307dc2b7500c952b342463c9b8fe3d",
+    "geometry": [
+      437,
+      395,
+      60,
+      25
+    ],
+    "normalIntent": "FishingCast(false)",
+    "originalAssets": [
+      142,
+      149,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179
+    ]
+  },
+  "wasm": [
+    {
+      "version": "5fde16fb186299cc265cec00a085c3ecbe76e4d0ff77a12de08f567cf28fc836",
+      "bytes": 249137
+    },
+    {
+      "version": "cc64a3a85149bf9180ebc1f4e061319d29c1f8eaecb0f11e5b30d4b7aff573b4",
+      "bytes": 262066
+    },
+    {
+      "version": "c61eebe4b256760c789b3d2566f1a272601c47ab7b07b1cd3e055ace255bb44a",
+      "bytes": 164047
+    }
+  ],
+  "capture": {
+    "sha256": "cf8d2712a345b7714d8c8a5deb34502ee81e54b61d674aff82dfe5d6a7d890f2",
+    "sources": [
+      {
+        "label": "WebGPU",
+        "sourceSha256": "0f0204d17969201cc6c4f97dc2b7209ec844534708fa3e5e4c2186c6849f2299",
+        "crop": null
+      },
+      {
+        "label": "WebGL2",
+        "sourceSha256": "49ea08d293bba2bb926d3c94aed07c3571aa1ecc876eab02369a512ac143047e",
+        "crop": null
+      },
+      {
+        "label": "Windows offscreen fixture",
+        "sourceSha256": "b2601727584840bb7f4d17cc18c4be460059bd1cce7dd6ccb1af0b158b4f6b5c",
+        "crop": [
+          390,
+          300,
+          634,
+          428
+        ]
+      }
+    ]
+  },
+  "open": [
+    "Crystal cast/tick cadence, nibble sampling and independent AutoReelChance",
+    "Windows actual window and production gameplay cutover",
+    "Original tackle drag icon and remaining full-parity scope"
+  ],
+  "adjacentStorageGate": {
+    "baselineSha256": "4ec639b2461aa5618caeee68c676164087a92a35d5599df41fe5b6ff9a4b79b3",
+    "candidateSha256": "ebc7ccaa5b1393fe9c4884b191bedc099f6247c8b821e0bedca3427380b22cf4",
+    "sameFailedTests": [
+      "not ok 95 - Group actual Page sends only AddMember and a new gesture can repeat it without a terminal packet",
+      "not ok 101 - Group invite socket outcome unknown stays consumed until another explicit gesture",
+      "not ok 111 - Page synchronous cross-domain reentry sees the outer reservation occupying the eighth Native slot",
+      "not ok 112 - Page action-time real packet publication invalidates an old reservation before the domain is claimed",
+      "not ok 121 - Page authenticated receive capture queues bootstrap before late WASM and never queues a refused outgoing action"
+    ]
+  }
+}

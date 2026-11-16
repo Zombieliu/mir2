@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-16T07:51:28.302Z",
+  "passed": true,
+  "gameStatus": 200,
+  "versionStatus": 200,
+  "gatewayStatus": 200,
+  "versionRevisions": [
+    {
+      "key": "revision",
+      "value": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+    }
+  ],
+  "gatewayRevisions": [
+    {
+      "key": "revision",
+      "value": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+    }
+  ],
+  "expectedSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "productionChangedByThisRound": false,
+  "signedLoginNotRetested": true
+}

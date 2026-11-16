@@ -1,0 +1,22 @@
+{
+  "kind": "source76 original Source75 ordinary Alt+x logout before replacement",
+  "initial": {
+    "loginPasswordVisible": false,
+    "screen": "game"
+  },
+  "settled": {
+    "loginPasswordVisible": true,
+    "publicActions": [
+      "Login"
+    ],
+    "screen": "login"
+  },
+  "shopPurchase": false,
+  "recordedLastSettledWorldPosition": {
+    "map": "0",
+    "x": 290,
+    "y": 611
+  },
+  "loginCredentialsWrittenToEvidence": false,
+  "loginScreenshotCaptured": false
+}

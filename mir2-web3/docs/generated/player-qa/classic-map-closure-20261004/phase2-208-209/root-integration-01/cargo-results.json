@@ -1,0 +1,48 @@
+{
+  "createdUtc": "2026-10-04T07:03:47.382386+00:00",
+  "baselineHead": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "integratedOwnershipAndProfile27": true,
+  "results": [
+    {
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-game-data",
+        "--test",
+        "classic_native_resource_scope",
+        "--test",
+        "platinum_176_content_loop"
+      ],
+      "exitCode": 0,
+      "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\cargo-01.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership"
+      ],
+      "exitCode": 0,
+      "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\cargo-02.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "--no-run"
+      ],
+      "exitCode": 0,
+      "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\cargo-03.log"
+    }
+  ]
+}

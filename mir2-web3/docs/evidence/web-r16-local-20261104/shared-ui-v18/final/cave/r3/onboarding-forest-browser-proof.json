@@ -1,0 +1,1787 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-06T02:02:30.433Z",
+  "passed": true,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-or-Digit3-keydown-up-only",
+    "mapOnlyCave": true,
+    "caveQuestActionsAuthorizedByCurrentProgress": false
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "0c37a0082782be781376ccb452fda18ea6f4235a29fbbd678e7db066b81049ac",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "cave",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2110009,
+        "minLevel": 16,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 500,
+        "experience": 0,
+        "kills": [],
+        "flags": [
+          {
+            "number": 2210091,
+            "message": "Reach the Oma Cave entrance",
+            "kind": "serverEvent",
+            "conditions": [
+              "omaCaveEntryReached"
+            ]
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": true,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "d001-trusted-interior-walking-and-ordinary-exit",
+    "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "complete"
+  ],
+  "screenshots": [
+    "01-current-native-task-card-before-measured-readiness.png",
+    "02-fresh-v2-native-task-card.png",
+    "03-d001-first-real-map-entry.png",
+    "04-d001-after-trusted-interior-walking.png",
+    "05-ordinary-d001-exit-map0-landing.png",
+    "06-saved-progress-native-diary.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 23,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 24,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 440,
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 446,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006
+      ]
+    },
+    {
+      "sequence": 583,
+      "method": "UserLocation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "direction": "Down"
+    },
+    {
+      "sequence": 587,
+      "method": "UserLocation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "direction": "Left"
+    },
+    {
+      "sequence": 589,
+      "method": "UserLocation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "direction": "Down"
+    },
+    {
+      "sequence": 591,
+      "method": "UserLocation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "direction": "Down"
+    },
+    {
+      "sequence": 593,
+      "method": "UserLocation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "direction": "Left"
+    },
+    {
+      "sequence": 601,
+      "method": "MapInformation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit"
+    },
+    {
+      "sequence": 602,
+      "method": "UserLocation",
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "direction": "Down"
+    },
+    {
+      "sequence": 626,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 629,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 644,
+      "method": "LoginSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 648,
+      "method": "StartGame",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "result": 4
+    },
+    {
+      "sequence": 654,
+      "method": "MapInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 655,
+      "method": "UserInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "gold": 440,
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1077,
+      "method": "CompleteQuest",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006
+      ]
+    },
+    {
+      "sequence": 1218,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200708,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1219,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1220,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200912,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1221,
+      "method": "HealthChanged",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1222,
+      "method": "ObjectStruck",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1224,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1225,
+      "method": "HealthChanged",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1227,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1230,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200708,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1231,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1232,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200912,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1233,
+      "method": "HealthChanged",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1234,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1235,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200708,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1236,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1237,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200912,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1238,
+      "method": "HealthChanged",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1239,
+      "method": "ObjectStruck",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 1000,
+      "attackerId": 200912,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1241,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1242,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200708,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1243,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1244,
+      "method": "ObjectAttack",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 200912,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1245,
+      "method": "HealthChanged",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1246,
+      "method": "ObjectStruck",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "objectId": 1000,
+      "attackerId": 200912,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1248,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1250,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    }
+  ],
+  "questOperations": [],
+  "movement": [
+    {
+      "from": {
+        "x": 151,
+        "y": 362
+      },
+      "position": {
+        "x": 151,
+        "y": 363
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 486,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 583,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 151,
+        "y": 363
+      },
+      "position": {
+        "x": 150,
+        "y": 363
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 366,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 587,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 150,
+        "y": 363
+      },
+      "position": {
+        "x": 150,
+        "y": 364
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 502,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 589,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 150,
+        "y": 364
+      },
+      "position": {
+        "x": 150,
+        "y": 365
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 378,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 591,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 150,
+        "y": 365
+      },
+      "position": {
+        "x": 149,
+        "y": 365
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 396,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 593,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 149,
+        "y": 365
+      },
+      "position": {
+        "x": 143,
+        "y": 40
+      },
+      "direction": "Left",
+      "outcome": "normal-map-transfer",
+      "heldForMs": 4010,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 602,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    }
+  ],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 42,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": false,
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 273,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 302,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 331,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 360,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "ea0f53a994127e32f5f0e81ecffa7bfa94cc723f3605b50ab8b606a334668b0f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "10779bcd7766258ee9db4a24840647515111bffec6ad14bbec19d45f4b333410",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+        "method": "GET",
+        "pathHash": "97683e5d28b7b86f34f3df98f875ec51309a939de1e225fe69b1924831338295",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "ea0f53a994127e32f5f0e81ecffa7bfa94cc723f3605b50ab8b606a334668b0f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "10779bcd7766258ee9db4a24840647515111bffec6ad14bbec19d45f4b333410",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "fbffe8dc2ed19ba20c36f2ded537ea4794bacde6cd22e4d69541ee6261ccc3cf",
+        "successfulResponseObserved": false
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "fcc7af992c2b1700f0c15447907db6832b006bc67a1cf65118e7f16d18903a7c",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "7989e231b73b00ed4e4b7039a7c0116f9416b485c1168ba78c3d92ed8e35aa00",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "b1d24ab321062cc5f8df968c2a71c19961feaf425ae11b39ee98f6e105596670",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "dbff63b3033f9e3c9a727e8b75deb4e9638334612d10ada56962433ab711c79d",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "38edecdf0b265ecf6af0f746191a792d2697a5ac47116554f1fccee386f62825",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": true,
+      "closeCode": null,
+      "closeFrames": [],
+      "closedPhase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 10,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "2f1fd577163167b168be0053beed8b392dee832f211b31fe670482fb9e462c31"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "a4c5cf6c695663b99f3f60ca81d8dcf557e81e540ce0d7172a4cd82df626600f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "c0cd7fa9ced215be64080be261a7ab43167b4a3b00bedeea06814ba3321e086e"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "c0cd7fa9ced215be64080be261a7ab43167b4a3b00bedeea06814ba3321e086e"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "c0cd7fa9ced215be64080be261a7ab43167b4a3b00bedeea06814ba3321e086e"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "889461d1072777dff05378d39381eb099674d3610bf8ca895ac97b8f69ae77d1"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "2f1fd577163167b168be0053beed8b392dee832f211b31fe670482fb9e462c31"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "7b6ad204dbd84825a45b2a1b373cdd35c7afd7acde7b3235d0442f9b6d757aaf"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "npcPurchaseOwner": 2,
+    "keepAlive": 3,
+    "walk": 6,
+    "logOut": 2
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793930554385,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 24,
+      "receivedAtMs": 1793930559476,
+      "method": "UserInformation",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 151,
+        "y": 362
+      }
+    },
+    {
+      "sequence": 629,
+      "receivedAtMs": 1793930592505,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 655,
+      "receivedAtMs": 1793930606057,
+      "method": "UserInformation",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1221,
+      "receivedAtMs": 1793930607228,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1225,
+      "receivedAtMs": 1793930607230,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1233,
+      "receivedAtMs": 1793930610355,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1238,
+      "receivedAtMs": 1793930612769,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1245,
+      "receivedAtMs": 1793930615410,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1250,
+      "receivedAtMs": 1793930619547,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 579,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    },
+    {
+      "sequence": 1217,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 2400
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "d001",
+      "missing": 0,
+      "sourceSprites": 413
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    },
+    {
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 350
+    },
+    {
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 244
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 244
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    }
+  ],
+  "resumeState": {
+    "hp": 99,
+    "maxHp": 99,
+    "mp": 49,
+    "maxMp": 49,
+    "dead": false,
+    "position": {
+      "x": 151,
+      "y": 362
+    },
+    "progression": {
+      "level": 11,
+      "experience": 522,
+      "maxExperience": 8000
+    },
+    "gold": 440,
+    "smallHpMedicine": 9,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      },
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      }
+    ],
+    "playerLevel": 11,
+    "knownFencing": true,
+    "fencingBooks": 0,
+    "bagEquipment": [],
+    "clothingInBag": [],
+    "clothingEquipped": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour"
+      }
+    ],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 2,
+        "quantity": 9,
+        "key": "Digit3"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "inProgress",
+        "current": 2,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 2,
+            "required": 4,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 42,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": false,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "keyboardPanelChecks": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    },
+    {
+      "phase": "d001-trusted-interior-walking-and-ordinary-exit",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "caveEntry": {
+    "ordinaryNativeRoute": false,
+    "normalPhysicalGateEntry": null,
+    "resumedSavedD001": true,
+    "entryMapPacketSequence": null,
+    "currentQuestWorldStamp": false,
+    "map": "d001",
+    "hp": 99,
+    "maxHp": 99,
+    "mp": 49,
+    "maxMp": 49,
+    "dead": false,
+    "position": {
+      "x": 151,
+      "y": 362
+    },
+    "visualReviewPending": true,
+    "skeletonCombatClaim": false,
+    "ordinaryExit": {
+      "map": "0",
+      "gate": {
+        "x": 148,
+        "y": 365
+      },
+      "landing": {
+        "x": 143,
+        "y": 40
+      },
+      "mapInformationSequence": 601,
+      "ownerLocationSequence": 602,
+      "actualDirection": "Left",
+      "outboundMovementCommands": 1,
+      "collisionFingerprint": "ede5159c0c90209a137fe9839673140984384c44caaedcbf942c88f9fe6bf97a",
+      "manualSteps": [
+        {
+          "from": {
+            "x": 151,
+            "y": 362
+          },
+          "position": {
+            "x": 151,
+            "y": 363
+          },
+          "direction": "Down",
+          "outcome": "moved",
+          "heldForMs": 486,
+          "keys": [
+            "ArrowDown"
+          ],
+          "sequence": 583,
+          "ackDirection": "Down",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 151,
+            "y": 363
+          },
+          "position": {
+            "x": 150,
+            "y": 363
+          },
+          "direction": "Left",
+          "outcome": "moved",
+          "heldForMs": 366,
+          "keys": [
+            "ArrowLeft"
+          ],
+          "sequence": 587,
+          "ackDirection": "Left",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 150,
+            "y": 363
+          },
+          "position": {
+            "x": 150,
+            "y": 364
+          },
+          "direction": "Down",
+          "outcome": "moved",
+          "heldForMs": 502,
+          "keys": [
+            "ArrowDown"
+          ],
+          "sequence": 589,
+          "ackDirection": "Down",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 150,
+            "y": 364
+          },
+          "position": {
+            "x": 150,
+            "y": 365
+          },
+          "direction": "Down",
+          "outcome": "moved",
+          "heldForMs": 378,
+          "keys": [
+            "ArrowDown"
+          ],
+          "sequence": 591,
+          "ackDirection": "Down",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 150,
+            "y": 365
+          },
+          "position": {
+            "x": 149,
+            "y": 365
+          },
+          "direction": "Left",
+          "outcome": "moved",
+          "heldForMs": 396,
+          "keys": [
+            "ArrowLeft"
+          ],
+          "sequence": 593,
+          "ackDirection": "Left",
+          "outboundMovementCommands": 1
+        }
+      ]
+    },
+    "publicScene": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "map": "d001",
+        "missing": 0,
+        "sourceSprites": 413
+      }
+    ]
+  },
+  "ordinaryPortalOwnerAttestations": [
+    {
+      "map": "0",
+      "landing": {
+        "x": 143,
+        "y": 40
+      },
+      "mapSequence": 601,
+      "ownerLocationSequence": 602,
+      "visibleOwnerMatched": true,
+      "actorFullSnapshotReady": false
+    }
+  ],
+  "caveEntryQuestComplete": false,
+  "persistence": {
+    "slayingBeforeLogout": false,
+    "slayingAfterRelogin": false,
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006
+    ],
+    "progressionBeforeLogout": {
+      "level": 11,
+      "experience": 522,
+      "maxExperience": 8000
+    },
+    "progressionAfterRelogin": {
+      "level": 11,
+      "experience": 522,
+      "maxExperience": 8000
+    },
+    "exactExperienceRetained": true,
+    "learnedFencingBeforeLogout": true,
+    "learnedFencingAfterRelogin": true,
+    "map": "0",
+    "beforeLogoutPosition": {
+      "x": 143,
+      "y": 40
+    },
+    "reloginPosition": {
+      "x": 143,
+      "y": 40
+    },
+    "exactReturnPositionRetained": true,
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "lastPhysicalNativeInput": {
+    "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "logical": {
+      "x": 493,
+      "y": 73.5
+    },
+    "css": {
+      "x": 621,
+      "y": 169.5
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": true,
+      "questLogOpen": true,
+      "frame": 77,
+      "generation": 2,
+      "revision": 4,
+      "openRevision": 2,
+      "hpOrb": {
+        "supported": true,
+        "ready": true,
+        "generation": 2,
+        "revision": 4,
+        "hp": 97,
+        "maxHp": 99,
+        "hpOnly": true,
+        "slot": {
+          "left": 0,
+          "top": 646
+        },
+        "image": "original-ui/Prguse/6.png",
+        "source": {
+          "left": 0,
+          "top": 2,
+          "width": 100,
+          "height": 78
+        },
+        "destination": {
+          "left": 0,
+          "top": 648,
+          "width": 100,
+          "height": 78
+        },
+        "layout": {
+          "left": 0,
+          "top": 648,
+          "width": 100,
+          "height": 78
+        }
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 4,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 522,
+          "maximum": 8000,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 65,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 65,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 11,
+          "maximum": 90,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 9,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 9,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 1244
+  },
+  "gameplayPassed": true,
+  "networkClean": true,
+  "incompleteReason": null,
+  "finishedAt": "2026-11-06T02:03:39.628Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "inProgress",
+      "current": 2,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 2,
+          "required": 4,
+          "done": false
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006
+  ],
+  "lastFullSnapshot": {
+    "sequence": 1251,
+    "receivedAtMs": 1793930619574,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "progression": {
+      "level": null,
+      "experience": 522,
+      "maxExperience": 8000
+    },
+    "gold": 440,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 602,
+    "packet": "UserLocation",
+    "position": {
+      "x": 143,
+      "y": 40
+    },
+    "direction": "Down",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 6,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

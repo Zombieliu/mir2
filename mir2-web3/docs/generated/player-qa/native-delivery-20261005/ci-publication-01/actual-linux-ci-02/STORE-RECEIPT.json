@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "files": [
+    {
+      "path": "actual-linux-ci-02/actual-test-receipt.json",
+      "bytes": 3526,
+      "sha256": "2f58a570a99b4744c248338ea248e47161bc3f550cb3f599a78b7039f8d5f94a"
+    },
+    {
+      "path": "actual-linux-ci-02/artifacts.json",
+      "bytes": 750,
+      "sha256": "77f26a58b4c94ac8c10c550c182140ebfd9260b89606501f6063b78e7f1bd5e8"
+    },
+    {
+      "path": "actual-linux-ci-02/ROOT-SUCCESS-REVIEW.json",
+      "bytes": 697,
+      "sha256": "51d9f63d667f937b3c4c4983c8385738870f0f62b728f4c5baf4e8a66ee0e50c"
+    },
+    {
+      "path": "actual-linux-ci-02/run.json",
+      "bytes": 3273,
+      "sha256": "d338eb71747353f7d265db609460616c9ace0393f3628b8e3c914245ac196dc2"
+    },
+    {
+      "path": "actual-linux-ci-02/tooling-artifact.zip",
+      "bytes": 49224,
+      "sha256": "1a215e087eadbf86b30b2a2a88db7baf8548b8a351ae6c0dec8422b77fc997a4"
+    },
+    {
+      "path": "actual-linux-ci-02/tooling.log",
+      "bytes": 58466,
+      "sha256": "d647f02d0025349e6ad6bc79e9de984a104621d1426a5e182ca257ce5c579bce"
+    },
+    {
+      "path": "root/PUSH-02.log",
+      "bytes": 140,
+      "sha256": "cd18af94f3e3be18d71a313b725cda4b549ffaf96ca63bfd720e4e558343c2ea"
+    },
+    {
+      "path": "root/PUSH-02-RECEIPT.json",
+      "bytes": 232,
+      "sha256": "701844af05aae0a6bc23b96e89f9961e2cfd83a5e16cb112478d83dd84d61043"
+    },
+    {
+      "path": "root/API-REMOTE-REF-02.log",
+      "bytes": 41,
+      "sha256": "5836635ad8338d1ba4ee2ab4b2b0080964613343595e903aabc844b8e9c5a7c1"
+    },
+    {
+      "path": "root/API-REMOTE-CONFIRMATION-02.json",
+      "bytes": 232,
+      "sha256": "889c70439e92eec30251ede78272c5be3bd0e29469f98c44e387f57c899ac1fa"
+    },
+    {
+      "path": "root/VERIFY-DISPATCH-02.log",
+      "bytes": 59,
+      "sha256": "4e2aadd8b8616ebb8538ea5be6cefc06e3eb649caa790c35087b582b3be90a44"
+    },
+    {
+      "path": "root/VERIFY-DISPATCH-02.json",
+      "bytes": 367,
+      "sha256": "b47103f7ff98ef84ab40f38cf0c233e12a7a793b3306f534aa7bc5122c55bcee"
+    },
+    {
+      "path": "root/push-and-verify-02.py",
+      "bytes": 2159,
+      "sha256": "383e0bf7d10f4892233c18aca73323437336077154fd878ecffa07e71fa235df"
+    },
+    {
+      "path": "root/capture-ci-success-02.py",
+      "bytes": 3242,
+      "sha256": "029187529bb3039ae8d617fb754375d57717e02b42fe2b10b330a622b897b934"
+    }
+  ],
+  "linksFollowedOrArchiveExtracted": false
+}

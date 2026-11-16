@@ -1,0 +1,98 @@
+sudo -n python3 -B - <<'PY'
+WRITER_SHA256 = '76b9022d7978fd1f45c2030c3679964f7224c4da6ff7b2de14da50096a623aed'
+import ctypes, hashlib, http.client, importlib.util, json, os, pathlib, socket, ssl, stat, sys, time
+
+
+def fingerprint(info):
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def need(condition, label):
+    if not condition:
+        raise RuntimeError(label)
+
+stage = pathlib.Path('/srv/.mir2-origin-r22-s17-20261008-01')
+path = stage / 'origin_r22_s17.py'
+for parent in [*reversed(stage.parents), stage]:
+    info = parent.lstat()
+    need(stat.S_ISDIR(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o022, 'unsafe-stage-parent')
+need(not stage.lstat().st_mode & 0o077, 'stage-not-private')
+info = path.lstat()
+need(stat.S_ISREG(info.st_mode) and info.st_uid == 0 and info.st_nlink == 1 and not info.st_mode & 0o077, 'unsafe-writer')
+fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+with os.fdopen(fd, 'rb') as stream:
+    before = fingerprint(os.fstat(stream.fileno()))
+    need(before == fingerprint(info), 'writer-open-race')
+    raw = stream.read(262145)
+    need(len(raw) <= 262144 and hashlib.sha256(raw).hexdigest() == WRITER_SHA256, 'writer-pin')
+    need(fingerprint(os.fstat(stream.fileno())) == before and fingerprint(path.lstat()) == before, 'writer-read-race')
+spec = importlib.util.spec_from_file_location('verified_r22_s17_writer', path)
+w = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = w
+exec(compile(raw, str(path), 'exec'), w.__dict__)
+g, ops = w.boot()
+
+
+class LocalTLS(http.client.HTTPSConnection):
+    def connect(self):
+        self.sock = self._context.wrap_socket(socket.create_connection(('127.0.0.1', self.port), self.timeout), server_hostname=self.host)
+
+
+with ops.lock(g, w.LOCK):
+    before = w.snapshot_services()
+    old_identity = w.stable_feed(g)
+    need(w.digest(g.read(w.CONFIG, 128 * 1024)) == w.PINS['config'], 'caddy-conflict')
+    objects = w.fixed_envelope(g)
+    old_objects = {o['path']: g.match(w.PUBLIC / o['path'], o) for o in w.PINS['previousObjects']}
+    for obj in objects:
+        g.match(w.PUBLIC / obj['path'], obj)
+    expected = {name: g.read(stage / w.PINS['sourceNames'][index], 32768, w.PINS['new'][index])
+                for index, name in [(0, 'latest.json'), (1, 'latest.p7s')]}
+    prepared = stage / 'feed17-ready'
+    need(not prepared.exists() and not prepared.is_symlink(), 'fresh-feed-stage-required')
+    prepared.mkdir(mode=0o700)
+    for name, data in expected.items():
+        w.write_new(g, ops, prepared / name, data, 0o444)
+    os.chmod(prepared, 0o755)
+    ops.sync_dir(g, prepared)
+    ops.sync_dir(g, stage)
+    current = w.PUBLIC / 'feed-current'
+    g.directory(current)
+    need(prepared.stat().st_dev == current.stat().st_dev and w.stable_feed(g) == old_identity, 'feed-cas-conflict')
+    rename = ctypes.CDLL(None, use_errno=True).renameat2
+    rename.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint)
+    rename.restype = ctypes.c_int
+    with g.dir_fd(stage) as source_fd, g.dir_fd(w.PUBLIC) as target_fd:
+        need(rename(source_fd, b'feed17-ready', target_fd, b'feed-current', 2) == 0, 'atomic-feed-exchange-failed')
+        os.fsync(source_fd)
+        os.fsync(target_fd)
+    checks = []
+    for name, data in expected.items():
+        need(g.read(current / name, 32768) == data, 'current-feed-bytes')
+        need(g.identity(g.file_info(prepared / name)) == old_identity[name], 'previous-feed-fingerprint-changed')
+        g.read(prepared / name, 32768, w.PINS['previousFeed'][name])
+        connection = LocalTLS('165.154.65.136.sslip.io', timeout=30, context=ssl.create_default_context())
+        try:
+            connection.request('GET', '/client-updates/' + name, headers={'Host': '165.154.65.136.sslip.io', 'Accept-Encoding': 'identity'})
+            response = connection.getresponse()
+            received = response.read(32769)
+            need(response.status == 200 and received == data and 'no-store' in response.getheader('Cache-Control', ''),
+                 'current-alias-status-bytes-cache')
+            need(response.getheader('Content-Length') == str(len(data)), 'current-alias-length')
+            checks.append({'name': name, 'status': 200, 'bytes': len(data), 'sha256': w.digest(data), 'tlsVerified': True,
+                           'cacheControl': 'no-store'})
+        finally:
+            connection.close()
+    for obj in w.PINS['previousObjects']:
+        need(g.match(w.PUBLIC / obj['path'], obj) == old_objects[obj['path']], 'previous-object-fingerprint-changed')
+    need(w.digest(g.read(w.CONFIG, 128 * 1024)) == w.PINS['config'], 'caddy-final-conflict')
+    w.same_pids(before, w.snapshot_services())
+    receipt = {'schema': 'mir2.native.current-origin-feed17.v1', 'passed': True, 'createdUnix': int(time.time()),
+               'sequence': 17, 'gameSource': w.GAME, 'engineSource': w.ENGINE, 'rootProofSha256': w.PINS['proof'],
+               'completeSourceObjectCountChecked': len(objects), 'oldFeed16BytesAndFingerprintsPreserved': True,
+               'oldFeedPrivateBackup': str(prepared), 'allServicePidsPreserved': True, 'caddyReloaded': False,
+               'gatewayRestarted': False, 'checks': checks}
+    w.write_new(g, ops, stage / 'FEED-PROMOTE-01.json', (json.dumps(receipt, indent=2) + '\n').encode())
+    print(json.dumps(receipt))
+
+PY

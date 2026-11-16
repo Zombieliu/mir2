@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-10-24T18:49:18.0453066+00:00",
+  "remote": "git@github.com:Zombieliu/mir2.git",
+  "checkpointBranch": "codex/cell-preproduction-p0-p1-20261024",
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "heads": {
+    "refs/heads/codex/windows-player-journey": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+    "refs/heads/codex/cell-preproduction-p0-p1-20261024": "461f1d85eed6309a55a88bd79a0022f7b97febe4"
+  },
+  "forcedPush": false,
+  "capacityAccepted": false,
+  "scope": "Source checkpoint safely pushed before new Release lifecycle/capacity validation; original branch retained."
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "mir2-native-downloads",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-10-02",
+  "account_id": "85bf64d86ea9221e172d26feba9fd47e",
+  "workers_dev": false,
+  "routes": [
+    { "pattern": "assets.mir2.obelisk.build/client-updates/*", "zone_name": "obelisk.build" }
+  ],
+  "r2_buckets": [
+    { "binding": "MIR2_ASSETS", "bucket_name": "mir2-web3-assets" }
+  ],
+  "observability": { "enabled": true }
+}

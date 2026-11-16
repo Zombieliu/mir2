@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ENDED_IDENTITY_NO_EVALUATION",
+  "basis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+    "bytes": 36368,
+    "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+  },
+  "draft": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\verify-ended-probe19-draft-v1.mjs",
+    "bytes": 37467,
+    "sha256": "83f6d9d606645b6307ac88c0a092f4bd9114b13509785d2c37c6e3b15f923360"
+  },
+  "mainRules": [
+    {
+      "at": 690,
+      "before": "release-native-10-v2-scout-observer-feasibility-18",
+      "after": "release-native-10-v2-scout-anti-convergence-feasibility-19"
+    },
+    {
+      "at": 934,
+      "before": "capacity-native10-v2-scout-observer-followup-18-diagnostics",
+      "after": "capacity-native10-v2-scout-anti-convergence-followup-19-diagnostics"
+    },
+    {
+      "at": 1030,
+      "before": "probe18-independent-verification-v1",
+      "after": "probe19-independent-verification-v1"
+    },
+    {
+      "at": 14091,
+      "before": "probe18-root-independent-cleanup-v1.json",
+      "after": "probe19-root-independent-cleanup-v1.json"
+    },
+    {
+      "at": 19235,
+      "before": "probe18-root-independent-cleanup-v1.json",
+      "after": "probe19-root-independent-cleanup-v1.json"
+    },
+    {
+      "at": 14668,
+      "before": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "after": "4fb58ade4aa95b677bb795625d01da542a84a3f7"
+    },
+    {
+      "at": 19957,
+      "before": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "after": "4fb58ade4aa95b677bb795625d01da542a84a3f7"
+    },
+    {
+      "at": 20048,
+      "before": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "after": "4fb58ade4aa95b677bb795625d01da542a84a3f7"
+    },
+    {
+      "at": 20140,
+      "before": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "after": "4fb58ade4aa95b677bb795625d01da542a84a3f7"
+    },
+    {
+      "at": 14872,
+      "before": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+      "after": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8"
+    },
+    {
+      "at": 20228,
+      "before": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+      "after": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8"
+    },
+    {
+      "at": 30722,
+      "before": "ce15097005c6a7abd3e861b3f4b8fd1708f95d1145096d58e747462e57c87f07",
+      "after": "1225f83d8b2d5546c04dff9b152ba1c64acd71e35dffebb4b8642a5485d2d267"
+    },
+    {
+      "at": 751,
+      "before": "let RUN=null;",
+      "after": "let RUN=null;\nconst ENDED_BINDING=Object.freeze({state:'PENDING_ACTUAL_ENDED_RUN_CLEANUP_AND_CONSUMERS',runId:null,ownedPids:null,rootCleanupSha256:null,consumerTerminalPins:null});"
+    },
+    {
+      "at": 13583,
+      "before": "async function verify(){",
+      "after": "async function verify(){\n assert.equal(ENDED_BINDING.state,'FINAL_ACTUAL_ENDED_RUN_AND_CLEANUP_BOUND','PENDING actual closed run, Root OS receipt and four consumers');assert.ok(ENDED_BINDING.consumerTerminalPins);"
+    },
+    {
+      "at": 14339,
+      "before": "assert.equal(RUN,'1792965008290-fc5e2eed');",
+      "after": "assert.equal(RUN,ENDED_BINDING.runId);"
+    },
+    {
+      "at": 14408,
+      "before": "assertRootCleanup(await read(BASE,'probe19-root-independent-cleanup-v1.json'),RUN)",
+      "after": "assertRootCleanup(await read(BASE,'probe19-root-independent-cleanup-v1.json'),RUN,ENDED_BINDING.ownedPids)"
+    },
+    {
+      "at": 14590,
+      "before": "const freezeName='capacity-scout-observer-preference-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,9465);assert.equal(freezePin.sha256,'1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e');",
+      "after": "const freezeName='capacity-scout-anti-convergence-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,9472);assert.equal(freezePin.sha256,'ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182');"
+    },
+    {
+      "at": 15507,
+      "before": " const priorName='capacity-attack-deadline-driver-frozen-v1.json',priorPin=await pin(BASE,priorName);assert.equal(priorPin.bytes,6759);assert.equal(priorPin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');assert.equal(frozen.priorFreeze.bytes,priorPin.bytes);assert.equal(frozen.priorFreeze.sha256,priorPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,priorName)));const prior=await read(BASE,priorName);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');\r",
+      "after": " const observerName='capacity-scout-observer-preference-driver-frozen-v1.json',observerPin=await pin(BASE,observerName);assert.equal(observerPin.bytes,9465);assert.equal(observerPin.sha256,'1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e');assert.equal(frozen.priorFreeze.bytes,observerPin.bytes);assert.equal(frozen.priorFreeze.sha256,observerPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,observerName)));const historicalObserver=await read(BASE,observerName);assert.equal(historicalObserver.actualCodeCommit,'3a6d8c862d03ded3133605472a8f38bc6258af52');assert.equal(historicalObserver.sourceSha256,'445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634');\n const priorName='capacity-attack-deadline-driver-frozen-v1.json',priorPin=await pin(BASE,priorName);assert.equal(priorPin.bytes,6759);assert.equal(priorPin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');assert.equal(historicalObserver.priorFreeze.bytes,priorPin.bytes);assert.equal(historicalObserver.priorFreeze.sha256,priorPin.sha256);assert.ok(samePath(historicalObserver.priorFreeze.path,path.join(BASE,priorName)));const prior=await read(BASE,priorName);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');\r"
+    },
+    {
+      "at": 17457,
+      "before": "const regressionName='scout-observer-preference-root-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,5378);assert.equal(regressionPin.sha256,'00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1');",
+      "after": "const regressionName='scout-anti-convergence-v1/root-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,5113);assert.equal(regressionPin.sha256,'e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a');"
+    },
+    {
+      "at": 18329,
+      "before": "regression.counts,{tests:219,passed:219",
+      "after": "regression.counts,{tests:226,passed:226"
+    },
+    {
+      "at": 19221,
+      "before": "[['tests',219],['pass',219]",
+      "after": "[['tests',226],['pass',226]"
+    },
+    {
+      "at": 22744,
+      "before": "assert.equal(pins.rootCleanup.sha256,'1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af');",
+      "after": "assert.equal(pins.rootCleanup.sha256,ENDED_BINDING.rootCleanupSha256);"
+    },
+    {
+      "at": 22575,
+      "before": "{path:'evidence-tools/verify-evidence.mjs',bytes:46895,sha256:'5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58'}",
+      "after": "{path:'evidence-tools/verify-evidence.mjs',bytes:49105,sha256:'cc376548a7040fa5179badaffc8b201ff908902ed70fe50258305681d74a1457'}"
+    },
+    {
+      "at": 32325,
+      "before": "75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6",
+      "after": "a2b9fa102a584cf7994ae5fc900f9232f86fe8174c19fc0a57bfd8c24dbde212"
+    },
+    {
+      "at": 32156,
+      "before": "launcher.files.length,121",
+      "after": "launcher.files.length,116"
+    },
+    {
+      "at": 32305,
+      "before": "bytes:66405,sha256:'a2b9fa102a584cf7994ae5fc900f9232f86fe8174c19fc0a57bfd8c24dbde212'",
+      "after": "bytes:66317,sha256:'a2b9fa102a584cf7994ae5fc900f9232f86fe8174c19fc0a57bfd8c24dbde212'"
+    },
+    {
+      "at": 34175,
+      "before": "actualFull219Regression:regressionPin",
+      "after": "actualFull226Regression:regressionPin"
+    },
+    {
+      "at": 36259,
+      "before": "frozen Node H/219 source",
+      "after": "frozen Node J/226 source"
+    }
+  ],
+  "mainRawInverseExact": true,
+  "contract": {
+    "basis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+      "bytes": 5695,
+      "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+    },
+    "target": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\probe-contract-v1.mjs",
+      "bytes": 5860,
+      "sha256": "4248510a14558a606694faed7644485efb802cfc965e95ba545209893c8675cd"
+    },
+    "before": "import assert from 'node:assert/strict';\nimport expected from './expected-probe-policy-v1.json' with {type:'json'};\nexport const EXPECTED_POLICY=Object.freeze(expected);\nexport const PROBE_PHASES=Object.freeze([['stage-2',2,300,5],['stage-10',10,300,5],['soak',10,360,6]]);\nexport const BOUNDS=Object.freeze({archiveBytes:64*1024*1024*1024,jsonBytes:256*1024*1024,rawRows:50000000,lineBytes:64*1024*1024,minuteWindows:16,continuousWindows:40000,phaseEvents:128,memoryBuckets:1201,memoryBucketMs:3000});\nexport function parseProbeInvocation(args){if(args.length===1&&args[0]==='--self-check')return{selfCheck:true,runId:null};assert.ok(args.length===2&&args[0]==='--verify-ended-probe18'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[1]),'Explicit ended-probe18 flag and originalrunID required');return{selfCheck:false,runId:args[1].slice(6)};}\nexport function assertPolicy(policy){assert.deepEqual(policy,EXPECTED_POLICY);}\nexport function assertCompletedProbeShape(report){\n assertPolicy(report.policy);assert.equal(report.ok,true);assert.equal(report.ordinaryAccountsOnly,true);assert.equal(report.visualAccepted,false);\n assert.deepEqual(report.stages.map(s=>s.name),PROBE_PHASES.map(p=>p[0]));\n for(const[name,actors,seconds,windows]of PROBE_PHASES){const s=report.stages.find(s=>s.name===name);assert.equal(s.controlledActors,actors);assert.equal(s.seconds,seconds);assert.ok(Number.isSafeInteger(s.startedAtMs)&&Number.isSafeInteger(s.endedAtMs));assert.equal(s.measuredSeconds,(s.endedAtMs-s.startedAtMs)/1000);assert.ok(s.measuredSeconds>=seconds);assert.equal(s.completed,true);assert.equal(s.passed,true);assert.equal(s.rollingWindows.length,windows);let previous=s.startedAtMs;for(const w of s.rollingWindows){assert.equal(w.startedAtMs,previous);assert.equal(w.seconds,(w.endedAtMs-w.startedAtMs)/1000);assert.ok(w.seconds>=60);assert.ok(w.endedAtMs<=s.endedAtMs);assert.equal(w.passed,true);assert.equal(w.elapsedSeconds,(w.endedAtMs-s.startedAtMs)/1000);previous=w.endedAtMs;}}\n assert.deepEqual(report.nativeResume,[]);assert.deepEqual(report.savedVerification,[]);\n assert.equal(report.peakControlledActors,10);assert.equal(report.highestPassedStage,10);assert.equal(report.policy.fullAcceptanceEligible,false);assert.equal(report.playableCapacityAccepted,false);\n}\nexport function memoryTrend(samples){const points=samples.filter(s=>Number.isFinite(s.memory?.currentBytes));if(points.length<2)return{samples:points.length,seconds:0,slopeMiBPerHour:null};const first=points[0].sampledAtMs,xs=points.map(p=>(p.sampledAtMs-first)/3600000),ys=points.map(p=>p.memory.currentBytes/1048576),xm=xs.reduce((a,b)=>a+b)/xs.length,ym=ys.reduce((a,b)=>a+b)/ys.length;let n=0,d=0;for(let i=0;i<xs.length;i++){n+=(xs[i]-xm)*(ys[i]-ym);d+=(xs[i]-xm)**2;}return{samples:points.length,seconds:(points.at(-1).sampledAtMs-first)/1000,slopeMiBPerHour:d?n/d:null,startMiB:ys[0],endMiB:ys.at(-1),peakMiB:Math.max(...ys)};}\nexport function histogramDelta(before,after){\n assert.equal(before.buckets.length,after.buckets.length);const buckets=after.buckets.map((b,i)=>{assert.equal(b.upperBoundUs,before.buckets[i].upperBoundUs);const count=b.count-before.buckets[i].count;assert.ok(Number.isSafeInteger(count)&&count>=0);return{upperBoundUs:b.upperBoundUs,count};});const count=after.count-before.count;assert.equal(buckets.reduce((a,b)=>a+b.count,0),count);\n const unknown=before.saturated||after.saturated||before.discardedSamples||after.discardedSamples;\n const quantile=p=>{if(!count||unknown)return null;const wanted=Math.ceil(count*p);let n=0;for(const b of buckets){n+=b.count;if(n>=wanted)return b.upperBoundUs;}return null;};\n return{count,sumUs:after.sumUs-before.sumUs,overBudgetCount:after.overBudgetCount-before.overBudgetCount,buckets,p99UpperUs:quantile(.99),p999UpperUs:quantile(.999),quantileKnown:count>0&&!unknown&&quantile(.999)!==null,unknownReasons:[...(!count?['zero-observations']:[]),...(unknown?['saturated-or-discarded-cumulative-input']:[]),...(count&&quantile(.999)===null&&!unknown?['overflow-bucket-upper-bound-unknown']:[])],phaseMaximumUs:null,maximumRule:'Cumulative max is not subtractable; no phase maximum inferred.'};\n}\nexport function phaseTelemetryDeltas(brackets){return brackets.map(p=>{const a=p.afterStart,b=p.beforeEnd;if(!a||!b||a.sampledAtMs>b.sampledAtMs)return{name:p.name,complete:false,reason:'no-inside-phase-sampling-pair',histograms:null};const histograms={};for(const k of['immediateRequests','lifecycleRequests','movementAdmissions','zoneWork','ownerTickDeadlineLag','pendingMovementDeadlineLag']){const x=a.zoneMetrics[k],y=b.zoneMetrics[k];histograms[k]=histogramDelta(x.duration??x,y.duration??y);if(x.duration){histograms[k].successCount=y.successCount-x.successCount;histograms[k].failureCount=y.failureCount-x.failureCount;}}return{name:p.name,complete:true,requestedStartedAtMs:p.startedAtMs,requestedEndedAtMs:p.endedAtMs,sampledStartedAtMs:a.sampledAtMs,sampledEndedAtMs:b.sampledAtMs,unobservedStartEdgeMs:a.sampledAtMs-p.startedAtMs,unobservedEndEdgeMs:p.endedAtMs-b.sampledAtMs,histograms,scope:a.zoneMetrics.scope,definition:'Inside-phase sampled cumulative-bucket differences only. Not lifetime quantiles, exact completephase maxima, clientACK or ingress-to-authoritative-outbound timing.',hardServerSloAdjudicated:false};});}\n\nexport function assertRootCleanup(value,runId){assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.deepEqual(value.ownedPids,[70676,45472]);assert.deepEqual(value.remainingOwnedProcesses,[]);assert.deepEqual(value.remainingOwnedPortListeners,[]);assert.ok(typeof value.observedAt==='string'&&Number.isFinite(Date.parse(value.observedAt)));assert.equal(typeof value.scope,'string');}\r\n",
+    "after": "import assert from 'node:assert/strict';\nimport expected from './expected-probe-policy-v1.json' with {type:'json'};\nexport const EXPECTED_POLICY=Object.freeze(expected);\nexport const PROBE_PHASES=Object.freeze([['stage-2',2,300,5],['stage-10',10,300,5],['soak',10,360,6]]);\nexport const BOUNDS=Object.freeze({archiveBytes:64*1024*1024*1024,jsonBytes:256*1024*1024,rawRows:50000000,lineBytes:64*1024*1024,minuteWindows:16,continuousWindows:40000,phaseEvents:128,memoryBuckets:1201,memoryBucketMs:3000});\nexport function parseProbeInvocation(args){if(args.length===1&&args[0]==='--self-check')return{selfCheck:true,runId:null};assert.ok(args.length===2&&args[0]==='--verify-ended-probe19'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[1]),'Explicit ended-probe19 flag and originalrunID required');return{selfCheck:false,runId:args[1].slice(6)};}\nexport function assertPolicy(policy){assert.deepEqual(policy,EXPECTED_POLICY);}\nexport function assertCompletedProbeShape(report){\n assertPolicy(report.policy);assert.equal(report.ok,true);assert.equal(report.ordinaryAccountsOnly,true);assert.equal(report.visualAccepted,false);\n assert.deepEqual(report.stages.map(s=>s.name),PROBE_PHASES.map(p=>p[0]));\n for(const[name,actors,seconds,windows]of PROBE_PHASES){const s=report.stages.find(s=>s.name===name);assert.equal(s.controlledActors,actors);assert.equal(s.seconds,seconds);assert.ok(Number.isSafeInteger(s.startedAtMs)&&Number.isSafeInteger(s.endedAtMs));assert.equal(s.measuredSeconds,(s.endedAtMs-s.startedAtMs)/1000);assert.ok(s.measuredSeconds>=seconds);assert.equal(s.completed,true);assert.equal(s.passed,true);assert.equal(s.rollingWindows.length,windows);let previous=s.startedAtMs;for(const w of s.rollingWindows){assert.equal(w.startedAtMs,previous);assert.equal(w.seconds,(w.endedAtMs-w.startedAtMs)/1000);assert.ok(w.seconds>=60);assert.ok(w.endedAtMs<=s.endedAtMs);assert.equal(w.passed,true);assert.equal(w.elapsedSeconds,(w.endedAtMs-s.startedAtMs)/1000);previous=w.endedAtMs;}}\n assert.deepEqual(report.nativeResume,[]);assert.deepEqual(report.savedVerification,[]);\n assert.equal(report.peakControlledActors,10);assert.equal(report.highestPassedStage,10);assert.equal(report.policy.fullAcceptanceEligible,false);assert.equal(report.playableCapacityAccepted,false);\n}\nexport function memoryTrend(samples){const points=samples.filter(s=>Number.isFinite(s.memory?.currentBytes));if(points.length<2)return{samples:points.length,seconds:0,slopeMiBPerHour:null};const first=points[0].sampledAtMs,xs=points.map(p=>(p.sampledAtMs-first)/3600000),ys=points.map(p=>p.memory.currentBytes/1048576),xm=xs.reduce((a,b)=>a+b)/xs.length,ym=ys.reduce((a,b)=>a+b)/ys.length;let n=0,d=0;for(let i=0;i<xs.length;i++){n+=(xs[i]-xm)*(ys[i]-ym);d+=(xs[i]-xm)**2;}return{samples:points.length,seconds:(points.at(-1).sampledAtMs-first)/1000,slopeMiBPerHour:d?n/d:null,startMiB:ys[0],endMiB:ys.at(-1),peakMiB:Math.max(...ys)};}\nexport function histogramDelta(before,after){\n assert.equal(before.buckets.length,after.buckets.length);const buckets=after.buckets.map((b,i)=>{assert.equal(b.upperBoundUs,before.buckets[i].upperBoundUs);const count=b.count-before.buckets[i].count;assert.ok(Number.isSafeInteger(count)&&count>=0);return{upperBoundUs:b.upperBoundUs,count};});const count=after.count-before.count;assert.equal(buckets.reduce((a,b)=>a+b.count,0),count);\n const unknown=before.saturated||after.saturated||before.discardedSamples||after.discardedSamples;\n const quantile=p=>{if(!count||unknown)return null;const wanted=Math.ceil(count*p);let n=0;for(const b of buckets){n+=b.count;if(n>=wanted)return b.upperBoundUs;}return null;};\n return{count,sumUs:after.sumUs-before.sumUs,overBudgetCount:after.overBudgetCount-before.overBudgetCount,buckets,p99UpperUs:quantile(.99),p999UpperUs:quantile(.999),quantileKnown:count>0&&!unknown&&quantile(.999)!==null,unknownReasons:[...(!count?['zero-observations']:[]),...(unknown?['saturated-or-discarded-cumulative-input']:[]),...(count&&quantile(.999)===null&&!unknown?['overflow-bucket-upper-bound-unknown']:[])],phaseMaximumUs:null,maximumRule:'Cumulative max is not subtractable; no phase maximum inferred.'};\n}\nexport function phaseTelemetryDeltas(brackets){return brackets.map(p=>{const a=p.afterStart,b=p.beforeEnd;if(!a||!b||a.sampledAtMs>b.sampledAtMs)return{name:p.name,complete:false,reason:'no-inside-phase-sampling-pair',histograms:null};const histograms={};for(const k of['immediateRequests','lifecycleRequests','movementAdmissions','zoneWork','ownerTickDeadlineLag','pendingMovementDeadlineLag']){const x=a.zoneMetrics[k],y=b.zoneMetrics[k];histograms[k]=histogramDelta(x.duration??x,y.duration??y);if(x.duration){histograms[k].successCount=y.successCount-x.successCount;histograms[k].failureCount=y.failureCount-x.failureCount;}}return{name:p.name,complete:true,requestedStartedAtMs:p.startedAtMs,requestedEndedAtMs:p.endedAtMs,sampledStartedAtMs:a.sampledAtMs,sampledEndedAtMs:b.sampledAtMs,unobservedStartEdgeMs:a.sampledAtMs-p.startedAtMs,unobservedEndEdgeMs:p.endedAtMs-b.sampledAtMs,histograms,scope:a.zoneMetrics.scope,definition:'Inside-phase sampled cumulative-bucket differences only. Not lifetime quantiles, exact completephase maxima, clientACK or ingress-to-authoritative-outbound timing.',hardServerSloAdjudicated:false};});}\n\nexport function assertRootCleanup(value,runId,ownedPids){assert.ok(Array.isArray(ownedPids)&&ownedPids.length===2&&ownedPids.every(p=>Number.isSafeInteger(p)&&p>0),'PENDING actual owned PIDs and Root cleanup shape');assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.deepEqual(value.ownedPids,ownedPids);assert.deepEqual(value.remainingOwnedProcesses,[]);assert.deepEqual(value.remainingOwnedPortListeners,[]);assert.ok(typeof value.observedAt==='string'&&Number.isFinite(Date.parse(value.observedAt)));assert.equal(typeof value.scope,'string');}\r\n"
+  },
+  "runner": {
+    "basis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+      "bytes": 2257,
+      "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+    },
+    "target": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\run-ended-probe19-v1.mjs",
+      "bytes": 2257,
+      "sha256": "d9402bdd6e25accf2556f1a98291ded3564c5763bc34880e4e4f209762ef454f"
+    },
+    "replacement": "probe18 to probe19 only"
+  },
+  "unchanged": [
+    {
+      "basis": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rawExact": true
+    },
+    {
+      "basis": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "rawExact": true
+    },
+    {
+      "basis": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "rawExact": true
+    }
+  ],
+  "actualStaticRefs": {
+    "runtimeSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\launcher-source-frozen-v1.json",
+      "bytes": 66317,
+      "sha256": "a2b9fa102a584cf7994ae5fc900f9232f86fe8174c19fc0a57bfd8c24dbde212"
+    },
+    "streamVerifier": {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/evidence-tools/verify-evidence.mjs",
+      "bytes": 49105,
+      "sha256": "cc376548a7040fa5179badaffc8b201ff908902ed70fe50258305681d74a1457"
+    }
+  },
+  "scope": "Original action/native/minute/continuous/HP/policy/telemetry/Store verifier algorithms are unchanged. Current identities use J/226→H/219→d240/210→19099. Missing run/PIDs/OS/consumer-terminal facts are PENDING; verify() first refuses before any run read. No packet-level900 replay added.",
+  "modulesImported": false,
+  "sourceToolSealed": false,
+  "actualReplayPerformed": false,
+  "testsRun": false,
+  "beforeReleaseSelfCheck": {
+    "intermediateDraft": {
+      "bytes": 37467,
+      "sha256": "76a5275173ac96bba52c7b9b285337f139ba87e9e57a5bd8be791ec96369c803"
+    },
+    "launcherBytesMetadataCorrectedToActual66317": true,
+    "noEvaluationOrReplay": true,
+    "current226OutputLabelsAlsoCorrected": true
+  }
+}

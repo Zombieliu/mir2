@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v2",
+  "sourceOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\reports\\1793047839765-82a5e52b.preparation-report.json",
+    "bytes": 12866,
+    "sha256": "07e47a4aa30335776e9f35a6e11f3249a64c2a30ceb6572e24230dea1ab8238f"
+  },
+  "records": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "sequence": 720,
+      "monotonicMs": 2402.4801,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "sequence": 685,
+      "monotonicMs": 5854.9031,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "sequence": 677,
+      "monotonicMs": 9425.2604,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "sequence": 1205,
+      "monotonicMs": 125281.7497,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    }
+  ],
+  "pointsAreActualSavedPositions": true,
+  "formalOrdinaryReloginVerified": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "isolated-ui-fixture.json",
+    "bytes": 693,
+    "sha256": "61f4fc337a374f6f1d3e1b60dca7ed2e9f068f716c47638f5e6c799ce934a497"
+  },
+  "producerReport": {
+    "testOnly": true,
+    "syntheticUiFixture": true,
+    "realPaymentValidation": false,
+    "sourceSnapshotSha256": "ff1e6f3c20555acbd6c68bf2a45b72b89e2f1e41a9af9572db80c5da87a2fd42",
+    "sourceSnapshotPreservedPrivately": true,
+    "originalAccountStoreModified": false,
+    "importedActorHistoricalUsdcOrderCount": 3,
+    "fixtureUsdcOrderCount": 0,
+    "fixtureProcurementLedger": "Empty, default legal shape; feature disabled; no driver",
+    "credit": 100,
+    "gold": 10000,
+    "providersEnabled": false,
+    "chainWritesPossible": false,
+    "reason": "Imported historical orders require their original recovery driver; this UI-only fixture never resumes chain work or changes the product recovery checks."
+  },
+  "phase": "synthetic UI only; original3 historical USDC orders preserved in private source store",
+  "realPaymentValidation": false
+}

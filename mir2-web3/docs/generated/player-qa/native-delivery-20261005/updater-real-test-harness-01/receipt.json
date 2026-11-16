@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.r18.updater-exact-signed-delta-harness.v1",
+  "productionUpdaterSource": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "onlyTestFileChanged": "apps/game-client/windows-updater/tests/real_packages.rs",
+  "baselineSha256": "efab9f9498eaa79bcd98843cb9971874d8a7a5378c0367ab241870f40713c840",
+  "harnessSha256": "5176dc84935b3f2a1b13e1bbfb7492c5e1f0cb9df35fc4ea4ef2f33eb942f622",
+  "change": "Replace inherited no-asset R17 expectation and suffix subset with exact signed game-request set; preserve all actual update, CMS, hash, private-file, pending launch, quarantine and rollback checks.",
+  "productionCodeChanged": false,
+  "testsExecuted": false,
+  "userInstallationChanged": false
+}

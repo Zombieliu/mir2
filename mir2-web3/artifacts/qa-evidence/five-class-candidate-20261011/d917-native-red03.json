@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.five-class-original-red.v3",
+  "createdUtc": "2026-10-11T22:33:54.167881+00:00",
+  "run": "d917-native-full03",
+  "exitCode": 101,
+  "passed": 985,
+  "failed": 2,
+  "originalIgnored": 7,
+  "sourceDrift": [],
+  "compiledSourceSnapshotSha256": "48b93d246681767362a142ec70e2e1a642537ea6c3d8da93dc3f25f0179c71bb",
+  "cargoLogSha256": "7d15628c089248375599daee40a99d8f7ab90badeb1a7dad137a827d8d082f4a",
+  "releaseBuilt": false,
+  "published": false,
+  "humanAccepted": false,
+  "originalFailuresRetained": true,
+  "archive": {
+    "path": "d917-native-red-original-evidence03.zip",
+    "sha256": "10e8bd282573746303e6be66e3ae888bbdac1800439efcec08bf900950d4b58a",
+    "bytes": 246287
+  },
+  "scope": "BackStep paired-clock test failures remain red; prior four corpse/revive fixture checks passed.",
+  "priorReds": [
+    {
+      "path": "d917-native-red01.json",
+      "sha256": "446fcf42cc92dd6fd286a3bcafaf87f38deda045c57664e6a45ef263d8adb56a"
+    },
+    {
+      "path": "d917-native-red02.json",
+      "sha256": "4460691df3f44ad1405bf198d90ee00d36ff0299fe73ed9381f65d73c9cc0d86"
+    }
+  ]
+}

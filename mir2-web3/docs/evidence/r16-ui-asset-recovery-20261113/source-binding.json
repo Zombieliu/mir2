@@ -1,0 +1,89 @@
+{
+  "source": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "parent": "54706a86499bbe5b0d73ef9318d679697f39d33d",
+  "snapshot": "63977fd7e102682ce3fe08f9223a127f7bd6250a",
+  "committedFiles": [
+    ".github/workflows/bevy-runtime-r2-release.yml",
+    "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
+    "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
+    "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
+    "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
+    "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
+    "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
+    "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
+    "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
+    "mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json",
+    "mir2-web3/apps/web/scripts/lib/production-asset-config.mjs",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-r2-upload.mjs",
+    "mir2-web3/apps/web/scripts/test-production-asset-config.mjs",
+    "mir2-web3/config/numeron-r16-web-assets.json",
+    "mir2-web3/docs/AGENT-CURRENT.md",
+    "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+    "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+    "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/README.md",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/browser-cases.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/build-receipt.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/default-font-recovered.png",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/preservation.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/production-before.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/receipt.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/retained-failures.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/runtime-artifact.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/rust-source-closure.json",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/tests.txt",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/ui-asset-fault.mjs",
+    "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/webgl2-skins-recovered.png"
+  ],
+  "matchingGitSourceFiles": 460,
+  "matchingRawBytes": 454,
+  "gitLineEndingNormalizations": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/Cargo.lock",
+      "sourceSha256": "3de2eb07fad487338b0a05042b34c1151bbf652531051416b62074ff7ab6b263",
+      "gitCanonicalSha256": "d2054e187c8af34028a88c4650b4da646451931a15a01e83ea405b3204ed88a8",
+      "gitBlob": "aae241f4c44eafbe8beb58e307b801a82c122568",
+      "difference": "Git line-ending normalization only"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/crystal_additive_ui.wgsl",
+      "sourceSha256": "5aee01a57baaaa797c6c0cff093e18a547561f464bb861e35074ee35343f7a65",
+      "gitCanonicalSha256": "7528835165fe6aea1c6375df8b87b310a04e5e50a23c7e99ac5dc5ec02e5a39c",
+      "gitBlob": "b222da14052cb367630821898388b61b7508574e",
+      "difference": "Git line-ending normalization only"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/Cargo.lock",
+      "sourceSha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8",
+      "gitCanonicalSha256": "a216ff6c6ef92ac18738544aa1c3e8cf76545838cbe0a8018caaba1aedd3da2a",
+      "gitBlob": "3feff5dab0351d04c3469a74072633b78ba482b4",
+      "difference": "Git line-ending normalization only"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/Cargo.lock",
+      "sourceSha256": "bf09b850a8ddecc936931f1d6339d0789b1440644dd8cee48824feed0cabcae7",
+      "gitCanonicalSha256": "fa2e7b35e5c85ef8487b472bb1e5396e90fb48823f3707463a60c4c59e8933fb",
+      "gitBlob": "3552e8b5e6765f573a40c9414510759d698c1aff",
+      "difference": "Git line-ending normalization only"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "sourceSha256": "bf65c023b73f01a3544674aa023f7bb8b6e52e19dba78e5f2dbb55c8e99fb969",
+      "gitCanonicalSha256": "dd8c223ac85f416917182938986e8ccbf594d7a241e34df9a509044e78d84204",
+      "gitBlob": "114695c7ccc7f724426eef55ee01693a215807e9",
+      "difference": "Git line-ending normalization only"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "sourceSha256": "e350e3712c1e767ae6e0b33690db497f516ba97fa7a73021297344ca3d9c58a7",
+      "gitCanonicalSha256": "6fde9a1d77ddaafe316cc6bca1e5eb91dc28e1d77abf70e5994b72020c10a021",
+      "gitBlob": "5f2f056a9ae6d0a23c8857b4df880a21b4d80dd4",
+      "difference": "Git line-ending normalization only"
+    }
+  ],
+  "runtime": "bevy-0c553a754308e5b8",
+  "artifactCommit": "c52640554fde32200d1d0da802c5b1bad74a08cb",
+  "artifactTag": "refs/tags/codex/r16-ui-asset-recovery-runtime-20261113",
+  "foreignIndexPreserved": true,
+  "artifactPublishedRef": "refs/tags/codex/r16-ui-asset-recovery-runtime-20261113"
+}

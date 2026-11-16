@@ -1,0 +1,10 @@
+{
+  "phase": "copy-owned-browser-profile",
+  "exit": 1,
+  "error": "ENOSPC",
+  "browserStarted": false,
+  "servicesStarted": false,
+  "gameplayAssertionsRun": false,
+  "partialOutputRetained": true,
+  "nextOutput": "F:/mir2-builds/r16-font-body-progress-20261116/world-r3-seeded-cache"
+}

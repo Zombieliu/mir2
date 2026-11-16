@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "historyPreservingMerge": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+  "finalGameRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "finalUpdaterRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "currentIntegrationHead": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "deltaFromGameToUpdater": [
+    "apps/game-client/windows-updater/src/engine_maintenance.rs"
+  ],
+  "gameBuiltFromFinalUpdaterRevision": false,
+  "updaterPurpose": "Independent Scope::Unified maintenance channel binding; oldbaseline pins and unknown no-I/O preserved",
+  "publicFeedsModified": false
+}

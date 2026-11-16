@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T19:30:37.974Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v4.json",
+    "bytes": 31015,
+    "sha256": "c988176e9409357eee0b0101851a8197ca0ab25d913d1224ab01dd1a2b50b6a1"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-seal-and-guard-v1.mjs",
+    "bytes": 13790,
+    "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+  },
+  "scope": "Independent narrow two-PowerShell-literal retry review. No source script or controller mode, syntax/test repeat, account/ACL operation, private/executable/raw/trace read, or realm launch.",
+  "priorReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-runtime-independent-review-v1\\review-v2.json",
+    "bytes": 3371,
+    "sha256": "79f7c7b18ab97105235995997623d15cf073ef8ad92970bf29d24c2ed786ef55"
+  },
+  "earlierReviewCoverageCorrection": "The earlier preseal review missed both PowerShell helpers retaining their old44 candidate-state gate. The real prepare refusal and prior reviews remain preserved; this addendum explicitly corrects that coverage gap.",
+  "delta": {
+    "changes": [
+      {
+        "before": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\initialize-private.ps1.before-fresh50-binding-repair-v1.txt",
+          "bytes": 2226,
+          "sha256": "95f66e1b42a00182563adfe8a99cded539340b006f7a89ad2c80908b7c941169"
+        },
+        "after": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\initialize-private.ps1",
+          "bytes": 2226,
+          "sha256": "12fa31e59cfc1729a8d9b332cdd2cb0f044281a1910bcd388386a479b78bc9bf"
+        },
+        "onlyTwoStringLiteralReplacements": true,
+        "fullRawInverseExact": true
+      },
+      {
+        "before": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recover-drained-owned.ps1.before-fresh50-binding-repair-v1.txt",
+          "bytes": 3195,
+          "sha256": "d312a0bd57a2d77159ba61817a4a793798e39ab98fcef512aa6660e69fc25a37"
+        },
+        "after": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recover-drained-owned.ps1",
+          "bytes": 3195,
+          "sha256": "92345903964b600be994b59874ccd953ae3d4e70c0b88987665edcac48c31583"
+        },
+        "onlyTwoStringLiteralReplacements": true,
+        "fullRawInverseExact": true
+      }
+    ],
+    "actualCandidateStateMatchesNewFiftyGate": true,
+    "preparedOnlyTwoFilePinsAndLocalAggregateChanged": true,
+    "remainingFortyNineLocalAndTwelveExternalEntriesUnchanged": true,
+    "allJavaScriptControllerAndOriginalTwentyNineNodeSyntaxEntriesUnchanged": true,
+    "aclPathOwnerAndProcessCounterRecoverySemanticsRawUnchanged": true
+  },
+  "evidence": {
+    "repair": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-powershell-binding-repair-v1.json",
+      "bytes": 2458,
+      "sha256": "9a8066a28939d6fd2b5c01f088017cea457b03628d0daf5591686d6f848642a5"
+    },
+    "actualPowerShellAstParse": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-powershell-parse-v1.json",
+      "bytes": 675,
+      "sha256": "1d40ae2bbe5af6281417044204d76f2d0b379be9e0467f15ea3101ca3e9c4be8"
+    },
+    "parserVersion": "7.6.5",
+    "parsedFiles": 2,
+    "parseErrors": 0,
+    "sourceScriptsExecuted": false,
+    "testsExecutedByReviewer": false
+  },
+  "failureHistory": {
+    "observedRootExecutions": {
+      "newSealExitCode": 0,
+      "readonlyGuardExitCode": 0,
+      "prepareExitCode": 1,
+      "prepareError": "initialize-private.ps1 rejected new50 candidate because its guard still required new44; PENDING_FRESH44_RELEASE_AND_FULL16",
+      "stdioEvidence": "Observed Root tool output only; no raw stdout/stderr file was created."
+    },
+    "artifactsPreserved": {
+      "seal": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-before-powershell-guard-failure-v1.json",
+        "bytes": 33193,
+        "sha256": "3c4a349693be80922ce2b7161ce8daf20592ae9cb10c7c7f691100eee9aa57fb"
+      },
+      "readonlyGuard": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\source-guard-readonly-before-powershell-guard-failure-v1.json",
+        "bytes": 2293,
+        "sha256": "dd1ca31962b48e50a7240a4f3bc56431d15cc84ac6b0af630ac7e58672967be0"
+      },
+      "preparationLock": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\preparation-before-powershell-guard-failure-v1.lock",
+        "bytes": 230,
+        "sha256": "8b88c3a7288c12b25fe5a853b8ac6bc83ed8d100f3aad56470efbe8937836d9d"
+      }
+    },
+    "activeSealGuardLockAbsent": true,
+    "privateAccountsAndRealmNotCreated": true,
+    "rawStdioFileNotFabricated": true
+  },
+  "rootNextStep": "Root can now reseal, run the separate read-only guard and then prepare100 ordinary accounts using prepared-v4. Actual prior seal/guard/prepare-lock artifacts remain in their explicit failure-history names. No previous failure is retrospectively called successful.",
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "probe17Executed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Started": false
+  }
+}

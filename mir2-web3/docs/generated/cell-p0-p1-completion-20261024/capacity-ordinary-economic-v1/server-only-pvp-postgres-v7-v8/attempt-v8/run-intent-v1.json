@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T21:15:34.218Z",
+  "profile": "server-only-preconfigured-pvp-full-combat-v1",
+  "storageBackend": "postgres-source-of-truth-isolated",
+  "sessionCache": "development-in-memory",
+  "postgresImportValidation": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-postgres-v1/import-validation-v1.json",
+    "bytes": 874,
+    "sha256": "89546097e8f903c8cfe67f8c610d5daa05bde9c49e64ecae2dbba1043a006f74"
+  },
+  "backend": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v2/bin/mir2-gateway.exe",
+    "bytes": 87439360,
+    "sha256": "e55d15eef60e2ee289a92bc17a72ce3731376b5ed8b06bd36831807b99bb0a7b"
+  },
+  "driver": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-pvp-stress.mjs",
+    "bytes": 46798,
+    "sha256": "a28701928adec72e401d004ad0bd5590b1a52d51ee1c275bdb03b49558bda3ca"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\fixture\\public\\fixture-manifest-v1.json",
+    "bytes": 135980,
+    "sha256": "45539895b112ae9ada6aefed4aa5d5de0765e1c6110e1ffe6a918e9cdfa4395e"
+  },
+  "normalPasswordLogin": true,
+  "authenticationBucket": "prior stress-v7 same-endpoint auth ledger copied unchanged; ordinary-run ledger and authentication controls unchanged",
+  "normalCombatAndHealing": true,
+  "legalPreconfiguredLevel40EquipmentAndLargeHp194": true,
+  "ordinarySupplyAccepted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

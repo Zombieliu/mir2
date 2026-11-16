@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public09 analysis derivatives only. Prior v1 pins unchanged; no private/account/store/raw recordings included.",
+  "previousWhitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\public-whitelist-v1.json",
+    "bytes": 1741,
+    "sha256": "4b1db9db06d23732331646399380b96760ddf3dfdfa646c488332062ba0bf5a1"
+  },
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\selected-events-v1.json",
+      "bytes": 293598,
+      "sha256": "40c77dd1f91cc4426e4b9da372c1701e3c723d69f6795a67e86f683265e4fff7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\spectator-three-frame-projection-v1.json",
+      "bytes": 14926,
+      "sha256": "07f231626e3683f3b98b058b1f374efd75465d4fce0552943b8094a62d728163"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\spectator-three-frame-projection-v2.json",
+      "bytes": 17690,
+      "sha256": "b1a25ffbd9a8f5c410c76f52995a939cdca36a0363d33f0ff35676c7fa9f6556"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\request49-witness-loss-v1.json",
+      "bytes": 7778,
+      "sha256": "1596d9217b6028c18725f56df96bba859094b55839194da609ac0c81aa4674bb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\summary-v1.json",
+      "bytes": 19950,
+      "sha256": "7d21d92d74e40d8d5199580cf14a95a73e93cb522f5a69e74188ec332f75a90d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\analyze-probe09-death-v1.mjs",
+      "bytes": 8066,
+      "sha256": "23eb1644237b618acf2cc09ce7bb674b14da6572079d09e9fed2b901b36d1580"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-probe09-death-analysis-v1.mjs",
+      "bytes": 12669,
+      "sha256": "334991928a3d0f27d4f4c1404e7a562a099a9b1c398d5acbb270e43d5729fe6d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\request49-observer-geometry-v1.json",
+      "bytes": 10065,
+      "sha256": "3799b3d9adbdf644fd1d3da9a885136103efcfbdaaa9dafcbed536d5b1ecdc1d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\poststrike-pursuit-budget-gap-v1.json",
+      "bytes": 28223,
+      "sha256": "b92b5432ded9e034e1403871f09e3097c520b461fc2b7117ddfde08990743a0f"
+    }
+  ]
+}

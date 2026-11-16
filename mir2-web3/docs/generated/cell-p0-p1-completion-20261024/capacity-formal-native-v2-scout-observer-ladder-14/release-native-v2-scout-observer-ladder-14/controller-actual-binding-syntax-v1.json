@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--check",
+    "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs"
+  ],
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "",
+  "onlySyntax": true,
+  "productImported": false,
+  "modeExecuted": false
+}

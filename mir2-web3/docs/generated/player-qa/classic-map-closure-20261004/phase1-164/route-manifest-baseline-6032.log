@@ -1,0 +1,126 @@
+TAP version 13
+# Subtest: level-15 routes bound every segment and preserve each class instructor branch
+ok 1 - level-15 routes bound every segment and preserve each class instructor branch
+  ---
+  duration_ms: 515.626
+  type: 'test'
+  ...
+# Subtest: decodes authoritative Crystal ClientQuestInfo headers
+ok 2 - decodes authoritative Crystal ClientQuestInfo headers
+  ---
+  duration_ms: 0.1852
+  type: 'test'
+  ...
+# Subtest: resolves quest NPC object IDs to real map positions
+ok 3 - resolves quest NPC object IDs to real map positions
+  ---
+  duration_ms: 0.158
+  type: 'test'
+  ...
+# Subtest: binds kill tasks to real respawns
+ok 4 - binds kill tasks to real respawns
+  ---
+  duration_ms: 0.1848
+  type: 'test'
+  ...
+# Subtest: q113 casters retain Crystal D711's shared BlackMaggot and WedgeMoth rows
+ok 5 - q113 casters retain Crystal D711's shared BlackMaggot and WedgeMoth rows
+  ---
+  duration_ms: 1575.0081
+  type: 'test'
+  ...
+# Subtest: distinguishes ordinary Q-drops from harvest Q-drops
+ok 6 - distinguishes ordinary Q-drops from harvest Q-drops
+  ---
+  duration_ms: 0.1665
+  type: 'test'
+  ...
+# Subtest: marks Crystal HarvestMonster subclasses as corpse-harvest item sources
+ok 7 - marks Crystal HarvestMonster subclasses as corpse-harvest item sources
+  ---
+  duration_ms: 0.1625
+  type: 'test'
+  ...
+# Subtest: models zero-index quest endpoints as visible Quest Diary actions
+ok 8 - models zero-index quest endpoints as visible Quest Diary actions
+  ---
+  duration_ms: 0.0583
+  type: 'test'
+  ...
+# Subtest: harvest monster drops can satisfy Crystal item tasks
+ok 9 - harvest monster drops can satisfy Crystal item tasks
+  ---
+  duration_ms: 0.1966
+  type: 'test'
+  ...
+# Subtest: binds q140 GoldChestnut to the imported chestnut-tree fields
+ok 10 - binds q140 GoldChestnut to the imported chestnut-tree fields
+  ---
+  duration_ms: 0.2516
+  type: 'test'
+  ...
+# Subtest: safe supply loot is derived from ordinary drops, class stats, and merchant trade lists
+ok 11 - safe supply loot is derived from ordinary drops, class stats, and merchant trade lists
+  ---
+  duration_ms: 1.7793
+  type: 'test'
+  ...
+# Subtest: progression skill books are class-compatible and level-bounded Crystal items
+ok 12 - progression skill books are class-compatible and level-bounded Crystal items
+  ---
+  duration_ms: 0.8918
+  type: 'test'
+  ...
+# Subtest: binds flag tasks to visible scripted-world NPC interactions
+ok 13 - binds flag tasks to visible scripted-world NPC interactions
+  ---
+  duration_ms: 0.2662
+  type: 'test'
+  ...
+# Subtest: summarizes the complete Warrior 1-50 data surface
+ok 14 - summarizes the complete Warrior 1-50 data surface
+  ---
+  duration_ms: 0.0913
+  type: 'test'
+  ...
+# Subtest: records current runtime-profile gaps separately from Crystal content gaps
+not ok 15 - records current runtime-profile gaps separately from Crystal content gaps
+  ---
+  duration_ms: 0.8576
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-route-manifest.mjs:283:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    26 !== 25
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 25
+  actual: 26
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs:285:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: builds distinct Warrior, Wizard, and Taoist instructor branches
+ok 16 - builds distinct Warrior, Wizard, and Taoist instructor branches
+  ---
+  duration_ms: 1754.8915
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 15
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4637.8159

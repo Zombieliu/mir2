@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:44:27.085Z",
+  "scope": "Bounded independent read-only addendum for the separately authorized actor92 repair. No product or scene writes, search rerun, service or test execution.",
+  "verdict": {
+    "staticBlockingFound": false,
+    "staticCandidateSuitableForFreshPairedProbe": true,
+    "formalCapacityPassed": false,
+    "accepted": false,
+    "capacityAccepted": false,
+    "authorizesRun": false
+  },
+  "artifactPins": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    }
+  ],
+  "originalReviewPin": {
+    "path": "C:/mir2-build/p01-completion-20261024/compact-halo-scene-independent-review-v1.json",
+    "bytes": 11639,
+    "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+  },
+  "changes": [
+    {
+      "actorIndex": 92,
+      "from": {
+        "x": 227,
+        "y": 531
+      },
+      "to": {
+        "x": 229,
+        "y": 534
+      },
+      "chebyshevDisplacement": 3
+    }
+  ],
+  "exactFirst10RawPreserved": true,
+  "adapters": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validate-candidate.mjs",
+        "bytes": 11177,
+        "sha256": "29a256fca718bfcc39987c68b37a0cf613f7adc98e2223bd48b9904777bc944b"
+      },
+      "adapter": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+        "bytes": 11508,
+        "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+      },
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/prefix-scout-cost-nearest-final-v3.mjs",
+        "bytes": 2562,
+        "sha256": "8bfec072bcce1d734615bf74dd0c1068029144b181311bbaeb7044711ea3017a"
+      },
+      "adapter": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+        "bytes": 2887,
+        "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+      },
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-nearest-final-v3.mjs",
+        "bytes": 8407,
+        "sha256": "ace668519d08c3ed6323a2ebeb01fa47cdb0919db283c25d79dd924611d46cf1"
+      },
+      "adapter": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+        "bytes": 8728,
+        "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+      },
+      "inverseRawExact": true
+    }
+  ],
+  "independentDirectChecks": {
+    "bodyChecks": 900,
+    "uniqueBodyCells": 900,
+    "haloChecks": 2500,
+    "uniqueHaloCells": 2102,
+    "witnessPointChecks": 29403,
+    "savedTargetPaths": 1548,
+    "savedScoutPaths": 18,
+    "pathCells": 66560,
+    "pathSteps": 64994,
+    "allSavedPathsAndDiagonalsClear": true,
+    "noOtherActiveRepresentativeHomeOnAnySavedPathOrGoal": true,
+    "originalPrefixContractsRead": [
+      {
+        "count": 2,
+        "homesPassed": true,
+        "clusterPassed": null
+      },
+      {
+        "count": 10,
+        "homesPassed": true,
+        "clusterPassed": true
+      },
+      {
+        "count": 25,
+        "homesPassed": true,
+        "clusterPassed": true
+      },
+      {
+        "count": 50,
+        "homesPassed": true,
+        "clusterPassed": true
+      },
+      {
+        "count": 100,
+        "homesPassed": true,
+        "clusterPassed": true
+      }
+    ],
+    "originalBudgetScoutReportsRead": [
+      {
+        "count": 10,
+        "secondCircuitUnitWalkSteps": 97,
+        "representativeHomeOccupancyOnly": true
+      },
+      {
+        "count": 25,
+        "secondCircuitUnitWalkSteps": 172,
+        "representativeHomeOccupancyOnly": true
+      },
+      {
+        "count": 50,
+        "secondCircuitUnitWalkSteps": 372,
+        "representativeHomeOccupancyOnly": true
+      },
+      {
+        "count": 100,
+        "secondCircuitUnitWalkSteps": 886,
+        "representativeHomeOccupancyOnly": true
+      }
+    ],
+    "modelDpRecalculations": [
+      {
+        "actors": 10,
+        "level": 1,
+        "dc": [
+          2,
+          4
+        ],
+        "idealExpectedPositiveHitsPerMinute": 57.722063220564465,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12
+      },
+      {
+        "actors": 10,
+        "level": 5,
+        "dc": [
+          3,
+          5
+        ],
+        "idealExpectedPositiveHitsPerMinute": 44.093522328913274,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12
+      },
+      {
+        "actors": 10,
+        "level": 10,
+        "dc": [
+          4,
+          6
+        ],
+        "idealExpectedPositiveHitsPerMinute": 35.8161865569273,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12
+      },
+      {
+        "actors": 10,
+        "level": 15,
+        "dc": [
+          5,
+          7
+        ],
+        "idealExpectedPositiveHitsPerMinute": 30.78765432098765,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12
+      },
+      {
+        "actors": 100,
+        "level": 1,
+        "dc": [
+          2,
+          4
+        ],
+        "idealExpectedPositiveHitsPerMinute": 244.02017408015817,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120
+      },
+      {
+        "actors": 100,
+        "level": 5,
+        "dc": [
+          3,
+          5
+        ],
+        "idealExpectedPositiveHitsPerMinute": 186.46033125031755,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120
+      },
+      {
+        "actors": 100,
+        "level": 10,
+        "dc": [
+          4,
+          6
+        ],
+        "idealExpectedPositiveHitsPerMinute": 151.4661636945588,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120
+      },
+      {
+        "actors": 100,
+        "level": 15,
+        "dc": [
+          5,
+          7
+        ],
+        "idealExpectedPositiveHitsPerMinute": 130.47366255144033,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120
+      }
+    ]
+  },
+  "trialHistory": [
+    {
+      "candidateNumber": 1,
+      "proposedHome": {
+        "x": 229,
+        "y": 533
+      },
+      "localFailureRepaired": false,
+      "affectedPrefixPassed": false
+    },
+    {
+      "candidateNumber": 2,
+      "proposedHome": {
+        "x": 229,
+        "y": 534
+      },
+      "localFailureRepaired": true,
+      "affectedPrefixPassed": true
+    }
+  ],
+  "trialHistoryCorrection": "Two trial records exist: candidate1 (229,533) failed, candidate2 (229,534) passed. Earlier chat description first-candidate pass was inaccurate; original failed trial is preserved.",
+  "limitations": [
+    "All scout prefix pass values were verified from immutable producer reports and unchanged adapters. They were not independently searched again.",
+    "The100-person second scout circuit is886 unit walk steps, versus97 at10. This is not proof that per-minute18 launched/12 dual-positive thresholds or95% native completion can be maintained.",
+    "123 canonical target slots at100 produce an ideal conditional130.474 positive hits/min atlevel15; this exceeds120positive but does not establish180launched/min or per-fighter/per-window supply.",
+    "Static all9 body geometry is conservative, but active peers, real dual-object snapshots, wandering targets, dynamic occupancy, corpse eligibility and survival remain live unknowns.",
+    "Native movement80 cells/min is cumulative receipt-backed moved cells, not distinct positions; original mislabeled metadata is preserved in old package with explicit alias.",
+    "Old100 failures remain valid historical artifacts. This addendum only removes the known static representative scout obstruction for this new scene; it does not retroactively accept any prior run."
+  ],
+  "privateDataRead": false,
+  "productMutated": false,
+  "sceneMutated": false,
+  "liveCapacityAccepted": false
+}

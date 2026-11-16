@@ -1,0 +1,107 @@
+{
+  "schema": "mir2.gateway.purification-linux-ci.v1",
+  "createdUtc": "2026-10-09T09:25:02.806643+00:00",
+  "runId": "37901046490",
+  "url": "https://github.com/Zombieliu/mir2/actions/runs/37901046490",
+  "revision": "5860815944e8077537cc12a7f32885b21c6d0a80",
+  "runConclusion": "success",
+  "jobs": [
+    {
+      "name": "build-linux-x64",
+      "conclusion": "success",
+      "databaseId": 113723433066
+    },
+    {
+      "name": "siege-acceptance / siege-linux",
+      "conclusion": "success",
+      "databaseId": 113723433524
+    }
+  ],
+  "githubArtifactDigest": "sha256:7c3032c7327990aa6fe17e34bf9c6524b739795a6308804ec51cb851050a63c0",
+  "githubArtifactBytes": 33763818,
+  "archiveSha256": "1e356d5cd66d0db59b261c7655b1009a49ed0863f44d5d89aad1cc95a0f2eed1",
+  "archiveBytes": 360024,
+  "binarySha256": "4a69e2bce15e9a65ecee199f24c292808f0ab6bbe6588b23fdab3cf4d4059afd",
+  "binaryBytes": 83453888,
+  "zoneHostBinarySha256": "e3804d13fcfb48ebb7928058c31ae37cadf09950b6553ae495d2c3bcfdb14d60",
+  "manifestSha256": "59dfd406ee2a464da50b02e775c37bf10aef73711d13271aab4d2893d9ca8000",
+  "logSha256": "b7d7d600e20042845a74ed06a37292aa0929dad69a22310df47191fa79a90c38",
+  "publicR2Upload": false,
+  "serverSwitched": false,
+  "archivedUtc": "2026-10-09T10:11:06.217315+00:00",
+  "evidenceArchiveSha256": "0d64a24904e5d669a2e2c51cb0e26c8956021a63993e72d7f0bcced1e2718883",
+  "originalArtifactRetainedLocally": true,
+  "privateHttpHeadersExcluded": true,
+  "entries": [
+    {
+      "path": "CI-VERIFIED.json",
+      "bytes": 1227,
+      "sha256": "2a738221f2f21e348b6a9d5bdc57ff9dfc15bae72109fa8543f9eef61f15f0a7"
+    },
+    {
+      "path": "ORIGINAL-VERIFIER-DERIVATION.json",
+      "bytes": 318,
+      "sha256": "aa05501c2c97baa93a12b27ac226af1ee966b4020163884d8378d61008574aa9"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 7476,
+      "sha256": "7cde83e530a922405c2d87b278dd9446537a8abf553b9b8b0a4c2e8425a1f3c2"
+    },
+    {
+      "path": "RECOVERY-VERIFIED.json",
+      "bytes": 638,
+      "sha256": "8ff0e3f9aa30fe1c1935957051e6607cc55fd67b070a7c503ef51d85e3613a35"
+    },
+    {
+      "path": "RELEASE.json",
+      "bytes": 1553,
+      "sha256": "4378084cecd24c0debf258c47762050ec7c8eaf7bd0b0b70cd4cd48614a68c42"
+    },
+    {
+      "path": "VERIFIED-FILES.json",
+      "bytes": 412,
+      "sha256": "59dfd406ee2a464da50b02e775c37bf10aef73711d13271aab4d2893d9ca8000"
+    },
+    {
+      "path": "ci-artifacts-original.json",
+      "bytes": 751,
+      "sha256": "3ec53f362b0fa3624321112a1fe0d089021800c2a71c15f53082fbbbdc518e12"
+    },
+    {
+      "path": "ci-log-original.txt",
+      "bytes": 3788382,
+      "sha256": "b7d7d600e20042845a74ed06a37292aa0929dad69a22310df47191fa79a90c38"
+    },
+    {
+      "path": "ci-status-original.json",
+      "bytes": 5106,
+      "sha256": "59496cbf70e4c4c9ad6be42b3893160ece6499156e850f2276db82f74e1052cc"
+    },
+    {
+      "path": "latest-mir2-gateway-release.json",
+      "bytes": 1721,
+      "sha256": "c849e2dc8721b40cd1e8b5a78c777cbdab4658b1b2b73e9f6274f8f5abfe33ec"
+    },
+    {
+      "path": "mir2-gateway-linux-x64-2026-10-09-purification-5860815944.tar.gz.sha256",
+      "bytes": 131,
+      "sha256": "e06accc149237cf6fd1686b50e8efd2fde8e600cd6397d02e58c8af1a501c812"
+    },
+    {
+      "path": "operators/Download-P4PurificationLinuxCI02.py",
+      "bytes": 6548,
+      "sha256": "020599c5efe685e71c507a9b3f7017a1dd6e37d543ebc334f45b85e98b1047ed"
+    },
+    {
+      "path": "operators/Resume-P4PurificationCIArtifact02.py",
+      "bytes": 2619,
+      "sha256": "a0613879db6ca36f322e6ca38cd960dc25c6e674c4f45caa7b5cf98dd01109ed"
+    },
+    {
+      "path": "operators/Verify-Recovered-P4PurificationCI.py",
+      "bytes": 3195,
+      "sha256": "0b09b3cd24d2f2289c7ff7862328cb638766e4442f78e892077c657f262d82ca"
+    }
+  ]
+}

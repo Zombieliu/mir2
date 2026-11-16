@@ -1,0 +1,11 @@
+# Formal10 independent verification archive
+
+The actual run `1792915219265-d3bcff63` failed its original formal profile. Independent evidence verification succeeded and preserved that verdict: `formalRunPassed=false`, `capacityAccepted=false`. The 2- and 10-player stages passed (300.153s and 300.298s); the 25-player stage completed 300.326s but failed original combat activity windows. The 50/100-player stages, 7200s soak and post-resume phase did not execute. No missing stage or minute window is promoted to a pass.
+
+[Actual independent receipt](tool/final-verification.json), [execution receipt](tool/actual-verification-execution-receipt-v1.json), [static review](independent-review/review-v4.json), [18 synthetic checks](tool/schema-selfcheck-v3-receipt.json) and [final tool seal](tool/tool-source-frozen-v2.json) are original bytes. Earlier prepared versions, their exact inverse provenance and tests remain included. Code copies use the .mjs.txt suffix. The unused incremental-reader v5 exploration was not adopted or copied; final execution used reviewed v4 and the trusted frozen-archive readline scope documented in [preparation](tool/preparation-v2.json).
+
+The [old13 supplement](probe13-actual-rate-supplement-v1/actual-phase-rate-supplement-v1.json) recalculated 3 whole phases / 22 actors using actual 300.301/300.119/360.406s. All original assessment/native fields match, apart from the deliberately separate configured seconds field. It reuses the earlier SHA-bound raw counters; it did not replay the raw log again and changed neither the original report nor its original independent receipt. This closes the old independent nominal-duration rate limitation and adds no capacity or survival acceptance.
+
+HP events were absent in this formal run; zero events do not prove a dose or sustained survival. Server histograms are inside-phase sampled bucket deltas with explicit omitted edges and unknown zero/overflow cases; they introduce no new server SLO gate. Wire completeness is independent of game acceptance. Root must still adjudicate P0 and any later fixed-Cell work.
+
+[Explicit whitelist](archive-whitelist-v1.json) and [copy receipt](public-copy-provenance-v1.json) bind all copied source/public bytes. Raw samples and recordings remain in the separately frozen original archive, and this operation did not read or copy them.

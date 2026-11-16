@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "before": {
+    "bytes": 155475,
+    "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+  },
+  "after": {
+    "bytes": 156391,
+    "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+  },
+  "rules": [
+    {
+      "label": "initialize optional scalar observations without changing low-hint early return",
+      "beforeUtf8": "function preferUnsharedScoutWaypoints(client, context, hints, now) {\n  if (hints.length < 2) return hints;",
+      "afterUtf8": "function preferUnsharedScoutWaypoints(client, context, hints, now, diagnostic) {\n  Object.assign(diagnostic, { hintCount: hints.length, activeOtherWaypointCount: null,\n    sharedHintCount: null, unsharedHintCount: null, hintPreferenceReason: 'insufficient-hints' });\n  if (hints.length < 2) return hints;",
+      "occurrences": 1
+    },
+    {
+      "label": "record existing waypoint scan result",
+      "beforeUtf8": "  if (!otherWaypoints.size) return hints;\n  const unshared = [], shared = [];",
+      "afterUtf8": "  diagnostic.activeOtherWaypointCount = otherWaypoints.size;\n  if (!otherWaypoints.size) {\n    diagnostic.sharedHintCount = 0; diagnostic.unsharedHintCount = hints.length;\n    diagnostic.hintPreferenceReason = 'no-active-other-waypoints';\n    return hints;\n  }\n  const unshared = [], shared = [];",
+      "occurrences": 1
+    },
+    {
+      "label": "record existing stable partition sizes and fixed reason",
+      "beforeUtf8": "  // A local home index is not a cross-cluster identity. These are same-map",
+      "afterUtf8": "  diagnostic.sharedHintCount = shared.length; diagnostic.unsharedHintCount = unshared.length;\n  diagnostic.hintPreferenceReason = unshared.length && shared.length ? 'reordered' :\n    shared.length ? 'all-hints-shared' : 'all-hints-unshared';\n  // A local home index is not a cross-cluster identity. These are same-map",
+      "occurrences": 1
+    },
+    {
+      "label": "pass existing local hint scan record; retain original array return",
+      "beforeUtf8": "const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now);",
+      "afterUtf8": "const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now, hintScan);",
+      "occurrences": 1
+    },
+    {
+      "label": "serialize only bounded scalar observations in existing capped row",
+      "beforeUtf8": "      hintScanTruncated: hintScan.truncated, hintOrderChangedByActiveScoutPreference: hintScan.hintOrderChangedByActiveScoutPreference,",
+      "afterUtf8": "      hintScanTruncated: hintScan.truncated, hintOrderChangedByActiveScoutPreference: hintScan.hintOrderChangedByActiveScoutPreference,\n      hintCount: hintScan.hintCount, activeOtherWaypointCount: hintScan.activeOtherWaypointCount,\n      sharedHintCount: hintScan.sharedHintCount, unsharedHintCount: hintScan.unsharedHintCount, hintPreferenceReason: hintScan.hintPreferenceReason,",
+      "occurrences": 1
+    }
+  ],
+  "inverseRawExact": true,
+  "existingReturnArraysAndStableOrderingPreserved": true,
+  "newScans": 0,
+  "clockCallsAdded": 0,
+  "scope": "Only diagnostics from existing bounded scans/partition; no behavior, commands, game counters or threshold changes."
+}

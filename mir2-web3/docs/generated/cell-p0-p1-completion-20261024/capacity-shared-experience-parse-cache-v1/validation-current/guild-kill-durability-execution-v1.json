@@ -1,0 +1,48 @@
+{
+  "name": "guild-kill-durability",
+  "command": [
+    "C:/Users/Administrator/.cargo/bin/rustup.exe",
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "guild_kill_source_",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exitCode": 101,
+  "signal": null,
+  "error": null,
+  "durationMs": 2558.0901999999915,
+  "totals": [
+    {
+      "status": "FAILED",
+      "passed": 0,
+      "failed": 2,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 1251
+    }
+  ],
+  "passed": false,
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-kill-durability-stdout-v1.log",
+      "bytes": 700,
+      "sha256": "9d09a0c53baa9346ed95dfa417a1c73676d713bde31d893fb5db5e30f9386762"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-kill-durability-stderr-v1.log",
+      "bytes": 54316,
+      "sha256": "928390e6ee06a52468cb71047f2f61fe31ded6afc8216c459cea620bc75bdef0"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/newcomer-v2-recovery-ledger.mjs:102
+  if (!isIsoInstant(functionalRecheckStartedAt)) throw new Error('functional recheck requires MIR2_V2_FUNCTIONAL_RECHECK_STARTED_AT as an ISO instant');
+                                                       ^
+
+Error: functional recheck requires MIR2_V2_FUNCTIONAL_RECHECK_STARTED_AT as an ISO instant
+    at resolveV2FunctionalRecheckLedger (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/newcomer-v2-recovery-ledger.mjs:102:56)
+    at loadV2FunctionalRecheckLedger (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/newcomer-v2-recovery-ledger.mjs:70:10)
+    at async file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/run-protocol-journey.mjs:139:7
+
+Node.js v22.18.0

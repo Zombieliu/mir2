@@ -1,0 +1,579 @@
+{
+  "schema": "mir2.r16.native-guild.verification.v1",
+  "recordedAt": "2026-11-08T02:07:43.905Z",
+  "parent": "85eecf4be8f7358504012e5045c97f8242364531",
+  "branch": "codex/windows-player-journey",
+  "changes": [
+    "Native GuildMemberChange handles real delta statuses without clearing unrelated ranks/members",
+    "Typed UserInformation identity reaches the social cursor, using realId rather than AOI/selection IDs",
+    "Exact local permission context retains option/value/requester/guild/scope and actual status7 cursor across metadata",
+    "Typed roster read retains a fresh255 cursor, exact definitely-unsent cancellation and retry after real bounded-channel rejection",
+    "Pending permission/read/rename intents are protected from ordinary queue eviction; original24/8 limits remain"
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 47842,
+      "sha256WindowsBytes": "c6d4597154218751b852fa4a25f5b80545229dc3c64cc8afad4c50c902ae2444",
+      "gitBlob": "f3825de5ebe7798bbdd2140ed410b0f987a86752"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pending_eviction_tests.rs",
+      "bytes": 10551,
+      "sha256WindowsBytes": "9a1229ed63a8281f3ff637e516ba27d09c13e3378ba7afa32b466acb3ded9cbb",
+      "gitBlob": "28749b123911dd34bd4d1846e5fd75963c2e0ee4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_permission_flow_tests.rs",
+      "bytes": 20778,
+      "sha256WindowsBytes": "e9756a2c62f014087f68fc4a3cbb68e033e1b670cfee11a0dc5b07e8e48692f3",
+      "gitBlob": "b6daab1d226db5dc572f0c16c19f6704b54375e5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 12825,
+      "sha256WindowsBytes": "2b4aa67322a9c6acfe3fad2a0a0bfbdaf147e9f5021cde7eb63a1463996e7581",
+      "gitBlob": "1cca0ec3d8186f33b77a2c4f6287fae9afa24768"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 956941,
+      "sha256WindowsBytes": "5fd3e701225d550c29993815bbceda76ea8fbdf83ace1280dee571aa4d81bf9f",
+      "gitBlob": "c36cb0ac9a347f68efcb75bc9461c87866605a2b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "bytes": 91803,
+      "sha256WindowsBytes": "17dd0a98c36f2cae7a1c6a8ee5d81cc3470adb6530e287820b247764cfc7cf2b",
+      "gitBlob": "42783952e6ee49a52a95c1714b94848bb0adbfb3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_pending_tests.rs",
+      "bytes": 22598,
+      "sha256WindowsBytes": "9cbb5e8998715c7e21e8a29233caa0c4f70cac5d69e2b9ae133d3b0bf2b1caec",
+      "gitBlob": "4e2cba845d029cdb2331b7d018d8b87db10544aa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_projection.rs",
+      "bytes": 36245,
+      "sha256WindowsBytes": "16cf5b93caafa1d7ce4fd8d39e3f36bbca6d181bc55b58411189348ff4a3db1e",
+      "gitBlob": "469e7859189849ef20fa265f51a98f1cd607ef02"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 424438,
+      "sha256WindowsBytes": "fd7fd6c83161ee43a7c7c392cca02aada94648889dd2b168d6b1c2be62ea756e",
+      "gitBlob": "e8f11af581db485ebc7951f31cc05e588dcd04bb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 831518,
+      "sha256WindowsBytes": "0fda45624bd7d5aed62240913c684dd0231c1654516b0db57335f8aa86378f14",
+      "gitBlob": "d8d6faaa151b15461d4092a6312cc193fbca5045"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_social_projection_tests.rs",
+      "bytes": 3217,
+      "sha256WindowsBytes": "13592bfdbf09f93098409eb9093e7e24fcb9d2fc3a00a252c8b6d17a5e8626df",
+      "gitBlob": "0ad0e1ed38382450a87716aa48d7a54c75951024"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_permission_wire_tests.rs",
+      "bytes": 11105,
+      "sha256WindowsBytes": "a1472ba4f1d7fb92d12905e350cec10cdff9b82391d3b3ee2fef77d7bcf2c6e7",
+      "gitBlob": "0e69d6bdcdd599fc50c78ecfbae41dba3c95f456"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "bytes": 8807,
+      "sha256WindowsBytes": "2c58fa68e47340d100701380815f0119d5e0e868b896770f4daf160659365f73",
+      "gitBlob": "549f555c326f1a3505d7a6d79175a13472bfe916"
+    }
+  ],
+  "locks": [
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "sha256": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "sha256": "3de2eb07fad487338b0a05042b34c1151bbf652531051416b62074ff7ab6b263"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "sha256": "5f65904d0fbdf4a98e02c097463ce57c4aa3424e938c3792fa90c5f7e7e88180"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "sha256": "1e9b8d4c7d4caf951b7b16bef72b2851b3443684fcbc66a2e905faed6825673d"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "sha256": "8aa5dc760d2ed6d142e586d250d1e107a455ece5a528950dfea910a65e70b749"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "sha256": "fa2e7b35e5c85ef8487b472bb1e5396e90fb48823f3707463a60c4c59e8933fb"
+    }
+  ],
+  "reference": {
+    "path": "Crystal/Client/MirScenes/GameScene.cs",
+    "sha256": "935d1ca35ddf4800bccdac4cd1675fcb59a269560a57bf98c2b952a459ffb504",
+    "bothWorktreesIdentical": true
+  },
+  "tests": {
+    "runs": [
+      {
+        "crate": "client-bevy",
+        "log": "client-social-v2-final.log",
+        "passed": 70,
+        "ignored": 0,
+        "tests": [
+          "social::guild_pending_tests::guild_info_waits_for_a_fresh_status255_not_status_metadata_other_deltas_or_republication",
+          "social::guild_pending_tests::guild_kick_only_accepts_matching_status3_not_leave_online_or_a_fake_legacy_option_echo",
+          "social::guild_pending_tests::guild_member_move_status5_matches_exact_member_and_destination_and_ignores_fabricated_change_type",
+          "social::guild_pending_tests::guild_permission_actual_status7_survives_a_later_full_packet_in_the_same_ui_publication",
+          "social::guild_pending_tests::guild_permission_builder_requires_real_viewer_complete_roster_rights_and_an_actual_flip",
+          "social::guild_pending_tests::guild_permission_distinct_options_have_independent_pending_and_share_the_existing_eight_slots",
+          "social::guild_pending_tests::guild_permission_expected_false_requires_a_clear_bit_not_any_status7_reply",
+          "social::guild_pending_tests::guild_permission_full_broadcast_other_actor_other_rank_or_wrong_bit_are_not_acks",
+          "social::guild_pending_tests::guild_permission_retained_old_matching_cursor_cannot_ack_a_new_request_or_repeated_projection",
+          "social::guild_pending_tests::guild_permission_typed_status7_uses_nested_rank_index_and_the_exact_requested_bit",
+          "social::guild_pending_tests::guild_permission_user_information_uses_real_character_index_not_world_object_id",
+          "social::guild_pending_tests::guild_rename_only_has_the_strict_five_second_retry_exception_permission_does_not_expire",
+          "social::guild_pending_tests::guild_rename_uses_scope_fresh_actor_target_and_expected_name_not_any_rank_broadcast",
+          "social::guild_pending_tests::guild_same_viewer_refresh_preserves_pending_but_same_name_with_a_new_real_id_retires_it",
+          "social::guild_pending_tests::guild_scope_change_cancels_only_guild_work_map_preserves_pending_and_session_reset_clears_all",
+          "social::guild_pending_tests::native_guild_read_retains_fresh_full_receipt_before_a_new_incomplete_delta",
+          "social::guild_projection::tests::native_guild_projection_cursor_and_scope_overflow_fail_without_any_mutation",
+          "social::guild_projection::tests::native_guild_projection_full255_establishes_complete_and_stable_own_role",
+          "social::guild_projection::tests::native_guild_projection_full_missing_viewer_or_known_rank_revokes_old_permissions",
+          "social::guild_projection::tests::native_guild_projection_join_requests_full_without_fabricating_character_id",
+          "social::guild_projection::tests::native_guild_projection_keeps_existing_200_member_limit_and_accepts_real_zero_id",
+          "social::guild_projection::tests::native_guild_projection_online_empty_deltas_do_not_clear_the_roster",
+          "social::guild_projection::tests::native_guild_projection_own_peer_delta_waits_for_identity_verified_status8",
+          "social::guild_projection::tests::native_guild_projection_peer_kick_and_leave_remove_only_the_target",
+          "social::guild_projection::tests::native_guild_projection_peer_rank_move_preserves_real_id_and_other_members",
+          "social::guild_projection::tests::native_guild_projection_rank_delta_cannot_rebind_an_existing_name_or_character_id",
+          "social::guild_projection::tests::native_guild_projection_rejects_missing_identity_duplicate_and_malformed_late_rows_atomically",
+          "social::guild_projection::tests::native_guild_projection_rejects_unknown_or_wrong_shape_status_without_partial_commit",
+          "social::guild_projection::tests::native_guild_projection_status6_inserts_and_renumbers_nested_flat_and_own_rank",
+          "social::guild_projection::tests::native_guild_projection_status6_partial_base_needs_roster_and_cannot_guess_positions",
+          "social::guild_projection::tests::native_guild_projection_status7_existing_index_updates_options_and_persists_cursor",
+          "social::guild_projection::tests::native_guild_projection_status7_unknown_index_never_creates_a_rank_or_cursor",
+          "social::guild_projection::tests::native_guild_projection_status8_new_verified_rank_is_partial_until255",
+          "social::guild_projection::tests::native_guild_projection_status8_requires_both_viewer_name_and_character_id",
+          "social::guild_projection::tests::native_guild_projection_viewer_kick_or_leave_retires_guild_and_permissions",
+          "social::guild_rank_native_tests::guild_rank_raw_legal_spaces_and_twenty_utf16_survive_typed_status_and_delta",
+          "social::guild_rank_native_tests::guild_rank_source_reply_has_status7_nested_index_and_no_command_echo",
+          "social::guild_rank_native_tests::guild_rank_status255_remains_an_explicit_full_list_replacement",
+          "social::guild_rank_native_tests::guild_rank_status7_merges_one_nonzero_rank_retaining_three_ranks_four_members",
+          "social::guild_rank_native_tests::guild_rank_status7_rejects_multi_rank_and_unknown_delta_without_model_mutation",
+          "social::guild_rank_native_tests::guild_rank_status7_requires_actual_nested_index_options_and_member_list",
+          "social::guild_rank_native_tests::guild_rank_status7_updates_own_numeric_rank_and_source_options",
+          "social::tests::a_different_inviter_supersedes_only_the_old_acceptance",
+          "social::tests::empty_guild_status_is_authoritative_leave_and_releases_guild_pending",
+          "social::tests::every_authoritative_group_and_guild_operation_releases_only_on_matching_state",
+          "social::tests::failed_or_unrelated_trade_packets_do_not_fake_completion",
+          "social::tests::group_invite_accept_is_correlated_and_allows_second_invite",
+          "social::tests::group_roster_is_bounded_and_leader_is_authoritative",
+          "social::tests::guild_invite_duplicate_and_roster_transition_are_idempotent",
+          "social::tests::guild_notice_receipt_does_not_optimistically_replace_content",
+          "social::tests::guild_packets_accept_server_packet_snake_case_and_camel_case_compatibility",
+          "social::tests::guild_permissions_follow_wire_bits_and_matching_rank_options",
+          "social::tests::guild_storage_packets_are_bounded_correlated_and_authoritative",
+          "social::tests::guild_unscoped_member_change_cannot_accept_a_fabricated_command_echo",
+          "social::tests::invite_failure_is_exactly_correlated_and_can_retry",
+          "social::tests::malformed_and_oversized_social_packets_fail_closed",
+          "social::tests::out_of_order_snapshot_does_not_release_unacknowledged_trade_or_group_work",
+          "social::tests::pending_is_not_cleared_by_unchanged_snapshot_but_is_cleared_by_matching_event",
+          "social::tests::reset_clears_models_and_pending",
+          "social::tests::scene_reset_preserves_social_models_but_session_reset_clears_them",
+          "social::tests::trade_deposit_and_retrieve_ack_match_packet_and_both_slots",
+          "social::trade_source_tests::trade_completion_and_terminal_cancel_reset_both_sides_and_only_trade_pending",
+          "social::trade_source_tests::trade_equal_guest_offer_packets_still_release_local_lock_but_not_own_gold_request",
+          "social::trade_source_tests::trade_malformed_packets_are_transactional_and_do_not_advance_revision",
+          "social::trade_source_tests::trade_matching_failure_is_a_cell_unlock_not_an_item_success",
+          "social::trade_source_tests::trade_new_owner_clears_previous_offer_but_duplicate_accept_retains_current_offer",
+          "social::trade_source_tests::trade_own_gold_request_requires_exact_same_exchange_snapshot_delta",
+          "social::trade_source_tests::trade_same_partner_new_exchange_cannot_acknowledge_an_old_own_offer",
+          "social::trade_source_tests::trade_unlock_is_not_cancel_and_keeps_offers_partner_and_unrelated_pending",
+          "social::trade_source_tests::trade_wire_sparse_slots_are_not_compacted_and_zero_count_is_not_invented"
+        ]
+      },
+      {
+        "crate": "client-bevy",
+        "log": "client-guild-v2-final.log",
+        "passed": 143,
+        "ignored": 2,
+        "tests": [
+          "crystal_ui::chat::tests::rendered_chat_pressed_guild_filters_rebuilt_text",
+          "crystal_ui::guild_pixel_text_view::tests::guild_gdi_is_english_only_without_touching_bundled_nonenglish_font_paths",
+          "crystal_ui::guild_pixel_text_view::tests::guild_image_cache_lru_drops_only_its_handle_and_stays_below_sixteen_mib",
+          "crystal_ui::guild_pixel_text_view::tests::guild_negative_cache_is_bounded_and_key_keeps_font_alignment_and_padding_policy",
+          "crystal_ui::guild_storage::tests::amount_box_starts_with_maximum_selected_and_clamps_numeric_input_without_overflow",
+          "crystal_ui::guild_storage::tests::constructor_keeps_source_index_one_but_initial_slots_zero_through_sixty_three",
+          "crystal_ui::guild_storage::tests::drag_matches_every_source_integer_y_including_nonreciprocal_snap_steps",
+          "crystal_ui::guild_storage::tests::every_visible_row_preserves_all_eight_columns_and_authoritative_slot_ids",
+          "crystal_ui::guild_storage::tests::storage_geometry_and_button_art_do_not_confuse_draw_size_with_hit_size",
+          "crystal_ui::guild_storage::tests::wheel_uses_truncated_notches_clamps_and_retains_the_source_zero_delta_update",
+          "crystal_ui::overlays::guild_buff_dialog::tests::acquisition_activation_and_permissions_use_authority_without_optimism",
+          "crystal_ui::overlays::guild_buff_dialog::tests::list_request_failure_retries_and_character_change_clears_authority",
+          "crystal_ui::overlays::guild_buff_dialog::tests::ordinary_deltas_preserve_catalog_and_other_buffs",
+          "crystal_ui::overlays::guild_buff_dialog::tests::scroll_drag_and_catalog_shrink_are_bounded_with_stable_ids",
+          "crystal_ui::overlays::guild_buff_dialog::tests::source_row_states_use_guildskill_icon_triplets",
+          "crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_a_full_protected_queue_rejects_new_ordinary_without_losing_any_request",
+          "crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_never_raises_the_eight_social_budget_to_match_twenty_four_queue_slots",
+          "crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_queued_permission_read_and_rename_survive_later_ordinary_overflow",
+          "crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_skips_all_mixed_protected_prefixes_and_preserves_fifo_among_ordinary_inputs",
+          "crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_stale_read_cannot_reenter_after_guild_change_or_same_name_rejoin",
+          "crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_typed_read_duplicate_remains_rejected_after_queue_drain_without_new_pending",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_actual_overlay_handler_enforces_native_300ms_without_optimistic_options",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_actual_overlay_rejects_invalid_option_foreign_owner_or_revoked_rank_permission",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_builder_and_queue_reject_wrong_requester_or_forged_viewer",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_enqueues_only_typed_context_without_optimistic_permissions",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_full_transport_queue_rejects_before_creating_pending",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_generic_social_entry_rejects_both_naked_type5_and_typed_variant",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_map_keeps_pending_but_session_reset_retires_queue_and_context",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_nonleader_cannot_edit_a_higher_rank",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_other_bits_are_independent_but_keep_the_original_server_options",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_real_status7_releases_only_the_matching_bit_and_actor",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_rechecks_authority_after_request_creation_at_actual_queue_admission",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_same_name_leave_rejoin_cannot_reuse_old_scope",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_same_rank_bit_stays_unique_after_queue_drain_and_opposite_full_projection",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_uses_the_same_finite_eight_budget_as_other_social_operations",
+          "crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_refresh_actual_panel_coalesces_unknown_member_until_complete_roster",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_cached_old_source_projection_does_not_ack_a_new_request",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_editor_releases_after_terminal_then_peer_delta_in_same_frame",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_foreign_actor_wrong_rank_or_text_does_not_release_request",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_full_queue_refuses_before_pending_and_input_follows_utf16_admission",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_hidden_timeout_is_strictly_after_five_seconds_and_keeps_other_pending",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_leave_and_rejoin_same_guild_scope_revokes_old_rename_only",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_matching_typed_terminal_releases_exact_pending_and_editor_before_deadline",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_metadata_255_matching_text_never_completes_request",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_new_membership_editor_keeps_actual_owner_and_clock_for_first_command",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_nonrename_status_does_not_ack_matching_text",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_same_name_source_terminal_still_completes",
+          "crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_scene_retains_pending_and_session_reset_retires_it",
+          "crystal_ui::overlays::guild_panel::tests::guild_buff_queue_failure_releases_list_retry_without_optimistic_unlock",
+          "crystal_ui::overlays::guild_panel::tests::guild_invitation_response_is_bound_to_exact_inviter_epoch",
+          "crystal_ui::overlays::guild_panel::tests::member_rank_change_is_only_sent_after_confirmation_with_original_fields",
+          "crystal_ui::overlays::guild_panel::tests::rank_rename_uses_type_three_and_cannot_edit_a_senior_rank",
+          "crystal_ui::overlays::guild_panel::tests::source_member_pages_advance_twenty_five_and_clamp_to_eighteen_visible_rows",
+          "crystal_ui::overlays::guild_panel::tests::source_notice_edit_and_submission_have_separate_limits",
+          "crystal_ui::overlays::guild_panel::tests::source_rank_edit_budget_is_twenty_utf16_and_selection_survives_sync",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_coalesced_control_a_release_then_digits_keeps_modifier_event_order",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_coalesced_digits_backspace_and_enter_submit_the_edited_not_old_amount",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_enter_on_invalid_uint_closes_silently_like_source_invoke_click",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_escape_drains_its_keyboard_batch_without_leaking_to_the_next_modal",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_modal_blocks_underlying_buttons_even_in_the_frame_it_closes",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_modal_submission_is_exact_nonoptimistic_deduplicated_and_throttled",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_mouse_buttons_keep_default_button_b_and_explicit_close_button_a",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_prompt_sync_cancels_changed_identity_revoked_rank_and_session_exit",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_real_keyboard_route_consumes_modal_keys_and_submits_only_on_enter",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_source_modal_has_exact_coin_input_button_geometry_and_invalid_ok_visibility",
+          "crystal_ui::overlays::guild_storage_tests::guild_gold_zero_and_stale_guild_rank_or_balance_do_not_send_mutations",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_alpha_true_size_centres_without_cropping_and_refreshes_same_handle",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_compressed_press_move_release_keeps_the_real_motion_before_ending_drag",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_current_stack_image_and_count_do_not_use_stale_tooltip_count_or_real_info",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_ecs_has_source_grid_background_hit_rects_and_separate_arrow_art",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_known_source_frame_zero_is_drawn_but_missing_source_is_not_guessed",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_original_images_keep_negative_odd_offsets_and_refresh_loaded_dimensions",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_real_original_pngs_follow_get_true_size_and_keep_full_draw_dimensions",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_scroll_persists_on_hide_but_session_reset_clears_pointer_and_gold_modal",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_source_tab_visibility_and_gold_withdraw_are_independent_rank_rules",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_thumb_drag_uses_source_grab_offset_scale_clamp_and_focus_release",
+          "crystal_ui::overlays::guild_storage_tests::guild_storage_wheel_is_window_cursor_modal_and_unit_scoped",
+          "crystal_ui::overlays::social_bond_dialog::host::tests::guild_creation_keyboard_enter_is_one_shot_and_escape_sends_no_name",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_cancel_and_stale_buttons_do_not_submit_or_restore",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_editor_applies_twenty_utf16_units_and_validates_before_submission",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_local_transport_failure_restores_only_current_authorization",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_map_npc_exit_and_session_boundaries_retire_queued_name",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_preserves_existing_bonds_and_never_handles_guild_war_as_sabuk",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_prompt_has_copy_in_all_nine_locales_without_translating_names",
+          "crystal_ui::overlays::social_bond_dialog::tests::guild_name_requires_the_sent_original_npc_link_and_consumes_request_once",
+          "crystal_ui::overlays::tests::crystal_character_gender_class_and_guild_projection_is_exact",
+          "crystal_ui::overlays::tests::guild_notice_edit_publish_failure_retry_and_receipt_stay_authoritative",
+          "crystal_ui::overlays::tests::guild_notice_editor_consumes_real_keyboard_messages_before_chat",
+          "crystal_ui::overlays::tests::guild_notice_preserves_source_lines_and_leaves_200_line_rejection_to_server",
+          "crystal_ui::overlays::tests::guild_permission_aliases_accept_authoritative_bit_names",
+          "crystal_ui::overlays::tests::guild_storage_and_rank_intents_register_exact_authoritative_pending_keys",
+          "crystal_ui::overlays::tests::guild_tabs_request_the_matching_authoritative_page",
+          "crystal_ui::overlays::tests::npc_game_shop_guild_and_trade_cells_share_the_crystal_item_hint_lifecycle",
+          "social::guild_pending_tests::guild_info_waits_for_a_fresh_status255_not_status_metadata_other_deltas_or_republication",
+          "social::guild_pending_tests::guild_kick_only_accepts_matching_status3_not_leave_online_or_a_fake_legacy_option_echo",
+          "social::guild_pending_tests::guild_member_move_status5_matches_exact_member_and_destination_and_ignores_fabricated_change_type",
+          "social::guild_pending_tests::guild_permission_actual_status7_survives_a_later_full_packet_in_the_same_ui_publication",
+          "social::guild_pending_tests::guild_permission_builder_requires_real_viewer_complete_roster_rights_and_an_actual_flip",
+          "social::guild_pending_tests::guild_permission_distinct_options_have_independent_pending_and_share_the_existing_eight_slots",
+          "social::guild_pending_tests::guild_permission_expected_false_requires_a_clear_bit_not_any_status7_reply",
+          "social::guild_pending_tests::guild_permission_full_broadcast_other_actor_other_rank_or_wrong_bit_are_not_acks",
+          "social::guild_pending_tests::guild_permission_retained_old_matching_cursor_cannot_ack_a_new_request_or_repeated_projection",
+          "social::guild_pending_tests::guild_permission_typed_status7_uses_nested_rank_index_and_the_exact_requested_bit",
+          "social::guild_pending_tests::guild_permission_user_information_uses_real_character_index_not_world_object_id",
+          "social::guild_pending_tests::guild_rename_only_has_the_strict_five_second_retry_exception_permission_does_not_expire",
+          "social::guild_pending_tests::guild_rename_uses_scope_fresh_actor_target_and_expected_name_not_any_rank_broadcast",
+          "social::guild_pending_tests::guild_same_viewer_refresh_preserves_pending_but_same_name_with_a_new_real_id_retires_it",
+          "social::guild_pending_tests::guild_scope_change_cancels_only_guild_work_map_preserves_pending_and_session_reset_clears_all",
+          "social::guild_pending_tests::native_guild_read_retains_fresh_full_receipt_before_a_new_incomplete_delta",
+          "social::guild_projection::tests::native_guild_projection_cursor_and_scope_overflow_fail_without_any_mutation",
+          "social::guild_projection::tests::native_guild_projection_full255_establishes_complete_and_stable_own_role",
+          "social::guild_projection::tests::native_guild_projection_full_missing_viewer_or_known_rank_revokes_old_permissions",
+          "social::guild_projection::tests::native_guild_projection_join_requests_full_without_fabricating_character_id",
+          "social::guild_projection::tests::native_guild_projection_keeps_existing_200_member_limit_and_accepts_real_zero_id",
+          "social::guild_projection::tests::native_guild_projection_online_empty_deltas_do_not_clear_the_roster",
+          "social::guild_projection::tests::native_guild_projection_own_peer_delta_waits_for_identity_verified_status8",
+          "social::guild_projection::tests::native_guild_projection_peer_kick_and_leave_remove_only_the_target",
+          "social::guild_projection::tests::native_guild_projection_peer_rank_move_preserves_real_id_and_other_members",
+          "social::guild_projection::tests::native_guild_projection_rank_delta_cannot_rebind_an_existing_name_or_character_id",
+          "social::guild_projection::tests::native_guild_projection_rejects_missing_identity_duplicate_and_malformed_late_rows_atomically",
+          "social::guild_projection::tests::native_guild_projection_rejects_unknown_or_wrong_shape_status_without_partial_commit",
+          "social::guild_projection::tests::native_guild_projection_status6_inserts_and_renumbers_nested_flat_and_own_rank",
+          "social::guild_projection::tests::native_guild_projection_status6_partial_base_needs_roster_and_cannot_guess_positions",
+          "social::guild_projection::tests::native_guild_projection_status7_existing_index_updates_options_and_persists_cursor",
+          "social::guild_projection::tests::native_guild_projection_status7_unknown_index_never_creates_a_rank_or_cursor",
+          "social::guild_projection::tests::native_guild_projection_status8_new_verified_rank_is_partial_until255",
+          "social::guild_projection::tests::native_guild_projection_status8_requires_both_viewer_name_and_character_id",
+          "social::guild_projection::tests::native_guild_projection_viewer_kick_or_leave_retires_guild_and_permissions",
+          "social::guild_rank_native_tests::guild_rank_raw_legal_spaces_and_twenty_utf16_survive_typed_status_and_delta",
+          "social::guild_rank_native_tests::guild_rank_source_reply_has_status7_nested_index_and_no_command_echo",
+          "social::guild_rank_native_tests::guild_rank_status255_remains_an_explicit_full_list_replacement",
+          "social::guild_rank_native_tests::guild_rank_status7_merges_one_nonzero_rank_retaining_three_ranks_four_members",
+          "social::guild_rank_native_tests::guild_rank_status7_rejects_multi_rank_and_unknown_delta_without_model_mutation",
+          "social::guild_rank_native_tests::guild_rank_status7_requires_actual_nested_index_options_and_member_list",
+          "social::guild_rank_native_tests::guild_rank_status7_updates_own_numeric_rank_and_source_options",
+          "social::tests::empty_guild_status_is_authoritative_leave_and_releases_guild_pending",
+          "social::tests::every_authoritative_group_and_guild_operation_releases_only_on_matching_state",
+          "social::tests::guild_invite_duplicate_and_roster_transition_are_idempotent",
+          "social::tests::guild_notice_receipt_does_not_optimistically_replace_content",
+          "social::tests::guild_packets_accept_server_packet_snake_case_and_camel_case_compatibility",
+          "social::tests::guild_permissions_follow_wire_bits_and_matching_rank_options",
+          "social::tests::guild_storage_packets_are_bounded_correlated_and_authoritative",
+          "social::tests::guild_unscoped_member_change_cannot_accept_a_fabricated_command_echo"
+        ]
+      },
+      {
+        "crate": "windows",
+        "log": "windows-guild-v2-qualified.log",
+        "passed": 29,
+        "ignored": 0,
+        "tests": [
+          "entity_overlays::tests::player_guild_and_name_follow_crystal_two_line_offsets_and_color",
+          "entity_overlays::tests::player_guild_lines_follow_name_view_and_hover_without_duplicates",
+          "gameplay_bridge::guild_creation_tests::native_guild_creation_original_npc_then_typed_name_round_trip_is_one_shot",
+          "gameplay_bridge::guild_creation_tests::native_guild_creation_packet_order_cannot_reopen_a_changed_service",
+          "gameplay_bridge::guild_creation_tests::native_guild_creation_queued_name_retires_on_map_npc_logout_or_exit",
+          "gameplay_bridge::guild_creation_tests::native_guild_creation_requires_current_enabled_link_npc_and_map_identity",
+          "gameplay_bridge::guild_creation_tests::native_guild_creation_transport_rejection_restores_draft_without_fabricating_success",
+          "gameplay_bridge::guild_creation_tests::native_guild_creation_unsolicited_name_return_never_reaches_gateway",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_permission_wire_acceptance_preserves_pending_without_optimistic_options_or_replay",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_permission_wire_definitely_unsent_releases_only_exact_request",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_permission_wire_naked_type5_cannot_borrow_another_typed_request",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_permission_wire_rechecks_authority_identity_and_visible_guild_at_dispatch",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_permission_wire_retired_context_cannot_consume_same_payload_in_successor_guild",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_read_wire_non_game_cancels_only_unsent_read_without_releasing_group",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_read_wire_old_scope_cannot_consume_successor_same_info_type",
+          "gameplay_bridge::guild_permission_wire_tests::native_guild_read_wire_real_bounded_full_releases_unsent_then_allows_one_fresh_read",
+          "gameplay_bridge::guild_rank_wire_tests::guild_rank_failure_for_other_editor_does_not_clear_current_context_or_focus",
+          "gameplay_bridge::guild_rank_wire_tests::guild_rank_queued_old_scope_or_expired_input_is_not_transmitted",
+          "gameplay_bridge::guild_rank_wire_tests::guild_rank_transport_acceptance_keeps_exact_pending_and_does_not_claim_success",
+          "gameplay_bridge::guild_rank_wire_tests::guild_rank_unsent_command_releases_only_exact_context_and_restores_matching_editor",
+          "gameplay_bridge::tests::guild_storage_helpers_map_typed_commands_and_reject_invalid_input",
+          "gateway::guild_wire_tests::guild_buff_delta_keeps_source_ids_stats_and_duration",
+          "gateway::guild_wire_tests::guild_buff_requests_serialize_as_ordinary_browser_commands",
+          "gateway::social_projection_tests::native_guild_gateway_other_players_and_invalid_real_identity_cannot_replace_self",
+          "gateway::social_projection_tests::native_guild_gateway_typed_identity_allows_only_real_member_id_in_status8",
+          "gateway::social_projection_tests::native_guild_gateway_typed_user_information_binds_real_character_not_object_or_selection",
+          "gateway::tests::quest_trade_and_guild_packet_adapters_retain_complete_tooltip_sources",
+          "native_protocol::tests::guild_storage_command_builders_fail_closed_at_native_boundary",
+          "social_bond_wire::tests::guild_creation_uses_only_original_name_request_and_typed_return"
+        ]
+      },
+      {
+        "crate": "runtime",
+        "log": "runtime-guild-v2-final.log",
+        "passed": 6,
+        "ignored": 0,
+        "tests": [
+          "native_data_path_tests::guild_rank_ingest_tests::guild_permission_ingest_actual_fifo_keeps_viewer_and_releases_only_fresh_bit_result",
+          "native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_fifo_retains_terminal_before_metadata_in_one_main_frame",
+          "native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_metadata_only_does_not_ack_even_if_text_matches",
+          "native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_scene_reset_retains_pending_and_ordinary_roster",
+          "native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_session_reset_retires_old_queued_terminal_and_pending",
+          "native_data_path_tests::guild_rank_ingest_tests::guild_read_ingest_retains_real_full_receipt_when_next_delta_needs_another_read"
+        ]
+      }
+    ],
+    "selectedPassExecutions": 248,
+    "uniquePasses": 198,
+    "newTests": 69,
+    "adjacentUniquePasses": 129,
+    "skipped": [
+      {
+        "crate": "client-bevy",
+        "name": "native_shell_ui::i18n_visual_tests::guild_main_window_matches_independent_crystal_gdi_reference_96dpi",
+        "reason": "explicit real-asset Guild main-window GPU/GDI pixel comparison; run alone with fresh output and independent C# reference"
+      },
+      {
+        "crate": "client-bevy",
+        "name": "native_shell_ui::i18n_visual_tests::guild_name_and_sabuk_npc_pages_render_offscreen",
+        "reason": "explicit production Guild name and Sabuk NPC offline GPU fixture; run alone with real assets and fresh evidence output"
+      }
+    ]
+  },
+  "candidate": {
+    "schema": "mir2.r16.native-guild.candidate.v1",
+    "recordedAt": "2026-11-08T02:07:43.893Z",
+    "path": "D:\\mir2-builds\\r16-native-guild-20261108/candidate-final/mir2-platform-windows.exe",
+    "bytes": 135187968,
+    "sha256": "a63bd2a356bced6b95000c0e35f84e0355ea0d568dbe3aef2cd98b2f74372b0d",
+    "buildExitCode": 0,
+    "canonicalManifestsAndLocksUnchanged": true,
+    "directSourcePinsStable": 13,
+    "nativeExecuted": false,
+    "installed": false,
+    "standaloneInstaller": false,
+    "requiresExistingR16Resources": true,
+    "publicDeployment": false
+  },
+  "artifacts": [
+    {
+      "path": "client-social-v2-final.log",
+      "bytes": 35904,
+      "sha256": "f5299cbe4c289a33032190c1b8df4ef9a2959780adcd2af990e339fb51c3d2ff"
+    },
+    {
+      "path": "client-guild-v2-final.log",
+      "bytes": 47166,
+      "sha256": "ceadb25987c90801da31155ff3b78bf37dd1251c78b64b4bceb9eabbb2c0aa68"
+    },
+    {
+      "path": "windows-guild-v2-qualified.log",
+      "bytes": 51800,
+      "sha256": "cd6868a011898bc1ddd174892f836015f051525246210a46902b584ea29bbe7b"
+    },
+    {
+      "path": "runtime-guild-v2-final.log",
+      "bytes": 3835,
+      "sha256": "eb6cfc99e04f8d007598ecddf24c8be717b6d90f27b6537e2cbf18627fea5b29"
+    },
+    {
+      "path": "client-social-initial.log",
+      "bytes": 38405,
+      "sha256": "732f4623808e75af1f4dc1a4ef5167cc7eb0249efe70ec791c43ff6880da0729"
+    },
+    {
+      "path": "client-guild-panel-initial.log",
+      "bytes": 33375,
+      "sha256": "7425c383d2d5aa524acc98c03c5108b4368ce1a54eb67150c0560645158885db"
+    },
+    {
+      "path": "client-guild-v2-initial.log",
+      "bytes": 48480,
+      "sha256": "73b11ff40f1297885748a63904d76848ab5228da0e6ee248e5e5c41e1a53e0ae"
+    },
+    {
+      "path": "client-guild-v2-qualified.log",
+      "bytes": 47887,
+      "sha256": "28343d2cf5a6e2ee81952bafe064d9b4101521f8332eb81252b772c47cacb192"
+    },
+    {
+      "path": "source-final-before.json",
+      "bytes": 4902,
+      "sha256": "5942814d10f4d97c22b61865f9493eb3669866fbd1a34a867818d6acb5c8e1c8"
+    },
+    {
+      "path": "source-final-after.json",
+      "bytes": 4902,
+      "sha256": "d05feb27aaae1ac6f78f8e3a7a7d33e1b90f63adc82f42e457dfaa18c330b29d"
+    },
+    {
+      "path": "source-before.json",
+      "bytes": 4425,
+      "sha256": "6d7d786d6d38800de029d1ee8f36a0e0f1ff15db8baab7ffb938e10c3da9947b"
+    },
+    {
+      "path": "native-build-result.json",
+      "bytes": 389,
+      "sha256": "5fde92f8730073a7a9267ae366565f7e30e83b2914dbf16ed97d0ed8e6880833"
+    },
+    {
+      "path": "native-build-final.log",
+      "bytes": 54893,
+      "sha256": "544805883ab94bc6a567eb86464fa0a2314ef5fa6460fd0346a156240fe38e4a"
+    },
+    {
+      "path": "native-build-final-result.json",
+      "bytes": 395,
+      "sha256": "0fee306902d92d41caaf33a9a5943ad0503dafd733e4c96b9e3a626c241b125b"
+    },
+    {
+      "path": "candidate-first.json",
+      "bytes": 481,
+      "sha256": "839cc9cc8bf6c1fb745e6b48e53a725d68b439a82dc8c168c0ad895a231bc322"
+    },
+    {
+      "path": "candidate-final.json",
+      "bytes": 548,
+      "sha256": "84ced674fc4cd315be94fc1213b0466508c93f8302062688a9d0b4f7a9746c21"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 867,
+      "sha256": "6d7b15e71c9357f4d2727221cc47c8efc89b081c5e44f7e3c2758527d3eda6d4"
+    }
+  ],
+  "initialFailures": [
+    {
+      "log": "client-social-initial.log",
+      "passed": 63,
+      "failed": 6,
+      "reason": "Legacy tests used non255 full-table fixtures, nonexistent changeType echoes, or omitted real member identity. Fixtures corrected; malformed echoes remain negative tests."
+    },
+    {
+      "log": "client-guild-panel-initial.log",
+      "passed": 32,
+      "failed": 1,
+      "reason": "Legacy nonrename-status fixture treated a populated permission-rank payload as create-rank/status8. Valid create-rank shape and missing-viewer rejection now explicit."
+    },
+    {
+      "log": "client-guild-v2-initial.log",
+      "passed": 141,
+      "failed": 2,
+      "reason": "Existing UI tests expected bare GuildRequestInfo intents after the typed local read conversion."
+    },
+    {
+      "log": "client-guild-v2-qualified.log",
+      "passed": 142,
+      "failed": 1,
+      "reason": "The remaining UI page fixture had no authoritative guild membership. It now seeds an ordinary GuildStatus before requesting its roster."
+    }
+  ],
+  "reviewFixes": [
+    "Preliminary release candidate retained uninstalled: review found definitely-unsent read leakage and ordinary-intent eviction of pending work",
+    "Real bounded production try_send Full test proves release before acceptance; fresh accepted read stays pending until a real complete roster",
+    "Six reverse-order queue-pressure tests and a real panel refresh test cover the missing paths"
+  ],
+  "scope": {
+    "backendChanged": false,
+    "serverWireChanged": false,
+    "saveSchemaChanged": false,
+    "servicesStarted": false,
+    "desktopControlled": false,
+    "nativeWindowExecuted": false,
+    "modelCalled": false,
+    "publicDeployment": false,
+    "candidate100": false,
+    "accepted": false
+  },
+  "open": [
+    "Native window/live-protocol and current candidate cross-client gameplay",
+    "Two explicit GPU/GDI real-asset checks",
+    "Guild member cap200 versus shared valid1000",
+    "Exact recruit/create-rank local context and structured failure acknowledgements",
+    "Rank-index renumbering concurrency boundary",
+    "Global cross-social budget and Web convergence",
+    "First Web owner unexpected-login cold-entry failure",
+    "Remaining pixel/language/input and release gates"
+  ]
+}

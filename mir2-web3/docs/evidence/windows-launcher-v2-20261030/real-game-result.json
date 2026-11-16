@@ -1,0 +1,7 @@
+{
+  "Candidate": "WN-CANDIDATE-20261029-unified-11",
+  "ExpectedSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+  "ActualSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+  "Passed": true,
+  "Observation": "Local launcher Home offered Start game while optional update r2026102912 was available; clicked Start game, actual installed executable opened login screen; no authentication action taken."
+}

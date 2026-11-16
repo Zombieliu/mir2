@@ -1,0 +1,436 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T20:35:10.402Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Independent explicit public allowlist for authentic formal standard native ladder02. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.",
+  "files": [
+    {
+      "path": "formal-native-v2-ladder-03/gateway-build-pin.json",
+      "bytes": 1296,
+      "sha256": "6f7e885f5e0257b005cb94c32ee63903445b523b1728843cddcbb2d4118d9677",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/source-pins.json",
+      "bytes": 26377,
+      "sha256": "917365be491b3fe3994baf6bed111b78d9094525d764f32bbcae73f6b1686746",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/source-pins-admitted-v2.json",
+      "bytes": 26739,
+      "sha256": "f49c166adba21daf4af9b02f6bbe6428916b1e4759bd2cbf431585c35bbe2834",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/realm-process.json",
+      "bytes": 1299,
+      "sha256": "f2c9d6ef5e5156c7072b6ba1cf1bc5e0b45e1233940a1408bd224e53b52d920c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/realm-cleanup.json",
+      "bytes": 2934,
+      "sha256": "2eeb0787ce1c371fa73f9be8c549ae238df79dd95d7f69118c68a3324548a733",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-public.jsonl",
+      "bytes": 5137,
+      "sha256": "c6f37cf51f1b12361f993e0ba198550a303ae87673deb6252e467f0e60e5038b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-public-status.json",
+      "bytes": 828,
+      "sha256": "ad35894d76d90cd71f5b3f400b3fff0724d5a61327cb3fb5ad7b355f23d949c4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-diagnostics-config.json",
+      "bytes": 3078,
+      "sha256": "9a9af96cae287b9b4e9634ec17baa4a33ccaac612387736a37b01b5f44a4dd81",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-public.mjs",
+      "bytes": 7767,
+      "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-public.test.mjs",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-public-test.log",
+      "bytes": 3196,
+      "sha256": "e27260963c3a8b1c83a6ce52c6acf5b9ae6b6e628f213064fa5f4f3348534bf3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/slow-stage-public-test-v2.log",
+      "bytes": 3462,
+      "sha256": "c9be6ee159c6caaf5a7922adef4e36e0c8ac6b492cef5027dad3770228bc7494",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/run-options.json",
+      "bytes": 3180,
+      "sha256": "63473f53d90f0d2300704265f7693c3082e7cd885f711ebe2920eeeaf0c46155",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/run-options-admitted-v2.json",
+      "bytes": 3691,
+      "sha256": "5f1a452ba00ad048ab417211b79d8a2a4b6490af240433fcb0704c243bb6de07",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/scenario.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/spectator-health-before.json",
+      "bytes": 641,
+      "sha256": "f50fac3552b222e0c5d6289d6401a0609e8c1746d34d50d2b1e282e5eedf13ad",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/monitor-options.json",
+      "bytes": 645,
+      "sha256": "bd6a1bcc0ce66237c1af1889cf1334eb6b57c19d98cc5ee5c6bd9925e5cc7c42",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/monitor-process.json",
+      "bytes": 223,
+      "sha256": "dab3c1639b276b45454db1237399574f1e6265c3882145415f9b9430c1ecc776",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/launcher-source-frozen-v1.json",
+      "bytes": 3205,
+      "sha256": "bf08eb6b6cfad245c3611dd6932b3812fba338d1cdbd0d4f1a5c239183ba17bb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/preparation-plan.json",
+      "bytes": 5390,
+      "sha256": "0bdd34abf58c74283254a7b562f73b1ca592c63e00e8c799cb0375896a33772c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/report-provenance.json",
+      "bytes": 1505,
+      "sha256": "41c97d16f4f356e12d9058371ec0fe6d72c484e16009325a80bfcc7d976e2404",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/feasibility-gate.json",
+      "bytes": 3803,
+      "sha256": "7b7c17ae289790b548ec539702b9174d2e642b5afe37f196541a675f43bfaebc",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/static-preparation-verification.json",
+      "bytes": 2067,
+      "sha256": "4c5dd5d2499657e52fbe04412b8e7c2335fea30c90056af2ddbcf88d135011ea",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/scenario-prefix-readiness.json",
+      "bytes": 1851,
+      "sha256": "7a1e4fc52f39680c7c53f37898bb75eda742437a9173880c44c2848272677794",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/input-lib.mjs",
+      "bytes": 13776,
+      "sha256": "dc865126c27b3b8da895b915f5d9e7c9e6c74aa887bc8e46613b476de27c70c6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/prepare-inputs.mjs",
+      "bytes": 11310,
+      "sha256": "a994d62d40d62971f36f782e9cab36dbe3b6dec4ac8b815e53ed33861f7d739c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/run-owned.mjs",
+      "bytes": 17197,
+      "sha256": "1c7f5dab484500e5f720858c97c19cc27381851b1fb82fec055c1f54036cc115",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/verify-feasibility-gate.mjs",
+      "bytes": 12529,
+      "sha256": "ebab305c5b50500e381966e92de42892d5ff154f0bd42924ad20a033617675a9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/reports/1792873511986-56c2dbe6.report.json",
+      "bytes": 83325,
+      "sha256": "3bbdcf1ab198eb6e32d9ccc9d251f7d919e3f3e8fb01e3c717877a6037dff6be",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/launcher-syntax-check.log",
+      "bytes": 425,
+      "sha256": "f781b2640720b09001e4c96705559456b6dfdb422177704a6fb7409f3ebca836",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/run-command.log",
+      "bytes": 1695,
+      "sha256": "6fe400a5648883a0778d3ce6bb370b2b2d28d2a38ba8e4b07b49c8a39ba3f205",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/spectator-health-after.json",
+      "bytes": 649,
+      "sha256": "f27b698cf5e01b52e768595b41549bace673f324e8a23b2d9d52e72d0b959fea",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-attack-v2.json",
+      "bytes": 1139,
+      "sha256": "d27ff7ef91c979d7884aa99047c27a820d845850d63786ea30fd88d786eb197f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "backend-source-native-attack-v2.json",
+      "bytes": 11716,
+      "sha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-movement-coordination-driver-frozen-v1.json",
+      "bytes": 7765,
+      "sha256": "61273b4e6aed7ceb3c8cbb04324d0892a560ae7f0bc2de4edfc22d3e13266853",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-movement-coordination-full-regression-source-pins-v2.json",
+      "bytes": 2042,
+      "sha256": "01d742234ba76f3cdf2bdbf6710da3f16f4101f62ed6aad1939da06348154e9f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-formal-native-v2-ladder-03-recordings-metadata.json",
+      "bytes": 1216,
+      "sha256": "f8ccab9fcf3d68690b83695ad079a680705179e63a8394744452b7f095ab6c01",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-formal-native-v2-ladder-03-monitor-endpoints.json",
+      "bytes": 4687,
+      "sha256": "0989cd5c3b59d17adf642f3c2241ecc35a4064ff9978a89abb0911a5d510b91e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/collect-public.mjs",
+      "bytes": 36115,
+      "sha256": "d642917d73df089f6511aad1451d6afc8078a7a0e28d6222b710a19bc6b9eb1d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-03/verify-public.mjs",
+      "bytes": 14730,
+      "sha256": "7a2d99c6de7db4ea80677a3c67ce6e62131752e31a61dd091d3ea9a0e0cda213",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "formal-native-v2-ladder-03/reports/1792873511986-56c2dbe6.samples.jsonl",
+      "bytes": 2823068,
+      "sha256": "2e24f4f3139b4d4fd912b84dbfa5f80b198dfab89f0a62479639857d4faf71a9",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "formal-native-v2-ladder-03/monitor-history.jsonl",
+      "bytes": 1366467,
+      "sha256": "4148c5b516811168477e32ca0e3fef3310454203c0e88f823919fa8ac268a0de",
+      "rows": 152,
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "formal-native-v2-ladder-03/recordings/0-498020.jsonl",
+      "bytes": 40463458,
+      "sha256": "62b417bca546a4935c3a7f7488699f65ecb252423152811c8c77c04ce00c644b",
+      "frames": 1377,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792873511986-56c2dbe6",
+    "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+    "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+    "originalBackendReleaseReused": true,
+    "reportOk": false,
+    "driverPlayableCapacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "normalProcessCleanup": true,
+    "diagnosticsComplete": true,
+    "slowStageMetadata": {
+      "rows": 59,
+      "bytes": 5137,
+      "sha256": "c6f37cf51f1b12361f993e0ba198550a303ae87673deb6252e467f0e60e5038b",
+      "status": {
+        "schemaVersion": 1,
+        "complete": true,
+        "reasons": [],
+        "stopRequested": false,
+        "stderrEnded": true,
+        "writerFinished": true,
+        "rowsQueued": 59,
+        "bytesQueued": 5137,
+        "maxBufferedLineBytes": 108,
+        "lineLimitBytes": 8192,
+        "totalLimitBytes": 33554432,
+        "writeLimitBytes": 1048576,
+        "writeHighWaterMarkBytes": 1048576,
+        "maxQueuedWriteBytes": 264,
+        "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label allowlist. observedAtMs is the launcher receive clock, not server span start/end. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+        "thresholdMs": 50,
+        "dataFile": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.jsonl"
+      }
+    },
+    "normalOwnedCleanup": true,
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "gatewaySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+    "backendInputCount": 39,
+    "realGameplayAttempt": true,
+    "report": "formal-native-v2-ladder-03/reports/1792873511986-56c2dbe6.report.json",
+    "raw": "formal-native-v2-ladder-03/reports/1792873511986-56c2dbe6.samples.jsonl",
+    "peakControlledActors": 8,
+    "highestPassedStage": 2,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-2",
+        "kind": "bootstrap",
+        "targetActors": 2,
+        "startedAtMs": 1792873512031,
+        "endedAtMs": 1792873550020,
+        "completed": true
+      },
+      {
+        "name": "stage-2",
+        "kind": "measurement",
+        "targetActors": 2,
+        "startedAtMs": 1792873550021,
+        "endedAtMs": 1792873850066,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792873850067,
+        "endedAtMs": 1792873877357,
+        "completed": false
+      }
+    ],
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792873550021,
+        "endedAtMs": 1792873850066,
+        "minuteWindows": 5
+      }
+    ],
+    "soakIntervalSeconds": null,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 0,
+    "passed60SecondSoakWindows": 0,
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      }
+    },
+    "capacityAccepted": false,
+    "formalRunStarted": true,
+    "failureWindow": {
+      "actor": "Lc7785700",
+      "phases": [
+        "stage-2",
+        "ramp"
+      ],
+      "seconds": 60.4859681,
+      "role": "movement",
+      "successfulMoves": 77,
+      "correctedMoves": 0,
+      "offeredMoves": 77,
+      "timeoutRatio": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "damage": 0
+    },
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true,
+    "normalGatewayExit": 0,
+    "normalMonitorExit": 0
+  },
+  "limitations": [
+    "Failure-window counters, if any, belong only to the recorded first failing continuous window, not the entire run.",
+    "Formal policy remains five300s measured cohorts2/10/25/50/100 plus7200s soak, original five resumes, post-resume60s/100 observation, five saves and all original latency/error/activity gates. Partial runs and shorter windows never substitute for full scope.",
+    "Typed Launched proves only this command launched a swing. The original driver still requires paired positive damage/health evidence for a hit.",
+    "The first/last monitor projection is a summary. Full raw monitor bytes and spectator payloads remain external and independently SHA-bound.",
+    "This File/loopback single-host formal profile does not certify production storage/RPO, TLS/NIC bandwidth, frontend acceptance or Cell scheduling."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "originalLog": {
+    "bytes": 143674,
+    "sha256": "10704d04e598d1eeb2fb91d1f8651e77238e1103091f140406840f1c87496f6a"
+  },
+  "result": "13 passed / 1 failed",
+  "failedTest": "living_struck_clock_is_optional_in_checkpoints_and_cleared_on_life_transition",
+  "changedTopLevelFields": [
+    "online_presence",
+    "state_root"
+  ],
+  "restoredOnlinePresence": {},
+  "originalOnlinePresence": {
+    "crowded-escape-observer": {
+      "owner": {
+        "namespace": "ffe020f926e1a5d3afb0d215744f5bdf",
+        "epoch": 2,
+        "session_id": "crowded-escape-observer",
+        "account_id": "crowded-escape-observer-account",
+        "character_index": 0,
+        "object_id": 102
+      },
+      "key": {
+        "shard_id": "primary",
+        "map_file_name": "crowded-escape-fixture",
+        "channel_id": 0,
+        "instance_id": "main"
+      },
+      "dead": false,
+      "name": "crowded-escape-observer",
+      "group_members": []
+    },
+    "crowded-escape-owner": {
+      "owner": {
+        "namespace": "ffe020f926e1a5d3afb0d215744f5bdf",
+        "epoch": 1,
+        "session_id": "crowded-escape-owner",
+        "account_id": "crowded-escape-owner-account",
+        "character_index": 0,
+        "object_id": 101
+      },
+      "key": {
+        "shard_id": "primary",
+        "map_file_name": "crowded-escape-fixture",
+        "channel_id": 0,
+        "instance_id": "main"
+      },
+      "dead": true,
+      "name": "crowded-escape-owner",
+      "group_members": []
+    }
+  },
+  "restoredStateRoot": "fb1c7a86b79a5736e0e9559862bfaec25d1a44fe21da490318bc9bcbe89e7b13",
+  "originalStateRoot": "c922d5af9e53e1c96e8a13893f24e7e537cf1de048abd1e915f999b35d4640b9",
+  "allOtherParsedFieldsEqual": true
+}

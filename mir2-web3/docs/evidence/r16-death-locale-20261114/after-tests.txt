@@ -1,0 +1,209 @@
+TAP version 13
+# quest localization tests passed; 22 authoritative V2 task definitions checked
+# Subtest: scripts\\test-quest-localization.mjs
+ok 1 - scripts\\test-quest-localization.mjs
+  ---
+  duration_ms: 362.6161
+  type: 'test'
+  ...
+# Subtest: browser dictionaries use the ten native languages in the native order
+ok 2 - browser dictionaries use the ten native languages in the native order
+  ---
+  duration_ms: 0.9566
+  type: 'test'
+  ...
+# Subtest: zh-CN supplies every browser control without blank values
+ok 3 - zh-CN supplies every browser control without blank values
+  ---
+  duration_ms: 0.3317
+  type: 'test'
+  ...
+# Subtest: zh-TW supplies every browser control without blank values
+ok 4 - zh-TW supplies every browser control without blank values
+  ---
+  duration_ms: 0.125
+  type: 'test'
+  ...
+# Subtest: en supplies every browser control without blank values
+ok 5 - en supplies every browser control without blank values
+  ---
+  duration_ms: 0.0952
+  type: 'test'
+  ...
+# Subtest: pt-BR supplies every browser control without blank values
+ok 6 - pt-BR supplies every browser control without blank values
+  ---
+  duration_ms: 0.0761
+  type: 'test'
+  ...
+# Subtest: ru supplies every browser control without blank values
+ok 7 - ru supplies every browser control without blank values
+  ---
+  duration_ms: 0.0739
+  type: 'test'
+  ...
+# Subtest: hi supplies every browser control without blank values
+ok 8 - hi supplies every browser control without blank values
+  ---
+  duration_ms: 0.1276
+  type: 'test'
+  ...
+# Subtest: id supplies every browser control without blank values
+ok 9 - id supplies every browser control without blank values
+  ---
+  duration_ms: 0.0702
+  type: 'test'
+  ...
+# Subtest: vi supplies every browser control without blank values
+ok 10 - vi supplies every browser control without blank values
+  ---
+  duration_ms: 0.1704
+  type: 'test'
+  ...
+# Subtest: th supplies every browser control without blank values
+ok 11 - th supplies every browser control without blank values
+  ---
+  duration_ms: 0.2227
+  type: 'test'
+  ...
+# Subtest: ar supplies every browser control without blank values
+ok 12 - ar supplies every browser control without blank values
+  ---
+  duration_ms: 0.1039
+  type: 'test'
+  ...
+# Subtest: unknown languages and keys preserve the caller's fallback
+ok 13 - unknown languages and keys preserve the caller's fallback
+  ---
+  duration_ms: 0.0964
+  type: 'test'
+  ...
+# Subtest: native wallet captions are not redefined by the browser dictionary
+ok 14 - native wallet captions are not redefined by the browser dictionary
+  ---
+  duration_ms: 0.0965
+  type: 'test'
+  ...
+# Subtest: browser settings explain the extra volume/account/sign-in scope
+ok 15 - browser settings explain the extra volume/account/sign-in scope
+  ---
+  duration_ms: 0.0709
+  type: 'test'
+  ...
+# Subtest: type-only native compatibility does not pull a runtime dependency
+ok 16 - type-only native compatibility does not pull a runtime dependency
+  ---
+  duration_ms: 0.1551
+  type: 'test'
+  ...
+# Subtest: quest feedback covers every language without exposing implementation terms
+ok 17 - quest feedback covers every language without exposing implementation terms
+  ---
+  duration_ms: 0.4051
+  type: 'test'
+  ...
+# Subtest: zh-CN route feedback preserves exact coordinate placeholders and local wording
+ok 18 - zh-CN route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.3875
+  type: 'test'
+  ...
+# Subtest: zh-TW route feedback preserves exact coordinate placeholders and local wording
+ok 19 - zh-TW route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.122
+  type: 'test'
+  ...
+# Subtest: en route feedback preserves exact coordinate placeholders and local wording
+ok 20 - en route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1573
+  type: 'test'
+  ...
+# Subtest: pt-BR route feedback preserves exact coordinate placeholders and local wording
+ok 21 - pt-BR route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0447
+  type: 'test'
+  ...
+# Subtest: ru route feedback preserves exact coordinate placeholders and local wording
+ok 22 - ru route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0937
+  type: 'test'
+  ...
+# Subtest: hi route feedback preserves exact coordinate placeholders and local wording
+ok 23 - hi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.041
+  type: 'test'
+  ...
+# Subtest: id route feedback preserves exact coordinate placeholders and local wording
+ok 24 - id route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0385
+  type: 'test'
+  ...
+# Subtest: vi route feedback preserves exact coordinate placeholders and local wording
+ok 25 - vi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0368
+  type: 'test'
+  ...
+# Subtest: th route feedback preserves exact coordinate placeholders and local wording
+ok 26 - th route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0369
+  type: 'test'
+  ...
+# Subtest: ar route feedback preserves exact coordinate placeholders and local wording
+ok 27 - ar route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.7335
+  type: 'test'
+  ...
+# Subtest: route arrival describes a hunting area or NPC approach and leaves the next action to the player
+ok 28 - route arrival describes a hunting area or NPC approach and leaves the next action to the player
+  ---
+  duration_ms: 0.1244
+  type: 'test'
+  ...
+# Subtest: movement confirmation timeout is localized without placeholders, budgets or implementation terms
+ok 29 - movement confirmation timeout is localized without placeholders, budgets or implementation terms
+  ---
+  duration_ms: 0.5273
+  type: 'test'
+  ...
+# Subtest: all three Help shortcut pages use Windows R16 copy and order in every locale
+ok 30 - all three Help shortcut pages use Windows R16 copy and order in every locale
+  ---
+  duration_ms: 44.4562
+  type: 'test'
+  ...
+# Subtest: Help shows the player's edited binding next to the translated description
+ok 31 - Help shows the player's edited binding next to the translated description
+  ---
+  duration_ms: 1.4856
+  type: 'test'
+  ...
+# Subtest: all translated image pages contain both shared text fields and no original English bitmap
+ok 32 - all translated image pages contain both shared text fields and no original English bitmap
+  ---
+  duration_ms: 142.0671
+  type: 'test'
+  ...
+# Subtest: English and unsupported legacy locales render the original Help bitmap range
+ok 33 - English and unsupported legacy locales render the original Help bitmap range
+  ---
+  duration_ms: 5.2553
+  type: 'test'
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 713.1725

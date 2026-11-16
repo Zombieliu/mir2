@@ -1,0 +1,182 @@
+{
+  "utc": "2026-10-11T02:37:20.323483+00:00",
+  "parent": "f2082841d4e79b29ffc6933ace349b572d1b3c21",
+  "sourceSha256": {
+    "mir2-web3/apps/game-client/platform-windows/src/input.rs": "e9ee9e4155fdbd1e055cb0dc567a0708712b8fab74863a2b32fe11a101071b12",
+    "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs": "dfdc6cf6186918e598c12890e916b93c553974c4b3fcae1b07d39f06753b1113"
+  },
+  "beforeSourceSha256": {
+    "mir2-web3/apps/game-client/platform-windows/src/input.rs": "fcc56d376b50deeebdbf12bce79b59440b9e8d2aff4c76f0a28a83b9bc5beb12",
+    "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs": "b4e759379dea517928f9e5691e9299ba826a7bab7859b0b3875b647034b3f207"
+  },
+  "onlyStandardRustfmtApplied": true,
+  "fullNativeFormattingCheckPassed": true,
+  "formattedNativeStageGatePassed": true,
+  "nativeComponentTestsDistinct": 911,
+  "sameExactTestNamesAsPriorStageGate": true,
+  "ignoredOriginalChecks": [
+    "assets::tests::measure_asset_root_diagnosis_per_frame",
+    "entity_presentation::mining_visual_tests::mining_source_pose_and_original_ore_icons_offscreen_gpu",
+    "gateway::target_lifecycle_network_tests::native_rejected_target_actual_gateway_round_trip",
+    "native_fonts::gpu_tests::font_gpu_rebuild_negative_control",
+    "native_fonts::gpu_tests::font_gpu_rebuild_soak",
+    "native_fonts::gpu_tests::nine_language_bundled_fonts_gpu_shapes_and_switches_without_os_fonts",
+    "window_sizing::tests::real_winit_login_choices_resize_world_ui_and_mouse_together"
+  ],
+  "selectedBeforeAfterSourceHashesEqual": true,
+  "testCommand": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "2",
+    "--config",
+    "profile.test.package.mir2-platform-windows.debug=\"line-tables-only\"",
+    "--config",
+    "profile.test.package.mir2-platform-windows.codegen-units=218",
+    "--manifest-path",
+    "apps/game-client/platform-windows/Cargo.toml",
+    "--bin",
+    "mir2-platform-windows",
+    "--",
+    "--test-threads=1",
+    "--nocapture",
+    "::"
+  ],
+  "peakTestPrivateBytes": 240447488,
+  "testProcessesStopped": false,
+  "firstFormattingGateFailureRetained": true,
+  "emptyFilterInvocationFailureRetained": true,
+  "noReexecutionOfAnActualFailedTest": true,
+  "newPackagePublished": false,
+  "nativeHumanAcceptance": false,
+  "archive": {
+    "bytes": 241635,
+    "sha256": "a22278f2a776ca2b56593bcce0dfc290b7ba1b5d2e96cb999befdd97f6949886",
+    "entries": 24
+  },
+  "entries": [
+    {
+      "path": "checks/check-06-committed-rustfmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/check-06-committed-rustfmt.stdout.log",
+      "bytes": 36999,
+      "sha256": "5d55b2a66de1a922736b0191426a5394f411537bc115600c21566bb7d0033314"
+    },
+    {
+      "path": "checks/check-07-formatted-native-stage-gate-supervisor.json",
+      "bytes": 444,
+      "sha256": "378eab8e6cd0cc1a3b5298c009e50ef322c81580ff58f277ee7df15dd649ecce"
+    },
+    {
+      "path": "checks/check-07-formatted-native-stage-gate-supervisor.stderr.log",
+      "bytes": 111,
+      "sha256": "00e4aade8cf93c6065ddaa2b253c734e70a49a2bddc257789a4f97427aa9da64"
+    },
+    {
+      "path": "checks/check-07-formatted-native-stage-gate-supervisor.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate-after.json",
+      "bytes": 4258,
+      "sha256": "eea14672e94d773e757a0feba0e8317c95256c4d96c0ae1c26a126f526a6d998"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate-before.json",
+      "bytes": 4259,
+      "sha256": "0c6918fcced4cac4378f281de559c4dec145caab6bfbedcd59589b740da25033"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate-result.json",
+      "bytes": 260,
+      "sha256": "8ca35c93d172aaa665a5a61a6657fce7e1bb49e26495b19cc9819e5d84ccd86a"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate-supervisor.json",
+      "bytes": 660,
+      "sha256": "11a4724c26a62e436a5e1b06a85a7d89c3497f7aeecd6cd2c9f53e5aafeecb45"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate-supervisor.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate-supervisor.stdout.log",
+      "bytes": 3936,
+      "sha256": "74a6c99b2841a5f148232573372f2d12ab1bf97a70476453d340275945a955f2"
+    },
+    {
+      "path": "checks/check-08-formatted-native-stage-gate.log",
+      "bytes": 2034856,
+      "sha256": "72923769be22363d3e5153a7adb6502363a131c89caf64151490d086e1fc886f"
+    },
+    {
+      "path": "formatting/FORMATTING-ONLY.json",
+      "bytes": 1593,
+      "sha256": "177fbb480261765192914a7d179938cef73f47ff545f4a67cf79da3d9c9ad381"
+    },
+    {
+      "path": "formatting/archive-helper-initial.py",
+      "bytes": 5273,
+      "sha256": "ddd53901cf90cacd5f51f1500bcc7ed87974eb402aa2abdfc0913eaa3e8a2747"
+    },
+    {
+      "path": "formatting/entity_presentation.rs.after",
+      "bytes": 202025,
+      "sha256": "dfdc6cf6186918e598c12890e916b93c553974c4b3fcae1b07d39f06753b1113"
+    },
+    {
+      "path": "formatting/entity_presentation.rs.before",
+      "bytes": 201426,
+      "sha256": "b4e759379dea517928f9e5691e9299ba826a7bab7859b0b3875b647034b3f207"
+    },
+    {
+      "path": "formatting/entity_presentation.rs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "formatting/entity_presentation.rs.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "formatting/input.rs.after",
+      "bytes": 375650,
+      "sha256": "e9ee9e4155fdbd1e055cb0dc567a0708712b8fab74863a2b32fe11a101071b12"
+    },
+    {
+      "path": "formatting/input.rs.before",
+      "bytes": 373252,
+      "sha256": "fcc56d376b50deeebdbf12bce79b59440b9e8d2aff4c76f0a28a83b9bc5beb12"
+    },
+    {
+      "path": "formatting/input.rs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "formatting/input.rs.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "formatting/workspace-check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "formatting/workspace-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

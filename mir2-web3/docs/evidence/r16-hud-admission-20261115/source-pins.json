@@ -1,0 +1,37 @@
+{
+  "baseHead": "276df66ab3b02cf7ebcc5555836647c6d66ef39b",
+  "workerDraftAtBuild": true,
+  "owned": [
+    {
+      "path": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "bytes": 64313,
+      "sha256": "17d387d77329dda4b769d89cb7733a20f5642e145c0f4a0e797ebe0661430d6f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
+      "bytes": 10886,
+      "sha256": "ec4943fbc654df487ead5cdeb2602c8638b936e2dd106b965c3f21b6b72b6ff6"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+      "bytes": 22634,
+      "sha256": "e34ebbb3a4578d72e8f73cd9023b59d191046d1782534c2c9714b1de94eaa24a"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/smoke-asset-hud-admission.mjs",
+      "bytes": 12634,
+      "sha256": "f18e67c169c060cd967bb788b1c61d17b4d28d6e98814af935d6e7c596fa22d6"
+    }
+  ],
+  "compiledComponent": {
+    "path": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+    "commit": "627b68ae4dd5575a40ea37df16603087ed68a522",
+    "gitLfSha256": "8897a95341737316e31d6e1958afb853b3950360824bb618104dd9c3fab1e0be",
+    "compiledRawSha256": "8897a95341737316e31d6e1958afb853b3950360824bb618104dd9c3fab1e0be"
+  },
+  "assetPackInventoryUnchanged": {
+    "bytes": 6366,
+    "sha256": "448b7fe9ebca2a82b9cbcefd57d66bc3d6bf9ecb2807eb4ed1950666981e7b7a"
+  },
+  "runtimeUnchanged": "bevy-0c553a754308e5b8"
+}

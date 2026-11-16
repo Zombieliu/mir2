@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "scheduling": [
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 1,
+        "sourceIndex": 0,
+        "retry": false,
+        "state": "started",
+        "phase": "headers",
+        "bytes": 0
+      },
+      "epochMs": 1794567225560,
+      "atMs": 47616.90000000596
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 1,
+        "sourceIndex": 0,
+        "retry": false,
+        "state": "failed",
+        "phase": "headers",
+        "bytes": 0,
+        "reason": "headers-timeout",
+        "retryable": true
+      },
+      "epochMs": 1794567233565,
+      "atMs": 55621.79999999702
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 2,
+        "sourceIndex": 1,
+        "retry": false,
+        "state": "started",
+        "phase": "headers",
+        "bytes": 0
+      },
+      "epochMs": 1794567233565,
+      "atMs": 55621.79999999702
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 2,
+        "sourceIndex": 1,
+        "retry": false,
+        "state": "failed",
+        "phase": "body",
+        "bytes": 0,
+        "status": 200,
+        "reason": "body-idle",
+        "retryable": true
+      },
+      "epochMs": 1794567248578,
+      "atMs": 70634.90000000596
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 3,
+        "sourceIndex": 1,
+        "retry": true,
+        "state": "started",
+        "phase": "headers",
+        "bytes": 0
+      },
+      "epochMs": 1794567248578,
+      "atMs": 70634.90000000596
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 3,
+        "sourceIndex": 1,
+        "retry": true,
+        "state": "failed",
+        "phase": "body",
+        "bytes": 0,
+        "status": 200,
+        "reason": "body-idle",
+        "retryable": true
+      },
+      "epochMs": 1794567263582,
+      "atMs": 85638.20000000298
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 4,
+        "sourceIndex": 0,
+        "retry": true,
+        "state": "started",
+        "phase": "headers",
+        "bytes": 0
+      },
+      "epochMs": 1794567264582,
+      "atMs": 86638.40000000596
+    },
+    {
+      "name": "bevyRuntimeDownload",
+      "detail": {
+        "attempt": 4,
+        "sourceIndex": 0,
+        "retry": true,
+        "state": "completed",
+        "phase": "compile",
+        "bytes": 31452436,
+        "status": 200
+      },
+      "epochMs": 1794567264686,
+      "atMs": 86742.5
+    },
+    {
+      "name": "bevyRuntimeFontPrewarmStart",
+      "epochMs": 1794567264695,
+      "atMs": 86751.40000000596
+    },
+    {
+      "name": "bevyRuntimeReady",
+      "detail": {
+        "reused": false,
+        "backend": "webgpu",
+        "compiledBackend": "webgpu",
+        "fallbackFrom": null,
+        "packageId": "webgpu"
+      },
+      "epochMs": 1794567264864,
+      "atMs": 86920.59999999404
+    }
+  ],
+  "nativeReadyWaitMs": 52097,
+  "scope": "explicit six-family prewarm follows binary completion; early DOM fonts remain permitted; original120s Native gate unchanged"
+}

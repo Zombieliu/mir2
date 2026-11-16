@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only remove historical unchanged315 main/policy rerun and update qualification scope; verifier only sibling package and labels, strict guards unchanged.",
+  "runner": {
+    "parent": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v16.mjs",
+      "bytes": 6590,
+      "sha256": "3b66e7d397f152a38f65392c69d4d05f949622554cb6c579c1feb3d35c438681"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v17.mjs",
+      "bytes": 6361,
+      "sha256": "ec15144160b0785d76c7147eae4c4c0060cebff206dadba5a0f74609cc0d6956"
+    },
+    "removedExactLine": "  {name:'capacity-execution-and-policy-regression',args:['--test','apps/web/scripts/playtest-capacity-soak.test.mjs','apps/web/scripts/playtest-capacity-policy.test.mjs']},\n",
+    "oldScope": "Fresh selected complete preparation/protection and continuation suites, adjacent ordinary economy/navigation/observations, three ordinary full-lifecycle driver unit suites, and complete capacity execution/policy regression suites for current-map ordinary funding and historical-prepared continuation integration. Named sources include the current recursive local full16 dependency closure. Older check counts are historical and not accumulated. No real gameplay/capacity/P0 acceptance.",
+    "newScope": "Fresh selected complete preparation/protection and continuation suites, adjacent ordinary economy/navigation/observations, and three ordinary full-lifecycle driver unit suites for the scoped post-sale Ruben navigation closed-history fix. Named sources include the current recursive local full16 dependency closure. Main/policy315 checks from05dad are historical, not rerun or accumulated. No real gameplay/capacity/P0 acceptance."
+  },
+  "full16Verifier": {
+    "parent": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v8.mjs",
+      "bytes": 15209,
+      "sha256": "edd63e82dc8954f0b2276cd3b2c1fb3ca472c1c656c59ffe48e3062a377ac090"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v9.mjs",
+      "bytes": 15209,
+      "sha256": "9cf6b5881ac593bcee5003c10dbd8f9eaf155854fffc4ad11907b8a8fcea5a8d"
+    },
+    "rules": [
+      [
+        "ordinary-capacity-bank-prepare-v16",
+        "ordinary-capacity-bank-prepare-v17"
+      ],
+      [
+        "W16 backend package",
+        "W17 backend package"
+      ]
+    ],
+    "counts": [
+      2,
+      5
+    ],
+    "inverseRawExact": true
+  },
+  "testsPerformed": false,
+  "full16ProofPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "gatewaySha256": "630f87bc22a803a70f1ea425f8ecd3796ccc6154e4815704aa03da1f26e16137",
+  "pageSha256": "b7094c92f66fda9aecd380e7f513dc108a322b48e3173146186bba36af31a651",
+  "sourceHeads": [
+    "a6ee787b8d5b9748418831e734882d595409c24c",
+    "a6ee787b8d5b9748418831e734882d595409c24c"
+  ],
+  "runtime": "bevy-0cd68510886134e0",
+  "scope": "ordinary local Chromium WebGPU /game against cloned File accounts",
+  "bilateral": {
+    "browser": "ui-agent-bilateral-r1/browser-r1/proof.json",
+    "file": "ui-agent-bilateral-r1/disk-readback.json",
+    "screenshot": "ui-agent-bilateral-r1/browser-r1/primary-completed-wallet.png",
+    "gold": [
+      933,
+      767
+    ],
+    "bothExactBags": true
+  },
+  "fullBag": {
+    "browser": "ui-agent-full-r1/browser-r1/proof.json",
+    "file": "ui-agent-full-r1/disk-readback.json",
+    "screenshot": "ui-agent-full-r1/browser-r1/full-bag-unlocked-same-offer.png",
+    "seededBagCells": 40,
+    "unlockRetainedOffer": true,
+    "oneOrdinaryUnequipAndEquip": true,
+    "oneExactRetrieval": true,
+    "gold": [
+      1000,
+      700
+    ],
+    "bothExactBags": true,
+    "exactEquippedSlotAndUidRestored": true
+  },
+  "processesClosed": true,
+  "sourceFixturesUnchanged": true
+}

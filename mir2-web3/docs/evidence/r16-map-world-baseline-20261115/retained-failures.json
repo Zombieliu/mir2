@@ -1,0 +1,105 @@
+{
+  "runs": [
+    {
+      "ordinal": 1,
+      "path": "C:/r16-route-map-lifecycle-20261115/fixture-r1/run-1/receipt.json",
+      "sha256": "7694f6e0e1ea0f56a3b08b79ea26c81667818d8cfe689e88c47153550e07db2e",
+      "passed": false,
+      "failure": {
+        "stage": "ordinary-protocol-walk-into-ReagentStore",
+        "message": "regular portal approach exists"
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "kind": "fixture-preparation"
+    },
+    {
+      "ordinal": 2,
+      "path": "C:/r16-route-map-lifecycle-20261115/fixture-r2/run-1/receipt.json",
+      "sha256": "0e92b38b4e2e06691c6635df107225d985df450fac55ec139de89581222ad196",
+      "passed": false,
+      "failure": {
+        "stage": "ordinary-protocol-walk-into-ReagentStore",
+        "message": "Cannot read properties of null (reading 'x')"
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "kind": "fixture-preparation"
+    },
+    {
+      "ordinal": 3,
+      "path": "C:/r16-route-map-lifecycle-20261115/fixture-r3/run-1/receipt.json",
+      "sha256": "f977c0e51ce17abd36345cf3b3896d1355d6fea9a4d8aef39c9ef2785dd8f0dc",
+      "passed": false,
+      "failure": {
+        "stage": "ordinary-protocol-walk-into-ReagentStore",
+        "message": "Timed out waiting for the expected gateway result."
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "kind": "fixture-preparation"
+    },
+    {
+      "ordinal": 4,
+      "path": "C:/r16-route-map-lifecycle-20261115/fixture-r4/run-1/receipt.json",
+      "sha256": "6985e20ec47d5c26c519f48f76886f6141f34365ee24bacc954b2ce620b8facd",
+      "passed": false,
+      "failure": {
+        "stage": "actual-Native-quest-route-through-interior-exit",
+        "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   x: 325,\n+   y: 290\n-   x: 326,\n-   y: 289\n  }\n"
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "kind": "fixture-preparation"
+    },
+    {
+      "ordinal": 5,
+      "path": "C:/r16-route-map-lifecycle-20261115/fixture-r5/run-1/receipt.json",
+      "sha256": "19ef64043944aca3cec031518531887ff4be7b185cc497ee6fbb9ff931161b5e",
+      "passed": false,
+      "failure": {
+        "stage": "hold-uncached-new-map-collision-then-ordinary-logout",
+        "message": "actual Native navigateQuestRoute control"
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "kind": "original-product-regression"
+    }
+  ],
+  "buildR1": {
+    "receipt": "C:/r16-route-map-lifecycle-20261115/build-receipt-r1.json",
+    "sha256": "098288e69fad30aae09a6cfd9ed09b506a91645e77a9913228375ad97a20bb14",
+    "failedTypeCheck": true,
+    "originalInputs": "C:/r16-route-map-lifecycle-20261115/failed-build-r1"
+  },
+  "buildR2": {
+    "receipt": "C:/r16-route-map-lifecycle-20261115/build-receipt-r2.json",
+    "sha256": "91117b49990f45c30298bbd0392b2deee0fe5de6678b157009c8a69b8c336b2c",
+    "passedBuildOnly": true,
+    "originalInputs": "C:/r16-route-map-lifecycle-20261115/build-r2-inputs"
+  },
+  "copyPreparation": {
+    "terminalFailure": "git show ENOBUFS after a successful guarded physical copy",
+    "resumed": "source input bindings independently rechecked; immutable original read directly from the already bound b9 physical source"
+  }
+}

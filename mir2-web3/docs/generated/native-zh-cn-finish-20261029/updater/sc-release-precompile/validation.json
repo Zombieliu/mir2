@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "kind": "clean-sparse-simplified-updater-release-precompile-only",
+  "sourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "sourceSummary": "updater-sc-precompile-summary.json",
+  "sourceInputs": "updater-sparse-source-inputs.json",
+  "inputReceipt": {
+    "filename": "updater-sparse-source-inputs.json",
+    "bytes": 4221,
+    "sha256": "3df6b934ef2d28002fd2051f3a433a74f1a1bf2e53269e712d6adcef4c3e90d1",
+    "included": false
+  },
+  "sourceSummaryReceipt": {
+    "filename": "updater-sc-precompile-summary.json",
+    "bytes": 1226,
+    "sha256": "8273bd46c940f2ecf6aa9454a9487558861d572cb46f8591b1c75a05142cb03c",
+    "included": false
+  },
+  "curatorVerifiedPhysicalInputs": 20,
+  "curatorVerifiedCleanPhysicalSourceHead": true,
+  "curatorVerifiedBothExecutableHashes": true,
+  "originalAssertSourceTrackedPassed": true,
+  "cargoReportedSeconds": 31.09,
+  "outputs": [
+    {
+      "name": "Mir2Launcher.exe",
+      "bytes": 392192,
+      "sha256": "cf4782eb831b3ef417d614b3d06ddb5838e8cf77ce3648ec88102eed9f6eb7e8"
+    },
+    {
+      "name": "Mir2Updater.exe",
+      "bytes": 1955328,
+      "sha256": "91216014357046dce1d4e405969f3cbd36695f4b0ea82abbb73f92a20d253231"
+    }
+  ],
+  "binariesIncluded": false,
+  "logReceipt": {
+    "filename": "updater-sc-precompile.log",
+    "bytes": 2047,
+    "sha256": "1883341bca745c4c6f46cb7032e3896e18e7a3680eb4d4e7795e8d876ff72636",
+    "included": false
+  },
+  "resultLines": [
+    "    Finished `release` profile [optimized] target(s) in 31.09s"
+  ],
+  "candidateSigningExecuted": false,
+  "candidateBundleVerified": false,
+  "gameCandidateBoundByThisReport": false,
+  "native242CheckoutTouched": false,
+  "scope": "Independent clean sparse updater source11d8 release build; earlier updater242 precompile remains historical. This is not final signed bundle or installation acceptance."
+}

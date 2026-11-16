@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T20:19:03.632Z",
+  "passed": true,
+  "runId": "1792955151058-4afb2f09",
+  "realmStamp": "1792955142379-1d2b2111",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "slowStageThresholdMs": 50,
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.audit-source.mjs",
+      "bytes": 9078,
+      "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.backend-source.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.independent-audit.json",
+      "bytes": 1750,
+      "sha256": "e3628a5a32e822fdeac680ccc73375719b4d37675f3eb2398e0adc718d8b201a"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.prepared-profile.json",
+      "bytes": 4391,
+      "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.realm-evidence.json",
+      "bytes": 34998,
+      "sha256": "273164b8f1529b2198bfdf02c7d1261bb1f06be73d869772a8674b1bb041edf6"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.release-input.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.runner-source.mjs",
+      "bytes": 14401,
+      "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.source-manifest-verification.json",
+      "bytes": 575,
+      "sha256": "26543564c191eec9304d5a4516fd41cb10eed73be5fa94e8d992915b97636dc0"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.zone-metrics.json",
+      "bytes": 23596,
+      "sha256": "8018ce18bcb0289bfb36d526bfa82e07e4f318b71351dbf32bb7377c5ed4c898"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-a.trace.jsonl",
+      "bytes": 979881,
+      "sha256": "2895002c9d164f9f3fa98686aeb954669b8672438cd9f76bb9ca588a8532586e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-b.trace.jsonl",
+      "bytes": 907129,
+      "sha256": "5ff17d001249454d2eeabb1b67c7b398c25a6a14b58ecd5d06fceb8831eda2b9"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-guard-newCharacter.trace.jsonl",
+      "bytes": 3479,
+      "sha256": "d8f1513ce5c26c6baa26f1e8bb33fefac4701fadd2b96561ecb697bfc3975c0d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-guard-startGame.trace.jsonl",
+      "bytes": 3441,
+      "sha256": "c14ee46b55c9f4d7f950ef330845b28cc2a44cc95e246ac088740e7a6823ee00"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-relogin-0.trace.jsonl",
+      "bytes": 685108,
+      "sha256": "1e19da8a0f0955b367f8439f5b9f0c7b25bd4a77b82826f332742ff16da490a9"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-relogin-1.trace.jsonl",
+      "bytes": 681056,
+      "sha256": "a55b572942796dfb2134b405b0942941ad477cbef970a4f2c9980aac846a4a2b"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09.report.json",
+      "bytes": 104551,
+      "sha256": "93ff28d507413635fc12a2732be7f7a8ce8a577843de96338102c05b4ba79461"
+    }
+  ],
+  "capacityAccepted": false
+}

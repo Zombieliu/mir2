@@ -1,0 +1,63 @@
+{
+  "owner": "Root",
+  "kind": "Source63 actual original Node tests",
+  "actual": {
+    "tests": 199,
+    "pass": 199,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 13064,
+    "builderPid": 50388,
+    "callerExitCode": 0
+  },
+  "input": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/node-tests02-config.json",
+      "bytes": 5027,
+      "sha256": "fae8ae287af0836af2296f5cc1f343035a0e41abcc3e387d0d09da838d0b3237"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source63-npc-shop-last-action-20261011-01\\preparation\\source63-source-snapshot02.json",
+      "bytes": 6597726,
+      "sha256": "a80f1579968f20eaff7d88c9480cda8aa37409e3509df9bb6a0789010ff09d2b"
+    },
+    "fullPrePostSourceCount": 19584,
+    "sourceDifferences": 0,
+    "toolsUnchanged": true,
+    "sourceReview": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/source63-source-review02.json",
+      "bytes": 5991,
+      "sha256": "4918da72c73c6c87388976092628e811ed07a9a8d3bddbc48b29737509df54fd"
+    }
+  },
+  "outputs": {
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/node-tests02/stdout.log",
+      "bytes": 51555,
+      "sha256": "48ef64b4ace6894960899ea0b86ebe4a91f84ec9b9a590c8b3fb1cc22d428471"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/node-tests02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/node-tests02/outer.json",
+      "bytes": 528,
+      "sha256": "42c480e0873a7b86830d2f518c38321dd686252860c22548505426968c48bcf2"
+    }
+  },
+  "historicalFailureRetained": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/node01-historical-failure01.json",
+    "bytes": 1947,
+    "sha256": "ad57bbcd29c693d291829af79e36d8bf3244ddd82fbda753d09add5836b3a115"
+  },
+  "scope": "Finite first action rejection diagnostics; original admission, proof and send checks preserved. Actual UI purchase/save/relogin not yet accepted.",
+  "productBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,445 @@
+{
+  "schemaVersion": "mir2-native-item-actor-asset-process-evidence-v1",
+  "evidenceKind": "local-development-observation-not-trusted-package-attestation",
+  "capturedOnLocalDate": "2026-09-03",
+  "workingTreeBaseRevision": "0e10b08bc0865831d57839055415674be6ca0a65",
+  "workingTreeDirtyAtBuild": true,
+  "crystalSourceRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "relevantCrystalSourceFilesClean": true,
+  "executable": {
+    "sha256": "55ca1d61a6977f164b1d6222de2aaafd4e21fef4a1c5db898ebee6ff0fbdb993",
+    "bytes": 88405504
+  },
+  "executableRelativePath": "apps/game-client/platform-windows/target/debug/mir2-platform-windows.exe",
+  "gateway": {
+    "sha256": "5c268641095bd300ad7f720cac8b3b3939fe2182e67db8db5e0c232f6aa497c3",
+    "bytes": 95134208
+  },
+  "gatewayRelativePath": "target/debug/mir2-gateway.exe",
+  "gatewayPid": 203456,
+  "gatewayEndpoint": "ws://127.0.0.1:7410/ws",
+  "processes": [
+    {
+      "pid": 240912,
+      "label": "assets-two-m-r1",
+      "character": "WingTwoM",
+      "characterIndex": 2,
+      "gender": "Male",
+      "effect": 2,
+      "armourIndex": 45,
+      "armourShape": 10,
+      "itemImage": 595,
+      "startedAt": "2026-09-03T04:46:24.4734665+08:00",
+      "actions": [
+        "auto-character",
+        "manual-inventory-page-0",
+        "attempt-unavailable-second-bag-tab",
+        "unequip",
+        "manual-inventory-first-cell",
+        "equip",
+        "manual-character"
+      ],
+      "runId": "item-actor-assets-20260903-r1"
+    },
+    {
+      "pid": 245444,
+      "label": "assets-two-f-r1",
+      "character": "WingTwoF",
+      "characterIndex": 3,
+      "gender": "Female",
+      "effect": 2,
+      "armourIndex": 51,
+      "armourShape": 10,
+      "itemImage": 605,
+      "startedAt": "2026-09-03T04:48:43.8560707+08:00",
+      "actions": [
+        "auto-character"
+      ],
+      "runId": "item-actor-assets-20260903-r1"
+    },
+    {
+      "pid": 247364,
+      "label": "assets-one-f-r1",
+      "character": "WingOneF",
+      "characterIndex": 1,
+      "gender": "Female",
+      "effect": 1,
+      "armourIndex": 379,
+      "armourShape": 9,
+      "itemImage": 86,
+      "startedAt": "2026-09-03T04:49:21.3196694+08:00",
+      "actions": [
+        "auto-character"
+      ],
+      "runId": "item-actor-assets-20260903-r1"
+    },
+    {
+      "pid": 247512,
+      "label": "assets-one-m-r1",
+      "character": "WingOneM",
+      "characterIndex": 0,
+      "gender": "Male",
+      "effect": 1,
+      "armourIndex": 375,
+      "armourShape": 9,
+      "itemImage": 87,
+      "startedAt": "2026-09-03T04:50:10.4605461+08:00",
+      "actions": [
+        "auto-character"
+      ],
+      "runId": "item-actor-assets-20260903-r1"
+    }
+  ],
+  "nativeSourceHashes": {
+    "apps/game-client/platform-windows/src/capture.rs": {
+      "sha256": "3790da88feb9a88a4f67c54c7cf8585a6184d296612f9e9bb80dd7a6b969f763",
+      "bytes": 64369
+    },
+    "apps/game-client/platform-windows/src/atlas.rs": {
+      "sha256": "5379ef2f9b68f8cc9d37322363a620aee0c31848f31bd16c8f1c2c03bd06902b",
+      "bytes": 123866
+    }
+  },
+  "captureAssetMetadata": {
+    "apps/web/public/original-ui/manifest.generated.json": {
+      "sha256": "9e387141d84f958ccabe56aece8f934351c8643eb6744cbcc197596d49d7d973",
+      "bytes": 10697300
+    },
+    "apps/web/public/original-ui/Items/meta.json": {
+      "sha256": "d44becf107b5309540fefbab7790fa8f669f847d6bf15adb3768c82db55588e4",
+      "bytes": 454553
+    },
+    "apps/web/public/original-ui/CArmour/09/meta.json": {
+      "sha256": "dc54d7915f9d0b3f67382e68e996ffc4aa0d78b26746e89dcdf6f536c2c3e4e7",
+      "bytes": 751918
+    },
+    "apps/web/public/original-ui/CArmour/10/meta.json": {
+      "sha256": "f8bb16d0781fb79092f98129b27b570030d1a3956787ad92c0411bacd648bcea",
+      "bytes": 751862
+    }
+  },
+  "finalAssetMetadata": {
+    "apps/web/public/original-ui/manifest.generated.json": {
+      "sha256": "a5aff31cf3a6e4217f6599f769ed5652cf2769dff0ab5bcba3618c1246c81c13",
+      "bytes": 10703122
+    },
+    "apps/web/public/original-ui/Items/meta.json": {
+      "sha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+      "bytes": 459663
+    },
+    "apps/web/public/original-ui/CArmour/09/meta.json": {
+      "sha256": "dc54d7915f9d0b3f67382e68e996ffc4aa0d78b26746e89dcdf6f536c2c3e4e7",
+      "bytes": 751918
+    },
+    "apps/web/public/original-ui/CArmour/10/meta.json": {
+      "sha256": "f8bb16d0781fb79092f98129b27b570030d1a3956787ad92c0411bacd648bcea",
+      "bytes": 751862
+    }
+  },
+  "assetMetadataTiming": "Eight captures precede the additive eleven Amulet/Poison stack-image export. All shown PNGs, CArmour metadata and the native EXE are unchanged. Capture and final metadata identities are deliberately separate.",
+  "sourceLibraries": [
+    {
+      "path": "Items.Lib",
+      "sha256": "5d5f6e0251d2e5f7d87cb18352be2c2999ea311a7aa988de63dcf2fa78f9fb5a",
+      "bytes": 4035433
+    },
+    {
+      "path": "CArmour/09.Lib",
+      "sha256": "9469eb3cd092518751fcee6c5703ae590575251b3087006e3c8cb3dce8e0e2da",
+      "bytes": 4449139
+    },
+    {
+      "path": "CArmour/10.Lib",
+      "sha256": "870304f256bad11ec24516d65792b80549545f14fe72feb521e2bff99a6dfe09",
+      "bytes": 5579595
+    }
+  ],
+  "itemCatalogue": {
+    "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+    "itemCount": 1628,
+    "catalogueImageCount": 913,
+    "stackImageCount": 11,
+    "uniqueImageCount": 924
+  },
+  "itemSourceExports": {
+    "catalogueMissingBefore": 632,
+    "stackImagesMissingBefore": 11,
+    "newPngCount": 643,
+    "reusedOriginalPngCount": 360,
+    "totalItemsFrames": 1003,
+    "requiredUniqueImages": 924
+  },
+  "armourSourceExports": {
+    "libraries": 2,
+    "frames": 3232,
+    "directSourcePixelAndGeometryCheck": true,
+    "poseCompositeCases": 512,
+    "poseCaseScope": "Warrior; both genders; CArmour/09 and /10; eight directions; every Standing(4),Walking(6),Running(6) phase"
+  },
+  "shownSourceAssets": [
+    {
+      "library": "Items",
+      "index": 87,
+      "width": 36,
+      "height": 32,
+      "x": 0,
+      "y": 0,
+      "sha256": "e4817c832477598e9668d84edf42c58f884695050e0ed495d9d18c32fb282e85"
+    },
+    {
+      "library": "Items",
+      "index": 86,
+      "width": 36,
+      "height": 30,
+      "x": 4,
+      "y": 2,
+      "sha256": "1e134aff57d98b02f6a82041c9b4b1823fcc61a3ba5e4e0f78f86b9a21263270"
+    },
+    {
+      "library": "Items",
+      "index": 595,
+      "width": 36,
+      "height": 30,
+      "x": 0,
+      "y": 0,
+      "sha256": "9b1952042162d44454414cf4fb8037b892fdcf57462665a5e4ff0489f5d89878"
+    },
+    {
+      "library": "Items",
+      "index": 605,
+      "width": 32,
+      "height": 30,
+      "x": 0,
+      "y": 0,
+      "sha256": "572b1ab9306c0664686f18a324535880f27d94dbd39822a14754fe7bf04e5973"
+    },
+    {
+      "library": "CArmour/09",
+      "index": 0,
+      "width": 72,
+      "height": 76,
+      "x": 7,
+      "y": -48,
+      "sha256": "8e41f462110995510894eeff14b48b0117deab5e796066f1293a4efbcd8a2677"
+    },
+    {
+      "library": "CArmour/09",
+      "index": 808,
+      "width": 60,
+      "height": 72,
+      "x": 10,
+      "y": -48,
+      "sha256": "4ef23cededed1dd5aebc5037ca37c81cdc3f3bffa94679f984c10694ab9a6c65"
+    },
+    {
+      "library": "CArmour/10",
+      "index": 0,
+      "width": 68,
+      "height": 76,
+      "x": 7,
+      "y": -49,
+      "sha256": "e89ec4f689d103aa5f651915ad4c22ae78c59311e7202eabe5e9ebcb2cdd2faa"
+    },
+    {
+      "library": "CArmour/10",
+      "index": 808,
+      "width": 64,
+      "height": 72,
+      "x": 7,
+      "y": -48,
+      "sha256": "e5374adb8450532c1b5de918a2cf2e94ca90e7872961dd29236c1558e5cceed6"
+    }
+  ],
+  "captures": [
+    {
+      "sidecar": "assets-one-f-r1-character-1788382178664-1.json",
+      "sidecarSha256": "28dd9685417ed6413af6b4e8c6411c341d860292e51bac443eef6ee578940032",
+      "image": "assets-one-f-r1-character-1788382178664-1.png",
+      "imageSha256": "6ecd38a496c18efba955866f90b8a666330167406dadbb5e06ee85f670544972",
+      "bytes": 1748500,
+      "capturedAt": "2026-09-02T20:49:38.664Z",
+      "scene": "character",
+      "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 288,
+        "y": 618,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-one-m-r1-character-1788382226980-1.json",
+      "sidecarSha256": "6f41cbab8779cfccd6465af3c20d3f6caee0f1bf45445f9031481b71d5072e55",
+      "image": "assets-one-m-r1-character-1788382226980-1.png",
+      "imageSha256": "3fb855fade024b14b96ceecfafbcff402f3991c04f2f60c6c68fadb019c1b76c",
+      "bytes": 1752613,
+      "capturedAt": "2026-09-02T20:50:26.980Z",
+      "scene": "character",
+      "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 290,
+        "y": 620,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-two-f-r1-character-1788382140018-1.json",
+      "sidecarSha256": "6d0884755f36a95f3121a5ca2a2782285baa614b5ffca89c08141959d430a9d7",
+      "image": "assets-two-f-r1-character-1788382140018-1.png",
+      "imageSha256": "3f5188671a51c078bf7861c6a519f6008ebf3bebf764872accf044907f9f4a71",
+      "bytes": 1754393,
+      "capturedAt": "2026-09-02T20:49:00.018Z",
+      "scene": "character",
+      "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 289,
+        "y": 619,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-two-m-r1-character-1788382000886-1.json",
+      "sidecarSha256": "d615a91582fc7af08571ba2b645838b9cb54473a015d215528ba6dcd63b4dfe0",
+      "image": "assets-two-m-r1-character-1788382000886-1.png",
+      "imageSha256": "36887326cd9ccb0e0f4efcc7ad729ee8febb28f9886993cb776f00b96206a07f",
+      "bytes": 1764197,
+      "capturedAt": "2026-09-02T20:46:40.886Z",
+      "scene": "character",
+      "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 290,
+        "y": 620,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-two-m-r1-in-game-1788382025049-2.json",
+      "sidecarSha256": "5c0080094f2148346e80e807afbd5744199d031e7462b27ba64706fd4867fc46",
+      "image": "assets-two-m-r1-in-game-1788382025049-2.png",
+      "imageSha256": "4682b1a2596d7400ad0b97fff8718877d1d6ea82d22a5d413f62d651cd90b26e",
+      "bytes": 1747748,
+      "capturedAt": "2026-09-02T20:47:05.049Z",
+      "scene": "in-game",
+      "uiState": "shell=in-game;screen=InGame;panel=Inventory;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 290,
+        "y": 620,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-two-m-r1-in-game-1788382062892-3.json",
+      "sidecarSha256": "84ec76dc6ea5e14d181c139908e60a29e8c3642dcad202d44abc678d54d25313",
+      "image": "assets-two-m-r1-in-game-1788382062892-3.png",
+      "imageSha256": "ba960e31539c24f6ca0c94df69ea944b405bde32bae76caa9da0c7c6bff88958",
+      "bytes": 1731810,
+      "capturedAt": "2026-09-02T20:47:42.892Z",
+      "scene": "in-game",
+      "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 290,
+        "y": 620,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-two-m-r1-in-game-1788382076681-4.json",
+      "sidecarSha256": "e1c0b81630bfc339cada8d84c14caf436bc3ad13591ef7a14f6645343e7739e5",
+      "image": "assets-two-m-r1-in-game-1788382076681-4.png",
+      "imageSha256": "4070bec94495005b2ec5f2f658032a23a7965cc10f71b956abb65d14880742a2",
+      "bytes": 1737387,
+      "capturedAt": "2026-09-02T20:47:56.681Z",
+      "scene": "in-game",
+      "uiState": "shell=in-game;screen=InGame;panel=Inventory;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 290,
+        "y": 620,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    },
+    {
+      "sidecar": "assets-two-m-r1-in-game-1788382107539-5.json",
+      "sidecarSha256": "a9824b29cab2bc634b55619e4fab973f6bffb97a738ed8f6c48437c6f4b36ec5",
+      "image": "assets-two-m-r1-in-game-1788382107539-5.png",
+      "imageSha256": "48b97a4136c204d2def3542051bd1303fda58b64f353da629bdd61d83b84d09b",
+      "bytes": 1752203,
+      "capturedAt": "2026-09-02T20:48:27.539Z",
+      "scene": "in-game",
+      "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+      "world": {
+        "map": "BichonProvince",
+        "x": 290,
+        "y": 620,
+        "light": null
+      },
+      "dpiScale": 1,
+      "eligible": false
+    }
+  ],
+  "validation": {
+    "windowsTests": {
+      "passed": 524,
+      "failed": 0
+    },
+    "itemIconTests": {
+      "passed": 11,
+      "failed": 0
+    },
+    "crystalLibraryExporterTests": "PASS",
+    "windowsPowerShell51GateSelfTest": {
+      "status": "PASS",
+      "controls": 10
+    },
+    "playerSpriteClosure": {
+      "families": 1,
+      "libraries": 4,
+      "frames": 5760
+    },
+    "frontendLogic": {
+      "status": "INCOMPLETE",
+      "stoppedAt": "test:bevy-runtime-budget",
+      "reason": "ENOENT public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "allPriorCommandsPassed": true,
+      "remainingFiveCommandsPassedSeparately": true
+    },
+    "powerShell7GateSelfTest": {
+      "status": "FAIL",
+      "reason": "native environment scoping compatibility probe; existing environment-scoping code unchanged"
+    }
+  },
+  "acceptance": {
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "originalSameStatePair": false,
+    "trustedCaptureProvenance": false
+  },
+  "remaining": [
+    "source UserItem.Image count-dependent runtime selection and live stack matrix",
+    "world CHumEffect wing layer",
+    "full actor classes/equipment/actions and sustained movement",
+    "remote-player appearance/name-only observations during rapid QA reconnects",
+    "source item double-click/drag/locking and belt/amulet destinations",
+    "original same-state pairs, authoritative light, trusted package, real DPI, signing and human acceptance"
+  ]
+}

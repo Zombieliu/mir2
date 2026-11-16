@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "library": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 33531,
+    "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+  },
+  "adapter": "projection-build-source-lib.mjs",
+  "expectedBackendInputCount": 50,
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "runtimeBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1404,
+    "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d"
+  },
+  "runtimeBindingDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\root-final-binding-derivation-v1.json",
+    "bytes": 1524,
+    "sha256": "3b991a9acae2ef78f0fe010ce4d847cf5965f9d1b5dd5101b67c56cc5e042ba8"
+  },
+  "oldPreparedPendingBindingNotUsed": true
+}

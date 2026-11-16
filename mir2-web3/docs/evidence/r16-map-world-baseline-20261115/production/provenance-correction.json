@@ -1,0 +1,12 @@
+{
+  "changedField": "sourceRevision",
+  "before": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "after": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+  "beforeSha256": "11c0caa74290f7fe8095f523f7f0978406a913190b85299a27ba2c3899832338",
+  "afterSha256": "77c2a033c738d4e6bd27929e04612e3cee316ef0f2facbe62ee27cba60800217",
+  "otherParsedFieldsUnchanged": true,
+  "committedSourceBlobsRechecked": 6,
+  "originalFailureRetained": true,
+  "originalGatesAndCodeUnchanged": true,
+  "reason": "The R1 runner was correctly rebound to f310 but the copied geometry provenance JSON still named b9. Its own guard refused to send any walk. The six committed geometry sources are byte-identical at f310; rebind the metadata, retain all geometry and guards."
+}

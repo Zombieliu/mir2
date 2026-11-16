@@ -1,0 +1,220 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "windows-live/windows-ui-summary.json",
+    "bytes": 7954,
+    "sha256": "03f9138d124e456873ea4915fc4303cd4dbb3144568df48478e17be942696f5c"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.windows-live-review.v1",
+    "recordedAtUtc": "2026-10-29T17:33:01.076950+00:00",
+    "scopePassed": true,
+    "scope": "Actual isolated full installer, no-argument Launcher to Engine to Game, SC wallet entry, three billing pages, ordinary NPC five procurement pages, EN/SC redraw and saved SC restart. Display/navigation only; not wallet signing or a fresh economic transaction.",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "actualInstallExitCode": 0,
+    "actualInstallSeconds": 259.3697881,
+    "allInstalledGameFileHashesVerified": 255079,
+    "installedUpdaterFilesVerified": 9,
+    "launcherArguments": [],
+    "directGameLaunch": false,
+    "assetRootOverride": false,
+    "isolatedAppdata": true,
+    "syntheticUiFixture": true,
+    "paymentProvidersEnabled": false,
+    "procurementChainDriverEnabled": false,
+    "phoneWalletSigningPerformed": false,
+    "chainTransactions": 0,
+    "paymentsAttempted": false,
+    "walletEntryObserved": true,
+    "realQrChallengeRequested": false,
+    "threeBillingPagesObserved": [
+      "fiat",
+      "Sui Testnet USDC",
+      "monthly-card"
+    ],
+    "procurementPagesObserved": [
+      "public",
+      "publish-conditions",
+      "my-orders",
+      "service-details",
+      "pending-claims"
+    ],
+    "npcEntryCaptionStillEnglish": "Personal procurement",
+    "localeSwitchObserved": [
+      "zh-CN",
+      "en",
+      "zh-CN"
+    ],
+    "restartPersistedLocale": "zh-CN",
+    "languageMenuInputIsolationPassed": false,
+    "knownIssue": "Existing P2 language footer pointer fallthrough: opening dropdown twice moved one tile each, present in both parents; not a merge regression.",
+    "knownIssueReceiptSha256": "97f52d95e5f9047d7d45a02946dd245517a9ffbad4cd9f31fb4b4ada5d552c6b",
+    "economyConservationPassed": true,
+    "beforeBalances": {
+      "gold": 10000,
+      "credit": 100
+    },
+    "afterBalances": {
+      "gold": 10000,
+      "credit": 100
+    },
+    "screenshots": [
+      {
+        "name": "installed-back-to-sc-settings",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-back-to-sc-settings-0.jpg",
+        "sha256": "cfaa76e4c2f6f1c801a30d66b161bebd9b5888ac7fc69bc538baa6b3d04b09d0",
+        "bytes": 198609,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-en-settings",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-en-settings-0.jpg",
+        "sha256": "0b5a3d164315d0251811a5eb8246940c70a235537f9bf651dfa8b24718e6ffed",
+        "bytes": 205883,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-npc-procurement-entry",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-npc-procurement-entry-0.jpg",
+        "sha256": "4d60a33c42c8a916e2ee98f2619bc4ce6c0c0509be423c9c90c4c33c8e373fb6",
+        "bytes": 209345,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-restart-persisted-sc-login",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-restart-persisted-sc-login-0.jpg",
+        "sha256": "7f49872e44d7ba0952c996c5d017609014e04b770286e2b50dd92d80ebd01356",
+        "bytes": 318137,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-fiat-recharge",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-fiat-recharge-0.jpg",
+        "sha256": "ced74e54871da5dcd0cf9d4844357ce1ce65372c3832e9a41b06ea6b4b394fcc",
+        "bytes": 85890,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-login-wallet-entry",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-login-wallet-entry-0.jpg",
+        "sha256": "1a61842fa6bbe7234f80593e44d7127030682a39b2cddba6c162a09753df9822",
+        "bytes": 318291,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-monthly-card",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-monthly-card-0.jpg",
+        "sha256": "18cf9fb116fb3a581913e3343b5d0a3ee75ef753f8486fce0d5e937a6b5b67a9",
+        "bytes": 86957,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-procurement-claim",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-procurement-claim-0.jpg",
+        "sha256": "a8a3887f7229b9f3bcb6625da79d4b9d65291743111c85fb175385f91e6b5cc7",
+        "bytes": 104205,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-procurement-orders",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-procurement-orders-0.jpg",
+        "sha256": "b1035c4ad857ebad5ceb44635fac5b36fec3dc758a3e6a227ec63a32128e6381",
+        "bytes": 98755,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-procurement-public",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-procurement-public-0.jpg",
+        "sha256": "93a15827327be462eb10c800645d614935896b62c54d868da04d1cfde11d742c",
+        "bytes": 105924,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-procurement-publish",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-procurement-publish-0.jpg",
+        "sha256": "fb8ee9c6346769a4c9a6fb2f2075a84bd722aa2e327ed83f1e08bb80d1249887",
+        "bytes": 124043,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-procurement-service",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-procurement-service-0.jpg",
+        "sha256": "5c5be93543460ab0883f1372a685982983e3d7178405b35ecee236aa7a728fbf",
+        "bytes": 112167,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-settings",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-settings-0.jpg",
+        "sha256": "6367f0ddfebb0de86e621530acec5c318dbdceda5806d9986258b74cbf6d4b0c",
+        "bytes": 210219,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-sc-usdc-recharge",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-sc-usdc-recharge-0.jpg",
+        "sha256": "2a1b411fa8aaed287a6b8d096bf920860e2812c8896a781653be87a3c5834b8d",
+        "bytes": 89190,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "installed-ten-language-menu",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\installed-ten-language-menu-0.jpg",
+        "sha256": "e6bba36024c0080b5bfffe43455e8878ba1f7ade3ec44652561e9dd3ddd3ec6a",
+        "bytes": 206827,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      },
+      {
+        "name": "packed-real-sc-login-wallet-entry",
+        "path": "C:\\mir2-build\\unified-20261029\\windows-live\\screenshots\\packed-real-sc-login-wallet-entry-0.jpg",
+        "sha256": "0fcdbc2f9dd026126f56fe9170c2ba2bb34746b99073180bd0c6f50c0df54746",
+        "bytes": 318023,
+        "width": 1026,
+        "height": 800,
+        "unmodified": true
+      }
+    ],
+    "humanAccepted": false,
+    "publisherAuthenticodeSigned": false,
+    "publicFeedChanged": false,
+    "remoteDeployment": false,
+    "r11UninstallReinstallPerformed": false,
+    "historicalR10UninstallReinstallDoesNotCount": true
+  },
+  "phase": "Actual installed Windows display/navigation and saved locale restart scope; input isolation explicitly failed as known existingP2",
+  "humanAccepted": false,
+  "languageMenuInputIsolationPassed": false
+}

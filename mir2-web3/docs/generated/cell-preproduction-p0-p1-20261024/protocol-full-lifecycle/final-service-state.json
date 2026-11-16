@@ -1,0 +1,20 @@
+{
+  "pid": 49716,
+  "executable": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\mir2-gateway.exe",
+  "alive": true,
+  "capacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "sampledAt": "2026-10-24T12:32:59.0130209Z"
+}

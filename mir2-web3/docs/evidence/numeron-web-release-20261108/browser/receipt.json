@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "kind": "public-numeron-three-existing-class-ui-scoped-receipt",
+  "uiFlowPassed": true,
+  "zeroConsoleOrHttpErrors": false,
+  "originalRunnerOverallFalsePreserved": true,
+  "publicOrigin": "https://numeron.obelisk.build",
+  "frontendRevisionShortReportedByCoordinator": "f2de",
+  "scope": "Existing ordinary QA identities only: UI password login, select original role, enter Bichon, plain Q and Native drawing; first role two physical keyboard steps; one acknowledged UI LogOut per role.",
+  "samePersistentBrowserAndContext": true,
+  "taskOnlyDisableHttp2": true,
+  "normalLogouts": 3,
+  "browserClosed": true,
+  "qaAccountsReleased": true,
+  "newRegistrations": 0,
+  "newCharacters": 0,
+  "questAcceptOrFinishCommands": 0,
+  "economicCommands": 0,
+  "walletOrModelActions": 0,
+  "roles": [
+    {
+      "ordinal": 1,
+      "className": "Warrior",
+      "uiFlowPassed": true,
+      "normalLogoutAck": true,
+      "level": 2,
+      "gold": 100,
+      "experience": 0,
+      "map": "0",
+      "initialPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "finalPosition": {
+        "x": 289,
+        "y": 614
+      },
+      "q1": {
+        "stage": "completed",
+        "current": 1,
+        "required": 1
+      },
+      "nativeQuestReady": true,
+      "nativeQuestOpen": true,
+      "questOwner": "bevy",
+      "runtimeBackend": "webgpu",
+      "otherPlayersObserved": 0,
+      "acceptedKeyboardSteps": [
+        {
+          "key": "ArrowUp",
+          "before": {
+            "x": 288,
+            "y": 615
+          },
+          "after": {
+            "x": 288,
+            "y": 614
+          },
+          "acceptedLocations": [
+            {
+              "sequence": 750,
+              "x": 288,
+              "y": 614,
+              "atMs": 353676
+            }
+          ],
+          "heldForMs": 318
+        },
+        {
+          "key": "ArrowRight",
+          "before": {
+            "x": 288,
+            "y": 614
+          },
+          "after": {
+            "x": 289,
+            "y": 614
+          },
+          "acceptedLocations": [
+            {
+              "sequence": 751,
+              "x": 289,
+              "y": 614,
+              "atMs": 354278
+            }
+          ],
+          "heldForMs": 612
+        }
+      ],
+      "logoutReturnScreen": "select"
+    },
+    {
+      "ordinal": 2,
+      "className": "Wizard",
+      "uiFlowPassed": true,
+      "normalLogoutAck": true,
+      "level": 2,
+      "gold": 100,
+      "experience": 0,
+      "map": "0",
+      "initialPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "finalPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "q1": {
+        "stage": "completed",
+        "current": 1,
+        "required": 1
+      },
+      "nativeQuestReady": true,
+      "nativeQuestOpen": true,
+      "questOwner": "bevy",
+      "runtimeBackend": "webgpu",
+      "otherPlayersObserved": 0,
+      "acceptedKeyboardSteps": [],
+      "logoutReturnScreen": "select"
+    },
+    {
+      "ordinal": 3,
+      "className": "Taoist",
+      "uiFlowPassed": true,
+      "normalLogoutAck": true,
+      "level": 2,
+      "gold": 100,
+      "experience": 0,
+      "map": "0",
+      "initialPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "finalPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "q1": {
+        "stage": "completed",
+        "current": 1,
+        "required": 1
+      },
+      "nativeQuestReady": true,
+      "nativeQuestOpen": true,
+      "questOwner": "bevy",
+      "runtimeBackend": "webgpu",
+      "otherPlayersObserved": 0,
+      "acceptedKeyboardSteps": [],
+      "logoutReturnScreen": "select"
+    }
+  ],
+  "originalHarnessMismatch": {
+    "file": "ui-proof.json",
+    "passed": false,
+    "stage": "ordinary-ui-logout",
+    "reason": "Acknowledged LogOut returns character selection. The old helper incorrectly required login.",
+    "readOnlyInspection": "after-logout-inspection.json",
+    "reconciliation": "warrior-reconciled.json",
+    "firstRoleWasNotRelogged": true
+  },
+  "remainingRolesReceipt": "ui-remaining-proof.json",
+  "remainingRolesReceiptPassed": true,
+  "pageErrors": 0,
+  "console": {
+    "error": 4,
+    "warning": 12
+  },
+  "consoleMessagesWereNotRetained": true,
+  "observedInitialHttp404s": 3,
+  "declaredFallbackRecovered": 3,
+  "resourceDelivery": "resource-delivery.json",
+  "privateQaFileUnchanged": true,
+  "persistentBrowserProfileIsPrivateAndNotAnArtifact": true,
+  "screenshots": [
+    {
+      "file": "role-1-Warrior-quest.png",
+      "sha256": "bcbaf085f5f16ed7e36d47bad829d76ab60b47e12e2c08c69d7bb2d3752fb6a9",
+      "visuallyChecked": true,
+      "onlyQaCharacterNamesVisible": true
+    },
+    {
+      "file": "role-1-city-after-movement.png",
+      "sha256": "c0c4c3be5b78b86468b2eac920ff0a41fa685a4496fe92c769723a7ff5fff9ad",
+      "visuallyChecked": true,
+      "onlyQaCharacterNamesVisible": true
+    },
+    {
+      "file": "role-2-Wizard-quest.png",
+      "sha256": "bc7ea9fb03d9c39ada921d46a113ae5a99fb9cce83e7cbce7490c47c3cfc904a",
+      "visuallyChecked": true,
+      "onlyQaCharacterNamesVisible": true
+    },
+    {
+      "file": "role-3-Taoist-quest.png",
+      "sha256": "73c5de30ccf4762d5ef64041a83dde1e65f859c25db6ae22d7ad7d4fe9edf3b5",
+      "visuallyChecked": true,
+      "onlyQaCharacterNamesVisible": true
+    }
+  ],
+  "limitations": [
+    "No new task acceptance or reward delivery in this browser scope",
+    "No UI re-login after these final movement/logout actions",
+    "Initial resource misses and console errors are retained; this is not a zero-error asset claim",
+    "Fallback bytes were captured by count, not hashed in-browser; coordinator independently verifies inherited pins"
+  ]
+}

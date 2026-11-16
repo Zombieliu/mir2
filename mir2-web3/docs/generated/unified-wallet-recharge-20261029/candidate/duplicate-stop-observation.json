@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-duplicate-stop-observation.json",
+    "bytes": 927,
+    "sha256": "04a7fb22eac2e399815e72990df630ad45be988ed21d68e9dca547876655bc82"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.duplicate-stop-observation.v1",
+    "producerCompleted": true,
+    "producerSummaryTimeUtc": "2026-10-29T16:47:10.9898279Z",
+    "duplicateLogCreatedUtc": "2026-10-29T16:47:25.0424661Z",
+    "duplicateLogBytes": 0,
+    "wrapperPid": 76732,
+    "wrapperCommandLine": "\"C:\\Users\\Administrator\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe\" -NoProfile -File C:/mir2-build/unified-20261029/run-unified-package.ps1 -Execute",
+    "wrapperStartedUtc": "2026-10-29T15:44:21.9935960Z",
+    "rootObservedSequentialReturnGuard": true,
+    "firstVerifierExited": true,
+    "onlyOwnDuplicateReadOnlyWrapperStopped": true,
+    "outerWrapperPassed": false,
+    "reason": "Avoid redundant second complete PS traversal after real producer succeeded; independent final target checker retains safety and full byte gates",
+    "stoppedUtc": "2026-10-29T16:50:52.0384970+00:00"
+  },
+  "phase": "Root stopped only owned redundant reader after first producer returned; outer wrapper not claimed exit0"
+}

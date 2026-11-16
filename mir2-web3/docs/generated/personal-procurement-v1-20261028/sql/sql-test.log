@@ -1,0 +1,38 @@
+PASS migration creates PL/pgSQL function and trigger
+PASS migration reapplication is idempotent
+PASS plain account update is allowed
+PASS plain account deletion is allowed
+PASS legacy procurement:null account update and deletion are allowed
+PASS procurement account deletion is blocked
+PASS procurement:null downgrade is blocked
+PASS omitted procurement downgrade is blocked
+PASS empty procurement authority is blocked
+PASS orders: removing the history collection is blocked
+PASS orders: clearing existing history is blocked
+PASS orders: replacing an existing key is blocked
+PASS locks: removing the history collection is blocked
+PASS locks: clearing existing history is blocked
+PASS locks: replacing an existing key is blocked
+PASS credits: removing the history collection is blocked
+PASS credits: clearing existing history is blocked
+PASS credits: replacing an existing key is blocked
+PASS outbox: removing the history collection is blocked
+PASS outbox: clearing existing history is blocked
+PASS outbox: replacing an existing key is blocked
+PASS deliveries: removing the history collection is blocked
+PASS deliveries: clearing existing history is blocked
+PASS deliveries: replacing an existing key is blocked
+PASS chain_inbox: removing the history collection is blocked
+PASS chain_inbox: clearing existing history is blocked
+PASS chain_inbox: replacing an existing key is blocked
+PASS absence_inbox: removing the history collection is blocked
+PASS absence_inbox: clearing existing history is blocked
+PASS absence_inbox: replacing an existing key is blocked
+PASS requests: removing the history collection is blocked
+PASS requests: clearing existing history is blocked
+PASS requests: replacing an existing key is blocked
+PASS normal state progression and appended history are allowed
+PASS transaction trigger rejection rolls back prior account debit and appended history
+PASS application error rolls back an otherwise allowed authority transition
+PASS a first procurement ledger can be created but cannot later be dropped
+{"passed":37,"failed":0,"pglite":"0.5.13","engine":{"version":"PostgreSQL 18.6 (PGlite 0.5.13) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit","server_version":"18.6"},"migrationSha256":"fbff057e674cf83a5c4a0e6b43233a5b6ed33a07098f81771d2742cb39c05f6f"}

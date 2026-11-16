@@ -1,0 +1,149 @@
+{
+  "passed": true,
+  "evidenceKind": "focused offline installer recipe, bundled-font pins and exact package allowlists",
+  "scope": "Static/focused integration checks only; does not certify a complete release package or installed product.",
+  "recipeStaticAssertions": 10,
+  "supportedLocales": 10,
+  "customMessagesPerLocale": 15,
+  "wholeFileFontPins": 11,
+  "allowlists": {
+    "scripts": 2,
+    "exactDocumentsAcceptedPerScript": 5,
+    "nearMissesRejectedPerScript": 30
+  },
+  "reports": [
+    "summary.json",
+    "recipe-static-result.json",
+    "focused-packaging-result.json"
+  ],
+  "releaseGateLimitations": {
+    "wholePackageSelfTestPassed": false,
+    "wholeVerifySelfTestPassed": false,
+    "wholeSelfTestBlocker": "Existing skillbar Title/meta.json identity mismatch before focused font/allowlist sections; unrelated identity gate unchanged.",
+    "trustedInnoCompilerAvailable": false,
+    "completeCompilerTranslationClosureValidated": false,
+    "installerCompiled": false,
+    "installerInstalled": false,
+    "packageSigned": false,
+    "productionDeployed": false
+  },
+  "sourcePins": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 120504,
+      "sha256": "1e9b188598b1ca52da35621096507381bc555e98624c78248b0a5fb80c04ceb0",
+      "workingRawSha256": "3532afcce292a456f186206dafdb289b4edf2b80dd32bb4dc29b28b2734aa54a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 174175,
+      "sha256": "a599a46c099052da0512603bc3d9872e35cf6d1d4dc269b520acf430a47c08e2",
+      "workingRawSha256": "66fef5c4bff848106de05ec4e915b22a4f7450d022480338dceae0b6006c0c6b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 36676,
+      "sha256": "938ae8603f5abfccf72b8a4931d5187d270a3d3875b7fecbecd4904d5adf1a94",
+      "workingRawSha256": "62a1e385685a26d19a6c9c3355940db5f65afc8983cee754fefc2178d00000dc"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6961,
+      "sha256": "23ce2a3def29ba1797b41e7aed82aab623e5f98305cdab31646875e5dfe8eba1",
+      "workingRawSha256": "c9f81e6473d9a8fc0cd6cdbd255bd8ea5d6b2fe5989fb2d6fb5c6d6b81810b1e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-CN.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3256,
+      "sha256": "d8f3b2cb9e8c4ba009b86daaeea0f33104c0c51c17f874eb09cc0fffc74a2645",
+      "workingRawSha256": "d8f3b2cb9e8c4ba009b86daaeea0f33104c0c51c17f874eb09cc0fffc74a2645"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-TW.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3244,
+      "sha256": "05349b71035f2ab9cd4dd4d577829343f2f719498d34a055ff576482ef5f95e6",
+      "workingRawSha256": "50b552c34448151ce0090dea956454e21ef79c706dde769ca0fb8a57fd741176"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.en.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3694,
+      "sha256": "0e402ec2e4ecc2b0bdd4e4b553ca44597ca2a9adb1f71b6303e201d8a4ca143c",
+      "workingRawSha256": "c6369151097a238a8c0ea5d36604da8c5aeade3a3e1e21dc795d36c0f6f6bc7b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.pt-BR.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4090,
+      "sha256": "f18fa8a623baf88dab0fea3feee09689bf3396f7a98d9675e06762a0caf2800e",
+      "workingRawSha256": "05b67058f04bb91d69b528531a3f55af863367234db96dd8fb46ed06f3fa2dd0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ru.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6557,
+      "sha256": "46d7df84047cc171c7107b536c0e3197bd40785af94edca0ad2e8448af9658b0",
+      "workingRawSha256": "9339578c8311ae7403b8db9211a8aa15af3351d98c46c3967ec157a42d8668ec"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.hi.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8634,
+      "sha256": "2f730e01b78f75a594563f740323ebfd891183d55e81b4f652b751b45d37e1bb",
+      "workingRawSha256": "569422857c87f30dd6afa736dae13dabcd8ec4942fcd3c31f1cf6df71b239e3d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.id.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3802,
+      "sha256": "8bebe5988998017aa7e3dd2dcc627f44ad00fc8fafb2038a13cc1c298b04036c",
+      "workingRawSha256": "9a14690d1d65f0a8ed4736ce445e3bc973e7d2fc96d5356b77fa20b15345b032"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.vi.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4835,
+      "sha256": "216d6c4e7331d4f32e8155518399c4632c59e3f4f351d1ba2a309214d0d399ef",
+      "workingRawSha256": "a5d7873e09c20dbbab18e100e0f0888ee78b1967ff3a9fc8452190a219cffd67"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.th.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8731,
+      "sha256": "4f6e19d540ae8c21dc96c3a7d3b5aa6849e1afd6b00d393be709e9a81f6143a0",
+      "workingRawSha256": "144efb528134c47b21e50c499083e6092b6caa3478646bdcc1eb967eb7b8b6a8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ar.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5564,
+      "sha256": "7c3776d9b2ee08298a01ace3c9afb261bf24eb65bfc77f2421754015358031a3",
+      "workingRawSha256": "ed84d4360ec11222c89d11a2bac94135fa664e833b5bdb8a6f3b5050d5bd5c4c"
+    }
+  ],
+  "rawLogReceipts": [
+    {
+      "path": "focused-packaging.log",
+      "bytes": 1595,
+      "sha256": "491fc58d79c0166b045883505219ef4649f4407df5659a8913211061c597f750"
+    },
+    {
+      "path": "package-selftest.log",
+      "bytes": 718,
+      "sha256": "1fc8d653c5133b8d3658a74a591326c05811af00fd277ea2fd49fa3db1d1989e"
+    },
+    {
+      "path": "verify-selftest.log",
+      "bytes": 808,
+      "sha256": "bec4a639a0bf43d56d35f3a5985f591fda16616137ccc58988691fd2606ef0ee"
+    }
+  ],
+  "logsIncluded": false,
+  "fontBinaryMasks": "Exact immutable whole-file pins plus validated SFNT table bounds; no whole-font exemption or arbitrary path-regex relaxation."
+}

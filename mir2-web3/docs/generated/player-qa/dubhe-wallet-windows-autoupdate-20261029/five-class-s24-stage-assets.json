@@ -1,0 +1,288 @@
+{
+  "schema": "mir2.windows.r2-publication-receipt.v2",
+  "mode": "stage",
+  "passed": true,
+  "startedUtc": "2026-10-28T20:40:06.123465+00:00",
+  "planSha256": "6b3fe5c87b1dc9d6f3d5af8a9516a9488750ccc3f21530d3e0ffc87572b7a409",
+  "candidate": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 24,
+    "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+    "feedSha256": "0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91",
+    "signatureSha256": "e691787d7ad8e69f7936573527c7a8650d4b5701aa46d6f9ae2f66cb098e90b6"
+  },
+  "expectedCurrent": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 22,
+    "sourceRevision": "1f2b71e841673d785bb4f0ca05802dae4c24627d",
+    "feedSha256": "b53e97c77d63930388a60d927d283fd89e9fe754c431a5fba66ef35a9b2cd5ad",
+    "signatureSha256": "4c234ab7ce990a761499a198ec9a1edad708c9372fbafda16cf9dab483e90c2d"
+  },
+  "uploadedObjects": [
+    "feeds/s24-0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91/latest.json",
+    "feeds/s24-0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91/latest.p7s",
+    "releases/updater-C8241025681123CE-s24/ENGINE.json",
+    "releases/updater-C8241025681123CE-s24/ENGINE.p7s",
+    "releases/updater-C8241025681123CE-s24/Mir2Updater.exe"
+  ],
+  "resumedObjects": [
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/BUILD-ATTESTATION.json",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/CONTROLS.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/DELIVERY.json",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/DELIVERY.p7s",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/KNOWN-ISSUES.md",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/MULTILINGUAL-SOURCES.json",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/NotoSansTC-OFL.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSans.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSansArabic.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSansDevanagari.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSansThai.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/PACKAGE-MANIFEST.json",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/README-START.txt",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.json",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.p7s",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/VERSION.json",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/0660b1bea31bc32faed4b606386c95c117e0d177041613fa2e0ecb18ed930007.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/0c9821cccd25bb8300680bf8f99f1b8c2bb6c88b3ed22b33bf99bd429ff3d714.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/15bd89df769bb25fcd44203244aee3ca2e81986f7918df13d809d41e559cacc7.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/4201756e4a1bf7605c6a65bb7a4a0830b3e4ed88b630bc3bd908c40cb34920e0.m2d.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/528847d0fd96267dc50905fbd5f2848a689586f88ea74b529ffdb820976da0d1.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/5886c5d25d0a90c289a7e2494523e750423ce944ca973515e4441ef5afdcaa15.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/5d2d792d37454ff5b57b5c6d08554a83ffca29fdbb903e6973b69524ce8e048c.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/5ff0d35d92bc07de09d021bb4e3c319b460d4a40a6b29710a6a4b0a530e5c079.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/825b8c0622b02140db13912509f636fe5d9346666b5f6f04dbb29ddb3b81d63a.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/953a9ff948d9560be335cc706d3441f4715f5482e15a0c79720dae9f1612d01b.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/9d3a7a8998ae90a5e0f6875e66ba536110790177f92c2ec99073b6e0eb17c486.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/a0961785f3c93b09dc8481e9b38703ec2c4a08cb28e3c9078c316f2fd6f37a06.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/a3d9aacb0095a309525b55e17c642d48d119dc6ea02c178b2fe0ed9ba7afbed4.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/a54e680a0c6175047ab0ae033ee51bfdf48ee8da4189c1801f03db77651e9ad4.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/c61d33d1332a42c0bc1c33eed9dd5b39f635b1c5f41f5bf0ded3970ef585bc0e.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/da5fae78ec68790cdac95a55d1d1e930a030474e7272b0baadcdcbc8e97cecbc.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/f020378e139f85e4d78bdc570286767d73dbcf15327d3f8df3af262fedc546d9.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/f432937769638c64be13dede19cd636a4a4cbe2e870a6262a443c35468c5474a.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/f54b4f5f4ed82482813ef252b412a32d59c819e30130bf3595faa45c3ac45bc7.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-client.toml",
+    "releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-platform-windows.exe"
+  ],
+  "verifiedObjects": [
+    {
+      "path": "feeds/s24-0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91/latest.json",
+      "size": 1157,
+      "sha256": "0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91"
+    },
+    {
+      "path": "feeds/s24-0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91/latest.p7s",
+      "size": 1614,
+      "sha256": "e691787d7ad8e69f7936573527c7a8650d4b5701aa46d6f9ae2f66cb098e90b6"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/BUILD-ATTESTATION.json",
+      "size": 1493,
+      "sha256": "63dce46d47459cf79af412bddd9624cd36dc5f7c4f9201ba0fb1d276e4bda241"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/CONTROLS.txt",
+      "size": 10612,
+      "sha256": "b9ad2a5a01b3ecbe673a3d38b1974b38492d3a62a0e28932eb8367ce19ebf7c6"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/DELIVERY.json",
+      "size": 15128937,
+      "sha256": "352dfcdc523be742f3fef3710997e9e4ef407d0cacff6e60794acee2bea95e03"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/DELIVERY.p7s",
+      "size": 1614,
+      "sha256": "3e094b1d51b912ee13604ea69615760ddfb87eed980760970a45f150136caf9a"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/KNOWN-ISSUES.md",
+      "size": 2152,
+      "sha256": "d2a2ffca1d2170ee0a0f2e3d3fdf0eff644f2fe4472c5ba7e6120ce12c4eadc9"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/MULTILINGUAL-SOURCES.json",
+      "size": 8618,
+      "sha256": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/NotoSansTC-OFL.txt",
+      "size": 4481,
+      "sha256": "e35ffdebb2225b49814c31889cbb3ce69cb3509e6a9f431edaba5e1a6de8cd15"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSans.txt",
+      "size": 4396,
+      "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSansArabic.txt",
+      "size": 4382,
+      "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSansDevanagari.txt",
+      "size": 4386,
+      "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/OFL-NotoSansThai.txt",
+      "size": 4380,
+      "sha256": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/PACKAGE-MANIFEST.json",
+      "size": 49712342,
+      "sha256": "bca71514a99e158eb583f48d3e81095219c81c0c122cb1ae498b081460f822c0"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/README-START.txt",
+      "size": 49327,
+      "sha256": "aec9858d307dad18f30e88e889628fa220631c54d12d17dcc7e2fc5c1cb56392"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.json",
+      "size": 706,
+      "sha256": "fb23ee4aa828c74c4f350adf392d08a3619890003898993d672df7665477111e"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "715446e2e78efff3ea8fdeef8d99e5e2770a7f99a03352da6b873a5529cc6b5b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/VERSION.json",
+      "size": 1220,
+      "sha256": "c54dc2c9d8301e1793b8316afe6cab554df19fc62468d6005f41c7897dbc802f"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/0660b1bea31bc32faed4b606386c95c117e0d177041613fa2e0ecb18ed930007.m2b.gz",
+      "size": 66823848,
+      "sha256": "0660b1bea31bc32faed4b606386c95c117e0d177041613fa2e0ecb18ed930007"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/0c9821cccd25bb8300680bf8f99f1b8c2bb6c88b3ed22b33bf99bd429ff3d714.m2b.gz",
+      "size": 60170742,
+      "sha256": "0c9821cccd25bb8300680bf8f99f1b8c2bb6c88b3ed22b33bf99bd429ff3d714"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/15bd89df769bb25fcd44203244aee3ca2e81986f7918df13d809d41e559cacc7.m2b.gz",
+      "size": 32509787,
+      "sha256": "15bd89df769bb25fcd44203244aee3ca2e81986f7918df13d809d41e559cacc7"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/4201756e4a1bf7605c6a65bb7a4a0830b3e4ed88b630bc3bd908c40cb34920e0.m2d.gz",
+      "size": 27021421,
+      "sha256": "4201756e4a1bf7605c6a65bb7a4a0830b3e4ed88b630bc3bd908c40cb34920e0"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/528847d0fd96267dc50905fbd5f2848a689586f88ea74b529ffdb820976da0d1.m2b.gz",
+      "size": 52650793,
+      "sha256": "528847d0fd96267dc50905fbd5f2848a689586f88ea74b529ffdb820976da0d1"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/5886c5d25d0a90c289a7e2494523e750423ce944ca973515e4441ef5afdcaa15.m2b.gz",
+      "size": 66806762,
+      "sha256": "5886c5d25d0a90c289a7e2494523e750423ce944ca973515e4441ef5afdcaa15"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/5d2d792d37454ff5b57b5c6d08554a83ffca29fdbb903e6973b69524ce8e048c.m2b.gz",
+      "size": 60847374,
+      "sha256": "5d2d792d37454ff5b57b5c6d08554a83ffca29fdbb903e6973b69524ce8e048c"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/5ff0d35d92bc07de09d021bb4e3c319b460d4a40a6b29710a6a4b0a530e5c079.m2b.gz",
+      "size": 42260655,
+      "sha256": "5ff0d35d92bc07de09d021bb4e3c319b460d4a40a6b29710a6a4b0a530e5c079"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/825b8c0622b02140db13912509f636fe5d9346666b5f6f04dbb29ddb3b81d63a.m2b.gz",
+      "size": 57404494,
+      "sha256": "825b8c0622b02140db13912509f636fe5d9346666b5f6f04dbb29ddb3b81d63a"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/953a9ff948d9560be335cc706d3441f4715f5482e15a0c79720dae9f1612d01b.m2b.gz",
+      "size": 56007392,
+      "sha256": "953a9ff948d9560be335cc706d3441f4715f5482e15a0c79720dae9f1612d01b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/9d3a7a8998ae90a5e0f6875e66ba536110790177f92c2ec99073b6e0eb17c486.m2b.gz",
+      "size": 52789118,
+      "sha256": "9d3a7a8998ae90a5e0f6875e66ba536110790177f92c2ec99073b6e0eb17c486"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/a0961785f3c93b09dc8481e9b38703ec2c4a08cb28e3c9078c316f2fd6f37a06.m2b.gz",
+      "size": 60556130,
+      "sha256": "a0961785f3c93b09dc8481e9b38703ec2c4a08cb28e3c9078c316f2fd6f37a06"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/a3d9aacb0095a309525b55e17c642d48d119dc6ea02c178b2fe0ed9ba7afbed4.m2b.gz",
+      "size": 37717049,
+      "sha256": "a3d9aacb0095a309525b55e17c642d48d119dc6ea02c178b2fe0ed9ba7afbed4"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/a54e680a0c6175047ab0ae033ee51bfdf48ee8da4189c1801f03db77651e9ad4.m2b.gz",
+      "size": 65613359,
+      "sha256": "a54e680a0c6175047ab0ae033ee51bfdf48ee8da4189c1801f03db77651e9ad4"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/c61d33d1332a42c0bc1c33eed9dd5b39f635b1c5f41f5bf0ded3970ef585bc0e.m2b.gz",
+      "size": 55794863,
+      "sha256": "c61d33d1332a42c0bc1c33eed9dd5b39f635b1c5f41f5bf0ded3970ef585bc0e"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/da5fae78ec68790cdac95a55d1d1e930a030474e7272b0baadcdcbc8e97cecbc.m2b.gz",
+      "size": 46872504,
+      "sha256": "da5fae78ec68790cdac95a55d1d1e930a030474e7272b0baadcdcbc8e97cecbc"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/f020378e139f85e4d78bdc570286767d73dbcf15327d3f8df3af262fedc546d9.m2b.gz",
+      "size": 65565120,
+      "sha256": "f020378e139f85e4d78bdc570286767d73dbcf15327d3f8df3af262fedc546d9"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/f432937769638c64be13dede19cd636a4a4cbe2e870a6262a443c35468c5474a.m2b.gz",
+      "size": 65582409,
+      "sha256": "f432937769638c64be13dede19cd636a4a4cbe2e870a6262a443c35468c5474a"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/delivery/f54b4f5f4ed82482813ef252b412a32d59c819e30130bf3595faa45c3ac45bc7.m2b.gz",
+      "size": 64522695,
+      "sha256": "f54b4f5f4ed82482813ef252b412a32d59c819e30130bf3595faa45c3ac45bc7"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-client.toml",
+      "size": 345,
+      "sha256": "33ae7e2cf643c43b3bab9b8839998f00051447baf40002ecfb5b19cb3a0a4e13"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-platform-windows.exe",
+      "size": 115421696,
+      "sha256": "ce8a604a5a2f0a1185fa279e0299232dab0e09f6498fba9be959f9d6a1f75440"
+    },
+    {
+      "path": "releases/updater-C8241025681123CE-s24/ENGINE.json",
+      "size": 421,
+      "sha256": "46c46a88e908d09e224e41ddc9d98c3cc62b297178cc05468b4e37d6b96a03c4"
+    },
+    {
+      "path": "releases/updater-C8241025681123CE-s24/ENGINE.p7s",
+      "size": 1614,
+      "sha256": "a318eb498484d8a0de9ee6bbb847ff7acfa0965bbe4531469118508308f2dcbe"
+    },
+    {
+      "path": "releases/updater-C8241025681123CE-s24/Mir2Updater.exe",
+      "size": 1959936,
+      "sha256": "c8241025681123ce3e9b24f3e78aac17577b24833395f7bb2644b8905aafc5de"
+    }
+  ],
+  "pointerAttempted": false,
+  "pointerChanged": false,
+  "transport": "fixed-expiring-worker-v1",
+  "downloadScope": "five-class",
+  "finishedUtc": "2026-10-28T20:46:20.067759+00:00"
+}

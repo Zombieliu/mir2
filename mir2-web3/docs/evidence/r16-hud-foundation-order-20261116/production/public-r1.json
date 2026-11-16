@@ -1,0 +1,205 @@
+{
+  "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+  "deployment": "dpl_G5MYZuxtdS9hbphJD2xweK4hMZgn",
+  "completeFunctionalRun": true,
+  "originalAcceptance": {
+    "kind": "r16-original-public-acceptance",
+    "accepted": false,
+    "checks": {
+      "exactSource": true,
+      "completeFunctionalRun": true,
+      "walletLoginOnly": true,
+      "movementOriginalEightSeconds": true,
+      "sixCompleteFonts": true,
+      "complete113": true,
+      "sharedNativeQuest": true,
+      "originalNative120": false,
+      "originalRuntimeBody120": false,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true
+    },
+    "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+    "deploymentId": "dpl_G5MYZuxtdS9hbphJD2xweK4hMZgn",
+    "originalMoveBudgetMs": 8000,
+    "originalNativeBudgetMs": 120000,
+    "nativeAfterFirstFrameMs": 191284,
+    "runtimeBodyAfterFirstFrameMs": 146013,
+    "supplementary180ObservationChangesOriginalBudget": false,
+    "wholeParityAccepted": false
+  },
+  "timing": {
+    "clockEpochMs": 1794765384389,
+    "authoritativeLoginSuccessMs": 48622,
+    "startIntentMs": 79362,
+    "startAckMs": 84435,
+    "authoritativeStarterMapMs": 84441,
+    "authoritativeSelfMs": 84442,
+    "firstPlayableObservedMs": 89078,
+    "terrainPaintVerifiedMs": 157473,
+    "sharedHudObservedMs": 280346,
+    "logoutIntentMs": 283468,
+    "logoutAckMs": 284656,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 48625,
+    "starterRegionWireHeadersMs": 51431.893,
+    "starterRegionResponseEventMs": 51432,
+    "starterRegionBodyMs": 55941,
+    "starterRegionCommitMs": 84587,
+    "sceneSpritesReadyMs": 84618,
+    "localeRequestMs": 48626,
+    "localeBodyMs": 66066,
+    "localeReadyMs": 66105,
+    "firstPlayableFrameMs": 89062,
+    "rendererBodyMs": 235075
+  },
+  "startToFirstPlayableMs": 9700,
+  "walking": {
+    "passed": true,
+    "source": "json",
+    "originalJsonBodyObserved": true,
+    "originalJsonAttempts": [
+      {
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "kind": "entry-monster-walking",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 89058,
+        "initiator": "script",
+        "priority": "High",
+        "bytes": 764724,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "headersAfterMs": 2819,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": "DYNAMIC",
+        "vercelCache": "MISS",
+        "cors": "wildcard",
+        "lastDataAfterMs": 35410,
+        "finishAfterMs": 35410,
+        "wireBytes": 529640
+      }
+    ],
+    "compiledVerified": false,
+    "livePackedWalkingObserved": false,
+    "compiledWalkingQualified": false,
+    "expectedJsonBytes": 764724,
+    "expectedPayloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "compiled": null,
+    "publication": {
+      "status": "not-started",
+      "frames": [],
+      "qualificationBeforeMs": 157026
+    },
+    "scope": "Equivalent full walking payload plus>=1 live visible exact-PNG DOM frame only for the compiled alternative; original JSON failures retained; no pure-GPU/all-directions/authoritative-animation claim."
+  },
+  "prewarmSummary": {
+    "requested": 113,
+    "ok": 113,
+    "failed": 0
+  },
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "workerRestartPassed": true,
+  "sharedQuestPassed": true,
+  "walletGuard": {
+    "schema": 1,
+    "requestInterception": false,
+    "operations": {
+      "http-read": 160,
+      "exact-login-session-read": 1,
+      "signed-login-approval": 1
+    },
+    "forbiddenCount": 0,
+    "forbidden": [],
+    "browserClosed": true
+  },
+  "mobile": {
+    "passed": true,
+    "approveUiClicks": 1
+  },
+  "normalLogout": true,
+  "desktopClosed": true,
+  "mobileClosed": true,
+  "sourceReceiptSha256": "eb1bf3499316fd56540c9ab1ff58a0bd57d743e83140cdffb8372ad59fb1241a",
+  "sourceSummarySha256": "e2b394e586057a91940c39dec36af9d9b8311f8f123abddc2193ae1396d5d9c7",
+  "originalClassifierSha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402",
+  "publicR2PreparedOnly": true,
+  "physicalPhoneCameraTested": false
+}

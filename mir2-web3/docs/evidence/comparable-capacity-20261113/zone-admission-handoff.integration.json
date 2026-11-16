@@ -1,0 +1,77 @@
+{
+  "schema": "mir2.zone-admission-handoff-root-integration.v1",
+  "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "codeIntegrationRevision": "1cac973aa7dfc5a563a05012182341cd0fa22a49",
+  "canonicalIntegrationPending": false,
+  "freshNative35": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\RESULTS.json",
+    "bytes": 21823,
+    "sha256": "7c1b3f66f3e914d83922fbd63e8cacb55a1e5ebaeb1aa3078fb34610a9c4b64a"
+  },
+  "compiledInputGitObjects": [
+    {
+      "path": "mir2-web3/apps/gateway",
+      "gitObject": "1f3f7658b6b8334f201d49d1096ae728bc1856ce"
+    },
+    {
+      "path": "mir2-web3/apps/simulation",
+      "gitObject": "2b7cbafd7b50072002d2b77bae283a2ad1e58060"
+    },
+    {
+      "path": "mir2-web3/packages/game-data",
+      "gitObject": "ab13d4cf5479b5d17bbed04a8d20f3b067138933"
+    },
+    {
+      "path": "mir2-web3/packages/production",
+      "gitObject": "7ef96a9ada44c95b569432a7319dfc14c759ba11"
+    },
+    {
+      "path": "mir2-web3/packages/protocol",
+      "gitObject": "656c47ab69d5b51bac4a45f7eabb232c59643fd9"
+    },
+    {
+      "path": "mir2-web3/vendor/dubhe-network-core",
+      "gitObject": "c62d2581d3fdabfae58152f092de7c54e8a8b640"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-wire",
+      "gitObject": "d8d9e98022a9de50f964aec193a3912436b6319f"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "gitObject": "8c0567acb253eec7f94fad349d0d7de2883b8c16"
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "gitObject": "a5d1d50d7ba8701e08e3a5a9e0e47b9287251fa3"
+    },
+    {
+      "path": "mir2-web3/scripts",
+      "gitObject": "84d93298ed1abeac0bd3d2801257de6e2e0c9f81"
+    },
+    {
+      "path": "mir2-web3/infra",
+      "gitObject": "c0a0392de151feca82ff0259c3b0dab282662245"
+    },
+    {
+      "path": ".github/workflows",
+      "gitObject": "c177421a53b0b9fdfd9f6ffe7d9df9685d260ecd"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack",
+      "gitObject": "4095e707e1602a09503deeb2a34cab9e62f35423"
+    },
+    {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-CATALOG.v0.2.json",
+      "gitObject": "c2e639404a1ed9f287f34b393a78585404e5235d"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/health-authority-05/source-vectors.csv",
+      "gitObject": "1934a03e6cf83acf48ac7a41a85bc63956405dd0"
+    }
+  ],
+  "candidateSourceClean": true,
+  "normalReleaseNotYetBuilt": true,
+  "capacityQualified": false,
+  "publicServiceDeployed": false
+}

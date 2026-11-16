@@ -1,0 +1,748 @@
+{
+  "kind": "r16-runtime-header-priority-production",
+  "passed": true,
+  "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "deploymentId": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+  "scope": "One ordinary fresh headless desktop Chrome plus official phone-sized Testnet PWA virtual-passkey login-only approval; no DNS/TLS/protocol override, no funds. Not a physical phone camera or global parity acceptance.",
+  "preservedProduction": true,
+  "rollbackNeeded": false,
+  "sourceOfTruth": "Final independent alias/deployment API plus public/version and unchanged Gateway health",
+  "finalReadback": {
+    "checkedAt": "2026-11-14T17:34:32.130Z",
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "readyState": "READY",
+    "publicVersion": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "gatewayRevision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5"
+  },
+  "workflows": [
+    {
+      "runId": 43619832562,
+      "operation": "stage",
+      "passed": true,
+      "sourceSha": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+      "implementationSha": "4dc44804db21babd1bb1176e1fd61891d6b2f63a",
+      "candidate": {
+        "id": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+        "url": "numeron-r16-oj83afw7s-obelisk-labs.vercel.app",
+        "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+        "readyState": "INITIALIZING"
+      },
+      "writes": [
+        {
+          "operation": "stage",
+          "site": "game"
+        }
+      ],
+      "rollbacks": [],
+      "credentialsRecorded": false,
+      "protectedAssets": {},
+      "publicAssets": {}
+    },
+    {
+      "runId": 43620560707,
+      "operation": "check",
+      "passed": true,
+      "sourceSha": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+      "implementationSha": "4dc44804db21babd1bb1176e1fd61891d6b2f63a",
+      "candidate": {
+        "id": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+        "url": "numeron-r16-oj83afw7s-obelisk-labs.vercel.app"
+      },
+      "writes": [],
+      "rollbacks": [],
+      "credentialsRecorded": false,
+      "protectedAssets": {
+        "protectedEntryScene": {
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "bytes": 458475,
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "protectedEntryFloor": {
+          "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+          "bytes": 439896,
+          "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d"
+        },
+        "protectedEntryPlayerMale": {
+          "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+          "bytes": 289851,
+          "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08"
+        },
+        "protectedEntryPlayerFemale": {
+          "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+          "bytes": 282415,
+          "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0"
+        },
+        "protectedEntryNpcs": {
+          "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+          "bytes": 313909,
+          "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9"
+        },
+        "protectedEntryObjects1": {
+          "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+          "bytes": 395412,
+          "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5"
+        },
+        "protectedEntryObjects2": {
+          "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+          "bytes": 395320,
+          "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d"
+        },
+        "protectedEntryObjects3": {
+          "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+          "bytes": 395216,
+          "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1"
+        },
+        "protectedEntryMonsterStanding": {
+          "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+          "bytes": 513566,
+          "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308"
+        },
+        "protectedEntryMonsterWalking": {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "bytes": 764724,
+          "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+        },
+        "protectedEntryGameplayLocale": {
+          "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+          "bytes": 3283113,
+          "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c"
+        },
+        "protectedEntryNameAssistantJane": {
+          "path": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+          "bytes": 366,
+          "sha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+        },
+        "protectedEntryNameMerchant": {
+          "path": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+          "bytes": 288,
+          "sha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+        },
+        "protectedEntryNameRuben": {
+          "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+          "bytes": 262,
+          "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+        },
+        "protectedEntryAssetWorker": {
+          "path": "/mir2-asset-worker.js",
+          "bytes": 44059,
+          "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
+        }
+      },
+      "publicAssets": {},
+      "protectedQrPending": true
+    },
+    {
+      "runId": 43620885934,
+      "operation": "promote",
+      "passed": true,
+      "sourceSha": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+      "implementationSha": "4dc44804db21babd1bb1176e1fd61891d6b2f63a",
+      "candidate": {
+        "id": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+        "url": "numeron-r16-oj83afw7s-obelisk-labs.vercel.app"
+      },
+      "writes": [
+        {
+          "operation": "promote",
+          "site": "game",
+          "deployment": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK"
+        }
+      ],
+      "rollbacks": [],
+      "credentialsRecorded": false,
+      "protectedAssets": {
+        "protectedEntryScene": {
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "bytes": 458475,
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "protectedEntryFloor": {
+          "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+          "bytes": 439896,
+          "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d"
+        },
+        "protectedEntryPlayerMale": {
+          "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+          "bytes": 289851,
+          "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08"
+        },
+        "protectedEntryPlayerFemale": {
+          "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+          "bytes": 282415,
+          "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0"
+        },
+        "protectedEntryNpcs": {
+          "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+          "bytes": 313909,
+          "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9"
+        },
+        "protectedEntryObjects1": {
+          "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+          "bytes": 395412,
+          "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5"
+        },
+        "protectedEntryObjects2": {
+          "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+          "bytes": 395320,
+          "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d"
+        },
+        "protectedEntryObjects3": {
+          "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+          "bytes": 395216,
+          "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1"
+        },
+        "protectedEntryMonsterStanding": {
+          "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+          "bytes": 513566,
+          "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308"
+        },
+        "protectedEntryMonsterWalking": {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "bytes": 764724,
+          "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+        },
+        "protectedEntryGameplayLocale": {
+          "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+          "bytes": 3283113,
+          "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c"
+        },
+        "protectedEntryNameAssistantJane": {
+          "path": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+          "bytes": 366,
+          "sha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+        },
+        "protectedEntryNameMerchant": {
+          "path": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+          "bytes": 288,
+          "sha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+        },
+        "protectedEntryNameRuben": {
+          "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+          "bytes": 262,
+          "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+        },
+        "protectedEntryAssetWorker": {
+          "path": "/mir2-asset-worker.js",
+          "bytes": 44059,
+          "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
+        }
+      },
+      "publicAssets": {
+        "publicEntryScene": {
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "bytes": 458475,
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "publicEntryFloor": {
+          "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+          "bytes": 439896,
+          "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d"
+        },
+        "publicEntryPlayerMale": {
+          "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+          "bytes": 289851,
+          "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08"
+        },
+        "publicEntryPlayerFemale": {
+          "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+          "bytes": 282415,
+          "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0"
+        },
+        "publicEntryNpcs": {
+          "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+          "bytes": 313909,
+          "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9"
+        },
+        "publicEntryObjects1": {
+          "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+          "bytes": 395412,
+          "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5"
+        },
+        "publicEntryObjects2": {
+          "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+          "bytes": 395320,
+          "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d"
+        },
+        "publicEntryObjects3": {
+          "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+          "bytes": 395216,
+          "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1"
+        },
+        "publicEntryMonsterStanding": {
+          "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+          "bytes": 513566,
+          "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308"
+        },
+        "publicEntryMonsterWalking": {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "bytes": 764724,
+          "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+        },
+        "publicEntryGameplayLocale": {
+          "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+          "bytes": 3283113,
+          "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c"
+        },
+        "publicEntryNameAssistantJane": {
+          "path": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+          "bytes": 366,
+          "sha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+        },
+        "publicEntryNameMerchant": {
+          "path": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+          "bytes": 288,
+          "sha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+        },
+        "publicEntryNameRuben": {
+          "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+          "bytes": 262,
+          "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+        },
+        "publicEntryAssetWorker": {
+          "path": "/mir2-asset-worker.js",
+          "bytes": 44059,
+          "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
+        }
+      },
+      "protectedQrPending": true,
+      "publicQrPending": true
+    }
+  ],
+  "acceptance": {
+    "kind": "r16-original-public-acceptance",
+    "accepted": true,
+    "checks": {
+      "exactSource": true,
+      "completeFunctionalRun": true,
+      "walletLoginOnly": true,
+      "movementOriginalEightSeconds": true,
+      "sixCompleteFonts": true,
+      "complete113": true,
+      "sharedNativeQuest": true,
+      "originalNative120": true,
+      "originalRuntimeBody120": true,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true
+    },
+    "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "deploymentId": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+    "originalMoveBudgetMs": 8000,
+    "originalNativeBudgetMs": 120000,
+    "nativeAfterFirstFrameMs": 110235,
+    "runtimeBodyAfterFirstFrameMs": 54074,
+    "supplementary180ObservationChangesOriginalBudget": false,
+    "wholeParityAccepted": false,
+    "runnerExit": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "publicFlow": {
+    "passed": true,
+    "qr": true,
+    "walletApproval": {
+      "passed": true,
+      "officialPwa": true,
+      "mobileBrowserEmulation": true,
+      "virtualPasskey": true,
+      "approveUiClicks": 1,
+      "approveRelayRequests": 1,
+      "fundingGuardClear": true,
+      "forbiddenRequests": 0
+    },
+    "qaRoleCreated": true,
+    "timing": {
+      "clockEpochMs": 1794677282056,
+      "authoritativeLoginSuccessMs": 46264,
+      "startIntentMs": 76993,
+      "startAckMs": 80204,
+      "authoritativeStarterMapMs": 80213,
+      "authoritativeSelfMs": 80213,
+      "firstPlayableObservedMs": 83453,
+      "terrainPaintVerifiedMs": 138484,
+      "sharedHudObservedMs": 193623,
+      "logoutIntentMs": 196848,
+      "logoutAckMs": 197805,
+      "manifestAttemptsBeforeStart": 1,
+      "manifestAttemptsAtOrAfterStart": 0,
+      "starterRegionRequestMs": 46268,
+      "starterRegionWireHeadersMs": 47699.012,
+      "starterRegionResponseEventMs": 47700,
+      "starterRegionBodyMs": 47710,
+      "starterRegionCommitMs": 80341,
+      "sceneSpritesReadyMs": 80376,
+      "localeRequestMs": 46269,
+      "localeBodyMs": 47816,
+      "localeReadyMs": 47851,
+      "firstPlayableFrameMs": 83388,
+      "rendererBodyMs": 137462
+    },
+    "startClickToFirstFrameMs": 6395,
+    "movementAckMs": 193,
+    "movement": {
+      "attempted": true,
+      "passed": true,
+      "status": "one-authoritative-walk",
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "authorityBinding": {
+        "connection": 1,
+        "startOrdinal": 1,
+        "seq": 20,
+        "packet": "UserInformation",
+        "atMs": 83608
+      },
+      "geometry": {
+        "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "townCollisionSha256": "11c0caa74290f7fe8095f523f7f0978406a913190b85299a27ba2c3899832338"
+      },
+      "physical": {
+        "input": "trusted-playwright-keyboard-pulse",
+        "key": "ArrowRight",
+        "atMs": 83608
+      },
+      "wire": {
+        "type": "walk",
+        "direction": "Right",
+        "atMs": 83611
+      },
+      "ack": {
+        "x": 289,
+        "y": 616,
+        "packet": "UserLocation",
+        "atMs": 83801
+      },
+      "ackWithinEightSeconds": true,
+      "rendered": {
+        "x": 289,
+        "y": 616,
+        "atMs": 83919
+      }
+    },
+    "fonts": {
+      "passed": true,
+      "expected": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "cacheReadsOnly": true,
+      "rows": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "present": true,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "present": true,
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "present": true,
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "present": true,
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ]
+    },
+    "prewarm": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "sharedHud": {
+      "optional": true,
+      "passed": true,
+      "status": "observed",
+      "gateReady": true,
+      "runtimeDelivered": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-shared-zh-TW.png"
+      }
+    },
+    "workerRestartPassed": true,
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    },
+    "bothBrowsersClosed": true,
+    "browserDiagnostics": {
+      "pageErrors": 0,
+      "consoleErrors": 1,
+      "startupConsoleRows": 2,
+      "startupResourceErrors": 0
+    }
+  },
+  "staticDiagnostics": {
+    "pageCdp": {
+      "rows": 623,
+      "maxRows": 8192,
+      "truncated": false,
+      "cleanupComplete": true,
+      "observerErrors": []
+    },
+    "playwright": {
+      "rows": 951,
+      "workerUpstreamRows": 344,
+      "truncated": false
+    },
+    "overlappingRowsNotAdded": true,
+    "runtimeRows": [
+      {
+        "ordinal": 163,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page-cdp",
+        "requestAtMs": 83504,
+        "outcome": "failed",
+        "initialPriority": "High",
+        "finishedAtMs": 91507,
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "ordinal": 189,
+        "page": 1,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page-cdp",
+        "requestAtMs": 91507,
+        "outcome": "failed",
+        "initialPriority": "High",
+        "finishedAtMs": 99508,
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "ordinal": 206,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page-cdp",
+        "requestAtMs": 99508,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 115797,
+        "status": 200,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": {
+          "age": 12,
+          "cf-cache-status": "DYNAMIC",
+          "x-vercel-cache": "HIT",
+          "content-encoding": "br",
+          "cache-control": "public, max-age=31536000, immutable",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.093,
+          "sendEnd": 0.212,
+          "receiveHeadersStart": 16284.792,
+          "receiveHeadersEnd": 16284.85
+        },
+        "finishedAtMs": 137674,
+        "browserReportedEncodedBytes": 6028113
+      }
+    ],
+    "headerPriority": [
+      {
+        "name": "runtimeHeaderPriorityBackground",
+        "atMs": 74371.5,
+        "epochMs": 1794677373446,
+        "generation": 1,
+        "reason": "timeout",
+        "waitedMs": 8002
+      }
+    ],
+    "causalityClaimed": false
+  },
+  "finalQr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "normalSystemNetwork": true,
+      "plainGamePath": "/game",
+      "noInterception": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "realMatrix": true,
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "normalSystemNetwork": true,
+      "plainGamePath": "/game",
+      "noInterception": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "realMatrix": true,
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    }
+  ],
+  "retainedLimitations": {
+    "priorPublicFailuresUnchanged": true,
+    "localSharedWarmMetadataDroppedRows": 148,
+    "actualCameraNotTested": true,
+    "publicFullThreeClasses1To30NotTestedThisRound": true,
+    "otherNavigationTargetsAndLiveOccupancyStillOpen": true,
+    "languagePixelAndGlobalParityStillOpen": true,
+    "publicStartupStillNeedsOptimization": true
+  },
+  "privateEvidence": [
+    {
+      "path": "C:/r16-header-priority-20261115/source-commit.json",
+      "sha256": "f5c72c42c3d243cd5b060b1bcac2b2c4afd2c4ffa6f7e908195cdd7e7fde986d"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/build-receipt-r1.json",
+      "sha256": "bd8d6a7b9f31e7d1d9bd2ef4dcfe8308ca83bc7581d4e964ddf1b2cab8962ac4"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/public-r1/preparation.json",
+      "sha256": "f696b8e7e68d8ff0c4fc4918aefdb28f3d4e76059ada25ece1def01ba4fc0afc"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/public-r1/desktop-runtime-header-priority-r1/receipt.json",
+      "sha256": "65f335d5bf14dfce9f34d33aea412cc1b633cb21d9d9855a1efced504a2fa629"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/public-r1/desktop-runtime-header-priority-r1/startup-probe.json",
+      "sha256": "3b15fec24e58b5f45095767115ca84fd9d4e71e63775dcdeeb4b25ee12d67fe7"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/public-r1/first-party-signed-summary.json",
+      "sha256": "b8343721db87e0b64a5d6ac93e5405d0b5491b1972fda5a900c58c85bece8a99"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/public-r1/approval-receipt.json",
+      "sha256": "58056f5a4997ff40e532942a19f94e2a9a02fbd562b5745d82a23f4c4701053b"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/public-r1/wallet-network-guard.json",
+      "sha256": "b2ceed8f8c92cab2d8e3f0cf3a35aaa452aa4fb6ff2d6f921124781b7a7ad28c"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/final-qr/qr-zh-cn-receipt.json",
+      "sha256": "ea507efd9cb6891dcb7749caccb5cc7ba6fe0ecb34d2e9e5061f9f3aa15343ae"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/final-qr/qr-zh-tw-receipt.json",
+      "sha256": "9ceec7678acd9240f86bebe5fc18054b39d24b5780d7c6ccfb267cdf69af59d3"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-11-02T22:38:41.490760+00:00",
+  "scope": "read-only companion withdrawal and navigation boundary review",
+  "sources": [
+    {
+      "path": "apps/ai-player/src/companion-controller.mjs",
+      "sha256": "6a1a8efe33d5e09798856de2ccc3497fc0f7c6ee3df3c049f7129e6bcabc0d96"
+    },
+    {
+      "path": "apps/ai-player/src/companion-policy.mjs",
+      "sha256": "128921b862b3ef4f4471157de37f6b3ec71bfd133195bbaf4c00417a603d1329"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-controller.test.mjs",
+      "sha256": "33227853b086e5f8316b6f55687e70d236e00619b62df6fddc70d5af39410454"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-policy.test.mjs",
+      "sha256": "e92a9451fc9d2f401b5fd7bc55e3e09c49b47ff19884f2d5340a43f1bd3e46d4"
+    }
+  ],
+  "conclusion": "PASS: no remaining actionable findings in the reviewed change",
+  "priorFinding": {
+    "severity": "P2",
+    "description": "Old navigation direction could cross an awaited collision load into a newer scene.",
+    "status": "closed",
+    "independentBeforeFixReproduced": true,
+    "independentAfterFix": {
+      "performed": false,
+      "blocked": true,
+      "walkCallCount": 0
+    }
+  },
+  "checks": {
+    "continuedWithdrawalUsesBoundWorldAndObservedSafetyOrArrival": true,
+    "mapPermissionBeforeWithdrawalAndAfterAwait": true,
+    "medicineMayPreemptWithdrawalWithoutBlindReplay": true,
+    "freshStatePolicyIdentityTargetAndOccupancyBeforeWalk": true,
+    "currentPositionUsedAfterAwait": true,
+    "configuredInviterAndServerPartyAuthorityUnchanged": true,
+    "newMedicineDuringLoadBlocksOldWalk": true,
+    "medicineCallsAcrossImmediateRetry": 1
+  },
+  "tests": {
+    "independentControllerAndPolicy": {
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0
+    },
+    "independentNewWithdrawalAndAwaitRegressions": {
+      "passed": 4,
+      "failed": 0
+    },
+    "inMemoryFaultChecks": [
+      "map-or-connection-change-during-collision-load",
+      "revoked-map-permission-during-collision-load",
+      "new-medicine-during-collision-load-and-immediate-retry"
+    ]
+  },
+  "backendTestsRerun": false,
+  "codeOrDocsEdited": false
+}

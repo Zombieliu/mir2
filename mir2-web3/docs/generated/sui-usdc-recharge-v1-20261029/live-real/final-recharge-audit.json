@@ -1,0 +1,229 @@
+{
+  "evidenceKind": "independent official fullnode and game database real Testnet recharge audit",
+  "observedAtUtc": "2026-10-28T21:12:05.715Z",
+  "fullnode": "https://fullnode.testnet.sui.io:443",
+  "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+  "passed": true,
+  "checks": {
+    "verifiedCreated": true,
+    "verifiedPaid": true,
+    "transactionSenders": true,
+    "checkpointSuccess": true,
+    "oneUsdcMoved": true,
+    "oneAppliedOrder": true,
+    "uniqueInvoice": true,
+    "uniqueReceiptDigest": true,
+    "twoIssuerReservations": true,
+    "onePayerReservation": true,
+    "paymentGasWithinCap": true,
+    "payerSuiChangeMatchesPaymentGas": true
+  },
+  "order": {
+    "id": "usdc_066575bf24e8ede6000e73d8d0fc2aaa9bdb475aa3e44d7faa72f1bff215fd7e",
+    "state": "applied",
+    "offer": {
+      "id": "usdc-isolated-test-usd1-v1",
+      "label": "Test only: 1 USDC / 100 Credits",
+      "currency": "usd",
+      "amountMinor": 100,
+      "credits": 100
+    },
+    "creditOrigin": "test",
+    "terms": {
+      "orderRef": "0xfb79ddf3569287031b9e7125bd69382bf300a768476d3f17b8ec2a0d596dfb43",
+      "accountRef": "0xdb84b57dbbac7b49b4a84736646221815c3db725eaae85edc5d3abe6d8d46001",
+      "snapshotHash": "0x1ae3af78af9884c6474b30e6d67d60d7e37562df0c43178c3b1834f9403c49be",
+      "payer": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "merchant": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "amountMicros": "1000000",
+      "expiresAtMs": "1793222746007"
+    },
+    "invoice": {
+      "invoiceId": "0xfdb531141bf73b1affb010b1ef3fcf9dcc6b16777ed7027fde481dbb4f27b999",
+      "createDigest": "6Kmz6ohmUNmpEipaZetWuR5HvZnTy93EkfhnyeQUKZvV",
+      "checkpoint": 400291251
+    },
+    "gameReceipt": {
+      "chainIdentifier": "4c78adac",
+      "packageId": "0xa7910040a275375a94796426a2a931f436b6615f2a92f53885438ff077cd403f",
+      "configId": "0xa7e85bf804e45c4fe5f1ee928e0d6faff9e853f9742b303660ec8b342862f1aa",
+      "invoiceId": "0xfdb531141bf73b1affb010b1ef3fcf9dcc6b16777ed7027fde481dbb4f27b999",
+      "orderId": "usdc_066575bf24e8ede6000e73d8d0fc2aaa9bdb475aa3e44d7faa72f1bff215fd7e",
+      "accountRef": "0xdb84b57dbbac7b49b4a84736646221815c3db725eaae85edc5d3abe6d8d46001",
+      "payer": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "merchant": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+      "amountMicro": 1000000,
+      "frozenHash": "0x1ae3af78af9884c6474b30e6d67d60d7e37562df0c43178c3b1834f9403c49be",
+      "digest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ",
+      "eventSeq": 0,
+      "checkpoint": 400291862,
+      "confirmedAtMs": 1793221728434
+    },
+    "applied": {
+      "characterIndex": 0,
+      "credits": 100,
+      "creditBefore": 0,
+      "creditAfter": 100,
+      "revision": 22,
+      "atMs": 1793221737053
+    },
+    "gameSave": {
+      "credit": 100,
+      "gold": 10000,
+      "revision": 22
+    }
+  },
+  "created": {
+    "state": "created",
+    "invoiceId": "0xfdb531141bf73b1affb010b1ef3fcf9dcc6b16777ed7027fde481dbb4f27b999",
+    "digest": "6Kmz6ohmUNmpEipaZetWuR5HvZnTy93EkfhnyeQUKZvV",
+    "checkpoint": "400291251"
+  },
+  "paid": {
+    "state": "paid",
+    "receipt": {
+      "invoiceId": "0xfdb531141bf73b1affb010b1ef3fcf9dcc6b16777ed7027fde481dbb4f27b999",
+      "configId": "0xa7e85bf804e45c4fe5f1ee928e0d6faff9e853f9742b303660ec8b342862f1aa",
+      "networkHash": "0xb55d4afda0318ec0a264cc5f46c4e61c96da8000e9ea1bdf04878266867c6246",
+      "orderRef": "0xfb79ddf3569287031b9e7125bd69382bf300a768476d3f17b8ec2a0d596dfb43",
+      "accountRef": "0xdb84b57dbbac7b49b4a84736646221815c3db725eaae85edc5d3abe6d8d46001",
+      "snapshotHash": "0x1ae3af78af9884c6474b30e6d67d60d7e37562df0c43178c3b1834f9403c49be",
+      "payer": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "merchant": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+      "amountMicros": "1000000",
+      "expiresAtMs": "1793222746007",
+      "paidAtMs": "1793221728434",
+      "packageId": "0xa7910040a275375a94796426a2a931f436b6615f2a92f53885438ff077cd403f",
+      "transactionDigest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ",
+      "eventSequence": "0",
+      "checkpoint": "400291862"
+    }
+  },
+  "transactions": [
+    {
+      "operation": "invoiceCreate",
+      "digest": "6Kmz6ohmUNmpEipaZetWuR5HvZnTy93EkfhnyeQUKZvV",
+      "checkpoint": "400291251",
+      "sender": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "success": true,
+      "gas": {
+        "computationCost": "1000000",
+        "storageCost": "5373200",
+        "storageRebate": "1557844",
+        "nonRefundableStorageFee": "156",
+        "netMist": "4815356"
+      },
+      "eventCount": 1
+    },
+    {
+      "operation": "payerPay",
+      "digest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ",
+      "checkpoint": "400291862",
+      "sender": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "success": true,
+      "gas": {
+        "computationCost": "1000000",
+        "storageCost": "6460000",
+        "storageRebate": "5137086",
+        "nonRefundableStorageFee": "514",
+        "netMist": "2322914"
+      },
+      "eventCount": 1
+    }
+  ],
+  "costs": {
+    "successfulOrderTransactions": 2,
+    "creationMist": "4815356",
+    "paymentMist": "2322914",
+    "successfulOrderTotalMist": "7138270",
+    "oldExpiredUnpaidInvoiceMist": "4815356",
+    "oneTimeSetupMist": "30550599",
+    "nonGasServerIndexerCostsMeasured": false
+  },
+  "beforeBalances": {
+    "observedAt": "2026-10-28T21:08:47.882Z",
+    "rows": [
+      {
+        "role": "payer",
+        "owner": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+        "usdcMicros": "19990000",
+        "suiMist": "997677468"
+      },
+      {
+        "role": "merchant",
+        "owner": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+        "usdcMicros": "0",
+        "suiMist": "959818689"
+      }
+    ]
+  },
+  "afterBalances": {
+    "observedAtUtc": "2026-10-28T21:12:05.715Z",
+    "rows": [
+      {
+        "role": "payer",
+        "owner": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+        "usdcMicros": "18990000",
+        "suiMist": "995354554"
+      },
+      {
+        "role": "merchant",
+        "owner": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+        "usdcMicros": "1000000",
+        "suiMist": "959818689"
+      }
+    ]
+  },
+  "separateUserTransfer": {
+    "amountMicros": "10000",
+    "digest": "5mrxwBAXXu8ntDmmbSnrmaHKju1wonoLCmJpqyNpgriM",
+    "includedInRechargeCost": false
+  },
+  "budgets": {
+    "setupReservedMist": "140000000",
+    "issuerMaximumMist": "100000000",
+    "issuerReservations": [
+      {
+        "digest": "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs",
+        "maximumMist": "50000000"
+      },
+      {
+        "digest": "6Kmz6ohmUNmpEipaZetWuR5HvZnTy93EkfhnyeQUKZvV",
+        "maximumMist": "50000000"
+      }
+    ],
+    "totalSetupPlusIssuerReservationMist": "240000000",
+    "overallReservedMaximumMist": "250000000",
+    "payerSeparateMaximumMist": "50000000",
+    "payerPaymentDigest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ"
+  },
+  "allGameOrders": [
+    {
+      "id": "usdc_066575bf24e8ede6000e73d8d0fc2aaa9bdb475aa3e44d7faa72f1bff215fd7e",
+      "state": "applied",
+      "invoiceId": "0xfdb531141bf73b1affb010b1ef3fcf9dcc6b16777ed7027fde481dbb4f27b999",
+      "digest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ",
+      "appliedCredits": 100
+    },
+    {
+      "id": "usdc_28eee27795d35d6fae66536be320af4952fb0edcae6140144e526601e28b63f8",
+      "state": "prepared",
+      "invoiceId": null,
+      "digest": null,
+      "appliedCredits": 0
+    },
+    {
+      "id": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "state": "invoiceBound",
+      "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+      "digest": null,
+      "appliedCredits": 0
+    }
+  ],
+  "instrumentation": "Clearly labelled Isolated QA Wallet; key stays in external Node process; not a stock-wallet or human acceptance claim",
+  "databaseAndChainObservationAtomic": false,
+  "noAuditSigningOrBroadcast": true,
+  "noKeysSignaturesCapabilitiesIncluded": true
+}

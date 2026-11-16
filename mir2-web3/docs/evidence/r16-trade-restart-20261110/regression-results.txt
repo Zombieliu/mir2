@@ -1,0 +1,29 @@
+R16 detached trade and durable recovery
+Rust 1.95, locked and offline. PostgreSQL 16.15 used an isolated loopback cluster.
+
+cargo test -p mir2-gateway --lib trade
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_local_trade_recovers_only_the_unprojected_actor ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_prepared_trade_committed_outbox_blocks_refund_after_relogin ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_prepared_trade_rejects_stale_quote_after_refund ... ok
+test result: ok. 70 passed; 0 failed; 0 ignored; 0 measured; 1718 filtered out; finished in 160.68s
+
+cargo test -p mir2-simulation --lib trade
+test runtime::trade_recovery::tests::file_trade_match_survives_one_projection_and_the_other_restarts_exactly_once ... ok
+test runtime::trade_recovery::tests::file_trade_restart_returns_only_new_unmatched_preparations ... ok
+test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 3313 filtered out; finished in 29.74s
+
+cargo test -p mir2-simulation --features test-support --test shared_trade_gold
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.12s
+
+Web four-script Node suite and scoped TypeScript noEmit
+# stage5 adapter tests passed (508 groups)
+# tests 100
+# pass 100
+# fail 0
+TypeScript completed with no diagnostics.
+
+Native scoped projection, dialog, source, and social operation tests (unchanged projection sources)
+7 + 45 + 9 + 13 passed.
+
+File r4 Gateway SHA-256
+72d53d80e3b2a664ae01bfc38b96b997a86c1b184f8dc7c148e40b76e4572d62

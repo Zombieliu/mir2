@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.r16.guild-fixture-qualification.v1",
+  "recordedAt": "2026-11-07T21:50:10.463Z",
+  "invalidSeedSha256": "b85560055237caf5c1cf703d99d8a34e77893843af6811496a10ed3239092869",
+  "invalidAfterSha256": "b85560055237caf5c1cf703d99d8a34e77893843af6811496a10ed3239092869",
+  "qualifiedSnapshotSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+  "personalAccountsUnchanged": true,
+  "members": 3,
+  "stableGuildIdFormatValid": true,
+  "uniquePublicCharacterIndices": true,
+  "previousServerRejectedInvalidId": true,
+  "productSourceChanged": false
+}

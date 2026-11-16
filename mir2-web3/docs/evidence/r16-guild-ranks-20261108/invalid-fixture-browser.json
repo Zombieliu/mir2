@@ -1,0 +1,57 @@
+{
+  "schema": "mir2.r16.guild-ranks.browser.v1",
+  "passed": false,
+  "backend": "webgl2-shared",
+  "startedAt": "2026-11-07T21:43:52.558Z",
+  "phases": [
+    "ordinary-owner-login"
+  ],
+  "commands": [
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "clientCapabilities"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "clientCapabilities"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "setLanguage"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "clientVersion"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "login"
+    }
+  ],
+  "packets": [],
+  "checks": [],
+  "screenshots": [
+    {
+      "name": "owner-failure",
+      "sha256": "2393094408fa336877c306f1b389e511cdf7065d3715636d7efdb9a8953a922b"
+    }
+  ],
+  "pageErrors": [],
+  "networkErrors": [],
+  "errors": [
+    {
+      "phase": "ordinary-owner-login",
+      "code": null,
+      "messageHash": "579685e1b8a26f7d79489c1452be29e9206c61071cb2e077f014745de7c7f995"
+    }
+  ],
+  "fixtureGuildCreatedBeforeStartup": true,
+  "guildCreationViaGameplayClaimed": false,
+  "browser": "156.0.8078.80",
+  "completedAt": "2026-11-07T21:44:55.369Z"
+}

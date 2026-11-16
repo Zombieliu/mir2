@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-25T07:42:35.9018477Z",
+  "scope": "Coordinator-authored record of CLI results observed in this conversation; excerpts transcribed from tool output. No original stdout/stderr file was captured and this is not a raw stderr log.",
+  "runId": "1792912711217-e7ea81f2",
+  "originalStderrFileCaptured": false,
+  "collection": {
+    "command": "node release-native-10-v2-compact-wire-feasibility-13/collect-public.mjs --collect-after-owned-cleanup",
+    "exitCode": 1,
+    "scriptLine": 264,
+    "scriptColumn": 206,
+    "errorExcerpt": "Error: Passing09 lacks actual300/300/360 and5/5/6 complete report/raw windows",
+    "publicDirectoryCreated": false
+  },
+  "subsequentVerification": {
+    "command": "node release-native-10-v2-compact-wire-feasibility-13/verify-public.mjs --verify-collected-public",
+    "exitCode": 1,
+    "errorCode": "ENOENT",
+    "errorExcerpt": "realpath capacity-native10-v2-compact-wire-followup-13-diagnostics",
+    "reason": "Verification was attempted after the collection refusal; the expected public directory did not exist."
+  },
+  "runtimeVerdictUnchanged": {
+    "reportOk": true,
+    "playableCapacityAccepted": false,
+    "normalCleanupChecks": 7,
+    "rootProcessesAbsent": true,
+    "rootPortsFree": true
+  },
+  "diagnosis": "Frozen generic SELECTED_RAW omits window rows; the first passing collector branch incorrectly filtered its selected list for those rows. Closed raw independently contains all 16 required windows.",
+  "actualRaw": {
+    "bytes": 29072097,
+    "rows": 41088,
+    "sha256": "83a7a56df6780212dd7a4671f3fd9bb1ee721cba5ad473e91f86c8c04bd13152"
+  },
+  "capacityAccepted": false,
+  "originalReportOrRawEdited": false
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source64 ordinary Warehouse entry observation",
+  "actions": [
+    "normal walk from BorderVillage into Warehouse 0140",
+    "normal F9 inventory toggle",
+    "ordinary NPC and ground clicks"
+  ],
+  "map": "Warehouse 0140",
+  "lastConfirmedPosition": {
+    "x": 6,
+    "y": 10
+  },
+  "gold": 190,
+  "inventoryNames": [
+    "Candle",
+    "CopperRing",
+    "GoldenPendant",
+    "Candle"
+  ],
+  "storageServiceOpened": false,
+  "storageDepositOrWithdrawalVerified": false,
+  "renderObservation": "Current scene uses visible fallback checker tiles. Warehouse artwork parity is not accepted.",
+  "historicalLogsExcluded": {
+    "errorCount": 2,
+    "errorTimestampUtc": "2026-10-11T01:12:08.442Z",
+    "source64RuntimeProofMtimeUtc": "2026-10-11T08:13:36.466Z",
+    "version": "Source49 bevy-9f53fb80070d4173",
+    "notEvidenceOfCurrentRuntimePanic": true
+  },
+  "npcInteractionPending": "Anthony at 8,9 is two tiles from 6,10. Normal movement/approach needs current UI verification; no current renderer failure is concluded.",
+  "screenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source64-warehouse-entry01.png",
+    "bytes": 124296,
+    "sha256": "db48f449e531dec0dfd5ae487b127aa13202c59b3515f7dda7e07ccc5ad0e478"
+  },
+  "normalUiOnly": true,
+  "qaAdminOrInternalApis": false,
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false
+}

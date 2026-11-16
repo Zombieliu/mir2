@@ -1,0 +1,168 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "runs": [
+    {
+      "run": 7,
+      "passed": false,
+      "failure": "all four original breathing phases must actually paint while the full pack remains withheld\n\n3 !== 4\n",
+      "idle": {
+        "startedAt": 1794598662437,
+        "endedAt": 1794598664638
+      },
+      "observedPhases": [
+        0,
+        1,
+        2
+      ],
+      "missingPhases": [
+        3
+      ],
+      "rows": [
+        {
+          "at": 1794598662447,
+          "path": "/original-ui/CArmour/00/16.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "2f48da1e304c5b291c71898f138af6d8d5c3d850280b8deb2ac96ba30211fbf0"
+        },
+        {
+          "at": 1794598662685,
+          "path": "/original-ui/CArmour/00/17.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "433232e60d3ff5cf91d60fedb7163f1bdc99d0508cf3c72f8708c1b5204d9acd"
+        },
+        {
+          "at": 1794598663408,
+          "path": "/original-ui/CArmour/00/18.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "54fe54a03cbe7c0f18466cee8a29a6317bafdf15aa26f2202da398e81de002be"
+        },
+        {
+          "at": 1794598664210,
+          "path": "/original-ui/CArmour/00/16.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "2f48da1e304c5b291c71898f138af6d8d5c3d850280b8deb2ac96ba30211fbf0"
+        }
+      ],
+      "earlierDecodedMissingPhase": [
+        {
+          "at": 1794598659877,
+          "path": "/original-ui/CArmour/00/19.png",
+          "sha256": "14eee434f14d0f1546c1ffe007b78ca9ec18f52182c3375c76d003962d8364ec"
+        },
+        {
+          "at": 1794598661670,
+          "path": "/original-ui/CArmour/00/19.png",
+          "sha256": "14eee434f14d0f1546c1ffe007b78ca9ec18f52182c3375c76d003962d8364ec"
+        }
+      ],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "evidence": [
+        {
+          "name": "entry-visual-receipt.json",
+          "path": "C:/r16-walking-recovery-20261114/fixture-r6/game-full/quest-after-r7/entry-visual-receipt.json",
+          "bytes": 351923,
+          "sha256": "cf7f7bc3f661558fc2082d1169380ab0ca6d93fe170eb27af5f08626cd7130c5"
+        },
+        {
+          "name": "early-player-before-assert.json",
+          "path": "C:/r16-walking-recovery-20261114/fixture-r6/game-full/quest-after-r7/early-player-before-assert.json",
+          "bytes": 36227,
+          "sha256": "654e0e8c9f645f6d84593c028f44e19a7ac72898561362578cd616978c164cc1"
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "passed": false,
+      "failure": "all four original breathing phases must actually paint while the full pack remains withheld\n\n3 !== 4\n",
+      "idle": {
+        "startedAt": 1794599020676,
+        "endedAt": 1794599022878
+      },
+      "observedPhases": [
+        3,
+        0,
+        2
+      ],
+      "missingPhases": [
+        1
+      ],
+      "rows": [
+        {
+          "at": 1794599020684,
+          "path": "/original-ui/CArmour/00/19.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "14eee434f14d0f1546c1ffe007b78ca9ec18f52182c3375c76d003962d8364ec"
+        },
+        {
+          "at": 1794599020711,
+          "path": "/original-ui/CArmour/00/16.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "2f48da1e304c5b291c71898f138af6d8d5c3d850280b8deb2ac96ba30211fbf0"
+        },
+        {
+          "at": 1794599022061,
+          "path": "/original-ui/CArmour/00/18.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "54fe54a03cbe7c0f18466cee8a29a6317bafdf15aa26f2202da398e81de002be"
+        },
+        {
+          "at": 1794599022414,
+          "path": "/original-ui/CArmour/00/19.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "14eee434f14d0f1546c1ffe007b78ca9ec18f52182c3375c76d003962d8364ec"
+        },
+        {
+          "at": 1794599022644,
+          "path": "/original-ui/CArmour/00/16.png",
+          "decoded": true,
+          "source": "data",
+          "sha256": "2f48da1e304c5b291c71898f138af6d8d5c3d850280b8deb2ac96ba30211fbf0"
+        }
+      ],
+      "earlierDecodedMissingPhase": [
+        {
+          "at": 1794599019194,
+          "path": "/original-ui/CArmour/00/17.png",
+          "sha256": "433232e60d3ff5cf91d60fedb7163f1bdc99d0508cf3c72f8708c1b5204d9acd"
+        }
+      ],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "evidence": [
+        {
+          "name": "entry-visual-receipt.json",
+          "path": "C:/r16-walking-recovery-20261114/fixture-r6/game-full/quest-after-r8/entry-visual-receipt.json",
+          "bytes": 291034,
+          "sha256": "551932d2c6d7acd1c05ed677862e99ffd8302eec0fac3c34d7c7a75fb900efbd"
+        },
+        {
+          "name": "early-player-before-assert.json",
+          "path": "C:/r16-walking-recovery-20261114/fixture-r6/game-full/quest-after-r8/early-player-before-assert.json",
+          "bytes": 34114,
+          "sha256": "3b753e8c57d8fab9aabc16ce7d9b85795b5a8c69b071842ac602eaa40c5edd94"
+        }
+      ]
+    }
+  ],
+  "scope": "Original2200ms/four-phase checks failed and remain failed. Old observer stores changes only and cannot establish timer/paint/CPU cause. No gameplay/source/threshold was changed."
+}

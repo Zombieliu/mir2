@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T04:59:41.023Z",
+  "runId": "1792902924884-3b7017e1",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-postrun-public-whitelist-v1.json",
+    "bytes": 8457,
+    "sha256": "1a2fe8642a9191705f186e4ce048fdb0df11b1cefa6b6a15931fb2b41f8b593d"
+  },
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-root-independent-cleanup-v1.json",
+        "bytes": 573,
+        "sha256": "60575f8ec0972dde637ad1c75f09442006873783df1357e9eb3424b2e8b8b36f"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/probe11-root-independent-cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-approach-checkpoint-push-verification-v1.json",
+        "bytes": 750,
+        "sha256": "43d83572953c2fcc803dc625d300d0fe7f7e6b43d18e48a8e63d0df63e3fa2e4"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/native-approach-checkpoint-push-verification-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-native-approach-checkpoint-preview-verification-v1.json",
+        "bytes": 490,
+        "sha256": "7f0da2b05de8ceb89b5984e4ec8c4bac0bbee52e942b3dac36419fdf6f8f62d1"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/root-native-approach-checkpoint-preview-verification-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal08-expected11-rejection-v1.json",
+        "bytes": 2293,
+        "sha256": "b9f52bcee1bcca188fdae854f97f25a27cbf7936e1a910da7ab4e0e94878f920"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/formal08-expected11-rejection-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\check-formal08-failed11-gate-v1.mjs",
+        "bytes": 2874,
+        "sha256": "cecca30bf1269d4f46d303d8db191e8cbf9f087ff0c237291f669ad5044b8d0c"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/check-formal08-failed11-gate-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-independent-collected-readonly-verification-v1.json",
+        "bytes": 1494,
+        "sha256": "fa1b73baba20df308bed60dd5d1a16aef1b162b00b159250e91b60ec61aa8802"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/probe11-independent-collected-readonly-verification-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-readonly-verifier-derivation-v1.json",
+        "bytes": 1344,
+        "sha256": "96ba28f1d3669d4ea7e7dcdfb63e57f2046339b1efb396ee39e576e7ae8e5cfc"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/probe11-readonly-verifier-derivation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\prepare-probe11-readonly-verifier-v1.mjs",
+        "bytes": 3903,
+        "sha256": "5e59361becd2c4009631752ff5e596cd855296305b82d9573d4b3e1f69c2b96d"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/prepare-probe11-readonly-verifier-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\verify-probe11-collected-readonly-v1.mjs",
+        "bytes": 18256,
+        "sha256": "1ce2e1a78b73a758076b60e607e941ce1a508f538589e447e293b1bc1e2ca8e0"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-analysis/verify-probe11-collected-readonly-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v4.json",
+        "bytes": 420078,
+        "sha256": "ea9fee31c5949ce78f76a87097d4c0af9c9520bdf22338a4def808b667878ed3"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/static/partition-span4-halo-static-validation-v4.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v4.json",
+        "bytes": 17974,
+        "sha256": "45e32703418639fd18d61c25a39ab3915a7de38a1458eb419169563b1cf049a8"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/static/partition-span4-halo-static-readiness-v4.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\rebind-halo-static-v4.mjs",
+        "bytes": 7612,
+        "sha256": "a86dc3be76ca42d33643e4c191e86e230e9c1ccd89dcd6c0c6cfa998aac7492f"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/static/rebind-halo-static-v4.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+        "bytes": 41896,
+        "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/capacity-native-witness-approach-driver-frozen-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-preseal-input-check-v1.json",
+        "bytes": 12760,
+        "sha256": "9e2db39550239f6d24fa678e82cbb3e61b91b2d00714b1d97e1eb4d14bcb6404"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/probe11/probe11-preseal-input-check-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-preseal-independent-review-v1.json",
+        "bytes": 5318,
+        "sha256": "a469179a73e1370a70137056353664956bdd875e57c1118a586f5e15dabaae2b"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/probe11/probe11-preseal-independent-review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\launcher-source-frozen-v1.json",
+        "bytes": 13975,
+        "sha256": "9275ec784473fd3a542648c70ebcd595bf42fc854290711fe0ece31fd5161b55"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/probe11/launcher-source-frozen-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\source-guard-readonly-verification.json",
+        "bytes": 1505,
+        "sha256": "b3893b216c745d6642787074fc8001e38015e4ac3821b1d78a0970ae18a8e6ba"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/probe11/source-guard-readonly-verification.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal08-preseal-input-check-v1.json",
+        "bytes": 12791,
+        "sha256": "ae28924f19d85b87eb513dee11492c9b05007b5922f04960656b24796eb4e5b8"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/formal08/formal08-preseal-input-check-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal08-preseal-independent-review-v1.json",
+        "bytes": 6298,
+        "sha256": "ab73d8ed7ecef56c4011edc3148e2722177c2ad006f39aa43a59f857b843ac7d"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/formal08/formal08-preseal-independent-review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\launcher-source-frozen-v1.json",
+        "bytes": 13967,
+        "sha256": "ffc8146def8c49881e80ff8372e56a18658bb17fa3f6415a9178d395a35ea9f2"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/formal08/launcher-source-frozen-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\source-guard-readonly-verification.json",
+        "bytes": 1508,
+        "sha256": "a6e93783dc5a9a8d83da2a135bd0ea29a5eb85375935aed98140d0663a10cc38"
+      },
+      "destination": "capacity-native10-v2-halo-followup-11-preparation/formal08/source-guard-readonly-verification.json"
+    }
+  ],
+  "originalCopies": 21,
+  "totalOriginalBytes": 587659,
+  "jsonStructuralSensitiveFieldScanPassed": true,
+  "sourceEqualsTargetRaw": true,
+  "originalCollectedSubtreeModified": false,
+  "existingEvidenceModified": false,
+  "rawOrRecordingPayloadCopied": false,
+  "privateValuesRead": false,
+  "rootCleanupProofRequeried": false,
+  "formalPrepared": false,
+  "capacityAccepted": false
+}

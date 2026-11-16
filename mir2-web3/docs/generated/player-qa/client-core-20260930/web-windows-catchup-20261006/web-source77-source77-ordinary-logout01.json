@@ -1,0 +1,10 @@
+{
+  "schema": "source77-ordinary-logout-v1",
+  "method": "ordinary Alt+x keyboard",
+  "loginPasswordFieldCount": 1,
+  "credentialsRecorded": false,
+  "loginScreenshotRecorded": false,
+  "notes": [
+    "Initial visible wait reached its selector deadline; a subsequent ordinary AX inspection confirmed the login form. The exit action was not repeated."
+  ]
+}

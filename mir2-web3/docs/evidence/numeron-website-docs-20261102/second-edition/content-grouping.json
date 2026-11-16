@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-11-02T10:30:07.626600+00:00",
+  "base": "00858ce9b850218dd07ea96daea4bbfe6b68035b",
+  "localBuildId": "kh0ziLeLrCNvLhYDW0jGA",
+  "files": {
+    "mir2-web3/apps/website/app/[locale]/layout.tsx": "55f0246c5cccb10b3712ddab493c06608c0531a674b16054c3d353df438bd099",
+    "mir2-web3/apps/website/app/[locale]/page.tsx": "0691c2895d1f5324cd6839c7acd148881491c5617ef0c76e7c9a57ea7cf84f49",
+    "mir2-web3/apps/website/app/components/documentation-directory.tsx": "af727f17f31212e9866f940224a9f6ffd9ac3206d562208361578f3fe284f27a",
+    "mir2-web3/apps/website/app/components/documentation-page.tsx": "566cdd4be6b990cd84076ebf27a10ef1e6cf033ccc687055fff6a85d2b85f245",
+    "mir2-web3/apps/website/app/components/site-chrome.tsx": "ac8adb4ffafbef01397b4f3e7f7293b71727dc708fb55ee50db05ba2dfb2a724",
+    "mir2-web3/apps/website/app/documentation.css": "3c283f8237ee3b0e692d7fb9c1b3d3a031ac28db8573f7825c3f2a33f733b8f1",
+    "mir2-web3/apps/website/app/globals.css": "ad19cef1730acf1334020c45bae67a25c1ec24f160e13a7e37224b39ef391173",
+    "mir2-web3/apps/website/app/robots.ts": "b68279752b510c20e9958d29c5104eceb9024dec38cd4055b9e7d0fd0f47d48b",
+    "mir2-web3/apps/website/app/sitemap.ts": "8930d2e06a40473400914379f8b08856aaee3fedab8930d63186a3fb8731af9f",
+    "mir2-web3/apps/website/lib/developer-content.ts": "f06a825970628091f7e4c568e493c8aaa803d24f1db91c935ff205cb94b8a5b2",
+    "mir2-web3/apps/website/lib/documentation-types.ts": "b27670f4d63759c63858afef64ad46717f4d225b94baf1a8954d294ee0d8a1a2",
+    "mir2-web3/apps/website/lib/documentation.ts": "9aa6d00ef016dfea380598fe5635741b100e7d2b94760671bd81eabe5089f312",
+    "mir2-web3/apps/website/lib/guide-content.ts": "0b6aff484a987a56c298db422bdec4ebd95fbd39bd824e36ddc1169d105b268e",
+    "mir2-web3/apps/website/lib/product-copy.ts": "ab43db970410ae04ab3932b845fe698e12201e5a98f8bf77210941a5134b0086",
+    "mir2-web3/apps/website/lib/site-copy.ts": "d4bf845839f475caf45f1f63d03687520feb181dc54b51f8e05380c128327325",
+    "mir2-web3/apps/website/next.config.mjs": "7b8617558694b9ce5bfa6c1af813c11ddeafb7ee1d6097e8f33a68277462ea4a",
+    "mir2-web3/apps/website/scripts/check-documentation.mjs": "094eadadc07366d7a24d7d6806383943f6566360d247a4128e431ebb7b420ab2",
+    "mir2-web3/apps/website/lib/documentation-navigation.ts": "9931eb37495b92974f3ae1997ec2da9e30e86de55e148f42039ba53693fa558a",
+    "mir2-web3/apps/website/public/zh-CN/guide-media/windows-login-r16.jpg": "86cb745c7c65832cc2ba1054b2f334e8e670c5a6054d4aefc599418562131a89",
+    "mir2-web3/apps/website/public/zh-CN/guide-media/wallet-qr-expired-r16.jpg": "cfbdabdc47b4fedcdd5574f847670ac92f0104cb5e222cb0197a96063338f0fd"
+  },
+  "validation": {
+    "staticPages": 649,
+    "articles": 19,
+    "sections": 62,
+    "contentLinks": 44,
+    "routes": 27,
+    "anchors": 141,
+    "publicBuildFilesScanned": 114,
+    "search": "desktop/mobile monthly-card query 9 to 1 to 9",
+    "collapsibleTroubleshooting": "closed to open to closed passed",
+    "viewportWidths": [
+      1425,
+      375
+    ],
+    "horizontalOverflow": false,
+    "consoleErrors": []
+  },
+  "production": "unchanged; local working tree only"
+}

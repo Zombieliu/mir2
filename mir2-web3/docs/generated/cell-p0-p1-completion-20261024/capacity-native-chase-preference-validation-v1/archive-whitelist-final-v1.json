@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-25T09:42:03.538Z",
+  "sourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "child": "capacity-native-chase-preference-validation-v1",
+  "explicitWhitelist": true,
+  "files": [
+    {
+      "source": "native-chase-preference-main-before-v1.mjs.txt",
+      "target": "native-chase-preference-main-before-v1.mjs.txt",
+      "file": "native-chase-preference-main-before-v1.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "source": "native-chase-preference-main-mutation-v1.json",
+      "target": "native-chase-preference-main-mutation-v1.json",
+      "file": "native-chase-preference-main-mutation-v1.json",
+      "bytes": 6417,
+      "sha256": "6c0d95fbcdb5f9a035da54bff5920cc47f8834daa8bb3eb0e8a8bafc05942291"
+    },
+    {
+      "source": "apply-native-chase-preference-v1.mjs",
+      "target": "apply-native-chase-preference-v1.mjs",
+      "file": "apply-native-chase-preference-v1.mjs",
+      "bytes": 7693,
+      "sha256": "e12b765c3a8597337c945cf16a0b98884ed537b8d71f8e747fd86ddc48e028e3"
+    },
+    {
+      "source": "verify-native-chase-preference-v1.mjs",
+      "target": "verify-native-chase-preference-v1.mjs",
+      "file": "verify-native-chase-preference-v1.mjs",
+      "bytes": 5993,
+      "sha256": "d8adc932974cf844200143922baf8f9af49e8dff6b08e2095c388035df57ac48"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/append-receipt-v1.json",
+      "target": "native-chase-preference-tests-v1/append-receipt-v1.json",
+      "file": "native-chase-preference-tests-v1/append-receipt-v1.json",
+      "bytes": 948,
+      "sha256": "3e011b89476bcc42d1dca4c3a238bf420e29a5bfdecefb71da7db33bd116c227"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/append-receipt-v2.json",
+      "target": "native-chase-preference-tests-v1/append-receipt-v2.json",
+      "file": "native-chase-preference-tests-v1/append-receipt-v2.json",
+      "bytes": 2943,
+      "sha256": "b16a417a9d5cf3a758e4ae41e66240b80896948c414f66d92bc6194666bea3af"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/append-tests-v1.mjs",
+      "target": "native-chase-preference-tests-v1/append-tests-v1.mjs",
+      "file": "native-chase-preference-tests-v1/append-tests-v1.mjs",
+      "bytes": 1479,
+      "sha256": "e476730c039faa6f3f9c26447329daf8007d2318c7205c951fc56402e3f0a63c"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/appended-cases-v1.mjs.txt",
+      "target": "native-chase-preference-tests-v1/appended-cases-v1.mjs.txt",
+      "file": "native-chase-preference-tests-v1/appended-cases-v1.mjs.txt",
+      "bytes": 13619,
+      "sha256": "14487e72c7dd744a6863aa0c7708b4bfd9c57158aaee49cfe18576fa411fb9fd"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/before-187.test.mjs.txt",
+      "target": "native-chase-preference-tests-v1/before-187.test.mjs.txt",
+      "file": "native-chase-preference-tests-v1/before-187.test.mjs.txt",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/before-focused-revision-v2.test.mjs.txt",
+      "target": "native-chase-preference-tests-v1/before-focused-revision-v2.test.mjs.txt",
+      "file": "native-chase-preference-tests-v1/before-focused-revision-v2.test.mjs.txt",
+      "bytes": 238437,
+      "sha256": "2c95cccec9d2aadf3b4a59bc5e48894ade2951fc50c8c26a1ddd48b903ad24b5"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/focused-green-v1.json",
+      "target": "native-chase-preference-tests-v1/focused-green-v1.json",
+      "file": "native-chase-preference-tests-v1/focused-green-v1.json",
+      "bytes": 2542,
+      "sha256": "ecd06a6a78d3db2dd703c2559359c6d73927b5ae17b23134a387ff6fd055552a"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/focused-green-v1.log",
+      "target": "native-chase-preference-tests-v1/focused-green-v1.log",
+      "file": "native-chase-preference-tests-v1/focused-green-v1.log",
+      "bytes": 4653,
+      "sha256": "f4ceaac9a5dfb800449e2c1f209d4018517510bfb0e5d57103332f4b958ecdc2"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/focused-green-v2.json",
+      "target": "native-chase-preference-tests-v1/focused-green-v2.json",
+      "file": "native-chase-preference-tests-v1/focused-green-v2.json",
+      "bytes": 3059,
+      "sha256": "9976a73394861674d9cc354adc7ff1bad49eec13619222dc861028539771ca2d"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/focused-green-v2.log",
+      "target": "native-chase-preference-tests-v1/focused-green-v2.log",
+      "file": "native-chase-preference-tests-v1/focused-green-v2.log",
+      "bytes": 3688,
+      "sha256": "c51e4a795321a80fc79a0402682177644a1c41fae3e6adc44e51f9353f3ecc41"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/patch-tests-v2.mjs",
+      "target": "native-chase-preference-tests-v1/patch-tests-v2.mjs",
+      "file": "native-chase-preference-tests-v1/patch-tests-v2.mjs",
+      "bytes": 4030,
+      "sha256": "93b3bd4f6adfbdd4a03e147e2dbab4b4fd93bbda6b7b65a54188180ee0053d82"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/run-focused-green-v1.mjs",
+      "target": "native-chase-preference-tests-v1/run-focused-green-v1.mjs",
+      "file": "native-chase-preference-tests-v1/run-focused-green-v1.mjs",
+      "bytes": 2338,
+      "sha256": "cdd912d53f3feb337b5452c7d7bc285919160f9f33eef0adf45794dee531b8d2"
+    },
+    {
+      "source": "native-chase-preference-tests-v1/run-focused-green-v2.mjs",
+      "target": "native-chase-preference-tests-v1/run-focused-green-v2.mjs",
+      "file": "native-chase-preference-tests-v1/run-focused-green-v2.mjs",
+      "bytes": 2727,
+      "sha256": "a201d6502a73dbfec364bb44101964c8bd0584698eb2f1469343d4f1e42ebacf"
+    },
+    {
+      "source": "native-chase-preference-independent-review-v1/source-review-v1.json",
+      "target": "native-chase-preference-independent-review-v1/source-review-v1.json",
+      "file": "native-chase-preference-independent-review-v1/source-review-v1.json",
+      "bytes": 7006,
+      "sha256": "62bade1cc1a842453274f19371adf7b7ca6cb197405560cabedb66253c8f67bd"
+    },
+    {
+      "source": "native-chase-preference-independent-review-v1/test-review-v1.json",
+      "target": "native-chase-preference-independent-review-v1/test-review-v1.json",
+      "file": "native-chase-preference-independent-review-v1/test-review-v1.json",
+      "bytes": 6437,
+      "sha256": "95682bf8c45ae2784405f0ca423b0bf309402d79a4145e3784347f4ab271dcfd"
+    },
+    {
+      "source": "native-chase-preference-independent-review-v1/test-review-v2.json",
+      "target": "native-chase-preference-independent-review-v1/test-review-v2.json",
+      "file": "native-chase-preference-independent-review-v1/test-review-v2.json",
+      "bytes": 7722,
+      "sha256": "e405722272174429c6794acff574d8efe120dd3dbe411fd66c4fd4f76f68d6d3"
+    },
+    {
+      "source": "native-chase-preference-independent-review-v1/final-integration-review-v1.json",
+      "target": "native-chase-preference-independent-review-v1/final-integration-review-v1.json",
+      "file": "native-chase-preference-independent-review-v1/final-integration-review-v1.json",
+      "bytes": 6013,
+      "sha256": "c92ea8583a1faea74ebd0b1890d9f878d59341e11eb481dc2829760d5d453555"
+    },
+    {
+      "source": "native-chase-preference-verification-v1/main-current-before-red-v1.mjs.txt",
+      "target": "native-chase-preference-verification-v1/main-current-before-red-v1.mjs.txt",
+      "file": "native-chase-preference-verification-v1/main-current-before-red-v1.mjs.txt",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    {
+      "source": "native-chase-preference-verification-v1/old-red-v1.log",
+      "target": "native-chase-preference-verification-v1/old-red-v1.log",
+      "file": "native-chase-preference-verification-v1/old-red-v1.log",
+      "bytes": 12333,
+      "sha256": "d3895e8a707f76dbd5ccef72a59d562582a3ea6d730509ba8f56b75ebb660712"
+    },
+    {
+      "source": "native-chase-preference-verification-v1/current-green-v1.log",
+      "target": "native-chase-preference-verification-v1/current-green-v1.log",
+      "file": "native-chase-preference-verification-v1/current-green-v1.log",
+      "bytes": 3691,
+      "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+    },
+    {
+      "source": "native-chase-preference-verification-v1/red-green-receipt-v1.json",
+      "target": "native-chase-preference-verification-v1/red-green-receipt-v1.json",
+      "file": "native-chase-preference-verification-v1/red-green-receipt-v1.json",
+      "bytes": 5650,
+      "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+    },
+    {
+      "source": "native-chase-preference-verification-v1/full-current-v1.log",
+      "target": "native-chase-preference-verification-v1/full-current-v1.log",
+      "file": "native-chase-preference-verification-v1/full-current-v1.log",
+      "bytes": 53991,
+      "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+    },
+    {
+      "source": "native-chase-preference-verification-v1/full-current-receipt-v1.json",
+      "target": "native-chase-preference-verification-v1/full-current-receipt-v1.json",
+      "file": "native-chase-preference-verification-v1/full-current-receipt-v1.json",
+      "bytes": 4682,
+      "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+    },
+    {
+      "source": "native-chase-preference-evidence-v1/evidence-lib.mjs",
+      "target": "native-chase-preference-evidence-v1/evidence-lib.mjs",
+      "file": "native-chase-preference-evidence-v1/evidence-lib.mjs",
+      "bytes": 9123,
+      "sha256": "e910e1674003303e306f1a88996a890fbe37f84c943978941dbfc2a97b0510a7"
+    },
+    {
+      "source": "native-chase-preference-evidence-v1/archive-public.mjs",
+      "target": "native-chase-preference-evidence-v1/archive-public.mjs",
+      "file": "native-chase-preference-evidence-v1/archive-public.mjs",
+      "bytes": 3646,
+      "sha256": "0039e122ad25bd0ab5fe6f097c12d01c9bf6acf1d8df690f20840bdbebda034e"
+    },
+    {
+      "source": "native-chase-preference-evidence-v1/freeze-driver.mjs",
+      "target": "native-chase-preference-evidence-v1/freeze-driver.mjs",
+      "file": "native-chase-preference-evidence-v1/freeze-driver.mjs",
+      "bytes": 8948,
+      "sha256": "6583fce431cf069c7833e78df1bc83981c115ffe961a7f110acfb4d3bd3a4ea7"
+    },
+    {
+      "source": "native-chase-preference-evidence-v1/prepare-evidence.mjs",
+      "target": "native-chase-preference-evidence-v1/prepare-evidence.mjs",
+      "file": "native-chase-preference-evidence-v1/prepare-evidence.mjs",
+      "bytes": 1742,
+      "sha256": "56bd79f13469ffab42f8f2f81daada97be1e12acc713961820ca300af4f9a88c"
+    },
+    {
+      "source": "native-chase-preference-evidence-v1/prepare-evidence-v2.mjs",
+      "target": "native-chase-preference-evidence-v1/prepare-evidence-v2.mjs",
+      "file": "native-chase-preference-evidence-v1/prepare-evidence-v2.mjs",
+      "bytes": 1742,
+      "sha256": "b2caa9e382a4169230d4d375a253e40513902c193b36892904a51c2f2030d731"
+    },
+    {
+      "source": "native-chase-preference-evidence-v1/README.md",
+      "target": "native-chase-preference-evidence-v1/README.md",
+      "file": "native-chase-preference-evidence-v1/README.md",
+      "bytes": 2029,
+      "sha256": "560e5f77c8b024a19b45e8d1173beced2d598c70f18eadf3f93ac81ac75e490b"
+    }
+  ],
+  "copiedFileCount": 33,
+  "copiedBytes": 952963,
+  "fullActual": {
+    "tests": 200,
+    "passed": 200,
+    "failed": 0,
+    "sourcePinsUnchangedAfterRun": true
+  },
+  "priorFocusedFailurePreserved": {
+    "tests": 13,
+    "passed": 12,
+    "failed": 1
+  },
+  "originalRedCurrentGreen": {
+    "red": {
+      "passed": 4,
+      "failed": 9
+    },
+    "green": {
+      "passed": 13,
+      "failed": 0
+    },
+    "finallyRestored": true
+  },
+  "noRuntimeOrPrivateCopied": true,
+  "noTestsExecutedByCollector": true,
+  "capacityAccepted": false,
+  "p2ImplementationPermitted": false,
+  "existingSourceReferences": {
+    "repositoryFiles": [
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+        "bytes": 37930,
+        "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 148409,
+        "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 238892,
+        "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+        "bytes": 4447,
+        "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "bytes": 5228,
+        "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+        "bytes": 21246,
+        "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "bytes": 10882,
+        "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+        "bytes": 6548,
+        "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+        "bytes": 6277,
+        "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+      }
+    ],
+    "original187": {
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+      "byteIdentical": true
+    }
+  },
+  "codeCommitNotYetAssigned": true,
+  "freezeNotCreatedByArchive": true
+}

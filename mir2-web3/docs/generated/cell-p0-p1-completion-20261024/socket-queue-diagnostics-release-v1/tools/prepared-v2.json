@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "state": "prepared-only-not-source-or-build-captured",
+  "preparedAt": "2026-10-24T22:54:13.049Z",
+  "expectedNewSourceCommit": null,
+  "reason": "Original39-input assumption was invalidated by the focused compile-v1. Four existing fixtures need the newly required diagnostics argument. The real committed dependency closure must include those two files rather than hiding them behind a compatibility wrapper.",
+  "oldPreparedV1RawPreserved": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\build-socket-diagnostics-v1.mjs",
+      "bytes": 4269,
+      "sha256": "7eb341979e8ae14771ff80ba1ca001de0cbbdcfac639a003fee175cf39b23272"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\capture-socket-diagnostics-release-v1.mjs",
+      "bytes": 2923,
+      "sha256": "ea6b02e379d0faa7d7ebf72b888b7b287a871736e9edf0b2a7a9d846d2b4bea3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\pin-socket-diagnostics-build-v1.mjs",
+      "bytes": 858,
+      "sha256": "a9c3bb551b36d29436e55243bf59ee8e9c452654a1beb33f98bf6c0753403b7b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\README-prepared-v1.md",
+      "bytes": 2883,
+      "sha256": "4777032eccd362c14aacfdd4d1c3ab04b30bb9884c6b642e892c5b0797534ce2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\source-lib.mjs",
+      "bytes": 8041,
+      "sha256": "5988e4190276c2498580dc9664c4ef35daf99b365892b8ce4d3964b4d3064ffe"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\source-review-v1.json",
+      "bytes": 4602,
+      "sha256": "687dec7769fc8b2a83fc16bed532cb37c16005020b614fb77bfb3783b207e6c7"
+    }
+  ],
+  "originalCompileFailure": {
+    "file": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-socket-diagnostics-focused-v1.log",
+    "bytes": 62567,
+    "sha256": "d9191d6a310a2e6c7e008046fea14aee62afd08149c38d0f293051051b15972c",
+    "classification": "Compile failure E0061 at four old fixture calls; not a runtime test failure",
+    "e0061Count": 4,
+    "diagnosticTestsExecutedInThatAttempt": false
+  },
+  "expectedBackendClosure": {
+    "total": 41,
+    "rust": 36,
+    "cargoAndDotCargo": 5,
+    "preservedOriginalInputs": 39,
+    "original38Unchanged": true,
+    "originalMutableInput": "mir2-web3/apps/gateway/src/web.rs",
+    "addedFixtures": [
+      {
+        "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+        "newNoneArguments": 3
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+        "newNoneArguments": 1
+      }
+    ],
+    "fixtureBaselineCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+    "fixtureRule": "Remove only the four approved None constructor-argument lines; restored final committed Git-LF bytes must exactly equal the099 blobs. No assertion or other byte may change."
+  },
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\pin-socket-diagnostics-build-v2.mjs",
+      "bytes": 985,
+      "sha256": "28719db17c2fa52e0091ad132a77f8252a9dcb8bd3068dd51b400716a219d648"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\build-socket-diagnostics-v2.mjs",
+      "bytes": 4269,
+      "sha256": "f17d598a90c52dcc06c41e424870192aee7be5a5696119ecab6b8b4de5bc75bb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\capture-socket-diagnostics-release-v2.mjs",
+      "bytes": 2965,
+      "sha256": "afc56ab662755155fdcc214b87fad6560967970a33f3dc909a1b5d89fda2305b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\README-prepared-v2.md",
+      "bytes": 4043,
+      "sha256": "2f41d6be22da78926bcfff155bbcc5172fb953054ca3b427e6a9ba48fc7021a4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\prepare-catalog-v2.mjs",
+      "bytes": 4571,
+      "sha256": "852ce300d0a069129421eb84ea8015fabd014884b58b08793f7b929f6902ec87"
+    }
+  ],
+  "outputs": {
+    "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json",
+    "release": "C:\\mir2-build\\p01-completion-20261024\\release-socket-diagnostics-v1.json",
+    "reasonForV1OutputNames": "First actual socket-diagnostics source/build candidate has not been captured; prepared-v2 corrects the tools, not an executed build."
+  },
+  "guards": [
+    "Explicit final new full40 commit and currentHEAD equality",
+    "Tracked tree clean",
+    "Ignored-inclusive untracked backend rejection",
+    "Exact base-to-HEAD41 path closure",
+    "Current raw and committedGitLF binding",
+    "Old38 raw/Git hashes unchanged",
+    "Two fixture inverse transforms exact099",
+    "Source unchanged before and after owned build",
+    "Complete unique Cargo log plus actual exit0 and installed1.95.0 toolchain",
+    "Fresh immutable executable must not equal preserved855b",
+    "Exclusive creation: old evidence cannot be overwritten"
+  ],
+  "execution": {
+    "sourcePinRun": false,
+    "buildRun": false,
+    "releaseCaptureRun": false,
+    "realmStarted": false,
+    "trackedSourceWritten": false,
+    "syntaxChecksOnly": true,
+    "capacityAccepted": false
+  }
+}

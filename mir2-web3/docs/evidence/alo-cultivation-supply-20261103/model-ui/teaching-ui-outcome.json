@@ -1,0 +1,93 @@
+{
+  "schema": "mir2-alo-model-teaching-windows/1",
+  "passed": true,
+  "environment": "test",
+  "humanTrial": false,
+  "nativeSha256": "e7e5b7baacbb0300c73d1525fc7b70b3cec365dd1b7d5f2b8be277cf39cfeaab",
+  "gatewaySha256": "cd35f1f8cba5c2d6602dc344421b25db613c4c82061fdf6f34b1946df914a3d7",
+  "resourceCount": 255063,
+  "model": "gpt-6-luna",
+  "actualModelCalls": 2,
+  "inputTokens": 2232,
+  "outputTokens": 249,
+  "calls": [
+    {
+      "model": "gpt-6-luna",
+      "providerModel": "gpt-6-luna",
+      "status": "completed",
+      "requestId": "req_07ec4f745a3a41f48e125c430893d00c",
+      "responseId": "resp_0b13ed24602ae5d2016ae9cafd67ec87d295bc3fc531255599",
+      "inputTokens": 1010,
+      "outputTokens": 134,
+      "httpStatus": null
+    },
+    {
+      "model": "gpt-6-luna",
+      "providerModel": "gpt-6-luna",
+      "status": "completed",
+      "requestId": "req_80609ff9c10a4a8b88cfb50ce883be6a",
+      "responseId": "resp_0af17762fb76e6bf016ae9cf45223887d2b9a67acd5e705a01",
+      "inputTokens": 1222,
+      "outputTokens": 115,
+      "httpStatus": null
+    }
+  ],
+  "initialHabits": {
+    "assistBeforeLoot": false,
+    "lootOnlyAfterCombat": false,
+    "askBeforeLeaving": false
+  },
+  "confirmed": {
+    "policyVersion": 2,
+    "style": "collection",
+    "party": {
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true,
+      "askBeforeLeaving": true
+    }
+  },
+  "partialFalsePreview": {
+    "askBeforeLeaving": false
+  },
+  "cancelledProfile": {
+    "policyVersion": 2,
+    "style": "collection",
+    "party": {
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true,
+      "askBeforeLeaving": true
+    }
+  },
+  "restart": {
+    "at": 1793709135990,
+    "type": "teachingNativeRestarted",
+    "oldPid": 59820,
+    "newPid": 56204,
+    "differentProcess": true,
+    "automatic": false,
+    "modelCallsUnchanged": true,
+    "archiveId": "3b663035-5b4b-419c-b6da-e6fe033c417f",
+    "policyVersion": 2,
+    "habits": {
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true,
+      "askBeforeLeaving": true
+    }
+  },
+  "scope": {
+    "guiModelPreviewAndConfirm": true,
+    "guiSingleFalseCancellation": true,
+    "sameArchiveRestart": true,
+    "supplyUiPreviewWasCancelled": true,
+    "actualSupplyPurchaseIsSeparateOrdinaryWsFixture": true,
+    "newModelWorldGameplayAfterTeachingNotClaimed": true
+  },
+  "screenshots": [
+    "01-model-proposal-before-confirm.jpg",
+    "02-model-teaching-confirmed-v2.jpg",
+    "03-model-partial-false-preview.jpg",
+    "04-cancel-keeps-habits-v2.jpg",
+    "05-supply-budget-confirmation.jpg",
+    "06-restarted-model-memory-v2.jpg"
+  ]
+}

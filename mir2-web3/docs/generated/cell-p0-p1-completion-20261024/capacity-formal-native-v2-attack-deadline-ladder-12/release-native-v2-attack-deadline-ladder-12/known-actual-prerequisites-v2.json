@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "state": "KNOWN_ACTUAL_RELEASE_AND_FULL16_WITH_PROBE16_PENDING",
+  "executionCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendInputs": 44,
+  "backendSourceAggregate": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "actualNodeTests": 210,
+  "binarySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "release": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "backendManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+  },
+  "driverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "full16ActualFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+    "bytes": 10820,
+    "sha256": "4fd5867e421360dca4bb5cf0ec9f5bcd9b21a364f46f0bbb3bf97d53c571f1fa"
+  },
+  "currentDriverBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\current-driver-binding.json",
+    "bytes": 2381,
+    "sha256": "3587f6193aaa9142482900c63f3695588774446112263dabc73d4d78d2aee64f"
+  },
+  "candidateReleaseBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\candidate-release-binding.json",
+    "bytes": 7176,
+    "sha256": "a711f0fe068bb9cfc6dd9dd78904daef3420f6380a230d9e0a7af63c703f3fd1"
+  },
+  "probeRuntimePreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\runtime-prepared-v2.json",
+    "bytes": 27071,
+    "sha256": "dd09c3db343dd150cc1de53ffd63bcfa31d2c10ee6493bfc42a633e2526a9c66"
+  },
+  "probe16TerminalResult": null,
+  "capacityAccepted": false
+}

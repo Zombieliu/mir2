@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "controller-v2-single-api-parameter-repair-and-companion-revision",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v1.mjs",
+    "bytes": 13330,
+    "sha256": "f7ae46ba51a62ce378ee786cd8d92a96bc8802a61ed0036fb80d69cdeec47060"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v2.mjs",
+    "bytes": 13330,
+    "sha256": "0378790828b92a6f585afd25013ddec7076452ffe3f3571f22e9e5d2f3e33f14"
+  },
+  "rules": [
+    {
+      "from": "const validated=await validator.validateCandidate(input.repository,FULL16,HEAD)",
+      "to": "const validated=await validator.validateCandidate(input.project,FULL16,HEAD)"
+    },
+    {
+      "from": "PREP=path.join(ROOT,'root-controller-preparation-v1.json')",
+      "to": "PREP=path.join(ROOT,'root-controller-preparation-v2.json')"
+    },
+    {
+      "from": "README=path.join(ROOT,'ROOT-CONTROLLER.md')",
+      "to": "README=path.join(ROOT,'ROOT-CONTROLLER-v2.md')"
+    }
+  ],
+  "forwardBytesExact": true,
+  "inverseRawBytesExact": true,
+  "semanticChange": "validateCandidate receives the exported mir2-web3 project root, matching the actual full16 finalizer; it does not receive the parent repository root.",
+  "otherSourceChanges": "Only PREP/README companion revision strings; SELF derives its actual filename from import.meta.url without another rule.",
+  "runtimePreparedOrExistingSourcesChanged": false,
+  "freezeAndGuardNamesUnchanged": true,
+  "sealExecutedHere": false,
+  "readonlyGuardExecutedHere": false,
+  "firstFailure": "Root reported first v1 seal exit1 Prepared full16 candidate profile identity differs before any freeze/guard/private/runtime creation; no original stdio file is claimed here."
+}

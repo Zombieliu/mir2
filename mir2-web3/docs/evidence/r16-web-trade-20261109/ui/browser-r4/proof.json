@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "passed": true,
+  "phase": "normal-logouts",
+  "scope": {
+    "isolatedLoopback": true,
+    "plannedOrdinaryAccounts": 2,
+    "reusedExistingIsolatedAccounts": true,
+    "primaryPhysicalUi": true,
+    "transparentRealServerWebSocket": true,
+    "onlyMatchingItemAckDelayed": true,
+    "modelCalls": 0,
+    "privilegedCommands": 0
+  },
+  "checks": [
+    {
+      "name": "primary-ui-new-character-in-real-world",
+      "passed": true,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "map": "0"
+    },
+    {
+      "name": "second-ordinary-player-same-realm",
+      "passed": true,
+      "adjacentInitially": true
+    },
+    {
+      "name": "ordinary-peer-adjacent-facing",
+      "passed": true,
+      "primaryPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "peerPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "peerDirection": "Up"
+    },
+    {
+      "name": "retrieve-pending-cancel-real-server-restores-assets",
+      "passed": true,
+      "heldPacket": "RetrieveTradeItem",
+      "from": 0,
+      "to": 4,
+      "heldMs": 661,
+      "realSuccess": true,
+      "terminalUnlock": false,
+      "exactUidSlotQuantityAndGoldRestored": true,
+      "retrievalSlotMoveExpected": true,
+      "lateAckReleasedUnmodified": true,
+      "noResurrection": true,
+      "noRepeatedEconomicCommands": true
+    },
+    {
+      "name": "both-normal-logouts-real-ack",
+      "passed": true
+    }
+  ],
+  "events": [
+    {
+      "at": 1794170523665,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170523666,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170525526,
+      "type": "command",
+      "who": "primary",
+      "command": "setLanguage"
+    },
+    {
+      "at": 1794170525526,
+      "type": "command",
+      "who": "primary",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170525526,
+      "type": "command",
+      "who": "primary",
+      "command": "login"
+    },
+    {
+      "at": 1794170528636,
+      "type": "command",
+      "who": "primary",
+      "command": "startGame"
+    },
+    {
+      "at": 1794170535177,
+      "type": "server-packet",
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "at": 1794170535207,
+      "type": "command",
+      "who": "primary",
+      "command": "npcPurchaseOwner"
+    },
+    {
+      "at": 1794170538703,
+      "type": "command",
+      "who": "peer",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170538716,
+      "type": "command",
+      "who": "peer",
+      "command": "login"
+    },
+    {
+      "at": 1794170538755,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170539469,
+      "type": "command",
+      "who": "peer",
+      "command": "startGame"
+    },
+    {
+      "at": 1794170542553,
+      "type": "command",
+      "who": "peer",
+      "command": "turn"
+    },
+    {
+      "at": 1794170542572,
+      "type": "command",
+      "who": "peer",
+      "command": "tradeRequest"
+    },
+    {
+      "at": 1794170548727,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170550525,
+      "type": "server-packet",
+      "packet": "TradeRequest"
+    },
+    {
+      "at": 1794170550742,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeReply"
+    },
+    {
+      "at": 1794170550797,
+      "type": "server-packet",
+      "packet": "TradeAccept"
+    },
+    {
+      "at": 1794170551390,
+      "type": "command",
+      "who": "primary",
+      "command": "depositTradeItem",
+      "from": 3,
+      "to": 0
+    },
+    {
+      "at": 1794170551526,
+      "type": "server-packet",
+      "packet": "DepositTradeItem",
+      "success": true,
+      "from": 3,
+      "to": 0
+    },
+    {
+      "at": 1794170552081,
+      "type": "command",
+      "who": "primary",
+      "command": "retrieveTradeItem",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "at": 1794170552146,
+      "type": "server-packet",
+      "packet": "RetrieveTradeItem",
+      "success": true,
+      "from": 0,
+      "to": 4
+    },
+    {
+      "at": 1794170552146,
+      "type": "real-ack-withheld",
+      "packet": "RetrieveTradeItem",
+      "from": 0,
+      "to": 4,
+      "success": true,
+      "rawSha256": "8a86f161d1bb4cf7f307b570bab012999ab8f264be3b4c6d40d309bdb1f05df1"
+    },
+    {
+      "at": 1794170552258,
+      "type": "pending-ui-before-cancel",
+      "operation": "retrieve",
+      "ackWithheld": true,
+      "cancelEnabled": true,
+      "allItemControlsDisabled": true
+    },
+    {
+      "at": 1794170552591,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeCancel"
+    },
+    {
+      "at": 1794170552644,
+      "type": "server-packet",
+      "packet": "TradeCancel",
+      "unlock": false
+    },
+    {
+      "at": 1794170552807,
+      "type": "held-ack-released",
+      "packet": "RetrieveTradeItem",
+      "rawSha256": "8a86f161d1bb4cf7f307b570bab012999ab8f264be3b4c6d40d309bdb1f05df1",
+      "heldForMs": 661
+    },
+    {
+      "at": 1794170553686,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170554339,
+      "type": "command",
+      "who": "primary",
+      "command": "logOut"
+    },
+    {
+      "at": 1794170556304,
+      "type": "server-packet",
+      "packet": "LogOutSuccess"
+    },
+    {
+      "at": 1794170556341,
+      "type": "command",
+      "who": "peer",
+      "command": "logOut"
+    }
+  ],
+  "commands": {
+    "primary": {
+      "clientCapabilities": 2,
+      "setLanguage": 1,
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "npcPurchaseOwner": 1,
+      "keepAlive": 2,
+      "tradeReply": 1,
+      "depositTradeItem": 1,
+      "retrieveTradeItem": 1,
+      "tradeCancel": 1,
+      "logOut": 1
+    },
+    "peer": {
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "turn": 1,
+      "tradeRequest": 1,
+      "keepAlive": 1,
+      "logOut": 1
+    }
+  },
+  "screenshots": [
+    "01-primary-in-town.png",
+    "retrieve-pending-cancel-enabled.png",
+    "retrieve-cancelled-after-old-ack.png"
+  ],
+  "errors": [],
+  "httpErrors": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "starter": {
+    "name": "Candle",
+    "quantity": 1,
+    "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "slot": 3
+  },
+  "finalPrimary": null
+}

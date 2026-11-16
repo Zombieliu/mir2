@@ -1,0 +1,134 @@
+[
+  {
+    "path": "C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\mir2_client_bevy-a9523797b30891a3.pdb",
+    "logicalBytes": 1275842560,
+    "beforeSha256": "5e33c965f66dbbf722a30686a2a6ee7a9643744a1e6c4ca29402d304de2c165e",
+    "afterSha256": "5e33c965f66dbbf722a30686a2a6ee7a9643744a1e6c4ca29402d304de2c165e",
+    "beforeAllocatedBytes": 1275842560,
+    "afterAllocatedBytes": 475082752,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,275,842,560 total bytes of data are stored in 475,082,752 bytes.\r\nThe compression ratio is 2.7 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-a9cf6cb393790c41.pdb",
+    "logicalBytes": 1275154432,
+    "beforeSha256": "ada97bd9132eb6c37ba6f343c71367941f3793f8a94901c44d304acb1a02355d",
+    "afterSha256": "ada97bd9132eb6c37ba6f343c71367941f3793f8a94901c44d304acb1a02355d",
+    "beforeAllocatedBytes": 1275154432,
+    "afterAllocatedBytes": 459497472,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,275,154,432 total bytes of data are stored in 459,497,472 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-98a54a009f9f875c.pdb",
+    "logicalBytes": 1268133888,
+    "beforeSha256": "7e326ac836bc0b0e04ac384742c823ad58c3d89126ed6dda34b7fcf0b5561f70",
+    "afterSha256": "7e326ac836bc0b0e04ac384742c823ad58c3d89126ed6dda34b7fcf0b5561f70",
+    "beforeAllocatedBytes": 1268133888,
+    "afterAllocatedBytes": 457162752,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,268,133,888 total bytes of data are stored in 457,162,752 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-20d629e283cf034d.pdb",
+    "logicalBytes": 1243598848,
+    "beforeSha256": "dbed47992bc82574326bf3f2b20b92f366b2337e2841c08a145661a9b5676328",
+    "afterSha256": "dbed47992bc82574326bf3f2b20b92f366b2337e2841c08a145661a9b5676328",
+    "beforeAllocatedBytes": 1243598848,
+    "afterAllocatedBytes": 449568768,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,243,598,848 total bytes of data are stored in 449,568,768 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-2e1beb0e14051a9b.pdb",
+    "logicalBytes": 1236365312,
+    "beforeSha256": "d5997a3ee2caa5861a1c0becca910c5b47c36b324fe803e463c1e87914b66060",
+    "afterSha256": "d5997a3ee2caa5861a1c0becca910c5b47c36b324fe803e463c1e87914b66060",
+    "beforeAllocatedBytes": 1236365312,
+    "afterAllocatedBytes": 444203008,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,236,365,312 total bytes of data are stored in 444,203,008 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_platform_windows-885f26529c360d17.pdb",
+    "logicalBytes": 1196863488,
+    "beforeSha256": "b8a4a49e7806d5deb98ef2393876e31946ebe6c8d5514ff1046aa1039b936f74",
+    "afterSha256": "b8a4a49e7806d5deb98ef2393876e31946ebe6c8d5514ff1046aa1039b936f74",
+    "beforeAllocatedBytes": 1196863488,
+    "afterAllocatedBytes": 515411968,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,196,863,488 total bytes of data are stored in 515,411,968 bytes.\r\nThe compression ratio is 2.3 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\mir2_platform_windows-862bc55556a078cd.pdb",
+    "logicalBytes": 1193054208,
+    "beforeSha256": "6a42d0d86ce0fd767c5295647e6f090b1922dc6547e4c8ab3b07c47bcd24c0ac",
+    "afterSha256": "6a42d0d86ce0fd767c5295647e6f090b1922dc6547e4c8ab3b07c47bcd24c0ac",
+    "beforeAllocatedBytes": 1193054208,
+    "afterAllocatedBytes": 513363968,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,193,054,208 total bytes of data are stored in 513,363,968 bytes.\r\nThe compression ratio is 2.3 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_platform_windows-29019765117be2ee.pdb",
+    "logicalBytes": 1190400000,
+    "beforeSha256": "a057eb200a60d5ff3e73f03712bdf0c46ad8d6fcfabfb99e457e5bd7141d23a0",
+    "afterSha256": "a057eb200a60d5ff3e73f03712bdf0c46ad8d6fcfabfb99e457e5bd7141d23a0",
+    "beforeAllocatedBytes": 1190400000,
+    "afterAllocatedBytes": 513617920,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,190,400,000 total bytes of data are stored in 513,617,920 bytes.\r\nThe compression ratio is 2.3 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_platform_windows-8f0f80378eca4457.pdb",
+    "logicalBytes": 1190096896,
+    "beforeSha256": "9f3d835841760542fb5492240175867d45ac0cd18230d3d742d3ec609f8e6e6f",
+    "afterSha256": "9f3d835841760542fb5492240175867d45ac0cd18230d3d742d3ec609f8e6e6f",
+    "beforeAllocatedBytes": 1190096896,
+    "afterAllocatedBytes": 510210048,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,190,096,896 total bytes of data are stored in 510,210,048 bytes.\r\nThe compression ratio is 2.3 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_platform_windows-e74665c6bcf6eeea.pdb",
+    "logicalBytes": 1187663872,
+    "beforeSha256": "b828e841523a387d72ba24c9922843e0bfa5f46143b51ba8b835f591c26b828f",
+    "afterSha256": "b828e841523a387d72ba24c9922843e0bfa5f46143b51ba8b835f591c26b828f",
+    "beforeAllocatedBytes": 1187663872,
+    "afterAllocatedBytes": 513519616,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,187,663,872 total bytes of data are stored in 513,519,616 bytes.\r\nThe compression ratio is 2.3 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-16bf56b7240b6760.pdb",
+    "logicalBytes": 1131614208,
+    "beforeSha256": "abfbf54c6331042b8ad484445dd076279ff60bace115a0d8d5df8e239b38c02c",
+    "afterSha256": "abfbf54c6331042b8ad484445dd076279ff60bace115a0d8d5df8e239b38c02c",
+    "beforeAllocatedBytes": 1131614208,
+    "afterAllocatedBytes": 422195200,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,131,614,208 total bytes of data are stored in 422,195,200 bytes.\r\nThe compression ratio is 2.7 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-ed8b0eac6621d57b.pdb",
+    "logicalBytes": 1129328640,
+    "beforeSha256": "6d9d2edd615a8df6926ced4506d998059a538239235e2449f35d61980a8b5a2f",
+    "afterSha256": "6d9d2edd615a8df6926ced4506d998059a538239235e2449f35d61980a8b5a2f",
+    "beforeAllocatedBytes": 1129328640,
+    "afterAllocatedBytes": 418226176,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,129,328,640 total bytes of data are stored in 418,226,176 bytes.\r\nThe compression ratio is 2.7 to 1.\r\n",
+    "stderr": ""
+  }
+]

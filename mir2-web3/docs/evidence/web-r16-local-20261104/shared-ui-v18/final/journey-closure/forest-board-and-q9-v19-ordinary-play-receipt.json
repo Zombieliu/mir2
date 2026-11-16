@@ -1,0 +1,419 @@
+{
+  "schemaVersion": 1,
+  "scope": "v19 ordinary browser journey from the completed forest objectives through the first cave task",
+  "passed": true,
+  "buildId": "-WCOg-GmVTGJ9mSZugKL0",
+  "renderer": "bevy-a46905128c316656",
+  "sources": [
+    {
+      "file": "forest-board-v19-r12/onboarding-forest-browser-proof.json",
+      "sha256": "4ded191ce7c8af1d1e34914f06cd6bcbe57892237f1a147c4bfbac1f8e626e63",
+      "originalPass": true,
+      "observed": "saved Oma and practice counts, ordinary route, unique Board finish"
+    },
+    {
+      "file": "forest-q9-v19-r1/onboarding-forest-browser-proof.json",
+      "sha256": "e248712fe205713deebca1d176801b74fd1d8bb389a3f83079c2731f62988fa7",
+      "originalPass": false,
+      "observed": "unique diary acceptance, ordinary cave entry, five interior steps, ordinary exit and logout",
+      "originalFailure": "CURRENT_TASK_CARD_SHOW_DETAILS_RECT_NOT_READY"
+    },
+    {
+      "file": "forest-q9-v19-r2/onboarding-forest-browser-proof.json",
+      "sha256": "52f51a696c255ff67cd107e0d95c163540ba671cbd7fc7d5f3278d5af5dc33fe",
+      "originalPass": true,
+      "observed": "saved cave objective and exit location, unique diary finish, exact normal relogin"
+    }
+  ],
+  "forestBoard": {
+    "initialObjectiveCounts": [
+      {
+        "current": 2,
+        "required": 2
+      },
+      {
+        "current": 1,
+        "required": 1
+      }
+    ],
+    "result": {
+      "npcTemplateIndex": 35,
+      "observedLoadedEndpoint24": true,
+      "normalNpcList": true,
+      "matchingAck": true,
+      "goldDelta": 500,
+      "experienceDelta": 40000
+    },
+    "sentSequence": 2456,
+    "ackSequence": 2466,
+    "checkpoint": {
+      "segment": "class",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2120015,
+        2110008
+      ],
+      "hp": 162,
+      "maxHp": 162,
+      "mp": 67,
+      "maxMp": 67,
+      "dead": false,
+      "position": {
+        "x": 333,
+        "y": 260
+      },
+      "gold": 4280,
+      "medicine": 3,
+      "fencingKnown": true,
+      "slayingKnown": true,
+      "exactAssetFingerprintHash": "d46740635e13d9c1e0426043eaaf7f5a1d5bc641354fc7a5b41099983db50bb4",
+      "questProgressFingerprintHash": "8ed6f6e96a385c64fc86c6faa87728e8cd1b8333e0d2f9df42d0f51b406ede78",
+      "normalLogoutAck": true,
+      "reloginVerifiedThisSegment": false,
+      "subsequentNormalLoginVerificationPending": true
+    },
+    "screenshot": {
+      "file": "forest-board-v19-r12/03-forest-board-report-completed.png",
+      "sha256": "49d16eec7170a81818a7520debf79f35987aab79e377e7e30c7213e2ff730fab"
+    }
+  },
+  "cave": {
+    "acceptSentSequence": 682,
+    "acceptAckSequence": 689,
+    "navigationCard": {
+      "clickedCurrentNativeControl": true,
+      "before": {
+        "x": 333,
+        "y": 260
+      },
+      "after": {
+        "x": 332,
+        "y": 259
+      },
+      "walkOrRunRequests": 1,
+      "reachedD001": false
+    },
+    "entry": {
+      "map": "d001",
+      "gate": {
+        "x": 147,
+        "y": 33
+      },
+      "landing": {
+        "x": 151,
+        "y": 362
+      },
+      "mapInformationSequence": 1952,
+      "ownerLocationSequence": 1953,
+      "actualDirection": "Up",
+      "outboundMovementCommands": 1,
+      "collisionFingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+      "manualSteps": [
+        {
+          "from": {
+            "x": 147,
+            "y": 35
+          },
+          "position": {
+            "x": 147,
+            "y": 34
+          },
+          "direction": "Up",
+          "outcome": "moved",
+          "heldForMs": 447,
+          "keys": [
+            "ArrowUp"
+          ],
+          "sequence": 1949,
+          "ackDirection": "Up",
+          "outboundMovementCommands": 1
+        }
+      ]
+    },
+    "objective": {
+      "questId": 2110009,
+      "stage": "readyToTurnIn",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach the Oma Cave entrance",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    "exit": {
+      "map": "0",
+      "gate": {
+        "x": 148,
+        "y": 365
+      },
+      "landing": {
+        "x": 143,
+        "y": 40
+      },
+      "mapInformationSequence": 1975,
+      "ownerLocationSequence": 1976,
+      "actualDirection": "Left",
+      "outboundMovementCommands": 1,
+      "collisionFingerprint": "ede5159c0c90209a137fe9839673140984384c44caaedcbf942c88f9fe6bf97a",
+      "manualSteps": [
+        {
+          "from": {
+            "x": 151,
+            "y": 362
+          },
+          "position": {
+            "x": 151,
+            "y": 363
+          },
+          "direction": "Down",
+          "outcome": "moved",
+          "heldForMs": 516,
+          "keys": [
+            "ArrowDown"
+          ],
+          "sequence": 1965,
+          "ackDirection": "Down",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 151,
+            "y": 363
+          },
+          "position": {
+            "x": 150,
+            "y": 363
+          },
+          "direction": "Left",
+          "outcome": "moved",
+          "heldForMs": 631,
+          "keys": [
+            "ArrowLeft"
+          ],
+          "sequence": 1967,
+          "ackDirection": "Left",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 150,
+            "y": 363
+          },
+          "position": {
+            "x": 150,
+            "y": 364
+          },
+          "direction": "Down",
+          "outcome": "moved",
+          "heldForMs": 566,
+          "keys": [
+            "ArrowDown"
+          ],
+          "sequence": 1969,
+          "ackDirection": "Down",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 150,
+            "y": 364
+          },
+          "position": {
+            "x": 150,
+            "y": 365
+          },
+          "direction": "Down",
+          "outcome": "moved",
+          "heldForMs": 519,
+          "keys": [
+            "ArrowDown"
+          ],
+          "sequence": 1971,
+          "ackDirection": "Down",
+          "outboundMovementCommands": 1
+        },
+        {
+          "from": {
+            "x": 150,
+            "y": 365
+          },
+          "position": {
+            "x": 149,
+            "y": 365
+          },
+          "direction": "Left",
+          "outcome": "moved",
+          "heldForMs": 342,
+          "keys": [
+            "ArrowLeft"
+          ],
+          "sequence": 1973,
+          "ackDirection": "Left",
+          "outboundMovementCommands": 1
+        }
+      ]
+    },
+    "ownerAttestations": [
+      {
+        "map": "d001",
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "mapSequence": 1952,
+        "ownerLocationSequence": 1953,
+        "visibleOwnerMatched": true,
+        "actorFullSnapshotReady": true
+      },
+      {
+        "map": "0",
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "mapSequence": 1975,
+        "ownerLocationSequence": 1976,
+        "visibleOwnerMatched": true,
+        "actorFullSnapshotReady": false
+      }
+    ],
+    "sceneResponses": [
+      {
+        "phase": "d001-ordinary-physical-map0-gate-approach",
+        "map": "d001",
+        "missing": 0,
+        "sourceSprites": 330
+      },
+      {
+        "phase": "d001-ordinary-physical-map0-gate-approach",
+        "map": "d001",
+        "missing": 0,
+        "sourceSprites": 413
+      }
+    ],
+    "screenshots": [
+      {
+        "file": "forest-q9-v19-r1/04-d001-first-real-map-entry.png",
+        "sha256": "310e42379de83c3922fcc566f371c098c13a84307f1000b89bdf00c830593733"
+      },
+      {
+        "file": "forest-q9-v19-r1/06-ordinary-d001-exit-map0-landing.png",
+        "sha256": "1ad0390fc3b2fccd8b5ade1813c785664cefef3f30bbba1834f081d1bc2cfe64"
+      }
+    ],
+    "actualDiaryFinishSentSequence": 591,
+    "actualDiaryFinishAckSequence": 595,
+    "reward": {
+      "questId": 2110009,
+      "goldDelta": 500,
+      "items": [
+        {
+          "name": "(HP)DrugSmall",
+          "count": 10
+        },
+        {
+          "name": "TownTeleport",
+          "count": 1
+        }
+      ],
+      "matchingAck": true,
+      "experienceConfigured": 0,
+      "experienceDelta": 0,
+      "experiencePackets": []
+    },
+    "turnIn": {
+      "quest": {
+        "questId": 2110009,
+        "stage": "readyToTurnIn",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach the Oma Cave entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      "normalFreshLogin": true,
+      "map": "0",
+      "position": {
+        "x": 143,
+        "y": 40
+      },
+      "openedFromActualDiary": true,
+      "priorEntryRepeated": false,
+      "priorAcceptanceRepeated": false,
+      "goldBefore": 4280,
+      "medicineBefore": 3,
+      "townTeleportBefore": 0,
+      "completed": true,
+      "goldAfter": 4780,
+      "medicineAfter": 13,
+      "townTeleportAfter": 1
+    }
+  },
+  "savedAndReadBack": {
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2120015,
+      2110009
+    ],
+    "progression": {
+      "level": 16,
+      "experience": 906,
+      "maxExperience": 50000
+    },
+    "gold": 4780,
+    "smallHpMedicine": 13,
+    "townTeleport": 1,
+    "position": {
+      "x": 143,
+      "y": 40
+    },
+    "exactAssets": true,
+    "exactProgress": true,
+    "exactExperience": true,
+    "learnedFencing": true,
+    "learnedSlaying": true,
+    "reopenedDiaryRewardStayedSettled": true,
+    "finalNormalLogout": true,
+    "browserClosed": true
+  },
+  "observedIssues": [
+    {
+      "feature": "Gilbert same-map position persistence",
+      "file": "forest-board-v19-gilbert-reconciliation.json",
+      "sha256": "a8ab3dba55b2e62206711ab7a45c7144bf8ba82c94a6ff54931d9ff50f399aa4",
+      "observed": "one fare and immediate destination; next login retained debit and returned to the earlier position"
+    },
+    {
+      "feature": "Map image routing",
+      "bigMap": "physical image point did not receive pointer",
+      "miniMap": "physically accepted image click produced zero walks or runs"
+    }
+  ],
+  "network": {
+    "httpErrors": 0,
+    "failed": 0,
+    "consoleErrors": 0
+  }
+}

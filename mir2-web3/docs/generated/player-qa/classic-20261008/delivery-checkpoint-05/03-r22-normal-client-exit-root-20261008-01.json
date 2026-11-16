@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.r22.normal-client-exit-observation.v1",
+  "observedAtUtc": "2026-10-08T11:44:41.924340+00:00",
+  "diagnosticFile": "C:\\Users\\Administrator\\AppData\\Local\\NumeronLegendOfRebirth\\logs\\startup.jsonl",
+  "diagnosticSha256": "f81b00e3191d00876fe7e3a61356b9eb7d086736bae052913049f7488a1904fe",
+  "diagnosticBytes": 15097,
+  "exitRecord": {
+    "event": "event_loop_returned",
+    "exitCode": 0,
+    "processId": 181324,
+    "unixMs": 1791455833473
+  },
+  "nativeAndLauncherProcessListEmpty": true,
+  "humanMessageNewlyReceived": false,
+  "normalEventLoopExitObserved": true,
+  "humanWheelAccepted": false,
+  "r22ReleaseAlreadyAuthorized": true,
+  "firstReceiptAttemptFailedBeforeCreatingFile": true
+}

@@ -1,0 +1,28 @@
+[bevy-runtime] lock=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\.bevy-runtime-build.lock pid=182700
+[bevy-runtime] profile=release
+[bevy-runtime] runtime=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\game-client\runtime
+[bevy-runtime] output=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\bevy-runtime
+[bevy-runtime] staging=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\.bevy-runtime-staging-182700-1794176022194-73396fb368b2
+[bevy-runtime] cargo-target-root=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime
+[bevy-runtime] wasm-bindgen-rust-min-stack=67108864
+[bevy-runtime] cargo=1.95.0 pinned=1.95.0 toolchain=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\game-client\runtime\rust-toolchain.toml
+[bevy-runtime] package=webgpu backend=webgpu
+[bevy-runtime] backend-target=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgpu
+[bevy-runtime] backend-wasm=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgpu\wasm32-unknown-unknown\wasm-release\mir2_bevy_runtime.wasm
+[bevy-runtime] cargo-defaults jobs=1 incremental=0
+[bevy-runtime] cargo build (webgpu)
+   Compiling mir2-protocol v0.1.0 (D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\packages\protocol)
+   Compiling mir2-client-core v0.1.0 (D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\game-client\client-core)
+   Compiling mir2-ui-core v0.1.0 (D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\game-client\ui-core)
+   Compiling mir2-game-data v0.1.0 (D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\packages\game-data)
+error: couldn't read `D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\packages\game-data\src\../../../config/quest-guidance/daily-weekly-v1.json`: 系统找不到指定的路径。 (os error 3)
+  --> D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\packages\game-data\src\periodic_quests.rs:68:64
+   |
+68 |           let value: PeriodicQuestCatalog = serde_json::from_str(include_str!(
+   |  ________________________________________________________________^
+69 | |             "../../../config/quest-guidance/daily-weekly-v1.json"
+70 | |         ))
+   | |_________^
+
+error: could not compile `mir2-game-data` (lib) due to 1 previous error
+[bevy-runtime] cargo build (webgpu) failed with exit code 101

@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.cdn.stage.authenticated-download.v1",
+  "passed": true,
+  "artifactId": 11533237847,
+  "runId": 37739769708,
+  "artifactDigest": "sha256:2874f1d32aa09dd70629ad4287d81365169690d807e6ba324c48a560331ee545",
+  "zipBytes": 5380,
+  "receiptSha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f",
+  "createdUnix": 1791443199,
+  "credentialValuesLogged": false
+}

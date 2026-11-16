@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "source": "491819b20efd53d4cc8442cb87e8c6fc1e1a80e8",
+  "candidate": "eb8e4d29cfcc-font-missing-retry-80259818",
+  "buildReceiptSha256": "59de11b7bfd1769e4c3cbce9e2ec788d8b6a4078e991e61ee876af76eca4f211",
+  "matchingGitBlobs": 58,
+  "originalFilesUnchanged": 65,
+  "pendingFilesUnchanged": 134
+}

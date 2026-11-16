@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/scripts/test-player-frames.mjs",
+      "unchangedFromHead": true
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/crystal-ui-export-manifest.json",
+      "unchangedFromHead": true
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-player-frames.ts",
+      "unchangedFromHead": true
+    }
+  ],
+  "failure": "Existing Fishing/00 expected range0..175 but current frozen export metadata is0..351 (line74)",
+  "selectedRun": "70 passing subtests; 1 unchanged file-level baseline failure",
+  "runtimeChange": "none"
+}

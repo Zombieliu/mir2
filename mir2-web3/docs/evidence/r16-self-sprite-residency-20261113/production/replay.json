@@ -1,0 +1,753 @@
+{
+  "source": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "implementation": "c4cc296c368bd6515cdd1dc2fd8975c4a97b113a",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "origin": "https://numeron.obelisk.build",
+  "gamePath": "/game",
+  "runtime": "bevy-0c553a754308e5b8",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "checkedAt": "2026-11-13T04:29:53.526Z",
+  "functionalReplayPassed": true,
+  "coldQualificationPassed": false,
+  "timings": {
+    "clockEpochMs": 1794543622454,
+    "authoritativeLoginSuccessMs": 41003,
+    "startIntentMs": 71647,
+    "startAckMs": 80182,
+    "authoritativeStarterMapMs": 80191,
+    "authoritativeSelfMs": 80191,
+    "firstPlayableObservedMs": 124856,
+    "terrainPaintVerifiedMs": 192955,
+    "sharedHudObservedMs": 245463,
+    "logoutIntentMs": 257601,
+    "logoutAckMs": 258661,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 41008,
+    "starterRegionWireHeadersMs": 47918.863,
+    "starterRegionResponseEventMs": 47929,
+    "starterRegionBodyMs": 48208,
+    "starterRegionCommitMs": 80318,
+    "sceneSpritesReadyMs": 80346,
+    "localeRequestMs": 41008,
+    "localeBodyMs": 47907,
+    "localeReadyMs": 47928,
+    "firstPlayableFrameMs": 124812,
+    "rendererBodyMs": 234549,
+    "clickToFirstPlayableMs": 53165,
+    "walkAckMs": 127,
+    "inputToRenderedMs": 165,
+    "hudObservedAfterPlayableMs": 120651,
+    "hudOriginal120sPassed": false,
+    "jointNativeFirstReadyAfterPlayableMs": 120544,
+    "jointNativeLastNotReadyAfterPlayableMs": 118542,
+    "rendererBodyAfterPlayableMs": 109737
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "expectedRuntimeDelivered": true,
+    "returnedToSelect": true
+  },
+  "authority": {
+    "freshEmptyRoster": true,
+    "selfPacketMatches": true,
+    "starterMapPacket": true,
+    "initialSelfPosition": {
+      "x": 288,
+      "y": 616
+    }
+  },
+  "protocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 1,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 125014
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 125017
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 125144
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 125179
+    }
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": true,
+    "status": "observed",
+    "gateReady": true,
+    "runtimeDelivered": true,
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-shared-zh-TW.png"
+    }
+  },
+  "questUi": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-react-fallback",
+    "questId": 2110001,
+    "stage": "available",
+    "objective": "向助理簡報告",
+    "counter": "0/1",
+    "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+    "journey": "當前主線 0/26",
+    "zeroWorldCommands": true,
+    "screenshot": "quest-available-zh-TW.png"
+  },
+  "prewarm": {
+    "passed": true,
+    "waitMs": 11060,
+    "snapshot": {
+      "runs": [
+        {
+          "name": "hud-core",
+          "label": "Core HUD",
+          "requested": 113,
+          "ok": 113,
+          "failed": 0,
+          "failedUrls": [],
+          "durationMs": 130020,
+          "sceneCacheHits": 0,
+          "sceneCacheMisses": 0,
+          "status": "done",
+          "requestFailures": [
+            {
+              "url": "/original-ui/Prguse/13.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/8.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10002,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/473.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/472.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10004,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/8.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/473.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/472.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/826.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10004,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/827.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/828.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/826.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/827.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/828.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10002,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1961.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1962.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1901.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1961.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1962.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1901.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1902.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1905.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10004,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1907.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1902.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "orchestrator": {
+        "backgroundMode": "afterPlayable",
+        "firstPlayable": true,
+        "requestedStage": "game",
+        "pendingBackgroundStage": null,
+        "activeBackgroundStage": null,
+        "completed": [
+          "game:background"
+        ],
+        "disposed": false
+      }
+    },
+    "originalMarkerPins": [
+      {
+        "frame": 985,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "frame": 986,
+        "bytes": 486,
+        "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+      }
+    ],
+    "cached": [
+      {
+        "frame": 985,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "frame": 986,
+        "bytes": 486,
+        "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+      }
+    ],
+    "samples": [
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/985.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/985.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/985.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/985.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/986.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/985.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ],
+      [
+        {
+          "path": "/original-ui/Prguse/985.png",
+          "complete": true,
+          "width": 28,
+          "height": 29,
+          "failed": null,
+          "hidden": false
+        }
+      ]
+    ],
+    "staleRequests": []
+  },
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "workerRestart": {
+    "passed": true,
+    "pin": {
+      "path": "/original-ui/Prguse/1.png",
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "beforeStatus": {
+      "version": "20261108-r16-08ec86d5105c-9a821c959783",
+      "fontMirrorFirst": true,
+      "staticAssetTiers": {
+        "critical": 19,
+        "background": 161,
+        "runtime": 0
+      },
+      "cacheCount": 5,
+      "entryCount": 327
+    },
+    "beforeCache": {
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "versions": [
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "running"
+      },
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "stopping"
+      },
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "stopped"
+      },
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "starting"
+      },
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "starting"
+      },
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "starting"
+      },
+      {
+        "versionId": "0",
+        "status": "activated",
+        "runningStatus": "running"
+      }
+    ],
+    "responses": [
+      {
+        "status": 200,
+        "fromServiceWorker": true
+      }
+    ],
+    "after": {
+      "status": 200,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "afterStatus": {
+      "version": "20261108-r16-08ec86d5105c-9a821c959783",
+      "fontMirrorFirst": true,
+      "staticAssetTiers": {
+        "critical": 19,
+        "background": 161,
+        "runtime": 0
+      },
+      "cacheCount": 5,
+      "entryCount": 327
+    },
+    "afterCache": {
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "nativeReady": true,
+    "noConfigurationMessageSentByTest": true
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "approval": {
+    "passed": true,
+    "officialPwa": true,
+    "mobileBrowserEmulation": true,
+    "virtualPasskey": true,
+    "approveUiClicks": 1,
+    "approveRelayRequests": 1,
+    "loginOnlyConsentVisible": true,
+    "relayApprovedExactSession": true
+  },
+  "walletGuard": {
+    "schema": 1,
+    "requestInterception": false,
+    "operations": {
+      "http-read": 154,
+      "exact-login-session-read": 1,
+      "signed-login-approval": 1
+    },
+    "forbiddenCount": 0,
+    "forbidden": [],
+    "browserClosed": true
+  },
+  "desktopClosed": true,
+  "rawGameSha256": "b8561a0e5eb2b375dcc15e03052c646750c32236d5cc42aa1e22fcd266651307",
+  "sourceNote": "The onboarding helper retains a historical walletSource label; frozen wrapper preflight verifies live c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b directly. No private wallet state or QR intent is published.",
+  "limits": [
+    "one clean virtual-passkey Testnet PWA wallet; not physical phone acceptance",
+    "one normal new QA role and one physical adjacent walk; not old-role restart or full class route",
+    "original 120s HUD observation gate failed by 651ms; no relaxed threshold; sample cadence separately retained",
+    "cold/WAN timings are a single observation and do not establish performance improvement"
+  ]
+}

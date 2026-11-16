@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.windows.r18.frozen-source.v1",
+  "sourceRevision": "0f5351f9299263fcdb2b5b8d64e9ca9abb6870e2",
+  "tree": "0ff53e1e8eaec0111768c0136cc3cbc15cab8a57",
+  "parentFrozenSource": "3b3072c48e857b7a36163093a3fe52d21a1b78b4",
+  "canonicalRefBefore": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+  "canonicalRefAdvanced": false,
+  "candidate": "WN-CANDIDATE-20261101-unified-18",
+  "version": "2026.11.1.18",
+  "engineSequence": 2026110107,
+  "packedSequence": 2026110108,
+  "ownedFixInputSha256": {
+    "mir2-web3/apps/game-client/platform-windows/src/assets.rs": "891e88fc80ec3a1761ecde73880c620be10e7435285d639c0bdfca9f346d0cef",
+    "mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs": "39d812a521b0085e2849bfd8b30d8b1d5db57b9d1f0a86df3c2cfb7ad1256c90",
+    "mir2-web3/apps/game-client/platform-windows/src/generation_launch_tests.rs": "66005a40c3d598f413f5a1e6c38f3e1e73489954cfca4f4bb6e427d9d7ec7930"
+  },
+  "createdUtc": "2026-11-01T09:39:29.193440+00:00",
+  "gameAndEngineMustUseSameSource": true,
+  "publicAcceptance": false
+}

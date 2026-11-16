@@ -1,0 +1,22 @@
+{
+  "sc": {
+    "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+    "requestedAt": 1794567265315,
+    "dataEvents": 17,
+    "decodedBytes": 16437364,
+    "encodedDataBytes": 0,
+    "maxDataGapMs": 15,
+    "headersAt": 1794567277370,
+    "status": 200,
+    "protocol": "http/1.1",
+    "serviceWorker": true,
+    "fromDiskCache": false,
+    "cacheControl": "public, max-age=31536000",
+    "firstDataAt": 1794567277385,
+    "lastDataAt": 1794567277385,
+    "finishedAt": 1794567277411,
+    "totalEncodedBytes": 0
+  },
+  "selectedSource": "/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+  "sourceEvidence": "separate fixed current-release HTTP mirror; actual worker bodies and exact hashes; not WAN coverage"
+}

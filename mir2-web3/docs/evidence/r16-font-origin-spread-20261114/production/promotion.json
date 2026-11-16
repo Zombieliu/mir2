@@ -1,0 +1,129 @@
+{
+  "workflow": {
+    "run": 43568139830,
+    "passed": true
+  },
+  "operation": "numeron-qr-promote",
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "artifactSha256": "b1a10fc71ac72d3a43bc295b882dff8e5fbd96078b24b223a78bd7f911c95f87",
+  "writes": [
+    {
+      "operation": "promote",
+      "site": "game",
+      "deployment": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu"
+    }
+  ],
+  "rollbacks": [],
+  "trafficAfter": {
+    "target": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu",
+    "alias": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu"
+  },
+  "independentMapping": {
+    "publicAlias": "numeron.obelisk.build",
+    "deploymentId": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu",
+    "revision": "7140aae96c41986968aadf040436e0ab396e1fdb",
+    "ref": "codex/windows-player-journey",
+    "state": "READY",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "target": "production",
+    "checkedAt": "2026-11-14T06:52:33.020Z"
+  },
+  "fullProtectedPublicMatches": [
+    {
+      "entry": "Scene",
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    {
+      "entry": "Floor",
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "bytes": 439896
+    },
+    {
+      "entry": "PlayerMale",
+      "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+      "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+      "bytes": 289851
+    },
+    {
+      "entry": "PlayerFemale",
+      "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+      "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+      "bytes": 282415
+    },
+    {
+      "entry": "Npcs",
+      "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+      "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+      "bytes": 313909
+    },
+    {
+      "entry": "Objects1",
+      "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+      "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+      "bytes": 395412
+    },
+    {
+      "entry": "Objects2",
+      "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+      "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+      "bytes": 395320
+    },
+    {
+      "entry": "Objects3",
+      "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+      "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+      "bytes": 395216
+    },
+    {
+      "entry": "MonsterStanding",
+      "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+      "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+      "bytes": 513566
+    },
+    {
+      "entry": "MonsterWalking",
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "bytes": 764724
+    },
+    {
+      "entry": "GameplayLocale",
+      "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+      "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "bytes": 3283113
+    },
+    {
+      "entry": "NameAssistantJane",
+      "path": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+      "bytes": 366,
+      "sha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+    },
+    {
+      "entry": "NameMerchant",
+      "path": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+      "bytes": 288,
+      "sha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+    },
+    {
+      "entry": "NameRuben",
+      "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+      "bytes": 262,
+      "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+    },
+    {
+      "entry": "AssetWorker",
+      "path": "/mir2-asset-worker.js",
+      "bytes": 44059,
+      "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
+    }
+  ],
+  "qrCanary": {
+    "pending": true,
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "relay": "https://relay.dubhe.obelisk.build"
+  },
+  "publicBrowserPending": true
+}

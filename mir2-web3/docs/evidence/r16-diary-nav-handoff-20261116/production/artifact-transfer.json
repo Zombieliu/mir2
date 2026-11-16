@@ -1,0 +1,13 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "workflowRun": 43842463384,
+  "artifact": 14214923839,
+  "bytes": 95700097,
+  "sha256": "56901e5f0dad2060c1cdee7b7cfe1c5e0c8593e4b45c2024c3eb43883fd777c4",
+  "githubDigestMatched": true,
+  "downloadedBytes": 5634624,
+  "reusedBytes": 90275895,
+  "transport": "new ZIP metadata and changed ranges plus prior compressed-body cache; full official ZIP digest verified",
+  "priorArchiveSha256": "9cbaf87eca1f09a43a5fbef5908f9921f48df309b4be7eb5a499ce0f72b08fda",
+  "signedUrlsKeptInMemoryOnly": true
+}

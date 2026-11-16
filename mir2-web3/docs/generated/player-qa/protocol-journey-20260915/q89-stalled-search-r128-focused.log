@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: q89 Wizard arms the exact live D2031 doorway after a stalled full Priest spread before respawn waiting
+ok 1 - q89 Wizard arms the exact live D2031 doorway after a stalled full Priest spread before respawn waiting
+  ---
+  duration_ms: 5.8136
+  type: 'test'
+  ...
+# Subtest: a q89 Priest full-spread pass with physical progress does not arm the D2032 fallback
+ok 2 - a q89 Priest full-spread pass with physical progress does not arm the D2032 fallback
+  ---
+  duration_ms: 0.5945
+  type: 'test'
+  ...
+# Subtest: a q89 Priest full-spread pass with unknown physical coordinates does not arm the D2032 fallback
+ok 3 - a q89 Priest full-spread pass with unknown physical coordinates does not arm the D2032 fallback
+  ---
+  duration_ms: 0.4426
+  type: 'test'
+  ...
+# Subtest: a catalogued D2032 Priest cannot arm a stalled q89 fallback without the exact live D2031 source and key
+ok 4 - a catalogued D2032 Priest cannot arm a stalled q89 fallback without the exact live D2031 source and key
+  ---
+  duration_ms: 0.405
+  type: 'test'
+  ...
+# Subtest: the stalled Priest fallback stays unavailable for other q89 objectives
+ok 5 - the stalled Priest fallback stays unavailable for other q89 objectives
+  ---
+  duration_ms: 1.0402
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 210.1573

@@ -1,0 +1,235 @@
+{
+  "kind": "Root actual spouse/diagnostics round and partial source matrix",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "parentCommit": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+  "matrix": {
+    "json": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix02.json",
+      "bytes": 2622886,
+      "sha256": "183dbe983c2b430db0f8ac38403ca1265bed3503fa7841fd9f6b82185dc78e52"
+    },
+    "md": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix02.md",
+      "bytes": 155516,
+      "sha256": "50af76d13ab8bb53d5561fd6b19873fbfb66b8bf9c5470f1e92f1724b8864cd0"
+    }
+  },
+  "codeSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06-source-snapshot.json",
+    "bytes": 9726777,
+    "sha256": "c606288de8718570787069120b71bd024f65213ec68f65dd23ade20cd2cc34ab"
+  },
+  "results": [
+    {
+      "file": "combined-matrix-review01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\combined-matrix-review01.json",
+      "bytes": 62076,
+      "sha256": "9819d35be1608f384440e1033db267e0e55b79219a027da54f18e4e2e35f61cb",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-combined-matrix-review01.json",
+        "bytes": 62076,
+        "sha256": "9819d35be1608f384440e1033db267e0e55b79219a027da54f18e4e2e35f61cb"
+      }
+    },
+    {
+      "file": "spouse-communication-source-review01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-communication-source-review01.json",
+      "bytes": 6183,
+      "sha256": "9f1f23b8c2505c053e855e289eab7a57565fb619911af2653a966e7851c27c28",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-spouse-communication-source-review01.json",
+        "bytes": 6289,
+        "sha256": "76d4ddb559bda1cc8bccee0379366e2805a204997c863087cb20f3d48931cb4f"
+      }
+    },
+    {
+      "file": "spouse-communication-source-review02.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-communication-source-review02.json",
+      "bytes": 4374,
+      "sha256": "ac05bfb7c046884dc66a755e0a500b5c6240a6348c88ca6a99945a8ecbd5a9b2",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-spouse-communication-source-review02.json",
+        "bytes": 4455,
+        "sha256": "b226709741c8e1869c23ce3f6c1e3a2cb6c56127c0d03d21c0e624e3edd5be49"
+      }
+    },
+    {
+      "file": "diagnostics-finite-result01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\diagnostics-finite-result01.json",
+      "bytes": 1761,
+      "sha256": "0f0bb8b97c4c277cbfb097a19e334ff389999de1b4dacbe37aeda2c407f421f4",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-trace-diagnostics01-finite-result.json",
+        "bytes": 1761,
+        "sha256": "0f0bb8b97c4c277cbfb097a19e334ff389999de1b4dacbe37aeda2c407f421f4"
+      }
+    },
+    {
+      "file": "spouse-cross-finite06-result.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-cross-finite06-result.json",
+      "bytes": 2309,
+      "sha256": "6044113b54fe5397064b29fea9b700879fb425a5cbeb537ce88d0662f325fb79",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06-result.json",
+        "bytes": 2309,
+        "sha256": "6044113b54fe5397064b29fea9b700879fb425a5cbeb537ce88d0662f325fb79"
+      }
+    },
+    {
+      "file": "next-build03-result.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\next-build03-result.json",
+      "bytes": 3023,
+      "sha256": "d41c011d4f42b020d25b3ef6590a8fe949e6609a7283a1ea06096c6e33fe511a",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03-result.json",
+        "bytes": 3023,
+        "sha256": "d41c011d4f42b020d25b3ef6590a8fe949e6609a7283a1ea06096c6e33fe511a"
+      }
+    },
+    {
+      "file": "thin-build05-result.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\thin-build05-result.json",
+      "bytes": 3395,
+      "sha256": "71c13fc8fc28ee0a74ea8f407450108d32e9b2bb20e45fc1fecb5a838d4a36fc",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05-result.json",
+        "bytes": 3395,
+        "sha256": "71c13fc8fc28ee0a74ea8f407450108d32e9b2bb20e45fc1fecb5a838d4a36fc"
+      }
+    },
+    {
+      "file": "auth-shared-plan01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\auth-shared-plan01.json",
+      "bytes": 19243,
+      "sha256": "df9c2d978bba74fe52bc19d6571c5662946a4c736e996a175d9ae53b91a664c6",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-shared-plan01.json",
+        "bytes": 19516,
+        "sha256": "1a3bfadf873a02a8aef7f05446d027c4c3448b9f48e1e697c55e1e6a8f69eb32"
+      }
+    },
+    {
+      "file": "native-baseline-object-check01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\native-baseline-object-check01.json",
+      "bytes": 11107,
+      "sha256": "28f20450c804a2558dfac9d4cba246e5f2ca9d1e535e79e2403fa1c35a2fa578",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-combined-baseline-object-check01.json",
+        "bytes": 11107,
+        "sha256": "28f20450c804a2558dfac9d4cba246e5f2ca9d1e535e79e2403fa1c35a2fa578"
+      }
+    },
+    {
+      "file": "thin04-warning-root-check01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\thin04-warning-root-check01.json",
+      "bytes": 7590,
+      "sha256": "3b6e4597110a4dfa922a08b8409975631b3a01aa2a71ebe7a204a23107c25d31",
+      "originalQa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build04-warning-root-check01.json",
+        "bytes": 7590,
+        "sha256": "3b6e4597110a4dfa922a08b8409975631b3a01aa2a71ebe7a204a23107c25d31"
+      }
+    }
+  ],
+  "authConstraints": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\auth-next-constraints02.json",
+    "bytes": 2019,
+    "sha256": "acc73d1b8c4ed5aeb75f01ba2a1ecc875a52fa29bf2ed8dac02ff026a27624d0"
+  },
+  "package": {
+    "exists": true,
+    "bytes": 372478397,
+    "files": 7299,
+    "directories": 775,
+    "links": 0
+  },
+  "outputRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261006-04",
+  "budgetBytes": 377487360,
+  "remainingBytes": 5008963,
+  "sourceCategories": {
+    "legacy": 181,
+    "open": 25,
+    "common limitation": 8,
+    "shared": 103
+  },
+  "records": 317,
+  "completeDenominatorFrozen": false,
+  "knownRecordedRemainingGaps": 25,
+  "goalStatus": "active",
+  "newDistinctFiniteTests": 5,
+  "checks": {
+    "spouseAndAdjacent119": true,
+    "diagnostics16": true,
+    "nextStrictTypeScriptAnd13Pages": true,
+    "thinFilesAndBudget": true
+  },
+  "warnings": {
+    "count": 44,
+    "staticClassified": true,
+    "runtimeVerified": false
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "repositoryLineEndingPolicy": {
+    "attributes": "text eol=lf",
+    "normalizedCopies": [
+      {
+        "file": "thin04-warning-source-review01.json",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\thin04-warning-source-review01.json",
+          "bytes": 32968,
+          "sha256": "3a472bcddc06d5c3e8dc4aab96daf6050a5393f13d5d58fca8f3f7551eae299d"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\thin04-warning-source-review01.json",
+          "bytes": 32322,
+          "sha256": "900c0219f361f16006000bc33836e7ef8a90aa20e786b6e12ead4ede1c1d3dbb"
+        }
+      },
+      {
+        "file": "spouse-communication-source-review01.json",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-communication-source-review01.json",
+          "bytes": 6289,
+          "sha256": "76d4ddb559bda1cc8bccee0379366e2805a204997c863087cb20f3d48931cb4f"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-communication-source-review01.json",
+          "bytes": 6183,
+          "sha256": "9f1f23b8c2505c053e855e289eab7a57565fb619911af2653a966e7851c27c28"
+        }
+      },
+      {
+        "file": "spouse-communication-source-review02.json",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-communication-source-review02.json",
+          "bytes": 4455,
+          "sha256": "b226709741c8e1869c23ce3f6c1e3a2cb6c56127c0d03d21c0e624e3edd5be49"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\spouse-communication-source-review02.json",
+          "bytes": 4374,
+          "sha256": "ac05bfb7c046884dc66a755e0a500b5c6240a6348c88ca6a99945a8ecbd5a9b2"
+        }
+      },
+      {
+        "file": "auth-shared-plan01.json",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\auth-shared-plan01.json",
+          "bytes": 19516,
+          "sha256": "1a3bfadf873a02a8aef7f05446d027c4c3448b9f48e1e697c55e1e6a8f69eb32"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\auth-shared-plan01.json",
+          "bytes": 19243,
+          "sha256": "df9c2d978bba74fe52bc19d6571c5662946a4c736e996a175d9ae53b91a664c6"
+        }
+      }
+    ],
+    "qualification": "Tracked QA JSON copies use LF. Original QA snapshots/result byte pins remain the untouched C: files they reference. Source freeze pins are actual checkout bytes, independently distinguished from fixed Git blob/text evidence."
+  }
+}

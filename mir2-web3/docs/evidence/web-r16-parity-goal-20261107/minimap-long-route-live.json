@@ -1,0 +1,506 @@
+{
+  "revision": "d3e9ebfa6b7f6dc5cb0f86fb64553603d60c5965",
+  "sourceBuild": "kur1ltza93-SYxjeasA9B",
+  "sourceReceiptSha256": "2c69b80b65034e1849a02b43d95f0dc7bd4692616d21aed3ba61e9d8ad195fcf",
+  "scope": "Ordinary Chrome compatibility renderer, isolated loopback File gateway, real packets and installed map regions. Ordinary no-blocker route.",
+  "actualRenderer": "compatibility",
+  "start": {
+    "x": 328,
+    "y": 264
+  },
+  "goal": {
+    "x": 328,
+    "y": 218
+  },
+  "click": {
+    "x": 1090,
+    "y": 126,
+    "localX": 61,
+    "localY": 8,
+    "hit": "IMG",
+    "distance": 0.748562360491178,
+    "projectedTile": {
+      "x": 328,
+      "y": 218
+    },
+    "crop": {
+      "left": 432.937,
+      "top": 210,
+      "width": 120,
+      "height": 108
+    },
+    "actualRect": {
+      "left": 1029,
+      "top": 118,
+      "width": 120,
+      "height": 108
+    },
+    "raster": {
+      "src": "/original-ui/MMap/101.png",
+      "width": 1052,
+      "height": 700
+    },
+    "at": 1794334662490
+  },
+  "motion": {
+    "commands": [
+      {
+        "type": "walk",
+        "direction": "upright",
+        "seq": 9,
+        "at": 1794334666603
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 11,
+        "at": 1794334667205
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 13,
+        "at": 1794334667805
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 15,
+        "at": 1794334668405
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 17,
+        "at": 1794334669005
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 19,
+        "at": 1794334669605
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 21,
+        "at": 1794334670205
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 23,
+        "at": 1794334670805
+      },
+      {
+        "type": "run",
+        "direction": "upright",
+        "seq": 25,
+        "at": 1794334671405
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 27,
+        "at": 1794334672005
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 29,
+        "at": 1794334672605
+      },
+      {
+        "type": "walk",
+        "direction": "upleft",
+        "seq": 31,
+        "at": 1794334673205
+      },
+      {
+        "type": "run",
+        "direction": "up",
+        "seq": 33,
+        "at": 1794334673805
+      },
+      {
+        "type": "run",
+        "direction": "up",
+        "seq": 35,
+        "at": 1794334674405
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 37,
+        "at": 1794334675005
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 39,
+        "at": 1794334675606
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 41,
+        "at": 1794334676205
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 43,
+        "at": 1794334676806
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 45,
+        "at": 1794334677406
+      },
+      {
+        "type": "run",
+        "direction": "upleft",
+        "seq": 47,
+        "at": 1794334678006
+      },
+      {
+        "type": "run",
+        "direction": "up",
+        "seq": 49,
+        "at": 1794334678606
+      },
+      {
+        "type": "run",
+        "direction": "up",
+        "seq": 51,
+        "at": 1794334679206
+      },
+      {
+        "type": "run",
+        "direction": "up",
+        "seq": 53,
+        "at": 1794334679806
+      },
+      {
+        "type": "run",
+        "direction": "up",
+        "seq": 55,
+        "at": 1794334680406
+      }
+    ],
+    "positions": [
+      {
+        "at": 1794334666611,
+        "seq": 10,
+        "x": 329,
+        "y": 263,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334667207,
+        "seq": 12,
+        "x": 331,
+        "y": 261,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334667805,
+        "seq": 14,
+        "x": 333,
+        "y": 259,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334668406,
+        "seq": 16,
+        "x": 335,
+        "y": 257,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334669007,
+        "seq": 18,
+        "x": 337,
+        "y": 255,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334669607,
+        "seq": 20,
+        "x": 339,
+        "y": 253,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334670207,
+        "seq": 22,
+        "x": 341,
+        "y": 251,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334670817,
+        "seq": 24,
+        "x": 343,
+        "y": 249,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334671428,
+        "seq": 26,
+        "x": 345,
+        "y": 247,
+        "direction": "UpRight"
+      },
+      {
+        "at": 1794334672033,
+        "seq": 28,
+        "x": 343,
+        "y": 245,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334672631,
+        "seq": 30,
+        "x": 341,
+        "y": 243,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334673235,
+        "seq": 32,
+        "x": 340,
+        "y": 242,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334673839,
+        "seq": 34,
+        "x": 340,
+        "y": 240,
+        "direction": "Up"
+      },
+      {
+        "at": 1794334674443,
+        "seq": 36,
+        "x": 340,
+        "y": 238,
+        "direction": "Up"
+      },
+      {
+        "at": 1794334675048,
+        "seq": 38,
+        "x": 338,
+        "y": 236,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334675652,
+        "seq": 40,
+        "x": 336,
+        "y": 234,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334676259,
+        "seq": 42,
+        "x": 334,
+        "y": 232,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334676861,
+        "seq": 44,
+        "x": 332,
+        "y": 230,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334677547,
+        "seq": 46,
+        "x": 330,
+        "y": 228,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334678085,
+        "seq": 48,
+        "x": 328,
+        "y": 226,
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1794334678690,
+        "seq": 50,
+        "x": 328,
+        "y": 224,
+        "direction": "Up"
+      },
+      {
+        "at": 1794334679294,
+        "seq": 52,
+        "x": 328,
+        "y": 222,
+        "direction": "Up"
+      },
+      {
+        "at": 1794334679962,
+        "seq": 54,
+        "x": 328,
+        "y": 220,
+        "direction": "Up"
+      },
+      {
+        "at": 1794334680518,
+        "seq": 56,
+        "x": 328,
+        "y": 218,
+        "direction": "Up"
+      }
+    ],
+    "unfoldedTileCount": 46,
+    "allMatchOffline": true,
+    "repeated": [],
+    "discontinuities": []
+  },
+  "timing": {
+    "firstAuthoritativeMovementAfterClickMs": 4121,
+    "lastAuthoritativeMovementAfterClickMs": 18028,
+    "collisionRequests": 9
+  },
+  "regions": [
+    {
+      "at": 1794334662565,
+      "camera": {
+        "x": 328,
+        "y": 264
+      },
+      "regionBounds": {
+        "minX": 276,
+        "maxX": 380,
+        "minY": 223,
+        "maxY": 324
+      },
+      "playBounds": {
+        "minX": 304,
+        "maxX": 352,
+        "minY": 245,
+        "maxY": 281
+      }
+    },
+    {
+      "at": 1794334670028,
+      "camera": {
+        "x": 339,
+        "y": 253
+      },
+      "regionBounds": {
+        "minX": 292,
+        "maxX": 396,
+        "minY": 206,
+        "maxY": 307
+      },
+      "playBounds": {
+        "minX": 320,
+        "maxX": 368,
+        "minY": 228,
+        "maxY": 264
+      }
+    },
+    {
+      "at": 1794334675512,
+      "camera": {
+        "x": 338,
+        "y": 236
+      },
+      "regionBounds": {
+        "minX": 292,
+        "maxX": 396,
+        "minY": 189,
+        "maxY": 290
+      },
+      "playBounds": {
+        "minX": 320,
+        "maxX": 368,
+        "minY": 211,
+        "maxY": 247
+      }
+    },
+    {
+      "at": 1794334680306,
+      "camera": {
+        "x": 328,
+        "y": 220
+      },
+      "regionBounds": {
+        "minX": 276,
+        "maxX": 380,
+        "minY": 172,
+        "maxY": 273
+      },
+      "playBounds": {
+        "minX": 304,
+        "maxX": 352,
+        "minY": 194,
+        "maxY": 230
+      }
+    }
+  ],
+  "crossing": {
+    "position": {
+      "x": 328,
+      "y": 222
+    },
+    "camera": {
+      "x": 328,
+      "y": 222
+    },
+    "originalNorthBoundary": 223,
+    "newNorthBoundary": 189,
+    "sameFloor": {
+      "before": {
+        "key": "sprite-4:326:222:0",
+        "x": 326,
+        "y": 222,
+        "top": 74,
+        "left": 134,
+        "camera": {
+          "x": 334,
+          "y": 232
+        },
+        "at": 1794334676290
+      },
+      "after": {
+        "key": "sprite-4:326:222:0",
+        "x": 326,
+        "y": 222,
+        "top": 394,
+        "left": 502,
+        "camera": {
+          "x": 328,
+          "y": 222
+        },
+        "at": 1794334679330
+      }
+    }
+  },
+  "logoutSavedPosition": {
+    "x": 328,
+    "y": 218
+  },
+  "reloginPosition": {
+    "x": 328,
+    "y": 218
+  },
+  "finalLogoutSavedPosition": {
+    "x": 328,
+    "y": 218
+  },
+  "originalFixtureUnchanged": true,
+  "ownedProcessesClosed": true,
+  "screenshot": {
+    "path": "minimap-long-route-destination.png",
+    "sha256": "7f51b2d08c9de388fb265e102838c8dccb79076ea68676c9e013c0b529df426b"
+  }
+}

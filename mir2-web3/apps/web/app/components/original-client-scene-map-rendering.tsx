@@ -3,6 +3,7 @@
 import { memo, type SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { CRYSTAL_MAP_DEPTH_GAIN, crystalMapDepth } from "../../lib/crystal-world-depth";
 import blendFramesManifest from "../../public/generated/original-map-blend/blend-frames.json";
 import {
   type MapAtlasIndex,
@@ -10,6 +11,7 @@ import {
   mapAtlasRectKeyForPath,
 } from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
+import type { R16EntrySpriteImages } from "../../lib/r16-entry-scene";
 import {
   alphaKeyMapObjectPixels,
   keyMapObjectImageOffThread,
@@ -28,7 +30,6 @@ import {
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
   DEFAULT_VIEWPORT_LAYOUT,
-  viewportDepthForCell,
   viewportFloorDepthForCell,
   type SceneBackdropTile,
   type ViewportMapSprite,
@@ -47,11 +48,18 @@ const FLOOR_LAYER_ORDERS: Record<OriginalMapSpriteKind, number> = {
   front: 2,
   tileAnimation: 3,
 };
+const MAP_LAYER_ORDERS: Record<OriginalMapSpriteKind, number> = {
+  back: -2,
+  middle: 0,
+  front: 1,
+  tileAnimation: -0.5,
+};
 
 function GameSceneBackdropInner({
   world,
   player,
   floorSprites,
+  packedFloor,
   cameraOffset,
   viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
   imperativeCamera = false,
@@ -60,6 +68,7 @@ function GameSceneBackdropInner({
   world: DisplayWorld;
   player: DisplayEntity | null;
   floorSprites: ViewportMapSprite[];
+  packedFloor: R16EntrySpriteImages | null;
   cameraOffset: ViewportOffset;
   viewportLayout?: ViewportLayout;
   imperativeCamera?: boolean;
@@ -96,7 +105,8 @@ function GameSceneBackdropInner({
           className="scene-backdrop-sprite"
           data-map-sprite-key={sprite.key}
           data-mir2-original-src={sprite.path}
-          src={sprite.path}
+          data-mir2-packed-floor={packedFloor?.[sprite.path] ? "true" : undefined}
+          src={packedFloor?.[sprite.path] ?? sprite.path}
           crossOrigin="anonymous"
           alt=""
           draggable={false}
@@ -126,6 +136,10 @@ export const GameSceneBackdrop = memo(GameSceneBackdropInner);
 // (rebuilt only on movement) and "animated" on the frame index (cheap — only multi-frame
 // sprites do work; single-frame sprites are skipped early). "all" preserves old behavior.
 export type ViewportSpriteAnimationFilter = "all" | "static" | "animated";
+type ViewportSpritePacks = {
+  floor: R16EntrySpriteImages | null;
+  objects: R16EntrySpriteImages | null;
+};
 
 export function buildViewportMapSprites(
   world: DisplayWorld,
@@ -134,6 +148,7 @@ export function buildViewportMapSprites(
   animationFilter: ViewportSpriteAnimationFilter = "all",
   rangeExpansion = 0,
   viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
+  packs?: ViewportSpritePacks,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
@@ -170,6 +185,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packs,
     );
     appendViewportMapSprite(
       floor,
@@ -183,6 +199,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packs,
     );
     appendViewportMapSprite(
       floor,
@@ -196,6 +213,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packs,
     );
     appendViewportMapSprite(
       floor,
@@ -209,6 +227,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packs,
     );
   }
 
@@ -254,7 +273,7 @@ export function buildMapTileDrawList(
       top: sprite.top + cameraOffset.y,
       width: sprite.width,
       height: sprite.height,
-      z: sprite.zIndex,
+      z: sprite.zIndex / CRYSTAL_MAP_DEPTH_GAIN,
     });
   };
   for (const sprite of mapSprites.floor) add(sprite, uncoveredFloor);
@@ -326,7 +345,7 @@ export function buildStandaloneMapTiles(
       top: sprite.top + cameraOffset.y,
       width: sprite.width,
       height: sprite.height,
-      z: sprite.zIndex,
+      z: sprite.zIndex / CRYSTAL_MAP_DEPTH_GAIN,
       additive: additive || undefined,
     });
     imageKeyBySpriteKey.set(sprite.key, imageKey);
@@ -401,6 +420,7 @@ function appendViewportMapSprite(
   inObjectBounds: boolean,
   animationFilter: ViewportSpriteAnimationFilter = "all",
   viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
+  packs?: ViewportSpritePacks,
 ) {
   if (!spriteId) {
     return;
@@ -440,7 +460,10 @@ function appendViewportMapSprite(
   if (!frame) {
     return;
   }
-  if (staticSceneAssetRecentlyFailed(frame.path)) {
+  const packedImage = sprite.drawMode === "floor"
+    ? packs?.floor?.[frame.path]
+    : packs?.objects?.[mapSpriteRenderPath(frame.path)];
+  if (!packedImage && staticSceneAssetRecentlyFailed(frame.path)) {
     return;
   }
 
@@ -485,7 +508,7 @@ function appendViewportMapSprite(
             FLOOR_LAYER_ORDERS[sprite.kind],
             viewportLayout,
           )
-        : viewportDepthForCell(cell.x, cell.y, player, 1),
+        : crystalMapDepth(cell.x, cell.y, player, MAP_LAYER_ORDERS[sprite.kind]),
   });
 }
 
@@ -697,6 +720,12 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   }
 
   image.dataset.mir2OriginalSrc = originalSrc;
+  if ((image.dataset.mir2PackedFloor === "true" || image.dataset.mir2PackedAsset === "true") &&
+      image.getAttribute("src")?.startsWith("data:")) {
+    clearSceneAssetRetryState(image);
+    image.src = originalSrc;
+    return;
+  }
   if (staticSceneAssetRecentlyFailed(originalSrc)) {
     image.dataset.mir2LoadFailed = "true";
     image.style.visibility = "hidden";
@@ -748,6 +777,9 @@ export function rescueStalledSceneAssetImages(root: ParentNode = document) {
   const images = Array.from(root.querySelectorAll<HTMLImageElement>("img[data-mir2-original-src]"));
 
   for (const image of images) {
+    // The self residency owns these already-decoded URLs and its finite retry
+    // lifecycle. A stalled target must never redirect or hide the displayed pose.
+    if (image.dataset.mir2ActorResident === "true") continue;
     checked += 1;
     if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
       clearSceneAssetRetryState(image);

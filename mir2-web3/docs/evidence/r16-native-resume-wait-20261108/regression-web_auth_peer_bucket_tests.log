@@ -1,0 +1,9 @@
+
+running 4 tests
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_changing_user_agent_cannot_bypass_peer_registration_limit ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_global_account_limit_survives_peer_and_user_agent_changes ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_login_pair_limit_survives_user_agent_changes ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_same_native_or_unknown_user_agent_does_not_block_other_peers ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1776 filtered out; finished in 0.00s
+

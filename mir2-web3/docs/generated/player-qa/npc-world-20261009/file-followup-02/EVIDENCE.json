@@ -1,0 +1,99 @@
+{
+  "schema": "mir2.npc-file-publication-fence-followup.v1",
+  "createdUtc": "2026-10-09T13:40:20.524703+00:00",
+  "parentSource": "3795cbd13390379f9b9d13cd09651e0bd0c05ba2",
+  "actualFinalTestStem": "23-root-file-npc-fence-after-authority-release",
+  "passed": 8,
+  "failed": 0,
+  "ignored": 0,
+  "names": [
+    "runtime::npc_source_guard_tests::actual_main_flag_mutation_with_live_oven_still_saves_before_ack",
+    "runtime::npc_source_guard_tests::actual_main_oven_failure_restores_exact_source_clock_and_retry_commits_once",
+    "runtime::npc_source_guard_tests::original_main_flag_is_durable_before_ack_on_all_npc_entry_wrappers",
+    "runtime::npc_source_guard_tests::original_main_known_file_rename_failure_retains_image_and_retry_saves_once",
+    "runtime::npc_source_guard_tests::original_main_known_pre_persist_failure_rolls_back_flag_and_suppresses_source_ack",
+    "runtime::npc_source_guard_tests::original_main_unknown_file_publication_suppresses_ack_and_survives_restart_frozen",
+    "runtime::npc_source_guard_tests::repeated_unchanged_main_does_not_consume_account_store_write_fault",
+    "runtime::npc_source_guard_tests::unchanged_main_with_live_oven_does_not_save_elapsed_only_timer_projection"
+  ],
+  "declared13RepositoryPathsStable": true,
+  "completeWorkspaceOrToolchainClosure": false,
+  "productionSourceChanged": false,
+  "onlyTestFixtureAndCiChangedBeforeArchive": true,
+  "originalWorkflowByteContentRetainedExceptAdditionalStep": true,
+  "ciAdditionalTests": [
+    "npc_source_guard_tests",
+    "npc_world_plan::tests"
+  ],
+  "ciExecutionClaimed": false,
+  "serverSwitched": false,
+  "fullGoalComplete": false,
+  "historicalFailure": "22: 6 passed/2 failed; Windows mandatory writer lock correctly denies a new read handle",
+  "fixtureCorrection": "Read live marker length; exact marker bytes after all authority holders drop; OS locking unchanged",
+  "restartScope": "Release all File authority holders and rebind, not independent process crash or power-loss acceptance",
+  "fileVisibilityIsNotConfirmedDurability": true,
+  "unknownFenceNeverCleared": true,
+  "reconciliationLimitation": "Existing offline tool accepts exact PENDING only and still rejects PENDING+FROZEN; no automatic reconciliation or thaw is claimed",
+  "archive": {
+    "file": "original-evidence.zip",
+    "bytes": 23735,
+    "sha256": "cd9945c63ab8308f3415fb60ffb06b126e5dfa831b0a9ebe98b057f3cafd233a",
+    "entries": [
+      {
+        "path": "actual/22-root-file-npc-publication-fence-before.json",
+        "bytes": 3410,
+        "sha256": "f6b7a889f63c6271c54fb2aa246c699419663b293f5012e13c11af7f5b5061fe"
+      },
+      {
+        "path": "actual/22-root-file-npc-publication-fence-after.json",
+        "bytes": 3409,
+        "sha256": "969501b3f6bf5a202e3c267d891e0a56c3d841bfb1251e544f981ffe8e6e6258"
+      },
+      {
+        "path": "actual/22-root-file-npc-publication-fence-result.json",
+        "bytes": 221,
+        "sha256": "8300950e8dd516a27e5688ddea6a2e1ccff5a73bc43c3724c64ffc19f7e270cb"
+      },
+      {
+        "path": "actual/22-root-file-npc-publication-fence.log",
+        "bytes": 43459,
+        "sha256": "e2a5e11af869ceb1070050a5131d581d23167efd61a39ca28d9f080223968bfd"
+      },
+      {
+        "path": "actual/23-root-file-npc-fence-after-authority-release-before.json",
+        "bytes": 3410,
+        "sha256": "0003e96238ba2045c55fbfdb6b81136b7d7d78e9db073310bd12d73f0c9ae987"
+      },
+      {
+        "path": "actual/23-root-file-npc-fence-after-authority-release-after.json",
+        "bytes": 3409,
+        "sha256": "6a02714e9d1f98daab2b658cc7996d387eb9738cded72a3171c305af230fe5b0"
+      },
+      {
+        "path": "actual/23-root-file-npc-fence-after-authority-release-result.json",
+        "bytes": 231,
+        "sha256": "08c4d865d36445ff474e535891bc2f482ad6832148c300d4c869cfbe36e4c70f"
+      },
+      {
+        "path": "actual/23-root-file-npc-fence-after-authority-release.log",
+        "bytes": 42045,
+        "sha256": "de589033046f9f2318d632e523de20a431017e0c3614c07db74d64c6cd23f9d6"
+      },
+      {
+        "path": "current-source/npc_source_guard_tests.rs",
+        "bytes": 17943,
+        "sha256": "d2267c243903e4bb603648fe29d2bb35ed9472673aa207f4a73767e82f807a09"
+      },
+      {
+        "path": "current-ci/gateway-release.yml",
+        "bytes": 8788,
+        "sha256": "f1c54b0aed9d24f737fd87afdca4f8f2d269b717b7db97950cd3c33d8b8c3d85"
+      },
+      {
+        "path": "previous-source-git/PUBLISHED-VERIFIED.json",
+        "bytes": 617,
+        "sha256": "3e15504ba4856c13c6c85a311caadef1975eb49e6dbbebb7ad4d4b7226845767"
+      }
+    ]
+  }
+}

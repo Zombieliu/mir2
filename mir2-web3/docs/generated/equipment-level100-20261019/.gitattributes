@@ -1,0 +1,3 @@
+# Preserve original audit bytes referenced by SHA-256 manifests.
+** -text
+.gitattributes text eol=lf

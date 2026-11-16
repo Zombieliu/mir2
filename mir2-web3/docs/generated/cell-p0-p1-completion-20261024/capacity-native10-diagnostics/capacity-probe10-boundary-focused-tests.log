@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: capacity policy has finite ceilings and never quietly relaxes fixed gates
+ok 1 - capacity policy has finite ceilings and never quietly relaxes fixed gates
+  ---
+  duration_ms: 1.4502
+  type: 'test'
+  ...
+# Subtest: ten ordinary native probe actors retain every fixed gate and cannot qualify for formal acceptance
+ok 2 - ten ordinary native probe actors retain every fixed gate and cannot qualify for formal acceptance
+  ---
+  duration_ms: 0.6378
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 85.1396

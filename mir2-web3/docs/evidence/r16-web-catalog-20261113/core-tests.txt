@@ -1,0 +1,340 @@
+TAP version 13
+# Subtest: clean source/package copy supports both prebuilt switches without Rust
+ok 1 - clean source/package copy supports both prebuilt switches without Rust
+  ---
+  duration_ms: 177.6494
+  type: 'test'
+  ...
+# Subtest: stale shared source cannot reuse a prebuilt package
+ok 2 - stale shared source cannot reuse a prebuilt package
+  ---
+  duration_ms: 80.4211
+  type: 'test'
+  ...
+# Subtest: wire fingerprint changes when apps/game-client/client-wire/Cargo.toml changes
+ok 3 - wire fingerprint changes when apps/game-client/client-wire/Cargo.toml changes
+  ---
+  duration_ms: 56.9894
+  type: 'test'
+  ...
+# Subtest: wire fingerprint changes when apps/game-client/client-wire/src/lib.rs changes
+ok 4 - wire fingerprint changes when apps/game-client/client-wire/src/lib.rs changes
+  ---
+  duration_ms: 56.6546
+  type: 'test'
+  ...
+# Subtest: corrupted WASM is rejected before publication
+ok 5 - corrupted WASM is rejected before publication
+  ---
+  duration_ms: 85.6136
+  type: 'test'
+  ...
+# Subtest: artifact hashes cannot bless bytes under the wrong immutable URL
+ok 6 - artifact hashes cannot bless bytes under the wrong immutable URL
+  ---
+  duration_ms: 86.4292
+  type: 'test'
+  ...
+# Subtest: new builder requires Presentation even though the legacy release reader supports old Core
+ok 7 - new builder requires Presentation even though the legacy release reader supports old Core
+  ---
+  duration_ms: 73.5325
+  type: 'test'
+  ...
+# Subtest: Presentation source fingerprint cannot reuse a stale prebuilt sibling
+ok 8 - Presentation source fingerprint cannot reuse a stale prebuilt sibling
+  ---
+  duration_ms: 71.8912
+  type: 'test'
+  ...
+# Subtest: Presentation byte drift is rejected independently of an intact Core
+ok 9 - Presentation byte drift is rejected independently of an intact Core
+  ---
+  duration_ms: 84.3049
+  type: 'test'
+  ...
+# Subtest: Presentation hashes cannot bless bytes under an incorrect immutable URL
+ok 10 - Presentation hashes cannot bless bytes under an incorrect immutable URL
+  ---
+  duration_ms: 100.8596
+  type: 'test'
+  ...
+# Subtest: builder rejects undeclared Presentation metadata and exact per-package byte boundaries
+ok 11 - builder rejects undeclared Presentation metadata and exact per-package byte boundaries
+  ---
+  duration_ms: 172.7117
+  type: 'test'
+  ...
+# Subtest: NPC policy fingerprint changes when apps/game-client/platform-web/Cargo.toml changes
+ok 12 - NPC policy fingerprint changes when apps/game-client/platform-web/Cargo.toml changes
+  ---
+  duration_ms: 56.8892
+  type: 'test'
+  ...
+# Subtest: NPC policy fingerprint changes when apps/game-client/platform-web/src/strict_json.rs changes
+ok 13 - NPC policy fingerprint changes when apps/game-client/platform-web/src/strict_json.rs changes
+  ---
+  duration_ms: 54.7067
+  type: 'test'
+  ...
+# Subtest: new builder rejects a legacy dual manifest without NPC Purchase before prebuilt acceptance
+ok 14 - new builder rejects a legacy dual manifest without NPC Purchase before prebuilt acceptance
+  ---
+  duration_ms: 69.5004
+  type: 'test'
+  ...
+# Subtest: new builder requires the independent Catalog Transport policy and checks its source bytes
+ok 15 - new builder requires the independent Catalog Transport policy and checks its source bytes
+  ---
+  duration_ms: 114.3042
+  type: 'test'
+  ...
+# Subtest: Catalog Transport remains a distinct immutable package under the original byte budget
+ok 16 - Catalog Transport remains a distinct immutable package under the original byte budget
+  ---
+  duration_ms: 171.6775
+  type: 'test'
+  ...
+# Subtest: Core ABI1 manifest rejects extra filenames, traversal, invalid identities and byte budgets
+ok 17 - Core ABI1 manifest rejects extra filenames, traversal, invalid identities and byte budgets
+  ---
+  duration_ms: 1.1882
+  type: 'test'
+  ...
+# Subtest: compiled Core identity rejects missing, malformed and stale Next closure independently of Bevy
+ok 18 - compiled Core identity rejects missing, malformed and stale Next closure independently of Bevy
+  ---
+  duration_ms: 0.8789
+  type: 'test'
+  ...
+# Subtest: declared Core reads verify both leaf bytes and bundle hash without touching historical files
+ok 19 - declared Core reads verify both leaf bytes and bundle hash without touching historical files
+  ---
+  duration_ms: 10.6143
+  type: 'test'
+  ...
+# Subtest: Core reader rejects byte drift and separately rejects a false concat version
+ok 20 - Core reader rejects byte drift and separately rejects a false concat version
+  ---
+  duration_ms: 5.7547
+  type: 'test'
+  ...
+# Subtest: standalone and source public copying retain only current two Core leaves with exact post-copy hashes
+ok 21 - standalone and source public copying retain only current two Core leaves with exact post-copy hashes
+  ---
+  duration_ms: 19.4319
+  type: 'test'
+  ...
+# Subtest: Core publication after Next rejects stale compiled identity before selecting its new URL
+ok 22 - Core publication after Next rejects stale compiled identity before selecting its new URL
+  ---
+  duration_ms: 5.615
+  type: 'test'
+  ...
+# Subtest: selected Core symlinks are rejected without following external file content
+ok 23 - selected Core symlinks are rejected without following external file content
+  ---
+  duration_ms: 4.2252
+  type: 'test'
+  ...
+# Subtest: dual Core manifest validates Presentation independently and preserves legacy four-key compatibility
+ok 24 - dual Core manifest validates Presentation independently and preserves legacy four-key compatibility
+  ---
+  duration_ms: 0.6638
+  type: 'test'
+  ...
+# Subtest: compiled closure includes the entire Presentation identity and is independent of key order
+ok 25 - compiled closure includes the entire Presentation identity and is independent of key order
+  ---
+  duration_ms: 0.5625
+  type: 'test'
+  ...
+# Subtest: dual reader returns four exact leaves and rejects missing active bundles or undeclared package content
+ok 26 - dual reader returns four exact leaves and rejects missing active bundles or undeclared package content
+  ---
+  duration_ms: 10.1444
+  type: 'test'
+  ...
+# Subtest: dual reader rejects Presentation byte drift and a separately falsified concatenated identity
+ok 27 - dual reader rejects Presentation byte drift and a separately falsified concatenated identity
+  ---
+  duration_ms: 7.2199
+  type: 'test'
+  ...
+# Subtest: Thin standalone and source merge retain only both active Core packages with four exact leaves
+ok 28 - Thin standalone and source merge retain only both active Core packages with four exact leaves
+  ---
+  duration_ms: 19.2359
+  type: 'test'
+  ...
+# Subtest: selected Presentation symlinks cannot substitute outside bytes
+ok 29 - selected Presentation symlinks cannot substitute outside bytes
+  ---
+  duration_ms: 5.5694
+  type: 'test'
+  ...
+# Subtest: NPC purchase descriptor keeps legacy manifests and requires exact ABI source versions filenames and byte budgets
+ok 30 - NPC purchase descriptor keeps legacy manifests and requires exact ABI source versions filenames and byte budgets
+  ---
+  duration_ms: 0.8902
+  type: 'test'
+  ...
+# Subtest: compiled closure pins NPC purchase descriptor and rejects addition removal or independent leaf identity drift
+ok 31 - compiled closure pins NPC purchase descriptor and rejects addition removal or independent leaf identity drift
+  ---
+  duration_ms: 0.4587
+  type: 'test'
+  ...
+# Subtest: triple reader returns three active version directories and six exact leaves with strict NPC closure
+ok 32 - triple reader returns three active version directories and six exact leaves with strict NPC closure
+  ---
+  duration_ms: 12.4781
+  type: 'test'
+  ...
+# Subtest: NPC reader rejects same-size leaf hash drift and independently false concatenated version
+ok 33 - NPC reader rejects same-size leaf hash drift and independently false concatenated version
+  ---
+  duration_ms: 11.3588
+  type: 'test'
+  ...
+# Subtest: NPC file budget accepts exact JS maximum and WASM maximum minus one using ordinary file fixtures
+ok 34 - NPC file budget accepts exact JS maximum and WASM maximum minus one using ordinary file fixtures
+  ---
+  duration_ms: 9.1176
+  type: 'test'
+  ...
+# Subtest: Thin standalone and source merge retain all three active packages with six exact post-copy leaves
+ok 35 - Thin standalone and source merge retain all three active packages with six exact post-copy leaves
+  ---
+  duration_ms: 25.879
+  type: 'test'
+  ...
+# Subtest: selected NPC purchase symlinks cannot substitute outside fixture bytes
+ok 36 - selected NPC purchase symlinks cannot substitute outside fixture bytes
+  ---
+  duration_ms: 5.5826
+  type: 'test'
+  ...
+# Subtest: actual WASM ABI and small renderer-independent payload
+ok 37 - actual WASM ABI and small renderer-independent payload
+  ---
+  duration_ms: 0.5409
+  type: 'test'
+  ...
+# Subtest: actual Ranking Inspect ABI is provided by Core with the same guarded admission
+ok 38 - actual Ranking Inspect ABI is provided by Core with the same guarded admission
+  ---
+  duration_ms: 2.734
+  type: 'test'
+  ...
+# Subtest: packaged Presentation plays an ordered reel and recast from one packet projection
+ok 39 - packaged Presentation plays an ordered reel and recast from one packet projection
+  ---
+  duration_ms: 6.6732
+  type: 'test'
+  ...
+# Subtest: actual V2 N2 endpoints allow diary accept and authoritative ready finish
+ok 40 - actual V2 N2 endpoints allow diary accept and authoritative ready finish
+  ---
+  duration_ms: 1.0176
+  type: 'test'
+  ...
+# Subtest: missing endpoints, wrong profile and malformed metadata never invent diary actions
+ok 41 - missing endpoints, wrong profile and malformed metadata never invent diary actions
+  ---
+  duration_ms: 0.5549
+  type: 'test'
+  ...
+# Subtest: ordinary NPC uses current object id and offer, independently of template index
+ok 42 - ordinary NPC uses current object id and offer, independently of template index
+  ---
+  duration_ms: 0.1872
+  type: 'test'
+  ...
+# Subtest: pending and sparse reward selection guards remain active with an open NPC
+ok 43 - pending and sparse reward selection guards remain active with an open NPC
+  ---
+  duration_ms: 0.195
+  type: 'test'
+  ...
+# Subtest: actual read-only Cash Preview layer and turn exports move together to Core
+ok 44 - actual read-only Cash Preview layer and turn exports move together to Core
+  ---
+  duration_ms: 1.955
+  type: 'test'
+  ...
+# Subtest: actual Presentation v2 observes queued body blockers without exposing them to the v1 reader
+ok 45 - actual Presentation v2 observes queued body blockers without exposing them to the v1 reader
+  ---
+  duration_ms: 2.417
+  type: 'test'
+  ...
+# Subtest: actual isolated Rust WASM preserves original catalog text under unchanged package budgets
+ok 46 - actual isolated Rust WASM preserves original catalog text under unchanged package budgets
+  ---
+  duration_ms: 7.5372
+  type: 'test'
+  ...
+# Subtest: actual Rust codec rejects malformed gzip and a noncatalog second envelope before returning any text
+ok 47 - actual Rust codec rejects malformed gzip and a noncatalog second envelope before returning any text
+  ---
+  duration_ms: 3.4623
+  type: 'test'
+  ...
+# Subtest: wire limit is checked before the wasm-bindgen input copy
+ok 48 - wire limit is checked before the wasm-bindgen input copy
+  ---
+  duration_ms: 0.2392
+  type: 'test'
+  ...
+# Subtest: mixed Text and real binary catalogs remain synchronous and in physical-frame order
+ok 49 - mixed Text and real binary catalogs remain synchronous and in physical-frame order
+  ---
+  duration_ms: 0.3664
+  type: 'test'
+  ...
+# Subtest: invalid or unnegotiated binary poisons only that physical connection and never partially applies a batch
+ok 50 - invalid or unnegotiated binary poisons only that physical connection and never partially applies a batch
+  ---
+  duration_ms: 0.4817
+  type: 'test'
+  ...
+# Subtest: retired connection and mid-batch replacement cannot deliver stale catalog entries
+ok 51 - retired connection and mid-batch replacement cannot deliver stale catalog entries
+  ---
+  duration_ms: 0.3995
+  type: 'test'
+  ...
+# Subtest: actual Page capability replacement retains catalog with receipts and attack declarations
+ok 52 - actual Page capability replacement retains catalog with receipts and attack declarations
+  ---
+  duration_ms: 23.3083
+  type: 'test'
+  ...
+# Subtest: actual Page does not negotiate after failed send or carry a decoder onto a replacement socket
+ok 53 - actual Page does not negotiate after failed send or carry a decoder onto a replacement socket
+  ---
+  duration_ms: 19.6131
+  type: 'test'
+  ...
+# Subtest: actual Page closes invalid binary, fences later Text and preserves the ordinary hero/raw handler
+ok 54 - actual Page closes invalid binary, fences later Text and preserves the ordinary hero/raw handler
+  ---
+  duration_ms: 33.1661
+  type: 'test'
+  ...
+# Subtest: catalog descriptor shares source identity and original independent policy budget
+ok 55 - catalog descriptor shares source identity and original independent policy budget
+  ---
+  duration_ms: 0.6403
+  type: 'test'
+  ...
+1..55
+# tests 55
+# suites 0
+# pass 55
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1571.1293

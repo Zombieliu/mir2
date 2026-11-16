@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "purpose": "The original copied-baseline receipt is preserved as a preparation snapshot, not an assertion that all recorded targets still match current files. Exactly two JSON targets gained the same185-byte driver-freeze role note before the prepared-v1 inventory was taken.",
+  "historicalReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\copied-baseline-inputs.json",
+    "bytes": 29710,
+    "sha256": "3008b4fb3b133d2226ac3385742e5911ffd26b620c25fa95ff160c977cf56ad5"
+  },
+  "changes": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\candidate-release-binding.json",
+      "recordedHistoricalSnapshot": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\candidate-release-binding.json",
+        "bytes": 920,
+        "sha256": "023875f05c5d4fe94ba777b562b016bfae79eb97af3c84f50ad88d8246cf1cb5"
+      },
+      "rawPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\metadata-snapshot-preimages-v1\\candidate-release-binding.json.before-role.txt",
+        "bytes": 920,
+        "sha256": "023875f05c5d4fe94ba777b562b016bfae79eb97af3c84f50ad88d8246cf1cb5"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\candidate-release-binding.json",
+        "bytes": 1105,
+        "sha256": "f6efb9908fe31fffca62feb8c6d8b75ebbe765839df9fbe48f2d6ffb73c4c28b"
+      },
+      "onlyAddedField": "driverFreezeRole",
+      "addedValue": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding.",
+      "exactRawInverse": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\current-driver-binding.json",
+      "recordedHistoricalSnapshot": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\current-driver-binding.json",
+        "bytes": 2438,
+        "sha256": "5e6a020a5b4fd9e71be39baa7b208aed1ca01c389614eead64bfc4ffb3006cc9"
+      },
+      "rawPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\metadata-snapshot-preimages-v1\\current-driver-binding.json.before-role.txt",
+        "bytes": 2438,
+        "sha256": "5e6a020a5b4fd9e71be39baa7b208aed1ca01c389614eead64bfc4ffb3006cc9"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\current-driver-binding.json",
+        "bytes": 2623,
+        "sha256": "835298a1a2b36824b7a9df0749986e4524873c73352da34e8eaa39d2038a8f49"
+      },
+      "onlyAddedField": "driverFreezeRole",
+      "addedValue": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding.",
+      "exactRawInverse": true
+    }
+  ],
+  "allOtherRecordedTargetsStillRawMatch": true,
+  "gameplayOrPolicyChanged": false
+}

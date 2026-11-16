@@ -1,0 +1,674 @@
+{
+  "schemaVersion": 1,
+  "contractId": "mir2-capacity-3000-5000-draft-20261030-v1",
+  "createdAtUtc": "2026-10-29T20:11:19.404371+00:00",
+  "status": "draft_not_frozen_not_executed",
+  "sourceRoot": "<repository>/mir2-web3",
+  "sourceGitHeadObserved": "bb690060d599d6d224f0ca708af2e75a1d4b533c",
+  "authority": {
+    "userTargetOnline": 5000,
+    "priorBindingTarget": {
+      "online": 500,
+      "continuouslyFighting": 500
+    },
+    "newTargetDistribution": "pending_user_and_coordinator_freeze",
+    "noImplicit5000AllCombatAcceptance": true,
+    "executionAuthorizedByThisDocument": false
+  },
+  "writeScope": [
+    "benchmark-contract.md",
+    "benchmark-contract.json"
+  ],
+  "newLoadExecuted": false,
+  "sshUsed": false,
+  "repositoryChanged": false,
+  "evidenceBoundary": {
+    "observationsAreHistorical": true,
+    "no5000CapacityClaim": true,
+    "ordinary25Qualified": false,
+    "preseeded25Qualified": false,
+    "historicalAoiRulerIsGameplayBenchmark": false
+  },
+  "historicalObservations": [
+    {
+      "source": "formal25Report",
+      "jsonPointer": "/stages/2",
+      "profile": "ordinary_native_mixed",
+      "actualActors": 25,
+      "measurementSeconds": 300.201,
+      "completed": true,
+      "passed": false,
+      "attackSuccesses": 207,
+      "attackTimeouts": 0,
+      "attackAckP95Ms": 110,
+      "failedCompleteMinuteAttackCounts": [
+        [
+          15,
+          17
+        ],
+        [
+          14,
+          19
+        ]
+      ],
+      "failure": "per_fighter_minimum_18_launched_per_minute_not_met",
+      "uniqueRootCauseProven": false
+    },
+    {
+      "source": "v11Report",
+      "profile": "server_only_preseeded_all_fighter_pvp",
+      "ordinaryEvidence": false,
+      "actualAdmitted": 25,
+      "requestedCeiling": 500,
+      "admissionSeconds": 65.756,
+      "completed300sStages": 0,
+      "wholeRunLaunchedIncludingAdmission": 4434,
+      "wholeRunPositiveIncludingAdmission": 2821,
+      "wholeRunOutcomeTimeouts": 0,
+      "reasonEnded": "operator_budget_drain",
+      "threeFullMinuteWindowsPassed": false,
+      "windowFailedActorCounts": [
+        1,
+        14,
+        5
+      ],
+      "failure": "positive_hp_witness_latency_and_some_window_ack_p95",
+      "uniqueStoreRootCauseProven": false
+    },
+    {
+      "source": "v11Samples",
+      "profile": "whole_run_not_steady_25_only",
+      "driverLagSamples": 268,
+      "driverLagP99MaximumMs": 78.315519,
+      "driverOver250ConsecutiveMax": 0,
+      "gatewayCpuCoresObservedMaximum": 10.035860190649116,
+      "gatewayPrivateBytesMaximum": 1091584000,
+      "hostLogicalProcessors": 32,
+      "hostFreeBytesMinimum": 38645923840,
+      "osHardLimitsEnforced": false
+    }
+  ],
+  "populations": {
+    "connected": "live transport sockets; not authentication or capacity acceptance",
+    "admitted": "unique authenticated accounts with successful StartGame and actual authoritative lifecycle",
+    "active": "declared alive population executing its frozen workload throughout each sample/window",
+    "continuousFighters": "every fighter independently meets every complete evidence window",
+    "hotspot": "separately frozen legal grid layout, map/Cell population, expected AOI edges and measured visibility",
+    "requiredSeries": [
+      "planned",
+      "sockets",
+      "authenticated",
+      "inWorld",
+      "alive",
+      "active",
+      "continuousFighters",
+      "hotspotPlayers",
+      "expectedAoiEdges",
+      "receivedAoiEdges"
+    ]
+  },
+  "profileSeparation": [
+    {
+      "id": "connections_only",
+      "claims": "connection_capacity_only"
+    },
+    {
+      "id": "prepared_synthetic_normal_authenticated_gameplay",
+      "claims": "normal_protocol_gameplay_with_preseeded_economy_not_ordinary_progression"
+    },
+    {
+      "id": "historical_ordinary_p0",
+      "claims": "original_100_mixed_control_only",
+      "stages": [
+        2,
+        10,
+        25,
+        50,
+        100
+      ],
+      "perStageSeconds": 300,
+      "finalSoakSeconds": 7200,
+      "unchanged": true
+    },
+    {
+      "id": "ordinary_500_all_combat",
+      "claims": "binding_500_500_only_after_supply_and_harness_qualification",
+      "stageSeconds": 300,
+      "finalSoakSeconds": 7200,
+      "implementedExecutable": false
+    },
+    {
+      "id": "online_3000_5000",
+      "claims": "pending_exact_distribution_and_activity_freeze",
+      "implementedExecutable": false
+    },
+    {
+      "id": "same_map_hotspot",
+      "claims": "only_measured_frozen_density_and_visibility_graph",
+      "separateAcceptance": true
+    }
+  ],
+  "existingThresholds": {
+    "sourceRefs": [
+      "contract500:52-56",
+      "core:76-83",
+      "pvp:255"
+    ],
+    "actualStageSecondsMinimum": 300,
+    "completeWindowSeconds": 60,
+    "final500AllCombatSoakSecondsMinimum": 7200,
+    "perFighterPerCompleteMinute": {
+      "launchedMinimum": 18,
+      "positiveSharedHpWitnessedMinimum": 12,
+      "nativeCompletionRatioMinimum": 0.95
+    },
+    "movementP95MsMaximum": 750,
+    "chatP95MsMaximum": 1000,
+    "sendLatenessMsMaximum": 250,
+    "actionEvidenceDeadlineMs": 2000,
+    "timeoutRatioExclusiveMaximum": 0.01,
+    "correctionRatioMaximum": 0.05,
+    "notLaunchedRatioMaximum": 0.05,
+    "pvpAdditionalAckP95MsMaximum": 900,
+    "pvpPositiveHpProofP95MsMaximum": 1000,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "perActorCommandsPerSecondMaximum": 3,
+    "memorySlopeMiBPerHourMaximum": 32,
+    "memoryWarmupSeconds": 300,
+    "generatorLagP99MsMaximum": 250,
+    "generatorOverLimitConsecutiveSamplesInvalidates": 3,
+    "noThresholdRelaxation": true
+  },
+  "arithmeticNotMeasuredThroughput": {
+    "500AllCombat": {
+      "launchedPerSecondMinimum": 150,
+      "positivePerSecondMinimum": 100
+    },
+    "3000AllCombatIfChosen": {
+      "launchedPerSecondMinimum": 900,
+      "positivePerSecondMinimum": 600
+    },
+    "5000AllCombatIfChosen": {
+      "launchedPerSecondMinimum": 1500,
+      "positivePerSecondMinimum": 1000
+    },
+    "5000PerActorCommandBudgetAggregateMaximumPerSecond": 15000
+  },
+  "hardPreconditions": [
+    "freeze workload populations/map density/skill mix/supply and source-data-hardware versions",
+    "new bounded admission/profile support for intended count; existing PvP max500 and ordinary target500 blocked",
+    "Linux real process+cgroup+PG+Redis+network monitor; Windows CIM producer cannot run there",
+    "durable finite authentication ledger and legitimate authorized dedicated synthetic admission; no production auth bypass or forged exits",
+    "verified capacity preparation and target/supply evidence; preseeded fixture cannot count as ordinary progression",
+    "bounded disk forecast and new approved space or independent host; preserve old backups",
+    "prod sentinel, independent abort control, quotas and rollback ownership before any shared-host probe",
+    "load generator quota/headroom independent from server; actual event lag measured",
+    "all external paid/chain providers and production identity secrets absent from load clone"
+  ],
+  "admissionConstraint": {
+    "ordinaryAdmissionsPerWindow": 25,
+    "reservedVerificationsPerWindow": 5,
+    "windowSeconds": 901,
+    "idealFirstToLastBatchSecondsFor500": 17119,
+    "idealFirstToLastBatchSecondsFor5000": 179299,
+    "idealHoursFor5000": 49.805277777777775,
+    "includesPreparationAndSoak": false,
+    "existingLoopbackDevelopmentAuthBudget": 600,
+    "existingDevelopmentAuthWindowSeconds": 900,
+    "productionPolicyMayBeChangedByContract": false
+  },
+  "executionPlanProposal": {
+    "currentSharedHostDiagnosticOnly": {
+      "coordinatorAuthorizedStages": [
+        2,
+        10
+      ],
+      "totalWallSecondsMaximum": 600,
+      "scope": "prepared_synthetic_normal_auth_gameplay_not_ordinary_capacity",
+      "cpuLimitVcpuStated": 1,
+      "memoryLimitBytesStated": 536870912,
+      "note": "Coordinator must freeze aggregate component quotas; never multiply this envelope per component. If clone+PG+Redis cannot fit, preflight blocks; do not borrow production resources."
+    },
+    "largeCampaignNeedsSeparateAuthorizationAndResources": true,
+    "fastExploration": {
+      "proposedStages": [
+        2,
+        10,
+        25,
+        50,
+        100,
+        250,
+        500,
+        1000,
+        2000,
+        3000,
+        5000
+      ],
+      "actualSecondsPerStage": 60,
+      "settleSecondsBeforeStage": 15,
+      "totalWallSecondsMaximum": 5400,
+      "onFirstInvalidOrFailedStage": "stop escalation and drain; preserve first-failure trace",
+      "verdictIfPassed": "short_probe_passed_not_qualified",
+      "admissionPreparationWithinWallBudget": true
+    },
+    "qualification": {
+      "selectedPoint": "highest actually green diagnostic point at frozen workload; not an inferred value",
+      "actualSecondsMinimum": 300,
+      "completeMinuteWindowsMinimum": 5,
+      "failure": "do not start soak"
+    },
+    "soak": {
+      "onlyAfterQualification": true,
+      "selectedPointsMaximumPerCampaign": 1,
+      "actualSeconds": 7200,
+      "qualifiesOnlyObservedCountAndWorkload": true,
+      "doesNotReplaceHistoricalP0Or500CombatRequirements": true
+    },
+    "campaignWallSecondsProposedMaximum": 14400,
+    "recoverySeparateFromStableWindow": {
+      "resumeSamples": 5,
+      "saveReadbackSamples": 5,
+      "postResumeSeconds": 60,
+      "oldTicketMustReject": true,
+      "finalAuthoritativeTransformAndEconomyRetained": true
+    },
+    "repeatPolicy": "No repeated identical failure runs. At most one bounded confirmation after a written causal hypothesis and explicit code/profile/instrumentation change; otherwise report blocker. New evidence preserves old failure."
+  },
+  "measurement": {
+    "samplingProposed": {
+      "cgroupProcessResourcesSeconds": 1,
+      "gatewayAndDriverHealthSeconds": 1,
+      "pgRedisCountersSeconds": 5,
+      "clockAndOwnerIdentityAtStartEnd": true
+    },
+    "timing": "Monotonic durations per process. Report real admission/warmup/measured/soak/recovery/drain wall time. No cross-machine timestamp subtraction without clock/error evidence; use causal command IDs and local monotonic intervals.",
+    "perCommandPhases": [
+      "planned",
+      "sent",
+      "authority_applied",
+      "durably_acknowledged",
+      "ack_received",
+      "shared_hp_witness_received",
+      "deadline_or_unknown"
+    ],
+    "cpu": [
+      "cpu.max",
+      "effective cpuset",
+      "cpu.stat throttle counters",
+      "per_core utilization",
+      "process cpu seconds",
+      "scheduler or PSI wait",
+      "steal/frequency",
+      "workers/queue/deadline"
+    ],
+    "memory": [
+      "cgroup memory.current/max/peak/high/events",
+      "RSS/private distinction",
+      "available host bytes",
+      "allocator and snapshot peaks",
+      "slope after 300s warmup",
+      "OOM/kill zero"
+    ],
+    "pg": [
+      "pool_wait and commit latency histograms",
+      "transactions and rollbacks",
+      "locks",
+      "WAL bytes/backlog",
+      "checkpoint and fsync latency",
+      "connections",
+      "DB and WAL disk growth",
+      "durability flags unchanged"
+    ],
+    "redis": [
+      "memory",
+      "fragmentation",
+      "ops",
+      "latency",
+      "evictions",
+      "clients",
+      "network",
+      "test DB/prefix ownership"
+    ],
+    "network": [
+      "actual TLS wire RX/TX",
+      "PPS",
+      "socket queues",
+      "retransmissions",
+      "RTT",
+      "NIC/cloud shaping",
+      "fanout graph",
+      "cross-cell traffic if actually present"
+    ],
+    "storage": [
+      "free bytes",
+      "test subtree growth",
+      "read/write bytes and IOPS",
+      "I/O latency",
+      "journal/WAL/log volume",
+      "rollback reserve"
+    ],
+    "generator": [
+      "cpu quota and use",
+      "RSS",
+      "event_loop_p99",
+      "intended vs launched rate",
+      "per_actor command budget",
+      "socket/fd limits",
+      "TLS cost",
+      "egress and host sharing"
+    ],
+    "noHighCardinalityPrometheusLabelsForSecretsOrActorIds": true,
+    "firstFailureTrace": "bounded redacted causal window with command/target/entity lifecycle, lock/save/encode/broadcast timings; retain gaps and censored >50ms logs honestly"
+  },
+  "sharedHostGuardProposal": {
+    "sourceOfHardwareSnapshot": "coordinator_report_not_new_hardware_measurement_by_this_agent",
+    "hostVcpu": 4,
+    "hostMemoryGiB": 8,
+    "reportedAvailableMemoryApproxGiB": 1.5,
+    "reportedDiskFreeBytes": 649732096,
+    "largeRunAllowedOnPresentSnapshot": false,
+    "newGuardValuesAreProposalsNotExistingAcceptedThresholds": true,
+    "largeRunDiskPreflight": {
+      "minimumFreeBytesProposed": 10737418240,
+      "additionalFormula": "clone + WAL_peak + bounded_evidence_rate*wall + logs + snapshots + rollback_reserve; use maximum of formula and minimum",
+      "reservedFreeBytesProposed": 2147483648
+    },
+    "tinyProbeDiskGuard": {
+      "maxEvidenceBytesProposed": 16777216,
+      "stopFreeBytesBelowProposed": 536870912,
+      "mustIncludeCloneWalAndRuntimeLogForecast": true
+    },
+    "hostFreeMemoryStopBytesProposed": 1073741824,
+    "hostFreeMemoryStopConsecutiveSecondsProposed": 3,
+    "immediateAbort": [
+      "any OOM/kill or economic/save invariant violation",
+      "any unexpected prod error/restart/owned sentinel failure",
+      "quota escape or wrong process/db/keyspace",
+      "monitor stale >5s or cannot verify ownership",
+      "disk reserve breach or unexpected log growth",
+      "test driver invalidation"
+    ],
+    "sustainedAbortProposed": [
+      "prod sentinel p95 exceeds baseline by max(20%,100ms) for 3 consecutive 5s windows",
+      "test cgroup memory >=90% limit for 3 consecutive 1s samples",
+      "CPU throttled-time / wall >10% for 10s while SLO/offered-load fails: record quota-limited, do not escalate"
+    ],
+    "noSentinelOrHardLimitMeansNoSharedHostLoad": true,
+    "zeroImpactCannotBeGuaranteedFromSharedKernelAndDisk": true,
+    "noBackupDeletion": true,
+    "noProductionProcessMutation": true,
+    "drain": "Stop new admission/commands; persist normal disconnect/save where responsive; verify six health counters zero, owned PIDs/listeners gone, durable lease/save recovery clean. Forced test-only termination must be explicit failure/receipt, never claim graceful."
+  },
+  "serverSizingMethod": {
+    "claims": "candidate experiment envelopes only, not CCU guarantees or purchase recommendations",
+    "candidateWorldGatewayEnvelopes": [
+      {
+        "vcpu": 4,
+        "memoryGiB": 8
+      },
+      {
+        "vcpu": 8,
+        "memoryGiB": 16
+      },
+      {
+        "vcpu": 16,
+        "memoryGiB": 32
+      },
+      {
+        "vcpu": 32,
+        "memoryGiB": 64
+      }
+    ],
+    "pgRedisGeneratorResourcesIncludedInAbove": false,
+    "pgRedisAndGeneratorsRequireExplicitAdditionalCaps": true,
+    "cpu": "Measured process CPU-seconds / real seconds under exact CPU model and cgroup quota. Start a candidate with 30% resource headroom; remeasure actual target. More workers do not remove serial locks or prove scaling.",
+    "memory": "Measure base + workload delta + map/entity/inflight/allocator/snapshot peaks + independent PG/Redis + safety reserve. No 25-to-5000 linear certificate.",
+    "network": "Use actual TLS wire rate/PPS and p95/p99 bursts at measured AOI graph, then candidate link with >=30% headroom and remeasure. Encoded payload estimate is not billable wire usage.",
+    "disk": "Size by measured clone/WAL/log/rollback growth and I/O/fsync latency; nominal GB alone is not capacity.",
+    "workerScaling": "Only after real partition scheduler exists: fixed exact workload and hard 1/2/4/8 CPU/worker experiments; report speedup and coordinator/store/encode cost.",
+    "multiHost": "Real same-world cross-host combat/migration and N+1 failure tests required; independent maps or theoretical dual-host1.5x are not evidence.",
+    "capacityResult": "Highest actually qualified observed population at exact profile/resources; lower-bound observation only. If no failed upper stage, upper limit is unknown. No unmeasured 5000 extrapolation."
+  },
+  "requiredResultColumns": [
+    "runId",
+    "sourceAndDataPins",
+    "profile",
+    "resourceCaps",
+    "plannedCount",
+    "connectedMinMax",
+    "admitted",
+    "aliveActiveMin",
+    "continuousFightersMin",
+    "mapCellAndHotspotDensity",
+    "actualWallByPhase",
+    "completeWindows",
+    "offeredLaunchedCompleted",
+    "ackP95P99",
+    "hpWitnessP95P99",
+    "timeoutsRejectedErrors",
+    "driverLagAndThrottle",
+    "perCoreAndTotalCpu",
+    "rssPeakAndSlope",
+    "pgCommitPoolWal",
+    "redisLatencyEvictions",
+    "wireBytesPpsRetransmits",
+    "diskFreeAndEvidenceBytes",
+    "abortReason",
+    "cleanup",
+    "verdict"
+  ],
+  "verdicts": [
+    "not_run",
+    "admission_blocked",
+    "preparation_failed",
+    "workload_invalid",
+    "generator_limited",
+    "monitor_invalid",
+    "resource_aborted",
+    "slo_failed",
+    "short_probe_passed",
+    "qualified_300s",
+    "soak_7200s_passed"
+  ],
+  "regressionTriggers": [
+    "source/protocol/ACK ordering/store durability change",
+    "AOI/map/cell/skill-density or supply change",
+    "CPU model/quota/worker/host/network/storage change",
+    "database schema/PG/Redis durability/config change",
+    "generator implementation or admission policy change"
+  ],
+  "functionalRegressionRequired": [
+    "normal authenticated shared-world interaction",
+    "movement/AOI join-leave and occupancy",
+    "save final Zone transform and resume old-ticket rejection",
+    "economy and unique equipment ownership",
+    "durable recovery and lease isolation",
+    "no QA/admin auth command exposure"
+  ],
+  "pendingBeforeFreeze": [
+    "5000 activity distribution and minimum fighters",
+    "maps/Cells and hotspot visibility definition",
+    "skill/effect mix",
+    "test preparation synthetic vs ordinary claim",
+    "legitimate large admission implementation and budget",
+    "Linux monitor and telemetry alignment",
+    "independent host/disk/quota and abort-owner approval",
+    "new harness support beyond500 with focused guard tests",
+    "permitted total run wall budget"
+  ],
+  "sourceRefs": [
+    {
+      "id": "contract500",
+      "path": "docs/CELL-500-COMBAT-ACCEPTANCE.zh-CN.md",
+      "lines": [
+        5,
+        9,
+        17,
+        23,
+        27,
+        34,
+        46,
+        52,
+        53,
+        54,
+        55,
+        56,
+        59,
+        65,
+        73,
+        75,
+        77,
+        92,
+        111,
+        122,
+        124,
+        130,
+        134,
+        135,
+        136,
+        137,
+        138,
+        140,
+        142,
+        149,
+        156
+      ],
+      "bytes": 22479,
+      "sha256Raw": "bda7b4e794d698c8a29867cbdf1cb27074c5763792e5345de64b1b30d085d5ea",
+      "sha256LfNormalized": "bda7b4e794d698c8a29867cbdf1cb27074c5763792e5345de64b1b30d085d5ea"
+    },
+    {
+      "id": "core",
+      "path": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "lines": [
+        22,
+        55,
+        56,
+        66,
+        76,
+        77,
+        78,
+        79,
+        82,
+        83
+      ],
+      "bytes": 41727,
+      "sha256Raw": "5f4c85124349a484f181c599a79ad469741f9f3c31597c9a5393f39a8dd83439",
+      "sha256LfNormalized": "5f4c85124349a484f181c599a79ad469741f9f3c31597c9a5393f39a8dd83439"
+    },
+    {
+      "id": "ordinaryEntry",
+      "path": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "lines": [
+        2346,
+        2348,
+        2349
+      ],
+      "bytes": 202767,
+      "sha256Raw": "ad4c21ee83ed592d0542f855f2ec89f9f053aa1ce4fea7dbbd6648c6d859578a",
+      "sha256LfNormalized": "ad4c21ee83ed592d0542f855f2ec89f9f053aa1ce4fea7dbbd6648c6d859578a"
+    },
+    {
+      "id": "pvp",
+      "path": "apps/web/scripts/playtest-capacity-pvp-stress.mjs",
+      "lines": [
+        46,
+        47,
+        57,
+        58,
+        59,
+        61,
+        255
+      ],
+      "bytes": 46798,
+      "sha256Raw": "a28701928adec72e401d004ad0bd5590b1a52d51ee1c275bdb03b49558bda3ca",
+      "sha256LfNormalized": "a28701928adec72e401d004ad0bd5590b1a52d51ee1c275bdb03b49558bda3ca"
+    },
+    {
+      "id": "monitor",
+      "path": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "lines": [
+        167,
+        210,
+        211
+      ],
+      "bytes": 21246,
+      "sha256Raw": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "sha256LfNormalized": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "id": "ordinaryPreparation",
+      "path": "apps/web/scripts/playtest-load-smoke.mjs",
+      "lines": [
+        34,
+        133,
+        446
+      ],
+      "bytes": 38588,
+      "sha256Raw": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0",
+      "sha256LfNormalized": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "id": "formal25Readme",
+      "path": "docs/generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v2/README.md",
+      "lines": [
+        3,
+        7
+      ],
+      "bytes": 4934,
+      "sha256Raw": "4075237a411bce922c4eb5144a5387ec4b78c6cefa412b8b4e43524742bed0b4",
+      "sha256LfNormalized": "4075237a411bce922c4eb5144a5387ec4b78c6cefa412b8b4e43524742bed0b4"
+    },
+    {
+      "id": "formal25Report",
+      "path": "docs/generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v2/1793103962697-3d1eda69.report.json",
+      "lines": [],
+      "bytes": 422205,
+      "sha256Raw": "250b514516ad6087444ffd79cf9f8db84c5b658ed7fa83fbed5cc79376d978aa",
+      "sha256LfNormalized": "250b514516ad6087444ffd79cf9f8db84c5b658ed7fa83fbed5cc79376d978aa"
+    },
+    {
+      "id": "v11Readme",
+      "path": "docs/generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/README.md",
+      "lines": [
+        7,
+        17,
+        19
+      ],
+      "bytes": 2639,
+      "sha256Raw": "fdfb5de7fb7b2992cf886376d073fdce8275121e3b0bb8474853b6caedd5f4f8",
+      "sha256LfNormalized": "fdfb5de7fb7b2992cf886376d073fdce8275121e3b0bb8474853b6caedd5f4f8"
+    },
+    {
+      "id": "v11Report",
+      "path": "docs/generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/pvp-v11/reports/1793176229483-570d3dce.pvp-stress-report.json",
+      "lines": [],
+      "bytes": 49457,
+      "sha256Raw": "2c35ce3d4d60d4c5b408e5dd73757090c293a64a638925413dd65856526f6d67",
+      "sha256LfNormalized": "2c35ce3d4d60d4c5b408e5dd73757090c293a64a638925413dd65856526f6d67"
+    },
+    {
+      "id": "v11Samples",
+      "path": "docs/generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/pvp-v11/reports/1793176229483-570d3dce.pvp-stress-samples.jsonl",
+      "lines": [],
+      "bytes": 1240279,
+      "sha256Raw": "269c0e80c564ac8dc7c7861166a9ceb91fe9bd753b40e65e15efaf9ed85547a5",
+      "sha256LfNormalized": "269c0e80c564ac8dc7c7861166a9ceb91fe9bd753b40e65e15efaf9ed85547a5"
+    },
+    {
+      "id": "legacyRuler",
+      "path": "docs/SCALABILITY-AND-CAPACITY.md",
+      "lines": [
+        52,
+        81,
+        93,
+        114
+      ],
+      "bytes": 9930,
+      "sha256Raw": "d835d4702e1275f448d0435bc931351f69d1c6afc6faa34dc2d6dc3769077348",
+      "sha256LfNormalized": "d835d4702e1275f448d0435bc931351f69d1c6afc6faa34dc2d6dc3769077348"
+    }
+  ],
+  "sourceWorkingTreeStatusCertified": false
+}

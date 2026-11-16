@@ -1,0 +1,16 @@
+{
+  "verifiedAtUtc": "2026-10-24T12:44:31.9126422Z",
+  "command": "git -c gc.auto=0 -c maintenance.auto=false fsck --full --strict --no-dangling",
+  "exitCode": 0,
+  "outputBytes": 0,
+  "lazyFetchingDisabled": true,
+  "conflictsRemaining": 0,
+  "mergeParents": [
+    "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+    "0a2a3200529684dd09c7b3ffaeea0a842b533f49"
+  ],
+  "upstreamHistoricalOrchestrationPreservedAsExactBlob": "9c20740db281f909d06b40097d4f142d5a7ef729",
+  "originalWorktree": "E:/mir2-player-journey",
+  "integrationWorktree": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey",
+  "note": "Original worktree and original remote branch preserved; old unrecoverable histories remain in the previously authorized external repair archive."
+}

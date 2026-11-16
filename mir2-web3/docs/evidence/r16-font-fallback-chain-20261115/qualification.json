@@ -1,0 +1,41 @@
+{
+  "kind": "r16-font-chain-and-safe-cache-reload-local",
+  "passed": true,
+  "parent": "ce9b7a999316512d838e93d35777d48030843243",
+  "candidate": "f310-font-chain-4a429129",
+  "build": {
+    "dist": ".next-font-chain-r2",
+    "builtId": "rxeER-xlkuRf18kbu7YYI",
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "durationMs": 42392
+  },
+  "tests": {
+    "files": 7,
+    "total": 146,
+    "passed": 146,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "fixedAssetVersion": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "localGatewaySource": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "localGatewaySha256": "6557d9da87e8cb867616caab80efb28c3063ac7361de1c5d59b0615d401c0842",
+  "foreignContentFilesPreserved": 29,
+  "productionDeployment": false,
+  "formalReadback": {
+    "checkedAt": "2026-11-14T21:38:26.746Z",
+    "deploymentId": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+    "revision": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "readyState": "READY"
+  },
+  "wholeParityAccepted": false,
+  "publicColdQualification": false,
+  "humanPhoneCameraTested": false
+}

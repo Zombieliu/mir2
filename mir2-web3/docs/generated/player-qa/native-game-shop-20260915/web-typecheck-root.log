@@ -1,0 +1,7 @@
+
+> mir2-web3-web@0.1.0 typecheck
+> node ./scripts/test-crystal-respawn-manifest-sync.mjs && next typegen && tsc --noEmit --pretty false
+
+Crystal respawn manifests match (464 source records, 463 named maps)
+Generating route types...
+✓ Types generated successfully

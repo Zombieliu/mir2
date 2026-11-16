@@ -1,0 +1,58 @@
+{
+  "owner": "Root",
+  "stage": "Source23 Rust07 source-only exact3 Bag source positional correction after original typed oracle failure",
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "reviewer": "/root/w2b_final_source_review",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-snapshot.json",
+    "bytes": 148546,
+    "sha256": "37211548ac2b7a6b81d8e7462e660a60ecc7eeca3154ecf1d64d450432723753"
+  },
+  "sourceCount": 432,
+  "confirmedBlockers": 0,
+  "sourceOnlyAcceptance": true,
+  "scope": "Independent source reader accepted only one literal2->3 changed, tests entiremodule suffix unchanged and reverse-exact to Rust06. Old source DTO has no serde(default), actual typed old decoder rejects positionallength2; exact3 now preserves that contract. Earlier Root/worker/staticreview2..3 admission is superseded by this original CPU proof. All original5 Bag,11 Tooltip,12Fishing tests preserved; six new full-facts/output decoder tests retained. Source acceptance only; new CPU/build pending.",
+  "finiteRustChecksAccepted": false,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "originalTestsRetained": true,
+  "addedProductOracleTests": 2,
+  "originalTestBackups": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tooltip-codec-before01.json",
+      "bytes": 55404,
+      "sha256": "607a3bcc9eb4b3268cdb74cfed37d17b37ce7cd9bfeb9cd1e815b8860435f547"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fishing-codec-before01.json",
+      "bytes": 17894,
+      "sha256": "21deafd1f1dc13ebb774dfc88e8e20772b041ade3a1706b6c522ab9fe6aa0105"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-bag-codec-before01.json",
+      "bytes": 9268,
+      "sha256": "802b5e354ff63291db3d3693c4372ee929f5ac37391f58c2a18b5083d52d034a"
+    }
+  ],
+  "originalFishingTestsRetained": 12,
+  "originalTooltipTestsRetained": 11,
+  "strictVisitorBodyRetained": true,
+  "originalBagTestsRetained": 5,
+  "previousAddedCodecOracleTests": 4,
+  "previousSourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust06-review.json",
+    "bytes": 2720,
+    "sha256": "ce89e1b173dc6713c6df9b043143416fade377404139484db07d3711c3fcbe85"
+  },
+  "priorActualFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui-failure06.json",
+    "bytes": 6520,
+    "sha256": "af90afcfd7b00e4fd6a5ce749e51709e8bb3f80c7f591aeb042822e8f52bc30a"
+  }
+}

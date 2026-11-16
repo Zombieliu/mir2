@@ -1,0 +1,15 @@
+{
+  "purpose": "Real first installed full launcher failure, before allowlist fix",
+  "observedAtUtc": "2026-10-29T11:14:11.775Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\.update\\engine-0D23AADE70ACAA6BB2C00941BE5379971E6BD764AE585DB8427C2E03DCEED363.exe",
+    "id": 1641592,
+    "title": "更新失败"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 359,
+  "height": 188,
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "gameExeSha256": "6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D",
+  "rawCapture": true
+}

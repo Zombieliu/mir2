@@ -1,0 +1,9 @@
+{
+  "stopped": true,
+  "verifiedExecutable": "C:\\mir2-build\\hunting-permit-postgres\\pgsql\\bin\\postgres.exe",
+  "verifiedPid": 55672,
+  "verifiedDataDirectory": "E:\\mir2-capacity-goal-20261030\\pgdata",
+  "pgCtlExitCode": 0,
+  "atUtc": "2026-10-30T16:59:13.4226403Z",
+  "postmasterPidFileAbsent": true
+}

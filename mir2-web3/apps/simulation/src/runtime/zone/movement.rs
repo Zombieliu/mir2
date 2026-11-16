@@ -1,10 +1,9 @@
 use mir2_protocol::{MirDirection, Point};
 
 pub(crate) const ZONE_WALK_DELAY_MS: u64 = 600;
-pub(crate) const ZONE_RUN_DELAY_MS: u64 = 300;
+pub(crate) const ZONE_RUN_DELAY_MS: u64 = 600;
 pub(crate) const ZONE_TURN_DELAY_MS: u64 = 350;
 pub(crate) const ZONE_RUN_GRACE_MS: u64 = 1_200;
-pub(crate) const ZONE_MOVE_READY_GRACE_MS: u64 = 120;
 
 pub(crate) fn offset_point(source: &Point, direction: MirDirection, amount: i32) -> Point {
     let (dx, dy) = match direction {

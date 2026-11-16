@@ -1,0 +1,6143 @@
+{
+  "scope": "Same signed public run; dataReceived contains numeric counters only.",
+  "transfers": [
+    {
+      "path": "https://numeron.obelisk.build/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 72973.240016,
+      "requestAtMs": 81242,
+      "failedTimestamp": 72981.244034,
+      "failedAtMs": 89246,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 72981.243896,
+      "requestAtMs": 89246,
+      "status": 200,
+      "headersTimestamp": 72999.999978,
+      "headersAtMs": 108002,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 298,
+      "receivedDataLength": 31441753,
+      "receivedEncodedDataLength": 6439818,
+      "maxDataGapMs": 9097,
+      "firstDataAtMs": 108011,
+      "lastDataAtMs": 125146,
+      "finishedTimestamp": 73017.142289,
+      "finishedAtMs": 125340,
+      "encodedBytes": 6439913
+    }
+  ],
+  "firstBootObservedAtMs": 127102,
+  "firstPlayableFrameMs": 81154,
+  "appBootAfterFirstPlayableMs": 45948,
+  "firstUiFailureObservedAtMs": 169104,
+  "samples": [
+    {
+      "atMs": 2172.2999999970198,
+      "observedAtMs": 3113,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 4163.600000008941,
+      "observedAtMs": 5103,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 6175.100000008941,
+      "observedAtMs": 7114,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 8168.9000000059605,
+      "observedAtMs": 9108,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 10160.60000000894,
+      "observedAtMs": 11100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 12166,
+      "observedAtMs": 13105,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 14164.5,
+      "observedAtMs": 15104,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 16160.40000000596,
+      "observedAtMs": 17100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Numeron Login TC"
+        ]
+      }
+    },
+    {
+      "atMs": 18160.60000000894,
+      "observedAtMs": 19100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Numeron Login TC"
+        ]
+      }
+    },
+    {
+      "atMs": 20160.29999999702,
+      "observedAtMs": 21100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Numeron Login TC"
+        ]
+      }
+    },
+    {
+      "atMs": 22160.29999999702,
+      "observedAtMs": 23100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 24161.40000000596,
+      "observedAtMs": 25101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 26161.29999999702,
+      "observedAtMs": 27101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 28161.79999999702,
+      "observedAtMs": 29101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 30159.90000000596,
+      "observedAtMs": 31099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 32160.5,
+      "observedAtMs": 33100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 34160.79999999702,
+      "observedAtMs": 35100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 36160.5,
+      "observedAtMs": 37100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 38160.10000000894,
+      "observedAtMs": 39099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 40163.20000000298,
+      "observedAtMs": 41102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 42163.10000000894,
+      "observedAtMs": 43102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 44161.70000000298,
+      "observedAtMs": 45101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 46160.70000000298,
+      "observedAtMs": 47100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 48159.90000000596,
+      "observedAtMs": 49099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 50160,
+      "observedAtMs": 51099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 52160.29999999702,
+      "observedAtMs": 53099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 54160.40000000596,
+      "observedAtMs": 55099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 56160.10000000894,
+      "observedAtMs": 57099,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 58159.90000000596,
+      "observedAtMs": 59100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 60160,
+      "observedAtMs": 61100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 62160.20000000298,
+      "observedAtMs": 63100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 64160.70000000298,
+      "observedAtMs": 65100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 66160.79999999702,
+      "observedAtMs": 67100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 68160.79999999702,
+      "observedAtMs": 69101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 70162.29999999702,
+      "observedAtMs": 71102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 72162.70000000298,
+      "observedAtMs": 73102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 74160.60000000894,
+      "observedAtMs": 75100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 76159.79999999702,
+      "observedAtMs": 77100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 78163.10000000894,
+      "observedAtMs": 79103,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 80163.40000000596,
+      "observedAtMs": 81103,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 82162.10000000894,
+      "observedAtMs": 83102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 84163.60000000894,
+      "observedAtMs": 85104,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 86163.90000000596,
+      "observedAtMs": 87104,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 88160,
+      "observedAtMs": 89100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 90160.20000000298,
+      "observedAtMs": 91100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 92160.29999999702,
+      "observedAtMs": 93100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 94160.5,
+      "observedAtMs": 95100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 96160.70000000298,
+      "observedAtMs": 97101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 98160.90000000596,
+      "observedAtMs": 99101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 100160.20000000298,
+      "observedAtMs": 101100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 102160.5,
+      "observedAtMs": 103100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 104161.70000000298,
+      "observedAtMs": 105102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 106160.90000000596,
+      "observedAtMs": 107101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 108161,
+      "observedAtMs": 109101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 110160.5,
+      "observedAtMs": 111100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 112162.20000000298,
+      "observedAtMs": 113102,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 114160.60000000894,
+      "observedAtMs": 115100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 116166.70000000298,
+      "observedAtMs": 117107,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 118160.20000000298,
+      "observedAtMs": 119100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 120160,
+      "observedAtMs": 121100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 122160.79999999702,
+      "observedAtMs": 123101,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      }
+    },
+    {
+      "atMs": 124159.90000000596,
+      "observedAtMs": 125100,
+      "booted": false,
+      "bootAttempted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "hud": null,
+      "quest": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 126161.70000000298,
+      "observedAtMs": 127102,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 268,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 268,
+        "generation": 2,
+        "revision": 6,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 128162.20000000298,
+      "observedAtMs": 129103,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 699,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 699,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 130159.79999999702,
+      "observedAtMs": 131100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 1132,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 1132,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 132162.60000000894,
+      "observedAtMs": 133103,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 1573,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 1573,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 134162.60000000894,
+      "observedAtMs": 135103,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 2008,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 2008,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 136160.60000000894,
+      "observedAtMs": 137101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 2448,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 2448,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 138160.20000000298,
+      "observedAtMs": 139100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 2883,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 2883,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 140167.79999999702,
+      "observedAtMs": 141108,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 3322,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 3322,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 142160,
+      "observedAtMs": 143100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 3759,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 3759,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 144160.79999999702,
+      "observedAtMs": 145101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 4193,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 4193,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 146160.60000000894,
+      "observedAtMs": 147101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 4630,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 4630,
+        "generation": 2,
+        "revision": 7,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 148160,
+      "observedAtMs": 149100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 5067,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 5067,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 150161.5,
+      "observedAtMs": 151102,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 5497,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 5497,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 152160.20000000298,
+      "observedAtMs": 153100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 5935,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 5935,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 154161,
+      "observedAtMs": 155101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 6373,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 6373,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 156163.5,
+      "observedAtMs": 157106,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 6812,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 6812,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 158161.20000000298,
+      "observedAtMs": 159101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 7241,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 7241,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 160161.20000000298,
+      "observedAtMs": 161102,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 7678,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 7678,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 162161.5,
+      "observedAtMs": 163101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 8118,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 8118,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 164161.60000000894,
+      "observedAtMs": 165102,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 8552,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 8552,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 166161.90000000596,
+      "observedAtMs": 167102,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 8990,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": null,
+        "frame": 8990,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 168163.60000000894,
+      "observedAtMs": 169104,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 9423,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 9423,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 170160.20000000298,
+      "observedAtMs": 171100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 9858,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 9858,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 172160.5,
+      "observedAtMs": 173101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 10302,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 10302,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 174160.10000000894,
+      "observedAtMs": 175100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 10738,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 10738,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 176160.90000000596,
+      "observedAtMs": 177101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 11175,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 11175,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 178159.90000000596,
+      "observedAtMs": 179100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 11613,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 11613,
+        "generation": 2,
+        "revision": 8,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 180160.79999999702,
+      "observedAtMs": 181101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 12044,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 12044,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 182159.79999999702,
+      "observedAtMs": 183100,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 12478,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 12478,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 184160.5,
+      "observedAtMs": 185101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 12913,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 12913,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 186160.79999999702,
+      "observedAtMs": 187101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 13347,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 13347,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 188160.90000000596,
+      "observedAtMs": 189101,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 13749,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 13749,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 190168.40000000596,
+      "observedAtMs": 191109,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 14060,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 14060,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 192181.20000000298,
+      "observedAtMs": 193121,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 14275,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 14275,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 194174.5,
+      "observedAtMs": 195115,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 14534,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 14534,
+        "generation": 2,
+        "revision": 9,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 196177.29999999702,
+      "observedAtMs": 197117,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 14772,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 14772,
+        "generation": 2,
+        "revision": 10,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 198178.29999999702,
+      "observedAtMs": 199118,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 15018,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 15018,
+        "generation": 2,
+        "revision": 10,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 200176.70000000298,
+      "observedAtMs": 201117,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 15266,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 15266,
+        "generation": 2,
+        "revision": 10,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 202180,
+      "observedAtMs": 203120,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 15503,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 15503,
+        "generation": 2,
+        "revision": 10,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 204177.60000000894,
+      "observedAtMs": 205118,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 15745,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 15745,
+        "generation": 2,
+        "revision": 10,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 206174.40000000596,
+      "observedAtMs": 207114,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 15976,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 15976,
+        "generation": 2,
+        "revision": 11,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 208181.40000000596,
+      "observedAtMs": 209122,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 16185,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 16185,
+        "generation": 2,
+        "revision": 11,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 210181.29999999702,
+      "observedAtMs": 211122,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 16371,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 16371,
+        "generation": 2,
+        "revision": 11,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 212183.79999999702,
+      "observedAtMs": 213124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 16580,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 16580,
+        "generation": 2,
+        "revision": 11,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 214184.5,
+      "observedAtMs": 215125,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 16811,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 16811,
+        "generation": 2,
+        "revision": 11,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 216183.20000000298,
+      "observedAtMs": 217123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 16978,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 16978,
+        "generation": 2,
+        "revision": 13,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 218181.20000000298,
+      "observedAtMs": 219121,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 17162,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 17162,
+        "generation": 2,
+        "revision": 14,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 220184,
+      "observedAtMs": 221124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 17322,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 17322,
+        "generation": 2,
+        "revision": 16,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 222184.29999999702,
+      "observedAtMs": 223124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 17529,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 17529,
+        "generation": 2,
+        "revision": 16,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 224211.70000000298,
+      "observedAtMs": 225152,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 17695,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 17695,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 226183.79999999702,
+      "observedAtMs": 227124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 17886,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 17886,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 228184.29999999702,
+      "observedAtMs": 229125,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 18074,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 18074,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 230182.79999999702,
+      "observedAtMs": 231123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 18268,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 18268,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 232188.29999999702,
+      "observedAtMs": 233128,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 18455,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 18455,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 234182.10000000894,
+      "observedAtMs": 235122,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 18660,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 18660,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 236181,
+      "observedAtMs": 237121,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 18851,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 18851,
+        "generation": 2,
+        "revision": 17,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 238183.90000000596,
+      "observedAtMs": 239124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 19042,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 19042,
+        "generation": 2,
+        "revision": 18,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 240183.90000000596,
+      "observedAtMs": 241124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 19244,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 19244,
+        "generation": 2,
+        "revision": 18,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 242180.5,
+      "observedAtMs": 243120,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 19429,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 19429,
+        "generation": 2,
+        "revision": 18,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 244191.70000000298,
+      "observedAtMs": 245132,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 19619,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 19619,
+        "generation": 2,
+        "revision": 18,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 246171,
+      "observedAtMs": 247111,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 19786,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 19786,
+        "generation": 2,
+        "revision": 19,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 248190.60000000894,
+      "observedAtMs": 249131,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 19967,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 19967,
+        "generation": 2,
+        "revision": 19,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 250183,
+      "observedAtMs": 251123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 20160,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 20160,
+        "generation": 2,
+        "revision": 19,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 252183.29999999702,
+      "observedAtMs": 253123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 20341,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 20341,
+        "generation": 2,
+        "revision": 19,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 254208.40000000596,
+      "observedAtMs": 255148,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 20514,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 20514,
+        "generation": 2,
+        "revision": 20,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 256183.20000000298,
+      "observedAtMs": 257123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 20674,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 20674,
+        "generation": 2,
+        "revision": 20,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 258183.5,
+      "observedAtMs": 259123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 20867,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 20867,
+        "generation": 2,
+        "revision": 20,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 260185.29999999702,
+      "observedAtMs": 261125,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 21036,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 21036,
+        "generation": 2,
+        "revision": 20,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 262183.700000003,
+      "observedAtMs": 263123,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 21215,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 21215,
+        "generation": 2,
+        "revision": 20,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 264186.799999997,
+      "observedAtMs": 265127,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 21379,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 21379,
+        "generation": 2,
+        "revision": 21,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 266195.700000003,
+      "observedAtMs": 267135,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 21550,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 21550,
+        "generation": 2,
+        "revision": 21,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 268184.299999997,
+      "observedAtMs": 269124,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 21707,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 21707,
+        "generation": 2,
+        "revision": 21,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 270177.10000000894,
+      "observedAtMs": 271117,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 21887,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 21887,
+        "generation": 2,
+        "revision": 21,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 272187.799999997,
+      "observedAtMs": 273128,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 22082,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 22082,
+        "generation": 2,
+        "revision": 21,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 274167.5,
+      "observedAtMs": 275108,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 22236,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 22236,
+        "generation": 2,
+        "revision": 22,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 276185.200000003,
+      "observedAtMs": 277125,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 22389,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 22389,
+        "generation": 2,
+        "revision": 22,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 278186.10000000894,
+      "observedAtMs": 279126,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 22568,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 22568,
+        "generation": 2,
+        "revision": 22,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 280186.799999997,
+      "observedAtMs": 281127,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 22756,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 22756,
+        "generation": 2,
+        "revision": 22,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 282185.60000000894,
+      "observedAtMs": 283125,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 22913,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 22913,
+        "generation": 2,
+        "revision": 22,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 284188.299999997,
+      "observedAtMs": 285128,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 23084,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 23084,
+        "generation": 2,
+        "revision": 23,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 286187.5,
+      "observedAtMs": 287127,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 23239,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 23239,
+        "generation": 2,
+        "revision": 23,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 288187,
+      "observedAtMs": 289127,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 23453,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 23453,
+        "generation": 2,
+        "revision": 23,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 290188.60000000894,
+      "observedAtMs": 291128,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 23610,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 23610,
+        "generation": 2,
+        "revision": 23,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 292185.299999997,
+      "observedAtMs": 293125,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 23738,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 23738,
+        "generation": 2,
+        "revision": 24,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 294198.5,
+      "observedAtMs": 295139,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 23907,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 23907,
+        "generation": 2,
+        "revision": 24,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 296219.10000000894,
+      "observedAtMs": 297159,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 24074,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 24074,
+        "generation": 2,
+        "revision": 24,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 298186.60000000894,
+      "observedAtMs": 299126,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 24238,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 24238,
+        "generation": 2,
+        "revision": 24,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 300187.799999997,
+      "observedAtMs": 301127,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 24395,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 24395,
+        "generation": 2,
+        "revision": 24,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 302188.299999997,
+      "observedAtMs": 303128,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 24577,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 24577,
+        "generation": 2,
+        "revision": 24,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 304204.10000000894,
+      "observedAtMs": 305143,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 24726,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 24726,
+        "generation": 2,
+        "revision": 25,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 306186.90000000596,
+      "observedAtMs": 307127,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 24899,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 24899,
+        "generation": 2,
+        "revision": 25,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 308190.700000003,
+      "observedAtMs": 309130,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 25035,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 25035,
+        "generation": 2,
+        "revision": 25,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 310191.5,
+      "observedAtMs": 311131,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 25161,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 25161,
+        "generation": 2,
+        "revision": 25,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 312186.799999997,
+      "observedAtMs": 313126,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 25304,
+        "generation": 2,
+        "revision": 5
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 25304,
+        "generation": 2,
+        "revision": 25,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    },
+    {
+      "atMs": 314188.60000000894,
+      "observedAtMs": 315128,
+      "booted": true,
+      "bootAttempted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-84ef836460a84e03"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 25494,
+        "generation": 2,
+        "revision": 6
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 25494,
+        "generation": 2,
+        "revision": 26,
+        "displayLanguage": "zh-TW"
+      },
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      }
+    }
+  ],
+  "gatewayRevisions": [
+    "82efff2c8c0eef72a950501d84acad3c6c3de958"
+  ],
+  "resourceErrors": [
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/349.png",
+      "status": 504,
+      "atMs": 117050,
+      "timestamp": 73009.048169,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/352.png",
+      "status": 504,
+      "atMs": 117050,
+      "timestamp": 73009.048292,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Cursors/Cursor_TextPrompt.CUR",
+      "status": 504,
+      "atMs": 117397,
+      "timestamp": 73009.394999,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/329.png",
+      "status": 504,
+      "atMs": 117397,
+      "timestamp": 73009.395167,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/361.png",
+      "status": 504,
+      "atMs": 117422,
+      "timestamp": 73009.419709,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/ChrSel/21.png",
+      "status": 504,
+      "atMs": 117644,
+      "timestamp": 73009.641625,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/341.png",
+      "status": 504,
+      "atMs": 117769,
+      "timestamp": 73009.767173,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/ChrSel/33.png",
+      "status": 504,
+      "atMs": 120928,
+      "timestamp": 73012.925933,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 504,
+      "atMs": 123732,
+      "timestamp": 73015.72986,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 124277,
+      "timestamp": 73016.274253,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 124277,
+      "timestamp": 73016.274373,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1933.png",
+      "status": 504,
+      "atMs": 125340,
+      "timestamp": 73017.338342,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1932.png",
+      "status": 504,
+      "atMs": 125341,
+      "timestamp": 73017.338491,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/2034.png",
+      "status": 504,
+      "atMs": 125341,
+      "timestamp": 73017.338549,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/2221.png",
+      "status": 504,
+      "atMs": 125341,
+      "timestamp": 73017.338605,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/2012.png",
+      "status": 504,
+      "atMs": 125341,
+      "timestamp": 73017.338662,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/2015.png",
+      "status": 504,
+      "atMs": 125341,
+      "timestamp": 73017.338715,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/12.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.33877,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.338826,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/13.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.338872,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/6.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.338985,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/4.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339162,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4259.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339285,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8532.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.33935,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8531.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339399,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8451.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339444,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4212.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339489,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8530.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339548,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8449.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339591,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4263.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339637,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4271.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.33968,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4215.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339724,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8561.png",
+      "status": 504,
+      "atMs": 125342,
+      "timestamp": 73017.339765,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8563.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.339811,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8522.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.339854,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/8526.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.339895,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1395.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.339937,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/7682.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.339982,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4143.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340026,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1397.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.34007,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/7684.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340113,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/7690.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340154,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1386.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340196,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1088.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.34024,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1389.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.34029,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/7697.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340332,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1089.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340375,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1390.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340415,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/1391.png",
+      "status": 504,
+      "atMs": 125343,
+      "timestamp": 73017.340455,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/12.png",
+      "status": 504,
+      "atMs": 125345,
+      "timestamp": 73017.342948,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/13.png",
+      "status": 504,
+      "atMs": 125345,
+      "timestamp": 73017.343109,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/CArmour/00/meta.json",
+      "status": 504,
+      "atMs": 125345,
+      "timestamp": 73017.343299,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/CHair/00/meta.json",
+      "status": 504,
+      "atMs": 125346,
+      "timestamp": 73017.343605,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/CWeapon/00/meta.json",
+      "status": 504,
+      "atMs": 125346,
+      "timestamp": 73017.343744,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/985.png",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.407722,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Cursors/Cursor_Normal_Atk.CUR",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.407785,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Cursors/Cursor_Npc.cur",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.40787,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Tiles/958.png",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.407934,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4230.png",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.407978,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4236.png",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.408022,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-map/WemadeMir2/Objects/4235.png",
+      "status": 504,
+      "atMs": 125411,
+      "timestamp": 73017.408062,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/CArmour/01/meta.json",
+      "status": 504,
+      "atMs": 125413,
+      "timestamp": 73017.411431,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Monster/000/meta.json",
+      "status": 504,
+      "atMs": 125414,
+      "timestamp": 73017.411641,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/00/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.41176,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/01/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.411865,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/03/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.411961,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/05/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.41205,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/07/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.41214,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/11/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.412233,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/15/meta.json",
+      "status": 504,
+      "atMs": 125415,
+      "timestamp": 73017.41232,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/NPC/45/meta.json",
+      "status": 504,
+      "atMs": 125416,
+      "timestamp": 73017.412408,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Monster/003/meta.json",
+      "status": 504,
+      "atMs": 125416,
+      "timestamp": 73017.412531,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Monster/004/meta.json",
+      "status": 504,
+      "atMs": 125416,
+      "timestamp": 73017.412634,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Monster/005/meta.json",
+      "status": 504,
+      "atMs": 125416,
+      "timestamp": 73017.41273,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Monster/139/meta.json",
+      "status": 504,
+      "atMs": 125416,
+      "timestamp": 73017.412818,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/961.png",
+      "status": 504,
+      "atMs": 167897,
+      "timestamp": 73059.895034,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/960.png",
+      "status": 504,
+      "atMs": 167932,
+      "timestamp": 73059.929759,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/950.png",
+      "status": 504,
+      "atMs": 167977,
+      "timestamp": 73059.975064,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/995.png",
+      "status": 504,
+      "atMs": 168027,
+      "timestamp": 73060.025271,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/360.png",
+      "status": 504,
+      "atMs": 168178,
+      "timestamp": 73060.175688,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1203.png",
+      "status": 504,
+      "atMs": 168291,
+      "timestamp": 73060.288558,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1204.png",
+      "status": 504,
+      "atMs": 168431,
+      "timestamp": 73060.429238,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1202.png",
+      "status": 504,
+      "atMs": 168492,
+      "timestamp": 73060.49014,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1205.png",
+      "status": 504,
+      "atMs": 168700,
+      "timestamp": 73060.6976,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/917.png",
+      "status": 504,
+      "atMs": 168794,
+      "timestamp": 73060.792337,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 168939,
+      "timestamp": 73060.937416,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 168939,
+      "timestamp": 73060.937562,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/15.png",
+      "status": 504,
+      "atMs": 168957,
+      "timestamp": 73060.95488,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 504,
+      "atMs": 168957,
+      "timestamp": 73060.954996,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/918.png",
+      "status": 504,
+      "atMs": 168972,
+      "timestamp": 73060.970286,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 504,
+      "atMs": 169032,
+      "timestamp": 73061.030009,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 504,
+      "atMs": 169035,
+      "timestamp": 73061.033375,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 504,
+      "atMs": 169110,
+      "timestamp": 73061.108342,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/997.png",
+      "status": 504,
+      "atMs": 169181,
+      "timestamp": 73061.179326,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/193.png",
+      "status": 504,
+      "atMs": 169192,
+      "timestamp": 73061.189629,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/956.png",
+      "status": 504,
+      "atMs": 169407,
+      "timestamp": 73061.405037,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/16.png",
+      "status": 504,
+      "atMs": 169425,
+      "timestamp": 73061.422823,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/919.png",
+      "status": 504,
+      "atMs": 169635,
+      "timestamp": 73061.633205,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/966.png",
+      "status": 504,
+      "atMs": 169640,
+      "timestamp": 73061.638466,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/979.png",
+      "status": 504,
+      "atMs": 169859,
+      "timestamp": 73061.857262,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/989.png",
+      "status": 504,
+      "atMs": 169872,
+      "timestamp": 73061.870313,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/17.png",
+      "status": 504,
+      "atMs": 170078,
+      "timestamp": 73062.075773,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/616.png",
+      "status": 504,
+      "atMs": 170085,
+      "timestamp": 73062.083193,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/965.png",
+      "status": 504,
+      "atMs": 170273,
+      "timestamp": 73062.2706,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/14.png",
+      "status": 504,
+      "atMs": 170307,
+      "timestamp": 73062.305323,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/270.png",
+      "status": 504,
+      "atMs": 170481,
+      "timestamp": 73062.479268,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/273.png",
+      "status": 504,
+      "atMs": 170510,
+      "timestamp": 73062.508306,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/951.png",
+      "status": 504,
+      "atMs": 170737,
+      "timestamp": 73062.735449,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/957.png",
+      "status": 504,
+      "atMs": 170815,
+      "timestamp": 73062.812509,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/276.png",
+      "status": 504,
+      "atMs": 171032,
+      "timestamp": 73063.030009,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/530.png",
+      "status": 504,
+      "atMs": 171035,
+      "timestamp": 73063.033458,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/206.png",
+      "status": 504,
+      "atMs": 171311,
+      "timestamp": 73063.309051,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1657.png",
+      "status": 504,
+      "atMs": 171323,
+      "timestamp": 73063.321316,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/210.png",
+      "status": 504,
+      "atMs": 171532,
+      "timestamp": 73063.529901,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1658.png",
+      "status": 504,
+      "atMs": 171549,
+      "timestamp": 73063.547099,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1656.png",
+      "status": 504,
+      "atMs": 171775,
+      "timestamp": 73063.773293,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/710.png",
+      "status": 504,
+      "atMs": 171995,
+      "timestamp": 73063.992613,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1290.png",
+      "status": 504,
+      "atMs": 172173,
+      "timestamp": 73064.170796,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1292.png",
+      "status": 504,
+      "atMs": 172199,
+      "timestamp": 73064.197378,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1293.png",
+      "status": 504,
+      "atMs": 172377,
+      "timestamp": 73064.375021,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1291.png",
+      "status": 504,
+      "atMs": 172405,
+      "timestamp": 73064.402555,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1294.png",
+      "status": 504,
+      "atMs": 172412,
+      "timestamp": 73064.409666,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1295.png",
+      "status": 504,
+      "atMs": 172582,
+      "timestamp": 73064.580226,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1297.png",
+      "status": 504,
+      "atMs": 172619,
+      "timestamp": 73064.617207,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1296.png",
+      "status": 504,
+      "atMs": 172711,
+      "timestamp": 73064.708809,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1298.png",
+      "status": 504,
+      "atMs": 172830,
+      "timestamp": 73064.827311,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1301.png",
+      "status": 504,
+      "atMs": 173045,
+      "timestamp": 73065.042804,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1299.png",
+      "status": 504,
+      "atMs": 173143,
+      "timestamp": 73065.141192,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1303.png",
+      "status": 504,
+      "atMs": 173174,
+      "timestamp": 73065.171799,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1300.png",
+      "status": 504,
+      "atMs": 173246,
+      "timestamp": 73065.244075,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1304.png",
+      "status": 504,
+      "atMs": 173274,
+      "timestamp": 73065.272112,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1305.png",
+      "status": 504,
+      "atMs": 173387,
+      "timestamp": 73065.385097,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1302.png",
+      "status": 504,
+      "atMs": 173472,
+      "timestamp": 73065.469141,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1307.png",
+      "status": 504,
+      "atMs": 173472,
+      "timestamp": 73065.469388,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1306.png",
+      "status": 504,
+      "atMs": 173578,
+      "timestamp": 73065.575602,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1308.png",
+      "status": 504,
+      "atMs": 173625,
+      "timestamp": 73065.623245,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1310.png",
+      "status": 504,
+      "atMs": 173672,
+      "timestamp": 73065.670032,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1311.png",
+      "status": 504,
+      "atMs": 173868,
+      "timestamp": 73065.865095,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1313.png",
+      "status": 504,
+      "atMs": 173871,
+      "timestamp": 73065.869286,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1309.png",
+      "status": 504,
+      "atMs": 174070,
+      "timestamp": 73066.067399,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1314.png",
+      "status": 504,
+      "atMs": 174071,
+      "timestamp": 73066.067513,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1312.png",
+      "status": 504,
+      "atMs": 174071,
+      "timestamp": 73066.06756,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1315.png",
+      "status": 504,
+      "atMs": 174075,
+      "timestamp": 73066.073276,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1316.png",
+      "status": 504,
+      "atMs": 174234,
+      "timestamp": 73066.231523,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1317.png",
+      "status": 504,
+      "atMs": 174272,
+      "timestamp": 73066.269546,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1318.png",
+      "status": 504,
+      "atMs": 174275,
+      "timestamp": 73066.272866,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1322.png",
+      "status": 504,
+      "atMs": 174493,
+      "timestamp": 73066.490449,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1321.png",
+      "status": 504,
+      "atMs": 174493,
+      "timestamp": 73066.490644,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1319.png",
+      "status": 504,
+      "atMs": 174521,
+      "timestamp": 73066.519187,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1320.png",
+      "status": 504,
+      "atMs": 174536,
+      "timestamp": 73066.534304,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1323.png",
+      "status": 504,
+      "atMs": 174653,
+      "timestamp": 73066.650683,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/1324.png",
+      "status": 504,
+      "atMs": 174653,
+      "timestamp": 73066.650808,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/361.png",
+      "status": 504,
+      "atMs": 174653,
+      "timestamp": 73066.650864,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/362.png",
+      "status": 504,
+      "atMs": 174653,
+      "timestamp": 73066.650907,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/156.png",
+      "status": 504,
+      "atMs": 174653,
+      "timestamp": 73066.651124,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/157.png",
+      "status": 504,
+      "atMs": 174653,
+      "timestamp": 73066.651351,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/158.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666472,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/287.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666588,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/288.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666638,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/289.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666685,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/500.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666725,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/501.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666766,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/502.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666808,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/503.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666847,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/504.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666887,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/506.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666934,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/507.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.666973,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/508.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667013,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/516.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667055,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/517.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667098,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667137,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/4.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667177,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/6.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667215,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1900.png",
+      "status": 504,
+      "atMs": 174669,
+      "timestamp": 73066.667288,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1901.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667331,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1902.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.66737,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1903.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667413,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1904.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667453,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1905.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.6675,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1906.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667541,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1907.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667579,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1908.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667621,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1909.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667666,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1910.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667704,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1911.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667741,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1912.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.66778,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1913.png",
+      "status": 504,
+      "atMs": 174670,
+      "timestamp": 73066.667817,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1914.png",
+      "status": 504,
+      "atMs": 174674,
+      "timestamp": 73066.672356,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1960.png",
+      "status": 504,
+      "atMs": 174674,
+      "timestamp": 73066.672454,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1961.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.672657,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/1962.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.672709,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/826.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.672758,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/826.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.672805,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/827.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.672921,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/827.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.672968,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/828.png",
+      "status": 504,
+      "atMs": 174675,
+      "timestamp": 73066.673035,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse/986.png",
+      "status": 504,
+      "atMs": 175078,
+      "timestamp": 73067.075862,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Title/670.png",
+      "status": 504,
+      "atMs": 175123,
+      "timestamp": 73067.12139,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/257.png",
+      "status": 504,
+      "atMs": 175124,
+      "timestamp": 73067.121525,
+      "serviceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/Prguse2/240.png",
+      "status": 504,
+      "atMs": 175124,
+      "timestamp": 73067.121585,
+      "serviceWorker": true
+    }
+  ],
+  "resourceErrorLimitReached": true,
+  "consoleCaptureLimitReached": true
+}

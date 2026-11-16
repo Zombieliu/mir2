@@ -1,0 +1,24 @@
+{
+  "owner": "Root",
+  "stage": "Source23 backend01",
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "reviewer": "/root/source21_tooltip_rust",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-backend01-snapshot.json",
+    "bytes": 145500,
+    "sha256": "5c5dfba040a433c7502977d31f7dd28316cfc6586c7967f17f6158b421791bcf"
+  },
+  "sourceCount": 486,
+  "confirmedBlockers": 0,
+  "sourceOnlyAcceptance": true,
+  "scope": "Conservative backend source and literal data closure; optional exact signed transform projection and six focused tests; no runtime/network/player acceptance",
+  "finiteRustChecksAccepted": false,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

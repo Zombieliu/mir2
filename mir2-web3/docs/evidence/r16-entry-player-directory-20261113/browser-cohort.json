@@ -1,0 +1,2658 @@
+{
+  "schemaVersion": 1,
+  "scope": "Isolated File Gateway + production Next + real owned Chrome; original8s movement/120s Native gates; actual6s initial body unavailability; no public WAN speed claim",
+  "runs": [
+    {
+      "run": "quest-after-r1",
+      "mode": "compatibility",
+      "gender": "male",
+      "passed": true,
+      "candidate": "8e82f53fcd74-player-meta-1e35025e",
+      "startGame": {
+        "acknowledgedAt": 1794536677886,
+        "bootstrapAt": 1794536678172,
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "map": "0"
+      },
+      "fastSelection": {
+        "loginAt": 1794536667052,
+        "selectReadyAt": 1794536669480,
+        "startClickAt": 1794536669501
+      },
+      "firstPlayable": {
+        "epochMs": 1794536692215,
+        "observedAt": 1794536692260
+      },
+      "earlyPlayer": {
+        "gender": "male",
+        "bodyDelayMs": 6000,
+        "releasedAt": 1794536693049,
+        "reads": [
+          {
+            "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+            "kind": "complete-player-pack",
+            "requestedAt": 1794536667064,
+            "closedAt": 1794536687071
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536686141,
+            "headersAt": 1794536693049,
+            "status": 503,
+            "finishedAt": 1794536693050,
+            "closedAt": 1794536693050
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536686142,
+            "headersAt": 1794536693049,
+            "status": 503,
+            "finishedAt": 1794536693050,
+            "closedAt": 1794536693050
+          },
+          {
+            "path": "/original-ui/CArmour/00/19.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536686187,
+            "headersAt": 1794536692200,
+            "status": 200,
+            "bytes": 2438,
+            "sha256": "14eee434f14d0f1546c1ffe007b78ca9ec18f52182c3375c76d003962d8364ec",
+            "finishedAt": 1794536692200,
+            "closedAt": 1794536692200
+          },
+          {
+            "path": "/original-ui/CHair/00/19.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536686188,
+            "headersAt": 1794536692199,
+            "status": 200,
+            "bytes": 200,
+            "sha256": "0de2f2d8c014d757bfc1956356bda547687356a3fea3944eafdc6a45549b4d43",
+            "finishedAt": 1794536692200,
+            "closedAt": 1794536692200
+          },
+          {
+            "path": "/original-ui/CArmour/00/16.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536686259,
+            "headersAt": 1794536692200,
+            "status": 200,
+            "bytes": 2442,
+            "sha256": "2f48da1e304c5b291c71898f138af6d8d5c3d850280b8deb2ac96ba30211fbf0",
+            "finishedAt": 1794536692200,
+            "closedAt": 1794536692200
+          },
+          {
+            "path": "/original-ui/CHair/00/16.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536686891,
+            "headersAt": 1794536692200,
+            "status": 200,
+            "bytes": 201,
+            "sha256": "a343d6e84d624dc95ffa809e0ce697e812546187529f2d91c34ca5ac3a5d5c2d",
+            "finishedAt": 1794536692200,
+            "closedAt": 1794536692200
+          },
+          {
+            "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+            "kind": "complete-player-pack",
+            "requestedAt": 1794536687274,
+            "status": 200,
+            "bytes": 289851,
+            "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+            "headersAt": 1794536693049,
+            "finishedAt": 1794536693050,
+            "closedAt": 1794536693050
+          },
+          {
+            "path": "/original-ui/CArmour/00/17.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692230,
+            "headersAt": 1794536692231,
+            "status": 200,
+            "bytes": 2432,
+            "sha256": "433232e60d3ff5cf91d60fedb7163f1bdc99d0508cf3c72f8708c1b5204d9acd",
+            "finishedAt": 1794536692231,
+            "closedAt": 1794536692231
+          },
+          {
+            "path": "/original-ui/CHair/00/17.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692230,
+            "headersAt": 1794536692231,
+            "status": 200,
+            "bytes": 209,
+            "sha256": "b929c2859559c267fb1f351556d270b0574c9a5440be6e90bafb6067fc18c2b6",
+            "finishedAt": 1794536692231,
+            "closedAt": 1794536692231
+          },
+          {
+            "path": "/original-ui/CArmour/00/18.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692244,
+            "headersAt": 1794536692245,
+            "status": 200,
+            "bytes": 2446,
+            "sha256": "54fe54a03cbe7c0f18466cee8a29a6317bafdf15aa26f2202da398e81de002be",
+            "finishedAt": 1794536692245,
+            "closedAt": 1794536692245
+          },
+          {
+            "path": "/original-ui/CHair/00/18.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692245,
+            "headersAt": 1794536692245,
+            "status": 200,
+            "bytes": 201,
+            "sha256": "dd50601957cf5c79fe658a360196134043b72c2b22b9d86bd13aef30cf9f5a90",
+            "finishedAt": 1794536692245,
+            "closedAt": 1794536692245
+          },
+          {
+            "path": "/original-ui/CArmour/00/44.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692346,
+            "headersAt": 1794536692347,
+            "status": 200,
+            "bytes": 2096,
+            "sha256": "b21e027b213791a7b8067edd63ba826fe3b26555a51210c0c88a5bf38c10ce2a",
+            "finishedAt": 1794536692348,
+            "closedAt": 1794536692348
+          },
+          {
+            "path": "/original-ui/CHair/00/44.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692346,
+            "headersAt": 1794536692348,
+            "status": 200,
+            "bytes": 245,
+            "sha256": "640902d0259a2807df188b34b563de45800ca5bf755eaad93dd557e201be9704",
+            "finishedAt": 1794536692348,
+            "closedAt": 1794536692348
+          },
+          {
+            "path": "/original-ui/CArmour/00/45.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692521,
+            "headersAt": 1794536692521,
+            "status": 200,
+            "bytes": 1921,
+            "sha256": "f868b3419a0d0b87f5e196b95411f9cde45f8a1bb31d2728dbea18da1fb5d391",
+            "finishedAt": 1794536692521,
+            "closedAt": 1794536692521
+          },
+          {
+            "path": "/original-ui/CHair/00/45.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692521,
+            "headersAt": 1794536692521,
+            "status": 200,
+            "bytes": 252,
+            "sha256": "3c990028d66ec16f31a0dc0bd8a2da63113886de083b17e54c11f928f8237655",
+            "finishedAt": 1794536692521,
+            "closedAt": 1794536692521
+          },
+          {
+            "path": "/original-ui/CArmour/00/46.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692721,
+            "headersAt": 1794536692725,
+            "status": 200,
+            "bytes": 2029,
+            "sha256": "342d647b98d2414c752802699182b8636c6da66dc4928cd1e38ab81833fcedda",
+            "finishedAt": 1794536692725,
+            "closedAt": 1794536692725
+          },
+          {
+            "path": "/original-ui/CHair/00/46.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692721,
+            "headersAt": 1794536692725,
+            "status": 200,
+            "bytes": 252,
+            "sha256": "6fcc1a66dc019b60300422d1ddf0f521d25b3782db25fa8827326074c988b397",
+            "finishedAt": 1794536692725,
+            "closedAt": 1794536692725
+          },
+          {
+            "path": "/original-ui/CArmour/00/47.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692821,
+            "headersAt": 1794536692821,
+            "status": 200,
+            "bytes": 2177,
+            "sha256": "92e752188462952e7398aa2fb077bbd52a5ede2bfed729819f50b94a28d4478e",
+            "finishedAt": 1794536692821,
+            "closedAt": 1794536692821
+          },
+          {
+            "path": "/original-ui/CHair/00/47.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692821,
+            "headersAt": 1794536692821,
+            "status": 200,
+            "bytes": 255,
+            "sha256": "e161041ed26d222892e29834b8b9ce612abac47b1497856720e0d1b7874ecf7a",
+            "finishedAt": 1794536692821,
+            "closedAt": 1794536692821
+          },
+          {
+            "path": "/original-ui/CArmour/00/48.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692889,
+            "headersAt": 1794536692890,
+            "status": 200,
+            "bytes": 1813,
+            "sha256": "092a26bb81c302344eb0b28f275096a0e745b4fba8866bad849b2c77aaabd0e8",
+            "finishedAt": 1794536692890,
+            "closedAt": 1794536692890
+          },
+          {
+            "path": "/original-ui/CHair/00/48.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692889,
+            "headersAt": 1794536692890,
+            "status": 200,
+            "bytes": 245,
+            "sha256": "461e37adc141ab8d1baf7b7260be8dd0422d2765264545fe9642fb4ed7dbae7f",
+            "finishedAt": 1794536692890,
+            "closedAt": 1794536692890
+          },
+          {
+            "path": "/original-ui/CArmour/00/68.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692904,
+            "headersAt": 1794536692904,
+            "status": 200,
+            "bytes": 2147,
+            "sha256": "1c6bd87ded43866b89eecaeb26476470fc0f89f03faec280eb517e4fce1ebdb1",
+            "finishedAt": 1794536692904,
+            "closedAt": 1794536692904
+          },
+          {
+            "path": "/original-ui/CHair/00/68.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536692904,
+            "headersAt": 1794536692906,
+            "status": 200,
+            "bytes": 234,
+            "sha256": "46258fb7e2837af008d29048aa4c74a25c89b0435ba749f772c8f84005d5a897",
+            "finishedAt": 1794536692906,
+            "closedAt": 1794536692906
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536693171,
+            "headersAt": 1794536693172,
+            "status": 503,
+            "finishedAt": 1794536693172,
+            "closedAt": 1794536693172
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536693172,
+            "headersAt": 1794536693172,
+            "status": 503,
+            "finishedAt": 1794536693172,
+            "closedAt": 1794536693172
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536693294,
+            "headersAt": 1794536693294,
+            "status": 503,
+            "finishedAt": 1794536693294,
+            "closedAt": 1794536693294
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536693295,
+            "headersAt": 1794536693295,
+            "status": 503,
+            "finishedAt": 1794536693295,
+            "closedAt": 1794536693295
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536693646,
+            "headersAt": 1794536693646,
+            "status": 503,
+            "finishedAt": 1794536693646,
+            "closedAt": 1794536693646
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536693646,
+            "headersAt": 1794536693646,
+            "status": 503,
+            "finishedAt": 1794536693646,
+            "closedAt": 1794536693646
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536764531,
+            "headersAt": 1794536764531,
+            "status": 503,
+            "finishedAt": 1794536764532,
+            "closedAt": 1794536764532
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536764532,
+            "headersAt": 1794536764532,
+            "status": 503,
+            "finishedAt": 1794536764532,
+            "closedAt": 1794536764532
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536764660,
+            "headersAt": 1794536764660,
+            "status": 503,
+            "finishedAt": 1794536764661,
+            "closedAt": 1794536764661
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536764661,
+            "headersAt": 1794536764661,
+            "status": 503,
+            "finishedAt": 1794536764661,
+            "closedAt": 1794536764661
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765012,
+            "headersAt": 1794536765012,
+            "status": 503,
+            "finishedAt": 1794536765012,
+            "closedAt": 1794536765012
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765012,
+            "headersAt": 1794536765012,
+            "status": 503,
+            "finishedAt": 1794536765012,
+            "closedAt": 1794536765012
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765013,
+            "headersAt": 1794536765013,
+            "status": 503,
+            "finishedAt": 1794536765013,
+            "closedAt": 1794536765013
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765014,
+            "headersAt": 1794536765014,
+            "status": 503,
+            "finishedAt": 1794536765014,
+            "closedAt": 1794536765014
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765135,
+            "headersAt": 1794536765135,
+            "status": 503,
+            "finishedAt": 1794536765135,
+            "closedAt": 1794536765135
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765135,
+            "headersAt": 1794536765135,
+            "status": 503,
+            "finishedAt": 1794536765136,
+            "closedAt": 1794536765136
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765487,
+            "headersAt": 1794536765487,
+            "status": 503,
+            "finishedAt": 1794536765487,
+            "closedAt": 1794536765487
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536765487,
+            "headersAt": 1794536765487,
+            "status": 503,
+            "finishedAt": 1794536765487,
+            "closedAt": 1794536765487
+          }
+        ],
+        "browser": {
+          "passed": true,
+          "rows": [
+            {
+              "at": 1794536678125,
+              "waitingForEntryPlayer": false,
+              "ready": false,
+              "pending": true,
+              "hasBody": false,
+              "bodyDecoded": false,
+              "bodyPath": null,
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536686221,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/19.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536686265,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/16.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536686830,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/17.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536687330,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/18.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536687830,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/19.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536688331,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/16.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536688830,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/17.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536689330,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/18.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536689830,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/19.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536690330,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/16.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536690830,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/17.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536691330,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/18.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536691831,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/19.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536692225,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/19.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692255,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/16.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692325,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/16.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692353,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/44.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692530,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/45.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692730,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/46.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692830,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/47.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536692906,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/68.png",
+              "firstPlayable": true
+            }
+          ],
+          "visible": {
+            "decoded": true,
+            "visible": true,
+            "source": "/original-ui/CArmour/00/68.png",
+            "gate": true
+          },
+          "withheldFullPack": true,
+          "firstPlayableAt": 1794536692215,
+          "startAckAt": 1794536677886,
+          "clickToPlayableScope": "controlled 6s initial body unavailability; not public latency"
+        },
+        "fullPackUpgrade": {
+          "observedAt": 1794536693060,
+          "actualDecodedDataImage": true
+        }
+      },
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794536692215,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794536692267,
+            "wireAt": 1794536692277,
+            "ackAt": 1794536692314,
+            "renderedAt": 1794536692362,
+            "ackMs": 37,
+            "inputToRenderedMs": 95,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794536692382,
+            "wireAt": 1794536692877,
+            "ackAt": 1794536692889,
+            "renderedAt": 1794536692904,
+            "ackMs": 12,
+            "inputToRenderedMs": 522,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "browserRestart": {
+        "firstProcessCount": 8,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 8
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 26455,
+        "prewarm": {
+          "passed": true,
+          "selection": "latest current-session hud-core; prior cancelled runs retained",
+          "waitMs": 1919,
+          "snapshot": {
+            "runs": [
+              {
+                "name": "hud-core",
+                "label": "Core HUD",
+                "requested": 113,
+                "ok": 113,
+                "failed": 0,
+                "failedUrls": [],
+                "durationMs": 7060.399999991059,
+                "sceneCacheHits": 0,
+                "sceneCacheMisses": 0,
+                "status": "done"
+              }
+            ],
+            "summary": {
+              "requested": 113,
+              "ok": 113,
+              "failed": 0
+            },
+            "orchestrator": {
+              "backgroundMode": "afterPlayable",
+              "firstPlayable": true,
+              "requestedStage": "game",
+              "pendingBackgroundStage": null,
+              "activeBackgroundStage": null,
+              "completed": [
+                "game:background"
+              ],
+              "disposed": false
+            }
+          },
+          "originalMarkerPins": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "cached": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "samples": [
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ]
+          ],
+          "staleRequests": []
+        },
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        },
+        "ordinaryLogouts": 0
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1352,
+        "prewarm": {
+          "passed": true,
+          "selection": "latest current-session hud-core; prior cancelled runs retained",
+          "waitMs": 1921,
+          "snapshot": {
+            "runs": [
+              {
+                "name": "hud-core",
+                "label": "Core HUD",
+                "requested": 113,
+                "ok": 113,
+                "failed": 0,
+                "failedUrls": [],
+                "durationMs": 129.3999999910593,
+                "sceneCacheHits": 0,
+                "sceneCacheMisses": 0,
+                "status": "done"
+              }
+            ],
+            "summary": {
+              "requested": 113,
+              "ok": 113,
+              "failed": 0
+            },
+            "orchestrator": {
+              "backgroundMode": "afterPlayable",
+              "firstPlayable": true,
+              "requestedStage": "game",
+              "pendingBackgroundStage": null,
+              "activeBackgroundStage": null,
+              "completed": [
+                "game:background"
+              ],
+              "disposed": false
+            }
+          },
+          "originalMarkerPins": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "cached": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "samples": [
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ]
+          ],
+          "staleRequests": []
+        },
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "ordinaryLogouts": 0
+      },
+      "logout": {
+        "sentAt": 1794536740614,
+        "acknowledgedAt": 1794536742887,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "warmLogout": {
+        "sentAt": 1794536772077,
+        "acknowledgedAt": 1794536774406,
+        "savedPosition": {
+          "x": 288,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "rawReceiptSha256": "0e3aab0758f4ce2655db92bb0e4e5536abc3f934954e8aa60817fd2eba9b168d"
+    },
+    {
+      "run": "quest-after-r2",
+      "mode": "webgl2",
+      "gender": "female",
+      "passed": true,
+      "candidate": "8e82f53fcd74-player-meta-1e35025e",
+      "startGame": {
+        "acknowledgedAt": 1794536827150,
+        "bootstrapAt": 1794536827459,
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "map": "0"
+      },
+      "fastSelection": {
+        "loginAt": 1794536816522,
+        "selectReadyAt": 1794536818951,
+        "startClickAt": 1794536818971
+      },
+      "firstPlayable": {
+        "epochMs": 1794536841652,
+        "observedAt": 1794536841664
+      },
+      "earlyPlayer": {
+        "gender": "female",
+        "bodyDelayMs": 6000,
+        "releasedAt": 1794536842464,
+        "reads": [
+          {
+            "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+            "kind": "complete-player-pack",
+            "requestedAt": 1794536818968,
+            "closedAt": 1794536838966
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536835591,
+            "headersAt": 1794536842464,
+            "status": 503,
+            "finishedAt": 1794536842464,
+            "closedAt": 1794536842464
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536835591,
+            "headersAt": 1794536842464,
+            "status": 503,
+            "finishedAt": 1794536842464,
+            "closedAt": 1794536842464
+          },
+          {
+            "path": "/original-ui/CArmour/00/824.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536835629,
+            "headersAt": 1794536841639,
+            "status": 200,
+            "bytes": 2230,
+            "sha256": "6553c7beabf3545f602a8041b21af62917a48e0db0f2cddc23bddc76faeee390",
+            "finishedAt": 1794536841639,
+            "closedAt": 1794536841639
+          },
+          {
+            "path": "/original-ui/CHair/00/824.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536835630,
+            "headersAt": 1794536841639,
+            "status": 200,
+            "bytes": 325,
+            "sha256": "185141068b7a4543a715f047cc05f8c470bc475185849304336059dd6a663a72",
+            "finishedAt": 1794536841639,
+            "closedAt": 1794536841639
+          },
+          {
+            "path": "/original-ui/CArmour/00/825.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536836096,
+            "headersAt": 1794536841639,
+            "status": 200,
+            "bytes": 2252,
+            "sha256": "0ecf7ca64fe2d2d252cf92c599d5d2ff325114d7723609b02e97ee668189c55b",
+            "finishedAt": 1794536841639,
+            "closedAt": 1794536841639
+          },
+          {
+            "path": "/original-ui/CHair/00/825.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536836096,
+            "headersAt": 1794536841639,
+            "status": 200,
+            "bytes": 302,
+            "sha256": "fd8ac033f2ace05b11c463e4d2ba3237e38628fef4468b7b3a19bb000041ac6b",
+            "finishedAt": 1794536841639,
+            "closedAt": 1794536841639
+          },
+          {
+            "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+            "kind": "complete-player-pack",
+            "requestedAt": 1794536839170,
+            "status": 200,
+            "bytes": 282415,
+            "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+            "headersAt": 1794536842464,
+            "finishedAt": 1794536842464,
+            "closedAt": 1794536842464
+          },
+          {
+            "path": "/original-ui/CArmour/00/826.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841659,
+            "headersAt": 1794536841659,
+            "status": 200,
+            "bytes": 2219,
+            "sha256": "dd456623d87a597fe503db6d82201ab81ae276a6350de253ab3673b5918e3134",
+            "finishedAt": 1794536841660,
+            "closedAt": 1794536841660
+          },
+          {
+            "path": "/original-ui/CHair/00/826.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841659,
+            "headersAt": 1794536841661,
+            "status": 200,
+            "bytes": 318,
+            "sha256": "3a1811d09b74232b49053e3c1b199368b9c3d732bca176fd5a634eab706e3ba9",
+            "finishedAt": 1794536841661,
+            "closedAt": 1794536841661
+          },
+          {
+            "path": "/original-ui/CArmour/00/827.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841674,
+            "headersAt": 1794536841674,
+            "status": 200,
+            "bytes": 2219,
+            "sha256": "c8f1d6a3d8bacbc078d539bb27b44686af09242d8aba6081ba8d84cee93f005d",
+            "finishedAt": 1794536841675,
+            "closedAt": 1794536841675
+          },
+          {
+            "path": "/original-ui/CHair/00/827.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841674,
+            "headersAt": 1794536841675,
+            "status": 200,
+            "bytes": 317,
+            "sha256": "5353bc77f263c867d8a2702e2bd8526c78b621cf903d5f1422364edd010e50dd",
+            "finishedAt": 1794536841675,
+            "closedAt": 1794536841675
+          },
+          {
+            "path": "/original-ui/CArmour/00/852.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841793,
+            "headersAt": 1794536841794,
+            "status": 200,
+            "bytes": 1951,
+            "sha256": "cfe29855735e4f329685a3d68649a0c1745879691ed1aa0dabac3aa3d59a860c",
+            "finishedAt": 1794536841794,
+            "closedAt": 1794536841794
+          },
+          {
+            "path": "/original-ui/CHair/00/852.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841793,
+            "headersAt": 1794536841794,
+            "status": 200,
+            "bytes": 473,
+            "sha256": "1ac3a6ab87ddd7a45598679ef222654d6fc4cfd1153c45102e9ceaa23dadf1d0",
+            "finishedAt": 1794536841794,
+            "closedAt": 1794536841794
+          },
+          {
+            "path": "/original-ui/CArmour/00/853.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841994,
+            "headersAt": 1794536841994,
+            "status": 200,
+            "bytes": 1754,
+            "sha256": "890c269cf92ea79e4b03ccd0a836508f6380ae092d388d65706f2c500efa2f05",
+            "finishedAt": 1794536841994,
+            "closedAt": 1794536841994
+          },
+          {
+            "path": "/original-ui/CHair/00/853.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536841994,
+            "headersAt": 1794536841995,
+            "status": 200,
+            "bytes": 480,
+            "sha256": "feedb981c843a6e88b4f6d8af8f2a27045757a853498903e12a2934e55657105",
+            "finishedAt": 1794536841995,
+            "closedAt": 1794536841995
+          },
+          {
+            "path": "/original-ui/CArmour/00/854.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842097,
+            "headersAt": 1794536842101,
+            "status": 200,
+            "bytes": 1742,
+            "sha256": "33127aa350cbe1e5b24677726c31f1c820f07658dc34d12b6a7fa8564fb4e4c6",
+            "finishedAt": 1794536842102,
+            "closedAt": 1794536842102
+          },
+          {
+            "path": "/original-ui/CHair/00/854.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842097,
+            "headersAt": 1794536842102,
+            "status": 200,
+            "bytes": 473,
+            "sha256": "6d1a1ccc9c8d01bec600f38493537e3367dd8988de55ad9244c3259f5972a9ca",
+            "finishedAt": 1794536842102,
+            "closedAt": 1794536842102
+          },
+          {
+            "path": "/original-ui/CArmour/00/855.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842195,
+            "headersAt": 1794536842195,
+            "status": 200,
+            "bytes": 1941,
+            "sha256": "7ec7cf27e653ea21eb2c14c1f0ed4a6fc41e2438d530d05fa558ba9fcbd3d1aa",
+            "finishedAt": 1794536842195,
+            "closedAt": 1794536842195
+          },
+          {
+            "path": "/original-ui/CHair/00/855.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842195,
+            "headersAt": 1794536842195,
+            "status": 200,
+            "bytes": 484,
+            "sha256": "aaf32374c343468d86847c12824e4433e7fdc7096e27a43c42804182044e8ccc",
+            "finishedAt": 1794536842195,
+            "closedAt": 1794536842195
+          },
+          {
+            "path": "/original-ui/CArmour/00/856.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842223,
+            "headersAt": 1794536842223,
+            "status": 200,
+            "bytes": 1653,
+            "sha256": "c672340dd04699b0df688942ae38f4fffe308e7906dd1b75bd687936a7a1b1a7",
+            "finishedAt": 1794536842223,
+            "closedAt": 1794536842223
+          },
+          {
+            "path": "/original-ui/CHair/00/856.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842223,
+            "headersAt": 1794536842223,
+            "status": 200,
+            "bytes": 481,
+            "sha256": "1df7029a7fb5368c9ae9d30eabeac6e5fe5fd1235cb2c5b26c08622e67ca96f8",
+            "finishedAt": 1794536842223,
+            "closedAt": 1794536842223
+          },
+          {
+            "path": "/original-ui/CArmour/00/857.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842323,
+            "headersAt": 1794536842325,
+            "status": 200,
+            "bytes": 1791,
+            "sha256": "d16191110340155cc7f68b999d54b39b42a6170d75ec3ac053590613552bb90f",
+            "finishedAt": 1794536842325,
+            "closedAt": 1794536842325
+          },
+          {
+            "path": "/original-ui/CHair/00/857.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842324,
+            "headersAt": 1794536842325,
+            "status": 200,
+            "bytes": 493,
+            "sha256": "4b2e65fd2b66941798d42ea176f1fa51924e71e6f328d7e09a28d4acee5a0fdc",
+            "finishedAt": 1794536842325,
+            "closedAt": 1794536842325
+          },
+          {
+            "path": "/original-ui/CArmour/00/876.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842337,
+            "headersAt": 1794536842337,
+            "status": 200,
+            "bytes": 1964,
+            "sha256": "fbfd4c48ec5b32f422cf86533b036aaf93dced7b624f5a378912ce9ff92e9394",
+            "finishedAt": 1794536842337,
+            "closedAt": 1794536842337
+          },
+          {
+            "path": "/original-ui/CHair/00/876.png",
+            "kind": "loose-player-frame",
+            "requestedAt": 1794536842337,
+            "headersAt": 1794536842338,
+            "status": 200,
+            "bytes": 413,
+            "sha256": "9ec19a3187300414c27aa01109822077807d240104249f7211bc3c862cbd1a9a",
+            "finishedAt": 1794536842338,
+            "closedAt": 1794536842338
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536842586,
+            "headersAt": 1794536842586,
+            "status": 503,
+            "finishedAt": 1794536842586,
+            "closedAt": 1794536842586
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536842586,
+            "headersAt": 1794536842586,
+            "status": 503,
+            "finishedAt": 1794536842586,
+            "closedAt": 1794536842586
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536842938,
+            "headersAt": 1794536842938,
+            "status": 503,
+            "finishedAt": 1794536842938,
+            "closedAt": 1794536842938
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536842938,
+            "headersAt": 1794536842938,
+            "status": 503,
+            "finishedAt": 1794536842938,
+            "closedAt": 1794536842938
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536843061,
+            "headersAt": 1794536843061,
+            "status": 503,
+            "finishedAt": 1794536843061,
+            "closedAt": 1794536843061
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536843061,
+            "headersAt": 1794536843061,
+            "status": 503,
+            "finishedAt": 1794536843061,
+            "closedAt": 1794536843061
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536843412,
+            "headersAt": 1794536843412,
+            "status": 503,
+            "finishedAt": 1794536843412,
+            "closedAt": 1794536843412
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536843413,
+            "headersAt": 1794536843413,
+            "status": 503,
+            "finishedAt": 1794536843413,
+            "closedAt": 1794536843413
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913289,
+            "headersAt": 1794536913289,
+            "status": 503,
+            "finishedAt": 1794536913290,
+            "closedAt": 1794536913290
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913290,
+            "headersAt": 1794536913290,
+            "status": 503,
+            "finishedAt": 1794536913290,
+            "closedAt": 1794536913290
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913412,
+            "headersAt": 1794536913412,
+            "status": 503,
+            "finishedAt": 1794536913412,
+            "closedAt": 1794536913412
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913412,
+            "headersAt": 1794536913412,
+            "status": 503,
+            "finishedAt": 1794536913412,
+            "closedAt": 1794536913412
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913773,
+            "headersAt": 1794536913773,
+            "status": 503,
+            "finishedAt": 1794536913773,
+            "closedAt": 1794536913773
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913773,
+            "headersAt": 1794536913773,
+            "status": 503,
+            "finishedAt": 1794536913774,
+            "closedAt": 1794536913774
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913775,
+            "headersAt": 1794536913775,
+            "status": 503,
+            "finishedAt": 1794536913775,
+            "closedAt": 1794536913775
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913775,
+            "headersAt": 1794536913775,
+            "status": 503,
+            "finishedAt": 1794536913775,
+            "closedAt": 1794536913775
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913896,
+            "headersAt": 1794536913896,
+            "status": 503,
+            "finishedAt": 1794536913896,
+            "closedAt": 1794536913896
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536913896,
+            "headersAt": 1794536913896,
+            "status": 503,
+            "finishedAt": 1794536913896,
+            "closedAt": 1794536913896
+          },
+          {
+            "path": "/original-ui/CArmour/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536914247,
+            "headersAt": 1794536914247,
+            "status": 503,
+            "finishedAt": 1794536914247,
+            "closedAt": 1794536914247
+          },
+          {
+            "path": "/original-ui/CHair/00/meta.json",
+            "kind": "remote-player-meta",
+            "requestedAt": 1794536914248,
+            "headersAt": 1794536914248,
+            "status": 503,
+            "finishedAt": 1794536914248,
+            "closedAt": 1794536914248
+          }
+        ],
+        "browser": {
+          "passed": true,
+          "rows": [
+            {
+              "at": 1794536827445,
+              "waitingForEntryPlayer": false,
+              "ready": false,
+              "pending": true,
+              "hasBody": false,
+              "bodyDecoded": false,
+              "bodyPath": null,
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536835672,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/824.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536836106,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/825.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536836606,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/826.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536837106,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/827.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536837606,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/824.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536838106,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/825.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536838607,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/826.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536839106,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/827.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536839606,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/824.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536840105,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/825.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536840605,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/826.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536841105,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/827.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536841605,
+              "waitingForEntryPlayer": true,
+              "ready": false,
+              "pending": true,
+              "hasBody": true,
+              "bodyDecoded": false,
+              "bodyPath": "/original-ui/CArmour/00/824.png",
+              "firstPlayable": false
+            },
+            {
+              "at": 1794536841661,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/824.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536841823,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/852.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536842005,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/853.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536842106,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/854.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536842205,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/855.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536842226,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/856.png",
+              "firstPlayable": true
+            },
+            {
+              "at": 1794536842338,
+              "waitingForEntryPlayer": false,
+              "ready": true,
+              "pending": false,
+              "hasBody": true,
+              "bodyDecoded": true,
+              "bodyPath": "/original-ui/CArmour/00/876.png",
+              "firstPlayable": true
+            }
+          ],
+          "visible": {
+            "decoded": true,
+            "visible": true,
+            "source": "/original-ui/CArmour/00/876.png",
+            "gate": true
+          },
+          "withheldFullPack": true,
+          "firstPlayableAt": 1794536841652,
+          "startAckAt": 1794536827150,
+          "clickToPlayableScope": "controlled 6s initial body unavailability; not public latency"
+        },
+        "fullPackUpgrade": {
+          "observedAt": 1794536842476,
+          "actualDecodedDataImage": true
+        }
+      },
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794536841652,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794536841671,
+            "wireAt": 1794536841710,
+            "ackAt": 1794536841742,
+            "renderedAt": 1794536841792,
+            "ackMs": 32,
+            "inputToRenderedMs": 121,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794536841823,
+            "wireAt": 1794536842310,
+            "ackAt": 1794536842311,
+            "renderedAt": 1794536842337,
+            "ackMs": 1,
+            "inputToRenderedMs": 514,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "browserRestart": {
+        "firstProcessCount": 8,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 8
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 26542,
+        "prewarm": {
+          "passed": true,
+          "selection": "latest current-session hud-core; prior cancelled runs retained",
+          "waitMs": 1852,
+          "snapshot": {
+            "runs": [
+              {
+                "name": "hud-core",
+                "label": "Core HUD",
+                "requested": 113,
+                "ok": 113,
+                "failed": 0,
+                "failedUrls": [],
+                "durationMs": 7016.79999999702,
+                "sceneCacheHits": 0,
+                "sceneCacheMisses": 0,
+                "status": "done"
+              }
+            ],
+            "summary": {
+              "requested": 113,
+              "ok": 113,
+              "failed": 0
+            },
+            "orchestrator": {
+              "backgroundMode": "afterPlayable",
+              "firstPlayable": true,
+              "requestedStage": "game",
+              "pendingBackgroundStage": null,
+              "activeBackgroundStage": null,
+              "completed": [
+                "game:background"
+              ],
+              "disposed": false
+            }
+          },
+          "originalMarkerPins": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "cached": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "samples": [
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ]
+          ],
+          "staleRequests": []
+        },
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        },
+        "ordinaryLogouts": 0
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1366,
+        "prewarm": {
+          "passed": true,
+          "selection": "latest current-session hud-core; prior cancelled runs retained",
+          "waitMs": 1867,
+          "snapshot": {
+            "runs": [
+              {
+                "name": "hud-core",
+                "label": "Core HUD",
+                "requested": 113,
+                "ok": 113,
+                "failed": 0,
+                "failedUrls": [],
+                "durationMs": 38.70000000298023,
+                "sceneCacheHits": 0,
+                "sceneCacheMisses": 0,
+                "status": "done"
+              }
+            ],
+            "summary": {
+              "requested": 113,
+              "ok": 113,
+              "failed": 0
+            },
+            "orchestrator": {
+              "backgroundMode": "afterPlayable",
+              "firstPlayable": true,
+              "requestedStage": "game",
+              "pendingBackgroundStage": null,
+              "activeBackgroundStage": null,
+              "completed": [
+                "game:background"
+              ],
+              "disposed": false
+            }
+          },
+          "originalMarkerPins": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "cached": [
+            {
+              "frame": 985,
+              "bytes": 469,
+              "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+            },
+            {
+              "frame": 986,
+              "bytes": 486,
+              "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+            }
+          ],
+          "samples": [
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/986.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ],
+            [
+              {
+                "path": "/original-ui/Prguse/985.png",
+                "complete": true,
+                "width": 28,
+                "height": 29,
+                "failed": null,
+                "hidden": false
+              }
+            ]
+          ],
+          "staleRequests": []
+        },
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "ordinaryLogouts": 0
+      },
+      "logout": {
+        "sentAt": 1794536889349,
+        "acknowledgedAt": 1794536891716,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "warmLogout": {
+        "sentAt": 1794536920612,
+        "acknowledgedAt": 1794536922965,
+        "savedPosition": {
+          "x": 288,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "rawReceiptSha256": "54a7cc36d04547779a7b240b46ee3121d0872469a604b04d7557cfeabc95acfc"
+    }
+  ]
+}

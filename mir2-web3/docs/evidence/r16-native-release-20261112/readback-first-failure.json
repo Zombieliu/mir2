@@ -1,0 +1,25 @@
+{
+  "firstReadPassed": false,
+  "failures": [
+    {
+      "attempt": 1,
+      "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm"
+    },
+    {
+      "attempt": 2,
+      "path": "/version"
+    }
+  ],
+  "details": "The old runner did not capture curl stderr/status; retained as failed attempts.",
+  "repeat": {
+    "presentation": {
+      "status": 200,
+      "bytes": 259326,
+      "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96",
+      "matchesManifest": true
+    },
+    "version": {
+      "status": 200
+    }
+  }
+}

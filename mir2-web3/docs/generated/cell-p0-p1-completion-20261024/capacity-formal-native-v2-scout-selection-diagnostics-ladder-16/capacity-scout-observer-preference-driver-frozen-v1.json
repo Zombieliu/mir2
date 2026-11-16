@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T21:18:22.316Z",
+  "state": "FINAL_COMMITTED_DRIVER_SOURCE",
+  "actualCodeCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "rustBackendModified": false,
+  "rustBackendChangeScope": "Current H has no Rust/Cargo delta from actual c743 build. Runtime guard independently checks all50 raw/GitLF inputs and full closure before reuse.",
+  "sourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 258200,
+      "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "gitSourceBindings": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "rawBytes": 37930,
+      "rawSha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "e74f78a20cd51a66460ee03a8ba23903fecbab4c",
+      "committedGitObject": "e74f78a20cd51a66460ee03a8ba23903fecbab4c"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "rawBytes": 153586,
+      "rawSha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "0abfec3f169ed4b2ac812d712cb21d6c67a7cd64",
+      "committedGitObject": "0abfec3f169ed4b2ac812d712cb21d6c67a7cd64"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "rawBytes": 258200,
+      "rawSha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "ec6ffe29b2981d76523c2be612fb981ba20cdf36",
+      "committedGitObject": "ec6ffe29b2981d76523c2be612fb981ba20cdf36"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "rawBytes": 4447,
+      "rawSha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "f9ac9210e43da18e85ce75f70f92bf5bafae42db",
+      "committedGitObject": "f9ac9210e43da18e85ce75f70f92bf5bafae42db"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "rawBytes": 5228,
+      "rawSha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "217fd903024bc89a860ecd2e1c4c80b20753537b",
+      "committedGitObject": "217fd903024bc89a860ecd2e1c4c80b20753537b"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "rawBytes": 21246,
+      "rawSha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "a65227bec58442cd2865455730899c220d67964b",
+      "committedGitObject": "a65227bec58442cd2865455730899c220d67964b"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "rawBytes": 10882,
+      "rawSha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "85f3c977ead3a05a175d523b6556446de7d426c8",
+      "committedGitObject": "85f3c977ead3a05a175d523b6556446de7d426c8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "rawBytes": 6548,
+      "rawSha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "01b929db555e7442044386689dc05bcd3d4b20e0",
+      "committedGitObject": "01b929db555e7442044386689dc05bcd3d4b20e0"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "rawBytes": 6277,
+      "rawSha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "gitAttributeFilteredObject": "7174c2d58d947ed8f9bbf78f42c2c1526e7b94f0",
+      "committedGitObject": "7174c2d58d947ed8f9bbf78f42c2c1526e7b94f0"
+    }
+  ],
+  "otherSevenInputsUnchanged": true,
+  "priorFreeze": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "priorTestRawPrefix": {
+    "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "bytes": 243920,
+    "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966",
+    "exact": true
+  },
+  "backendSourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "fullRegression": {
+    "passed": 219,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "finalSourceFullRegressionPerformed": true,
+    "sourcePinsUnchangedAfterRun": true,
+    "exactSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+    "receipt": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+      "bytes": 5378,
+      "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+    },
+    "log": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-v1.log",
+      "bytes": 59078,
+      "sha256": "4b2d8af950ce74bd775bdb01a14aef9531ac3b6ef1ae9968573b1f7d4af95727"
+    },
+    "stderr": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "focusedTests": {
+    "passed": 9,
+    "includedInFull219": true,
+    "sourcePreservation": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\source-preservation-and-focused-receipt-v1.json",
+      "bytes": 21049,
+      "sha256": "5177c156deabecce26c37cc4104e36ff7b22352ebf26c6b77478a4bb23fa5684"
+    }
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-independent-review-v1\\review-v1.json",
+    "bytes": 7980,
+    "sha256": "2ff103a69374fa6860616d566d3a22b488c3e5ebe77b000cd019b8cff9afbfbc"
+  },
+  "fullRegressionReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-independent-review-v1\\full-regression-addendum-v1.json",
+    "bytes": 3152,
+    "sha256": "281d5faacadc10c0df2f476b9c5ed2b9ce50ddfaf4dc5e37979c4624dc08af6a"
+  },
+  "freezeBuilder": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\freeze-committed-driver-v1.mjs",
+    "bytes": 5960,
+    "sha256": "27cab14b71601f687c5acce05fca77dc93dfa196ed490cca0b753d61be7831d6"
+  },
+  "originalPolicyUnchanged": true,
+  "functionalVerificationOnly": true,
+  "capacityAccepted": false,
+  "realCapacityRunPerformedByThisFreeze": false,
+  "p2ImplementationPermitted": false
+}

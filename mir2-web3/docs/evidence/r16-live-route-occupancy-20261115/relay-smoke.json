@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "scope": "Real browser and unchanged payload forwarding through a loopback QA intent gate; not a gameplay or public-network qualification.",
+  "gateSourceSha256": "118500651669f2e216be822b838fa0f62fee580194ea2736c2e3f25a68f77514",
+  "browserVersion": "157.0.8103.78",
+  "framesentBoundaryVerified": true,
+  "events": [
+    {
+      "type": "connected",
+      "at": 1794681951315,
+      "connection": 1
+    },
+    {
+      "type": "armed",
+      "at": 1794681951330,
+      "id": 1,
+      "direction": "Up",
+      "maxMs": 2500
+    },
+    {
+      "type": "held",
+      "at": 1794681951331,
+      "id": 1,
+      "connection": 1,
+      "direction": "Up",
+      "bytes": 32
+    },
+    {
+      "type": "released",
+      "at": 1794681951332,
+      "id": 1,
+      "reason": "explicit",
+      "count": 3,
+      "heldMs": 1
+    },
+    {
+      "type": "armed",
+      "at": 1794681951380,
+      "id": 2,
+      "direction": "Down",
+      "maxMs": 2500
+    },
+    {
+      "type": "arm-expired",
+      "at": 1794681953892,
+      "id": 2
+    },
+    {
+      "type": "closed",
+      "at": 1794681954094
+    }
+  ],
+  "wire": {
+    "sent": 4,
+    "received": 4
+  },
+  "unmatchedArmTerminates": true,
+  "closed": {
+    "browser": true,
+    "server": true
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "sealedAt": "2026-10-25T16:36:46.582Z",
+  "actualCodeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "prepared": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\prepared-v1.json",
+    "bytes": 7234,
+    "sha256": "002b6ee01de9fc5f60b4d21d95883ca9904b2365bc370cd5fd5481257786c4ee"
+  },
+  "independentSourceReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-independent-review-v1.json",
+    "bytes": 5278,
+    "sha256": "bc3a99cdc61021a4de94e20939081328c1f0f9c8c0e3c24428b5a32accd64be1"
+  },
+  "preservedPendingBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\final-source-binding-pending-original-v1.json",
+    "bytes": 192,
+    "sha256": "678463e39a418a376ffa786c44733ce0096ebfe2e4e503470907e3e2007ba7db"
+  },
+  "finalBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\final-source-binding-v1.json",
+    "bytes": 804,
+    "sha256": "9399a96c74f345eeaa0fa4cefb8ced88712a79dd7be6d8bb8bae24abe4d66555"
+  },
+  "files": [
+    {
+      "file": "source-lib-v1.mjs",
+      "bytes": 16541,
+      "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+    },
+    {
+      "file": "pin-build-source-v1.mjs",
+      "bytes": 906,
+      "sha256": "9c2bb5502f3f9d6eadd7146daf670c5a2d88372da6518e198a82e8abaac385cc"
+    },
+    {
+      "file": "build-release-v1.mjs",
+      "bytes": 4904,
+      "sha256": "864ab65942cebd22edab689bab3eb46222fb38e42e0ec5124d4c22d3c3cbdbf1"
+    },
+    {
+      "file": "capture-release-v1.mjs",
+      "bytes": 3492,
+      "sha256": "7e6f40d82f785a397ef24022cccb53f92e30eac1ddc18f1d5296afbb598e545f"
+    },
+    {
+      "file": "prepare-entrypoints-v1.mjs",
+      "bytes": 4717,
+      "sha256": "2939c504f293248e8320e0acca7bc403e2cd4dcc52e91d3499b5b93003aa6243"
+    },
+    {
+      "file": "entrypoint-derivation-v1.json",
+      "bytes": 5817,
+      "sha256": "28b68650ab94aa627651e7d7c0ff7451df77aac7ef492fb12c7b4d0d4cd5c582"
+    },
+    {
+      "file": "final-source-binding-v1.json",
+      "bytes": 804,
+      "sha256": "9399a96c74f345eeaa0fa4cefb8ced88712a79dd7be6d8bb8bae24abe4d66555"
+    },
+    {
+      "file": "source-and-parameter-schema-v1.json",
+      "bytes": 3002,
+      "sha256": "2a773f037d4db999454f8564171a3f6acebb77ab38a0977af5cdb905558e774f"
+    },
+    {
+      "file": "slow-stage-scoped-draft-v1.json",
+      "bytes": 1000,
+      "sha256": "bd518cf5ed1328bc9511a97fc5b19c08031cfb6bea4f4774f40f71743358850e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3186,
+      "sha256": "ccee84531a2c4a639844e317d08766757ea237df21f1afd0d7df4b76385c5029"
+    },
+    {
+      "file": "prepare-metadata-v1.mjs",
+      "bytes": 4935,
+      "sha256": "5dcb9281abf053937b699fdaaa497168430e8b2c67e16ebe37f65a2026700646"
+    }
+  ],
+  "sourceSha256": "4a5927c657bd1c6f59c850bb335ade7dd5df7cc88eee171c21091ac28504711a",
+  "onlyPreparedConfigurationChanged": "final-source-binding-v1.json",
+  "reviewedOtherTenInputsUnchanged": true,
+  "actualCaptureExecuted": false,
+  "actualBuildExecuted": false,
+  "capacityAccepted": false
+}

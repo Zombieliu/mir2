@@ -1,0 +1,204 @@
+{
+  "scope": "Unchanged C4B browser control, passive key/HUD reads only; original deadlines unchanged. Does not replace failed original R2.",
+  "phase": "after-open-key",
+  "timeline": [
+    {
+      "phase": "before",
+      "at": 1794819179072,
+      "hudNavigation": [],
+      "focus": {
+        "tag": "CANVAS",
+        "id": "mir2-quest-ui-canvas"
+      },
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-quest-ui-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 4,
+        "openRevision": 3
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        }
+      },
+      "keyboard": {
+        "at": 1794819179000,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "handled": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": null,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": true,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794819155085
+    },
+    {
+      "phase": "after-open-key",
+      "at": 1794819179142,
+      "hudNavigation": [],
+      "focus": {
+        "tag": "CANVAS",
+        "id": "mir2-quest-ui-canvas"
+      },
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-quest-ui-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 4,
+        "openRevision": 3
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794819179126,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": false,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": false,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794819155085
+    },
+    {
+      "phase": "after-open-key",
+      "at": 1794819179193,
+      "hudNavigation": [],
+      "focus": {
+        "tag": "CANVAS",
+        "id": "mir2-quest-ui-canvas"
+      },
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-quest-ui-canvas",
+      "quest": {
+        "ready": true,
+        "open": true,
+        "generation": 2,
+        "revision": 6,
+        "openRevision": 4
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794819179126,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": false,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": false,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794819155085
+    },
+    {
+      "phase": "after-open-key",
+      "at": 1794819179463,
+      "hudNavigation": [],
+      "focus": {
+        "tag": "CANVAS",
+        "id": "mir2-quest-ui-canvas"
+      },
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-quest-ui-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 7,
+        "openRevision": 5
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794819179440,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "handled": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": null,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": true,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794819155085
+    }
+  ]
+}

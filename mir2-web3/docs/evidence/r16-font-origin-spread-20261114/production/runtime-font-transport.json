@@ -1,0 +1,810 @@
+{
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "observer": "existing frozen passive collector",
+  "scope": "Only fonts, WASM and runtime glue, plus UserLocation/KeepAlive metadata. Not a complete resource waterfall. No payloads, auth headers or query strings.",
+  "assets": [
+    {
+      "path": "https://numeron.obelisk.build/_next/static/media/r16-login-tc.93f45434.woff2",
+      "requestTimestamp": 187603.623798,
+      "requestAtMs": 17311,
+      "status": 200,
+      "headersTimestamp": 187606.360002,
+      "headersAtMs": 20045,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 19,
+      "receivedDataLength": 246760,
+      "receivedEncodedDataLength": 247084,
+      "maxDataGapMs": 0,
+      "firstDataAtMs": 20045,
+      "lastDataAtMs": 20045,
+      "finishedTimestamp": 187606.35132,
+      "finishedAtMs": 20045,
+      "encodedBytes": 247341
+    },
+    {
+      "path": "https://numeron.obelisk.build/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+      "requestTimestamp": 187603.779571,
+      "requestAtMs": 17464,
+      "status": 200,
+      "headersTimestamp": 187605.7988,
+      "headersAtMs": 19483,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 16,
+      "receivedDataLength": 252454,
+      "receivedEncodedDataLength": 117622,
+      "maxDataGapMs": 271,
+      "firstDataAtMs": 19754,
+      "lastDataAtMs": 21763,
+      "finishedTimestamp": 187608.07661,
+      "finishedAtMs": 21763,
+      "encodedBytes": 117921
+    },
+    {
+      "path": "https://numeron.obelisk.build/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+      "requestTimestamp": 187608.21871,
+      "requestAtMs": 21903,
+      "status": 200,
+      "headersTimestamp": 187609.439626,
+      "headersAtMs": 23125,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 9,
+      "receivedDataLength": 259326,
+      "receivedEncodedDataLength": 122002,
+      "maxDataGapMs": 1622,
+      "firstDataAtMs": 24747,
+      "lastDataAtMs": 25820,
+      "finishedTimestamp": 187612.182023,
+      "finishedAtMs": 25868,
+      "encodedBytes": 122263
+    },
+    {
+      "path": "https://numeron.obelisk.build/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+      "requestTimestamp": 187612.304876,
+      "requestAtMs": 25990,
+      "status": 200,
+      "headersTimestamp": 187613.005409,
+      "headersAtMs": 26690,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 6,
+      "receivedDataLength": 164087,
+      "receivedEncodedDataLength": 72990,
+      "maxDataGapMs": 86,
+      "firstDataAtMs": 26776,
+      "lastDataAtMs": 26997,
+      "finishedTimestamp": 187613.31138,
+      "finishedAtMs": 26997,
+      "encodedBytes": 73231
+    },
+    {
+      "path": "https://numeron.obelisk.build/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web_bg.wasm",
+      "requestTimestamp": 187613.454701,
+      "requestAtMs": 27139,
+      "status": 200,
+      "headersTimestamp": 187614.196367,
+      "headersAtMs": 27881,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 6,
+      "receivedDataLength": 190701,
+      "receivedEncodedDataLength": 90346,
+      "maxDataGapMs": 56,
+      "firstDataAtMs": 27924,
+      "lastDataAtMs": 28120,
+      "finishedTimestamp": 187614.435036,
+      "finishedAtMs": 28123,
+      "encodedBytes": 90620
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestTimestamp": 187681.119251,
+      "requestAtMs": 94821,
+      "status": 504,
+      "headersTimestamp": 187722.207893,
+      "headersAtMs": 135897,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "failedTimestamp": 187722.208018,
+      "failedAtMs": 135897,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "requestTimestamp": 187689.606769,
+      "requestAtMs": 103295,
+      "status": 200,
+      "headersTimestamp": 187691.959534,
+      "headersAtMs": 105647,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 3,
+      "receivedDataLength": 141747,
+      "receivedEncodedDataLength": 20744,
+      "maxDataGapMs": 0,
+      "firstDataAtMs": 105647,
+      "lastDataAtMs": 105647,
+      "finishedTimestamp": 187691.958923,
+      "finishedAtMs": 105647,
+      "encodedBytes": 20854
+    },
+    {
+      "path": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 187689.607675,
+      "requestAtMs": 103295,
+      "failedTimestamp": 187697.608826,
+      "failedAtMs": 111296,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 187697.608695,
+      "requestAtMs": 111296,
+      "status": 200,
+      "headersTimestamp": 187700.619042,
+      "headersAtMs": 114309,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "failedTimestamp": 187715.620711,
+      "failedAtMs": 129310,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 187715.620526,
+      "requestAtMs": 129309,
+      "status": 200,
+      "headersTimestamp": 187760.168923,
+      "headersAtMs": 173859,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 22,
+      "receivedDataLength": 291332,
+      "receivedEncodedDataLength": 116711,
+      "maxDataGapMs": 12200,
+      "firstDataAtMs": 186059,
+      "lastDataAtMs": 186810,
+      "failedTimestamp": 187788.124153,
+      "failedAtMs": 201814,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 187789.124233,
+      "requestAtMs": 202814,
+      "status": 200,
+      "headersTimestamp": 187789.268274,
+      "headersAtMs": 202958,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 389,
+      "receivedDataLength": 31452436,
+      "receivedEncodedDataLength": 6026756,
+      "maxDataGapMs": 460,
+      "firstDataAtMs": 203075,
+      "lastDataAtMs": 256897,
+      "finishedTimestamp": 187843.007284,
+      "finishedAtMs": 256897,
+      "encodedBytes": 6027121
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestTimestamp": 187843.030647,
+      "requestAtMs": 256897,
+      "failedTimestamp": 187959.163917,
+      "failedAtMs": 372860,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestTimestamp": 187843.030785,
+      "requestAtMs": 256897,
+      "status": 200,
+      "headersTimestamp": 187918.367307,
+      "headersAtMs": 332061,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 28,
+      "receivedDataLength": 11941968,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 20,
+      "firstDataAtMs": 332081,
+      "lastDataAtMs": 332081,
+      "finishedTimestamp": 187918.382888,
+      "finishedAtMs": 332106,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestTimestamp": 187843.502114,
+      "requestAtMs": 257210
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestTimestamp": 187843.502177,
+      "requestAtMs": 257210,
+      "status": 200,
+      "headersTimestamp": 187935.669285,
+      "headersAtMs": 349363,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 621572,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 4,
+      "firstDataAtMs": 349367,
+      "lastDataAtMs": 349367,
+      "finishedTimestamp": 187935.669252,
+      "finishedAtMs": 349367,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestTimestamp": 187843.502233,
+      "requestAtMs": 257210,
+      "status": 200,
+      "headersTimestamp": 187918.367466,
+      "headersAtMs": 332062,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 6,
+      "receivedDataLength": 11941968,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 28,
+      "firstDataAtMs": 332090,
+      "lastDataAtMs": 332090,
+      "finishedTimestamp": 187918.395098,
+      "finishedAtMs": 332117,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestTimestamp": 187843.502295,
+      "requestAtMs": 257210,
+      "status": 200,
+      "headersTimestamp": 187943.767166,
+      "headersAtMs": 357462,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 243520,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 1,
+      "firstDataAtMs": 357463,
+      "lastDataAtMs": 357463,
+      "finishedTimestamp": 187943.767107,
+      "finishedAtMs": 357463,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestTimestamp": 187843.50235,
+      "requestAtMs": 257210,
+      "status": 200,
+      "headersTimestamp": 187950.465215,
+      "headersAtMs": 364160,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 37780,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 1,
+      "firstDataAtMs": 364161,
+      "lastDataAtMs": 364161,
+      "finishedTimestamp": 187950.462393,
+      "finishedAtMs": 364161,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestTimestamp": 187843.502405,
+      "requestAtMs": 257210,
+      "status": 200,
+      "headersTimestamp": 187957.991145,
+      "headersAtMs": 371687,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 2,
+      "receivedDataLength": 234892,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 0,
+      "firstDataAtMs": 371687,
+      "lastDataAtMs": 371687,
+      "finishedTimestamp": 187957.99142,
+      "finishedAtMs": 371688,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestTimestamp": 187918.41146,
+      "requestAtMs": 332106,
+      "status": 200,
+      "headersTimestamp": 187935.669417,
+      "headersAtMs": 349363,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 621572,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 5,
+      "firstDataAtMs": 349368,
+      "lastDataAtMs": 349368,
+      "finishedTimestamp": 187935.669335,
+      "finishedAtMs": 349368,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestTimestamp": 187935.674664,
+      "requestAtMs": 349368,
+      "status": 200,
+      "headersTimestamp": 187943.767292,
+      "headersAtMs": 357463,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 243520,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 1,
+      "firstDataAtMs": 357464,
+      "lastDataAtMs": 357464,
+      "finishedTimestamp": 187943.767121,
+      "finishedAtMs": 357464,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestTimestamp": 187943.768493,
+      "requestAtMs": 357464,
+      "status": 200,
+      "headersTimestamp": 187950.465336,
+      "headersAtMs": 364161,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 37780,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 0,
+      "firstDataAtMs": 364161,
+      "lastDataAtMs": 364161,
+      "finishedTimestamp": 187950.462421,
+      "finishedAtMs": 364161,
+      "encodedBytes": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestTimestamp": 187950.465829,
+      "requestAtMs": 364161,
+      "status": 200,
+      "headersTimestamp": 187957.991282,
+      "headersAtMs": 371687,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "dataEvents": 1,
+      "receivedDataLength": 234892,
+      "receivedEncodedDataLength": 0,
+      "maxDataGapMs": 1,
+      "firstDataAtMs": 371688,
+      "lastDataAtMs": 371688,
+      "finishedTimestamp": 187957.99143,
+      "finishedAtMs": 371688,
+      "encodedBytes": 0
+    }
+  ],
+  "wire": [
+    {
+      "kind": "sent",
+      "atMs": 75549,
+      "timestamp": 187661.861658,
+      "type": "keepAlive",
+      "time": 1794639272369
+    },
+    {
+      "kind": "received",
+      "atMs": 75683,
+      "timestamp": 187661.995663,
+      "packet": "KeepAlive",
+      "time": 1794639272369
+    },
+    {
+      "kind": "sent",
+      "atMs": 90548,
+      "timestamp": 187676.861309,
+      "type": "keepAlive",
+      "time": 1794639287368
+    },
+    {
+      "kind": "received",
+      "atMs": 90699,
+      "timestamp": 187677.011898,
+      "packet": "KeepAlive",
+      "time": 1794639287368
+    },
+    {
+      "kind": "sent",
+      "atMs": 103404,
+      "timestamp": 187689.716654,
+      "type": "walk"
+    },
+    {
+      "kind": "sent",
+      "atMs": 105550,
+      "timestamp": 187691.863041,
+      "type": "keepAlive",
+      "time": 1794639302370
+    },
+    {
+      "kind": "received",
+      "atMs": 116689,
+      "timestamp": 187702.999478,
+      "packet": "UserLocation"
+    },
+    {
+      "kind": "received",
+      "atMs": 116690,
+      "timestamp": 187703.000217,
+      "packet": "KeepAlive",
+      "time": 1794639302370
+    },
+    {
+      "kind": "sent",
+      "atMs": 120553,
+      "timestamp": 187706.864616,
+      "type": "keepAlive",
+      "time": 1794639317373
+    },
+    {
+      "kind": "received",
+      "atMs": 120695,
+      "timestamp": 187707.006108,
+      "packet": "KeepAlive",
+      "time": 1794639317373
+    },
+    {
+      "kind": "sent",
+      "atMs": 135551,
+      "timestamp": 187721.862107,
+      "type": "keepAlive",
+      "time": 1794639332371
+    },
+    {
+      "kind": "received",
+      "atMs": 135688,
+      "timestamp": 187721.998559,
+      "packet": "KeepAlive",
+      "time": 1794639332371
+    },
+    {
+      "kind": "sent",
+      "atMs": 150553,
+      "timestamp": 187736.864113,
+      "type": "keepAlive",
+      "time": 1794639347373
+    },
+    {
+      "kind": "received",
+      "atMs": 150695,
+      "timestamp": 187737.006234,
+      "packet": "KeepAlive",
+      "time": 1794639347373
+    },
+    {
+      "kind": "sent",
+      "atMs": 165554,
+      "timestamp": 187751.86537,
+      "type": "keepAlive",
+      "time": 1794639362374
+    },
+    {
+      "kind": "received",
+      "atMs": 165698,
+      "timestamp": 187752.009084,
+      "packet": "KeepAlive",
+      "time": 1794639362374
+    },
+    {
+      "kind": "sent",
+      "atMs": 180552,
+      "timestamp": 187766.862801,
+      "type": "keepAlive",
+      "time": 1794639377373
+    },
+    {
+      "kind": "received",
+      "atMs": 180708,
+      "timestamp": 187767.018542,
+      "packet": "KeepAlive",
+      "time": 1794639377373
+    },
+    {
+      "kind": "sent",
+      "atMs": 195551,
+      "timestamp": 187781.861571,
+      "type": "keepAlive",
+      "time": 1794639392372
+    },
+    {
+      "kind": "received",
+      "atMs": 195691,
+      "timestamp": 187782.001182,
+      "packet": "KeepAlive",
+      "time": 1794639392372
+    },
+    {
+      "kind": "sent",
+      "atMs": 210552,
+      "timestamp": 187796.862086,
+      "type": "keepAlive",
+      "time": 1794639407373
+    },
+    {
+      "kind": "received",
+      "atMs": 210689,
+      "timestamp": 187796.999384,
+      "packet": "KeepAlive",
+      "time": 1794639407373
+    },
+    {
+      "kind": "sent",
+      "atMs": 225551,
+      "timestamp": 187811.861285,
+      "type": "keepAlive",
+      "time": 1794639422372
+    },
+    {
+      "kind": "received",
+      "atMs": 225700,
+      "timestamp": 187812.010562,
+      "packet": "KeepAlive",
+      "time": 1794639422372
+    },
+    {
+      "kind": "sent",
+      "atMs": 240554,
+      "timestamp": 187826.862166,
+      "type": "keepAlive",
+      "time": 1794639437375
+    },
+    {
+      "kind": "received",
+      "atMs": 240689,
+      "timestamp": 187826.99774,
+      "packet": "KeepAlive",
+      "time": 1794639437375
+    },
+    {
+      "kind": "sent",
+      "atMs": 255553,
+      "timestamp": 187841.861633,
+      "type": "keepAlive",
+      "time": 1794639452374
+    },
+    {
+      "kind": "received",
+      "atMs": 255689,
+      "timestamp": 187841.997255,
+      "packet": "KeepAlive",
+      "time": 1794639452374
+    },
+    {
+      "kind": "sent",
+      "atMs": 270555,
+      "timestamp": 187856.863329,
+      "type": "keepAlive",
+      "time": 1794639467376
+    },
+    {
+      "kind": "received",
+      "atMs": 270699,
+      "timestamp": 187857.006352,
+      "packet": "KeepAlive",
+      "time": 1794639467376
+    },
+    {
+      "kind": "sent",
+      "atMs": 285553,
+      "timestamp": 187871.86142,
+      "type": "keepAlive",
+      "time": 1794639482374
+    },
+    {
+      "kind": "received",
+      "atMs": 285725,
+      "timestamp": 187872.032202,
+      "packet": "KeepAlive",
+      "time": 1794639482374
+    },
+    {
+      "kind": "sent",
+      "atMs": 300556,
+      "timestamp": 187886.862122,
+      "type": "keepAlive",
+      "time": 1794639497376
+    },
+    {
+      "kind": "received",
+      "atMs": 300697,
+      "timestamp": 187887.001997,
+      "packet": "KeepAlive",
+      "time": 1794639497376
+    },
+    {
+      "kind": "sent",
+      "atMs": 315557,
+      "timestamp": 187901.863382,
+      "type": "keepAlive",
+      "time": 1794639512377
+    },
+    {
+      "kind": "received",
+      "atMs": 315698,
+      "timestamp": 187902.002802,
+      "packet": "KeepAlive",
+      "time": 1794639512377
+    },
+    {
+      "kind": "sent",
+      "atMs": 330559,
+      "timestamp": 187916.864629,
+      "type": "keepAlive",
+      "time": 1794639527379
+    },
+    {
+      "kind": "received",
+      "atMs": 330697,
+      "timestamp": 187917.002376,
+      "packet": "KeepAlive",
+      "time": 1794639527379
+    },
+    {
+      "kind": "sent",
+      "atMs": 345557,
+      "timestamp": 187931.862978,
+      "type": "keepAlive",
+      "time": 1794639542377
+    },
+    {
+      "kind": "received",
+      "atMs": 345698,
+      "timestamp": 187932.002533,
+      "packet": "KeepAlive",
+      "time": 1794639542377
+    },
+    {
+      "kind": "sent",
+      "atMs": 360559,
+      "timestamp": 187946.86346,
+      "type": "keepAlive",
+      "time": 1794639557379
+    },
+    {
+      "kind": "received",
+      "atMs": 360700,
+      "timestamp": 187947.003749,
+      "packet": "KeepAlive",
+      "time": 1794639557379
+    }
+  ],
+  "firstWalkTransport": {
+    "websocketFrameMs": 13283,
+    "keepAlives": [
+      {
+        "sentRelativeToWalkMs": -27855,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": -12855,
+        "rttMs": 151
+      },
+      {
+        "sentRelativeToWalkMs": 2146,
+        "rttMs": 11137
+      },
+      {
+        "sentRelativeToWalkMs": 17148,
+        "rttMs": 141
+      },
+      {
+        "sentRelativeToWalkMs": 32145,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 47147,
+        "rttMs": 142
+      },
+      {
+        "sentRelativeToWalkMs": 62149,
+        "rttMs": 144
+      },
+      {
+        "sentRelativeToWalkMs": 77146,
+        "rttMs": 156
+      },
+      {
+        "sentRelativeToWalkMs": 92145,
+        "rttMs": 140
+      },
+      {
+        "sentRelativeToWalkMs": 107145,
+        "rttMs": 137
+      },
+      {
+        "sentRelativeToWalkMs": 122145,
+        "rttMs": 149
+      },
+      {
+        "sentRelativeToWalkMs": 137146,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 152145,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 167147,
+        "rttMs": 143
+      },
+      {
+        "sentRelativeToWalkMs": 182145,
+        "rttMs": 171
+      },
+      {
+        "sentRelativeToWalkMs": 197145,
+        "rttMs": 140
+      },
+      {
+        "sentRelativeToWalkMs": 212147,
+        "rttMs": 139
+      },
+      {
+        "sentRelativeToWalkMs": 227148,
+        "rttMs": 138
+      },
+      {
+        "sentRelativeToWalkMs": 242146,
+        "rttMs": 140
+      },
+      {
+        "sentRelativeToWalkMs": 257147,
+        "rttMs": 140
+      }
+    ],
+    "gatewayHealthBefore": {
+      "status": 200,
+      "startedAt": 95662,
+      "finishedAt": 95932,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 6266711,
+      "successes": 0,
+      "failures": 0,
+      "count": 0,
+      "sumUs": 0
+    },
+    "gatewayHealthAfter": null,
+    "admissionCounterDelta": null
+  },
+  "originalPrivateSha256": "b969745d8e3a18824fe6212e6ff4b95c253d9deafdde9c33e41ef92386e87a2d"
+}

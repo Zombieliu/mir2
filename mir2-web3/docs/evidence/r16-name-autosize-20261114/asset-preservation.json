@@ -1,0 +1,116 @@
+{
+  "passed": true,
+  "deterministicIndependentExports": 2,
+  "unchangedOriginalPngs": [
+    {
+      "key": "entity-assistant-jane",
+      "pngSha256": "d7c45ab85fe05802c14ef8602cd804bbe4efe1e87ab065bbaa998a78746d6da6"
+    },
+    {
+      "key": "entity-merchant-ruben-multiline",
+      "pngSha256": "4ef60032c450d5357279aa9be86c74192026a4bdac0bd2b5122631923eb3038c"
+    },
+    {
+      "key": "hud-hp",
+      "pngSha256": "6853e8d57b6284a6c92c4206422cafb9dd09b228a5a77dfb9db439d7cd05722f"
+    },
+    {
+      "key": "minimap-coordinate",
+      "pngSha256": "81c8ee4b1c342797c7fd966d25124b7dce05350b99a72a0f006773c65f8109c3"
+    },
+    {
+      "key": "chat-online-players",
+      "pngSha256": "7cb235bcc90d4e8f2aa587f9434bc1fe12069e7a1b3c0aa4d7dd2bafbad70784"
+    },
+    {
+      "key": "chat-line-message-net-8",
+      "pngSha256": "c2676055e09afbbebfa186a8e7828ba3c9dac8ac3075763dcc53de68fb31d028"
+    },
+    {
+      "key": "chat-system-error",
+      "pngSha256": "49e6a15c4a75a63b363cb3e2644d3afbdc2aa82206ef95e5ac99296d8e6c223e"
+    },
+    {
+      "key": "pt-br-accents",
+      "pngSha256": "b7cfc452063660b7376099a98e154489828b6934fe5c13ceb579ffe211b3744a"
+    }
+  ],
+  "added": [
+    {
+      "key": "entity-assistant-jane-auto",
+      "text": "Assistant Jane",
+      "size": {
+        "mode": "auto",
+        "requested": null,
+        "measured": {
+          "width": 79,
+          "height": 14
+        },
+        "output": {
+          "width": 81,
+          "height": 16
+        }
+      },
+      "foreground": "#FF00FF00",
+      "pngSha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+    },
+    {
+      "key": "entity-merchant-auto",
+      "text": "Merchant",
+      "size": {
+        "mode": "auto",
+        "requested": null,
+        "measured": {
+          "width": 52,
+          "height": 14
+        },
+        "output": {
+          "width": 54,
+          "height": 16
+        }
+      },
+      "foreground": "#FF00FF00",
+      "pngSha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+    },
+    {
+      "key": "entity-ruben-auto",
+      "text": "Ruben",
+      "size": {
+        "mode": "auto",
+        "requested": null,
+        "measured": {
+          "width": 38,
+          "height": 14
+        },
+        "output": {
+          "width": 40,
+          "height": 16
+        }
+      },
+      "foreground": "#FFFFFFFF",
+      "pngSha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+    }
+  ],
+  "oldManifestSha256": "96a25dc099622f5ab382d67bf1ed66814a826d28316476b374db62d2d73e5460",
+  "newManifestSha256": "e325b15600f85b7ff7465cdd62346118fabeee01400ec12207d98aaaa8f04729",
+  "font": {
+    "requestedFamily": "Arial",
+    "resolvedFamily": "Arial",
+    "style": "Regular",
+    "sizePoints": 8,
+    "dpi": 96,
+    "fileName": "arial.ttf",
+    "fileSha256": "edfbd22a3d088fc2f5d7c79b8c9c732df6dc878a60f0a80be0f92a3c7a634404"
+  },
+  "originalFont": {
+    "requestedFamily": "Arial",
+    "resolvedFamily": "Arial",
+    "style": "Regular",
+    "sizePoints": 8,
+    "dpi": 96,
+    "fileName": "arial.ttf",
+    "fileSha256": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a"
+  },
+  "fontFileChanged": true,
+  "fontProvenanceDecision": "Initial identical-font-file gate failed. Read-only review proved all eight original PNGs byte-identical with the current installed Arial at the same 8pt/96DPI; those exact comparisons are mandatory before installation. New manifest honestly records the current font file and exporter environment, and old manifest is retained."
+}

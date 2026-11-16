@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.stone-parent-qualification.v1",
+  "parent": "07c7a55b2d834f097ead83e6f8f600ba82e4d683",
+  "declared": 470,
+  "authored": 24,
+  "protected": 446,
+  "mismatchCount": 0,
+  "mismatches": [],
+  "method": "Canonical Git clean blobs, batched stdin-paths",
+  "createdUtc": "2026-10-09T15:23:29.2295985Z"
+}

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_CANDIDATE_NOT_EXECUTED",
+  "writeSet": [
+    "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+    "mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs"
+  ],
+  "files": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\protocol-navigation-workspace-v1\\protocol-navigation.mjs.before-workspace-v1.txt",
+        "bytes": 18249,
+        "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+        "bytes": 19998,
+        "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+      },
+      "fullForwardRawExact": true,
+      "fullInverseRawExact": true,
+      "hunks": [
+        {
+          "beforeStartLineZeroBased": 15,
+          "beforeLines": 0,
+          "afterStartLineZeroBased": 15,
+          "afterLines": 21,
+          "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "afterSha256": "897781c601c5a8f72b97ab982d0cec3b7c5a4f05eff74c84c44c472fc5e1a0cf"
+        },
+        {
+          "beforeStartLineZeroBased": 206,
+          "beforeLines": 10,
+          "afterStartLineZeroBased": 227,
+          "afterLines": 21,
+          "beforeSha256": "213d50fefb541b4afe26796f326ef310042f1673eb5de8ce8fe62918721c9ee2",
+          "afterSha256": "d6dcd250d40a14fbb66165a6cecabf7dd29941f56f48960d36f4cf3f6735153d"
+        },
+        {
+          "beforeStartLineZeroBased": 217,
+          "beforeLines": 8,
+          "afterStartLineZeroBased": 249,
+          "afterLines": 28,
+          "beforeSha256": "fd61c62f93f2aaca16c198b80548f9b52544d27f18c4230eb9410a377e0d000b",
+          "afterSha256": "1f4ad7ab8c656531d30a154a672770556f04dd433f745666a289c9d3b11bed09"
+        },
+        {
+          "beforeStartLineZeroBased": 226,
+          "beforeLines": 17,
+          "afterStartLineZeroBased": 278,
+          "afterLines": 16,
+          "beforeSha256": "a799cc24a269e9d78adfb48460dcd1a2fa771df8eb291d7ac2cd852053a5ecf3",
+          "afterSha256": "585a720b448771dfd5f46a8c0cf25bfd0e5b00d454285817b1e808d419fc380a"
+        },
+        {
+          "beforeStartLineZeroBased": 245,
+          "beforeLines": 1,
+          "afterStartLineZeroBased": 296,
+          "afterLines": 0,
+          "beforeSha256": "43d8869cba222e0003b0f25ba18313b5777a55091d7ff1860996d88776592488",
+          "afterSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\protocol-navigation-workspace-v1\\test-protocol-navigation.mjs.before-workspace-v1.txt",
+        "bytes": 8276,
+        "sha256": "e1ef0c1c71c1a25a96ecae65e20d03e0ff1c42faffab29a8b25cab797a3cc52b"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-navigation.mjs",
+        "bytes": 18156,
+        "sha256": "5f17e004728b180a2d260314f21f942d771e3bdf498c37155cd38a6287dd565b"
+      },
+      "fullForwardRawExact": true,
+      "fullInverseRawExact": true,
+      "hunks": [
+        {
+          "beforeStartLineZeroBased": 216,
+          "beforeLines": 0,
+          "afterStartLineZeroBased": 216,
+          "afterLines": 198,
+          "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "afterSha256": "32c9c0cb7eaab6c5b2e56af090701b02677c8cc6b6f4e20b09e39dd545b0a159"
+        }
+      ]
+    }
+  ],
+  "diff": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\protocol-navigation-workspace-v1\\source-diff-v1.patch",
+    "bytes": 17066,
+    "sha256": "d399dd5c350f8f173f662f05b92029a02d61fb11de31b8ad68a26704c682a607"
+  },
+  "old14TestPrefixBytes": 8276,
+  "old14TestsRawPrefixExact": true,
+  "newTests": 5,
+  "sourceInvariants": {
+    "STEPSAndMapParsingAndPreSearchFunctionsRawExact": true,
+    "AStarHeapWhileDiagonalOrderingBodyExactAfterRemovingOnlyLeaseIndentAndOneFirstTouchLine": true,
+    "allFunctionsAfterSearchIncludingMinHeapAndHeapLessRawExact": true,
+    "initialScoreInfinityPredecessorMinus2ClosedZero": true,
+    "startAndFirstFiniteScoreTouchBeforeMutation": true,
+    "onlyTouchedCellsResetFinally": true,
+    "busyBeforeAllocationAndReleasedOnExceptions": true,
+    "reentrantAndOver4MUseOriginalFreshThreeArrayBehavior": true,
+    "capacityMayCoverSmallerDifferentMapDimensions": true,
+    "noPathResultOrObstacleCaching": true
+  },
+  "retention": {
+    "retainedSlotCount": 1,
+    "maxRetainedCells": 4000000,
+    "bytesPerRetainedCell": 17,
+    "maxRetainedTypedArrayBytes": 68000000,
+    "notTotalProcessRss": true,
+    "includes": [
+      "Float64 scores",
+      "Int32 predecessor",
+      "Uint8 closed",
+      "Int32 dirty indices"
+    ]
+  },
+  "testIsolation": {
+    "separateNodeModuleIsolatePerFixture": true,
+    "constructorAndFillHooksFinallyRestored": true,
+    "newProductionExports": 0
+  },
+  "verification": {
+    "gitDiffCheckExitCode": 0,
+    "nodeChecksExecutedHere": false,
+    "testsExecutedHere": false,
+    "cargoExecutedHere": false,
+    "loadExecutedHere": false
+  },
+  "suggestedRootCommands": [
+    "node --check apps/web/scripts/quest-agent/protocol-navigation.mjs",
+    "node --check apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+    "node --test apps/web/scripts/quest-agent/test-protocol-navigation.mjs"
+  ],
+  "limitations": [
+    "No measured live generator improvement yet.",
+    "Cache memory bound excludes map bitmaps, heap/path objects, replaced buffers before GC and fresh reentrant/oversized fallbacks.",
+    "Initial/growing workspace still fully initializes score/predecessor arrays."
+  ]
+}

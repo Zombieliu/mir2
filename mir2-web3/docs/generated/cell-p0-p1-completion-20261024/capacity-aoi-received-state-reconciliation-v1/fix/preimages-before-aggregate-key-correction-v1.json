@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "canonicalDriverCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+  "sourceSha256": "30863fa8e8b0af6f5588cddafb43ec7355e83bd2c3f9a792fb8c4ebc6f3f1750",
+  "files": [
+    {
+      "path": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 286361,
+      "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "aggregateVerified": false
+}

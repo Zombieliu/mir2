@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v11",
+  "state": "SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING",
+  "sourcePrivate": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private",
+  "sourceReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\preparation-episode-receipt-v1.json",
+    "bytes": 5867,
+    "sha256": "9244128ab88b971ee49883c767ee49470175c881981ee08bdb3fc23821829771"
+  },
+  "sourceReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\reports\\1793059295383-3bd423ad.preparation-report.json",
+    "bytes": 27965,
+    "sha256": "86a8672faedd7c7d4b16406bd18d2251b7636f5a2c8b703e0dc99d8898471863"
+  },
+  "sourceCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\cleanup-v1.json",
+    "bytes": 1037,
+    "sha256": "5f39b7a144573461c5960fcdcd4b0bd9373373c616cd19f21b35c90fb31a0920"
+  },
+  "sourcePreparedIndex": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\prepared-index-v1.json",
+    "bytes": 2419,
+    "sha256": "d4af274a99077f85086599b8ea50ca7d1b0d85ecf9c83cf252342939e1824d51"
+  },
+  "sourceOwnedProcess": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\owned-process-v1.json",
+    "bytes": 742,
+    "sha256": "6ef976aa61dd711296f5a206b8da16b71041bf07c59f4a34764ffca4a829c364"
+  },
+  "sourceFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\frozen-source-v1.json",
+    "bytes": 97599,
+    "sha256": "8bf6cea20d2060fdca404297a00d7862b38247fdc65b35af8e0f50d9e0036a4e"
+  },
+  "sourceOriginalVerdict": {
+    "ok": false,
+    "error": "safe Deer funding holds 2/3 Venison after 2 hunts and 8 attempts",
+    "preparedCount": 7,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "sourceControlledPoolAccounts": 100,
+  "sourceReadyCharacters": 8,
+  "sourceRegisteredAccounts": 92,
+  "sourceStoreTotalAccounts": 101,
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "normalLogout": true
+    }
+  ],
+  "sourceFailedCharacter": {
+    "name": "L370e2a07",
+    "characterIndex": 8,
+    "notPrepared": true,
+    "catchTimeNormalLogoutFlag": false,
+    "originalFailure": "safe Deer funding holds 2/3 Venison after 2 hunts and 8 attempts",
+    "lastPublicPreparation": {
+      "initialFreshHp": 18,
+      "initialMaximumHp": 18,
+      "initialHpStock": 1,
+      "initialGold": 0,
+      "initialPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "commands": 45,
+      "movementCommands": 11,
+      "commandCounts": {
+        "clientVersion": 1,
+        "interact": 1,
+        "selectNpcDialog": 1,
+        "run": 7,
+        "walk": 4,
+        "attackV2": 19,
+        "harvest": 12
+      },
+      "elapsedMs": 92213.47439999995,
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "pathHazardCount": 0,
+      "pathReplanCount": 0,
+      "fundingTargetRejectionCount": 6,
+      "finalPublicTransform": {
+        "x": 287,
+        "y": 604
+      },
+      "actualStagingReached": false
+    },
+    "finalExactHp": null,
+    "finalHpStock": null,
+    "coldStoreHpStockReadbackPerformed": false,
+    "scope": "Source failed eighth is never promoted. Original error holds2of3 Venison after2hunts8attempts; funding result remains null, no sale-value sufficiency or final exactHP/HPstock is inferred from that message. Complete current W10 cold Store is pinned without editing; future ordinary login must freshly prove all identities/health/stock."
+  },
+  "sourcePreparedEligibilityInherited": false,
+  "newCurrentSourceQualification": null,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\accounts.json",
+      "bytes": 162309,
+      "sha256": "2021501f77b568c20892db3b94400e92430b45ff091878f263ea8357955f02bb",
+      "relative": "accounts.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\capacity-pool.json",
+      "bytes": 20743,
+      "sha256": "1e3890898fff94c9dcdc096334bdf6d9b200d53886c3ffeba7675a6c3f66d7d4",
+      "relative": "capacity-pool.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 651,
+      "sha256": "1dbed962110056e1ebee1bcc7e79ab8c8f2ed0eeb2b344ce625c34eeab4140c5",
+      "relative": "capacity-auth-budget.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+      "relative": "recovery-mac-key.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+      "relative": "identity-session-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+      "relative": "identity-recovery-pepper.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+      "relative": "passkey-auth-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/.mir2-directory-durability"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "f0fd53ccf5d86236d7a7bddfea614d7b520de2792d4fb4a922665606f523594d",
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/quarantine/.mir2-directory-durability"
+    }
+  ],
+  "fileCount": 11,
+  "totalBytes": 184357,
+  "recovery": {
+    "expectedControlFiles": [
+      ".mir2-directory-durability",
+      ".mir2-recovery-exclusive.lock",
+      ".mir2-recovery-owner-v1.json",
+      "quarantine/.mir2-directory-durability"
+    ],
+    "journalPayloadsMustEqualZero": true,
+    "preservedDestination": "source-save-recovery-preserved",
+    "activeDestination": "save-recovery",
+    "activeInitialization": "Empty new directory; normal Gateway creates a new path-bound ownership sentinel. Original control files remain unchanged only in preserved archive."
+  },
+  "copyPolicy": {
+    "copyExclusively": true,
+    "sourcePinsBeforeAndAfter": true,
+    "fullStoreAndPoolRawBytes": true,
+    "accountStoreRewritePerformed": false,
+    "poolRewritePerformed": false,
+    "stockOrPositionEditPerformed": false,
+    "authLedgerCopiedUnchanged": true,
+    "loginNotBeforeOverrideAllowed": false,
+    "seederInvoked": false,
+    "secretsValuesReported": false,
+    "latestLedgerSource": "Exact latest actual W10 capacity-auth-budget.json, same endpoint and100 identities, never reset or rolled back"
+  },
+  "scope": "Continue actual W10 normally closed whole cold Store/pool/four secrets/latest ledger/current4controls by raw EXCL. Original false7prepared/8ready and failed eighth funding2of3/2hunts8attempts/45commands11moves/0hazard0replan retained. Dedicated first4 no-economic inventory reuse remains onlyfirst4, not inherited readiness for7. No seed/grant/Store/pool/auth/time/origin edit. SameV6 ee06/55backend/Rust32 remains strict reuse; new helper HEAD/currentRootJSreceipt unknown.",
+  "priorRecoveryArchive": {
+    "directory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\source-save-recovery-preserved",
+    "retainInPlace": true,
+    "copiedToNewActive": false,
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": ".mir2-directory-durability"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relative": ".mir2-recovery-exclusive.lock"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "052c786473656e0a0ff27996259c3d663b5f87f0488a2875db4267e478de7975",
+        "relative": ".mir2-recovery-owner-v1.json"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "quarantine/.mir2-directory-durability"
+      }
+    ],
+    "scope": "W10 original source-preserved four controls remain untouched in place. Current W10 active controls will only be copied to the new preserved directory; a fresh active directory is normally initialized by Gateway."
+  },
+  "sourceIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\root-independent-cleanup-v1.json",
+    "bytes": 203,
+    "sha256": "19a86ddbbc4db5192fddf5759f7bfe67a827810f6292de9e49b2a4da2bd9f564"
+  },
+  "sourceFirst4InventoryReuse": true,
+  "sourceFirst4InventoryReuseScope": "Historical W10 receipt proves only the first4 names, not all7 prepared. All100 need fresh normal preparation; only the same first4 are the dedicated no-economic reuse assertion."
+}

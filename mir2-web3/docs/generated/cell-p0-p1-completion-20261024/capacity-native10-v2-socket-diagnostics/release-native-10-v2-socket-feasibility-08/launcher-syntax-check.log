@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-10-24T23:35:50.804Z",
+  "allPassed": true,
+  "checks": [
+    {
+      "file": "collect-public.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "driver-report-contract.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "initialize-private.ps1",
+      "passed": true,
+      "mode": "PowerShell AST parse only"
+    },
+    {
+      "file": "input-lib.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "monitor-owned.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "prepare-inputs.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "recover-drained-owned.ps1",
+      "passed": true,
+      "mode": "PowerShell AST parse only"
+    },
+    {
+      "file": "request-stop.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "run-owned.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "slow-stage-public.test.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "socket-build-source-lib.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "verify-full16-gate.mjs",
+      "passed": true,
+      "mode": "node --check"
+    },
+    {
+      "file": "verify-public.mjs",
+      "passed": true,
+      "mode": "node --check"
+    }
+  ],
+  "gameModulesEvaluated": false,
+  "realmStarted": false
+}

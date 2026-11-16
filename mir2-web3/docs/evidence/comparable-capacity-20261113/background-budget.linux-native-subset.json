@@ -1,0 +1,107 @@
+{
+  "schema": "mir2.background-budget-linux-native-artifact-subset-audit.v1",
+  "nativeArtifactChecksPassed": true,
+  "fullCandidateVerificationPassed": false,
+  "fullVerifierExecuted": false,
+  "oldUnboundVerifierModifiedOrBypassed": false,
+  "sourceRevision": "99b959cef4286cc0c11bfa9f7a892bac061344ee",
+  "windowsSourceRevision": "32eb62774dc8ac1a49876808f6118948f137d5b6",
+  "canonicalIntegrationRevision": "362ea11c2498ffb7dda28d38299ed4aa6ca6c425",
+  "runId": 43700044674,
+  "nativeJobId": 132768973026,
+  "wholeWorkflowStatus": "completed",
+  "wholeWorkflowConclusion": "success",
+  "wholeWorkflowSuccessProven": true,
+  "nativeJobConclusion": "success",
+  "artifacts": {
+    "gateway": {
+      "path": "gateway-artifact.zip",
+      "id": 14155909642,
+      "bytes": 84688227,
+      "sha256": "f5a3c1fa0b390209acbca961f050d7e864036a284111325542f64a9491756a10",
+      "name": "mir2-playtest-wallet-gateway-linux-x64-99b959cef4286cc0c11bfa9f7a892bac061344ee"
+    },
+    "nativeEvidence": {
+      "path": "native-evidence-artifact.zip",
+      "id": 14155889812,
+      "bytes": 88428,
+      "sha256": "0e7ff3a8b2331c56e3c5e91d06035f926991b49f9d2a1a81357f0613e00f00a2",
+      "name": "mir2-playtest-wallet-build-evidence-99b959cef4286cc0c11bfa9f7a892bac061344ee"
+    }
+  },
+  "binarySha256": "c8f5e7b569fafc61788daa96a55788ef54d620cdf6f09d7df87c7044d03408aa",
+  "binarySizeBytes": 103830680,
+  "packageSha256": "c743dda43a5f32f583800b7548f8830657d9c43938dd6f916a5d6bf768299176",
+  "releaseManifestSha256": "0d15d93a01311923f7e855d6f932baf859fe194dd638d47a31b77716761e60fc",
+  "artifactDirectory": "E:\\mir2-capacity-linux-artifacts-background-budget-99b-v1\\native-audit\\release",
+  "startupReceiptSha256": "38c6c381309167d8484e746c9f3df22ba525a1b52b8d95c0249a318eb54e31e8",
+  "gatewayExitCode": 0,
+  "redisExitCode": 0,
+  "nativeRequiredGates": [
+    "activities_postgres",
+    "billing_postgres",
+    "gateway-package",
+    "gateway-postgres-startup",
+    "linux-release-security",
+    "monthly_card_postgres",
+    "schema_union"
+  ],
+  "gateReceiptSha256": "b118b6619e6e0eef8e11cd21d04bd8e7829fd47495cf13b748bc275da41998d9",
+  "mapManifestSha256": "e77b07d62c9b3d2bcefcc213d738bdec262a2f31d30d12040f32e2d56a848d08",
+  "mapArchiveSha256": "67be149193cb95b681dddc9b21213f447607ccc611714751c32018cbe13eb3af",
+  "maps": {
+    "fileCount": 1620,
+    "totalFileBytes": 42111309,
+    "allGitArtifactBytesMatch": true,
+    "noLFSPointers": true,
+    "freshLiveMapMatchNotProven": true
+  },
+  "allFiftySevenCompiledInputsEqualWindows32ebAndIntegration": true,
+  "sourceEquivalenceSha256": "4603ef1565cded826969c74355edf3fca27cb93d6693f821f937edb7b7e37c98",
+  "windowsNative143DescriptorIsReferenceNotLinuxFullSuite": true,
+  "windowsNativeReference": {
+    "nativePassed": 143,
+    "gateway": 45,
+    "rpc": 1,
+    "simulation": 97,
+    "WindowsReferenceNotLinuxFullSuite": true,
+    "releaseCargoActualExitCode": 0,
+    "releaseCompileWrapperExitCode": 1,
+    "releaseCompileNormalEnvelopePassed": false,
+    "releaseHelperCleanupWasForced": true,
+    "releaseCompilerEnvelopeFailurePreserved": true,
+    "nativeDescriptorIntegrationPendingAtExecution": true
+  },
+  "releaseTag": "playtest-background-budget-99b959cef428",
+  "ELFExecutedLocally": false,
+  "missingFullQualification": [
+    "fresh current TEST identity/config/map proof",
+    "strict whole-candidate binding and Root review",
+    "actual deployment authorization",
+    "closed qualifying workload result"
+  ],
+  "nativePreauditOnly": false,
+  "actualInputSha256": "483696f132c54702ee0b334e9fbc3dcfbe1df959147ebef194fbd5d0e19a38e9",
+  "completedOfficialMetadataSha256": "b15c4c7a709adb148ddba87a0074f030e76b2dc566f457d9d147b2ea5071f40e",
+  "deploymentApproved": false,
+  "capacityQualified": false,
+  "localHundredActorOutcomeNotInferred": true,
+  "fullAuditProof": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-linux-artifact-audit-bound-v1\\native-artifact-audit.json",
+    "bytes": 11788,
+    "sha256": "2b9b47b23cd4a2288c1a8ed031f0a44f9104cfb19737e18b5543a706508fb156"
+  },
+  "localOfflineAuditJob": {
+    "receipt": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-linux-artifact-audit-actual-v1\\job-result.json",
+      "bytes": 1213,
+      "sha256": "b7441961eb83f6673bb7d312f5cef39cf6b62f30524a440b5324171a69c3d39b"
+    },
+    "actualExitCodes": [
+      0,
+      0
+    ],
+    "allOwnedClosedNoKill": true
+  },
+  "publicServiceDeployed": false
+}

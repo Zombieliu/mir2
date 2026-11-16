@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-24T21:10:33.295Z",
+  "repositoryCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "scope": "Exact two writer-file bytes before any native patrol Run-preference edit. Original formal03 failure and prior driver freeze remain unchanged.",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "copy": "C:\\mir2-build\\p01-completion-20261024\\patrol-run-preference-preimage-v1\\playtest-capacity-soak.mjs",
+      "bytes": 129465,
+      "sha256": "854a6281bfcd164176477f70dc88a41e1478a8b425448d810e197970f695c4db"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "copy": "C:\\mir2-build\\p01-completion-20261024\\patrol-run-preference-preimage-v1\\playtest-capacity-soak.test.mjs",
+      "bytes": 180693,
+      "sha256": "17ec1c40b5c0acfdd553b171e29225311a687e80091f4c175a0775fd6e434617"
+    }
+  ]
+}

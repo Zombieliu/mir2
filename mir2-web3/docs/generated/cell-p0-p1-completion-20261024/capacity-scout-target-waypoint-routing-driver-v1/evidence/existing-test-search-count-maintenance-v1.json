@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "approvedByRoot": true,
+  "changedOriginalCases": [
+    3173,
+    3308,
+    3447
+  ],
+  "rules": [
+    {
+      "before": "test('observer scout preference preserves the exact cyclic fallback when hints exhaust only the remaining four-search budget'",
+      "after": "test('observer scout preference preserves the exact cyclic fallback when its hint fails within the four-search budget'"
+    },
+    {
+      "before": "  assert.equal(hinted.client.navigationAttemptCount, 3); assert.equal(hinted.client.navigationAttempts.length, 3);\n  const selection = hinted.rows.find(row => row.type === 'combatScoutSelection');\n  assert.equal(selection.reason, 'cyclic-fallback'); assert.equal(selection.pathSearches, 4); assert.equal(selection.hintPathSearches, 3);",
+      "after": "  assert.equal(hinted.client.navigationAttemptCount, 1); assert.equal(hinted.client.navigationAttempts.length, 1);\n  const selection = hinted.rows.find(row => row.type === 'combatScoutSelection');\n  assert.equal(selection.reason, 'cyclic-fallback'); assert.equal(selection.pathSearches, 2); assert.equal(selection.hintPathSearches, 1);"
+    },
+    {
+      "before": "  assert.equal(selected.scoutHomeIndex, 0); assert.equal(client.navigationAttemptCount, 3);",
+      "after": "  assert.equal(selected.scoutHomeIndex, 0); assert.equal(client.navigationAttemptCount, 1);"
+    },
+    {
+      "before": "  assert.equal(rows.find(row => row.type === 'combatScoutSelection').pathSearches, 4);",
+      "after": "  assert.equal(rows.find(row => row.type === 'combatScoutSelection').pathSearches, 2);"
+    },
+    {
+      "before": "test('scout anti-convergence failed preferred paths keep the exact cyclic fallback and four total searches'",
+      "after": "test('scout anti-convergence failed preferred paths keep the exact cyclic fallback within four total searches'"
+    },
+    {
+      "before": "  assert.equal(ranked.rows.at(-1).reason, 'cyclic-fallback'); assert.equal(ranked.rows.at(-1).pathSearches, 4);\n  assert.equal(ranked.rows.at(-1).hintPathSearches, 3); assert.equal(ranked.other.navigationAttemptCount, 3);",
+      "after": "  assert.equal(ranked.rows.at(-1).reason, 'cyclic-fallback'); assert.equal(ranked.rows.at(-1).pathSearches, 3);\n  assert.equal(ranked.rows.at(-1).hintPathSearches, 2); assert.equal(ranked.other.navigationAttemptCount, 2);"
+    }
+  ],
+  "inverseRawExact": true,
+  "inverseThenOriginalTestPrefixRawExact": true,
+  "unchangedAssertions": "fallback deepEqual, rejected-cell read-only retention, hint ordering, finite state, claims and no gameplay credit",
+  "reason": "One validated attack tile per hint replaces repeated home-adjacent searches; actual one-hint 1 failed/2 total and two-hint 2 failed/3 total, all within original four searches."
+}

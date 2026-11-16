@@ -1,0 +1,37 @@
+{
+  "classifierSha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402",
+  "frozenBeforePromotion": true,
+  "testsPassed": 7,
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "actualPreviousE6FunctionalSuccessCorrectlyRejected": {
+    "kind": "r16-original-public-acceptance",
+    "accepted": false,
+    "checks": {
+      "exactSource": true,
+      "completeFunctionalRun": true,
+      "walletLoginOnly": true,
+      "movementOriginalEightSeconds": true,
+      "sixCompleteFonts": true,
+      "complete113": true,
+      "sharedNativeQuest": true,
+      "originalNative120": false,
+      "originalRuntimeBody120": false,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true
+    },
+    "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+    "deploymentId": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+    "originalMoveBudgetMs": 8000,
+    "originalNativeBudgetMs": 120000,
+    "nativeAfterFirstFrameMs": 211585,
+    "runtimeBodyAfterFirstFrameMs": 146582,
+    "supplementary180ObservationChangesOriginalBudget": false,
+    "wholeParityAccepted": false
+  },
+  "actualCliRejectsPreviousColdFailure": true,
+  "newSource": "5b011e5d2fcce78883b517e5992ef23245052f84",
+  "newCandidate": "dpl_CGUG4eNnpBEreSxFPi7rsoZcNVhV",
+  "rollbackRequiredIfOriginalGatesFail": true
+}

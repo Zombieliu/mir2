@@ -1,0 +1,243 @@
+{
+  "schema": "mir2.wallet.real-legacy-launcher-check.v1",
+  "passed": true,
+  "installation": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\e2e-old23-installation",
+  "actualLegacyLauncherExecuted": true,
+  "legacyLauncherSha256": "7404CDF744D1FD89C90AB67B088A0972F8059B25F0E311331CC11B6BC07A6B9E",
+  "actualEngineBinaryExecuted": true,
+  "launcherExitCode": 0,
+  "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+  "engineSourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+  "gameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+  "candidate": "WN-CANDIDATE-20261029-wallet-28",
+  "sequence": 24,
+  "outcome": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261029-wallet-28",
+    "changedGameFiles": 101918,
+    "delivery": {
+      "bundles": 5,
+      "fallbacks": 0,
+      "patches": 0
+    },
+    "downloadedBytes": 332981956,
+    "downloadedFiles": 870,
+    "sequence": 24,
+    "wireBytes": 397833195
+  },
+  "beforeCandidate": "WN-CANDIDATE-20261011-invited-25",
+  "beforeExeSha256": "901C47188259B5F2A6B73070B12456D4ECC13AAB02C68B975E1843FFFC507348",
+  "transport": "compiled public HTTPS five-class feed/origin",
+  "gameLaunched": false,
+  "firstLaunchHealthAccepted": false,
+  "pendingFirstLaunchPreserved": true,
+  "mir2EnvironmentRemoved": true,
+  "personalAndLogsPreserved": true,
+  "allManifestPayloadsVerified": true,
+  "verifiedFileCount": 255069,
+  "verifiedPayloadBytes": 1202414057,
+  "manifestSha256": "BCA71514A99E158EB583F48D3E81095219C81C0C122CB1AE498B081460F822C0",
+  "exeSha256": "CE8A604A5A2F0A1185FA279E0299232DAB0E09F6498FBA9BE959F9D6A1F75440",
+  "strictReportSha256": "4CDB98689B7FDEE725297670E832D3271E119A60121966A2188935485A7ECA66",
+  "realBridgeReportSha256": "9629C2C90ACB4AAEB211987C4E304A680320901DC871CA102BAB23530FD698C3",
+  "finalBindingSha256": "084D076B10F26784923A9E3FCAFB34131F4BAD38DB81DE7FF8C349E89EE1607C",
+  "feedSha256": "0C7C9626271C98D478A48CE79DCA92F31436B84AD20B6C2DB4462D65B4DE8A91",
+  "elapsedSeconds": 1947.01,
+  "events": [
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 255069,
+        "copyFlushMs": 0,
+        "elapsedMs": 104649,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "checking-installed",
+        "total": 255069,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793220984
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 257,
+        "copyFlushMs": 0,
+        "elapsedMs": 408,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 257,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793221038
+    },
+    {
+      "detail": {
+        "elapsedMs": 2466,
+        "fileCount": 257,
+        "path": "delivery/5886c5d25d0a90c289a7e2494523e750423ce944ca973515e4441ef5afdcaa15.m2b.gz",
+        "wireBytes": 66806762
+      },
+      "event": "delivery-bundle",
+      "time": 1793221038
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 7246,
+        "copyFlushMs": 0,
+        "elapsedMs": 7249,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 7246,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793221047
+    },
+    {
+      "detail": {
+        "elapsedMs": 8957,
+        "fileCount": 7246,
+        "path": "delivery/f54b4f5f4ed82482813ef252b412a32d59c819e30130bf3595faa45c3ac45bc7.m2b.gz",
+        "wireBytes": 64522695
+      },
+      "event": "delivery-bundle",
+      "time": 1793221047
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 24955,
+        "copyFlushMs": 0,
+        "elapsedMs": 26845,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 24955,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793221075
+    },
+    {
+      "detail": {
+        "elapsedMs": 28099,
+        "fileCount": 24955,
+        "path": "delivery/c61d33d1332a42c0bc1c33eed9dd5b39f635b1c5f41f5bf0ded3970ef585bc0e.m2b.gz",
+        "wireBytes": 55794863
+      },
+      "event": "delivery-bundle",
+      "time": 1793221075
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 21499,
+        "copyFlushMs": 0,
+        "elapsedMs": 23663,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 21499,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793221100
+    },
+    {
+      "detail": {
+        "elapsedMs": 24661,
+        "fileCount": 21499,
+        "path": "delivery/825b8c0622b02140db13912509f636fe5d9346666b5f6f04dbb29ddb3b81d63a.m2b.gz",
+        "wireBytes": 57404494
+      },
+      "event": "delivery-bundle",
+      "time": 1793221100
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 30490,
+        "copyFlushMs": 0,
+        "elapsedMs": 30155,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 30490,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793221131
+    },
+    {
+      "detail": {
+        "elapsedMs": 31439,
+        "fileCount": 30490,
+        "path": "delivery/528847d0fd96267dc50905fbd5f2848a689586f88ea74b529ffdb820976da0d1.m2b.gz",
+        "wireBytes": 52650793
+      },
+      "event": "delivery-bundle",
+      "time": 1793221131
+    },
+    {
+      "detail": {
+        "cacheHits": 100466,
+        "completed": 101331,
+        "copyFlushMs": 1122492,
+        "elapsedMs": 929551,
+        "outcome": "complete",
+        "payloadResolveMs": 686557,
+        "phase": "staging",
+        "total": 101331,
+        "writtenBytes": 482553686
+      },
+      "event": "local-phase-end",
+      "time": 1793222061
+    },
+    {
+      "detail": {
+        "completed": 101925,
+        "elapsedMs": 55930,
+        "outcome": "complete",
+        "phase": "preparing",
+        "total": 101925
+      },
+      "event": "local-phase-end",
+      "time": 1793222117
+    },
+    {
+      "detail": {
+        "completed": 101925,
+        "elapsedMs": 660748,
+        "outcome": "complete",
+        "phase": "installing",
+        "total": 101925
+      },
+      "event": "local-phase-end",
+      "time": 1793222778
+    },
+    {
+      "detail": {
+        "activated": true,
+        "candidate": "WN-CANDIDATE-20261029-wallet-28",
+        "changedGameFiles": 101918,
+        "delivery": {
+          "bundles": 5,
+          "fallbacks": 0,
+          "patches": 0
+        },
+        "downloadedBytes": 332981956,
+        "downloadedFiles": 870,
+        "sequence": 24,
+        "wireBytes": 397833195
+      },
+      "event": "update",
+      "time": 1793222779
+    }
+  ]
+}

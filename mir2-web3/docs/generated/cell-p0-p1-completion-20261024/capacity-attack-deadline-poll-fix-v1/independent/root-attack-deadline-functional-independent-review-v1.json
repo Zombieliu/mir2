@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:26:50.472Z",
+  "scope": "Read-only cross-check of Root actual focused Rust8, same-invocation Node210 and integration rustfmt1 summary; no tests repeated.",
+  "summary": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-validation-v1.json",
+    "bytes": 7819,
+    "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea"
+  },
+  "summarySource": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-validation-v1.mjs",
+    "bytes": 5185,
+    "sha256": "478f9abf05899539d2dc6ede1345f35c4b57adcd13ea66246be9558752d66941"
+  },
+  "actualEvidence": [
+    {
+      "kind": "rustFocused",
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-correlated-slow-stage-validation-v1\\focused-execution-v1.json",
+        "bytes": 1744,
+        "sha256": "1874a8243344494a7a65ceef06a263a3cf1b7eacd898010636caae510cda91c6"
+      },
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/focused-v1.log",
+        "bytes": 64266,
+        "sha256": "43ab5289f35aeea4e9ad34e89321409695662c450441fec06259e86127c0e2a6"
+      }
+    },
+    {
+      "kind": "nodeRegression",
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\frozen-full-driver-receipt-v1.json",
+        "bytes": 4758,
+        "sha256": "c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4"
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\frozen-full-driver-v1.log",
+        "bytes": 56491,
+        "sha256": "537f26b4a6037136470083a6a90acbf9ccc432f47f38cdeb82aace539b65dfb0"
+      }
+    },
+    {
+      "kind": "rustfmt",
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\integration-rustfmt-execution-v1.json",
+        "bytes": 1063,
+        "sha256": "dd9246da118a1afb860c0d54aca11c9e6ed304eca1c033d1d09c1b319f6dd99d"
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\integration-rustfmt-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 857503,
+      "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+    }
+  ],
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "proof": {
+    "backendManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+      "bytes": 32926,
+      "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+    },
+    "backendInputCount": 44,
+    "currentOther43RawExact": true,
+    "currentWebRawMatchesFocusedBeforeAfterAndRootFmt": true,
+    "currentAllNineDriverInputsMatchFull210": true,
+    "summaryThreeChecksMatchOriginalReceiptsAndLogs": true,
+    "rustFocusedFooter": "8 passed; 0 failed; 0 ignored; 1245 filtered",
+    "nodeFullFooter": "210 passed; 0 failed/cancelled/skipped/todo",
+    "rustfmtReceiptExitCode": 0,
+    "preliminaryMain185PlusAdjacent25NotMisrepresented": true
+  },
+  "limits": [
+    "This cross-check does not independently execute the referenced tests or OS queries.",
+    "Rust focused8 is a bounded diagnostic module, not a workspace run.",
+    "Current 43-original-backend check here is raw bytes; future committed filtered Git objects are checked by the new Release source guard.",
+    "No new source-bound Release, full lifecycle or real capacity run is established by this summary.",
+    "Original Formal11 remains failed; P0 remains pending and P2 frozen."
+  ],
+  "verdict": {
+    "functionalSummaryEvidencePassed": true,
+    "blockingFindingIds": [],
+    "eligibleForRootCheckpoint": true,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "schema": "mir2.classic.map-transfer-availability.candidate.v1",
+  "utc": "2026-10-10T02:35:13.982902+00:00",
+  "parent": "431520196068b710c6588bf53c75a599c2f726bd",
+  "localPassedDistinct": 146,
+  "newTests": 11,
+  "retainedRegressionTests": 135,
+  "existingIgnoredBenchmark": 1,
+  "inputScope": "24 selected paths before/after/current, not a whole-workspace or toolchain closure",
+  "finalRuns": [
+    {
+      "stem": "06-final-gateway-transfer-and-original-movement",
+      "passed": 36,
+      "ignored": 0,
+      "originalLogSha256": "fc58d4d3c2201407a36307781c79b70310a88428da49e7ede60a48303a5fbec7",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--release",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "map_transfer_availability_tests::",
+        "unavailable_combat_target",
+        "owner_location_order",
+        "owner_attack_animation",
+        "movement_deadline",
+        "crowded_escape_tests",
+        "cadence_map_transfer_tests::",
+        "shared_gateway_turn_commits_allowed_crystal_map_coordinate_transfer",
+        "map_transfer_poison_tests::"
+      ],
+      "exitCode": 0
+    },
+    {
+      "stem": "07-final-simulation-terrain-transfer-and-cold",
+      "passed": 87,
+      "ignored": 1,
+      "originalLogSha256": "f92865c7f31d90a4c13ad3308116bd8c99bc9c095adfffcf92ef49a4600f1aad",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "map::map_collision_source_tests::",
+        "map::map_transfer_metadata_tests::",
+        "map_transfer_availability_tests::",
+        "unavailable_collision_tests::",
+        "zone::runtime::door_tests::",
+        "zone::runtime::checkpoint::tests::",
+        "source_map_loading::tests",
+        "source_map_io::tests"
+      ],
+      "exitCode": 0
+    },
+    {
+      "stem": "08-final-normal-missing-collision",
+      "passed": 5,
+      "ignored": 0,
+      "originalLogSha256": "cc8866ad044eb0302113b4ea9208027b0dcdd7a7535975bc8da0284a85ec430a",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_missing_map_collision",
+        "--",
+        "--test-threads=1"
+      ],
+      "exitCode": 0
+    },
+    {
+      "stem": "09-final-original-shared-movement",
+      "passed": 14,
+      "ignored": 0,
+      "originalLogSha256": "4035821c54d31e31c391d817b6eb4dd5994df63d84abf6652a17c1ca3d71c7eb",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_zone",
+        "--",
+        "--test-threads=1",
+        "player_a_walks_player_b",
+        "player_a_runs_player_b",
+        "mounted_run_checks_third",
+        "run_from_standstill",
+        "run_step_expires",
+        "run_received_inside_grace",
+        "ready_pending_run",
+        "buffered_walk_run",
+        "continuous_run_extends",
+        "run_checks_intermediate",
+        "high_frequency_input",
+        "movement_input_after_ready",
+        "stale_movement_intent",
+        "zone_movement_emits_save_transform"
+      ],
+      "exitCode": 0
+    },
+    {
+      "stem": "10-final-original-optimized-gateway-map-flow",
+      "passed": 4,
+      "ignored": 0,
+      "originalLogSha256": "fd37f78821dcb2b67a2db60d9527c35ab356c84d434b63fd2fbfa9375ffe801a",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--release",
+        "-p",
+        "mir2-gateway",
+        "--test",
+        "shared_purification_map_transfer",
+        "--",
+        "--test-threads=1"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "redBaselines": [
+    {
+      "stem": "01-before-product-fix-destination",
+      "passed": 2,
+      "failed": 2,
+      "originalLogSha256": "b815aa2faec717c588f0a14fd6dcb74f3055571d79f8f120f178b61683078e2c"
+    },
+    {
+      "stem": "02-before-product-fix-gateway",
+      "passed": 1,
+      "failed": 6,
+      "originalLogSha256": "5e63e0c9741f0d8c19dd4f692294c04f4baabda77057530598e195b0fccdd1a8"
+    },
+    {
+      "stem": "05-original-owner-fixture-unavailable-baseline",
+      "passed": 3,
+      "failed": 5,
+      "originalLogSha256": "0c47feab9166cae269d6941c35348cb86c8522c3d9e98762ad2f2304691b6614"
+    }
+  ],
+  "fixtureRepair": "only seven explicit-open constructor lines; all original assertions and clocks unchanged",
+  "originalWorkflowPlusOneAdditiveGate": true,
+  "reviewedSha256": {
+    "mir2-web3/apps/simulation/src/runtime/map.rs": "d0265590220e6edb91cd5ea0b191179699fe8954a62246bde92e052a39f3cb2f",
+    "mir2-web3/apps/simulation/src/runtime/zone/collision.rs": "4fa3dc74d105c51008f553ae3c4f06049a8a3747fed65bd514d3436deccf7b08",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs": "0d5a8e3d791a16888505c64543d6d9542ed868c85230475c7dd464e5b9c8b025",
+    "mir2-web3/apps/gateway/src/routing.rs": "c19831b76f580b9c175a61093fe1241c28de5808c74bb49e2ad228a05a186a0b",
+    "mir2-web3/apps/gateway/src/routing/tests/owner_location_order_tests.rs": "2b7a055b1b14e638263c3eeb14c860682731fa8243ad8d0feda66051edc1030e",
+    "mir2-web3/apps/simulation/src/runtime/map_transfer_availability_tests.rs": "3e69fac2efbac695bce7651f9bbcf0f296f26c4ccb41e8065fd043d2abaa5c8c",
+    "mir2-web3/apps/gateway/src/routing/tests/map_transfer_availability_tests.rs": "89311342d25d2cf139a180266099e1686eb473ba656013c4bd9793dd584160d7",
+    ".github/workflows/gateway-release.yml": "23ca1b25011f70f4dc6ed7b1c0b6e9a1c821fc29ab2854b1b1e956da1aa83ffc"
+  },
+  "qualifiedPredecessorSource": "9fe7c45ff6a9b198d87322b9ecca4a2abcac6547",
+  "qualifiedPredecessorRun": "38006259110",
+  "failedPredecessorSource": "431520196068b710c6588bf53c75a599c2f726bd",
+  "failedPredecessorRun": "38013314930",
+  "failedPredecessorGate": {
+    "passed": 16,
+    "failed": 5,
+    "siegeJob": "success"
+  },
+  "archive": {
+    "path": "original-evidence.zip",
+    "entries": 86,
+    "bytes": 1204683,
+    "sha256": "a1f75f30bab890e5133f20a532f420962fe816858fcaf18b98d572ccf6a1d49a",
+    "everyEntryByteVerified": true
+  },
+  "signedDownloadCredentialRedactions": [
+    {
+      "path": "failed-ci-log-original.stderr.log",
+      "originalSha256": "f77729cf46c980c27be1b85212bcb8ee0c872e3bf28d6b458bb0bef4c724ff2e",
+      "archivedSha256": "0e33d9824975f3a6e0db12463270031e49c1b6b8636e0969248152d7e1854077",
+      "originalRetainedLocally": true,
+      "redaction": "temporary signed log-download query credential"
+    }
+  ],
+  "sourcePublished": false,
+  "exactLinuxPassed": false,
+  "gatewayPublished": false,
+  "publicPacketStoriesPassed": false,
+  "nativeHumanAcceptance": false,
+  "acceptedActionReceiptComplete": false,
+  "joinAdmissionComplete": false,
+  "sourceMapLoadPopulationComplete": false,
+  "fullClassicGoalComplete": false,
+  "liveGatewaySource": "64b6b10c05732048da9c6bf5ccb0a491d2d053d3",
+  "realSavesModified": false,
+  "clientInstallerOrR2FeedModified": false
+}

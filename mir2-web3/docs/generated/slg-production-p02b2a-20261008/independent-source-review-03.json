@@ -1,0 +1,53 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T16:28:22.8359508Z",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\authored-source-03.json",
+  "authoredSourceSha256": "e3feb1606ff8b0dbe8f647fbb1acb700297f03992513f8c1a386903f93e3699d",
+  "authoredFileCount": 9,
+  "shaAndLengthMismatches": 0,
+  "baselineCommit": "4644753b78c201cfa7dccc6cf6d694ce10021235",
+  "priorReviewPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\independent-source-review-02.json",
+  "priorReviewSha256": "7f0b4281be6c1c46c33ef989d4faef29ee4fad918ca16b06c269d78e48c5f4ce",
+  "changedSourcePaths": [
+    "mir2-web3/apps/simulation/src/runtime/item_grants_tests.rs"
+  ],
+  "inverseDeltaMatchesSource02Bytes": true,
+  "templateLiteralCorrections": 5,
+  "allProductCodeAndAssertionsUnchanged": true,
+  "otherEightAuthoredPathsUnchanged": true,
+  "newTestFunctions": 16,
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Accepted for original CargoGuard focused retry after the actual Source02 fixture failures. Exactly five item_grants_tests.rs potion-name literals changed from nonexistent HealthPotion(S) to the actual Crystal (HP)DrugSmall template already used by existing runtime fixtures. Inversely replacing only those five literals restores exact Source02 file SHA256 and length, so all assertions, quantities, identity/capacity/fence checks and function bodies remain unchanged. All other eight source paths remain byte-identical to Source02, including all business code and the other eight new tests. All nine current Source03 hashes and lengths match. Runner differs only by review02 to review03 reference, inverse-byte verified. Source01 static review missed the root enum import; Source02 static review also missed the invalid potion fixture lookup. Historical compile failure and actual 4 passed/4 failed/0 ignored result remain preserved and are not a final passing result. No product source or test assertion has been loosened by this delta.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\run-check.ps1",
+    "sha256": "f28ef4899ec3203eca3716e7619eb71cc620f469ff1ce51f28107d7b7718c409",
+    "priorRunnerPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\run-check-02.ps1",
+    "priorRunnerSha256": "0f5c68c6735aeb36645a84a5a3a88280d29b819c802f4b5780d1083add69a0fc",
+    "inverseByteMatch": true,
+    "originalPolicyAndProbeUnchangedByDelta": true,
+    "targetRelocated": false
+  },
+  "historicalFailedRun": {
+    "resultPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\grant-tests-02\\result.json",
+    "resultSha256": "84f32817f207d6e09f63404368884956ff584071f7af0db13fe5aa7fa0b79ffc",
+    "logPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\grant-tests-02\\cargo.log",
+    "logSha256": "02c311a06735001a70f87b366be158c3db7f924b99a16711f1034c71a3aff6cd",
+    "exitCode": 101,
+    "executedTests": 8,
+    "passed": 4,
+    "failed": 4,
+    "ignored": 0,
+    "reason": "Nonexistent HealthPotion(S) template in new fixture helper"
+  },
+  "limits": [
+    "Focus test permission only; no current final success asserted.",
+    "Controlled File opt-in template grants; no normal gateway, UI, PostgreSQL or atomic durable account publication acceptance.",
+    "Source01/02 review, manifests, Cargo logs and original nonce evidence retained.",
+    "No ground-drop migration is part of these nine authored files."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}

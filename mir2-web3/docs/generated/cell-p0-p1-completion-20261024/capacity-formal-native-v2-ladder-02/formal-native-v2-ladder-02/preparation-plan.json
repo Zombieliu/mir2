@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T19:28:01.757Z",
+  "state": "scripts-and-public-configuration-only-not-executed",
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "charactersCreated": 0,
+  "capacityAccepted": false,
+  "originalFormal": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-01",
+  "feasibilityRoot": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06",
+  "releaseRecord": "C:\\mir2-build\\p01-completion-20261024\\release-native-attack-v2.json",
+  "originalBackendReleaseReused": true,
+  "exactCopies": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\scenario.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\scenario-prefix-readiness.json",
+      "bytes": 1851,
+      "sha256": "7a1e4fc52f39680c7c53f37898bb75eda742437a9173880c44c2848272677794"
+    }
+  ],
+  "runOptions": {
+    "stages": "2,10,25,50,100",
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "wallSeconds": 18000,
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "attackResults": "v2",
+    "originalPolicyUnchanged": true
+  },
+  "admissionRule": "Real probe06 original same461f/855b/39 backend plus exact new9 driver/import/data/transport closure, source-matched navigation declaration, original30s stage+360s soak/six complete passing60s windows, complete raw/monitor verification and normal owned cleanup; checked before both prepare and run.",
+  "sourceRule": "Strict06 original backend guard reused: every39 raw+461f Gitblob, base-to-currentHEAD exactbackendclosure,461f-to-currentHEAD emptybackenddiff,cleantrackedtree,ignored-inclusiveuntrackedbackendrejection. Current committed driver/import/data/tools separate driverSourceCommit; no duplicate backendReleasebinding.",
+  "login": {
+    "ordinaryPoolAccounts": 100,
+    "accountOnlyProvisioning": true,
+    "ordinaryLoginWindowMs": 901000,
+    "admissionBudget": 25,
+    "verificationBudget": 5,
+    "resetOrBypass": false
+  },
+  "cleanup": "Original normal drain/sixzero, monitorIPC stop+exit0+terminal, stdinshutdown45s/exactPIDexeSHA/portsfree; explicitdrainedforcedrecovery neverclaimsnormalexit.",
+  "reportRule": "Original report bytes/verdict remain unchanged; report-provenance.json binds backendSourceCommit,driverSourceCommit,exact reportSHA and driverfreeze separately. External full verifier still adjudicates formal acceptance.",
+  "prepareCommand": "node \"C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\prepare-inputs.mjs\" --prepare-authorized-inputs",
+  "executeCommand": "node \"C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-owned.mjs\" --execute-authorized-probe --attack-results=v2",
+  "validation": {
+    "syntaxNode": 6,
+    "syntaxPowerShell": 2,
+    "passed": true,
+    "readonlyQAPending": true,
+    "productModulesImported": false,
+    "prepareExecuted": false,
+    "seederExecuted": false,
+    "realmStarted": false
+  },
+  "scripts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\input-lib.mjs",
+      "bytes": 13776,
+      "sha256": "dc865126c27b3b8da895b915f5d9e7c9e6c74aa887bc8e46613b476de27c70c6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\prepare-inputs.mjs",
+      "bytes": 11053,
+      "sha256": "34a9dd9389896e023974420892649ad09f0a2464aa4678b1ef2bbeb4b73ae832"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-owned.mjs",
+      "bytes": 16294,
+      "sha256": "2e28fa5fe23077097615e93c835f862400abf455228141752b5665f461ad1285"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\verify-feasibility-gate.mjs",
+      "bytes": 12529,
+      "sha256": "ebab305c5b50500e381966e92de42892d5ff154f0bd42924ad20a033617675a9"
+    }
+  ]
+}

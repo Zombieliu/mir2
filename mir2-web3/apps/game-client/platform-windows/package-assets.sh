@@ -69,6 +69,7 @@ done
 
 for required in \
   "$FALLBACK_UI_SOURCE/Sound/Login2.wav" \
+  "$FALLBACK_UI_SOURCE/Sound/91.wav" \
   "$FALLBACK_UI_SOURCE/Sound/Select2.wav"; do
   if [[ ! -f "$required" || ! -s "$required" ]]; then
     echo "missing or empty required native audio asset: $required" >&2
@@ -106,6 +107,7 @@ cp -R "$FALLBACK_UI_SOURCE/AArmour/00/." "$DESTINATION/original-ui/AArmour/00/"
 cp -R "$FALLBACK_UI_SOURCE/Monster/000/." "$DESTINATION/original-ui/Monster/000/"
 cp -R "$FALLBACK_UI_SOURCE/NPC/00/." "$DESTINATION/original-ui/NPC/00/"
 cp "$FALLBACK_UI_SOURCE/Sound/Login2.wav" "$DESTINATION/original-ui/Sound/Login2.wav"
+cp "$FALLBACK_UI_SOURCE/Sound/91.wav" "$DESTINATION/original-ui/Sound/91.wav"
 cp "$FALLBACK_UI_SOURCE/Sound/Select2.wav" "$DESTINATION/original-ui/Sound/Select2.wav"
 
 test -f "$DESTINATION/bevy-entity-atlases/manifest.json"
@@ -147,6 +149,7 @@ test -f "$DESTINATION/original-ui/AArmour/00/0.png"
 test -f "$DESTINATION/original-ui/Monster/000/0.png"
 test -f "$DESTINATION/original-ui/NPC/00/0.png"
 test -s "$DESTINATION/original-ui/Sound/Login2.wav"
+test -s "$DESTINATION/original-ui/Sound/91.wav"
 test -s "$DESTINATION/original-ui/Sound/Select2.wav"
 
 SOURCE_ITEMS_FILE_COUNT="$(find "$FALLBACK_UI_SOURCE/Items" -type f | wc -l | tr -d '[:space:]')"

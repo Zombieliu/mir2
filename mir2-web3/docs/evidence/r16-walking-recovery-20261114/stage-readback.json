@@ -1,0 +1,10 @@
+{
+  "id": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "state": "READY",
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "ref": "codex/windows-player-journey",
+  "target": "production",
+  "checkedAt": "2026-11-13T17:39:23.864Z",
+  "method": "authenticated Vercel get_deployment readback; staged candidate only"
+}

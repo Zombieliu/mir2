@@ -1,0 +1,106 @@
+{
+  "utc": "2026-10-11T09:02:53.515585+00:00",
+  "publishedGatewayRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "linuxRunId": 38114472571,
+  "linuxArtifactId": 11694208951,
+  "binarySha256": "fc530898d8cbf563389fe708ac3a279846d28b56ae97e340af3ed7d100ad8202",
+  "backup": "/var/backups/mir2-playtest-before-4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "normalStopAndColdRestart": true,
+  "ordinaryChecksPassed": 44,
+  "resumeChecksPassed": 18,
+  "normalAcknowledgedLogouts": 14,
+  "ordinaryCommandsOnly": true,
+  "adminCommandsUsed": false,
+  "authWeakened": false,
+  "realUserSavesEdited": false,
+  "startupMonthlyPriceUnchanged": 1000,
+  "baseEnvAndUnitAndOriginalProductionPidUnchanged": true,
+  "finalObservedNoSessions": true,
+  "archive": {
+    "path": "original-evidence.zip",
+    "bytes": 12715,
+    "sha256": "a7f02a5a270a69d819d108af2242025044168402462e53d4c37a2d8dbe23093e",
+    "files": [
+      {
+        "path": "ci-01/server/artifact-01/CI-VERIFIED.json",
+        "bytes": 1235,
+        "sha256": "9195291140fd10aab8b921eb0205f34c145a860f00bb4bbc5154433d5d5a8686"
+      },
+      {
+        "path": "ci-01/server/artifact-01/latest-mir2-gateway-release.json",
+        "bytes": 1737,
+        "sha256": "35bc231a3bb92df016e0a0b4516166bf08e6ce5ca4407bece71ed5dd8e88c287"
+      },
+      {
+        "path": "server-rollout-01/DEPLOYED-01.json",
+        "bytes": 2383,
+        "sha256": "f50341375f3b31b850a9a6ad8a591648ca2eeb9a09d70a1bd82016bc737432d6"
+      },
+      {
+        "path": "server-rollout-01/PRICE-OVERRIDE-CORRECTION.json",
+        "bytes": 1656,
+        "sha256": "79703aa5905eff7bf4162dc4b9074d8407d97ea27f6b8711db7dd7e020f856d6"
+      },
+      {
+        "path": "server-rollout-01/startup-price-identity-02.json",
+        "bytes": 336,
+        "sha256": "312a620613463ce9dcbe50c178f2b6ea47524fe9be8275c5734ee0fca5b849f1"
+      },
+      {
+        "path": "server-rollout-01/deploy-preflight-01.log",
+        "bytes": 105,
+        "sha256": "ca78de52e5b26979f42b164ac33bf2ca77dcee63e1f579edc04b17ce2acd8073"
+      },
+      {
+        "path": "server-rollout-01/deploy-apply-02.log",
+        "bytes": 2180,
+        "sha256": "0c73a24a7b8fe1279dbb5855938f5d2edc4ea45a922a4029d7b3259436edf852"
+      },
+      {
+        "path": "server-rollout-01/ordinary-public-01/RESULT.json",
+        "bytes": 6658,
+        "sha256": "9d9c16400d07bedf3307ef53f49baa9ad77a9763b821407c8444391482d38021"
+      },
+      {
+        "path": "server-rollout-01/ordinary-recovery-01/RESULT.json",
+        "bytes": 736,
+        "sha256": "214efe889d0e0d5788a1c44f14da0ac51b48bb6456ea97b19594e08d2a5bf671"
+      },
+      {
+        "path": "server-rollout-01/ordinary-public-02/RESULT.json",
+        "bytes": 12631,
+        "sha256": "d367f9b031d099b3f9ca88ce48122628795ec83a1844312a3ff9c6a219fcf4c9"
+      },
+      {
+        "path": "server-rollout-01/native-resume-public-01/RESULT.json",
+        "bytes": 3811,
+        "sha256": "242d50853c4ae79548fb078b29f6f639c5210af9883a64b81d12d0ef2db00ddc"
+      },
+      {
+        "path": "operator-readonly-03/OBSERVED.json",
+        "bytes": 3980,
+        "sha256": "fc1642245677da50bb32dcd7761a2940a608cdb48cd4106af6b0e8c9e8caa59f"
+      },
+      {
+        "path": "operator-readonly-04/OBSERVED.json",
+        "bytes": 4191,
+        "sha256": "f9a66fb7d9d1c0017c654bdf1d4759720027ec7e08a68eba172531ee63da2ccc"
+      },
+      {
+        "path": "operator-readonly-04/STARTUP-VERIFIED.json",
+        "bytes": 711,
+        "sha256": "b7bf065e765562fdb096edd1c9de68cdec65534a8f8f43d878d9099c727aae9e"
+      }
+    ]
+  },
+  "originalRetainedFailures": [
+    "first operator rejected exact existing monthly-price startup before switching",
+    "first public owned primary fixture died before movement; original assertion failed",
+    "normal relogin restored live primary; diagnostic expecting a dead fixture failed without sending TownRevive"
+  ],
+  "oldFailuresRelabeledPassed": false,
+  "nativeRenderAcceptance": false,
+  "aliveCrowdEscapeAccepted": false,
+  "windowsClientPublished": false,
+  "fullClassicComplete": false
+}

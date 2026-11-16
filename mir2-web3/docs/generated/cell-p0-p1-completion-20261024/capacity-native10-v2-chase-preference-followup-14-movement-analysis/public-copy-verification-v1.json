@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T10:54:00.114Z",
+  "runId": "1792923531277-bc2bda2e",
+  "child": "capacity-native10-v2-chase-preference-followup-14-movement-analysis",
+  "sourceCopyCount": 15,
+  "totalFiles": 17,
+  "copiedBytes": 1469131,
+  "allRawCopiesByteEqual": true,
+  "allJsonParsed": true,
+  "noUnexpectedFilesBeforeVerification": true,
+  "provenance": {
+    "bytes": 5272,
+    "sha256": "ec8eda616111e1536ccee1e9ef30bfe338f4f961414a5f2cfc315b51cc3e4f20"
+  },
+  "originalAnalysisRawPasses": 2,
+  "wholeCorrections": 5,
+  "failedWindowCorrections": 4,
+  "capacityAccepted": false,
+  "sourceOrRuntimeChanged": false
+}

@@ -1,0 +1,110 @@
+{
+  "passed": true,
+  "evidenceKind": "actual native Windows UI and saved-language restart smoke",
+  "binarySha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff",
+  "screenshots": [
+    {
+      "image": "screenshots/01-zh-cn-welcome.jpg",
+      "sidecar": "screenshots/01-zh-cn-welcome.json",
+      "bytes": 216967,
+      "sha256": "c5ff41ccd382febd32563dfcf4a34d010ac1107a0b11d11079baba9f2ccd9826",
+      "purpose": "Simplified startup after display index fix",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/02-zh-cn-options.jpg",
+      "sidecar": "screenshots/02-zh-cn-options.json",
+      "bytes": 224854,
+      "sha256": "fd1569b2dfade158f423dcd26d4d38692dc2918dc41d097cb8f6b758bb8b25ea",
+      "purpose": "Simplified Options and current language",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/03-ten-language-menu.jpg",
+      "sidecar": "screenshots/03-ten-language-menu.json",
+      "bytes": 223777,
+      "sha256": "97d09b28acf789bdeea525b75236ae60eb2e20d6cd731517add5044d5a8a2aff",
+      "purpose": "Ten locale choices including Simplified Chinese",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/04-english-switch.jpg",
+      "sidecar": "screenshots/04-english-switch.json",
+      "bytes": 223646,
+      "sha256": "e9ef2ebc0a43c4b985afdc2f0a6f2348682ba83b7834355073084c03e6a4f4df",
+      "purpose": "Language switch changes system UI while actor name remains unchanged",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/05-zh-cn-restored.jpg",
+      "sidecar": "screenshots/05-zh-cn-restored.json",
+      "bytes": 218085,
+      "sha256": "a626d0bd55e2c1de17f3726679e003d22706a3539ae145ec97454987ce6fa71f",
+      "purpose": "Simplified selected from in-game language menu",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/06-zh-cn-shop.jpg",
+      "sidecar": "screenshots/06-zh-cn-shop.json",
+      "bytes": 214870,
+      "sha256": "1b0fe20b78c01c1d53281a3eb10ba6c43da154b76161e5374602df1950b5599a",
+      "purpose": "Actual Simplified shop; 100 credits and 10000 gold retained",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/07-zh-cn-fiat.jpg",
+      "sidecar": "screenshots/07-zh-cn-fiat.json",
+      "bytes": 87905,
+      "sha256": "f8393c0a50be651b91d32440f61d7887de1221be737536dc0ed11d0201237331",
+      "purpose": "Fiat entrance selected; unavailable status displayed without payment",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/08-zh-cn-usdc.jpg",
+      "sidecar": "screenshots/08-zh-cn-usdc.json",
+      "bytes": 100954,
+      "sha256": "afc022d40f99dfb228cf3f931d19fbc3a1af0afbdade552f7d1949e1e0c77061",
+      "purpose": "USDC entrance and three existing historical order statuses",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/09-zh-cn-monthly.jpg",
+      "sidecar": "screenshots/09-zh-cn-monthly.json",
+      "bytes": 88728,
+      "sha256": "89ba51847c26c90ea6e636abf4e0e6daa81787dc4e1c53fa3721b13e9478f072",
+      "purpose": "Monthly card independently displayed; no purchase or activation",
+      "locale": "zh-CN"
+    },
+    {
+      "image": "screenshots/10-zh-cn-after-restart.jpg",
+      "sidecar": "screenshots/10-zh-cn-after-restart.json",
+      "bytes": 207857,
+      "sha256": "e2da8c121bb097e9365c9cf148641b4b595084ce1ce7ed83f9cb19375b94fd31",
+      "purpose": "Saved Simplified preference survives client restart with English installer seed",
+      "locale": "zh-CN"
+    }
+  ],
+  "localeChoices": 10,
+  "languageSequence": [
+    "zh-CN",
+    "en",
+    "zh-CN"
+  ],
+  "restartSeed": "en",
+  "persistedAndObservedAfterRestart": "zh-CN",
+  "rechargePages": [
+    "法币充值",
+    "USDC链上充值",
+    "月卡"
+  ],
+  "evidence": [
+    "evidence/final-ui-result.json",
+    "evidence/saved-locale-before-restart.json"
+  ],
+  "finalClientPanicFound": false,
+  "firstStartupFailurePreserved": "evidence/first-simplified-startup-failure.json",
+  "visualInspection": "Curator opened all ten actual JPEGs and checked welcome/options/ten-language menu/English and Simplified switch/shop/three separate pages/restarted Simplified welcome.",
+  "toolBoundary": "A close click attempted after screenshot 10 reported unknown screenshotId and was not retried. It is not counted as a successful close action; screenshots 1-10 and saved/restarted language were already observed.",
+  "humanFrontendAccepted": false,
+  "newPaymentClaim": false
+}

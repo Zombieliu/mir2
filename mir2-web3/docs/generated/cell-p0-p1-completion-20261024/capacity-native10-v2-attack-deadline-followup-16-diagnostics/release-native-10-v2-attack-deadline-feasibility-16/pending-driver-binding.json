@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "state": "HISTORICAL_PENDING_DRAFT_PRESERVED",
+  "actualBoundDriver": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "executionAuthorized": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

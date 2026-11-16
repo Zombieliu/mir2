@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T06:41:34.572Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs"
+  ],
+  "exitCode": 1,
+  "signal": null,
+  "tests": 21,
+  "passed": 19,
+  "failed": 2,
+  "sourceBefore": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.mjs",
+      "bytes": 13744,
+      "sha256": "74d975c40f24d947ea7e8643d19f56d695d02262335a371e851ecc8028693783"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs",
+      "bytes": 16074,
+      "sha256": "ae5578e972f9ac3293cf8b161dc465a736664fa0c874622332b66d927a26d9df"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.mjs",
+      "bytes": 13744,
+      "sha256": "74d975c40f24d947ea7e8643d19f56d695d02262335a371e851ecc8028693783"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs",
+      "bytes": 16074,
+      "sha256": "ae5578e972f9ac3293cf8b161dc465a736664fa0c874622332b66d927a26d9df"
+    }
+  ],
+  "sourceUnchanged": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v1-failed.log",
+    "bytes": 8662,
+    "sha256": "39719013b693f3926891538157dcdd3ed63440c5131f6d28acb02ac9594423d6"
+  },
+  "scope": "External fake-class synthetic assertions only; no game module import, backend build, realm, account preparation or load.",
+  "realmStarted": false
+}

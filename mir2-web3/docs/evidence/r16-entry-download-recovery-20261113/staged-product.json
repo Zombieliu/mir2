@@ -1,0 +1,33 @@
+{
+  "base": "31e9b6a74661c31d6515dd7322b466285f975d71",
+  "files": [
+    "mir2-web3/apps/web/app/original-client-shell.tsx",
+    "mir2-web3/apps/web/app/page.tsx",
+    "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+    "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+    "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+    "mir2-web3/apps/web/package.json",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs",
+    "mir2-web3/apps/web/scripts/test-r16-entry-npc-recovery.mjs",
+    "mir2-web3/apps/web/scripts/test-renderer-wasm-opt.mjs",
+    "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs"
+  ],
+  "blobs": {
+    "mir2-web3/apps/web/app/original-client-shell.tsx": "0ee785da7ef317bc76d1d42017050643bd63a01e",
+    "mir2-web3/apps/web/app/page.tsx": "9bdedad2c362d24a153b17c1e02712fa81b3bf94",
+    "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts": "9e550d44d6649ac84cadf5b9c6c9b3928a814b5d",
+    "mir2-web3/apps/web/lib/first-crystal-scene-request.ts": "f7fa858f05dbe86472a38f9769ed38e445b23809",
+    "mir2-web3/apps/web/lib/r16-entry-scene.ts": "a4d56dd9fb29fae449d421ceb0e9ca0befd55964",
+    "mir2-web3/apps/web/package.json": "03bb778ae1538c2cc47a0869cbc8021665d26094",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs": "ea9fc59a59213f252c92fd636d378d309043abb6",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs": "47a15f4a7e0a1df2d1e5530aab366bc569ec9844",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs": "b6f4fedd2efe9f810ae98b4e2bf28133685cd25e",
+    "mir2-web3/apps/web/scripts/test-r16-entry-npc-recovery.mjs": "845baaf963b20998659c6ef65cba1885f78ab9fb",
+    "mir2-web3/apps/web/scripts/test-renderer-wasm-opt.mjs": "f6f6c657213c8b950bc9ecae2e4bb79a2109f5bc",
+    "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs": "a47fb7d3920d3c8c988d9303d576e7adb2045927"
+  },
+  "sourceMatchesQualifiedCandidate": true,
+  "foreignShellExcluded": true
+}

@@ -1,0 +1,343 @@
+{
+  "passed": true,
+  "checkedAtUtc": "2026-10-29T15:54:17.965338+00:00",
+  "scope": "Rehashed existing producer raw logs only; no tests executed; raw logs not committed",
+  "checkedCount": 67,
+  "files": [
+    {
+      "file": "backend-check-v1.log",
+      "bytes": 70362,
+      "sha256": "f9941e23988bec4a01c4bba899d3c33e831ad828de24e029b412f0e8276202f4"
+    },
+    {
+      "file": "backend-test-schema-v1.log",
+      "bytes": 50772,
+      "sha256": "002b9eec61651d0a87224d1d560dbfe2aa48c30747079f5223e30e0b4fa31fef"
+    },
+    {
+      "file": "backend-test-migration-v2.log",
+      "bytes": 44812,
+      "sha256": "1bd708efc98031739b0b953d1b9ae8eac73aee03ff8d0fda8f4691e402c4a642"
+    },
+    {
+      "file": "backend-test-simulation-usdc-v2.log",
+      "bytes": 46785,
+      "sha256": "fd3836efef49b670e91c44cc3e0b8d00002d797b07215a4ce079085d6442de82"
+    },
+    {
+      "file": "backend-test-simulation-procurement-v2.log",
+      "bytes": 50070,
+      "sha256": "07aec26b5336a1a197683775a78947a74f27d8c4f912785e484bcf0febaddfe1"
+    },
+    {
+      "file": "backend-test-uid-file-v2.log",
+      "bytes": 55988,
+      "sha256": "d6dd17844173c7688e7f5550e30c1386f9a2b451bdb6575e507766e30bc50a61"
+    },
+    {
+      "file": "backend-test-billing-recharge-v2.log",
+      "bytes": 56454,
+      "sha256": "bbd1e8eaf51ac07405fe373650834ca41e346c5c2f6fe55c6a4292a37431a29d"
+    },
+    {
+      "file": "backend-test-activities-v2.log",
+      "bytes": 56657,
+      "sha256": "a01c4a40c91d21a7e13e6ecbe6d4b4a95c4290834fbf9e8c97cfb31f841ec0dd"
+    },
+    {
+      "file": "backend-test-production-v3.log",
+      "bytes": 46532,
+      "sha256": "dc569b6111c6a86f6a6dd25b6c6fb51005b139a7e04944e38fb6eb64efc6c9dd"
+    },
+    {
+      "file": "backend-test-stones-v3.log",
+      "bytes": 46050,
+      "sha256": "4b1bd6cfb138ed626ac8dcc71f4fee086e465f77ab5fad0d3b965a2da9032c59"
+    },
+    {
+      "file": "backend-test-gateway-identity-v3.log",
+      "bytes": 68649,
+      "sha256": "6fb00e023380fdac3f7546ade857b36055ff71833e1709dd921f0328b437ab26"
+    },
+    {
+      "file": "backend-test-gateway-auth-v3.log",
+      "bytes": 58523,
+      "sha256": "9da49721f3e841bd0a0d149144ee9cc8617d70d8038e58ec7fdccfb3a1280859"
+    },
+    {
+      "file": "backend-test-gateway-usdc-v3.log",
+      "bytes": 59014,
+      "sha256": "2e73cc71df12c0d17077fe774b493e512d3c30974f1b800fbac45dc5010fac94"
+    },
+    {
+      "file": "backend-test-gateway-procurement-worker-v3.log",
+      "bytes": 59032,
+      "sha256": "d880c53512018c5c994ec8cb13d241623cd9ab63868c4ee93aa875bb44469d03"
+    },
+    {
+      "file": "backend-test-guild-kill-source-v3.log",
+      "bytes": 58022,
+      "sha256": "da2de9637c0e3285d79de7c0ef7143fd51f4639e2ec335adc1df3efb1d1be953"
+    },
+    {
+      "file": "backend-test-live-aoi-v3.log",
+      "bytes": 59563,
+      "sha256": "8e1ba42e3443f6b08cead8c709887f1d6a34c94d114d393b1732bb5cc13e966a"
+    },
+    {
+      "file": "backend-test-pending-aoi-v3.log",
+      "bytes": 58000,
+      "sha256": "bda3adb6ebabf8e995914a970ff2098d723b1f68858e47ed77e70c48e5949a58"
+    },
+    {
+      "file": "backend-test-attack-binding-v3.log",
+      "bytes": 57842,
+      "sha256": "5c2e256fef26a189de9261b1a7e05475d2b4b96d665fc2bddd48479878e51891"
+    },
+    {
+      "file": "backend-test-protocol-v3.log",
+      "bytes": 6507,
+      "sha256": "5e83575f0e89bc50e29cc5f376aa1f3d1bf7f1a425fd45c6a5f123de46636c10"
+    },
+    {
+      "file": "backend-test-web-usdc-v2.log",
+      "bytes": 58031,
+      "sha256": "bc0049335d83005f10e21bcb0bdf9e6baecd2a542db8c8fba78813fa752ec76b"
+    },
+    {
+      "file": "backend-test-web-procurement-v1.log",
+      "bytes": 58017,
+      "sha256": "22c0b4e5ebf367a4ab5347a4bad46499bcbe43bd89ea5a2a071db1d9d8772b62"
+    },
+    {
+      "file": "native-build-build.log",
+      "bytes": 60678,
+      "sha256": "ddd587c2af602db6126f2625ea0d40ecc232461414e00d9ace6ef40ebbc238ee"
+    },
+    {
+      "file": "native-client-01-native-i18n.log",
+      "bytes": 33357,
+      "sha256": "ebcec8328a3996deef3b77a76dc525f2396c40779a67ab01074c03c054af9510"
+    },
+    {
+      "file": "native-client-02-native-login-locale.log",
+      "bytes": 27666,
+      "sha256": "ca8c7c04b824108d97dbd95051417e4455d85e0972fa1db8c135e14cfa9fbf5b"
+    },
+    {
+      "file": "native-client-03-native-wallet-login.log",
+      "bytes": 27652,
+      "sha256": "373778b0b17656271e7bc3601c705cbd293d5900c390a9051310ad8732b36b2b"
+    },
+    {
+      "file": "native-client-04-native-shell-ui-tests-wallet.log",
+      "bytes": 28048,
+      "sha256": "8432450249308b4fb84f985e03e8e433dc8ab4d7a204ec1f68a00417aa248d1d"
+    },
+    {
+      "file": "native-client-05-native-billing.log",
+      "bytes": 29620,
+      "sha256": "38bded0ae59b6050026aca46ec912eb6064a5e6e4d22f320a35445b9f6942387"
+    },
+    {
+      "file": "native-client-06-native-procurement.log",
+      "bytes": 29011,
+      "sha256": "853960a5f72149308276a1d2cb118039985c78e7af7eeae8908b1550b1524519"
+    },
+    {
+      "file": "native-client-07-native-display.log",
+      "bytes": 28375,
+      "sha256": "9ab45d90d11164605f8ec736686be1db01a0ce8eca2b8ec09fb5a0d6b56091fd"
+    },
+    {
+      "file": "native-client-08-player-text.log",
+      "bytes": 28527,
+      "sha256": "66a6bc7cc436d0a3cca29c6604e198e9c291352fe034716e3b4170ce5415aef1"
+    },
+    {
+      "file": "native-client-09-quest-practice.log",
+      "bytes": 28181,
+      "sha256": "521c8585bf83d8316c3d6c3c6114d5d17b7655ce75d0a036dcb02c081586d494"
+    },
+    {
+      "file": "native-client-10-native-system-role-and-group-captions.log",
+      "bytes": 27574,
+      "sha256": "85d9fd467751fd7437c391335316bcdd6be5079b733ebf93f6548a3d5e907c6d"
+    },
+    {
+      "file": "native-client-11-native-quest-counters-render-localized.log",
+      "bytes": 27576,
+      "sha256": "bfd1f59b75c46a1bd0085a87777bd78c18c0698405de7ed8b650dbeb1d79042d"
+    },
+    {
+      "file": "native-client-12-procurement-modal-and-close-frame.log",
+      "bytes": 27580,
+      "sha256": "7dc505573a57f5684ed67131f2abd5a5ad9758afeddebe84ff5e5aac4c8a2bf6"
+    },
+    {
+      "file": "native-client-13-native-inventory-double-click.log",
+      "bytes": 28656,
+      "sha256": "8e925a9e1d128ddebbd04b721a2352b6f9cdde0964c38232120c1b5d0c6d2662"
+    },
+    {
+      "file": "native-client-14-guild-pixel-text.log",
+      "bytes": 27860,
+      "sha256": "6f7ef65c2c9461b52b5c59df3a27ad548475a66bafb65865e26bcc038e991504"
+    },
+    {
+      "file": "native-client-15-crystal-ui-widget-tests.log",
+      "bytes": 29515,
+      "sha256": "b788deae48cfc8bc4f976aa159a094c916f7e6f45cc76f11cbff8bd0c41b06d5"
+    },
+    {
+      "file": "native-client-gpu-billing_windows_gpu_three_routes_and_channel_states.log",
+      "bytes": 27561,
+      "sha256": "4c43d0a272c5d4514969bbd5e7723091e259324c35721ebbeeecdd695f7fe592"
+    },
+    {
+      "file": "native-client-gpu-guild_main_window_matches_independent_crystal_gdi_reference_96dpi.log",
+      "bytes": 27584,
+      "sha256": "66c567d71948e1f133d65a9631bb22358e4ebf8e246f0880bdaf8b8432cfc749"
+    },
+    {
+      "file": "native-client-gpu-procurement_windows_gpu_five_pages_and_explicit_confirmations.log",
+      "bytes": 27571,
+      "sha256": "5bfc452c0cd627345a6b44a522bfc5b5069c2efc0bbb11c2f2adf69dd7291820"
+    },
+    {
+      "file": "native-client-gpu-simplified_chinese_npc_quest_and_inventory_render_offscreen.log",
+      "bytes": 27578,
+      "sha256": "2d4934b7cd4db22abcd03007c1c6e91ae3f0e1dd21ac21f117045d9ec3a6c851"
+    },
+    {
+      "file": "native-client-initial-feature-resolution-failed.log",
+      "bytes": 935,
+      "sha256": "cf66231aedcb2e82753106c99f711e53f32ca8587219b3f6177a6a35ad6b44f9"
+    },
+    {
+      "file": "native-editorial-check.log",
+      "bytes": 316,
+      "sha256": "0ea783575ac1c6491708dfbc6455e4feacfccb83e17629b33a24017465fe1ee8"
+    },
+    {
+      "file": "native-editorial-selftest.log",
+      "bytes": 351,
+      "sha256": "71ecb020d5659578355d90677f943390c361c608b9db9a61b1aa285cabc9f373"
+    },
+    {
+      "file": "native-focused-runner-invocation-failed.log",
+      "bytes": 2168,
+      "sha256": "7ff62230d043fdc1e20bec81b339fa6779ba4c583ade4de8bdf34b2a041a8313"
+    },
+    {
+      "file": "native-font-corpus-check.log",
+      "bytes": 318,
+      "sha256": "454de985cb18e4f50327af045cb8c8e4c3e2e4e4b3773a1ebaf9577aedcb49a5"
+    },
+    {
+      "file": "native-host-01-wallet-login-tests.log",
+      "bytes": 55419,
+      "sha256": "67b73a92878120cc22c0a30de9cdcdf35beced788fbb730a805629d6534f268e"
+    },
+    {
+      "file": "native-host-02-wallet-login-http-tests.log",
+      "bytes": 55261,
+      "sha256": "b08a138d8ed1a352b8ee510760b0e68e6fd82a62e9443234387b884dc5e830bb"
+    },
+    {
+      "file": "native-host-03-shell-bridge.log",
+      "bytes": 56387,
+      "sha256": "e6f43f2ab2da48caea3afe2543504ced0f63d636bb9c9eb59ad3be003628fafa"
+    },
+    {
+      "file": "native-host-04-native-protocol-tests.log",
+      "bytes": 56704,
+      "sha256": "318b0762d2582aaad2d6a081143573d975e3f97a16940209808dac8aa6d2c4ca"
+    },
+    {
+      "file": "native-host-05-billing-browser-tests.log",
+      "bytes": 54371,
+      "sha256": "e2c88f1098bae6983dc2b3f4ef7aedf6e4011a672fc578a4136bf6d903b6c8b2"
+    },
+    {
+      "file": "native-host-06-native-fonts-tests.log",
+      "bytes": 54829,
+      "sha256": "d704c28d675ef66c2b31380db4ee247793991252192732c2ef4f5a5ba5c7e104"
+    },
+    {
+      "file": "native-host-07-native-locale-tests.log",
+      "bytes": 54516,
+      "sha256": "13f8e599234f0700db2b05ebf0564d0556069e170febead359eae460b5ee8a65"
+    },
+    {
+      "file": "native-host-08-packed-assets-tests.log",
+      "bytes": 54399,
+      "sha256": "c6507a5dc00db4c06b92b1092b2e5e8706ea50b93cb389f4270bdd2de4df2abd"
+    },
+    {
+      "file": "native-host-adjacent-billing_credit_cache_requires_the_current_request_account_and_active_character.log",
+      "bytes": 54395,
+      "sha256": "ec71b3949442bfe15c43cc88025aa81608463e0dc932bd42efa319b3d7b74029"
+    },
+    {
+      "file": "native-host-adjacent-world_and_pointer_gates_cover_modal_dialog_dead_and_capture_states.log",
+      "bytes": 54198,
+      "sha256": "fa856802bc0dfa6ed177fd6cf3ecc50543c92ec09b50159698e1f67455c0b401"
+    },
+    {
+      "file": "native-host-compile-v1.log",
+      "bytes": 344,
+      "sha256": "b6a89eaefeb4352f743c89dc6a04087be3c2e380d8db65ea6a570f89900a1cb9"
+    },
+    {
+      "file": "native-host-compile-v2.log",
+      "bytes": 68945,
+      "sha256": "36af900074757a1074dfe057836977441c5d4dbc695186198ddf7bfd798d9ec1"
+    },
+    {
+      "file": "native-host-gpu-native_wallet_login_offscreen_fixture.log",
+      "bytes": 54183,
+      "sha256": "66c30c72cbf220777b908b927a2eb09f67025b01f47a9288e0417f8bbf71ea3c"
+    },
+    {
+      "file": "procurement-sc-focused-v1.log",
+      "bytes": 11096,
+      "sha256": "e72c6626134d22e913d12bc20c91244c62cce814f05f00bf4c1054ab148d87aa"
+    },
+    {
+      "file": "procurement-sc-focused-v2.log",
+      "bytes": 29306,
+      "sha256": "7048fa6d6fbb5a01fc5217f82b0cd3a7a823f0812d135c643bef932026baa11a"
+    },
+    {
+      "file": "procurement-sc-i18n-regression.log",
+      "bytes": 29082,
+      "sha256": "49ef9f855f429425f9970e2fb5553fbe8ae058c88a31354f03e9822d2e4e4caf"
+    },
+    {
+      "file": "procurement-sc-gpu-v1.log",
+      "bytes": 27571,
+      "sha256": "48cdb757e8f2aa29d73cc59e684928495ccdd223307bbdd5346ef45e11b2c83c"
+    },
+    {
+      "file": "procurement-sc-generate.log",
+      "bytes": 365,
+      "sha256": "d2771a45d93e1d9562582c09866ab15a5dbd28295b038517b8134a05fb31d7cc"
+    },
+    {
+      "file": "procurement-sc-generate-check.log",
+      "bytes": 301,
+      "sha256": "26ee9b836e8855fd0bdda116079d957efd7a4976153e401fe626aa6225f0c021"
+    },
+    {
+      "file": "procurement-sc-font-corpus.log",
+      "bytes": 318,
+      "sha256": "7605a0fe9176e4b5b00c8b00bea189c55d59227cc6d6e4d3d9aeb9ce3576897c"
+    },
+    {
+      "file": "web-typecheck.log",
+      "bytes": 1401,
+      "sha256": "6ebcdba9a51812e4c2cbc7b29316ebefbaa011b35ea67826b44ccc01f5011de8"
+    }
+  ]
+}

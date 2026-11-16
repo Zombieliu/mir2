@@ -1,0 +1,82 @@
+{
+  "passed": true,
+  "capturedByProducer": 64,
+  "includedRepresentativeCaptures": 10,
+  "humanAccepted": false,
+  "liveAcceptance": false,
+  "walletQr": "reserved .invalid offline fixture; no wallet authentication",
+  "initialProcurementLocale": "zh-TW",
+  "files": [
+    {
+      "artifact": "native/screenshots/native-gpu-billing/zh-CN-monthly-1024x768.png",
+      "path": "native-gpu-billing/zh-CN-monthly-1024x768.png",
+      "sha256": "a8f9480ad63d129a55f092b515cec8082d3245b86b0cf510b635a2f0023043a9",
+      "bytes": 180018
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-billing/zh-CN-usdc-disabled-1024x768.png",
+      "path": "native-gpu-billing/zh-CN-usdc-disabled-1024x768.png",
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31",
+      "bytes": 216625
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-sc-gameplay/zh-CN-npc-opaque-name-1024x768.png",
+      "path": "native-gpu-sc-gameplay/zh-CN-npc-opaque-name-1024x768.png",
+      "sha256": "11f120304ade1ab440961399a4c06fa72171a3e8f79b458fa0f0e86cdc27f685",
+      "bytes": 81306
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-sc-gameplay/zh-CN-quest-diary-detail-1024x768.png",
+      "path": "native-gpu-sc-gameplay/zh-CN-quest-diary-detail-1024x768.png",
+      "sha256": "6b21a45e06c5c32486aee0dc72172ac24b7102923e65d4eb5d8760809a2eb432",
+      "bytes": 683828
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-sc-gameplay/zh-CN-bag-item-tooltip-1024x768.png",
+      "path": "native-gpu-sc-gameplay/zh-CN-bag-item-tooltip-1024x768.png",
+      "sha256": "7c2594d4c1c1f42f6d0062e2e8fd0f5184bad52f65256a716da96f9525c265e3",
+      "bytes": 82019
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-procurement/procurement-delivery-confirm-1024x768.png",
+      "path": "native-gpu-procurement/procurement-delivery-confirm-1024x768.png",
+      "sha256": "50116294479302dbbee7137761f827d94f2256c469d35c8cc05ae41d9546e451",
+      "bytes": 257676
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-guild-gdi/guild-main-window-english-1024x768.png",
+      "path": "native-gpu-guild-gdi/guild-main-window-english-1024x768.png",
+      "sha256": "f7c5b144411e41df694ad1b6cddfb03ad2301b677fdf88423bfbe08bb40cd43a",
+      "bytes": 101428
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-wallet/05-wallet-pending-zh-CN-all-locales-offscreen-fixture.png",
+      "path": "native-gpu-wallet/05-wallet-pending-zh-CN-all-locales-offscreen-fixture.png",
+      "sha256": "1553b507e0a5f7da4f0ddd74068a402a69d6bd0202f9c205fbd00f592b7ee86e",
+      "bytes": 1615415
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-wallet/14-wallet-pending-ar-all-locales-offscreen-fixture.png",
+      "path": "native-gpu-wallet/14-wallet-pending-ar-all-locales-offscreen-fixture.png",
+      "sha256": "f404e0ea0c9e673a27fec709f5d3323091064ce2bb808d942da93df5be829778",
+      "bytes": 1612312
+    },
+    {
+      "artifact": "native/screenshots/native-gpu-wallet/01-wallet-entry-en-offscreen-fixture.png",
+      "path": "native-gpu-wallet/01-wallet-entry-en-offscreen-fixture.png",
+      "sha256": "a8a8c3622347ba969992aea149a106a122312483853325e5109fba8c35df2893",
+      "bytes": 2480764
+    }
+  ],
+  "curatorVisualReview": {
+    "viewedNow": 3,
+    "paths": [
+      "native-gpu-billing/zh-CN-monthly-1024x768.png",
+      "native-gpu-procurement/procurement-delivery-confirm-1024x768.png",
+      "native-gpu-wallet/05-wallet-pending-zh-CN-all-locales-offscreen-fixture.png"
+    ],
+    "producerVisualReviewSampleCount": 10
+  },
+  "allProducerGpuReportsIncluded": true,
+  "completeCaptureInventory": "capture-inventory.json"
+}

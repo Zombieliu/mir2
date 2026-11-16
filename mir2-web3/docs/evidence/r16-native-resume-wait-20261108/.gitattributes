@@ -1,0 +1,2 @@
+# Preserve the exact bytes recorded in SHA256 verification receipts.
+* -text

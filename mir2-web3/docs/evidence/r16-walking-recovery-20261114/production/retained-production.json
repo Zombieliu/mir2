@@ -1,0 +1,412 @@
+{
+  "kind": "walking-recovery-retained-production-public-retry",
+  "passed": true,
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "publicUrl": "https://numeron.obelisk.build/game",
+  "deploymentId": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk",
+  "checkedAt": "2026-11-13T23:08:22.618Z",
+  "promotionWorkflow": 43522596457,
+  "scope": "One actual fresh ordinary browser with official phone-sized Testnet wallet login-only approval, one new QArole, one physical ordinary adjacent walk, exact original static scene, shared Native HUD/Q, original six full fonts, HUD113/113, Worker restart and ordinary logout/browser close. No transport/TLS/DNS/asset overrides.",
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 20,
+      "packet": "UserInformation",
+      "atMs": 54473
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "179f44defe27229913cd60b3bd85dd79105d8ff0f0bfa35b3f0358eb7682dbab"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 54473
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 54476
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 54600
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 54638
+    }
+  },
+  "authority": {
+    "initialSelfPosition": {
+      "x": 288,
+      "y": 616
+    },
+    "initialSpawnPrecondition": {
+      "atMs": 51128,
+      "passed": true,
+      "initialSelfPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "latestSelfPosition": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    "currentSpawnPrecondition": {
+      "passed": true,
+      "checks": {
+        "completeAuthorityTrail": true,
+        "sameStartAndRole": true,
+        "sameCurrentOwner": true,
+        "canonicalInitialUserInformation": true,
+        "currentMapZero": true,
+        "noPriorWorldActions": true,
+        "trustedCurrentPacket": true,
+        "exactPinnedGeometry": true,
+        "completePinnedTownCollision": true,
+        "originalTownSafeAndCovered": true,
+        "currentAuthorityMatchesPlayable": true,
+        "adjacentVerifiedSafeTile": true
+      },
+      "initial": {
+        "packet": "UserInformation",
+        "seq": 20,
+        "atMs": 51044,
+        "connection": 1,
+        "start": 1,
+        "objectId": "1000",
+        "position": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "current": {
+        "packet": "UserInformation",
+        "seq": 20,
+        "atMs": 51044,
+        "connection": 1,
+        "start": 1,
+        "objectId": "1000",
+        "position": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "target": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "connection": 1,
+      "startOrdinal": 1,
+      "historicalFixedPredicates": {
+        "initialAtOriginalStarter": true,
+        "latestAtOriginalStarter": true
+      },
+      "interpretation": "The received initial position is retained. Only latest accepted same-role/start/socket authority matching the actual first-playable camera may authorize one pinned collision-safe Town-adjacent walk. Movement cause is not inferred.",
+      "atMs": 54463
+    },
+    "preInputBinding": {
+      "passed": true,
+      "checks": {
+        "completeAuthorityTrail": true,
+        "sameStartAndRole": true,
+        "sameCurrentOwner": true,
+        "canonicalInitialUserInformation": true,
+        "currentMapZero": true,
+        "noPriorWorldActions": true,
+        "trustedCurrentPacket": true,
+        "exactPinnedGeometry": true,
+        "completePinnedTownCollision": true,
+        "originalTownSafeAndCovered": true,
+        "currentAuthorityMatchesPlayable": true,
+        "adjacentVerifiedSafeTile": true
+      },
+      "initial": {
+        "packet": "UserInformation",
+        "seq": 20,
+        "atMs": 51044,
+        "connection": 1,
+        "start": 1,
+        "objectId": "1000",
+        "position": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "current": {
+        "packet": "UserInformation",
+        "seq": 20,
+        "atMs": 51044,
+        "connection": 1,
+        "start": 1,
+        "objectId": "1000",
+        "position": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "target": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "connection": 1,
+      "startOrdinal": 1,
+      "historicalFixedPredicates": {
+        "initialAtOriginalStarter": true,
+        "latestAtOriginalStarter": true
+      },
+      "interpretation": "The received initial position is retained. Only latest accepted same-role/start/socket authority matching the actual first-playable camera may authorize one pinned collision-safe Town-adjacent walk. Movement cause is not inferred.",
+      "atMs": 54473,
+      "focused": true,
+      "observedSelfPosition": {
+        "x": 288,
+        "y": 616
+      }
+    }
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "expectedRuntimeDelivered": true,
+    "returnedToSelect": true
+  },
+  "staticEntryChecks": {
+    "completeCapture": true,
+    "exactStaticHttpBody": true,
+    "afterAuthBeforeStart": true,
+    "authoritativeSpawn": true,
+    "staticSceneCommit": true,
+    "exactFirstPlayable": true,
+    "noMatchingDynamicRequest": true
+  },
+  "fonts": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "present": true,
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "present": true,
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "present": true,
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "present": true,
+      "bytes": 243520,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "present": true,
+      "bytes": 37780,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "present": true,
+      "bytes": 234892,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    }
+  ],
+  "ui": {
+    "engine": "chrome",
+    "headlessDesktopViewport": true,
+    "networkMock": false,
+    "pageErrors": 0,
+    "consoleErrors": 88,
+    "browserClosed": true
+  },
+  "resourceOutcome": {
+    "prewarmPassed": true,
+    "sharedHudPassed": true,
+    "workerRestartPassed": true,
+    "originalFontsPassed": true,
+    "assetHttpErrors": 87,
+    "consoleErrors": 88,
+    "recoveryPassed": true,
+    "noResourceErrorClaim": false
+  },
+  "timing": {
+    "clockEpochMs": 1794610579097,
+    "authoritativeLoginSuccessMs": 16995,
+    "startIntentMs": 47549,
+    "startAckMs": 51036,
+    "authoritativeStarterMapMs": 51044,
+    "authoritativeSelfMs": 51044,
+    "firstPlayableObservedMs": 54341,
+    "terrainPaintVerifiedMs": 106061,
+    "sharedHudObservedMs": 162519,
+    "logoutIntentMs": 165541,
+    "logoutAckMs": 166480,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 16999,
+    "starterRegionWireHeadersMs": 17847.364,
+    "starterRegionResponseEventMs": 17848,
+    "starterRegionBodyMs": 18122,
+    "starterRegionCommitMs": 51182,
+    "sceneSpritesReadyMs": 51269,
+    "localeRequestMs": 16999,
+    "localeBodyMs": 21400,
+    "localeReadyMs": 21428,
+    "firstPlayableFrameMs": 54281,
+    "rendererBodyMs": 105263,
+    "clickToFirstFrameMs": 6732,
+    "firstFrameToSharedHudObservedMs": 108238,
+    "walkWireToAckMs": 124,
+    "walkWireToRenderedMs": 162
+  },
+  "qr": [
+    {
+      "locale": "zh-cn",
+      "passed": true,
+      "browserClosed": true,
+      "raw": {
+        "path": "C:/r16-walking-recovery-20261114/release-retry/public-qr/qr-zh-cn-receipt.json",
+        "sha256": "b7e64fbb1907ccabcca9ac2313cd0b3e31d991ab6c2a4206bc781147bf60dc4c"
+      }
+    },
+    {
+      "locale": "zh-tw",
+      "passed": true,
+      "browserClosed": true,
+      "raw": {
+        "path": "C:/r16-walking-recovery-20261114/release-retry/public-qr/qr-zh-tw-receipt.json",
+        "sha256": "e65639a5d46ee4ca0f074ee8f0658598c21628cb670cc788b6417ada70be7e5b"
+      }
+    }
+  ],
+  "statics": {
+    "final-public-readback.json": {
+      "raw": {
+        "path": "C:/r16-walking-recovery-20261114/release/final-public-readback.json",
+        "sha256": "1bc219544c05bffdd5ae9417f79b10230b4ce60294dd22d844768a6493e77d1c"
+      },
+      "passed": true
+    },
+    "standing-public-readback.json": {
+      "raw": {
+        "path": "C:/r16-walking-recovery-20261114/release/standing-public-readback.json",
+        "sha256": "59f073388d0842f83a36c940ee9321671c4b75bebc51ae3e6064a2a07b8fbfba"
+      },
+      "passed": true
+    },
+    "bootstrap-public-readback.json": {
+      "raw": {
+        "path": "C:/r16-walking-recovery-20261114/release/bootstrap-public-readback.json",
+        "sha256": "58fa5107c0dbf16528475b75263632ef1023280354f726df5c087f1dc697c7eb"
+      },
+      "passed": true
+    }
+  },
+  "boundaries": {
+    "relocatedSpawnLiveCovered": false,
+    "currentFirstInputSpawn": {
+      "x": 288,
+      "y": 616
+    },
+    "relocatedBranchOfflineTests": 10,
+    "compiledWalkingFallbackLiveCovered": false,
+    "publicWalkingDelivery": "Complete original JSON path; no public compiled fallback or public Deer Walking consumption claim.",
+    "localCompiledWalkingSessions": 4,
+    "physicalPhoneCovered": false,
+    "financialTransactionCovered": false,
+    "overallParityComplete": false,
+    "npcNameLayerPatchInThisDeployment": false
+  },
+  "screenshot": {
+    "file": "public-hud-after-worker-restart.png",
+    "stage": "Actual final complete-HUD game after Worker restart, not the earlier loading screenshot",
+    "raw": {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/signed-public/desktop-walking-compiled-recovery-authority-r2/public-hud-after-worker-restart.png",
+      "sha256": "6d354366b8dba20d76d55a730bd0161ced45f395d603fb3ab2145b1959215b57"
+    }
+  },
+  "evidence": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/signed-public/desktop-walking-compiled-recovery-authority-r2/receipt.json",
+      "sha256": "bfedda94246113d47b0803b7c1d3e8a94e340fa4a25debcecd5feb6043fbe772"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/signed-public/first-party-signed-summary.json",
+      "sha256": "183db20a55b94c2597d71ed7970ada53cff614415c6cc474036d94c4c5e81d23"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/signed-public/preparation.json",
+      "sha256": "fd294a93a622c4fa53e2575fca30a5af35d1997c7c692fc3e8751bd905eaba64"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/signed-public/pinned-town-collision.json",
+      "sha256": "179f44defe27229913cd60b3bd85dd79105d8ff0f0bfa35b3f0358eb7682dbab"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/spawn-policy-tests.json",
+      "sha256": "c8b7302e647a1999d753f3dc0c0e119d4d4ef8891e7060b1ab523b2993da7d6f"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/mechanical-differences.json",
+      "sha256": "33ebbdce530e3eaa5ba60a522cc34cb1f1fb10dacf0e6044655b38a7c2228e87"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/promotion/numeron-r16-release.json",
+      "sha256": "bb5c9f10a5e089b5331ec0b70ac30a34406fb3928eb71ceb1c6f2b3d243c3c94"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-retry/final-production-readback.json",
+      "sha256": "8bb296ab7b78b6da98708482e0bfe0a49cd2236866fcab0385081966b0c9bf9a"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/local-four-sessions-qualified.json",
+      "sha256": "cba2a2b6fe6c6ac3adfb2cfe1829e085cfeb0a901b5fdfe8da67320529044746"
+    }
+  ]
+}

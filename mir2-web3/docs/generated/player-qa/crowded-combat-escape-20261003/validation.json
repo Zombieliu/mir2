@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-10-03T13:16:01.043463+00:00",
+  "baseCommit": "ac9ea83be8880319272919bc0b7d82416c919e57",
+  "publishedR16GameplaySource": "5ec7e7227833e5caacc31957902ca3b9f9fd4d0a",
+  "branch": "codex/crowded-combat-control-20261003",
+  "sourceIdentity": "Containing commit plus the exact tested source file hashes below; no self-referential commit hash is embedded.",
+  "sourceFileSha256": {
+    "apps/game-client/platform-windows/src/input.rs": "de75c86399f9d52670f5518ec63cd2c51ca20cf6079bd065851ea14ee75cf625",
+    "apps/game-client/platform-windows/src/entity_presentation.rs": "ab68e317006ff77fa36e4d48d73084aea8576a768c01cdaf4d193f722a754b25",
+    "apps/game-client/runtime/src/entity_animation.rs": "3422690b709095d74d5eb9145f7cfb029f4cb3181ba9aa8102711467f3b5b451",
+    "apps/simulation/src/runtime/combat.rs": "828e3067c75ab3b78fcb025fee1b348b5bebc5294e1dfa9f1c098545d998bed2",
+    "apps/simulation/src/runtime/zone/runtime.rs": "bbd5ca4b7bc578439d3e2d758590cd52171723b2fb91406d442606c55444b186",
+    "apps/simulation/src/runtime/zone/types.rs": "810d3f19cd06dbeaab78c6f95df09b2f376ed43ebab948fb85006416848937ea",
+    "apps/simulation/src/world_runtime.rs": "2f7f9c352b3821edf17411cc41269e772553c80da68ea729bdb8fc6625cd12aa",
+    "apps/gateway/src/routing.rs": "b9a3ccd3c114bff2666a3d2416ed3e10dea4691b729a79ed13f570c220788323",
+    "apps/simulation/src/runtime/player_status_admission_tests.rs": "d57f61402dbd486a44de1c57c8a5f91604b91a823ae5be46e6afa7852a0570e8",
+    "apps/simulation/tests/shared_crowded_escape.rs": "ef96305dfd065b20f65c56fa17e1193c9751f17355eebd44f078593283bddc78",
+    "apps/simulation/tests/shared_zone.rs": "fc212f3a0e29498d70ebd7b1a58af4645d19992889f33b691d6ec056cd65dc20",
+    "apps/gateway/src/routing/tests/crowded_escape_tests.rs": "ce1df85ac6bc0f90f9c60d22d41731f3927c518a910d86744d8f09208be9b550"
+  },
+  "environment": {
+    "toolchain": "Rust 1.95.0",
+    "host": "Windows",
+    "cargoTargetDir": "C:/mir2-build/periodic-short-play-20261003",
+    "nativeAssetRoot": "C:/Users/Administrator/.codex/worktrees/sabuk-siege/mir2-player-journey/mir2-web3/dist/r16/mir2-assets",
+    "nativeAssets": "process-local complete R16 fixtures; installed F-drive assets were not used or modified",
+    "testThreads": 1
+  },
+  "finalChecks": [
+    {
+      "id": "native-all",
+      "passed": 858,
+      "failed": 0,
+      "ignored": 5,
+      "testExecutionSeconds": 5.86,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/native-all.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-native-final-all-20261003.log",
+      "fullLogSha256": "3dc73c947ab0a241bfbfd579b8547da1cbb3a5be09ecda99b132aa6c9588c127",
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows -- --test-threads=1"
+    },
+    {
+      "id": "animation-core",
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 0.0,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/animation-core.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-entity-animation-green-20261003.log",
+      "fullLogSha256": "83e686b498190e014ad6797b4b38eb9858f7dacbc0a05a2c9e3333527d24e82e",
+      "command": "rustc +1.95.0 --edition=2021 --test apps/game-client/runtime/src/entity_animation.rs -o C:/mir2-build/crowded-entity-animation-tests-20261003.exe; run that executable"
+    },
+    {
+      "id": "dense-zone",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 0.1,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/dense-zone.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-escape-server-green-20261003.log",
+      "fullLogSha256": "cd264b38a40319caa7e9662dc3e9e05171fc3ebcccbe6c97ea85cec857dfc198",
+      "command": "cargo +1.95.0 test -p mir2-simulation --features test-support --test shared_crowded_escape -- --test-threads=1"
+    },
+    {
+      "id": "zone-adjacent",
+      "passed": 168,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 2.17,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/zone-adjacent.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-zone-adjacent-20261003.log",
+      "fullLogSha256": "8cc9b1036a00b60aa4baecbbfb3dcef93d65f059a1572da383ca4ec5f5a98f3b",
+      "command": "cargo +1.95.0 test -p mir2-simulation --lib runtime::zone::runtime:: -- --test-threads=1"
+    },
+    {
+      "id": "personal-status",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 0.0,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/personal-status.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-personal-status-green-final-20261003.log",
+      "fullLogSha256": "fb0d116046cbdb530af446a0284b0405aa8311c8800dd1062edae228cff2d704",
+      "command": "compiled mir2-simulation lib test executable: crowded_personal --test-threads=1 (Cargo equivalent: cargo +1.95.0 test -p mir2-simulation --lib crowded_personal -- --test-threads=1)"
+    },
+    {
+      "id": "gateway-status",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 6.01,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/gateway-status.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-gateway-status-green-20261003.log",
+      "fullLogSha256": "08154121f368b6a06765b85288486639a481043872fe3774e89610b386caa4c1",
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib crowded_escape_tests -- --test-threads=1"
+    },
+    {
+      "id": "gateway-adjacent",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 64.91,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/gateway-adjacent.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-gateway-adjacent-20261003.log",
+      "fullLogSha256": "3c56920630bd1201663b52853544455d03def87e1a2d4945c08578e5ddee7ed0",
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib -- owner_attack_animation_tests owner_packet_normalization_tests owner_location_order_tests movement_deadline_tests pending_zone_aoi_tests cadence_map_transfer_tests map_transfer_poison_tests zone_skill_cadence_tests poisoning_carried_tests shared_session_hot_path_tests shared_magic_rejects_nonplayer_actor shared_in_process_runtime_routes_magic --test-threads=1"
+    },
+    {
+      "id": "shared-zone-all",
+      "passed": 209,
+      "failed": 0,
+      "ignored": 0,
+      "testExecutionSeconds": 2.55,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/shared-zone-all.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-shared-zone-green-20261003.log",
+      "fullLogSha256": "40a271988179a9dd339b5c8e13073e6801f6eef6ea1239479f40307c49339691",
+      "command": "cargo +1.95.0 test -p mir2-simulation --test shared_zone -- --test-threads=1"
+    }
+  ],
+  "retainedBehaviorFailures": [
+    {
+      "id": "native-sequence-red",
+      "passed": 1,
+      "failed": 2,
+      "ignored": 0,
+      "testExecutionSeconds": 0.01,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/native-sequence-red.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-native-sequence-red-20261003.log",
+      "fullLogSha256": "b16592e374ae1dffc739d310c6fcb94c91333f5cd5736baaed6510c9ad99d594"
+    },
+    {
+      "id": "dense-zone-red",
+      "passed": 3,
+      "failed": 7,
+      "ignored": 0,
+      "testExecutionSeconds": 0.09,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/dense-zone-red.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-escape-server-red2-20261003.log",
+      "fullLogSha256": "29f88af69f6b68a69ac7539581649471146936d7180c908c9a82832375c58290"
+    },
+    {
+      "id": "personal-status-red",
+      "passed": 1,
+      "failed": 2,
+      "ignored": 0,
+      "testExecutionSeconds": 0.0,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/personal-status-red.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-personal-status-red-20261003.log",
+      "fullLogSha256": "0f99c3e1d8091fb52186ce7ea5732f2841733bdd96d75757422d2f9002a30f2c"
+    },
+    {
+      "id": "gateway-physical-red",
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0,
+      "testExecutionSeconds": 2.24,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/gateway-physical-red.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-gateway-status-red2-20261003.log",
+      "fullLogSha256": "64b88f3ffd8e030d198a03ce237ad89149bc0248d42fdee6b7b4872a5b29410e"
+    },
+    {
+      "id": "gateway-cast-red",
+      "passed": 3,
+      "failed": 1,
+      "ignored": 0,
+      "testExecutionSeconds": 4.05,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/gateway-cast-red.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-gateway-cast-red-20261003.log",
+      "fullLogSha256": "c358004b6af7c2ed53c6ad766acc73bbc02c1b686cba38c9ad30406a4ad3d09c"
+    },
+    {
+      "id": "shared-zone-initial",
+      "passed": 204,
+      "failed": 5,
+      "ignored": 0,
+      "testExecutionSeconds": 2.54,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/shared-zone-initial.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-shared-zone-adjacent-20261003.log",
+      "fullLogSha256": "a9d2773afb932e43f2d92dcdefc0374343f5bd71a371bdac2f60b7c9fa476c17"
+    },
+    {
+      "id": "shared-zone-r16-baseline",
+      "passed": 204,
+      "failed": 5,
+      "ignored": 0,
+      "testExecutionSeconds": 2.52,
+      "summary": "docs/generated/player-qa/crowded-combat-escape-20261003/shared-zone-r16-baseline.txt",
+      "retainedFullLog": "C:/mir2-build/crowded-shared-zone-r16-baseline-20261003.log",
+      "fullLogSha256": "84368da5aa7ae9337b78c10d2017efbccb93c3b39c9b34fdc261beba3214c0db"
+    }
+  ],
+  "initialNativeSelection": {
+    "passed": 2,
+    "failed": 5,
+    "evidence": "earlier conversation tool output; no standalone original log was captured",
+    "notIncludedInFinalPassTotal": true
+  },
+  "retainedSetupErrors": [
+    {
+      "retainedFullLog": "C:/mir2-build/crowded-escape-server-red-20261003.log",
+      "sha256": "3e55498120a37a14bde4f2086e400f668984c08626016b20db30ca8bee51401e",
+      "behaviorTestsPassed": 0,
+      "category": "test-fixture compilation, not a behavior result"
+    },
+    {
+      "retainedFullLog": "C:/mir2-build/crowded-gateway-status-red-20261003.log",
+      "sha256": "8c2e2669a3a5a1a8ae2983f89b1fb14e0cdb857ec9ce5a67a9876ce45df9fc1e",
+      "behaviorTestsPassed": 0,
+      "category": "test-fixture compilation, not a behavior result"
+    }
+  ],
+  "formatAndWhitespace": {
+    "newStandaloneTestModulesAndAnimationRustfmtCheck": true,
+    "gitDiffCheck": true,
+    "giantExistingFilesReformatted": false
+  },
+  "scenarioBoundaries": {
+    "nativeSixtyStepContinuousHitFixture": {
+      "steps": 60,
+      "hitEvents": 960,
+      "maximumWaitingFlinches": 1,
+      "realSourceSequenceIncrements": 1
+    },
+    "sharedDenseMonsterFixture": "Seven real shared-Zone monster AI attackers; every damage/vital settlement preserved, one optional corridor. Eight live blockers still prevent collision bypass; ordinary death frees an exit.",
+    "statusFixtures": "Explicit finite test-support Zone fixture and isolated trusted Gateway checkpoint fixtures; not player/client QA commands or a live boss journey.",
+    "sourcePostHitRunCooldownFullParity": false
+  },
+  "release": {
+    "newInstallerBuilt": false,
+    "updateFeedChanged": false,
+    "gatewayDeployed": false,
+    "installedClientModified": false,
+    "playerStoreModified": false,
+    "capacityGoalResumed": false
+  },
+  "acceptance": {
+    "newGpuScreenshots": false,
+    "humanWindowsGameplay": false,
+    "exactUserMapClassReproduced": false,
+    "onlineLoadTest": false,
+    "wholeGameAccepted": false
+  }
+}

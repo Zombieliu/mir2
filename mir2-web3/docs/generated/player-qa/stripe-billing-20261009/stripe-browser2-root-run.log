@@ -1,0 +1,7 @@
+
+running 2 tests
+test billing_browser::tests::checkout_host_and_scheme_are_exact ... ok
+test quoted_windows_arguments_and_illegal_uri_characters_are_rejected ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

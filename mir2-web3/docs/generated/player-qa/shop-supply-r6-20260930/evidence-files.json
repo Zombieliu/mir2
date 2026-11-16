@@ -1,0 +1,185 @@
+{
+  "localRoot": "C:\\mir2-ui-repair-20260921\\shop-supply-r6-20260930",
+  "files": [
+    {
+      "file": "shop-03/ar-medicine-shop.png",
+      "bytes": 118282,
+      "sha256": "b7b2a546886619e16bc1621791f0d6b4c761ac8aacdd8864ac7b8f0727b81709"
+    },
+    {
+      "file": "shop-03/en-medicine-shop.png",
+      "bytes": 118563,
+      "sha256": "b219563534aba1578ab9b7ae26fb20013c144f6b65d45454d5ccb50fc3592438"
+    },
+    {
+      "file": "shop-03/hi-medicine-shop.png",
+      "bytes": 118913,
+      "sha256": "a54497bba0968c24d243e11cc6625f78459c0eb6e1e3282858a76d64952b9607"
+    },
+    {
+      "file": "shop-03/id-medicine-shop.png",
+      "bytes": 118351,
+      "sha256": "c45ce2ea49e747db53b969a66e9576ce34d6f63ec890d4fa9aa55833162f26a8"
+    },
+    {
+      "file": "shop-03/pt-BR-medicine-shop.png",
+      "bytes": 120527,
+      "sha256": "c1c9b05e0bc885f3dba5fd273c3486d790a9df9e75e444aeca7643e762f0cdcd"
+    },
+    {
+      "file": "shop-03/ru-medicine-shop.png",
+      "bytes": 119872,
+      "sha256": "7d0cef80ac1a2b608cfcc1d508b1d42b2b371563b76f28a7a6d145e2e99dca72"
+    },
+    {
+      "file": "shop-03/th-medicine-shop.png",
+      "bytes": 118310,
+      "sha256": "1cf6d5847ec0e756b740b71227eb9349e8fc9a1c2b79706f1f931be5b84e3f08"
+    },
+    {
+      "file": "shop-03/vi-medicine-shop.png",
+      "bytes": 118638,
+      "sha256": "3ee435b2a72a0ec73e5092d6af77b333fbf6986c2405c3e0b12eadc236bbb483"
+    },
+    {
+      "file": "shop-03/zh-TW-medicine-shop.png",
+      "bytes": 120054,
+      "sha256": "dc05befffe5625d484172119abd2e76a6fdedca70b7d2a04b0060a49d81eeac8"
+    },
+    {
+      "file": "supply-02/ar-supply-Alchemist_Samuel.png",
+      "bytes": 46551,
+      "sha256": "982d4928b0d732a598b86283d19106e86644567392db9bf5e5911a4825e069f5"
+    },
+    {
+      "file": "supply-02/ar-supply-Merchant_Bull.png",
+      "bytes": 63823,
+      "sha256": "450ad3ea0e62d3ce3e9b04e36e585fb8e0b4ece7516d1892227de10a10960091"
+    },
+    {
+      "file": "supply-02/ar-supply-Specialist_Travis.png",
+      "bytes": 54511,
+      "sha256": "44aabc4b54156f7e03267fd5ff31e67a2d2404cab196d859b233d208f26badfc"
+    },
+    {
+      "file": "supply-02/en-supply-Alchemist_Samuel.png",
+      "bytes": 49542,
+      "sha256": "52cfc3b2ae04f029d340f43dcc01b00c1a65f09719de4aea1b7353c63fafbf58"
+    },
+    {
+      "file": "supply-02/en-supply-Merchant_Bull.png",
+      "bytes": 66288,
+      "sha256": "b60725c6ac41a0cb473266369f2782dd13d210cd354e85074ea2e63e5536fc5e"
+    },
+    {
+      "file": "supply-02/en-supply-Specialist_Travis.png",
+      "bytes": 58136,
+      "sha256": "2668335f2421b4cb5461bc186fb184f54e87cb0e5d2861107af09a87572a924a"
+    },
+    {
+      "file": "supply-02/hi-supply-Alchemist_Samuel.png",
+      "bytes": 50676,
+      "sha256": "0eb47d187b12d826889b36febe9f701c0b7b16de64eb8eaaac9da360148aa7a4"
+    },
+    {
+      "file": "supply-02/hi-supply-Merchant_Bull.png",
+      "bytes": 66966,
+      "sha256": "be784feedb21f599ff15eaae63f31e1fe050aee05899837d662eaffa239957d7"
+    },
+    {
+      "file": "supply-02/hi-supply-Specialist_Travis.png",
+      "bytes": 56173,
+      "sha256": "f05bd203c22434f5eaf802249bd04e9c355f861de642a0427ea2337525328791"
+    },
+    {
+      "file": "supply-02/id-supply-Alchemist_Samuel.png",
+      "bytes": 51562,
+      "sha256": "730c6d7457a400bc5d6f6446e63c6c8f7ef4b067ccd63e6580a88f688414e379"
+    },
+    {
+      "file": "supply-02/id-supply-Merchant_Bull.png",
+      "bytes": 73284,
+      "sha256": "ecfab0cd5ee07e739e3abc055d3412b207bee9e7539f283eb7df6d6cb7f40083"
+    },
+    {
+      "file": "supply-02/id-supply-Specialist_Travis.png",
+      "bytes": 61304,
+      "sha256": "8d1251bf22740f529e1925c13ffd01c1555e839f451e43708d61c503d9ff1b0e"
+    },
+    {
+      "file": "supply-02/pt-BR-supply-Alchemist_Samuel.png",
+      "bytes": 58013,
+      "sha256": "c9da5c181484c13cc323ee9355bf0db4dcd09809ff7718cf617c2f9ea8a61e26"
+    },
+    {
+      "file": "supply-02/pt-BR-supply-Merchant_Bull.png",
+      "bytes": 79831,
+      "sha256": "ed64e842b704a337c84fed430b3f66d91bcfde169ccc17a4509d4a09e1d248ab"
+    },
+    {
+      "file": "supply-02/pt-BR-supply-Specialist_Travis.png",
+      "bytes": 67428,
+      "sha256": "b1e32a0b2e6ce0e24840034e4c5f7ab38041cf74bf36dcfee2d69e2f4568ab67"
+    },
+    {
+      "file": "supply-02/ru-supply-Alchemist_Samuel.png",
+      "bytes": 53031,
+      "sha256": "c3e464cd4797e810d58a823c97c48dc3c6a77193c08a1f81223eca7bccf48969"
+    },
+    {
+      "file": "supply-02/ru-supply-Merchant_Bull.png",
+      "bytes": 76489,
+      "sha256": "c7bced6d079af363811f744caa71dc75111fdd374f517c60bc61b0564c8244ed"
+    },
+    {
+      "file": "supply-02/ru-supply-Specialist_Travis.png",
+      "bytes": 62449,
+      "sha256": "89cdf9879d68cb13b46fd6a67cbc2b47ecade928102173fcce6dbd06bda5a52f"
+    },
+    {
+      "file": "supply-02/th-supply-Alchemist_Samuel.png",
+      "bytes": 43855,
+      "sha256": "cea99460dd7a5339270f496f43d61c1e9b5241927d943a4fb340c4c2ed1bac43"
+    },
+    {
+      "file": "supply-02/th-supply-Merchant_Bull.png",
+      "bytes": 59266,
+      "sha256": "060e0ec576d4c55da85713766ef2039f76f5065ae9467cee3692f4c167fd667e"
+    },
+    {
+      "file": "supply-02/th-supply-Specialist_Travis.png",
+      "bytes": 52371,
+      "sha256": "32b2ad19750eb15515eb62952288f091dd845a2f2f12f3e68cf825fdb1853eff"
+    },
+    {
+      "file": "supply-02/vi-supply-Alchemist_Samuel.png",
+      "bytes": 52432,
+      "sha256": "75e43352919c47b0f45db961e4aff3bc63cab611316edd1f08d941fba8dcc81b"
+    },
+    {
+      "file": "supply-02/vi-supply-Merchant_Bull.png",
+      "bytes": 72447,
+      "sha256": "eb60964231912bc700192ca7e3f7a5aac2372f8489804d093f2439eaa1c11699"
+    },
+    {
+      "file": "supply-02/vi-supply-Specialist_Travis.png",
+      "bytes": 59758,
+      "sha256": "46f1aba8d979649c7001b397ba955eb79d0fe54e5dd7e2e6dfee12636507a9e2"
+    },
+    {
+      "file": "supply-02/zh-TW-supply-Alchemist_Samuel.png",
+      "bytes": 50007,
+      "sha256": "59876e0f2f24211e2e5c63ad1bd36dab8da90124b5530498879ccc856120d720"
+    },
+    {
+      "file": "supply-02/zh-TW-supply-Merchant_Bull.png",
+      "bytes": 61166,
+      "sha256": "15913599e43093a0ddbb95bf08745b72bcfad240543ef816bbc6c5d195582be7"
+    },
+    {
+      "file": "supply-02/zh-TW-supply-Specialist_Travis.png",
+      "bytes": 52886,
+      "sha256": "f5a2725e7b29886a2a32c3129ac7ced0d42d871104aace144e0ce4f2ee90f3a4"
+    }
+  ]
+}

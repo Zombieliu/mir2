@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T14:26:29.724Z",
+  "finishedAt": "2026-10-26T14:26:35.124Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "check-source-readonly-v1.mjs",
+    "--repository",
+    "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey",
+    "--expected-head",
+    "74473d41ff989a36d9697f57ee4d9eb9c86b779a"
+  ],
+  "cwd": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9",
+  "expectedHead": "74473d41ff989a36d9697f57ee4d9eb9c86b779a",
+  "readOnly": true,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdoutFile": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-root-guard-stdout-v1.log",
+  "stderrFile": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-root-guard-stderr-v1.log",
+  "capacityAccepted": false
+}

@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-formal-ladder-v4-public-archive",
+  "archiveScope": "Explicit public originals only; private Store/pool/traffic ledger/keys/tokens/credentials/Gateway logs/recordings/binaries excluded.",
+  "createdAt": "2026-10-27T15:33:43.226Z",
+  "sourcePackage": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\episode\\reports\\1793109793965-def55b88.report.json",
+        "bytes": 418181,
+        "sha256": "71630f45d49ec0e2fc042bc9bdea6037fe723bc8dc676ffafbb45fe1fb9a71c9"
+      },
+      "destination": "reports/1793109793965-def55b88.report.json",
+      "pinBasis": "canonical receipt.rawOriginalReport",
+      "copyBytes": 418181,
+      "copySha256": "71630f45d49ec0e2fc042bc9bdea6037fe723bc8dc676ffafbb45fe1fb9a71c9"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\episode\\reports\\1793109793965-def55b88.samples.jsonl",
+        "bytes": 46017024,
+        "sha256": "fc9b8598ab98c66b633dcea9547a6af2031b35590aa4887a066b0b10fcb6e6bc"
+      },
+      "destination": "reports/1793109793965-def55b88.samples.jsonl",
+      "pinBasis": "canonical receipt.rawOriginalSamples",
+      "copyBytes": 46017024,
+      "copySha256": "fc9b8598ab98c66b633dcea9547a6af2031b35590aa4887a066b0b10fcb6e6bc"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/episode/formal-episode-receipt-v1.json",
+        "bytes": 374910,
+        "sha256": "1136a00f7482f124254e9b5571a3492b96fa761c0d9f53405af9b9c4d44424de"
+      },
+      "destination": "episode/formal-episode-receipt-v1.json",
+      "pinBasis": "actual ended public episode original",
+      "copyBytes": 374910,
+      "copySha256": "1136a00f7482f124254e9b5571a3492b96fa761c0d9f53405af9b9c4d44424de"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/episode/cleanup-v1.json",
+        "bytes": 5621,
+        "sha256": "233575dc90a5a04d934353d540ebb967d09673caf6258551dc3e979646014f61"
+      },
+      "destination": "episode/cleanup-v1.json",
+      "pinBasis": "actual ended public episode original",
+      "copyBytes": 5621,
+      "copySha256": "233575dc90a5a04d934353d540ebb967d09673caf6258551dc3e979646014f61"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/episode/root-independent-cleanup-v1.json",
+        "bytes": 285,
+        "sha256": "2b4289d77f9e804742f31ed5d32398878bcfc152b39fc7714830e949f9a82c4b"
+      },
+      "destination": "episode/root-independent-cleanup-v1.json",
+      "pinBasis": "actual ended public episode original",
+      "copyBytes": 285,
+      "copySha256": "2b4289d77f9e804742f31ed5d32398878bcfc152b39fc7714830e949f9a82c4b"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/episode/progress-current.json",
+        "bytes": 418,
+        "sha256": "f29b021a6c4f81a9ab6bfc709aa807c62293ed355c1b0d199a4567dd7591634f"
+      },
+      "destination": "episode/progress-current.json",
+      "pinBasis": "actual ended public episode original",
+      "copyBytes": 418,
+      "copySha256": "f29b021a6c4f81a9ab6bfc709aa807c62293ed355c1b0d199a4567dd7591634f"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/episode/monitor-current.json",
+        "bytes": 9223,
+        "sha256": "efb937231167f9e26ac09d6e3ad1efb3d100600e452d1d58d73f1ed38df92ee7"
+      },
+      "destination": "episode/monitor-current.json",
+      "pinBasis": "actual ended public episode original",
+      "copyBytes": 9223,
+      "copySha256": "efb937231167f9e26ac09d6e3ad1efb3d100600e452d1d58d73f1ed38df92ee7"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/root-owned-exit-v1.json",
+        "bytes": 322,
+        "sha256": "b3b87db64bbe4c1d86cd854802556d9bc071de1b1c249a78a9ddf3de84b0391e"
+      },
+      "destination": "root-owned-exit-v1.json",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 322,
+      "copySha256": "b3b87db64bbe4c1d86cd854802556d9bc071de1b1c249a78a9ddf3de84b0391e"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/root-owned-stdout.log",
+        "bytes": 1593,
+        "sha256": "16d364dcbc82fd252c9680295e10569854d0fe8ed04f56952998d690e7645782"
+      },
+      "destination": "root-owned-stdout.log",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 1593,
+      "copySha256": "16d364dcbc82fd252c9680295e10569854d0fe8ed04f56952998d690e7645782"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/root-owned-stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "root-owned-stderr.log",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 0,
+      "copySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/frozen-source-v1.json",
+        "bytes": 235207,
+        "sha256": "a7d57151bd6e1dfe08bf2c07e6b18e65d85ecca53132b48f42b02a382f51f56b"
+      },
+      "destination": "frozen-source-v1.json",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 235207,
+      "copySha256": "a7d57151bd6e1dfe08bf2c07e6b18e65d85ecca53132b48f42b02a382f51f56b"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/prepare-config-pending-v1.json",
+        "bytes": 18349,
+        "sha256": "2a1c4a91e246760dbb9f5c13d67789ab75720073c815b9cb00ed22ac931b7a7f"
+      },
+      "destination": "prepare-config-pending-v1.json",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 18349,
+      "copySha256": "2a1c4a91e246760dbb9f5c13d67789ab75720073c815b9cb00ed22ac931b7a7f"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/root-current-source-final-review-v1.json",
+        "bytes": 1305,
+        "sha256": "2560c7bebb33a9e69163d1ac7be3b5d08a34a0e784f53389a7e069de45f8ee13"
+      },
+      "destination": "root-current-source-final-review-v1.json",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 1305,
+      "copySha256": "2560c7bebb33a9e69163d1ac7be3b5d08a34a0e784f53389a7e069de45f8ee13"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v4/root-final-binding-receipt-v1.json",
+        "bytes": 2341,
+        "sha256": "00c65a76ad8b14ff98f5d526e929177ed73821b4720ad50f84e519fdb0fe4b60"
+      },
+      "destination": "root-final-binding-receipt-v1.json",
+      "pinBasis": "actual terminal or frozen public original",
+      "copyBytes": 2341,
+      "copySha256": "00c65a76ad8b14ff98f5d526e929177ed73821b4720ad50f84e519fdb0fe4b60"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-chat-focused-v22\\root-focused-receipt-v1.json",
+        "bytes": 19732,
+        "sha256": "f4190ab326c415491813a44443f244cadbad906341c66a94b8ecdb7cfad6948e"
+      },
+      "destination": "node-v22/root-focused-receipt-v1.json",
+      "pinBasis": "actual current78 focused receipt",
+      "copyBytes": 19732,
+      "copySha256": "f4190ab326c415491813a44443f244cadbad906341c66a94b8ecdb7cfad6948e"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-chat-focused-v22\\native-target-supply-adjacent-regression.stdout.log",
+        "bytes": 21771,
+        "sha256": "0bad65459c6c556931e32e015dfec99c1b3f3b12ef0c8e32212807c1245bec01"
+      },
+      "destination": "node-v22/native-target-supply-adjacent-regression.stdout.log",
+      "pinBasis": "actual current78 stdout",
+      "copyBytes": 21771,
+      "copySha256": "0bad65459c6c556931e32e015dfec99c1b3f3b12ef0c8e32212807c1245bec01"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-chat-focused-v22\\native-target-supply-adjacent-regression.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "node-v22/native-target-supply-adjacent-regression.stderr.log",
+      "pinBasis": "actual current78 stderr",
+      "copyBytes": 0,
+      "copySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\run-owned-formal-v1.mjs",
+        "bytes": 23115,
+        "sha256": "336fda8a230a8b81b9cf4c5970ea265e3765bd6007f520ed469b4edd5e8c3ec4"
+      },
+      "destination": "tools/run-owned-formal-v1.mjs",
+      "pinBasis": "actual frozen toolPin",
+      "copyBytes": 23115,
+      "copySha256": "336fda8a230a8b81b9cf4c5970ea265e3765bd6007f520ed469b4edd5e8c3ec4"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\copy-source-bank-v1.mjs",
+        "bytes": 21771,
+        "sha256": "ee1afe881bf8538745911f0ba0a659ab9b43b0f78e05eb8303773c42c4513598"
+      },
+      "destination": "tools/copy-source-bank-v1.mjs",
+      "pinBasis": "actual frozen toolPin",
+      "copyBytes": 21771,
+      "copySha256": "ee1afe881bf8538745911f0ba0a659ab9b43b0f78e05eb8303773c42c4513598"
+    }
+  ],
+  "totalOriginalFiles": 19,
+  "totalOriginalBytes": 47171168,
+  "allCopiesRawExact": true,
+  "structuredSecretValueFieldsFound": 0,
+  "diagnostic": {
+    "file": "target-supply-diagnosis-v1.json",
+    "bytes": 22758,
+    "sha256": "dbcfbf9d5e1ce60cf639f1e7b1f29e005493d373d5c7252f74148d5356a56c7b"
+  },
+  "result": {
+    "canonicalStandardRunPassed": false,
+    "cleanupComplete": true,
+    "ownedExit": 1,
+    "stage2Passed": true,
+    "stage10Passed": true,
+    "stage25Passed": false,
+    "stage50Measured": false,
+    "stage100Measured": false,
+    "stage500Measured": false
+  },
+  "qualificationBoundary": {
+    "currentFocusedTests": 78,
+    "sourceBindings": 45,
+    "backend": "V6/55/Rust32 strictly reused; no fresh Rust build/test",
+    "full16": "Existing actual full16-v2 reused after exact14-dependency proof; no duplicate full16 package copied"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "humanFrontendAccepted": false
+}

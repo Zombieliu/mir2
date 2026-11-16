@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "createdAt": "2026-11-07T12:03:03.027Z",
+  "passed": true,
+  "scope": "Current c404 base plus pinned uncommitted Native worktree, canonical manifest and synchronized canonical lock, release/offline/locked build only",
+  "sourceBaseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "canonicalManifest": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+    "bytes": 2429,
+    "sha256": "5f65904d0fbdf4a98e02c097463ce57c4aa3424e938c3792fa90c5f7e7e88180"
+  },
+  "canonicalLock": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+    "bytes": 158883,
+    "sha256": "1e9b8d4c7d4caf951b7b16bef72b2851b3443684fcbc66a2e905faed6825673d"
+  },
+  "sourceBefore": "native-canonical-source-before.json",
+  "sourceAfter": "native-canonical-source-after.json",
+  "commandReceipt": "native-canonical-build-command-receipt.json",
+  "buildLog": "native-canonical-release.log",
+  "sourceStable": true,
+  "sourceCount": 608,
+  "sourceBytes": 103647664,
+  "actualCanonicalDependencyCount": 395,
+  "allActualCanonicalInputsPrePinned": true,
+  "previousExternalCandidatePreserved": true,
+  "rustc": "1.95.0 (59807616e 2026-04-14)",
+  "canonicalLockedOfflineReleaseBuildPassed": true,
+  "canonicalSourceOrLockWrittenByBuild": false,
+  "originalInstallationChanged": false,
+  "publicTomlChanged": false,
+  "nativeExecuted": false,
+  "servicesStarted": false,
+  "candidate": {
+    "path": "D:/mir2-builds/r16-shortcut-20261107/native-game-canonical/mir2-platform-windows.exe",
+    "bytes": 135006208,
+    "sha256": "bc3bde1d0f063f3c52abe790424249a983f298f4941245a5b6c2c0081dd5190a"
+  },
+  "cacheBuild": {
+    "path": "F:/mir2-builds/canonical-companion-native/release/mir2-platform-windows.exe",
+    "bytes": 135006208,
+    "sha256": "bc3bde1d0f063f3c52abe790424249a983f298f4941245a5b6c2c0081dd5190a"
+  },
+  "compiledDependencyFile": {
+    "path": "F:/mir2-builds/canonical-companion-native/release/mir2-platform-windows.d",
+    "bytes": 36078,
+    "sha256": "2540906b7f958e386506cad07434c26e28e570b3c890f76373a076c8312c843e"
+  },
+  "limitations": [
+    "No Native UI or gameplay was exercised.",
+    "Current uncommitted source pins identify this candidate; base revision alone is not an exact source snapshot.",
+    "The QA candidate directory contains the EXE only; its public TOML/resources/preferences and explicit isolated Gateway must be prepared separately."
+  ]
+}

@@ -1,0 +1,1521 @@
+{
+  "run": "quest-after-r2",
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "developmentBuild": false,
+  "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+  "originalReceiptSha256": "d6480b695d94ddc0bbcf312809bffad823ddbda10aa0b5c9a1e05320552beee2",
+  "passed": true,
+  "failure": null,
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "gender": "female",
+  "renderer": "webgl2",
+  "startGame": {
+    "acknowledgedAt": 1794546715553,
+    "bootstrapAt": 1794546715856,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "map": "0"
+  },
+  "firstPlayable": {
+    "epochMs": 1794546726932,
+    "observedAt": 1794546726935
+  },
+  "startAckToFirstPlayableMs": 11379,
+  "standingChunks": {
+    "faultInjected": false,
+    "reads": [
+      {
+        "path": "/_next/static/chunks/5809.e689500beb523383.js",
+        "gender": "female",
+        "direction": 4,
+        "bytes": 14605,
+        "gzipBytes": 10351,
+        "sha256": "68f229d791507964c7960a91264e1bffde043ac48caa50632c8767bf239d1d4a",
+        "requestedAt": 1794546723972,
+        "headersAt": 1794546723976,
+        "status": 200,
+        "finishedAt": 1794546723976
+      }
+    ]
+  },
+  "earlyPlayer": {
+    "passed": true,
+    "withheldFullPack": true,
+    "firstPlayableAt": 1794546726932,
+    "startAckAt": 1794546715553,
+    "rows": [
+      {
+        "at": 1794546715844,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": false,
+        "bodyDecoded": false,
+        "bodyPath": null,
+        "displaySource": null,
+        "firstPlayable": false
+      },
+      {
+        "at": 1794546723990,
+        "waitingForEntryPlayer": true,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/NPC/15/2.png",
+        "displaySource": "data",
+        "left": "5px",
+        "top": "-48px",
+        "width": "80px",
+        "height": "88px",
+        "firstPlayable": false,
+        "pngSha256": "45d2b6f629cc8d636f95a4493b62918167ce7f86959a5a37540e09806bdd2870"
+      },
+      {
+        "at": 1794546724029,
+        "waitingForEntryPlayer": true,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": false,
+        "bodyPath": "/original-ui/Monster/005/23.png",
+        "displaySource": "",
+        "left": "-11px",
+        "top": "-44px",
+        "width": "76px",
+        "height": "80px",
+        "firstPlayable": false
+      },
+      {
+        "at": 1794546724102,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/824.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": false,
+        "pngSha256": "6553c7beabf3545f602a8041b21af62917a48e0db0f2cddc23bddc76faeee390"
+      },
+      {
+        "at": 1794546724522,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/825.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": false,
+        "pngSha256": "0ecf7ca64fe2d2d252cf92c599d5d2ff325114d7723609b02e97ee668189c55b"
+      },
+      {
+        "at": 1794546725022,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/826.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": false,
+        "pngSha256": "dd456623d87a597fe503db6d82201ab81ae276a6350de253ab3673b5918e3134"
+      },
+      {
+        "at": 1794546725522,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/827.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": false,
+        "pngSha256": "c8f1d6a3d8bacbc078d539bb27b44686af09242d8aba6081ba8d84cee93f005d"
+      },
+      {
+        "at": 1794546726021,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/824.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": false,
+        "pngSha256": "6553c7beabf3545f602a8041b21af62917a48e0db0f2cddc23bddc76faeee390"
+      },
+      {
+        "at": 1794546726521,
+        "waitingForEntryPlayer": false,
+        "ready": false,
+        "pending": true,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/825.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": false,
+        "pngSha256": "0ecf7ca64fe2d2d252cf92c599d5d2ff325114d7723609b02e97ee668189c55b"
+      },
+      {
+        "at": 1794546726942,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/825.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true,
+        "pngSha256": "0ecf7ca64fe2d2d252cf92c599d5d2ff325114d7723609b02e97ee668189c55b"
+      },
+      {
+        "at": 1794546726968,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/826.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true,
+        "pngSha256": "dd456623d87a597fe503db6d82201ab81ae276a6350de253ab3673b5918e3134"
+      },
+      {
+        "at": 1794546727521,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/827.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true,
+        "pngSha256": "c8f1d6a3d8bacbc078d539bb27b44686af09242d8aba6081ba8d84cee93f005d"
+      },
+      {
+        "at": 1794546728021,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/824.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true,
+        "pngSha256": "6553c7beabf3545f602a8041b21af62917a48e0db0f2cddc23bddc76faeee390"
+      },
+      {
+        "at": 1794546728521,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/825.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true,
+        "pngSha256": "0ecf7ca64fe2d2d252cf92c599d5d2ff325114d7723609b02e97ee668189c55b"
+      },
+      {
+        "at": 1794546729021,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/826.png",
+        "displaySource": "data",
+        "left": "10px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true,
+        "pngSha256": "dd456623d87a597fe503db6d82201ab81ae276a6350de253ab3673b5918e3134"
+      },
+      {
+        "at": 1794546731243,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546732213,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546732421,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546732543,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546732622,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546733407,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546733622,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546733665,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546733721,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546733941,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/880.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546733982,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/881.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546734607,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546734771,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546734822,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735022,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735121,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/880.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735172,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/881.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735242,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735441,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735813,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546735922,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736121,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736221,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736322,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/880.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736372,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/881.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736414,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736581,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736681,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546736822,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737030,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737221,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737286,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737322,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737521,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/880.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737573,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/881.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737632,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737721,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737921,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546737969,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738121,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/856.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-47px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738182,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/857.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738221,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738401,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738422,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738622,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738721,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/880.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738771,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/881.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546738821,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739021,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739103,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739121,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739309,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/856.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-47px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739372,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/857.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739421,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739522,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794546739722,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      }
+    ],
+    "visible": {
+      "decoded": true,
+      "visible": true,
+      "source": "/original-ui/CArmour/00/879.png",
+      "displaySource": "blob",
+      "gate": true
+    },
+    "idle": {
+      "startedAt": 1794546726935,
+      "endedAt": 1794546729136
+    }
+  },
+  "fullPackUpgrade": {
+    "observedAt": 1794546741592,
+    "actualDecodedDataImage": true,
+    "walkingFrames": [
+      {
+        "path": "/original-ui/CArmour/00/852.png",
+        "index": 44,
+        "data": true,
+        "decoded": true
+      },
+      {
+        "path": "/original-ui/CArmour/00/857.png",
+        "index": 49,
+        "data": true,
+        "decoded": true
+      }
+    ]
+  },
+  "earlyWalks": {
+    "passed": true,
+    "firstPlayableAt": 1794546726932,
+    "rows": [
+      {
+        "key": "ArrowRight",
+        "direction": "Right",
+        "to": {
+          "x": 289,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794546729137,
+        "wireAt": 1794546729144,
+        "ackAt": 1794546729157,
+        "renderedAt": 1794546729189,
+        "ackMs": 13,
+        "inputToRenderedMs": 52,
+        "rendered": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      {
+        "key": "ArrowLeft",
+        "direction": "Left",
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794546729190,
+        "wireAt": 1794546729743,
+        "ackAt": 1794546729754,
+        "renderedAt": 1794546729780,
+        "ackMs": 11,
+        "inputToRenderedMs": 590,
+        "rendered": {
+          "x": 288,
+          "y": 616
+        }
+      }
+    ],
+    "returnedToSpawn": true
+  },
+  "continuousWalk": {
+    "startedAt": 1794546729780,
+    "rows": [
+      {
+        "step": 0,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546730757
+      },
+      {
+        "step": 0,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546731344
+      },
+      {
+        "step": 1,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546731962
+      },
+      {
+        "step": 1,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546732581
+      },
+      {
+        "step": 2,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546733149
+      },
+      {
+        "step": 2,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546733767
+      },
+      {
+        "step": 3,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546734352
+      },
+      {
+        "step": 3,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546734956
+      },
+      {
+        "step": 4,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546735544
+      },
+      {
+        "step": 4,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546736178
+      },
+      {
+        "step": 5,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546736762
+      },
+      {
+        "step": 5,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546737394
+      },
+      {
+        "step": 6,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546737992
+      },
+      {
+        "step": 6,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546738593
+      },
+      {
+        "step": 7,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546739195
+      },
+      {
+        "step": 7,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546739795
+      }
+    ],
+    "endedAt": 1794546739795
+  },
+  "standingFaces": null,
+  "native": {
+    "passed": true,
+    "waitMs": 26438,
+    "fontCache": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "prewarmPassed": true,
+    "prewarmSummary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    }
+  },
+  "worker": {
+    "passed": true,
+    "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+    "restored": {
+      "status": 200,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "lifecycle": [
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopping",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopped",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      }
+    ]
+  },
+  "logout": {
+    "sentAt": 1794546774469,
+    "acknowledgedAt": 1794546776816,
+    "savedPosition": {
+      "x": 289,
+      "y": 616
+    },
+    "returnedToSelect": true,
+    "gutter": {
+      "x": 64,
+      "y": 480
+    }
+  },
+  "firstSave": {
+    "passed": true,
+    "className": "Warrior",
+    "level": 30,
+    "gold": 76360,
+    "experience": 19497,
+    "fields": [
+      "map_file_name",
+      "position",
+      "direction",
+      "gold",
+      "credit",
+      "experience",
+      "max_experience",
+      "inventory_items_json",
+      "belt_items_json",
+      "equipment_items_json",
+      "equipment_items_explicit_empty",
+      "storage_items_json",
+      "hero_inventory_items_json",
+      "hero_equipment_items_json",
+      "quest_states_json",
+      "skill_states_json"
+    ],
+    "questStateCount": 26
+  },
+  "warm": {
+    "passed": true,
+    "loginKind": "normal-password",
+    "startAcknowledgedAt": 1794546792239,
+    "authoritativeStart": {
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "characterIndex": 2
+    },
+    "nativeWaitMs": 1352,
+    "prewarmPassed": true,
+    "saved": true,
+    "logout": {
+      "sentAt": 1794546805645,
+      "acknowledgedAt": 1794546807993,
+      "savedPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "returnedToSelect": true,
+      "gutter": {
+        "x": 64,
+        "y": 480
+      }
+    }
+  },
+  "catalogTransport": {
+    "passed": true,
+    "sessions": [
+      {
+        "declared": true,
+        "binaryFrames": 10,
+        "wireBytes": 80457,
+        "decodedBytes": 633495,
+        "packets": {
+          "NewItemInfo": 145,
+          "NewQuestInfo": 200,
+          "NewRecipeInfo": 79,
+          "GameShopInfo": 105
+        }
+      },
+      {
+        "declared": true,
+        "binaryFrames": 10,
+        "wireBytes": 80457,
+        "decodedBytes": 633495,
+        "packets": {
+          "NewItemInfo": 145,
+          "NewQuestInfo": 200,
+          "NewRecipeInfo": 79,
+          "GameShopInfo": 105
+        }
+      }
+    ]
+  },
+  "transientRuntimeRecovery": {
+    "passed": true,
+    "initialFailures": 2,
+    "firstSuccessfulAttempt": 3,
+    "originalHeaderDelayMs": 25000,
+    "successfulBytes": 32378001,
+    "successfulSha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "scope": "fixed-byte two503 fault recovery, not WAN performance; original8s walk/120s Native gates unchanged"
+  }
+}

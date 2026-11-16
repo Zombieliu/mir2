@@ -1,0 +1,120 @@
+{
+  "owner": "Root",
+  "kind": "Source46 current Native EXE compile checkpoint, full Web delivery still pending",
+  "generatedAtUtc": "2026-10-08T15:34:25.301Z",
+  "parentCommit": "429fe0eb2a860da30f6327702b29395df62c3afc",
+  "windowsFixedFunctionBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "previousGoalTurnClassification": "progress",
+  "goalStatus": "active",
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false,
+  "native": {
+    "actual": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source46-native-actual01.json",
+      "bytes": 7924,
+      "sha256": "07b54c1309ae12192b9e32962c765ab9b5030fd79c0bce6599fc3171af3e2855"
+    },
+    "sourceCount": 917,
+    "profile": "original dev/debug, optimized + debuginfo",
+    "actualExitCode": 0,
+    "elapsedMs": 835593,
+    "policyBClosed": true,
+    "actualCBytes": 197697568768,
+    "freshnessUpperMs": 74,
+    "guardMinimumBytes": 53687091200,
+    "guardFreshMaxMs": 2000,
+    "probeTimeoutMs": 15000,
+    "exe": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\native-source46-delivery01\\source46-mir2-platform-windows.exe",
+      "bytes": 106106368,
+      "sha256": "fff975b5e969b2a46216ee0015cd8df1dfa082c012ab4b7eab7684525f18e73e"
+    },
+    "oldExeExactSaved": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\native-source46-delivery01\\source31-historical-mir2-platform-windows.exe",
+      "bytes": 106137600,
+      "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+    },
+    "runtimeAssetsPackaged": false,
+    "launched": false,
+    "testsRun": 0,
+    "qualification": "Normal Native compilation only, not all test closure/current backend/runtime-assets/player validation."
+  },
+  "renderer": {
+    "carriedSource45Actual": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-static-actual01.json",
+      "bytes": 25542,
+      "sha256": "72f947ebcc0893e17551e7e5aaa4918fcd4172b0a93f766f86e2455382bf22f7"
+    },
+    "carriedSource45Cargo": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-cargo-actual01.json",
+      "bytes": 22126,
+      "sha256": "4da54a07d4c5ca7882f5c33d9fb1c0c4440da0737655e2dbb6ef9be43897188c"
+    },
+    "threeCompiledAndStaticConverted": true,
+    "fullMetadataAbiGzipInitAccepted": false,
+    "publicArtifactsReplaced": false
+  },
+  "tests": {
+    "newWebTaps": 0,
+    "newRustTests": 0,
+    "newTypeScriptRuns": 0,
+    "carriedSource45": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-finite-result01.json",
+      "bytes": 10803,
+      "sha256": "a1e81dc2628cab527adb5ea5b8045bae6cbd2d6dc9744edbd67cd32b7e17554f"
+    },
+    "qualification": "No new tests this compile-only round. Source45 prior actual 48 entry/Quest TAP and one Stage5 TAP/501 logical groups remain scoped to their actual intervals."
+  },
+  "rawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source46-native-raw-evidence01.json",
+    "bytes": 115665,
+    "sha256": "e36efd93f1384b749892bc674ef9ed297dcfa843b1a21ee2f9dbc07677c14bda"
+  },
+  "fullPackageRoute": {
+    "firstReadOnlyPlan": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source46-full-package-readonly-plan01.json",
+      "bytes": 71089,
+      "sha256": "90af6719d33b62c2b0999b8537a75cd870fd7ca9be0280caccfa1aa30fa84b40"
+    },
+    "guardRouteReadOnlyReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source46-original-builder-guard-route-review01.json",
+      "bytes": 22729,
+      "sha256": "4bc5122a85080dc87d44cfffb656d36a5ddde266de8f1d00e2d01017eea9d9db"
+    },
+    "originalFreshCandidateAdoptionEntrypoint": false,
+    "originalCargoGuardRoutePossibleConditionally": true,
+    "metadataGateNotRun": true,
+    "pendingUserClarification": "Whether original static WebAssembly.validate/Module gates may run while preserving no UI/game launch.",
+    "noAnswerInferred": true,
+    "protectedOldImmutableVersionsAndNextThin08": true,
+    "originalBevyLockPresenceMustRefuseLaunchWithoutReadingContentsOrQueryingPid": true
+  },
+  "delivery": {
+    "currentCompiledNativeProduced": true,
+    "source46FullWebPackageProduced": false,
+    "lastCompleteWebPackage": "Source25 Next08/Thin08",
+    "playableVerified": false,
+    "playableDate": null,
+    "remaining": [
+      "Original renderer and Core metadata/name/normalizedABI/defaultgzip gates and immutable publication",
+      "Fresh original Next/Thin outputs with new runtime",
+      "Native runtime assets/package assembly where required",
+      "Actual login/Quest/battle/save/relogin, mobile and human acceptance"
+    ]
+  },
+  "userTsconfigPreserved": {
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "priorSource45ActualPublication": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-publication01.json",
+    "bytes": 17884,
+    "sha256": "2062d75db4b0fa381780dffe8cd9388d783f8cb72d217f8c3010775aff2145e7"
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "networkUsed": false,
+  "qualification": "Native compile output advances source matching delivery; no full Web package, actual Ready or player acceptance claim. Execution boundary question pending; repeat approval is not inferred from time."
+}

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_AND_SYNTHETIC30_VERIFIED_NO_GAME_EXECUTION",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\synthetic-tests-v1.log",
+      "bytes": 7579,
+      "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\helper-synthetic-fixture-repair-v1.json",
+      "bytes": 1097,
+      "sha256": "bfda7c64e00b37e6fcea15dddb71ab7a13b8e941c92cdd0926e0475bd9bf7644"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.test.failed-v1.mjs.txt",
+      "bytes": 22794,
+      "sha256": "082af3cbbe63e9fe86aea1ed2e491af58e5e3afcc6cbff6d90a5e848c318cbb2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.test.before-v1.mjs.txt",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    }
+  ],
+  "sourceSha256": "5e8dfd3f6e68251401491332b978c8a13775165d1e437913912b9aeedd12c53e",
+  "testCount": 30,
+  "passed": 30,
+  "failed": 0,
+  "onlyFiveScopedLabelsAdded": [
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush"
+  ],
+  "oldHelperUnmodified": true,
+  "gameThresholdsChanged": false
+}

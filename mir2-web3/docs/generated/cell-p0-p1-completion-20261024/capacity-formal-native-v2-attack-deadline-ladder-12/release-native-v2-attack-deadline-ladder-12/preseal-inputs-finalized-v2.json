@@ -1,0 +1,617 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T17:52:09.006Z",
+  "state": "formal12-actual-fresh16-bound-not-sealed",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12",
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendInputCount": 44,
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\INHERITANCE-DRAFT-v1.json",
+      "bytes": 2585,
+      "sha256": "5fb67f729e3c747df130dc49642e0d514e5280462d0b846bf86650cbba536b08"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\PENDING-BINDINGS-v1.json",
+      "bytes": 5010,
+      "sha256": "9caf44da979b9a907d6f6ea0acd77fe17cbefeb690aceb0ce4e8383b05a60b89"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\README-DRAFT-v1.md",
+      "bytes": 994,
+      "sha256": "1627530e4e06b3a5a61c57679d659295f927f7d44e82acb56fe75d934fd4ce3a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\ROOT-CONTROLLER-DRAFT-v1.md",
+      "bytes": 2075,
+      "sha256": "8747385f59e67b8f178649d555c105f9008478cc762cd902bd887b774027c27e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\TEMPLATE-README-v2.md",
+      "bytes": 2087,
+      "sha256": "e22766d310b3d76576758e1baca0387df39157446d1a6a1179dcd79d4326161c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\TEMPLATE-README-v4.md",
+      "bytes": 1092,
+      "sha256": "ad6c0eb8c0b8dfa0f4de7e91ef91798c8b2390ffc1e355dd390d3513f3075e48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\actual-bind-cli-identity-inverse-v3.json",
+      "bytes": 755,
+      "sha256": "4b65a4a1d47e2c66b7fb3246c3338ca5da4bb12a6c03bf5d7ab15b2fbde08b75"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\actual-bind-v2-prewrite-rejection-v1.json",
+      "bytes": 740,
+      "sha256": "121407d8e3472524d123d1f000d124a7f1bff29fcbec31817f8418450220007a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\actual-binding-tools-derivation-v6.json",
+      "bytes": 6834,
+      "sha256": "0feb163d2cc8327cce4e724bf95723c8cea49b60b75387fe751ebd56be4ebf2b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\actual-scene-source-binding-v2.json",
+      "bytes": 1354,
+      "sha256": "6ac46f7f6cc5451001cea3fa653473ab10eb0fa0a2dc3ce5478835f61a702da7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\backend-driver-source-guard.mjs",
+      "bytes": 1811,
+      "sha256": "85885be1409c9b40701dd5640d871ac01ca85db6352ece769905ca4a402d8459"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\backend-library-binding.json",
+      "bytes": 343,
+      "sha256": "37ed2f37a817b821828b3970d266150c36d4438b3fd73855842887439f5bb2ca"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v1.mjs",
+      "bytes": 10118,
+      "sha256": "bfc5e6d29bafdf5fe3537fc0f1446c45213faf9d5230c0284b8a96dfaccd916d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v2.mjs",
+      "bytes": 10118,
+      "sha256": "4b086dbbb4759dcf4084fc055765852928e2b4c2f9c3abce0b761cdf6502c117"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v3.mjs",
+      "bytes": 10118,
+      "sha256": "2bf0bc6d93a49450288348a69ed676eb2402558dd7b97bbac9f1635dfd67a993"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v4.mjs",
+      "bytes": 10118,
+      "sha256": "98b63456d0e39f5cd6c071c3d460e52ce6092604a8542edf31d094e23da46655"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bound-formal12-binding-v1.json",
+      "bytes": 16601,
+      "sha256": "a1dad69b57e9e3c9435fe93f5603394847a2e6f8e8ba61cd9402a8534f3903eb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\candidate-release-binding.json",
+      "bytes": 7176,
+      "sha256": "a711f0fe068bb9cfc6dd9dd78904daef3420f6380a230d9e0a7af63c703f3fd1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\collect-public.mjs",
+      "bytes": 43338,
+      "sha256": "0b42ec9ac66116cab7e2c32ed8e9f3ddf7dede63c1708de5036f14e0dafd1115"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\collect-public.mjs.before-safety-v3.txt",
+      "bytes": 43295,
+      "sha256": "f884360ff91867dccd8fd7679cf967e7540bc53d7a7cbe55f902c9de2ae6747c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\copied-baseline-inputs.json",
+      "bytes": 1178,
+      "sha256": "417813cfa268acac2232edf20382be8f0c62c30a068588afd83068ff1629b5dc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\current-driver-binding.json",
+      "bytes": 2381,
+      "sha256": "3587f6193aaa9142482900c63f3695588774446112263dabc73d4d78d2aee64f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\derive-pending-runtime-v2.mjs",
+      "bytes": 17053,
+      "sha256": "7087a3e0c418207f5caa8d3c3a6a621353a1333ed54756b97ebf5ae816df2d66"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\driver-binding-contract.mjs",
+      "bytes": 1187,
+      "sha256": "4bbffabe92c1973d4065abc829651ae670ac267fcbbc9ffdb2db61576d8cf83a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\driver-evidence-contract.mjs",
+      "bytes": 4575,
+      "sha256": "b23df3246d3f23102394f5e8652dad8890f87bf8a02021991ea7748e81224860"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\driver-report-contract.mjs",
+      "bytes": 9778,
+      "sha256": "dcae5502bc7f5e5e8a658b95b4ce614c1c1ea3fe0519a25ee07f466ee0c4cc5a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\execution-prerequisites-v1.json",
+      "bytes": 7399,
+      "sha256": "3b84eaf80ebab07a90049e0721f7de8007a9289dbb531c8e92e0274977798514"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\finish-pending-safety-v3.mjs",
+      "bytes": 3878,
+      "sha256": "03b2e292e441620870ace3e844f827f553338a470b65b9fb83709f66da6a570b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\fix-preseal-state-v2.mjs",
+      "bytes": 3722,
+      "sha256": "adba72241ba2566d375cd3c779069b10a0b112f0007630eb6106baca68cbdcb9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\fix-scene-evidence-namespace-v4.mjs",
+      "bytes": 4379,
+      "sha256": "64d944ba325a0e8919a4de34ba6a58a038f11af50c7f2339586ce9ea96feff5e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\formal-template-contract.mjs",
+      "bytes": 1291,
+      "sha256": "1c8bdfcbf7147d2b81ff8ceff2bf8c2a81283978e6550a34a19fcfb03ec851a2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\full16-actual-prerequisite-v1.json",
+      "bytes": 4869,
+      "sha256": "2a1eb6b8747caa988282bd7a68584351ba24625dc346283abd727e576c024e51"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\full16-gate-derivation-v1.json",
+      "bytes": 2041,
+      "sha256": "d1266bed92d0d420eb6d2b8b6401ec64170cef879f876f330adfd4fd57ccf690"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\helper-synthetic-fixture-repair-v1.json",
+      "bytes": 1097,
+      "sha256": "bfda7c64e00b37e6fcea15dddb71ab7a13b8e941c92cdd0926e0475bd9bf7644"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\historical-scene-contract.mjs.txt",
+      "bytes": 10033,
+      "sha256": "2baa5ee428dfb3b95acb664993988977a570ac7c93c8bf28d8b0f70d859909ad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\initialize-private.ps1",
+      "bytes": 2419,
+      "sha256": "5da81f82aab6bb66e0365f8c711eaec0bbe50ef25eea780552e35fb141d033a3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\initialize-private.ps1.before-safety-v3.txt",
+      "bytes": 2257,
+      "sha256": "7980b027f03b09c6e5646821f397d2ebea31bf076c50514974ccbf9a36ab3e63"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\input-lib.mjs",
+      "bytes": 16482,
+      "sha256": "5e0c86cfd57d4a9c04bad753e052729df10561417fcdac68e1c63da89ec2c8e4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\known-actual-prerequisites-v2.json",
+      "bytes": 2279,
+      "sha256": "d1cccb177788b1adff608b93a0111134b1407135281dcaa57982618d4718d6a4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\launcher-syntax-preparation-v2.log",
+      "bytes": 1382,
+      "sha256": "e07faf976f1ed7f84d822d23a6a4f0bba4a8238747b70df2324e88440353007a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\launcher-syntax-preparation-v3.log",
+      "bytes": 1431,
+      "sha256": "5ca0656ec33c3623dc80f9b7797471de628288eff8b0e368ce99a84499798c44"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\launcher-syntax-scene-namespace-v4.log",
+      "bytes": 39,
+      "sha256": "5ca75e142903db64fc3c867d817e1576c52284756608ce3099c9b36b879c412c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\monitor-owned.mjs",
+      "bytes": 1183,
+      "sha256": "8ea0f1d4cba4158f19e636ba2347341cb755c0c592ad1da0348f270601c070f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\monitor-owned.mjs.before-safety-v3.txt",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\pending-safety-adjustment-v3.json",
+      "bytes": 6311,
+      "sha256": "243843e83c7117f5437c943c2892213941ac26ba6eec7aff2b49bac6c9ab21aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\policy-basis-v1.json",
+      "bytes": 13595,
+      "sha256": "4b8b5809bdd044bcc7d051367080f163e2f930e519fbf9acc2bb3fb96b5f4568"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preparation-plan.json",
+      "bytes": 2139,
+      "sha256": "389fc2f608bec3da70b1cdb1772f6b3ca8129e69c3e50fc399b267f3bf9c4d4c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-actual-binding-tools-v6.mjs",
+      "bytes": 5283,
+      "sha256": "3dc93572863d8269c0d868a5397de007638b778b01b61234aaba61f9844c900b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-inputs.mjs",
+      "bytes": 11766,
+      "sha256": "bdc10b1aa572b00cb1e0732deaa56e4bf11296d73dc1d2be11eeb239d7addf21"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-inputs.mjs.before-scene-namespace-v4.txt",
+      "bytes": 11761,
+      "sha256": "54bb05e9d8f11c888d5468aa9e26563ce1861d7600fd2c870c67e9cf81137234"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-root-controller-draft-v5.mjs",
+      "bytes": 11725,
+      "sha256": "696c54ff755b386ebeff92630910b31ed0ad2a6a7ba627606fd319ee18a84582"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-inputs-finalized-v1.json",
+      "bytes": 27669,
+      "sha256": "60fcc220a8c208b2ebf44d1e6928862cead6709939d3f7895f2d7eba536c3912"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-state-correction-proof-v2.json",
+      "bytes": 2042,
+      "sha256": "385c5e565bda53c8649acdd4eabdca2002029d66c9dfb6da6f97318591089f79"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\projection-build-source-lib.mjs",
+      "bytes": 153,
+      "sha256": "27716706ffe3f2c674a7193ce9a54c17cda141703d8e05a75696b1c67baa0206"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\recover-drained-owned.ps1",
+      "bytes": 3388,
+      "sha256": "237288d418917947e73adb8e8927d8c861ccf4d8623ba7017fd5e62773a9f5d2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\recover-drained-owned.ps1.before-safety-v3.txt",
+      "bytes": 3226,
+      "sha256": "0712e002d6568eecc9b53078b9fdd1d5f65a2d9d5230d58b6d542b8838bde5fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\request-stop.mjs",
+      "bytes": 916,
+      "sha256": "776dd9c23799a4e5113c6c26131e9d293f5ea60ab78208c7d6454b385541b640"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\request-stop.mjs.before-safety-v3.txt",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-controller-derivation-draft-v1.json",
+      "bytes": 8029,
+      "sha256": "ebea6706044573e14565506b9642ebd0b4006faf56be44b8604908448f704f0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-controller-syntax-v5.log",
+      "bytes": 53,
+      "sha256": "40cc5f6b3ad40dc2acfa10ec1eeb0755406612d10ccc49594439deda94f33059"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-draft-v1.mjs",
+      "bytes": 13423,
+      "sha256": "891a68922f0b6d1b0e44bb898aa7a880431e66fe05e15f7ad8c3b7cf0a362409"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-v1.mjs",
+      "bytes": 13747,
+      "sha256": "47ea96e1cb5b2eabe85ce86c5565adaeda4ae56701d5f326fe410c0ef69dc3fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-v2.mjs",
+      "bytes": 13747,
+      "sha256": "01bfc8c6953ee7247217380ea4daaa3f350ff1362bf689dd8c4903ab092ea0cf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-adapter-synthetics.mjs",
+      "bytes": 2034,
+      "sha256": "09b381ec6fcfc99628666e2a2d1107f1a271bcff2685bb6045a9d1e83dd7510f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-options.draft-v1.json",
+      "bytes": 2898,
+      "sha256": "18e1ea8f68fb466c0f53e05aa63582057b04ee037bba1f3a50b2d4228f626242"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-options.json",
+      "bytes": 2915,
+      "sha256": "391d142894828f7232ef038b6e5a63222067ec403bcb31f0253ce89e1578aaaf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-options.json.before-actual-v6.txt",
+      "bytes": 2831,
+      "sha256": "effaa5c49c676d950b70e2f65d6a7dc0f224b9a5280c4c596faa4d040c18ae73"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-owned.mjs",
+      "bytes": 19850,
+      "sha256": "3bae40e1a20cd17b44ef9ba060ab0fd9f0facb961ca4a500651bc522c5b67b43"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-derivation-v2.json",
+      "bytes": 34568,
+      "sha256": "4b1d3433db5da926b6c5e4e1626eb71476df1cc7cafa92d0633d26c59577054f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-prepared-v2.json",
+      "bytes": 19571,
+      "sha256": "97bebc1db738f74481ab4ffa450f5f31c3485f9a5887e48e7bd16374854f54dc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-prepared-v3.json",
+      "bytes": 22459,
+      "sha256": "4476955949b0fca177ebc0973161ca4bf7926b381a4f9162b3929484f67f2551"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-prepared-v4.json",
+      "bytes": 25154,
+      "sha256": "e2b08d32467f568b17b496f9087da028573b0eed89a614864dabf471f5f77a55"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-prepared-v5.json",
+      "bytes": 28097,
+      "sha256": "ac5266d76326b3122ce3804fd1e08ce0c0936212b63821615c43bebedba95862"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scene-binding.json",
+      "bytes": 6703,
+      "sha256": "d76752be7e1c7bf983cdca1766a68682de1dfa1e840141a5dbac7be6eb808e6b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 4074,
+      "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scene-evidence-namespace-inverse-v4.json",
+      "bytes": 1683,
+      "sha256": "27bd52b6d103e1a37a5d2b397c1884994cc6e48d3a661911cee40e1ab951f1dd"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-diagnostics-config.json",
+      "bytes": 4315,
+      "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-helper-freeze-v1.json",
+      "bytes": 2314,
+      "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\synthetic-tests-v1.log",
+      "bytes": 7579,
+      "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-feasibility-gate.mjs",
+      "bytes": 19628,
+      "sha256": "dc13d189d393bca422b7807f3836a132bbb03fbbee651b1ba2a99c028c4d180e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-full16-gate.mjs",
+      "bytes": 5142,
+      "sha256": "1ecd3b23d54451ccb5eb35e9116a46ede0e039488edebac9672b52024164d4e7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-probe16-collected-evidence.mjs",
+      "bytes": 16157,
+      "sha256": "f548b97565a962797ddca2129ba3420831e27dd44c14241d1989a9a66a89719b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-public.mjs",
+      "bytes": 19042,
+      "sha256": "155567b67a1c1b93b6683c9d553cbb1f002662bfaeb119d7c0956debcc585987"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    }
+  ],
+  "sourceSha256": "70f1e2694a48334b3acc359b4a0da0c1396a0fc078f8c3be9ff763944b4f083a",
+  "syntax": {
+    "passed": true,
+    "scripts": [
+      "backend-driver-source-guard.mjs",
+      "bind-actual-ended16-v1.mjs",
+      "bind-actual-ended16-v2.mjs",
+      "bind-actual-ended16-v3.mjs",
+      "bind-actual-ended16-v4.mjs",
+      "collect-public.mjs",
+      "derive-pending-runtime-v2.mjs",
+      "driver-binding-contract.mjs",
+      "driver-evidence-contract.mjs",
+      "driver-report-contract.mjs",
+      "finish-pending-safety-v3.mjs",
+      "fix-preseal-state-v2.mjs",
+      "fix-scene-evidence-namespace-v4.mjs",
+      "formal-template-contract.mjs",
+      "hp-maintenance-status-schema.mjs",
+      "input-lib.mjs",
+      "measured-phase-contract.mjs",
+      "monitor-owned.mjs",
+      "native-chase-report-contract.mjs",
+      "phase-window-contract.mjs",
+      "prepare-actual-binding-tools-v6.mjs",
+      "prepare-inputs.mjs",
+      "prepare-root-controller-draft-v5.mjs",
+      "projection-build-source-lib.mjs",
+      "request-stop.mjs",
+      "root-seal-and-guard-draft-v1.mjs",
+      "root-seal-and-guard-v1.mjs",
+      "root-seal-and-guard-v2.mjs",
+      "run-adapter-synthetics.mjs",
+      "run-owned.mjs",
+      "scene-contract.mjs",
+      "scene-driver-compatibility.mjs",
+      "slow-stage-public.mjs",
+      "slow-stage-public.test.mjs",
+      "slow-stage-row-contract.mjs",
+      "verify-feasibility-gate.mjs",
+      "verify-full16-gate.mjs",
+      "verify-probe16-collected-evidence.mjs",
+      "verify-public.mjs",
+      "wire-diagnostics-adapter.mjs",
+      "wire-diagnostics-adapter.test.mjs",
+      "wire-diagnostics-contract.mjs"
+    ]
+  },
+  "actualProbe16RunId": "1792949214664-bea1433d",
+  "actualProbe16Independent": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\final-verification.json",
+    "bytes": 449267,
+    "sha256": "b1d786f3ae059dba0c626a6f43f74381d4a113d15e36195295d32d668dc89fa7"
+  },
+  "actualProbe16SourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 2457,
+    "sha256": "bc2ce35c20f8ff491443da7bbbc2d7e3fffc3dc63d809b467efbc2899410f9c2"
+  },
+  "actualProbe16Execution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 813,
+    "sha256": "dee8e31af98139fc471fb72d9a5931bd66331bc046ea0d263fbba2d783cf069d"
+  },
+  "actualFresh16CompletePassingWindows": [
+    5,
+    5,
+    6
+  ],
+  "formalCompleteMinuteWindows": 146,
+  "executionPrerequisites": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\execution-prerequisites-v1.json",
+    "bytes": 7399,
+    "sha256": "3b84eaf80ebab07a90049e0721f7de8007a9289dbb531c8e92e0274977798514"
+  },
+  "rootSealExecutor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-v2.mjs",
+    "bytes": 13747,
+    "sha256": "01bfc8c6953ee7247217380ea4daaa3f350ff1362bf689dd8c4903ab092ea0cf"
+  },
+  "accountPrepared": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false,
+  "previousPreseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-inputs-finalized-v1.json",
+    "bytes": 27669,
+    "sha256": "60fcc220a8c208b2ebf44d1e6928862cead6709939d3f7895f2d7eba536c3912"
+  },
+  "stateCorrection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-state-correction-proof-v2.json",
+    "bytes": 2042,
+    "sha256": "385c5e565bda53c8649acdd4eabdca2002029d66c9dfb6da6f97318591089f79"
+  }
+}

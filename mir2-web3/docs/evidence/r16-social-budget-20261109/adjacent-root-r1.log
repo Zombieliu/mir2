@@ -1,0 +1,889 @@
+TAP version 13
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:259:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:284:52)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:326:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:419:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:448:23)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at useItem (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:728:12)
+#     at Object.dispatchBevyBagIntent (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:781:24)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:511:20)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at Object.dispatchBevyCharacterIntent (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:791:31)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:559:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at Object.dispatchBevyCharacterIntent (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:791:31)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:571:23)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# [mir2] equipment send outcome is unknown ReferenceError: socialBudgetRef is not defined
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+#     at send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at Object.dispatchBevyCharacterIntent (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:791:31)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:578:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+#     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+# Subtest: ordinary medicine Use reaches socket with a complete session even if equipment WASM is unavailable
+not ok 1 - ordinary medicine Use reaches socket with a complete session even if equipment WASM is unavailable
+  ---
+  duration_ms: 91.8155
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:234:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+    Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:174:20)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:236:21)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: unknown bag metadata refuses Use, and Equip refuses a missing ledger
+ok 2 - unknown bag metadata refuses Use, and Equip refuses a missing ledger
+  ---
+  duration_ms: 1.2118
+  type: 'test'
+  ...
+# Subtest: weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot
+not ok 3 - weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot
+  ---
+  duration_ms: 4.047
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:249:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:259:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: React Use and native Equip/Use all choose the current free ring hand through the real send gate
+not ok 4 - React Use and native Equip/Use all choose the current free ring hand through the real send gate
+  ---
+  duration_ms: 0.7461
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:268:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:284:41)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: mount Use proves the current instance but emits only Crystal wire slot 13
+not ok 5 - mount Use proves the current instance but emits only Crystal wire slot 13
+  ---
+  duration_ms: 0.3629
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:292:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+    Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:159:20)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:299:23)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a replaced mount, non-mount item, or missing instance proof cannot issue mount Use
+ok 6 - a replaced mount, non-mount item, or missing instance proof cannot issue mount Use
+  ---
+  duration_ms: 0.4714
+  type: 'test'
+  ...
+# Subtest: synchronous action listener logout prevents outer Equip bytes and releases its proven-unsent reservation
+not ok 7 - synchronous action listener logout prevents outer Equip bytes and releases its proven-unsent reservation
+  ---
+  duration_ms: 0.8323
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:320:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     type: 'logOut'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'logOut'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:327:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: synchronous action listener logout also prevents outer Move bytes
+not ok 8 - synchronous action listener logout also prevents outer Move bytes
+  ---
+  duration_ms: 0.3339
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:334:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+    Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:216:12)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:339:21)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells
+not ok 9 - cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells
+  ---
+  duration_ms: 1.0095
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:345:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+    send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:216:12)
+    Object.moveItem (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:699:16)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:366:21)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: cross-page move rechecks the socket, connection, session, and logout gate after the synchronous action event
+not ok 10 - cross-page move rechecks the socket, connection, session, and logout gate after the synchronous action event
+  ---
+  duration_ms: 0.486
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:377:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+    send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:216:12)
+    Object.moveItem (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:699:16)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:389:23)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a captured render identity from another connection or session cannot send item commands
+ok 11 - a captured render identity from another connection or session cannot send item commands
+  ---
+  duration_ms: 0.4876
+  type: 'test'
+  ...
+# Subtest: late WASM installation cannot establish a baseline across a pre-existing logout gate
+ok 12 - late WASM installation cannot establish a baseline across a pre-existing logout gate
+  ---
+  duration_ms: 0.446
+  type: 'test'
+  ...
+# Subtest: actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK
+not ok 13 - actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK
+  ---
+  duration_ms: 0.5529
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:415:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:419:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual raw send rechecks the original Bevy token and live host after synchronous action listeners
+not ok 14 - actual raw send rechecks the original Bevy token and live host after synchronous action listeners
+  ---
+  duration_ms: 0.6527
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:436:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    only this definitely-unsent reservation is canceled
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:450:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations
+not ok 15 - retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations
+  ---
+  duration_ms: 0.3688
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:454:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:347:39)
+    Object.send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:216:12)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:470:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: storage compatibility callbacks require a storage proof for current and stale owners
+ok 16 - storage compatibility callbacks require a storage proof for current and stale owners
+  ---
+  duration_ms: 0.6011
+  type: 'test'
+  ...
+# Subtest: actual Bevy intent adapter preserves UID0 and global bag cells through shared Equip/Use/Move gates
+not ok 17 - actual Bevy intent adapter preserves UID0 and global bag cells through shared Equip/Use/Move gates
+  ---
+  duration_ms: 1.1373
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:498:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:511:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual close wrapper revokes ownership before a same-frame queued Use can submit
+ok 18 - actual close wrapper revokes ownership before a same-frame queued Use can submit
+  ---
+  duration_ms: 0.377
+  type: 'test'
+  ...
+# Subtest: actual Character dispatch rechecks UID0, hidden Bag and first empty second-page slot through one real ledger
+not ok 19 - actual Character dispatch rechecks UID0, hidden Bag and first empty second-page slot through one real ledger
+  ---
+  duration_ms: 0.9596
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:557:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:559:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Character source replacement, full bag and final synchronous logout cannot send
+not ok 20 - actual Character source replacement, full bag and final synchronous logout cannot send
+  ---
+  duration_ms: 1.1742
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-page-gate.mjs:566:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:572:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Character unknown send keeps the existing pending reservation
+ok 21 - actual Character unknown send keeps the existing pending reservation
+  ---
+  duration_ms: 1.0972
+  type: 'test'
+  ...
+# Subtest: actual Page selects a player with guidance and requires held Shift plus v2 to request attack
+ok 22 - actual Page selects a player with guidance and requires held Shift plus v2 to request attack
+  ---
+  duration_ms: 3.814
+  type: 'test'
+  ...
+# Subtest: actual Shift lifecycle stops only player pursuit on release and retires on blur, pagehide, hidden and cleanup
+ok 23 - actual Shift lifecycle stops only player pursuit on release and retires on blur, pagehide, hidden and cleanup
+  ---
+  duration_ms: 0.6328
+  type: 'test'
+  ...
+# Subtest: actual Page key and cancel props retain skill forwarding while synchronizing held Shift
+ok 24 - actual Page key and cancel props retain skill forwarding while synchronizing held Shift
+  ---
+  duration_ms: 0.3729
+  type: 'test'
+  ...
+# Subtest: actual Page preserves manual movement when retiring a different combat approach
+ok 25 - actual Page preserves manual movement when retiring a different combat approach
+  ---
+  duration_ms: 0.1464
+  type: 'test'
+  ...
+# Subtest: actual Page mode controls use custom shortcut and native request proofs with no optimistic mode update
+ok 26 - actual Page mode controls use custom shortcut and native request proofs with no optimistic mode update
+  ---
+  duration_ms: 1.4836
+  type: 'test'
+  ...
+# Subtest: actual ChangeAMode updates raw authority and visible world only for a valid current receipt
+ok 27 - actual ChangeAMode updates raw authority and visible world only for a valid current receipt
+  ---
+  duration_ms: 0.4387
+  type: 'test'
+  ...
+# Subtest: actual session retirement clears held Shift and its raw combat source before another player can be targeted
+not ok 28 - actual session retirement clears held Shift and its raw combat source before another player can be targeted
+  ---
+  duration_ms: 2.6278
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-player-attack-input.mjs:178:1'
+  failureType: 'testCodeFailure'
+  error: 'groupOperationsRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    retireEquipmentSession (eval at <anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-player-attack-input.mjs:188:15), <anonymous>:4:5)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-player-attack-input.mjs:189:35)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual capture uses current authenticated StartGame, role, physical socket, realm and context only
+ok 29 - actual capture uses current authenticated StartGame, role, physical socket, realm and context only
+  ---
+  duration_ms: 456.4529
+  type: 'test'
+  ...
+# Subtest: actual private sender bypasses generic state/logging and distinguishes entered throw from not-sent
+ok 30 - actual private sender bypasses generic state/logging and distinguishes entered throw from not-sent
+  ---
+  duration_ms: 16.2142
+  type: 'test'
+  ...
+# Subtest: every captured source dimension is rechecked after serialization and never upgraded to a new source
+ok 31 - every captured source dimension is rechecked after serialization and never upgraded to a new source
+  ---
+  duration_ms: 133.4704
+  type: 'test'
+  ...
+# Subtest: actual lifecycle functions erase owner-private memory and Blob before unrelated teardown
+ok 32 - actual lifecycle functions erase owner-private memory and Blob before unrelated teardown
+  ---
+  duration_ms: 62.6477
+  type: 'test'
+  ...
+# Subtest: actual successful StartGame and logout packet branches invoke retirement before replacing the role
+ok 33 - actual successful StartGame and logout packet branches invoke retirement before replacing the role
+  ---
+  duration_ms: 29.9429
+  type: 'test'
+  ...
+# Subtest: actual realm changes and feature revocation retire private data and never revive an old Source
+ok 34 - actual realm changes and feature revocation retire private data and never revive an old Source
+  ---
+  duration_ms: 47.4714
+  type: 'test'
+  ...
+# Subtest: actual open callback requires authority and cancels existing world intent before exposing the window
+ok 35 - actual open callback requires authority and cancels existing world intent before exposing the window
+  ---
+  duration_ms: 14.8947
+  type: 'test'
+  ...
+# Subtest: actual message handler consumes private/invalid envelopes before Hero, raw ingress, world/history and logs
+ok 36 - actual message handler consumes private/invalid envelopes before Hero, raw ingress, world/history and logs
+  ---
+  duration_ms: 68.9347
+  type: 'test'
+  ...
+# Subtest: escaped JSON type names are still private before the actual generic handler
+ok 37 - escaped JSON type names are still private before the actual generic handler
+  ---
+  duration_ms: 29.8988
+  type: 'test'
+  ...
+# Subtest: actual private receive drops foreign sockets/generations and absorbs decoder exceptions
+ok 38 - actual private receive drops foreign sockets/generations and absorbs decoder exceptions
+  ---
+  duration_ms: 15.2807
+  type: 'test'
+  ...
+# Subtest: actual party invitation repeats lease/character/source checks between SwitchGroup and AddMember
+ok 39 - actual party invitation repeats lease/character/source checks between SwitchGroup and AddMember
+  ---
+  duration_ms: 85.7826
+  type: 'test'
+  ...
+# Subtest: actual sendRaw rejects all three private command kinds before evaluating any generic globals
+ok 40 - actual sendRaw rejects all three private command kinds before evaluating any generic globals
+  ---
+  duration_ms: 9.245
+  type: 'test'
+  ...
+# Subtest: actual Page close returns ownership to normal Bag without closing the bag or sending a command
+ok 41 - actual Page close returns ownership to normal Bag without closing the bag or sending a command
+  ---
+  duration_ms: 208.3075
+  type: 'test'
+  ...
+# Subtest: actual Page password handoff invokes the existing set/change/unlock panel once per service
+ok 42 - actual Page password handoff invokes the existing set/change/unlock panel once per service
+  ---
+  duration_ms: 567.323
+  type: 'test'
+  ...
+# Subtest: actual Page rent confirms exactly one existing command after handoff; retired owner sends none
+not ok 43 - actual Page rent confirms exactly one existing command after handoff; retired owner sends none
+  ---
+  duration_ms: 86.7018
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:243:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     message: '@ADDSTORAGE',
+    -     type: 'chat'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'chat'
+      message: '@ADDSTORAGE'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:252:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page source Bag2 mapping and its own reserved empty target pass the final fence once
+not ok 44 - actual Page source Bag2 mapping and its own reserved empty target pass the final fence once
+  ---
+  duration_ms: 87.8478
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:272:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:281:34)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page final listener owner retirement burns the unsent request ID and clears only its reservation
+not ok 45 - actual Page final listener owner retirement burns the unsent request ID and clears only its reservation
+  ---
+  duration_ms: 84.3147
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:289:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - 'st-0000000000000001'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'st-0000000000000001'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:292:55)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page replacement source/target or edited DTO after mir2:action cannot enter socket
+ok 46 - actual Page replacement source/target or edited DTO after mir2:action cannot enter socket
+  ---
+  duration_ms: 267.0586
+  type: 'test'
+  ...
+# Subtest: actual Page socket throw after irreversible claim retains outcome-unknown reservation
+not ok 47 - actual Page socket throw after irreversible claim retains outcome-unknown reservation
+  ---
+  duration_ms: 89.5335
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:313:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(reservation)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:317:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Storage RPC captured same-clock/same-pointer terminals cannot revoke a newer gesture proof
+ok 48 - actual Storage RPC captured same-clock/same-pointer terminals cannot revoke a newer gesture proof
+  ---
+  duration_ms: 1.489
+  type: 'test'
+  ...
+# Subtest: actual Storage new Down during final listener revokes the old intent before socket entry
+ok 49 - actual Storage new Down during final listener revokes the old intent before socket entry
+  ---
+  duration_ms: 87.4107
+  type: 'test'
+  ...
+# Subtest: actual Page service lifecycle requests only Storage until close then requests the normal Bag host
+ok 50 - actual Page service lifecycle requests only Storage until close then requests the normal Bag host
+  ---
+  duration_ms: 354.9931
+  type: 'test'
+  ...
+# Subtest: actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture
+ok 51 - actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture
+  ---
+  duration_ms: 25.0891
+  type: 'test'
+  ...
+# Subtest: actual Shell old cancellation cannot release a synchronously established replacement UI lease/token
+ok 52 - actual Shell old cancellation cannot release a synchronously established replacement UI lease/token
+  ---
+  duration_ms: 26.3434
+  type: 'test'
+  ...
+# Subtest: actual Shell old cancel or up cannot clear a synchronously established replacement world hold
+ok 53 - actual Shell old cancel or up cannot clear a synchronously established replacement world hold
+  ---
+  duration_ms: 46.2108
+  type: 'test'
+  ...
+# Subtest: actual Shell active or arming storage stops held keyboard movement even without a ready pointer context
+ok 54 - actual Shell active or arming storage stops held keyboard movement even without a ready pointer context
+  ---
+  duration_ms: 131.3935
+  type: 'test'
+  ...
+# Subtest: actual Shell movement watches storage transitions and committed shortcut gates update without resubscribing
+not ok 55 - actual Shell movement watches storage transitions and committed shortcut gates update without resubscribing
+  ---
+  duration_ms: 20.3521
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:493:1'
+  failureType: 'testCodeFailure'
+  error: 'guildKeyboardOwnsEvent is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    Object.handleShortcutKey [as current] (eval at render (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/window-keydown-test-fixture.mjs:52:23), <anonymous>:28:5)
+    listener (eval at createShellKeydownFixture (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/window-keydown-test-fixture.mjs:44:3), <anonymous>:16:63)
+    key (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:527:66)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:529:3)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Shell window blur/resize/unmount withdraw Storage and remove its own terminal listeners
+ok 56 - actual Shell window blur/resize/unmount withdraw Storage and remove its own terminal listeners
+  ---
+  duration_ms: 44.2018
+  type: 'test'
+  ...
+# Subtest: actual Shell layout owner/geometry replacement cancels Storage before clearing world holds
+ok 57 - actual Shell layout owner/geometry replacement cancels Storage before clearing world holds
+  ---
+  duration_ms: 44.7685
+  type: 'test'
+  ...
+# Subtest: actual Bag hook first construction publishes its initial owner without a TDZ and retired cleanup cannot rewrite replacement
+ok 58 - actual Bag hook first construction publishes its initial owner without a TDZ and retired cleanup cannot rewrite replacement
+  ---
+  duration_ms: 3.1895
+  type: 'test'
+  ...
+# Subtest: actual Storage hook obsolete cleanup leaves the replacement sink/host/owner intact
+ok 59 - actual Storage hook obsolete cleanup leaves the replacement sink/host/owner intact
+  ---
+  duration_ms: 3.0491
+  type: 'test'
+  ...
+# Subtest: Source35 storage integration safe expiry preserves custody and unsafe numeric dates fail closed
+ok 60 - Source35 storage integration safe expiry preserves custody and unsafe numeric dates fail closed
+  ---
+  duration_ms: 0.2575
+  type: 'test'
+  ...
+# Subtest: Source35 actual Page wide storage dates retain one-shot physical Bag2 transfer custody
+not ok 61 - Source35 actual Page wide storage dates retain one-shot physical Bag2 transfer custody
+  ---
+  duration_ms: 84.3824
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:682:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:699:41)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Shell arming shortcut listener swallows combat/item keys before their callbacks
+not ok 62 - actual Shell arming shortcut listener swallows combat/item keys before their callbacks
+  ---
+  duration_ms: 19.5981
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs:710:1'
+  failureType: 'testCodeFailure'
+  error: 'guildKeyboardOwnsEvent is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    Object.handleShortcutKey [as current] (eval at render (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/window-keydown-test-fixture.mjs:52:23), <anonymous>:28:5)
+    listener (eval at createShellKeydownFixture (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/window-keydown-test-fixture.mjs:44:3), <anonymous>:16:63)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs:724:45)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..62
+# tests 62
+# suites 0
+# pass 40
+# fail 22
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2962.1945

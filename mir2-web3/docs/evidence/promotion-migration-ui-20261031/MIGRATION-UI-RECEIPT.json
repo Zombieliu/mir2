@@ -1,0 +1,96 @@
+{
+  "schema": "mir2.promotion-migration.component-browser-fixture.v1",
+  "verifiedAtUtc": "2026-10-30T20:11:38.572Z",
+  "origin": "http://127.0.0.1:7368",
+  "sourceWorktree": "C:/Users/Administrator/.codex/worktrees/promotion-vercel-release/mir2-player-journey",
+  "browser": "isolated headless Google Chrome via Playwright",
+  "launchAttempts": 1,
+  "actualProductionComponentAndCssModules": true,
+  "nextServerVerified": false,
+  "backendEndToEndVerified": false,
+  "allApiTrafficMocked": true,
+  "realUserCookiesRead": false,
+  "realFinancialWrites": 0,
+  "results": [
+    {
+      "name": "Chinese pending proof is read-only with an independent unchecked consent",
+      "passed": true,
+      "elapsedMs": 88,
+      "screenshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-promotion-migration-component-ui-20261031\\evidence\\migration-pending-desktop.png",
+      "sizes": {
+        "width": 1440,
+        "html": 1440,
+        "body": 1440
+      },
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "name": "checkbox enables exactly one intercepted confirmation with the real network payload",
+      "passed": true,
+      "elapsedMs": 49,
+      "post": {
+        "method": "POST",
+        "path": "/api/promotions/confirm",
+        "query": "",
+        "season": "numeron-windows-playtest-20261030",
+        "body": {
+          "candidateId": "local-ui-migration-candidate",
+          "termsVersion": "local-ui-v1",
+          "campaignId": "numeron-windows-playtest-20261030"
+        }
+      },
+      "submittedIsNotCompleted": true
+    },
+    {
+      "name": "authoritative refreshed completion shows both times and the audit record without a financial approval",
+      "passed": true,
+      "elapsedMs": 83,
+      "screenshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-promotion-migration-component-ui-20261031\\evidence\\migration-completed-desktop.png",
+      "sizes": {
+        "width": 1440,
+        "html": 1440,
+        "body": 1440
+      },
+      "reads": 3
+    },
+    {
+      "name": "payment-unverified rejection remains inline after a successful ten-second background refresh",
+      "passed": true,
+      "elapsedMs": 138,
+      "screenshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-promotion-migration-component-ui-20261031\\evidence\\migration-error-desktop.png",
+      "sizes": {
+        "width": 1440,
+        "html": 1440,
+        "body": 1440
+      },
+      "reads": 2,
+      "writes": 1
+    },
+    {
+      "name": "local proof expiry disables consent and confirmation without making a write",
+      "passed": true,
+      "elapsedMs": 97,
+      "screenshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-promotion-migration-component-ui-20261031\\evidence\\migration-expired-desktop.png",
+      "sizes": {
+        "width": 1440,
+        "html": 1440,
+        "body": 1440
+      },
+      "writes": 0
+    },
+    {
+      "name": "Chinese mobile pending proof remains readable within the viewport",
+      "passed": true,
+      "elapsedMs": 66,
+      "screenshot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-promotion-migration-component-ui-20261031\\evidence\\migration-pending-mobile.png",
+      "sizes": {
+        "width": 390,
+        "html": 390,
+        "body": 390
+      }
+    }
+  ],
+  "failures": [],
+  "exitCode": 0
+}

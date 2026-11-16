@@ -1,0 +1,1950 @@
+[
+  {
+    "case": "default-font",
+    "mode": "compatibility",
+    "passed": true,
+    "coldNativeWaitMs": 27232,
+    "warmNativeWaitMs": 1332,
+    "earlyWalks": {
+      "passed": true,
+      "firstPlayableAt": 1794529537403,
+      "rows": [
+        {
+          "key": "ArrowRight",
+          "direction": "Right",
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794529537424,
+          "wireAt": 1794529537463,
+          "ackAt": 1794529537522,
+          "renderedAt": 1794529537569,
+          "ackMs": 59,
+          "inputToRenderedMs": 145,
+          "rendered": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "direction": "Left",
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794529537593,
+          "wireAt": 1794529538066,
+          "ackAt": 1794529538098,
+          "renderedAt": 1794529538131,
+          "ackMs": 32,
+          "inputToRenderedMs": 538,
+          "rendered": {
+            "x": 288,
+            "y": 616
+          }
+        }
+      ],
+      "returnedToSpawn": true
+    },
+    "finalTile": {
+      "x": 289,
+      "y": 616
+    },
+    "prewarm": {
+      "passed": true,
+      "selection": "latest current-session hud-core; prior cancelled runs retained",
+      "waitMs": 1890,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": [],
+            "durationMs": 7072.5,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done"
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ]
+      ],
+      "staleRequests": []
+    },
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "firstSave": {
+      "passed": true,
+      "className": "Warrior",
+      "level": 30,
+      "gold": 76360,
+      "experience": 19497,
+      "fields": [
+        "map_file_name",
+        "position",
+        "direction",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_items_json",
+        "belt_items_json",
+        "equipment_items_json",
+        "equipment_items_explicit_empty",
+        "storage_items_json",
+        "hero_inventory_items_json",
+        "hero_equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "questStateCount": 26
+    },
+    "warmSaved": true,
+    "workerRestart": {
+      "passed": true,
+      "originalFrame": "/original-ui/Prguse/1.png",
+      "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+      "restored": {
+        "status": 200,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "originNetworkReads": 0,
+      "lifecycle": [
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopping",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopped",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        }
+      ]
+    },
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    },
+    "assetRecovery": {
+      "kind": "font",
+      "document": "e42acd40-8452-4282-b048-cc96e4151c55",
+      "runtimeIdentities": 1,
+      "frameRegressed": false,
+      "reads": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "attempt": 1,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794529563435,
+          "before": {
+            "at": 1794529563435,
+            "generation": 2,
+            "frame": 1,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "status": 503,
+          "completedAt": 1794529563435
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "attempt": 2,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794529564438,
+          "before": {
+            "at": 1794529564438,
+            "generation": 2,
+            "frame": 173,
+            "questReady": false,
+            "hudReady": false,
+            "error": "quest UI font or skin failed to load"
+          },
+          "status": 200,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+          "matchesPinnedBody": true,
+          "completedAt": 1794529564486
+        }
+      ],
+      "samples": [
+        {
+          "at": 1794529513977,
+          "generation": null,
+          "frame": null,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529563137,
+          "generation": 0,
+          "frame": 0,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529563435,
+          "generation": 2,
+          "frame": 1,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529563540,
+          "generation": 2,
+          "frame": 2,
+          "questReady": false,
+          "hudReady": false,
+          "error": "quest UI font or skin failed to load"
+        },
+        {
+          "at": 1794529564514,
+          "generation": 2,
+          "frame": 179,
+          "questReady": true,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529564615,
+          "generation": 2,
+          "frame": 180,
+          "questReady": true,
+          "hudReady": true,
+          "error": null
+        }
+      ],
+      "wallIntervals": null,
+      "retryClockScope": "Stricter browser wall observation also passed; exact policy separately checked with Time<Real>.",
+      "final": {
+        "questReady": true,
+        "hudReady": true,
+        "error": null,
+        "generation": 2,
+        "frame": 3767
+      }
+    }
+  },
+  {
+    "case": "webgl2-font",
+    "mode": "webgl2",
+    "passed": true,
+    "coldNativeWaitMs": 27240,
+    "warmNativeWaitMs": 1335,
+    "earlyWalks": {
+      "passed": true,
+      "firstPlayableAt": 1794529705230,
+      "rows": [
+        {
+          "key": "ArrowRight",
+          "direction": "Right",
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794529705252,
+          "wireAt": 1794529705291,
+          "ackAt": 1794529705318,
+          "renderedAt": 1794529705347,
+          "ackMs": 27,
+          "inputToRenderedMs": 95,
+          "rendered": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "direction": "Left",
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794529705370,
+          "wireAt": 1794529705892,
+          "ackAt": 1794529705894,
+          "renderedAt": 1794529705923,
+          "ackMs": 2,
+          "inputToRenderedMs": 553,
+          "rendered": {
+            "x": 288,
+            "y": 616
+          }
+        }
+      ],
+      "returnedToSpawn": true
+    },
+    "finalTile": {
+      "x": 289,
+      "y": 616
+    },
+    "prewarm": {
+      "passed": true,
+      "selection": "latest current-session hud-core; prior cancelled runs retained",
+      "waitMs": 1833,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": [],
+            "durationMs": 7055.199999988079,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done"
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ]
+      ],
+      "staleRequests": []
+    },
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "firstSave": {
+      "passed": true,
+      "className": "Warrior",
+      "level": 30,
+      "gold": 76360,
+      "experience": 19497,
+      "fields": [
+        "map_file_name",
+        "position",
+        "direction",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_items_json",
+        "belt_items_json",
+        "equipment_items_json",
+        "equipment_items_explicit_empty",
+        "storage_items_json",
+        "hero_inventory_items_json",
+        "hero_equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "questStateCount": 26
+    },
+    "warmSaved": true,
+    "workerRestart": {
+      "passed": true,
+      "originalFrame": "/original-ui/Prguse/1.png",
+      "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+      "restored": {
+        "status": 200,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "originNetworkReads": 0,
+      "lifecycle": [
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopping",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopped",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        }
+      ]
+    },
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    },
+    "assetRecovery": {
+      "kind": "font",
+      "document": "8f9efcab-affa-40d4-b91b-46147c3b35d8",
+      "runtimeIdentities": 1,
+      "frameRegressed": false,
+      "reads": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "attempt": 1,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794529731301,
+          "before": {
+            "at": 1794529731301,
+            "generation": 2,
+            "frame": 2,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "status": 503,
+          "completedAt": 1794529731301
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "attempt": 2,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794529732308,
+          "before": {
+            "at": 1794529732308,
+            "generation": 2,
+            "frame": 174,
+            "questReady": false,
+            "hudReady": false,
+            "error": "quest UI font or skin failed to load"
+          },
+          "status": 200,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+          "matchesPinnedBody": true,
+          "completedAt": 1794529732352
+        }
+      ],
+      "samples": [
+        {
+          "at": 1794529681848,
+          "generation": null,
+          "frame": null,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529731118,
+          "generation": 0,
+          "frame": 1,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529731301,
+          "generation": 2,
+          "frame": 2,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794529731392,
+          "generation": 2,
+          "frame": 3,
+          "questReady": false,
+          "hudReady": false,
+          "error": "quest UI font or skin failed to load"
+        },
+        {
+          "at": 1794529732450,
+          "generation": 2,
+          "frame": 180,
+          "questReady": true,
+          "hudReady": true,
+          "error": null
+        }
+      ],
+      "wallIntervals": null,
+      "retryClockScope": "Stricter browser wall observation also passed; exact policy separately checked with Time<Real>.",
+      "final": {
+        "questReady": true,
+        "hudReady": true,
+        "error": null,
+        "generation": 2,
+        "frame": 1771
+      }
+    }
+  },
+  {
+    "case": "default-skins",
+    "mode": "compatibility",
+    "passed": true,
+    "coldNativeWaitMs": 28125,
+    "warmNativeWaitMs": 1404,
+    "earlyWalks": {
+      "passed": true,
+      "firstPlayableAt": 1794530064678,
+      "rows": [
+        {
+          "key": "ArrowRight",
+          "direction": "Right",
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794530064708,
+          "wireAt": 1794530064738,
+          "ackAt": 1794530064776,
+          "renderedAt": 1794530064838,
+          "ackMs": 38,
+          "inputToRenderedMs": 130,
+          "rendered": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "direction": "Left",
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794530064844,
+          "wireAt": 1794530065339,
+          "ackAt": 1794530065340,
+          "renderedAt": 1794530065378,
+          "ackMs": 1,
+          "inputToRenderedMs": 534,
+          "rendered": {
+            "x": 288,
+            "y": 616
+          }
+        }
+      ],
+      "returnedToSpawn": true
+    },
+    "finalTile": {
+      "x": 289,
+      "y": 616
+    },
+    "prewarm": {
+      "passed": true,
+      "selection": "latest current-session hud-core; prior cancelled runs retained",
+      "waitMs": 1937,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": [],
+            "durationMs": 7021.4000000059605,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done"
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ]
+      ],
+      "staleRequests": []
+    },
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "firstSave": {
+      "passed": true,
+      "className": "Warrior",
+      "level": 30,
+      "gold": 76360,
+      "experience": 19497,
+      "fields": [
+        "map_file_name",
+        "position",
+        "direction",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_items_json",
+        "belt_items_json",
+        "equipment_items_json",
+        "equipment_items_explicit_empty",
+        "storage_items_json",
+        "hero_inventory_items_json",
+        "hero_equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "questStateCount": 26
+    },
+    "warmSaved": true,
+    "workerRestart": {
+      "passed": true,
+      "originalFrame": "/original-ui/Prguse/1.png",
+      "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+      "restored": {
+        "status": 200,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "originNetworkReads": 0,
+      "lifecycle": [
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopping",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopped",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        }
+      ]
+    },
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    },
+    "assetRecovery": {
+      "kind": "skins",
+      "document": "1e505968-a4dd-4d8e-9a5e-4d656797bcdf",
+      "runtimeIdentities": 1,
+      "frameRegressed": false,
+      "reads": [
+        {
+          "path": "/original-ui/Prguse/961.png",
+          "attempt": 1,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530090711,
+          "before": {
+            "at": 1794530090711,
+            "generation": 2,
+            "frame": 1,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "beforeFailure": {
+            "at": 1794530091757,
+            "generation": 2,
+            "frame": 157,
+            "questReady": false,
+            "hudReady": true,
+            "error": null
+          },
+          "status": 503,
+          "completedAt": 1794530091757
+        },
+        {
+          "path": "/original-ui/Prguse/827.png",
+          "attempt": 1,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530090726,
+          "before": {
+            "at": 1794530090726,
+            "generation": 2,
+            "frame": 1,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "status": 503,
+          "completedAt": 1794530090726
+        },
+        {
+          "path": "/original-ui/Prguse/827.png",
+          "attempt": 2,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530091721,
+          "before": {
+            "at": 1794530091721,
+            "generation": 2,
+            "frame": 152,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "status": 200,
+          "bytes": 3346,
+          "sha256": "cd023ff2f8e325002366d309866541cc2d89b680a73943d7bfabcac9dfde99fb",
+          "matchesPinnedBody": true,
+          "completedAt": 1794530091731
+        },
+        {
+          "path": "/original-ui/Prguse/961.png",
+          "attempt": 2,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530092773,
+          "before": {
+            "at": 1794530092773,
+            "generation": 2,
+            "frame": 352,
+            "questReady": false,
+            "hudReady": true,
+            "error": "quest UI font or skin failed to load"
+          },
+          "status": 200,
+          "bytes": 85739,
+          "sha256": "77eee235ca7baf4e9cda9230907ac11e67cd11df26a754405639610eaf161547",
+          "matchesPinnedBody": true,
+          "completedAt": 1794530092789
+        }
+      ],
+      "samples": [
+        {
+          "at": 1794530041247,
+          "generation": null,
+          "frame": null,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794530090416,
+          "generation": 0,
+          "frame": 0,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794530090711,
+          "generation": 2,
+          "frame": 1,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794530091757,
+          "generation": 2,
+          "frame": 157,
+          "questReady": false,
+          "hudReady": true,
+          "error": null
+        },
+        {
+          "at": 1794530091791,
+          "generation": 2,
+          "frame": 159,
+          "questReady": false,
+          "hudReady": true,
+          "error": "quest UI font or skin failed to load"
+        },
+        {
+          "at": 1794530092877,
+          "generation": 2,
+          "frame": 360,
+          "questReady": true,
+          "hudReady": true,
+          "error": null
+        }
+      ],
+      "wallIntervals": [
+        {
+          "path": "/original-ui/Prguse/827.png",
+          "milliseconds": 995
+        },
+        {
+          "path": "/original-ui/Prguse/961.png",
+          "milliseconds": 1016
+        }
+      ],
+      "retryClockScope": "Exact 1s/2s boundaries are checked with Bevy Time<Real> in real AssetServer tests. Browser wall intervals are observations of different frame phases; original 8s movement and 120s Native gates remain enforced by the full-game fixture.",
+      "final": {
+        "questReady": true,
+        "hudReady": true,
+        "error": null,
+        "generation": 2,
+        "frame": 4062
+      }
+    }
+  },
+  {
+    "case": "webgl2-skins",
+    "mode": "webgl2",
+    "passed": true,
+    "coldNativeWaitMs": 28128,
+    "warmNativeWaitMs": 1438,
+    "earlyWalks": {
+      "passed": true,
+      "firstPlayableAt": 1794530190024,
+      "rows": [
+        {
+          "key": "ArrowRight",
+          "direction": "Right",
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794530190045,
+          "wireAt": 1794530190079,
+          "ackAt": 1794530190135,
+          "renderedAt": 1794530190169,
+          "ackMs": 56,
+          "inputToRenderedMs": 124,
+          "rendered": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "direction": "Left",
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794530190198,
+          "wireAt": 1794530190681,
+          "ackAt": 1794530190683,
+          "renderedAt": 1794530190713,
+          "ackMs": 2,
+          "inputToRenderedMs": 515,
+          "rendered": {
+            "x": 288,
+            "y": 616
+          }
+        }
+      ],
+      "returnedToSpawn": true
+    },
+    "finalTile": {
+      "x": 289,
+      "y": 616
+    },
+    "prewarm": {
+      "passed": true,
+      "selection": "latest current-session hud-core; prior cancelled runs retained",
+      "waitMs": 1843,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": [],
+            "durationMs": 7068.800000011921,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done"
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ]
+      ],
+      "staleRequests": []
+    },
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "firstSave": {
+      "passed": true,
+      "className": "Warrior",
+      "level": 30,
+      "gold": 76360,
+      "experience": 19497,
+      "fields": [
+        "map_file_name",
+        "position",
+        "direction",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_items_json",
+        "belt_items_json",
+        "equipment_items_json",
+        "equipment_items_explicit_empty",
+        "storage_items_json",
+        "hero_inventory_items_json",
+        "hero_equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "questStateCount": 26
+    },
+    "warmSaved": true,
+    "workerRestart": {
+      "passed": true,
+      "originalFrame": "/original-ui/Prguse/1.png",
+      "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+      "restored": {
+        "status": 200,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "originNetworkReads": 0,
+      "lifecycle": [
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopping",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "stopped",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "starting",
+          "status": "activated"
+        },
+        {
+          "versionId": "0",
+          "runningStatus": "running",
+          "status": "activated"
+        }
+      ]
+    },
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    },
+    "assetRecovery": {
+      "kind": "skins",
+      "document": "732bbeb9-f19b-4c6f-a2a3-a47bf700ec6d",
+      "runtimeIdentities": 1,
+      "frameRegressed": false,
+      "reads": [
+        {
+          "path": "/original-ui/Prguse/961.png",
+          "attempt": 1,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530215858,
+          "before": {
+            "at": 1794530215859,
+            "generation": 0,
+            "frame": 1,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "beforeFailure": {
+            "at": 1794530217128,
+            "generation": 2,
+            "frame": 171,
+            "questReady": false,
+            "hudReady": true,
+            "error": null
+          },
+          "status": 503,
+          "completedAt": 1794530217128
+        },
+        {
+          "path": "/original-ui/Prguse/827.png",
+          "attempt": 1,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530216113,
+          "before": {
+            "at": 1794530216113,
+            "generation": 2,
+            "frame": 2,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "status": 503,
+          "completedAt": 1794530216113
+        },
+        {
+          "path": "/original-ui/Prguse/827.png",
+          "attempt": 2,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530217107,
+          "before": {
+            "at": 1794530217107,
+            "generation": 2,
+            "frame": 169,
+            "questReady": false,
+            "hudReady": false,
+            "error": null
+          },
+          "status": 200,
+          "bytes": 3346,
+          "sha256": "cd023ff2f8e325002366d309866541cc2d89b680a73943d7bfabcac9dfde99fb",
+          "matchesPinnedBody": true,
+          "completedAt": 1794530217108
+        },
+        {
+          "path": "/original-ui/Prguse/961.png",
+          "attempt": 2,
+          "source": "bevy-wasm-fetch-with-str",
+          "requestedAt": 1794530218142,
+          "before": {
+            "at": 1794530218142,
+            "generation": 2,
+            "frame": 380,
+            "questReady": false,
+            "hudReady": true,
+            "error": "quest UI font or skin failed to load"
+          },
+          "status": 200,
+          "bytes": 85739,
+          "sha256": "77eee235ca7baf4e9cda9230907ac11e67cd11df26a754405639610eaf161547",
+          "matchesPinnedBody": true,
+          "completedAt": 1794530218146
+        }
+      ],
+      "samples": [
+        {
+          "at": 1794530166622,
+          "generation": null,
+          "frame": null,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794530215859,
+          "generation": 0,
+          "frame": 1,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794530216113,
+          "generation": 2,
+          "frame": 2,
+          "questReady": false,
+          "hudReady": false,
+          "error": null
+        },
+        {
+          "at": 1794530217128,
+          "generation": 2,
+          "frame": 171,
+          "questReady": false,
+          "hudReady": true,
+          "error": null
+        },
+        {
+          "at": 1794530217161,
+          "generation": 2,
+          "frame": 173,
+          "questReady": false,
+          "hudReady": true,
+          "error": "quest UI font or skin failed to load"
+        },
+        {
+          "at": 1794530218220,
+          "generation": 2,
+          "frame": 384,
+          "questReady": true,
+          "hudReady": true,
+          "error": null
+        }
+      ],
+      "wallIntervals": [
+        {
+          "path": "/original-ui/Prguse/827.png",
+          "milliseconds": 994
+        },
+        {
+          "path": "/original-ui/Prguse/961.png",
+          "milliseconds": 1014
+        }
+      ],
+      "retryClockScope": "Exact 1s/2s boundaries are checked with Bevy Time<Real> in real AssetServer tests. Browser wall intervals are observations of different frame phases; original 8s movement and 120s Native gates remain enforced by the full-game fixture.",
+      "final": {
+        "questReady": true,
+        "hudReady": true,
+        "error": null,
+        "generation": 2,
+        "frame": 1981
+      }
+    }
+  }
+]

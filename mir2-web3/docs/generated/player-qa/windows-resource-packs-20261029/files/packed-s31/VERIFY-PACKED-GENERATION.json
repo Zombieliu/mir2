@@ -1,0 +1,33 @@
+{
+  "projectedReport": {
+    "catalogSha256": "708511179A1A5EBF64326C029ABEF8DB728E9DA0E95366DBF914300C723F476F",
+    "cmsVerified": true,
+    "engineSourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe",
+    "feedSha256": "FFF8F4232FA7531979100BD194FBBF33E5F41B6D185D1CC7423EA8F2CC8A210E",
+    "feedSignatureSha256": "A82F3FED65868CC475380339AC3904D552D9079BC27C7FAEB17C2B0E0C7C4948",
+    "fullResourceVerified": true,
+    "gameSourceRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+    "generationSignatureSha256": "0788876A20CE811654E742B0BF33FE07166A6D79739D60BA8F7ED442A84AF147",
+    "logicalBytes": 1086897789,
+    "manifestSha256": "1E35573B0C0E5986501F646EF5552A9578DFDE59F67BE7F8687E012E7CB9F861",
+    "metadataOnly": false,
+    "packBytes": 1069012997,
+    "packCount": 33,
+    "packVerifierSha256": "39FCB4534934ADFD55FE62D95EAA5730CA1798C071465ADDEA866B3E68D03300",
+    "passed": true,
+    "published": false,
+    "resourceCount": 255057,
+    "schema": "mir2.windows.packed-generation-verification.v1",
+    "sequence": 31,
+    "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "sourceClean": true,
+    "uniquePayloadBytes": 1053173797,
+    "uniquePayloads": 247471,
+    "verifiedUnix": 1793257196
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "verify-generation",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "7C35C9841311F0D63B7A0997B37C2B087C158E66868746E28A564A24C9F89819",
+  "sourceSize": 1096
+}

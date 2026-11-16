@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-26T23:36:18.481Z",
+  "runId": "1793057646570-c2fb7dc7",
+  "realmStamp": "1793057632464-9c427e44",
+  "all16Passed": true,
+  "pairedDeathReceiptsMatchRawTrace": true,
+  "pairedReviveAndKillDropPickupReceiptsMatchRawTrace": true,
+  "onlyOrdinarySentCommands": true,
+  "sentCommandCount": 351,
+  "backendInputCount": 55,
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": "d9ec9d2094ee058bfa909b05bbcf45dcf4a28b39",
+  "driverSourceCommit": "d9ec9d2094ee058bfa909b05bbcf45dcf4a28b39",
+  "backendSourceAggregate": "9c46d4727a99500b373565e431843c82d2bfdf24815e5211b8142896de257ed2",
+  "frozenDriverRawPinsMatched": 14,
+  "originalEntryRootCount": 6,
+  "checkedPublicFileCount": 13,
+  "checkedPrivateValueCount": 6,
+  "credentialValuesAbsent": true,
+  "rawZoneMetricsVersion": 2,
+  "rawZoneMetricsComplete": true,
+  "nonzeroClassDeltas": {
+    "movementAdmissions": {
+      "count": 108,
+      "successCount": 108,
+      "failureCount": 0,
+      "sumUs": 748466,
+      "overBudgetCount": 2
+    },
+    "immediateRequests": {
+      "count": 145,
+      "successCount": 145,
+      "failureCount": 0,
+      "sumUs": 387705,
+      "overBudgetCount": 0
+    },
+    "lifecycleRequests": {
+      "count": 18,
+      "successCount": 16,
+      "failureCount": 2,
+      "sumUs": 6098061,
+      "overBudgetCount": 11
+    }
+  },
+  "binarySha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6",
+  "sixCountersZeroBeforeAndAfter": true,
+  "normalExitCode": 0,
+  "firstNoLootAttemptPreserved": true,
+  "scope": "Strictly reused ee06 V6/55/Rust32 build under independently bound current full16 source closure. Original16 normal-protocol assertions and pinned neutral verifier are unchanged. No frontend/native UI, two-computer, capacity, Cell or global ghost census acceptance"
+}

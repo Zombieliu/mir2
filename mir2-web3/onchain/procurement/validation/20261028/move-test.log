@@ -1,0 +1,22 @@
+INCLUDING DEPENDENCY Dubhe
+[NOTE] Dependencies on Sui, MoveStdlib, Bridge, DeepBook, and SuiSystem are automatically added, but this feature is disabled for your package because you have explicitly included dependencies on Sui. Consider removing these dependencies from `Move.toml`.
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING mir2_procurement
+Running Move unit tests
+[ PASS    ] mir2_procurement::intent_tests::cancel_after_fill_rejected
+[ PASS    ] mir2_procurement::intent_tests::cross_contract_replay_rejected
+[ PASS    ] mir2_procurement::intent_tests::cross_dapp_replay_rejected
+[ PASS    ] mir2_procurement::intent_tests::cross_network_replay_rejected
+[ PASS    ] mir2_procurement::intent_tests::early_expiry_rejected
+[ PASS    ] mir2_procurement::intent_tests::fill_after_cancel_rejected
+[ PASS    ] mir2_procurement::intent_tests::fill_after_expiry_rejected
+[ PASS    ] mir2_procurement::intent_tests::fill_at_deadline_rejected
+[ PASS    ] mir2_procurement::intent_tests::forged_actor_rejected
+[ PASS    ] mir2_procurement::intent_tests::forged_oracle_rejected
+[ PASS    ] mir2_procurement::intent_tests::frozen_bcs_and_dual_signature_match_node_and_rust
+[ PASS    ] mir2_procurement::intent_tests::open_decisions_respect_expiry
+[ PASS    ] mir2_procurement::intent_tests::proof_deadline_is_exclusive
+[ PASS    ] mir2_procurement::intent_tests::revoked_oracle_key_rejected
+Test result: OK. Total tests: 14; passed: 14; failed: 0
+Total number of linter warnings suppressed: 1 (unique lints: 1)

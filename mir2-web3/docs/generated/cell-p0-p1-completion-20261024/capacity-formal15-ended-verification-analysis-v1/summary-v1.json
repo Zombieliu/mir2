@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T00:52:49.007Z",
+  "runId": "1792974410829-a5288349",
+  "basis": {
+    "finalVerification": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/final-verification.json",
+      "bytes": 567259,
+      "sha256": "91a5907737a1772f09d033cf79581c3d2f5cf3ba835ffb8f2c3d1100bf7eaca7"
+    },
+    "executionReceipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+      "bytes": 814,
+      "sha256": "58247884163c476a6cec43dc6ead63d7f0fbe8c571ea3fffebd2d22929123455"
+    },
+    "toolSeal": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/tool-source-frozen-v1.json",
+      "bytes": 2305,
+      "sha256": "9376a31a430ce2fa457d1dddeee635a4efcb0076e7155b6416fadff2e0cbcbd7"
+    },
+    "originalReport": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-v2-scout-anti-convergence-ladder-15/reports/1792974410829-a5288349.report.json",
+      "bytes": 424421,
+      "sha256": "e938a814eed311b80281ffcd6cadf16e57d36c78f48a1f35ad4caf68d90355a3"
+    }
+  },
+  "verdict": {
+    "independentVerificationPassed": true,
+    "formalRunPassed": false,
+    "capacityAccepted": false,
+    "originalVerdictPreserved": true,
+    "rootP0AcceptanceAdjudicated": false,
+    "P0Accepted": false,
+    "P2Started": false
+  },
+  "phases": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.126,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.257,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-25",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.276,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-50",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-100",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 7200,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 120,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "post-resume-observation",
+      "configuredSeconds": 60,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 1,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    }
+  ],
+  "completedMinuteWindows": 15,
+  "originalCompleteMinuteWindowsRequiredForFullPass": 146,
+  "failedWindows": [
+    {
+      "stage": "stage-25",
+      "index": 4,
+      "seconds": 60.048,
+      "failedActors": [
+        {
+          "actor": "Ldf5bef05",
+          "role": "combat",
+          "launchedAttacks": 16,
+          "positiveHits": 16,
+          "launchedPerActualMinute": 15.987210231814547,
+          "positiveHitsPerActualMinute": 15.987210231814547,
+          "nativePassed": true,
+          "gaps": 0
+        },
+        {
+          "actor": "Ldf5bef0f",
+          "role": "combat",
+          "launchedAttacks": 15,
+          "positiveHits": 15,
+          "launchedPerActualMinute": 14.988009592326138,
+          "positiveHitsPerActualMinute": 14.988009592326138,
+          "nativePassed": true,
+          "gaps": 0
+        }
+      ],
+      "timeoutRatio": 0
+    }
+  ],
+  "continuous": {
+    "total": 230,
+    "completeAtLeast60Seconds": 205,
+    "finalPartial": 25,
+    "allPartialHaveFinalFlag": true,
+    "failureCount": 0,
+    "minSeconds": 0.3066407000001054,
+    "maxSeconds": 60.76489070000011
+  },
+  "attacks": {
+    "wholeRun": {
+      "count": 451,
+      "successful": 451,
+      "attackV2Requests": 451,
+      "attackV2NotLaunched": 0
+    },
+    "measuredCompletedPhases": [
+      {
+        "phase": "stage-2",
+        "measuredSeconds": 300.126,
+        "count": 0,
+        "successful": 0
+      },
+      {
+        "phase": "stage-10",
+        "measuredSeconds": 300.257,
+        "count": 157,
+        "successful": 157
+      },
+      {
+        "phase": "stage-25",
+        "measuredSeconds": 300.276,
+        "count": 232,
+        "successful": 232
+      }
+    ],
+    "measuredTotal": 389,
+    "outsideTheseMeasuredPhases": 62,
+    "outsidePhaseClassificationNotPerformed": true,
+    "independentPerRequestTyped900PacketReplay": false
+  },
+  "sourceRoles": {
+    "backendBuild": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "execution": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "driver": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "backendInputCount": 50,
+    "prepared": {
+      "count": 367,
+      "sourceConfigSha256": "9d1f72da7a7bb49156285a132c2c714bd39605dd6e86e4ca0a9193d5fc3e9a32"
+    },
+    "admitted": {
+      "count": 372,
+      "sourceConfigSha256": "5c8be7bc19d26ecf69326c19224f6f657d469099f00f606bed042a3912b40b8a"
+    }
+  },
+  "monitor": {
+    "complete": true,
+    "invalidCount": 0,
+    "noStops": true,
+    "maxGapMs": 7513,
+    "standaloneHistorySHA": "6fd4715ca051b955b4a3b5009e85ed643c95b2b20e705ba76e7e7cf7890ec7d8"
+  },
+  "hp": {
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "notContinuousHpCoverage": true
+  },
+  "wire": {
+    "complete": true,
+    "rows": 5155,
+    "diagnosticOnly": true
+  },
+  "store": {
+    "complete": true,
+    "rows": 92,
+    "bytes": 20154,
+    "sha256": "c4d814b9c7281c1c283b01050d66e3ffd56481760fbcd6787a5d074e621afce8",
+    "contributesToGameAcceptance": false,
+    "completedOnlyCannotProveMissingHolder": true
+  },
+  "memory": {
+    "soakExecuted": false,
+    "replayedMemory": null,
+    "twoHourStabilityOrPlateauProven": false,
+    "originalMinimumObservationSeconds": 1800,
+    "originalMaximumSlopeMiBPerHour": 32
+  },
+  "limits": [
+    "Independent source/replay consistency PASS preserves actual Formal15 FAILED; no50/100/two-hour/post-resume execution or new capacity acceptance",
+    "Whole451 versus measured389 leaves62 outside the three measured phases; no ramp/settle classification was inferred",
+    "230 continuous windows are205>=60s plus25final partial, not230 complete minutes",
+    "Typed-result and dual-positive900ms packets were not independently reconstructed; original frozen J/226 driver gates remain unchanged",
+    "HPzero is no verified dose and no continuous survival proof",
+    "Store92 are separate completed-only diagnostics, not a holder attribution or game gate",
+    "Root historical facts recorded independentWindowAdjudicationPending before this actual replay; the original facts file remains unchanged"
+  ],
+  "rawOrMonitorRescannedHere": false,
+  "testsRerun": false,
+  "copyExecuted": false
+}

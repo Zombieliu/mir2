@@ -1,0 +1,1 @@
+{"schema":1,"kind":"r16-test-revision-alignment","passed":true,"revision":"d53f9e3b22e2b92c2dc86644b6ae370fc1acab53","binaryUnchanged":true,"onlyAddedEnvironmentKey":"MIR2_DEPLOY_REVISION","idleBeforeStop":true,"normalStop":true,"snapshotBytes":1039489,"secretsRecorded":false}

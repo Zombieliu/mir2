@@ -1,0 +1,141 @@
+{
+  "owner": "Root",
+  "kind": "Source23 actual unknown-retirement finite Web fixtures and strict TypeScript only",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node03-snapshot.json",
+    "bytes": 9756520,
+    "sha256": "ca7ed3e53eafdb00290fddb034ebfdbf9afb0ca27c69d3d7076f2299452fa9ca"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node03-source-review.json",
+    "bytes": 2733,
+    "sha256": "548836c0bf96fe5959c29e9dabc5b6fef05d9efadfce21ee1908981c1b464d19"
+  },
+  "page": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+    "bytes": 995759,
+    "sha256": "7836bf1a0c8bb4934efbaccb269eca4d75605ac5f205fb5abe77d34c13167307"
+  },
+  "shell": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+    "bytes": 321102,
+    "sha256": "303b6645cbb445273f2b3258d989a7de010f7b6e508d409cacf7ffc6bb768b71"
+  },
+  "script": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+    "bytes": 545600,
+    "sha256": "fd7691baf7f2b153d12ab3c885ed313800e2e14af1964a28e71959d517561157"
+  },
+  "jobs": [
+    {
+      "name": "stage5-03",
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-stage5-03.config.json",
+        "bytes": 4360,
+        "sha256": "36fdde573f3714216a1fa1866012f8b6e649dac393f22d5828876211b0dfcc27"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 80752,
+        "kind": "Source23 original Stage5 memory-only fixture03 unknown-retirement",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 1568,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-stage5-03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false,
+        "pin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-stage5-03.outer.json",
+          "bytes": 523,
+          "sha256": "7ad9cbb25ca13d1c5501099c7a2f67212df1ba11f5b92de3ec56369c6bd3c399"
+        }
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-stage5-03.stdout.log",
+        "bytes": 206,
+        "sha256": "9e249ac638bc17169ec67ac5483cbf0dc38559c908172daa66151a356f4a9de0"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-stage5-03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "result": {
+        "fileLevelTests": 1,
+        "passed": 1,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "namedGroups": 357,
+        "priorNamedGroups": 318,
+        "addedNamedGroups": 39
+      }
+    },
+    {
+      "name": "tsc03",
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc03.config.json",
+        "bytes": 3931,
+        "sha256": "48bd9aa0a2128e3e6643fea1b5de2c86b43e7c644974aea19c28c315b1b6a387"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 112752,
+        "kind": "Source23 original strict code-only TypeScript03 unknown-retirement",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 7529,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-tsc03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false,
+        "pin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc03.outer.json",
+          "bytes": 521,
+          "sha256": "ef58552623061fa7485d1b2549ed727dcd61388bd917867afbc27697be9ce066"
+        }
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc03.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "result": {
+        "strictTypeScriptExit": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      }
+    }
+  ],
+  "finiteMemoryAccepted": true,
+  "rawRustBehaviorExecuted": false,
+  "abiResponses": "bounded data mocks; this finite Node fixture does not execute shared Rust or WASM",
+  "actualBrowserOrNativeInput": false,
+  "productionBuildAccepted": false,
+  "presentationBudgetFailureRecorded": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-core-build01.outer.json",
+    "bytes": 505,
+    "sha256": "58e0a39bd554acefe92ea4dbd5912e5da429b5fcf15902f7b8e41f470ae7202a"
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

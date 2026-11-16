@@ -1,0 +1,99 @@
+{
+  "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+  "database": "mir2_r16_auth_body_fea64484b6_canary_20261116",
+  "productionInstalled": false,
+  "passed": true,
+  "ordinaryRegistration": true,
+  "ordinaryPasswordLogin": true,
+  "normalNewCharacter": true,
+  "map": "0",
+  "initialLocation": {
+    "x": 288,
+    "y": 616
+  },
+  "authoritativeMovedLocation": {
+    "x": 288,
+    "y": 617
+  },
+  "movementMs": 116.594,
+  "neutralMonsterWalkCount": 1,
+  "monsterCount": 21,
+  "neutralWalkSample": [
+    {
+      "objectId": 206711,
+      "x": 275,
+      "y": 603,
+      "direction": "Left"
+    }
+  ],
+  "normalLogouts": 2,
+  "sameRoleReentry": true,
+  "savedLocationPreserved": true,
+  "existingRowsUnchanged": {
+    "accounts": {
+      "rows": 321,
+      "canonicalBytes": 2391236,
+      "sha256": "1a62150ac110fcfa71388150c0ec38b102c3796fe299d158f8cad7e6040f8bee"
+    },
+    "characters": {
+      "rows": 233,
+      "canonicalBytes": 78738,
+      "sha256": "5e7348047c852fcd041af57213b21615b71bb37e24e2ab948f260e4682278bbf"
+    },
+    "character_saves": {
+      "rows": 233,
+      "canonicalBytes": 2701539,
+      "sha256": "61e73bb5e78d0952a4c69a402bcce50e51f408ec069623a0f420c4dc91515e0e"
+    }
+  },
+  "qaAccountSha256": "5c3199c1e4e3d18130d0b53f221204647512b4c4173bc77560c83c0c6a3521fb",
+  "productionProcessUnchanged": true,
+  "packetCounts": {
+    "realmInfo": 2,
+    "Connected": 2,
+    "worldSnapshot": 10,
+    "ClientVersion": 2,
+    "NewAccount": 1,
+    "identitySession": 2,
+    "LoginSuccess": 2,
+    "monthlyCard": 4,
+    "NewCharacterSuccess": 1,
+    "StartGame": 2,
+    "Chat": 2,
+    "UpdateNotice": 2,
+    "NewItemInfo": 290,
+    "MapInformation": 2,
+    "UserInformation": 2,
+    "NewQuestInfo": 400,
+    "NewRecipeInfo": 158,
+    "CompleteQuest": 2,
+    "ReceiveMail": 2,
+    "FriendUpdate": 2,
+    "GameShopInfo": 212,
+    "BaseStatsInfo": 2,
+    "ObjectMonster": 77,
+    "ObjectNpc": 50,
+    "ObjectSpell": 104,
+    "ObjectHealth": 36,
+    "TimeOfDay": 2,
+    "ChangeAMode": 2,
+    "ChangePMode": 2,
+    "SwitchGroup": 4,
+    "DefaultNPC": 2,
+    "GuildBuffList": 5,
+    "NPCUpdate": 8,
+    "NPCResponse": 8,
+    "MentorUpdate": 3,
+    "LoverUpdate": 2,
+    "GuildStatus": 3,
+    "GuildMemberChange": 3,
+    "ObjectGuildNameChanged": 2,
+    "DeleteGroup": 2,
+    "UserLocation": 1,
+    "ObjectRemove": 2,
+    "KeepAlive": 1,
+    "ObjectWalk": 1,
+    "LogOutSuccess": 2
+  },
+  "debugCommandsSent": 0
+}

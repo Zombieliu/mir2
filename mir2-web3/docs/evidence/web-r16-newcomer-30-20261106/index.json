@@ -1,0 +1,151 @@
+{
+  "schema": "mir2.r16.newcomer-three-classes-evidence.v1",
+  "release": "v21-r3",
+  "packageOrigin": "http://127.0.0.1:19041/",
+  "scope": "ordinary local WebSocket task route, File persistence and actual desktop browser readback",
+  "timedAcceptanceSeparate": true,
+  "roles": [
+    {
+      "class": "Warrior",
+      "level": 30,
+      "main": 22,
+      "growth": 4,
+      "functionalPassed": true,
+      "browserPassed": true
+    },
+    {
+      "class": "Wizard",
+      "level": 27,
+      "main": 19,
+      "growth": 3,
+      "functionalPassed": false,
+      "browserPassed": true,
+      "q20": "0/3"
+    },
+    {
+      "class": "Taoist",
+      "level": 30,
+      "main": 22,
+      "growth": 4,
+      "functionalPassed": true,
+      "browserPassed": true
+    }
+  ],
+  "files": [
+    {
+      "path": "assets-v21-r3.json",
+      "bytes": 1751,
+      "sha256": "c1a07579a326554d2a4f15af4d32b43ad08918fad03afb3035f8cca6f15d9325"
+    },
+    {
+      "path": "http-scenes-v21-r3.json",
+      "bytes": 2732,
+      "sha256": "f75d436fc14032fc189a6cd758d745fd0854ba4b95a2ca7160db17a0423ad206"
+    },
+    {
+      "path": "package-v21-r2.json",
+      "bytes": 633,
+      "sha256": "ceff2263996a5526e168a936b7ff9434c458a44f58ff8bf730c92140928cc1e5"
+    },
+    {
+      "path": "package-v21-r3.json",
+      "bytes": 635,
+      "sha256": "c4d10b278a4c80a9034319f13cb83cc25f5313733f787736fc05ee851d5ed2fb"
+    },
+    {
+      "path": "preservation-v21-r3.json",
+      "bytes": 962,
+      "sha256": "8b595d2a7ab1863ec49ba3ba4c1de8c020280c3666bda878c3798ceea09933a5"
+    },
+    {
+      "path": "protocol-regression.log",
+      "bytes": 23175,
+      "sha256": "07588bd7e2bdbadc03ad4ac471f885aada0a414b7b1898676fa6f7eb619127c6"
+    },
+    {
+      "path": "regression.log",
+      "bytes": 8022,
+      "sha256": "a7c8a2471331981d490a208c0abfed3379461cb336eb8764f76131b57472fad9"
+    },
+    {
+      "path": "taoist-browser-final.json",
+      "bytes": 12704,
+      "sha256": "21c77286dee77ae33aa6dbffe7f6f8423fa8927913863e104d0342397be6531e"
+    },
+    {
+      "path": "taoist-final-01-web-quest-diary.png",
+      "bytes": 113272,
+      "sha256": "85a5533e266fa8f2643470e872fe21a949631559f3c034f0ef602ae26fac9faf"
+    },
+    {
+      "path": "taoist-final-02-web-class-skill-tooltip.png",
+      "bytes": 229295,
+      "sha256": "b574b4a6779f16c51bd083aed11422f75a38a7f17ad8c1242ce6adf379c11ac1"
+    },
+    {
+      "path": "taoist-protocol.json",
+      "bytes": 5364,
+      "sha256": "122568cd81c46e70ddad023d06e8fb4097d9705265195f1ce5728f80e3037126"
+    },
+    {
+      "path": "taoist-supply-browser-durable.json",
+      "bytes": 2474,
+      "sha256": "3969afce6c90aa6ee57a58f975d79bc896e0789bfd8897a651861d4e5ea5fe9c"
+    },
+    {
+      "path": "warrior-browser-final.json",
+      "bytes": 12541,
+      "sha256": "dbcf45267386783cd48d6a1518d00a365ad2a21e74e08d8d9c5c73afda21c159"
+    },
+    {
+      "path": "warrior-final-01-web-quest-diary.png",
+      "bytes": 113384,
+      "sha256": "7342bfe56f48ac68c859588b25c0bde9292f14fda53687b9fce73b58e07b8087"
+    },
+    {
+      "path": "warrior-final-02-web-class-skill-tooltip.png",
+      "bytes": 228582,
+      "sha256": "4813bbbe3943ce097d026c608b2f1c59219b347fc58bb1aa9cafe3b14e24df66"
+    },
+    {
+      "path": "warrior-protocol.json",
+      "bytes": 28691,
+      "sha256": "de98b7d5acb14fbf543b0fe96d38017e0ead6d16481d5ef903e3b185de14c853"
+    },
+    {
+      "path": "wizard-browser-revive.json",
+      "bytes": 11952,
+      "sha256": "6e77a9d035d16ec8a4badbef210092555d63947a85f98da751bcb14652bc7bc2"
+    },
+    {
+      "path": "wizard-functional-clock-negative.json",
+      "bytes": 46354,
+      "sha256": "73beaa27da1a4331fb658622e2ed570568933c4f1f33f070c69128519047710c"
+    },
+    {
+      "path": "wizard-latest-protocol.json",
+      "bytes": 32349,
+      "sha256": "b0f52110f4d0ad2805fbeb20ce689308407b1e152d80dcea917d5c5fe8b705e5"
+    },
+    {
+      "path": "wizard-ordinary-negative.json",
+      "bytes": 17755,
+      "sha256": "499446d31b5cd9bf01b5c633c022c388ab22265c4755e6fe6512b3985e750c4d"
+    },
+    {
+      "path": "wizard-post-clock-verdict.json",
+      "bytes": 3679,
+      "sha256": "fe28e0efff9c71f6b1902a34f0d878d8d225ae7985a1fe16c8fd058614b88f2b"
+    },
+    {
+      "path": "wizard-revive-01-web-quest-diary.png",
+      "bytes": 105527,
+      "sha256": "c5441a04d28028128ae58775584fdf139bdfb296834a1547e462326f2fd01250"
+    },
+    {
+      "path": "wizard-revive-02-web-class-skill-tooltip.png",
+      "bytes": 185423,
+      "sha256": "75e1ac29a73b36f35b205e83ec39ba490614f7902c016a0b23d623600834e0ae"
+    }
+  ]
+}

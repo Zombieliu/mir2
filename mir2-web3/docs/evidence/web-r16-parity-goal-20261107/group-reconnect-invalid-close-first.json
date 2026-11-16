@@ -1,0 +1,3678 @@
+{
+  "schema": "mir2.r16.group.browser.v1",
+  "passed": false,
+  "requestedBackend": "webgl2-shared",
+  "startedAt": "2026-11-07T14:35:24.502Z",
+  "phases": [
+    "ordinary-peer-registration",
+    "ordinary-browser-login",
+    "target-refuses-sender-remains-off",
+    "physical-connection-close-and-confirmed-session-reset"
+  ],
+  "commands": [
+    {
+      "phase": "ordinary-browser-login",
+      "type": "clientCapabilities"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "clientCapabilities"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "setLanguage"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "clientVersion"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "login"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "startGame"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "keepAlive"
+    },
+    {
+      "phase": "ordinary-browser-login",
+      "type": "npcPurchaseOwner"
+    },
+    {
+      "phase": "target-refuses-sender-remains-off",
+      "type": "switchGroup",
+      "allowGroup": false
+    },
+    {
+      "phase": "target-refuses-sender-remains-off",
+      "type": "addMember",
+      "subject": "peerA"
+    },
+    {
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "type": "keepAlive"
+    },
+    {
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "type": "keepAlive"
+    },
+    {
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "type": "keepAlive"
+    },
+    {
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "type": "keepAlive"
+    },
+    {
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "type": "keepAlive"
+    }
+  ],
+  "packets": [
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "DeleteGroup"
+    },
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "peer1",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "peer1",
+      "phase": "ordinary-peer-registration",
+      "packet": "DeleteGroup"
+    },
+    {
+      "source": "peer1",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": true
+    },
+    {
+      "source": "peer1",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": true
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "Connected"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ClientVersion"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "LoginSuccess"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "KeepAlive"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "StartGame"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "Chat"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "UpdateNotice"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "MapInformation"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "UserInformation"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewQuestInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewItemInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NewRecipeInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "CompleteQuest"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ReceiveMail"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "FriendUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GameShopInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "BaseStatsInfo"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectSpell"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectHealth"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "TimeOfDay"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ChangeAMode"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ChangePMode"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "DefaultNPC"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GuildBuffList"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCResponse"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCResponse"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCResponse"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "NPCResponse"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "MentorUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "LoverUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GuildStatus"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GuildMemberChange"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "GuildBuffList"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectGuildNameChanged"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectPlayer"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectPlayer"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectNpc"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "ObjectMonster"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "DeleteGroup"
+    },
+    {
+      "source": "browser",
+      "phase": "ordinary-browser-login",
+      "packet": "SwitchGroup",
+      "allowGroup": true
+    },
+    {
+      "source": "browser",
+      "phase": "target-refuses-sender-remains-off",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "browser",
+      "phase": "target-refuses-sender-remains-off",
+      "packet": "MentorUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "target-refuses-sender-remains-off",
+      "packet": "GuildStatus"
+    },
+    {
+      "source": "browser",
+      "phase": "target-refuses-sender-remains-off",
+      "packet": "GuildMemberChange"
+    },
+    {
+      "source": "browser",
+      "phase": "target-refuses-sender-remains-off",
+      "packet": "GuildBuffList"
+    },
+    {
+      "source": "browser",
+      "phase": "target-refuses-sender-remains-off",
+      "packet": "Chat"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "KeepAlive"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "KeepAlive"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "Chat"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "KeepAlive"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "KeepAlive"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "MentorUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildStatus"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildMemberChange"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildBuffList"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "KeepAlive"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "ObjectRemove"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "MentorUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildStatus"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildMemberChange"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildBuffList"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "MentorUpdate"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildStatus"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildMemberChange"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "GuildBuffList"
+    },
+    {
+      "source": "browser",
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "packet": "ObjectRemove"
+    }
+  ],
+  "checks": [
+    {
+      "name": "refusedTargetDoesNotEnableSender",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "refused-invite",
+      "sha256": "42ca86757aa5819b9e225fbf655667b861709402704b97d7d496aa5734c7b92b"
+    },
+    {
+      "name": "failure",
+      "sha256": "55c2b002e994bf8aa0d814297ebd1b0cd2abf3d3f250684a1e61ae3ff3209e71"
+    }
+  ],
+  "pageErrors": [],
+  "networkErrors": [],
+  "errors": [
+    {
+      "phase": "physical-connection-close-and-confirmed-session-reset",
+      "code": null,
+      "messageHash": "208281de23019c27c7ede1fe9b622d17308eec3d2aeb970f220fb109b1cf026a"
+    }
+  ],
+  "browser": "156.0.8078.80",
+  "initialPosition": {
+    "x": 287,
+    "y": 617
+  },
+  "completedAt": "2026-11-07T14:37:37.621Z"
+}

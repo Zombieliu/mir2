@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "state": "WORKING_TREE_CANDIDATE",
+  "startedAt": "2026-10-26T09:31:04.364Z",
+  "endedAt": "2026-10-26T09:31:04.439Z",
+  "changedBackendInput": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+  "unchangedBackendInputs": 49,
+  "driverInputs": 9,
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "format",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "apps/simulation/src/runtime/shared_experience_profile.rs"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "durationMs": 65.9216,
+      "totals": [],
+      "passed": false,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v1\\format-stdout-v1.log",
+          "bytes": 3850,
+          "sha256": "c8fc717b6d236e3bdcfab9ec5c69ec8d98b38385503ffca1163dc2470ac914fd"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v1\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "capacityAcceptance": false
+}

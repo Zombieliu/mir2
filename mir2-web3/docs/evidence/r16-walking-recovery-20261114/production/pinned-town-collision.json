@@ -1,0 +1,2719 @@
+{
+  "schema": 1,
+  "sourceRevision": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "map": "0",
+  "mapFileName": "0.map",
+  "mapType": 100,
+  "mapWidth": 700,
+  "mapHeight": 700,
+  "completeMapCells": 490000,
+  "bounds": {
+    "minX": 278,
+    "maxX": 298,
+    "minY": 606,
+    "maxY": 626
+  },
+  "cells": [
+    {
+      "x": 278,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 607,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 615,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 616,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 617,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 618,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 619,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 620,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 622,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 623,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 278,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 610,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 616,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 617,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 618,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 619,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 620,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 622,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 623,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 624,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 279,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 617,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 618,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 619,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 620,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 622,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 623,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 280,
+      "y": 626,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 618,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 619,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 620,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 622,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 625,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 281,
+      "y": 626,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 606,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 619,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 620,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 624,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 625,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 282,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 606,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 623,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 624,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 283,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 623,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 624,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 284,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 613,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 614,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 624,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 625,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 285,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 614,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 625,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 286,
+      "y": 626,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 287,
+      "y": 626,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 607,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 288,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 606,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 607,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 289,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 606,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 607,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 290,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 606,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 607,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 291,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 607,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 615,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 622,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 292,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 615,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 621,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 622,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 293,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 611,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 294,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 610,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 611,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 295,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 609,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 610,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 611,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 612,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 617,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 618,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 296,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 608,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 610,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 611,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 612,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 613,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 617,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 618,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 297,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 606,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 607,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 608,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 609,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 610,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 611,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 612,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 613,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 614,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 615,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 616,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 617,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 618,
+      "blocked": true,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 619,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 620,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 621,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 622,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 623,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 624,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 625,
+      "blocked": false,
+      "doorIndex": 0
+    },
+    {
+      "x": 298,
+      "y": 626,
+      "blocked": false,
+      "doorIndex": 0
+    }
+  ],
+  "startSafeZone": {
+    "location": {
+      "x": 288,
+      "y": 616
+    },
+    "size": 10,
+    "startPoint": true
+  },
+  "sourceClosure": [
+    {
+      "path": "mir2-web3/apps/web/lib/crystal-map-blend.ts",
+      "bytes": 730,
+      "sha256": "cbc611c3c6e697aae7a3036960c11c1a32dee7edf7d0ef4fe5644aa777661259",
+      "gitBlob": "2df54cb5939f9133f0c47294b9202de36783442b"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/crystal-map-loader.ts",
+      "bytes": 73092,
+      "sha256": "5b2baf06c032bc873e40b3b59fdf87327561e2575c8879dfbebac33c1d0410cd",
+      "gitBlob": "30ba3f1394cceb3a42a2b6ca94b5ecab82714d6c"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/crystal-minimap-transform.ts",
+      "bytes": 5223,
+      "sha256": "7ce25505c129fdb5b368a67744b0445287ade703eee0558d4580fa686fd3b882",
+      "gitBlob": "497a66dd50ed155373cc91beccbaa377eee0736d"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5",
+      "gitBlob": "9100bbe8b20c7961b06f69a294a25f1fbb3a107e"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-minimap-transforms.ts",
+      "bytes": 639,
+      "sha256": "ae3c6cbcc147e5d7b68e51ed57c3602256aba27ddacc2b9b43b2cefa9d9e156f",
+      "gitBlob": "2c5e1c1b97187cef88d50c6c52eb0480003f48bb"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+      "gitBlob": "4a04eafd6e355d5e78fe5c2bd72d1cec9a00a49a"
+    }
+  ],
+  "compressedMap": {
+    "bytes": 512762,
+    "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+  },
+  "decodedMap": {
+    "bytes": 12740008,
+    "sha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6"
+  },
+  "method": "Execute exact Git-pinned production parseMapGeometry, parsedCellAt and parsedCellBlocksMovement on exact packaged0.map.gz; derive all441 real Town cells. Door tiles are excluded from QA. No sparse presentation missing-cell inference."
+}

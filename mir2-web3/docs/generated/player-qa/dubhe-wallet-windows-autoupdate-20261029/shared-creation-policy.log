@@ -1,0 +1,13 @@
+
+running 8 tests
+test native_shell_ui::preview_visual_tests::creation_policy_three_class_offscreen ... ignored, explicit real-asset offscreen three-class policy screenshot; run alone with MIR2_PREVIEW_VISUAL_ASSET_ROOT and MIR2_PREVIEW_VISUAL_OUTPUT
+test native_shell::tests::creation_policy_keeps_reset_default_and_keyboard_cycle_on_allowed_classes ... ok
+test native_shell::tests::creation_policy_never_filters_existing_assassin_or_archer_roster_and_start_game ... ok
+test native_shell::tests::creation_policy_rejects_every_disabled_create_intent_before_pending_state ... ok
+test native_shell::tests::creation_policy_defaults_to_five_and_rejects_invalid_explicit_names ... ok
+test native_shell_ui::tests::creation_policy_keyboard_cycles_only_allowed_choices_and_blocks_injected_submit ... ok
+test native_shell_ui::tests::creation_policy_ignores_disabled_pointer_class_selection ... ok
+test native_shell_ui::tests::creation_policy_renders_only_three_classes_in_all_nine_locales ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 1606 filtered out; finished in 0.64s
+

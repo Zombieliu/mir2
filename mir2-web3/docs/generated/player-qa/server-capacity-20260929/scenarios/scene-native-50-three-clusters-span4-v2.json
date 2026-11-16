@@ -1,0 +1,1203 @@
+{
+  "mapFileName": "0",
+  "patrolSpan": 4,
+  "anchors": [
+    {
+      "x": 244,
+      "y": 576
+    },
+    {
+      "x": 250,
+      "y": 576
+    },
+    {
+      "x": 260,
+      "y": 576
+    },
+    {
+      "x": 266,
+      "y": 576
+    },
+    {
+      "x": 275,
+      "y": 577
+    },
+    {
+      "x": 260,
+      "y": 598
+    },
+    {
+      "x": 244,
+      "y": 592
+    },
+    {
+      "x": 250,
+      "y": 592
+    },
+    {
+      "x": 244,
+      "y": 608
+    },
+    {
+      "x": 250,
+      "y": 608
+    },
+    {
+      "x": 257,
+      "y": 589
+    },
+    {
+      "x": 276,
+      "y": 592
+    },
+    {
+      "x": 260,
+      "y": 608
+    },
+    {
+      "x": 279,
+      "y": 611
+    },
+    {
+      "x": 282,
+      "y": 575
+    },
+    {
+      "x": 266,
+      "y": 598
+    },
+    {
+      "x": 266,
+      "y": 592
+    },
+    {
+      "x": 282,
+      "y": 592
+    },
+    {
+      "x": 266,
+      "y": 608
+    },
+    {
+      "x": 275,
+      "y": 601
+    },
+    {
+      "x": 312,
+      "y": 560
+    },
+    {
+      "x": 328,
+      "y": 560
+    },
+    {
+      "x": 344,
+      "y": 560
+    },
+    {
+      "x": 312,
+      "y": 576
+    },
+    {
+      "x": 325,
+      "y": 573
+    },
+    {
+      "x": 328,
+      "y": 582
+    },
+    {
+      "x": 344,
+      "y": 576
+    },
+    {
+      "x": 315,
+      "y": 589
+    },
+    {
+      "x": 328,
+      "y": 592
+    },
+    {
+      "x": 344,
+      "y": 592
+    },
+    {
+      "x": 318,
+      "y": 560
+    },
+    {
+      "x": 334,
+      "y": 560
+    },
+    {
+      "x": 345,
+      "y": 565
+    },
+    {
+      "x": 319,
+      "y": 577
+    },
+    {
+      "x": 334,
+      "y": 576
+    },
+    {
+      "x": 334,
+      "y": 582
+    },
+    {
+      "x": 350,
+      "y": 576
+    },
+    {
+      "x": 320,
+      "y": 590
+    },
+    {
+      "x": 334,
+      "y": 592
+    },
+    {
+      "x": 350,
+      "y": 592
+    },
+    {
+      "x": 228,
+      "y": 640
+    },
+    {
+      "x": 247,
+      "y": 638
+    },
+    {
+      "x": 258,
+      "y": 642
+    },
+    {
+      "x": 228,
+      "y": 656
+    },
+    {
+      "x": 246,
+      "y": 654
+    },
+    {
+      "x": 243,
+      "y": 665
+    },
+    {
+      "x": 260,
+      "y": 656
+    },
+    {
+      "x": 231,
+      "y": 669
+    },
+    {
+      "x": 248,
+      "y": 668
+    },
+    {
+      "x": 260,
+      "y": 670
+    }
+  ],
+  "monsterNames": [
+    "Deer",
+    "Hen"
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        5,
+        15
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16,
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "combatActorIndices": [
+        25,
+        35
+      ],
+      "movementActorIndices": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        36,
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "combatActorIndices": [
+        45
+      ],
+      "movementActorIndices": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        46,
+        47,
+        48,
+        49
+      ]
+    }
+  ],
+  "generated": {
+    "staticOnly": true,
+    "accepted": false,
+    "purpose": "Fifty ordinary actors, three distributed same-map groups, five fighters split2+2+1",
+    "footprintCells": 1250,
+    "routeProofs": [
+      {
+        "origin": {
+          "x": 275,
+          "y": 560
+        },
+        "visitedCells": 33713,
+        "footprintCells": 1250,
+        "paths": [
+          {
+            "actorIndex": 0,
+            "bounded4000PathExists": true,
+            "cells": 32,
+            "idealAllRunSeconds": 12
+          },
+          {
+            "actorIndex": 1,
+            "bounded4000PathExists": true,
+            "cells": 26,
+            "idealAllRunSeconds": 9.75
+          },
+          {
+            "actorIndex": 2,
+            "bounded4000PathExists": true,
+            "cells": 18,
+            "idealAllRunSeconds": 6.75
+          },
+          {
+            "actorIndex": 3,
+            "bounded4000PathExists": true,
+            "cells": 17,
+            "idealAllRunSeconds": 6
+          },
+          {
+            "actorIndex": 4,
+            "bounded4000PathExists": true,
+            "cells": 18,
+            "idealAllRunSeconds": 6.75
+          },
+          {
+            "actorIndex": 5,
+            "bounded4000PathExists": true,
+            "cells": 39,
+            "idealAllRunSeconds": 14.25
+          },
+          {
+            "actorIndex": 6,
+            "bounded4000PathExists": true,
+            "cells": 34,
+            "idealAllRunSeconds": 12.75
+          },
+          {
+            "actorIndex": 7,
+            "bounded4000PathExists": true,
+            "cells": 33,
+            "idealAllRunSeconds": 12
+          },
+          {
+            "actorIndex": 8,
+            "bounded4000PathExists": true,
+            "cells": 49,
+            "idealAllRunSeconds": 18
+          },
+          {
+            "actorIndex": 9,
+            "bounded4000PathExists": true,
+            "cells": 49,
+            "idealAllRunSeconds": 18
+          },
+          {
+            "actorIndex": 10,
+            "bounded4000PathExists": true,
+            "cells": 30,
+            "idealAllRunSeconds": 11.25
+          },
+          {
+            "actorIndex": 11,
+            "bounded4000PathExists": true,
+            "cells": 33,
+            "idealAllRunSeconds": 12
+          },
+          {
+            "actorIndex": 12,
+            "bounded4000PathExists": true,
+            "cells": 49,
+            "idealAllRunSeconds": 18
+          },
+          {
+            "actorIndex": 13,
+            "bounded4000PathExists": true,
+            "cells": 53,
+            "idealAllRunSeconds": 19.5
+          },
+          {
+            "actorIndex": 14,
+            "bounded4000PathExists": true,
+            "cells": 16,
+            "idealAllRunSeconds": 6
+          },
+          {
+            "actorIndex": 15,
+            "bounded4000PathExists": true,
+            "cells": 39,
+            "idealAllRunSeconds": 14.25
+          },
+          {
+            "actorIndex": 16,
+            "bounded4000PathExists": true,
+            "cells": 33,
+            "idealAllRunSeconds": 12
+          },
+          {
+            "actorIndex": 17,
+            "bounded4000PathExists": true,
+            "cells": 33,
+            "idealAllRunSeconds": 12
+          },
+          {
+            "actorIndex": 18,
+            "bounded4000PathExists": true,
+            "cells": 49,
+            "idealAllRunSeconds": 18
+          },
+          {
+            "actorIndex": 19,
+            "bounded4000PathExists": true,
+            "cells": 42,
+            "idealAllRunSeconds": 15.75
+          },
+          {
+            "actorIndex": 20,
+            "bounded4000PathExists": true,
+            "cells": 38,
+            "idealAllRunSeconds": 14.25
+          },
+          {
+            "actorIndex": 21,
+            "bounded4000PathExists": true,
+            "cells": 54,
+            "idealAllRunSeconds": 20.25
+          },
+          {
+            "actorIndex": 22,
+            "bounded4000PathExists": true,
+            "cells": 70,
+            "idealAllRunSeconds": 26.25
+          },
+          {
+            "actorIndex": 23,
+            "bounded4000PathExists": true,
+            "cells": 38,
+            "idealAllRunSeconds": 14.25
+          },
+          {
+            "actorIndex": 24,
+            "bounded4000PathExists": true,
+            "cells": 51,
+            "idealAllRunSeconds": 18.75
+          },
+          {
+            "actorIndex": 25,
+            "bounded4000PathExists": true,
+            "cells": 54,
+            "idealAllRunSeconds": 20.25
+          },
+          {
+            "actorIndex": 26,
+            "bounded4000PathExists": true,
+            "cells": 70,
+            "idealAllRunSeconds": 26.25
+          },
+          {
+            "actorIndex": 27,
+            "bounded4000PathExists": true,
+            "cells": 41,
+            "idealAllRunSeconds": 15
+          },
+          {
+            "actorIndex": 28,
+            "bounded4000PathExists": true,
+            "cells": 54,
+            "idealAllRunSeconds": 20.25
+          },
+          {
+            "actorIndex": 29,
+            "bounded4000PathExists": true,
+            "cells": 70,
+            "idealAllRunSeconds": 26.25
+          },
+          {
+            "actorIndex": 30,
+            "bounded4000PathExists": true,
+            "cells": 44,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 31,
+            "bounded4000PathExists": true,
+            "cells": 60,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 32,
+            "bounded4000PathExists": true,
+            "cells": 71,
+            "idealAllRunSeconds": 26.25
+          },
+          {
+            "actorIndex": 33,
+            "bounded4000PathExists": true,
+            "cells": 45,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 34,
+            "bounded4000PathExists": true,
+            "cells": 60,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 35,
+            "bounded4000PathExists": true,
+            "cells": 60,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 36,
+            "bounded4000PathExists": true,
+            "cells": 76,
+            "idealAllRunSeconds": 28.5
+          },
+          {
+            "actorIndex": 37,
+            "bounded4000PathExists": true,
+            "cells": 46,
+            "idealAllRunSeconds": 17.25
+          },
+          {
+            "actorIndex": 38,
+            "bounded4000PathExists": true,
+            "cells": 60,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 39,
+            "bounded4000PathExists": true,
+            "cells": 76,
+            "idealAllRunSeconds": 28.5
+          },
+          {
+            "actorIndex": 40,
+            "bounded4000PathExists": true,
+            "cells": 81,
+            "idealAllRunSeconds": 30
+          },
+          {
+            "actorIndex": 41,
+            "bounded4000PathExists": true,
+            "cells": 79,
+            "idealAllRunSeconds": 29.25
+          },
+          {
+            "actorIndex": 42,
+            "bounded4000PathExists": true,
+            "cells": 83,
+            "idealAllRunSeconds": 30.75
+          },
+          {
+            "actorIndex": 43,
+            "bounded4000PathExists": true,
+            "cells": 97,
+            "idealAllRunSeconds": 36
+          },
+          {
+            "actorIndex": 44,
+            "bounded4000PathExists": true,
+            "cells": 95,
+            "idealAllRunSeconds": 35.25
+          },
+          {
+            "actorIndex": 45,
+            "bounded4000PathExists": true,
+            "cells": 106,
+            "idealAllRunSeconds": 39.75
+          },
+          {
+            "actorIndex": 46,
+            "bounded4000PathExists": true,
+            "cells": 97,
+            "idealAllRunSeconds": 36
+          },
+          {
+            "actorIndex": 47,
+            "bounded4000PathExists": true,
+            "cells": 110,
+            "idealAllRunSeconds": 41.25
+          },
+          {
+            "actorIndex": 48,
+            "bounded4000PathExists": true,
+            "cells": 109,
+            "idealAllRunSeconds": 40.5
+          },
+          {
+            "actorIndex": 49,
+            "bounded4000PathExists": true,
+            "cells": 111,
+            "idealAllRunSeconds": 41.25
+          }
+        ],
+        "unavailable": [],
+        "longestCells": 111
+      },
+      {
+        "origin": {
+          "x": 293,
+          "y": 616
+        },
+        "visitedCells": 16918,
+        "footprintCells": 1250,
+        "paths": [
+          {
+            "actorIndex": 0,
+            "bounded4000PathExists": true,
+            "cells": 50,
+            "idealAllRunSeconds": 18.75
+          },
+          {
+            "actorIndex": 1,
+            "bounded4000PathExists": true,
+            "cells": 45,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 2,
+            "bounded4000PathExists": true,
+            "cells": 44,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 3,
+            "bounded4000PathExists": true,
+            "cells": 44,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 4,
+            "bounded4000PathExists": true,
+            "cells": 43,
+            "idealAllRunSeconds": 15.75
+          },
+          {
+            "actorIndex": 5,
+            "bounded4000PathExists": true,
+            "cells": 34,
+            "idealAllRunSeconds": 12.75
+          },
+          {
+            "actorIndex": 6,
+            "bounded4000PathExists": true,
+            "cells": 50,
+            "idealAllRunSeconds": 18.75
+          },
+          {
+            "actorIndex": 7,
+            "bounded4000PathExists": true,
+            "cells": 44,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 8,
+            "bounded4000PathExists": true,
+            "cells": 50,
+            "idealAllRunSeconds": 18.75
+          },
+          {
+            "actorIndex": 9,
+            "bounded4000PathExists": true,
+            "cells": 44,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 10,
+            "bounded4000PathExists": true,
+            "cells": 37,
+            "idealAllRunSeconds": 13.5
+          },
+          {
+            "actorIndex": 11,
+            "bounded4000PathExists": true,
+            "cells": 28,
+            "idealAllRunSeconds": 10.5
+          },
+          {
+            "actorIndex": 12,
+            "bounded4000PathExists": true,
+            "cells": 34,
+            "idealAllRunSeconds": 12.75
+          },
+          {
+            "actorIndex": 13,
+            "bounded4000PathExists": true,
+            "cells": 15,
+            "idealAllRunSeconds": 5.25
+          },
+          {
+            "actorIndex": 14,
+            "bounded4000PathExists": true,
+            "cells": 45,
+            "idealAllRunSeconds": 16.5
+          },
+          {
+            "actorIndex": 15,
+            "bounded4000PathExists": true,
+            "cells": 28,
+            "idealAllRunSeconds": 10.5
+          },
+          {
+            "actorIndex": 16,
+            "bounded4000PathExists": true,
+            "cells": 28,
+            "idealAllRunSeconds": 10.5
+          },
+          {
+            "actorIndex": 17,
+            "bounded4000PathExists": true,
+            "cells": 28,
+            "idealAllRunSeconds": 10.5
+          },
+          {
+            "actorIndex": 18,
+            "bounded4000PathExists": true,
+            "cells": 28,
+            "idealAllRunSeconds": 10.5
+          },
+          {
+            "actorIndex": 19,
+            "bounded4000PathExists": true,
+            "cells": 19,
+            "idealAllRunSeconds": 6.75
+          },
+          {
+            "actorIndex": 20,
+            "bounded4000PathExists": true,
+            "cells": 60,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 21,
+            "bounded4000PathExists": true,
+            "cells": 83,
+            "idealAllRunSeconds": 30.75
+          },
+          {
+            "actorIndex": 22,
+            "bounded4000PathExists": true,
+            "cells": 83,
+            "idealAllRunSeconds": 30.75
+          },
+          {
+            "actorIndex": 23,
+            "bounded4000PathExists": true,
+            "cells": 52,
+            "idealAllRunSeconds": 19.5
+          },
+          {
+            "actorIndex": 24,
+            "bounded4000PathExists": true,
+            "cells": 70,
+            "idealAllRunSeconds": 26.25
+          },
+          {
+            "actorIndex": 25,
+            "bounded4000PathExists": true,
+            "cells": 61,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 26,
+            "bounded4000PathExists": true,
+            "cells": 67,
+            "idealAllRunSeconds": 24.75
+          },
+          {
+            "actorIndex": 27,
+            "bounded4000PathExists": true,
+            "cells": 54,
+            "idealAllRunSeconds": 20.25
+          },
+          {
+            "actorIndex": 28,
+            "bounded4000PathExists": true,
+            "cells": 51,
+            "idealAllRunSeconds": 18.75
+          },
+          {
+            "actorIndex": 29,
+            "bounded4000PathExists": true,
+            "cells": 52,
+            "idealAllRunSeconds": 19.5
+          },
+          {
+            "actorIndex": 30,
+            "bounded4000PathExists": true,
+            "cells": 60,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 31,
+            "bounded4000PathExists": true,
+            "cells": 83,
+            "idealAllRunSeconds": 30.75
+          },
+          {
+            "actorIndex": 32,
+            "bounded4000PathExists": true,
+            "cells": 78,
+            "idealAllRunSeconds": 29.25
+          },
+          {
+            "actorIndex": 33,
+            "bounded4000PathExists": true,
+            "cells": 59,
+            "idealAllRunSeconds": 21.75
+          },
+          {
+            "actorIndex": 34,
+            "bounded4000PathExists": true,
+            "cells": 67,
+            "idealAllRunSeconds": 24.75
+          },
+          {
+            "actorIndex": 35,
+            "bounded4000PathExists": true,
+            "cells": 61,
+            "idealAllRunSeconds": 22.5
+          },
+          {
+            "actorIndex": 36,
+            "bounded4000PathExists": true,
+            "cells": 67,
+            "idealAllRunSeconds": 24.75
+          },
+          {
+            "actorIndex": 37,
+            "bounded4000PathExists": true,
+            "cells": 53,
+            "idealAllRunSeconds": 19.5
+          },
+          {
+            "actorIndex": 38,
+            "bounded4000PathExists": true,
+            "cells": 51,
+            "idealAllRunSeconds": 18.75
+          },
+          {
+            "actorIndex": 39,
+            "bounded4000PathExists": true,
+            "cells": 58,
+            "idealAllRunSeconds": 21.75
+          },
+          {
+            "actorIndex": 40,
+            "bounded4000PathExists": true,
+            "cells": 66,
+            "idealAllRunSeconds": 24.75
+          },
+          {
+            "actorIndex": 41,
+            "bounded4000PathExists": true,
+            "cells": 52,
+            "idealAllRunSeconds": 19.5
+          },
+          {
+            "actorIndex": 42,
+            "bounded4000PathExists": true,
+            "cells": 56,
+            "idealAllRunSeconds": 21
+          },
+          {
+            "actorIndex": 43,
+            "bounded4000PathExists": true,
+            "cells": 70,
+            "idealAllRunSeconds": 26.25
+          },
+          {
+            "actorIndex": 44,
+            "bounded4000PathExists": true,
+            "cells": 68,
+            "idealAllRunSeconds": 25.5
+          },
+          {
+            "actorIndex": 45,
+            "bounded4000PathExists": true,
+            "cells": 79,
+            "idealAllRunSeconds": 29.25
+          },
+          {
+            "actorIndex": 46,
+            "bounded4000PathExists": true,
+            "cells": 62,
+            "idealAllRunSeconds": 23.25
+          },
+          {
+            "actorIndex": 47,
+            "bounded4000PathExists": true,
+            "cells": 83,
+            "idealAllRunSeconds": 30.75
+          },
+          {
+            "actorIndex": 48,
+            "bounded4000PathExists": true,
+            "cells": 74,
+            "idealAllRunSeconds": 27.75
+          },
+          {
+            "actorIndex": 49,
+            "bounded4000PathExists": true,
+            "cells": 62,
+            "idealAllRunSeconds": 23.25
+          }
+        ],
+        "unavailable": [],
+        "longestCells": 83
+      }
+    ],
+    "clusterSupply": [
+      {
+        "index": 0,
+        "center": {
+          "x": 260,
+          "y": 592
+        },
+        "fighters": 2,
+        "actors": 20,
+        "canonicalAllocatedPassiveSupply": {
+          "count": 50,
+          "hp": 1130,
+          "idealHpPerMinute": 297.0833333333332,
+          "byName": {
+            "Deer": 44,
+            "Hen": 6
+          }
+        },
+        "sourceSlotIds": [
+          206203,
+          206302,
+          206313,
+          206316,
+          206319,
+          206320,
+          206323,
+          206324,
+          206327,
+          206330,
+          206331,
+          206334,
+          206335,
+          206339,
+          206500,
+          206502,
+          206503,
+          206511,
+          206512,
+          206514,
+          206515,
+          206521,
+          206524,
+          206526,
+          206527,
+          206529,
+          206530,
+          206532,
+          206533,
+          206536,
+          206539,
+          206541,
+          206544,
+          206545,
+          206547,
+          206700,
+          206706,
+          206707,
+          206708,
+          206710,
+          206711,
+          206714,
+          206717,
+          206718,
+          271800,
+          271801,
+          271804,
+          271806,
+          271807,
+          271809
+        ],
+        "requiredHpPerMinuteAtMean4": 96,
+        "requiredHpPerMinuteAtMean6": 144,
+        "idealHitsPerMinuteEachAtMean6": 24.756944444444432,
+        "nearbyCanonicalHostileWeakSlots": {
+          "count": 8,
+          "hp": 160,
+          "idealHpPerMinute": 32,
+          "byName": {
+            "Scarecrow": 8
+          }
+        }
+      },
+      {
+        "index": 1,
+        "center": {
+          "x": 328,
+          "y": 576
+        },
+        "fighters": 2,
+        "actors": 20,
+        "canonicalAllocatedPassiveSupply": {
+          "count": 24,
+          "hp": 580,
+          "idealHpPerMinute": 156.80555555555557,
+          "byName": {
+            "Deer": 23,
+            "Hen": 1
+          }
+        },
+        "sourceSlotIds": [
+          206201,
+          206202,
+          206208,
+          206210,
+          206214,
+          206215,
+          206216,
+          206220,
+          206221,
+          206222,
+          206223,
+          206227,
+          206228,
+          206508,
+          206523,
+          206538,
+          206542,
+          206702,
+          206703,
+          206705,
+          206713,
+          206716,
+          206719,
+          271802
+        ],
+        "requiredHpPerMinuteAtMean4": 96,
+        "requiredHpPerMinuteAtMean6": 144,
+        "idealHitsPerMinuteEachAtMean6": 13.067129629629632,
+        "nearbyCanonicalHostileWeakSlots": {
+          "count": 37,
+          "hp": 1024,
+          "idealHpPerMinute": 172.66666666666674,
+          "byName": {
+            "Scarecrow": 11,
+            "HookingCat": 14,
+            "RakingCat": 12
+          }
+        }
+      },
+      {
+        "index": 2,
+        "center": {
+          "x": 244,
+          "y": 656
+        },
+        "fighters": 1,
+        "actors": 10,
+        "canonicalAllocatedPassiveSupply": {
+          "count": 18,
+          "hp": 410,
+          "idealHpPerMinute": 107.3611111111111,
+          "byName": {
+            "Deer": 16,
+            "Hen": 2
+          }
+        },
+        "sourceSlotIds": [
+          206501,
+          206504,
+          206510,
+          206513,
+          206519,
+          206522,
+          206525,
+          206528,
+          206534,
+          206537,
+          206540,
+          206543,
+          206549,
+          206701,
+          206709,
+          206712,
+          271803,
+          271808
+        ],
+        "requiredHpPerMinuteAtMean4": 48,
+        "requiredHpPerMinuteAtMean6": 72,
+        "idealHitsPerMinuteEachAtMean6": 17.893518518518515,
+        "nearbyCanonicalHostileWeakSlots": {
+          "count": 7,
+          "hp": 140,
+          "idealHpPerMinute": 28,
+          "byName": {
+            "Scarecrow": 7
+          }
+        }
+      }
+    ],
+    "combinedUniquePassiveSupply": {
+      "count": 92,
+      "hp": 2120,
+      "idealHpPerMinute": 561.2499999999999,
+      "byName": {
+        "Deer": 83,
+        "Hen": 9
+      }
+    },
+    "overlappingCanonicalSlots": [],
+    "sourceHashes": {
+      "driver": "3b0304d3f08eac672b5e8e1722eb48ef845f3c738b3636434e903a55bc91915e",
+      "respawns": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3",
+      "collision": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    "limitations": [
+      "Original gates remain12 positive hits/min per fighter and all native movement/latency/AOI/resume/save requirements. Resource projections are not acceptance.",
+      "RespawnHP/min is an ideal upper bound, not guaranteed harvest. Dynamic wandering, competition, misses and rising level/damage can exhaust it.",
+      "Canonical source slots are counted once. Runtime hunts only within declared observer coverage and retains global in-flight target claims; overlapping territories could still compete.",
+      "There are ordinary hostile Scarecrow/cats near some patrol footprints. No monster or player data is changed; survival and affordable potions need live ordinary evidence.",
+      "Full5x5 patrol footprints are statically clear and disjoint. Live occupancy remains authoritative; no ignored collision or free displacement.",
+      "This is a distributed three-group workload, not50 simultaneously on one screen. No public connection, account data or gameplay mutation was used to prepare it.",
+      "Admission order v2 guarantees four close first-ten patrol pairs remain inside AOI16; chat probe8 still needs actual peer receipts and is not guaranteed for every arbitrary pair of patrol positions."
+    ],
+    "scenarioRevision": 2,
+    "derivedFrom": {
+      "path": "C:/mir2-ui-repair-20260921/playtest-load-20260929/scene-native-50-three-clusters-span4-v1.json",
+      "sha256": "a9fd5c3f35afa92d85498320f182d313a2893ab251d7461e19ef1324c224fcd0"
+    },
+    "admissionReordering": {
+      "newToOldAnchorIndex": [
+        0,
+        10,
+        1,
+        11,
+        2,
+        5,
+        3,
+        13,
+        7,
+        17,
+        4,
+        6,
+        8,
+        9,
+        12,
+        15,
+        14,
+        16,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "reason": "Introduce four near patrol pairs in the first ten admissions without changing any group footprint, combat home, target supply or acceptance threshold.",
+      "pairedMovementActors": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ]
+      ]
+    }
+  }
+}

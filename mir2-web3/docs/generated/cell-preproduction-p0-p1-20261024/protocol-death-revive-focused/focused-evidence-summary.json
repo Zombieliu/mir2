@@ -1,0 +1,1062 @@
+{
+  "schemaVersion": 1,
+  "summarizedAt": "2026-10-24T12:47:43.029Z",
+  "runId": "1792845858629-b969ae9c",
+  "report": "1792845858629-b969ae9c.report.json",
+  "status": "7 focused checks passed; earlier incomplete full-lifecycle report stays unchanged",
+  "sourceAssociation": {
+    "originalFull": "../protocol-full-lifecycle/1792844742353-ccf6fb6e.report.json",
+    "nativeEnvironmentProjection": "../protocol-full-lifecycle/1792844742353-ccf6fb6e.core-projection.report.json",
+    "ordinaryExistingCharacters": [
+      "Af85551a6",
+      "Bf85551a6"
+    ],
+    "originalFullStatus": "14 passed and 2 not_run; never rewritten or promoted"
+  },
+  "navigation": {
+    "method": "Resume saved western corridor at286612; occupied hints use radius1, otherwise exact unoccupied hints. Plan complete segments against static collision plus current public entities and transfer hazards before ordinary Walk/Run. B follows within AOI; current visible live cats supply attack IDs.",
+    "metadataCaveat": "The report routeWitness wording was inherited from the preceding strict-corridor attempt. Actual recorded target/radius/preflightPath and authoritative Walk/Run receipts define this corrected run; not every waypoint was visited exactly.",
+    "segments": [
+      {
+        "actor": 0,
+        "target": {
+          "x": 287,
+          "y": 611
+        },
+        "radius": 1,
+        "fromSequence": 720,
+        "throughSequence": 720,
+        "successfulSteps": 0,
+        "preflightPath": [
+          {
+            "x": 286,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 286,
+          "y": 612
+        },
+        "radius": 5,
+        "fromSequence": 696,
+        "throughSequence": 696,
+        "successfulSteps": 0,
+        "preflightPath": [
+          {
+            "x": 284,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 289,
+          "y": 611
+        },
+        "radius": 0,
+        "fromSequence": 724,
+        "throughSequence": 740,
+        "successfulSteps": 3,
+        "preflightPath": [
+          {
+            "x": 286,
+            "y": 612
+          },
+          {
+            "x": 287,
+            "y": 612
+          },
+          {
+            "x": 288,
+            "y": 612
+          },
+          {
+            "x": 289,
+            "y": 611
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 289,
+          "y": 611
+        },
+        "radius": 5,
+        "fromSequence": 704,
+        "throughSequence": 704,
+        "successfulSteps": 0,
+        "preflightPath": [
+          {
+            "x": 284,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 291,
+          "y": 611
+        },
+        "radius": 0,
+        "fromSequence": 743,
+        "throughSequence": 745,
+        "successfulSteps": 2,
+        "preflightPath": [
+          {
+            "x": 289,
+            "y": 611
+          },
+          {
+            "x": 290,
+            "y": 611
+          },
+          {
+            "x": 291,
+            "y": 611
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 291,
+          "y": 611
+        },
+        "radius": 5,
+        "fromSequence": 708,
+        "throughSequence": 712,
+        "successfulSteps": 2,
+        "preflightPath": [
+          {
+            "x": 284,
+            "y": 612
+          },
+          {
+            "x": 285,
+            "y": 612
+          },
+          {
+            "x": 286,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 292,
+          "y": 611
+        },
+        "radius": 0,
+        "fromSequence": 752,
+        "throughSequence": 756,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 291,
+            "y": 611
+          },
+          {
+            "x": 292,
+            "y": 611
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 292,
+          "y": 611
+        },
+        "radius": 5,
+        "fromSequence": 718,
+        "throughSequence": 723,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 286,
+            "y": 612
+          },
+          {
+            "x": 287,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 293,
+          "y": 610
+        },
+        "radius": 0,
+        "fromSequence": 762,
+        "throughSequence": 765,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 292,
+            "y": 611
+          },
+          {
+            "x": 293,
+            "y": 610
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 293,
+          "y": 610
+        },
+        "radius": 5,
+        "fromSequence": 728,
+        "throughSequence": 731,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 287,
+            "y": 612
+          },
+          {
+            "x": 288,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 294,
+          "y": 610
+        },
+        "radius": 0,
+        "fromSequence": 770,
+        "throughSequence": 772,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 293,
+            "y": 610
+          },
+          {
+            "x": 294,
+            "y": 610
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 294,
+          "y": 610
+        },
+        "radius": 5,
+        "fromSequence": 736,
+        "throughSequence": 739,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 288,
+            "y": 612
+          },
+          {
+            "x": 289,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 294,
+          "y": 609
+        },
+        "radius": 0,
+        "fromSequence": 778,
+        "throughSequence": 780,
+        "successfulSteps": 1,
+        "preflightPath": [
+          {
+            "x": 294,
+            "y": 610
+          },
+          {
+            "x": 294,
+            "y": 609
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 294,
+          "y": 609
+        },
+        "radius": 5,
+        "fromSequence": 744,
+        "throughSequence": 744,
+        "successfulSteps": 0,
+        "preflightPath": [
+          {
+            "x": 289,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 296,
+          "y": 607
+        },
+        "radius": 0,
+        "fromSequence": 783,
+        "throughSequence": 787,
+        "successfulSteps": 2,
+        "preflightPath": [
+          {
+            "x": 294,
+            "y": 609
+          },
+          {
+            "x": 295,
+            "y": 608
+          },
+          {
+            "x": 296,
+            "y": 607
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 296,
+          "y": 607
+        },
+        "radius": 5,
+        "fromSequence": 750,
+        "throughSequence": 752,
+        "successfulSteps": 2,
+        "preflightPath": [
+          {
+            "x": 289,
+            "y": 612
+          },
+          {
+            "x": 290,
+            "y": 612
+          },
+          {
+            "x": 291,
+            "y": 612
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 297,
+          "y": 601
+        },
+        "radius": 1,
+        "fromSequence": 796,
+        "throughSequence": 821,
+        "successfulSteps": 5,
+        "preflightPath": [
+          {
+            "x": 296,
+            "y": 607
+          },
+          {
+            "x": 296,
+            "y": 606
+          },
+          {
+            "x": 296,
+            "y": 605
+          },
+          {
+            "x": 297,
+            "y": 604
+          },
+          {
+            "x": 297,
+            "y": 603
+          },
+          {
+            "x": 297,
+            "y": 602
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 297,
+          "y": 602
+        },
+        "radius": 5,
+        "fromSequence": 765,
+        "throughSequence": 790,
+        "successfulSteps": 6,
+        "preflightPath": [
+          {
+            "x": 291,
+            "y": 612
+          },
+          {
+            "x": 292,
+            "y": 611
+          },
+          {
+            "x": 293,
+            "y": 610
+          },
+          {
+            "x": 294,
+            "y": 610
+          },
+          {
+            "x": 294,
+            "y": 609
+          },
+          {
+            "x": 294,
+            "y": 608
+          },
+          {
+            "x": 294,
+            "y": 607
+          }
+        ]
+      },
+      {
+        "actor": 0,
+        "target": {
+          "x": 299,
+          "y": 590
+        },
+        "radius": 1,
+        "fromSequence": 856,
+        "throughSequence": 978,
+        "successfulSteps": 17,
+        "preflightPath": [
+          {
+            "x": 297,
+            "y": 602
+          },
+          {
+            "x": 297,
+            "y": 603
+          },
+          {
+            "x": 297,
+            "y": 604
+          },
+          {
+            "x": 298,
+            "y": 604
+          },
+          {
+            "x": 299,
+            "y": 604
+          },
+          {
+            "x": 299,
+            "y": 603
+          },
+          {
+            "x": 299,
+            "y": 602
+          },
+          {
+            "x": 299,
+            "y": 601
+          },
+          {
+            "x": 299,
+            "y": 600
+          },
+          {
+            "x": 299,
+            "y": 599
+          },
+          {
+            "x": 299,
+            "y": 598
+          },
+          {
+            "x": 299,
+            "y": 597
+          },
+          {
+            "x": 299,
+            "y": 596
+          },
+          {
+            "x": 299,
+            "y": 595
+          },
+          {
+            "x": 299,
+            "y": 594
+          },
+          {
+            "x": 299,
+            "y": 593
+          },
+          {
+            "x": 299,
+            "y": 592
+          },
+          {
+            "x": 299,
+            "y": 591
+          }
+        ]
+      },
+      {
+        "actor": 1,
+        "target": {
+          "x": 298,
+          "y": 591
+        },
+        "radius": 5,
+        "fromSequence": 841,
+        "throughSequence": 929,
+        "successfulSteps": 14,
+        "preflightPath": [
+          {
+            "x": 294,
+            "y": 607
+          },
+          {
+            "x": 295,
+            "y": 607
+          },
+          {
+            "x": 296,
+            "y": 606
+          },
+          {
+            "x": 296,
+            "y": 605
+          },
+          {
+            "x": 297,
+            "y": 604
+          },
+          {
+            "x": 297,
+            "y": 603
+          },
+          {
+            "x": 297,
+            "y": 602
+          },
+          {
+            "x": 297,
+            "y": 601
+          },
+          {
+            "x": 296,
+            "y": 601
+          },
+          {
+            "x": 296,
+            "y": 600
+          },
+          {
+            "x": 296,
+            "y": 599
+          },
+          {
+            "x": 296,
+            "y": 598
+          },
+          {
+            "x": 296,
+            "y": 597
+          },
+          {
+            "x": 296,
+            "y": 596
+          }
+        ]
+      }
+    ],
+    "movementCommands": [
+      {
+        "actor": "victim",
+        "walk": 11,
+        "run": 12
+      },
+      {
+        "actor": "observer",
+        "walk": 11,
+        "run": 9
+      }
+    ],
+    "nonOrdinaryCommandsUsed": []
+  },
+  "equipment": {
+    "removal": {
+      "armourRemoved": true,
+      "uniqueId": 1,
+      "to": 0,
+      "receipt": 714,
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      }
+    },
+    "restoration": {
+      "receipt": 1214,
+      "equipped": true
+    },
+    "commands": [
+      {
+        "sequence": 713,
+        "type": "removeItem",
+        "grid": "inventory",
+        "uniqueId": 1,
+        "to": 0
+      },
+      {
+        "sequence": 1213,
+        "type": "equipItem",
+        "grid": "inventory",
+        "uniqueId": 1,
+        "to": 1
+      }
+    ],
+    "noGrantOrSaveEdit": true
+  },
+  "ordinaryConsumableUse": {
+    "reason": "The shared navigator automatically uses existing HP supplies during low-HP movement. This is an ordinary public command and consumed a real carried item; no direct HP write or item grant.",
+    "item": "(HP)DrugSmall",
+    "uniqueId": 2,
+    "requestSequence": 873,
+    "receipt": {
+      "actor": "victim",
+      "sequence": 875,
+      "at": "2026-10-24T12:44:56.742Z",
+      "direction": "received",
+      "packet": "UseItem",
+      "payload": {
+        "grid": "Inventory",
+        "success": true,
+        "uniqueId": 2
+      }
+    },
+    "postRunCarriedState": [
+      {
+        "actor": "victim",
+        "snapshot": {
+          "gold": 26,
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "itemIndex": 0,
+              "name": "WoodenSword",
+              "count": 1,
+              "slot": "weapon"
+            },
+            {
+              "uniqueId": "1",
+              "itemIndex": 0,
+              "name": "BaseDress(M)",
+              "count": 1,
+              "slot": "armour"
+            },
+            {
+              "uniqueId": "3",
+              "itemIndex": 0,
+              "name": "Candle",
+              "count": 1,
+              "slot": "torch"
+            }
+          ]
+        }
+      },
+      {
+        "actor": "observer",
+        "snapshot": {
+          "gold": 0,
+          "inventory": [
+            {
+              "uniqueId": "2",
+              "itemIndex": 0,
+              "name": "(HP)DrugSmall",
+              "count": 1,
+              "slot": "2"
+            }
+          ],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "itemIndex": 0,
+              "name": "WoodenSword",
+              "count": 1,
+              "slot": "weapon"
+            },
+            {
+              "uniqueId": "1",
+              "itemIndex": 0,
+              "name": "BaseDress(M)",
+              "count": 1,
+              "slot": "armour"
+            },
+            {
+              "uniqueId": "3",
+              "itemIndex": 0,
+              "name": "Candle",
+              "count": 1,
+              "slot": "torch"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "death": {
+    "evidence": {
+      "actor": "Af85551a6",
+      "observerId": 50018,
+      "mapFileName": "0",
+      "location": {
+        "x": 298,
+        "y": 591
+      },
+      "ownerDeathReceipt": 1118,
+      "observerDeathReceipt": 1021
+    },
+    "packets": [
+      {
+        "actor": "victim",
+        "sequence": 1118,
+        "at": "2026-10-24T12:45:21.901Z",
+        "direction": "received",
+        "packet": "Death",
+        "payload": {
+          "direction": "Right",
+          "location": {
+            "x": 298,
+            "y": 591
+          }
+        }
+      },
+      {
+        "actor": "observer",
+        "sequence": 1020,
+        "at": "2026-10-24T12:45:21.901Z",
+        "direction": "received",
+        "packet": "ObjectHealth",
+        "payload": {
+          "expire": 0,
+          "objectId": 50018,
+          "percent": 0
+        }
+      },
+      {
+        "actor": "observer",
+        "sequence": 1021,
+        "at": "2026-10-24T12:45:21.901Z",
+        "direction": "received",
+        "packet": "ObjectDied",
+        "payload": {
+          "direction": "Right",
+          "kind": 0,
+          "location": {
+            "x": 298,
+            "y": 591
+          },
+          "objectId": 50018
+        }
+      }
+    ],
+    "incomingDamage": {
+      "positiveReceipts": [
+        {
+          "sequence": 832,
+          "damage": 3
+        },
+        {
+          "sequence": 835,
+          "damage": 1
+        },
+        {
+          "sequence": 863,
+          "damage": 4
+        },
+        {
+          "sequence": 866,
+          "damage": 2
+        },
+        {
+          "sequence": 988,
+          "damage": 3
+        },
+        {
+          "sequence": 1010,
+          "damage": 3
+        },
+        {
+          "sequence": 1039,
+          "damage": 2
+        },
+        {
+          "sequence": 1055,
+          "damage": 3
+        },
+        {
+          "sequence": 1073,
+          "damage": 3
+        },
+        {
+          "sequence": 1087,
+          "damage": 2
+        },
+        {
+          "sequence": 1104,
+          "damage": 3
+        },
+        {
+          "sequence": 1121,
+          "damage": 2
+        }
+      ],
+      "total": 31,
+      "scope": "Actual owner incoming damage; public Death does not identify a unique killing source."
+    }
+  },
+  "revive": {
+    "evidence": {
+      "actor": "Af85551a6",
+      "fromMap": "0",
+      "toMap": "0",
+      "hp": 18,
+      "location": {
+        "x": 288,
+        "y": 616
+      },
+      "requestReceipt": 1126,
+      "revivedReceipt": 1145,
+      "aliveSnapshotReceipt": 1169,
+      "observerPacket": "ObjectRevived",
+      "observerReceipt": 1024,
+      "ack": 1145,
+      "owners": [
+        {
+          "name": "Af85551a6",
+          "objectId": 1000,
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        {
+          "name": "Bf85551a6",
+          "objectId": 1000,
+          "map": "0",
+          "x": 299,
+          "y": 596,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        }
+      ],
+      "observerActor": []
+    },
+    "packets": [
+      {
+        "actor": "victim",
+        "sequence": 1126,
+        "at": "2026-10-24T12:45:22.118Z",
+        "direction": "sent",
+        "packet": "townRevive",
+        "payload": null
+      },
+      {
+        "actor": "victim",
+        "sequence": 1145,
+        "at": "2026-10-24T12:45:22.181Z",
+        "direction": "received",
+        "packet": "Revived",
+        "payload": {}
+      },
+      {
+        "actor": "observer",
+        "sequence": 1024,
+        "at": "2026-10-24T12:45:22.140Z",
+        "direction": "received",
+        "packet": "ObjectRevived",
+        "payload": {
+          "effect": true,
+          "objectId": 50018
+        }
+      },
+      {
+        "actor": "observer",
+        "sequence": 1025,
+        "at": "2026-10-24T12:45:22.171Z",
+        "direction": "received",
+        "packet": "ObjectRemove",
+        "payload": {
+          "objectId": 50018
+        }
+      }
+    ],
+    "visibilityBoundary": "Observer received ObjectRevived for the same player then ObjectRemove because the town landing is outside its AOI. Observer did not see a re-entered town actor. Exact positive HP18, alive state and landing288616 are proven by the owner fresh snapshot; ObjectRevived alone has no HP/location fields."
+  },
+  "sourcePins": [
+    {
+      "runId": "1792845433696-23f84151",
+      "source": "mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845433696-23f84151",
+      "source": "mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "sha256": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845433696-23f84151",
+      "source": "mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845433696-23f84151",
+      "source": "mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845433696-23f84151",
+      "source": "mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845433696-23f84151",
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\run-death-revive-focused.mjs",
+      "evidenceSource": "1792845433696-23f84151.runner-source.mjs",
+      "sha256": "913c4db24520aa0f069f4c8c4ad717a724158d728decf30d899b672dc397f991",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845654430-cb5de189",
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\run-death-revive-focused.mjs",
+      "evidenceSource": "1792845654430-cb5de189.runner-source.mjs",
+      "sha256": "ab251d0dc8f371c1819c01110d90e24dbb4aafadd09cedf04f810f34b111dd36",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845654430-cb5de189",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845654430-cb5de189",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "sha256": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845654430-cb5de189",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845654430-cb5de189",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845654430-cb5de189",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845858629-b969ae9c",
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\run-death-revive-focused.mjs",
+      "evidenceSource": "1792845858629-b969ae9c.runner-source.mjs",
+      "sha256": "7fcd0bbdbc862e966da6d917f1077b34f792314f1c92169549103be92ad86429",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845858629-b969ae9c",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845858629-b969ae9c",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "sha256": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845858629-b969ae9c",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845858629-b969ae9c",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036",
+      "matchesPin": true
+    },
+    {
+      "runId": "1792845858629-b969ae9c",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "evidenceSource": "..\\..\\..\\..\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097",
+      "matchesPin": true
+    }
+  ],
+  "allPinsMatch": true,
+  "fullLifecycleAccepted": false,
+  "nativeVisualAccepted": false,
+  "loadAccepted": false
+}

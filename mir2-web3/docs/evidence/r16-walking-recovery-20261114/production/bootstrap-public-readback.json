@@ -1,0 +1,2507 @@
+{
+  "passed": true,
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "versionBeforeAndAfterMatched": true,
+  "checkedAt": "2026-11-13T23:01:06.602Z",
+  "origin": "https://numeron.obelisk.build",
+  "rows": [
+    {
+      "kind": "scene",
+      "path": "/_next/static/chunks/r16-entry-scene-fallback.2de96a71b81f435a.js",
+      "passed": true,
+      "scriptBytes": 458590,
+      "scriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+      "jsonBytes": 458475,
+      "payloadSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "uniquePayloads": 1,
+      "counts": {
+        "cells": 6819,
+        "sprites": 957
+      },
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 458590
+        }
+      ]
+    },
+    {
+      "kind": "floor",
+      "path": "/_next/static/chunks/r16-entry-floor-fallback.c9903a19ce2f9700.js",
+      "passed": true,
+      "scriptBytes": 439514,
+      "scriptSha256": "77b660b7ed9a23ce3877ba30ca15f1c1469647a3c6aee72ccb3455804489e4cf",
+      "jsonBytes": 439896,
+      "payloadSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "uniquePayloads": 1,
+      "counts": {
+        "pngs": 124
+      },
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 439514
+        }
+      ]
+    },
+    {
+      "kind": "locale",
+      "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+      "passed": true,
+      "scriptBytes": 3336037,
+      "scriptSha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+      "jsonBytes": 3283113,
+      "payloadSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "uniquePayloads": 1,
+      "counts": {
+        "entries": 5164,
+        "fullTenVectors": true
+      },
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 3336037
+        }
+      ]
+    },
+    {
+      "kind": "walking",
+      "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.3fa6bc4ce2b84e3d.js",
+      "passed": true,
+      "scriptBytes": 764839,
+      "scriptSha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+      "jsonBytes": 764724,
+      "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "uniquePayloads": 1,
+      "counts": {
+        "pngs": 240,
+        "libraries": 5,
+        "frames": 240,
+        "directions": 8,
+        "framesPerDirection": 6
+      },
+      "imagePins": [
+        {
+          "path": "/original-ui/Monster/000/32.png",
+          "bytes": 3431,
+          "sha256": "f912d8c96d6c0cfa2af7dff347a15c41ff79c760f22f98cafe4cb8ac90ab255f",
+          "width": 128,
+          "height": 100,
+          "library": "Monster/000",
+          "index": 32,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/000/33.png",
+          "bytes": 3475,
+          "sha256": "610d82e63ffdc84e3a431eace587e0054744c07e29e3c206f3fbed9a31206ec0",
+          "width": 128,
+          "height": 104,
+          "library": "Monster/000",
+          "index": 33,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/000/34.png",
+          "bytes": 3399,
+          "sha256": "93980ae1bf7cfd2c579700650fe28e26e7f2b6fcfe6ebe1da1109ba32be6e673",
+          "width": 120,
+          "height": 100,
+          "library": "Monster/000",
+          "index": 34,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/000/35.png",
+          "bytes": 3398,
+          "sha256": "35d8acd9b2293ac1529a86cd1c903918e35b4eafb9e153480158a5853d51ca57",
+          "width": 112,
+          "height": 108,
+          "library": "Monster/000",
+          "index": 35,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/000/36.png",
+          "bytes": 3505,
+          "sha256": "08b02a8043820b907a588677cfcb622b95414a2ef313845eacc4180923453aba",
+          "width": 116,
+          "height": 108,
+          "library": "Monster/000",
+          "index": 36,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/000/37.png",
+          "bytes": 3368,
+          "sha256": "0a2fcb51312383191f13c5759e3a5d3f5eb0d96205303ee4d4d66eab0a4353ea",
+          "width": 120,
+          "height": 100,
+          "library": "Monster/000",
+          "index": 37,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/000/38.png",
+          "bytes": 3008,
+          "sha256": "ff3f34f0ab1f1a4c6a34c8857749ed69b23d63078e1b6c9fc6da89f9cdcf51e2",
+          "width": 116,
+          "height": 72,
+          "library": "Monster/000",
+          "index": 38,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/000/39.png",
+          "bytes": 3026,
+          "sha256": "a2e1d0bff087abbcf0281a213660c5b17844967a835fd2a2b45a1cdb0dbe496d",
+          "width": 120,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 39,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/000/40.png",
+          "bytes": 2918,
+          "sha256": "59cbcf6bff8505b43a8edfecf88ef08754c8c98fbe5e3d86afb5e7d45505eef9",
+          "width": 120,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 40,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/000/41.png",
+          "bytes": 3094,
+          "sha256": "ced054017cb159f7a18addabebd3f48b62f7771c858d45816e56c6f9bbfcfd4d",
+          "width": 120,
+          "height": 88,
+          "library": "Monster/000",
+          "index": 41,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/000/42.png",
+          "bytes": 2927,
+          "sha256": "08247b8cd82cc63fb9dcc93d95dbec22f55e582fbd973922f73b8be77237d218",
+          "width": 120,
+          "height": 84,
+          "library": "Monster/000",
+          "index": 42,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/000/43.png",
+          "bytes": 3005,
+          "sha256": "bb788bf1f85f1187dd7c2c13a9ddb07bbe2402255475847545127bd92dbc5a49",
+          "width": 120,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 43,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/000/44.png",
+          "bytes": 2714,
+          "sha256": "c5a27a9abc78834907e56057f0accbe9079722b223ad989aed5a87d7e3a75b23",
+          "width": 88,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 44,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/000/45.png",
+          "bytes": 2782,
+          "sha256": "4cfbee7b6b58de7ac1b602b90c5d25dbb296f6aa9b366cd69ba3adec6b5ae612",
+          "width": 96,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 45,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/000/46.png",
+          "bytes": 2619,
+          "sha256": "2a6b5683c610d6397685decf5ab1601746f38c3300ebdb4f5b72264932a8e9b0",
+          "width": 96,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 46,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/000/47.png",
+          "bytes": 2888,
+          "sha256": "b3b37fb1b99c47d3c54ef2de086452d8d64d851726cee3be49de594503f930cc",
+          "width": 108,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 47,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/000/48.png",
+          "bytes": 2816,
+          "sha256": "27ed417b2f15107401cec19bf45eef87f2c58e671e7b07c5d8369968edbf8aec",
+          "width": 108,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 48,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/000/49.png",
+          "bytes": 2609,
+          "sha256": "cd3b3d18c688b4b47d18d8ac4a60b02f976aef9501d3d3acd8f6b64ebcf8a7c4",
+          "width": 88,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 49,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/000/50.png",
+          "bytes": 2770,
+          "sha256": "bc549bd81e74fb194dd1258a90c966a12c0ad47ff189fa471b1e23e210f42d78",
+          "width": 68,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 50,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/000/51.png",
+          "bytes": 2787,
+          "sha256": "d770949abc06170fcacce8489486bb77e7ff3f9a09b6e4f7a0e450a9b8de3ed0",
+          "width": 68,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 51,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/000/52.png",
+          "bytes": 2714,
+          "sha256": "52b65db27ef1d7f44c1d212113cb03803c89e9f6cef5f2d3661cd44850a9e6d7",
+          "width": 60,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 52,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/000/53.png",
+          "bytes": 2721,
+          "sha256": "4e8f1842c38bfa327d37b2e30025a7bc57baad75978bf935802eb52c4f3eb8fa",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 53,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/000/54.png",
+          "bytes": 2801,
+          "sha256": "bc5f6b952446bd764ce3dac1cce84c867cc5ea80318441829f6b6c740c794097",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 54,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/000/55.png",
+          "bytes": 2680,
+          "sha256": "030aabcfc327db1a43f15f6e7fa67503cce4c9f9d96eb4d7aced216d0a738c8b",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 55,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/000/56.png",
+          "bytes": 3214,
+          "sha256": "b7a43c54475d76c2286215328ced0b87904bf064052dff6b27e1cbe6fe7ea730",
+          "width": 88,
+          "height": 92,
+          "library": "Monster/000",
+          "index": 56,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/000/57.png",
+          "bytes": 3112,
+          "sha256": "fefc87c6acd85ca6d3e173179c3041f4cb997bee3291e93b429cd0765821f1ec",
+          "width": 88,
+          "height": 88,
+          "library": "Monster/000",
+          "index": 57,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/000/58.png",
+          "bytes": 3056,
+          "sha256": "11a15f0d5cc54c071c77c2e45ca0046404b8798472b1a87097f72375769eefb5",
+          "width": 88,
+          "height": 76,
+          "library": "Monster/000",
+          "index": 58,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/000/59.png",
+          "bytes": 3090,
+          "sha256": "f5c0515bc762c6da8484eccf2aecd1bcb7681a210ef5b394949e2f1d2a88d462",
+          "width": 84,
+          "height": 84,
+          "library": "Monster/000",
+          "index": 59,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/000/60.png",
+          "bytes": 3052,
+          "sha256": "eaec69b85898911cb39e62c6d69e7e79f2fc92fa388d2d10c43ac4da1285d791",
+          "width": 88,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 60,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/000/61.png",
+          "bytes": 3087,
+          "sha256": "7942baeb4a887992c71770ac305e855e2a937197ebb165845ac1feb3a817045c",
+          "width": 88,
+          "height": 80,
+          "library": "Monster/000",
+          "index": 61,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/000/62.png",
+          "bytes": 3308,
+          "sha256": "cb14264db2814ac0e72473196124f2d9feafe93904c5ea138240f76d43a6a9d4",
+          "width": 76,
+          "height": 116,
+          "library": "Monster/000",
+          "index": 62,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/000/63.png",
+          "bytes": 3311,
+          "sha256": "c4ae1cce73e703d15a47b51ebaceb4058351b7729a88c2ac025f4d8e7ae8991f",
+          "width": 80,
+          "height": 112,
+          "library": "Monster/000",
+          "index": 63,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/000/64.png",
+          "bytes": 3167,
+          "sha256": "2eadcd0e4d86b986cc01b9d879f95a0590afb4cb1d49184aa271c138b04a8270",
+          "width": 84,
+          "height": 108,
+          "library": "Monster/000",
+          "index": 64,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/000/65.png",
+          "bytes": 3271,
+          "sha256": "32285f2a0f025552c247d7199f97597d03ab8eb30a56d57a12a9a4cc8a7bd8bd",
+          "width": 88,
+          "height": 104,
+          "library": "Monster/000",
+          "index": 65,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/000/66.png",
+          "bytes": 3191,
+          "sha256": "71d76b90a14198257638f7a1d97d9741d9d7c65eff935c6696ae7ba22c960f4f",
+          "width": 88,
+          "height": 104,
+          "library": "Monster/000",
+          "index": 66,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/000/67.png",
+          "bytes": 3281,
+          "sha256": "ea575bd87094d77b12fa27468e0a9f995669aa277b9b2aa266dbf1d9727e785b",
+          "width": 84,
+          "height": 112,
+          "library": "Monster/000",
+          "index": 67,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/000/68.png",
+          "bytes": 3390,
+          "sha256": "9bba79734892673b00b313b6d80c3485e3b31a38f0e1a7cbb784f1c3f42933b1",
+          "width": 68,
+          "height": 128,
+          "library": "Monster/000",
+          "index": 68,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/000/69.png",
+          "bytes": 3267,
+          "sha256": "4498547152deacf184ffd3d87885900388aea6e1e8e5e1a743094c1368e1e9d3",
+          "width": 60,
+          "height": 128,
+          "library": "Monster/000",
+          "index": 69,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/000/70.png",
+          "bytes": 3234,
+          "sha256": "6fb01866bfdcb15c7e954d33e02d86e0964e24caf264e5fddd1b46a060676cc9",
+          "width": 68,
+          "height": 128,
+          "library": "Monster/000",
+          "index": 70,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/000/71.png",
+          "bytes": 3306,
+          "sha256": "38ef044fda2919cb9e8b6b080d2052182ae3bcdc0135916c8a224b67d053ad53",
+          "width": 68,
+          "height": 124,
+          "library": "Monster/000",
+          "index": 71,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/000/72.png",
+          "bytes": 3259,
+          "sha256": "423c43a39e83cc49b3dcd6856975baadd3a19025e17ebe2388b1cce7d8f33fff",
+          "width": 68,
+          "height": 124,
+          "library": "Monster/000",
+          "index": 72,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/000/73.png",
+          "bytes": 3236,
+          "sha256": "60bb497c8c4787dad576530f7d73234ffaeecb1a307a2cedfbc96e60c05704ab",
+          "width": 64,
+          "height": 128,
+          "library": "Monster/000",
+          "index": 73,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/000/74.png",
+          "bytes": 3567,
+          "sha256": "5536953e7de56e1967591ee1ffe5e28f30d12f1ac924cd97b5beca317fb6c4ed",
+          "width": 112,
+          "height": 112,
+          "library": "Monster/000",
+          "index": 74,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/000/75.png",
+          "bytes": 3542,
+          "sha256": "1bfdb4069afeb5592ccd11905ace316f20f1204ba3fd374609b4408c2d0e0e33",
+          "width": 104,
+          "height": 116,
+          "library": "Monster/000",
+          "index": 75,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/000/76.png",
+          "bytes": 3554,
+          "sha256": "04c3a8d63cb29d267248d22b54b855ca58036fe0915817136fcbcac53f069520",
+          "width": 92,
+          "height": 120,
+          "library": "Monster/000",
+          "index": 76,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/000/77.png",
+          "bytes": 3483,
+          "sha256": "66251a881fb729aefdd6beef34d2987e6af1946a816507409ddf161f8f8842cd",
+          "width": 84,
+          "height": 120,
+          "library": "Monster/000",
+          "index": 77,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/000/78.png",
+          "bytes": 3648,
+          "sha256": "ce39d57c4a92861cf8bcac3166b2a6ef0c469eaa99658627ce7cf0dbeaebea0a",
+          "width": 92,
+          "height": 120,
+          "library": "Monster/000",
+          "index": 78,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/000/79.png",
+          "bytes": 3476,
+          "sha256": "221e9784fc5f08c0a242c0fd5d49e88c8b33d5f5ad37d81d31ecf85c8a76a243",
+          "width": 100,
+          "height": 116,
+          "library": "Monster/000",
+          "index": 79,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/003/32.png",
+          "bytes": 859,
+          "sha256": "93f2d7e5fde6fe39c33f01052f54884869579876a85fc2bda9b85a8b3b82925a",
+          "width": 24,
+          "height": 53,
+          "library": "Monster/003",
+          "index": 32,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/003/33.png",
+          "bytes": 852,
+          "sha256": "ddd8c0c534d89836dff6a0a8b1655118910bd624f91088cb924a50ec20f21450",
+          "width": 24,
+          "height": 53,
+          "library": "Monster/003",
+          "index": 33,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/003/34.png",
+          "bytes": 841,
+          "sha256": "ea4a7cc7cefd3654e5824b384f793892a249cb9e562fa05e11fc43715b59e4d9",
+          "width": 24,
+          "height": 53,
+          "library": "Monster/003",
+          "index": 34,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/003/35.png",
+          "bytes": 845,
+          "sha256": "a0dad6668e9caa774e7be393100fde93153c3d574ff38726cdf311fe288675cf",
+          "width": 24,
+          "height": 53,
+          "library": "Monster/003",
+          "index": 35,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/003/36.png",
+          "bytes": 843,
+          "sha256": "03d2cf3425c8411442364f1d5ec2e90aa3df67d694218359714541e4e3e089a7",
+          "width": 24,
+          "height": 53,
+          "library": "Monster/003",
+          "index": 36,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/003/37.png",
+          "bytes": 851,
+          "sha256": "85c1ac5f36a3cedbc3528b3e00ce655c72d2a915731138281520bbcb397ce1f3",
+          "width": 24,
+          "height": 53,
+          "library": "Monster/003",
+          "index": 37,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/003/38.png",
+          "bytes": 951,
+          "sha256": "4a816f8505a86f1ffb4f00912bce1c3105cedf8b0d0bf836e2f583a5d3d936a6",
+          "width": 44,
+          "height": 49,
+          "library": "Monster/003",
+          "index": 38,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/003/39.png",
+          "bytes": 949,
+          "sha256": "eff45e20c6e12b84a4bf1202010824f3b621403c8b565629ce1021e9742e4487",
+          "width": 44,
+          "height": 49,
+          "library": "Monster/003",
+          "index": 39,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/003/40.png",
+          "bytes": 903,
+          "sha256": "c4fbab5baec13d281c0a99ace5390bb0fb230f3196a0855fb56234189eb9c03a",
+          "width": 44,
+          "height": 49,
+          "library": "Monster/003",
+          "index": 40,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/003/41.png",
+          "bytes": 921,
+          "sha256": "1bde7a78ee0e0bb2b67c8cdfdaab28f9ebfe3898b3f17e8f8be2604efa6fe244",
+          "width": 44,
+          "height": 49,
+          "library": "Monster/003",
+          "index": 41,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/003/42.png",
+          "bytes": 937,
+          "sha256": "c5c5f5994df2b18250cc30136d364bbac7b58279c3df96585f21b3a7bbbfd0f9",
+          "width": 44,
+          "height": 49,
+          "library": "Monster/003",
+          "index": 42,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/003/43.png",
+          "bytes": 929,
+          "sha256": "45822fa22cbf238287bd520b8e8279aa729b1336771efbdc9d87a1991709fc50",
+          "width": 44,
+          "height": 49,
+          "library": "Monster/003",
+          "index": 43,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/003/44.png",
+          "bytes": 925,
+          "sha256": "b4d6943ab945873d025dfe863016eef280c0bb969487deef1412035a3344cbd7",
+          "width": 56,
+          "height": 34,
+          "library": "Monster/003",
+          "index": 44,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/003/45.png",
+          "bytes": 897,
+          "sha256": "efdda602b8a86eacf4a4070a69c53e0cbbe0cce4c815d588faa8f16b00ecbcda",
+          "width": 56,
+          "height": 35,
+          "library": "Monster/003",
+          "index": 45,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/003/46.png",
+          "bytes": 937,
+          "sha256": "33aa7e22260f810396fd0aae406270fe23a1f12b843358d59e281e0dcb612a6d",
+          "width": 56,
+          "height": 34,
+          "library": "Monster/003",
+          "index": 46,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/003/47.png",
+          "bytes": 922,
+          "sha256": "3d719db1296dfe6ff254bac5afbfc2c461433082fe664fe979f61505cfc73cf3",
+          "width": 56,
+          "height": 34,
+          "library": "Monster/003",
+          "index": 47,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/003/48.png",
+          "bytes": 925,
+          "sha256": "f47fe186dcddd564eb42e849eaa69d3ba003e843d91201661740dc4f422f4d5a",
+          "width": 56,
+          "height": 34,
+          "library": "Monster/003",
+          "index": 48,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/003/49.png",
+          "bytes": 895,
+          "sha256": "cf39282d12d6475e20a3ead5e3029e8bacfba634b1fc1cd3634e9e5de04f6df3",
+          "width": 56,
+          "height": 35,
+          "library": "Monster/003",
+          "index": 49,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/003/50.png",
+          "bytes": 718,
+          "sha256": "dd07506d8fcc48c2cc469db7abb940437cef267db26b198b0124116357d24fd2",
+          "width": 48,
+          "height": 31,
+          "library": "Monster/003",
+          "index": 50,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/003/51.png",
+          "bytes": 733,
+          "sha256": "2488a9e63b501906889394b486b580420acab95feffd2454d3488df1d938f622",
+          "width": 48,
+          "height": 30,
+          "library": "Monster/003",
+          "index": 51,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/003/52.png",
+          "bytes": 739,
+          "sha256": "0583dada654a48d1ecbbaaa0c88307af538431824decf8b589d99795395ebd3b",
+          "width": 48,
+          "height": 29,
+          "library": "Monster/003",
+          "index": 52,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/003/53.png",
+          "bytes": 747,
+          "sha256": "bb15910d70c243d4712841e0f91403fac976b294ae315f1c0499f2af0e7113d4",
+          "width": 48,
+          "height": 28,
+          "library": "Monster/003",
+          "index": 53,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/003/54.png",
+          "bytes": 750,
+          "sha256": "8124dc63f598859d1f44f6d9ed253382129f9b1afc87ee394efb135340b9a529",
+          "width": 48,
+          "height": 29,
+          "library": "Monster/003",
+          "index": 54,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/003/55.png",
+          "bytes": 742,
+          "sha256": "723f398533eef151dc072594c83874420ddb69dd970ee32a2c1207c4510a280a",
+          "width": 48,
+          "height": 29,
+          "library": "Monster/003",
+          "index": 55,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/003/56.png",
+          "bytes": 514,
+          "sha256": "05b16b617bfdb0443a73a160562c2b60fa6325ff802277d564a1dee6ca3dd10a",
+          "width": 24,
+          "height": 27,
+          "library": "Monster/003",
+          "index": 56,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/003/57.png",
+          "bytes": 491,
+          "sha256": "53739e96f5cd3cf0d69f296d6780933cd690c83211be4f7cdb28e5fbd363139a",
+          "width": 24,
+          "height": 26,
+          "library": "Monster/003",
+          "index": 57,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/003/58.png",
+          "bytes": 506,
+          "sha256": "86005d1113d7ea62e7d908832209bd7cdd1629539ac81542fce5ec08ddadac63",
+          "width": 24,
+          "height": 26,
+          "library": "Monster/003",
+          "index": 58,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/003/59.png",
+          "bytes": 514,
+          "sha256": "297178f9935046098f644ee1f82e5ef8580550ba0ee030197bc5f70a80e696a7",
+          "width": 24,
+          "height": 27,
+          "library": "Monster/003",
+          "index": 59,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/003/60.png",
+          "bytes": 514,
+          "sha256": "2306c17ddd774376b9517af500ad0700cf6f50e14c2f57c58fffaee50530305a",
+          "width": 24,
+          "height": 27,
+          "library": "Monster/003",
+          "index": 60,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/003/61.png",
+          "bytes": 504,
+          "sha256": "b77e6ded87ae7b2903c372835c9096a33f80802460587c54fb3a89d477fe09c1",
+          "width": 24,
+          "height": 26,
+          "library": "Monster/003",
+          "index": 61,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/003/62.png",
+          "bytes": 692,
+          "sha256": "9614996b7033b35ef4848cd2f620016301e7cd2afcedf6be32f081e4c553c244",
+          "width": 32,
+          "height": 29,
+          "library": "Monster/003",
+          "index": 62,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/003/63.png",
+          "bytes": 611,
+          "sha256": "9f69bbe717f6b1320afacc0fb97a2a1d298150c78f3e74b2345e4d282251bee3",
+          "width": 28,
+          "height": 28,
+          "library": "Monster/003",
+          "index": 63,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/003/64.png",
+          "bytes": 653,
+          "sha256": "78da67db320e37d8ecfbad8c8ea7e9042219a494b0ff5d4d34e66755f6d34322",
+          "width": 32,
+          "height": 29,
+          "library": "Monster/003",
+          "index": 64,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/003/65.png",
+          "bytes": 655,
+          "sha256": "05c00cf4c12379f72727d3161f6ef66ce2f3c3aa992f48a3ee9c759c2d81af2f",
+          "width": 32,
+          "height": 31,
+          "library": "Monster/003",
+          "index": 65,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/003/66.png",
+          "bytes": 652,
+          "sha256": "165f7da403720db2f59c4212370624a6a1a1a9322d34befd70e9cf4cb8622ff1",
+          "width": 32,
+          "height": 31,
+          "library": "Monster/003",
+          "index": 66,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/003/67.png",
+          "bytes": 684,
+          "sha256": "a162f871b46cf397e150c6475d7d29bf9fa342441efd02f17670430d17ab8326",
+          "width": 32,
+          "height": 30,
+          "library": "Monster/003",
+          "index": 67,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/003/68.png",
+          "bytes": 816,
+          "sha256": "793a2f7a2a024ee04a9b50d5a7960ccd80b9ba10b9969fbab2e564bab723f2c6",
+          "width": 40,
+          "height": 33,
+          "library": "Monster/003",
+          "index": 68,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/003/69.png",
+          "bytes": 796,
+          "sha256": "6599506ec641b79775a9f004f5f0e562982a450998d42b4b9d310e03907fe0b1",
+          "width": 40,
+          "height": 34,
+          "library": "Monster/003",
+          "index": 69,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/003/70.png",
+          "bytes": 767,
+          "sha256": "7c26b3e362a3146d4832ca53fcaf5bcb315ff17b3f6801ab68d7c90e85512f93",
+          "width": 40,
+          "height": 33,
+          "library": "Monster/003",
+          "index": 70,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/003/71.png",
+          "bytes": 825,
+          "sha256": "d0a6da10e6143e635e4b30b8fbaa93dff0945197c8d7f912009e037958c34a56",
+          "width": 40,
+          "height": 33,
+          "library": "Monster/003",
+          "index": 71,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/003/72.png",
+          "bytes": 804,
+          "sha256": "39636a2d03b1a57a35771e6cb297265693c6daa2e596c28695118bb39c30d4f2",
+          "width": 40,
+          "height": 33,
+          "library": "Monster/003",
+          "index": 72,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/003/73.png",
+          "bytes": 807,
+          "sha256": "de7492c7447f69575fa770597047e74d8c3d9b61c91750b1201c90ca984a11ba",
+          "width": 40,
+          "height": 34,
+          "library": "Monster/003",
+          "index": 73,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/003/74.png",
+          "bytes": 860,
+          "sha256": "a3d46af2c564efb01de487edd55b12bfdccbcb9e34754d21ca85c25a8fc057c6",
+          "width": 32,
+          "height": 48,
+          "library": "Monster/003",
+          "index": 74,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/003/75.png",
+          "bytes": 830,
+          "sha256": "7bdefb25268a1002218754ce2a6044765fea6fd876c15626749b723fea18e7ea",
+          "width": 28,
+          "height": 48,
+          "library": "Monster/003",
+          "index": 75,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/003/76.png",
+          "bytes": 878,
+          "sha256": "ef0a540584f121ba58cc04d3671e9621de2be9243140dd3d6935e6d510c61853",
+          "width": 32,
+          "height": 48,
+          "library": "Monster/003",
+          "index": 76,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/003/77.png",
+          "bytes": 853,
+          "sha256": "60ff817f34c3527ef74a6ed583baa970dfd9de02b2d381cacfca4f1d28bb4544",
+          "width": 32,
+          "height": 48,
+          "library": "Monster/003",
+          "index": 77,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/003/78.png",
+          "bytes": 861,
+          "sha256": "c72b753ff272e566b3dfc7b5f4b51d013ef2632ea3ac1c75c1e0df92cb73a2c2",
+          "width": 32,
+          "height": 48,
+          "library": "Monster/003",
+          "index": 78,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/003/79.png",
+          "bytes": 831,
+          "sha256": "3211ccebffa11ee0bbd9d8798f0e21664ca470e2f1b5836d67fa2e45a2be2747",
+          "width": 32,
+          "height": 48,
+          "library": "Monster/003",
+          "index": 79,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/004/32.png",
+          "bytes": 2093,
+          "sha256": "167839312eee0a92afcb80441f851207e2d09ab03cb89dd7351c6bc14cfc7649",
+          "width": 60,
+          "height": 84,
+          "library": "Monster/004",
+          "index": 32,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/004/33.png",
+          "bytes": 2100,
+          "sha256": "d3a709ee672c9af52b580616c5004c92090420292d0c733addd9c22ad858ae36",
+          "width": 60,
+          "height": 88,
+          "library": "Monster/004",
+          "index": 33,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/004/34.png",
+          "bytes": 2121,
+          "sha256": "55a31dc47db9f176f597b52e9df82dc8e6bf79305c7d7cc6df0bf6704a399e86",
+          "width": 60,
+          "height": 84,
+          "library": "Monster/004",
+          "index": 34,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/004/35.png",
+          "bytes": 2124,
+          "sha256": "e8eaad9f42e50e25132ac2e25faac58921221ae48bf459b85bb2df2891598333",
+          "width": 60,
+          "height": 84,
+          "library": "Monster/004",
+          "index": 35,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/004/36.png",
+          "bytes": 2127,
+          "sha256": "3eb805372c706a3203207632e2ece28e9b7bcdb5760ba0f6329ec4aa81eeb31d",
+          "width": 60,
+          "height": 88,
+          "library": "Monster/004",
+          "index": 36,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/004/37.png",
+          "bytes": 2147,
+          "sha256": "4f0a5cee42e69b7f32ae7cd5eab9daed4763c5b4850ab8089d766363a1f2ffbb",
+          "width": 60,
+          "height": 84,
+          "library": "Monster/004",
+          "index": 37,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/004/38.png",
+          "bytes": 2439,
+          "sha256": "f9f6bc0d4202c2367fc7ee2c196091ae0117aa529d2cf804d3a28c6f8b355b78",
+          "width": 76,
+          "height": 76,
+          "library": "Monster/004",
+          "index": 38,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/004/39.png",
+          "bytes": 2460,
+          "sha256": "b7258e87e68d0f164853f45900312e50de025df381b04b9f61c9087918755bcc",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/004",
+          "index": 39,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/004/40.png",
+          "bytes": 2463,
+          "sha256": "eba9c19b13a553e6559ecf4984eb4bcef875cd7fac87bbcca3c32318c7b961b5",
+          "width": 76,
+          "height": 76,
+          "library": "Monster/004",
+          "index": 40,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/004/41.png",
+          "bytes": 2472,
+          "sha256": "9d576af23068e7e5dc391c92c051b2d41031a69525290ec9af550e36aa644d64",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/004",
+          "index": 41,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/004/42.png",
+          "bytes": 2414,
+          "sha256": "b57d44db0c9a920e8952679d38787270bc600c56f00185022f2a8c0e84963bbc",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/004",
+          "index": 42,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/004/43.png",
+          "bytes": 2402,
+          "sha256": "218e1f15b2158e77037984d1c66ef72198c71084a154a7d39079d931ae13d817",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/004",
+          "index": 43,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/004/44.png",
+          "bytes": 2452,
+          "sha256": "8a04b4c9bf3cbda33a3149d3dcefbbd4482a3ef314de19dfad80d5deef39c5f8",
+          "width": 92,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 44,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/004/45.png",
+          "bytes": 2491,
+          "sha256": "edbf932ad56f87e8138d5ee66dab7bf3c1099c99fa0232401a88aad5fc05ed6a",
+          "width": 96,
+          "height": 68,
+          "library": "Monster/004",
+          "index": 45,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/004/46.png",
+          "bytes": 2473,
+          "sha256": "6646b76062d9681475031fb0b50d7a6562df8831232c966e013523e9a6ad3417",
+          "width": 92,
+          "height": 68,
+          "library": "Monster/004",
+          "index": 46,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/004/47.png",
+          "bytes": 2470,
+          "sha256": "42bfe976c42b05c0251ab91ac656d878fb26ef086f8291ffca1db8b2da65bade",
+          "width": 92,
+          "height": 68,
+          "library": "Monster/004",
+          "index": 47,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/004/48.png",
+          "bytes": 2467,
+          "sha256": "d125252525baa1a43746974433ee16b6ec19dc6b65b4b4f9b52699acc61696ec",
+          "width": 96,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 48,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/004/49.png",
+          "bytes": 2417,
+          "sha256": "172077718e16e936aa535c807f0fb9f7e54214c759f5f1fb8132d0f85a29fea1",
+          "width": 92,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 49,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/004/50.png",
+          "bytes": 2290,
+          "sha256": "013a29b52066bf33c57f330dd3582e3f95bc35ef4e897336b21fcf5c5d25dbb1",
+          "width": 72,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 50,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/004/51.png",
+          "bytes": 2224,
+          "sha256": "df792026a8d34875f71d286a4dad26feadc0bd39f6d003c3e088fdedbcfa4c56",
+          "width": 76,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 51,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/004/52.png",
+          "bytes": 2159,
+          "sha256": "1f28dbaaa50b7000394f85a7fb015f2f05d2fd6fac424ba2d3c07cafed90e09b",
+          "width": 76,
+          "height": 60,
+          "library": "Monster/004",
+          "index": 52,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/004/53.png",
+          "bytes": 2215,
+          "sha256": "030ef87c359f4a461856637518338e9859614740e33d12f99a1889e4e06c5912",
+          "width": 76,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 53,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/004/54.png",
+          "bytes": 2260,
+          "sha256": "dd8621f98aa5001917020af8d10d487895cdd22b086904fa5857517934a8687d",
+          "width": 80,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 54,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/004/55.png",
+          "bytes": 2236,
+          "sha256": "7d980ba53de9b6d8d31bc8f09ab964f128b7d1d4803035a0fcfa9617b938978b",
+          "width": 76,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 55,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/004/56.png",
+          "bytes": 1591,
+          "sha256": "42bde392b04d8b92dfc7fca40e4c7c19f50b23d00e35482df417681107eaa0fc",
+          "width": 60,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 56,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/004/57.png",
+          "bytes": 1516,
+          "sha256": "1403a8ac1d9f43076db9c7c41d9a05238289e972abe22a9895a9366ba769b330",
+          "width": 60,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 57,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/004/58.png",
+          "bytes": 1520,
+          "sha256": "48a5a37edc8812acb498cd14b32a7a9a0c127d785de3ae3041fa2b278c837122",
+          "width": 60,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 58,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/004/59.png",
+          "bytes": 1628,
+          "sha256": "6da4d8515b5ba907a62b93ab0e837de80ff94d5bcac40ab2f25f454b403b6b07",
+          "width": 60,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 59,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/004/60.png",
+          "bytes": 1568,
+          "sha256": "80865157dfda29844efe14d374d09f3f2dc25431c14ab87adf861115c72b5d8f",
+          "width": 60,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 60,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/004/61.png",
+          "bytes": 1506,
+          "sha256": "292fdd5539f1f6b85b4b2cc7707ba2b82397d28d1f75c9b73af142933585d43d",
+          "width": 60,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 61,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/004/62.png",
+          "bytes": 2058,
+          "sha256": "478adea96d81d8a16ce97095b6f4cc8c4e04420541b8faa2eb7f1b8f89d11731",
+          "width": 64,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 62,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/004/63.png",
+          "bytes": 2012,
+          "sha256": "faf987d42d5406a086dc2f44d3f6afa6e73cae8dda5fdd7a8aed60d2ae3afbe4",
+          "width": 64,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 63,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/004/64.png",
+          "bytes": 2085,
+          "sha256": "3a53bd6ab54b67afbe36e8755f4992c6ba2ab3f00e5a53002260b5127e7e5a68",
+          "width": 64,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 64,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/004/65.png",
+          "bytes": 2173,
+          "sha256": "6d9d65edf817580b1c01a92cdd911aa5ce8758686b6ce9997b0c772db79972bf",
+          "width": 64,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 65,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/004/66.png",
+          "bytes": 2073,
+          "sha256": "b481e4a6046633f44e13abe0732b946ff6b4bc59f49f04afef64b52b8495a165",
+          "width": 64,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 66,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/004/67.png",
+          "bytes": 1980,
+          "sha256": "93caef8b4548337e5465dc56b6357733924bb08f5297e545fafec60624e2ee3e",
+          "width": 64,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 67,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/004/68.png",
+          "bytes": 2364,
+          "sha256": "846962f1356b7aeaac2fa78e2bbe16b8e6379b098cb3869bfed9cd29f0136082",
+          "width": 80,
+          "height": 68,
+          "library": "Monster/004",
+          "index": 68,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/004/69.png",
+          "bytes": 2348,
+          "sha256": "fe95fcd9583a221ca4e9802c1c3a73404d12c94777cc1e094e28d23225b83441",
+          "width": 80,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 69,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/004/70.png",
+          "bytes": 2345,
+          "sha256": "79224b2f36e79cd8ce14a89dcaf7295eb205ee3a6177037ec1b4481552700667",
+          "width": 80,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 70,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/004/71.png",
+          "bytes": 2455,
+          "sha256": "2b152d10c099bc1dbee2b1b4e7e1aaf8e89dee75b87ccacf22054e5df2f805de",
+          "width": 80,
+          "height": 64,
+          "library": "Monster/004",
+          "index": 71,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/004/72.png",
+          "bytes": 2362,
+          "sha256": "4244c875829896aaab9bec34821e02bb033a9c578232692c707c5175593c5b06",
+          "width": 80,
+          "height": 68,
+          "library": "Monster/004",
+          "index": 72,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/004/73.png",
+          "bytes": 2344,
+          "sha256": "5b3c8ce388264bbc70a09fbb5cf1e9e453b37ead5bd1a16f5d124289757f90cd",
+          "width": 80,
+          "height": 68,
+          "library": "Monster/004",
+          "index": 73,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/004/74.png",
+          "bytes": 2311,
+          "sha256": "c0c4343ed904622c6d5c80ee632c9d10508b2dbce8973c41956dbc3c1e31ccb8",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/004",
+          "index": 74,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/004/75.png",
+          "bytes": 2293,
+          "sha256": "f16ba458f8f068c74dc10be06f2213320ca9da6446c4826a14176aed7d3af630",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/004",
+          "index": 75,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/004/76.png",
+          "bytes": 2273,
+          "sha256": "9b10c706e67ff70a2570a9079ab05166897f41f775a5e24fb620fe5b8f8adb04",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/004",
+          "index": 76,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/004/77.png",
+          "bytes": 2345,
+          "sha256": "ce60ac76212199c967ddce4293a6688b4ae372808709f97cec4966a0426d4fa7",
+          "width": 64,
+          "height": 76,
+          "library": "Monster/004",
+          "index": 77,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/004/78.png",
+          "bytes": 2271,
+          "sha256": "94219026c40268ab06a06777dfe24671984ba58cdc50611d90e3406a8318fe18",
+          "width": 64,
+          "height": 76,
+          "library": "Monster/004",
+          "index": 78,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/004/79.png",
+          "bytes": 2366,
+          "sha256": "8a3953dfa3495ae77b4186df9140b8adade1a5bd95e89bda60b2c2664cf2da18",
+          "width": 64,
+          "height": 76,
+          "library": "Monster/004",
+          "index": 79,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/005/32.png",
+          "bytes": 2766,
+          "sha256": "0bc6437bd7eca3008317d7baa2eee98525f5f5252589fafb1461be1d01548290",
+          "width": 76,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 32,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/005/33.png",
+          "bytes": 2860,
+          "sha256": "61855b805b7aef33e4add24818dfc8ae5580cfe61ee4b8aee5da39a2c6c00e08",
+          "width": 80,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 33,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/005/34.png",
+          "bytes": 2790,
+          "sha256": "3ab5bee3aeeecfc253425496d2f844a0aac588a44789aa8bd7f1364695985989",
+          "width": 80,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 34,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/005/35.png",
+          "bytes": 2777,
+          "sha256": "f2d5ba47746154b9ed807cb4c8ea96e1fbb2cec1548fdc06de64f648b27e3c7d",
+          "width": 84,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 35,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/005/36.png",
+          "bytes": 2766,
+          "sha256": "9c1bc7d7a6823bf5c1f059802b80c82ad863852d5bdc03358afa4b88fa28e171",
+          "width": 84,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 36,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/005/37.png",
+          "bytes": 2738,
+          "sha256": "c224072c74732d4a289682be509ec381b80b3f109f797633e1d28d2530cc225b",
+          "width": 80,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 37,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/005/38.png",
+          "bytes": 2907,
+          "sha256": "87a068d98f0a42aec22c06fb1df5f95ef03fdbd324a2dd6d7c67b77d40cd7d28",
+          "width": 84,
+          "height": 88,
+          "library": "Monster/005",
+          "index": 38,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/005/39.png",
+          "bytes": 2853,
+          "sha256": "67b84b161b7259a9195e5678aabb9ddc7ea8241d446ff02a5475c217009bc1fa",
+          "width": 84,
+          "height": 88,
+          "library": "Monster/005",
+          "index": 39,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/005/40.png",
+          "bytes": 2763,
+          "sha256": "cf11018fef42e69ec64defe8a1e25cc126f258d0d0c865ddb37a19f1298155f4",
+          "width": 88,
+          "height": 88,
+          "library": "Monster/005",
+          "index": 40,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/005/41.png",
+          "bytes": 2689,
+          "sha256": "b765a749eb9a7b725e3e69bb7ca306b198ae5dce11dc728f0423da6d576ad65a",
+          "width": 84,
+          "height": 92,
+          "library": "Monster/005",
+          "index": 41,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/005/42.png",
+          "bytes": 2839,
+          "sha256": "590cf0d8f5550be0302094d4658bda89676e5efe7d8ab2d306d6ff681a1e8951",
+          "width": 88,
+          "height": 88,
+          "library": "Monster/005",
+          "index": 42,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/005/43.png",
+          "bytes": 2867,
+          "sha256": "16610ea97210bc5201fd46c39e4f465945a50f9990ed8459db1c326f441ceb6b",
+          "width": 84,
+          "height": 88,
+          "library": "Monster/005",
+          "index": 43,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/005/44.png",
+          "bytes": 2755,
+          "sha256": "73fca95d376873449b8c25c89a97e648e24979f7a755dde2443d63cc99b815f6",
+          "width": 84,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 44,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/005/45.png",
+          "bytes": 2687,
+          "sha256": "c78e82c498af41dce3c838112e60a5c22e261b640c9dc805db2cd8eb132c313c",
+          "width": 84,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 45,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/005/46.png",
+          "bytes": 2706,
+          "sha256": "b50043581093adb897ead33869be252d926863e9813b810f419fbb6d7e8def22",
+          "width": 84,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 46,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/005/47.png",
+          "bytes": 2679,
+          "sha256": "dbbad3a6c9d7f5eaf79f6e06ba46ab1e757de6906fcc6003a5325cbf6861f2df",
+          "width": 80,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 47,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/005/48.png",
+          "bytes": 2619,
+          "sha256": "69cb94119df756ec8d5991a39f0f43948f7106676ef8014066e0d22e010c8dbf",
+          "width": 80,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 48,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/005/49.png",
+          "bytes": 2807,
+          "sha256": "4f070147700e072ef72f34bd095d50ca55ec0eee71f02ef2b293a0c52e5b84aa",
+          "width": 80,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 49,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/005/50.png",
+          "bytes": 2377,
+          "sha256": "1332328630580433925a238c5a1b01a7ea884c8d456285231ea72c3ff7dde4f1",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 50,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/005/51.png",
+          "bytes": 2462,
+          "sha256": "dc0573a06df66d551eef3ce04f3da1820ecf236fe756ab01a342d550c2fa872b",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 51,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/005/52.png",
+          "bytes": 2596,
+          "sha256": "a46e02e990c96aeefb6e201289668bc90fff0842474c3981ffa665306a64add0",
+          "width": 96,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 52,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/005/53.png",
+          "bytes": 2629,
+          "sha256": "7fb5b63759a71eea2d6f36601fc1c672bd79ad11ae44cb42ddc0bd1fdcb92398",
+          "width": 100,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 53,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/005/54.png",
+          "bytes": 2618,
+          "sha256": "90981ec37651a8744e82ac608eeb31bbbd8ca7cc8e59bb9024cd973c4d3dbd48",
+          "width": 100,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 54,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/005/55.png",
+          "bytes": 2548,
+          "sha256": "91feb758121ca6bde70092180d873086774ddbd8f8749204c2284c8e6fbaea97",
+          "width": 96,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 55,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/005/56.png",
+          "bytes": 2459,
+          "sha256": "affb90bab02e82491678f26df96ba0842ca2c977b6ed1bdd049fcbbb2a3910c5",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 56,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/005/57.png",
+          "bytes": 2564,
+          "sha256": "3489866558154c1518de5fc41db3c030f762c1df97009472e598a3922b4c3aa3",
+          "width": 84,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 57,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/005/58.png",
+          "bytes": 2522,
+          "sha256": "dde238501803b7ccea4bcdeec0702e98d427cd7d172f634afc497fc5a423397f",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 58,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/005/59.png",
+          "bytes": 2487,
+          "sha256": "6c7bac9292559758b9ddc4689deb363e8a9341d7fd306e871aff64673fcb812b",
+          "width": 84,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 59,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/005/60.png",
+          "bytes": 2497,
+          "sha256": "63d1576913d0275179bc14b8e67940c62ac8f9655e32cef961c6357dd72d0eb6",
+          "width": 84,
+          "height": 72,
+          "library": "Monster/005",
+          "index": 60,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/005/61.png",
+          "bytes": 2541,
+          "sha256": "fcfb490d49eaba0f4cb414d097d2446c125b0c988208756aa1350acb38200324",
+          "width": 84,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 61,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/005/62.png",
+          "bytes": 2419,
+          "sha256": "eccf351b1aeea41264798c297eeeff805ad507eb5997827b01f7333067017d71",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 62,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/005/63.png",
+          "bytes": 2331,
+          "sha256": "c74cc2a34f595a9869a919633a3e32a07f4ae9905417ca5af32cdcd271fbc2f7",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 63,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/005/64.png",
+          "bytes": 2262,
+          "sha256": "9e850a3c2fee69372a831b0a230d382a5c65cd8287a961d58840c2a3ebf6d13b",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 64,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/005/65.png",
+          "bytes": 2302,
+          "sha256": "d7ed4a328c83c650cb25113d09e2ab0702a75ef8c3f4bdeb252e0e509d8b45c4",
+          "width": 72,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 65,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/005/66.png",
+          "bytes": 2296,
+          "sha256": "b7da8b30938d66d1eccce05a721efc0905bdb68b9424c7bcf046ee84a43ee5c8",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 66,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/005/67.png",
+          "bytes": 2407,
+          "sha256": "9211295500f356122c83b8e3f587a610848b60af2963b505bad50b5b97a80572",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 67,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/005/68.png",
+          "bytes": 2455,
+          "sha256": "3599171aaa072771cd03ddb7fa340db2ca1dcfcdc1033c4d56927f124cef24f2",
+          "width": 68,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 68,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/005/69.png",
+          "bytes": 2288,
+          "sha256": "663fb48d2316c8f0fb8284f665ec1331d4d2f00312115714f8ef09d674db9881",
+          "width": 68,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 69,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/005/70.png",
+          "bytes": 2404,
+          "sha256": "58b506d417e6dccf23cb4ea199c21c4fd5b9fb4e6fbb6732be8d4bf99674f76e",
+          "width": 68,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 70,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/005/71.png",
+          "bytes": 2510,
+          "sha256": "39cfa61ff0ff68dcf575a0727a8309fd537c6fb8c9c2541bb5cd915314e106b7",
+          "width": 64,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 71,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/005/72.png",
+          "bytes": 2257,
+          "sha256": "e64bf1633c435197b2767235076cfdabecb0ca7cd2e9012c520c3c7466626a2a",
+          "width": 64,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 72,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/005/73.png",
+          "bytes": 2366,
+          "sha256": "ea5b0a86910fc674be108293905d6de8695cd552209db916974a5cc5c0517b0f",
+          "width": 68,
+          "height": 76,
+          "library": "Monster/005",
+          "index": 73,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/005/74.png",
+          "bytes": 2533,
+          "sha256": "e41b41419ff26dc2547474091db405a7564614fc71afa51cd2decaf8753bbd48",
+          "width": 68,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 74,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/005/75.png",
+          "bytes": 2697,
+          "sha256": "7d73e8d57f7ff8a53effbefd7406c482a647cdafd0214e93111452a62dfa6705",
+          "width": 72,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 75,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/005/76.png",
+          "bytes": 2816,
+          "sha256": "a07b16fdab239edfeb321d34f214dd22b779cee0fc197af2b903dbe392f54738",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 76,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/005/77.png",
+          "bytes": 2817,
+          "sha256": "7594f6e740b3a835990f332e3002912d8efaec8df45511c0b9ba3c963de182ee",
+          "width": 76,
+          "height": 80,
+          "library": "Monster/005",
+          "index": 77,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/005/78.png",
+          "bytes": 2795,
+          "sha256": "fc0754ef8508c992b1ad3c92212805ed1a2035c58208089242807996d64e657d",
+          "width": 76,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 78,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/005/79.png",
+          "bytes": 2571,
+          "sha256": "d81ad16f3af7fdb454a75baec7e7fd6168b5ecb820ac213ffe43769920563314",
+          "width": 72,
+          "height": 84,
+          "library": "Monster/005",
+          "index": 79,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/139/32.png",
+          "bytes": 2566,
+          "sha256": "890a033139b43389d258846228c23b0836d16f8ffa4227130053d2dd9c921806",
+          "width": 72,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 32,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/33.png",
+          "bytes": 2488,
+          "sha256": "75eb49523fab1f2a4c66e31f227cad531dcbc1815a4d16510a64184092b13b9c",
+          "width": 72,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 33,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/34.png",
+          "bytes": 2517,
+          "sha256": "c1f40f6d1da86caa917bddf3f5b9e29c4cc2e4bfed78357d6321857b25d5698f",
+          "width": 76,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 34,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/35.png",
+          "bytes": 2505,
+          "sha256": "9c1c5e6ac60e4332e56b2b0ffae52e80db0f5b659a967fe086fa454ec0aa1391",
+          "width": 72,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 35,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/36.png",
+          "bytes": 2560,
+          "sha256": "b77413cda04c08453919e4f147f8b9358ce7adef7e595462b6fe6edb109b6a21",
+          "width": 72,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 36,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/37.png",
+          "bytes": 2509,
+          "sha256": "dbf9d0be3d1e6e85e10a97df84556b05650f579752d0362e8b5a7491e207ec7f",
+          "width": 72,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 37,
+          "direction": 0
+        },
+        {
+          "path": "/original-ui/Monster/139/41.png",
+          "bytes": 2373,
+          "sha256": "11915a1f10d35973e09164caccabd874f5c857fc1e0d9c5e0624f515db761750",
+          "width": 76,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 41,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/139/42.png",
+          "bytes": 2290,
+          "sha256": "27b751b19b420a97054b8862f897e1bb7dd883f17fc8356a3aba99aa8da4737a",
+          "width": 72,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 42,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/139/43.png",
+          "bytes": 2217,
+          "sha256": "3c73615f7545b909cfa109f4d6f5a349815dcf418e4cd8e89d6867f25bfffb17",
+          "width": 72,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 43,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/139/44.png",
+          "bytes": 2325,
+          "sha256": "dc0207239dce5074a829cf06e7e59465086bb948c0049dc2a0bf90462168cd5b",
+          "width": 72,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 44,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/139/45.png",
+          "bytes": 2313,
+          "sha256": "31d5cb1488b167cd8070609ecc226a4c3daf65239cdf36255fdf856fda66f521",
+          "width": 72,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 45,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/139/46.png",
+          "bytes": 2389,
+          "sha256": "1d748bdec86454531cc5482b533826e85a5489052dff1207d2b6a4a238949baa",
+          "width": 76,
+          "height": 68,
+          "library": "Monster/139",
+          "index": 46,
+          "direction": 1
+        },
+        {
+          "path": "/original-ui/Monster/139/50.png",
+          "bytes": 2286,
+          "sha256": "3eb855c96dc4415208dc78dd12367b41841d71fe4690227331651cf9dceeeb91",
+          "width": 96,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 50,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/139/51.png",
+          "bytes": 2142,
+          "sha256": "de0deae2783c9c92538dca04b7fba1d4e6dfbd2591a59b06c593a76ba8ac9a10",
+          "width": 92,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 51,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/139/52.png",
+          "bytes": 2118,
+          "sha256": "c2cf3fe969a81be4ed6aed3aadafbad9ce714457893d5e1103f02069474c9718",
+          "width": 88,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 52,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/139/53.png",
+          "bytes": 2179,
+          "sha256": "906db33955ddef0031ceab9129942c5da7488b5b7980c31e408cc0571752eb20",
+          "width": 84,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 53,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/139/54.png",
+          "bytes": 2058,
+          "sha256": "a031bba590dec5cf97601c2f5cf04704f656c604e58108be92470029c0902e46",
+          "width": 92,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 54,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/139/55.png",
+          "bytes": 2197,
+          "sha256": "837de44d6219b9b21187af4d6eae2c03bca6ca4dbb5c59af1d50cfe919bc740b",
+          "width": 92,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 55,
+          "direction": 2
+        },
+        {
+          "path": "/original-ui/Monster/139/59.png",
+          "bytes": 2482,
+          "sha256": "76f2f027a69f65786c76c0c62b718f573c528b09068fdea2a3214ff860dbdf9a",
+          "width": 80,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 59,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/139/60.png",
+          "bytes": 2442,
+          "sha256": "591d2de4a1880b3b4a7b48305ce384db6a8c115bb84189078eb879aa8b06c048",
+          "width": 80,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 60,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/139/61.png",
+          "bytes": 2434,
+          "sha256": "86ad7f4b02ffb690de9a3813e99f76fde21411a028d13e7f4deb71f9fdfc8d10",
+          "width": 80,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 61,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/139/62.png",
+          "bytes": 2375,
+          "sha256": "c1caea89cc3ff6ca174eaa48cb395d8f9eae69401fecce983cd737ffd849e65d",
+          "width": 76,
+          "height": 72,
+          "library": "Monster/139",
+          "index": 62,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/139/63.png",
+          "bytes": 2329,
+          "sha256": "7082de7f9043722daec6620a5ea902fd8c28da17035a84d9dc4dfcc2d794c37e",
+          "width": 76,
+          "height": 68,
+          "library": "Monster/139",
+          "index": 63,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/139/64.png",
+          "bytes": 2337,
+          "sha256": "702fda2391874b292c1186a345406dd721c8c8d4b70bb705fdcbfd24d1d8a352",
+          "width": 76,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 64,
+          "direction": 3
+        },
+        {
+          "path": "/original-ui/Monster/139/68.png",
+          "bytes": 2518,
+          "sha256": "4d51377cfa4899607c3486c695fbda70869951a62ad552ee4f380d4cda02708d",
+          "width": 64,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 68,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/139/69.png",
+          "bytes": 2511,
+          "sha256": "063571da4dbcf26f8da8bc05021ac63afe3416fbd10656206f164c0afd5cf712",
+          "width": 64,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 69,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/139/70.png",
+          "bytes": 2667,
+          "sha256": "bd147ae1793d59a3f9e3c871d69b61c6f2ea588bef355ce70ef0efa81adb2fe9",
+          "width": 64,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 70,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/139/71.png",
+          "bytes": 2613,
+          "sha256": "683f514365999c9f7109b6faa2374e5e52735819a088e213b86326abe22c775c",
+          "width": 64,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 71,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/139/72.png",
+          "bytes": 2573,
+          "sha256": "b56c4e2d80266529ce9ad96ce672070e1d5ee508cb9febf5bdfa44ed26cfea08",
+          "width": 64,
+          "height": 84,
+          "library": "Monster/139",
+          "index": 72,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/139/73.png",
+          "bytes": 2583,
+          "sha256": "c675d579cb395813188bca45034522d7f2a2c700f4a94c1677fb780c966277ce",
+          "width": 64,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 73,
+          "direction": 4
+        },
+        {
+          "path": "/original-ui/Monster/139/77.png",
+          "bytes": 2394,
+          "sha256": "fdfb96c6a08cb35b31eccb3b0583fb5822d83712f7b338ec9d8d5fe26ef432d6",
+          "width": 68,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 77,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/139/78.png",
+          "bytes": 2380,
+          "sha256": "9d66cc0e01a070c106eaf20b2effab3eb28678ff71adfb101c27f729f8558982",
+          "width": 68,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 78,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/139/79.png",
+          "bytes": 2475,
+          "sha256": "0e97a60c447982b8465050e5e1b74bea08329340f99d32a61040ed57e655ccc1",
+          "width": 68,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 79,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/139/80.png",
+          "bytes": 2544,
+          "sha256": "e06f65e1a6cb0870580945cc535997de6834d17d592e39e44d3e434c79d83e98",
+          "width": 72,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 80,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/139/81.png",
+          "bytes": 2491,
+          "sha256": "87098400ccba6427f797010a853d85e015c5d829a55e0ced899b0ef5894c4dbc",
+          "width": 68,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 81,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/139/82.png",
+          "bytes": 2525,
+          "sha256": "87c82cca52ad617841aa955b9ecdb7c55507374b9fa05a7fd0849a3f192b0f9a",
+          "width": 72,
+          "height": 88,
+          "library": "Monster/139",
+          "index": 82,
+          "direction": 5
+        },
+        {
+          "path": "/original-ui/Monster/139/86.png",
+          "bytes": 2473,
+          "sha256": "518f672972ef77d165d566eb877da01293165fd5f69d80e7da9c8046e16730ed",
+          "width": 88,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 86,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/139/87.png",
+          "bytes": 2274,
+          "sha256": "63c1a210553430291411960476fcc323a0317e34cda3cafea4def8a2539fe8fa",
+          "width": 88,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 87,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/139/88.png",
+          "bytes": 2353,
+          "sha256": "845b77303761fba0c44087b51f68eae41c472f80b861e335964a25584f05ae01",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 88,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/139/89.png",
+          "bytes": 2445,
+          "sha256": "abf1eef720dd4fc111ba4d77287792d0a1a090bea073ddbe76286c9dc8155989",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 89,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/139/90.png",
+          "bytes": 2346,
+          "sha256": "023e7842675768b2972d592aa279aa84f0f3f0aac944fedddfdcbc8b8d5cbbb4",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 90,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/139/91.png",
+          "bytes": 2445,
+          "sha256": "878b6f1a398f52579ee711dd3906c0ebd4803830af67de5fd39cd0c9a01c2af2",
+          "width": 88,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 91,
+          "direction": 6
+        },
+        {
+          "path": "/original-ui/Monster/139/95.png",
+          "bytes": 2584,
+          "sha256": "c0426b43f40fb31bcc2fe9420c57c2372c08c2dbcd8c647a6b0080235097b22d",
+          "width": 88,
+          "height": 76,
+          "library": "Monster/139",
+          "index": 95,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/139/96.png",
+          "bytes": 2533,
+          "sha256": "9b9fa8c10b1d5d7f9ea360c6376905159dc42a9a3e7178333992c51c3aa0dab5",
+          "width": 88,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 96,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/139/97.png",
+          "bytes": 2549,
+          "sha256": "757a13fe30a550e1df0e5fd4a45934259c9c1f1c5393eb392ef698c7700861d4",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 97,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/139/98.png",
+          "bytes": 2531,
+          "sha256": "59243ae516270d53402823a76c45ec1b69861fb97d6e17b81c11b26d51e1e204",
+          "width": 88,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 98,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/139/99.png",
+          "bytes": 2494,
+          "sha256": "e32a5f58f36fc24a833ee1ff1a1e3826c0e108e51f473338d11283e59c194dfd",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 99,
+          "direction": 7
+        },
+        {
+          "path": "/original-ui/Monster/139/100.png",
+          "bytes": 2488,
+          "sha256": "6d6ae5a49bf44721efa9cd6a2942ea08d70330e5f0799d9e6fb59b380de1b294",
+          "width": 92,
+          "height": 80,
+          "library": "Monster/139",
+          "index": 100,
+          "direction": 7
+        }
+      ],
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 764839
+        }
+      ]
+    }
+  ],
+  "performedAfterSignedColdBrowser": true,
+  "scope": "Actual deployed names resolved statically from production webpack; full response bytes parsed as static AST/JSON, exact original payload bytes and SHA. No remote code execution; performed after the ordinary cold-browser replay."
+}

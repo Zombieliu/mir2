@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.comparable.combat-contract.v1",
+  "scenario": "dispersed-melee",
+  "attackMode": "all",
+  "spell": "none",
+  "primaryActionKinds": ["attack", "chat"],
+  "expectedPrimaryOffersPerActorPerMinute": 52,
+  "targetBinding": "planned-adjacent-cell-and-current-shared-object-id",
+  "attackTerminalEvidence": {
+    "ownerLocationRequired": true,
+    "allDeclaredPeerAnimationsRequired": true,
+    "targetOutcomeRequired": true,
+    "hitRequiresAttackerBoundStruckAndVictimBoundDamageAndExactHpDelta": true,
+    "explicitMissOrBlockIsValidTerminal": true,
+    "unpairedHpChangeOrAnimationIsInsufficient": true,
+    "ambiguousCompetingDamageIsHardFailure": true
+  },
+  "potions": {
+    "schema": "mir2.comparable.reactive-potions.v1",
+    "itemIndex": 662,
+    "hpTriggerRatio": 0.7,
+    "minIntervalMs": 2000,
+    "maximumInFlightPerActor": 1,
+    "onlyWhenAttackAndChatIdle": true,
+    "primaryOfferWhilePotionPending": "notSent",
+    "ackDeadlineMs": 2500,
+    "stockStateDeadlineMs": 2500,
+    "ordinaryUidAndGridAckRequired": true,
+    "successfulUseMustConsumeExactlyOne": true,
+    "laterHpIncreaseAloneIsNotPotionProof": true,
+    "retryAfterTimeout": false,
+    "restockAllowed": false,
+    "includedInPrimaryOfferDenominator": false,
+    "issuedUseEvidenceFailureIsHardFailure": true
+  },
+  "safety": {
+    "deathEndsStage": true,
+    "debugRespawnAllowed": false,
+    "damageAiRegenOrDropChangesAllowed": false,
+    "finalSaveComparedToLastAuthoritativeState": true,
+    "ordinaryDurabilityAndStockChangesAllowed": true
+  },
+  "capacityClaimAllowed": false
+}

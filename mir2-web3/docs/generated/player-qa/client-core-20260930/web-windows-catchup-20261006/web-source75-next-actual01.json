@@ -1,0 +1,52 @@
+{
+  "owner": "Root Source75",
+  "kind": "Actual closed original strict Next01",
+  "actualExitCode": 0,
+  "originalCallerClosed": true,
+  "originalCallerPostguardPassed": true,
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 85104,
+    "kind": "Root approved original Source75 strict Next01 after focused and adjacent107",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 63539,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source75-storage-prepare-paint-20261012-01/root-approved01/next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "configPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\next-build01-config.json",
+    "bytes": 5322,
+    "sha256": "b638ae210b628e3caed0b2dfd61f4504c6e6f7459d8d9ff9261a5f2f887d69ff"
+  },
+  "inputSnapshotPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-strict-snapshot02.json",
+    "bytes": 19908529,
+    "sha256": "40aecdd1b00c7b5e68e05aa20c56fe468d2f5fa1a452b26069730bda75827616"
+  },
+  "nodeActualProofPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-node-actual02.json",
+    "bytes": 3103,
+    "sha256": "6762c82ebef0f23ff8067b79f52f6c54a9dd84b95c01749503ccaaef81359243"
+  },
+  "outputSnapshotPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\actual-next-output-snapshot01.json",
+    "bytes": 14580728,
+    "sha256": "e8546825ed0b8ef097d4b968f6a5cd91324756d929a811ee41c76bf3e8b75c12"
+  },
+  "outputFiles": 21036,
+  "outputDirectories": 631,
+  "outputBytes": 675059240,
+  "generatedStaticPages13": true,
+  "stderrBytes": 0,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "runtimeLaunched": false,
+  "uiOperated": false
+}

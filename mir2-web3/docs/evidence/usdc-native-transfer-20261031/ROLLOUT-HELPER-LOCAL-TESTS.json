@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.native-usdc-helper-local-tests.v6",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "workflowRunId": "41093332871",
+  "passed": true,
+  "testsExecuted": 45,
+  "suites": [
+    {
+      "receipt": "ROLLOUT-HELPER-BASE-TESTS.json",
+      "testsExecuted": 33,
+      "passed": true,
+      "receiptSha256": "bbed574904f1d1c801b9cfadd93f6f273d0fca154a9d8597e75437fda3bd771c"
+    },
+    {
+      "receipt": "NORMALIZED-PROJECTION-LOCAL-TESTS.json",
+      "testsExecuted": 12,
+      "passed": true,
+      "receiptSha256": "3ea020a36c44dcf9812b09c5b4bfe2394c3ba306306e80f8130a7b862647b491"
+    }
+  ],
+  "executionModel": "separate bounded base guards and normalized-projection suites, bound by the final review; not one simultaneous 45-test invocation",
+  "finalReviewReceipt": "HELPER-PROJECTION-FINAL-REVIEW.json",
+  "finalReviewReceiptSha256": "685b4cebadc81f59a0c7007d2c8f89f114f9839305b00810d89a750d2b70097a",
+  "finalReviewedFileHashes": {
+    "direct-transfer-remote-phases.py": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+    "direct-transfer-coordinate.py": "7cf3f84d95b14cad9bef128180efcf5587f41ed04cbd1e9b409489eb86b69ea5",
+    "forward-clone-replay-20261031.py": "ef4724875e0481c9e359cdbf6b0a189a0a33140fe1584e82fa3122a1fc63fc3b",
+    "test-direct-transfer-deploy.py": "3870565c707b5da5637eaf2d4348e26e4593f7aa284f2bfad4fa9387c11c800a",
+    "test-native-normalized-projection-guard.py": "4c84d0bf75b1a384ff78b6011995e124759eac4ac6ce2c83d56df880488da365",
+    "DIAGNOSTIC-BEFORE-CLONE-PROOF-20261031.json": "e55ed5141a7e2e08ef5bd0c6c49e27019b3c3d767484d2b48ef26beb80fdb5eb"
+  },
+  "remoteExecutionPerformedByTheseLocalTests": false,
+  "docker": false,
+  "scope": "actual helper local tests; live/clone acceptance is recorded separately; historical failed evidence is retained"
+}

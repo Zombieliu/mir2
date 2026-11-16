@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.cloudflare.read-probe-primary-doc-bindings.v1",
+  "readDate": "2026-10-05",
+  "authenticatedRequests": false,
+  "sources": [
+    {
+      "url": "https://developers.cloudflare.com/api/resources/user/subresources/tokens/methods/verify/",
+      "title": "Verify Token — Cloudflare API",
+      "method": "GET",
+      "path": "/client/v4/user/tokens/verify",
+      "usedChecks": ["top-level boolean success", "result object", "result.status equals active"],
+      "discardedFields": ["token identifier", "dates", "errors and messages"],
+      "doesNotProve": "bucket write or Worker edit authority"
+    },
+    {
+      "url": "https://developers.cloudflare.com/api/resources/r2/subresources/buckets/methods/get/",
+      "title": "Get Bucket — Cloudflare API",
+      "method": "GET",
+      "path": "/client/v4/accounts/{account_id}/r2/buckets/{bucket_name}",
+      "usedChecks": ["top-level boolean success", "result object", "result.name equals fixed known bucket"],
+      "discardedFields": ["creation date", "location", "jurisdiction", "storage class", "errors and messages"],
+      "doesNotProve": "R2 object upload, Worker edit or deployment authority"
+    }
+  ],
+  "workerNetworkScope": "official unauthenticated documentation browsing only",
+  "rawApiResponsesRetained": false,
+  "credentialsExamplesCopied": false
+}

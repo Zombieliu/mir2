@@ -1,0 +1,17 @@
+{
+  "kind": "actual-hosted-atlas-reexport-comparison",
+  "passed": true,
+  "oldDurationMs": 20684,
+  "candidateDurationMs": 23093,
+  "canonicalSha256": "ce8783023340d67d50b4ae611af3238462a9876cde37993a565050c763dfa256",
+  "canonicalSizeIndependent": true,
+  "sourceOfTimingRegression": "C:/r16-prewarm-body-20261112/release/metadata-churn.json",
+  "diagnosticManifestKeys": [
+    "checkedAt",
+    "version",
+    "cacheNamespace",
+    "versionSource",
+    "inputs",
+    "remoteAssets"
+  ]
+}

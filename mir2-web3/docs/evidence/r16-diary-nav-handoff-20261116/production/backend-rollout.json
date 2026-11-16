@@ -1,0 +1,31 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "oldSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "passed": true,
+  "rollbackPerformed": false,
+  "databaseRestored": false,
+  "newPid": 1830689,
+  "newBinarySha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+  "onlyChangedEnvironmentKeys": [
+    "MIR2_DEPLOY_REVISION"
+  ],
+  "existingRowsUnchanged": {
+    "accounts": {
+      "rows": 322,
+      "canonicalBytes": 2399289,
+      "sha256": "053be12f66071fb21e215224fb9a9f31f6707ce72d5e2b83a8fb47625ef97836"
+    },
+    "characters": {
+      "rows": 234,
+      "canonicalBytes": 79082,
+      "sha256": "b7bfc17c9549081600689b834955cc8d6b37d2235fd3cb78da655e5c2d2af270"
+    },
+    "character_saves": {
+      "rows": 234,
+      "canonicalBytes": 2711334,
+      "sha256": "5fa9f6d9c5ff0e141b7389fd9d0d828fbaed7649cc9f2be51370b18fa389d7f8"
+    }
+  },
+  "originalConfigurationFilesUnchanged": 24,
+  "observedAtUtc": "2026-11-16T10:29:04.086750+00:00"
+}

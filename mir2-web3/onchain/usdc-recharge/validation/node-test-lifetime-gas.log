@@ -1,0 +1,146 @@
+
+> @mir2/usdc-recharge-chain@0.1.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: configuration only permits the exact official testnet/native USDC domain
+ok 1 - configuration only permits the exact official testnet/native USDC domain
+  ---
+  duration_ms: 0.9979
+  type: 'test'
+  ...
+# Subtest: monetary values preserve u64 precision and reject floating point/ambiguous decimals
+ok 2 - monetary values preserve u64 precision and reject floating point/ambiguous decimals
+  ---
+  duration_ms: 0.1893
+  type: 'test'
+  ...
+# Subtest: BCS invoice and payment event have a frozen field order
+ok 3 - BCS invoice and payment event have a frozen field order
+  ---
+  duration_ms: 1.616
+  type: 'test'
+  ...
+# Subtest: verified paid receipt binds fullnode transaction, sender, BCS event and invoice object
+ok 4 - verified paid receipt binds fullnode transaction, sender, BCS event and invoice object
+  ---
+  duration_ms: 1.0106
+  type: 'test'
+  ...
+# Subtest: unpaid invoice verifies creation and never grants credits
+ok 5 - unpaid invoice verifies creation and never grants credits
+  ---
+  duration_ms: 0.4659
+  type: 'test'
+  ...
+# Subtest: not finalized, missing transaction or missing object remains unknown
+ok 6 - not finalized, missing transaction or missing object remains unknown
+  ---
+  duration_ms: 0.4857
+  type: 'test'
+  ...
+# Subtest: failed create is explicit only after a checkpoint, without issuing a new invoice
+ok 7 - failed create is explicit only after a checkpoint, without issuing a new invoice
+  ---
+  duration_ms: 0.3913
+  type: 'test'
+  ...
+# Subtest: payment receipt rejects forged sender, foreign package, wrong event type and duplicate events
+ok 8 - payment receipt rejects forged sender, foreign package, wrong event type and duplicate events
+  ---
+  duration_ms: 0.8743
+  type: 'test'
+  ...
+# Subtest: payment cannot be replayed for a different order/account/offer/payer/merchant/amount/expiry
+ok 9 - payment cannot be replayed for a different order/account/offer/payer/merchant/amount/expiry
+  ---
+  duration_ms: 0.7744
+  type: 'test'
+  ...
+# Subtest: invoice mutation effects and payment timestamp must match the returned object
+ok 10 - invoice mutation effects and payment timestamp must match the returned object
+  ---
+  duration_ms: 0.8643
+  type: 'test'
+  ...
+# Subtest: a changing fullnode observation does not invent a settlement receipt
+ok 11 - a changing fullnode observation does not invent a settlement receipt
+  ---
+  duration_ms: 0.2693
+  type: 'test'
+  ...
+# Subtest: wallet proof verifies Sui personal-message signature for exactly this address/message
+ok 12 - wallet proof verifies Sui personal-message signature for exactly this address/message
+  ---
+  duration_ms: 17.5308
+  type: 'test'
+  ...
+# Subtest: exact issuer create bytes/signature bind every issued invoice term
+ok 13 - exact issuer create bytes/signature bind every issued invoice term
+  ---
+  duration_ms: 17.903
+  type: 'test'
+  ...
+# Subtest: wallet pay contains exact native USDC split, invoice call and payer change, without issuer gas
+ok 14 - wallet pay contains exact native USDC split, invoice call and payer change, without issuer gas
+  ---
+  duration_ms: 79.9698
+  type: 'test'
+  ...
+# Subtest: coin selection fails closed for insufficient or foreign owned USDC
+ok 15 - coin selection fails closed for insufficient or foreign owned USDC
+  ---
+  duration_ms: 0.8177
+  type: 'test'
+  ...
+# Subtest: CLI returns bounded JSON only and does not expose arbitrary errors or secrets
+ok 16 - CLI returns bounded JSON only and does not expose arbitrary errors or secrets
+  ---
+  duration_ms: 82.3237
+  type: 'test'
+  ...
+# Subtest: issuer gas guard requires an absolute durable path and positive bounded lifetime limit
+ok 17 - issuer gas guard requires an absolute durable path and positive bounded lifetime limit
+  ---
+  duration_ms: 0.2787
+  type: 'test'
+  ...
+# Subtest: exact digest retries survive a subprocess restart without spending another gas slot
+ok 18 - exact digest retries survive a subprocess restart without spending another gas slot
+  ---
+  duration_ms: 44.2527
+  type: 'test'
+  ...
+# Subtest: lifetime reservations are cumulative, not a per-day or per-process counter
+ok 19 - lifetime reservations are cumulative, not a per-day or per-process counter
+  ---
+  duration_ms: 6.9523
+  type: 'test'
+  ...
+# Subtest: a ledger cannot be reused for another domain, issuer, gas budget or widened lifetime cap
+ok 20 - a ledger cannot be reused for another domain, issuer, gas budget or widened lifetime cap
+  ---
+  duration_ms: 4.759
+  type: 'test'
+  ...
+# Subtest: a locked, truncated, corrupt or over-budget ledger fails closed
+ok 21 - a locked, truncated, corrupt or over-budget ledger fails closed
+  ---
+  duration_ms: 4.8037
+  type: 'test'
+  ...
+# Subtest: unknown issuer submission retains its full reservation before exact replay
+ok 22 - unknown issuer submission retains its full reservation before exact replay
+  ---
+  duration_ms: 18.5158
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 526.7674

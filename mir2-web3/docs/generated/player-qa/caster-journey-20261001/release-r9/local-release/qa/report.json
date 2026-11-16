@@ -1,0 +1,28 @@
+{
+  "allNewPayloadHashesVerified": true,
+  "engineRollbackVerified": true,
+  "engineUpdated": true,
+  "failedReleaseQuarantined": true,
+  "gameLaunched": false,
+  "passed": true,
+  "pendingFirstLaunchRetained": true,
+  "requests": [
+    "releases/game-WN-CANDIDATE-20261001-invited-09/BUILD-ATTESTATION.json",
+    "releases/game-WN-CANDIDATE-20261001-invited-09/KNOWN-ISSUES.md",
+    "releases/game-WN-CANDIDATE-20261001-invited-09/MULTILINGUAL-SOURCES.json",
+    "releases/game-WN-CANDIDATE-20261001-invited-09/NotoSansTC-OFL.txt",
+    "releases/game-WN-CANDIDATE-20261001-invited-09/README-START.txt",
+    "releases/game-WN-CANDIDATE-20261001-invited-09/mir2-platform-windows.exe",
+    "releases/updater-00A898666E57DC04-s5/Mir2Updater.exe"
+  ],
+  "result": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261001-invited-09",
+    "changedGameFiles": 6,
+    "downloadedBytes": 112374808,
+    "downloadedFiles": 7,
+    "sequence": 5
+  },
+  "rollback": "WN-CANDIDATE-20261001-invited-08",
+  "unchangedPayloadFiles": 123025
+}

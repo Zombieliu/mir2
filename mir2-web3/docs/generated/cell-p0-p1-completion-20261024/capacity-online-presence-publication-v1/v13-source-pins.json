@@ -1,0 +1,1924 @@
+{
+  "schemaVersion": 1,
+  "mode": "single-stage-diagnostic",
+  "repository": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey",
+  "project": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "driverCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "backendCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "driverAggregate": "cb8c542abdda05a3d6bc2fac7309a14bcb359517cfdb2eae5554e2f708bb03e1",
+  "backendAggregate": "2488e6653a3154dccf112b8b86b721d1a27ad96b9c711359bd9118c4ad1fda81",
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/parse-cache-root-readonly-source-guard-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/parse-cache-root-readonly-source-guard-stdout-v1.log",
+      "bytes": 388,
+      "sha256": "1d94125a8aa9cd5dcd380c171fc2bdb12761e64b0e43bd6bac402f4b1449a29d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/parse-cache-root-readonly-source-guard-v1.mjs",
+      "bytes": 978,
+      "sha256": "fbaad6902a609cc2955e7df116b320766e23b3e734ab10b51db87b4ee004522d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-v1/root-focused-receipt-v1.json",
+      "bytes": 45742,
+      "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+    },
+    {
+      "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\seed_capacity_accounts.exe",
+      "bytes": 67982336,
+      "sha256": "b261ed037a2055e6a10964554a0da8a98719b95b5017317b11e623e0ff622094"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-aoi-received-state-driver-frozen-v1.json",
+      "bytes": 10528,
+      "sha256": "b3b361cd4b39ba19a1fa937f3196be836baffa5ef924a25fafff580821c62268"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-target-waypoint-routing-driver-frozen-v1.json",
+      "bytes": 13577,
+      "sha256": "8c9f3dd42444909ba38a5660bf07b0d1e587cf3ecaec84392b5eab189ccca09b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-target-waypoint-routing-v1\\initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\loopback-multi-source-ip-actual-v1\\actual-receipt-v1.json",
+      "bytes": 2806,
+      "sha256": "f2e83e91709f6714aad48eb2335a49735422df9509a16167ed64032966e8d309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\source-pins-v1.json",
+      "bytes": 81680,
+      "sha256": "df8957e54db89aca08dde6d6b88677e1ee5fd47d09c4fa1d974332171dba026a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\authoring-syntax-v1.json",
+      "bytes": 9298,
+      "sha256": "43ae6104ca938c4d4456977d5a1487a74894d51cc81e966b72d2b112b2af23f2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\check-source-readonly-v1.mjs",
+      "bytes": 2333,
+      "sha256": "9f6f6a3fe2157881c623c516052ba5234da1a3f28bb360534a26e3bb7f22ae1c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\config-100.json",
+      "bytes": 7396,
+      "sha256": "19f4cd3778efd868ec7e2ce18b2e83941096838537d7f544df7d4b583f51e906"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\config-50.json",
+      "bytes": 7603,
+      "sha256": "7bbc77f3a7d57453ca4f08da642f8514be6414126790ca4c651a56adf7b8ccf8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\current-report-contract.mjs",
+      "bytes": 1123,
+      "sha256": "576ca52dbe7c8ac077bdb2dde8ce684f4425d8b494b56946da494838e8e7bd48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\derivation-v1.json",
+      "bytes": 12135,
+      "sha256": "59e5558123707bc35a1f04c054ec09fe3c2410db73bdff25bfe998a1631d1636"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-capacity.mjs",
+      "bytes": 159174,
+      "sha256": "58a12f1246cfa646d424e23d2cd9cead6fee06b39cb5e32db881887b30ad07f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-connect.mjs",
+      "bytes": 2536,
+      "sha256": "2a8ed66172c47384f903c2f4586ac4fcf593fabf3ad88e4c6db1409702327490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-policy.mjs",
+      "bytes": 5786,
+      "sha256": "3e25651096f4ac0d33843a946852203672d9b8e9963254ed54cc029aeb82058a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-input.mjs",
+      "bytes": 7824,
+      "sha256": "c4c9e754709a936b8504e32d1f44fcfa8674d5d6f753d7f396e7fb96e8f37eda"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\finalize-source-pins-v1.mjs",
+      "bytes": 12092,
+      "sha256": "fe1fe43d45d872ad433ca427aed5f54c5f2801e867b7012c2070636bd6e91308"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\monitor-episode.mjs",
+      "bytes": 1174,
+      "sha256": "b0de573783b84d0fbfff081ca007fa85c117772db7512515234d896d1340d982"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\normalized-reader.mjs",
+      "bytes": 6658,
+      "sha256": "cf6f0181cc47045832482aff037a78d18a5a58092fe7015a2fe6813c8f5bca72"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-execution-v1.json",
+      "bytes": 2054,
+      "sha256": "8f897eab19a2e92f40f9c6bd71b2645f20d2bfb7acdf7702db84dba6dc69a214"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stdout-v1.log",
+      "bytes": 1572,
+      "sha256": "767a9d70790fbf27e10a690bb839592c3b74e7654c4ce642c84e900bbb213336"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\prepare-episode.mjs",
+      "bytes": 4783,
+      "sha256": "bb90ce643a07fb1c26acf252f62c247e9e8dbe8fba47947671e4caacd5d62805"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\root-execution-runner-v1.mjs",
+      "bytes": 3028,
+      "sha256": "a8a889c4ccba416c06258e329612ce23fc3bd2e30eaa288be36f029f85663ecb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\run-episode.mjs",
+      "bytes": 26085,
+      "sha256": "e2a9705fc80cef42a2b45f353f80f4f6f60a457f8b0e9322eca0b76432125104"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\scenario-100.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\scenario-50.json",
+      "bytes": 3044,
+      "sha256": "b1507f0347cf497533771ddefce27ae0dc7026dcd1b7fcbc681dfc490e0838e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\store-diagnostics-current-backend.mjs",
+      "bytes": 3761,
+      "sha256": "d78690f017d85c036608de29062934cd1fe34b5e10439b76e25431c450d9a90c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\backend-authority-delta-v1.json",
+      "bytes": 26655,
+      "sha256": "781e4650f53d1e9c94104bbbcce6c0066486e045202b431ff357163436181590"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\source-pins-v1.json",
+      "bytes": 31564,
+      "sha256": "86e8d7403bf44eab464709e409bab3ee8091eef2d92e3f836ad9387e717c85d6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\navigation-workspace-release-reuse-v1\\binding-v1.json",
+      "bytes": 3906,
+      "sha256": "3be096dcf3520a825f71a356ed661b6007ba18a81cd1cac7163902c931dab551"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\backend-source-v5.json",
+      "bytes": 66046,
+      "sha256": "cf2c8e39096e5133dc8cf95045e957b8f81a4e04f626444b5d25c1a015d3f0f7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+      "bytes": 87455744,
+      "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-receipt-v5.json",
+      "bytes": 2263,
+      "sha256": "25c8bd180ad2b0ec63e52b060d5f9b0c8560520c49f951e414fb1a9245820a3a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-release-v5.mjs",
+      "bytes": 6924,
+      "sha256": "193a601a7c598a677dc67e2c5c3fc6b235a0c63f1b81940a18d103a53ea2d02a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\release-v5.json",
+      "bytes": 2275,
+      "sha256": "8272b00152df3bd96902fa7fbaa6a0bb365ca50abd0b9b25ef5fa0d570a1d65c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\root-final-config-v5.json",
+      "bytes": 11996,
+      "sha256": "5165c480baf1d32d9ace65540279e89542fff503b5e71742ae7475e4b8aeaafb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\source-lib-v5.mjs",
+      "bytes": 21520,
+      "sha256": "2e4bb28ba64adb0cdbd930242e9039c8aa1184471de3e30f1e8f8ea08fcad186"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\parse-cache-root-readonly-source-guard-execution-v1.json",
+      "bytes": 1043,
+      "sha256": "8546656bc9548d5c21410f0c3e3665994987fe6e339413ab71fda1272bbe508a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe21-independent-verification-v1\\final-verification.json",
+      "bytes": 458498,
+      "sha256": "7de22a47905e0982c49d8a544f105e0bbee2f3e09833f2a99fa39869f5e5f1ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\backend-library-binding.json",
+      "bytes": 1842,
+      "sha256": "2cdbad67484a7f7affb199e8618d4145503229547b843ceb3d74021321e1d47b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\current-driver-binding.json",
+      "bytes": 2854,
+      "sha256": "5f37cc09140cf340e0995e04a154dd9dfbd14e9c690336304c5219f3341eb56a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\driver-binding-contract.mjs",
+      "bytes": 1623,
+      "sha256": "5da37e3b7eef5c6a1461fe089db087af6fbd97cdf71380d00925e440cc5b5a12"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\driver-evidence-contract.mjs",
+      "bytes": 829,
+      "sha256": "f003a1c819778a792fa8766b4ae6a8862ede5433779dcdcc1c145d4315e97536"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\input-lib.mjs",
+      "bytes": 16970,
+      "sha256": "f84fd2460eb0cc26aef6fd8259ec42d264fc03beb2170332d689a300ae327cb8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\launcher-source-frozen-v1.json",
+      "bytes": 57127,
+      "sha256": "74cb15c4d6b04fce88520d0447c02e2d4e6337659491bc08eaf245867e183183"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\projection-build-source-lib.mjs",
+      "bytes": 176,
+      "sha256": "2565a31dce077a8ffd230953586b12c073ce81c4993a936ebde96d4a78b221ad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "9557bc4e2f07d72a8ab0eb688266986d88b7402cd3ba3c9cde3e0a3fbf844abf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\source-guard-readonly-verification.json",
+      "bytes": 2395,
+      "sha256": "f020759808f61af128c0dfedae92c072366a1e02b9a685ee6bbb9991b70f2b40"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-receipt-v1.json",
+      "bytes": 3129,
+      "sha256": "3f0a16dbf89a1435ad00541ba85d02d27dcd5d7e63e0ecfdfc270240831a6292"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-stdout-v1.log",
+      "bytes": 65264,
+      "sha256": "8f42f04210f9cac7d394d46b2d5fa1f3142a7609e8bf7f582d412e662202a037"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-receipt-v1.json",
+      "bytes": 6449,
+      "sha256": "714a32dad7c2db920db7ecb938b0d0f438d4ffea32ec09b6157c5f5866381eb8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stdout-v1.log",
+      "bytes": 65261,
+      "sha256": "bc642fdc2391da64ea29d5cc5bd10c38f07ece625b08d9a86ff24e5a5b28bb19"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-receipt-v1.json",
+      "bytes": 7372,
+      "sha256": "552c91e2bd67232bf3ba17e06d18698d6ae98bb57197ff6da4cf08c9e2455169"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stdout-v1.log",
+      "bytes": 8360,
+      "sha256": "5086ba7d8288fa086d0955e155b7938faf3d1ad437c7cb833dbde72adc2c22f7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-receipt-v1.json",
+      "bytes": 7108,
+      "sha256": "666662841a185b690908750cd73f216ab91469d5e4f9209deaafc87f80329cb1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stdout-v1.log",
+      "bytes": 265,
+      "sha256": "6c39edda24bb15155abef1f38fcc1d13dd257d4e36164329bc87e376af3ef6bf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stderr-v1.log",
+      "bytes": 53576,
+      "sha256": "52f0fb4e55ce584b2b4e3e9b908cff337419dadca14f36e01ad30aa8a133b986"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "239ee64cc20316d10a533755b1ed095a47af9eeedb11155885aee3627c88a5dd"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stderr-v1.log",
+      "bytes": 43459,
+      "sha256": "6d0e18c6167b8412988e26b590d685a5e1a4be7ab245f0036391435fda5009c5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "426afa70fddbaefba4b85be3788abc48972a1d29b06e8727193c6793c5f9c5f4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "657ac7bd4e4584655a9d1ef0118e670b49dbad85bee0c6030896efde251564d1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "bcc9be1c088e27675c29460d7dcbc46776513d74b9bd58d083b15eb94886869d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stdout-v1.log",
+      "bytes": 394,
+      "sha256": "c44ce87fbfe7842247c3a556c93732fa442d15795e8efd5755a93ff69b1df534"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "eaf453d26d61452cf83bb1f46267978c7c2d5ef1d4229233f44e84ce1fb44d0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "1e6b3e4ff4e591d16d9f85586363aea12209e17f6d9d8e6aa974706667e79c5b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stderr-v1.log",
+      "bytes": 43251,
+      "sha256": "60bbf7d160043efdd45de5c49c62e8b5d274112ad04d63f9bf8ea11ae754dad0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stdout-v1.log",
+      "bytes": 3404,
+      "sha256": "f4bed587dc106f5c0367aeecd1c329d5270d7812aad46250f50fbc7c6b386133"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stdout-v1.log",
+      "bytes": 239,
+      "sha256": "e72e4dc519717f704a6bd3d7eb143bd06267740967ab91f052ae9c5e2ea8292b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "7a2ca59942737ca0c12988b7184289dea241c1d9d34d94c2b5f4dde7026f722e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stdout-v1.log",
+      "bytes": 248,
+      "sha256": "cb5296f3109ad723bc3eece757951ec7843bd8b664402abe427c7a871d0c54be"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stdout-v1.log",
+      "bytes": 243,
+      "sha256": "e6c434507f1a871758cfcd15e9303ba5ce192a2557a660061716210bed4e12fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stdout-v1.log",
+      "bytes": 246,
+      "sha256": "3cb716c470b8f752d514331c5af3e16a135df36943e3431f42aaeea1b9975e0a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "12b4a52631343b15bdaa40906ddcbf24a8cd0880063a751b9b334c20d3080d1d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stdout-v1.log",
+      "bytes": 914,
+      "sha256": "3bd646a4e8620d06541a3a4b2857ae3062254726d015bb1306aac2ed99c56bb7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stderr-v1.log",
+      "bytes": 63970,
+      "sha256": "74cb9a4452be50ae0eafdb7e581e3d7c01a1d267cba0df27eba9240e3de18b64"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stdout-v1.log",
+      "bytes": 2907,
+      "sha256": "a530f1a36ebf60a4a35b602a710c7cd785d592f3eba2565166f736aed30347a6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stdout-v1.log",
+      "bytes": 531,
+      "sha256": "a56156b8c1dfaa36ebec71bbf5e81cfe2d302665e9145e7fc08f0fc8928ea580"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stderr-v1.log",
+      "bytes": 50323,
+      "sha256": "bb0e56ad15840ccce482ad8c3ba0e31208ac1178b0ee9bfd65a07c3e2e828e7d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stdout-v1.log",
+      "bytes": 860,
+      "sha256": "db9ef951c368d2d9231035f6c97a85b1da01d78b65b9584ad0e7ac41100e3ad5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stderr-v1.log",
+      "bytes": 50825,
+      "sha256": "20865a27954dd6d1db7d9503166169bf1a665b6b18ff45f941d3b16071fca232"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stdout-v1.log",
+      "bytes": 595,
+      "sha256": "e21dc1cabc50a8547e7278910a041f14d5e12b436fe2ebad56166b7bf8a14008"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stderr-v1.log",
+      "bytes": 50325,
+      "sha256": "169bebb7548a1383e1cb8ab35252b36775fee4835178febfbf1aa9ae1b87427c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stdout-v1.log",
+      "bytes": 726,
+      "sha256": "39631f063b5d1768f1f2d4ff846d28df524777f231576e52fcec444e9070b401"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\admission-lock-order-stderr-v1.log",
+      "bytes": 53576,
+      "sha256": "61b95cc34e9c07045bce0b1061aabaea2a65107d089cd18aa487e563b350855c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "0090b2b81abd8b261c7c4233026ecd081fc203922d99a9c95b6899cab8972127"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\experience-profile-stderr-v1.log",
+      "bytes": 43459,
+      "sha256": "cd1ba22c2f4af9d18eb6cc5f6b70f74f5c4a03bbee7ceee2a4dd5e50b01549df"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "8512e5025624e4432fa8318eea198b3d880766492166b52448a2bf2b6f9b0fd9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "ddd693c5d735ae9137a9189ed8896643aea51396984fd7d78d6841d2a01cde7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-kill-source-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "cfaf906ece7e8dd7b4be815dd194a9649cf446cc9c4cfa47809eb9240ba7e642"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-kill-source-stdout-v1.log",
+      "bytes": 394,
+      "sha256": "55f2fbb4981db09e9459fd732d9fb94b077ab560322a38963776d6a41eba2581"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "cfaf906ece7e8dd7b4be815dd194a9649cf446cc9c4cfa47809eb9240ba7e642"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "65a8951aa883a801179115f0794146bf4e11345db02de30ee30e3fe3de5190e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-live-overflow-stderr-v1.log",
+      "bytes": 57767,
+      "sha256": "1acaf8de59afedbd55756da3ed217169a7a40a890b5d0e504dda1a37881edb45"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-live-overflow-stdout-v1.log",
+      "bytes": 2162,
+      "sha256": "3f1f908bbdf87b64c3cac2eea2005f1b3a369f1b2d89b01f64281ac354a2327a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-transport-close-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "4eead63c8d0d385ea920b2e4c2ef3a704ddacbd988f9e3a3f9cd229082faca3c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-transport-close-stdout-v1.log",
+      "bytes": 531,
+      "sha256": "83882021c57553faba5e212fe8dff24fdedfae086f301c799fd337f8631a1344"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+      "bytes": 9751,
+      "sha256": "ceed263ddc0eeac5316791d841c129c8f25dd7fccbf84652a34c5c38bf61c856"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 72967,
+      "sha256": "f0cf87ff12371e978d58d655b4ca95f8dd3d23913f043cd2cb5b3ed7eaa8f64a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-authority-parse-cache-v1\\shared_experience_profile.rs.before-cache-v1.txt",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-release-v1\\release-tools-v2.mjs",
+      "bytes": 32590,
+      "sha256": "39f96f673d2d02912a948c0ed8a32be90c6c8ce2a6e3e160c70e7716a0f1a514"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v2\\backend-source-v2.json",
+      "bytes": 48017,
+      "sha256": "d50ba5382ca9f07607f0175120397447358915ecb6076c86ba1220eb8c8cbbad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v2\\build-release-v2.mjs",
+      "bytes": 7019,
+      "sha256": "9a0d0e6bf7748f0b829ac165cb9336c043df56fa49df215428ab81f48ed7fd3e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v2\\source-lib-v2.mjs",
+      "bytes": 20600,
+      "sha256": "8dca84dd5e3d846588cea79c50e2c46d4bb1452b8b553b8648496e4d447060de"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v3\\backend-source-v3.json",
+      "bytes": 56458,
+      "sha256": "bc49d6fe7a3074ed739ce0956c6f87df135a2b9226ed9ed56668df5cfcb50432"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-outbound-batch-release-v1\\bin\\mir2-gateway.exe",
+      "bytes": 87455744,
+      "sha256": "333085f2ab76a2bf13eec9e05d9deadeb243c866e580e169ac0eddbf9807164b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-outbound-batch-release-v1\\build-release-v1.mjs",
+      "bytes": 6658,
+      "sha256": "f44a96d6ae1c6ee21e1e63f8a4c090a5f7fd5056f70ff34312276bd8470f9b8b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\backend-source-v4.json",
+      "bytes": 65936,
+      "sha256": "ba5cdb916e018c0ff9e12e67d4c8c3192ff8846ff564c96d63437daec4ce44f7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1076833,
+      "sha256": "e529e18de8f0f095bcc9ca4bcf260106a0f761d36f54f72bed2606699c552fe5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\scene-effect-runtime.ts",
+      "bytes": 9932,
+      "sha256": "f0637a866dcb695eb27ab8256fd66f6b53dba6e1871518544c16c1ac09776c53"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 39617,
+      "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 157490,
+      "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 292873,
+      "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "bytes": 14738,
+      "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-navigation.mjs",
+      "bytes": 18156,
+      "sha256": "5f17e004728b180a2d260314f21f942d771e3bdf498c37155cd38a6287dd565b"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-observation.mjs",
+      "bytes": 22513,
+      "sha256": "4fe117f3ec511262f38cb63fcb392f4b889c71ae79036803809fed9f4aea41c6"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-owner-action-pose.mjs",
+      "bytes": 8167,
+      "sha256": "500ae71577cb7389f2e6fe1dcbde2e9d468e904e8bc70e01dfc13308b8ced397"
+    }
+  ],
+  "runtimeLibrary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\source-lib-v5.mjs",
+    "bytes": 21520,
+    "sha256": "2e4bb28ba64adb0cdbd930242e9039c8aa1184471de3e30f1e8f8ea08fcad186"
+  },
+  "release": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\release-v5.json",
+    "bytes": 2275,
+    "sha256": "8272b00152df3bd96902fa7fbaa6a0bb365ca50abd0b9b25ef5fa0d570a1d65c"
+  },
+  "backendManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\backend-source-v5.json",
+    "bytes": 66046,
+    "sha256": "cf2c8e39096e5133dc8cf95045e957b8f81a4e04f626444b5d25c1a015d3f0f7"
+  },
+  "formalGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\source-guard-readonly-verification.json",
+    "bytes": 2395,
+    "sha256": "f020759808f61af128c0dfedae92c072366a1e02b9a685ee6bbb9991b70f2b40"
+  },
+  "formalFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\launcher-source-frozen-v1.json",
+    "bytes": 57127,
+    "sha256": "74cb15c4d6b04fce88520d0447c02e2d4e6337659491bc08eaf245867e183183"
+  },
+  "full16Prerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+    "bytes": 9751,
+    "sha256": "ceed263ddc0eeac5316791d841c129c8f25dd7fccbf84652a34c5c38bf61c856"
+  },
+  "probe21Final": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe21-independent-verification-v1\\final-verification.json",
+    "bytes": 458498,
+    "sha256": "7de22a47905e0982c49d8a544f105e0bbee2f3e09833f2a99fa39869f5e5f1ba"
+  },
+  "sceneBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scene-binding.json",
+    "bytes": 6784,
+    "sha256": "9557bc4e2f07d72a8ab0eb688266986d88b7402cd3ba3c9cde3e0a3fbf844abf"
+  },
+  "driverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-aoi-received-state-driver-frozen-v1.json",
+    "bytes": 10528,
+    "sha256": "b3b361cd4b39ba19a1fa937f3196be836baffa5ef924a25fafff580821c62268"
+  },
+  "aclScript": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-target-waypoint-routing-v1\\initialize-fresh-private.ps1",
+    "bytes": 1643,
+    "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+  },
+  "seeder": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\seed_capacity_accounts.exe",
+    "bytes": 67982336,
+    "sha256": "b261ed037a2055e6a10964554a0da8a98719b95b5017317b11e623e0ff622094"
+  },
+  "ordinaryAccountsFreshPerEpisode": true,
+  "noAutomaticEpisodeChaining": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "productionAccepted": false,
+  "sourceFileCount": 158,
+  "canonicalDriverCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "formalAcceptanceEligible": false,
+  "executionKind": "external-derived-diagnostic",
+  "derivedExecutorSourcePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\prepare-episode.mjs",
+      "bytes": 4783,
+      "sha256": "bb90ce643a07fb1c26acf252f62c247e9e8dbe8fba47947671e4caacd5d62805"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\run-episode.mjs",
+      "bytes": 26085,
+      "sha256": "e2a9705fc80cef42a2b45f353f80f4f6f60a457f8b0e9322eca0b76432125104"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-capacity.mjs",
+      "bytes": 159174,
+      "sha256": "58a12f1246cfa646d424e23d2cd9cead6fee06b39cb5e32db881887b30ad07f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-connect.mjs",
+      "bytes": 2536,
+      "sha256": "2a8ed66172c47384f903c2f4586ac4fcf593fabf3ad88e4c6db1409702327490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-policy.mjs",
+      "bytes": 5786,
+      "sha256": "3e25651096f4ac0d33843a946852203672d9b8e9963254ed54cc029aeb82058a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\monitor-episode.mjs",
+      "bytes": 1174,
+      "sha256": "b0de573783b84d0fbfff081ca007fa85c117772db7512515234d896d1340d982"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\current-report-contract.mjs",
+      "bytes": 1123,
+      "sha256": "576ca52dbe7c8ac077bdb2dde8ce684f4425d8b494b56946da494838e8e7bd48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-input.mjs",
+      "bytes": 7824,
+      "sha256": "c4c9e754709a936b8504e32d1f44fcfa8674d5d6f753d7f396e7fb96e8f37eda"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\store-diagnostics-current-backend.mjs",
+      "bytes": 3761,
+      "sha256": "d78690f017d85c036608de29062934cd1fe34b5e10439b76e25431c450d9a90c"
+    }
+  ],
+  "currentOverrides": [
+    "quiescent ordinary full-roster admission with original keepalive/auth/gear",
+    "simultaneous native activation then original settle",
+    "fresh original measured continuous assessment; all measured game SLO false retained without early stop",
+    "unchanged genuine sourceIP25+5/901000ms ledger",
+    "V13 online presence exact-borrow reuse diagnostic; same held-only supply/no purchase/no revive gameplay profile and Gateway-only passive MIR2_GATEWAY_ZONE_DELIVERY_TRACE=1. New actual backend/execution HEAD after b24 requires fresh Root Rust checks/immutable V5 Release; canonical657/nav4ecd/obs+frontendc6 preserved, c6 Node242/focused39/typecheck13/16 explicitly reused. Fresh V13 50 must complete measurement/normal cleanup without hardstop before any100; V12 failed50 grants no eligibility. Original300s measured game SLO record-only and all safety stops retained. No capacity/P0 acceptance."
+  ],
+  "wholeRunContinuityAccepted": false,
+  "loopbackSourceAddressActualEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\loopback-multi-source-ip-actual-v1\\actual-receipt-v1.json",
+    "bytes": 2806,
+    "sha256": "f2e83e91709f6714aad48eb2335a49735422df9509a16167ed64032966e8d309"
+  },
+  "parentDriverCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+  "parentDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-target-waypoint-routing-driver-frozen-v1.json",
+    "bytes": 13577,
+    "sha256": "8c9f3dd42444909ba38a5660bf07b0d1e587cf3ecaec84392b5eab189ccca09b"
+  },
+  "historicalRuntimeLibrary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 72967,
+    "sha256": "f0cf87ff12371e978d58d655b4ca95f8dd3d23913f043cd2cb5b3ed7eaa8f64a"
+  },
+  "actualRuntimeGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-execution-v1.json",
+    "bytes": 2054,
+    "sha256": "8f897eab19a2e92f40f9c6bd71b2645f20d2bfb7acdf7702db84dba6dc69a214"
+  },
+  "currentCanonicalSourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 39617,
+      "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157490,
+      "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 292873,
+      "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "state": "FINAL_ONLINE_PRESENCE_REUSE_DIAGNOSTIC_ONLY",
+  "authorizedActors": [
+    50,
+    100
+  ],
+  "executionCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "historicalBackendCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "historicalBackendManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "historicalRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "backendAuthorityDelta": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\backend-authority-delta-v1.json",
+    "bytes": 26655,
+    "sha256": "781e4650f53d1e9c94104bbbcce6c0066486e045202b431ff357163436181590"
+  },
+  "historicalQualificationScope": "Actual L/C full16 and Probe21 retained as historical producer facts only; no fresh current-cache-backend lifecycle pass is claimed.",
+  "diagnosticSourceBaseline": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\source-pins-v1.json",
+    "bytes": 81680,
+    "sha256": "df8957e54db89aca08dde6d6b88677e1ee5fd47d09c4fa1d974332171dba026a"
+  },
+  "currentSourceQualification": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-v1/root-focused-receipt-v1.json",
+    "bytes": 45742,
+    "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+  },
+  "allSelectedTestsPassed": true,
+  "knownReproducedBaselineFailureCount": 0,
+  "currentBackendQualificationScope": "Fresh Root-selected V5 Rust checks on complete new backend closure, new actual build/immutable Release; exact unchanged c6 Node242/focused39/typecheck validation reused without rerunning JS/TS. No ordinary lifecycle or capacity/P0 qualification.",
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-receipt-v5.json",
+    "bytes": 2263,
+    "sha256": "25c8bd180ad2b0ec63e52b060d5f9b0c8560520c49f951e414fb1a9245820a3a"
+  },
+  "actualRuntimeGuardSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\root-execution-runner-v1.mjs",
+    "bytes": 3028,
+    "sha256": "a8a889c4ccba416c06258e329612ce23fc3bd2e30eaa288be36f029f85663ecb"
+  },
+  "actualRuntimeGuardLogs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stdout-v1.log",
+      "bytes": 1572,
+      "sha256": "767a9d70790fbf27e10a690bb839592c3b74e7654c4ce642c84e900bbb213336"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "currentBackendFocusedRawReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-v1/root-focused-receipt-v1.json",
+    "bytes": 45742,
+    "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+  },
+  "actualCurrentSourceQualification": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-v1/root-focused-receipt-v1.json",
+    "bytes": 45742,
+    "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+  },
+  "diagnosticCandidateOnly": true,
+  "profiling": {
+    "enabledByPackage": false,
+    "scope": "Root may explicitly choose same-process CPU profiling; package never starts a profiler or second episode."
+  },
+  "currentDependencyRegression": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-receipt-v1.json",
+    "bytes": 6449,
+    "sha256": "714a32dad7c2db920db7ecb938b0d0f438d4ffea32ec09b6157c5f5866381eb8"
+  },
+  "navigationDependencies": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2",
+      "relative": "apps/web/scripts/quest-agent/protocol-navigation.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-navigation.mjs",
+      "bytes": 18156,
+      "sha256": "5f17e004728b180a2d260314f21f942d771e3bdf498c37155cd38a6287dd565b",
+      "relative": "apps/web/scripts/quest-agent/test-protocol-navigation.mjs"
+    }
+  ],
+  "expectedHead": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendSourceInputCount": 55,
+  "navigationDependencyCommit": "4ecd237e25858a2080456a2e52d64b9ba0c167cd",
+  "currentBackendValidation": {
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-v1/root-focused-receipt-v1.json",
+      "bytes": 45742,
+      "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+    },
+    "selectedRustTestsPassed": 116,
+    "sourceUnchanged": true,
+    "allSelectedTestsPassed": true,
+    "fresh": true,
+    "reused": false,
+    "rustReexecuted": true,
+    "executionSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+    "sourceInputCount": 55,
+    "results": [
+      {
+        "name": "format",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "rustfmt",
+          "--check",
+          "--edition",
+          "2021",
+          "--config",
+          "skip_children=true",
+          "apps/gateway/src/shared_experience_profiles.rs",
+          "apps/simulation/src/runtime/zone/manager.rs",
+          "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+          "apps/simulation/src/runtime/zone/manager_presence_publication_tests.rs",
+          "apps/simulation/src/runtime/zone/runtime/presence_publication_fixtures.rs",
+          "apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stdout-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "actualTotals": []
+      },
+      {
+        "name": "manager-and-presence",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::zone::manager::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stdout-v1.log",
+          "bytes": 3404,
+          "sha256": "f4bed587dc106f5c0367aeecd1c329d5270d7812aad46250f50fbc7c6b386133"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stderr-v1.log",
+          "bytes": 43251,
+          "sha256": "60bbf7d160043efdd45de5c49c62e8b5d274112ad04d63f9bf8ea11ae754dad0"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 26,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2930
+          }
+        ]
+      },
+      {
+        "name": "zone_partition_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_partition_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stdout-v1.log",
+          "bytes": 595,
+          "sha256": "e21dc1cabc50a8547e7278910a041f14d5e12b436fe2ebad56166b7bf8a14008"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stderr-v1.log",
+          "bytes": 50825,
+          "sha256": "20865a27954dd6d1db7d9503166169bf1a665b6b18ff45f941d3b16071fca232"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "zone_partition_identity_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_partition_identity_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stdout-v1.log",
+          "bytes": 726,
+          "sha256": "39631f063b5d1768f1f2d4ff846d28df524777f231576e52fcec444e9070b401"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stderr-v1.log",
+          "bytes": 50325,
+          "sha256": "169bebb7548a1383e1cb8ab35252b36775fee4835178febfbf1aa9ae1b87427c"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "zone_manager_admission_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_manager_admission_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stdout-v1.log",
+          "bytes": 860,
+          "sha256": "db9ef951c368d2d9231035f6c97a85b1da01d78b65b9584ad0e7ac41100e3ad5"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stderr-v1.log",
+          "bytes": 50323,
+          "sha256": "bb0e56ad15840ccce482ad8c3ba0e31208ac1178b0ee9bfd65a07c3e2e828e7d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 9,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "experience-profile",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::shared_experience_profile::tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stdout-v1.log",
+          "bytes": 2798,
+          "sha256": "426afa70fddbaefba4b85be3788abc48972a1d29b06e8727193c6793c5f9c5f4"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stderr-v1.log",
+          "bytes": 43459,
+          "sha256": "6d0e18c6167b8412988e26b590d685a5e1a4be7ab245f0036391435fda5009c5"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 21,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2935
+          }
+        ]
+      },
+      {
+        "name": "owner-health-live-fork",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owner_health_transaction_fork_carries_fifo_but_checkpoint_never_replays_it",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stdout-v1.log",
+          "bytes": 246,
+          "sha256": "3cb716c470b8f752d514331c5af3e16a135df36943e3431f42aaeea1b9975e0a"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-modes",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_pmode_moves_attacks_searches_and_clears_targets_independently",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stdout-v1.log",
+          "bytes": 248,
+          "sha256": "cb5296f3109ad723bc3eece757951ec7843bd8b664402abe427c7a871d0c54be"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "7a2ca59942737ca0c12988b7184289dea241c1d9d34d94c2b5f4dde7026f722e"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-brown-clock",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_last_hitter_and_brown_have_distinct_strict_deadlines",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stdout-v1.log",
+          "bytes": 239,
+          "sha256": "e72e4dc519717f704a6bd3d7eb143bd06267740967ab91f052ae9c5e2ea8292b"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-owner-death",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_owner_death_kills_pets_and_cancels_all_pending_authority",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stdout-v1.log",
+          "bytes": 243,
+          "sha256": "e6c434507f1a871758cfcd15e9303ba5ce192a2557a660061716210bed4e12fc"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "vampire-death",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "vampire_ai::death_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stdout-v1.log",
+          "bytes": 914,
+          "sha256": "3bd646a4e8620d06541a3a4b2857ae3062254726d015bb1306aac2ed99c56bb7"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "web-live-overflow",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_live_overflow_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stdout-v1.log",
+          "bytes": 2907,
+          "sha256": "a530f1a36ebf60a4a35b602a710c7cd785d592f3eba2565166f736aed30347a6"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stderr-v1.log",
+          "bytes": 63970,
+          "sha256": "74cb9a4452be50ae0eafdb7e581e3d7c01a1d267cba0df27eba9240e3de18b64"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 25,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1244
+          }
+        ]
+      },
+      {
+        "name": "web-transport-close",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_transport_close_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stdout-v1.log",
+          "bytes": 531,
+          "sha256": "a56156b8c1dfaa36ebec71bbf5e81cfe2d302665e9145e7fc08f0fc8928ea580"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1265
+          }
+        ]
+      },
+      {
+        "name": "store-durability",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "config::config_account_store_durability_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stdout-v1.log",
+          "bytes": 368,
+          "sha256": "12b4a52631343b15bdaa40906ddcbf24a8cd0880063a751b9b334c20d3080d1d"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2954
+          }
+        ]
+      },
+      {
+        "name": "guild-clock-store",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stdout-v1.log",
+          "bytes": 218,
+          "sha256": "657ac7bd4e4584655a9d1ef0118e670b49dbad85bee0c6030896efde251564d1"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "admission-lock-order",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stdout-v1.log",
+          "bytes": 253,
+          "sha256": "239ee64cc20316d10a533755b1ed095a47af9eeedb11155885aee3627c88a5dd"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stderr-v1.log",
+          "bytes": 53576,
+          "sha256": "52f0fb4e55ce584b2b4e3e9b908cff337419dadca14f36e01ad30aa8a133b986"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1268
+          }
+        ]
+      },
+      {
+        "name": "kill-award-commit",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stdout-v1.log",
+          "bytes": 215,
+          "sha256": "1e6b3e4ff4e591d16d9f85586363aea12209e17f6d9d8e6aa974706667e79c5b"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "eaf453d26d61452cf83bb1f46267978c7c2d5ef1d4229233f44e84ce1fb44d0c"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1268
+          }
+        ]
+      },
+      {
+        "name": "guild-kill-source",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "guild_kill_source_",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stdout-v1.log",
+          "bytes": 394,
+          "sha256": "c44ce87fbfe7842247c3a556c93732fa442d15795e8efd5755a93ff69b1df534"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "bcc9be1c088e27675c29460d7dcbc46776513d74b9bd58d083b15eb94886869d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1267
+          }
+        ]
+      }
+    ],
+    "scope": "Only the newly executed Root selected Rust checks on the complete new backend closure; historical Rust57 and V4 Rust111 are not reused."
+  },
+  "zoneDeliveryTrace": {
+    "enabled": true,
+    "passiveDiagnosticOnly": true,
+    "gatewayChildEnvironment": {
+      "MIR2_GATEWAY_ZONE_DELIVERY_TRACE": "1"
+    },
+    "recipientScope": "all player recipients",
+    "rawOutput": "private/gateway.stderr.log",
+    "formalCapacityEligible": false,
+    "capacityAccepted": false,
+    "scope": "V13 online presence exact-borrow reuse diagnostic; same held-only supply/no purchase/no revive gameplay profile and Gateway-only passive MIR2_GATEWAY_ZONE_DELIVERY_TRACE=1. New actual backend/execution HEAD after b24 requires fresh Root Rust checks/immutable V5 Release; canonical657/nav4ecd/obs+frontendc6 preserved, c6 Node242/focused39/typecheck13/16 explicitly reused. Fresh V13 50 must complete measurement/normal cleanup without hardstop before any100; V12 failed50 grants no eligibility. Original300s measured game SLO record-only and all safety stops retained. No capacity/P0 acceptance."
+  },
+  "historicalDiagnosticEpisode": null,
+  "diagnosticBaselineCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+  "historicalDependencyRegression": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-receipt-v1.json",
+    "bytes": 3129,
+    "sha256": "3f0a16dbf89a1435ad00541ba85d02d27dcd5d7e63e0ecfdfc270240831a6292"
+  },
+  "currentObservationFrontendQualification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-receipt-v1.json",
+    "bytes": 7372,
+    "sha256": "552c91e2bd67232bf3ba17e06d18698d6ae98bb57197ff6da4cf08c9e2455169"
+  },
+  "currentTypecheckQualification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-receipt-v1.json",
+    "bytes": 7108,
+    "sha256": "666662841a185b690908750cd73f216ab91469d5e4f9209deaafc87f80329cb1"
+  },
+  "observationDependencyCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+  "frontendSourceCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+  "observationSourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "bytes": 14738,
+      "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-observation.mjs",
+      "bytes": 22513,
+      "sha256": "4fe117f3ec511262f38cb63fcb392f4b889c71ae79036803809fed9f4aea41c6"
+    }
+  ],
+  "sourceFrontendPins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1076833,
+      "sha256": "e529e18de8f0f095bcc9ca4bcf260106a0f761d36f54f72bed2606699c552fe5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\scene-effect-runtime.ts",
+      "bytes": 9932,
+      "sha256": "f0637a866dcb695eb27ab8256fd66f6b53dba6e1871518544c16c1ac09776c53"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-owner-action-pose.mjs",
+      "bytes": 8167,
+      "sha256": "500ae71577cb7389f2e6fe1dcbde2e9d468e904e8bc70e01dfc13308b8ced397"
+    }
+  ],
+  "selectedRustTestsPassed": 116,
+  "releaseConfig": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\root-final-config-v5.json",
+    "bytes": 11996,
+    "sha256": "5165c480baf1d32d9ace65540279e89542fff503b5e71742ae7475e4b8aeaafb"
+  },
+  "rustTestsReexecuted": true,
+  "freshNodeTestsPerformed": false,
+  "reusedNodeTestsPassed": 242,
+  "reusedFocusedTestsPassed": 39,
+  "typecheckReexecuted": false,
+  "actualRuntimeGuardCheckerSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\check-source-readonly-v1.mjs",
+    "bytes": 2333,
+    "sha256": "9f6f6a3fe2157881c623c516052ba5234da1a3f28bb360534a26e3bb7f22ae1c"
+  }
+}

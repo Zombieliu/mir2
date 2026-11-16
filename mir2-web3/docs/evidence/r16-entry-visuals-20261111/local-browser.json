@@ -1,0 +1,268 @@
+{
+  "scope": "Exact hosted profile in isolated File loopback, ordinary password login, authoritative StartGame, screenshot and direction key.",
+  "release": "3682477690000060fca9ae54e89ca16f775c2c43",
+  "buildId": "8eS_zZ84shdS5JbVt7FE4",
+  "buildReceiptSha256": "8a84fb27e90d86febb17e10e02d9990f6aa363133463770af22282a08b1aec0d",
+  "assets": {
+    "objects": {
+      "path": "/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json",
+      "bytes": 1185944,
+      "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe",
+      "frames": 90,
+      "compressedBytes": 876665
+    },
+    "actors": {
+      "path": "/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json",
+      "bytes": 885989,
+      "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895",
+      "frames": 419,
+      "compressedBytes": 584991,
+      "libraryCounts": {
+        "CArmour/00": 160,
+        "CHair/00": 160,
+        "NPC/00": 14,
+        "NPC/01": 14,
+        "NPC/03": 14,
+        "NPC/05": 14,
+        "NPC/07": 14,
+        "NPC/11": 14,
+        "NPC/15": 14,
+        "NPC/45": 1
+      }
+    }
+  },
+  "lanes": [
+    {
+      "lane": "packed-visuals-with-raw-and-actor-metadata-blocked",
+      "receiptSha256": "b77766fcacc76ecf93b183feea6577c56427dcbf967031d297c4abf4e7f4caf0",
+      "first": {
+        "objects": 71,
+        "packedObjects": 71,
+        "alphaKeyed": 67,
+        "packedAlphaKeyed": 67,
+        "npcs": 8,
+        "packedNpcs": 8,
+        "self": {
+          "path": "/original-ui/CArmour/00/16.png",
+          "packed": true,
+          "width": 64,
+          "height": 72
+        },
+        "actors": 22,
+        "afterAckMs": 4709
+      },
+      "rawMediaSuccess": 0,
+      "blockedMetadata": 40,
+      "assetsAt": [
+        {
+          "kind": "actors",
+          "bytes": 885989,
+          "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895",
+          "beforeStartAckMs": 11561,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "objects",
+          "bytes": 1185944,
+          "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe",
+          "beforeStartAckMs": 11558,
+          "releaseAfterAckMs": null
+        }
+      ],
+      "walkingBody": {
+        "path": "/original-ui/CArmour/00/44.png",
+        "packed": true,
+        "width": 68,
+        "height": 72
+      },
+      "move": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 289,
+        "y": 616
+      },
+      "stageScreenshotSha256": "2d2d4f962150270312d2f6036571657c2c4b3060089d81d5e35864025853b87e",
+      "afterWalkScreenshotSha256": "0419041f1fc38f448635559c79534d9b4ba7b0b709955c34963b6f26036a1fee",
+      "fixtureUnchanged": true
+    },
+    {
+      "lane": "invalid-visual-packs-use-raw",
+      "receiptSha256": "68e9c57427fb6ed49a27d9f9f580eec329040954cb3ad4eb8f31010472ef7914",
+      "first": {
+        "objects": 71,
+        "packedObjects": 0,
+        "alphaKeyed": 67,
+        "packedAlphaKeyed": 0,
+        "npcs": 8,
+        "packedNpcs": 0,
+        "self": {
+          "path": "/original-ui/CArmour/00/16.png",
+          "packed": false,
+          "width": 64,
+          "height": 72
+        },
+        "actors": 22,
+        "afterAckMs": 789
+      },
+      "rawMediaSuccess": 101,
+      "blockedMetadata": 0,
+      "assetsAt": [
+        {
+          "kind": "actors",
+          "bytes": 885989,
+          "sha256": "83b26ac4ac0f6073f4e75d6f0d6d23ce2c8e1138a091faa4f260b8479aee5e72",
+          "beforeStartAckMs": 12379,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "objects",
+          "bytes": 1185944,
+          "sha256": "d2255d30d8ead194df43571db73827c572d2a82a53fe67f6be5372eb5ed5b40a",
+          "beforeStartAckMs": 12378,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "actors",
+          "bytes": 885989,
+          "sha256": "83b26ac4ac0f6073f4e75d6f0d6d23ce2c8e1138a091faa4f260b8479aee5e72",
+          "beforeStartAckMs": 10292,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "objects",
+          "bytes": 1185944,
+          "sha256": "d2255d30d8ead194df43571db73827c572d2a82a53fe67f6be5372eb5ed5b40a",
+          "beforeStartAckMs": 10290,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "actors",
+          "bytes": 885989,
+          "sha256": "83b26ac4ac0f6073f4e75d6f0d6d23ce2c8e1138a091faa4f260b8479aee5e72",
+          "beforeStartAckMs": -135,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "objects",
+          "bytes": 1185944,
+          "sha256": "d2255d30d8ead194df43571db73827c572d2a82a53fe67f6be5372eb5ed5b40a",
+          "beforeStartAckMs": -136,
+          "releaseAfterAckMs": null
+        }
+      ],
+      "walkingBody": {
+        "path": "/original-ui/CArmour/00/45.png",
+        "packed": false,
+        "width": 60,
+        "height": 72
+      },
+      "move": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 289,
+        "y": 616
+      },
+      "stageScreenshotSha256": "5e8ff77dd562ddf5f958ec66be062756f3ae0f7ac931e0f1881bb86d70e7d8d2",
+      "afterWalkScreenshotSha256": "b0a7c13a07cc83a3a0672e635e85d213f1c5a180f78e9b41c933c807b221cda2",
+      "fixtureUnchanged": true
+    },
+    {
+      "lane": "late-objects-preserve-alpha",
+      "receiptSha256": "6b49aa2096deccea1d325771c25b22abcbb21a144a9bd36d41b5aae1d0e17025",
+      "first": {
+        "objects": 71,
+        "packedObjects": 71,
+        "alphaKeyed": 67,
+        "packedAlphaKeyed": 67,
+        "npcs": 8,
+        "packedNpcs": 8,
+        "self": {
+          "path": "/original-ui/CArmour/00/16.png",
+          "packed": true,
+          "width": 64,
+          "height": 72
+        },
+        "actors": 22,
+        "afterAckMs": 1137
+      },
+      "rawMediaSuccess": 86,
+      "blockedMetadata": 0,
+      "rawBeforeObjects": {
+        "objects": 68,
+        "packedObjects": 0,
+        "keyed": 67,
+        "packedKeyed": 0,
+        "actors": 22,
+        "npcs": 8,
+        "packedNpcs": 8,
+        "self": {
+          "path": "/original-ui/CArmour/00/16.png",
+          "packed": true,
+          "width": 64,
+          "height": 72
+        },
+        "bevyOwnsWorld": false
+      },
+      "assetsAt": [
+        {
+          "kind": "actors",
+          "bytes": 885989,
+          "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895",
+          "beforeStartAckMs": 12177,
+          "releaseAfterAckMs": null
+        },
+        {
+          "kind": "objects",
+          "bytes": 1185944,
+          "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe",
+          "beforeStartAckMs": 12175,
+          "releaseAfterAckMs": 1025
+        }
+      ],
+      "walkingBody": {
+        "path": "/original-ui/CArmour/00/44.png",
+        "packed": true,
+        "width": 68,
+        "height": 72
+      },
+      "move": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 289,
+        "y": 616
+      },
+      "stageScreenshotSha256": "2dc1ec10bf4edb6e201bce79db497ee3f22ecb0e2a14efccb42dc588bd955892",
+      "afterWalkScreenshotSha256": "cda03b8a8e642f9dd3d4fc5906cfc9ca2682330591aa519096e22e67609445cb",
+      "fixtureUnchanged": true
+    }
+  ],
+  "focusedTests": 43,
+  "releaseGuardTests": 68,
+  "historicFrameTest": {
+    "suite": "test-player-frames.mjs",
+    "baselineAndCandidate": {
+      "expected": [
+        0,
+        175
+      ],
+      "actual": [
+        0,
+        351
+      ]
+    }
+  },
+  "baselineLocal": {
+    "proved": true,
+    "objects": 71,
+    "visibleActorLayers": 22,
+    "visibleActorLayersDecodedAfterMove": 3
+  },
+  "geometrySha256": "deae05c691a42b0fd770409743f3ea390eeb9740a4f740081f3a55ddaa59dc54",
+  "alphaAuditSha256": "6092347f1d8fb8a24e3b9b32e6228671f45792df46f6d659a2e73826f1d82f8c"
+}

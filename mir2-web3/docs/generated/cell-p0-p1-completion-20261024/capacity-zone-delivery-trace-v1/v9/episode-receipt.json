@@ -1,0 +1,525 @@
+{
+  "schemaVersion": 1,
+  "mode": "single-stage-diagnostic",
+  "zoneDeliveryTrace": {
+    "enabled": true,
+    "passiveDiagnosticOnly": true,
+    "gatewayChildEnvironment": {
+      "MIR2_GATEWAY_ZONE_DELIVERY_TRACE": "1"
+    },
+    "recipientScope": "all player recipients",
+    "rawOutput": "private/gateway.stderr.log",
+    "formalCapacityEligible": false,
+    "capacityAccepted": false,
+    "scope": "Passive diagnostic trace may affect timing; no formal capacity score or acceptance."
+  },
+  "canonicalDriverCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "currentBackendSourceCommit": "74473d41ff989a36d9697f57ee4d9eb9c86b779a",
+  "currentExecutionSourceCommit": "74473d41ff989a36d9697f57ee4d9eb9c86b779a",
+  "currentBackendValidation": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\root-focused-receipt-v1.json",
+      "bytes": 32091,
+      "sha256": "beb1fd2156956c349517cee09f0b0d019d07148a24f451840710e56c37289d80"
+    },
+    "selectedRustTestsPassed": 55,
+    "sourceUnchanged": true,
+    "allSelectedTestsPassed": true,
+    "scope": "Root fresh nine named checks: actual selected Rust55; no fresh ordinary full lifecycle or capacity acceptance",
+    "results": [
+      {
+        "name": "format",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "rustfmt",
+          "--check",
+          "--edition",
+          "2021",
+          "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v1\\root-format-v2\\sender-fragment.rs",
+          "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v1\\root-format-v2\\routing-trace-fragment.rs",
+          "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v1\\root-format-v2\\tests-tail.rs",
+          "apps/gateway/src/routing/tests/guild_kill_source_tests.rs"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\format-stdout-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "actualTotals": []
+      },
+      {
+        "name": "web-live-overflow",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_live_overflow_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-live-overflow-stdout-v1.log",
+          "bytes": 2687,
+          "sha256": "032edd2d1608d18d548fa26a79290dec37a56f900f300b7fe998500b3aaa45ab"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-live-overflow-stderr-v1.log",
+          "bytes": 63604,
+          "sha256": "2dc4e6b5e80527c2f4c353a6e2a73460007808239c63e84e0428c27515751203"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 23,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1244
+          }
+        ]
+      },
+      {
+        "name": "web-transport-close",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_transport_close_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-transport-close-stdout-v1.log",
+          "bytes": 531,
+          "sha256": "05b8c43a51da2fb7a6ad0ecf1c8697b0b1821278c365584ce12bcd46abf8dc72"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-transport-close-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "bcc9be1c088e27675c29460d7dcbc46776513d74b9bd58d083b15eb94886869d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1263
+          }
+        ]
+      },
+      {
+        "name": "experience-profile",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::shared_experience_profile::tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\experience-profile-stdout-v1.log",
+          "bytes": 2798,
+          "sha256": "b7d6980e617b6239a799bd46797ce7571cc92b3db0d15efb617ed0bbfc51b3e2"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\experience-profile-stderr-v1.log",
+          "bytes": 43459,
+          "sha256": "89a7e8c60b8371237ada27ded7e90fc3053e49d1787d61c0044ada1e65ecf451"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 21,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2925
+          }
+        ]
+      },
+      {
+        "name": "store-durability",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "config::config_account_store_durability_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\store-durability-stdout-v1.log",
+          "bytes": 368,
+          "sha256": "f0e10ce96da1c8ddb7f4b76917ab433a05bf41578ad7946a5cc2520dd70c62d1"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\store-durability-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "7a2ca59942737ca0c12988b7184289dea241c1d9d34d94c2b5f4dde7026f722e"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2944
+          }
+        ]
+      },
+      {
+        "name": "guild-clock-store",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-clock-store-stdout-v1.log",
+          "bytes": 218,
+          "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-clock-store-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "ddd693c5d735ae9137a9189ed8896643aea51396984fd7d78d6841d2a01cde7f"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2945
+          }
+        ]
+      },
+      {
+        "name": "admission-lock-order",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\admission-lock-order-stdout-v1.log",
+          "bytes": 253,
+          "sha256": "6d7171506cbe6074edc66a498904eaa3893d163fa88d9a2c262e072a3e73d4f4"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\admission-lock-order-stderr-v1.log",
+          "bytes": 53576,
+          "sha256": "d97f7f9a12e858c79af0a2b1e6915d055994bd1946487de2d199bd6cedbb0868"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1266
+          }
+        ]
+      },
+      {
+        "name": "kill-award-commit",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\kill-award-commit-stdout-v1.log",
+          "bytes": 215,
+          "sha256": "4b17c46a1167048cb28431360d1addcf9d5816bbcbbba737adb87cfc95ed0a8a"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\kill-award-commit-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "b476576e0f956b68e9c23f3c6c44665c6aac01d7081827917037757ec6260b8d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1266
+          }
+        ]
+      },
+      {
+        "name": "guild-kill-source",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "guild_kill_source_",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-kill-source-stdout-v1.log",
+          "bytes": 394,
+          "sha256": "8d9b71c69e54632edec4542321412e9dd7aa5428170536dc38fbd24ab5c87cd5"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-kill-source-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "c3e0f8a7958ec75bfe7e3423e1947e5bbab42c31d712541457c3d7b7158dd5d0"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1265
+          }
+        ]
+      }
+    ],
+    "freshOrdinaryLifecyclePerformed": false
+  },
+  "historicalFull16": {
+    "passed": true,
+    "runId": "1792989329251-1a7f71f3",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "executionSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "appliesToCurrentBackend": false
+  },
+  "historicalProbe21": {
+    "feasibilityPassed": true,
+    "runId": "1792990526387-b0d2ecc9",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "executionSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "capacityAccepted": false,
+    "appliesToCurrentBackend": false,
+    "scope": "Historical actual L/C Probe21; current passive-trace backend has separate selected Rust55/build evidence, without a fresh lifecycle or raw replay claim"
+  },
+  "derivedExecutorSourcePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\prepare-episode.mjs",
+      "bytes": 4783,
+      "sha256": "bb90ce643a07fb1c26acf252f62c247e9e8dbe8fba47947671e4caacd5d62805"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\diagnostic-capacity.mjs",
+      "bytes": 159174,
+      "sha256": "58a12f1246cfa646d424e23d2cd9cead6fee06b39cb5e32db881887b30ad07f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\diagnostic-connect.mjs",
+      "bytes": 2536,
+      "sha256": "2a8ed66172c47384f903c2f4586ac4fcf593fabf3ad88e4c6db1409702327490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\diagnostic-policy.mjs",
+      "bytes": 5786,
+      "sha256": "3e25651096f4ac0d33843a946852203672d9b8e9963254ed54cc029aeb82058a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\monitor-episode.mjs",
+      "bytes": 1174,
+      "sha256": "b0de573783b84d0fbfff081ca007fa85c117772db7512515234d896d1340d982"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\current-report-contract.mjs",
+      "bytes": 1123,
+      "sha256": "576ca52dbe7c8ac077bdb2dde8ce684f4425d8b494b56946da494838e8e7bd48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\scenario-50.json",
+      "bytes": 3044,
+      "sha256": "b1507f0347cf497533771ddefce27ae0dc7026dcd1b7fcbc681dfc490e0838e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\scenario-100.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\episode-input.mjs",
+      "bytes": 7014,
+      "sha256": "83a7bba7de1394e00bde8242e2f588a3c42f569073c21e1d277533ac2f2c8e3e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\normalized-reader.mjs",
+      "bytes": 4627,
+      "sha256": "340b7595a4c49a279ac3f5df83ee1ab1d67725ee302242ad33e077c5773ed35d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\store-diagnostics-current-backend.mjs",
+      "bytes": 3619,
+      "sha256": "bc8520d2496520b9a53899c6d98f0edfad8de490434c49a6b6147556b893c11f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\finalize-source-pins-v1.mjs",
+      "bytes": 8042,
+      "sha256": "721ff55064579caf2c0dbcb685ff5c1d84854d8359710802c8520a3b31c4517d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\run-episode.mjs",
+      "bytes": 25822,
+      "sha256": "c16d3cad8cfbe6f9cf80e204de9f4112432392bab6d6a7aa0dd0b311706388af"
+    }
+  ],
+  "formalAcceptanceEligible": false,
+  "networkGenerator": "multi-source-local-generator",
+  "sourceAddresses": [
+    "127.0.0.2",
+    "127.0.0.3"
+  ],
+  "wholeRunContinuityAccepted": false,
+  "bootstrapContinuousAcceptance": null,
+  "diagnosticSteadyOnline": null,
+  "measuredSloFailuresRecordOnly": true,
+  "quiescentOrdinaryAdmission": true,
+  "retainedActivityOnlyContinuityFailure": false,
+  "actors": 50,
+  "runId": "1793024911630-059d730c",
+  "wrapperError": null,
+  "stage": null,
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\episode-50\\reports\\1793024911630-059d730c.report.json",
+    "ok": false,
+    "error": "Persistent AOI loss, ghost or duplicate during active load",
+    "highestMeasuredStage": null,
+    "highestPassedStage": null
+  },
+  "declaredButUnexecuted": {
+    "soakSeconds": 3600,
+    "resumeSamples": 1,
+    "saveSamples": 1
+  },
+  "successCallbackSentinel": false,
+  "originalFailedVerdictRetained": false,
+  "expectedFullyMeasuredGameFailure": false,
+  "classification": "partial-or-unsafe-error",
+  "cleanupComplete": true,
+  "eligibleForNextIndependentEpisode": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "productionAccepted": false,
+  "scope": "External derived executor; original L reference declarations, L/C ordinary full16 and Probe21 retained only as historical source basis; current passive-trace backend has focused/build validation and no claimed fresh lifecycle pass. Quiescent ordinary admission; original native settle starts after the full roster. All measured game SLO verdicts, including timeouts, remain original false and record-only; actual safety stops remain fatal. Fresh measured assessor and online counts are separate; no whole-run continuity acceptance. No report rewrite. No automatic next episode. Root must independently check OS absence/ports and safety before launching100."
+}

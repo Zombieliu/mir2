@@ -1,0 +1,12 @@
+{
+  "source": "build-r2.log",
+  "rawSha256": "d458e8ea061e9c253a56da9e00f9897f076f2721e62ca1413e925501d36dd717",
+  "publishedSha256": "7c705004166727966662a4b482d08d8e398f3664343474bad93ea1d0e2e7893a",
+  "formatOnly": true,
+  "changes": [
+    "tabs in leading whitespace expanded to four spaces",
+    "trailing whitespace and extra final blank lines removed",
+    "line endings normalized"
+  ],
+  "rawLogRetainedLocally": true
+}

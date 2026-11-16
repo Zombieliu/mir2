@@ -1,0 +1,263 @@
+[
+  {
+    "label": "before-q",
+    "owner": "bevy",
+    "canvasSelector": "#mir2-web3-canvas",
+    "focus": {
+      "tag": "CANVAS",
+      "id": "mir2-web3-canvas"
+    },
+    "keyboard": {
+      "at": 1794532650729,
+      "actions": [
+        "quests"
+      ],
+      "stage": "dispatch",
+      "reason": "window-action",
+      "accepted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": true,
+      "editable": false,
+      "sceneInteractionReady": true,
+      "gameplayCallbackPresent": true,
+      "defaultPrevented": false,
+      "heroActive": false,
+      "heroTransitioning": false,
+      "heroWorldBlocked": false,
+      "heroLeaseHeld": false
+    },
+    "quest": {
+      "ready": true,
+      "open": false,
+      "generation": 2,
+      "error": null
+    },
+    "hud": {
+      "ready": true,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      }
+    },
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    }
+  },
+  {
+    "label": "after-q",
+    "owner": "bevy",
+    "canvasSelector": "#mir2-web3-canvas",
+    "focus": {
+      "tag": "CANVAS",
+      "id": "mir2-web3-canvas"
+    },
+    "keyboard": {
+      "at": 1794532701050,
+      "actions": [
+        "quests"
+      ],
+      "stage": "dispatch",
+      "reason": "window-action",
+      "accepted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": true,
+      "editable": false,
+      "sceneInteractionReady": true,
+      "gameplayCallbackPresent": true,
+      "defaultPrevented": false,
+      "heroActive": false,
+      "heroTransitioning": false,
+      "heroWorldBlocked": false,
+      "heroLeaseHeld": false
+    },
+    "quest": {
+      "ready": true,
+      "open": true,
+      "generation": 2,
+      "error": null
+    },
+    "hud": {
+      "ready": true,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": true
+      }
+    },
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    }
+  },
+  {
+    "label": "task-text-verified",
+    "owner": "bevy",
+    "canvasSelector": "#mir2-web3-canvas",
+    "focus": {
+      "tag": "CANVAS",
+      "id": "mir2-web3-canvas"
+    },
+    "keyboard": {
+      "at": 1794532701050,
+      "actions": [
+        "quests"
+      ],
+      "stage": "dispatch",
+      "reason": "window-action",
+      "accepted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": true,
+      "editable": false,
+      "sceneInteractionReady": true,
+      "gameplayCallbackPresent": true,
+      "defaultPrevented": false,
+      "heroActive": false,
+      "heroTransitioning": false,
+      "heroWorldBlocked": false,
+      "heroLeaseHeld": false
+    },
+    "quest": {
+      "ready": true,
+      "open": true,
+      "generation": 2,
+      "error": null
+    },
+    "hud": {
+      "ready": true,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": true
+      }
+    },
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    }
+  },
+  {
+    "label": "pixels-captured",
+    "owner": "bevy",
+    "canvasSelector": "#mir2-web3-canvas",
+    "focus": {
+      "tag": "CANVAS",
+      "id": "mir2-web3-canvas"
+    },
+    "keyboard": {
+      "at": 1794532701050,
+      "actions": [
+        "quests"
+      ],
+      "stage": "dispatch",
+      "reason": "window-action",
+      "accepted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": true,
+      "editable": false,
+      "sceneInteractionReady": true,
+      "gameplayCallbackPresent": true,
+      "defaultPrevented": false,
+      "heroActive": false,
+      "heroTransitioning": false,
+      "heroWorldBlocked": false,
+      "heroLeaseHeld": false
+    },
+    "quest": {
+      "ready": true,
+      "open": true,
+      "generation": 2,
+      "error": null
+    },
+    "hud": {
+      "ready": true,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": true
+      }
+    },
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    }
+  },
+  {
+    "label": "after-close",
+    "owner": "bevy",
+    "canvasSelector": "#mir2-web3-canvas",
+    "focus": {
+      "tag": "CANVAS",
+      "id": "mir2-web3-canvas"
+    },
+    "keyboard": {
+      "at": 1794532701309,
+      "actions": [
+        "quests"
+      ],
+      "stage": "dispatch",
+      "reason": "window-action",
+      "accepted": true,
+      "handled": true,
+      "repeat": false,
+      "focused": true,
+      "visible": true,
+      "editable": null,
+      "sceneInteractionReady": true,
+      "gameplayCallbackPresent": true,
+      "defaultPrevented": true,
+      "heroActive": false,
+      "heroTransitioning": false,
+      "heroWorldBlocked": false,
+      "heroLeaseHeld": false
+    },
+    "quest": {
+      "ready": true,
+      "open": false,
+      "generation": 2,
+      "error": null
+    },
+    "hud": {
+      "ready": true,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      }
+    },
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    }
+  }
+]

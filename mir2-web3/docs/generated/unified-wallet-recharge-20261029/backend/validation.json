@@ -1,0 +1,518 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "backend-integration-validation.json",
+    "bytes": 18657,
+    "sha256": "bc0241c33e24d8ff1c526cd0ff126cc2c7862462226971758fa626bf87af6b2c"
+  },
+  "producerReport": {
+    "schema": "mir2.unified-backend-integration-validation.v1",
+    "recordedUtc": "2026-10-29T14:22:54.217325+00:00",
+    "passed": true,
+    "sourcePhase": "Uncommitted merge integration; exact owned source pins below. Coordinator has not yet created the final unified merge commit.",
+    "integrationRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\unified-wallet-recharge-20261029\\mir2-player-journey",
+    "branch": "codex/unified-wallet-recharge-20261029",
+    "head": "b87f4071a2026ce96c85ca746ed69f207887a322",
+    "mergeHead": "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844",
+    "resolvedFiles": 15,
+    "resolvedHunks": 48,
+    "ownedFilesWritten": [
+      {
+        "path": "apps/gateway/src/routing.rs",
+        "rawBytes": 1402357,
+        "rawSha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+        "normalizedLfBytes": 1402357,
+        "normalizedLfSha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06"
+      },
+      {
+        "path": "apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+        "rawBytes": 6217,
+        "rawSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+        "normalizedLfBytes": 6217,
+        "normalizedLfSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5"
+      },
+      {
+        "path": "apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+        "rawBytes": 28829,
+        "rawSha256": "1660fe03c32ce7bf48ef588b3a16ca3e6a54c5472f3a182fd70871f47d610bc9",
+        "normalizedLfBytes": 28829,
+        "normalizedLfSha256": "1660fe03c32ce7bf48ef588b3a16ca3e6a54c5472f3a182fd70871f47d610bc9"
+      },
+      {
+        "path": "apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+        "rawBytes": 13491,
+        "rawSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+        "normalizedLfBytes": 13491,
+        "normalizedLfSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+      },
+      {
+        "path": "apps/simulation/src/billing.rs",
+        "rawBytes": 34629,
+        "rawSha256": "53acf1e6274bc33d26482bb7b7dc6a9b30fd2919bbc3a9ab49b46fbf5f7076ab",
+        "normalizedLfBytes": 34629,
+        "normalizedLfSha256": "53acf1e6274bc33d26482bb7b7dc6a9b30fd2919bbc3a9ab49b46fbf5f7076ab"
+      },
+      {
+        "path": "apps/simulation/src/config.rs",
+        "rawBytes": 341014,
+        "rawSha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+        "normalizedLfBytes": 341014,
+        "normalizedLfSha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0"
+      },
+      {
+        "path": "apps/simulation/src/db_projection.rs",
+        "rawBytes": 34064,
+        "rawSha256": "6c3274681e4a4ea5074e72559b9464a77f9d61dc838125d2d8693613969599d6",
+        "normalizedLfBytes": 34064,
+        "normalizedLfSha256": "6c3274681e4a4ea5074e72559b9464a77f9d61dc838125d2d8693613969599d6"
+      },
+      {
+        "path": "apps/simulation/src/lib.rs",
+        "rawBytes": 7264,
+        "rawSha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780",
+        "normalizedLfBytes": 7264,
+        "normalizedLfSha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780"
+      },
+      {
+        "path": "apps/simulation/src/runtime/inventory.rs",
+        "rawBytes": 192275,
+        "rawSha256": "22d80f4e8ef0240edc3c0918f2b01a96260194419f778f0609a7a24011763f52",
+        "normalizedLfBytes": 192275,
+        "normalizedLfSha256": "22d80f4e8ef0240edc3c0918f2b01a96260194419f778f0609a7a24011763f52"
+      },
+      {
+        "path": "apps/simulation/src/runtime/mod.rs",
+        "rawBytes": 9268,
+        "rawSha256": "3cd0019d808b60fbd106682c2be5c3e0b68e33e683fe065d18d535b2b2730b50",
+        "normalizedLfBytes": 9268,
+        "normalizedLfSha256": "3cd0019d808b60fbd106682c2be5c3e0b68e33e683fe065d18d535b2b2730b50"
+      },
+      {
+        "path": "apps/simulation/src/runtime/production_tests.rs",
+        "rawBytes": 30424,
+        "rawSha256": "347c16bcd4c3ccbe0cd3ac265051c23da3fe15de1319bedec630594549b98b2b",
+        "normalizedLfBytes": 30424,
+        "normalizedLfSha256": "347c16bcd4c3ccbe0cd3ac265051c23da3fe15de1319bedec630594549b98b2b"
+      },
+      {
+        "path": "apps/simulation/src/runtime/save.rs",
+        "rawBytes": 180142,
+        "rawSha256": "cf1d95f16af954d475c9f4afac43b747bccfe4b47379a3d5eeea6bae34cb3779",
+        "normalizedLfBytes": 180142,
+        "normalizedLfSha256": "cf1d95f16af954d475c9f4afac43b747bccfe4b47379a3d5eeea6bae34cb3779"
+      },
+      {
+        "path": "apps/simulation/src/runtime/stones_tests.rs",
+        "rawBytes": 18664,
+        "rawSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f",
+        "normalizedLfBytes": 18664,
+        "normalizedLfSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f"
+      },
+      {
+        "path": "apps/simulation/tests/activities.rs",
+        "rawBytes": 30777,
+        "rawSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29",
+        "normalizedLfBytes": 30777,
+        "normalizedLfSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29"
+      },
+      {
+        "path": "apps/simulation/tests/activities_postgres.rs",
+        "rawBytes": 22788,
+        "rawSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3",
+        "normalizedLfBytes": 22788,
+        "normalizedLfSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3"
+      },
+      {
+        "path": "apps/simulation/src/config_stones.rs",
+        "rawBytes": 8328,
+        "rawSha256": "4d2d00ff5a6f970037cf2a70a22192a56e58bc61c39ce20e6af6ad747ce52316",
+        "normalizedLfBytes": 8328,
+        "normalizedLfSha256": "4d2d00ff5a6f970037cf2a70a22192a56e58bc61c39ce20e6af6ad747ce52316"
+      },
+      {
+        "path": "apps/simulation/src/config_schema_compat_tests.rs",
+        "rawBytes": 8524,
+        "rawSha256": "737e6942890c1a70108688c52d78ca70db4725b0a728fbb3cde4935238a026fb",
+        "normalizedLfBytes": 8524,
+        "normalizedLfSha256": "737e6942890c1a70108688c52d78ca70db4725b0a728fbb3cde4935238a026fb"
+      },
+      {
+        "path": "apps/simulation/src/config_schema_integration_tests.rs",
+        "rawBytes": 10137,
+        "rawSha256": "41af19bbf44943e330ee663f36fa95af044cc3498d8fe6bdbfba9b521e6f9513",
+        "normalizedLfBytes": 10137,
+        "normalizedLfSha256": "41af19bbf44943e330ee663f36fa95af044cc3498d8fe6bdbfba9b521e6f9513"
+      },
+      {
+        "path": "infra/postgres/migrations/0015_sealed_stone_authority.sql",
+        "rawBytes": 518,
+        "rawSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62",
+        "normalizedLfBytes": 518,
+        "normalizedLfSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62"
+      }
+    ],
+    "automaticallyMergedPreservationPins": [
+      {
+        "path": "apps/simulation/src/user_item_uid.rs",
+        "bytes": 43714,
+        "sha256": "b43c34e3d8586e83d7b1e53fd992c1d8ad866f7b88c131038cfa457b41033239"
+      },
+      {
+        "path": "apps/gateway/src/auth.rs",
+        "bytes": 25013,
+        "sha256": "463e66a794fda8fc0fec6c16ccb9f70c52ca9ba368541dbafa297f2853cc519e"
+      },
+      {
+        "path": "apps/gateway/src/channel_identity.rs",
+        "bytes": 44776,
+        "sha256": "f700da34aea7e5e2527d61d40e250d0340c86f9b81d801fc604acd2d8837e978"
+      },
+      {
+        "path": "apps/gateway/src/identity.rs",
+        "bytes": 54623,
+        "sha256": "538a9a4473d789e9a6dd77ead2c8bd7fe9fc3c1b6912ccad3b8a4cc9f1429a73"
+      },
+      {
+        "path": "packages/protocol/src/procurement.rs",
+        "bytes": 11040,
+        "sha256": "685cd01dae73439069cf54e0ebd7df7059ceb97a9106872b001a8ce727ce1e08"
+      },
+      {
+        "path": "infra/postgres/migrations/0017_sealed_stone_authority.sql",
+        "bytes": 528,
+        "sha256": "ffc898518dd9af9420a6bfea30e32393fb05c30a093c4b7a60c6fff69257ff2b"
+      },
+      {
+        "path": "infra/postgres/migrations/0018_procurement_authority_guard.sql",
+        "bytes": 2201,
+        "sha256": "767bed5307ade14cfcb110ee734bdae6a9b41baeb07c8a6a5923ad0deff77471"
+      },
+      {
+        "path": "infra/postgres/migrations/0019_sui_usdc_billing_authority.sql",
+        "bytes": 9118,
+        "sha256": "4099e4723690b0651f47f01759545d9d2e2ace1dd36bb50094c685340e93112a"
+      }
+    ],
+    "preservedSemantics": [
+      "Schema13 USDC/procurement ledgers, workers, immutable terms, pending credit capacity and old-schema field rejection.",
+      "Valid historical schema6 stone/conquest and schema7/8/9 monthly/billing/activity authorities survive upgrades to current13; real mixed schema9 ledgers and stones preserved; forged schema5 stone authority rejected.",
+      "Both immutable sealed-stone migration IDs0015 and0017 retained; same SQL after line-ending normalization. Procurement0018 and USDC0019 anti-erasure/unique receipt guards preserved.",
+      "Durable UID issuer skips the monthly-card replay range.",
+      "Procurement owner authentication/lease and typed attack binding retained; common gateway auth/account-binding code unchanged.",
+      "Three conflict-affected AOI/guild reward routing regression groups passed."
+    ],
+    "cargoCheck": {
+      "passed": true,
+      "command": "cargo +1.95.0 check --locked -p mir2-simulation -p mir2-gateway",
+      "log": {
+        "path": "backend-check-v1.log",
+        "bytes": 70362,
+        "sha256": "f9941e23988bec4a01c4bba899d3c33e831ad828de24e029b412f0e8276202f4"
+      }
+    },
+    "tests": [
+      {
+        "name": "schema",
+        "package": "mir2-simulation",
+        "target": "lib",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-schema-v1.log",
+          "bytes": 50772,
+          "sha256": "002b9eec61651d0a87224d1d560dbfe2aa48c30747079f5223e30e0b4fa31fef"
+        }
+      },
+      {
+        "name": "migration",
+        "package": "mir2-simulation",
+        "target": "lib",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-migration-v2.log",
+          "bytes": 44812,
+          "sha256": "1bd708efc98031739b0b953d1b9ae8eac73aee03ff8d0fda8f4691e402c4a642"
+        }
+      },
+      {
+        "name": "simulation-usdc",
+        "package": "mir2-simulation",
+        "target": "lib",
+        "passed": 21,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-simulation-usdc-v2.log",
+          "bytes": 46785,
+          "sha256": "fd3836efef49b670e91c44cc3e0b8d00002d797b07215a4ce079085d6442de82"
+        }
+      },
+      {
+        "name": "simulation-procurement",
+        "package": "mir2-simulation",
+        "target": "lib",
+        "passed": 54,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-simulation-procurement-v2.log",
+          "bytes": 50070,
+          "sha256": "07aec26b5336a1a197683775a78947a74f27d8c4f912785e484bcf0febaddfe1"
+        }
+      },
+      {
+        "name": "uid-file",
+        "package": "mir2-simulation",
+        "target": "user_item_uid_file",
+        "passed": 18,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-uid-file-v2.log",
+          "bytes": 55988,
+          "sha256": "d6dd17844173c7688e7f5550e30c1386f9a2b451bdb6575e507766e30bc50a61"
+        }
+      },
+      {
+        "name": "billing-recharge",
+        "package": "mir2-simulation",
+        "target": "billing_recharge",
+        "passed": 24,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-billing-recharge-v2.log",
+          "bytes": 56454,
+          "sha256": "bbd1e8eaf51ac07405fe373650834ca41e346c5c2f6fe55c6a4292a37431a29d"
+        }
+      },
+      {
+        "name": "activities",
+        "package": "mir2-simulation",
+        "target": "activities",
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-activities-v2.log",
+          "bytes": 56657,
+          "sha256": "a01c4a40c91d21a7e13e6ecbe6d4b4a95c4290834fbf9e8c97cfb31f841ec0dd"
+        }
+      },
+      {
+        "name": "production",
+        "package": "mir2-simulation",
+        "target": "lib",
+        "passed": 18,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-production-v3.log",
+          "bytes": 46532,
+          "sha256": "dc569b6111c6a86f6a6dd25b6c6fb51005b139a7e04944e38fb6eb64efc6c9dd"
+        }
+      },
+      {
+        "name": "stones",
+        "package": "mir2-simulation",
+        "target": "lib",
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-stones-v3.log",
+          "bytes": 46050,
+          "sha256": "4b1bd6cfb138ed626ac8dcc71f4fee086e465f77ab5fad0d3b965a2da9032c59"
+        }
+      },
+      {
+        "name": "gateway-identity",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 47,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-gateway-identity-v3.log",
+          "bytes": 68649,
+          "sha256": "6fb00e023380fdac3f7546ade857b36055ff71833e1709dd921f0328b437ab26"
+        }
+      },
+      {
+        "name": "gateway-auth",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-gateway-auth-v3.log",
+          "bytes": 58523,
+          "sha256": "9da49721f3e841bd0a0d149144ee9cc8617d70d8038e58ec7fdccfb3a1280859"
+        }
+      },
+      {
+        "name": "gateway-usdc",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-gateway-usdc-v3.log",
+          "bytes": 59014,
+          "sha256": "2e73cc71df12c0d17077fe774b493e512d3c30974f1b800fbac45dc5010fac94"
+        }
+      },
+      {
+        "name": "gateway-procurement-worker",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-gateway-procurement-worker-v3.log",
+          "bytes": 59032,
+          "sha256": "d880c53512018c5c994ec8cb13d241623cd9ab63868c4ee93aa875bb44469d03"
+        }
+      },
+      {
+        "name": "guild-kill-source",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-guild-kill-source-v3.log",
+          "bytes": 58022,
+          "sha256": "da2de9637c0e3285d79de7c0ef7143fd51f4639e2ec335adc1df3efb1d1be953"
+        }
+      },
+      {
+        "name": "live-aoi",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-live-aoi-v3.log",
+          "bytes": 59563,
+          "sha256": "8e1ba42e3443f6b08cead8c709887f1d6a34c94d114d393b1732bb5cc13e966a"
+        }
+      },
+      {
+        "name": "pending-aoi",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-pending-aoi-v3.log",
+          "bytes": 58000,
+          "sha256": "bda3adb6ebabf8e995914a970ff2098d723b1f68858e47ed77e70c48e5949a58"
+        }
+      },
+      {
+        "name": "attack-binding",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-attack-binding-v3.log",
+          "bytes": 57842,
+          "sha256": "5c2e256fef26a189de9261b1a7e05475d2b4b96d665fc2bddd48479878e51891"
+        }
+      },
+      {
+        "name": "protocol",
+        "package": "mir2-protocol",
+        "target": "lib",
+        "passed": 75,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-protocol-v3.log",
+          "bytes": 6507,
+          "sha256": "5e83575f0e89bc50e29cc5f376aa1f3d1bf7f1a425fd45c6a5f123de46636c10"
+        }
+      },
+      {
+        "name": "web-usdc",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-web-usdc-v2.log",
+          "bytes": 58031,
+          "sha256": "bc0049335d83005f10e21bcb0bdf9e6baecd2a542db8c8fba78813fa752ec76b"
+        }
+      },
+      {
+        "name": "web-procurement",
+        "package": "mir2-gateway",
+        "target": "lib",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "log": {
+          "path": "backend-test-web-procurement-v1.log",
+          "bytes": 58017,
+          "sha256": "22c0b4e5ebf367a4ab5347a4bad46499bcbe43bd89ea5a2a071db1d9d8772b62"
+        }
+      }
+    ],
+    "reportedSuccessfulCasesAcrossCommands": 365,
+    "uniqueSuccessfulTestIdentities": 359,
+    "successfulHarnessLinesIncludingChildRepeats": 365,
+    "countingPolicy": "Per-command counts can overlap. Unique identities deduplicate package + target + full Rust test name, including UID subprocess probes and overlapping identity/attack filters. Protocol includes41 library plus34 roundtrip cases; doc-tests contain0 cases.",
+    "postgresCompileOnly": {
+      "passed": true,
+      "command": "cargo +1.95.0 test --locked -p mir2-simulation --test activities_postgres --no-run",
+      "log": {
+        "path": "backend-test-activities-pg-compile-only-v1.log",
+        "bytes": 54225,
+        "sha256": "dec47ccac033bb1bda43b7da1c40ed81efb224714e481be809dfbe5a5e3f3bf2"
+      },
+      "executed": false
+    },
+    "verificationBoundaries": {
+      "livePostgresExecuted": false,
+      "liveChainTransactions": false,
+      "liveGatewayOrGameServiceStarted": false,
+      "dockerUsed": false,
+      "originalEOrCWorktreesModified": false,
+      "gitAddOrCommitPerformed": false,
+      "humanOrWindowsUnifiedAcceptanceClaimed": false
+    },
+    "historicalAttempts": [
+      "backend-test-migration-v1.log: new alias-identity test initially compared LF/CRLF raw strings. Test now normalizes only Windows newlines; production SQL unchanged.",
+      "backend-test-production-v2.log,backend-test-stones-v2.log,backend-test-web-usdc-v1.log: initial filter selected0 cases. Corrected filters above executed actual18,14,3 cases; zero-case runs are not counted."
+    ],
+    "decisionEvidence": {
+      "path": "backend-resolution-decisions.json",
+      "bytes": 2442,
+      "sha256": "516a0d98e637bce0bd8e5332d1d71d4fe382d2478cc57bb3583c991e5524ca6c"
+    },
+    "remaining": [
+      "Coordinator source review/staging/final merge commit and frontend/SDK integration.",
+      "Native PostgreSQL/multi-host cutover not executed; no DB deployment claimed.",
+      "Unified Windows wallet QR login and recharge UI/service acceptance must use the final unified build; no direct Game launch substitute."
+    ]
+  },
+  "phase": "pre-merge-commit module validation retained verbatim; backend source unchanged by procurement UI fix",
+  "committedMergeRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+  "finalGameRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536"
+}

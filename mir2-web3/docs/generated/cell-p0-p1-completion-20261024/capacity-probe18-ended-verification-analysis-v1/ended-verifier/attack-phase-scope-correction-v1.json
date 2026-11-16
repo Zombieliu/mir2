@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T22:18:47.011Z",
+  "runId": "1792965008290-fc5e2eed",
+  "scope": "Precise naming correction only, using the peer analysis of its existing single raw scan. No additional raw read, verifier replay, source edit or verdict change.",
+  "originalFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-actual-terminal-independent-facts-v1.json",
+    "bytes": 10133,
+    "sha256": "ef3a0ec4f8f5cf69e2bcfa0e73bfc96041074de60d3383852527d676eec6cdf3"
+  },
+  "independentEndedResult": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+    "bytes": 437094,
+    "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+  },
+  "supportingPhaseScopeCorrection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\scope-correction-v1.json",
+    "bytes": 1262,
+    "sha256": "1dbabd71a481f15bee248cd9373e438ee49f02f4d2398e9466b74c299656edac"
+  },
+  "oldField": {
+    "path": "attackCounts.bootstrapOrRamp",
+    "value": 5,
+    "description": "The field name is overbroad; it must not be interpreted as five ramp-phase attacks."
+  },
+  "correctedField": {
+    "path": "attackCounts.settle",
+    "value": 5,
+    "meaning": "All five measurement-external attack action rows have phase settle; five launched and positive hits. This is the stable preparation segment, not the measured stages and not ramp."
+  },
+  "countsUnchanged": {
+    "wholeRun": 358,
+    "measurementPhases": 353,
+    "stage10": 166,
+    "soak": 187,
+    "measurementExternal": 5
+  },
+  "verdictUnchanged": {
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "capacityAccepted": false
+  },
+  "finalReceiptTextBoundary": "The final ended receipt contains authentic bootstrap phase-brackets and continuous-window phases arrays that include ramp/settle, but does not label these five attacks as ramp. Those authentic source-derived phase arrays are retained unchanged.",
+  "originalFactsPreserved": true,
+  "originalEndedReceiptPreserved": true,
+  "perRequest900msReplayPerformed": false
+}

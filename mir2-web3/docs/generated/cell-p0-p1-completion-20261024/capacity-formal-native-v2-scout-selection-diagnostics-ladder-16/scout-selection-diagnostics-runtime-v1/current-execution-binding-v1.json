@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_REUSED_C743_RELEASE_AND_CURRENT_NODE9",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "backendSourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "driverFrozenManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "currentFullRegression": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5162,
+    "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+  },
+  "rebuildPerformed": false,
+  "realmStarted": false
+}

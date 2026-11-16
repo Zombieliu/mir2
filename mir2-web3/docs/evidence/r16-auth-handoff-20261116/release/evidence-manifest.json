@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "name": "release-pin.json",
+      "bytes": 1046,
+      "sha256": "ea54cdd277d271146f38b5a875fee18fe8228e7823ea8dd64b314c860fc14574",
+      "sourceSha256": "ea54cdd277d271146f38b5a875fee18fe8228e7823ea8dd64b314c860fc14574"
+    },
+    {
+      "name": "source-closure.json",
+      "bytes": 88815,
+      "sha256": "4defbe908ffcc41628140a7d0b91ee36c0a3de9b5946ab4c08daabf4ed496bf5",
+      "sourceSha256": "4defbe908ffcc41628140a7d0b91ee36c0a3de9b5946ab4c08daabf4ed496bf5"
+    },
+    {
+      "name": "baseline-readback.json",
+      "bytes": 853,
+      "sha256": "f1f8f51a798ed9deafdb5a52a3eae44871bb64df2dc61890a40cfdc57cbd880f",
+      "sourceSha256": "f1f8f51a798ed9deafdb5a52a3eae44871bb64df2dc61890a40cfdc57cbd880f"
+    },
+    {
+      "name": "release-guards.log",
+      "bytes": 23921,
+      "sha256": "357c0635431ec2a933eae78a77b94771aa7ac7d9150ed153fcf814c089e523d7",
+      "sourceSha256": "ba457d2200b3416793d977e86ec65988e5da32f57603c0723a5a48dabd0d5946"
+    }
+  ],
+  "productionTrafficChanged": false,
+  "backendRun": 43809422151,
+  "backendStateAtPin": "in-progress-not-qualified",
+  "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6"
+}

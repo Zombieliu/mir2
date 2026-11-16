@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T08:27:08.1468989Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Bounded independent static QA of the ended-formal10 trusted-archive verifier. No actual verifier, selfcheck, live or closed raw rescan, product test, realm or source mutation was executed by reviewer.",
+  "toolRoot": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1",
+  "sealedInputs": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\tool-source-frozen-v2.json",
+    "bytes": 7620,
+    "sha256": "4a25cfdb34ad60f1f40e0cce28db3d4dda8743f965e2ebde23aa06b14c3e9a4e"
+  },
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\preparation-v2.json",
+    "bytes": 8549,
+    "sha256": "17e60dfd4f668d89800fd804a66eb92a61927fb8aab98e2c681e07a4549a6f75"
+  },
+  "entry": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\run-ended-formal10-v3.mjs",
+    "bytes": 2410,
+    "sha256": "f4051f68adefddb18f60346874e9d353d83a3b2d5d7a31dcd91b41d32a9acba2"
+  },
+  "verifier": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\verify-ended-formal10-v4.mjs",
+    "bytes": 28111,
+    "sha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7"
+  },
+  "contract": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\formal-contract-v2.mjs",
+    "bytes": 6103,
+    "sha256": "5aa9f0057bacf899270b14619d0168148c07323f97065aff8c56bf14cf227b4c"
+  },
+  "hpContract": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\hp-proof-contract-v2.mjs",
+    "bytes": 4644,
+    "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+  },
+  "expectedPolicy": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\expected-formal-policy-v1.json",
+    "bytes": 1038,
+    "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+  },
+  "syntheticReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\schema-selfcheck-v3-receipt.json",
+    "bytes": 4302,
+    "sha256": "317ed78cfe37bf5ee5695bb4e6de5b0fef87fb5d041c9927d928a6f39eafb273"
+  },
+  "syntheticLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1\\schema-selfcheck-v3.log",
+    "bytes": 1559,
+    "sha256": "b37e269f8b922c41827cfc45625843cfd3b77d2e4e6250422ceb1f32083a3c23"
+  },
+  "rawClosure": {
+    "sealedFiles": 36,
+    "actualRawPinsVerified": 36,
+    "rawMismatches": 0,
+    "currentAdoptedVerifier": "verify-ended-formal10-v4.mjs",
+    "unadoptedV5ReaderExplorationNotExecutionInput": true,
+    "inverseProofs": [
+      {
+        "file": "inverse-provenance-v1.json",
+        "edits": 26,
+        "restoresCorrectedProbe13V2Exact": true
+      },
+      {
+        "file": "refinement-provenance-v2.json",
+        "edits": 19,
+        "restoresFormalV1Exact": true
+      },
+      {
+        "file": "refinement-provenance-v3.json",
+        "edits": 4,
+        "restoresFormalV2Exact": true
+      },
+      {
+        "file": "refinement-provenance-v4.json",
+        "edits": 3,
+        "restoresFormalV3Exact": true
+      }
+    ],
+    "rootCleanupContractAppendExact": true,
+    "allPriorRevisionsAndProofsPreserved": true,
+    "productOrFrozenRuntimeInputsChanged": false
+  },
+  "staticFindings": {
+    "F1": {
+      "description": "Originalv2 per-kind metric status dictionary lacked cardinality/string limits.",
+      "closedIn": "verify-ended-formal10-v3.mjs retained in v4",
+      "closure": "Eachkind status maximum128 keys, strings1..80, prototype keys rejected; kind/type/actor bounded; source mutation inverse exact."
+    },
+    "F2": {
+      "description": "Root independent cleanup file was previously hashed but its runidentity and outcomes were not checked.",
+      "closedIn": "verify-ended-formal10-v4.mjs plusformal-contract-v2.mjs",
+      "closure": "Reads the actual required rootcleanup and checks schema1,currentrun,gateway70212,monitor68764,processesAbsent/portsFree/readOnlyIndependentCheck true,capacityAccepted false andempty processes/listeningPorts; verifiedAt must parse as a date. Missingrootproof/publicarchive fails before a final verification receipt."
+    },
+    "F3": {
+      "description": "readline aggregates a wholeline before the64MiB line-size check.",
+      "disposition": "Root explicitly accepts trusted-frozen-producer, rawSHA/bytes-bound input scope; no incrementalreader refactor adopted this round.",
+      "cannotClaimAbsoluteAdversarialLineMemoryBound": true,
+      "notNewGameGate": true
+    }
+  },
+  "formalContract": {
+    "expectedRun": "1792915219265-d3bcff63",
+    "expectedPreparedSourceAggregate": "3c49fdaddd4d59b2ac0cb8159b50e52ecd2a2edc746b773623f40a038d06c162",
+    "originalPolicyExactComparedToCurrentFrozenFormalRunOptions": true,
+    "stageActors": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "configuredStageSeconds": 300,
+    "configuredSoakSeconds": 7200,
+    "configuredPostResumeSeconds": 60,
+    "fullSuccessWindowCounts": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      120,
+      1
+    ],
+    "fullSuccessTotalWindows": 146,
+    "rawWindowsRequireActualAtLeast60000Ms": true,
+    "rawWindowClocksContiguousAndReportAssessmentExact": true,
+    "wholePhaseActivityAndNativeRateUseMeasuredSeconds": true,
+    "fullShapeCheckedOnlyWhenOriginalReportOk": true,
+    "failurePartialNeverPromotedToFullSuccess": true,
+    "fiveNativeResumeRowsRawReportExact": true,
+    "fiveSavedVerificationReportEntriesRequiredPassed": true,
+    "savedPrivateAccountStateNotIndependentlyOpened": true,
+    "minimumLoginSuccessCountOnFullSuccess": 105,
+    "original18Attacks12DualHits95PercentRun50Cells80AndLatencyThresholdsUnchanged": true
+  },
+  "streamAndStateBounds": {
+    "archiveMaximumBytes": 68719476736,
+    "jsonMaximumBytes": 268435456,
+    "declaredLineBytes": 67108864,
+    "rawRowsMaximum": 50000000,
+    "actorsPerState": 100,
+    "phaseStates": 7,
+    "metricKindsPerState": 128,
+    "statusesPerKind": 128,
+    "fixedStringMaximum": 80,
+    "minuteWindows": 146,
+    "continuousWindows": 40000,
+    "selectedCorrections": 256,
+    "rawResumes": 5,
+    "memoryBuckets": 1201,
+    "memoryBucketMs": 3000,
+    "lineLimitEnforcedAfterReadlineAggregation": true,
+    "trustedInputBoundaryExplicit": true
+  },
+  "memoryAndTelemetry": {
+    "memoryReplaysOriginalRegressionArithmeticFromRetainedRawSuffix": true,
+    "historyAtMost1201ThreeSecondBuckets": true,
+    "initialMemoryAtNotRecorded": true,
+    "reportSampleCountSelectsSuffix": true,
+    "preciseWarmupCutoffNotIndependentlyProven": true,
+    "minimum1800SecondsAndMaximum32MiBPerHourUnchanged": true,
+    "telemetryUsesInsidePhaseAfterStartBeforeEndBucketDeltas": true,
+    "omittedEdgeTimesExplicit": true,
+    "zeroOverflowSaturatedDiscardedQuantilesRemainUnknown": true,
+    "cumulativeMaximumNotSubtracted": true,
+    "notClientAckOrIngressToAuthoritativeOutboundTiming": true,
+    "noNew35_50_150MsHardServerSlo": true
+  },
+  "hpAndWire": {
+    "hpTenKnownStatusesAndVerifiedEffectSemantics": true,
+    "zeroHpEventsDoesNotClaimDoseOrSurvival": true,
+    "consumeAndHealRemainDistinct": true,
+    "unrecordedSendMonoCursorQuantityBeforeNotIndependentlyReplayed": true,
+    "wireSourceTerminalAndPersistedRowCountsCompared": true,
+    "wireSequenceGapsOrBoundedTruncationRemainDiagnostic": true,
+    "wireIncompleteDoesNotChangeOriginalGameVerdictOrGiveAckDamageCredit": true
+  },
+  "identityAndExternalProofs": {
+    "sourceCurrentCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "driverAggregate": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendInputs": 41,
+    "releaseSha": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+    "original51LauncherSha": "c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724",
+    "normalOwnedCleanupSevenChecksAndExit0Required": true,
+    "independentRootCleanupActuallyParsed": true,
+    "reportProvenanceByteShaAndPublicOriginalCopiesCompared": true,
+    "publicProjectionFrozenVerifierRoundTripRequired": true,
+    "missingMetadataOrRootCleanupFailsClosed": true,
+    "reviewerDidNotQueryLiveProcessesOrReadPrivateData": true
+  },
+  "entryBoundary": {
+    "onlyExplicitSealShaEndedFlagRunIdAccepted": true,
+    "sealedInputsCheckedBeforeChildSpawnAndAgainAfter": true,
+    "entryExecutesOnlyAdoptedV4Verifier": true,
+    "oneHourBoundedChildTimeout": true,
+    "originalDataNeverWritten": true,
+    "newExecutionLogReceiptAndFinalUseWx": true,
+    "nonzeroChildIsNotSuccessfulVerification": true,
+    "independentGamePassNotAutomaticRootP0OrProductionAcceptance": true
+  },
+  "syntheticEvidence": {
+    "cases": 18,
+    "passed": 18,
+    "failed": 0,
+    "sourceBeforeAfterExact": true,
+    "receiptAndLogRawPinsVerified": true,
+    "scope": "Pure synthetic schema/clock/histogram/rootcleanup/status boundary checks. Wholephase actualdenominator is additionally source-reviewed; no realrun or product suite was executed.",
+    "authorExecutionOnlyReviewerDidNotRerun": true
+  },
+  "priorProbe13Disclosure": {
+    "originalFinalSha": "c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c",
+    "oldIndependentWholePhaseRateUsedConfigured300_300_360": true,
+    "cannotClaimOldWholePhaseIndependentRateWasActualDurationExact": true,
+    "originalDriverAssessmentAlreadyUsedActualDuration": true,
+    "rawReportFullAssessmentsAndCounterEqualityRemainBound": true,
+    "actual16MinuteClocksAnd132ContinuousActorCounterReplayRemainBound": true,
+    "oldFinalAndRawUnchanged": true,
+    "actualDurationSupplementaryProbe13ReplayNotPerformedByThisReviewer": true,
+    "rootPlansSeparateHonestSupplement": true
+  },
+  "actualFormalOutcomeBoundary": {
+    "rootReported": "Endedfailed:2and10completepassed;25completed300.326s butthird/fourthcombatwindowsfailed; no50or100stage or7200soak.",
+    "notIndependentlyVerifiedByThisStaticReview": true,
+    "neverRelabel15ObservedWindowsAs146": true,
+    "neverFillMissingStages": true,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "verdict": {
+    "staticToolReviewPassed": true,
+    "blockingFindings": [],
+    "eligibleForRootAuthorizedEndedInvocation": true,
+    "actualVerifierExecuted": false,
+    "actualRawRead": false,
+    "actualFormalPassVerified": false,
+    "capacityAccepted": false,
+    "rootP0AcceptanceAdjudicated": false,
+    "productionAccepted": false,
+    "p2Authorized": false
+  },
+  "limitations": [
+    "Trusted archive scope is explicit. Readline wholeline aggregation means the stated64MiB check is not an absolute memory defense against adversarial oversized lines. Root accepted this limitation; it is not a game condition.",
+    "This is static readiness of a tool, not a fullformal result. Realfailed/partial artifacts remain originalfailed/partial; only actual source-matched postcleanup verification may issue a consistency receipt.",
+    "The savedverification checks bind originalfive passed report entries and frozen ordinarylogout/relogin implementation; no private accountstore was opened by reviewer.",
+    "Latency/packet proofs are bound through original report/raw assessments and pinned collection. This review does not synthesize new receipts or independently classify private or unlogged wire history.",
+    "P0 remains unaccepted and P2 cannot start from this18case synthetic result, the10actorprobe or static source review."
+  ]
+}

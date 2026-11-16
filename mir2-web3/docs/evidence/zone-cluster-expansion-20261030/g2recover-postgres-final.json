@@ -1,0 +1,18 @@
+{
+  "version": "16.15",
+  "serverAddress": "127.0.0.1",
+  "port": 62169,
+  "database": "mir2_zone_lease_test_20261030_69f2a7f5",
+  "leaseRows": 0,
+  "saveOperationRows": 0,
+  "playerDropTable": "zone_player_drop_operations",
+  "playerDropRows": 0,
+  "recoveryReceiptTable": "zone_player_drop_recovery_receipts",
+  "remainingDropFixtureDatabases": [],
+  "otherClientConnections": 0,
+  "applicationSchemas": [
+    "observer_owned",
+    "public"
+  ],
+  "atUtc": "2026-10-30T16:59:11.9280265Z"
+}

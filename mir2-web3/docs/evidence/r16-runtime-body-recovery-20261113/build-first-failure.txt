@@ -1,0 +1,45 @@
+Evidence copy: leading indentation tabs expanded to spaces. Original bytes and SHA remain in receipt.json rawEvidence and the private original log.
+
+▲ Next.js 16.4.4 (webpack)
+✓ Running next.config.ts took 28ms
+
+  Creating an optimized production build ...
+  Using tsconfig file: tsconfig.runtime-body.json
+  Using tsconfig file: tsconfig.runtime-body.json
+  Using tsconfig file: tsconfig.runtime-body.json
+✓ Compiled successfully in 13.0s
+  Running TypeScript ...
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+      - include was updated to add '.next-runtime-body/types/**/*.ts'
+      - include was updated to add '.next-runtime-body/dev/types/**/*.ts'
+
+  Finished TypeScript in 11.1s ...
+  Collecting page data using 31 workers ...
+Error: Cannot find module 'next/dist/compiled/next-server/app-route.runtime.prod.js'
+Require stack:
+- C:\r16-runtime-body-recovery-20261113\next-output-r1\server\app\api\scene\starter\route.js
+- E:\r16-quest-text-20261111\build\mir2-web3\apps\web\node_modules\next\dist\server\require.js
+- E:\r16-quest-text-20261111\build\mir2-web3\apps\web\node_modules\next\dist\server\load-components.js
+- E:\r16-quest-text-20261111\build\mir2-web3\apps\web\node_modules\next\dist\build\utils.js
+- E:\r16-quest-text-20261111\build\mir2-web3\apps\web\node_modules\next\dist\build\worker.js
+- E:\r16-quest-text-20261111\build\mir2-web3\apps\web\node_modules\next\dist\compiled\jest-worker\processChild.js
+    at ignore-listed frames {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\r16-runtime-body-recovery-20261113\\next-output-r1\\server\\app\\api\\scene\\starter\\route.js',
+    'E:\\r16-quest-text-20261111\\build\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'E:\\r16-quest-text-20261111\\build\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'E:\\r16-quest-text-20261111\\build\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'E:\\r16-quest-text-20261111\\build\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\worker.js',
+    'E:\\r16-quest-text-20261111\\build\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\jest-worker\\processChild.js'
+  ]
+}
+
+> Build error occurred
+Error: Failed to collect page data for /api/scene/starter
+    at ignore-listed frames {
+  type: 'Error'
+}

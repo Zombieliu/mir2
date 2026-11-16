@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.windows.updater-precompile.v1",
+  "capturedAtUtc": "2026-10-29T08:03:18.314Z",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "sourceClean": true,
+  "passed": true,
+  "buildCommand": "cargo +1.95.0 build --locked --release --manifest-path apps/game-client/windows-updater/Cargo.toml --target x86_64-pc-windows-msvc --target-dir <external-target> --jobs 2",
+  "rustflags": "--remap-path-prefix=<PROJECT>=mir2-source",
+  "releaseSecondsFromCargoLog": 53.63,
+  "outputs": [
+    {
+      "path": "Mir2Launcher.exe",
+      "bytes": 389120,
+      "sha256": "6532c0ddd35d281cde79000d7a19dfe5253507da5c07b003c2fa9a87451d6ec5"
+    },
+    {
+      "path": "Mir2Updater.exe",
+      "bytes": 1952256,
+      "sha256": "d30427bd56374c32ccc6f243b8eb870aea3b61005eb7c1f4037bed73999ec1cf"
+    }
+  ],
+  "log": {
+    "path": "updater-precompile.log",
+    "bytes": 2551,
+    "sha256": "f8e35116b3c8421cd77e2a626207b0027b0db6d955b8a3b3d823775a6c22dcc2"
+  },
+  "metadataSigningExecuted": false,
+  "candidateInputsPending": true,
+  "trustPinCheckedUsingPublicKeyOnly": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+  "newKeysOrTrustStoreChanges": false
+}

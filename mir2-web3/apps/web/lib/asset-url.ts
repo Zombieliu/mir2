@@ -12,6 +12,7 @@ const SAME_ORIGIN_ACTOR_LIBRARY_ROOTS = new Set([
   "CArmour",
   "CHair",
   "CWeapon",
+  "Fishing",
   "AArmour",
   "AHair",
   "AWeapon",

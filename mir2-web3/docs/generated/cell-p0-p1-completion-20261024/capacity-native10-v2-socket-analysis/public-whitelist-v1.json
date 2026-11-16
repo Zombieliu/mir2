@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public08 derived artifacts only; no private stores, credentials, executables, recordings or complete external raw included.",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\analyze-v1.mjs",
+      "bytes": 13308,
+      "sha256": "ef830be17711c9df5cead63998f2e54548ecc334e4a825ebd7ee8b806e61377b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\summary-v1.json",
+      "bytes": 17003,
+      "sha256": "f54c49ad36bd0d0f9641e101cff871daabd6882d61e2604d66caf72afed35599"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\selected-events-v1.json",
+      "bytes": 398829,
+      "sha256": "cbd703e524e6de00ad75dfc0422dc61d3d466169a0aaf18334c3dd5afc774734"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\README-v1.md",
+      "bytes": 1913,
+      "sha256": "04949707f611db56ed4e962734c483cccabafaf36ac0ea9161178824a345853a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\finalize-public-analysis-v1.mjs",
+      "bytes": 10644,
+      "sha256": "8e1de6d9590826bae727a4f26bde20a4fd1d977b3a85c4aa9b05dd28c739d0d4"
+    }
+  ],
+  "structuredSensitiveKeyMatches": [],
+  "rawRemainsExternal": true
+}

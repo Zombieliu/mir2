@@ -1,0 +1,21 @@
+{
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "workflowRunId": 41136078361,
+  "localOnly": true,
+  "sshOrRemoteMutations": false,
+  "tests": {
+    "command": "python -m unittest -v test_prepare_artifact test_range_transport test_export_artifact",
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "logSha256": "06cfe295acd2f047c506d80bdd77f9d4bac22d45b3e4536e3f64a0d70c0afeaa"
+  },
+  "files": {
+    "prepare_artifact.py": "f805ac7c73e55a6f7acb5c47c43b0d6998bd905d4a601b9cfae34dd00548ab5b",
+    "range_transport.py": "245ce92b63f415854a987389edf028a59d7a8fc668f9b05f494d573bf87d782d",
+    "export_artifact.py": "1fb3a476c9473fdcfb0a29ed80603fbb32b2988c50cc335fd1cc428cce8dcbb0",
+    "test_prepare_artifact.py": "0ef8d07a8036079b4902a359a6e44fbe00a5ccd3bea64cf9a265f3fd9c3068dc",
+    "test_range_transport.py": "302003dd12e6a8bd58f82ab8aff91d7c01ca7f5f9518dfbcce676865a0b1ad21",
+    "test_export_artifact.py": "4a466799829a5fb2bc39db228b6da562e5575445e14c69c7002b132c026cc141"
+  }
+}

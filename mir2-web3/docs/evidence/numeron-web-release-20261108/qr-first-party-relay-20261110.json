@@ -1,0 +1,148 @@
+{
+  "entry": "https://numeron.obelisk.build/game",
+  "relay": "https://relay.dubhe.obelisk.build",
+  "wallet": "https://wallet.dubhe.obelisk.build",
+  "relayRelease": {
+    "source": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "previousDeployment": "dpl_Ech5Rehf78MG9FXH7fAV9wwFC7GZ",
+    "verifiedDeployment": "dpl_EzTCz5GgYRFgLswMUzR51B77etgC",
+    "stageRun": 42731630805,
+    "promotionRun": 42732390871,
+    "fixedAssetRun": 42494701555,
+    "protectedAndPublicCreateThenPending": true,
+    "stageReceiptSha256": "8f28bf7a346395f904420c579fc7282ea436cac8d1bdc49fbdda6fefc72267c8",
+    "promotionReceiptSha256": "6474b46329ec96fffec38c4e8ea8d6685e4f0c7bb066b11dd79cae6ea8b3de7c"
+  },
+  "browserRoundsOnRelayRelease": {
+    "directFirst": {
+      "https": "TLS 1.3, h2",
+      "createResponseHeaders": 200,
+      "browserAbortObserved": true,
+      "qrVisible": false,
+      "gameRoleCreated": false,
+      "receiptSha256": "146e8df23ee51801d116de0429f4d7386791895450c315e4405d076b1c4f8a0a"
+    },
+    "directSecond": {
+      "createResponseBodyCompleteMs": 1630,
+      "visibleQrModulesMatched": 2401,
+      "pendingPolls": 5,
+      "firstPartySessionReadHttp": 200,
+      "firstPartyApproveHttp": 200,
+      "firstPartyApprovePreflightHttp": 204,
+      "officialWalletLoginOnlyConsentVisible": true,
+      "officialWalletApprovalViewVisible": true,
+      "specificFundingOrTransactionRequests": 0,
+      "broadRequestGuardPassed": false,
+      "reasonForStopping": "The test guard flagged a generic request pattern without a retained operation classification",
+      "gameExchangeReached": false,
+      "gameRoleCreated": false,
+      "desktopReceiptSha256": "e6f6ce188418d97803c70130618166d0f8a058ed1b20956e6634ffbbf47f8c58",
+      "walletReceiptSha256": "8a735608fd8e2895f387495b47848f9437d2e8542e437ab6f60c5ba53a5b1237"
+    },
+    "defaultNetworkFullGame": {
+      "gameHttp": 200,
+      "ordinaryAndRefreshAbortMs": [12003, 12001],
+      "qrVisible": false
+    }
+  },
+  "sameOriginTransportDiagnostic": {
+    "browserUsed": "Chrome",
+    "purpose": "Read the real response body directly without signing",
+    "defaultNetworkQuietBodyCompleteMs": [563, 618],
+    "directH2QuietBodyCompleteMs": [777, 810],
+    "directHttp11QuietBodyCompleteMs": [1182, 842],
+    "defaultNetworkColdGame": {
+      "protocol": "h2",
+      "responseHeadersMs": 3215,
+      "firstResponseDataMs": 8304,
+      "responseBodyCompleteMs": 13309,
+      "bodyBytes": 1320,
+      "status": 200,
+      "matchesFirstPartyRelay": true
+    }
+  },
+  "responseDeliveryRelease": {
+    "source": "83eadf4f96c81bcf26d6e98c41b3a58761c48ea2",
+    "base": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "releaseGuardSource": "330db0dd1eb57f554b7cac25bea0f717247f2193",
+    "stageRun": 42734782902,
+    "promotionRun": 42735819303,
+    "firstPromotionAttempt": "The source checkout hit the runner deadline before the website job started",
+    "stagedDeployment": "dpl_DRLvQMibFvHL8MDyPxHXYNvtETKt",
+    "stagedReceiptSha256": "8456396ea9e375026d25b6002c08b13f2f981ef961a728ea98dbf5c364108008",
+    "baselineDeployment": "dpl_EzTCz5GgYRFgLswMUzR51B77etgC",
+    "publicAliasDeployment": "dpl_DRLvQMibFvHL8MDyPxHXYNvtETKt",
+    "promotionReceiptSha256": "e404e9115286892a3a8d200331c764e19187b64259f9dda9d0dff8e55f6030dd",
+    "protectedAndPublicCreateThenPending": true,
+    "onlyChangedFile": "mir2-web3/apps/web/lib/dubhe-wallet-login.ts",
+    "createTimeoutMs": 20000,
+    "pollTimeoutMs": 12000,
+    "maximumTransientRetries": 1,
+    "exchangeRetries": 0,
+    "walletTestsPassed": 24,
+    "releaseGuardTestsPassed": 69,
+    "typescriptNoEmitPassed": true
+  },
+  "browserValidationAfterDelivery": {
+    "directFullFlow": {
+      "passed": true,
+      "publicTls": "TLS 1.3",
+      "browserProtocol": "h2",
+      "actualCreateAttempts": 1,
+      "visibleQrModulesMatched": 2401,
+      "walletPollingStates": ["pending", "approved"],
+      "pollRequests": 4,
+      "mobilePwaCommit": "6c59fb545613df872e1b94d4b4b665fe7dcb4c32",
+      "officialPwaMobileViewportAndVirtualPasskey": true,
+      "physicalPhoneCamera": false,
+      "relaySessionGetHttp": 200,
+      "relayApprovePostHttp": 200,
+      "relayPreflightHttp": 204,
+      "forbiddenOrUnknownWalletOperations": 0,
+      "channelExchangeHttp": 200,
+      "loginSuccess": 1,
+      "dedicatedTestnetQaCharactersCreated": 1,
+      "startGameResult": 4,
+      "loadedOriginalCityTiles": 177,
+      "terrainPixelSamples": 6,
+      "logOutSuccess": 1,
+      "visibleCharacterSelectionAfterLogout": true,
+      "ownedContextsClosed": true,
+      "fullReceiptSha256": "38d1b92cb08a48749b82e2e9dfda8108772216658b9b9b4805e308043ebc50d7",
+      "desktopReceiptSha256": "33964cf76211a0450450126c89546ab10339d207804d8dbe799daff82a2766f3",
+      "walletReceiptSha256": "37eed26d53f9ecffd2eca5df9a36739d8999a1f728e2f431305506dfa9477809"
+    },
+    "defaultNetworkColdAttempt": {
+      "gameHttp": 200,
+      "automaticAttemptAbortMs": [20001, 20000],
+      "responseHeadersObserved": false,
+      "qrVisible": false,
+      "receiptSha256": "4ceb1e38f46fcfe00c46a5718516f18d055c79bfb179dd375bb2d86f7912e5e7"
+    },
+    "defaultNetworkAfterResourceWait": {
+      "passed": true,
+      "gameHttp": 200,
+      "waitedForResourceIdleWithLimitMs": 60000,
+      "resourceIdleReached": false,
+      "pendingUnclassifiedGetsAtClick": 11,
+      "createHttp": 200,
+      "createBodyCompleteMs": 15101,
+      "pollHttp": 200,
+      "pollBodyCompleteMs": 9236,
+      "qrVisible": true,
+      "pending": true,
+      "signed": false,
+      "receiptSha256": "676976cda2e1f0b502bf58af6bfc09957b4b6dcea900a3f03446f484349ffa6a"
+    },
+    "defaultNetworkIsolatedCold": {
+      "gameHttp": 200,
+      "waitedForResourceIdle": false,
+      "pendingUnclassifiedGetsAtClick": 17,
+      "automaticAttemptAbortMs": [20004, 20001],
+      "responseHeadersObserved": false,
+      "qrVisible": false,
+      "receiptSha256": "8fafc65d2d07ff983b1e36a2adf88cd41173476c28503bdc78b0afe9d905f75c"
+    }
+  }
+}

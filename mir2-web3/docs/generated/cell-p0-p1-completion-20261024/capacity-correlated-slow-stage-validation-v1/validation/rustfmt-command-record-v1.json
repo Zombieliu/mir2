@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T16:25:49.195Z",
+  "evidenceKind": "Author record of observed successful tool output, not a separately captured raw stdout/stderr file.",
+  "command": "rustup",
+  "arguments": [
+    "run",
+    "1.95.0",
+    "rustfmt",
+    "--edition",
+    "2021",
+    "--config",
+    "skip_children=true",
+    "--check",
+    "apps/gateway/src/web.rs"
+  ],
+  "cwd": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "observedExitCode": 0,
+  "observedStdoutEmpty": true,
+  "observedStderrEmpty": true,
+  "rawStdoutFileCaptured": false,
+  "rawStderrFileCaptured": false,
+  "checkOnly": true,
+  "sourceWritten": false,
+  "sourceBefore": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "sourceAfter": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "newExecutionPerformedForThisRecord": false,
+  "focusedRustTests": 8,
+  "newRegressionTests": 1,
+  "existingRegressionTests": 7,
+  "newReleaseBuilt": false,
+  "newLoadPerformed": false
+}

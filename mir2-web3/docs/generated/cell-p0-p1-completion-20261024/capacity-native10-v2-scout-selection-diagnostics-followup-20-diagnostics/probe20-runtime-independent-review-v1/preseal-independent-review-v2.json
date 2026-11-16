@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T01:47:11.480Z",
+  "scope": "Narrow independent source-metadata correction review after actual first seal failure; no target import or mode.",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\runtime-prepared-v3.json",
+    "bytes": 52047,
+    "sha256": "fe982d9ea3975e06e107d850bd77fcf53ee4cb7c0674b0b1ce08292f7ad42fbd"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-seal-and-guard-v1.mjs",
+    "bytes": 17598,
+    "sha256": "06429d705d71cdf3af1062070648b146f95f6a2b4d4dd6f7171a2d96d3e6e12b"
+  },
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "previousReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-runtime-independent-review-v1\\preseal-independent-review-v1.json",
+    "bytes": 9165,
+    "sha256": "531e4611e67502479d23610b32fc4ab77ff93d77fa7514ab8dee43d50eac655b"
+  },
+  "previousPrepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\runtime-prepared-v2.json",
+    "bytes": 50348,
+    "sha256": "cdb89bd41d5187dd7e68aab27f36b0e00e05f12d52e570a0d22a983e42179794"
+  },
+  "previousReviewQualification": "The original review missed the three active scene identity leaves. It is preserved as historical static review and does not establish a successful seal; this revision supersedes its current scene-identity and seal-eligibility conclusion.",
+  "actualFailedFirstSeal": {
+    "facts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-preseal-failure-v1.json",
+      "bytes": 2419,
+      "sha256": "d412ca63843194a5e95efc037d6b0a97096aa626114ae0cd996b837b839d44ee"
+    },
+    "exitCode": 1,
+    "stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-seal-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-seal-stderr-v1.log",
+      "bytes": 2027,
+      "sha256": "38b13c7028a67f2324432cd2fde4d487aa28ee25361b8deba780c42245a8ccab"
+    },
+    "failedBeforeFreezeGuardProvisionOrRealm": true
+  },
+  "sceneCorrection": {
+    "proof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-current-source-identity-fix-v3.json",
+      "bytes": 3457,
+      "sha256": "b6859cbe2b150f77303ab595b1c1b46acfa32fb91bfd98df168ca6a5dda02c2a"
+    },
+    "before": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-binding.json.before-active-current-K-v3.txt",
+      "bytes": 6784,
+      "sha256": "eea4e2a2d7799dccec5177a6cb16bc14487c2124375e84ab2f971689b19d09c8"
+    },
+    "after": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "25a6543936cba85f0a97498d818c66e989e33e1bb3d939be8325f43c7f5812de"
+    },
+    "uniqueTextRules": 3,
+    "forwardRawExact": true,
+    "inverseRawExact": true,
+    "changedTopLevelFields": [
+      "activeDriverSourceCommit",
+      "activeExecutionSourceCommit",
+      "currentDriverSourceSha256"
+    ],
+    "directCurrentDriverBindingComparison": {
+      "activeBackendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+      "activeDriverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "activeExecutionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "currentDriverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+      "allFourMatchCurrentDriverBinding": true
+    },
+    "historicalStaticMetadataByteExact": true,
+    "sceneContractSource": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    "canonicalGeometryProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2563,
+      "sha256": "1e03413bc5a3133e2b44f4a8ebb334cafa07600c48a964186567f59d1c7eaaee"
+    },
+    "allOtherSceneJSONValuesUnchanged": true,
+    "noGeometryOrAStarRerun": true
+  },
+  "preparedDelta": {
+    "localInputs": 71,
+    "externalInputs": 37,
+    "localAggregate": "e4e512434dcb87ff8c90e9ff5fb42903d7c5961dbcfacde23fb33ff7781cc475",
+    "externalAggregate": "d90546ee9e74241bdd3612d4a831a088b0ba4e51a8bcb185b8675431bfa66384",
+    "changedExistingInputs": [
+      "scene-binding.json"
+    ],
+    "addedLocalInputs": [
+      "runtime-prepared-v2.json",
+      "scene-binding.json.before-active-current-K-v3.txt",
+      "scene-current-source-identity-fix-v3.json"
+    ],
+    "addedExternalInput": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-preseal-failure-v1.json",
+      "bytes": 2419,
+      "sha256": "d412ca63843194a5e95efc037d6b0a97096aa626114ae0cd996b837b839d44ee"
+    },
+    "otherPriorInputsAndAllJSModulesControllerUnchanged": true,
+    "prior28SyntaxRowsExact": true,
+    "originalB1StoreChildAndB2NullPlaceholderCorrectionPreserved": true,
+    "priorSourceReviewCoverage": "Prior actual 96 nontrace raw hashes, 6 opaque trace references/sizes, 33 template inverses, evidence/controller inverses, policy/resource/roles, K232 ancestry and six declaration basis retained; no large payload or trace rehash."
+  },
+  "sourceSealPlan": {
+    "existingUniqueInputs": 119,
+    "additionalPreparedSelfReviewAndSyntax": 3,
+    "expectedFinalUniqueInputs": 122,
+    "maximum": 128,
+    "preparationReferences": 27
+  },
+  "formal16Boundary": "Root reports no formal16 scene-binding has been generated. No nonexistent binding or future execution is certified; its eventual three active scene identity leaves must match the current binding before final approval.",
+  "runtimeStateAbsent": [
+    "private",
+    "bin",
+    "reports",
+    "recordings",
+    "preparation.lock",
+    "execution.lock",
+    "source-pins.json",
+    "compact-navigation-wire-terminal.json",
+    "realm-cleanup.json",
+    "realm-execution.json",
+    "launcher-source-frozen-v1.json",
+    "source-guard-readonly-verification.json",
+    "launcher-syntax-check.log",
+    "realm-process.json"
+  ],
+  "executionBoundary": {
+    "currentRevisionESMEvaluationNotPerformedHere": true,
+    "actualSecondSealNotYetPerformed": true,
+    "noTestsOrBuild": true,
+    "noPrivateRawMonitorBinaryOrTracePayloadRead": true,
+    "currentProbeResultKnown": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

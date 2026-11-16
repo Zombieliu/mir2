@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "monitorTerminal": true,
+  "stop": true,
+  "outcome": "completed",
+  "reason": "local stop-file requested normal monitor completion",
+  "servicesStopped": false,
+  "sampleCount": 697,
+  "monitorReadback": {
+    "remoteExitStatus": null,
+    "remoteExitStatusReceived": false,
+    "exitStatusMethodReturn": null,
+    "remoteTerminalSampleObserved": false,
+    "completedBy": "localStopFile",
+    "streamEndReason": "localStopFile",
+    "expectedIdentity": {
+      "pid": 1077951,
+      "startTicks": 1549561055,
+      "invocationId": "f0889eecc5f44b9db77fc02e2ba8bc41",
+      "activeState": "active"
+    },
+    "expectedRevision": "7403bc5ee5cbb472477db101b8be603136049dcf"
+  }
+}

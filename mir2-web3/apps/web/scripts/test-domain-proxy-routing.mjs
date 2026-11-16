@@ -44,6 +44,8 @@ try {
     "/generated/crystal-packs/full/pages/aa/example.png",
     "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgpu/mir2_bevy_runtime.js",
     "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+    "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgl2-shared/mir2_bevy_runtime.js",
+    "/bevy-runtime/v/bevy-9a5cbecc8f85ff75/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
   ]) {
     assert.equal(worker.isStaticAssetRequest(new URL(`https://mir2.example${assetPath}`)), true, assetPath);
   }
@@ -81,6 +83,13 @@ try {
     "",
     "the overlay must not mix Bevy runtime versions",
   );
+  for (const suffix of [".js", "_bg.wasm"]) {
+    const path = `pkg-webgl2-shared/mir2_bevy_runtime${suffix}`;
+    assert.equal(worker.bevyRuntimeObjectKeyForPath(`/bevy-runtime/v/bevy-9a5cbecc8f85ff75/${path}`,
+      "mir2/v/release", "bevy-9a5cbecc8f85ff75"), `mir2/v/release/bevy-runtime/v/bevy-9a5cbecc8f85ff75/${path}`);
+    assert.equal(worker.bevyRuntimeObjectKeyForPath(`/bevy-runtime/v/bevy-stale/${path}`,
+      "mir2/v/release", "bevy-9a5cbecc8f85ff75"), "");
+  }
   for (const applicationPath of ["/", "/api/asset-manifest", "/ws", "/generated/not-an-asset/file.json"]) {
     assert.equal(worker.isStaticAssetRequest(new URL(`https://mir2.example${applicationPath}`)), false, applicationPath);
   }
@@ -166,6 +175,15 @@ try {
     assert.equal(secondRuntimeResponse.headers.get("x-mir2-runtime-transport"), "stored-gzip-no-transform");
     assert.equal(WebAssembly.validate(gunzipSync(await secondRuntimeResponse.arrayBuffer())), true);
     assert.equal(r2Reads, 2, "each WASM request should read the immutable compressed R2 object");
+    const sharedRuntimeResponse = await worker.default.fetch(new Request(runtimeUrl.replace("pkg-webgpu", "pkg-webgl2-shared")), env, ctx);
+    assert.equal(sharedRuntimeResponse.status, 200);
+    assert.equal(sharedRuntimeResponse.headers.get("x-mir2-runtime-transport"), "stored-gzip-no-transform");
+    assert.equal(WebAssembly.validate(gunzipSync(await sharedRuntimeResponse.arrayBuffer())), true);
+    assert.equal(r2Reads, 3);
+    assert.equal(cacheWrites.length, 0);
+    const staleSharedResponse = await worker.default.fetch(new Request(runtimeUrl.replace("pkg-webgpu", "pkg-webgl2-shared").replace("bevy-9a5cbecc8f85ff75", "bevy-ffffffffffffffff")), env, ctx);
+    assert.equal(staleSharedResponse.status, 404);
+    assert.equal(r2Reads, 3, "stale shared URLs must be rejected before storage lookup");
 
     const overlayReads = [];
     const fallbackBody = Uint8Array.from([9, 8, 7]);

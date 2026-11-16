@@ -1,0 +1,31 @@
+{
+  "checks": 231,
+  "releaseGuards": 70,
+  "files": [
+    {
+      "from": "affected-checks.log",
+      "to": "checks.log",
+      "rawBytes": 54936,
+      "rawSha256": "a95e131a3d8e32a27cb00a82a67a9f20c58a38404858735f1b5617a32356a634",
+      "publishedBytes": 53524,
+      "publishedSha256": "6613eadcb05ff9ddc08a2fcac833837dfee890d8b201259c3d65c2d97d4f64d5"
+    },
+    {
+      "from": "release/guard-tests.log",
+      "to": "release-guards.log",
+      "rawBytes": 17390,
+      "rawSha256": "13e64bb3ccc25a3a1f5133fbafdf39055bc1f08de50e1007a59b0444334def74",
+      "publishedBytes": 16960,
+      "publishedSha256": "80ee5d3255eb2d62c7e1352682491ef0d16c5e59f21120df5aaa9e5f8b296fcd"
+    },
+    {
+      "from": "build.log",
+      "to": "build.log",
+      "rawBytes": 2456,
+      "rawSha256": "2ae7f7a80ad791af96ec87a567d3fb745dc17992b07619709f98c11f90174812",
+      "publishedBytes": 2451,
+      "publishedSha256": "83e840c690a93c4f484684b59d356f3399ac775eda5eae7a75db9d2ec97699b8"
+    }
+  ],
+  "scope": "Only whitespace and line endings normalized; raw logs retained privately."
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "mir2.r16.fishing.tests.v1",
+  "checks": {
+    "platform-web-exact.log": {
+      "sha256": "ffc93cacffeadee750209363989168cb9cedf8c45423418b5507f1ad44323257",
+      "checkedOutput": "102 passed; 0 failed"
+    },
+    "tests-core-exact.log": {
+      "sha256": "e5fe10e4df4a3a0bdb70a9ec208098236f2c6c70e0a6bf43c7978323518a997e",
+      "checkedOutput": "# pass 216"
+    },
+    "tests-stage5-exact.log": {
+      "sha256": "582e744ec65dc9d720f1e47f9fde56cb67e8ee892b3ce51080d588bb53e37125",
+      "checkedOutput": "stage5 adapter tests passed (514 groups)"
+    },
+    "tests-tsc-exact.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checkedOutput": ""
+    },
+    "neighbors-exact.log": {
+      "sha256": "3357baf73fb51c4f092b572663aff3a4a7b24cd298ab77ff66f74921c157ba64",
+      "checkedOutput": "# pass 400"
+    },
+    "runtime-budget-exact.log": {
+      "sha256": "b05dd592cade5b831f4e331e1356f5a9540a8271fecba27b45f4b5861e56f31c",
+      "checkedOutput": "bevy runtime budget passed (bevy-b27119c94bf94458)"
+    },
+    "cold-bootstrap-red.log": {
+      "sha256": "c15eca9f6e30e5b0b55f7b41ff58e9e1d36f0b9a68fa07b0d458140dd42ef731",
+      "checkedOutput": "FAILED"
+    },
+    "turn-gap-red.log": {
+      "sha256": "545e5547d11abcaece9bf8569a001529a58c1c50d50ecb2ccaff54e4e0f12cbb",
+      "checkedOutput": "FAILED"
+    },
+    "adjacent-final-source.log": {
+      "sha256": "acd855ad603292b6ffa4e552a861514263c9d10c0e0d131b99154247783770c7",
+      "checkedOutput": "# pass 28"
+    },
+    "system-menu-quest-baseline.log": {
+      "sha256": "b7f22c4305e61d4b7f05cb81ed4aa1be656b62292b066e0c37d40cf26f9fbb1e",
+      "checkedOutput": "onToggleQuestLog"
+    },
+    "web-neighbors-trade-review-head-storage.log": {
+      "sha256": "af4aadf343483789b668e77b9c7be2e52e0ed633a615379a96ca42e8ee3238be",
+      "checkedOutput": "# fail 5"
+    }
+  },
+  "selectedGroupsOverlap": true,
+  "staleTrackedRenderer": "bevy-0cd68510886134e0",
+  "qualifiedRenderer": "bevy-b27119c94bf94458",
+  "preservedBaselineFailures": [
+    "old quest button source assertion",
+    "five old Group budget checks with the stale prebuilt renderer"
+  ],
+  "smokeStage5": "Updated menu entry expectation and passed script syntax check. Full legacy smoke was not rerun."
+}

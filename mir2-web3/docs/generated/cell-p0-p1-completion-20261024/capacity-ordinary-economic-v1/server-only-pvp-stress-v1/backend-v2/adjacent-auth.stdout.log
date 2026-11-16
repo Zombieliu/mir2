@@ -1,0 +1,17 @@
+
+running 12 tests
+test ai_distribution::tests::push_adapter_receives_canonical_package_auth_and_idempotency ... ok
+test attack_protocol::tests::auth_and_active_actor_are_required_before_any_reservation ... ok
+test auth::tests::passkey_gateway_token_maps_only_supported_auth_methods ... ok
+test cache::tests::in_memory_auth_attempts_increment_and_clear ... ok
+test cache::tests::in_memory_auth_token_can_only_be_consumed_once ... ok
+test web::tests::native_resume_auth_revision_overflow_blocks_issue_reserve_and_commit ... ok
+test web::tests::native_resume_control_never_maps_to_simulation_auth_or_unsafe_actions ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_changing_user_agent_cannot_bypass_peer_registration_limit ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_global_account_limit_survives_peer_and_user_agent_changes ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_login_pair_limit_survives_user_agent_changes ... ok
+test web::web_auth_peer_bucket_tests::auth_peer_bucket_same_native_or_unknown_user_agent_does_not_block_other_peers ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1266 filtered out; finished in 1.99s
+

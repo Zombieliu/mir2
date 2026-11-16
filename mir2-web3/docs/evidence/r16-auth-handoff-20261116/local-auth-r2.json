@@ -1,0 +1,73 @@
+{
+  "scope": "Isolated strict production Next build, controlled in-memory relay with real Passkey crypto, actual Rust Gateway and browser UI. No production access, real wallet/phone acceptance or role/gameplay qualification.",
+  "candidate": "r16-auth-body-56c223a0",
+  "startedAt": "2026-11-16T05:11:20.188Z",
+  "passed": true,
+  "requestBodies": [
+    {
+      "kind": "create",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": false
+    },
+    {
+      "kind": "status",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": true
+    },
+    {
+      "kind": "status",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": true
+    },
+    {
+      "kind": "status",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": true
+    }
+  ],
+  "relay": {
+    "creates": 1,
+    "polls": 3,
+    "approvals": 1
+  },
+  "wire": {
+    "loginSuccess": 1,
+    "passkeyLogin": 1,
+    "unexpectedMutation": 0
+  },
+  "closed": {
+    "browser": true,
+    "next": true,
+    "gateway": true,
+    "relay": true
+  },
+  "processIds": [
+    {
+      "name": "gateway",
+      "pid": 103332
+    },
+    {
+      "name": "next",
+      "pid": 108260
+    }
+  ],
+  "incompletePost": {
+    "status": 400,
+    "elapsedMs": 2014
+  },
+  "selectVisible": true,
+  "rawCapture": {
+    "method": "Page.captureScreenshot",
+    "scope": "Supplemental current pixels without waiting for unrelated document.fonts readiness. Original r1 timeout retained."
+  },
+  "replay": {
+    "status": 200,
+    "exchangeStatus": 401,
+    "alreadyUsed": true
+  },
+  "finishedAt": "2026-11-16T05:11:32.985Z"
+}

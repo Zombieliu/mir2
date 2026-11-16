@@ -1,0 +1,48 @@
+{
+  "owner": "Root",
+  "kind": "Source32 read-only structural follow-up accepted for Source33 implementation",
+  "createdAtUtc": "2026-10-07T20:45:02.361Z",
+  "reviewer": "/root/source30_native_bundle independent read-only architecture explorer",
+  "implementationPerformed": false,
+  "publishedExportsToPreserve": {
+    "core": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+    "presentation": "480c0f52f80f44083067aafee4d998b18ef6388405711ef4f97e2193da81ba9b",
+    "coreWasmBytes": 252590,
+    "presentationWasmBytes": 261575,
+    "npcPurchaseReceiptAbiAlreadyInPublishedCore": false
+  },
+  "currentMeasuredUnpublishedCore": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\core03\\optimized_mir2_platform_web_bg.wasm",
+    "bytes": 351501,
+    "sha256": "7bbdebfb089efa626dba16e17bd309b857a801f0c3a138a37694d5e3668cd49e"
+  },
+  "scopeDecision": "Preserve every existing published Source25 Core/PUI export and existing document facade API. Keep unshipped Source31 NPC Receipt ABI1 in its own exclusive policy module; its raw export package location changes explicitly. Do not claim unchanged unpublished Core export set.",
+  "implementationPlan": [
+    "Add mutually-exclusive npc-purchase-policy feature in existing platform-web crate, Wire optional only for NPC feature. Preserve Core/PUI policies.",
+    "Extract existing StrictMailValue verbatim into unexported strict_json.rs and retain mail_compose reexport for old Gold; NPC imports shared walker without linking old Mail wasm exports.",
+    "Extend existing build-client-core builder to3 original feature builds, same two basenames, original optimizer/metadata gates and strict per-bundle<262144/JS<=204800. Validate all3 before any immutable publication, manifest-last.",
+    "Extend existing release manifest verifier with exact npcPurchase descriptor and sourceSha, distinct immutable version, exact2 leaves, same budget and complete closure.",
+    "Extend existing client-core-runtime loader to verified NPC module, preserve getNpcPurchaseReceiptHost API and one permanent document facade/ledger, key to NPC version, never recreate through remount/retry/reconnect.",
+    "Retain and extend existing source fingerprint, feature/exports, manifest/closure, loader permanent custody, Wire26 and bridge17 regression cases."
+  ],
+  "productPaths": [
+    "apps/game-client/platform-web/Cargo.toml",
+    "apps/game-client/platform-web/src/lib.rs",
+    "apps/game-client/platform-web/src/strict_json.rs",
+    "apps/game-client/platform-web/src/mail_compose.rs",
+    "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+    "apps/web/scripts/build-client-core.mjs",
+    "apps/web/scripts/lib/client-core-release-files.mjs",
+    "apps/web/lib/client-core-runtime.ts"
+  ],
+  "limitations": [
+    "No actual third-bundle size measured or acceptance asserted.",
+    "No metadata/full-module-validation replacement or relaxation.",
+    "Existing Next/Thin flattened closure must be verified for3 bundles before delivery.",
+    "Current Windows/Gateway shipped EXEs remain Source31; Source32 tests are fresh finite test binaries, not production EXE builds.",
+    "No UI, browser, WASM API/instance, live gateway/server/network, account or save operation authorized/performed."
+  ],
+  "strictBudgetAndOriginalGuardPreserved": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

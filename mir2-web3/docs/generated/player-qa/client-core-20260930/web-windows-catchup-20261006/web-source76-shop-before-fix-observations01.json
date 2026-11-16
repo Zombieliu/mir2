@@ -1,0 +1,62 @@
+{
+  "kind": "source76-ordinary-innkeeper-purchase-before-fix",
+  "initial": {
+    "action": {
+      "keys": [
+        "route",
+        "stage",
+        "reason"
+      ],
+      "reason": null
+    },
+    "canvas": {
+      "interactive": "true",
+      "pointerEvents": "auto",
+      "rect": {
+        "height": 483,
+        "width": 644,
+        "x": 1,
+        "y": 173
+      }
+    },
+    "compatibilityShopCount": 1,
+    "loginPasswordVisible": false,
+    "shop": {
+      "keys": [
+        "source",
+        "preview",
+        "renderServiceCurrent",
+        "plannerPresent",
+        "corePresent",
+        "host"
+      ]
+    }
+  },
+  "settled": {
+    "action": {
+      "reason": null,
+      "route": "none",
+      "stage": "idle"
+    },
+    "compatibilityShopCount": 1,
+    "shop": {
+      "corePresent": true,
+      "host": {
+        "active": false,
+        "transitioning": false
+      },
+      "hostKeys": [
+        "active",
+        "transitioning",
+        "blocksInput",
+        "errorPresent"
+      ],
+      "plannerPresent": true,
+      "preview": null,
+      "renderServiceCurrent": true,
+      "source": null
+    }
+  },
+  "bought": false,
+  "loginScreenshotCaptured": false
+}

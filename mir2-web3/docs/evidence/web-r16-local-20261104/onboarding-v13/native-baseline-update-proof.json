@@ -1,0 +1,43 @@
+{
+  "schema": "mir2.r16.native-runtime-baseline-update.v1",
+  "passed": true,
+  "canonicalBaseline": {
+    "schema": 1,
+    "id": "r16-platinum-fiveclass-newcomer-v2",
+    "contentProfile": "platinum_fiveclass",
+    "questGuidance": "newcomer-v2",
+    "questCadence": "newcomer-v2",
+    "onboarding": "native"
+  },
+  "backupPreserved": true,
+  "backupDirectory": "native-baseline-backup-20261104",
+  "changedFiles": [
+    {
+      "path": "apps/ai-player/scripts/local-gateway.mjs",
+      "oldSha256": "d6489acd201240c61dcbb26600e27240fd192d910443f597d8ae6bed0d45f97f",
+      "newSha256": "bfd2f8d13a182e4bc4caa727631442a5b9e21d7d9bfa1a254ee80c2efde2ed0b"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "oldSha256": "9497f6fdc236bd9045b0b9722457e73d9841fda925cb368a010d0cc529c44e6a",
+      "newSha256": "bb82fc0719849d87dc6b5f370dd1557ef7da9f56c4f3d461287607cdfecb6a6b"
+    },
+    {
+      "path": "apps/ai-player/src/generated-gameplay-baseline.mjs",
+      "oldSha256": null,
+      "newSha256": "b18c4900a96ebebed9d1a43b7b770d699f641b27b8cf9f157c732ef68d98ba52"
+    }
+  ],
+  "oldManifestFiles": 474,
+  "newManifestFiles": 475,
+  "oldManifestSha256": "21d3f5f33a7d4ff7874bb89f0539c3a7de3a035cbce5c6724807362e04d6a1fe",
+  "newManifestSha256": "fa1a3fa0d9a545c5d1501c7c4f2d0e4e99d34c7c8a1a5ca0ce456c5125b84a84",
+  "nativeExecutablePinUnchanged": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "gatewayPinUnchanged": "7d0f109717150ebfacb205db403c19bccf58ad9eec296e78bb63e0e221c6070a",
+  "launcherPinUnchanged": "d86ff602af1aa1be9868d1911676a346997cd177e6c623232e2d10258ae7a9bb",
+  "noExecutableRebuildClaim": true,
+  "privateDataRead": false,
+  "privateDataChanged": false,
+  "servicesStartedOrStopped": false,
+  "activation": "next-normal-launch"
+}

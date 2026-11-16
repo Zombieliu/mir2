@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 1,
+  "scope": "Readonly public conditional supply-risk summary. No source/scene/policy edits, load, or capacity acceptance.",
+  "capacityAccepted": false,
+  "evidence": {
+    "detailedReport": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\halo-natural-progression-risk-v1.json",
+      "bytes": 29992,
+      "sha256": "f3ced78fdd459c027ec95c0f98f4c2fec0adbe6f95aa180f30b17f02bef96da7"
+    },
+    "originalRaw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.samples.jsonl",
+      "bytes": 17808660,
+      "rows": 28609,
+      "sha256": "a42c137132dd966434a46e735dafdd9fd53dd63d6f97983c06ea7f265b4286dc"
+    },
+    "staticValidation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v2.json",
+      "bytes": 420058,
+      "sha256": "462f11fe28b7c42096256c525c2282bb80813e461efaf7f1bbeb9748adc18fae"
+    },
+    "helper": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\summarize-halo-progression-risk-v1.mjs",
+      "bytes": 5519,
+      "sha256": "541e2159971b4bc35f08d7a4728c965bb2067d7c6eaf29ec2a531043faaf9db7"
+    },
+    "historicalSummary": {
+      "file": "C:/mir2-build/p01-completion-20261024/halo-natural-progression-risk-summary-v1.json",
+      "bytes": 14008,
+      "sha256": "05e3cb07c2b2a4b4c2bb9ad84d491a600db88586f2345e8a1b6296e2dfbff0ab"
+    },
+    "finalSummaryHelper": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-halo-risk-summary-v2.mjs",
+      "bytes": 1709,
+      "sha256": "024e7049cc86acfa9c1d1241f951da1921053593faebb2aa129db2b14cfda2ac"
+    }
+  },
+  "conclusion": "No evidence that ordinary fresh starter-Warrior leveling must or is likely to make every fighter dealD10 during the two-hour soak. A higher-DC supply limit exists conditionally, but08 attack-planning cadence snapshots only observedlevels1-5; the closed126-slot/default-XP model does not approachlevel20 even under an overgenerous reward allocation.",
+  "nativeDamage": {
+    "formula": "floor(WarriorLevel/5) added to effective equipmentDC; normalWoodenSword givesMinDC2/MaxDC4. AgainstDeer/Scarecrow AC0, ordinary rolls are inside this band before overkill clipping or real bonuses.",
+    "bands": [
+      {
+        "levels": "1-4",
+        "dc": "2-4"
+      },
+      {
+        "levels": "5-9",
+        "dc": "3-5"
+      },
+      {
+        "levels": "10-14",
+        "dc": "4-6"
+      },
+      {
+        "levels": "15-19",
+        "dc": "5-7"
+      },
+      {
+        "levels": "20-24",
+        "dc": "6-8"
+      },
+      {
+        "levels": "25-29",
+        "dc": "7-9"
+      },
+      {
+        "levels": "30-34",
+        "dc": "8-10"
+      }
+    ],
+    "source": {
+      "file": "apps/simulation/src/runtime/stats.rs",
+      "line": 232
+    },
+    "authoritativeResolution": {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 16748
+    },
+    "overkill": "runtime/zone/runtime.rs:14260 clampsactualDamage to remainingmonsterHP. All14 observed hits below the modeledMinDC have postHealthPercent0, so they are terminal overkill clipping rather than a rawDC measurement.",
+    "observedSubMinChecks": {
+      "count": 14,
+      "allPostHealthZero": true,
+      "selected": [
+        {
+          "line": 4952,
+          "at": 1792885638224,
+          "level": 1,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "8",
+          "targetId": 206639
+        },
+        {
+          "line": 5554,
+          "at": 1792885653520,
+          "level": 1,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "16",
+          "targetId": 206648
+        },
+        {
+          "line": 9829,
+          "at": 1792885777111,
+          "level": 2,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "78",
+          "targetId": 206620
+        },
+        {
+          "line": 11630,
+          "at": 1792885829208,
+          "level": 3,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "107",
+          "targetId": 206537
+        },
+        {
+          "line": 12717,
+          "at": 1792885859932,
+          "level": 3,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "124",
+          "targetId": 206712
+        },
+        {
+          "line": 15348,
+          "at": 1792885933844,
+          "level": 4,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "165",
+          "targetId": 206513
+        },
+        {
+          "line": 20920,
+          "at": 1792886092011,
+          "level": 4,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "244",
+          "targetId": 206712
+        },
+        {
+          "line": 21648,
+          "at": 1792886111726,
+          "level": 5,
+          "damage": 2,
+          "postHealthPercent": 0,
+          "requestId": "255",
+          "targetId": 206525
+        },
+        {
+          "line": 23020,
+          "at": 1792886149820,
+          "level": 5,
+          "damage": 2,
+          "postHealthPercent": 0,
+          "requestId": "275",
+          "targetId": 206537
+        },
+        {
+          "line": 23373,
+          "at": 1792886159630,
+          "level": 5,
+          "damage": 2,
+          "postHealthPercent": 0,
+          "requestId": "281",
+          "targetId": 206614
+        },
+        {
+          "line": 24649,
+          "at": 1792886195016,
+          "level": 5,
+          "damage": 2,
+          "postHealthPercent": 0,
+          "requestId": "298",
+          "targetId": 206620
+        },
+        {
+          "line": 25115,
+          "at": 1792886209216,
+          "level": 5,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "305",
+          "targetId": 206543
+        },
+        {
+          "line": 26248,
+          "at": 1792886243022,
+          "level": 5,
+          "damage": 1,
+          "postHealthPercent": 0,
+          "requestId": "323",
+          "targetId": 206617
+        },
+        {
+          "line": 28305,
+          "at": 1792886300213,
+          "level": 5,
+          "damage": 2,
+          "postHealthPercent": 0,
+          "requestId": "346",
+          "targetId": 206639
+        }
+      ]
+    }
+  },
+  "observed08": {
+    "elapsedAttackMinutes": 11.318233333333334,
+    "firstAttack": {
+      "line": 4541,
+      "at": 1792885627442,
+      "phase": "settle",
+      "level": 1,
+      "status": "success",
+      "requestId": "1",
+      "result": "launched",
+      "targetId": 206639,
+      "damage": 3,
+      "hunting": "Scarecrow"
+    },
+    "lastAttack": {
+      "line": 28511,
+      "at": 1792886306536,
+      "phase": "soak",
+      "level": 5,
+      "status": "success",
+      "requestId": "350",
+      "result": "launched",
+      "targetId": 206642,
+      "damage": 3,
+      "hunting": "Scarecrow"
+    },
+    "totalAttackActions": 350,
+    "confirmedPositiveHits": 349,
+    "objectDiedTraces": 46,
+    "perLevel": [
+      {
+        "level": 1,
+        "attackActions": 29,
+        "positiveHits": 29,
+        "confirmedDamageHistogram": {
+          "1": 2,
+          "2": 13,
+          "3": 4,
+          "4": 10
+        }
+      },
+      {
+        "level": 2,
+        "attackActions": 49,
+        "positiveHits": 49,
+        "confirmedDamageHistogram": {
+          "1": 1,
+          "2": 21,
+          "3": 16,
+          "4": 11
+        }
+      },
+      {
+        "level": 3,
+        "attackActions": 69,
+        "positiveHits": 69,
+        "confirmedDamageHistogram": {
+          "1": 2,
+          "2": 22,
+          "3": 16,
+          "4": 29
+        }
+      },
+      {
+        "level": 4,
+        "attackActions": 97,
+        "positiveHits": 97,
+        "confirmedDamageHistogram": {
+          "1": 2,
+          "2": 44,
+          "3": 29,
+          "4": 22
+        }
+      },
+      {
+        "level": 5,
+        "attackActions": 106,
+        "positiveHits": 105,
+        "confirmedDamageHistogram": {
+          "1": 2,
+          "2": 5,
+          "3": 44,
+          "4": 28,
+          "5": 26
+        }
+      }
+    ],
+    "scope": "Levels are cadence.level from real owner snapshots. Damage is positive dual-end evidence. This old08 failed12 movement planning opportunities; these attack observations do not promote it to capacity acceptance."
+  },
+  "conditionalFull100": {
+    "actors": 100,
+    "fighters": 10,
+    "targets": 126,
+    "requiredPositiveHitsPerMinute": 120,
+    "ratesByLevel": [
+      {
+        "level": 1,
+        "assumedMinDc": 2,
+        "assumedMaxDc": 4,
+        "cumulativeNativeExperienceToLevel": 0,
+        "idealUniformExpectedPositiveHitsPerMinute": 250.37831919880713,
+        "minimumDcUpperHitCountPerMinute": 369.7499999999998,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 45882
+      },
+      {
+        "level": 5,
+        "assumedMinDc": 3,
+        "assumedMaxDc": 5,
+        "cumulativeNativeExperienceToLevel": 1000,
+        "idealUniformExpectedPositiveHitsPerMinute": 191.30730579688083,
+        "minimumDcUpperHitCountPerMinute": 256.6166666666669,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 31844
+      },
+      {
+        "level": 10,
+        "assumedMinDc": 4,
+        "assumedMaxDc": 6,
+        "cumulativeNativeExperienceToLevel": 7900,
+        "idealUniformExpectedPositiveHitsPerMinute": 155.40169181527202,
+        "minimumDcUpperHitCountPerMinute": 195.9166666666668,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 24308
+      },
+      {
+        "level": 15,
+        "assumedMinDc": 5,
+        "assumedMaxDc": 7,
+        "cumulativeNativeExperienceToLevel": 76900,
+        "idealUniformExpectedPositiveHitsPerMinute": 133.80699588477364,
+        "minimumDcUpperHitCountPerMinute": 143.48333333333323,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 17806
+      },
+      {
+        "level": 20,
+        "assumedMinDc": 6,
+        "assumedMaxDc": 8,
+        "cumulativeNativeExperienceToLevel": 456900,
+        "idealUniformExpectedPositiveHitsPerMinute": 114.63065843621412,
+        "minimumDcUpperHitCountPerMinute": 143.48333333333323,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 17806
+      },
+      {
+        "level": 25,
+        "assumedMinDc": 7,
+        "assumedMaxDc": 9,
+        "cumulativeNativeExperienceToLevel": 1896900,
+        "idealUniformExpectedPositiveHitsPerMinute": 104.95432098765401,
+        "minimumDcUpperHitCountPerMinute": 113.13333333333306,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 14038
+      },
+      {
+        "level": 30,
+        "assumedMinDc": 8,
+        "assumedMaxDc": 10,
+        "cumulativeNativeExperienceToLevel": 7296900,
+        "idealUniformExpectedPositiveHitsPerMinute": 90.94938271604931,
+        "minimumDcUpperHitCountPerMinute": 113.13333333333306,
+        "minimumDcUpperTwoHourHitCountWithInitialStock": 14038
+      }
+    ]
+  },
+  "conditionalFailureBoundary": "If all10 fighters keep effectiveMinDC>=7 for the entire120min, only the same126 canonical slots replenish, no target healing/other positive damage opportunity exists, and fixed native delays hold, the generous positive-hit upper count including initial stock is14038<14400 required. This is a conditional pool ceiling, not a prediction that the actual fresh actors will reach it.",
+  "conditionalExpectedPressure": "For starter gear atlevel20-24 (DC6-8), the ideal uniform-roll expected steady positive-hit supply is114.63/min<120. That expectation is not an unconditional failure or a sampled RNG replay. Atlevel15-19 it remains133.81/min, still before chase/witness/allocation losses.",
+  "xp": {
+    "killCapacityPerMinute": 30.34999999999996,
+    "baseExperiencePerMinuteAfterLevel1to21Tier2": 1043,
+    "twoHours": {
+      "minutes": 120,
+      "rawKillCountUpperIncludingInitial": 3768,
+      "experienceUpperAtTier2IncludingInitial": 129444
+    },
+    "entire18000SecondBudget": {
+      "minutes": 300,
+      "rawKillCountUpperIncludingInitial": 9231,
+      "experienceUpperAtTier2IncludingInitial": 317184
+    },
+    "experienceNeededToLevel20": 456900,
+    "experienceNeededToLevel25": 1896900,
+    "scope": "An intentionally overgenerous conditional upper bound assigning all126 canonical slot rewards to one fresh player, initial stock plus ideal immediate respawns, tier2 until level20, no other sources/positive bonuses. It is not a bound on live wandering or the full map510slots. Existing level-difference reductions would lower XP."
+  },
+  "xpAssumptions": "platinum_176 has2x monsterXP throughlevel21,3x at22-35,4x at36-50; defaultworldrate1, QA-natural multiplier absent=>1. Closed126slot upper counts assign every reward to one fresh actor, no other XP/positive bonuses. Within300min317184XP<456900 required to reachlevel20. Real sharing and level-difference penalties slow this further, but wandering/new targets/other XP/buffs/startingXP invalidate this closed-pool bound.",
+  "equipmentBoundary": "An equipment/buff increase can reachMinDC7 beforelevel25; e.g.level10 baseDC2 plus effectiveequipmentMinDC5. The current driver only equips normal starting items and does not auto-equip level-up upgrades. Monitor realDC/damage rather than infer it solely fromlevel. stats.rs:628-633 excludes brokenequipment from the stat block; ordinary wear could lower effectiveDC, so the stable-weapon damage bands are conditional, not a projected future gear state.",
+  "alternateOnly": [
+    {
+      "name": "Hen",
+      "hp": 5,
+      "minDc": 1,
+      "maxDc": 1,
+      "level": 2,
+      "rawExperience": 9,
+      "scope": "LowerHP5 worsens highdamage hit supply; not a supply fix."
+    },
+    {
+      "name": "HookingCat",
+      "hp": 30,
+      "minDc": 2,
+      "maxDc": 4,
+      "level": 13,
+      "rawExperience": 23,
+      "scope": "HP30/32 can raise hits per target but is hostileDC2-4; static template only, no safe home/coverage/survival proof and no scene change authorized."
+    },
+    {
+      "name": "RakingCat",
+      "hp": 32,
+      "minDc": 2,
+      "maxDc": 4,
+      "level": 13,
+      "rawExperience": 27,
+      "scope": "HP30/32 can raise hits per target but is hostileDC2-4; static template only, no safe home/coverage/survival proof and no scene change authorized."
+    }
+  ],
+  "limits": [
+    "Only a canonical statically reachable pool was modeled. Its membership is not a live closed-world guarantee.",
+    "Static expected total hits cannot prove18launchedattacks/12dual-endhits per fighter in every60s; actualmiss/quarantine/chase/bodyblock/witness still apply.",
+    "No09/formal start is delayed or authorized by this result. Actual09/new profile evidence remains independent.",
+    "No XP lock, QA grant, monster modification or threshold change is proposed.",
+    "Observed level5 is the last/max attack-planning snapshot in08; it does not assert the exact final logout level without a retainedLevelChanged packet."
+  ]
+}

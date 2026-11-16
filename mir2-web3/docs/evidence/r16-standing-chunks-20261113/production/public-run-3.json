@@ -1,0 +1,99 @@
+{
+  "run": 3,
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+  "passed": false,
+  "functionalReplayPassed": false,
+  "failure": {
+    "phase": "desktop-click-ready",
+    "code": "LOGIN_RESOURCES_DID_NOT_SETTLE"
+  },
+  "scope": {
+    "phase": "desktop-click-ready",
+    "code": "LOGIN_RESOURCES_DID_NOT_SETTLE"
+  },
+  "rawReceiptSha256": "bc4261f5857a2e338d15cba022681099e204df5f6069fbf2ae4fa48419495a5a",
+  "closed": true,
+  "gameRoleCreated": false,
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "exactVersionedStarterRegion": false
+  },
+  "protocol": {
+    "gameSockets": 0,
+    "passkeyLogin": 0,
+    "loginSuccess": 0,
+    "newCharacter": 0,
+    "newCharacterSuccess": 0,
+    "startGame": 0,
+    "startGameResult": null,
+    "walk": 0,
+    "logOut": 0,
+    "logOutSuccess": 0,
+    "unexpectedMutation": 0
+  },
+  "timing": {
+    "clockEpochMs": 1794551741739,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": null,
+    "starterRegionWireHeadersMs": null,
+    "starterRegionResponseEventMs": null,
+    "starterRegionBodyMs": null,
+    "starterRegionCommitMs": null,
+    "sceneSpritesReadyMs": null,
+    "localeRequestMs": null,
+    "localeBodyMs": null,
+    "localeReadyMs": null,
+    "firstPlayableFrameMs": null,
+    "rendererBodyMs": null,
+    "clickToFirstPlayableMs": null,
+    "hudAfterPlayableMs": null,
+    "rendererBodyAfterPlayableMs": null,
+    "jointNativeReadyAfterPlayableMs": null
+  },
+  "coldQualificationPassed": false,
+  "movement": {
+    "attempted": false,
+    "passed": null,
+    "status": "not-reached"
+  },
+  "visualCity": {
+    "passed": false,
+    "status": "not-reached"
+  },
+  "questUi": {
+    "passed": false,
+    "status": "not-reached"
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-reached"
+  },
+  "prewarm": {
+    "passed": false,
+    "status": "not-reached"
+  },
+  "fonts": {
+    "passed": false,
+    "status": "no-complete-result"
+  },
+  "workerRestart": {
+    "passed": false,
+    "status": "not-reached"
+  },
+  "logout": {
+    "attempted": false,
+    "passed": false,
+    "returnedToSelect": false,
+    "sent": 0,
+    "acknowledged": 0
+  },
+  "approval": null,
+  "walletGuard": null,
+  "entryPackReads": [],
+  "runtimeReads": []
+}

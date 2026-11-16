@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "syntaxOnly": true,
+  "executionPerformed": false,
+  "checks": [
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\source-lib-v1.mjs",
+        "bytes": 13053,
+        "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-source-lib-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-source-lib-v1.mjs",
+        "bytes": 9374,
+        "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-backend-source-lib-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\verify-inputs.mjs",
+        "bytes": 1397,
+        "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\verify-inputs.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-verify-inputs.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\finalize-inputs-v1.mjs",
+        "bytes": 2989,
+        "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\finalize-inputs-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-finalize-inputs-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\freeze-inputs-v1.mjs",
+        "bytes": 1893,
+        "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\freeze-inputs-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-freeze-inputs-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\run-owned-full.mjs",
+        "bytes": 14907,
+        "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\run-owned-full.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-run-owned-full.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\audit-owned-full.mjs",
+        "bytes": 9736,
+        "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\audit-owned-full.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-audit-owned-full.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\frozen-audit-support.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-frozen-audit-support.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs",
+        "bytes": 16759,
+        "sha256": "44edfc1ba8dc6088b1e4923ed050daefe118dbb4877122aa46e1aa65fce49497"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "combinedOutput": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-author-pending-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

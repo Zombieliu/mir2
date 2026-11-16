@@ -1,0 +1,117 @@
+{
+  "checkedAt": "2026-11-16T02:01:36.196Z",
+  "application": "306066f29590d1e2e14155d83644fbc19f11a4c3",
+  "controller": "b87aa402a38aeb70f30e5afe285862cd8ecf7a46",
+  "attemptedDeployment": "dpl_9txRbTXzvDryXkCGH1hHtPn1Gssn",
+  "attemptedPublication": true,
+  "originalTwoCohortsAccepted": false,
+  "publicRows": [
+    {
+      "cohort": "r1",
+      "accepted": true,
+      "moveMs": 226,
+      "nativeMs": 51176,
+      "runtimeBodyMs": 10137,
+      "firstQRenderer": "ordinary-react-fallback",
+      "timedQRenderer": "ordinary-shared-native",
+      "timedQOwner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "sixOriginalFonts": true,
+      "hud113": true,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true,
+      "approvalOnly": true,
+      "realTestnetWallet": true,
+      "zeroQWorldMutations": true
+    },
+    {
+      "cohort": "r2",
+      "accepted": false,
+      "moveMs": 131,
+      "nativeMs": 128080,
+      "runtimeBodyMs": 1911,
+      "firstQRenderer": "ordinary-react-fallback",
+      "timedQRenderer": "ordinary-shared-native",
+      "timedQOwner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "sixOriginalFonts": true,
+      "hud113": true,
+      "workerRestart": true,
+      "normalLogout": true,
+      "bothBrowsersClosed": true,
+      "approvalOnly": true,
+      "realTestnetWallet": true,
+      "zeroQWorldMutations": true
+    }
+  ],
+  "reason": "R2 Native128080ms exceeds original120000ms; functional completion does not override the original classifier.",
+  "webPromoteRun": 43786660426,
+  "webRollbackRun": 43788334107,
+  "backendWorkflowRun": 43782096198,
+  "currentProduction": {
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "pid": 1729017
+  },
+  "rolledBackBothEnds": true,
+  "originalConfigsPreserved": 24,
+  "originalRowsPreserved": {
+    "accounts": 318,
+    "characters": 230,
+    "characterSaves": 230
+  },
+  "currentRowsIncludingNewQa": {
+    "accounts": 320,
+    "characters": 232,
+    "characterSaves": 232
+  },
+  "databaseRestored": false,
+  "newQaProgressRetained": true,
+  "postRollbackQr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "realMatrix": true,
+      "pollsAfterCancel": 0,
+      "browserClosed": true,
+      "physicalCamera": false
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "realMatrix": true,
+      "pollsAfterCancel": 0,
+      "browserClosed": true,
+      "physicalCamera": false
+    }
+  ],
+  "readbacks": [
+    {
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "ok": null
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "ok": true
+    }
+  ],
+  "preservedRawWip": 29,
+  "privateOverlaysRestored": 15,
+  "allOwnedLocalHandlesClosed": true,
+  "physicalPhoneCamera": false,
+  "firstColdQClosed": false,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "goal": "active"
+}

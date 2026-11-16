@@ -1,0 +1,41 @@
+{
+  "owner": "Root",
+  "kind": "Source74 exact-owned Web closure before Source75",
+  "normalNativeHeaderCloseThenBagCloseThenAltX": true,
+  "loginPasswordVisibleObservedWithoutReadingValues": true,
+  "normalLogoutObserved": true,
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source74-bag-storage-skins-20261012-01/root-approved01/web-start01-config.json",
+    "bytes": 2995,
+    "sha256": "9e5e05f5751cca0bf87c8d47ed126b3016877536d8b34722a7bb4b11e8ee19e5"
+  },
+  "childPid": 84052,
+  "parentPid": 84152,
+  "ownedChildIdentityVerifiedTwice": true,
+  "exactOwnedChildStopped": true,
+  "parentNotKilled": true,
+  "originalExecSession": 69084,
+  "actualOriginalCallerClosedExit": -1,
+  "expectedExactOwnedStopExit": true,
+  "originalPostguardPassed": true,
+  "closedOuter": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 84052,
+    "kind": "Source74 actual original caller local Web complete genuine Bag Storage skins",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4256978,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\web-start01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "gatewayUnchanged": true,
+  "foreignProcessesNotQueried": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

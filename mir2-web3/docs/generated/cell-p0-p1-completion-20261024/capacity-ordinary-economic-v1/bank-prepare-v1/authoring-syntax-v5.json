@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 5,
+  "packageId": "ordinary-capacity-bank-prepare-v1",
+  "state": "PENDING_ROOT_REVIEW_NOT_FROZEN_NOT_RUN",
+  "supersedesAuthoring": "authoring-syntax-v4.json",
+  "change": "Owned production child passes one options argument with legal onProgress callback. Synchronous one-file tiny whitelist progress only; no timer/network/game commands, credentials, pool data, history rewrites or swallowed I/O errors.",
+  "previousChild": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\owned-child-v1.mjs",
+    "bytes": 1693,
+    "sha256": "6e888ceb88adc1fabedbe7203dad10f65074ae60a69032ea5a02c382e5d81f45"
+  },
+  "currentChild": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\owned-child-v1.mjs",
+    "bytes": 2201,
+    "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+  },
+  "liveOutput": "episode/preparation-current.json",
+  "checkpointActorFields": "A checkpoint callback that omits name/index records null; no prior actor identity is invented.",
+  "checks": [
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\owned-child-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "pins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\source-lib-v1.mjs",
+      "bytes": 13861,
+      "sha256": "e029c5ce9b8e292de5c1a20e07a928f912bb93247c9b23251052b8c2863da4ef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\run-owned-prepare-v1.mjs",
+      "bytes": 21456,
+      "sha256": "147c6413512791e17e222ea40b268f7464c635c09ada33d1afcc9bf0fa92bb44"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\freeze-prepare-v1.mjs",
+      "bytes": 7090,
+      "sha256": "a0b35e3c089b0ae1267f1f5c7bc8b565ad6e2ebdc98efc3e5071fe4a8ea050b1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\prepare-config-pending-v3.json",
+      "bytes": 4075,
+      "sha256": "25061da26604e7e98e4ad453870abf4c5e9a013f150922c9d28f028d4f650cd0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+      "bytes": 22813,
+      "sha256": "116fd663f0b49403975d9c48368f59b39daa2c74a66c4567e8ba2edccc2021fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\static-staging-proof-v2.json",
+      "bytes": 25000,
+      "sha256": "9fe1834dd3d7adac7cf1246e95952221b19b88c37de21ae8e5f7fbbf06bc3232"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\resource-profile-v1.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    }
+  ],
+  "freezePerformed": false,
+  "loadPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

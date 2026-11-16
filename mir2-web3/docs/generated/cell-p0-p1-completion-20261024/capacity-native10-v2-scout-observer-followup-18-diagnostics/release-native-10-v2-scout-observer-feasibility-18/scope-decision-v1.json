@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARATION_ONLY",
+  "requested25PrefixNotImplemented": true,
+  "reason": "Existing immutable probe capacityPolicy limits actors to10; standard requires a long soak and resume/save, so the earlier 2/10/25 short design is unsupported without changing core. Root chose unchanged original 2/10 probe instead; no core/profile change, no unsupported25 directory or mode was created.",
+  "stages": [
+    2,
+    10
+  ],
+  "stageSeconds": 300,
+  "soakSeconds": 360,
+  "combatActors": 1,
+  "ordinaryAccountPoolSize": 100,
+  "maximumControlledActors": 10,
+  "completeWindows": [
+    5,
+    5,
+    6
+  ],
+  "policyUnchangedFromProbe17": true,
+  "resourceCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "softCpuCores": 8,
+  "privateBytes": 4294967296,
+  "workingSetBytes": 8589934592,
+  "minHostFreeBytes": 8589934592,
+  "hardQuota": false,
+  "actualWindowsExecuted": 0,
+  "capacityAccepted": false
+}

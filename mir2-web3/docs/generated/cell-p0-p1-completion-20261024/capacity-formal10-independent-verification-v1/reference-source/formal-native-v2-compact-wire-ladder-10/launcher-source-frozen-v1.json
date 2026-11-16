@@ -1,0 +1,492 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T07:58:42.732Z",
+  "state": "final-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "patrolSpan": 2,
+  "sceneStaticCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "wireDiagnostics": {
+    "version": "v2",
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "wrapperTests": 28,
+    "core187CoversWrapper": false,
+    "terminalFile": "compact-navigation-wire-terminal.json",
+    "terminalOutsideRaw": true,
+    "existingWriter": {
+      "defaultMaxBufferedBytes": 4194304,
+      "addMayRecordFailureAndReturn": true,
+      "durableRowsRequireRawCrosscheck": true
+    }
+  },
+  "coreFunctionalEvidenceCoversWrapper": false,
+  "wrapperUnitTests": 28,
+  "adapterUnitTests": 8,
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v6.json",
+    "bytes": 26339,
+    "sha256": "de146199a73f1be24c5c1a7ce241fead3b92126455d7096c0f5fcd6c02376163"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal10-independent-review-v1\\preseal-independent-review-v6.json",
+    "bytes": 13622,
+    "sha256": "7ffcc26c9f16d8cfac313c1742db39bd1c1f5c4342364ff5462323c927a1c8b8"
+  },
+  "executionPrerequisites": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-execution-prerequisites-v5.json",
+    "bytes": 9818,
+    "sha256": "77c4ffa11dba05e93a8e4ec3df397d6d723bbb06451680b0e67b1c5fc1445073"
+  },
+  "rootSealExecutor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\seal-compact-wire-formal10-v6.mjs",
+    "bytes": 8008,
+    "sha256": "f41409bf89547f8d7500f9ac2eb34a85e8a2d075419361fe1d24e0b7fcd9e471"
+  },
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\DIAGNOSTICS-PREPARED.md",
+      "bytes": 3587,
+      "sha256": "2ce5193cf2d4ec8f45bc85c4af1f03a780512e0c2e679a5e228a6aa90e3cdf5e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\candidate-release-binding.json",
+      "bytes": 6386,
+      "sha256": "442246921e74e6614bbd6280150765bcda16ddc4eb9aec57cf7f3c3df8e67835"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\collect-public.mjs",
+      "bytes": 41882,
+      "sha256": "59f25bff4ca5f6da894b9c6fae157883c10f2efea47365e8c36e25ecd2c98650"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\complete-fresh13-gate-v1.mjs",
+      "bytes": 6748,
+      "sha256": "6d78e738f44b7aa4838d2f94c7207f14463127ee356801505ce15f58b94cc5e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\copied-baseline-inputs.json",
+      "bytes": 14132,
+      "sha256": "1c88d0fd6e0bbff5caa93a6dd4c4ecda0c403b7cdb485f94aa0ebfeb6434efbe"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\create-from-formal08-probe13.mjs",
+      "bytes": 7064,
+      "sha256": "c9b4d4d94404579443e4629b450338335e07f34795d04bb5737b06062a60920e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\driver-report-contract.mjs",
+      "bytes": 9319,
+      "sha256": "a53b9b58f3142487e6a197c5987aed04459d68ae81340b2a40008de0ba3418f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\final-inputs-approved.json",
+      "bytes": 81841,
+      "sha256": "47d844f00d1c1931cb0ca651fc6a78df9fcc7c600b92f030f4790f7a5a0835eb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\input-lib.mjs",
+      "bytes": 14680,
+      "sha256": "05fa358a0c286cdcb3dbd879bc1049dff534bbee195810230b72b90a687caee9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\integrate-wire-collection-v1.mjs",
+      "bytes": 5850,
+      "sha256": "8ab0c9141f9bac706c5ecf0e88b1b6c433c63cb169e17371bb677c4d0af7cfc2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\integrate-wire-source-v1.mjs",
+      "bytes": 4340,
+      "sha256": "09b3285cb44fc8d1265bd6a89f83b2d0596cbefd1f0fc22002a8ebb60ef82d13"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\launcher-source-prepared-v1.json",
+      "bytes": 3129,
+      "sha256": "ce9d0951b7cacc7d95d00601e8132d2f1d967f877f7ce6dbeb1c2c417ce825ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\launcher-syntax-check.log",
+      "bytes": 1428,
+      "sha256": "4b314c2328896de6b10b16ec0d3e74431e3b951cabb18fcfc36e6f285cb053b3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\preparation-plan.json",
+      "bytes": 3054,
+      "sha256": "018fca2f9150602ec5efadb4f91980d8830a591072ae61d8b12e2acf5fa61403"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\prepare-inputs.mjs",
+      "bytes": 11454,
+      "sha256": "c0baf33cceeaaa04ca773028a2011e0e660a0532a036bd6508a6058a19f55ea0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\run-adapter-synthetics.mjs",
+      "bytes": 2034,
+      "sha256": "09b381ec6fcfc99628666e2a2d1107f1a271bcff2685bb6045a9d1e83dd7510f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\run-options.json",
+      "bytes": 3065,
+      "sha256": "2d49d53cbe638aedc002a30fd229e3dfe9d1e1fa103c3bd4515546c88933a76a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\run-owned.mjs",
+      "bytes": 19575,
+      "sha256": "66d52557bc31a92468e8c84384a3258d72c8cbc092f4f5144f0abdfe91d2b2f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\scene-binding.json",
+      "bytes": 6417,
+      "sha256": "b11055102404d50a8c14d43faaaf331bdde1b73cf1fb9f2ff5f5e6adcf1a7bcb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\scene-contract.mjs",
+      "bytes": 10033,
+      "sha256": "2baa5ee428dfb3b95acb664993988977a570ac7c93c8bf28d8b0f70d859909ad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\static-preparation-verification.json",
+      "bytes": 3399,
+      "sha256": "e3fc79cdf4899ad28e2285491f3464dffe6e4590c1f5aee8587a823aeb9c8076"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-feasibility-gate.mjs",
+      "bytes": 19527,
+      "sha256": "1271b11da525a7c228bcfca473a1255f224e7919826ffd1bc86d25b4d193cdc4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+      "bytes": 13659,
+      "sha256": "be17670e9203446fe40be75282bef05d43895dabba36fc2c19b7cfd8558f9c2a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-public.mjs",
+      "bytes": 18729,
+      "sha256": "42b634bdf9f31ecc27e1eda803a8b730e298887316f7b07a6d1dd96a632fbab3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    }
+  ],
+  "sourceSha256": "377b206576d506dfd396f718030b833c78398a2f827792225e5f334d58992972",
+  "scripts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\collect-public.mjs",
+      "bytes": 41882,
+      "sha256": "59f25bff4ca5f6da894b9c6fae157883c10f2efea47365e8c36e25ecd2c98650"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\complete-fresh13-gate-v1.mjs",
+      "bytes": 6748,
+      "sha256": "6d78e738f44b7aa4838d2f94c7207f14463127ee356801505ce15f58b94cc5e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\create-from-formal08-probe13.mjs",
+      "bytes": 7064,
+      "sha256": "c9b4d4d94404579443e4629b450338335e07f34795d04bb5737b06062a60920e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\driver-report-contract.mjs",
+      "bytes": 9319,
+      "sha256": "a53b9b58f3142487e6a197c5987aed04459d68ae81340b2a40008de0ba3418f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\input-lib.mjs",
+      "bytes": 14680,
+      "sha256": "05fa358a0c286cdcb3dbd879bc1049dff534bbee195810230b72b90a687caee9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\integrate-wire-collection-v1.mjs",
+      "bytes": 5850,
+      "sha256": "8ab0c9141f9bac706c5ecf0e88b1b6c433c63cb169e17371bb677c4d0af7cfc2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\integrate-wire-source-v1.mjs",
+      "bytes": 4340,
+      "sha256": "09b3285cb44fc8d1265bd6a89f83b2d0596cbefd1f0fc22002a8ebb60ef82d13"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\prepare-inputs.mjs",
+      "bytes": 11454,
+      "sha256": "c0baf33cceeaaa04ca773028a2011e0e660a0532a036bd6508a6058a19f55ea0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\run-adapter-synthetics.mjs",
+      "bytes": 2034,
+      "sha256": "09b381ec6fcfc99628666e2a2d1107f1a271bcff2685bb6045a9d1e83dd7510f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\run-owned.mjs",
+      "bytes": 19575,
+      "sha256": "66d52557bc31a92468e8c84384a3258d72c8cbc092f4f5144f0abdfe91d2b2f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\scene-contract.mjs",
+      "bytes": 10033,
+      "sha256": "2baa5ee428dfb3b95acb664993988977a570ac7c93c8bf28d8b0f70d859909ad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-feasibility-gate.mjs",
+      "bytes": 19527,
+      "sha256": "1271b11da525a7c228bcfca473a1255f224e7919826ffd1bc86d25b4d193cdc4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+      "bytes": 13659,
+      "sha256": "be17670e9203446fe40be75282bef05d43895dabba36fc2c19b7cfd8558f9c2a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-public.mjs",
+      "bytes": 18729,
+      "sha256": "42b634bdf9f31ecc27e1eda803a8b730e298887316f7b07a6d1dd96a632fbab3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    }
+  ]
+}

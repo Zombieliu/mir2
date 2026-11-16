@@ -1,0 +1,8 @@
+Candidate release configuration tests passed (endpoints, profiles, daylight, map coverage, actor allowlist)
+Candidate actor closure guards passed (valid frame, duplicate, escaping path, missing image, missing library)
+PET_GUILD_CLOSURE_SELFTEST=passed (6219 PNG, 22 metadata, 15 Pet frame sets, 11 sounds; mutation rejection checks passed)
+VERIFY_ADS_SELFTEST=passed
+EXISTING_RELEASE_PATH_SCAN=passed
+PINNED_FONT_PATH_SCAN=passed (gvar only; exact full-font bytes; adjacent leaks and altered fonts rejected)
+UNICODE_PATH_BOUNDARY_SELFTEST=passed
+verify-windows-candidate self-test passed

@@ -1,0 +1,23 @@
+{
+  "candidate": "e10a84e12923-firstparty-fonts-c84e5706",
+  "scripts": {
+    "entry-player-probe.mjs": "6b83c0c355eb98fb36a99c634d1cd299f17d8da07b65b63dc35fab8bdaa1d4e5",
+    "invoke.mjs": "64a7123c57c878c170f378203a37603ff520910e2745b176e617f48f827f063e",
+    "profile.mjs": "3c40d2cb928b0799a4f59b7d621997f2e906572473591a45fe990a5f88b32930",
+    "run.mjs": "5b9ab592f583bb1ca2245a77ac4ac9497f9ca8283ddd3437868ebcaf64c4c516",
+    "standing-faces.mjs": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+    "ui-asset-fault.mjs": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "c14a406f7a56a564889a32adafbb9989eb058d1c5155e3a1f94a7d74427e6ea0"
+  },
+  "previousPreparationSha256": "a53f45e60e0d930bd15029c8c32dbfbca1cbb2b66698bdbd71a176d141fc7a6b",
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "originalFirstPlayableObservationMs": 60000,
+  "addedFault": "Real app TC prefix stalls15s then complete same-pin CDN replacement. Existing JSON2x20s, NPC2x20s, binary8s headers+2x15s idle, Native recovery, full6-fontSHA, 113/113, realWorkerrestart and complete-browser-close warm session retained.",
+  "evidenceChange": "Expected hosted font source is now app-first. Replace prior deliberate font/binary overlap assertion with actual completion→font-prewarm→ready milestones, matching this change. No gameplay gate changed.",
+  "noPublicResources": true,
+  "noUserStateInjection": true,
+  "correction": "The raw cache milestone API has atMs, not the epochMs derived by the scene observer. Compare finite atMs in the same document. Original failed r1 and its52.288s Native/full6-font passes remain; production bytes and every gameplay/timeout gate unchanged."
+}

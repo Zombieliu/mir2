@@ -1,0 +1,62 @@
+{
+  "schema": "mir2.comparable.fd3-dense100-closed.v1",
+  "candidateSource": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "windowsBinarySha256": "e3409b70c3e1661a8bee7f3432aaab9816f92f26283fc3fed72fbe121aad8e38",
+  "planSha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+  "resourceContract": {
+    "logicalCpus": 4,
+    "serverAffinityMaskHex": "0xf",
+    "memoryCommitBytes": 8589934592,
+    "budgetScope": "all-declared-server-processes",
+    "includesOsOrInjector": false,
+    "injectorAffinityMaskHex": "0xff0"
+  },
+  "population": 100,
+  "plannedScoredDurationSeconds": 300,
+  "measurementStartedAtUtc": "2026-11-14T07:52:30.140Z",
+  "measurementPlannedEndAtUtc": "2026-11-14T07:57:30.140Z",
+  "observationEndedAtUtc": "2026-11-14T07:57:32.139Z",
+  "offered": 16000,
+  "completedOnTime": 15157,
+  "timedOut": 123,
+  "notSent": 720,
+  "passedActorMinuteWindows": 113,
+  "allActorMinuteWindows": 500,
+  "equipmentOperations": 12,
+  "allEquipmentPassed": true,
+  "all100NormalLogoutClose": true,
+  "freshActors": [
+    0,
+    99
+  ],
+  "allFreshStateAndNormalLogoutClosePassed": true,
+  "controllerDriverServerActualExitCodes": [
+    1,
+    1,
+    0
+  ],
+  "normalServerStopProven": true,
+  "allOwnedMembersExitedNoKill": true,
+  "resourceRows": 3651,
+  "resourceEvidenceComplete": true,
+  "fileReaderActualExitCode": 1,
+  "fullActorFileReadbackPerformed": false,
+  "independentVerifierActualExitCode": 1,
+  "capacityQualified": false,
+  "productionStackQualified": false,
+  "physicalTriClientQualified": false,
+  "sourceReportSha256": "ec685f35f84b07863c66683442b951296e6c80401ae1544d5ec2f087dd7f26d1",
+  "sourceEventsSha256": "2da5ff07df3a760a4734e946e6252eb05edf68906adec0ce3d50704bc8fc7e8d",
+  "controllerSha256": "45d4c029da997756136be2dbacbe567f0f47658df053977b0f5545013df297c6",
+  "fileReaderReceiptSha256": "daa7a3ec0823a138105560b82e9bcb847ae10223113dd2424625f30fdb7fb2e1",
+  "independentVerifierReceiptSha256": "8b3f362a2183b2d35b3b203a396ff042bfd9e63fe314f39b8f79eddef61408a3",
+  "auth": {
+    "priorAttemptsRetained": 1173,
+    "newAttemptsRetained": 114,
+    "totalAttempts": 1287,
+    "historyVersion": 26,
+    "historySha256": "d224cf06211f0a425a5020f5459968b8e031f97d38a712e04f0d2899fdb36baf",
+    "resetPerformed": false
+  },
+  "interpretation": "The targeted mentor checkpoint regression and two-player calibration passed; this100-player common-plan run still failed and does not establish the principal latency cause."
+}

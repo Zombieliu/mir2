@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only two exact literal substitutions from verifier v7; syntax check only. Verifier not executed.",
+  "createdAt": "2026-10-27T08:32:23.812865+00:00",
+  "parent": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v7.mjs",
+    "bytes": 15209,
+    "sha256": "42c531599e9de6376621fca07b4f03d848c16a64aa64372b306a08cfe3e541ac"
+  },
+  "current": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v8.mjs",
+    "bytes": 15209,
+    "sha256": "edd63e82dc8954f0b2276cd3b2c1fb3ca472c1c656c59ffe48e3062a377ac090"
+  },
+  "rules": [
+    {
+      "from": "ordinary-capacity-bank-prepare-v15",
+      "to": "ordinary-capacity-bank-prepare-v16",
+      "actualOccurrences": 2
+    },
+    {
+      "from": "W15 backend package",
+      "to": "W16 backend package",
+      "actualOccurrences": 5
+    }
+  ],
+  "inverse": {
+    "appliedInReverseRuleOrder": true,
+    "rawBytesExactlyEqualParent": true,
+    "bytes": 15209,
+    "sha256": "42c531599e9de6376621fca07b4f03d848c16a64aa64372b306a08cfe3e541ac"
+  },
+  "syntax": {
+    "command": [
+      "node",
+      "--check",
+      "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v8.mjs"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "verifierExecuted": false,
+  "freezePerformed": false,
+  "ownedModeExecuted": false,
+  "repositoryModified": false
+}

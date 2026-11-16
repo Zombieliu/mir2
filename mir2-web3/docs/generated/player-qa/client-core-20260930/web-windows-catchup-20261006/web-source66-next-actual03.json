@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "sourceRound": "Source66",
+  "purpose": "Warehouse visible NPC interaction strict Web build",
+  "rootAccepted": true,
+  "actualExitCode": 0,
+  "childPid": 66616,
+  "elapsedMs": 43592,
+  "childExited": true,
+  "childDisposed": true,
+  "originalCallerExitCode": 0,
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "command": "node node_modules/next/dist/bin/next build --webpack",
+  "cwd": "E:/mir2-player-journey/work/web-source66-visible-npc-full-public03/mir2-web3/apps/web",
+  "nextVersion": "16.2.11",
+  "compiled": true,
+  "strictTypeScriptPassed": true,
+  "compileSeconds": 15.2,
+  "typeScriptSeconds": 12.9,
+  "staticPages": 13,
+  "ignoredBuildErrors": false,
+  "prePostSourcePinsMatched": true,
+  "sourceInputCount": 36369,
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/preparation03/source66-full-public-source-snapshot03.json",
+    "bytes": 21674523,
+    "sha256": "e0ee3ae3f85afd3620bee865d7ec6850bdb81cc991befe7c5d94e4706024b4e6"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/full-public-source-review03.json",
+    "bytes": 7123,
+    "sha256": "5c8275c2d0dac38c6ac4b070dcf7fe9097559af62debb99c4b164dc76552489b"
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/next-build03-config.json",
+    "bytes": 5188,
+    "sha256": "844938eb2376873979d1ddacb32b68becb42dfb078efcd2c0df9525f6fdc68fb"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/next-build03/stdout.log",
+    "bytes": 2026,
+    "sha256": "cada488a6a2cc9c2cef3a53157cfaf432c3cc12596157871835ff2e1ded67ee8"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/next-build03/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "warningCount": 0,
+  "warningKind": "No stderr diagnostics",
+  "legacyAssetRowsBefore": 13,
+  "legacyAssetRowsAfter": 13,
+  "removedAssetRows": 0,
+  "distBasename": ".next-web-windows-catchup-source64-20261011-01",
+  "mainTsconfigPreserved": true,
+  "isolatedNextEnvPreserved": true,
+  "testCounts": {
+    "passed": 208,
+    "failed": 0
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "storageLiveAccepted": false,
+  "candidate100": false,
+  "humanFrontendAccepted": false,
+  "goalComplete": false,
+  "kind": "Actual strict Next full-public same-drive Source66",
+  "CStrictBuildAndMalformedClosurePreserved": true,
+  "CClosureEvidence": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-preparation01/nft-out-of-scope-blocker01.json",
+    "bytes": 16903357,
+    "sha256": "0599dd526a1166c095364ed924ebe6f53b43e5e1d3a12d163be2b45d7b80712d"
+  },
+  "node208CarriedWithIdenticalProductAndTestInputs": true,
+  "publicFiles": 17016,
+  "atlasPages": 79,
+  "atlasPageBytes": 25025532,
+  "compiledAtlas": {
+    "MIR2_PINNED_MAP_ATLAS_ENABLED": "",
+    "MIR2_PINNED_MAP_ATLAS_MANIFEST_PATH": "",
+    "MIR2_PINNED_MAP_ATLAS_CONTENT_HASH": ""
+  },
+  "thinStillPending": true,
+  "failedThin02Preserved": true
+}

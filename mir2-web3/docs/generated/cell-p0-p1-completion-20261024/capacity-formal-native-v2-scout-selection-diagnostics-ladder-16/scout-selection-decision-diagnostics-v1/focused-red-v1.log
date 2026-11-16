@@ -1,0 +1,251 @@
+TAP version 13
+# Subtest: scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+not ok 1 - scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+  ---
+  duration_ms: 5.2433
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3483:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   activeOtherWaypointCount: undefined,
+    +   hintCount: undefined,
+    +   hintPreferenceReason: undefined,
+    +   sharedHintCount: undefined,
+    +   unsharedHintCount: undefined
+    -   activeOtherWaypointCount: null,
+    -   hintCount: 1,
+    -   hintPreferenceReason: 'insufficient-hints',
+    -   sharedHintCount: null,
+    -   unsharedHintCount: null
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    hintCount: 1
+    activeOtherWaypointCount: ~
+    sharedHintCount: ~
+    unsharedHintCount: ~
+    hintPreferenceReason: 'insufficient-hints'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3490:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+not ok 2 - scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+  ---
+  duration_ms: 0.8587
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3501:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   activeOtherWaypointCount: undefined,
+    +   hintCount: undefined,
+    +   hintPreferenceReason: undefined,
+    +   sharedHintCount: undefined,
+    +   unsharedHintCount: undefined
+    -   activeOtherWaypointCount: 0,
+    -   hintCount: 2,
+    -   hintPreferenceReason: 'no-active-other-waypoints',
+    -   sharedHintCount: 0,
+    -   unsharedHintCount: 2
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    hintCount: 2
+    activeOtherWaypointCount: 0
+    sharedHintCount: 0
+    unsharedHintCount: 2
+    hintPreferenceReason: 'no-active-other-waypoints'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3505:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: scout selection diagnostics count mixed alternatives and report the existing stable reordering
+not ok 3 - scout selection diagnostics count mixed alternatives and report the existing stable reordering
+  ---
+  duration_ms: 1.0987
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3513:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   activeOtherWaypointCount: undefined,
+    +   hintCount: undefined,
+    +   hintPreferenceReason: undefined,
+    +   sharedHintCount: undefined,
+    +   unsharedHintCount: undefined
+    -   activeOtherWaypointCount: 1,
+    -   hintCount: 2,
+    -   hintPreferenceReason: 'reordered',
+    -   sharedHintCount: 1,
+    -   unsharedHintCount: 1
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    hintCount: 2
+    activeOtherWaypointCount: 1
+    sharedHintCount: 1
+    unsharedHintCount: 1
+    hintPreferenceReason: 'reordered'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3517:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+not ok 4 - scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+  ---
+  duration_ms: 0.8952
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3525:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   activeOtherWaypointCount: undefined,
+    +   hintCount: undefined,
+    +   hintPreferenceReason: undefined,
+    +   sharedHintCount: undefined,
+    +   unsharedHintCount: undefined
+    -   activeOtherWaypointCount: 1,
+    -   hintCount: 2,
+    -   hintPreferenceReason: 'all-hints-unshared',
+    -   sharedHintCount: 0,
+    -   unsharedHintCount: 2
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    hintCount: 2
+    activeOtherWaypointCount: 1
+    sharedHintCount: 0
+    unsharedHintCount: 2
+    hintPreferenceReason: 'all-hints-unshared'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3531:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+not ok 5 - scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+  ---
+  duration_ms: 1.442
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3538:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   activeOtherWaypointCount: undefined,
+    +   hintCount: undefined,
+    +   hintPreferenceReason: undefined,
+    +   sharedHintCount: undefined,
+    +   unsharedHintCount: undefined
+    -   activeOtherWaypointCount: 2,
+    -   hintCount: 2,
+    -   hintPreferenceReason: 'all-hints-shared',
+    -   sharedHintCount: 2,
+    -   unsharedHintCount: 0
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    hintCount: 2
+    activeOtherWaypointCount: 2
+    sharedHintCount: 2
+    unsharedHintCount: 0
+    hintPreferenceReason: 'all-hints-shared'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3548:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+not ok 6 - scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+  ---
+  duration_ms: 12.6542
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3555:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(rows.slice(0, -1).every(row => row.hintCount === 2 && row.activeOtherWaypointCount === 0 &&
+        row.sharedHintCount === 0 && row.unsharedHintCount === 2 && row.hintPreferenceReason === 'no-active-other-waypoints' &&
+        row.pathSearches === 2 && row.hintPathSearches === 1 && row.truncated === false))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3562:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 0
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 115.8503

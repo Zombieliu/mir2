@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-11-15T18:54:44.596Z",
+  "mutated": false,
+  "transport": "Node native fetch, release-controller endpoint paths",
+  "reads": [
+    {
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "bodySha256": "945caa675b0e9bc83712ec68f003b15a20a9c84051ab396b7a4ec43eec1ad7d3",
+      "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+      "passed": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "bodySha256": "d018ae7358b54f562a44d608cddfee30cfa843ae813af18f8561a7b794824100",
+      "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

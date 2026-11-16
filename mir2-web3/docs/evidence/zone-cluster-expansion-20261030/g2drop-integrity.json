@@ -1,0 +1,32 @@
+{
+  "atUtc": "2026-10-30T15:47:30.3858910Z",
+  "baseline": "d894526752214248bd32ba82f6f75951cd346c4a",
+  "artifactCount": 25,
+  "sha256": {
+    "g2drop-bins-final-result.json": "d5e0988e2e934c0a1cab667c3b6879e1000611b77ed793372b21c6d5300b4bf3",
+    "g2drop-bins-final.log": "434e69c86b7d2de13dc9259aecfe4937c36eefb5b37d5c82daaf02d90552c343",
+    "g2drop-checkpoint-adjacent-result.json": "a6e61369e9f3267f919f0be044e59e15715442413248fe0a28c9c13ffe1f9e16",
+    "g2drop-checkpoint-adjacent.log": "09868949a8257fed4bd152493947f16fbd758b18ea0824a4841e102370fba7c6",
+    "g2drop-economy-guard-adjacent-result.json": "530667bb059daa5dc2bc5bb3a15f15faa3a09c8eb020d2f5ae6c5d1e57f4d486",
+    "g2drop-economy-guard-adjacent.log": "aa149878ad112dde24fcd5f46e7732ae8d3e0ddecd8bc939903ba2f42a643c2f",
+    "g2drop-fixture-stop.json": "8455993821304b165ff73c52767e1281ac8c743281c8376d1f17e0e75fa3e2c1",
+    "g2drop-gateway-ground-adjacent-result.json": "16529b8902e93ed0b1d9de06af55b0a92c63b07cf4a4bc97f35b2e696cea6557",
+    "g2drop-gateway-ground-adjacent.log": "0e8074f6ed4c7048dae968b4a00474a127a057edeba05d4cd1f58f0c1a07922b",
+    "g2drop-guard-integration-check-result.json": "bb588404fceb8ff3efebbd7be376c66191ef6351a1a90b9e60ffd933d37863c7",
+    "g2drop-guard-integration-check.log": "e8635332490058406771955654fcd3c838981887db90d4279d6767273d27f59c",
+    "g2drop-postgres-final-result.json": "5ada44650cf19d53e327605b811d9cf1d29ff86a3c494e8ad8c8d75212937bb2",
+    "g2drop-postgres-final.json": "e4b2e07107ca8c4a9652d83e99fd1235a1557c6d51287f0b70c48ac8a7795e6b",
+    "g2drop-postgres-final.log": "7e64a85cfe3c2887474809e010f59027dd8c4d6c9c72a1038cbd0cab902d65b9",
+    "g2drop-save-operation-adjacent-result.json": "6095ec8adf72c75c9f122cd042a9548798e0b2b65b98e3a33386f7f1823cfa4b",
+    "g2drop-save-operation-adjacent.log": "5c36effb0e0dbfce76d1ee6501accc953ecc0e79d7511ab56b699297ea8971ba",
+    "g2drop-simulation-final-result.json": "c8ad52a9e8a4db597f84b3d5ba2c7a480e3b368efaa028f964481d11173c2c8c",
+    "g2drop-simulation-final.log": "0a5645ac0e2215b4a3cdf797cf07eb8744d66c5b69841ed919d47bbdde945fe6",
+    "g2drop-simulation-ground-adjacent-result.json": "f872369757b829b5fe7705bb9d39638195891f9d87e9c987830dff8c69c28150",
+    "g2drop-simulation-ground-adjacent.log": "90824021d180711a70d6c73adfe9066cb20cc32fe91e8665ecbc716e3a888e80",
+    "g2drop-teardown-adjacent-result.json": "b4f3dbbceb0b1a123b90eb6246605b458670189dc05eec3a8270bf8dd80a19d3",
+    "g2drop-teardown-adjacent.log": "224259dd0a4a2e80bcd25fa5a0ea96529eeaae1246e5f21338d93a1f3fee58f3",
+    "g2drop-unknown-adjacent-result.json": "5a2ef5859d3936405ae1d48234508acdb4c0e448acba8bc6e2e76adca56cb510",
+    "g2drop-unknown-adjacent.log": "7acde87d99b8730c41b79760bb3bf3296bbc994f6b592c0e7d16d4bd52d2d031",
+    "g2drop-verification.json": "9ad5982a9a00cd9376d9b1653adeb0b14888307ea63175c44873db2b52a3415c"
+  }
+}

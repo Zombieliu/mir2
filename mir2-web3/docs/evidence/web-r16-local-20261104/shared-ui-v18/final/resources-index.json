@@ -1,0 +1,18 @@
+{
+  "phase": "resources",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 1,
+  "bytes": 1144,
+  "entries": [
+    {
+      "path": "release/v18-live-map-assets-receipt.json",
+      "source": "D:/mir2-builds/web-r16-20261106/v18-live-map-assets-receipt.json",
+      "bytes": 1144,
+      "sha256": "7bcdbf5438d28f33fdb3b71951a56160304ebe8299d1fa29fbd32a5258fab899"
+    }
+  ]
+}

@@ -31,6 +31,8 @@ new Function("exports", "module", "require", compiled.outputText)(
 );
 
 const {
+  CRYSTAL_FISHING_ROD_FRAME_OFFSET,
+  crystalFishingRodLibrary,
   crystalMountFrameIndex,
   crystalMountedPlayerActionForPresentation,
   crystalPlayerAnimationMeta,
@@ -63,6 +65,30 @@ const frameSetFor = (libraryKey) => ({
   actions: frameSetCatalog.libraries[libraryKey].actions,
 });
 const right = 2;
+
+const fishingManifest = JSON.parse(
+  readFileSync(new URL("./crystal-ui-export-manifest.json", import.meta.url), "utf8"),
+);
+for (const [weapon, rod] of [["CWeapon/49", "Fishing/00"], ["CWeapon/50", "Fishing/01"]]) {
+  assert.equal(crystalFishingRodLibrary(weapon), rod);
+  assert.deepEqual(fishingManifest.libraries[rod].ranges, [[0, 175]]);
+}
+assert.equal(crystalFishingRodLibrary("CWeapon/48"), null);
+for (const [phase, start, count, interval, rodDownLeft] of [
+  ["fishingCast", 632, 8, 100, 40],
+  ["fishingWait", 696, 6, 120, 94],
+  ["fishingReel", 744, 8, 100, 152],
+]) {
+  for (const bodyOffset of [0, 808]) {
+    const animation = crystalPlayerAnimationMeta(phase, bodyOffset, CRYSTAL_FISHING_ROD_FRAME_OFFSET);
+    assert.equal(animation.frameBaseOffset, start + bodyOffset);
+    assert.equal(animation.frameCount, count);
+    assert.equal(animation.directionStride, count);
+    assert.equal(animation.frameIntervalMs, interval);
+    assert.equal(animation.weaponFrameOffset + 5 * count, rodDownLeft);
+    assert.equal(crystalPlayerFrameIndex(phase, 7, count - 1, bodyOffset), start + bodyOffset + 8 * count - 1);
+  }
+}
 
 assert.deepEqual(crystalPlayerAnimationMeta("running", 0, 0), {
   frameBaseOffset: 80,

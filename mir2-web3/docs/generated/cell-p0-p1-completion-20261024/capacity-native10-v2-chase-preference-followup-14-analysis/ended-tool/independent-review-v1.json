@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T10:32:52.0015657Z",
+  "scope": "Static review only of the sealed ended14 verifier candidate, without product imports, actual verifier/self-check/schema tests, live raw/monitor/recordings or private-data reads.",
+  "toolSeal": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/tool-source-frozen-v1.json",
+    "bytes": 1417,
+    "sha256": "3c493322b1296f43d7bd2f9b570f5719cafae928e3a8228e82c06f52820ea6b1"
+  },
+  "verifier": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/verify-ended-probe14-v1.mjs",
+    "bytes": 27982,
+    "sha256": "66486662f9be4eccccc0015ddbd3040ae5dc4b44125d1b4fe99c3a70e5222d29"
+  },
+  "contract": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/probe-contract-v1.mjs",
+    "bytes": 5820,
+    "sha256": "55dab5ae7ea97da1e26514dc4d8e730b53a92945e76a409a1ff4d67489fe4ae4"
+  },
+  "runner": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/run-ended-probe14-v1.mjs",
+    "bytes": 2257,
+    "sha256": "d5624b5ca5cbe4a5cd9497bab379716027576567a5a7b78d453ac3feb7e5fe8a"
+  },
+  "hpContract": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/hp-proof-contract-v2.mjs",
+    "bytes": 4644,
+    "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+  },
+  "preparation": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/preparation-v1.json",
+    "bytes": 3972,
+    "sha256": "83e8a47211173749dab46f49a21a4280eca13f4d0e7215728bfd9e81837ba1bb"
+  },
+  "inputClosure": {
+    "files": 7,
+    "totalRawBytes": 62461,
+    "allRawSizesAndHashesMatch": true,
+    "orderedAggregateMatches": true,
+    "expectedProbePolicyEqualsActualPreparedPolicy": true,
+    "hpHelperRawSameAsOriginalCorrectedV2": true,
+    "recordedNodeSyntaxChecksOnly": true,
+    "testsRerunByReviewer": false
+  },
+  "findings": [
+    {
+      "id": "V1",
+      "result": "pass",
+      "evidence": "Explicit ended14 invocation takes one original run ID; runner requires the externally supplied exact tool seal SHA, checks all seven source pins before/after, writes log/execution/final outputs with wx and never starts a game realm. Missing public archive or root cleanup throws before raw verification."
+    },
+    {
+      "id": "V2",
+      "result": "pass",
+      "evidence": "Backend468/41/a430, newb84d/db4e/19099-20fd driver freeze, exact2/10/360 probe policy, paired scene10/100 and six metadata declarations are separately bound against report/catalog/sidecar. Actual prepared source aggregatebfdaf011 and sealed19769/0d994 73-input launcher are checked."
+    },
+    {
+      "id": "V3",
+      "result": "pass",
+      "evidence": "checkAssessment uses a.measuredSeconds??a.seconds, so completed whole-phase native activity rates use the actual phase elapsed time. Raw minute elapsed time is actual end-start, must be>=60000ms, is contiguous with real phase clocks, and its counters/status metrics are replayed and compared to the original assessment."
+    },
+    {
+      "id": "V4",
+      "result": "pass",
+      "evidence": "Success-only assertCompletedProbeShape requires exact stage-2/stage-10/soak order, configured300/300/360 plus measured>=configured, exact5/5/6 full windows, no resume/save substitution and original report.ok. Success also requires no continuous failure/safety stop and complete valid monitor samples. capacityAccepted is alwaysfalse for this probe."
+    },
+    {
+      "id": "V5",
+      "result": "pass",
+      "evidence": "Failed/partial shape is preserved. If report.stages is empty, phaseChecks can derive a partial phase duration from phaseEnded without requiring three completed stages or16 windows. Only already present raw windows are replayed; missing later phases stay incomplete and probePassed remainsfalse."
+    },
+    {
+      "id": "V6",
+      "result": "pass",
+      "evidence": "assertRootCleanup requires the actual run ID, schema1, gateway48796/monitor62296, process/port absence booleans, empty arrays, readOnlyIndependentCheck, timestamp and capacityfalse. These PIDs match the small public realm/monitor process records; actual cleanup is still root-owned. Seven normal owned-cleanup flags and exit0 are checked separately."
+    },
+    {
+      "id": "V7",
+      "result": "pass",
+      "evidence": "The original corrected HP10-status helper is raw-identical. Verified events require matching sent identity, valid ACK and actual consumption or exact HP increase. Consumption and healing stay distinct. Zero HP events yield successProofChecked=false, verifiedEventsChecked0 and noVerifiedDoseObserved=true; no dose/survival or native-completion credit is invented."
+    },
+    {
+      "id": "V8",
+      "result": "pass",
+      "evidence": "Type/kind/status/actor dictionaries and actor maps retain bounded counts/string lengths and prototype-key rejection. Minute windows<=16, phase ends<=3, continuous summaries<=40000, sequence gap samples<=16 and correction samples<=256 are bounded. Raw file/row/JSON caps remain the explicitly trusted-archive model."
+    },
+    {
+      "id": "V9",
+      "result": "pass",
+      "evidence": "Wire rows and terminal/source/count/uninstall state are independently described without adding ACK/damage credit. Diagnostic incomplete/truncation cannot establish object absence. Phase telemetry uses inside-sample cumulative bucket deltas, unknown zero/saturation/overflow quantiles and no subtracted lifetime max or new server hard gate. This short probe does not claim formal2h memory slope."
+    }
+  ],
+  "failureShapeExamined": {
+    "source": "Parent/author ended14 status, not a raw read by this reviewer",
+    "runId": "1792923531277-bc2bda2e",
+    "stages": [],
+    "stage2EndedSeconds": 272.682,
+    "completed": false,
+    "rawCompleteMinutesReported": 4,
+    "expectedStaticBehavior": "Retain partial boundary/available minute checks, require no fabricated fifth/sixth minute or later completed stage, return probePassedfalse while independently verifying preserved evidence."
+  },
+  "verdict": {
+    "staticContractPassed": true,
+    "noBlockingFound": true,
+    "blockingFindingIds": [],
+    "eligibleForRootAuthorizedEndedInvocation": true,
+    "actualVerificationExecutedByReviewer": false,
+    "syntheticOrProductTestsExecutedByReviewer": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2ImplementationPermitted": false
+  },
+  "limits": [
+    "This is static source review; it does not assert that public collection, root OS cleanup, complete raw replay or any actual ended verifier invocation has succeeded.",
+    "Node readline aggregates a complete line before the64MiB check. The accepted trust boundary is producer-schema-bounded SHA/bytes-pinned archives; no adversarial overlong-line memory guarantee is claimed.",
+    "The HP producer does not log sendMono, receipt cursor or quantityBefore. The helper cannot independently reconstruct original2s freshness or the numeric inventory decrease; it checks the available recorded proof and common possible capture span.",
+    "For failed partial phases with no report.stage assessment, the tool verifies available raw minute/continuous counters and records an incomplete boundary, not a newly computed whole-partial-phase pass.",
+    "A passed10-actor probe remains only a prerequisite for a fresh formal run. It cannot accept25/50/100 capacity,7200s soak, P0/P2 or production, and zero HP events prove no dose or sustained survival."
+  ]
+}

@@ -1,0 +1,1091 @@
+{
+  "schema": 1,
+  "kind": "r16-font-fill-production-evidence",
+  "recordedAt": "2026-11-11T12:09:18.223Z",
+  "scope": "Public ordinary Chrome, real dedicated Testnet-wallet login signature and fresh level-one role. No physical phone, funding or financial transaction. The full signed-game run FAILED; passing components are listed separately.",
+  "source": "da134332ed9f20a54b7e5433f4f2ab95ed704444",
+  "releaseImplementation": "5811ed7eabdf1a49182cc4c43ed8eb82ce09cb2f",
+  "platform": {
+    "checkedAt": "2026-11-11T12:06:50.355Z",
+    "alias": {
+      "alias": "numeron.obelisk.build",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "deploymentId": "dpl_2puBSpb7sVCUJ3spvUhT2EHBJzvV",
+      "redirect": null
+    },
+    "deployment": {
+      "id": "dpl_2puBSpb7sVCUJ3spvUhT2EHBJzvV",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "readyState": "READY",
+      "target": "production",
+      "source": "da134332ed9f20a54b7e5433f4f2ab95ed704444",
+      "branch": "codex/windows-player-journey",
+      "buildMs": 271246
+    },
+    "runtimeErrorLogScan": {
+      "deploymentId": "dpl_2puBSpb7sVCUJ3spvUhT2EHBJzvV",
+      "levels": [
+        "error",
+        "fatal"
+      ],
+      "rangeStart": "2026-11-11T11:45:07.487Z",
+      "rangeEnd": "2026-11-11T12:05:07.487Z",
+      "limit": 20,
+      "noMatchingLogs": true,
+      "scope": "Vercel server logs only; not a client, Cloudflare, R2 or Gateway error-clearance."
+    }
+  },
+  "readback": {
+    "kind": "numeron-verified-production-alias-v1",
+    "publicAlias": "numeron.obelisk.build",
+    "deploymentId": "dpl_2puBSpb7sVCUJ3spvUhT2EHBJzvV",
+    "revision": "da134332ed9f20a54b7e5433f4f2ab95ed704444",
+    "firstPartyRelayCanaryPassed": true,
+    "relayOrigin": "https://relay.dubhe.obelisk.build",
+    "checkedAt": "2026-11-11T12:05:43.127Z",
+    "worker": {
+      "sha256": "d36a16e46315fa48c7ec597aded137d2bbe5c5f2c8875387e1e99a13dc364b0a",
+      "bytes": 26374
+    }
+  },
+  "release": {
+    "stage": {
+      "runId": "43010503846",
+      "passed": true
+    },
+    "promote": {
+      "runId": "43013353467",
+      "passed": true
+    },
+    "credentialsRecorded": false,
+    "rollbacks": [],
+    "assetBodies": [
+      {
+        "kind": "EntryScene",
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "protectedSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "publicSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "bytes": 458475
+      },
+      {
+        "kind": "EntryFloor",
+        "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "protectedSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+        "publicSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+        "bytes": 439896
+      },
+      {
+        "kind": "EntryPlayerMale",
+        "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+        "protectedSha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+        "publicSha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+        "bytes": 289851
+      },
+      {
+        "kind": "EntryPlayerFemale",
+        "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+        "protectedSha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+        "publicSha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+        "bytes": 282415
+      },
+      {
+        "kind": "EntryNpcs",
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "protectedSha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "publicSha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "bytes": 313909
+      },
+      {
+        "kind": "EntryObjects1",
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "protectedSha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+        "publicSha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+        "bytes": 395412
+      },
+      {
+        "kind": "EntryObjects2",
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "protectedSha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+        "publicSha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+        "bytes": 395320
+      },
+      {
+        "kind": "EntryObjects3",
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "protectedSha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+        "publicSha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+        "bytes": 395216
+      },
+      {
+        "kind": "EntryMonsterStanding",
+        "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+        "protectedSha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+        "publicSha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+        "bytes": 513566
+      },
+      {
+        "kind": "EntryMonsterWalking",
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "protectedSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "publicSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "bytes": 764724
+      },
+      {
+        "kind": "EntryGameplayLocale",
+        "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "protectedSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+        "publicSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+        "bytes": 3283113
+      }
+    ],
+    "protectedQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "publicQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    }
+  },
+  "validation": {
+    "focusedAndAdjacentNodeTests": 64,
+    "releaseGateNodeTests": 68,
+    "productionAndTypeScriptBuildPassed": true,
+    "localDefaultAndSharedWebglGameSmokesPassed": true,
+    "sourceEvidence": "receipt.json"
+  },
+  "publicQr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "revision": "da134332ed9f20a54b7e5433f4f2ab95ed704444",
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "renderedQr": {
+        "valid": true,
+        "width": 240,
+        "height": 240,
+        "matched": 2401,
+        "total": 2401
+      },
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "revision": "da134332ed9f20a54b7e5433f4f2ab95ed704444",
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "renderedQr": {
+        "valid": true,
+        "width": 240,
+        "height": 240,
+        "matched": 2401,
+        "total": 2401
+      },
+      "browserClosed": true
+    }
+  ],
+  "signedGame": {
+    "passed": false,
+    "failure": {
+      "phase": "inspect-world-paint",
+      "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-player-male"
+    },
+    "checks": {
+      "exactRevision": true,
+      "publicEdgeAndTlsVerified": true,
+      "normalLoginVisible": true,
+      "quietLoginResources": true,
+      "realQrImage": true,
+      "emptyQaRoster": true,
+      "createOnApprovedSocket": true,
+      "oneDedicatedQaRoleCreated": true,
+      "startMatchesCreatedRole": true,
+      "visibleReadyGameStage": true,
+      "exactVersionedStarterRegion": true,
+      "expectedRuntimeDelivered": true,
+      "returnedToSelect": true
+    },
+    "gameProtocol": {
+      "gameSockets": 1,
+      "passkeyLogin": 1,
+      "loginSuccess": 1,
+      "newCharacter": 1,
+      "newCharacterSuccess": 1,
+      "startGame": 1,
+      "startGameResult": 4,
+      "walk": 1,
+      "logOut": 1,
+      "logOutSuccess": 1,
+      "unexpectedMutation": 0
+    },
+    "authorizedApprovalOnly": {
+      "approved": true,
+      "exactAppAndSession": true,
+      "loginOnlyConsent": true,
+      "noFunds": true,
+      "httpsRelayReadAndApprove": true,
+      "oneClick": true,
+      "oneRequest": true
+    },
+    "normalTestnetWalletCreated": true,
+    "qaGameRoleCreated": true,
+    "walletNetworkGuard": {
+      "schema": 1,
+      "requestInterception": false,
+      "operations": {
+        "http-read": 153,
+        "exact-login-session-read": 1,
+        "signed-login-approval": 1
+      },
+      "forbiddenCount": 0,
+      "forbidden": [],
+      "browserClosed": true
+    },
+    "staticEntry": {
+      "passed": true,
+      "runtimeStaticProved": true,
+      "checks": {
+        "completeCapture": true,
+        "exactStaticHttpBody": true,
+        "afterAuthBeforeStart": true,
+        "authoritativeSpawn": true,
+        "staticSceneCommit": true,
+        "exactFirstPlayable": true,
+        "noMatchingDynamicRequest": true
+      },
+      "source": "r16-entry-static",
+      "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+      "authoritativeSpawn": {
+        "x": 288,
+        "y": 616
+      },
+      "firstPlayableSpawn": {
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "objectId": "1000"
+      },
+      "selectedRequest": {
+        "scope": "staticStarterRegion",
+        "queryless": true,
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "requestOrdinal": 2,
+        "requestedMs": 51612,
+        "decodedBytes": 458475,
+        "encodedBytes": 35271,
+        "status": 200,
+        "ttfbMs": 11678,
+        "headersMs": 63290,
+        "responseEventMs": 63290,
+        "responseTiming": {
+          "scope": "browser-network-response",
+          "connectionReused": true,
+          "requestTimeFromRequestEventMs": 0.804,
+          "offsetsMs": {
+            "proxyStart": null,
+            "proxyEnd": null,
+            "dnsStart": null,
+            "dnsEnd": null,
+            "connectStart": null,
+            "connectEnd": null,
+            "sslStart": null,
+            "sslEnd": null,
+            "workerStart": null,
+            "workerReady": null,
+            "workerFetchStart": null,
+            "workerRespondWithSettled": null,
+            "sendStart": 1674.592,
+            "sendEnd": 1674.797,
+            "receiveHeadersStart": 11676.398,
+            "receiveHeadersEnd": 11676.43
+          },
+          "firstHeadersAfterRequestMs": 11677.202,
+          "completeHeadersAfterRequestMs": 11677.234,
+          "beforeSendAfterRequestMs": 1675.396,
+          "sendToHeadersMs": 10001.601,
+          "firstHeadersMs": 63289.202,
+          "completeHeadersMs": 63289.234
+        },
+        "protocol": "h2",
+        "serviceWorker": false,
+        "diskCache": false,
+        "contentEncoding": "br",
+        "edgeCache": "DYNAMIC",
+        "functionCache": "MISS",
+        "firstDataMs": 64252,
+        "lastDataMs": 78394,
+        "transferMs": 26781,
+        "bodyCompleteMs": 78393,
+        "totalEncodedBytes": 35516
+      },
+      "staticRequests": 1,
+      "matchingDynamicRequests": 0,
+      "droppedRows": 0,
+      "selection": {
+        "loginSuccessMs": 51609,
+        "selectReadyMs": 81613,
+        "startSubmitMs": 82469,
+        "requestMs": 51612,
+        "screenAtRequest": "openingLogin-commit-boundary",
+        "screenTransitions": [
+          {
+            "screen": "login",
+            "atMs": 21945
+          },
+          {
+            "screen": "openingLogin",
+            "atMs": 51613
+          },
+          {
+            "screen": "select",
+            "atMs": 81629
+          },
+          {
+            "screen": "game",
+            "atMs": 86509
+          }
+        ]
+      },
+      "asset": {
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "decodedBytes": 458475,
+        "map": "0",
+        "spawn": {
+          "x": 288,
+          "y": 616
+        },
+        "playBounds": {
+          "minX": 272,
+          "maxX": 320,
+          "minY": 602,
+          "maxY": 638
+        },
+        "regionBounds": {
+          "minX": 244,
+          "maxX": 348,
+          "minY": 580,
+          "maxY": 681
+        },
+        "cellCount": 6819,
+        "spriteCount": 957,
+        "requestOrdinal": 2,
+        "method": "playwright-requestfinished-cdp-getResponseBody"
+      }
+    },
+    "timing": {
+      "clockEpochMs": 1794397699681,
+      "authoritativeLoginSuccessMs": 51609,
+      "startIntentMs": 82470,
+      "startAckMs": 86410,
+      "authoritativeStarterMapMs": 86413,
+      "authoritativeSelfMs": 86414,
+      "firstPlayableObservedMs": 132468,
+      "sharedHudObservedMs": 378282,
+      "logoutIntentMs": 378968,
+      "logoutAckMs": 379975,
+      "manifestAttemptsBeforeStart": 1,
+      "manifestAttemptsAtOrAfterStart": 0,
+      "starterRegionRequestMs": 51612,
+      "starterRegionWireHeadersMs": 63289.234,
+      "starterRegionResponseEventMs": 63290,
+      "starterRegionBodyMs": 78393,
+      "starterRegionCommitMs": 86533,
+      "sceneSpritesReadyMs": 86555,
+      "localeRequestMs": 72457,
+      "localeBodyMs": 99768,
+      "localeReadyMs": 99789,
+      "firstPlayableFrameMs": 132370,
+      "rendererBodyMs": 208812
+    },
+    "firstPlayableAfterStartIntentMs": 49900,
+    "sharedHudObservedAfterStartIntentMs": 295812,
+    "movement": {
+      "attempted": true,
+      "passed": true,
+      "status": "one-authoritative-walk",
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "geometry": {
+        "source": "sha256-pinned-local-release-reference",
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+      },
+      "physical": {
+        "input": "trusted-playwright-keyboard-pulse",
+        "key": "ArrowRight",
+        "atMs": 132593
+      },
+      "wire": {
+        "type": "walk",
+        "direction": "Right",
+        "atMs": 132596
+      },
+      "ack": {
+        "x": 289,
+        "y": 616,
+        "packet": "UserLocation",
+        "atMs": 132743
+      },
+      "ackWithinEightSeconds": true,
+      "rendered": {
+        "x": 289,
+        "y": 616,
+        "atMs": 132763
+      }
+    },
+    "firstWalkTransport": {
+      "websocketFrameMs": 147,
+      "keepAlives": [
+        {
+          "sentRelativeToWalkMs": -67160,
+          "rttMs": 136
+        },
+        {
+          "sentRelativeToWalkMs": -52158,
+          "rttMs": 136
+        },
+        {
+          "sentRelativeToWalkMs": -37158,
+          "rttMs": 1525
+        },
+        {
+          "sentRelativeToWalkMs": -22159,
+          "rttMs": 135
+        },
+        {
+          "sentRelativeToWalkMs": -7158,
+          "rttMs": 139
+        },
+        {
+          "sentRelativeToWalkMs": 7840,
+          "rttMs": 138
+        },
+        {
+          "sentRelativeToWalkMs": 22842,
+          "rttMs": 137
+        },
+        {
+          "sentRelativeToWalkMs": 37840,
+          "rttMs": 137
+        },
+        {
+          "sentRelativeToWalkMs": 52841,
+          "rttMs": 155
+        },
+        {
+          "sentRelativeToWalkMs": 67840,
+          "rttMs": 139
+        },
+        {
+          "sentRelativeToWalkMs": 82843,
+          "rttMs": 138
+        },
+        {
+          "sentRelativeToWalkMs": 97842,
+          "rttMs": 141
+        },
+        {
+          "sentRelativeToWalkMs": 112842,
+          "rttMs": 140
+        },
+        {
+          "sentRelativeToWalkMs": 127840,
+          "rttMs": 140
+        },
+        {
+          "sentRelativeToWalkMs": 142841,
+          "rttMs": 139
+        },
+        {
+          "sentRelativeToWalkMs": 157840,
+          "rttMs": 139
+        },
+        {
+          "sentRelativeToWalkMs": 172842,
+          "rttMs": 137
+        },
+        {
+          "sentRelativeToWalkMs": 187842,
+          "rttMs": 139
+        },
+        {
+          "sentRelativeToWalkMs": 202840,
+          "rttMs": 138
+        },
+        {
+          "sentRelativeToWalkMs": 217843,
+          "rttMs": 178
+        },
+        {
+          "sentRelativeToWalkMs": 232842,
+          "rttMs": 138
+        }
+      ],
+      "gatewayHealthBefore": {
+        "status": 200,
+        "startedAt": 82456,
+        "finishedAt": 82911,
+        "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+        "complete": true,
+        "sinceInitializationMs": 239149635,
+        "successes": 560,
+        "failures": 0,
+        "count": 560,
+        "sumUs": 7744623
+      },
+      "gatewayHealthAfter": {
+        "status": 200,
+        "startedAt": 132761,
+        "finishedAt": 135200,
+        "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+        "complete": true,
+        "sinceInitializationMs": 239201924,
+        "successes": 561,
+        "failures": 0,
+        "count": 561,
+        "sumUs": 7751165
+      },
+      "admissionCounterDelta": {
+        "successes": 1,
+        "failures": 0,
+        "count": 1,
+        "sumUs": 6542,
+        "oneObservedAdmission": true
+      }
+    },
+    "questUi": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-react-fallback",
+      "questId": 2110001,
+      "stage": "available",
+      "objective": "向助理簡報告",
+      "counter": "0/1",
+      "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+      "journey": "當前主線 0/26",
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "sharedHud": {
+      "optional": true,
+      "passed": true,
+      "status": "observed",
+      "gateReady": true,
+      "runtimeDelivered": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-shared-zh-TW.png"
+      }
+    },
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    },
+    "ui": {
+      "engine": "chrome",
+      "headlessDesktopViewport": true,
+      "networkMock": false,
+      "pageErrors": 0,
+      "consoleErrors": 9,
+      "browserClosed": true
+    },
+    "entryVisualPacks": [
+      {
+        "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+        "kind": "entry-player-male",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 82290,
+        "initiator": "script",
+        "priority": "High",
+        "bytes": 49152,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "headersAfterMs": 17488,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": "DYNAMIC",
+        "vercelCache": "MISS",
+        "cors": "wildcard",
+        "lastDataAfterMs": 21862,
+        "failAfterMs": 29864,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "kind": "entry-npcs",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 99844,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20003,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "kind": "entry-objects-1",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 99844,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "kind": "entry-objects-2",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 99844,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "kind": "entry-objects-3",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 99845,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+        "kind": "entry-player-male",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 112358,
+        "initiator": "script",
+        "priority": "High",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20001,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "kind": "entry-npcs",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 120050,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "kind": "entry-objects-1",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 120050,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "kind": "entry-objects-2",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 120051,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "kind": "entry-objects-3",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 120051,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20002,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+        "kind": "entry-monster-standing",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 132366,
+        "initiator": "script",
+        "priority": "High",
+        "bytes": 513566,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "headersAfterMs": 735,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": "DYNAMIC",
+        "vercelCache": "HIT",
+        "cors": "wildcard",
+        "lastDataAfterMs": 8351,
+        "finishAfterMs": 8351,
+        "wireBytes": 355533
+      },
+      {
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "kind": "entry-monster-walking",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 140718,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20001,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "kind": "entry-monster-walking",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 160922,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false,
+        "failAfterMs": 20001,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      }
+    ],
+    "browserMarkerTrace": {
+      "saved": true,
+      "bytes": 61494,
+      "eof": true,
+      "dataLossOccurred": false,
+      "filename": "private-game-start-trace.json",
+      "scope": "blink.user_timing markers only; not a complete CPU profile"
+    },
+    "performanceObserver": {
+      "samples": 188,
+      "longTasks": 7,
+      "maxLongTaskMs": 200
+    },
+    "sampledRuntimeEndpoints": [
+      {
+        "observedAtMs": 209441,
+        "booted": true,
+        "hud": {
+          "ready": false,
+          "error": null,
+          "frame": 5,
+          "generation": 2,
+          "revision": 1
+        },
+        "fonts": {
+          "status": "loaded",
+          "loading": []
+        },
+        "package": {
+          "selectedBackend": "webgpu",
+          "packageId": "webgpu",
+          "runtimeVersion": "bevy-84ef836460a84e03"
+        }
+      },
+      {
+        "observedAtMs": 379437,
+        "booted": true,
+        "hud": {
+          "ready": true,
+          "error": null,
+          "frame": 38570,
+          "generation": 2,
+          "revision": 2
+        },
+        "fonts": {
+          "status": "loaded",
+          "loading": []
+        },
+        "package": {
+          "selectedBackend": "webgpu",
+          "packageId": "webgpu",
+          "runtimeVersion": "bevy-84ef836460a84e03"
+        }
+      }
+    ],
+    "observedAssets": [
+      {
+        "path": "/client-core/5fde16fb186299cc265cec00a085c3ecbe76e4d0ff77a12de08f567cf28fc836/mir2_platform_web_bg.wasm",
+        "requestAtMs": 19304,
+        "headersAtMs": 20933,
+        "finishedAtMs": 22205,
+        "status": 200,
+        "encodedBytes": 116530,
+        "serviceWorker": false
+      },
+      {
+        "path": "/_next/static/media/r16-login-tc.93f45434.woff2",
+        "requestAtMs": 21946,
+        "headersAtMs": 25983,
+        "finishedAtMs": 25984,
+        "status": 200,
+        "encodedBytes": 247289,
+        "serviceWorker": false
+      },
+      {
+        "path": "/client-core/cc64a3a85149bf9180ebc1f4e061319d29c1f8eaecb0f11e5b30d4b7aff573b4/mir2_platform_web_bg.wasm",
+        "requestAtMs": 25976,
+        "headersAtMs": 27813,
+        "finishedAtMs": 28815,
+        "status": 200,
+        "encodedBytes": 123566,
+        "serviceWorker": false
+      },
+      {
+        "path": "/client-core/c61eebe4b256760c789b3d2566f1a272601c47ab7b07b1cd3e055ace255bb44a/mir2_platform_web_bg.wasm",
+        "requestAtMs": 29304,
+        "headersAtMs": 29839,
+        "finishedAtMs": 30420,
+        "status": 200,
+        "encodedBytes": 73224,
+        "serviceWorker": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 81630,
+        "headersAtMs": 186534,
+        "finishedAtMs": 186537,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+        "requestAtMs": 132448,
+        "headersAtMs": 134975,
+        "finishedAtMs": 134975,
+        "status": 200,
+        "encodedBytes": 21247,
+        "serviceWorker": false
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "requestAtMs": 134976,
+        "headersAtMs": 135145,
+        "finishedAtMs": 209016,
+        "status": 200,
+        "encodedBytes": 6442976,
+        "serviceWorker": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "requestAtMs": 209312,
+        "headersAtMs": 289822,
+        "finishedAtMs": 378173,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "requestAtMs": 209312,
+        "headersAtMs": 289822,
+        "finishedAtMs": 293574,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 209312,
+        "headersAtMs": 209321,
+        "finishedAtMs": 209402,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "requestAtMs": 209312,
+        "headersAtMs": 289818,
+        "finishedAtMs": 290959,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "requestAtMs": 209312,
+        "headersAtMs": 289817,
+        "finishedAtMs": 291194,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "requestAtMs": 209312,
+        "headersAtMs": 289817,
+        "finishedAtMs": 292576,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 378598,
+        "headersAtMs": 378598,
+        "finishedAtMs": 378598,
+        "status": 200,
+        "encodedBytes": 0,
+        "serviceWorker": true
+      }
+    ],
+    "workerResourceSamples": [
+      {
+        "origin": "https://numeron.obelisk.build",
+        "timeOrigin": 1794397724587.3,
+        "fontSharingAvailable": true,
+        "fontInflightCount": 0,
+        "rows": [
+          {
+            "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+            "startMs": 56711,
+            "durationMs": 104875.5,
+            "responseStart": 64203.89999997616,
+            "responseEnd": 161586.5,
+            "transferSize": 7662801,
+            "encodedBodySize": 7662501,
+            "decodedBodySize": 11941968
+          }
+        ]
+      }
+    ],
+    "fontObservationLimit": "The captured Worker timing contains one completed TC font body and sharing feature detection. The Native TC request followed CSS completion and was served quickly from the Worker. This run does not recreate overlapping-body sharing; that is covered by the controlled real-browser baseline/candidate fixture in receipt.json. Worker timing here is not claimed to cover all fonts.",
+    "clientErrorsRemain": {
+      "consoleErrors": 9,
+      "pageErrors": 0,
+      "observedKinds": [
+        "resource 404",
+        "resource 503",
+        "mobile joystick dynamic chunk timeout"
+      ],
+      "cleared": false
+    },
+    "screenshots": [
+      "public-task.png",
+      "public-shared-task.png"
+    ]
+  },
+  "preservation": {
+    "originalWipFilesHashVerified": 62,
+    "originalWipStatusRows": 38,
+    "unrelatedNewEvidenceDirectory": "mir2-web3/docs/evidence/three-platform-capacity-20261111/",
+    "unrelatedNewEvidenceUntouched": true,
+    "noUserWipStaged": true
+  },
+  "remaining": [
+    "Male entry visual pack: two browser reads aborted; release byte/hash probes passed separately.",
+    "Slow cold startup and shared HUD font/resource loading.",
+    "Earlier public first-step latency long tail remains open; this one 147 ms sample is not a fix.",
+    "Physical phone and other rendering paths.",
+    "Current three-class fresh 1-30 journeys, runtime-source audit and remaining global Windows R16 parity gates."
+  ]
+}

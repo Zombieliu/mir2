@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "scope": "Frozen Release99bc and original native driver plus narrowly authorized probe cap10 boundary; unique independent ten ordinary fresh account/character natural-supply feasibility run. No grants, teleports, Butcher or server content changes. Original18/12 and six60s windows unchanged. Not formal capacity acceptance.",
+  "sourceConfigSha256": "63ac7a499f7eefb47c847fe074e63cce4b78c0351b624be79fa52f30932c894c",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 108464,
+      "sha256": "c76c4d756a4316c0e7c1d847c03f2dc621d957f03f108192ea78397bf0d1b530"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 36588,
+      "sha256": "1e067f87fd9cbb2a2c370823ccca1d3c6046b23e45e7c5e6108d5d883f347bcc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "apps/web/scripts/playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/scenario.json",
+      "bytes": 1176,
+      "sha256": "33e20d0ba000003398e3cac5a09be7859b739b0d10ba17544160a0ca86a69450"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "9379e369bb2630a398e2fb1f678202a4c9d4929a916b5d7ef4a8c9aa98297715"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/run-options.json",
+      "bytes": 699,
+      "sha256": "0a97a6825c42056904b57d7aaf7c19016c7f1ab409572943a7f1d74137260f14"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/backend-source-frozen.json",
+      "bytes": 6582,
+      "sha256": "ce83e56f3d1dfa0475b8ff22ab0852a4731210bbe3f29b1cfc4ef1718002699e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/gateway-build-pin.json",
+      "bytes": 618,
+      "sha256": "fb141a28f1b502a9cd4f274ea7763ba2f83d3747c50aa3d812c9b236fadaa615"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-10-candidate-static-readiness-v1.json",
+      "bytes": 3793,
+      "sha256": "65b67ea904b9654dac8ac892feae1c33d1a12107dfac9944d05299d77be6ec2b"
+    }
+  ]
+}

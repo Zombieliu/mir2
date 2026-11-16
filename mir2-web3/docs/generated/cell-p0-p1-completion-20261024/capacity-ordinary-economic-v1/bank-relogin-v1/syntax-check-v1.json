@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "checks": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\copy-bank-v1.mjs",
+        "bytes": 7743,
+        "sha256": "5b383d46230ab834cfcadf8dd9c3e843d97a4a50893b4106920ee14a380de63f"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\copy-bank-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "sourceImported": false
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\source-lib-v1.mjs",
+        "bytes": 13730,
+        "sha256": "9a306f9c85447769842496e3f63f33ba806d4a47e3de46276f48dc752702462b"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "sourceImported": false
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\owned-child-v1.mjs",
+        "bytes": 1555,
+        "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\owned-child-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "sourceImported": false
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\run-bank-pilot-v1.mjs",
+        "bytes": 20588,
+        "sha256": "bd6695da3243c0168061d6bbd4dda8f5ff46af86ccbfc88866323b1f0b8c0a41"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\run-bank-pilot-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "sourceImported": false
+    }
+  ],
+  "checksPerformed": 4,
+  "allPassed": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\syntax-check-v1.log",
+    "bytes": 560,
+    "sha256": "3461c15d462c989e7a0eff8e62137bf99469c27304944c3d82abc1672bf9f38b"
+  },
+  "scope": "Actual Node --check only. The runner was rechecked after the final readback qualification change; the other three source hashes stayed unchanged. No source import, tests, copier, freeze, process, load or game command ran."
+}

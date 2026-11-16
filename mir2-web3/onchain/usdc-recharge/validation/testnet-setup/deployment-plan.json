@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "network": "testnet",
+  "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+  "chainIdentifier": "4c78adac",
+  "networkHash": "0xb55d4afda0318ec0a264cc5f46c4e61c96da8000e9ea1bdf04878266867c6246",
+  "issuerAddress": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+  "merchantAddress": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+  "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+  "operation": "deployment-config-enable-and-at-most-one-invoice",
+  "maximumCumulativeReservedMist": "200000000",
+  "allocations": {
+    "publish": "100000000",
+    "config": "20000000",
+    "enable": "20000000",
+    "invoice": "50000000"
+  },
+  "plannedMaximumMist": "190000000",
+  "playerPayment": "excluded; player wallet pays its own SUI gas, and requires legitimate Testnet USDC",
+  "sourcePins": {
+    "Move.toml": "f39f5229bff0fa656a0297572def44fb5587da897cbc4e31d8d00d01484db0ae",
+    "sources/recharge.move": "838dc10c465d6d4c37ab8d75e476e5617320d0ef5f8986af3b915d58d43cb9ec"
+  },
+  "compilerSha256": "62e27004b8414e829c650ca35b239c24a5d2a9e770d2dc6b611915c1d4fdc2d3",
+  "noMainnet": true,
+  "noRealFunds": true,
+  "noDocker": true,
+  "noDefaultWallet": true,
+  "planHash": "db9299ed27b6139217f162ed00ae006b3f6d7e4acb71139949c74da29ced564a"
+}

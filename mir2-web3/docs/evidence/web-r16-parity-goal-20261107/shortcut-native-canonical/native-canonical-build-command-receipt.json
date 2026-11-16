@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "startedAt": "2026-11-07T12:01:47.0621465Z",
+  "finishedAt": "2026-11-07T12:02:27.4930547Z",
+  "rustc": "1.95.0 (59807616e 2026-04-14)",
+  "command": "cargo +1.95.0 build --manifest-path E:/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/Cargo.toml --release --offline --locked --bin mir2-platform-windows --target-dir F:/mir2-builds/canonical-companion-native",
+  "exitCode": 0,
+  "log": "D:/mir2-builds/r16-shortcut-20261107/native-canonical-release.log",
+  "sourceBefore": "native-canonical-source-before.json",
+  "nativeExecuted": false,
+  "servicesStarted": false
+}

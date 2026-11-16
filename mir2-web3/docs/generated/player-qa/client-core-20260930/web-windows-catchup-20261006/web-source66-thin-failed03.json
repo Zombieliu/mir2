@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "source": "Source66",
+  "attempt": "full-public same-drive Thin03",
+  "owner": "Root",
+  "originalCallerBodyBytes": 4569,
+  "originalCallerBodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "inputCount": 57289,
+  "acceptedSourceCount": 36369,
+  "outputCount": 20920,
+  "nftTraces": 61,
+  "nftRawReferences": 129822,
+  "nftTargets": 39100,
+  "rootSourceDifferences": 0,
+  "rootMembershipDifferences": 0,
+  "rootUncoveredNftReferences": 0,
+  "rootControlDifferences": 0,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source66-npc-visible-range-20261011-01\\root-approved01\\thin-build03-config.json",
+    "bytes": 5547,
+    "sha256": "0c1993e55f003105ec29a82de046363339c346f7cd2cf88a65248617fbe8ce2b"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source66-npc-visible-range-20261011-01\\root-approved01\\thin-source-review03.json",
+    "bytes": 17379,
+    "sha256": "b023e3c29baf11a4707467bc77960dd7f76c77be9fd55215a297989f6f5ac055"
+  },
+  "actual": {
+    "pid": 57856,
+    "exitCode": 1,
+    "elapsedMs": 14864,
+    "exited": true,
+    "disposed": true
+  },
+  "failure": "Sharp native package metadata/license mismatch: @img/sharp-win32-x64",
+  "gatePreserved": true,
+  "helperUnchanged": true,
+  "attemptPreserved": true,
+  "packageAccepted": false,
+  "packageCapVerified": false,
+  "runtimeStarted": false,
+  "candidate100": false,
+  "goalComplete": false,
+  "strictNext03Passed": true,
+  "node208IdenticalInputsPassed": true,
+  "storageLivePending": true
+}

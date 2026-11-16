@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source65 generation01",
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test03-config03.json",
+    "bytes": 5722,
+    "sha256": "18058c0216a2d081be81f35083c219f4327048c3879e6dfa0e736f010382bfbd"
+  },
+  "sourceSnapshotPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/preparation/source65-isolated-snapshot01.json",
+    "bytes": 518470,
+    "sha256": "a83bef35b740464942ccb87b0703ef4bc46dbd8cfa0ee797edbf0ba7e7c9c592"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 101,
+    "builderPid": 66548,
+    "kind": "Source65 Root accepted gateway-npc-purchase-test03 exact successful Source62 Guard schema",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 142795,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test03-config03.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "guardAfter": {
+    "childPid": 39860,
+    "childStartedUtc": "/Date(1791708159108)/",
+    "childStartMs": 1073.6670000000001,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 101,
+    "exitBits": "101",
+    "completedUtc": "/Date(1791708300794)/",
+    "completionMs": 142754.4866,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "guardPolicy": {
+    "thresholdBytes": "53687091200",
+    "policy": "B",
+    "guardUnchanged": true
+  },
+  "counts": {
+    "passed": 13,
+    "failed": 5,
+    "ignored": 0
+  },
+  "tests": [
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_complete_owner_pair_finishes_actual_gold_once",
+      "status": "FAILED"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_encode_failure_publishes_nothing",
+      "status": "FAILED"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_missing_pair_keeps_failure_and_receipt_first",
+      "status": "FAILED"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_packet_free_control_and_replay_emit_only_original_frame",
+      "status": "FAILED"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_send_failure_stops_before_later_messages",
+      "status": "FAILED"
+    },
+    {
+      "name": "web::tests::npc_purchase_goods_selector_is_canonical_before_any_number_conversion",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_reader_raw_envelope_cannot_fallback_to_generic_buy_item",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_accepts_only_actual_begin_and_idempotent_owner_pair",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_actual_purchase_original_query_and_replay_are_lossless",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_snapshot_projection_keeps_original_turn_and_known_receipt_on_size_failure",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count",
+      "status": "ok"
+    }
+  ],
+  "failureStage": "New dispatch tests failed at the common real owner fixture LoginSuccess assertion, before any purchase or sink assertion. The original 13 selected NPC purchase regressions passed.",
+  "accepted": false,
+  "productBuildAccepted": false,
+  "uiOperated": false,
+  "goalComplete": false
+}

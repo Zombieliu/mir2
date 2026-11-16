@@ -1,0 +1,121 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "producerReceipt": {
+    "filename": "unified-updater-execution-summary.json",
+    "bytes": 4206,
+    "sha256": "52153c34b96b6fc16dc55a2baf2493502ef5d3dc36a1184b1fc03f365c27c3dd"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.unified-updater-execution-summary.v1",
+    "recordedAtUtc": "2026-10-29T16:42:35.3557081Z",
+    "passed": true,
+    "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "sourceClean": true,
+    "sourceSnapshotFilesChecked": 1343,
+    "sequence": 2026102911,
+    "releaseBuildSeconds": 42.57,
+    "engine": {
+      "bytes": 2184192,
+      "sha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB"
+    },
+    "launcher": {
+      "bytes": 512512,
+      "sha256": "E6442339EC5786F4350F694FA058C0E9D4363D0E3D50BDB27F2C3AE65FCA6D96"
+    },
+    "bundle": {
+      "root": "C:\\mir2-build\\unified-20261029\\updater-release-r11\\bundle",
+      "verifiedFiles": 9,
+      "cmsAndClosureVerified": true,
+      "cmsSignerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+      "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "originalSignedArtifactFingerprintsStillMatch": true
+    },
+    "archive": {
+      "path": "F:/mir2-build/unified-20261029/unified-update-r11.tar.gz",
+      "sha256": "119F90395F0D8C7CEBB444A14F1E81E53722288BEEA25F2F696446E1A00C5D55",
+      "bytes": 1056931241,
+      "fileCount": 255082,
+      "uncompressedBytes": 1272761608,
+      "components": [
+        {
+          "directory": "releases/game-WN-CANDIDATE-20261029-unified-11",
+          "kind": "game",
+          "identity": "WN-CANDIDATE-20261029-unified-11",
+          "descriptorSha256": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+          "fileCount": 255079,
+          "totalBytes": 1270575381
+        },
+        {
+          "directory": "releases/updater-C7B2A20912225637-s2026102911",
+          "kind": "engine",
+          "identity": "2",
+          "engineIdentitySha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB",
+          "descriptorSha256": "C31C8167BFE937C3992BD2DAB0D4999A0F6098863EADE66D692231A7ADE086E3",
+          "fileCount": 3,
+          "totalBytes": 2186227
+        }
+      ],
+      "cmsVerifiedByArchivePython": false,
+      "cmsVerifiedSeparatelyByOriginalBundleVerifierAndStagedGamePreflight": true,
+      "receiptSha256": "51B93D94A31F30DF57EF7923CBC46B4BE03056858C4EF726B7A2756E65B22E18"
+    },
+    "repositoryGatesModified": false,
+    "stagingRenamedDuringThisRun": false,
+    "producerPackagePending": true,
+    "installOrPublishAllowed": false,
+    "guiPerformed": false,
+    "installationPerformed": false,
+    "remoteDeployment": false,
+    "publicAuthenticode": "NotSigned",
+    "limitations": [
+      "Game package producer full final verification is still pending; archive success is a separate local artifact check.",
+      "Before Inno or installation, root must confirm producer complete PASS and unchanged final VERSION raw SHA25651AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A.",
+      "Internal TEST CMS signatures do not provide public publisher Authenticode."
+    ],
+    "evidence": [
+      {
+        "path": "unified-updater-staged-preflight.json",
+        "bytes": 1037,
+        "sha256": "AC234EDFB7D53B71D0AE7E9A6A5E1A4CCFA20C3D9E2A75B00E7A5883C0E37D2B"
+      },
+      {
+        "path": "unified-updater-build.log",
+        "bytes": 3278,
+        "sha256": "5257600A551F903A604FD1E07AE0B5831B43193D578B18B995EC77161430A636"
+      },
+      {
+        "path": "unified-updater-verification.json",
+        "bytes": 592,
+        "sha256": "3AF0BFAF18B871F8BFFA2B44FBC0DF46FB7E9E6CEC6295EB1AEB33DA55AF429B"
+      },
+      {
+        "path": "unified-updater-verification.log",
+        "bytes": 594,
+        "sha256": "E107E3728ACBDF698FEDCB75B9F59865D1ED55AA3C3DAEA9A7E2FCE789DD0A46"
+      },
+      {
+        "path": "unified-updater-archive.log",
+        "bytes": 1092,
+        "sha256": "30198197330C7B00286879406840636DCB8236519C295AA138F05466FD83C3AC"
+      },
+      {
+        "path": "unified-updater-pipeline-result.json",
+        "bytes": 705,
+        "sha256": "CDF9E9712453ABF24A5C00B017E465B849E1A2B1D4743373F359A5F9391D125C"
+      },
+      {
+        "path": "unified-updater-signed-artifact-fingerprints.json",
+        "bytes": 3867,
+        "sha256": "2F7F0250105D4658C98CB22D01487C471A87D95106003185CBCDC59B18AD767B"
+      }
+    ]
+  },
+  "phase": "Real Engine77 local TEST-CMS bundle/archive pipeline; complete Game producer postmove gate remains separate pending",
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "producerPackageOverallPassed": false,
+  "installationOrPublicationAllowed": false
+}

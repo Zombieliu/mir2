@@ -1,0 +1,274 @@
+TAP version 13
+# Subtest: actual v27 data binds208 runtime maps, all76 main directed hops and correct nested Boss DropPaths
+ok 1 - actual v27 data binds208 runtime maps, all76 main directed hops and correct nested Boss DropPaths
+  ---
+  duration_ms: 1.2355
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedraw source proof
+ok 2 - legacy compatibility fails closed on changedraw source proof
+  ---
+  duration_ms: 0.2504
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedparsed source proof
+ok 3 - legacy compatibility fails closed on changedparsed source proof
+  ---
+  duration_ms: 0.1064
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedpath source proof
+ok 4 - legacy compatibility fails closed on changedpath source proof
+  ---
+  duration_ms: 0.0709
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedkey source proof
+ok 5 - legacy compatibility fails closed on changedkey source proof
+  ---
+  duration_ms: 0.0706
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedcondition source proof
+ok 6 - legacy compatibility fails closed on changedcondition source proof
+  ---
+  duration_ms: 0.0821
+  type: 'test'
+  ...
+# Subtest: only declared normal endpoints, finite deadlines and natural kill budgets are accepted
+ok 7 - only declared normal endpoints, finite deadlines and natural kill budgets are accepted
+  ---
+  duration_ms: 0.44
+  type: 'test'
+  ...
+# Subtest: paired revision, exact actual data hashes and unchanged QA configuration are mandatory
+ok 8 - paired revision, exact actual data hashes and unchanged QA configuration are mandatory
+  ---
+  duration_ms: 0.3148
+  type: 'test'
+  ...
+# Subtest: ordinary command allowlist excludes admin/public raw warp paths
+ok 9 - ordinary command allowlist excludes admin/public raw warp paths
+  ---
+  duration_ms: 0.2918
+  type: 'test'
+  ...
+# Subtest: transport redacts nested credentials without changing actual sent login payload
+ok 10 - transport redacts nested credentials without changing actual sent login payload
+  ---
+  duration_ms: 10.0317
+  type: 'test'
+  ...
+# Subtest: WSS controller refreshes own damage vitals with a bounded500ms cadence, not every hit or observer hit
+ok 11 - WSS controller refreshes own damage vitals with a bounded500ms cadence, not every hit or observer hit
+  ---
+  duration_ms: 0.6222
+  type: 'test'
+  ...
+# Subtest: prepared hop controller requires fresh live transfer, actual map packet and exact landing
+ok 12 - prepared hop controller requires fresh live transfer, actual map packet and exact landing
+  ---
+  duration_ms: 0.9192
+  type: 'test'
+  ...
+# Subtest: NPC matching rejects template-only, stale, wrong-kind/id/position and unexposed link
+ok 13 - NPC matching rejects template-only, stale, wrong-kind/id/position and unexposed link
+  ---
+  duration_ms: 0.2366
+  type: 'test'
+  ...
+# Subtest: unpicked or prepared/vendor book cannot be credited as a naturally acquired use
+ok 14 - unpicked or prepared/vendor book cannot be credited as a naturally acquired use
+  ---
+  duration_ms: 0.1771
+  type: 'test'
+  ...
+# Subtest: complete synthetic receipt structure is accepted only in its bounded lane, never fresh levels/whole world/native
+ok 15 - complete synthetic receipt structure is accepted only in its bounded lane, never fresh levels/whole world/native
+  ---
+  duration_ms: 5.5283
+  type: 'test'
+  ...
+# Subtest: transition-implied source position remains pending instead of claiming direct source authority
+ok 16 - transition-implied source position remains pending instead of claiming direct source authority
+  ---
+  duration_ms: 2.9214
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectssource-hash false acceptance
+ok 17 - receipt verifier rejectssource-hash false acceptance
+  ---
+  duration_ms: 2.3346
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsstatic-hop false acceptance
+ok 18 - receipt verifier rejectsstatic-hop false acceptance
+  ---
+  duration_ms: 2.3309
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsstale-hop false acceptance
+ok 19 - receipt verifier rejectsstale-hop false acceptance
+  ---
+  duration_ms: 2.6476
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsduplicate-hop false acceptance
+ok 20 - receipt verifier rejectsduplicate-hop false acceptance
+  ---
+  duration_ms: 2.5869
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectswrong-position false acceptance
+ok 21 - receipt verifier rejectswrong-position false acceptance
+  ---
+  duration_ms: 2.2681
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsno-intent false acceptance
+ok 22 - receipt verifier rejectsno-intent false acceptance
+  ---
+  duration_ms: 3.6334
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsmissing-save false acceptance
+ok 23 - receipt verifier rejectsmissing-save false acceptance
+  ---
+  duration_ms: 2.6381
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectswrong-save-count false acceptance
+ok 24 - receipt verifier rejectswrong-save-count false acceptance
+  ---
+  duration_ms: 2.9378
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsfresh-level false acceptance
+ok 25 - receipt verifier rejectsfresh-level false acceptance
+  ---
+  duration_ms: 2.0713
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsvisual false acceptance
+ok 26 - receipt verifier rejectsvisual false acceptance
+  ---
+  duration_ms: 1.958
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectswhole-world false acceptance
+ok 27 - receipt verifier rejectswhole-world false acceptance
+  ---
+  duration_ms: 2.4493
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsdeadline false acceptance
+ok 28 - receipt verifier rejectsdeadline false acceptance
+  ---
+  duration_ms: 2.5689
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsd71653 false acceptance
+ok 29 - receipt verifier rejectsd71653 false acceptance
+  ---
+  duration_ms: 2.3767
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsteleport false acceptance
+ok 30 - receipt verifier rejectsteleport false acceptance
+  ---
+  duration_ms: 3.5354
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsother-player false acceptance
+ok 31 - receipt verifier rejectsother-player false acceptance
+  ---
+  duration_ms: 2.482
+  type: 'test'
+  ...
+# Subtest: source spawn identity and no-drop outcomes stay separate; no target item is a retained result
+ok 32 - source spawn identity and no-drop outcomes stay separate; no target item is a retained result
+  ---
+  duration_ms: 4.7065
+  type: 'test'
+  ...
+# Subtest: omitting no-drop, missing ObjectDied, pretending absence is killed, death removal and bigger kill budget are rejected
+ok 33 - omitting no-drop, missing ObjectDied, pretending absence is killed, death removal and bigger kill budget are rejected
+  ---
+  duration_ms: 14.8461
+  type: 'test'
+  ...
+# Subtest: owned pickup/book learning and saved skill are observable, while missing exact source-kill link stays unaccepted
+ok 34 - owned pickup/book learning and saved skill are observable, while missing exact source-kill link stays unaccepted
+  ---
+  duration_ms: 3.6282
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectswrong-owner
+ok 35 - item/book receipt rejectswrong-owner
+  ---
+  duration_ms: 3.1967
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectspreexisting-uid
+ok 36 - item/book receipt rejectspreexisting-uid
+  ---
+  duration_ms: 2.8859
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectsno-newmagic
+ok 37 - item/book receipt rejectsno-newmagic
+  ---
+  duration_ms: 2.7318
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectsfailed-ack
+ok 38 - item/book receipt rejectsfailed-ack
+  ---
+  duration_ms: 2.7433
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectswrong-class-book
+ok 39 - item/book receipt rejectswrong-class-book
+  ---
+  duration_ms: 4.3516
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectsbook-not-debited
+ok 40 - item/book receipt rejectsbook-not-debited
+  ---
+  duration_ms: 3.1367
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectsbook-skill-unsaved
+ok 41 - item/book receipt rejectsbook-skill-unsaved
+  ---
+  duration_ms: 2.7363
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectsforged-kill-link
+ok 42 - item/book receipt rejectsforged-kill-link
+  ---
+  duration_ms: 3.2586
+  type: 'test'
+  ...
+# Subtest: item/book receipt rejectslearn-is-activation
+ok 43 - item/book receipt rejectslearn-is-activation
+  ---
+  duration_ms: 2.7236
+  type: 'test'
+  ...
+# Subtest: three-class aggregation needs independent accounts and one exact pair and cannot imply complete classic world
+ok 44 - three-class aggregation needs independent accounts and one exact pair and cannot imply complete classic world
+  ---
+  duration_ms: 2.578
+  type: 'test'
+  ...
+1..44
+# tests 44
+# suites 0
+# pass 44
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 424.7558

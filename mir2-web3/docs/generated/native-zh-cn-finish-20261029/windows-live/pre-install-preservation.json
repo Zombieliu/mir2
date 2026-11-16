@@ -1,0 +1,29 @@
+{
+  "observedAtUtc": "2026-10-29T08:25:59.2086346Z",
+  "normalInstall": {
+    "uninstallString": "\"D:\\Mir2Invite\\uninstall\\unins000.exe\"",
+    "version": "2026.10.07.19",
+    "location": "D:\\Mir2Invite\\",
+    "displayName": "Numeron - Legend of Rebirth",
+    "gameExeSha256": "901C47188259B5F2A6B73070B12456D4ECC13AAB02C68B975E1843FFFC507348"
+  },
+  "personalPreferences": [
+    {
+      "file": "locale.json",
+      "exists": true,
+      "sha256": "192A60E8DCDBE02BF6123B549804DBD8A78294F4B0B56185E8009DC29E50504D"
+    },
+    {
+      "file": "locale-seed.json",
+      "exists": true,
+      "sha256": "DC84556B72DACD74DE10C7668CB25AD039C537E0AC407A9D2878F49CD0C2C2DF"
+    },
+    {
+      "file": "display.json",
+      "exists": true,
+      "sha256": "3F0C7040D5EB8A0AB028ED2F417821E35320E20B3F07FDB309C14F5B40B8196D"
+    }
+  ],
+  "validationIdentityAbsent": true,
+  "isolationDirectory": "F:/mir2-build/native-zh-cn-finish-20261029/installed-validation"
+}

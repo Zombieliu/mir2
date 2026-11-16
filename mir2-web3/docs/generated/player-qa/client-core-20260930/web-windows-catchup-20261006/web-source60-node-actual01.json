@@ -1,0 +1,45 @@
+{
+  "source": "Source60",
+  "observedAt": "2026-10-11T04:37:50.795Z",
+  "callerExitCode": 0,
+  "owner": "Root",
+  "exitCode": 0,
+  "builderPid": 34576,
+  "kind": "Source60 original Node combat and bag regressions pending actual70 tests",
+  "exited": true,
+  "disposed": true,
+  "elapsedMs": 5364,
+  "configPath": "C:/mir2-cross-platform-storage-20261002/web-source60-bag-belt-arbitration-20261011-01/root-approved01/node-tests01-config01.json",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\root-approved01\\node-tests01-config01.json",
+    "bytes": 4873,
+    "sha256": "d11043be7bddc8282fd59132d36354f47394c808cd0bb535fa3e95c1f3fdc8fc"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\preparation\\source-snapshot.json",
+    "bytes": 6601070,
+    "sha256": "40610736392b150613c43c858cb71caa440b92623a7839647a27d15f67cce50c"
+  },
+  "rootSourceVerifiedInputs": 19582,
+  "rootSourceDifferences": 0,
+  "tests": 70,
+  "passed": 70,
+  "failed": 0,
+  "skipped": 0,
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\node-tests01\\stdout.log",
+    "bytes": 17386,
+    "sha256": "5e76ba155cbcdbcd077d7f7bcea550dc13c7b4c62e29158e3efdd3507eabe745"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\node-tests01\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

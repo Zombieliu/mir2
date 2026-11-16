@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-26T10:24:24.118Z",
+  "profile": "release",
+  "sourceCommit": "56211fdceb2b38dff6cee8e2b4a00d1eefae4f11",
+  "backendSourceCommit": "56211fdceb2b38dff6cee8e2b4a00d1eefae4f11",
+  "executionSourceCommit": "56211fdceb2b38dff6cee8e2b4a00d1eefae4f11",
+  "driverSourceCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "backendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-release-v1\\backend-source-v1.json",
+    "bytes": 50409,
+    "sha256": "d56dde413d0015dd6da15412192a13b43ee1676fc4263b74225d901b69a9e0fc"
+  },
+  "backendInputCount": 50,
+  "sourceManifestSha256": "ebeb84d43aa696b2a8f326184b9ef7a2b2049312f623ff5db31dee7c06b35964",
+  "binary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87433728,
+    "sha256": "3e4e318f299b1a0d9e85641354b3415f6cf8c7f2732aa35c41f1a901fec5d296"
+  },
+  "buildLog": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\shared-experience-parse-cache-v1-release-build.log",
+    "bytes": 56033,
+    "sha256": "e6f6cdb799205526a9933e342965bb67a74961c7bf498c1edbc44d1e1dea4e8e"
+  },
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-release-v1\\build-receipt-v1.json",
+    "bytes": 62794,
+    "sha256": "62ec1c419dd8679f7cd277ea7529b1366c65cf37d16c876983a53a9a92387003"
+  },
+  "buildArguments": [
+    "+1.95.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ],
+  "toolchain": {
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)"
+  },
+  "visualStudio": {
+    "targetArch": "x64",
+    "linkExecutable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe"
+  },
+  "buildJobs": 4,
+  "sourceVerifiedBeforeAndAfterBuild": true,
+  "ignoredInclusiveUntrackedBackendCount": 0,
+  "previousBackendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "previousRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "onlyBackendDelta": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+  "otherOriginalInputsUnchanged": 49,
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-aoi-received-state-driver-frozen-v1.json",
+    "bytes": 10528,
+    "sha256": "b3b361cd4b39ba19a1fa937f3196be836baffa5ef924a25fafff580821c62268"
+  },
+  "driverSourceSha256": "cb8c542abdda05a3d6bc2fac7309a14bcb359517cfdb2eae5554e2f708bb03e1",
+  "rootFocusedValidation": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\root-focused-receipt-v1.json",
+      "bytes": 9543,
+      "sha256": "7870f577ab2d0a8e1db728acc3332682aede8fa32f7922e08450b2ea4e864c23"
+    },
+    "sourceBefore": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\source-before-v1.json",
+      "bytes": 11186,
+      "sha256": "91988b44c93cbc81074bd63d64b033065e2b87feef0c01190892d40e4bd55b85"
+    },
+    "sourceAfter": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\source-after-v1.json",
+      "bytes": 11186,
+      "sha256": "91988b44c93cbc81074bd63d64b033065e2b87feef0c01190892d40e4bd55b85"
+    },
+    "logs": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\format-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\format-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\experience-profile-stdout-v1.log",
+        "bytes": 2798,
+        "sha256": "7a03e0c2f3a4969c0a82ae3b0e1b3b306925e940719f5029b6734c24959af3a3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\experience-profile-stderr-v1.log",
+        "bytes": 43609,
+        "sha256": "689c30716c1eeeba5eb76f00489406e31a8298727840c0a772af5946f075f029"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\store-durability-stdout-v1.log",
+        "bytes": 368,
+        "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\store-durability-stderr-v1.log",
+        "bytes": 43101,
+        "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-clock-store-stdout-v1.log",
+        "bytes": 218,
+        "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-clock-store-stderr-v1.log",
+        "bytes": 43101,
+        "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\admission-lock-order-stdout-v1.log",
+        "bytes": 253,
+        "sha256": "130db78452259019a5ac6a1a4d6b31ba90e6e633885b1f9947e295ec20713426"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\admission-lock-order-stderr-v1.log",
+        "bytes": 53869,
+        "sha256": "3e64ca77e9e66c0e026e0c583948de08c6d053f9951cf790e8fa76dc28286e73"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\kill-award-commit-stdout-v1.log",
+        "bytes": 215,
+        "sha256": "e559fda2b305933bc676986bb03e0be0db1212cb9358b60f99f3278a165df2f1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\kill-award-commit-stderr-v1.log",
+        "bytes": 53409,
+        "sha256": "eb28d1255d0f081a66226232b4281a0f50f85c7733a0da56977c361a66eb580e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-kill-durability-stdout-v1.log",
+        "bytes": 700,
+        "sha256": "9d09a0c53baa9346ed95dfa417a1c73676d713bde31d893fb5db5e30f9386762"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-kill-durability-stderr-v1.log",
+        "bytes": 54316,
+        "sha256": "928390e6ee06a52468cb71047f2f61fe31ded6afc8216c459cea620bc75bdef0"
+      }
+    ],
+    "actualResults": [
+      {
+        "name": "format",
+        "exitCode": 0,
+        "totals": [],
+        "passed": true
+      },
+      {
+        "name": "experience-profile",
+        "exitCode": 0,
+        "totals": [
+          {
+            "status": "ok",
+            "passed": 21,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2925
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "store-durability",
+        "exitCode": 0,
+        "totals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2944
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "guild-clock-store",
+        "exitCode": 0,
+        "totals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2945
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "admission-lock-order",
+        "exitCode": 0,
+        "totals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1252
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "kill-award-commit",
+        "exitCode": 0,
+        "totals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1252
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "guild-kill-durability",
+        "exitCode": 101,
+        "totals": [
+          {
+            "status": "FAILED",
+            "passed": 0,
+            "failed": 2,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1251
+          }
+        ],
+        "passed": false
+      }
+    ],
+    "sourceUnchangedBeforeAfter": true,
+    "sourceChangeAcceptancePassed": true,
+    "allSelectedTestsPassed": false,
+    "passingRustTests": 26,
+    "knownBaselineFailures": [
+      {
+        "test": "routing::tests::guild_kill_source_tests::guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt",
+        "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:37:5:",
+        "message": "assertion `left == right` failed\n  left: []\n right: [ZoneMonsterKillAward { source_receipt_key: None, experience_selection: None, mentor_bank: None, monster_object_id: 912345, killed_at_ms: 1000, monster_name: \"Scarecrow\", experience: 6, drops: [], boss_audit: None }]"
+      },
+      {
+        "test": "routing::tests::guild_kill_source_tests::guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_success_packets",
+        "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:127:68:",
+        "message": "index out of bounds: the len is 0 but the index is 0"
+      }
+    ],
+    "knownBaselineFailureCount": 2,
+    "baselineControl": {
+      "qualification": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-source-change-validation-v1.json",
+        "bytes": 3313,
+        "sha256": "92eda292c128dc4dd5a9e3ada8ab0356a326ffe76095ff932efa8a1c03bfef3c"
+      },
+      "actualControl": {
+        "file": "C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-c-baseline-control-v1/actual-control-receipt-v1.json",
+        "bytes": 1846,
+        "sha256": "84fa9bd16e6b11cba6c625c3123c1db66fbbe81936854d600b4e35108e3318e3"
+      },
+      "controlLogs": [
+        {
+          "file": "C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-c-baseline-control-v1/control-stdout-v1.log",
+          "bytes": 700,
+          "sha256": "21a3149e44a66a26fde69de5e0692872bf1a5224e055224f0baeb56682dddb9f"
+        },
+        {
+          "file": "C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-c-baseline-control-v1/control-stderr-v1.log",
+          "bytes": 54609,
+          "sha256": "113674463c701f3219b79765c18b9fba0c09eadbe1be9caa638b71666e7c28bc"
+        }
+      ],
+      "controlPreimage": {
+        "file": "C:/mir2-build/p01-completion-20261024/shared-experience-authority-parse-cache-v1/shared_experience_profile.rs.before-cache-v1.txt",
+        "bytes": 76309,
+        "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+      },
+      "candidatePreserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-c-baseline-control-v1\\candidate-preserved-v1.rs.txt",
+        "bytes": 94359,
+        "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea"
+      },
+      "sourceChangeAcceptancePassed": true,
+      "allSelectedTestsPassed": false,
+      "passingRustTests": 26,
+      "knownBaselineFailures": [
+        {
+          "test": "routing::tests::guild_kill_source_tests::guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt",
+          "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:37:5:",
+          "message": "assertion `left == right` failed\n  left: []\n right: [ZoneMonsterKillAward { source_receipt_key: None, experience_selection: None, mentor_bank: None, monster_object_id: 912345, killed_at_ms: 1000, monster_name: \"Scarecrow\", experience: 6, drops: [], boss_audit: None }]"
+        },
+        {
+          "test": "routing::tests::guild_kill_source_tests::guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_success_packets",
+          "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:127:68:",
+          "message": "index out of bounds: the len is 0 but the index is 0"
+        }
+      ],
+      "knownBaselineFailureCount": 2,
+      "diagnosticCandidateOnly": true,
+      "formalAcceptanceEligible": false
+    },
+    "diagnosticCandidateOnly": true
+  },
+  "sourceChangeAcceptancePassed": true,
+  "allSelectedTestsPassed": false,
+  "knownBaselineFailures": [
+    {
+      "test": "routing::tests::guild_kill_source_tests::guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt",
+      "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:37:5:",
+      "message": "assertion `left == right` failed\n  left: []\n right: [ZoneMonsterKillAward { source_receipt_key: None, experience_selection: None, mentor_bank: None, monster_object_id: 912345, killed_at_ms: 1000, monster_name: \"Scarecrow\", experience: 6, drops: [], boss_audit: None }]"
+    },
+    {
+      "test": "routing::tests::guild_kill_source_tests::guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_success_packets",
+      "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:127:68:",
+      "message": "index out of bounds: the len is 0 but the index is 0"
+    }
+  ],
+  "knownBaselineFailureCount": 2,
+  "diagnosticCandidateOnly": true,
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "scope": "New single-file shared experience authority parse-cache backend Release. Exact C50 closure with49 raw/GitLF inputs unchanged, preserved four-None fixtures and AOI657b Node9 raw/Git identical. Actual focused checks and any explicitly controlled baseline failures remain exact; Cargo stdout/exit bound. Diagnostic candidate only; no lifecycle, formal, capacity, P0 or production acceptance."
+}

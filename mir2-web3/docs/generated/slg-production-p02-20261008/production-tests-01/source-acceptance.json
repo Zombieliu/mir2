@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "c4efd7f13669434b7a5c09ec0e573b77f28fc95c71d85f068ec806bb147ced92"
+  },
+  "independentSourceReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02-20261008\\independent-source-review.json",
+    "sha256": "d7c06dc1fc064f347a26711bb32a78559d4b6ed586eb069dd5d311584446a114"
+  },
+  "scope": "Controlled personal production Session/File-source transactions and adjacent save/NPC regressions; no live game, Postgres, gateway or installer acceptance."
+}

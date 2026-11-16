@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source59 actual original Node combat54 and bag12 regressions",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/root-approved01/node-tests01-config01.json",
+    "bytes": 4613,
+    "sha256": "bc41a5b61d54e98c333369639e4f06682da45895194f3f70c8efbdb80fc02f61"
+  },
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/preparation/source-snapshot.json",
+    "bytes": 6599876,
+    "sha256": "f5f097a7ce131118bf72f8d27fe07d3d1b15771526957ea8361cbc1ca950c729"
+  },
+  "originalOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 55984,
+    "kind": "Source59 original Node combat and bag regressions",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4892,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/root-approved01/node-tests01-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "inputHashes": {
+    "declared": 19580,
+    "rootMatched": 19580,
+    "originalCallerPrePostMatched": true
+  },
+  "tests": 66,
+  "pass": 66,
+  "fail": 0,
+  "skipped": 0,
+  "cancelled": 0,
+  "newProductionWireRegressionPassed": true,
+  "strictRustSchemaUnchanged": true,
+  "stderrBytes": 0,
+  "productRuntimeLaunched": false,
+  "uiOperated": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

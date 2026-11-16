@@ -1,0 +1,33 @@
+{
+  "status": "draft",
+  "environment": "test",
+  "timeZone": "Asia/Shanghai",
+  "draft": {
+    "campaignId": "numeron-playtest-20261029",
+    "fundingMode": "revenue_share",
+    "termsVersion": "numeron-playtest-20261029-v1",
+    "startsAtMs": 1793219738449,
+    "endsAtMs": 1793824538449,
+    "rules": {
+      "testWalletEnrollment": true,
+      "minimumLevel": 1,
+      "activeUtcDays": 1,
+      "candidateTtlMs": 604800000,
+      "confirmationWindowMs": 86400000,
+      "maximumCoverageMs": 604800000,
+      "reserveBps": 0,
+      "walletCooldownMs": 259200000
+    },
+    "budgetMicroUsd": 0,
+    "memberLimit": 0,
+    "leaderLimit": 0,
+    "perLeaderMemberLimit": 0,
+    "perMemberRevenueCapMicroUsd": 0
+  },
+  "intendedSwitches": {
+    "recruitmentEnabled": true,
+    "commissionEnabled": true,
+    "payoutEnabled": false
+  },
+  "disclosure": "Independent seven-day test season. Verified wallet enrollment uses a wallet display identity, with no game character or level granted. Enrollment alone creates no gameplay qualification, payment evidence, commission or payout. Cross-branch Sui USDC recharge provenance is not integrated. The 2026-11-01 formal season draft is unchanged."
+}

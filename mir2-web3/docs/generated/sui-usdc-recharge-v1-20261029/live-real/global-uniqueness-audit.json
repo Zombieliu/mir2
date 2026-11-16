@@ -1,0 +1,39 @@
+{
+  "evidenceKind": "global isolated database uniqueness and native USDC object ownership supplement",
+  "observedAtUtc": "2026-10-28T21:13:57.326Z",
+  "passed": true,
+  "checks": {
+    "globalInvoiceIdsUnique": true,
+    "globalPaidDigestsUnique": true,
+    "exactlyOneGlobalAppliedOrder": true,
+    "merchantCoinOwnership": true,
+    "payerCoinOwnership": true,
+    "coinInstanceIdsDisjoint": true
+  },
+  "allAccountOrderCount": 3,
+  "allCreatedInvoiceCount": 2,
+  "allAppliedOrderCount": 1,
+  "coins": [
+    {
+      "role": "payer",
+      "owner": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "allCoinsCorrectlyOwned": true,
+      "coinObjectCount": 1,
+      "totalCoinMicros": "18990000",
+      "coinIds": [
+        "0xd25d07fab65afcc52794bf4f1b7b18a0f7457f4a0d89839cf78e211a177ba35a"
+      ]
+    },
+    {
+      "role": "merchant",
+      "owner": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "allCoinsCorrectlyOwned": true,
+      "coinObjectCount": 1,
+      "totalCoinMicros": "1000000",
+      "coinIds": [
+        "0xe4071042a2741c692e6114f24623725c761c6c5e60a4ac83265b8112e558c25e"
+      ]
+    }
+  ],
+  "scope": "All accounts in isolated private-live store, exact current payer/merchant coin objects; no keys/signing/broadcast"
+}

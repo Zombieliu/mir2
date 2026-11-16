@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "kind": "actual-wrapper-built-signed-updater-r9-and-strict-bundle-verification",
+  "gameCandidate": "WN-CANDIDATE-20261029-invited-09",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "updaterSourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "sequence": 2026102909,
+  "sourceCleanAfter": true,
+  "pipelineExitCode": 0,
+  "strictBundleFileCount": 9,
+  "curatorRecomputedAllNineFileHashes": true,
+  "curatorRecomputedEightEvidenceArtifactReceipts": true,
+  "launcher": {
+    "path": "Mir2Launcher.exe",
+    "bytes": 392192,
+    "sha256": "838c9bb6c2fd0e8478a704907fd98248b9bcdfa5a3c09b3ff07c8100f585d8ae"
+  },
+  "engine": {
+    "path": "updater/engines/0D23AADE70ACAA6BB2C00941BE5379971E6BD764AE585DB8427C2E03DCEED363/Mir2Updater.exe",
+    "bytes": 1955328,
+    "sha256": "0d23aade70acaa6bb2c00941be5379971e6bd764ae585db8427c2e03dceed363"
+  },
+  "detachedCmsVerified": true,
+  "signingPublicKeySha256": "6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e",
+  "publicAuthenticode": "NotSigned",
+  "producerReports": [
+    {
+      "path": "producer-final.json",
+      "sourceReceipt": {
+        "filename": "updater-release-r9-final.json",
+        "bytes": 4615,
+        "sha256": "6ebb8bfe931c49a16b9904c48793c10d9d9ddce56db9891d3af4cd55fab5d7e6",
+        "included": false
+      }
+    },
+    {
+      "path": "verification.json",
+      "sourceReceipt": {
+        "filename": "updater-release-r9-verification.json",
+        "bytes": 592,
+        "sha256": "8a672aaca58c6e9fd7777fbed9298dd5a11c829e51f52bc514f24c3691c91ad1",
+        "included": false
+      }
+    }
+  ],
+  "buildReceipt": {
+    "filename": "BUILD-UPDATER.json",
+    "bytes": 625,
+    "sha256": "9638f841d665a26283025dcc01e016fd7144ccbb3d9201bf5febe38a7d4b4c93",
+    "included": false
+  },
+  "installerIncludeReceipt": {
+    "filename": "installer-updater-files.iss",
+    "bytes": 1752,
+    "sha256": "dba84b24b7973ec419bf3ef4ad0a7438ef4e84a36169996b871be9bae70d09f8",
+    "included": false
+  },
+  "installerIncludeResultLines": [
+    "{\"passed\": true, \"supplementalFiles\": 9, \"cms\": \"required separately\"}"
+  ],
+  "installerIncludeLogReceipt": {
+    "filename": "updater-release-r9-installer-input.log",
+    "bytes": 72,
+    "sha256": "42f9065deecbf4a4dce4c0f2417e90214302efd5f917abaf7fa659b4f6df9262",
+    "included": false
+  },
+  "precompileHashesAreHistorical": true,
+  "finalWrapperBinariesDifferFromPrecompile": true,
+  "binariesAndRawSignaturesIncluded": false,
+  "installerCompiledByThisReport": false,
+  "installedFlowVerifiedByThisReport": false,
+  "newKeys": false,
+  "trustStoreChanged": false,
+  "remoteDeployment": false
+}

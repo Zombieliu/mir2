@@ -1,0 +1,554 @@
+{
+  "scope": "Restart-safe immutable image cache configuration and tiers; bounded hydration with reset/config fencing and ordered writes; unchanged original assets and gameplay; stale startup-loader assertion corrected",
+  "candidate": "0bb62d2fc959-worker-lifecycle-d2d0dff5",
+  "parent": "a852afd202ab7cc52d37c795ea5f7ab13835c40e",
+  "authoritativeHead": "0bb62d2fc959bef264a812d9108f35f782d67d22",
+  "sourceArchiveSha256": "965e4be2143c1f73e862aa94eeb1f23e1c7e533cf782728bf91103b5e8a757a8",
+  "previousBuildReceiptSha256": "5f2cc4f8c3a2b8b3ab6c6e4bcbef9659417942c0cee28bcc2cb9c90fe08c03c2",
+  "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+  "buildConfigSha256": "429269443ae5fef187b37271ce374b4863a1fe1620cc6dadc9f2f86e3d474c57",
+  "version": "20261108-r16-08ec86d5105c",
+  "changedFiles": [
+    {
+      "filename": "mir2-web3/apps/web/app/api/asset-manifest/route.ts",
+      "sha256": "3dbc19919580029c8564933cb45f8188dc69ff53ec5d024c398163c28199ca69",
+      "gitBlob": "7ddfb682b960c6e7b106c62d822198fb3dc6ef67"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha256": "b461699bfb863e6d61a83d1159f6e5047c443660bf6cae7562f01c621c4a96a5",
+      "gitBlob": "0978a7c5b7d1ab3d7897c17fedc8e2824628ad9b"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-entity-animation-runtime.ts",
+      "sha256": "f0f7086f95c6aaf5bcd75a0bf5dda35e1180c175070d42a7e055ed409119a15e",
+      "gitBlob": "eaa81509078b1690051160ac5940d2033d94419c"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+      "sha256": "2cdec232b9e043879dfa11951f1e1f8899d75260ebb17af9d90a0fe7e3de82e1",
+      "gitBlob": "c104b9e005b39d6384ce31192a70d58c825befd6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+      "sha256": "f4a07e1bf403062896f564f466118c41cadebea8ac0f963690429ff4433de42b",
+      "gitBlob": "29a1ac6e3dc7f0792f7ce67e62a82a449bc35d6f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "sha256": "973bff27d13480764a3ded3d5deba62c68910eee16671174e9e47f065a657763",
+      "gitBlob": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "98fff3b4acc7935720349919e72e4be012414208dce4cb6590f7acbaed1fb7ac",
+      "gitBlob": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "0721718c93bce04c49d18ca98dbf20a37c2b86a0ff157cf7c60815eff2ecf679",
+      "gitBlob": "f824ead652555d71d39a90adf4cddec3f09d1d7a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/asset-cache-packs.ts",
+      "sha256": "53d339b09b586638350ce8e25f82c8fa6e05160527d4840db78ad9802ee57de3",
+      "gitBlob": "4b63603b516e555d4c8af20339cee2ef96f05c4c"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/asset-prewarm-request.ts",
+      "sha256": "52ca7ece0c1211d8e7c73cf7b97a91205434adee7fb35f966d4bf7e46e252237",
+      "gitBlob": "0a67f3546b246313c03dbd3b36979aa2867d2664"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "sha256": "a149f35858cb0126431984789029d45043758bf33b268ca531b157e1a563d554",
+      "gitBlob": "b8fc5e3c53e26e39aa929901b6bc0f962523560c"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha256": "0163b054e3ba66243d5b42e19751b3e119167889e02cbabba91ca450d1a6fa52",
+      "gitBlob": "55a5722574be2a4647b3a5467f70cc15d44b184b"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
+      "sha256": "ba4da0c36e286393b29a298a012060f05ab4c2b98fcb1d5d9103f2e0770fbe8a",
+      "gitBlob": "a153a92e60a3bbcef0ad3a3302988c5165cec7bc"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "sha256": "55825f02e7b999bdc3e97c1ab991b059f605b0289cfda05242a65ad0fa6df51b",
+      "gitBlob": "2fb8593c7b94f8c178ebe1ddf79a225cd924afeb"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/client-presentation-runtime.ts",
+      "sha256": "cbe8bfe8ec4fcb8427dfae5a19ccad150f8013f536c9da09f9b5f0361a711951",
+      "gitBlob": "5f4d85cb917d4fdb019924f1b9de66beda699749"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+      "sha256": "4facb5c9be60665619d9d8f0806469381145344b91d3f4d15b0ef5d2255d08ff",
+      "gitBlob": "886b5f37e7571a47d8a931772ba5f525a339aabd"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/native-attack-movement.ts",
+      "sha256": "ccc6d8e6e59d24043c8a2c21badb30f98f29987915c4081bbdc727714403f55d",
+      "gitBlob": "077a538a1f3f0346761e04277662a8648ed4aea5"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+      "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+      "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+      "sha256": "6eb91c281c98cf1ef9e120c4e2204b44eba805e83f2698c709976ae417c1ab18",
+      "gitBlob": "4d702deee9894bbc789d1a12faeeebd832d651c7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "2ef7f93a848eab806cb51ce7efd3198745445714cc5d1932f876a6f504412757",
+      "gitBlob": "84abf6349c210535ee66f87d7df85bbe802c447f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-bootstrap-race.ts",
+      "sha256": "95c0bbbbd6b02bf2992d3a3f5a45e9a95dfa55501a1b9b8092aca4583d65ae5e",
+      "gitBlob": "0c8914c74b60e0916d27d197a939bcd2eb4fb54f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+      "sha256": "afc8fbfab5b45ba4d6dcd6f128423e2707ea82072052a0698b20418d49789b84",
+      "gitBlob": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+      "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+      "gitBlob": "1c6e01e81a30d7c69da3357684d582a20d1ce3b5"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+      "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d",
+      "gitBlob": "baeaa46d50c82eb6153042f56b2bd92fd86cc879"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+      "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a",
+      "gitBlob": "4c7fe9b30c5165dbf02ff3f0e24d60544d2d3c2a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+      "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c",
+      "gitBlob": "7b53c1b678180f5d850692e9b1a6278386eb80c0"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+      "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d",
+      "gitBlob": "8702d9e6c719333372fa40f12b4371ddc96b304b"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+      "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96",
+      "gitBlob": "58de992c48dc7cf9ee8ed7d8a4a73f980ffddb37"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha256": "a0b5b907f3eaad2540aa50c6297e2c52b74103adeefc697d9cbe129198eb7f5e",
+      "gitBlob": "762efe15633ea8fab1324106bb0b57ffe92089ad"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-manifest-identity.mjs",
+      "sha256": "d2d893dc620d456780661fcbd00c3578bab0de95db6059796d76cb3285541275",
+      "gitBlob": "e7f0cab1075bbdf51dbeea46cb67329d9cad7374"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-policy.mjs",
+      "sha256": "0850af13f4625d9baf8a79c382f49f786e29d46a0345a786475a1bb7e79041fd",
+      "gitBlob": "4c17df721848b36654d676c2e0691dfcf2f373df"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+      "sha256": "3f3aec2d72aa8374c69b7a7f3ff808183f3e647c7b5f117622a25d1c8c717c01",
+      "gitBlob": "6ac2e0a61249d7182336b5ebc8a31ca15fd839a8"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-startup-budget.mjs",
+      "sha256": "840f18007f0cb0d56cec387f619530029146d1008aa52ba3ff6f09ed055de437",
+      "gitBlob": "4af7d850972254b5a37fb29587a12a67947af89e"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha256": "5c3bd0eed13ff26d6f66470294fc029d9d1200153b5967ae5494c254d809f2df",
+      "gitBlob": "59ca78b8571322733591ac1c6b3ce27f24827c5e"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+      "sha256": "1504ba816dd075b0e9de9da4bafa362988af9e660754a0241632b5bc11d73fc9",
+      "gitBlob": "c6ddec224d66637d3f56b49f8da4272ab9133358"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-combat-input.mjs",
+      "sha256": "a483178879ef5802fd7394ec91cbb731c4fc3ba698042683892ab762d9bd6ce6",
+      "gitBlob": "6712f1fbea65eadce414ac69366fdf89deb9aeb4"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "sha256": "edb62e0e390edee100b486d4c95e89708ade353afdbb02868b9ebba5a98e2af5",
+      "gitBlob": "00e732dedcdcbeb7a352da98a164b74c7cff6c71"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs",
+      "sha256": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+      "gitBlob": "d3eb2215de8feb20cd61f7dbfdb3dc61cf44f377"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "sha256": "343f4a1a76a590558e6ff1c6a080c30fe05ee691df178d2afb65e9307f1ada1a",
+      "gitBlob": "615444c3cb845e9aa63084d0d8743f437e82dc97"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "8c030138c36963061966475815f441554d8b0399e3de2d061f4fc857c1a2e0be",
+      "gitBlob": "7541f4ff18f7244bb7d0d65727cd16b1ae2ff340"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha256": "34ef23a4ba803c7ddd0009a0e91df4f1ab59a02708f22acca632c4770b13f0e0",
+      "gitBlob": "c479d5acb4830fcc7e39e53e9f4279014d70d8d1"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "sha256": "372045c0a47c9668fa8f07101f00a1666d6cdcafc4bd02962d3125a0df03db83",
+      "gitBlob": "fc22718d68fa1410d30fcda1fc783ccfe7b776ab"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-client-core-runtime.mjs",
+      "sha256": "cc8b453e0057402db73ac8bf42518f6c41e520de726bd5c0401e778efb9594f7",
+      "gitBlob": "20617a8db9ef15ba1b62e2c70991ba69198d872a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-native-attack-movement.mjs",
+      "sha256": "afd243664dfa0c706cd03a2e9a5d29306a37e926f87036ed01eb88eb4d9fc38b",
+      "gitBlob": "401f346461ba2157d91bff293e893356f2c2900f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-newcomer-v2-journey.mjs",
+      "sha256": "26b4ffb843ac0dcf524542aca620fb7a1e37e0968495d7fb8ad098c9c97a5d95",
+      "gitBlob": "f25f94561799231bef7afae98b124a95ecc598b2"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-player-attack-input.mjs",
+      "sha256": "deef089b0117e07f27cfbea02e1bcd8c490f568903d228ea9816352b874cb5fe",
+      "gitBlob": "0383a20884d84695f495690a75b88de98c4ab16c"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-belt-shortcut-diagnostics.mjs",
+      "sha256": "e1ed3f52aa8b9e2c1674d3bb32e48e13937c68066b38726dccc07ff59ff1becb",
+      "gitBlob": "eb8e2d0c1bf161ae8f7b0e4b4cd24d70beb0aa65"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-group-hover.mjs",
+      "sha256": "b28529983e1195bde2c47f7406af4ee40e531e7453f1c78b70f2ba88a97776c2",
+      "gitBlob": "fa4f30eda5912770a582dbd6de77441d25228bee"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
+      "sha256": "fe95c2289ac9852eafd9553b6e9cce85f89d5d474f64b64ddc02da08169431b7",
+      "gitBlob": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-language-parity.mjs",
+      "sha256": "51395153080a33985df3632fe286ffb85d36e821d95147043fa6717d169e8995",
+      "gitBlob": "b7f907871cb96a889588cae5da2320e711a213b7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+      "sha256": "ab05b17ad0763186079eabc97288b11080c1595db006e1ddf0926a85545bc7dc",
+      "gitBlob": "6abdf0aa794f891528aeacd3113cbf17ede85696"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-route-correction.mjs",
+      "sha256": "11856a6d4a004f8bbc4d9ca2af2837c9a1c6eb8a2e1ea6873eabb193a2c1fce3",
+      "gitBlob": "f5b9b8936e30d2104fd2d1b8bba7c9a0fddc79b8"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha256": "c0f4d3966e4b66ce05dc2c1200a41e5b8a61fcf9138acd9f3286847311891a81",
+      "gitBlob": "ff7983341e0fcadd3aad4a95629ceae129107aca"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-bootstrap-race.mjs",
+      "sha256": "439cf1a6c90fd47b0d8bba09b9852799a939a2edfeef26c78ade1c0057fdcbd2",
+      "gitBlob": "4d34c16993eb07ef5f704de40e47f1261d0f76d6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+      "sha256": "2e3ff7526c95bbb3dc9c7eb262525ef0638f80f323fa98a02b1075ee4de8114a",
+      "gitBlob": "a8af5488094ea63a3ab3680ca469a9383d9062ec"
+    }
+  ],
+  "generatedInputs": {
+    "lib/generated/bevy_runtime_version.json": "32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8",
+    "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+    "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+    "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "326d3e502d06fbffc31f84d3a5c7fb7404cc843cf689040980790828341eccdf",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "6c0bc68bd87d78602a60aff7567daa4e2067d1ecf7670f683172da503a19047f",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "a40b7e86e2cb98bb55beee4f742004695602aa0b8fc6bea6b3f8117799d0e7e9",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime.js": "326d3e502d06fbffc31f84d3a5c7fb7404cc843cf689040980790828341eccdf",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "6c0bc68bd87d78602a60aff7567daa4e2067d1ecf7670f683172da503a19047f",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js": "a40b7e86e2cb98bb55beee4f742004695602aa0b8fc6bea6b3f8117799d0e7e9",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+    "public/bevy-runtime-releases/bevy-84ef836460a84e03/runtime-manifest.json": "32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8",
+    "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+    "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+    "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+    "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+    "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+    "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+    "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+    "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+    "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+    "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed"
+  },
+  "runtimeSourceOverlays": [
+    {
+      "file": "mir2-web3/apps/game-client/client-core/Cargo.lock",
+      "sha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/Cargo.toml",
+      "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/auth_ui.rs",
+      "sha256": "52d61788cec439af1564269fc270bdfee16e792170ffea1970fa445fadf32622"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/cash_preview.rs",
+      "sha256": "5e5d07ccf650f92413379d68536670280cda32e1ed04b6f141ec05ef6bd6e8fd"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/chat_ui.rs",
+      "sha256": "5fc58219341418a8c663497a4a1a0441163a130214f06fd3792b9bf1b6307168"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/clock.rs",
+      "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/entity_animation.rs",
+      "sha256": "9b3fd4a9f74bac3113bb02d0cc278dce8c65f0571f0facf6b942ad06d1623e2c"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/equipment_pending.rs",
+      "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/fishing_click.rs",
+      "sha256": "479c34270b538e773b31ebacf71d81d950211435ab3fd779c63daa0a4c08ccd7"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/intent.rs",
+      "sha256": "b2d24c18624cf6359eac00387805d99fd75d75ea45ba759ff2f07b2b95fcfdd2"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/interpolation.rs",
+      "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/item_names.rs",
+      "sha256": "43e8479124e6ab6adfbaada3b214a088710de7b2f49d8d369a8b2e2eda2ad330"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/item_tooltip.rs",
+      "sha256": "0496131e32d2536b7330bf487dd4f68f7a4af10b8f1107161e27356dc81a9a04"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/item_tooltip_types.rs",
+      "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/lib.rs",
+      "sha256": "10202f0bd4db1008ff07cc86c06e2c1cc96d07acc4b86fea5c54d778c31ebdd3"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/mail_compose.rs",
+      "sha256": "ca4cd917da422f623132d261384cca07a48ab046ec3c321021d339a1fce9cc31"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/mail_parcel.rs",
+      "sha256": "5e40c7c2ed652c5dbf8d5bee79cd3fa10ceefe2282187d6a7eb76d0f7f1c4d25"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/map_route.rs",
+      "sha256": "96654530f2d8e76ad654ff582cc96d9ee915a5399e26a6312c5a33cda8f3a6b6"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/motion.rs",
+      "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "sha256": "6edd4bd07153a940f68bdb465eb0ee923e5216908506437b22ccf4df64d74025"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "sha256": "906ebdbc2aca2520a5524f4207c679ef6a0f8343a9315e587222b78cff7db173"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "sha256": "26df6d94035049ded08ddac24b224938da614f23457fb961cb404a7ea88c92a7"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/npc_purchase_host.rs",
+      "sha256": "18fe6cc5266ab9ed0c5b1a6820dd045209b2db7ca4a4ff991ae4966d16a3f4dc"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "sha256": "90a81047017581290ca23d0c6bd42264b59461954052f133f394d86a22c59dee"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/npc_repair_quote.rs",
+      "sha256": "18bc85d3ffece369c8bb1a84ff9b76234b5246806108b390bf9d8487d0715f10"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/ordered_map.rs",
+      "sha256": "a8d80e3a02cc43748565749fbf604baf8b3475780b2aa96ad745151534786732"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/quest.rs",
+      "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/ranking_inspect.rs",
+      "sha256": "21d25b988e34ddb4cf2e5d4dba405cc8474dcc2a0ce0471609667e8758c77cd6"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-core/src/reconciliation.rs",
+      "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-wire/Cargo.lock",
+      "sha256": "f1ea96a1afa008b565a1ee481ed4caa2c396b73bac80d68015dbe0fc7802d750"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-wire/Cargo.toml",
+      "sha256": "38a3ac4cc26de4d18c51c36026e84383c1c4ccc88dd31b725385cebd5651588e"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-wire/src/lib.rs",
+      "sha256": "a15864a99067b15e0d3cdf507120e22ac9153da8e20adbf88506a67d8a38a19c"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/Cargo.lock",
+      "sha256": "c8e1fda2fa320f180a1d5252962034f61266b2375f052198e717e40ab6e85155"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/Cargo.toml",
+      "sha256": "ef797825e86c499ece3528c8bcea25b3cb2ec564f4c4b2633bdf757b5ab49b7b"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/README.md",
+      "sha256": "c5c3ab0c14322b21711187d8ee9e7012f7736db8bfcb16e90a3e01b1984ddd34"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/rust-toolchain.toml",
+      "sha256": "2502bc508cb09537bb43e98698911ccc2109aa947b3beba56f535119fd750cf6"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/auth_ui.rs",
+      "sha256": "86d150b08076dc34a3ec36c4d63e9e56b6ac0f8023dc96047596b0264c95e191"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/bag_to_belt.rs",
+      "sha256": "c209be803870326f8d0869dd7db4f065b56a111a1a11405552a7c0af99f4014d"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/cash_preview.rs",
+      "sha256": "c92beffad40a5069dbb8a93e3be09dcc69630764fe6f2d03f177187ec1375c38"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/chat_ui.rs",
+      "sha256": "7f66ee40f459d580a5cfa4c62ec511cc1bea50271deda9a3d565ca810aec25ed"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/core_api.rs",
+      "sha256": "5743271b90f2f6a25d45b47b0a83be2d5154c69ae0a15908d04471fa14d2cd7a"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/entity_animation.rs",
+      "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/entity_animation_state.rs",
+      "sha256": "fcdc0a69692680379f561e03b65219c95a8947d7de39d67756108fd637bda014"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/equipment_pending.rs",
+      "sha256": "5d27eff8a70f165a0d96bddf8e99113d8bb3d66ab7c63b367f3969595bb91a99"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/fishing_click.rs",
+      "sha256": "441d92172f117641743477755ef35f2299ff9e192f64b2ad3785c00393a90356"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/item_tooltip.rs",
+      "sha256": "a6cdde3c9634ba939a28c253360728bca9d38d2ef751c0cd07671af3c2f08fe3"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/lib.rs",
+      "sha256": "82056e87afeb8ad4b509b6b87918dda285c94627fbc52f30a354377505c7cfb3"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/mail_compose.rs",
+      "sha256": "2b8e71002931549269489e0ef8662ea65604aaeb08fa2d40c182df5fdfb921a9"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/mail_parcel.rs",
+      "sha256": "8f645711c71c277c63a61224ddcfd50b4c4a45b301aeb6fbb3afa35b2c97fd3e"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/map_route.rs",
+      "sha256": "661ce8827a1bc136d125aa5e16d473d71c7a8e135af8785e85db45abaee5df76"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/npc_gold_buy_attempt.rs",
+      "sha256": "d8b8813cb7a81c9a2e51fed9cfa6ce55d327e6daaf902f634b46a2c9ccf12605"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/npc_gold_buy_attempt_tests.rs",
+      "sha256": "7e6949114c9c0961274a69a2cd91abdaf700508cd83084317e7b3f40e427104f"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/npc_pearl_buy.rs",
+      "sha256": "4ebcb856b6c5ca594ead3f497ae5cf11bb067ff91090371246bdf7bccd08520a"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+      "sha256": "679fc449ea536d65fa0290a1834ea27691a74ebb10d97bc16a3065284b417b8d"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/npc_repair_quote.rs",
+      "sha256": "70d27fa8a1cc1151401b3c0d184a65b431e423965fbaeaf51cfb5aae1e508259"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/ranking_inspect.rs",
+      "sha256": "600d641ef39e812bab6b54180e25cc4653e03e1ee2d8079a5da628df7fa843b4"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-web/src/strict_json.rs",
+      "sha256": "7f8bfc46a2b38fc8c24ae43bb78fc557f4acfe27592643ff904e97a5d06baf98"
+    }
+  ],
+  "runtime": "bevy-84ef836460a84e03",
+  "status": {
+    "code": 0,
+    "signal": null
+  },
+  "builtId": "vEITILK2t5e9YXvZaYIG1",
+  "durationMs": 37029
+}

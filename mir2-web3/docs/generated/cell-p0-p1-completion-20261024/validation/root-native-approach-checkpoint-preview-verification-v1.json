@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T04:18:03.305Z",
+  "result": {
+    "files": 1043,
+    "frozenBackendFiles": 32,
+    "historicalBackendPins": 32,
+    "additionalReleases": 3,
+    "additionalBackendInputs": 113,
+    "fullRuns": 4,
+    "failedReportsPreserved": 0,
+    "capacityReports": 18,
+    "capacityAccepted": 0,
+    "archivedFiles": 18,
+    "archivedRows": 197846,
+    "archivedMonitorRows": 3612,
+    "invalidMonitorRows": 422
+  },
+  "readmeLocalLinksChecked": 91
+}

@@ -1,0 +1,247 @@
+{
+  "schema": "mir2-r16-alo-web-e2e/1",
+  "localOnly": true,
+  "modelProvider": "rules",
+  "baseCommit": "c6a71f73483d66e2d62d061f284e0fa8e0c00ea5",
+  "gatewaySourceCommit": "ac6817dbf95ab1e5d1e98f78a9dd88b6885a8731",
+  "gatewaySha256": "60dbb6b2ad9df5165dc1472dc64c7c0281e6094a1c1208c161dfccf35f5ea974",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "source": {
+    "apps/web/lib/r16-companion-client.ts": "9bf7718ecc2e0d96511b185a4e2adc1c706a3486beb6ff640f78175cb3e91f3d",
+    "apps/web/app/components/r16-companion-window.tsx": "edbf0a2036e41d8d96de596fe29705a43e27fadc422380a0fbd6e87ee56c7f67",
+    "apps/web/app/page.tsx": "34ded65e6850714bd5d246d9b2914c79d99edfd12cbc6443f91a3cfd4584282b"
+  },
+  "phases": [
+    "reserve-own-loopback",
+    "prepare-independent-next-source",
+    "ordinary-new-file-store-provisioning",
+    "actual-headless-web-start",
+    "owner-browser-login-select-enter",
+    "teach-real-web-button-and-check-memory",
+    "experience-records-through-real-ui",
+    "usage-costs-through-real-ui",
+    "browser-download-archive-and-verify-hmac",
+    "restart-owned-actor-same-sqlite-and-reopen",
+    "signed-archive-import-into-fresh-running-actor",
+    "imported-alo-joins-through-ordinary-web-ui",
+    "ordinary-owner-walking-and-actor-follow",
+    "ordinary-shared-field-strike-after-import"
+  ],
+  "events": [
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "teach",
+      "status": "ok"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "visit"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "choice"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "teachingCheck"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "visitEnd"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    }
+  ],
+  "pageErrors": [],
+  "startGameAcks": [
+    4
+  ],
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "baseline": {
+    "version": 1,
+    "partyHabits": [
+      false,
+      false,
+      false
+    ],
+    "feedback": 0
+  },
+  "taught": {
+    "version": 2,
+    "partyHabits": [
+      true,
+      true,
+      true
+    ],
+    "activeFeedback": 1,
+    "modelCalls": 0
+  },
+  "trial": {
+    "visits": 1,
+    "entrySource": "reminder",
+    "reminderCount": 1,
+    "choice": "shared-history",
+    "teachingUnderstood": true,
+    "visitEnded": true,
+    "purchases": 0,
+    "offerConfigured": false
+  },
+  "costs": {
+    "runtimeSeconds": 29,
+    "modelCalls": 0,
+    "complete": false,
+    "modelMicros": "0",
+    "unmeasuredHosting": true,
+    "purchaseIntentDisabled": true
+  },
+  "archive": {
+    "verifiedHmac": true,
+    "sha256": "9e27651a895897707b595f9d9d6117e6c0a1440f4fb41360144c30b17d2db776",
+    "bytes": 3181,
+    "archiveVersion": 2,
+    "policyVersion": 2
+  },
+  "restart": {
+    "actorRestarted": true,
+    "firstActorPid": 182424,
+    "secondActorPid": 180092,
+    "actorSaveConfirmed": true,
+    "sameSqlitePath": true,
+    "identityUnchanged": true,
+    "sameActiveFeedbackId": true,
+    "policyVersion": 2,
+    "partyHabits": [
+      true,
+      true,
+      true
+    ],
+    "visitAndChoicePreserved": true,
+    "feedbackRendered": true
+  },
+  "portable": {
+    "distinctProcess": true,
+    "thirdPid": 162156,
+    "newSqlite": true,
+    "sameIdentity": true,
+    "fullExportedGrowthEqual": true,
+    "sameActiveFeedbackId": true,
+    "policyVersion": 2,
+    "usesOriginalSeparateTrialLedger": true,
+    "modelCalls": 0
+  },
+  "party": {
+    "uiInvite": true,
+    "authoritativeMembers": 2,
+    "actorOnline": true
+  },
+  "follow": {
+    "actorMovedTiles": 7,
+    "distanceToOwner": 3,
+    "serverMovementObserved": true
+  },
+  "fieldApproach": [
+    {
+      "x": 298,
+      "y": 616,
+      "monsterCount": 4,
+      "monsterNames": [
+        "ArcherGuard",
+        "Royal_Guard",
+        "Guard",
+        "Deer",
+        "Scarecrow",
+        "Hen"
+      ],
+      "targetDistance": 12,
+      "safe": true
+    },
+    {
+      "x": 295,
+      "y": 614,
+      "monsterCount": 4,
+      "monsterNames": [
+        "ArcherGuard",
+        "Royal_Guard",
+        "Guard",
+        "Deer",
+        "Scarecrow",
+        "Hen"
+      ],
+      "targetDistance": 10,
+      "safe": true
+    },
+    {
+      "x": 294,
+      "y": 610,
+      "monsterCount": 5,
+      "monsterNames": [
+        "ArcherGuard",
+        "Royal_Guard",
+        "Guard",
+        "Deer",
+        "Scarecrow",
+        "Hen",
+        "RakingCat"
+      ],
+      "targetDistance": 6,
+      "safe": true
+    },
+    {
+      "x": 293,
+      "y": 606,
+      "monsterCount": 5,
+      "monsterNames": [
+        "Royal_Guard",
+        "Guard",
+        "Deer",
+        "Scarecrow",
+        "Hen",
+        "RakingCat"
+      ],
+      "targetDistance": 4,
+      "safe": true
+    },
+    {
+      "x": 290,
+      "y": 604,
+      "monsterCount": 11,
+      "monsterNames": [
+        "Royal_Guard",
+        "Guard",
+        "RakingCat",
+        "Deer",
+        "Scarecrow",
+        "Hen"
+      ],
+      "targetDistance": 4,
+      "safe": false
+    }
+  ],
+  "combat": {
+    "ordinaryPointer": true,
+    "monster": "Deer",
+    "ownerHits": 6,
+    "actorHits": 6,
+    "monsterDeathObserved": true,
+    "policyVersion": 2,
+    "baselineLootComparison": false
+  },
+  "result": "pass"
+}

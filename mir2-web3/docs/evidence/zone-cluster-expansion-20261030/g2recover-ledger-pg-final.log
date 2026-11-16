@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 13 tests
+test economy::player_drop::pg_tests::player_drop_postgres_abort_unknown_freezes_successor_and_only_queries_original_operation ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_complete_source_ledger_ack_restart_and_terminal_pickup ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_namespace_cannot_adopt_prepared_operation_or_uid_authority ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_service_gold_exact_retry_and_successor_terminal_preserve_newer_canonical ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_service_split_preserves_exact_nested_attributes_and_reserves_uids_once ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_successor_abort_retires_old_prepared_source_without_assets_or_uid_reuse ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_uid_requires_census_idempotent_full_u64_fenced_and_exhaustion ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_unknown_commit_keeps_prepared_and_freezes_absent_receipt_retry ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_accepts_deleted_terminal_actors_only_with_completed_delivery_and_roster_absence ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_certifies_successor_abort_and_database_expiry_without_asset_mutation ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_commit_unknown_keeps_durable_base_but_freezes_all_new_writes ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_reads_all_pages_and_never_certifies_truncated_or_changed_prepared_set ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_retains_exact_base_without_original_session_and_rejects_stale_source_or_head ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 1518 filtered out; finished in 38.53s

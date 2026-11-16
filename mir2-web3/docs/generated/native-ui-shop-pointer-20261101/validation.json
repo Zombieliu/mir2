@@ -1,0 +1,244 @@
+{
+  "schema": "mir2.native-ui.shop-pointer.v1",
+  "baseRevision": "b6c739d964f3d8744cf84916f6f3b6cd9c557f91",
+  "status": "offline-focused-checks-passed-live-login-not-exercised",
+  "selectedRuns": [
+    {
+      "label": "native-chat-final",
+      "passedTests": 4,
+      "scope": "native",
+      "filter": "native_chat_pointer",
+      "ignoredOnly": false,
+      "logSha256": "6896b819b63afc381b0d18892599af138b0ef52f805afbd9aa9cd2188ca13085",
+      "elapsedSeconds": 91.958
+    },
+    {
+      "label": "native-npc-final",
+      "passedTests": 2,
+      "scope": "native",
+      "filter": "native_npc_buysell",
+      "ignoredOnly": false,
+      "logSha256": "c310765db400d73ebbb52c8b1321eb1af683fdb83eb533edca75ad2b1c7a43dc",
+      "elapsedSeconds": 1.036
+    },
+    {
+      "label": "native-transport-final",
+      "passedTests": 31,
+      "scope": "native",
+      "filter": "npc_gold_buy_transport_tests",
+      "ignoredOnly": false,
+      "logSha256": "aaa27094ea1a00848f213973da4f5f00eb19cc407f09cfb79fb29ef166cbaa8c",
+      "elapsedSeconds": 0.97
+    },
+    {
+      "label": "native-pointer-final",
+      "passedTests": 31,
+      "scope": "native",
+      "filter": "input::tests::native_",
+      "ignoredOnly": false,
+      "logSha256": "22d8a4fc9da358a1819c25bcf43f977a18446129627576e6c417ce3173b89ed1",
+      "elapsedSeconds": 5.929
+    },
+    {
+      "label": "shared-gate-final",
+      "passedTests": 10,
+      "scope": "shared",
+      "filter": "npc_gold_buy_attempt::tests",
+      "ignoredOnly": false,
+      "logSha256": "88ad84df149a254ef534d60ff6932238dd6bce815f8d9e2c5ca92d96f4e086d5",
+      "elapsedSeconds": 0.942
+    },
+    {
+      "label": "shared-shop-03",
+      "passedTests": 73,
+      "scope": "shared",
+      "filter": "npc_shop",
+      "ignoredOnly": false,
+      "logSha256": "b446521ac22369fd863fda70c56a7c110496bff74e9a70cbeef7986d442099d8",
+      "elapsedSeconds": 41.636
+    },
+    {
+      "label": "runtime-npc-03",
+      "passedTests": 1,
+      "scope": "runtime",
+      "filter": "native_npc_buysell",
+      "ignoredOnly": false,
+      "logSha256": "5b4d4879ed3c7eefe0db1103c39196cb70187400b76b4b22a03e36ecac86c269",
+      "elapsedSeconds": 88.561
+    },
+    {
+      "label": "runtime-economy-01",
+      "passedTests": 36,
+      "scope": "runtime",
+      "filter": "npc_purchase_economy",
+      "ignoredOnly": false,
+      "logSha256": "b2f92364c755145eac2fc6488ad9702e201789735e7ccbf91787200ec2634e5f",
+      "elapsedSeconds": 1.026
+    },
+    {
+      "label": "shared-visual-02",
+      "passedTests": 1,
+      "scope": "shared",
+      "filter": "npc_shop_buysell_ready_and_waiting_windows_offscreen",
+      "ignoredOnly": true,
+      "logSha256": "b0b4f58e8be278717dfd6ad2672e712398166ff0c6a5205847d69a99094bef9f",
+      "elapsedSeconds": 3.665
+    }
+  ],
+  "passedTests": 189,
+  "attemptedRuns": [
+    {
+      "label": "native-chat-01",
+      "passed": false,
+      "exitCode": 101,
+      "logSha256": "d071ad2a537c8b7af9060c6634dd4ba10bffbc59b72f7e8aba075660827406cd"
+    },
+    {
+      "label": "native-chat-02",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "b9e33da7accff74bd21bc944182cb94e255b8a9951ad3908059b43936725916c"
+    },
+    {
+      "label": "native-chat-final",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "6896b819b63afc381b0d18892599af138b0ef52f805afbd9aa9cd2188ca13085"
+    },
+    {
+      "label": "native-npc-01",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "c310765db400d73ebbb52c8b1321eb1af683fdb83eb533edca75ad2b1c7a43dc"
+    },
+    {
+      "label": "native-npc-final",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "c310765db400d73ebbb52c8b1321eb1af683fdb83eb533edca75ad2b1c7a43dc"
+    },
+    {
+      "label": "native-pointer-01",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "8beba37be4cc9f91a73a6de957062c7c853f19f21f18ade51131c88f94a5add0"
+    },
+    {
+      "label": "native-pointer-final",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "22d8a4fc9da358a1819c25bcf43f977a18446129627576e6c417ce3173b89ed1"
+    },
+    {
+      "label": "native-transport-01",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "edf7429fb4fd9304bbe11ff36d9067a280d0ab395b11e8e94558af4f70d1ab71"
+    },
+    {
+      "label": "native-transport-final",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "aaa27094ea1a00848f213973da4f5f00eb19cc407f09cfb79fb29ef166cbaa8c"
+    },
+    {
+      "label": "runtime-economy-01",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "b2f92364c755145eac2fc6488ad9702e201789735e7ccbf91787200ec2634e5f"
+    },
+    {
+      "label": "runtime-npc-01",
+      "passed": false,
+      "exitCode": 101,
+      "logSha256": "fb198a954c9b7606dbcb9534bdfe4cc681088345ebc8da610a5c793b2e0f299b"
+    },
+    {
+      "label": "runtime-npc-02",
+      "passed": false,
+      "exitCode": 101,
+      "logSha256": "e8ba25ea0890bf6630709e9f811ccb71944e489015181c521f81c609f9040c2a"
+    },
+    {
+      "label": "runtime-npc-03",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "5b4d4879ed3c7eefe0db1103c39196cb70187400b76b4b22a03e36ecac86c269"
+    },
+    {
+      "label": "shared-gate-01",
+      "passed": false,
+      "exitCode": 101,
+      "logSha256": "94a98453a468031f0a3b08a643ba583c7e8f98adb547c0ba13a2de18dc641f0e"
+    },
+    {
+      "label": "shared-gate-02",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "a1c162b9615985859fcd1b07239f082416360911d0b147447adb6a878b81c91d"
+    },
+    {
+      "label": "shared-gate-final",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "88ad84df149a254ef534d60ff6932238dd6bce815f8d9e2c5ca92d96f4e086d5"
+    },
+    {
+      "label": "shared-shop-01",
+      "passed": false,
+      "exitCode": 101,
+      "logSha256": "560023446f017fd7ecf956937faf2cb2793a7b72a93206ab466da346993bf06d"
+    },
+    {
+      "label": "shared-shop-02",
+      "passed": false,
+      "exitCode": 101,
+      "logSha256": "b4a336cec16bc2942c772c770f35f35c233e6f92f75316a15ad7720bae35116f"
+    },
+    {
+      "label": "shared-shop-03",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "b446521ac22369fd863fda70c56a7c110496bff74e9a70cbeef7986d442099d8"
+    },
+    {
+      "label": "shared-visual-01",
+      "passed": false,
+      "exitCode": 1,
+      "logSha256": "ee2d95d3680cc22e7e4663183511c373cbd8fd7bca9601ac9bcc4763c5209f17"
+    },
+    {
+      "label": "shared-visual-02",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "b0b4f58e8be278717dfd6ad2672e712398166ff0c6a5205847d69a99094bef9f"
+    },
+    {
+      "label": "simplified-check-01",
+      "passed": true,
+      "exitCode": 0,
+      "logSha256": "86a46df9275ab99158f1bf3b926a3faee761f4b3dfd7263c9691f421a04ee3f6"
+    }
+  ],
+  "finalChangedSourceSha256": {
+    "apps/game-client/client-bevy/src/crystal_ui/npc_shop_visibility_tests.rs": "11b7e09141de0bbd97d5c200bd181b21d9b5b0e5ed33bec8f42835198c241e80",
+    "apps/game-client/client-bevy/src/crystal_ui/overlays.rs": "8c84eeacb5d44808174a18f405e64b706957b4fee2f1ca1eaae2dcb092348cf5",
+    "apps/game-client/client-bevy/src/native_i18n.rs": "37af286e5d24b62c9ea54bfaa66b4d82ebbb6d907bb75dff65559a305c3e5dee",
+    "apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs": "043747bd4dcb6a721c4157e6f74519b3cd344834b25020cb599359dc6f0157a6",
+    "apps/game-client/platform-windows/src/chat_pointer_input_tests.rs": "ffc5a319e4887fa12b717b72ea025437f5a02d9d9dcb99350aced29f66253bd6",
+    "apps/game-client/platform-windows/src/cursor.rs": "59bb6a0723f4515282a9e966669524dc1d94365aac4ef2f701bd4fb279b6f403",
+    "apps/game-client/platform-windows/src/entity_presentation.rs": "e6d8189335dfb8b5940250200f162ec8d55fef6d6ef3d4289744a424b6b9dc71",
+    "apps/game-client/platform-windows/src/gateway.rs": "49d1bbf164eab10dd48ca3882cd71ca4b3e1d097531f8ea806874f7b10c3f891",
+    "apps/game-client/platform-windows/src/input.rs": "96ccd807394c50fb5f09f6bc2e045aad7611ef20de0a4d90641b8445436a16b8",
+    "apps/game-client/platform-windows/src/npc_shop_activation_tests.rs": "4607b4dff1918e0c1c3a99edcb654f3ed03c3eda06a5fa78eb9842511c34e842",
+    "apps/game-client/runtime/src/lib.rs": "fdfd8d5b20cdb93981946771157885d56745c66d380ec637b72a06649dbbe78f",
+    "apps/game-client/runtime/src/native_data_path_tests/npc_shop_ingest_sequence_tests.rs": "ef9379494aae4a526d19261262f476f4ce98d7319e53c265da9b5178d2a2460b",
+    "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json": "13574e9f66b1cef08fa422592e3047b3d3551d8083d882bc5348ee889f2a5d29",
+    "packages/game-data/data/native-i18n/extra/zh-CN.json": "7682c61e0305e4d263b1554912bd376834b3d34fb9c9117fb4bd034fd64048c9"
+  },
+  "lockfile": "runtime tests selected with -p mir2-bevy-runtime from the native Windows manifest and its existing --locked graph; standalone runtime lockfile not changed",
+  "screenshots": "Offline GPU production widgets with explicit local fixtures; no socket, login or server purchase",
+  "archiveSha256": "b71799e8110b99095d6fe1573911b8a188e4a1713781f1231941987b77121318",
+  "rawEvidenceRoot": "E:/mir2-release/windows-ui-shop-pointer-20261101/evidence",
+  "humanAccepted": false
+}

@@ -1,0 +1,153 @@
+TAP version 13
+# Subtest: generated literal imports and each original serialization format retain the exact pins
+ok 1 - generated literal imports and each original serialization format retain the exact pins
+  ---
+  duration_ms: 137.8019
+  type: 'test'
+  ...
+# (node:94164) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: normal verified HTTP does not request any compiled fallback
+ok 2 - normal verified HTTP does not request any compiled fallback
+  ---
+  duration_ms: 151.2122
+  type: 'test'
+  ...
+# Subtest: two 20s scene header failures recover the exact scene through one shared chunk
+ok 3 - two 20s scene header failures recover the exact scene through one shared chunk
+  ---
+  duration_ms: 79.9376
+  type: 'test'
+  ...
+# Subtest: two zero-body stalls recover the floor with all 124 original PNG strings
+ok 4 - two zero-body stalls recover the floor with all 124 original PNG strings
+  ---
+  duration_ms: 66.2946
+  type: 'test'
+  ...
+# Subtest: two transient HTTP failures recover all ten locale vectors without changing matcher input
+ok 5 - two transient HTTP failures recover all ten locale vectors without changing matcher input
+  ---
+  duration_ms: 110.0442
+  type: 'test'
+  ...
+# Subtest: a retired scene observer cannot receive the fallback while a live observer still can
+ok 6 - a retired scene observer cannot receive the fallback while a live observer still can
+  ---
+  duration_ms: 53.5581
+  type: 'test'
+  ...
+# Subtest: definitive status, Retry-After, short/corrupt/oversized HTTP do not grant a fallback
+ok 7 - definitive status, Retry-After, short/corrupt/oversized HTTP do not grant a fallback
+  ---
+  duration_ms: 202.1555
+  type: 'test'
+  ...
+# Subtest: a corrupted compiled payload cannot install locale rows
+ok 8 - a corrupted compiled payload cannot install locale rows
+  ---
+  duration_ms: 73.3598
+  type: 'test'
+  ...
+# Subtest: the shared chunk observation times out once and cannot publish a late module
+ok 9 - the shared chunk observation times out once and cannot publish a late module
+  ---
+  duration_ms: 1.0382
+  type: 'test'
+  ...
+# Subtest: release and request geometry exclusions do not start a chunk
+ok 10 - release and request geometry exclusions do not start a chunk
+  ---
+  duration_ms: 37.6334
+  type: 'test'
+  ...
+# Subtest: the complete town walking pack is a high-priority playable resource and still shares one verified read
+ok 11 - the complete town walking pack is a high-priority playable resource and still shares one verified read
+  ---
+  duration_ms: 44.717
+  type: 'test'
+  ...
+# Subtest: two positive partial walking bodies recover the exact original pack through one compiled observation
+ok 12 - two positive partial walking bodies recover the exact original pack through one compiled observation
+  ---
+  duration_ms: 44.1145
+  type: 'test'
+  ...
+# Subtest: walking definitive responses and rejected complete bytes never grant a compiled fallback
+ok 13 - walking definitive responses and rejected complete bytes never grant a compiled fallback
+  ---
+  duration_ms: 302.6273
+  type: 'test'
+  ...
+# Subtest: a final terminal response after one transport failure does not authorize walking fallback
+ok 14 - a final terminal response after one transport failure does not authorize walking fallback
+  ---
+  duration_ms: 37.5346
+  type: 'test'
+  ...
+# Subtest: a corrupt compiled walking payload is rejected after exactly two transient HTTP attempts
+ok 15 - a corrupt compiled walking payload is rejected after exactly two transient HTTP attempts
+  ---
+  duration_ms: 37.4791
+  type: 'test'
+  ...
+# Subtest: walking compiled timeout remains twenty seconds and a late valid module cannot publish
+ok 16 - walking compiled timeout remains twenty seconds and a late valid module cannot publish
+  ---
+  duration_ms: 40.9846
+  type: 'test'
+  ...
+# Subtest: standing failure and another release cannot start the walking compiled fallback
+ok 17 - standing failure and another release cannot start the walking compiled fallback
+  ---
+  duration_ms: 41.118
+  type: 'test'
+  ...
+# Subtest: the actual town effect starts walking independently of a pending standing pack and drops late owner updates
+not ok 18 - the actual town effect starts walking independently of a pending standing pack and drops late owner updates
+  ---
+  duration_ms: 59.402
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-pinned-bootstrap-chunk.mjs:250:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+        'standing',
+    -   'walking'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'standing'
+    1: 'walking'
+  actual:
+    0: 'standing'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs:266:41)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: the unchanged Shell monster effect suppresses a retired observer and shares verified walking recovery with the live entry
+ok 19 - the unchanged Shell monster effect suppresses a retired observer and shares verified walking recovery with the live entry
+  ---
+  duration_ms: 91.8294
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 18
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1949.7208

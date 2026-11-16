@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "scope": "Capture preparation error, not a test or full-regression failure",
+  "originalScript": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\capture-window-timing-preimage-v1.mjs",
+    "bytes": 1511,
+    "sha256": "85011a6289bd873a305ffac10a50b0176525cf84dc91c0694dc79d995ebb5c6f"
+  },
+  "correctedScript": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\capture-window-timing-preimage-v2.mjs",
+    "bytes": 1693,
+    "sha256": "b61d2501502c99948b8a32429d39fedc6fdab468201c7c584e9fdd92f9f30cfb"
+  },
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "cwd": "mir2-web3 subdirectory of repository",
+  "originalGitArgument": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b:apps/web/scripts/playtest-capacity-soak.mjs",
+  "stderr": "fatal: path mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs exists, but not apps/web/scripts/playtest-capacity-soak.mjs",
+  "childGitExitCode": 128,
+  "nodeExitCode": 1,
+  "preimagesWrittenByFailedAttempt": 0,
+  "sourceModifiedByFailedAttempt": false,
+  "testsExecutedByFailedAttempt": false,
+  "correction": "Use HEAD:./apps/web/scripts/... while cwd is mir2-web3. v2 captured both raw files and exact GitLF equality before any edit."
+}

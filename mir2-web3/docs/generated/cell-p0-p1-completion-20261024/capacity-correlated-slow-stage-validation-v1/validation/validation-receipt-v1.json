@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:22:14.798Z",
+  "scope": "Five existing connection-correlated diagnostic stage labels only, no gameplay/flush/save/receipt/timeout/threshold changes.",
+  "source": {
+    "file": "apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "mutation": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/mutation-v1.json",
+    "bytes": 3929,
+    "sha256": "d7d30e40bd93bb683b9c9cb9988796e346d5f9f259c93e3c983ed11127b53ddb"
+  },
+  "originalPreimage": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/web-before-v1.rs.txt",
+    "bytes": 855687,
+    "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+  },
+  "focusedExecution": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/focused-execution-v1.json",
+    "bytes": 1744,
+    "sha256": "1874a8243344494a7a65ceef06a263a3cf1b7eacd898010636caae510cda91c6"
+  },
+  "focusedLog": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/focused-v1.log",
+    "bytes": 64266,
+    "sha256": "43ab5289f35aeea4e9ad34e89321409695662c450441fec06259e86127c0e2a6"
+  },
+  "tests": {
+    "status": "ok",
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 1245
+  },
+  "command": "rustup",
+  "arguments": [
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "web::tests::socket_diagnostics_tests",
+    "-j",
+    "4",
+    "--",
+    "--nocapture"
+  ],
+  "rustfmt": {
+    "command": "rustup",
+    "arguments": [
+      "run",
+      "1.95.0",
+      "rustfmt",
+      "--edition",
+      "2021",
+      "--config",
+      "skip_children=true",
+      "--check",
+      "apps/gateway/src/web.rs"
+    ],
+    "observedExitCode": 0,
+    "sourceWritten": false,
+    "executionReceiptCommandDisplayClarification": "The original focused receipt compacted spaces in its human rustfmt command string. This argv records the actual format-check invocation, not a second execution."
+  },
+  "diffCheck": {
+    "command": "git",
+    "arguments": [
+      "diff",
+      "--check",
+      "--",
+      "apps/gateway/src/web.rs"
+    ],
+    "observedExitCode": 0
+  },
+  "sourceUnchangedAcrossTests": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "fixedCellStarted": false,
+  "externalScopedParserUpgradeStillRequired": true,
+  "newBackendReleaseAndOrdinaryFull16StillRequiredBeforeAnyNewRealm": true,
+  "onlyReadOrWrittenSourceFile": "apps/gateway/src/web.rs"
+}

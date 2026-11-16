@@ -1,0 +1,51 @@
+{
+  "restored": true,
+  "at": "2026-11-16T07:48:18.665Z",
+  "overlays": 21,
+  "preservedWip": 29,
+  "results": [
+    {
+      "folder": "game-r1",
+      "passed": false,
+      "backend": "webgpu",
+      "ackMs": 99,
+      "nativeMs": null,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "folder": "game-r2",
+      "passed": true,
+      "backend": "webgpu",
+      "ackMs": 116,
+      "nativeMs": 111853,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "folder": "game-r3",
+      "passed": true,
+      "backend": "webgl2",
+      "ackMs": 115,
+      "nativeMs": 23280,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "allLocalGameProcessesClosed": true,
+  "productionUnchanged": true,
+  "source": "D:/mir2-builds/r16-font-batch-20261115/source",
+  "buildNotServableAgainstRestoredSource": true
+}

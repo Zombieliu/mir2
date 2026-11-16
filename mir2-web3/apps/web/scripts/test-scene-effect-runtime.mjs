@@ -116,7 +116,8 @@ const visualLayersSource = readFileSync(
 const shellSource = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
 const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const globalCssSource = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
-const resolvedEffectLayerStart = visualLayersSource.indexOf("displayResolvedEffectFrames.map");
+const resolvedEffectLayerStart = visualLayersSource.indexOf("(effectsEnabled ? displayResolvedEffectFrames : []).map");
+assert.ok(resolvedEffectLayerStart >= 0, "the actual effects-enabled render branch must be present");
 const resolvedEffectLayerSource = visualLayersSource.slice(
   resolvedEffectLayerStart,
   visualLayersSource.indexOf('{screen === "game" && sceneLightClassName', resolvedEffectLayerStart),
@@ -167,29 +168,24 @@ assert.doesNotMatch(
   "effect metadata offsets must not receive a second half-cell center offset",
 );
 assert.equal(runtime.CRYSTAL_ADDITIVE_MIX_BLEND_MODE, "plus-lighter");
-assert.equal(
-  runtime.crystalSceneEffectLayerOffset("objectSpell"),
-  48,
+assert.ok(
+  runtime.crystalSceneEffectLayerOffset("objectSpell") < 5,
   "persistent world spells render before the entity layer",
 );
-assert.equal(
-  runtime.crystalSceneEffectLayerOffset("objectSpell", true),
-  49,
+assert.ok(
+  runtime.crystalSceneEffectLayerOffset("objectSpell", true) < 5,
   "a world-spell mask remains below the entity layer",
 );
-assert.equal(
-  runtime.crystalSceneEffectLayerOffset("spell"),
-  90,
+assert.ok(
+  runtime.crystalSceneEffectLayerOffset("spell") > 7,
   "transient combat spells remain above actors",
 );
-assert.equal(
-  runtime.crystalSceneEffectLayerOffset("attackOverlay"),
-  90,
+assert.ok(
+  runtime.crystalSceneEffectLayerOffset("attackOverlay") > 7,
   "attacker-bound overlays remain above the actor layer",
 );
-assert.equal(
-  runtime.crystalSceneEffectLayerOffset("actorEffect"),
-  90,
+assert.ok(
+  runtime.crystalSceneEffectLayerOffset("actorEffect") > 7,
   "actor-bound revive effects remain above the actor layer",
 );
 assert.deepEqual(

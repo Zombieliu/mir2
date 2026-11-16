@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T19:19:19.614Z",
+  "publicChild": "capacity-account-store-wait-diagnostics-release-v1",
+  "copyCount": 28,
+  "totalCopiedBytes": 286973,
+  "files": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+        "bytes": 23031,
+        "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+      },
+      "destination": "preparation/source-lib-v1.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/source-lib-v1.mjs",
+        "bytes": 23031,
+        "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/pin-build-source-v1.mjs",
+        "bytes": 981,
+        "sha256": "cbae8b80108e56e9549d771e9d29aaaa9012f845946a16a33c12ca5ccdc04a9f"
+      },
+      "destination": "preparation/pin-build-source-v1.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/pin-build-source-v1.mjs",
+        "bytes": 981,
+        "sha256": "cbae8b80108e56e9549d771e9d29aaaa9012f845946a16a33c12ca5ccdc04a9f"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/build-release-v1.mjs",
+        "bytes": 4969,
+        "sha256": "258cd1db150e433c7d6be30335d514509272400c047bb6edd632aa9c7d26b14f"
+      },
+      "destination": "preparation/build-release-v1.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/build-release-v1.mjs",
+        "bytes": 4969,
+        "sha256": "258cd1db150e433c7d6be30335d514509272400c047bb6edd632aa9c7d26b14f"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/capture-release-v1.mjs",
+        "bytes": 3693,
+        "sha256": "948fd449ca36a48d4d88aa11ecc0ecc0e3622bdcab5808b4c7ef17f0a14bcfa7"
+      },
+      "destination": "preparation/capture-release-v1.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/capture-release-v1.mjs",
+        "bytes": 3693,
+        "sha256": "948fd449ca36a48d4d88aa11ecc0ecc0e3622bdcab5808b4c7ef17f0a14bcfa7"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json",
+        "bytes": 2356,
+        "sha256": "46433ee760553bd30e211cc37b3f11c3cfc66ea1956af923f3ced05b605b0745"
+      },
+      "destination": "preparation/final-source-binding-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/final-source-binding-v1.json",
+        "bytes": 2356,
+        "sha256": "46433ee760553bd30e211cc37b3f11c3cfc66ea1956af923f3ced05b605b0745"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-derivation-plan-v1.json",
+        "bytes": 3198,
+        "sha256": "2fa2f931e07f144435f50bb6fccc1c5275d08ac5ad2439ef12a6d35c5925271a"
+      },
+      "destination": "preparation/source-derivation-plan-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/source-derivation-plan-v1.json",
+        "bytes": 3198,
+        "sha256": "2fa2f931e07f144435f50bb6fccc1c5275d08ac5ad2439ef12a6d35c5925271a"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-draft-v1.mjs.txt",
+        "bytes": 15663,
+        "sha256": "c997b93bacf3080f723415324a258820b07033c7bdca5d2a02950b38ec45e1f3"
+      },
+      "destination": "preparation/source-lib-draft-v1.mjs.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/source-lib-draft-v1.mjs.txt",
+        "bytes": 15663,
+        "sha256": "c997b93bacf3080f723415324a258820b07033c7bdca5d2a02950b38ec45e1f3"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-library-derivation-rules-v1.json",
+        "bytes": 13471,
+        "sha256": "8450640a99b55ef165837ac5412af4d16c9b2e5186da0b2b343899142916ffd4"
+      },
+      "destination": "preparation/source-library-derivation-rules-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/source-library-derivation-rules-v1.json",
+        "bytes": 13471,
+        "sha256": "8450640a99b55ef165837ac5412af4d16c9b2e5186da0b2b343899142916ffd4"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/functional-binding-validator-draft-v1.mjs.txt",
+        "bytes": 5801,
+        "sha256": "c297201b10206d7f749186dd317a5636312ba9e3538883190350862deeb20993"
+      },
+      "destination": "preparation/functional-binding-validator-draft-v1.mjs.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/functional-binding-validator-draft-v1.mjs.txt",
+        "bytes": 5801,
+        "sha256": "c297201b10206d7f749186dd317a5636312ba9e3538883190350862deeb20993"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-before-actual-functional-v2.mjs.txt",
+        "bytes": 21543,
+        "sha256": "a5591bd8524fc4e9f715c4f76136aeb71983dcd7aa8f0022d5fb92a5f663d1a3"
+      },
+      "destination": "preparation/source-lib-before-actual-functional-v2.mjs.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/source-lib-before-actual-functional-v2.mjs.txt",
+        "bytes": 21543,
+        "sha256": "a5591bd8524fc4e9f715c4f76136aeb71983dcd7aa8f0022d5fb92a5f663d1a3"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/actual-functional-shape-adjustment-v2.json",
+        "bytes": 4896,
+        "sha256": "072e89fc2985e80ccb923e1eba9ee51d855a824501ced49b1b80c7e902bc2099"
+      },
+      "destination": "preparation/actual-functional-shape-adjustment-v2.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/actual-functional-shape-adjustment-v2.json",
+        "bytes": 4896,
+        "sha256": "072e89fc2985e80ccb923e1eba9ee51d855a824501ced49b1b80c7e902bc2099"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json",
+        "bytes": 1132,
+        "sha256": "18f27c599638eab7e9481d4537bf7bea55239ac908558be1e3f2fb43dcb9b751"
+      },
+      "destination": "preparation/required-root-binding-fields-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/required-root-binding-fields-v1.json",
+        "bytes": 1132,
+        "sha256": "18f27c599638eab7e9481d4537bf7bea55239ac908558be1e3f2fb43dcb9b751"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/entrypoint-derivation-v1.json",
+        "bytes": 34823,
+        "sha256": "497377c21d01b4f60cbb45210c74edda8ea6e5be6f7161215815afa4a1f0b64e"
+      },
+      "destination": "preparation/entrypoint-derivation-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/entrypoint-derivation-v1.json",
+        "bytes": 34823,
+        "sha256": "497377c21d01b4f60cbb45210c74edda8ea6e5be6f7161215815afa4a1f0b64e"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md",
+        "bytes": 2843,
+        "sha256": "2b8b9cf1417022dc3c24cc2803cf58adda0db7ed9ad65b0eba6c95eb393cb021"
+      },
+      "destination": "preparation/README.md",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/README.md",
+        "bytes": 2843,
+        "sha256": "2b8b9cf1417022dc3c24cc2803cf58adda0db7ed9ad65b0eba6c95eb393cb021"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/backend-source-account-store-wait-diagnostics-v1.json",
+        "bytes": 41831,
+        "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+      },
+      "destination": "backend-source-account-store-wait-diagnostics-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/backend-source-account-store-wait-diagnostics-v1.json",
+        "bytes": 41831,
+        "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+        "bytes": 3343,
+        "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+      },
+      "destination": "release-account-store-wait-diagnostics-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/release-account-store-wait-diagnostics-v1.json",
+        "bytes": 3343,
+        "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-v1-build-receipt.json",
+        "bytes": 2453,
+        "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+      },
+      "destination": "build/build-receipt-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/build/build-receipt-v1.json",
+        "bytes": 2453,
+        "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-account-store-wait-diagnostics-v1-release-build.log",
+        "bytes": 56033,
+        "sha256": "64e6c04e66681b8486cd29bd401faaec7d7cdd7fad61f3395b2defa7b9f0e864"
+      },
+      "destination": "build/release-build-v1.log",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/build/release-build-v1.log",
+        "bytes": 56033,
+        "sha256": "64e6c04e66681b8486cd29bd401faaec7d7cdd7fad61f3395b2defa7b9f0e864"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/prepared-v1.json",
+        "bytes": 4381,
+        "sha256": "b34689e8d2196899b0382e4336baa0ffededd6444cebec3c73eafcbac9f9601c"
+      },
+      "destination": "preparation/prepared-pending-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/prepared-pending-v1.json",
+        "bytes": 4381,
+        "sha256": "b34689e8d2196899b0382e4336baa0ffededd6444cebec3c73eafcbac9f9601c"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/prepared-v2.json",
+        "bytes": 5824,
+        "sha256": "11e52453d1c2a18fe7a76cd8f2eb00e01378ccf21cd7065fb2be8a5c1c191b31"
+      },
+      "destination": "preparation/prepared-actual-v2.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/prepared-actual-v2.json",
+        "bytes": 5824,
+        "sha256": "11e52453d1c2a18fe7a76cd8f2eb00e01378ccf21cd7065fb2be8a5c1c191b31"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/actual-binding-finalization-v2.json",
+        "bytes": 3809,
+        "sha256": "ef26872edd52852a51a44978fc5847721060b13c88e5445ee36d7dbf36ee9c62"
+      },
+      "destination": "preparation/actual-binding-finalization-v2.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/actual-binding-finalization-v2.json",
+        "bytes": 3809,
+        "sha256": "ef26872edd52852a51a44978fc5847721060b13c88e5445ee36d7dbf36ee9c62"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json.before-actual-v2.txt",
+        "bytes": 2105,
+        "sha256": "dec3448773688cbcb3f15f23c2fff94caa0c45ab2ed477ea3404c9e0ed92813a"
+      },
+      "destination": "preparation/pending-preimages/final-source-binding-v1.json.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/pending-preimages/final-source-binding-v1.json.txt",
+        "bytes": 2105,
+        "sha256": "dec3448773688cbcb3f15f23c2fff94caa0c45ab2ed477ea3404c9e0ed92813a"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json.before-actual-v2.txt",
+        "bytes": 1091,
+        "sha256": "b953cd1bcf560e50160f36ecb1996a0a601c48c2e0774b85846721f0522025c9"
+      },
+      "destination": "preparation/pending-preimages/required-root-binding-fields-v1.json.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/pending-preimages/required-root-binding-fields-v1.json.txt",
+        "bytes": 1091,
+        "sha256": "b953cd1bcf560e50160f36ecb1996a0a601c48c2e0774b85846721f0522025c9"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md.before-actual-v2.txt",
+        "bytes": 2799,
+        "sha256": "8b0595b53d1861dbb66c95c9bcfe661151718dec6da960fb1c6cc6e330c3d3fd"
+      },
+      "destination": "preparation/pending-preimages/README.md.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/preparation/pending-preimages/README.md.txt",
+        "bytes": 2799,
+        "sha256": "8b0595b53d1861dbb66c95c9bcfe661151718dec6da960fb1c6cc6e330c3d3fd"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-independent-review-v1.json",
+        "bytes": 8841,
+        "sha256": "09b81c8ff29a4398aba054c1c093cc92f83494e6c37d52633f746f7dbe0572b3"
+      },
+      "destination": "review/prepared-source-review-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/review/prepared-source-review-v1.json",
+        "bytes": 8841,
+        "sha256": "09b81c8ff29a4398aba054c1c093cc92f83494e6c37d52633f746f7dbe0572b3"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-independent-review-final-v2.json",
+        "bytes": 3687,
+        "sha256": "58df262700d460319fbd981b0885dfb95f31d2516421b789bb3ec77279dde1d2"
+      },
+      "destination": "review/final-binding-review-v2.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/review/final-binding-review-v2.json",
+        "bytes": 3687,
+        "sha256": "58df262700d460319fbd981b0885dfb95f31d2516421b789bb3ec77279dde1d2"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/actual-source-release-independent-review-v1.json",
+        "bytes": 2841,
+        "sha256": "d30b70166aba33c4e141aebecb4c8a28fb09546e6a4fc2aedf6de42aaed995eb"
+      },
+      "destination": "review/actual-source-release-review-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/review/actual-source-release-review-v1.json",
+        "bytes": 2841,
+        "sha256": "d30b70166aba33c4e141aebecb4c8a28fb09546e6a4fc2aedf6de42aaed995eb"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-release-full16-public-archive-v1/capacity-account-store-wait-diagnostics-release-v1-whitelist-v1.json",
+        "bytes": 9535,
+        "sha256": "2e447716d971784410e6b26d6214c15e1da29fb68529e7d00d8e432810525a67"
+      },
+      "destination": "public-whitelist-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/public-whitelist-v1.json",
+        "bytes": 9535,
+        "sha256": "2e447716d971784410e6b26d6214c15e1da29fb68529e7d00d8e432810525a67"
+      }
+    }
+  ],
+  "readme": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-account-store-wait-diagnostics-release-v1/README.md",
+    "bytes": 1779,
+    "sha256": "64630e7db6066cdd2c5b1854271953eec6dd9408d15e5982e6f44cfb8ba03460"
+  },
+  "relativeLinksChecked": 10,
+  "relativeLinksAllExist": true,
+  "allCopiesReadBackRawExact": true,
+  "privateFilesCopied": false,
+  "binariesCopied": false,
+  "recordingsCopied": false,
+  "newRustInputFilesCreated": false,
+  "auditOrTestsOrGameExecutedByArchive": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Frozen": true
+}

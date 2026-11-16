@@ -1,0 +1,42 @@
+{
+  "phase": "release-v20",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 5,
+  "bytes": 122614,
+  "entries": [
+    {
+      "path": "release/next-build-v20.log",
+      "source": "D:/mir2-builds/web-r16-20261106/next-build-v20.log",
+      "bytes": 2921,
+      "sha256": "081181b322378b9084eb790975d9b0f3001abcabafe2ba479fa8a07a55c6fc36"
+    },
+    {
+      "path": "release/v20-map-transfer-regression.log",
+      "source": "D:/mir2-builds/web-r16-20261106/v20-map-transfer-regression.log",
+      "bytes": 59354,
+      "sha256": "4b925abe161b1fd5c966e304aa5c5b1ca2dd705c8b0f62390b3eb72ed1e9840c"
+    },
+    {
+      "path": "release/v20-npc-transform-test.log",
+      "source": "D:/mir2-builds/web-r16-20261106/v20-npc-transform-test.log",
+      "bytes": 58756,
+      "sha256": "d84e8f112b93202f0966ccdaeb55c72b3f41a806c0996e371dc39002b8cc4457"
+    },
+    {
+      "path": "release/v20-package-audit.json",
+      "source": "D:/mir2-builds/web-r16-20261106/v20-package-audit.json",
+      "bytes": 624,
+      "sha256": "4a44bd52b2f81433b23db3fcc0dd9a2f4fed07a6544240b2cb7a9eda6f856336"
+    },
+    {
+      "path": "release/v20-runtime-preservation-proof.json",
+      "source": "D:/mir2-builds/web-r16-20261106/v20-runtime-preservation-proof.json",
+      "bytes": 959,
+      "sha256": "166d39424eadc792c1a9bfbb52e915a093eaf38cbc2f61844a28149e3a4d43b9"
+    }
+  ]
+}

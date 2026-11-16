@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "passed": false,
+  "scope": "three-existing-QA-roles-normal-UI-login-select-city-Q-first-role-movement-logout",
+  "roles": [
+    {
+      "ordinal": 1,
+      "className": "Warrior",
+      "passed": false,
+      "moved": [
+        {
+          "key": "ArrowUp",
+          "before": {
+            "x": 288,
+            "y": 615
+          },
+          "after": {
+            "x": 288,
+            "y": 614
+          },
+          "acceptedLocations": [
+            {
+              "sequence": 750,
+              "x": 288,
+              "y": 614,
+              "atMs": 353676
+            }
+          ],
+          "heldForMs": 318
+        },
+        {
+          "key": "ArrowRight",
+          "before": {
+            "x": 288,
+            "y": 614
+          },
+          "after": {
+            "x": 289,
+            "y": 614
+          },
+          "acceptedLocations": [
+            {
+              "sequence": 751,
+              "x": 289,
+              "y": 614,
+              "atMs": 354278
+            }
+          ],
+          "heldForMs": 612
+        }
+      ],
+      "authority": {
+        "className": "Warrior",
+        "level": 2,
+        "map": "0",
+        "position": {
+          "x": 288,
+          "y": 615
+        },
+        "gold": 100,
+        "experience": 0,
+        "hp": 24,
+        "maxHp": 24,
+        "q1": {
+          "stage": "completed",
+          "current": 1,
+          "required": 1
+        },
+        "assetsDigest": "ef40449bf5ae56777a3500ceebec6119c30df4f74abeeada72b886cf1291b15e",
+        "otherPlayersObserved": 0
+      },
+      "loginWireMatched": true,
+      "startWireMatched": true,
+      "entryUi": {
+        "screen": "game",
+        "quest": {
+          "ready": true,
+          "error": false,
+          "questLogOpen": false,
+          "capturesPointer": false,
+          "frame": 26162,
+          "generation": 2,
+          "revision": 2
+        },
+        "runtimeBackend": "webgpu",
+        "frame": {
+          "x": 128,
+          "y": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "assetsPending": false,
+          "owner": "react"
+        },
+        "sceneCanvasVisible": true
+      },
+      "openQuest": {
+        "screen": "game",
+        "quest": {
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 26175,
+          "generation": 2,
+          "revision": 3
+        },
+        "runtimeBackend": "webgpu",
+        "frame": {
+          "x": 128,
+          "y": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "assetsPending": false,
+          "owner": "bevy"
+        },
+        "sceneCanvasVisible": true
+      },
+      "finalPosition": {
+        "x": 289,
+        "y": 614
+      },
+      "motionCommands": [
+        {
+          "type": "walk",
+          "atMs": 353480,
+          "afterSequence": 749
+        },
+        {
+          "type": "walk",
+          "atMs": 354086,
+          "afterSequence": 750
+        }
+      ]
+    }
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "keepAlive": 15,
+    "startGame": 1,
+    "walk": 2,
+    "logOut": 1
+  },
+  "packets": [
+    {
+      "ordinal": 1,
+      "method": "LoginSuccess",
+      "sequence": 8
+    },
+    {
+      "ordinal": 1,
+      "method": "StartGame",
+      "sequence": 12,
+      "result": 4
+    },
+    {
+      "ordinal": 1,
+      "method": "LogOutSuccess",
+      "sequence": 754
+    }
+  ],
+  "errors": [
+    {
+      "ordinal": 1,
+      "phase": "ordinary-ui-logout",
+      "code": "BROWSER_OPERATION_FAILED",
+      "name": "TimeoutError",
+      "messageSha256": "dbb08aeb5f50d8638db462b0eaffe26b99964f79198d14807d9667675c4c93e6"
+    }
+  ],
+  "sockets": [
+    {
+      "ordinal": 1,
+      "id": 1,
+      "closed": false,
+      "realmMatchesProfile": true
+    }
+  ],
+  "normalLogouts": 1,
+  "privateInputUnchanged": true,
+  "phase": {
+    "name": "ordinary-ui-logout",
+    "ordinal": 1,
+    "className": "Warrior",
+    "atMs": 354575
+  },
+  "bootstrapCustodyBegins": 1,
+  "contextRetainedForDriverCorrection": true,
+  "failureCleanupNormalLogout": false
+}

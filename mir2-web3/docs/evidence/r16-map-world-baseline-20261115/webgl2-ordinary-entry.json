@@ -1,0 +1,302 @@
+{
+  "passed": true,
+  "scope": "Ordinary authenticated walking into imported ReagentStore portal; no save mutation or administrative commands.",
+  "walks": [
+    {
+      "from": {
+        "x": 322,
+        "y": 293
+      },
+      "to": {
+        "x": 323,
+        "y": 293
+      },
+      "at": 1794684848361,
+      "ackAt": 1794684848377,
+      "map": "0",
+      "authoritative": {
+        "x": 323,
+        "y": 293
+      }
+    },
+    {
+      "from": {
+        "x": 323,
+        "y": 293
+      },
+      "to": {
+        "x": 324,
+        "y": 292
+      },
+      "at": 1794684848840,
+      "ackAt": 1794684848981,
+      "map": "0",
+      "authoritative": {
+        "x": 324,
+        "y": 292
+      }
+    },
+    {
+      "from": {
+        "x": 324,
+        "y": 292
+      },
+      "to": {
+        "x": 325,
+        "y": 292
+      },
+      "at": 1794684849436,
+      "ackAt": 1794684849595,
+      "map": "0",
+      "authoritative": {
+        "x": 325,
+        "y": 292
+      }
+    },
+    {
+      "from": {
+        "x": 325,
+        "y": 292
+      },
+      "to": {
+        "x": 326,
+        "y": 291
+      },
+      "at": 1794684850052,
+      "ackAt": 1794684850209,
+      "map": "0",
+      "authoritative": {
+        "x": 326,
+        "y": 291
+      }
+    },
+    {
+      "from": {
+        "x": 326,
+        "y": 291
+      },
+      "to": {
+        "x": 327,
+        "y": 290
+      },
+      "at": 1794684850662,
+      "ackAt": 1794684850819,
+      "map": "0",
+      "authoritative": {
+        "x": 327,
+        "y": 290
+      }
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 290
+      },
+      "to": {
+        "x": 327,
+        "y": 289
+      },
+      "at": 1794684851274,
+      "ackAt": 1794684851431,
+      "map": "0",
+      "authoritative": {
+        "x": 327,
+        "y": 289
+      }
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 289
+      },
+      "to": {
+        "x": 326,
+        "y": 288
+      },
+      "at": 1794684851885,
+      "ackAt": 1794684852043,
+      "map": "0",
+      "authoritative": {
+        "x": 326,
+        "y": 288
+      }
+    }
+  ],
+  "packets": [
+    {
+      "at": 1794684848268,
+      "packet": "MapInformation",
+      "payload": {
+        "bigMapIndex": 101,
+        "fileName": "0",
+        "lights": 0,
+        "mapDarkLight": 0,
+        "mapIndex": 1,
+        "miniMapIndex": 101,
+        "music": 0,
+        "spawnFlags": {
+          "fire": false,
+          "lightning": false
+        },
+        "title": "BichonProvince",
+        "weatherParticles": 0
+      }
+    },
+    {
+      "at": 1794684848377,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Right",
+        "x": 323,
+        "y": 293
+      }
+    },
+    {
+      "at": 1794684848981,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "UpRight",
+        "x": 324,
+        "y": 292
+      }
+    },
+    {
+      "at": 1794684849595,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Right",
+        "x": 325,
+        "y": 292
+      }
+    },
+    {
+      "at": 1794684850209,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "UpRight",
+        "x": 326,
+        "y": 291
+      }
+    },
+    {
+      "at": 1794684850819,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "UpRight",
+        "x": 327,
+        "y": 290
+      }
+    },
+    {
+      "at": 1794684851431,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Up",
+        "x": 327,
+        "y": 289
+      }
+    },
+    {
+      "at": 1794684852043,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "UpLeft",
+        "x": 326,
+        "y": 288
+      }
+    },
+    {
+      "at": 1794684852318,
+      "packet": "MapInformation",
+      "payload": {
+        "bigMapIndex": 0,
+        "fileName": "0108",
+        "lights": 2,
+        "mapDarkLight": 0,
+        "mapIndex": 4,
+        "miniMapIndex": 0,
+        "music": 0,
+        "spawnFlags": {
+          "fire": false,
+          "lightning": false
+        },
+        "title": "ReagentStore",
+        "weatherParticles": 0
+      }
+    },
+    {
+      "at": 1794684852318,
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Down",
+        "x": 8,
+        "y": 12
+      }
+    }
+  ],
+  "commands": [
+    {
+      "at": 1794684837519,
+      "type": "clientVersion"
+    },
+    {
+      "at": 1794684837818,
+      "type": "login"
+    },
+    {
+      "at": 1794684838572,
+      "type": "startGame"
+    },
+    {
+      "at": 1794684847830,
+      "type": "keepAlive"
+    },
+    {
+      "at": 1794684848362,
+      "type": "walk"
+    },
+    {
+      "at": 1794684848840,
+      "type": "walk"
+    },
+    {
+      "at": 1794684849436,
+      "type": "walk"
+    },
+    {
+      "at": 1794684850052,
+      "type": "walk"
+    },
+    {
+      "at": 1794684850662,
+      "type": "walk"
+    },
+    {
+      "at": 1794684851274,
+      "type": "walk"
+    },
+    {
+      "at": 1794684851886,
+      "type": "walk"
+    },
+    {
+      "at": 1794684852501,
+      "type": "clientVersion",
+      "reason": "ordinary post-transfer full observation refresh, matching protocol-travel"
+    },
+    {
+      "at": 1794684852511,
+      "type": "logOut"
+    }
+  ],
+  "arrival": {
+    "map": "0108",
+    "position": {
+      "x": 8,
+      "y": 12
+    },
+    "bootstrapWaitMs": 10
+  },
+  "normalLogout": true,
+  "closed": true
+}

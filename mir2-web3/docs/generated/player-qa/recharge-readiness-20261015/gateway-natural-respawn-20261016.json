@@ -1,0 +1,98 @@
+{
+  "recordedAtUtc": "2026-10-15T17:48:30.716159+00:00",
+  "sourceBaseCommit": "5491d0c8ebbdda92828983c305e5fcb8c829db66",
+  "fixture": "mir2-web3/apps/gateway/tests/vertical_slice_gateway_persistence.rs",
+  "fixtureSha256": "70442fbaaf12bce30f150eb98b5ae61fda83e334f0bfde2358f63a75e44722ff",
+  "changes": "Test-only bounded wall-clock wait after complete ordinary-Walk field coverage finds no live harvest target; no production changes.",
+  "build": {
+    "command": "CARGO_TARGET_DIR=C:/mir2-build/integration-20261015-target CARGO_BUILD_JOBS=4 cargo +1.95.0 rustc --locked --manifest-path mir2-web3/apps/gateway/Cargo.toml --test vertical_slice_gateway_persistence --profile test -- -C extra-filename=-followupnatural04",
+    "exitCode": 0,
+    "durationSeconds": 11.09,
+    "log": "gateway-original-natural-respawn04-build02.txt",
+    "logSha256": "ae987fd37a8b7d07c2b62b7a08e360d4c4e554c40cd9207df948c34b161d2188",
+    "uniqueFilenameReason": "Initial standard-name link failed with LNK1104 on an existing executable; no foreign holder was terminated or changed."
+  },
+  "run": {
+    "workingDirectory": "mir2-web3/apps/gateway",
+    "command": "MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10 C:/mir2-build/integration-20261015-target/debug/deps/vertical_slice_gateway_persistence-followupnatural04.exe --test-threads=1 --nocapture",
+    "exitCode": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "durationSeconds": 537.79,
+    "log": "gateway-vertical-persistence-final03.txt",
+    "logSha256": "182f5e74134e34e0c3332d5526ba3795496126f153a622bbaaee8ef0eee1fae3"
+  },
+  "observedEmptyFieldRecovery": {
+    "questId": 4,
+    "confirmedKillsAtEmpty": 11,
+    "attempt": 12,
+    "visibleLiveInsideBoundsBefore": 0,
+    "ownerHpBefore": 30,
+    "ownerMaxHpBefore": 30,
+    "ownerDeadBefore": false,
+    "maximumWaitSeconds": 330,
+    "actualWaitMilliseconds": 180222,
+    "timedOut": false,
+    "recoveredObjectId": 204803,
+    "visibleLiveInsideBoundsAfter": 2,
+    "visibleLiveOutsideBoundsAfter": 1,
+    "ownerHpAfter": 30,
+    "ownerDeadAfter": false,
+    "readyToTurnInAtConfirmedKill": 18,
+    "actualDeerMeatCountAtReady": 5,
+    "causalityLimit": "Ordinary observation proves target recovery while waiting for the natural wall-clock cycle; it does not trace an individual spawn event."
+  },
+  "sourceWaitPolicy": {
+    "manifest": "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+    "mapFileName": "0",
+    "ruleIndex": 48,
+    "monsterName": "Deer",
+    "center": [
+      205,
+      325
+    ],
+    "delayMinutes": 5,
+    "randomDelayMinutes": 0,
+    "cadenceCoverageMarginSeconds": 30,
+    "realTimeOnly": true
+  },
+  "boundsPreserved": {
+    "maximumKills": 30,
+    "questAttempts": 120,
+    "attackAttempts": 80,
+    "starterAttempts": 600,
+    "harvestPasses": 54,
+    "acceptedNoDamageSwings": 12
+  },
+  "allOriginalEndStateAssertionsPreserved": true,
+  "unchanged": [
+    "production simulation and gateway",
+    "real wall clock and spawn policy",
+    "player HP, damage and equipment",
+    "drop probability and RNG",
+    "quest completion, rewards, save and password-relogin assertions"
+  ],
+  "residualExistingLimit": "Finite 30-kill budget does not mathematically guarantee random quest drops. No drop chance, RNG or budget changes were made.",
+  "parentCi": {
+    "head": "5491d0c8ebbdda92828983c305e5fcb8c829db66",
+    "successWorkflows": {
+      "home": 38768176448,
+      "desktop": 38768176462,
+      "developerEnvironment": 38768177012,
+      "handoff": 38768176201,
+      "crossPlatform": 38768176137
+    },
+    "candidate": {
+      "runId": 38768176361,
+      "linux": "success",
+      "windows": "failure",
+      "gatewayPersistencePassed": 4,
+      "gatewayPersistenceFailed": 1,
+      "failure": "Complete hunt coverage empty after 11 kills and four quest meats; native1138, vertical13, ordinary2, security21 and sharedZone209 passed."
+    }
+  },
+  "remoteQualification": "Final new head CI and merge status remain authoritative on PR255; parent results are not relabelled as new-head success.",
+  "deployed": false,
+  "candidate100": false
+}

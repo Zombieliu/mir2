@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact external path/input/output/writer relocation only; original core validator/navigation/geometry algorithms unchanged",
+  "receipts": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validate-candidate.mjs",
+        "bytes": 11177,
+        "sha256": "29a256fca718bfcc39987c68b37a0cf613f7adc98e2223bd48b9904777bc944b"
+      },
+      "adapter": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+        "bytes": 11508,
+        "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+      },
+      "changes": [
+        [
+          "import { loadGeometry, PARAMETERS, ROOT, BASE, PROJECT, STEPS, key, dist, pin, writeNew, fixedDamageSupply, geometrySelfChecks } from './static-lib.mjs';",
+          "import { loadGeometry, PARAMETERS, BASE, PROJECT, STEPS, key, dist, pin, fixedDamageSupply, geometrySelfChecks } from '../partition-span2-compact-halo-scene-v1/static-lib.mjs';\nconst ROOT=import.meta.dirname;\nconst writeNew=(file,value)=>{if(path.dirname(path.resolve(file))!==path.resolve(ROOT))throw new Error('Output must be an immediate child of dedicated repairdirectory');fs.writeFileSync(file,JSON.stringify(value,null,2)+'\\n',{flag:'wx'});return pin(file);};"
+        ],
+        [
+          "candidate-100-v1.json",
+          "candidate-100-repaired-v4.json"
+        ],
+        [
+          "validation-v1.json",
+          "validation-repaired-v4.json"
+        ]
+      ],
+      "inverseRawExact": true,
+      "algorithmBodyUnchanged": true,
+      "writerRelocation": "Same JSONLF/wx/absolute-parent output guard andpin semantics, dedicated new repairdirectory instead of sealedprior root."
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/prefix-scout-cost-nearest-final-v3.mjs",
+        "bytes": 2562,
+        "sha256": "8bfec072bcce1d734615bf74dd0c1068029144b181311bbaeb7044711ea3017a"
+      },
+      "adapter": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+        "bytes": 2887,
+        "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+      },
+      "changes": [
+        [
+          "import { loadGeometry, PARAMETERS, ROOT, STEPS, key, dist, pin, writeNew } from './static-lib.mjs';",
+          "import path from 'node:path';\nimport { loadGeometry, PARAMETERS, STEPS, key, dist, pin } from '../partition-span2-compact-halo-scene-v1/static-lib.mjs';\nconst ROOT=import.meta.dirname;\nconst writeNew=(file,value)=>{if(path.dirname(path.resolve(file))!==path.resolve(ROOT))throw new Error('Output must be an immediate child of dedicated repairdirectory');fs.writeFileSync(file,JSON.stringify(value,null,2)+'\\n',{flag:'wx'});return pin(file);};"
+        ],
+        [
+          "candidate-100-nearest-ordered-final-v3.json",
+          "candidate-100-repaired-v4.json"
+        ],
+        [
+          "prefix-scout-cost-nearest-final-v3.json",
+          "prefix-scout-cost-repaired-v4.json"
+        ]
+      ],
+      "inverseRawExact": true,
+      "algorithmBodyUnchanged": true,
+      "writerRelocation": "Same JSONLF/wx/absolute-parent output guard andpin semantics, dedicated new repairdirectory instead of sealedprior root."
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-nearest-final-v3.mjs",
+        "bytes": 8407,
+        "sha256": "ace668519d08c3ed6323a2ebeb01fa47cdb0919db283c25d79dd924611d46cf1"
+      },
+      "adapter": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+        "bytes": 8728,
+        "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+      },
+      "changes": [
+        [
+          "import { loadGeometry, PARAMETERS, ROOT, BASE, PROJECT, pin, writeNew } from './static-lib.mjs';",
+          "import path from 'node:path';\nimport { loadGeometry, PARAMETERS, BASE, PROJECT, pin } from '../partition-span2-compact-halo-scene-v1/static-lib.mjs';\nconst ROOT=import.meta.dirname;\nconst writeNew=(file,value)=>{if(path.dirname(path.resolve(file))!==path.resolve(ROOT))throw new Error('Output must be an immediate child of dedicated repairdirectory');fs.writeFileSync(file,JSON.stringify(value,null,2)+'\\n',{flag:'wx'});return pin(file);};"
+        ],
+        [
+          "candidate-100-nearest-ordered-final-v3.json",
+          "candidate-100-repaired-v4.json"
+        ],
+        [
+          "validation-nearest-ordered-final-v3.json",
+          "validation-repaired-v4.json"
+        ],
+        [
+          "conditional-level-supply-nearest-final-v3.json",
+          "conditional-level-supply-repaired-v4.json"
+        ],
+        [
+          "closed124canonical-slot",
+          "closed observed canonical-slot"
+        ],
+        [
+          "recalculates124deduplicated",
+          "recalculates the deduplicated"
+        ]
+      ],
+      "inverseRawExact": true,
+      "algorithmBodyUnchanged": true,
+      "writerRelocation": "Same JSONLF/wx/absolute-parent output guard andpin semantics, dedicated new repairdirectory instead of sealedprior root."
+    }
+  ],
+  "helper": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+    "bytes": 3222,
+    "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+  }
+}

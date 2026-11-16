@@ -1,0 +1,139 @@
+{
+  "observedAtUtc": "2026-10-30T14:26:20.232709+00:00",
+  "backendSourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+  "backendWorkflowRunId": "41059751540",
+  "backendArtifact": {
+    "artifactId": 12978694597,
+    "artifactName": "promotion-backend-050950f5b9773a36901861a1a95c18b8058793a5",
+    "workflowRunId": "41059751540",
+    "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+    "branch": "codex/windows-promotion-bridge-20261030",
+    "conclusion": "success",
+    "githubDigest": "sha256:7318ce670000be87e4cb28b9b2959b4f89de93aa974855266742924fce2f17c7",
+    "zipSha256": "7318ce670000be87e4cb28b9b2959b4f89de93aa974855266742924fce2f17c7",
+    "bytes": 83511867
+  },
+  "backendTarSha256": "c0d0a976a1b347abd56a7c29071b8f951fe08d0d0f12149d2c9e86860d88c094",
+  "onlineBackup": {
+    "path": "/var/backups/mir2-windows-promotion-bridge-20261030/050950f5b9773a36901861a1a95c18b8058793a5/online-original.pg16.dump",
+    "bytes": 447831,
+    "sha256": "c80467b70dfd82907570289fa6b4583eea7b7242c50e396be682e101ed73d9f7"
+  },
+  "offlineBackupCompletedBeforeSchemaWriteBarrier": true,
+  "retainedOriginalRows": {
+    "accounts": {
+      "count": 120,
+      "sha256": "6e36e8bd8a41bd2d507543f38019eef3bad6ad16c6ff058a18fa2078fddcdbac"
+    },
+    "characters": {
+      "count": 36,
+      "sha256": "97a912df6931f7c70bfb3bdd934ff05c15ff641998421563a09f5e71c25956e8"
+    },
+    "character_saves": {
+      "count": 36,
+      "sha256": "c2a193678ec0f8b5aeaecb6bab2ebcac14b4f1bc381b8ccf6d179c60ebb7ca41"
+    },
+    "character_items": {
+      "count": 215,
+      "sha256": "bd21f358a5d2912852709582088ade4145adb5e4b8fdece88d4367912a0e8fe7"
+    },
+    "character_mail": {
+      "count": 8,
+      "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+    },
+    "_billing": {
+      "count": 4,
+      "sha256": "7ccfa7d0bb50d33ffa23712df2970b55fd7b0a496bbaed55d2650f3dda081434"
+    },
+    "_historicalOrders": {
+      "count": 13,
+      "sha256": "2813af44df26cfc33cbe731f1204f258aef2b410a037af6f828b4c83b5793033"
+    }
+  },
+  "cloneAcceptance": {
+    "passed": true,
+    "path": "/var/backups/mir2-windows-promotion-bridge-20261030/050950f5b9773a36901861a1a95c18b8058793a5/CLONE-ACCEPTANCE-20261030T140912Z-31d83869.json",
+    "sha256": "5a59c9fa694d8d3f2306d39aaad5950c023cefc8c0c040c3cb7101432a04742f",
+    "schemaAudit": {
+      "accounts": 120,
+      "accountsSeeded": 0,
+      "allPersistedFieldsRetained": true,
+      "characterSaves": 36,
+      "characters": 36,
+      "cloneOnly": true,
+      "expectedMigrations": 26,
+      "financialRowsWritten": 0,
+      "migrationsAppliedTwice": true,
+      "originalRowsPreserved": true,
+      "originalRowsSha256": "2fc1377052fb3c5aeb6893aca0143092295971561386a5000f35547e20b39129",
+      "typedRowsWithEmptyDefaultNormalization": 0
+    },
+    "walletHttp": {
+      "accountIdMatchesOriginal": true,
+      "accountIdSha256": "2d305292dd23aa9f12d3b6367d80ec06a3ff78cf553a41b542b7bd999caa61c6",
+      "characterListMatchesOriginal": true,
+      "characterListSha256": "5b432c5d235c0c2a67bd7499822fd7b990d5675bfcba4f0e32758fbc368f0a56",
+      "characters": 1,
+      "credentialIdMatchesOriginal": true,
+      "payoutRemainsOff": true,
+      "realMobileSignature": false,
+      "singleUseReplayRejected": true,
+      "successfulExchanges": 2,
+      "syntheticServerProof": true,
+      "wrongSecretRejected": true
+    }
+  },
+  "gateway": {
+    "pid": 1134705,
+    "paymentOriginPreserved": true,
+    "oldBinaryRollbackForbidden": true
+  },
+  "publication": {
+    "apiOrigin": "https://api-playtest.165.154.65.136.sslip.io",
+    "campaign": {
+      "campaignId": "numeron-windows-playtest-20261030",
+      "gameClient": "windows",
+      "payoutEnabled": false
+    },
+    "databaseRestore": false,
+    "gatewayRollback": false,
+    "originalRowsPreservedAtSetupAndWorkerStart": true,
+    "payoutEnabled": false,
+    "phase": "verify",
+    "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+    "status": "verified-publication",
+    "worker": {
+      "binarySha256": "55894249f4f3408b3c8bc60fac48f4e32bb0844f43640c5ff09a5ee6bb7b96f6",
+      "consumers": {
+        "databaseConnections": 5,
+        "processes": [
+          1134705,
+          1135433
+        ]
+      },
+      "pid": 1135433
+    }
+  },
+  "newSystemActors": {
+    "count": 2,
+    "characters": 0,
+    "walletCredentials": 0,
+    "sessions": 0,
+    "humanFinanceApproval": false
+  },
+  "frontendCandidate": {
+    "id": "dpl_2ekBnauSAihEAWLFguLcHKrs7kx3",
+    "sourceSha": "806e8be6d7da536184413856573965d0113e97ab",
+    "promotionWorkflowRunId": "41071419623",
+    "publicVerification": "passed",
+    "receipt": "FRONTEND-PUBLICATION.json",
+    "realMobileAcceptance": "pending"
+  },
+  "acceptanceLimits": {
+    "realMobileSignature": false,
+    "realRecharge": false,
+    "chainPayout": false,
+    "nativeUpdaterPublished": false,
+    "dockerStarted": false
+  }
+}

@@ -1,0 +1,2 @@
+# Preserve measured evidence bytes and manifest hashes on every platform.
+* -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol

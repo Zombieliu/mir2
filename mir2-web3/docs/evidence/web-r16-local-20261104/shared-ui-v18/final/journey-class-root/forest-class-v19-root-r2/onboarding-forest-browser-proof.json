@@ -1,0 +1,6068 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-06T05:31:23.546Z",
+  "passed": false,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-or-Digit3-keydown-up-only"
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "0c37a0082782be781376ccb452fda18ea6f4235a29fbbd678e7db066b81049ac",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "class",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2120015,
+        "minLevel": 15,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 5000,
+        "experience": 0,
+        "kills": [],
+        "flags": []
+      },
+      {
+        "id": 2110008,
+        "minLevel": 15,
+        "startNpcId": 0,
+        "finishNpcId": 24,
+        "gold": 500,
+        "experience": 40000,
+        "kills": [
+          {
+            "monster": "Oma",
+            "monsterIndex": 48,
+            "count": 2,
+            "message": "Defeat 2 Oma."
+          }
+        ],
+        "flags": [
+          {
+            "number": 2210081,
+            "message": "Complete your class practice",
+            "kind": "classPractice",
+            "requirements": {
+              "warrior": [
+                "Slaying learned",
+                "normal attack landed with Slaying learned"
+              ],
+              "wizard": [
+                "GreatFireBall learned",
+                "GreatFireBall damage committed"
+              ],
+              "taoist": [
+                "SpiritSword learned",
+                "normal attack landed with SpiritSword learned"
+              ],
+              "assassin": [
+                "DoubleSlash learned",
+                "DoubleSlash attack damage committed"
+              ],
+              "archer": [
+                "DoubleShot learned",
+                "DoubleShot damage committed"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": false,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "saved-death-recovered-through-visible-town-revive-with-real-losses-retained",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "q8-root-visible-ordinary-input",
+    "ordinary-segment-save-and-logout",
+    "ordinary-visible-town-revive-after-saved-death",
+    "segment-incomplete"
+  ],
+  "screenshots": [
+    "01-current-native-task-card-before-measured-readiness.png",
+    "02-fresh-v2-native-task-card.png",
+    "03-saved-death-before-normal-town-revive.png",
+    "04-segment-complete-before-normal-logout.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 19,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 26,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 27,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 5780,
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 449,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2120015
+      ]
+    },
+    {
+      "sequence": 612,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 613,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 614,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206013
+    },
+    {
+      "sequence": 615,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 616,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206320
+    },
+    {
+      "sequence": 617,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 618,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 619,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 620,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 621,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 622,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 623,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206545
+    },
+    {
+      "sequence": 624,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206604
+    },
+    {
+      "sequence": 625,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206610
+    },
+    {
+      "sequence": 626,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206619
+    },
+    {
+      "sequence": 627,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 628,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 629,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 630,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 631,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 632,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 633,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 634,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 668,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 40,
+      "objectId": 205626
+    },
+    {
+      "sequence": 722,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Up"
+    },
+    {
+      "sequence": 725,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Up"
+    },
+    {
+      "sequence": 729,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Up"
+    },
+    {
+      "sequence": 731,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 100,
+      "objectId": 206007
+    },
+    {
+      "sequence": 734,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Down"
+    },
+    {
+      "sequence": 736,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 738,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Left"
+    },
+    {
+      "sequence": 740,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 100,
+      "objectId": 206700
+    },
+    {
+      "sequence": 742,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Left"
+    },
+    {
+      "sequence": 744,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Left"
+    },
+    {
+      "sequence": 748,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Left"
+    },
+    {
+      "sequence": 803,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "Left"
+    },
+    {
+      "sequence": 806,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 808,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 100,
+      "objectId": 271807
+    },
+    {
+      "sequence": 809,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 810,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205626,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 811,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 812,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 813,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 814,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 815,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 146,
+      "mp": 63
+    },
+    {
+      "sequence": 816,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 818,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 819,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 142,
+      "mp": 63
+    },
+    {
+      "sequence": 821,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 95,
+      "objectId": 1000
+    },
+    {
+      "sequence": 823,
+      "method": "MagicLeveled",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000
+    },
+    {
+      "sequence": 826,
+      "method": "UserLocation",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 827,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 828,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205626,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 830,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 0,
+      "objectId": 205626
+    },
+    {
+      "sequence": 831,
+      "method": "ObjectDied",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205626,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 833,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 40,
+      "objectId": 205626
+    },
+    {
+      "sequence": 835,
+      "method": "ChangeQuest",
+      "phase": "q8-root-visible-ordinary-input",
+      "questId": 2110008,
+      "taken": true,
+      "completed": true
+    },
+    {
+      "sequence": 836,
+      "method": "GainExperience",
+      "phase": "q8-root-visible-ordinary-input",
+      "amount": 60
+    },
+    {
+      "sequence": 838,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 839,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 840,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 841,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 842,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 844,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 138,
+      "mp": 63
+    },
+    {
+      "sequence": 845,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 847,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 92,
+      "objectId": 1000
+    },
+    {
+      "sequence": 848,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 849,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 850,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 851,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 852,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 853,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 136,
+      "mp": 63
+    },
+    {
+      "sequence": 854,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 856,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 91,
+      "objectId": 1000
+    },
+    {
+      "sequence": 859,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 860,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 861,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 862,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 863,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 864,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 135,
+      "mp": 63
+    },
+    {
+      "sequence": 865,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 867,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 90,
+      "objectId": 1000
+    },
+    {
+      "sequence": 868,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 869,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 870,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 871,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 872,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 873,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 133,
+      "mp": 63
+    },
+    {
+      "sequence": 874,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 876,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 89,
+      "objectId": 1000
+    },
+    {
+      "sequence": 877,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 878,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 879,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 880,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 881,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 882,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 128,
+      "mp": 63
+    },
+    {
+      "sequence": 883,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 885,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 85,
+      "objectId": 1000
+    },
+    {
+      "sequence": 886,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 887,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 888,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 889,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 890,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 891,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 133,
+      "mp": 63
+    },
+    {
+      "sequence": 892,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 89,
+      "objectId": 1000
+    },
+    {
+      "sequence": 893,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 894,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 895,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 896,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 897,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 898,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 131,
+      "mp": 63
+    },
+    {
+      "sequence": 899,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 901,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 87,
+      "objectId": 1000
+    },
+    {
+      "sequence": 902,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 903,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 904,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 905,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 906,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 907,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 127,
+      "mp": 63
+    },
+    {
+      "sequence": 908,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 910,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 85,
+      "objectId": 1000
+    },
+    {
+      "sequence": 913,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 914,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 915,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 916,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 917,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 918,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 123,
+      "mp": 63
+    },
+    {
+      "sequence": 919,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 921,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 82,
+      "objectId": 1000
+    },
+    {
+      "sequence": 922,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 923,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 924,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 925,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 926,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 927,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 120,
+      "mp": 63
+    },
+    {
+      "sequence": 928,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 930,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 80,
+      "objectId": 1000
+    },
+    {
+      "sequence": 931,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 932,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 933,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 934,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 935,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 936,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 116,
+      "mp": 63
+    },
+    {
+      "sequence": 937,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 939,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 77,
+      "objectId": 1000
+    },
+    {
+      "sequence": 940,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 941,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 942,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 943,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 944,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 945,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 110,
+      "mp": 63
+    },
+    {
+      "sequence": 946,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 948,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 73,
+      "objectId": 1000
+    },
+    {
+      "sequence": 949,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 950,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 951,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 952,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 953,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 954,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 107,
+      "mp": 63
+    },
+    {
+      "sequence": 955,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 957,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 71,
+      "objectId": 1000
+    },
+    {
+      "sequence": 959,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 960,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 961,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 962,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 963,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 965,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 104,
+      "mp": 63
+    },
+    {
+      "sequence": 966,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 968,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 69,
+      "objectId": 1000
+    },
+    {
+      "sequence": 969,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 970,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 971,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 972,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 973,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 974,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 102,
+      "mp": 63
+    },
+    {
+      "sequence": 975,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 977,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 68,
+      "objectId": 1000
+    },
+    {
+      "sequence": 978,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 979,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 980,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 981,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 982,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 983,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 99,
+      "mp": 63
+    },
+    {
+      "sequence": 984,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 986,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 66,
+      "objectId": 1000
+    },
+    {
+      "sequence": 987,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 988,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 989,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 990,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 991,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 992,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 94,
+      "mp": 63
+    },
+    {
+      "sequence": 993,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 995,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 63,
+      "objectId": 1000
+    },
+    {
+      "sequence": 996,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 997,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 998,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 999,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1000,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1001,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 90,
+      "mp": 63
+    },
+    {
+      "sequence": 1002,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1004,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 60,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1005,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1006,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1007,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1008,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1009,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1010,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 88,
+      "mp": 63
+    },
+    {
+      "sequence": 1011,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1013,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 59,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1016,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1017,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1018,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1019,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1020,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1021,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 87,
+      "mp": 63
+    },
+    {
+      "sequence": 1022,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1024,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 58,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1025,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1026,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1027,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1028,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1029,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1030,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 84,
+      "mp": 63
+    },
+    {
+      "sequence": 1031,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1033,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 56,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1034,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1035,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1036,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1037,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1038,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1039,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 89,
+      "mp": 63
+    },
+    {
+      "sequence": 1040,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 59,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1041,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1042,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1043,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1044,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1045,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1046,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 86,
+      "mp": 63
+    },
+    {
+      "sequence": 1047,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1049,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 57,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1050,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1051,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1052,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1053,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1054,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1055,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 81,
+      "mp": 63
+    },
+    {
+      "sequence": 1056,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1058,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 54,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1059,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1060,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1061,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1062,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1063,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1066,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 79,
+      "mp": 63
+    },
+    {
+      "sequence": 1067,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1069,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 53,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1070,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1071,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1072,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1073,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1074,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1075,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 77,
+      "mp": 63
+    },
+    {
+      "sequence": 1076,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1078,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 51,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1079,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1080,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1081,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1082,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1083,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1084,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 73,
+      "mp": 63
+    },
+    {
+      "sequence": 1085,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1087,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 48,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1088,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1089,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1090,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1091,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1092,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1093,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 69,
+      "mp": 63
+    },
+    {
+      "sequence": 1094,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1096,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 46,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1097,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1098,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1099,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1100,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1101,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1102,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 74,
+      "mp": 63
+    },
+    {
+      "sequence": 1103,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 49,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1104,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1105,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1106,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1107,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1108,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1109,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 68,
+      "mp": 63
+    },
+    {
+      "sequence": 1110,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1112,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 45,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1115,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1116,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1117,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1118,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1119,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1120,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 67,
+      "mp": 63
+    },
+    {
+      "sequence": 1121,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1123,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 44,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1124,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1125,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1126,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1127,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1128,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1129,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 72,
+      "mp": 63
+    },
+    {
+      "sequence": 1130,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 48,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1131,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1132,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1133,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1134,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1135,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1136,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 69,
+      "mp": 63
+    },
+    {
+      "sequence": 1137,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1139,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 46,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1140,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1141,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1142,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1143,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1144,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1145,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 66,
+      "mp": 63
+    },
+    {
+      "sequence": 1146,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1148,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 44,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1149,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1150,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1151,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1152,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1153,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1154,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 65,
+      "mp": 63
+    },
+    {
+      "sequence": 1155,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1157,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 43,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1158,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1159,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1160,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1161,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1162,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1163,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 62,
+      "mp": 63
+    },
+    {
+      "sequence": 1164,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1166,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 41,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1169,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1170,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1171,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1172,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1173,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1174,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 61,
+      "mp": 63
+    },
+    {
+      "sequence": 1175,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1177,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 40,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1178,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1179,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1180,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1181,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1182,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1183,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 59,
+      "mp": 63
+    },
+    {
+      "sequence": 1184,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1186,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 39,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1187,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1188,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1189,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1190,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1191,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1192,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 54,
+      "mp": 63
+    },
+    {
+      "sequence": 1193,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1195,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 36,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1196,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1197,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1198,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1199,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1200,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1201,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 47,
+      "mp": 63
+    },
+    {
+      "sequence": 1202,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1204,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 31,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1205,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1206,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1207,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1208,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1209,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1210,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 41,
+      "mp": 63
+    },
+    {
+      "sequence": 1211,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1213,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 27,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1215,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1216,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1217,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1218,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1219,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1221,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 36,
+      "mp": 63
+    },
+    {
+      "sequence": 1222,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1224,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 24,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1225,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1226,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1227,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1228,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1229,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1230,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 34,
+      "mp": 63
+    },
+    {
+      "sequence": 1231,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1233,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 22,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1234,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1235,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1236,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1237,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1238,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1239,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 32,
+      "mp": 63
+    },
+    {
+      "sequence": 1240,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1242,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 21,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1243,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1244,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1245,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1246,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1247,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1248,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 37,
+      "mp": 63
+    },
+    {
+      "sequence": 1249,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 24,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1250,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1251,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1252,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1253,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1254,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1255,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 35,
+      "mp": 63
+    },
+    {
+      "sequence": 1256,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1258,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 23,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1259,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1260,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1261,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1262,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1263,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1264,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 29,
+      "mp": 63
+    },
+    {
+      "sequence": 1265,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1267,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 19,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1270,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1271,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1272,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1273,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1274,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1275,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 27,
+      "mp": 63
+    },
+    {
+      "sequence": 1276,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1278,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 18,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1279,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1280,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1281,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1282,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1283,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1284,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 22,
+      "mp": 63
+    },
+    {
+      "sequence": 1285,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1287,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 14,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1288,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1289,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1290,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1291,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1292,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1293,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 20,
+      "mp": 63
+    },
+    {
+      "sequence": 1294,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1296,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 13,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1297,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1298,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1299,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1300,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1301,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1302,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 19,
+      "mp": 63
+    },
+    {
+      "sequence": 1303,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1305,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 12,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1306,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1307,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1308,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1309,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1310,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1311,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 15,
+      "mp": 63
+    },
+    {
+      "sequence": 1312,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1314,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 10,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1315,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1316,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1317,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1318,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1319,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1322,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 12,
+      "mp": 63
+    },
+    {
+      "sequence": 1323,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1325,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 8,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1326,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1327,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1328,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1329,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1330,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1331,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 17,
+      "mp": 63
+    },
+    {
+      "sequence": 1332,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 11,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1333,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1334,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1335,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1336,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1337,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1338,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 12,
+      "mp": 63
+    },
+    {
+      "sequence": 1339,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1341,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 8,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1342,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1343,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1344,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1345,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1346,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1347,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 7,
+      "mp": 63
+    },
+    {
+      "sequence": 1348,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1350,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 4,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1351,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1352,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1353,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1354,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1355,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1356,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 1,
+      "mp": 63
+    },
+    {
+      "sequence": 1357,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1359,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 0,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1360,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1361,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1362,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1363,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1364,
+      "method": "ObjectAttack",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1365,
+      "method": "Death",
+      "phase": "q8-root-visible-ordinary-input",
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1366,
+      "method": "HealthChanged",
+      "phase": "q8-root-visible-ordinary-input",
+      "hp": 0,
+      "mp": 63
+    },
+    {
+      "sequence": 1367,
+      "method": "ObjectStruck",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "attackerId": 205615,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1369,
+      "method": "ObjectHealth",
+      "phase": "q8-root-visible-ordinary-input",
+      "percent": 0,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1370,
+      "method": "ObjectDied",
+      "phase": "q8-root-visible-ordinary-input",
+      "objectId": 1000,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1415,
+      "method": "ObjectHealth",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 1416,
+      "method": "ObjectHealth",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 1417,
+      "method": "ObjectHealth",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 1418,
+      "method": "ObjectHealth",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 1419,
+      "method": "UserLocation",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1420,
+      "method": "Revived",
+      "phase": "ordinary-visible-town-revive-after-saved-death"
+    },
+    {
+      "sequence": 1422,
+      "method": "ObjectHealth",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1429,
+      "method": "HealthChanged",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "hp": 149,
+      "mp": 63
+    },
+    {
+      "sequence": 1430,
+      "method": "UserLocation",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1431,
+      "method": "ObjectAttack",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "objectId": 205615,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1432,
+      "method": "ObjectAttack",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "objectId": 206604,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1433,
+      "method": "ObjectAttack",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "objectId": 206609,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1434,
+      "method": "ObjectAttack",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "objectId": 206619,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1435,
+      "method": "ObjectAttack",
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "objectId": 206643,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1445,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-visible-town-revive-after-saved-death"
+    }
+  ],
+  "questOperations": [],
+  "movement": [
+    {
+      "from": {
+        "x": 287,
+        "y": 609
+      },
+      "position": {
+        "x": 287,
+        "y": 608
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 553,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 722,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 608
+      },
+      "position": {
+        "x": 287,
+        "y": 607
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 736,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 725,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 606
+      },
+      "position": {
+        "x": 287,
+        "y": 607
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 572,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 734,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 607
+      },
+      "position": {
+        "x": 286,
+        "y": 607
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 444,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 738,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 286,
+        "y": 607
+      },
+      "position": {
+        "x": 285,
+        "y": 607
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 550,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 742,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 607
+      },
+      "position": {
+        "x": 284,
+        "y": 607
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 489,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 744,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 284,
+        "y": 607
+      },
+      "position": {
+        "x": 283,
+        "y": 607
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 699,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 748,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    }
+  ],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 40,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 237,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 266,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 295,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 324,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "ea0f53a994127e32f5f0e81ecffa7bfa94cc723f3605b50ab8b606a334668b0f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "10779bcd7766258ee9db4a24840647515111bffec6ad14bbec19d45f4b333410",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-root-visible-ordinary-input",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-root-visible-ordinary-input",
+        "method": "GET",
+        "pathHash": "b8471fdefde0b070e79c6a8f02aa95b2916c01c280a84179faa781df3bcc5a44",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-root-visible-ordinary-input",
+        "method": "GET",
+        "pathHash": "b8471fdefde0b070e79c6a8f02aa95b2916c01c280a84179faa781df3bcc5a44",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-root-visible-ordinary-input",
+        "method": "GET",
+        "pathHash": "b8471fdefde0b070e79c6a8f02aa95b2916c01c280a84179faa781df3bcc5a44",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-root-visible-ordinary-input",
+        "method": "GET",
+        "pathHash": "1dbb8e842c90518bbcd78157bfe192323991e7ddbbfc4c73e8ca022b9c1084fe",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "50bfcdf37217270afe6360da1c1b9df07a2ea30313acaf79363e2b4247b98d26"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "2022c8ed2c17b796697bac46b1c5e24110cf153cfa7e2151b5add82d668d4e7c"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "fb799b8db8c6f3b9f93836fd26621c5a182da8691353f5a415d393ca0826310f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "fb799b8db8c6f3b9f93836fd26621c5a182da8691353f5a415d393ca0826310f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "fb799b8db8c6f3b9f93836fd26621c5a182da8691353f5a415d393ca0826310f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "929fe215b510213117b857578354e6cfe12f1f3b55d7bc989be3eaf71038818c"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "keepAlive": 66,
+    "npcPurchaseOwner": 1,
+    "walk": 9,
+    "run": 1,
+    "attack": 1,
+    "tick": 2,
+    "townRevive": 1,
+    "logOut": 1
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793943088934,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 27,
+      "receivedAtMs": 1793943105018,
+      "method": "UserInformation",
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 287,
+        "y": 609
+      }
+    },
+    {
+      "sequence": 815,
+      "receivedAtMs": 1793943633482,
+      "method": "HealthChanged",
+      "hp": 146,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 819,
+      "receivedAtMs": 1793943633656,
+      "method": "HealthChanged",
+      "hp": 142,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 844,
+      "receivedAtMs": 1793943635875,
+      "method": "HealthChanged",
+      "hp": 138,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 853,
+      "receivedAtMs": 1793943638573,
+      "method": "HealthChanged",
+      "hp": 136,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 864,
+      "receivedAtMs": 1793943641330,
+      "method": "HealthChanged",
+      "hp": 135,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 873,
+      "receivedAtMs": 1793943643932,
+      "method": "HealthChanged",
+      "hp": 133,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 882,
+      "receivedAtMs": 1793943646527,
+      "method": "HealthChanged",
+      "hp": 128,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 891,
+      "receivedAtMs": 1793943649622,
+      "method": "HealthChanged",
+      "hp": 133,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 898,
+      "receivedAtMs": 1793943651926,
+      "method": "HealthChanged",
+      "hp": 131,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 907,
+      "receivedAtMs": 1793943654660,
+      "method": "HealthChanged",
+      "hp": 127,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 918,
+      "receivedAtMs": 1793943657376,
+      "method": "HealthChanged",
+      "hp": 123,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 927,
+      "receivedAtMs": 1793943660067,
+      "method": "HealthChanged",
+      "hp": 120,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 936,
+      "receivedAtMs": 1793943662665,
+      "method": "HealthChanged",
+      "hp": 116,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 945,
+      "receivedAtMs": 1793943665537,
+      "method": "HealthChanged",
+      "hp": 110,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 954,
+      "receivedAtMs": 1793943668265,
+      "method": "HealthChanged",
+      "hp": 107,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 965,
+      "receivedAtMs": 1793943670872,
+      "method": "HealthChanged",
+      "hp": 104,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 974,
+      "receivedAtMs": 1793943673623,
+      "method": "HealthChanged",
+      "hp": 102,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 983,
+      "receivedAtMs": 1793943676196,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 992,
+      "receivedAtMs": 1793943678801,
+      "method": "HealthChanged",
+      "hp": 94,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1001,
+      "receivedAtMs": 1793943681647,
+      "method": "HealthChanged",
+      "hp": 90,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1010,
+      "receivedAtMs": 1793943684270,
+      "method": "HealthChanged",
+      "hp": 88,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1021,
+      "receivedAtMs": 1793943686872,
+      "method": "HealthChanged",
+      "hp": 87,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1030,
+      "receivedAtMs": 1793943689546,
+      "method": "HealthChanged",
+      "hp": 84,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1039,
+      "receivedAtMs": 1793943692581,
+      "method": "HealthChanged",
+      "hp": 89,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1046,
+      "receivedAtMs": 1793943694893,
+      "method": "HealthChanged",
+      "hp": 86,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1055,
+      "receivedAtMs": 1793943697488,
+      "method": "HealthChanged",
+      "hp": 81,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1066,
+      "receivedAtMs": 1793943700359,
+      "method": "HealthChanged",
+      "hp": 79,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1075,
+      "receivedAtMs": 1793943702946,
+      "method": "HealthChanged",
+      "hp": 77,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1084,
+      "receivedAtMs": 1793943705655,
+      "method": "HealthChanged",
+      "hp": 73,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1093,
+      "receivedAtMs": 1793943708355,
+      "method": "HealthChanged",
+      "hp": 69,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1102,
+      "receivedAtMs": 1793943711382,
+      "method": "HealthChanged",
+      "hp": 74,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1109,
+      "receivedAtMs": 1793943713560,
+      "method": "HealthChanged",
+      "hp": 68,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1120,
+      "receivedAtMs": 1793943716278,
+      "method": "HealthChanged",
+      "hp": 67,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1129,
+      "receivedAtMs": 1793943719267,
+      "method": "HealthChanged",
+      "hp": 72,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1136,
+      "receivedAtMs": 1793943721558,
+      "method": "HealthChanged",
+      "hp": 69,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1145,
+      "receivedAtMs": 1793943724287,
+      "method": "HealthChanged",
+      "hp": 66,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1154,
+      "receivedAtMs": 1793943726884,
+      "method": "HealthChanged",
+      "hp": 65,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1163,
+      "receivedAtMs": 1793943729681,
+      "method": "HealthChanged",
+      "hp": 62,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1174,
+      "receivedAtMs": 1793943732365,
+      "method": "HealthChanged",
+      "hp": 61,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1183,
+      "receivedAtMs": 1793943735055,
+      "method": "HealthChanged",
+      "hp": 59,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1192,
+      "receivedAtMs": 1793943737855,
+      "method": "HealthChanged",
+      "hp": 54,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1201,
+      "receivedAtMs": 1793943740627,
+      "method": "HealthChanged",
+      "hp": 47,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1210,
+      "receivedAtMs": 1793943743317,
+      "method": "HealthChanged",
+      "hp": 41,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1221,
+      "receivedAtMs": 1793943745861,
+      "method": "HealthChanged",
+      "hp": 36,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1230,
+      "receivedAtMs": 1793943748550,
+      "method": "HealthChanged",
+      "hp": 34,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1239,
+      "receivedAtMs": 1793943751236,
+      "method": "HealthChanged",
+      "hp": 32,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1248,
+      "receivedAtMs": 1793943754298,
+      "method": "HealthChanged",
+      "hp": 37,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1255,
+      "receivedAtMs": 1793943756460,
+      "method": "HealthChanged",
+      "hp": 35,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1264,
+      "receivedAtMs": 1793943759036,
+      "method": "HealthChanged",
+      "hp": 29,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1275,
+      "receivedAtMs": 1793943761577,
+      "method": "HealthChanged",
+      "hp": 27,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1284,
+      "receivedAtMs": 1793943764341,
+      "method": "HealthChanged",
+      "hp": 22,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1293,
+      "receivedAtMs": 1793943766909,
+      "method": "HealthChanged",
+      "hp": 20,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1302,
+      "receivedAtMs": 1793943769705,
+      "method": "HealthChanged",
+      "hp": 19,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1311,
+      "receivedAtMs": 1793943772385,
+      "method": "HealthChanged",
+      "hp": 15,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1322,
+      "receivedAtMs": 1793943775287,
+      "method": "HealthChanged",
+      "hp": 12,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1331,
+      "receivedAtMs": 1793943778231,
+      "method": "HealthChanged",
+      "hp": 17,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1338,
+      "receivedAtMs": 1793943780375,
+      "method": "HealthChanged",
+      "hp": 12,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1347,
+      "receivedAtMs": 1793943782928,
+      "method": "HealthChanged",
+      "hp": 7,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1356,
+      "receivedAtMs": 1793943785607,
+      "method": "HealthChanged",
+      "hp": 1,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1365,
+      "receivedAtMs": 1793943788177,
+      "method": "Death",
+      "hp": 0,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": true,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1420,
+      "receivedAtMs": 1793944080727,
+      "method": "Revived",
+      "hp": null,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "sequence": 1428,
+      "receivedAtMs": 1793944080786,
+      "method": "worldSnapshot",
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "sequence": 1445,
+      "receivedAtMs": 1793944088827,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 696,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 900
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 871
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    },
+    {
+      "phase": "ordinary-visible-town-revive-after-saved-death",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 957
+    }
+  ],
+  "resumeState": {
+    "hp": 0,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": true,
+    "position": {
+      "x": 280,
+      "y": 605
+    },
+    "progression": {
+      "level": 15,
+      "experience": 876,
+      "maxExperience": 40000
+    },
+    "gold": 5780,
+    "smallHpMedicine": 3,
+    "equipment": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      },
+      {
+        "name": "SharpSword",
+        "slot": "weapon",
+        "durabilityCurrent": 18000,
+        "durabilityMax": 18000
+      }
+    ],
+    "playerLevel": 15,
+    "knownFencing": true,
+    "fencingBooks": 0,
+    "bagEquipment": [
+      {
+        "name": "WoodenSword",
+        "slot": 0,
+        "equipSlot": "weapon"
+      }
+    ],
+    "clothingInBag": [],
+    "clothingEquipped": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour"
+      }
+    ],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 0,
+        "quantity": 3,
+        "key": "Digit1"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2120015
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "readyToTurnIn",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 40,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "rootManual": {
+    "localInputOnly": true,
+    "privateSceneNotArchived": true,
+    "actions": [
+      {
+        "action": "walk",
+        "beforeVitals": {
+          "hp": 149,
+          "maxHp": 149,
+          "mp": 63,
+          "maxMp": 63,
+          "dead": false,
+          "position": {
+            "x": 287,
+            "y": 609
+          }
+        },
+        "actionError": "NO_LEGAL_CARDINAL_PATH_TO_OBSERVED_TARGET",
+        "after": {
+          "hp": 149,
+          "maxHp": 149,
+          "mp": 63,
+          "maxMp": 63,
+          "dead": false,
+          "position": {
+            "x": 283,
+            "y": 607
+          }
+        },
+        "attacks": [],
+        "ownHits": [],
+        "deaths": []
+      },
+      {
+        "action": "click",
+        "beforeVitals": {
+          "hp": 149,
+          "maxHp": 149,
+          "mp": 63,
+          "maxMp": 63,
+          "dead": false,
+          "position": {
+            "x": 283,
+            "y": 607
+          }
+        },
+        "after": {
+          "hp": 149,
+          "maxHp": 149,
+          "mp": 63,
+          "maxMp": 63,
+          "dead": false,
+          "position": {
+            "x": 282,
+            "y": 607
+          }
+        },
+        "attacks": [],
+        "ownHits": [],
+        "deaths": []
+      },
+      {
+        "action": "click",
+        "beforeVitals": {
+          "hp": 0,
+          "maxHp": 149,
+          "mp": 63,
+          "maxMp": 63,
+          "dead": true,
+          "position": {
+            "x": 280,
+            "y": 605
+          }
+        },
+        "after": {
+          "hp": 0,
+          "maxHp": 149,
+          "mp": 63,
+          "maxMp": 63,
+          "dead": true,
+          "position": {
+            "x": 280,
+            "y": 605
+          }
+        },
+        "attacks": [],
+        "ownHits": [],
+        "deaths": []
+      }
+    ]
+  },
+  "eightDirectionRouteChecks": [
+    {
+      "position": {
+        "x": 283,
+        "y": 607
+      },
+      "neighbours": [
+        {
+          "direction": "Up",
+          "tile": {
+            "x": 283,
+            "y": 606
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "UpRight",
+          "tile": {
+            "x": 284,
+            "y": 606
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 3,
+              "kind": "npc",
+              "hp": null
+            }
+          ]
+        },
+        {
+          "direction": "Right",
+          "tile": {
+            "x": 284,
+            "y": 607
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "DownRight",
+          "tile": {
+            "x": 284,
+            "y": 608
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "Down",
+          "tile": {
+            "x": 283,
+            "y": 608
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "DownLeft",
+          "tile": {
+            "x": 282,
+            "y": 608
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "Left",
+          "tile": {
+            "x": 282,
+            "y": 607
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "UpLeft",
+          "tile": {
+            "x": 282,
+            "y": 606
+          },
+          "staticBlocked": true,
+          "entities": []
+        }
+      ],
+      "chosen": null
+    }
+  ],
+  "deathDuringNormalRetreat": true,
+  "initialRevive": {
+    "normalUi": true,
+    "oneCommand": true,
+    "matchingRevivedObserved": true,
+    "before": {
+      "hp": 0,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": true,
+      "position": {
+        "x": 280,
+        "y": 605
+      }
+    },
+    "after": {
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    "goldBefore": 5780,
+    "goldAfter": 5780,
+    "smallHpMedicineBefore": 3,
+    "smallHpMedicineAfter": 3,
+    "retainedQuestLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "readyToTurnIn",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "segmentCheckpoint": {
+    "segment": "class",
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2120015
+    ],
+    "hp": 149,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "gold": 5780,
+    "medicine": 3,
+    "fencingKnown": true,
+    "slayingKnown": true,
+    "exactAssetFingerprintHash": "8ce163093dd08b54e3404f180d8630ddb8c6c91eb1bc1dd1a5edffc1dfdb2c9e",
+    "questProgressFingerprintHash": "99bd8340dcff597218d129fe6f9d931ffa86a6f3c7db9a8c04a1e35da30b4ad3",
+    "normalLogoutAck": true,
+    "reloginVerifiedThisSegment": false,
+    "subsequentNormalLoginVerificationPending": true
+  },
+  "forestComplete": false,
+  "gameplayPassed": false,
+  "networkClean": true,
+  "incompleteReason": "CLASS_OR_CAVE_GAMEPLAY_INCOMPLETE",
+  "finishedAt": "2026-11-06T05:48:08.965Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 4,
+          "required": 4,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120015,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110008,
+      "stage": "readyToTurnIn",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006,
+    2110007,
+    2120015
+  ],
+  "lastFullSnapshot": {
+    "sequence": 1446,
+    "receivedAtMs": 1793944088869,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "progression": {
+      "level": null,
+      "experience": 876,
+      "maxExperience": 40000
+    },
+    "gold": 5780,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 1430,
+    "packet": "UserLocation",
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "direction": "Down",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 7,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

@@ -1,0 +1,2921 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792898022018-efb7a76a",
+  "rawPin": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.samples.jsonl",
+    "bytes": 13028051,
+    "sha256": "79510b349b2f1c70092fcad4bbc5ed79b76f14a4ceb3811b02704ff11e786b68",
+    "rows": 21101
+  },
+  "source": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/source-pins.json",
+    "bytes": 40923,
+    "sha256": "f43e5327e06b5d5fd45bd4ff6354fe72cda0a5427f25ab09729b84c12dd6c7c4"
+  },
+  "from82": {
+    "line": 15236,
+    "at": 1792898606498,
+    "sentAtWallMs": 1792898606451,
+    "sentAtMs": 596790.2952,
+    "requestId": "82",
+    "owner": {
+      "objectId": 1000,
+      "x": 254,
+      "y": 670,
+      "dead": false,
+      "hp": 30,
+      "maxHp": 30
+    },
+    "target": {
+      "objectId": 206624,
+      "x": 254,
+      "y": 671,
+      "dead": false,
+      "hp": 6,
+      "maxHp": 20
+    },
+    "outcome": "success",
+    "protocolResult": "launched",
+    "truncated": false,
+    "packetCount": 12,
+    "packets": [
+      {
+        "receiver": "observer",
+        "sequence": 6553,
+        "monotonicMs": 596799.2652,
+        "atMs": 1792898606460,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 50005,
+          "location": {
+            "x": 254,
+            "y": 670
+          },
+          "direction": "Down"
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 6554,
+        "monotonicMs": 596814.6064,
+        "atMs": 1792898606475,
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 206624,
+          "attackerId": 50005,
+          "location": {
+            "x": 254,
+            "y": 671
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 6555,
+        "monotonicMs": 596814.6445,
+        "atMs": 1792898606475,
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 206624,
+          "damage": 3
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 6556,
+        "monotonicMs": 596814.662,
+        "atMs": 1792898606475,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206624,
+          "percent": 0
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 6557,
+        "monotonicMs": 596814.6788,
+        "atMs": 1792898606475,
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 206624,
+          "location": {
+            "x": 254,
+            "y": 671
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4400,
+        "monotonicMs": 596816.0076,
+        "atMs": 1792898606477,
+        "type": "attackResultV2",
+        "protocolVersion": 2,
+        "requestId": "82",
+        "objectId": 206624,
+        "result": "launched"
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4401,
+        "monotonicMs": 596816.0439,
+        "atMs": 1792898606477,
+        "packet": "UserLocation",
+        "payload": {
+          "x": 254,
+          "y": 670,
+          "direction": "Down"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4402,
+        "monotonicMs": 596816.0654,
+        "atMs": 1792898606477,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 1000,
+          "location": {
+            "x": 254,
+            "y": 670
+          },
+          "direction": "Down"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4403,
+        "monotonicMs": 596816.0805,
+        "atMs": 1792898606477,
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 206624,
+          "attackerId": 1000,
+          "location": {
+            "x": 254,
+            "y": 671
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4404,
+        "monotonicMs": 596816.0904,
+        "atMs": 1792898606477,
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 206624,
+          "damage": 3
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4405,
+        "monotonicMs": 596816.1074,
+        "atMs": 1792898606477,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206624,
+          "percent": 0
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 4406,
+        "monotonicMs": 596816.1193,
+        "atMs": 1792898606477,
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 206624,
+          "location": {
+            "x": 254,
+            "y": 671
+          },
+          "direction": "Up"
+        }
+      }
+    ]
+  },
+  "to83": {
+    "line": 17955,
+    "at": 1792898655972,
+    "sentAtWallMs": 1792898655879,
+    "sentAtMs": 646218.0169,
+    "requestId": "83",
+    "owner": {
+      "objectId": 1000,
+      "x": 271,
+      "y": 670,
+      "dead": false,
+      "hp": 30,
+      "maxHp": 30
+    },
+    "target": {
+      "objectId": 206645,
+      "x": 270,
+      "y": 671,
+      "dead": false
+    },
+    "outcome": "success",
+    "protocolResult": "launched",
+    "truncated": false,
+    "packetCount": 10,
+    "packets": [
+      {
+        "receiver": "observer",
+        "sequence": 5012,
+        "monotonicMs": 646228.6548,
+        "atMs": 1792898655889,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 50005,
+          "location": {
+            "x": 271,
+            "y": 670
+          },
+          "direction": "DownLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 5132,
+        "monotonicMs": 646245.7726,
+        "atMs": 1792898655906,
+        "type": "attackResultV2",
+        "protocolVersion": 2,
+        "requestId": "83",
+        "objectId": 206645,
+        "result": "launched"
+      },
+      {
+        "receiver": "owner",
+        "sequence": 5133,
+        "monotonicMs": 646245.831,
+        "atMs": 1792898655907,
+        "packet": "UserLocation",
+        "payload": {
+          "x": 271,
+          "y": 670,
+          "direction": "DownLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 5134,
+        "monotonicMs": 646245.8591,
+        "atMs": 1792898655907,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 1000,
+          "location": {
+            "x": 271,
+            "y": 670
+          },
+          "direction": "DownLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 5135,
+        "monotonicMs": 646297.2512,
+        "atMs": 1792898655958,
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 206645,
+          "attackerId": 1000,
+          "location": {
+            "x": 270,
+            "y": 671
+          },
+          "direction": "DownLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 5136,
+        "monotonicMs": 646297.2736,
+        "atMs": 1792898655958,
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 206645,
+          "damage": 3
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 5137,
+        "monotonicMs": 646297.2849,
+        "atMs": 1792898655958,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206645,
+          "percent": 85
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 5013,
+        "monotonicMs": 646297.3365,
+        "atMs": 1792898655958,
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 206645,
+          "attackerId": 50005,
+          "location": {
+            "x": 270,
+            "y": 671
+          },
+          "direction": "DownLeft"
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 5014,
+        "monotonicMs": 646297.3455,
+        "atMs": 1792898655958,
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 206645,
+          "damage": 3
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 5015,
+        "monotonicMs": 646297.353,
+        "atMs": 1792898655958,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206645,
+          "percent": 85
+        }
+      }
+    ]
+  },
+  "gapMoves": [
+    {
+      "line": 15315,
+      "type": "action",
+      "at": 1792898607913,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 598196.2663,
+      "sentAtMs": 598231.0683,
+      "plannedTarget": {
+        "x": 254,
+        "y": 669
+      },
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 254,
+        "y": 669
+      },
+      "direction": "Up",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 5.3985000000102445,
+      "plannedLatencyMs": 40.20050000003539
+    },
+    {
+      "line": 15360,
+      "type": "action",
+      "at": 1792898608664,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 598946.2663,
+      "sentAtMs": 598982.4962,
+      "plannedTarget": {
+        "x": 254,
+        "y": 667
+      },
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 254,
+        "y": 667
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.412899999995716,
+      "plannedLatencyMs": 37.64280000003055
+    },
+    {
+      "line": 15403,
+      "type": "action",
+      "at": 1792898609408,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 599696.2663,
+      "sentAtMs": 599726.751,
+      "plannedTarget": {
+        "x": 254,
+        "y": 666
+      },
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 254,
+        "y": 666
+      },
+      "direction": "Up",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.4817999999504536,
+      "plannedLatencyMs": 31.966499999980442
+    },
+    {
+      "line": 15450,
+      "type": "action",
+      "at": 1792898610172,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 600446.2663,
+      "sentAtMs": 600479.4146,
+      "plannedTarget": {
+        "x": 252,
+        "y": 664
+      },
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 252,
+        "y": 664
+      },
+      "direction": "UpLeft",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 6.928399999975227,
+      "plannedLatencyMs": 40.07669999997597
+    },
+    {
+      "line": 15495,
+      "type": "action",
+      "at": 1792898610899,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 601196.2663,
+      "sentAtMs": 601217.0728,
+      "plannedTarget": {
+        "x": 252,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206534,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 252,
+        "y": 663
+      },
+      "direction": "Up",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.8890000000828877,
+      "plannedLatencyMs": 21.695500000030734
+    },
+    {
+      "line": 15530,
+      "type": "action",
+      "at": 1792898611661,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 601946.2663,
+      "sentAtMs": 601966.8197,
+      "plannedTarget": {
+        "x": 254,
+        "y": 663
+      },
+      "scouting": true,
+      "scoutHomeIndex": 3,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 254,
+        "y": 663
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.1731999999610707,
+      "plannedLatencyMs": 21.726599999936298
+    },
+    {
+      "line": 15569,
+      "type": "action",
+      "at": 1792898612409,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 602696.2663,
+      "sentAtMs": 602713.3417,
+      "plannedTarget": {
+        "x": 255,
+        "y": 662
+      },
+      "scouting": true,
+      "scoutHomeIndex": 3,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 255,
+        "y": 662
+      },
+      "direction": "UpRight",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.8800000000046566,
+      "plannedLatencyMs": 18.95539999997709
+    },
+    {
+      "line": 15604,
+      "type": "action",
+      "at": 1792898613185,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 603446.2663,
+      "sentAtMs": 603488.944,
+      "plannedTarget": {
+        "x": 255,
+        "y": 660
+      },
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 255,
+        "y": 660
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.1152000000001863,
+      "plannedLatencyMs": 43.79290000000037
+    },
+    {
+      "line": 15648,
+      "type": "action",
+      "at": 1792898613890,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 604196.2663,
+      "sentAtMs": 604208.1537,
+      "plannedTarget": {
+        "x": 255,
+        "y": 658
+      },
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 255,
+        "y": 658
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6833999999798834,
+      "plannedLatencyMs": 12.570799999986775
+    },
+    {
+      "line": 15689,
+      "type": "action",
+      "at": 1792898614682,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 604946.2663,
+      "sentAtMs": 604985.9456,
+      "plannedTarget": {
+        "x": 255,
+        "y": 656
+      },
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 255,
+        "y": 656
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.1970000000437722,
+      "plannedLatencyMs": 40.87630000000354
+    },
+    {
+      "line": 15738,
+      "type": "action",
+      "at": 1792898615415,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 605696.2663,
+      "sentAtMs": 605733.8017,
+      "plannedTarget": {
+        "x": 255,
+        "y": 655
+      },
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 255,
+        "y": 655
+      },
+      "direction": "Up",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.2813000000314787,
+      "plannedLatencyMs": 38.81669999996666
+    },
+    {
+      "line": 15782,
+      "type": "action",
+      "at": 1792898616164,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 606446.2663,
+      "sentAtMs": 606482.1016,
+      "plannedTarget": {
+        "x": 253,
+        "y": 653
+      },
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 253,
+        "y": 653
+      },
+      "direction": "UpLeft",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.7568999999202788,
+      "plannedLatencyMs": 36.59219999995548
+    },
+    {
+      "line": 15833,
+      "type": "action",
+      "at": 1792898616918,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 607196.2663,
+      "sentAtMs": 607235.9116,
+      "plannedTarget": {
+        "x": 252,
+        "y": 652
+      },
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 252,
+        "y": 652
+      },
+      "direction": "UpLeft",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.171500000054948,
+      "plannedLatencyMs": 40.816800000029616
+    },
+    {
+      "line": 15874,
+      "type": "action",
+      "at": 1792898617661,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 607946.2663,
+      "sentAtMs": 607979.0595,
+      "plannedTarget": {
+        "x": 254,
+        "y": 652
+      },
+      "scouting": true,
+      "scoutHomeIndex": 5,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 254,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.0373000000836328,
+      "plannedLatencyMs": 33.83050000004005
+    },
+    {
+      "line": 15922,
+      "type": "action",
+      "at": 1792898618411,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 608696.2663,
+      "sentAtMs": 608729.5558,
+      "plannedTarget": {
+        "x": 256,
+        "y": 652
+      },
+      "scouting": true,
+      "scoutHomeIndex": 5,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 256,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.1682000000728294,
+      "plannedLatencyMs": 34.457700000028126
+    },
+    {
+      "line": 15998,
+      "type": "action",
+      "at": 1792898619904,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 610196.2663,
+      "sentAtMs": 610223.5408,
+      "plannedTarget": {
+        "x": 257,
+        "y": 652
+      },
+      "scouting": true,
+      "scoutHomeIndex": 5,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 257,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5854000000981614,
+      "plannedLatencyMs": 27.859900000039488
+    },
+    {
+      "line": 16037,
+      "type": "action",
+      "at": 1792898620668,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 610946.2663,
+      "sentAtMs": 610973.5054,
+      "plannedTarget": {
+        "x": 259,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 259,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.0901999999769032,
+      "plannedLatencyMs": 28.32929999998305
+    },
+    {
+      "line": 16077,
+      "type": "action",
+      "at": 1792898621402,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 611696.2663,
+      "sentAtMs": 611711.0303,
+      "plannedTarget": {
+        "x": 261,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 261,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5143000000389293,
+      "plannedLatencyMs": 15.278300000005402
+    },
+    {
+      "line": 16111,
+      "type": "action",
+      "at": 1792898622149,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 612446.2663,
+      "sentAtMs": 612458.4919,
+      "plannedTarget": {
+        "x": 263,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 263,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.4266999999526888,
+      "plannedLatencyMs": 12.652299999957904
+    },
+    {
+      "line": 16155,
+      "type": "action",
+      "at": 1792898622900,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 613196.2663,
+      "sentAtMs": 613208.9909,
+      "plannedTarget": {
+        "x": 265,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 265,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.4930000000167638,
+      "plannedLatencyMs": 13.217599999974482
+    },
+    {
+      "line": 16190,
+      "type": "action",
+      "at": 1792898623644,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 613946.2663,
+      "sentAtMs": 613954.5229,
+      "plannedTarget": {
+        "x": 267,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 267,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6389999999664724,
+      "plannedLatencyMs": 8.89559999993071
+    },
+    {
+      "line": 16230,
+      "type": "action",
+      "at": 1792898624392,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 614696.2663,
+      "sentAtMs": 614701.2458,
+      "plannedTarget": {
+        "x": 269,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 269,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6735999999800697,
+      "plannedLatencyMs": 5.653099999995902
+    },
+    {
+      "line": 16281,
+      "type": "action",
+      "at": 1792898625141,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 615446.2663,
+      "sentAtMs": 615449.3136,
+      "plannedTarget": {
+        "x": 270,
+        "y": 652
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 270,
+        "y": 652
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.7173000000184402,
+      "plannedLatencyMs": 3.764599999994971
+    },
+    {
+      "line": 16332,
+      "type": "action",
+      "at": 1792898625890,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 616196.2663,
+      "sentAtMs": 616200.3966,
+      "plannedTarget": {
+        "x": 272,
+        "y": 654
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206528,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 272,
+        "y": 654
+      },
+      "direction": "DownRight",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.8493000000016764,
+      "plannedLatencyMs": 4.979599999962375
+    },
+    {
+      "line": 16382,
+      "type": "action",
+      "at": 1792898626666,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 616946.2663,
+      "sentAtMs": 616975.7906,
+      "plannedTarget": {
+        "x": 272,
+        "y": 656
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 272,
+        "y": 656
+      },
+      "direction": "Down",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.7868000000016764,
+      "plannedLatencyMs": 30.311099999933504
+    },
+    {
+      "line": 16424,
+      "type": "action",
+      "at": 1792898627417,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 617696.2663,
+      "sentAtMs": 617725.8727,
+      "plannedTarget": {
+        "x": 272,
+        "y": 658
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 272,
+        "y": 658
+      },
+      "direction": "Down",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5230000000447035,
+      "plannedLatencyMs": 30.129399999976158
+    },
+    {
+      "line": 16462,
+      "type": "action",
+      "at": 1792898628170,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 618446.2663,
+      "sentAtMs": 618477.967,
+      "plannedTarget": {
+        "x": 272,
+        "y": 659
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 272,
+        "y": 659
+      },
+      "direction": "Down",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.8198000000556931,
+      "plannedLatencyMs": 32.52049999998417
+    },
+    {
+      "line": 16506,
+      "type": "action",
+      "at": 1792898628916,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 619196.2663,
+      "sentAtMs": 619225.3858,
+      "plannedTarget": {
+        "x": 274,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "direction": "DownRight",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6086999999824911,
+      "plannedLatencyMs": 29.728200000012293
+    },
+    {
+      "line": 16551,
+      "type": "action",
+      "at": 1792898629665,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 619946.2663,
+      "sentAtMs": 619975.3799,
+      "plannedTarget": {
+        "x": 275,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 275,
+        "y": 661
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.6586999999126419,
+      "plannedLatencyMs": 29.772299999953248
+    },
+    {
+      "line": 16602,
+      "type": "action",
+      "at": 1792898630413,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 620696.2663,
+      "sentAtMs": 620722.1832,
+      "plannedTarget": {
+        "x": 274,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.4915000000037253,
+      "plannedLatencyMs": 26.4083999999566
+    },
+    {
+      "line": 16641,
+      "type": "action",
+      "at": 1792898631161,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 621446.2663,
+      "sentAtMs": 621470.0281,
+      "plannedTarget": {
+        "x": 275,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 275,
+        "y": 661
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5799999999580905,
+      "plannedLatencyMs": 24.341799999936484
+    },
+    {
+      "line": 16678,
+      "type": "action",
+      "at": 1792898631905,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 622196.2663,
+      "sentAtMs": 622214.9634,
+      "plannedTarget": {
+        "x": 274,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206513,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5714999999618158,
+      "plannedLatencyMs": 19.26859999995213
+    },
+    {
+      "line": 16716,
+      "type": "action",
+      "at": 1792898632652,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 622946.2663,
+      "sentAtMs": 622962.1753,
+      "plannedTarget": {
+        "x": 276,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 276,
+        "y": 661
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.5540999999502674,
+      "plannedLatencyMs": 17.463099999935366
+    },
+    {
+      "line": 16749,
+      "type": "action",
+      "at": 1792898633397,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 623696.2663,
+      "sentAtMs": 623706.4183,
+      "plannedTarget": {
+        "x": 278,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 278,
+        "y": 661
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.579799999948591,
+      "plannedLatencyMs": 10.731799999950454
+    },
+    {
+      "line": 16788,
+      "type": "action",
+      "at": 1792898634139,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 624446.2663,
+      "sentAtMs": 624449.155,
+      "plannedTarget": {
+        "x": 279,
+        "y": 661
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 279,
+        "y": 661
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.4111999999731779,
+      "plannedLatencyMs": 3.2998999999836087
+    },
+    {
+      "line": 16829,
+      "type": "action",
+      "at": 1792898634888,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 625196.2663,
+      "sentAtMs": 625198.1378,
+      "plannedTarget": {
+        "x": 281,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 281,
+        "y": 663
+      },
+      "direction": "DownRight",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.7402000000001863,
+      "plannedLatencyMs": 2.611700000008568
+    },
+    {
+      "line": 16864,
+      "type": "action",
+      "at": 1792898635666,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 625946.2663,
+      "sentAtMs": 625982.4766,
+      "plannedTarget": {
+        "x": 281,
+        "y": 662
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 281,
+        "y": 662
+      },
+      "direction": "Up",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5778999999165535,
+      "plannedLatencyMs": 36.78819999995176
+    },
+    {
+      "line": 16902,
+      "type": "action",
+      "at": 1792898636415,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 626696.2663,
+      "sentAtMs": 626729.0456,
+      "plannedTarget": {
+        "x": 281,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 281,
+        "y": 663
+      },
+      "direction": "Down",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5222000000067055,
+      "plannedLatencyMs": 33.30149999994319
+    },
+    {
+      "line": 16939,
+      "type": "action",
+      "at": 1792898637164,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 627446.2663,
+      "sentAtMs": 627475.2094,
+      "plannedTarget": {
+        "x": 282,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.46029999991878867,
+      "plannedLatencyMs": 29.403399999951944
+    },
+    {
+      "line": 16976,
+      "type": "action",
+      "at": 1792898637913,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 628196.2663,
+      "sentAtMs": 628229.655,
+      "plannedTarget": {
+        "x": 283,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 283,
+        "y": 663
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.3489999999292195,
+      "plannedLatencyMs": 34.73769999993965
+    },
+    {
+      "line": 17024,
+      "type": "action",
+      "at": 1792898638665,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 628946.2663,
+      "sentAtMs": 628984.5158,
+      "plannedTarget": {
+        "x": 282,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.4651999999769032,
+      "plannedLatencyMs": 39.71470000001136
+    },
+    {
+      "line": 17066,
+      "type": "action",
+      "at": 1792898639412,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 629696.2663,
+      "sentAtMs": 629728.546,
+      "plannedTarget": {
+        "x": 283,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 283,
+        "y": 663
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.4736999999731779,
+      "plannedLatencyMs": 32.75339999992866
+    },
+    {
+      "line": 17104,
+      "type": "action",
+      "at": 1792898640153,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 630446.2663,
+      "sentAtMs": 630469.2275,
+      "plannedTarget": {
+        "x": 282,
+        "y": 663
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206704,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5076999999582767,
+      "plannedLatencyMs": 23.46889999997802
+    },
+    {
+      "line": 17140,
+      "type": "action",
+      "at": 1792898640906,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 631196.2663,
+      "sentAtMs": 631215.0394,
+      "plannedTarget": {
+        "x": 282,
+        "y": 664
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206507,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 282,
+        "y": 664
+      },
+      "direction": "Down",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5921999999554828,
+      "plannedLatencyMs": 19.36529999994673
+    },
+    {
+      "line": 17177,
+      "type": "action",
+      "at": 1792898641653,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 631946.2663,
+      "sentAtMs": 631962.6021,
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206507,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "direction": "DownRight",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.7097999999532476,
+      "plannedLatencyMs": 17.045599999953993
+    },
+    {
+      "line": 17216,
+      "type": "action",
+      "at": 1792898642403,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 632696.2663,
+      "sentAtMs": 632714.6319,
+      "plannedTarget": {
+        "x": 284,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206507,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 284,
+        "y": 665
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5495999999111518,
+      "plannedLatencyMs": 18.915199999930337
+    },
+    {
+      "line": 17259,
+      "type": "action",
+      "at": 1792898643149,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 633446.2663,
+      "sentAtMs": 633459.8316,
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206507,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.8164000000106171,
+      "plannedLatencyMs": 14.381700000027195
+    },
+    {
+      "line": 17298,
+      "type": "action",
+      "at": 1792898643891,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 634196.2663,
+      "sentAtMs": 634209.6559,
+      "plannedTarget": {
+        "x": 284,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206507,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 284,
+        "y": 665
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 18.969399999943562,
+      "plannedLatencyMs": 32.35899999993853
+    },
+    {
+      "line": 17347,
+      "type": "action",
+      "at": 1792898644648,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 634946.2663,
+      "sentAtMs": 634958.9867,
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206507,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.6748000000370666,
+      "plannedLatencyMs": 13.395200000028126
+    },
+    {
+      "line": 17389,
+      "type": "action",
+      "at": 1792898645395,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 635696.2663,
+      "sentAtMs": 635705.856,
+      "plannedTarget": {
+        "x": 284,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206715,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 284,
+        "y": 665
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.2794999999459833,
+      "plannedLatencyMs": 10.869199999957345
+    },
+    {
+      "line": 17425,
+      "type": "action",
+      "at": 1792898646149,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 636446.2663,
+      "sentAtMs": 636464.7455,
+      "plannedTarget": {
+        "x": 284,
+        "y": 666
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206715,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 284,
+        "y": 666
+      },
+      "direction": "Down",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.6377000000793487,
+      "plannedLatencyMs": 19.116900000022724
+    },
+    {
+      "line": 17459,
+      "type": "action",
+      "at": 1792898646896,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 637196.2663,
+      "sentAtMs": 637205.6029,
+      "plannedTarget": {
+        "x": 285,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206715,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 285,
+        "y": 665
+      },
+      "direction": "UpRight",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.891899999929592,
+      "plannedLatencyMs": 10.228499999968335
+    },
+    {
+      "line": 17500,
+      "type": "action",
+      "at": 1792898647641,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 637946.2663,
+      "sentAtMs": 637953.4577,
+      "plannedTarget": {
+        "x": 285,
+        "y": 666
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206715,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 285,
+        "y": 666
+      },
+      "direction": "Down",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.46399999991990626,
+      "plannedLatencyMs": 7.655399999930523
+    },
+    {
+      "line": 17535,
+      "type": "action",
+      "at": 1792898648392,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 638696.2663,
+      "sentAtMs": 638702.5934,
+      "plannedTarget": {
+        "x": 285,
+        "y": 665
+      },
+      "hunting": "Deer",
+      "chaseTargetId": 206715,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 285,
+        "y": 665
+      },
+      "direction": "Up",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.4303000000072643,
+      "plannedLatencyMs": 6.757400000002235
+    },
+    {
+      "line": 17578,
+      "type": "action",
+      "at": 1792898649140,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 639446.2663,
+      "sentAtMs": 639450.9202,
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.7152999999234453,
+      "plannedLatencyMs": 5.369199999957345
+    },
+    {
+      "line": 17660,
+      "type": "action",
+      "at": 1792898650663,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 640946.2663,
+      "sentAtMs": 640972.128,
+      "plannedTarget": {
+        "x": 282,
+        "y": 665
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 282,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5910000000149012,
+      "plannedLatencyMs": 26.45270000002347
+    },
+    {
+      "line": 17701,
+      "type": "action",
+      "at": 1792898651411,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 641696.2663,
+      "sentAtMs": 641719.6988,
+      "plannedTarget": {
+        "x": 280,
+        "y": 665
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 280,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.896999999997206,
+      "plannedLatencyMs": 24.32949999999255
+    },
+    {
+      "line": 17746,
+      "type": "action",
+      "at": 1792898652160,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 642446.2663,
+      "sentAtMs": 642470.1622,
+      "plannedTarget": {
+        "x": 278,
+        "y": 665
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 278,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5085999999428168,
+      "plannedLatencyMs": 24.404499999945983
+    },
+    {
+      "line": 17781,
+      "type": "action",
+      "at": 1792898652907,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 643196.2663,
+      "sentAtMs": 643217.9687,
+      "plannedTarget": {
+        "x": 276,
+        "y": 665
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 276,
+        "y": 665
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5286000000778586,
+      "plannedLatencyMs": 22.23100000002887
+    },
+    {
+      "line": 17827,
+      "type": "action",
+      "at": 1792898653655,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 643946.2663,
+      "sentAtMs": 643966.1721,
+      "plannedTarget": {
+        "x": 274,
+        "y": 667
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 274,
+        "y": 667
+      },
+      "direction": "DownLeft",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.7020999999949709,
+      "plannedLatencyMs": 20.607899999944493
+    },
+    {
+      "line": 17867,
+      "type": "action",
+      "at": 1792898654414,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 644696.2663,
+      "sentAtMs": 644722.4962,
+      "plannedTarget": {
+        "x": 272,
+        "y": 669
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 272,
+        "y": 669
+      },
+      "direction": "DownLeft",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5084999999962747,
+      "plannedLatencyMs": 26.738400000031106
+    },
+    {
+      "line": 17918,
+      "type": "action",
+      "at": 1792898655160,
+      "phase": "stage-10",
+      "actor": "L25081f05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 645446.2663,
+      "sentAtMs": 645470.903,
+      "plannedTarget": {
+        "x": 271,
+        "y": 670
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206645,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 261,
+        "y": 669
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 271,
+        "y": 670
+      },
+      "direction": "DownLeft",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.013399999937974,
+      "plannedLatencyMs": 25.650099999969825
+    }
+  ],
+  "deferrals": [
+    {
+      "line": 15313,
+      "type": "combatScoutAdvanced",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898607889,
+      "reason": "time-budget",
+      "homeIndex": 1,
+      "confirmedMoves": 4,
+      "elapsedMs": 20350
+    },
+    {
+      "line": 15449,
+      "type": "combatScoutAdvanced",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898610172,
+      "reason": "waypoint-reached",
+      "homeIndex": 2,
+      "confirmedMoves": 4,
+      "elapsedMs": 2283
+    },
+    {
+      "line": 15567,
+      "type": "combatScoutAdvanced",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898612409,
+      "reason": "waypoint-reached",
+      "homeIndex": 3,
+      "confirmedMoves": 2,
+      "elapsedMs": 783
+    },
+    {
+      "line": 15832,
+      "type": "combatScoutAdvanced",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898616918,
+      "reason": "waypoint-reached",
+      "homeIndex": 4,
+      "confirmedMoves": 6,
+      "elapsedMs": 3769
+    },
+    {
+      "line": 16677,
+      "type": "combatChaseDeferred",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898631905,
+      "targetId": 206513,
+      "mapFileName": "0",
+      "nonImprovingMoves": 4,
+      "elapsedMs": 2989,
+      "pursuitMs": 5269,
+      "confirmedMoves": 8,
+      "reason": "route-loop",
+      "ttlMs": 30000,
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "target": {
+        "x": 274,
+        "y": 662
+      },
+      "attacksSent": 0
+    },
+    {
+      "line": 17103,
+      "type": "combatChaseDeferred",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898640153,
+      "targetId": 206704,
+      "mapFileName": "0",
+      "nonImprovingMoves": 4,
+      "elapsedMs": 2989,
+      "pursuitMs": 7530,
+      "confirmedMoves": 11,
+      "reason": "route-loop",
+      "ttlMs": 30000,
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "target": {
+        "x": 282,
+        "y": 662
+      },
+      "attacksSent": 0
+    },
+    {
+      "line": 17346,
+      "type": "combatChaseDeferred",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898644648,
+      "targetId": 206507,
+      "mapFileName": "0",
+      "nonImprovingMoves": 4,
+      "elapsedMs": 2995,
+      "pursuitMs": 3772,
+      "confirmedMoves": 6,
+      "reason": "route-loop",
+      "ttlMs": 30000,
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "target": {
+        "x": 283,
+        "y": 666
+      },
+      "attacksSent": 0
+    },
+    {
+      "line": 17534,
+      "type": "combatChaseDeferred",
+      "actor": "L25081f05",
+      "phase": "stage-10",
+      "at": 1792898648392,
+      "targetId": 206715,
+      "mapFileName": "0",
+      "nonImprovingMoves": 4,
+      "elapsedMs": 2997,
+      "pursuitMs": 3026,
+      "confirmedMoves": 5,
+      "reason": "no-progress",
+      "ttlMs": 30000,
+      "actual": {
+        "x": 285,
+        "y": 665
+      },
+      "target": {
+        "x": 284,
+        "y": 665
+      },
+      "attacksSent": 0
+    }
+  ]
+}

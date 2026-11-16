@@ -15,7 +15,7 @@ use android_input::{
 use bevy::app::AppExit;
 use bevy::prelude::*;
 use gateway_bridge::{
-    clear_bounded_inbound_transaction, drain_bounded_inbound_into_models,
+    clear_bounded_inbound_transaction, drain_bounded_inbound_into_models, enqueue_game_shop_gift,
     enqueue_game_shop_purchase, enqueue_security_request, enqueue_storage_request,
     AndroidGatewayHostAdapter, AndroidGatewayHostWriteOutcome, AndroidGatewayHostWriteResult,
     AndroidGatewayInboundQueue, AndroidGatewayOutboundLease, AndroidGatewayOutboundQueue,
@@ -401,6 +401,22 @@ fn apply_queued_ui_actions(
                 g_index,
                 quantity,
                 price_type,
+            );
+            continue;
+        }
+        if let mir2_ui_core::action::UiAction::GameShopGift {
+            g_index,
+            quantity,
+            recipient_name,
+        } = action
+        {
+            let _ = enqueue_game_shop_gift(
+                &mut ui_state,
+                &mut gateway,
+                &mut inbound,
+                g_index,
+                quantity,
+                recipient_name,
             );
             continue;
         }

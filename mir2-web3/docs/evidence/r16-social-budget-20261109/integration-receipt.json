@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "scope": "Shared Native social budget integration; no server rules/save-schema/network authority change",
+  "createdAt": "2026-11-08T23:34:35.542Z",
+  "head": "9e76c17bc34e3bf49a8f015aa0e403870dd9e4b0",
+  "version": "bevy-0cd68510886134e0",
+  "nativeTestedPinsUnchanged": true,
+  "nativeTestedPins": 19,
+  "publication20FilesUnchanged": true,
+  "sourcePins": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1138291,
+      "sha256": "5fc2fe55f2c5131de3dc6e9956c1ca4a404afeeed31023dba377053d14f4720b"
+    },
+    {
+      "path": "apps/web/lib/social-operation-budget-host.ts",
+      "bytes": 11599,
+      "sha256": "0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977"
+    },
+    {
+      "path": "apps/web/scripts/lib/social-budget-test-runtime.mjs",
+      "bytes": 2694,
+      "sha256": "111dda2617bb4b429daf47a717ea081c3b2f7da2ebb5584829f1b5923a94d612"
+    },
+    {
+      "path": "apps/web/scripts/test-storage-page-gate.mjs",
+      "bytes": 210568,
+      "sha256": "508cbc0b186f9d4a407406fd1a0b9a941d6f555068db9c9e97e6c45ec8d74df1"
+    },
+    {
+      "path": "apps/web/scripts/test-social-operation-budget-host.mjs",
+      "bytes": 22373,
+      "sha256": "4d11a714872c7b7ca6e81a43a4e031bde8d1354fd33b734e9e294340d1efc70a"
+    },
+    {
+      "path": "apps/web/scripts/fixtures/social-budget-command-mapping.json",
+      "bytes": 21339,
+      "sha256": "53bf006916c8e5dc78070a2b383c1ec0061e49c9a0e16afcc1e81d37e05e7693"
+    },
+    {
+      "path": "apps/web/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba"
+    },
+    {
+      "path": "apps/web/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "bytes": 31429183,
+      "sha256": "6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e"
+    },
+    {
+      "path": "apps/web/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "bytes": 117805,
+      "sha256": "6e105aa2fce2f29ff2c645766f4fc91fd992bcf42fe1199d2be025214b225f9b"
+    },
+    {
+      "path": "apps/web/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "bytes": 16601428,
+      "sha256": "5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5"
+    },
+    {
+      "path": "apps/web/public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "bytes": 139721,
+      "sha256": "916012e00e0a01130c2f1598cebfb0f7c8f233b7bd6986772b9c87bc620f47d1"
+    },
+    {
+      "path": "apps/web/public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "bytes": 32357557,
+      "sha256": "9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0"
+    }
+  ],
+  "tests": {
+    "webSelected": {
+      "passed": 569,
+      "failed": 0,
+      "log": "web-final-r1.log",
+      "stage5InternalGroups": 507
+    },
+    "page": {
+      "passed": 116,
+      "log": "page-budget-integration-r1.log"
+    },
+    "transportHost": {
+      "passed": 17,
+      "log": "social-budget-host-tests-r2.log"
+    },
+    "typescript": {
+      "exitCode": 0,
+      "log": "typescript-r5.log"
+    },
+    "native": {
+      "passed": 108,
+      "log": "native-social-final.log"
+    },
+    "runtimeHost": {
+      "passed": 9,
+      "log": "runtime-host-final.log"
+    },
+    "originalProjection": {
+      "passed": 5,
+      "log": "platform-trade-projection-tests-r1.log"
+    },
+    "countsOverlap": true
+  },
+  "wasm": {
+    "profiles": 3,
+    "realBridgeCalls": 1014,
+    "perProfileFixtureCases": 43,
+    "painterOrGameplayFromPureAbi": false,
+    "proof": "wasm/proof.json"
+  },
+  "ordinaryUiPending": true,
+  "publiclyDeployed": false,
+  "goalComplete": false
+}

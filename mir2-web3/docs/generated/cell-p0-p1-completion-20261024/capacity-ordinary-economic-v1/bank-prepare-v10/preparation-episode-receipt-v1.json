@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v10",
+  "mode": "continued-actual-v9-ordinary-bank-preparation-only",
+  "actualV9PartialBankContinuation": true,
+  "sourceW9NoPathFailureRetained": true,
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-bank-plan-pending-v1.json",
+    "bytes": 16577,
+    "sha256": "76dd4c56b196d6aa3d85ea9f12341d6a5329f7de3eaf4d4325a19ecbc2a7f6e0"
+  },
+  "sourceBankCopyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\source-bank-copy-receipt-v1.json",
+    "bytes": 8702,
+    "sha256": "0430b635eeb00b4f191f7d102da39363b21e9de320b1b60f9897ad3c1782f7d4"
+  },
+  "sourceOriginalFailedVerdictRetained": true,
+  "sourcePreparedEligibilityInherited": false,
+  "sourceFirst4InventoryReuse": true,
+  "sourceFirst4InventoryReuseEvidence": {
+    "passed": true,
+    "actors": [
+      {
+        "name": "L370e2a00",
+        "characterIndex": 1,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 720,
+        "afterSequence": 723,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a01",
+        "characterIndex": 2,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 685,
+        "afterSequence": 688,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a02",
+        "characterIndex": 3,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 677,
+        "afterSequence": 680,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a03",
+        "characterIndex": 4,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 684,
+        "afterSequence": 687,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      }
+    ],
+    "duplicateOrdinaryPreparationRows": 0,
+    "scope": "Actual raw ordinaryPreparation result commandCounts must exist and sum to commands; absent members mean unsent types only within that complete module-owned count object. No missing summary commandCounts is treated as zero. Fresh ordinary-login before/after stock >=12; no hunting, harvest, pickup, sale or purchase. No inherited readiness."
+  },
+  "seederInvoked": false,
+  "loginNotBeforeOverridden": false,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "maxPrepared": 100,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\frozen-source-v1.json",
+    "bytes": 97599,
+    "sha256": "8bf6cea20d2060fdca404297a00d7862b38247fdc65b35af8e0f50d9e0036a4e"
+  },
+  "driverSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "executionSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\reports\\1793059295383-3bd423ad.preparation-report.json",
+    "bytes": 27965,
+    "sha256": "86a8672faedd7c7d4b16406bd18d2251b7636f5a2c8b703e0dc99d8898471863"
+  },
+  "rawOriginalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\reports\\1793059295383-3bd423ad.preparation.jsonl",
+    "bytes": 2291588,
+    "sha256": "ead6e69e4fc02a1459e1897caccc8188efa4b4a77ca528e987855bf137434b44"
+  },
+  "rawOriginalVerdict": {
+    "attackResults": "v2",
+    "ok": false,
+    "error": "safe Deer funding holds 2/3 Venison after 2 hunts and 8 attempts",
+    "preparedCount": 7,
+    "testExecution": false,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "preparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\prepared-index-v1.json",
+    "bytes": 2419,
+    "sha256": "d4af274a99077f85086599b8ea50ca7d1b0d85ecf9c83cf252342939e1824d51"
+  },
+  "preparedIndexValid": false,
+  "progressCheckpoints": [],
+  "progressIsColdCheckpoint": false,
+  "productionPreparationEvidence": false,
+  "preparationComplete": false,
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\cleanup-v1.json",
+    "bytes": 1037,
+    "sha256": "5f39b7a144573461c5960fcdcd4b0bd9373373c616cd19f21b35c90fb31a0920"
+  },
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "gameplayEngineActivated": false,
+  "nativeResumeExercisePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

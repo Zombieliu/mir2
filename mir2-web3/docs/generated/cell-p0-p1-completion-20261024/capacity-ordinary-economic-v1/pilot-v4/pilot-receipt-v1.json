@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-preparation-pilot-v4",
+  "mode": "ordinary-economic-preparation-functional-pilot",
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\frozen-source-v1.json",
+    "bytes": 79651,
+    "sha256": "ee7ab96c10432d06e72198f756a42f9bd9181cb510db707c65ca9493ebb9d8bf"
+  },
+  "driverSourceCommit": "f1d4a00d5c73f6580e4e72b02d05b554a729aae8",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\reports\\1793042214886-d262ad8a.report.json",
+    "bytes": 14086,
+    "sha256": "f76d920527b27c81a72ee7e84b16628aede40699cb854c2e0cd48a507a22d218"
+  },
+  "rawOriginalVerdict": {
+    "ok": false,
+    "error": "ordinary supplies: hostile near staging",
+    "safetyStopped": false,
+    "highestPassedStage": null
+  },
+  "ordinaryPreparationEvidence": {
+    "originalSamples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\reports\\1793042214886-d262ad8a.samples.jsonl",
+      "bytes": 733845,
+      "sha256": "7af4427d85eb1d72cd8176edacec4f7e1e54207b8c382a6a4e1f33ed7260c564"
+    },
+    "preparationRows": 1,
+    "preparedActors": 0,
+    "failedPreparationCount": 1,
+    "closedLoops": 0,
+    "cohortActivations": []
+  },
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\cleanup-v1.json",
+    "bytes": 1041,
+    "sha256": "ba898bc069a8dad0ef35d4380a5f129d979b1fd1adb2fa3cda2a0bc3c25304dc"
+  },
+  "functionalPilotDurationOnly": true,
+  "sustainableTwoHourSupplyProven": false,
+  "formalFiveMinuteStagePerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

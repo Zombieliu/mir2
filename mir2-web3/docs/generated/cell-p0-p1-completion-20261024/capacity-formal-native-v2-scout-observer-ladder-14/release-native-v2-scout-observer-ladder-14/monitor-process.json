@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "pid": 57860,
+  "runnerPid": 71652,
+  "exe": "C:\\Program Files\\nodejs\\node.exe",
+  "gatewayPid": 66160,
+  "control": "Private parent-child IPC stop-owned-monitor; no network control listener"
+}

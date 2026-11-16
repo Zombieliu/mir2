@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "sourceGeneration": "Source68 generation03",
+  "kind": "actual original strict Next build",
+  "capturedAt": "2026-10-11T13:31:05.421Z",
+  "execution": {
+    "owner": "Root",
+    "builderPid": 65356,
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 60838
+  },
+  "configuration": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved03/next-build01-config.json",
+    "bytes": 5656,
+    "sha256": "cb063fd988ede9641bf4e1a6b3ccd73b683d3f7c73d4cbbeb9f8a4890930768e"
+  },
+  "inputReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved03/next-source-review01.json",
+    "bytes": 7211,
+    "sha256": "1ce84a59096146b481f2ff5a2ef334d2429c9ff813a1b4a75531d08af781d9a3"
+  },
+  "nodeRegression": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-node-actual03.json",
+    "bytes": 2781,
+    "sha256": "bb4f373299b54fa03f5e0c9ee2b6a9f8b1c9b4a60d574c1dbea291a52b6995dd"
+  },
+  "logs": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/next-build01/outer.json",
+      "bytes": 514,
+      "sha256": "4335458591efafb2f7597cc7cd9c70cf8edb75029a653b9d5473d1bfab307b74"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/next-build01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/next-build01/stdout.log",
+      "bytes": 2026,
+      "sha256": "c61279bdc62a27322ca3fb47e4cb8cf74a55452e6d6724f57ae12fa7959040be"
+    }
+  ],
+  "validation": {
+    "compiled": true,
+    "strictTypeScriptComplete": true,
+    "typeScriptSeconds": 20,
+    "staticPagesGenerated": 13,
+    "stderrBytes": 0,
+    "mainTsconfigUnchanged": true,
+    "originalCallerPreAndPost36369InputsMatched": true
+  },
+  "scope": {
+    "thinBuildAccepted": false,
+    "runtimeStarted": false,
+    "storageTooltipUiAccepted": false,
+    "candidateAccepted": false,
+    "humanFrontendAccepted": false,
+    "goalComplete": false
+  }
+}

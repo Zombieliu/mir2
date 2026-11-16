@@ -1,0 +1,19 @@
+   Compiling mir2-windows-updater v1.0.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\windows-updater)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.94s
+     Running unittests src\lib.rs (mir2-web3\apps\game-client\windows-updater\target\debug\deps\mir2_windows_updater-45f04c9c198cc4c2.exe)
+
+running 11 tests
+test ui::tests::unknown_locale_uses_english_and_region_variants_are_normalized ... ok
+test ui::transfer::tests::repeated_zero_byte_polls_preserve_the_waiting_deadline ... ok
+test ui::transfer::tests::completed_bytes_and_slow_zero_byte_samples_do_not_divide_by_zero ... ok
+test ui::transfer::tests::reset_stall_and_resumed_counters_never_reuse_a_previous_download_estimate ... ok
+test ui::tests::every_supported_locale_has_every_native_update_stage ... ok
+test ui::windows::native_tests::close_releases_a_waiting_confirmation_without_authorizing_download ... ok
+test ui::windows::native_tests::update_and_play_require_distinct_user_actions_and_busy_clicks_cannot_authorize_them ... ok
+test ui::windows::native_tests::launch_commit_closes_the_window_without_becoming_user_cancellation ... ok
+test ui::windows::native_tests::native_window_updates_and_distinguishes_programmatic_close_from_cancel ... ok
+test ui::windows::native_tests::fallback_retry_is_distinct_from_launch_authorization ... ok
+test ui::windows::native_tests::nine_locale_launcher_copy_fits_at_100_150_and_200_percent_layouts ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 120 filtered out; finished in 0.34s
+

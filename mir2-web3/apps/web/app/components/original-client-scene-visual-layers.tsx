@@ -1,23 +1,29 @@
 "use client";
 
-import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import type { R16EntrySpriteImages } from "../../lib/r16-entry-scene";
+import { crystalEntityDepth } from "../../lib/crystal-world-depth";
+
+import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
 import { originalAssetPath } from "../../lib/asset-url";
 import type { EffectAnimation, EffectAssets, EffectFrameMeta } from "../../lib/crystal-magic-effects";
 import {
   loadEffectAssets,
+  resolveMapEffect,
   resolveSpellImpactEffect,
   resolveSpellProjectileEffect,
   resolveSpellReturnEffect,
   spellNameForNumber,
 } from "../../lib/crystal-magic-effects";
+import { FISHING_BITE_NOTICE, FISHING_WATER_EFFECTS } from "../../lib/world-fishing-feedback";
 import {
   collectResolvedSceneEffectFrames,
   CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
   crystalSceneEffectLayerOffset,
   sceneEffectAnimationAssetUrls,
 } from "../../lib/scene-effect-runtime";
+import { r16ProjectileFrameInterval, r16TargetedSpell } from "../../lib/r16-targeted-projectiles";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import { localizeCrystalEntityName } from "../../lib/crystal-content-localization";
@@ -31,6 +37,7 @@ import type {
   CrystalEntityAnimationPose,
   DisplayEntity,
   DisplayProjectile,
+  DisplaySceneEffect,
   DisplayWorld,
   EntityKind,
   EntityMotionSnapshot,
@@ -75,6 +82,7 @@ import {
   type ViewportOffset,
 } from "./original-client-scene-rendering";
 import { OriginalClientWeatherLayer } from "./original-client-weather-layer";
+import { DecodedSelfSprite, type ResidentActorImage, type ResidentActorImages } from "./original-client-self-sprite";
 
 type ViewportGroundDrop = DisplayWorld["groundDrops"][number] & {
   dx: number;
@@ -89,14 +97,22 @@ type ViewportProjectile = DisplayProjectile & {
   progress: number;
 };
 
+// R16 draws these transient effects after the complete world and before item labels.
+const R16_TARGETED_EFFECT_DEPTH = 3_100_000;
+
+function isTransientSceneEffect(source: DisplaySceneEffect["source"]) {
+  return source === "spell" || source === "attackOverlay" || source === "fishingWater" || source === "fishingBite";
+}
+
 function projectilePhaseFrame(
   animation: EffectAnimation | null,
   startedAt: number,
   now: number,
   loop: boolean,
+  interval?: number,
 ): EffectFrameMeta | null {
   if (!animation || now < startedAt || animation.frames.length === 0) return null;
-  const rawIndex = Math.floor((now - startedAt) / Math.max(animation.interval, 1));
+  const rawIndex = Math.floor((now - startedAt) / Math.max(interval ?? animation.interval, 1));
   const index = loop ? rawIndex % animation.frames.length : rawIndex;
   return index >= 0 && index < animation.frames.length ? animation.frames[index] ?? null : null;
 }
@@ -120,9 +136,13 @@ type ViewportMapLight = {
 };
 
 type EntitySpriteLayersProps = {
+  packedActors: R16EntrySpriteImages | null;
   useBevyEntityRenderer: boolean;
+  effectsEnabled: boolean;
   sprite: ViewportEntitySprite | null;
   objectId: number | string;
+  residentImages?: ResidentActorImages;
+  onResidentError?: (key: string, url: string) => void;
 };
 
 // The body/hair/weapon <img> layers for one actor. Memoised so they only re-render when their
@@ -133,91 +153,26 @@ type EntitySpriteLayersProps = {
 // (a single static frame, redrawn 60×/sec for nothing) visibly flicker.
 const EntitySpriteLayers = memo(function EntitySpriteLayers({
   useBevyEntityRenderer,
+  effectsEnabled,
   sprite,
   objectId,
+  packedActors, residentImages, onResidentError,
 }: EntitySpriteLayersProps) {
   return (
     <>
-      {!useBevyEntityRenderer && sprite?.mount ? (
-        <img
-          className="entity-sprite-layer mount"
-          src={originalAssetPath(sprite.mount.path)}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={originalAssetPath(sprite.mount.path)}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{
-            left: sprite.mount.x,
-            top: sprite.mount.y,
-            width: sprite.mount.width,
-            height: sprite.mount.height,
-          }}
-        />
-      ) : null}
-      {!useBevyEntityRenderer &&
-        sprite?.rearWeapons.map((weapon, index) => (
-          <img
-            key={`rear-${objectId}-${index}-${weapon.path}`}
-            className="entity-sprite-layer weapon rear"
-            src={originalAssetPath(weapon.path)}
-            alt=""
-            draggable={false}
-            data-mir2-original-src={originalAssetPath(weapon.path)}
-            onError={handleSceneAssetImageError}
-            onLoad={handleSceneAssetImageLoad}
-            style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
-          />
-        ))}
-      {!useBevyEntityRenderer && sprite?.body ? (
-        <img
-          className="entity-sprite-layer body"
-          src={originalAssetPath(sprite.body.path)}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={originalAssetPath(sprite.body.path)}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{
-            left: sprite.body.x,
-            top: sprite.body.y,
-            width: sprite.body.width,
-            height: sprite.body.height,
-          }}
-        />
-      ) : null}
-      {!useBevyEntityRenderer && sprite?.hair ? (
-        <img
-          className="entity-sprite-layer hair"
-          src={originalAssetPath(sprite.hair.path)}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={originalAssetPath(sprite.hair.path)}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{
-            left: sprite.hair.x,
-            top: sprite.hair.y,
-            width: sprite.hair.width,
-            height: sprite.hair.height,
-          }}
-        />
-      ) : null}
-      {!useBevyEntityRenderer &&
-        sprite?.frontWeapons.map((weapon, index) => (
-          <img
-            key={`front-${objectId}-${index}-${weapon.path}`}
-            className="entity-sprite-layer weapon front"
-            src={originalAssetPath(weapon.path)}
-            alt=""
-            draggable={false}
-            data-mir2-original-src={originalAssetPath(weapon.path)}
-            onError={handleSceneAssetImageError}
-            onLoad={handleSceneAssetImageLoad}
-            style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
-          />
-        ))}
-      {sprite?.effect ? (
+      {!useBevyEntityRenderer && sprite?.mount ? <ActorSpriteImage role="mount" layer={sprite.mount}
+        className="entity-sprite-layer mount" residentImages={residentImages} onResidentError={onResidentError} /> : null}
+      {!useBevyEntityRenderer && sprite?.rearWeapons.map((weapon, index) => <ActorSpriteImage
+        key={`rear-${objectId}-${index}-${weapon.path}`} role={"rear:" + index} layer={weapon}
+        className="entity-sprite-layer weapon rear" residentImages={residentImages} onResidentError={onResidentError} />)}
+      {!useBevyEntityRenderer && sprite?.body ? <ActorSpriteImage role="body" layer={sprite.body}
+        className="entity-sprite-layer body" packedActors={packedActors} residentImages={residentImages} onResidentError={onResidentError} /> : null}
+      {!useBevyEntityRenderer && sprite?.hair ? <ActorSpriteImage role="hair" layer={sprite.hair}
+        className="entity-sprite-layer hair" packedActors={packedActors} residentImages={residentImages} onResidentError={onResidentError} /> : null}
+      {!useBevyEntityRenderer && sprite?.frontWeapons.map((weapon, index) => <ActorSpriteImage
+        key={`front-${objectId}-${index}-${weapon.path}`} role={"front:" + index} layer={weapon}
+        className="entity-sprite-layer weapon front" residentImages={residentImages} onResidentError={onResidentError} />)}
+      {effectsEnabled && sprite?.effect ? (
         <>
           <img
             className="entity-sprite-layer action-effect"
@@ -265,6 +220,50 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
     </>
   );
 });
+
+function ActorSpriteImage({ role, layer, className, packedActors, residentImages, onResidentError }: {
+  role: string; layer: NonNullable<ViewportEntitySprite["body"]>; className: string;
+  packedActors?: R16EntrySpriteImages | null; residentImages?: ResidentActorImages;
+  onResidentError?: (key: string, url: string) => void;
+}) {
+  const resident = residentImages?.get(role);
+  if (resident) return <ResidentActorSpriteImage layer={layer} className={className} resident={resident} onError={onResidentError} />;
+  const source = packedActors?.[layer.path] ?? originalAssetPath(layer.path);
+  return <img className={className} src={source} alt="" draggable={false}
+    data-mir2-original-src={originalAssetPath(layer.path)}
+    data-mir2-packed-asset={source.startsWith("data:") ? "true" : undefined}
+    onError={handleSceneAssetImageError}
+    onLoad={handleSceneAssetImageLoad}
+    style={{ left: layer.x, top: layer.y, width: layer.width, height: layer.height }} />;
+}
+
+function ResidentActorSpriteImage({ layer, className, resident, onError }: {
+  layer: NonNullable<ViewportEntitySprite["body"]>; className: string;
+  resident: ResidentActorImage;
+  onError?: (key: string, url: string) => void;
+}) {
+  const slot = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const container = slot.current, image = resident.image;
+    if (!container || !image.complete || image.naturalWidth < 1) return;
+    // Move the exact decoded element into this React-owned slot. Assigning its
+    // URL to a different <img> can briefly clear the body's decoded/paint state.
+    image.className = className; image.alt = ""; image.draggable = false;
+    image.dataset.mir2OriginalSrc = originalAssetPath(layer.path);
+    image.dataset.mir2ActorResident = "true";
+    if (resident.url.startsWith("data:")) image.dataset.mir2PackedAsset = "true";
+    else delete image.dataset.mir2PackedAsset;
+    Object.assign(image.style, { left: layer.x + "px", top: layer.y + "px", width: layer.width + "px", height: layer.height + "px" });
+    const failed = () => onError?.(resident.key, resident.url);
+    image.addEventListener("error", failed);
+    container.replaceChildren(image);
+    // The native load occurred before attachment. Wake the existing body gate;
+    // it still checks this actual element's complete/naturalWidth/visibility.
+    image.dispatchEvent(new Event("load"));
+    return () => { image.removeEventListener("error", failed); if (image.parentNode === container) image.remove(); };
+  }, [resident.image, resident.key, resident.url, layer.path, layer.x, layer.y, layer.width, layer.height, className, onError]);
+  return <span ref={slot} style={{ display: "contents" }} />;
+}
 
 // --- Procedural magic / map VFX fallback ----------------------------------
 // The real effect atlases (lib/crystal-magic-effects) are PREFERRED: loadEffectAssets fetches the
@@ -433,7 +432,7 @@ function FallbackVfxNode({
     return null;
   }
   const palette = paletteForElement(effect.element);
-  const zIndex = viewportDepthForCell(effect.worldX, effect.worldY, viewportDepthPlayer, 90);
+  const zIndex = viewportDepthForCell(effect.worldX, effect.worldY, viewportDepthPlayer, 10);
 
   if (effect.kind === "streak") {
     // Coloured trail along the projectile path (origin -> target), drawn as a thin rotated bar.
@@ -503,12 +502,17 @@ function FallbackVfxNode({
 
 function OriginalClientSceneVisualLayersInner({
   screen,
+  assetReleaseId = null,
   t,
   world,
+  fishingEffects,
+  warmFishingEffects,
   player,
   selectedEntity,
   viewportGroundDrops,
   viewportMapSprites,
+  packedObjects,
+  packedActors,
   viewportEntitySprites,
   viewportProjectiles,
   viewportDepthPlayer,
@@ -520,18 +524,25 @@ function OriginalClientSceneVisualLayersInner({
   registerEntityEl,
   sceneSpriteFrameIndex,
   useBevyEntityRenderer,
+  nameView = true, dropView = true, effectsEnabled = true,
+  hoveredObjectId = null, questTargetObjectIds,
   entityKindClassName,
   onPickGroundDrop,
   onActivateEntity,
   viewportLayout,
 }: {
   screen: ClientScreen;
+  assetReleaseId?: string | null;
   t: TranslateFn;
   world: DisplayWorld;
+  fishingEffects: readonly DisplaySceneEffect[];
+  warmFishingEffects: boolean;
   player: DisplayEntity | null;
   selectedEntity: DisplayEntity | null;
   viewportGroundDrops: ViewportGroundDrop[];
   viewportMapSprites: ViewportMapSprites;
+  packedObjects: R16EntrySpriteImages | null;
+  packedActors: R16EntrySpriteImages | null;
   viewportEntitySprites: ViewportEntitySpriteEntry[];
   viewportProjectiles: ViewportProjectile[];
   viewportDepthPlayer: Pick<DisplayEntity, "x" | "y">;
@@ -543,6 +554,10 @@ function OriginalClientSceneVisualLayersInner({
   registerEntityEl: (key: string, objectId: string) => (el: HTMLElement | null) => void;
   sceneSpriteFrameIndex: number;
   useBevyEntityRenderer: boolean;
+  nameView?: boolean; dropView?: boolean; hpView?: boolean; effectsEnabled?: boolean;
+  /** Current world hover and Native tracker targets; selected entity is not hover authority. */
+  hoveredObjectId?: string | null;
+  questTargetObjectIds?: ReadonlySet<string>;
   entityKindClassName: (kind: EntityKind) => string;
   onPickGroundDrop: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
@@ -563,15 +578,22 @@ function OriginalClientSceneVisualLayersInner({
   // visibly distinct instead of inert. collectViewportFallbackVfx returns [] on idle frames, so
   // this costs nothing when nothing is casting and no projectiles are live.
   const effectAssets = useEffectAssets(screen === "game");
+  useEffect(() => {
+    if (!effectAssets || !warmFishingEffects || !effectsEnabled) return;
+    for (const name of [...FISHING_WATER_EFFECTS.ripple, ...FISHING_WATER_EFFECTS.bite, FISHING_BITE_NOTICE]) {
+      const animation = resolveMapEffect(effectAssets, name);
+      if (animation) for (const url of sceneEffectAnimationAssetUrls(animation)) void decodeSceneEffectFrame(url);
+    }
+  }, [effectAssets, effectsEnabled, warmFishingEffects]);
   const resolvedEffectFrames = collectResolvedSceneEffectFrames(
     effectAssets,
-    world.effects,
+    fishingEffects.length ? [...world.effects, ...fishingEffects] : world.effects,
     motionNow,
   );
   const persistentEffectAssetUrls = Array.from(
     new Set(
       resolvedEffectFrames.flatMap(({ effect, animation }) =>
-        effect.source === "spell" || effect.source === "attackOverlay"
+        isTransientSceneEffect(effect.source)
           ? []
           : sceneEffectAnimationAssetUrls(animation),
       ),
@@ -604,9 +626,15 @@ function OriginalClientSceneVisualLayersInner({
   const displayResolvedEffectFrames = persistentEffectsReady
     ? resolvedEffectFrames
     : resolvedEffectFrames.filter(
-        ({ effect }) => effect.source === "spell" || effect.source === "attackOverlay",
+        ({ effect }) => isTransientSceneEffect(effect.source),
       );
   const spellByCaster = new Map<string, string>();
+  const r16CastStarts = new Map<string, number>();
+  for (const effect of world.effects) {
+    if (effect.source === "spell" && effect.objectId && r16TargetedSpell(effect.spellOrEffect)) {
+      r16CastStarts.set(effect.objectId, effect.startedAt);
+    }
+  }
   for (const resolved of resolvedEffectFrames) {
     if (resolved.effect.source === "spell" && resolved.effect.objectId) {
       spellByCaster.set(resolved.effect.objectId, resolved.animation.name);
@@ -641,9 +669,11 @@ function OriginalClientSceneVisualLayersInner({
     for (const projectile of viewportProjectiles) {
       const spell = spellByCaster.get(projectile.key);
       if (!spell) continue;
+      const targeted = projectile.r16Targeted;
+      const direction = targeted?.phase === "projectile" ? targeted.direction : 0;
       const phases = {
         spell,
-        projectile: resolveSpellProjectileEffect(effectAssets, spell),
+        projectile: resolveSpellProjectileEffect(effectAssets, spell, direction),
         impact: resolveSpellImpactEffect(effectAssets, spell),
         returnEffect: resolveSpellReturnEffect(effectAssets, spell),
       };
@@ -657,16 +687,19 @@ function OriginalClientSceneVisualLayersInner({
   const [failedDropIcons, setFailedDropIcons] = useState<ReadonlySet<number>>(() => new Set());
   const fallbackVfx = collectViewportFallbackVfx(
     {
-      entities: viewportEntitySprites.map(({ entity }) => ({
-        objectId: entity.objectId,
-        x: entity.x,
-        y: entity.y,
-        dx: entity.dx,
-        dy: entity.dy,
-        attackAnimation: entity.attackAnimation,
-        attackStartedAt: entity.attackStartedAt,
-      })),
-      projectiles: viewportProjectiles,
+      entities: viewportEntitySprites
+        .filter(({ entity }) => entity.attackStartedAt === undefined ||
+          r16CastStarts.get(entity.objectId) !== entity.attackStartedAt)
+        .map(({ entity }) => ({
+          objectId: entity.objectId,
+          x: entity.x,
+          y: entity.y,
+          dx: entity.dx,
+          dy: entity.dy,
+          attackAnimation: entity.attackAnimation,
+          attackStartedAt: entity.attackStartedAt,
+        })),
+      projectiles: viewportProjectiles.filter((projectile) => !projectile.r16Targeted),
     },
     {
       now: motionNow,
@@ -734,7 +767,7 @@ function OriginalClientSceneVisualLayersInner({
               style={{
                 left: `${VIEWPORT_TILE_CENTER_X + drop.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x + dropStackOffsetX}px`,
                 top: `${VIEWPORT_TILE_CENTER_Y + drop.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y - 12 + dropStackOffsetY}px`,
-                zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 16),
+                zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 1),
               }}
               onClick={() => onPickGroundDrop(drop.objectId)}
               data-ui-interactive="true"
@@ -759,7 +792,7 @@ function OriginalClientSceneVisualLayersInner({
               ) : (
                 <span className="drop-dot" />
               )}
-              <span className="drop-label" style={{ color: argbToCssColor(drop.nameColourArgb) }}>
+              <span className="drop-label" style={{ color: argbToCssColor(drop.nameColourArgb), visibility: dropView ? "visible" : "hidden" }}>
                 {drop.quantity > 1 ? `${drop.name} x${drop.quantity}` : drop.name}
               </span>
             </button>
@@ -774,13 +807,15 @@ function OriginalClientSceneVisualLayersInner({
         {viewportMapSprites.objects.map((sprite) => {
           const blendMode = resolvedMapSpriteBlendMode(sprite);
           const renderPath = mapSpriteRenderPath(sprite.path);
+          const packedPath = packedObjects?.[renderPath];
           // Tall additive beams need a brighter curve than compact torch glows.
           const isBlendColumn = Boolean(blendMode && sprite.width <= 64 && sprite.height >= 180);
           return (
             <img
-              key={sprite.key}
+              key={packedPath ? sprite.key + ":packed" : sprite.key}
               className="scene-map-object-sprite"
-              src={renderPath}
+              src={packedPath ?? renderPath}
+              data-mir2-packed-asset={packedPath ? "true" : undefined}
               alt=""
               draggable={false}
               data-map-sprite-path={sprite.path}
@@ -809,6 +844,9 @@ function OriginalClientSceneVisualLayersInner({
         })}
         {viewportEntitySprites.map(({ entity, sprite }) => {
           const isPlayer = player?.objectId === entity.objectId;
+          const entityDepth = crystalEntityDepth(
+            entity, viewportDepthPlayer, entityMotionSnapshots[entity.objectId], motionNow,
+          );
           const isInteractiveEntity = !isPlayer;
           // In the imperative path the sub-tile glide is written by the motion driver
           // (display Hz) onto this stack's transform; render at the cell base here.
@@ -821,19 +859,6 @@ function OriginalClientSceneVisualLayersInner({
           const hitBounds = entitySpriteHitBounds(sprite);
           const hitWidth = hitBounds.right - hitBounds.left;
           const hitHeight = hitBounds.bottom - hitBounds.top;
-          const handleEntityPointerActivate = (event: MouseEvent<HTMLElement>) => {
-            if (event.button !== 0 && event.button !== 2) {
-              return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            onActivateEntity(entity.objectId);
-          };
-          const handleEntityContextActivate = (event: MouseEvent<HTMLElement>) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onActivateEntity(entity.objectId);
-          };
           return (
             <div
               key={`sprite-${entity.objectId}`}
@@ -842,12 +867,10 @@ function OriginalClientSceneVisualLayersInner({
               style={{
                 left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
                 top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y}px`,
-                zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64),
+                zIndex: entityDepth.sortZ + 5,
               }}
               data-ui-interactive={isInteractiveEntity ? "true" : "false"}
               data-object-id={entity.objectId}
-              onMouseDown={isInteractiveEntity ? handleEntityPointerActivate : undefined}
-              onContextMenu={isInteractiveEntity ? handleEntityContextActivate : undefined}
             >
               {isInteractiveEntity ? (
                 <button
@@ -860,23 +883,32 @@ function OriginalClientSceneVisualLayersInner({
                     height: `${hitHeight}px`,
                   }}
                   aria-label={label}
-                  onMouseDown={handleEntityPointerActivate}
-                  onContextMenu={handleEntityContextActivate}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
                   }}
                 />
               ) : null}
-              <EntitySpriteLayers
-                useBevyEntityRenderer={useBevyEntityRenderer}
-                sprite={sprite}
-                objectId={entity.objectId}
-              />
+              {isPlayer && screen === "game" && !useBevyEntityRenderer ? (
+                <DecodedSelfSprite key={JSON.stringify([world.mapFileName, entity.objectId, entity.genderKey, entity.classKey,
+                  entity.sprite?.bodyLibrary, entity.sprite?.hairLibrary, entity.sprite?.weaponLibrary,
+                  entity.sprite?.weaponLibrarySecondary, entity.sprite?.mountLibrary,
+                  entity.sprite?.altBodyLibrary, entity.sprite?.altHairLibrary, entity.sprite?.altWeaponLibrary,
+                  entity.sprite?.altWeaponLibrarySecondary, entity.sprite?.frameBaseOffset, entity.sprite?.weaponFrameOffset,
+                  entity.sprite?.altFrameBaseOffset, entity.sprite?.altWeaponFrameOffset, entity.sprite?.mountFrameOffset])}
+                  sprite={sprite} packedActors={packedActors} assetReleaseId={assetReleaseId}>
+                  {(displayed, images, failed) => <EntitySpriteLayers useBevyEntityRenderer={false}
+                    effectsEnabled={effectsEnabled} packedActors={packedActors} sprite={displayed}
+                    objectId={entity.objectId} residentImages={images} onResidentError={failed} />}
+                </DecodedSelfSprite>
+              ) : <EntitySpriteLayers useBevyEntityRenderer={useBevyEntityRenderer} effectsEnabled={effectsEnabled}
+                packedActors={packedActors} sprite={sprite} objectId={entity.objectId} />}
             </div>
           );
         })}
-        {viewportProjectiles.map((projectile) => {
+        {(effectsEnabled ? viewportProjectiles : []).map((projectile) => {
+          const targeted = projectile.r16Targeted;
+          if (targeted?.phase === "pending") return null;
           const travelEndsAt = projectile.travelEndsAt ?? projectile.expiresAt;
           const exact = exactProjectileEffects.get(projectile.key);
           const exactSpell = exact?.spell ?? "";
@@ -887,8 +919,14 @@ function OriginalClientSceneVisualLayersInner({
                 {
                   phase: "projectile",
                   animation: exact.projectile,
-                  frame: motionNow < travelEndsAt
-                    ? projectilePhaseFrame(exact.projectile, projectile.startedAt, motionNow, true)
+                  frame: (!targeted || targeted.phase === "projectile") && motionNow < travelEndsAt
+                    ? projectilePhaseFrame(
+                        exact.projectile,
+                        projectile.startedAt,
+                        motionNow,
+                        true,
+                        targeted ? r16ProjectileFrameInterval(travelEndsAt - projectile.startedAt) : undefined,
+                      )
                     : null,
                   dx: projectile.fromDx + (projectile.toDx - projectile.fromDx) * projectile.progress,
                   dy: projectile.fromDy + (projectile.toDy - projectile.fromDy) * projectile.progress,
@@ -898,7 +936,9 @@ function OriginalClientSceneVisualLayersInner({
                 {
                   phase: "impact",
                   animation: exact.impact,
-                  frame: projectilePhaseFrame(exact.impact, impactStartedAt, motionNow, false),
+                  frame: !targeted || targeted.phase === "impact"
+                    ? projectilePhaseFrame(exact.impact, impactStartedAt, motionNow, false)
+                    : null,
                   dx: projectile.toDx,
                   dy: projectile.toDy,
                   worldX: projectile.toX,
@@ -964,14 +1004,16 @@ function OriginalClientSceneVisualLayersInner({
                           ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
                           : undefined,
                       pointerEvents: "none",
-                      zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 80),
+                      zIndex: targeted
+                        ? R16_TARGETED_EFFECT_DEPTH
+                        : viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 9),
                     }}
                   />
                 ))}
               </Fragment>
             );
           }
-          if (exact || motionNow >= travelEndsAt) return null;
+          if (targeted || exact || motionNow >= travelEndsAt) return null;
           const currentLeft =
             VIEWPORT_TILE_CENTER_X +
             (projectile.fromDx + (projectile.toDx - projectile.fromDx) * projectile.progress) * VIEWPORT_CELL_WIDTH +
@@ -993,13 +1035,13 @@ function OriginalClientSceneVisualLayersInner({
                 left: currentLeft,
                 top: currentTop,
                 transform: `translate(-50%, -50%) rotate(${angle}rad)`,
-                zIndex: viewportDepthForCell(projectile.toX, projectile.toY, viewportDepthPlayer, 80),
+                zIndex: viewportDepthForCell(projectile.toX, projectile.toY, viewportDepthPlayer, 9),
               }}
             />
           );
         })}
         {/* Procedural magic / map VFX fallback nodes (atlas-free; see FallbackVfxNode). */}
-        {fallbackVfx.map((effect) => (
+        {(effectsEnabled ? fallbackVfx : []).map((effect) => (
           <FallbackVfxNode
             key={effect.key}
             effect={effect}
@@ -1015,7 +1057,7 @@ function OriginalClientSceneVisualLayersInner({
         className={`viewport-effect-overlay ${screen !== "game" ? "hidden" : ""}`}
         aria-hidden="true"
       >
-        {displayResolvedEffectFrames.map(({ effect, animation, frame }) => {
+        {(effectsEnabled ? displayResolvedEffectFrames : []).map(({ effect, animation, frame }) => {
           const anchor = effect.objectId
             ? viewportEntitySprites.find(({ entity }) => entity.objectId === effect.objectId)?.entity
             : undefined;
@@ -1029,6 +1071,9 @@ function OriginalClientSceneVisualLayersInner({
           const worldY = anchor?.y ?? effect.y;
           const dx = anchor?.dx ?? worldX - (player?.x ?? worldX);
           const dy = anchor?.dy ?? worldY - (player?.y ?? worldY);
+          // Crystal draws the free water effects after world objects, then draws the actor notice.
+          const fishingDepth = effect.source === "fishingWater" ? R16_TARGETED_EFFECT_DEPTH
+            : effect.source === "fishingBite" ? R16_TARGETED_EFFECT_DEPTH + 1 : null;
           return (
             <Fragment key={effect.key}>
               <img
@@ -1078,12 +1123,14 @@ function OriginalClientSceneVisualLayersInner({
                       ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
                       : undefined,
                   pointerEvents: "none",
-                  zIndex: viewportDepthForCell(
-                    worldX,
-                    worldY,
-                    viewportDepthPlayer,
-                    crystalSceneEffectLayerOffset(effect.source),
-                  ),
+                  zIndex: fishingDepth ?? (effect.source === "spell" && r16TargetedSpell(effect.spellOrEffect)
+                    ? R16_TARGETED_EFFECT_DEPTH
+                    : viewportDepthForCell(
+                        worldX,
+                        worldY,
+                        viewportDepthPlayer,
+                        crystalSceneEffectLayerOffset(effect.source),
+                      )),
                 }}
               />
               {frame.maskPath ? (
@@ -1123,7 +1170,7 @@ function OriginalClientSceneVisualLayersInner({
                     mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
                     opacity: animation.opacity,
                     pointerEvents: "none",
-                    zIndex: viewportDepthForCell(
+                    zIndex: fishingDepth ?? viewportDepthForCell(
                       worldX,
                       worldY,
                       viewportDepthPlayer,
@@ -1239,28 +1286,21 @@ function OriginalClientSceneVisualLayersInner({
                   : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
               const labelLines = entityDisplayLabelLines(entity, t);
-              const labelText = labelLines.map((line) => line.text).join("\r\n");
               const labelColour = entityNameplateColor(entity);
               const questIcon =
                 entity.kind === "npc"
                   ? questIconForEntity(entity, world.questLog, sceneSpriteFrameIndex)
                   : null;
-              const entityGdiText = entity.dead
+              // Crystal creates an AutoSize MirLabel for each NPC name line;
+              // 48/50px is its centering anchor, never a text clipping width.
+              const labelAnchorWidth = entity.kind === "npc" || entity.kind === "monster" ? 48 : 50;
+              const labelGdiTexts = labelLines.map((line) => entity.dead
                 ? null
                 : findCrystalGdiTextAsset({
-                    text: labelText,
-                    foreground: labelColour,
+                    text: line.text,
+                    foreground: line.role === "secondary" && entity.kind === "npc" ? "#ffffff" : labelColour,
                     outline: true,
-                    width: labelLines.length > 1 ? 54 : 50,
-                    height: labelLines.length > 1 ? 32 : 15,
-                  }) ??
-                  findCrystalGdiTextAsset({
-                    text: labelText.replace(/\r?\n/g, " "),
-                    foreground: labelColour,
-                    outline: true,
-                    width: 50,
-                    height: 15,
-                  });
+                  }));
               const healthRatio =
                 isPlayer && entity.hp !== undefined && entity.maxHp
                   ? ratio(entity.hp, entity.maxHp)
@@ -1284,21 +1324,16 @@ function OriginalClientSceneVisualLayersInner({
                       onError={handleSceneAssetImageError}
                       onLoad={handleSceneAssetImageLoad}
                       onMouseDown={(event) => {
-                        if (event.button === 0 || event.button === 2) {
+                        if (event.button === 0) {
                           event.preventDefault();
                           event.stopPropagation();
                           onActivateEntity(entity.objectId);
                         }
                       }}
-                      onContextMenu={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        onActivateEntity(entity.objectId);
-                      }}
                       style={{
                         left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityQuestIconLeftOffset(entity, sprite)}px`,
                         top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityQuestIconTopOffset(sprite)}px`,
-                        zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 96),
+                        zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 12),
                       }}
                     />
                   ) : null}
@@ -1327,10 +1362,14 @@ function OriginalClientSceneVisualLayersInner({
                     }
                     type="button"
                     className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
+                    aria-label={labelLines.map((line) => line.text).join(" ")}
                     style={{
                       left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityNameplateLeftOffset(entity, sprite)}px`,
                       top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
                       "--entity-name-color": labelColour,
+                      visibility: nameView || hoveredObjectId === entity.objectId
+                        || (entity.kind === "monster" && !entity.dead && questTargetObjectIds?.has(entity.objectId))
+                        ? "visible" : "hidden",
                     } as CSSProperties}
                     data-ui-interactive={isInteractiveEntity ? "true" : "false"}
                     data-object-id={entity.objectId}
@@ -1341,7 +1380,7 @@ function OriginalClientSceneVisualLayersInner({
                     onMouseDown={
                       isInteractiveEntity
                         ? (event) => {
-                            if (event.button === 0 || event.button === 2) {
+                            if (event.button === 0) {
                               event.preventDefault();
                               event.stopPropagation();
                             }
@@ -1349,23 +1388,21 @@ function OriginalClientSceneVisualLayersInner({
                         : undefined
                     }
                     onClick={isInteractiveEntity ? () => onActivateEntity(entity.objectId) : undefined}
-                    onContextMenu={
-                      isInteractiveEntity
-                        ? (event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onActivateEntity(entity.objectId);
-                          }
-                        : undefined
-                    }
                   >
-                    {entityGdiText ? (
-                      <CrystalGdiTextImage
-                        asset={entityGdiText}
-                        className="entity-nameplate-gdi"
-                        accessibleText={labelLines.map((line) => line.text).join(" ")}
-                      />
-                    ) : labelLines.map((line, index) => (
+                    {labelLines.map((line, index) => {
+                      const gdiText = labelGdiTexts[index];
+                      return gdiText ? (
+                        <CrystalGdiTextImage
+                          key={`${entity.objectId}-label-${index}`}
+                          asset={gdiText}
+                          className="entity-nameplate-gdi"
+                          accessibleText={line.text}
+                          style={{
+                            marginLeft: Math.trunc((labelAnchorWidth - gdiText.size.output.width) / 2),
+                            top: Math.trunc(gdiText.size.output.height / 2) - 6,
+                          }}
+                        />
+                      ) : (
                         <strong
                           key={`${entity.objectId}-label-${index}`}
                           className={
@@ -1376,7 +1413,8 @@ function OriginalClientSceneVisualLayersInner({
                         >
                           {line.text}
                         </strong>
-                      ))}
+                      );
+                    })}
                     {entity.dead ? (
                       <strong className="entity-state-label">{t("ui.dead")}</strong>
                     ) : null}
@@ -1398,14 +1436,14 @@ function OriginalClientSceneVisualLayersInner({
 export const OriginalClientSceneVisualLayers = memo(OriginalClientSceneVisualLayersInner);
 
 function entityDisplayName(entity: DisplayEntity, t: TranslateFn): string {
-  return localizeCrystalEntityName(entity.name, t);
+  return entity.kind === "npc" || entity.kind === "monster" ? localizeCrystalEntityName(entity.name, t) : entity.name;
 }
 
 function entityDisplayLabelLines(
   entity: DisplayEntity,
   t: TranslateFn,
 ): Array<{ text: string; role: "primary" | "secondary" }> {
-  const displayName = localizeCrystalEntityName(entity.name, t);
+  const displayName = entityDisplayName(entity, t);
   if (entity.ownerName) {
     return [
       { text: displayName, role: "primary" },

@@ -1,0 +1,1104 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-24T21:48:45.459Z",
+  "repositoryCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "scope": "Bounded read-only review of the original formal04 two-name map0/span2 scenario. JSON parsing, source reading and small arithmetic only; no game/test imports, pathfinding, realm, build, load, recording or private-account reads.",
+  "conclusion": {
+    "unconditionalStaticFailureProven": false,
+    "staticAcceptanceProven": false,
+    "decision": "No unconditional supply contradiction was established for the unchanged formal04 profile. A genuine qualifying07 gate can authorize fresh formal04 as originally frozen; every prefix and the two-hour workload still require the original runtime gates.",
+    "conditionalWarning": "At100, the same154 static targets serve10 rather than5 fighters. The fixed-positive-damage10 ideal stock model gives100.2 hits/min against120 required; that is a conditional shortage, not proof that all real successful attacks stay at least10 damage or that live supply equals the initial canonical set."
+  },
+  "scenario": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-04\\scenario.json",
+    "bytes": 5844,
+    "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402",
+    "equalOriginalCandidateBytes": true,
+    "originalCandidate": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-safe-home-100-candidate-v3.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402"
+    },
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "anchors": 100,
+    "combatClusters": 1,
+    "activeCoverageRule": "Current actual-ready, in-game, living, same-map movement clients activate their declared home footprints. Future, paused, closed and absent clients cannot lend observer coverage; actual attacks additionally require real nearby observers. This review does not substitute static homes for online witness evidence."
+  },
+  "requirements": {
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "movementIntervalMs": 750,
+    "attacksPerFighterMinute": 18,
+    "positiveHitsPerFighterMinute": 12,
+    "minimumNativeRunRatio": 0.5,
+    "timeoutExclusive": 0.01,
+    "maximumCorrectionRatio": 0.05
+  },
+  "prefixes": [
+    {
+      "count": 2,
+      "combatIndices": [],
+      "combatActors": 0,
+      "movementObservers": 2,
+      "combatFraction": 0,
+      "requiredLaunchedAttacksPerMinute": 0,
+      "requiredDualEndPositiveHitsPerMinute": 0,
+      "canonicalReachableTargets": 0,
+      "canonicalTargetNames": null,
+      "conditionalIdealPositiveHitRatesByFixedDamage": {
+        "3": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0
+      },
+      "conditionalRateDefinition": "Sum ceil(nativeHP/fixedPositiveDamage)/nativeRespawnMinutes over distinct static canonical reachable IDs; ignores kill duration, AI/travel, contention, real accuracy, quarantine and per-window timing. This is not an unconditional attempt ceiling or an acceptance result.",
+      "conditionalAllocation": [
+        {
+          "damage": 3,
+          "perFighterDemand": 12,
+          "required": 0,
+          "maxAllocatedUpper": 0,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 5,
+          "perFighterDemand": 12,
+          "required": 0,
+          "maxAllocatedUpper": 0,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 10,
+          "perFighterDemand": 12,
+          "required": 0,
+          "maxAllocatedUpper": 0,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 25,
+          "perFighterDemand": 12,
+          "required": 0,
+          "maxAllocatedUpper": 0,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        }
+      ],
+      "staticFighterSummaries": [],
+      "navigationRecomputedThisReview": false
+    },
+    {
+      "count": 10,
+      "combatIndices": [
+        5
+      ],
+      "combatActors": 1,
+      "movementObservers": 9,
+      "combatFraction": 0.1,
+      "requiredLaunchedAttacksPerMinute": 18,
+      "requiredDualEndPositiveHitsPerMinute": 12,
+      "canonicalReachableTargets": 32,
+      "canonicalTargetNames": null,
+      "conditionalIdealPositiveHitRatesByFixedDamage": {
+        "3": 64.69999999999999,
+        "5": 36.23333333333334,
+        "10": 20.700000000000003,
+        "25": 7.7666666666666675
+      },
+      "conditionalRateDefinition": "Sum ceil(nativeHP/fixedPositiveDamage)/nativeRespawnMinutes over distinct static canonical reachable IDs; ignores kill duration, AI/travel, contention, real accuracy, quarantine and per-window timing. This is not an unconditional attempt ceiling or an acceptance result.",
+      "conditionalAllocation": [
+        {
+          "damage": 3,
+          "perFighterDemand": 12,
+          "required": 12,
+          "maxAllocatedUpper": 12,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 5,
+          "perFighterDemand": 12,
+          "required": 12,
+          "maxAllocatedUpper": 12,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 10,
+          "perFighterDemand": 12,
+          "required": 12,
+          "maxAllocatedUpper": 12.000000000000002,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 25,
+          "perFighterDemand": 12,
+          "required": 12,
+          "maxAllocatedUpper": 7.7666666666666675,
+          "allDemandsPossible": false,
+          "interpretation": "necessary positive-hit threshold"
+        }
+      ],
+      "staticFighterSummaries": [
+        {
+          "index": 5,
+          "home": {
+            "x": 260,
+            "y": 670
+          },
+          "targets": 32,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 64.69999999999999,
+            "5": 36.23333333333334,
+            "10": 20.700000000000003,
+            "25": 7.7666666666666675
+          }
+        }
+      ],
+      "navigationRecomputedThisReview": false
+    },
+    {
+      "count": 25,
+      "combatIndices": [
+        5,
+        15
+      ],
+      "combatActors": 2,
+      "movementObservers": 23,
+      "combatFraction": 0.08,
+      "requiredLaunchedAttacksPerMinute": 36,
+      "requiredDualEndPositiveHitsPerMinute": 24,
+      "canonicalReachableTargets": 112,
+      "canonicalTargetNames": {
+        "Deer": 76,
+        "Scarecrow": 36
+      },
+      "conditionalIdealPositiveHitRatesByFixedDamage": {
+        "3": 231.4333333333335,
+        "5": 129.36666666666665,
+        "10": 74.76666666666665,
+        "25": 27.299999999999958
+      },
+      "conditionalRateDefinition": "Sum ceil(nativeHP/fixedPositiveDamage)/nativeRespawnMinutes over distinct static canonical reachable IDs; ignores kill duration, AI/travel, contention, real accuracy, quarantine and per-window timing. This is not an unconditional attempt ceiling or an acceptance result.",
+      "conditionalAllocation": [
+        {
+          "damage": 3,
+          "perFighterDemand": 12,
+          "required": 24,
+          "maxAllocatedUpper": 24,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 5,
+          "perFighterDemand": 12,
+          "required": 24,
+          "maxAllocatedUpper": 24,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 10,
+          "perFighterDemand": 12,
+          "required": 24,
+          "maxAllocatedUpper": 24,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 25,
+          "perFighterDemand": 12,
+          "required": 24,
+          "maxAllocatedUpper": 23.999999999999968,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        }
+      ],
+      "staticFighterSummaries": [
+        {
+          "index": 5,
+          "home": {
+            "x": 260,
+            "y": 670
+          },
+          "targets": 96,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 196.4833333333335,
+            "5": 109.88333333333331,
+            "10": 63.31666666666663,
+            "25": 23.283333333333296
+          }
+        },
+        {
+          "index": 15,
+          "home": {
+            "x": 248,
+            "y": 592
+          },
+          "targets": 110,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 227.7833333333335,
+            "5": 127.31666666666665,
+            "10": 73.61666666666662,
+            "25": 26.849999999999962
+          }
+        }
+      ],
+      "navigationRecomputedThisReview": false
+    },
+    {
+      "count": 50,
+      "combatIndices": [
+        5,
+        15,
+        25,
+        35,
+        45
+      ],
+      "combatActors": 5,
+      "movementObservers": 45,
+      "combatFraction": 0.1,
+      "requiredLaunchedAttacksPerMinute": 90,
+      "requiredDualEndPositiveHitsPerMinute": 60,
+      "canonicalReachableTargets": 154,
+      "canonicalTargetNames": {
+        "Deer": 102,
+        "Scarecrow": 52
+      },
+      "conditionalIdealPositiveHitRatesByFixedDamage": {
+        "3": 310.70000000000016,
+        "5": 173.73333333333315,
+        "10": 100.20000000000012,
+        "25": 36.76666666666664
+      },
+      "conditionalRateDefinition": "Sum ceil(nativeHP/fixedPositiveDamage)/nativeRespawnMinutes over distinct static canonical reachable IDs; ignores kill duration, AI/travel, contention, real accuracy, quarantine and per-window timing. This is not an unconditional attempt ceiling or an acceptance result.",
+      "conditionalAllocation": [
+        {
+          "damage": 3,
+          "perFighterDemand": 12,
+          "required": 60,
+          "maxAllocatedUpper": 60,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 5,
+          "perFighterDemand": 12,
+          "required": 60,
+          "maxAllocatedUpper": 59.99999999999998,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 10,
+          "perFighterDemand": 12,
+          "required": 60,
+          "maxAllocatedUpper": 60.00000000000001,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 25,
+          "perFighterDemand": 12,
+          "required": 60,
+          "maxAllocatedUpper": 36.766666666666666,
+          "allDemandsPossible": false,
+          "interpretation": "necessary positive-hit threshold"
+        }
+      ],
+      "staticFighterSummaries": [
+        {
+          "index": 5,
+          "home": {
+            "x": 260,
+            "y": 670
+          },
+          "targets": 131,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 262.5500000000003,
+            "5": 146.84999999999977,
+            "10": 84.55000000000008,
+            "25": 31.149999999999952
+          }
+        },
+        {
+          "index": 15,
+          "home": {
+            "x": 248,
+            "y": 592
+          },
+          "targets": 152,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 306.20000000000016,
+            "5": 171.2333333333334,
+            "10": 98.70000000000024,
+            "25": 36.26666666666666
+          }
+        },
+        {
+          "index": 25,
+          "home": {
+            "x": 284,
+            "y": 608
+          },
+          "targets": 120,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 241.50000000000023,
+            "5": 134.99999999999986,
+            "10": 78.00000000000006,
+            "25": 28.49999999999996
+          }
+        },
+        {
+          "index": 35,
+          "home": {
+            "x": 280,
+            "y": 576
+          },
+          "targets": 122,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 244.30000000000024,
+            "5": 136.59999999999985,
+            "10": 78.80000000000004,
+            "25": 28.89999999999996
+          }
+        },
+        {
+          "index": 45,
+          "home": {
+            "x": 236,
+            "y": 592
+          },
+          "targets": 152,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 306.20000000000016,
+            "5": 171.2333333333334,
+            "10": 98.70000000000024,
+            "25": 36.26666666666666
+          }
+        }
+      ],
+      "navigationRecomputedThisReview": false
+    },
+    {
+      "count": 100,
+      "combatIndices": [
+        5,
+        15,
+        25,
+        35,
+        45,
+        55,
+        65,
+        75,
+        85,
+        95
+      ],
+      "combatActors": 10,
+      "movementObservers": 90,
+      "combatFraction": 0.1,
+      "requiredLaunchedAttacksPerMinute": 180,
+      "requiredDualEndPositiveHitsPerMinute": 120,
+      "canonicalReachableTargets": 154,
+      "canonicalTargetNames": {
+        "Deer": 102,
+        "Scarecrow": 52
+      },
+      "conditionalIdealPositiveHitRatesByFixedDamage": {
+        "3": 310.70000000000016,
+        "5": 173.73333333333315,
+        "10": 100.20000000000012,
+        "25": 36.766666666666644
+      },
+      "conditionalRateDefinition": "Sum ceil(nativeHP/fixedPositiveDamage)/nativeRespawnMinutes over distinct static canonical reachable IDs; ignores kill duration, AI/travel, contention, real accuracy, quarantine and per-window timing. This is not an unconditional attempt ceiling or an acceptance result.",
+      "conditionalAllocation": [
+        {
+          "damage": 3,
+          "perFighterDemand": 12,
+          "required": 120,
+          "maxAllocatedUpper": 120.00000000000004,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 5,
+          "perFighterDemand": 12,
+          "required": 120,
+          "maxAllocatedUpper": 119.99999999999996,
+          "allDemandsPossible": true,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 10,
+          "perFighterDemand": 12,
+          "required": 120,
+          "maxAllocatedUpper": 100.20000000000022,
+          "allDemandsPossible": false,
+          "interpretation": "necessary positive-hit threshold"
+        },
+        {
+          "damage": 25,
+          "perFighterDemand": 12,
+          "required": 120,
+          "maxAllocatedUpper": 36.766666666666666,
+          "allDemandsPossible": false,
+          "interpretation": "necessary positive-hit threshold"
+        }
+      ],
+      "staticFighterSummaries": [
+        {
+          "index": 5,
+          "home": {
+            "x": 260,
+            "y": 670
+          },
+          "targets": 130,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 259.5500000000003,
+            "5": 145.1833333333331,
+            "10": 83.55000000000008,
+            "25": 30.81666666666662
+          }
+        },
+        {
+          "index": 15,
+          "home": {
+            "x": 248,
+            "y": 592
+          },
+          "targets": 152,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 306.20000000000016,
+            "5": 171.2333333333334,
+            "10": 98.70000000000024,
+            "25": 36.26666666666666
+          }
+        },
+        {
+          "index": 25,
+          "home": {
+            "x": 284,
+            "y": 608
+          },
+          "targets": 120,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 241.50000000000023,
+            "5": 134.99999999999986,
+            "10": 78.00000000000006,
+            "25": 28.49999999999996
+          }
+        },
+        {
+          "index": 35,
+          "home": {
+            "x": 280,
+            "y": 576
+          },
+          "targets": 124,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 248.80000000000024,
+            "5": 139.09999999999982,
+            "10": 80.30000000000008,
+            "25": 29.39999999999996
+          }
+        },
+        {
+          "index": 45,
+          "home": {
+            "x": 236,
+            "y": 592
+          },
+          "targets": 152,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 306.20000000000016,
+            "5": 171.2333333333334,
+            "10": 98.70000000000024,
+            "25": 36.26666666666666
+          }
+        },
+        {
+          "index": 55,
+          "home": {
+            "x": 268,
+            "y": 608
+          },
+          "targets": 124,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 248.80000000000024,
+            "5": 139.09999999999982,
+            "10": 80.3000000000001,
+            "25": 29.39999999999996
+          }
+        },
+        {
+          "index": 65,
+          "home": {
+            "x": 252,
+            "y": 644
+          },
+          "targets": 131,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 261.8000000000003,
+            "5": 146.4333333333331,
+            "10": 84.3000000000001,
+            "25": 31.06666666666662
+          }
+        },
+        {
+          "index": 75,
+          "home": {
+            "x": 248,
+            "y": 572
+          },
+          "targets": 149,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 299.4500000000003,
+            "5": 167.48333333333335,
+            "10": 96.45000000000023,
+            "25": 35.51666666666665
+          }
+        },
+        {
+          "index": 85,
+          "home": {
+            "x": 268,
+            "y": 592
+          },
+          "targets": 125,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 251.05000000000024,
+            "5": 140.34999999999982,
+            "10": 81.05000000000011,
+            "25": 29.64999999999996
+          }
+        },
+        {
+          "index": 95,
+          "home": {
+            "x": 248,
+            "y": 608
+          },
+          "targets": 152,
+          "isolatedObservers": 0,
+          "conditionalPositiveHitRates": {
+            "3": 306.20000000000016,
+            "5": 171.2333333333334,
+            "10": 98.70000000000024,
+            "25": 36.26666666666666
+          }
+        }
+      ],
+      "navigationRecomputedThisReview": false
+    }
+  ],
+  "nativeContent": {
+    "manifest": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    "allMapSelectedRules": 22,
+    "allMapSelectedStockSlots": 510,
+    "rules": [
+      {
+        "respawnIndex": 5,
+        "name": "Scarecrow",
+        "count": 10,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 110,
+          "y": 60
+        },
+        "spread": 70
+      },
+      {
+        "respawnIndex": 7,
+        "name": "Scarecrow",
+        "count": 10,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 220,
+          "y": 60
+        },
+        "spread": 60
+      },
+      {
+        "respawnIndex": 13,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 210,
+          "y": 185
+        },
+        "spread": 45
+      },
+      {
+        "respawnIndex": 14,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 265,
+          "y": 125
+        },
+        "spread": 45
+      },
+      {
+        "respawnIndex": 15,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 310,
+          "y": 95
+        },
+        "spread": 45
+      },
+      {
+        "respawnIndex": 26,
+        "name": "Deer",
+        "count": 10,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 420,
+          "y": 380
+        },
+        "spread": 45
+      },
+      {
+        "respawnIndex": 27,
+        "name": "Deer",
+        "count": 10,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 470,
+          "y": 330
+        },
+        "spread": 45
+      },
+      {
+        "respawnIndex": 31,
+        "name": "Scarecrow",
+        "count": 10,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 500,
+          "y": 400
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 41,
+        "name": "Deer",
+        "count": 10,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 600,
+          "y": 580
+        },
+        "spread": 40
+      },
+      {
+        "respawnIndex": 42,
+        "name": "Scarecrow",
+        "count": 20,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 540,
+          "y": 530
+        },
+        "spread": 70
+      },
+      {
+        "respawnIndex": 43,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 550,
+          "y": 550
+        },
+        "spread": 70
+      },
+      {
+        "respawnIndex": 44,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 570,
+          "y": 610
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 47,
+        "name": "Scarecrow",
+        "count": 20,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 640,
+          "y": 530
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 48,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 5,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 205,
+          "y": 325
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 49,
+        "name": "Deer",
+        "count": 30,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 5,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 260,
+          "y": 380
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 51,
+        "name": "Scarecrow",
+        "count": 20,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 6,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 200,
+          "y": 400
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 62,
+        "name": "Deer",
+        "count": 30,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 340,
+          "y": 550
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 63,
+        "name": "Deer",
+        "count": 40,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 247,
+          "y": 565
+        },
+        "spread": 50
+      },
+      {
+        "respawnIndex": 64,
+        "name": "Scarecrow",
+        "count": 50,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 6,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 330,
+          "y": 530
+        },
+        "spread": 40
+      },
+      {
+        "respawnIndex": 65,
+        "name": "Deer",
+        "count": 50,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 4,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 270,
+          "y": 625
+        },
+        "spread": 60
+      },
+      {
+        "respawnIndex": 66,
+        "name": "Scarecrow",
+        "count": 50,
+        "hp": 20,
+        "ai": 0,
+        "agility": 8,
+        "respawnMinutes": 5,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 270,
+          "y": 625
+        },
+        "spread": 60
+      },
+      {
+        "respawnIndex": 67,
+        "name": "Deer",
+        "count": 20,
+        "hp": 25,
+        "ai": 2,
+        "agility": 7,
+        "respawnMinutes": 3,
+        "randomRespawnMinutes": 0,
+        "center": {
+          "x": 295,
+          "y": 625
+        },
+        "spread": 50
+      }
+    ],
+    "hp": {
+      "Deer": 25,
+      "Scarecrow": 20
+    },
+    "respawn": "Selected native rules have zero jitter and3–6 minute delays from death. Deer AI2 requires harvested or removed corpse before due respawn can proceed; ordinary unharvested corpse expires after180000ms, so it is not a permanent blocked slot. Respawn still requires its own due time; harvest does not shorten it.",
+    "damage": "All ordinary capacity roles are Warrior/Male. Authoritative physical melee first rolls accuracy against native agility, then real min/max DC/luck and monster armour. Warrior class base DC rises by trunc(level/5), before equipment and other stats. Neither fixed3 nor fixed10 damage is established for every real future swing.",
+    "attacksVersusHits": "V2 activity counts correlated launched attacks; notLaunched does not count as launched attack or hit. A positive hit still requires original dual-end damage/shared-health evidence.18 launched attacks/min is not identical to18 positive hits/min;12 hits/min is a separate required minimum."
+  },
+  "prospectiveRisks": [
+    "The100 prefix adds no canonical reachable targets beyond50 while doubling fighter demand. Real higher damage can kill stock faster; low damage can improve hit stock but consume more time and expose movement/cooldown costs.",
+    "Static mean replenishment never proves each fighter in each60s window. Native AI wandering, chase/coverage geometry, target-claim contention, corpse/death phases and unequal nearest-target scheduling can cause a local empty window despite sufficient aggregate stock.",
+    "Every unsuccessful/unverified native attack exception permanently quarantines that actor/target objectId for the run;65 quarantined IDs stops it. Respawn of the same ID does not wash quarantine. Real agility misses and late/unknown evidence can progressively reduce usable per-actor stock; a finite2h must-fail bound has not been proven from unknown live swing times.",
+    "Damage and effective supply are not frozen at initial starter level: earlier fighters continue ordinary combat while later accounts await normal admission windows, and during two-hour soak. Never extrapolate the initial candidate damage or six-minute result across the whole ladder.",
+    "Original span2 safe homes and existing4000 navigation proof concern geometry, not live occupancy or Run ratio. The native primed fallback preference preserves true obstacles and may still return Walk when no legal Run exists;50%Run and other activity gates may correctly fail.",
+    "No alternate span4 scene, optional Hen target, resource-threshold change or failed-run reclassification was used."
+  ],
+  "monitorWithoutNewInstrumentation": [
+    "Original per-actor continuous60s launched attacks, positive hits, native completion, movement Run ratio, cells/min and correction/timeout/fanout gates.",
+    "Existing V2 action outcomes, actual positive damage/health evidence and available owner level/stat-derived timing; do not infer a successful attack from owner position alone.",
+    "Existing ambiguousTargetQuarantined records and repeated target IDs, scout/chase/fallback activity and failures; count isolation by actor and keep original failure verdicts.",
+    "Existing public zone histogram phase deltas, slow-stage receive-time records, driver lag and resource monitors. None of these static supply calculations establish server throughput or a physical-host maximum."
+  ],
+  "inputPins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-stage-two-name-safe-home-supply-plan-v3.json",
+      "bytes": 229425,
+      "sha256": "1fbdd41fda6398f96457f4de293fc3b5bfe6fbb34529bcc2500d4dd8abc2331a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-stage-two-name-package-v3.json",
+      "bytes": 207906,
+      "sha256": "c0fafa966e571f9e108ba6873cc6096f0a0b5118a5bff3953f2179cf829c1ce5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-04\\run-options.json",
+      "bytes": 2950,
+      "sha256": "7defaef8a93060cfe29caab5d6d2c7bb43dcd121e1251cd73529aecbed219e15"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+      "bytes": 6826,
+      "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d"
+    }
+  ],
+  "sourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 130681,
+      "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6",
+      "lines": [
+        541,
+        804,
+        814,
+        1018,
+        1247,
+        1252,
+        1254,
+        1367,
+        1699
+      ]
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "lines": [
+        53,
+        80,
+        82,
+        166,
+        175,
+        185,
+        220,
+        332
+      ]
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958",
+      "lines": [
+        315,
+        389,
+        404,
+        412,
+        975,
+        1664
+      ]
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8",
+      "lines": [
+        2727,
+        2762,
+        2776,
+        14335,
+        14340,
+        14354,
+        16651,
+        16678,
+        16748,
+        16771
+      ]
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488",
+      "lines": [
+        372,
+        390,
+        1382
+      ]
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\stats.rs",
+      "bytes": 31065,
+      "sha256": "4e075d9af585560c0db0fadb29a75610e217858bcbc766e6e2ef4f1d04335ece",
+      "lines": [
+        183,
+        208,
+        225,
+        232,
+        233,
+        235
+      ]
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\combat.rs",
+      "bytes": 145584,
+      "sha256": "0c48587e14d774ef91a592cf26ff74eafb5972af9efdb84e6ca310c031f4d46a",
+      "lines": [
+        736
+      ]
+    }
+  ],
+  "oldGeometryScope": "Previous canonical reachable-target analysis is retained by raw SHA, and HP/respawn fields were cross-checked against current native manifest. No navigation, live creature census, build or performance measurement was rerun. Earlier historical warning about future homes predates the current actual-active coverage fix and does not describe current code.",
+  "acceptance": {
+    "capacityAccepted": false,
+    "profileOrThresholdChanged": false,
+    "sourceChanged": false,
+    "serviceOrTestStarted": false
+  }
+}

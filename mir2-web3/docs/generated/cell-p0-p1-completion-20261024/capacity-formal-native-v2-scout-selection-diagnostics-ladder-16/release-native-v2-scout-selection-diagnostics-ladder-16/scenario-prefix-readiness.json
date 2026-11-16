@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "profile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "status": "Exact repaired compact static pair approved by root for freshprobe12 only",
+  "staticOnly": true,
+  "dynamicSupplyVerified": false,
+  "capacityAccepted": false,
+  "sourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "sourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "probeScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+    "bytes": 804,
+    "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+  },
+  "formalScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+    "bytes": 5844,
+    "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+  },
+  "analysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+    "bytes": 20628,
+    "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+  },
+  "collection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+    "bytes": 7084,
+    "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+  },
+  "first10RawByteExact": true,
+  "bodyCellsChecked": 900,
+  "haloChecks": 2500,
+  "representativeOriginalScoutsPassed": true,
+  "representativeTourSteps": [
+    {
+      "count": 10,
+      "steps": 97,
+      "passed": true
+    },
+    {
+      "count": 25,
+      "steps": 172,
+      "passed": true
+    },
+    {
+      "count": 50,
+      "steps": 372,
+      "passed": true
+    },
+    {
+      "count": 100,
+      "steps": 886,
+      "passed": true
+    }
+  ],
+  "rootApprovalIsFreshProbeOnly": true,
+  "historicalSummaryPreApprovalFlagsPreserved": true,
+  "liveRisks": [
+    "100representative tour886unitsteps is not an actual complete online tour.",
+    "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+    "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression."
+  ]
+}

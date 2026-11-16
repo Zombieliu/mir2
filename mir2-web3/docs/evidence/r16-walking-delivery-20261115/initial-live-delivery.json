@@ -1,0 +1,80 @@
+{
+  "scope": "Read-only sequential public static GETs, normal system network. These requests may naturally warm CDN caches; not a cold-player qualification.",
+  "source": "c1d4c85c89e3f1960d349c823cb3a42976e2b2e6",
+  "pin": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "bytes": 764724,
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+  },
+  "rows": [
+    {
+      "lane": "game",
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "startedAt": "2026-11-15T02:49:46.349Z",
+      "headersMs": 1249,
+      "status": 200,
+      "headers": {
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "MISS",
+        "x-mir2-asset-cache": "bootstrap",
+        "content-type": "application/json; charset=utf-8",
+        "content-encoding": "br",
+        "content-length": null,
+        "etag": "W/\"a63b7ba5a8ff7909ff4638ca9d45109c\"",
+        "age": "0",
+        "vary": "accept-encoding"
+      },
+      "bodyMs": 2415,
+      "bytes": 764724,
+      "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "pinMatches": true
+    },
+    {
+      "lane": "game-repeat",
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "startedAt": "2026-11-15T02:49:48.765Z",
+      "headersMs": 244,
+      "status": 200,
+      "headers": {
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "HIT",
+        "x-mir2-asset-cache": "bootstrap",
+        "content-type": "application/json; charset=utf-8",
+        "content-encoding": "br",
+        "content-length": null,
+        "etag": "W/\"a63b7ba5a8ff7909ff4638ca9d45109c\"",
+        "age": "1",
+        "vary": "accept-encoding"
+      },
+      "bodyMs": 686,
+      "bytes": 764724,
+      "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "pinMatches": true
+    },
+    {
+      "lane": "current-asset-release",
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "startedAt": "2026-11-15T02:49:49.451Z",
+      "headersMs": 873,
+      "status": 404,
+      "headers": {
+        "cache-control": "no-store",
+        "cf-cache-status": null,
+        "x-vercel-cache": null,
+        "x-mir2-asset-cache": null,
+        "content-type": "text/plain; charset=utf-8",
+        "content-encoding": null,
+        "content-length": "9",
+        "etag": null,
+        "age": null,
+        "vary": "accept-encoding"
+      },
+      "bodyMs": 874,
+      "bytes": 9,
+      "sha256": "8bf1172df581a12c2c602a62dd15e76b3096035a2d65c910c29838f277eafa0d",
+      "pinMatches": false
+    }
+  ]
+}

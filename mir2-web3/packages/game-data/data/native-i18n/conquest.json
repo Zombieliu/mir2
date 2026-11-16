@@ -1,0 +1,755 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "key": "conquest.castle.name",
+      "en": "Sabuk Wall",
+      "zh-TW": "沙巴克城",
+      "pt-BR": "Muralha de Sabuk",
+      "ru": "Стена Сабука",
+      "hi": "सबुक दुर्ग",
+      "id": "Benteng Sabuk",
+      "vi": "Thành Sabuk",
+      "th": "ปราสาทซาบัค",
+      "ar": "قلعة سابوك",
+      "aliases": [
+        "Sabuk Wall"
+      ]
+    },
+    {
+      "key": "conquest.registration.title",
+      "en": "Siege registration",
+      "zh-TW": "攻城報名",
+      "pt-BR": "Inscrição para o cerco",
+      "ru": "Регистрация на осаду",
+      "hi": "घेराबंदी के लिए पंजीकरण",
+      "id": "Pendaftaran Pengepungan",
+      "vi": "Đăng ký công thành",
+      "th": "ลงทะเบียนสงครามปราสาท",
+      "ar": "التسجيل في الحصار",
+      "aliases": [
+        "Siege registration"
+      ]
+    },
+    {
+      "key": "conquest.status.title",
+      "en": "Siege status",
+      "zh-TW": "攻城狀態",
+      "pt-BR": "Estado do cerco",
+      "ru": "Состояние осады",
+      "hi": "घेराबंदी की स्थिति",
+      "id": "Status Pengepungan",
+      "vi": "Trạng thái công thành",
+      "th": "สถานะสงครามปราสาท",
+      "ar": "حالة الحصار",
+      "aliases": [
+        "Siege status"
+      ]
+    },
+    {
+      "key": "conquest.registration.apply",
+      "en": "Apply for the next siege",
+      "zh-TW": "報名下一場攻城戰",
+      "pt-BR": "Inscrever-se no próximo cerco",
+      "ru": "Зарегистрироваться на следующую осаду",
+      "hi": "अगली घेराबंदी के लिए पंजीकरण करें",
+      "id": "Daftar Pengepungan Berikutnya",
+      "vi": "Đăng ký trận công thành tiếp theo",
+      "th": "ลงทะเบียนสงครามปราสาทครั้งถัดไป",
+      "ar": "التسجيل في الحصار القادم",
+      "aliases": [
+        "Apply for the next siege"
+      ]
+    },
+    {
+      "key": "conquest.back",
+      "en": "Back",
+      "zh-TW": "返回",
+      "pt-BR": "Voltar",
+      "ru": "Назад",
+      "hi": "वापस",
+      "id": "Kembali",
+      "vi": "Quay lại",
+      "th": "กลับ",
+      "ar": "رجوع",
+      "aliases": [
+        "Back"
+      ]
+    },
+    {
+      "key": "conquest.close",
+      "en": "Close",
+      "zh-TW": "關閉",
+      "pt-BR": "Fechar",
+      "ru": "Закрыть",
+      "hi": "बंद करें",
+      "id": "Tutup",
+      "vi": "Đóng",
+      "th": "ปิด",
+      "ar": "إغلاق",
+      "aliases": [
+        "Close"
+      ]
+    },
+    {
+      "key": "conquest.status.schedule",
+      "en": "Siege schedule: daily {0}-{1} (UTC{2}).",
+      "zh-TW": "攻城時間：每日 {0}-{1}（UTC{2}）。",
+      "pt-BR": "Horário do cerco: diariamente {0}-{1} (UTC{2}).",
+      "ru": "Расписание осады: ежедневно {0}-{1} (UTC{2}).",
+      "hi": "घेराबंदी का समय: प्रतिदिन {0}-{1} (UTC{2})।",
+      "id": "Jadwal pengepungan: setiap hari {0}-{1} (UTC{2}).",
+      "vi": "Lịch công thành: hằng ngày {0}-{1} (UTC{2}).",
+      "th": "เวลาสงครามปราสาท: ทุกวัน {0}-{1} (UTC{2})",
+      "ar": "موعد الحصار: يوميًا {0}-{1} (UTC{2}).",
+      "aliases": [
+        "Siege schedule: daily {0}-{1} (UTC{2})."
+      ]
+    },
+    {
+      "key": "conquest.status.owner",
+      "en": "Castle owner: {0}",
+      "zh-TW": "城主行會：{0}",
+      "pt-BR": "Guilda dona do castelo: {0}",
+      "ru": "Владелец замка: {0}",
+      "hi": "किले की स्वामी गिल्ड: {0}",
+      "id": "Pemilik kastel: {0}",
+      "vi": "Bang hội sở hữu thành: {0}",
+      "th": "กิลด์เจ้าของปราสาท: {0}",
+      "ar": "مالك القلعة: {0}",
+      "aliases": [
+        "Castle owner: {0}"
+      ]
+    },
+    {
+      "key": "conquest.status.attacker",
+      "en": "Registered attacker: {0}",
+      "zh-TW": "已報名攻城行會：{0}",
+      "pt-BR": "Atacante inscrito: {0}",
+      "ru": "Зарегистрированный атакующий: {0}",
+      "hi": "पंजीकृत हमलावर गिल्ड: {0}",
+      "id": "Penyerang terdaftar: {0}",
+      "vi": "Bang hội công thành đã đăng ký: {0}",
+      "th": "กิลด์ฝ่ายบุกที่ลงทะเบียน: {0}",
+      "ar": "المهاجم المسجل: {0}",
+      "aliases": [
+        "Registered attacker: {0}"
+      ]
+    },
+    {
+      "key": "conquest.status.active",
+      "en": "War in progress.",
+      "zh-TW": "攻城戰進行中。",
+      "pt-BR": "Guerra em andamento.",
+      "ru": "Война идёт.",
+      "hi": "युद्ध चल रहा है।",
+      "id": "Perang sedang berlangsung.",
+      "vi": "Chiến tranh đang diễn ra.",
+      "th": "สงครามกำลังดำเนินอยู่",
+      "ar": "الحرب جارية.",
+      "aliases": [
+        "War in progress."
+      ]
+    },
+    {
+      "key": "conquest.status.inactive",
+      "en": "War has not started.",
+      "zh-TW": "攻城戰尚未開始。",
+      "pt-BR": "A guerra ainda não começou.",
+      "ru": "Война ещё не началась.",
+      "hi": "युद्ध अभी शुरू नहीं हुआ है।",
+      "id": "Perang belum dimulai.",
+      "vi": "Chiến tranh chưa bắt đầu.",
+      "th": "สงครามยังไม่เริ่ม",
+      "ar": "لم تبدأ الحرب بعد.",
+      "aliases": [
+        "War has not started."
+      ]
+    },
+    {
+      "key": "conquest.status.ended",
+      "en": "War ended. Castle owner: {0}",
+      "zh-TW": "攻城戰已結束。城主行會：{0}",
+      "pt-BR": "A guerra terminou. Guilda dona do castelo: {0}",
+      "ru": "Война окончена. Владелец замка: {0}",
+      "hi": "युद्ध समाप्त हुआ। किले की स्वामी गिल्ड: {0}",
+      "id": "Perang berakhir. Pemilik kastel: {0}",
+      "vi": "Chiến tranh đã kết thúc. Bang hội sở hữu thành: {0}",
+      "th": "สงครามสิ้นสุดแล้ว กิลด์เจ้าของปราสาท: {0}",
+      "ar": "انتهت الحرب. مالك القلعة: {0}",
+      "aliases": [
+        "War ended. Castle owner: {0}"
+      ]
+    },
+    {
+      "key": "conquest.status.noGuild",
+      "en": "No guild",
+      "zh-TW": "無行會",
+      "pt-BR": "Nenhuma guilda",
+      "ru": "Нет гильдии",
+      "hi": "कोई गिल्ड नहीं",
+      "id": "Tidak ada guild",
+      "vi": "Không có bang hội",
+      "th": "ไม่มีกิลด์",
+      "ar": "لا توجد نقابة",
+      "aliases": [
+        "No guild"
+      ]
+    },
+    {
+      "key": "conquest.status.noApplicant",
+      "en": "No applicant",
+      "zh-TW": "尚無行會報名",
+      "pt-BR": "Nenhum inscrito",
+      "ru": "Нет заявок",
+      "hi": "कोई आवेदक नहीं",
+      "id": "Belum ada pendaftar",
+      "vi": "Chưa có bang hội đăng ký",
+      "th": "ยังไม่มีกิลด์ลงทะเบียน",
+      "ar": "لا يوجد متقدم",
+      "aliases": [
+        "No applicant"
+      ]
+    },
+    {
+      "key": "conquest.registration.saved",
+      "en": "Registration saved.",
+      "zh-TW": "攻城報名已儲存。",
+      "pt-BR": "Inscrição salva.",
+      "ru": "Регистрация сохранена.",
+      "hi": "पंजीकरण सहेजा गया।",
+      "id": "Pendaftaran tersimpan.",
+      "vi": "Đã lưu đăng ký.",
+      "th": "บันทึกการลงทะเบียนแล้ว",
+      "ar": "تم حفظ التسجيل.",
+      "aliases": [
+        "Registration saved."
+      ]
+    },
+    {
+      "key": "conquest.registration.failed",
+      "en": "Siege registration failed. Reopen this page and try again.",
+      "zh-TW": "攻城報名失敗，請重新開啟此頁後再試。",
+      "pt-BR": "Falha na inscrição para o cerco. Reabra esta página e tente novamente.",
+      "ru": "Не удалось зарегистрироваться на осаду. Откройте эту страницу заново и повторите попытку.",
+      "hi": "घेराबंदी का पंजीकरण विफल रहा। यह पृष्ठ दोबारा खोलकर फिर कोशिश करें।",
+      "id": "Pendaftaran pengepungan gagal. Buka kembali halaman ini dan coba lagi.",
+      "vi": "Đăng ký công thành thất bại. Hãy mở lại trang này và thử lại.",
+      "th": "ลงทะเบียนสงครามปราสาทไม่สำเร็จ โปรดเปิดหน้านี้อีกครั้งแล้วลองใหม่",
+      "ar": "فشل التسجيل في الحصار. أعد فتح هذه الصفحة وحاول مجددًا.",
+      "aliases": [
+        "Siege registration failed. Reopen this page and try again."
+      ]
+    },
+    {
+      "key": "conquest.registration.leaderOnly",
+      "en": "Only the current guild leader may register.",
+      "zh-TW": "只有現任行會會長可報名。",
+      "pt-BR": "Somente o líder atual da guilda pode se inscrever.",
+      "ru": "Зарегистрироваться может только текущий глава гильдии.",
+      "hi": "केवल वर्तमान गिल्ड नेता पंजीकरण कर सकता है।",
+      "id": "Hanya pemimpin guild saat ini yang dapat mendaftar.",
+      "vi": "Chỉ bang chủ hiện tại mới có thể đăng ký.",
+      "th": "เฉพาะหัวหน้ากิลด์คนปัจจุบันเท่านั้นที่ลงทะเบียนได้",
+      "ar": "يمكن لقائد النقابة الحالي فقط التسجيل.",
+      "aliases": [
+        "Only the current guild leader may register."
+      ]
+    },
+    {
+      "key": "conquest.registration.busy",
+      "en": "Another guild already registered.",
+      "zh-TW": "已有其他行會報名。",
+      "pt-BR": "Outra guilda já se inscreveu.",
+      "ru": "Другая гильдия уже зарегистрирована.",
+      "hi": "दूसरी गिल्ड पहले ही पंजीकरण कर चुकी है।",
+      "id": "Guild lain sudah mendaftar.",
+      "vi": "Một bang hội khác đã đăng ký.",
+      "th": "มีกิลด์อื่นลงทะเบียนแล้ว",
+      "ar": "سجلت نقابة أخرى بالفعل.",
+      "aliases": [
+        "Another guild already registered."
+      ]
+    },
+    {
+      "key": "conquest.registration.ownerDenied",
+      "en": "Castle owner cannot register.",
+      "zh-TW": "城主行會不可報名攻打自己的城池。",
+      "pt-BR": "A guilda dona do castelo não pode se inscrever.",
+      "ru": "Владелец замка не может зарегистрироваться.",
+      "hi": "किले की स्वामी गिल्ड पंजीकरण नहीं कर सकती।",
+      "id": "Pemilik kastel tidak dapat mendaftar.",
+      "vi": "Bang hội sở hữu thành không thể đăng ký.",
+      "th": "กิลด์เจ้าของปราสาทไม่สามารถลงทะเบียนได้",
+      "ar": "لا يمكن لمالك القلعة التسجيل.",
+      "aliases": [
+        "Castle owner cannot register."
+      ]
+    },
+    {
+      "key": "conquest.registration.settled",
+      "en": "A completed siege cannot reopen today.",
+      "zh-TW": "今日已結束的攻城戰不可重新開啟。",
+      "pt-BR": "Um cerco encerrado não pode ser reaberto hoje.",
+      "ru": "Завершённую осаду нельзя возобновить сегодня.",
+      "hi": "समाप्त हो चुकी घेराबंदी आज दोबारा शुरू नहीं की जा सकती।",
+      "id": "Pengepungan yang sudah selesai tidak dapat dibuka lagi hari ini.",
+      "vi": "Trận công thành đã kết thúc không thể mở lại trong hôm nay.",
+      "th": "สงครามปราสาทที่สิ้นสุดแล้วไม่สามารถเปิดใหม่ได้ในวันนี้",
+      "ar": "لا يمكن إعادة فتح حصار انتهى اليوم.",
+      "aliases": [
+        "A completed siege cannot reopen today."
+      ]
+    },
+    {
+      "key": "conquest.management.title",
+      "en": "Castle management",
+      "zh-TW": "城池管理",
+      "pt-BR": "Administração do castelo",
+      "ru": "Управление замком",
+      "hi": "किले का प्रबंधन",
+      "id": "Pengelolaan Kastel",
+      "vi": "Quản lý thành",
+      "th": "จัดการปราสาท",
+      "ar": "إدارة القلعة",
+      "aliases": [
+        "Castle management"
+      ]
+    },
+    {
+      "key": "conquest.management.taxRate",
+      "en": "Tax rate: {0}%",
+      "zh-TW": "稅率：{0}%",
+      "pt-BR": "Taxa de imposto: {0}%",
+      "ru": "Ставка налога: {0}%",
+      "hi": "कर दर: {0}%",
+      "id": "Tarif pajak: {0}%",
+      "vi": "Thuế suất: {0}%",
+      "th": "อัตราภาษี: {0}%",
+      "ar": "معدل الضريبة: {0}%",
+      "aliases": [
+        "Tax rate: {0}%"
+      ]
+    },
+    {
+      "key": "conquest.management.taxTreasury",
+      "en": "Tax treasury: {0} gold",
+      "zh-TW": "稅收金庫：{0} 金幣",
+      "pt-BR": "Tesouro de impostos: {0} ouro",
+      "ru": "Налоговая казна: {0} золота",
+      "hi": "कर भंडार: {0} सोना",
+      "id": "Kas pajak: {0} emas",
+      "vi": "Kho thuế: {0} vàng",
+      "th": "คลังภาษี: {0} ทอง",
+      "ar": "خزينة الضرائب: {0} ذهب",
+      "aliases": [
+        "Tax treasury: {0} gold"
+      ]
+    },
+    {
+      "key": "conquest.management.guildBank",
+      "en": "Guild bank: {0} gold",
+      "zh-TW": "行會金庫：{0} 金幣",
+      "pt-BR": "Banco da guilda: {0} ouro",
+      "ru": "Банк гильдии: {0} золота",
+      "hi": "गिल्ड का कोष: {0} सोना",
+      "id": "Bank guild: {0} emas",
+      "vi": "Ngân quỹ bang hội: {0} vàng",
+      "th": "คลังกิลด์: {0} ทอง",
+      "ar": "خزينة النقابة: {0} ذهب",
+      "aliases": [
+        "Guild bank: {0} gold"
+      ]
+    },
+    {
+      "key": "conquest.management.setTax",
+      "en": "Set tax: {0}%",
+      "zh-TW": "設定稅率：{0}%",
+      "pt-BR": "Definir imposto: {0}%",
+      "ru": "Установить налог: {0}%",
+      "hi": "कर दर निर्धारित करें: {0}%",
+      "id": "Atur pajak: {0}%",
+      "vi": "Đặt thuế suất: {0}%",
+      "th": "ตั้งภาษี: {0}%",
+      "ar": "ضبط الضريبة: {0}%",
+      "aliases": [
+        "Set tax: {0}%"
+      ]
+    },
+    {
+      "key": "conquest.management.openGate",
+      "en": "Open gate",
+      "zh-TW": "開啟城門",
+      "pt-BR": "Abrir portão",
+      "ru": "Открыть ворота",
+      "hi": "द्वार खोलें",
+      "id": "Buka Gerbang",
+      "vi": "Mở cổng thành",
+      "th": "เปิดประตูปราสาท",
+      "ar": "فتح البوابة",
+      "aliases": [
+        "Open gate"
+      ]
+    },
+    {
+      "key": "conquest.management.closeGate",
+      "en": "Close gate",
+      "zh-TW": "關閉城門",
+      "pt-BR": "Fechar portão",
+      "ru": "Закрыть ворота",
+      "hi": "द्वार बंद करें",
+      "id": "Tutup Gerbang",
+      "vi": "Đóng cổng thành",
+      "th": "ปิดประตูปราสาท",
+      "ar": "إغلاق البوابة",
+      "aliases": [
+        "Close gate"
+      ]
+    },
+    {
+      "key": "conquest.management.repairGate",
+      "en": "Repair gate",
+      "zh-TW": "修復城門",
+      "pt-BR": "Reparar portão",
+      "ru": "Починить ворота",
+      "hi": "द्वार की मरम्मत करें",
+      "id": "Perbaiki Gerbang",
+      "vi": "Sửa cổng thành",
+      "th": "ซ่อมประตูปราสาท",
+      "ar": "إصلاح البوابة",
+      "aliases": [
+        "Repair gate"
+      ]
+    },
+    {
+      "key": "conquest.management.repairWall",
+      "en": "Repair wall {0}",
+      "zh-TW": "修復城牆 {0}",
+      "pt-BR": "Reparar muralha {0}",
+      "ru": "Починить стену {0}",
+      "hi": "दीवार {0} की मरम्मत करें",
+      "id": "Perbaiki Tembok {0}",
+      "vi": "Sửa tường thành {0}",
+      "th": "ซ่อมกำแพง {0}",
+      "ar": "إصلاح الجدار {0}",
+      "aliases": [
+        "Repair wall {0}"
+      ]
+    },
+    {
+      "key": "conquest.management.restoreArcher",
+      "en": "Restore archer {0}",
+      "zh-TW": "重新招募弓箭手 {0}",
+      "pt-BR": "Recontratar arqueiro {0}",
+      "ru": "Нанять лучника {0}",
+      "hi": "तीरंदाज़ {0} को फिर नियुक्त करें",
+      "id": "Rekrut Kembali Pemanah {0}",
+      "vi": "Tuyển lại cung thủ {0}",
+      "th": "จ้างพลธนู {0} อีกครั้ง",
+      "ar": "إعادة تعيين الرامي {0}",
+      "aliases": [
+        "Restore archer {0}"
+      ]
+    },
+    {
+      "key": "conquest.management.withdraw",
+      "en": "Withdraw taxes to guild bank",
+      "zh-TW": "將稅收轉入行會金庫",
+      "pt-BR": "Transferir impostos para o banco da guilda",
+      "ru": "Перевести налоги в банк гильдии",
+      "hi": "कर राशि गिल्ड के कोष में जमा करें",
+      "id": "Transfer Pajak ke Bank Guild",
+      "vi": "Chuyển thuế vào ngân quỹ bang hội",
+      "th": "โอนภาษีเข้าคลังกิลด์",
+      "ar": "تحويل الضرائب إلى خزينة النقابة",
+      "aliases": [
+        "Withdraw taxes to guild bank"
+      ]
+    },
+    {
+      "key": "conquest.management.saved",
+      "en": "Castle management saved.",
+      "zh-TW": "城池管理設定已儲存。",
+      "pt-BR": "Administração do castelo salva.",
+      "ru": "Изменения управления замком сохранены.",
+      "hi": "किले के प्रबंधन में किए बदलाव सहेजे गए।",
+      "id": "Pengelolaan kastel tersimpan.",
+      "vi": "Đã lưu thay đổi quản lý thành.",
+      "th": "บันทึกการจัดการปราสาทแล้ว",
+      "ar": "تم حفظ إعدادات إدارة القلعة.",
+      "aliases": [
+        "Castle management saved."
+      ]
+    },
+    {
+      "key": "conquest.management.failed",
+      "en": "Castle management failed. Check permissions and guild funds.",
+      "zh-TW": "城池管理操作失敗，請確認權限與行會金庫餘額。",
+      "pt-BR": "Falha na administração do castelo. Verifique as permissões e os fundos da guilda.",
+      "ru": "Не удалось изменить управление замком. Проверьте права и средства гильдии.",
+      "hi": "किले का प्रबंधन विफल रहा। अनुमति और गिल्ड के कोष की जाँच करें।",
+      "id": "Pengelolaan kastel gagal. Periksa izin dan dana guild.",
+      "vi": "Quản lý thành thất bại. Hãy kiểm tra quyền hạn và ngân quỹ bang hội.",
+      "th": "จัดการปราสาทไม่สำเร็จ โปรดตรวจสอบสิทธิ์และเงินในคลังกิลด์",
+      "ar": "فشلت إدارة القلعة. تحقق من الصلاحيات وأموال النقابة.",
+      "aliases": [
+        "Castle management failed. Check permissions and guild funds."
+      ]
+    },
+    {
+      "key": "conquest.management.leaderOnly",
+      "en": "Only the castle owner guild leader may manage this castle.",
+      "zh-TW": "只有城主行會的現任會長可管理此城池。",
+      "pt-BR": "Somente o líder da guilda dona do castelo pode administrá-lo.",
+      "ru": "Управлять замком может только глава гильдии-владельца.",
+      "hi": "केवल किले की स्वामी गिल्ड का नेता इस किले का प्रबंधन कर सकता है।",
+      "id": "Hanya pemimpin guild pemilik kastel yang dapat mengelola kastel ini.",
+      "vi": "Chỉ bang chủ của bang hội sở hữu thành mới có thể quản lý thành này.",
+      "th": "เฉพาะหัวหน้ากิลด์เจ้าของปราสาทเท่านั้นที่จัดการปราสาทนี้ได้",
+      "ar": "يمكن لقائد النقابة المالكة للقلعة فقط إدارتها.",
+      "aliases": [
+        "Only the castle owner guild leader may manage this castle."
+      ]
+    },
+    {
+      "key": "conquest.management.defenses",
+      "en": "Defenses: {0}",
+      "zh-TW": "城防：{0}",
+      "pt-BR": "Defesas: {0}",
+      "ru": "Оборона: {0}",
+      "hi": "रक्षा व्यवस्थाएँ: {0}",
+      "id": "Pertahanan: {0}",
+      "vi": "Công sự: {0}",
+      "th": "แนวป้องกัน: {0}",
+      "ar": "الدفاعات: {0}",
+      "aliases": [
+        "Defenses: {0}"
+      ]
+    },
+    {
+      "key": "conquest.announce.started",
+      "en": "Siege started. Attacker: {0}",
+      "zh-TW": "攻城戰已開始。攻城行會：{0}",
+      "pt-BR": "O cerco começou. Atacante: {0}",
+      "ru": "Осада началась. Атакующий: {0}",
+      "hi": "घेराबंदी शुरू हुई। हमलावर गिल्ड: {0}",
+      "id": "Pengepungan dimulai. Penyerang: {0}",
+      "vi": "Công thành đã bắt đầu. Bang hội tấn công: {0}",
+      "th": "สงครามปราสาทเริ่มแล้ว กิลด์ฝ่ายบุก: {0}",
+      "ar": "بدأ الحصار. المهاجم: {0}",
+      "aliases": [
+        "Siege started. Attacker: {0}"
+      ]
+    },
+    {
+      "key": "conquest.announce.captured",
+      "en": "Castle captured by {0}.",
+      "zh-TW": "{0} 已佔領城池。",
+      "pt-BR": "Castelo capturado por {0}.",
+      "ru": "Гильдия {0} захватила замок.",
+      "hi": "गिल्ड {0} ने किले पर कब्ज़ा कर लिया।",
+      "id": "Kastel direbut oleh {0}.",
+      "vi": "Bang hội {0} đã chiếm thành.",
+      "th": "กิลด์ {0} ยึดปราสาทได้แล้ว",
+      "ar": "استولت {0} على القلعة.",
+      "aliases": [
+        "Castle captured by {0}."
+      ]
+    },
+    {
+      "key": "conquest.announce.ended",
+      "en": "Siege ended. Castle owner: {0}.",
+      "zh-TW": "攻城戰已結束。城主行會：{0}。",
+      "pt-BR": "O cerco terminou. Guilda dona do castelo: {0}.",
+      "ru": "Осада окончена. Владелец замка: {0}.",
+      "hi": "घेराबंदी समाप्त हुई। किले की स्वामी गिल्ड: {0}।",
+      "id": "Pengepungan berakhir. Pemilik kastel: {0}.",
+      "vi": "Công thành đã kết thúc. Bang hội sở hữu thành: {0}.",
+      "th": "สงครามปราสาทสิ้นสุดแล้ว กิลด์เจ้าของปราสาท: {0}",
+      "ar": "انتهى الحصار. مالك القلعة: {0}.",
+      "aliases": [
+        "Siege ended. Castle owner: {0}."
+      ]
+    },
+    {
+      "key": "conquest.management.repairDefenses",
+      "en": "Repair defenses",
+      "zh-TW": "修復城防",
+      "pt-BR": "Reparar defesas",
+      "ru": "Починить укрепления",
+      "hi": "रक्षा व्यवस्थाओं की मरम्मत करें",
+      "id": "Perbaiki Pertahanan",
+      "vi": "Sửa công sự",
+      "th": "ซ่อมแนวป้องกัน",
+      "ar": "إصلاح الدفاعات",
+      "aliases": [
+        "Repair defenses"
+      ]
+    },
+    {
+      "key": "conquest.management.restoreArchers",
+      "en": "Restore archers",
+      "zh-TW": "重新招募弓箭手",
+      "pt-BR": "Recontratar arqueiros",
+      "ru": "Нанять лучников",
+      "hi": "तीरंदाज़ों को फिर नियुक्त करें",
+      "id": "Rekrut Kembali Pemanah",
+      "vi": "Tuyển lại cung thủ",
+      "th": "จ้างพลธนูอีกครั้ง",
+      "ar": "إعادة تعيين الرماة",
+      "aliases": [
+        "Restore archers"
+      ]
+    },
+    {
+      "key": "conquest.management.gateHp",
+      "en": "Gate {0}: {1}/{2}",
+      "zh-TW": "城門 {0}：{1}/{2}",
+      "pt-BR": "Portão {0}: {1}/{2}",
+      "ru": "Ворота {0}: {1}/{2}",
+      "hi": "द्वार {0}: {1}/{2}",
+      "id": "Gerbang {0}: {1}/{2}",
+      "vi": "Cổng thành {0}: {1}/{2}",
+      "th": "ประตู {0}: {1}/{2}",
+      "ar": "البوابة {0}: {1}/{2}",
+      "aliases": [
+        "Gate {0}: {1}/{2}"
+      ]
+    },
+    {
+      "key": "conquest.management.wallHp",
+      "en": "Wall {0}: {1}/{2}",
+      "zh-TW": "城牆 {0}：{1}/{2}",
+      "pt-BR": "Muralha {0}: {1}/{2}",
+      "ru": "Стена {0}: {1}/{2}",
+      "hi": "दीवार {0}: {1}/{2}",
+      "id": "Tembok {0}: {1}/{2}",
+      "vi": "Tường thành {0}: {1}/{2}",
+      "th": "กำแพง {0}: {1}/{2}",
+      "ar": "الجدار {0}: {1}/{2}",
+      "aliases": [
+        "Wall {0}: {1}/{2}"
+      ]
+    },
+    {
+      "key": "conquest.management.archerHp",
+      "en": "Archer {0}: {1}/{2}",
+      "zh-TW": "弓箭手 {0}：{1}/{2}",
+      "pt-BR": "Arqueiro {0}: {1}/{2}",
+      "ru": "Лучник {0}: {1}/{2}",
+      "hi": "तीरंदाज़ {0}: {1}/{2}",
+      "id": "Pemanah {0}: {1}/{2}",
+      "vi": "Cung thủ {0}: {1}/{2}",
+      "th": "พลธนู {0}: {1}/{2}",
+      "ar": "الرامي {0}: {1}/{2}",
+      "aliases": [
+        "Archer {0}: {1}/{2}"
+      ]
+    },
+    {
+      "key": "conquest.management.repairCost",
+      "en": "Repair cost: {0} gold.",
+      "zh-TW": "修復費用：{0} 金幣。",
+      "pt-BR": "Custo de reparo: {0} ouro.",
+      "ru": "Стоимость ремонта: {0} золота.",
+      "hi": "मरम्मत की लागत: {0} सोना।",
+      "id": "Biaya perbaikan: {0} emas.",
+      "vi": "Chi phí sửa chữa: {0} vàng.",
+      "th": "ค่าซ่อม: {0} ทอง",
+      "ar": "تكلفة الإصلاح: {0} ذهب.",
+      "aliases": [
+        "Repair cost: {0} gold."
+      ]
+    },
+    {
+      "key": "conquest.management.open",
+      "en": "Open",
+      "zh-TW": "開啟",
+      "pt-BR": "Aberto",
+      "ru": "Открыто",
+      "hi": "खुला",
+      "id": "Terbuka",
+      "vi": "Mở",
+      "th": "เปิด",
+      "ar": "مفتوح",
+      "aliases": [
+        "Open"
+      ]
+    },
+    {
+      "key": "conquest.management.closed",
+      "en": "Closed",
+      "zh-TW": "關閉",
+      "pt-BR": "Fechado",
+      "ru": "Закрыто",
+      "hi": "बंद",
+      "id": "Tertutup",
+      "vi": "Đóng",
+      "th": "ปิด",
+      "ar": "مغلق",
+      "aliases": [
+        "Closed"
+      ]
+    },
+    {
+      "key": "conquest.announce.requested",
+      "en": "Siege requested by {0}.",
+      "zh-TW": "{0} 已報名攻城。",
+      "pt-BR": "Cerco solicitado por {0}.",
+      "ru": "Гильдия {0} подала заявку на осаду.",
+      "hi": "गिल्ड {0} ने घेराबंदी के लिए आवेदन किया।",
+      "id": "Pengepungan diajukan oleh {0}.",
+      "vi": "Bang hội {0} đã đăng ký công thành.",
+      "th": "กิลด์ {0} ยื่นขอสงครามปราสาทแล้ว",
+      "ar": "قدمت {0} طلبًا للحصار.",
+      "aliases": [
+        "Siege requested by {0}."
+      ]
+    },
+    {
+      "key": "conquest.announce.unowned",
+      "en": "Siege ended. The castle is unowned.",
+      "zh-TW": "攻城戰已結束，城池目前無主。",
+      "pt-BR": "O cerco terminou. O castelo não tem dono.",
+      "ru": "Осада окончена. У замка нет владельца.",
+      "hi": "घेराबंदी समाप्त हुई। किले का कोई स्वामी नहीं है।",
+      "id": "Pengepungan berakhir. Kastel belum memiliki pemilik.",
+      "vi": "Công thành đã kết thúc. Thành hiện chưa có chủ.",
+      "th": "สงครามปราสาทสิ้นสุดแล้ว ปราสาทยังไม่มีเจ้าของ",
+      "ar": "انتهى الحصار. لا يوجد مالك للقلعة.",
+      "aliases": [
+        "Siege ended. The castle is unowned."
+      ]
+    },
+    {
+      "key": "conquest.status.unowned",
+      "en": "Castle is unowned.",
+      "zh-TW": "城池目前無主。",
+      "pt-BR": "O castelo não tem dono.",
+      "ru": "У замка нет владельца.",
+      "hi": "किले का कोई स्वामी नहीं है।",
+      "id": "Kastel belum memiliki pemilik.",
+      "vi": "Thành hiện chưa có chủ.",
+      "th": "ปราสาทยังไม่มีเจ้าของ",
+      "ar": "لا يوجد مالك للقلعة.",
+      "aliases": [
+        "Castle is unowned."
+      ]
+    },
+    {
+      "key": "conquest.status.noSiegeApplicant",
+      "en": "No siege applicant.",
+      "zh-TW": "尚無行會報名攻城。",
+      "pt-BR": "Nenhuma guilda se inscreveu para o cerco.",
+      "ru": "Нет заявок на осаду.",
+      "hi": "किसी गिल्ड ने घेराबंदी के लिए आवेदन नहीं किया है।",
+      "id": "Belum ada pendaftar pengepungan.",
+      "vi": "Chưa có bang hội đăng ký công thành.",
+      "th": "ยังไม่มีกิลด์ลงทะเบียนสงครามปราสาท",
+      "ar": "لم تتقدم أي نقابة للحصار.",
+      "aliases": [
+        "No siege applicant."
+      ]
+    }
+  ]
+}

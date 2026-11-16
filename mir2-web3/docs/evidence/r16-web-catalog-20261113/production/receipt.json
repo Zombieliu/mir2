@@ -1,0 +1,550 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-12T21:51:52.774Z",
+  "origin": "https://numeron.obelisk.build",
+  "path": "/game",
+  "source": "8654cdcb36e20e114f3e1d34cd142d0b5396638a",
+  "baseline": "codex/windows-player-journey",
+  "includesUserFeedback6997f810ed": true,
+  "deployment": "dpl_9KSedR4DePS2tFQGh4T5qZiMVdAK",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "deploymentReadyAndProduction": true,
+  "stage": {
+    "passed": true,
+    "workflowRun": "43308400205",
+    "implementation": "84c888f90c3327eaac66fda15e32182f804351b8"
+  },
+  "promote": {
+    "passed": true,
+    "workflowRun": "43310294840",
+    "implementation": "82efff2c8c0eef72a950501d84acad3c6c3de958"
+  },
+  "releaseHelperAndWorkflowBytesUnchangedAcrossImplementationAdvance": true,
+  "publicAliasAndProductionTargetMatch": true,
+  "rollbacks": [],
+  "onlyGameProjectWrites": true,
+  "publicationPassed": true,
+  "fullPublicAcceptancePassed": false,
+  "candidate100": false,
+  "humanAccepted": false,
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "revision": "8654cdcb36e20e114f3e1d34cd142d0b5396638a",
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "revision": "8654cdcb36e20e114f3e1d34cd142d0b5396638a",
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    }
+  ],
+  "loginOnlyApproval": {
+    "passed": true,
+    "officialPwa": true,
+    "mobileBrowserEmulation": true,
+    "virtualPasskey": true,
+    "approveUiClicks": 1,
+    "forbiddenOperations": 0,
+    "physicalPhoneCameraOrBiometricTested": false
+  },
+  "protocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 1,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "returnedToSelect": true
+  },
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 57154
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 57157
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 59076
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 59163
+    }
+  },
+  "firstWalkTransport": {
+    "websocketFrameMs": 1919,
+    "keepAlives": [
+      {
+        "sentRelativeToWalkMs": -27981,
+        "rttMs": 129
+      },
+      {
+        "sentRelativeToWalkMs": -12982,
+        "rttMs": 130
+      },
+      {
+        "sentRelativeToWalkMs": 2018,
+        "rttMs": 129
+      },
+      {
+        "sentRelativeToWalkMs": 17018,
+        "rttMs": 170
+      },
+      {
+        "sentRelativeToWalkMs": 32019,
+        "rttMs": 133
+      },
+      {
+        "sentRelativeToWalkMs": 47018,
+        "rttMs": 133
+      },
+      {
+        "sentRelativeToWalkMs": 62018,
+        "rttMs": 128
+      },
+      {
+        "sentRelativeToWalkMs": 77020,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 92018,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 107018,
+        "rttMs": 129
+      },
+      {
+        "sentRelativeToWalkMs": 122021,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 137018,
+        "rttMs": 137
+      },
+      {
+        "sentRelativeToWalkMs": 152018,
+        "rttMs": 129
+      },
+      {
+        "sentRelativeToWalkMs": 167021,
+        "rttMs": 135
+      },
+      {
+        "sentRelativeToWalkMs": 182018,
+        "rttMs": 129
+      },
+      {
+        "sentRelativeToWalkMs": 197018,
+        "rttMs": 127
+      },
+      {
+        "sentRelativeToWalkMs": 212018,
+        "rttMs": 162
+      },
+      {
+        "sentRelativeToWalkMs": 227018,
+        "rttMs": 137
+      },
+      {
+        "sentRelativeToWalkMs": 242021,
+        "rttMs": 134
+      }
+    ],
+    "gatewayHealthBefore": {
+      "status": 200,
+      "startedAt": 46041,
+      "finishedAt": 46750,
+      "revision": "62931e1c5111ca978808a3b0702c12183974d53d",
+      "complete": true,
+      "sinceInitializationMs": 2809310,
+      "successes": 0,
+      "failures": 0,
+      "count": 0,
+      "sumUs": 0
+    },
+    "gatewayHealthAfter": {
+      "status": 200,
+      "startedAt": 59161,
+      "finishedAt": 59231,
+      "revision": "62931e1c5111ca978808a3b0702c12183974d53d",
+      "complete": true,
+      "sinceInitializationMs": 2821793,
+      "successes": 1,
+      "failures": 0,
+      "count": 1,
+      "sumUs": 506
+    },
+    "admissionCounterDelta": {
+      "successes": 1,
+      "failures": 0,
+      "count": 1,
+      "sumUs": 506,
+      "oneObservedAdmission": true
+    }
+  },
+  "firstPlayableAfterStartMs": 10979,
+  "timing": {
+    "clockEpochMs": 1794519266114,
+    "authoritativeLoginSuccessMs": 15349,
+    "startIntentMs": 46054,
+    "startAckMs": 53784,
+    "authoritativeStarterMapMs": 53792,
+    "authoritativeSelfMs": 53792,
+    "firstPlayableObservedMs": 57033,
+    "terrainPaintVerifiedMs": 127456,
+    "logoutIntentMs": 309730,
+    "logoutAckMs": 310705,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 15352,
+    "starterRegionWireHeadersMs": 16504.846,
+    "starterRegionResponseEventMs": 16505,
+    "starterRegionBodyMs": 16733,
+    "starterRegionCommitMs": 53912,
+    "sceneSpritesReadyMs": 53941,
+    "localeRequestMs": 15352,
+    "localeBodyMs": 25044,
+    "localeReadyMs": 25066,
+    "firstPlayableFrameMs": 56948,
+    "rendererBodyMs": null
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": false,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "nativeWithinOriginal120Seconds": false,
+  "worker": {
+    "cacheByteAndShaRestoredAfterActualStopAndStart": true,
+    "nativeReady": false,
+    "wholeCheckPassed": false
+  },
+  "prewarm": {
+    "requested": 113,
+    "ok": 113,
+    "failed": 0
+  },
+  "quest": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-react-fallback",
+    "questId": 2110001,
+    "stage": "available",
+    "objective": "向助理簡報告",
+    "counter": "0/1",
+    "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+    "journey": "當前主線 0/26",
+    "zeroWorldCommands": true,
+    "screenshot": "quest-available-zh-TW.png"
+  },
+  "originalFonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "pageErrors": 0,
+  "consoleErrors": 51,
+  "ownedBrowsersClosed": true,
+  "failure": {
+    "phase": "verify-public-worker-restart-and-persistent-HUD-cache",
+    "code": "AUTOMATION_FAILED"
+  },
+  "functionErrorScan": {
+    "tool": "Vercel get_runtime_logs",
+    "since": "30m",
+    "levels": [
+      "error",
+      "fatal"
+    ],
+    "groupsReturned": 0,
+    "limitation": "No function error groups returned; this does not negate browser network aborts, 504s or shared-HUD failure."
+  },
+  "preservation": {
+    "baselineCount": 132,
+    "unchanged": 131,
+    "changedSinceReleaseSnapshot": [
+      {
+        "path": "mir2-web3/docs/evidence/gateway-equip-logout-20261112/README.md",
+        "before": "5d3d4c51d083b92d70516097b5a10993c9834a468c64b2f65288e70bd9506e32",
+        "after": "f65e323490c496d1b776739f82fc153e54cc5509c4626524146e7360c07002a2"
+      }
+    ],
+    "earlierConcurrentEdits": [
+      {
+        "file": "mir2-web3/docs/evidence/gateway-equip-logout-20261112/README.md",
+        "before": "ed41a153ba80b031ddb9c6c331ad48ac4f0c1d196ea07f3a6ec6c0443bd39335",
+        "current": "5d3d4c51d083b92d70516097b5a10993c9834a468c64b2f65288e70bd9506e32"
+      }
+    ]
+  },
+  "rawEvidenceRoot": "C:/r16-web-catalog-release-20261113",
+  "rawEvidence": [
+    {
+      "path": "stage/numeron-r16-release.json",
+      "bytes": 9890,
+      "sha256": "bf4e6127dd01b54ec43e9deaabce546ad6df4ba3d4f2831c38a2bad60044c1dc"
+    },
+    {
+      "path": "promote/numeron-r16-release.json",
+      "bytes": 15533,
+      "sha256": "0f35db5bae6e99eedfc95f37a98c135bad07300293afb5b3e71f9da4cdb752c4"
+    },
+    {
+      "path": "final-public-readback.json",
+      "bytes": 2860,
+      "sha256": "cce18779e4b5ed2288e13ca6bd4ad49048f79c637d556a0f16d0be2fff5f0036"
+    },
+    {
+      "path": "final-check.json",
+      "bytes": 1492,
+      "sha256": "79b5f7564a4fc7f8aa09e52f60f64091ca0a3438454f100d54b269744e769508"
+    },
+    {
+      "path": "signed-public/preparation.json",
+      "bytes": 7325,
+      "sha256": "d4b6e306e9c5be7ff77324f1a693a523b5827d21a6ca422464869715d423cf61"
+    },
+    {
+      "path": "signed-public/first-party-signed-summary.json",
+      "bytes": 51388,
+      "sha256": "ce8becb11975df971f9476291f126fa6f072914af4f0c49650a9404041b62915"
+    },
+    {
+      "path": "signed-public/approval-receipt.json",
+      "bytes": 1821,
+      "sha256": "3b282d066c2214a61ae9ed3b8f969f3cc179bf27956de172205c804021f6a368"
+    },
+    {
+      "path": "signed-public/wallet-network-guard.json",
+      "bytes": 288,
+      "sha256": "415894fac2e4c800982a467a9b34fca60750fd4b809973a12ba23ad0ccd4e14a"
+    },
+    {
+      "path": "signed-public/browser-closed.json",
+      "bytes": 60,
+      "sha256": "c8676c1b906c706544be50c6cc9a92a1c7f73fa04e5e8a1f345c0e012ecfa63a"
+    },
+    {
+      "path": "signed-public/desktop-first-party-web-catalog-release/receipt.json",
+      "bytes": 67818,
+      "sha256": "f65a4faaa8f487ed5020fb9808b5783cb7feb5e4bad3c629d2b40d74de2bb4a8"
+    },
+    {
+      "path": "signed-public/desktop-first-party-web-catalog-release/startup-probe.json",
+      "bytes": 176297,
+      "sha256": "4b06dd752fd8be0709cdebcde6899b63057232d3cae7ca365cfc349c9f8a096c"
+    },
+    {
+      "path": "signed-public/desktop-first-party-web-catalog-release/websocket-frame-metadata.json",
+      "bytes": 52157,
+      "sha256": "1a807ad4c5a7f3ae77460b5b70663653b021ee4709f83d3b11feace4e77e25b3"
+    },
+    {
+      "path": "signed-public/desktop-first-party-web-catalog-release/worker-restart.json",
+      "bytes": 1900,
+      "sha256": "931c6b8cbd9d0343a123ea452b25f884bf9792ce2486b4b4c8bf793177899070"
+    },
+    {
+      "path": "signed-public/desktop-first-party-web-catalog-release/prewarm-and-markers.json",
+      "bytes": 10518,
+      "sha256": "9e5e595b1fc6bc141a888a57160293f30c499923dc929b06f0024a0bd9aa7552"
+    },
+    {
+      "path": "signed-public/desktop-first-party-web-catalog-release/original-fonts.json",
+      "bytes": 2377,
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "path": "public-qr/qr-zh-cn-receipt.json",
+      "bytes": 2376,
+      "sha256": "b56acb08e08ac8a27351c05c2dc1dfd0d4e9d22f26866bab2d85e91873ba2bd6"
+    },
+    {
+      "path": "public-qr/qr-zh-tw-receipt.json",
+      "bytes": 2362,
+      "sha256": "b318fa148349470eeac3b7666c5e96a1e7115ee88a7de35a91ff872f24824573"
+    }
+  ],
+  "frozenScripts": {
+    "run.mjs": "33f236e95967ed7c7bde1e61d50003eb44da984a54eff93a34595ebc35931e43",
+    "desktop-qr-city-direct-cdp.mjs": "b3416e8b1f9996a5643cfe628f106c887cd6473e749c1d4aa2978fcfd655b732",
+    "scene-gate.mjs": "2318440b78fef60734fc2737910643bf5b5e1d09991e55c42401655385219068",
+    "mobile-wallet-public.mjs": "7289dafefc9d68efd06198f04d3f27679eca88745c8104ec432896ec88902bb4",
+    "coordinated-approval-step.mjs": "d1517f42b9b89025b46a50a73818d4c13ad228dcb7f0d7e61e8e5ade908c1d45",
+    "passive-approval-round.mjs": "a0b9c0c5685421940ec922366db6af4d6c2dbd01debec60227988c7ec27e90b4",
+    "classify-wallet-request.mjs": "ab34b854c2847ba041a63ebfd50df3b5cca95673731d243cbd2a9d6d4a52ea25",
+    "handoff.mjs": "2aae21d569d3c339ba190e9184b650de1647ef902b802bbc6aa85c676566918f",
+    "verify-rendered-qr.mjs": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef",
+    "terrain-observation.mjs": "50e0e2b859edb668b2481aa4293a908a925bf36b871dc4e8e735aeb05de7681a",
+    "verify-public-quest.mjs": "db07bef80fb1ea49fe6e679fe53d0e7011ea20b3feddd259edca79e0ef389fdf",
+    "perf-probe.mjs": "27fa948ba2354c23dee4ab91128c907aa43fd315fc35d08127130bacf9e58d62",
+    "verify-shared-quest.mjs": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+    "verify-prewarm.mjs": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+    "frame-metadata.mjs": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825",
+    "handoff-time.mjs": "6dc1d58a2d8101bf1f7272b73cc4a23691b58fd2a3b243d2dc28c5f5b05e85d7",
+    "verify-worker-restart.mjs": "fd678683ec19b582324937df06ab4a22624cd7e57ae032d90e823b742911e203",
+    "worker-font-network.mjs": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+    "verify-original-fonts.mjs": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d"
+  },
+  "next": "Recover bounded runtime-body transport before boot; retain original 8-second walk and 120-second Native gates, disposal and single-boot ownership. No timeout increases or repeated App boot are qualified here."
+}

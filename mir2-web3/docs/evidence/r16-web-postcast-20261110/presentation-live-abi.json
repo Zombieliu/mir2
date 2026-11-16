@@ -1,0 +1,157 @@
+{
+  "schema": "mir2.r16.postcast-live-presentation-abi.v1",
+  "presentation": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+  "manifestSha256": "7db42b475aa372719ef4b74addc9153f27ab797e760dc6af10f36eaa71a3c6a6",
+  "wasmSha256": "0836ec2d40bb41a7b554557edd2a021cabbd06838c186372f974b85705fb107e",
+  "rows": [
+    {
+      "name": "bootstrap",
+      "nowMs": 1000,
+      "actionSourceRevision": 1,
+      "action": "standing",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": true,
+        "worldKey": "world-fishing-source:91",
+        "objectId": "7",
+        "actionSourceKey": "world-fishing-source:91",
+        "sourceRevision": 1,
+        "continuityRevision": 1,
+        "bridgeEpoch": 1,
+        "incarnation": 1,
+        "lastNowMs": 1000,
+        "action": "standing",
+        "direction": "Right"
+      }
+    },
+    {
+      "name": "projected-first-cast",
+      "nowMs": 1100,
+      "actionSourceRevision": 2,
+      "action": "spell",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": false
+      }
+    },
+    {
+      "name": "same-receipt-aligned",
+      "nowMs": 1230,
+      "actionSourceRevision": 3,
+      "action": "spell",
+      "frame": 1,
+      "authority": {
+        "version": 1,
+        "known": true,
+        "worldKey": "world-fishing-source:91",
+        "objectId": "7",
+        "actionSourceKey": "world-fishing-source:91",
+        "sourceRevision": 3,
+        "continuityRevision": 3,
+        "bridgeEpoch": 1,
+        "incarnation": 1,
+        "lastNowMs": 1230,
+        "action": "spell",
+        "direction": "Right"
+      }
+    },
+    {
+      "name": "first-walk-predicted",
+      "nowMs": 1800,
+      "actionSourceRevision": 3,
+      "action": "walking",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": false
+      }
+    },
+    {
+      "name": "first-walk-acknowledged",
+      "nowMs": 1920,
+      "actionSourceRevision": 4,
+      "action": "walking",
+      "frame": 1,
+      "authority": {
+        "version": 1,
+        "known": true,
+        "worldKey": "world-fishing-source:91",
+        "objectId": "7",
+        "actionSourceKey": "world-fishing-source:91",
+        "sourceRevision": 4,
+        "continuityRevision": 3,
+        "bridgeEpoch": 1,
+        "incarnation": 1,
+        "lastNowMs": 1920,
+        "action": "walking",
+        "direction": "Right"
+      }
+    },
+    {
+      "name": "ready-after-walk",
+      "nowMs": 2410,
+      "actionSourceRevision": 5,
+      "action": "standing",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": true,
+        "worldKey": "world-fishing-source:91",
+        "objectId": "7",
+        "actionSourceKey": "world-fishing-source:91",
+        "sourceRevision": 5,
+        "continuityRevision": 3,
+        "bridgeEpoch": 1,
+        "incarnation": 1,
+        "lastNowMs": 2410,
+        "action": "standing",
+        "direction": "Right"
+      }
+    },
+    {
+      "name": "stale-cast-rejected",
+      "nowMs": 2420,
+      "actionSourceRevision": 4,
+      "action": "standing",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": false
+      }
+    },
+    {
+      "name": "retained-proof-cannot-heal",
+      "nowMs": 2430,
+      "actionSourceRevision": 6,
+      "action": "standing",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": false
+      }
+    },
+    {
+      "name": "next-real-cast",
+      "nowMs": 2500,
+      "actionSourceRevision": 7,
+      "action": "spell",
+      "frame": 0,
+      "authority": {
+        "version": 1,
+        "known": true,
+        "worldKey": "world-fishing-source:91",
+        "objectId": "7",
+        "actionSourceKey": "world-fishing-source:91",
+        "sourceRevision": 7,
+        "continuityRevision": 5,
+        "bridgeEpoch": 1,
+        "incarnation": 1,
+        "lastNowMs": 2500,
+        "action": "spell",
+        "direction": "Right"
+      }
+    }
+  ]
+}

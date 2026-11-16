@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T07:37:19.934Z",
+  "command": "node hp-proof-v2-selfcheck.mjs",
+  "exitCode": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.mjs",
+      "bytes": 3490,
+      "sha256": "b12118b6490e356a61fbaebbf05a66e9889e49f9708685eedbde1298791c7a06"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.mjs",
+      "bytes": 3490,
+      "sha256": "b12118b6490e356a61fbaebbf05a66e9889e49f9708685eedbde1298791c7a06"
+    }
+  ],
+  "sourceUnchanged": true,
+  "log": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.log",
+    "bytes": 1184,
+    "sha256": "5e31f16a8330e2087de26c60f6d1d853fd4023ecb66713abe6c7df376263608f"
+  },
+  "tests": 13,
+  "passed": 13,
+  "failed": 0,
+  "pureSynthetic": true,
+  "productTestsRun": false,
+  "liveRunDataRead": false,
+  "checks": [
+    {
+      "name": "verified-consumed requires matched ack and structured quantity proof",
+      "passed": true
+    },
+    {
+      "name": "verified-healed requires actual HP increase",
+      "passed": true
+    },
+    {
+      "name": "verified can independently contain both effects",
+      "passed": true
+    },
+    {
+      "name": "verified without either proof is rejected",
+      "passed": true
+    },
+    {
+      "name": "consumption Boolean alone does not provide proof",
+      "passed": true
+    },
+    {
+      "name": "healed proof must actually exceed previous HP",
+      "passed": true
+    },
+    {
+      "name": "acknowledgement is mandatory and bounded scalar proof",
+      "passed": true
+    },
+    {
+      "name": "verified event without actually recorded sent is rejected",
+      "passed": true
+    },
+    {
+      "name": "unknown success status is rejected rather than mistaken for verified",
+      "passed": true
+    },
+    {
+      "name": "zero events retain dictionary and explicitly no real verified dose",
+      "passed": true
+    },
+    {
+      "name": "ordinary not-sent fixed reason is accepted without dose credit",
+      "passed": true
+    },
+    {
+      "name": "failure terminal closes pending without creating success",
+      "passed": true
+    },
+    {
+      "name": "proof events inconsistent with a shared2s capture are rejected",
+      "passed": true
+    }
+  ],
+  "scope": "Verifiedconsumption,verifiedhealing,both,noeffect rejection,missingack,sentmatching,unknownstatus,zeroevent nonvacuity,not-sent/failure terminals andpossible2scapture consistency."
+}

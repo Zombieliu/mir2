@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "kind": "numeron-r16-release",
+  "passed": true,
+  "domainMovePending": true,
+  "customDomainChanged": false,
+  "oldGameProjectMutatedByHelper": false,
+  "writes": [
+    {
+      "operation": "stage",
+      "site": "game"
+    }
+  ],
+  "rollbacks": [],
+  "credentialsRecorded": false,
+  "operation": "numeron-qr-stage",
+  "sourceSha": "72c00d20aeb82a9f87c79c2a8567a3146d9a2cfc",
+  "implementationSha": "39e8bcaeec33712491db690ed947b07116f763de",
+  "projects": {
+    "original": {
+      "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "24.x"
+    },
+    "main": {
+      "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+      "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+      "rootDirectory": null,
+      "nodeVersion": "24.x"
+    },
+    "game": {
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "production": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "26.x"
+    }
+  },
+  "sourceClosure": {
+    "base": "1cc89f69a05dd35046f4497254a14b91128da1ed",
+    "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "ref": "codex/windows-player-journey",
+    "changedFiles": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+        "sha": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha": "b1747f8c09b222adaf1edfbd0c6dd6c0830335e1"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+        "sha": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+        "sha": "615444c3cb845e9aa63084d0d8743f437e82dc97"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+        "sha": "cfb69e4be11e8acd090b10b48ef1365bad1df671"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
+        "sha": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "80bacafc3f258447b0b8b8241c6033ddc6550327"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "e0aaae454f92d9e7348d30b45de4e04bd744e6d6"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "750f3f0a09f9cefd0224d636864130c5715b0383"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "55a95b540eda43e5e2d5d020bf777ef07dbbb6c8"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/README.md",
+        "sha": "29d02c5ed20a52499d749dad3e1a22cc65867761"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/baseline-keyboard-quest.log",
+        "sha": "ba0b8a183cceb4303d56b77457d73fa4c8ce491a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/candidate-adjacent-green.log",
+        "sha": "572324090719093abee54c537e48bba8af583f02"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/dispatch-removal-red.log",
+        "sha": "68606c201f8e28cd4155d73764719900cf8723d7"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/keyboard-red.log",
+        "sha": "9cc04f4e5a363cebe5b3a16dd3f1429df57a29a0"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/production-build-r2.log",
+        "sha": "83258dc972c3aa03e5307b01d60452f3e51c6f8f"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r7-hud.png",
+        "sha": "d1ff3a64083e33defb30b65326f2eb3ac87683ba"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r8-hud.png",
+        "sha": "bafdbf16a60e752759c17d10a4878b179a03060a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/receipt.json",
+        "sha": "047b77ef20d345f8874847cd392d82989761471a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/shortcut-adjacent-green.log",
+        "sha": "89ce3fd84a57ad84e725851ee879886cbf7d6c65"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/ui-intent-red.log",
+        "sha": "71e70e6f42caf3bcaa3257a5c3be20841abe8171"
+      }
+    ]
+  },
+  "assetPublication": {
+    "runId": "42494701555",
+    "artifactId": 13622863928,
+    "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+    "manifestBytes": 15716826
+  },
+  "trafficBefore": {
+    "target": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+    "alias": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB"
+  },
+  "trafficAfter": {
+    "target": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+    "alias": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB"
+  },
+  "candidates": {
+    "game": {
+      "id": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "url": "numeron-r16-hdjmhq085-obelisk-labs.vercel.app",
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "readyState": "INITIALIZING"
+    }
+  }
+}

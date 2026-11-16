@@ -1,0 +1,20 @@
+{
+  "name": "packed-real-sc-login-wallet-entry",
+  "capturedAtUtc": "2026-10-29T17:30:30.580Z",
+  "window": {
+    "app": "process:C:\\mir2-build\\unified-20261029\\packed-local-baseline\\generations\\9dfbd083b6b92972539bc01816645ed6131297bb7ca4dedec659438987a74186\\mir2-platform-windows.exe",
+    "id": 1969638,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/packed-real-sc-login-wallet-entry-0.jpg",
+      "sha256": "0fcdbc2f9dd026126f56fe9170c2ba2bb34746b99073180bd0c6f50c0df54746",
+      "bytes": 318023,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

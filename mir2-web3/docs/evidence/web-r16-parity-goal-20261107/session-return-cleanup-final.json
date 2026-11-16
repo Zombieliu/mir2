@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.r16.session-return.cleanup.v1",
+  "checkedAt": "2026-11-07T10:59:25.0504257Z",
+  "ownedPorts": [
+    19247,
+    19277,
+    19349
+  ],
+  "closed": true,
+  "preservedSourceListeners": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19235,
+      "OwningProcess": 129280
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19232,
+      "OwningProcess": 128444
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19231,
+      "OwningProcess": 126788
+    }
+  ]
+}

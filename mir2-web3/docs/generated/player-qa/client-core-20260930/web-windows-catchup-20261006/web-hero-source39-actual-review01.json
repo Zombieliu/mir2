@@ -1,0 +1,123 @@
+{
+  "kind": "source39-final-actual-review-with-two-formatting-deltas",
+  "reviewer": "/root/source30_native_bundle",
+  "recordedAtUtc": "2026-10-08T04:25:41.647Z",
+  "acceptedFiniteResult": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source39-finite-result03.json",
+    "bytes": 374309,
+    "sha256": "d7518519045518091c78af282ee68c67c4176271f4daae6bf772f00e960c6194"
+  },
+  "acceptedRawEvidence": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-raw-evidence01.json",
+    "bytes": 202566,
+    "sha256": "14dbe5cf9144880e04688d4907e2ef53bffcb4a39697df12b8a81aede82a2389"
+  },
+  "acceptedDocumentation": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "bytes": 287901,
+      "sha256": "d1688f27640b03e14a6f658e23104bdbc305768df1d3cd1b79f2dbe16389c1ca"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "bytes": 906021,
+      "sha256": "faf7c4d1235433b055e26e7f221ebdb354e4c316337d6b6145ad8d997049b201"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 1025787,
+      "sha256": "fa2907de8e815431304e7d59fe04490e22794cf5fc6ac9a6d608a7bcea57f43f"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "bytes": 559111,
+      "sha256": "6059c3bdf2ec74301cac8a1e0689eec744e70597dbd476b77d94afd058a48614"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "bytes": 501640,
+      "sha256": "091aca8deedd7341ee0d5ab2e2f22e16879c489885a9e70fad4b6ef902798285"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+      "bytes": 647546,
+      "sha256": "9d1e4cc66c180c02a41ec1086e327cbba3d3ba2bcabf0e44c8d8e230476b1d17"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+      "bytes": 42874,
+      "sha256": "61746bb205fefb92c49b6375620804cb1b6c395a29ea7d204ab0b44794a01da9"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+      "bytes": 61898,
+      "sha256": "f877cefa21f81679b226658e7d1690c39eb8bb9add4335bb344504f546aa3915"
+    }
+  ],
+  "actualFindings": [
+    "Final repo result and external result03 are byte-identical; 8 Source39 documentation heads match their pins and exact removal restores prior document hashes.",
+    "69 actual passing executions; 56 normalized original test function identities; 21 new functions; two prior compile failures executed zero tests.",
+    "WASM static cargo check is not a production package, initialization check, or player verification.",
+    "Five actual Guard calls retained all 25 nonce files; C minimum 264547229696 bytes; freshness conservative upper maximum 70 ms; every PolicyB completed/exited/disposed.",
+    "Runtime/Page/ABI/sink/qualified Ready and current complete Web package remain unconnected or undelivered; matrix unchanged; latest complete package Source25; no playable/Candidate100/overall97.5 completion claim."
+  ],
+  "formattingReview": {
+    "accepted": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source39-formatting01.json",
+      "bytes": 92850,
+      "sha256": "d07debf5ed22697acfadfc5d6a668896c7cd28c886df705bdf82428df0f859a0"
+    },
+    "beforeMatchesActualTestedSource": true,
+    "afterMatchesCurrentCheckout": true,
+    "deletedTrailingSingleSpaces": 16,
+    "lineEndingSequenceUnchanged": true,
+    "actualLineEndings": {
+      "crlf": 1071,
+      "lf": 1
+    },
+    "retested": false
+  },
+  "writesByReviewer": false,
+  "processesExecutedByReviewer": false,
+  "priorActualReviewPreserved": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source39-actual-review01.json",
+    "bytes": 3805,
+    "sha256": "3d523637213de2535a9a489b6d4d2794e32bb52b27dbf1892dcbb81de5d7ae7e"
+  },
+  "formattingReviews": [
+    {
+      "accepted": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source39-formatting01.json",
+        "bytes": 92850,
+        "sha256": "d07debf5ed22697acfadfc5d6a668896c7cd28c886df705bdf82428df0f859a0"
+      },
+      "beforeMatchesActualTestedSource": true,
+      "afterMatchesCurrentCheckout": true,
+      "deletedTrailingSingleSpaces": 16,
+      "lineEndingSequenceUnchanged": true,
+      "actualLineEndings": {
+        "crlf": 1071,
+        "lf": 1
+      },
+      "retested": false
+    },
+    {
+      "accepted": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source39-formatting02.json",
+        "bytes": 135575,
+        "sha256": "87a295f906934580fbcf10238f045baccb479af4b1a5948cfeecf229f4fb5990"
+      },
+      "beforeMatchesActualTestedSource": true,
+      "afterMatchesCurrentCheckout": true,
+      "deletedFinalLfBytes": 1,
+      "otherBytesUnchanged": true,
+      "retested": false
+    }
+  ],
+  "finalCurrentInputReview": {
+    "declared": 899,
+    "identicalToTested": 897,
+    "onlyTwoWhitespaceDifferences": true,
+    "reviewerActuallyRehashed899": true
+  }
+}

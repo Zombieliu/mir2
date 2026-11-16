@@ -1,0 +1,486 @@
+{
+  "purpose": "Final review-source hashes, distinct from the executable used by the live protocol run",
+  "files": [
+    {
+      "file": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "55c0a4ee03e43287c6dff94481fb6cdb2d777b34e6ce962f97096bde584dc5ae",
+      "bytes": 939675,
+      "lfNormalizedSha256": "55c0a4ee03e43287c6dff94481fb6cdb2d777b34e6ce962f97096bde584dc5ae"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "sha256": "dc3dc3061a5e375b110f35330045fdc7e3b803016be6f732bfce6922926bc9b9",
+      "bytes": 5437,
+      "lfNormalizedSha256": "dc3dc3061a5e375b110f35330045fdc7e3b803016be6f732bfce6922926bc9b9"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "sha256": "3b21c4902944f17a26847c2aed7927f467965ed598faf3ad852585f1afd8f694",
+      "bytes": 597750,
+      "lfNormalizedSha256": "3b21c4902944f17a26847c2aed7927f467965ed598faf3ad852585f1afd8f694"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "sha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d",
+      "bytes": 11240,
+      "lfNormalizedSha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing.rs",
+      "sha256": "62356af992ccac151ad5fa891cf033a9ae8c69d90628d778e328fa6b8b6519cb",
+      "bytes": 1364443,
+      "lfNormalizedSha256": "62356af992ccac151ad5fa891cf033a9ae8c69d90628d778e328fa6b8b6519cb"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "sha256": "0121d90969c4cd12b3a1c751b5bcbf8f7961d8031b55b1bb9424b3149d6ce093",
+      "bytes": 21059,
+      "lfNormalizedSha256": "0121d90969c4cd12b3a1c751b5bcbf8f7961d8031b55b1bb9424b3149d6ce093"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs",
+      "sha256": "741040eed7c67e10f66b4582c77ce92269a7cccc066edc0bedf8e9e7e14c9b44",
+      "bytes": 38571,
+      "lfNormalizedSha256": "741040eed7c67e10f66b4582c77ce92269a7cccc066edc0bedf8e9e7e14c9b44"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/Cargo.toml",
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942",
+      "bytes": 812,
+      "lfNormalizedSha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/billing.rs",
+      "sha256": "beb04880281a1e598707074ec07f0bbc0c5860ac3ce77bcecb7ac137785d2738",
+      "bytes": 32246,
+      "lfNormalizedSha256": "a64f7e3cf481625b9de59274d6647b6416a4b830ddaa10df5fa9ef7c2c76f6c0"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_refresh_fail_closed_tests.rs",
+      "sha256": "7a086a5165af624eee12dfe0e663bbb5e41f136c989734cde75d8d85e1512712",
+      "bytes": 66783,
+      "lfNormalizedSha256": "7a086a5165af624eee12dfe0e663bbb5e41f136c989734cde75d8d85e1512712"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_schema_integration_tests.rs",
+      "sha256": "fda8e1635c195996a6b231ddccf8994e400b437516e9eb8945aadd8e73473466",
+      "bytes": 8326,
+      "lfNormalizedSha256": "fda8e1635c195996a6b231ddccf8994e400b437516e9eb8945aadd8e73473466"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_stones.rs",
+      "sha256": "b82d4bb7ed1ce05a471ace5a6510a94adc46ee6fa597f5f5cb63074f78359105",
+      "bytes": 8329,
+      "lfNormalizedSha256": "b82d4bb7ed1ce05a471ace5a6510a94adc46ee6fa597f5f5cb63074f78359105"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5",
+      "bytes": 342825,
+      "lfNormalizedSha256": "76aa5333deda8da30f7aa60397578b7a4d792b7dcb2609a8c24a733269b197c5"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "sha256": "02e50019a5632e456fadf8ba4f78afae2ebbf6f38a43bee99d05f75d26fb18de",
+      "bytes": 32429,
+      "lfNormalizedSha256": "02e50019a5632e456fadf8ba4f78afae2ebbf6f38a43bee99d05f75d26fb18de"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/lib.rs",
+      "sha256": "533afafdd6aa933a464fbe425603e05fc1189c047fd854a294dec9c8fd1a9055",
+      "bytes": 6861,
+      "lfNormalizedSha256": "533afafdd6aa933a464fbe425603e05fc1189c047fd854a294dec9c8fd1a9055"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/creature_reward_uid_tests.rs",
+      "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+      "bytes": 9230,
+      "lfNormalizedSha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/drops.rs",
+      "sha256": "885c6d95fc10bee2ce7df161871b818b5ac7b25ab745bbbf87f0bc61e22c7ca6",
+      "bytes": 174063,
+      "lfNormalizedSha256": "885c6d95fc10bee2ce7df161871b818b5ac7b25ab745bbbf87f0bc61e22c7ca6"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/equipment.rs",
+      "sha256": "092f84f7c44a2a856f2c8074bd3d53cdc8810053e15fc1d6aba56ff34cfa4a91",
+      "bytes": 109643,
+      "lfNormalizedSha256": "092f84f7c44a2a856f2c8074bd3d53cdc8810053e15fc1d6aba56ff34cfa4a91"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/exact_drop_uid_tests.rs",
+      "sha256": "283d58cfd546a4573297de51813d94f5025d96dd8e6834acda5e353d84daa7ab",
+      "bytes": 19188,
+      "lfNormalizedSha256": "283d58cfd546a4573297de51813d94f5025d96dd8e6834acda5e353d84daa7ab"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/fishing_uid_tests.rs",
+      "sha256": "090f4ada97070c0a4027a8942608c102e5b768c8309350a0412c08ff812be2c7",
+      "bytes": 2401,
+      "lfNormalizedSha256": "090f4ada97070c0a4027a8942608c102e5b768c8309350a0412c08ff812be2c7"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/fishing.rs",
+      "sha256": "736d34b844f75df67abbef3ed1156397ce433f79483d3eaa3e3f6c34d7db789f",
+      "bytes": 31933,
+      "lfNormalizedSha256": "736d34b844f75df67abbef3ed1156397ce433f79483d3eaa3e3f6c34d7db789f"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "sha256": "d14a7180b4f2d810b9510673bc84ff7a1011ff411ff86c85a3777cf2e7016ae0",
+      "bytes": 24268,
+      "lfNormalizedSha256": "d14a7180b4f2d810b9510673bc84ff7a1011ff411ff86c85a3777cf2e7016ae0"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "69a73ae6d83b7a232ff635e0cc4cb128d7cc78b0f51db6e258eaf77208591fca",
+      "bytes": 190859,
+      "lfNormalizedSha256": "69a73ae6d83b7a232ff635e0cc4cb128d7cc78b0f51db6e258eaf77208591fca"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/item_grants_tests.rs",
+      "sha256": "f449333555dbeb1420ebd367d00a7dae0c3a50ca4cdeff24787d8285febb4e7a",
+      "bytes": 7941,
+      "lfNormalizedSha256": "f449333555dbeb1420ebd367d00a7dae0c3a50ca4cdeff24787d8285febb4e7a"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/item_grants.rs",
+      "sha256": "c1d8522d7dc848cdc3b63eb6ef93b8a81050ee4974b5194bb2f431ba56394a1a",
+      "bytes": 7905,
+      "lfNormalizedSha256": "c1d8522d7dc848cdc3b63eb6ef93b8a81050ee4974b5194bb2f431ba56394a1a"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance_tests.rs",
+      "sha256": "8dc67d4f993e0c66c7993a02e4c884c72179bc1eae814fa865ce72b40fb46bd7",
+      "bytes": 14424,
+      "lfNormalizedSha256": "8dc67d4f993e0c66c7993a02e4c884c72179bc1eae814fa865ce72b40fb46bd7"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "sha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4",
+      "bytes": 8418,
+      "lfNormalizedSha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "4b81b12312fa0d388e3b5f605cc9b2ced829d619082a77396dd4df8f8d4f62a5",
+      "bytes": 166922,
+      "lfNormalizedSha256": "4b81b12312fa0d388e3b5f605cc9b2ced829d619082a77396dd4df8f8d4f62a5"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/mining_uid_tests.rs",
+      "sha256": "3a2d4193e18e9be3533c2cf3ac17b34d0eaa84c42c0ea28befc7be577579c9ec",
+      "bytes": 2887,
+      "lfNormalizedSha256": "3a2d4193e18e9be3533c2cf3ac17b34d0eaa84c42c0ea28befc7be577579c9ec"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "sha256": "b8ad73bd55654b8626b9c7c20a2808845f04386f001aaf46aed08efc4d314308",
+      "bytes": 15146,
+      "lfNormalizedSha256": "b8ad73bd55654b8626b9c7c20a2808845f04386f001aaf46aed08efc4d314308"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "sha256": "fcc8906edfddc3a1f3ccaf01e1c5f95247ae95e7c97d4f2b3c5560b42a8d284b",
+      "bytes": 9240,
+      "lfNormalizedSha256": "fcc8906edfddc3a1f3ccaf01e1c5f95247ae95e7c97d4f2b3c5560b42a8d284b"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+      "sha256": "3b265354479bafef0c07328245a504b6e6b949fe32470f9627a886733fcdd7f7",
+      "bytes": 52904,
+      "lfNormalizedSha256": "3b265354479bafef0c07328245a504b6e6b949fe32470f9627a886733fcdd7f7"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "sha256": "6cdf7507ed85a8e8a1f5a23f2a25f299e203a3c32c713d1b4a36f67189d1c587",
+      "bytes": 44928,
+      "lfNormalizedSha256": "6cdf7507ed85a8e8a1f5a23f2a25f299e203a3c32c713d1b4a36f67189d1c587"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/npc_purchase_uid_tests.rs",
+      "sha256": "47550355d37288acd7ce27be8751a7d98d114c04b6ec912f1a7a53105da8a215",
+      "bytes": 7347,
+      "lfNormalizedSha256": "47550355d37288acd7ce27be8751a7d98d114c04b6ec912f1a7a53105da8a215"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/npc_script.rs",
+      "sha256": "e19b5c5b4721beca07df3da910b563a85388b27843493cc00eb5dcb7da016053",
+      "bytes": 154876,
+      "lfNormalizedSha256": "e19b5c5b4721beca07df3da910b563a85388b27843493cc00eb5dcb7da016053"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "sha256": "0bdcbbf9155477d31aff15259b62076097a7ef7666244e23f243b0cd8b81eca3",
+      "bytes": 55897,
+      "lfNormalizedSha256": "0bdcbbf9155477d31aff15259b62076097a7ef7666244e23f243b0cd8b81eca3"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/production_tests.rs",
+      "sha256": "53114649b8b011b8d66c07f8f58773be60cf72f79509e9f248df34fbe2dbee9a",
+      "bytes": 30544,
+      "lfNormalizedSha256": "53114649b8b011b8d66c07f8f58773be60cf72f79509e9f248df34fbe2dbee9a"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "sha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a",
+      "bytes": 32768,
+      "lfNormalizedSha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/quest_uid_tests.rs",
+      "sha256": "39c74c80356b79f5cea312e91352b834ae5e1613355b189d26a6938199e89060",
+      "bytes": 4344,
+      "lfNormalizedSha256": "39c74c80356b79f5cea312e91352b834ae5e1613355b189d26a6938199e89060"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/quests.rs",
+      "sha256": "7fa0d7341bf5cd9a178d4e37fcfb970b3a76166baaa06fff91700e7eedb2cd7e",
+      "bytes": 86357,
+      "lfNormalizedSha256": "7fa0d7341bf5cd9a178d4e37fcfb970b3a76166baaa06fff91700e7eedb2cd7e"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/resources.rs",
+      "sha256": "03e6220822d0213338ad272101aadeefe87f5ad7dbb0207ee5d7dc215d5edd95",
+      "bytes": 39636,
+      "lfNormalizedSha256": "03e6220822d0213338ad272101aadeefe87f5ad7dbb0207ee5d7dc215d5edd95"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "86a97da8bd68223c55ce150547e5520bae811a4bbfa809ec7cbd1dbb9d801370",
+      "bytes": 179980,
+      "lfNormalizedSha256": "86a97da8bd68223c55ce150547e5520bae811a4bbfa809ec7cbd1dbb9d801370"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8",
+      "bytes": 99414,
+      "lfNormalizedSha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "sha256": "8d49a1e1a206ecb1d7c4352462c58cad46ac9d4126a8f3f465e34d315d79b6c9",
+      "bytes": 229536,
+      "lfNormalizedSha256": "8d49a1e1a206ecb1d7c4352462c58cad46ac9d4126a8f3f465e34d315d79b6c9"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs",
+      "sha256": "1189f2fe3816cb4247db0f193b29b12183764f132f771dc7ab5f5c6147793c95",
+      "bytes": 45943,
+      "lfNormalizedSha256": "1189f2fe3816cb4247db0f193b29b12183764f132f771dc7ab5f5c6147793c95"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/stones_tests.rs",
+      "sha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f",
+      "bytes": 18664,
+      "lfNormalizedSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/stones.rs",
+      "sha256": "c3e130b2e20219be4d52460af9354889a1492ce5d45ae848cff0e3af4aeec42b",
+      "bytes": 19017,
+      "lfNormalizedSha256": "c3e130b2e20219be4d52460af9354889a1492ce5d45ae848cff0e3af4aeec42b"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "sha256": "07b1594bf30fd567fdeb7e290ad63432a92327ae639d58ebac30267ee0f6eb86",
+      "bytes": 2437876,
+      "lfNormalizedSha256": "07b1594bf30fd567fdeb7e290ad63432a92327ae639d58ebac30267ee0f6eb86"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "3a81f24f4bab5db7ad15c1078c98e647e834553d49e41cd6771b11e9581f34c9",
+      "bytes": 54248,
+      "lfNormalizedSha256": "3a81f24f4bab5db7ad15c1078c98e647e834553d49e41cd6771b11e9581f34c9"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "sha256": "1e830cf93add28342af33dad669a80dc5dfa62c33c82ba86da23cf19cf76b63e",
+      "bytes": 2277,
+      "lfNormalizedSha256": "1e830cf93add28342af33dad669a80dc5dfa62c33c82ba86da23cf19cf76b63e"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/partition.rs",
+      "sha256": "8560805a891983344d3049844d35b185fd178f7843e51306fabc83714cf4728f",
+      "bytes": 5899,
+      "lfNormalizedSha256": "8560805a891983344d3049844d35b185fd178f7843e51306fabc83714cf4728f"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "049c442a5aca095fe7265dc27390ed1ed9e9f68387f6de0dbfc2635e7532942d",
+      "bytes": 747724,
+      "lfNormalizedSha256": "049c442a5aca095fe7265dc27390ed1ed9e9f68387f6de0dbfc2635e7532942d"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+      "bytes": 43402,
+      "lfNormalizedSha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/activities_postgres.rs",
+      "sha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3",
+      "bytes": 22788,
+      "lfNormalizedSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/activities.rs",
+      "sha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29",
+      "bytes": 30777,
+      "lfNormalizedSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/shared_player_damage_settlement.rs",
+      "sha256": "f28dd836dbb3e4880864a7effc37dbf1194fa0a8461a2aefa86ea06e934aa1aa",
+      "bytes": 18666,
+      "lfNormalizedSha256": "f28dd836dbb3e4880864a7effc37dbf1194fa0a8461a2aefa86ea06e934aa1aa"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/shared_player_death_zone.rs",
+      "sha256": "018a49702d7c26ef866e06d9222c710383b7ebf218f9251c6e9feeb5cfc5484b",
+      "bytes": 12039,
+      "lfNormalizedSha256": "018a49702d7c26ef866e06d9222c710383b7ebf218f9251c6e9feeb5cfc5484b"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "sha256": "ee62c50e25f79f700a140f7f96b7ad51af8143f2db672353bcffe8a84e307c48",
+      "bytes": 14282,
+      "lfNormalizedSha256": "ee62c50e25f79f700a140f7f96b7ad51af8143f2db672353bcffe8a84e307c48"
+    },
+    {
+      "file": "mir2-web3/apps/web/package-lock.json",
+      "sha256": "4db53d5dfcef25e9a7b3b6f67d066c2d25cd0111f77fc5d109f42165b8e735a7",
+      "bytes": 76989,
+      "lfNormalizedSha256": "4db53d5dfcef25e9a7b3b6f67d066c2d25cd0111f77fc5d109f42165b8e735a7"
+    },
+    {
+      "file": "mir2-web3/apps/web/package.json",
+      "sha256": "9149ab59b87c138f5aec42d4abfdb1f95006aeaf1ed70fdf736a43ab2fb6dcc9",
+      "bytes": 22280,
+      "lfNormalizedSha256": "9149ab59b87c138f5aec42d4abfdb1f95006aeaf1ed70fdf736a43ab2fb6dcc9"
+    },
+    {
+      "file": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+      "sha256": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4",
+      "bytes": 24632,
+      "lfNormalizedSha256": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4"
+    },
+    {
+      "file": "mir2-web3/apps/web/scripts/playtest-lifecycle.test.mjs",
+      "sha256": "3d4f41a62fec0f066d7eda8cfbc3a0b9d7ee9bfbb6b2b50ae4c8ae2a13ab8045",
+      "bytes": 17957,
+      "lfNormalizedSha256": "3d4f41a62fec0f066d7eda8cfbc3a0b9d7ee9bfbb6b2b50ae4c8ae2a13ab8045"
+    },
+    {
+      "file": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+      "bytes": 38856,
+      "lfNormalizedSha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.test.mjs",
+      "sha256": "30126c0f5b048c8b8fbc394bc240eecdc6cd421a5b3ada0708c173128ed1a470",
+      "bytes": 19493,
+      "lfNormalizedSha256": "30126c0f5b048c8b8fbc394bc240eecdc6cd421a5b3ada0708c173128ed1a470"
+    },
+    {
+      "file": "mir2-web3/apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2",
+      "bytes": 20058,
+      "lfNormalizedSha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "mir2-web3/apps/web/scripts/playtest-native-resume-smoke.test.mjs",
+      "sha256": "77429ef5ec8a2b28c171af74c877ef39a89bb6292efb6e1df3deb5599c42731e",
+      "bytes": 10642,
+      "lfNormalizedSha256": "77429ef5ec8a2b28c171af74c877ef39a89bb6292efb6e1df3deb5599c42731e"
+    },
+    {
+      "file": "mir2-web3/Cargo.lock",
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98",
+      "bytes": 250739,
+      "lfNormalizedSha256": "ad3c52ac44ccf0b2e53086414e63118a6239fccab2d00eae0b90048a9f51c4df"
+    },
+    {
+      "file": "mir2-web3/Cargo.toml",
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+      "bytes": 365,
+      "lfNormalizedSha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "file": "mir2-web3/infra/postgres/migrations/0017_sealed_stone_authority.sql",
+      "sha256": "ffc898518dd9af9420a6bfea30e32393fb05c30a093c4b7a60c6fff69257ff2b",
+      "bytes": 528,
+      "lfNormalizedSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62"
+    },
+    {
+      "file": "mir2-web3/packages/game-data/src/lib.rs",
+      "sha256": "d720b7b86396a109ca77f358c54a6e9517b25cbd0c8ab1ce6458d9179eb2aa99",
+      "bytes": 176397,
+      "lfNormalizedSha256": "d720b7b86396a109ca77f358c54a6e9517b25cbd0c8ab1ce6458d9179eb2aa99"
+    },
+    {
+      "file": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf",
+      "bytes": 1411,
+      "lfNormalizedSha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    },
+    {
+      "file": "mir2-web3/packages/production/Cargo.toml",
+      "sha256": "2aa3f4cef57e4ea73a3f15afa602b89cdbc97f03f485902a02d44d2e875e109a",
+      "bytes": 264,
+      "lfNormalizedSha256": "2aa3f4cef57e4ea73a3f15afa602b89cdbc97f03f485902a02d44d2e875e109a"
+    },
+    {
+      "file": "mir2-web3/packages/production/src/catalog.rs",
+      "sha256": "b5781ee8a285714c605c91dbf40b79820fb405c93f2bcaa84f1e3bbe9672c0f8",
+      "bytes": 9901,
+      "lfNormalizedSha256": "b5781ee8a285714c605c91dbf40b79820fb405c93f2bcaa84f1e3bbe9672c0f8"
+    },
+    {
+      "file": "mir2-web3/packages/production/src/jobs.rs",
+      "sha256": "fd1ed35fc43e24f530e39bfcdc3b53886563f850483751e97925ecc7b4a17ed4",
+      "bytes": 22932,
+      "lfNormalizedSha256": "fd1ed35fc43e24f530e39bfcdc3b53886563f850483751e97925ecc7b4a17ed4"
+    },
+    {
+      "file": "mir2-web3/packages/production/src/lib.rs",
+      "sha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a",
+      "bytes": 1815,
+      "lfNormalizedSha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a"
+    },
+    {
+      "file": "mir2-web3/packages/production/src/planning.rs",
+      "sha256": "fcc97c5867c0dff917548218b4df20a34ce74c6c95fdd3f314ea8177322f8f35",
+      "bytes": 6325,
+      "lfNormalizedSha256": "fcc97c5867c0dff917548218b4df20a34ce74c6c95fdd3f314ea8177322f8f35"
+    },
+    {
+      "file": "mir2-web3/packages/production/src/stones_tests.rs",
+      "sha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c",
+      "bytes": 35603,
+      "lfNormalizedSha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c"
+    },
+    {
+      "file": "mir2-web3/packages/production/src/stones.rs",
+      "sha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d",
+      "bytes": 40474,
+      "lfNormalizedSha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d"
+    },
+    {
+      "file": "mir2-web3/packages/production/tests/production.rs",
+      "sha256": "3a766cede2b0ee4c2d3869f2f6212e19bccf86e25919ef08fc5db58a1469cdb5",
+      "bytes": 23231,
+      "lfNormalizedSha256": "3a766cede2b0ee4c2d3869f2f6212e19bccf86e25919ef08fc5db58a1469cdb5"
+    },
+    {
+      "file": "mir2-web3/rust-toolchain.toml",
+      "sha256": "667a93776d9bb1bb4a17b8839e365d26ed380807de5b44f664c87af73bb0bd87",
+      "bytes": 113,
+      "lfNormalizedSha256": "667a93776d9bb1bb4a17b8839e365d26ed380807de5b44f664c87af73bb0bd87"
+    }
+  ],
+  "newlinePolicy": "Raw SHA256 pins the reviewed working source. lfNormalizedSha256 additionally accepts only CRLF-to-LF conversion for these UTF-8 source files; recorded evidence is preserved byte-exact by topic .gitattributes."
+}

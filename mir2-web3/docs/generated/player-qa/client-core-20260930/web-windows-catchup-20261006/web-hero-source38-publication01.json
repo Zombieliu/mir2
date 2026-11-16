@@ -1,0 +1,454 @@
+{
+  "owner": "Root",
+  "kind": "Source38 local commit with failed remote push attempts; actual remote independently remains Source37",
+  "createdAtUtc": "2026-10-08T02:34:47.266Z",
+  "commit": "38a079e9b2a126c8d2ddcd325badbc8fdac1d09d",
+  "parent": "6116c2e640227b2408b98682a66ebdafa092ea18",
+  "branch": "codex/windows-player-journey",
+  "title": "Share strict Hero owner projection and retain item receipts",
+  "localCommitted": true,
+  "remoteSynced": false,
+  "remoteCommitVerified": "6116c2e640227b2408b98682a66ebdafa092ea18",
+  "remoteVerification": "Independent strict known-host SSH443 ls-remote exit0 after final failed push",
+  "gitResults": {
+    "s38Commit53": {
+      "chunk_id": "a04a79",
+      "wall_time_seconds": 0.3615075,
+      "exit_code": 0,
+      "original_token_count": 148,
+      "output": "[codex/windows-player-journey 38a079e9b2] Share strict Hero owner projection and retain item receipts\n 15 files changed, 1988 insertions(+), 125 deletions(-)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json\n"
+    },
+    "s38ActualCommit55": {
+      "head": "38a079e9b2a126c8d2ddcd325badbc8fdac1d09d",
+      "parent": "6116c2e640227b2408b98682a66ebdafa092ea18",
+      "title": "Share strict Hero owner projection and retain item receipts",
+      "rows": [
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/hero_model.rs",
+          "oid": "820cf6d3d4a47acfdc29922b9f6d0ff0253fb4b9"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+          "oid": "f595e27c1118506fd6ac98064738b261c7f11100"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+          "oid": "f9b3b38028249ad5bdc1fc99820cc2c7139df8ac"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs",
+          "oid": "c2805cab6ec6638e7da8ddbba665e7fb8ba777ea"
+        },
+        {
+          "path": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+          "oid": "044551c0ca8c0f779599f6a68182f99c12aa8281"
+        },
+        {
+          "path": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+          "oid": "3b2fe68c28462e4fff5f5cb7cd9df3b621663478"
+        },
+        {
+          "path": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+          "oid": "806f18eecc0ed06e624574623fd69515e72c2b1c"
+        },
+        {
+          "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+          "oid": "6981d727c43f9bba935fce3f99f378cd5aa06c1d"
+        },
+        {
+          "path": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+          "oid": "78c016b2f759e14221d9a0e0fccb5ccb588122ea"
+        },
+        {
+          "path": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+          "oid": "74d72100b25fec5c60a3173cfe8dd63983dbd30c"
+        },
+        {
+          "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+          "oid": "7c53fd093ccb6581eccfad422bdc7033741cc381"
+        },
+        {
+          "path": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+          "oid": "183bcc4c9ba5f9fccc25181efbf8a40d16407a24"
+        },
+        {
+          "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json",
+          "oid": "df7a612f99ef9c03528ae7b85af2bcf4ff2fc175"
+        },
+        {
+          "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json",
+          "oid": "422d028851e276ab9d0b8f4cb6d113c016d544d4"
+        },
+        {
+          "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json",
+          "oid": "a280535583f77c93638f8ff9cb76c7349c5ce385"
+        }
+      ]
+    },
+    "s38StagedRaw51": {
+      "chunk_id": "d5ddfa",
+      "wall_time_seconds": 0.1818528,
+      "exit_code": 0,
+      "original_token_count": 599,
+      "output": ":100644 100644 14d680bc59bcd193f33723e879b5354fcafd0115 820cf6d3d4a47acfdc29922b9f6d0ff0253fb4b9 M\tmir2-web3/apps/game-client/client-bevy/src/hero_model.rs\n:100644 100644 54b2a6725b7ed9522ad3f063b177a683cadf6939 f595e27c1118506fd6ac98064738b261c7f11100 M\tmir2-web3/apps/game-client/runtime/src/lib.rs\n:100644 100644 0853ccdec763086211fa12a304837011af09017b f9b3b38028249ad5bdc1fc99820cc2c7139df8ac M\tmir2-web3/apps/game-client/runtime/src/native_ingest.rs\n:100644 100644 4fdf131806d20d051bd1810887b03dd8ec558f97 c2805cab6ec6638e7da8ddbba665e7fb8ba777ea M\tmir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs\n:100644 100644 0214bec72bd7006012563e2585e3512c28ba4daf 044551c0ca8c0f779599f6a68182f99c12aa8281 M\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n:100644 100644 c9ff3ac7ec40472934f1d4d87596aaff4134df8c 3b2fe68c28462e4fff5f5cb7cd9df3b621663478 M\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n:100644 100644 b366904ab84b032f1922e7301e075bce2816ae2e 806f18eecc0ed06e624574623fd69515e72c2b1c M\tmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n:100644 100644 f8026d18555fc0db70262e9a41057dc509fcd385 6981d727c43f9bba935fce3f99f378cd5aa06c1d M\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n:100644 100644 ee89d6a1a49417c75118693de23032501bd5f0ee 78c016b2f759e14221d9a0e0fccb5ccb588122ea M\tmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n:100644 100644 9b09eefdd42da205390ee7c06f9a306f6aad2b04 74d72100b25fec5c60a3173cfe8dd63983dbd30c M\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n:100644 100644 1eb0048b5a751b16c4f61fbde5218cc66afb8c47 7c53fd093ccb6581eccfad422bdc7033741cc381 M\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n:100644 100644 8e8d912324f962de3686fd73fdb16623d314a30d 183bcc4c9ba5f9fccc25181efbf8a40d16407a24 M\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n:000000 100644 0000000000000000000000000000000000000000 df7a612f99ef9c03528ae7b85af2bcf4ff2fc175 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json\n:000000 100644 0000000000000000000000000000000000000000 422d028851e276ab9d0b8f4cb6d113c016d544d4 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json\n:000000 100644 0000000000000000000000000000000000000000 a280535583f77c93638f8ff9cb76c7349c5ce385 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json\n"
+    },
+    "s38StagedCheck51": {
+      "chunk_id": "10484e",
+      "wall_time_seconds": 0.1917381,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "s38PostCommitReads54": [
+      {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "4ce9d9",
+          "wall_time_seconds": 0.1186186,
+          "exit_code": 0,
+          "original_token_count": 36,
+          "output": "38a079e9b2a126c8d2ddcd325badbc8fdac1d09d\n6116c2e640227b2408b98682a66ebdafa092ea18\nShare strict Hero owner projection and retain item receipts\n"
+        }
+      },
+      {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "271112",
+          "wall_time_seconds": 0.1538398,
+          "exit_code": 0,
+          "original_token_count": 599,
+          "output": ":100644 100644 14d680bc59bcd193f33723e879b5354fcafd0115 820cf6d3d4a47acfdc29922b9f6d0ff0253fb4b9 M\tmir2-web3/apps/game-client/client-bevy/src/hero_model.rs\n:100644 100644 54b2a6725b7ed9522ad3f063b177a683cadf6939 f595e27c1118506fd6ac98064738b261c7f11100 M\tmir2-web3/apps/game-client/runtime/src/lib.rs\n:100644 100644 0853ccdec763086211fa12a304837011af09017b f9b3b38028249ad5bdc1fc99820cc2c7139df8ac M\tmir2-web3/apps/game-client/runtime/src/native_ingest.rs\n:100644 100644 4fdf131806d20d051bd1810887b03dd8ec558f97 c2805cab6ec6638e7da8ddbba665e7fb8ba777ea M\tmir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs\n:100644 100644 0214bec72bd7006012563e2585e3512c28ba4daf 044551c0ca8c0f779599f6a68182f99c12aa8281 M\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n:100644 100644 c9ff3ac7ec40472934f1d4d87596aaff4134df8c 3b2fe68c28462e4fff5f5cb7cd9df3b621663478 M\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n:100644 100644 b366904ab84b032f1922e7301e075bce2816ae2e 806f18eecc0ed06e624574623fd69515e72c2b1c M\tmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n:100644 100644 f8026d18555fc0db70262e9a41057dc509fcd385 6981d727c43f9bba935fce3f99f378cd5aa06c1d M\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n:100644 100644 ee89d6a1a49417c75118693de23032501bd5f0ee 78c016b2f759e14221d9a0e0fccb5ccb588122ea M\tmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n:100644 100644 9b09eefdd42da205390ee7c06f9a306f6aad2b04 74d72100b25fec5c60a3173cfe8dd63983dbd30c M\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n:100644 100644 1eb0048b5a751b16c4f61fbde5218cc66afb8c47 7c53fd093ccb6581eccfad422bdc7033741cc381 M\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n:100644 100644 8e8d912324f962de3686fd73fdb16623d314a30d 183bcc4c9ba5f9fccc25181efbf8a40d16407a24 M\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n:000000 100644 0000000000000000000000000000000000000000 df7a612f99ef9c03528ae7b85af2bcf4ff2fc175 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json\n:000000 100644 0000000000000000000000000000000000000000 422d028851e276ab9d0b8f4cb6d113c016d544d4 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json\n:000000 100644 0000000000000000000000000000000000000000 a280535583f77c93638f8ff9cb76c7349c5ce385 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json\n"
+        }
+      },
+      {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "4a40e5",
+          "wall_time_seconds": 0.1615969,
+          "exit_code": 0,
+          "original_token_count": 40,
+          "output": "warning: in the working copy of 'mir2-web3/apps/web/tsconfig.json', CRLF will be replaced by LF the next time Git touches it\nmir2-web3/apps/web/tsconfig.json\n"
+        }
+      },
+      {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "51e72a",
+          "wall_time_seconds": 0.097012,
+          "exit_code": 0,
+          "original_token_count": 9,
+          "output": "git@github.com:Zombieliu/mir2.git\n"
+        }
+      }
+    ],
+    "s38BeforePush56": {
+      "chunk_id": "ba0d05",
+      "wall_time_seconds": 5.0055222,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "6116c2e640227b2408b98682a66ebdafa092ea18\trefs/heads/codex/windows-player-journey\n"
+    },
+    "s38PushPoll58": {
+      "chunk_id": "9f5877",
+      "wall_time_seconds": 0.0000083,
+      "exit_code": 1,
+      "original_token_count": 51,
+      "output": "error: RPC failed; HTTP 408 curl 22 The requested URL returned error: 408\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\nEverything up-to-date\n"
+    },
+    "s38AfterFirstPush59": {
+      "chunk_id": "7f98cf",
+      "wall_time_seconds": 2.4972735999999998,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "6116c2e640227b2408b98682a66ebdafa092ea18\trefs/heads/codex/windows-player-journey\n"
+    },
+    "s38PushRetryPoll61": {
+      "chunk_id": "c4b0e9",
+      "wall_time_seconds": 0.0000066,
+      "exit_code": 1,
+      "original_token_count": 51,
+      "output": "error: RPC failed; HTTP 408 curl 22 The requested URL returned error: 408\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\nEverything up-to-date\n"
+    },
+    "s38AfterRetry62": {
+      "chunk_id": "bb2890",
+      "wall_time_seconds": 5.2746462,
+      "exit_code": 128,
+      "original_token_count": 33,
+      "output": "fatal: unable to access 'https://github.com/Zombieliu/mir2.git/': schannel: failed to receive handshake, SSL/TLS connection failed\n"
+    },
+    "s38PushBufferedPoll64": {
+      "chunk_id": "ba231f",
+      "wall_time_seconds": 0.0000071,
+      "exit_code": 1,
+      "original_token_count": 51,
+      "output": "error: RPC failed; HTTP 408 curl 22 The requested URL returned error: 408\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\nEverything up-to-date\n"
+    },
+    "s38SshRead65": {
+      "chunk_id": "617cb7",
+      "wall_time_seconds": 4.4375085,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "6116c2e640227b2408b98682a66ebdafa092ea18\trefs/heads/codex/windows-player-journey\n"
+    },
+    "s38SshPushPoll69": {
+      "chunk_id": "c5131f",
+      "wall_time_seconds": 0.0000064,
+      "exit_code": 128,
+      "original_token_count": 40,
+      "output": "Connection to ssh.github.com closed by remote host.\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n"
+    },
+    "s38SshAfterPoll71": {
+      "chunk_id": "080d1f",
+      "wall_time_seconds": 0.0000071,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "6116c2e640227b2408b98682a66ebdafa092ea18\trefs/heads/codex/windows-player-journey\n"
+    },
+    "s38SshPushKeepAlivePoll73": {
+      "chunk_id": "ff7c9a",
+      "wall_time_seconds": 0.0000073,
+      "exit_code": 128,
+      "original_token_count": 40,
+      "output": "Connection to ssh.github.com closed by remote host.\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n"
+    },
+    "s38FinalRemotePoll75": {
+      "chunk_id": "06c225",
+      "wall_time_seconds": 0.0000074,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "6116c2e640227b2408b98682a66ebdafa092ea18\trefs/heads/codex/windows-player-journey\n"
+    }
+  },
+  "failedPushes": 5,
+  "pushFailure": "Three HTTPS HTTP408; two SSH443 remote connection closures during push. Read-only remote checks succeeded and confirmed unchanged parent. No force or rewrite; no TLS/host-key verification disabled; no persistent remote config change.",
+  "temporaryTransportChoices": [
+    "HTTPS original",
+    "HTTPS HTTP1.1",
+    "HTTPS HTTP1.1 postBuffer16777216",
+    "SSH443 strict existing github.com HostKeyAlias/BatchMode",
+    "Same SSH443 with ServerAliveInterval10/CountMax6"
+  ],
+  "actualScopedBlobCount": 15,
+  "expectedWorkingTreePins": [
+    {
+      "relativePath": "apps/game-client/client-bevy/src/hero_model.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hero_model.rs",
+        "bytes": 60197,
+        "sha256": "d3cf763b8b61f3e1ca10f55d7b76e1719f33767199182f993e8b7ed3f2fac493",
+        "relativePath": "apps/game-client/client-bevy/src/hero_model.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/lib.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+        "bytes": 436404,
+        "sha256": "db20c4645a065c462ff4f0f51ff15512974469642063e7e4d4be370763172e1f",
+        "relativePath": "apps/game-client/runtime/src/lib.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/native_ingest.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\native_ingest.rs",
+        "bytes": 133014,
+        "sha256": "e80975d48f6b3abc2f650319650c16cf106b7aadfd227bc5e867177a49a5fd14",
+        "relativePath": "apps/game-client/runtime/src/native_ingest.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_purchase_economy.rs",
+        "bytes": 120950,
+        "sha256": "1a1fa063e6abadfb7b592b370624fe2dea9e21c810600055b36a5dbd65fd3794",
+        "relativePath": "apps/game-client/runtime/src/npc_purchase_economy.rs"
+      }
+    },
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 284993,
+        "sha256": "ac82aa027d5211f771c7d619ad045653b856a1385fdae82d560c3e7da39d67d5"
+      }
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 903113,
+        "sha256": "a74ab918179573a7c751ed72d305012c0f7beee91cbd192b6dcf86748875e96f"
+      }
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1022879,
+        "sha256": "66983f89bb17f9ce41f8950b7d4ff0cfeaaf2bbc3255b5459a565ed6c62c221e"
+      }
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 644638,
+        "sha256": "7206046d20df45452018bad6b446e3fb54416a67ed4e6fe57b17bac3df8d57a3"
+      }
+    },
+    {
+      "relativePath": "docs/PLAYER-QA-PLAYTHROUGH.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 39966,
+        "sha256": "f878e1015f6c663cb6e69bb89807e20aa05ea7fd3047da52f5bddc53c1c6fb41"
+      }
+    },
+    {
+      "relativePath": "docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 58990,
+        "sha256": "4e64b160a98aef8a9132b957237d9d94aed6e2f23226b69be09e57014eb8d004"
+      }
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 558514,
+        "sha256": "e827af9106df04b6f923c6de3b8dc680704e0bf07a253d2f6a788eaff0abbc16"
+      }
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 501043,
+        "sha256": "035f3c5d43c18d1ea329ec5cf1109d3d1ae579e01e67dcbb918772109dbf782f"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source38-raw-evidence01.json",
+        "bytes": 3950659,
+        "sha256": "526f81974771cc9cbb479783058a5b875176b151a85a2b2f03f0c347925e4515"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source38-finite-result01.json",
+        "bytes": 52867,
+        "sha256": "777e3a0b7742521104aafcdbb9b83dba37753ea18768308b3cb83d3dd92eea9f"
+      }
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-transport-source37-publication01.json",
+        "bytes": 13734,
+        "sha256": "5a29bd4822b561fda773def908b239601263fc6088038475b948e510e081d288"
+      }
+    }
+  ],
+  "actualScopedBlobs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_model.rs",
+      "oid": "820cf6d3d4a47acfdc29922b9f6d0ff0253fb4b9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "oid": "f595e27c1118506fd6ac98064738b261c7f11100"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "oid": "f9b3b38028249ad5bdc1fc99820cc2c7139df8ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "oid": "c2805cab6ec6638e7da8ddbba665e7fb8ba777ea"
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "oid": "044551c0ca8c0f779599f6a68182f99c12aa8281"
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "oid": "3b2fe68c28462e4fff5f5cb7cd9df3b621663478"
+    },
+    {
+      "path": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "oid": "806f18eecc0ed06e624574623fd69515e72c2b1c"
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "oid": "6981d727c43f9bba935fce3f99f378cd5aa06c1d"
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "oid": "78c016b2f759e14221d9a0e0fccb5ccb588122ea"
+    },
+    {
+      "path": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "oid": "74d72100b25fec5c60a3173cfe8dd63983dbd30c"
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "oid": "7c53fd093ccb6581eccfad422bdc7033741cc381"
+    },
+    {
+      "path": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+      "oid": "183bcc4c9ba5f9fccc25181efbf8a40d16407a24"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json",
+      "oid": "df7a612f99ef9c03528ae7b85af2bcf4ff2fc175"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json",
+      "oid": "422d028851e276ab9d0b8f4cb6d113c016d544d4"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json",
+      "oid": "a280535583f77c93638f8ff9cb76c7349c5ce385"
+    }
+  ],
+  "finiteResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source38-finite-result01.json",
+    "bytes": 52867,
+    "sha256": "777e3a0b7742521104aafcdbb9b83dba37753ea18768308b3cb83d3dd92eea9f"
+  },
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source38-raw-evidence01.json",
+    "bytes": 3950659,
+    "sha256": "526f81974771cc9cbb479783058a5b875176b151a85a2b2f03f0c347925e4515"
+  },
+  "actualIndependentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source38-actual-review01.json",
+    "bytes": 1951,
+    "sha256": "5d5b9cb6a147974b9fa4b9ffb5af7a8e6a023d24c271877e6db6e21c45e89a32"
+  },
+  "userTsconfigExcludedAndPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "postCommitReaderCorrection": "Known combined stderr tsconfig CRLF warning separated from actual sole tracked diff path; source and commit unchanged.",
+  "sshOriginConfigUnchanged": true,
+  "noForceOrRewrite": true,
+  "gitNetworkUsed": true,
+  "gameNetworkUsed": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "fullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "goalStatus": "active"
+}

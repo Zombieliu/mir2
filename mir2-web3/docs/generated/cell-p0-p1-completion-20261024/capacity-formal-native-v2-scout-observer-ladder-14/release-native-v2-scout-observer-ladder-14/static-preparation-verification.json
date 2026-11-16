@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "state": "reviewed-formal14-fresh18-bound-not-executed",
+  "preparedReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\runtime-prepared-v3.json",
+    "bytes": 38848,
+    "sha256": "c00f3c62ee28b68b94bce5e773c4c17faeb59a79be7972bf5ab91cd3bcb588bc"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-runtime-independent-review-v1\\preseal-independent-review-v3.json",
+    "bytes": 5252,
+    "sha256": "c8933852e99bfb17a7f6bf98ca501628c8d2eec772376cce714140ab9a56ebc5"
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendInputCount": 50,
+  "freshProbe18RunId": "1792965008290-fc5e2eed",
+  "freshProbe18Passed": true,
+  "formalCompleteMinuteWindows": 146,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "passed": true,
+  "policyScenarioResourceUnchanged": true,
+  "syntaxPassed": true
+}

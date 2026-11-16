@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792942371568-1e322224",
+  "scope": "Explicit raw-byte public copies only; no game verdict or runtime modification.",
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\select-timeouts-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\select-timeouts-v1.mjs",
+      "bytes": 4303,
+      "sha256": "ea4bcb8ecf2772176cfc07ca6751fab412796a053f55dd6baf87cea2f35d5bfc",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\selected-timeouts-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\selected-timeouts-v1.json",
+      "bytes": 99083,
+      "sha256": "6d0630e628de3d3f9d44f1de5b1be08e602c8157bdcdbc7b0d6534650885b0ba",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\correlate-telemetry-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\correlate-telemetry-v1.mjs",
+      "bytes": 7597,
+      "sha256": "2c3f1eb58523120eccebf6d4529a9f5cf1d0cfa2793b6770d88077cc8503ac2a",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\telemetry-correlation-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\telemetry-correlation-v1.json",
+      "bytes": 318013,
+      "sha256": "984f255b74fe7899c92d170d20f6ecde3654aaeb68edb00f29f5268e3a1529f9",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\select-input-stage-spans-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\select-input-stage-spans-v1.mjs",
+      "bytes": 2790,
+      "sha256": "4afc4c6a35d70e7f937c4bfa5c134128a8fb7b394c0a77a18f0d6d4700699b01",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\input-stage-spans-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\input-stage-spans-v1.json",
+      "bytes": 187622,
+      "sha256": "985b073ea98a5c926679ffda17e88a97fe61a1c336ea18e9b1bced8532b804ce",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\finalize-summary-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\finalize-summary-v1.mjs",
+      "bytes": 9983,
+      "sha256": "c3b14408e941b532c5516109173157f87b5106cd84a9aeb26cc61a6e9fddfc52",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\source-assertions-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\source-assertions-v1.json",
+      "bytes": 5398,
+      "sha256": "55eccfaeb87fb98b7a8e5fb478179ce2722feb68eec2b54093ac5e53ff82ce9d",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\summary-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\summary-v1.json",
+      "bytes": 112262,
+      "sha256": "0b50431970201261b5f78ed3deda8ffd4b239b3b500187997c6af00f73f11288",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\public-whitelist-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\public-whitelist-v1.json",
+      "bytes": 4968,
+      "sha256": "e020ce548496ab98176640624887986271238d534d6e400319b49fb0a0a71be2",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-server-path-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\formal11-attack-timeout-server-path-v1.json",
+      "bytes": 12150,
+      "sha256": "e1143afa23930b4ba2ecb089967eaffc89ac9de148e06d60d17401050f5fe9d3",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    }
+  ],
+  "totalCopies": 11,
+  "totalCopiedBytes": 764169,
+  "authoredReadme": {
+    "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-attack-timeout-analysis-v1\\README.md",
+    "bytes": 1915,
+    "sha256": "e5f4f2d684ac41e187ab1858f5a13207eb0561f8e356859264149b6f170b9904"
+  },
+  "relativeLinksChecked": [
+    "summary-v1.json",
+    "selected-timeouts-v1.json",
+    "telemetry-correlation-v1.json",
+    "input-stage-spans-v1.json",
+    "source-assertions-v1.json",
+    "formal11-attack-timeout-server-path-v1.json",
+    "public-whitelist-v1.json"
+  ],
+  "sourceAfterVerified": true,
+  "allDestinationBytesVerified": true,
+  "originalVerdictPreserved": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Frozen": true,
+  "excluded": [
+    "original samples raw",
+    "original monitor and slow logs",
+    "private accounts/store",
+    "binary",
+    "recording payload"
+  ],
+  "archiveScript": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-public-archive-v1\\archive-v2.mjs",
+    "bytes": 5497,
+    "sha256": "b4e9a4fc65b86035059aa46605547ada7c83d279148d5a66e1db3d84ed547740"
+  },
+  "earlierMetadataAttempt": {
+    "source": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-public-archive-v1\\archive-v1.mjs",
+      "bytes": 5086,
+      "sha256": "b464463cf3a6d6f8603ef626b1e2c1bbfe4d14cebc2b3f27a98b7ef4e3da8e27"
+    },
+    "result": "Path-separator string assertion safely refused before any file copy; only an empty target directory existed. This revision compares resolved paths and still refuses nonempty targets."
+  }
+}

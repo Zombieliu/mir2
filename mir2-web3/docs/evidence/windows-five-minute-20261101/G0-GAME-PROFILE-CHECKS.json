@@ -1,0 +1,363 @@
+{
+  "schema": "mir2.native-game.resource-read-profile-validation.v1",
+  "atUtc": "2026-11-01T15:27:11.557371+00:00",
+  "passed": true,
+  "baseHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+  "branch": "codex/windows-player-journey",
+  "validationScope": "offline source-level focused CPU/filesystem tests and affected Game binary compile check; no GPU or packaged runtime execution",
+  "boundedInputs": {
+    "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\final-inputs.json",
+    "sha256": "2bb24cb307d66c38a1180e18dabd42a403817bcbfd04fab0a9c68e2a632fff9f",
+    "bytes": 2645
+  },
+  "boundedInputsUnchangedAfterValidation": true,
+  "modifiedGameFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/capture.rs",
+      "sha256": "6a3f388c5a21b5c45ec260a76381595f0495d74b6bf957ef4056d9106e6c9994"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads.rs",
+      "sha256": "3a538f9c7116629b6fd507b04baee3506c338555fa81781a925821406331e617"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads_tests.rs",
+      "sha256": "4ad16154d1a52a6afe45e719af56350130e7f719ccb9d27e7a139a052fdbf639"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs",
+      "sha256": "a1fc5e9a527e2d54697c291daed75423e407cef29ab3043e679a81228b111d81"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/generation_launch_tests.rs",
+      "sha256": "34efca9c56d37915208db6ce131b0c09268f795c6d428e44e0d0db8855f79f58"
+    }
+  ],
+  "preexistingR18StartupFixPreserved": true,
+  "preexistingUntrackedGenerationLaunchTestsPreserved": true,
+  "executedTestCounts": {
+    "passed": 38,
+    "failed": 0,
+    "ignored": 0
+  },
+  "filteredOutAreNotIgnoredOrExecuted": true,
+  "commands": [
+    {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\resource-reads-final.json",
+        "sha256": "67aa66dea414731268c7d056be529121f7cf8080973c272498dc000e5d71834d",
+        "bytes": 1370
+      },
+      "schema": "mir2.game-profile.validation-command.v1",
+      "name": "resource-reads-final",
+      "startedAtUtc": "2026-11-01T15:24:00.373840+00:00",
+      "completedAtUtc": "2026-11-01T15:25:03.115659+00:00",
+      "elapsedSeconds": 62.73487259999092,
+      "cwd": "E:\\mir2-player-journey",
+      "argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "resource_reads",
+        "--",
+        "--nocapture"
+      ],
+      "environmentOverrides": {
+        "CARGO_TARGET_DIR": "E:/mir2-release/windows-ui-shop-pointer-20261101/test-target",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TERM_COLOR": "never"
+      },
+      "inputManifestSha256": "2bb24cb307d66c38a1180e18dabd42a403817bcbfd04fab0a9c68e2a632fff9f",
+      "exitCode": 0,
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\resource-reads-final.log",
+        "sha256": "6d74d0d3878983892d616626eccea56540487dac690237fda2f8804aae723259",
+        "bytes": 46875
+      },
+      "testSummaryLines": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1215 filtered out; finished in 0.09s"
+      ],
+      "compilerSummaryLines": [
+        "    Finished `test` profile [optimized + debuginfo] target(s) in 1m 01s"
+      ],
+      "inputFilesUnchangedAfterCommand": true,
+      "executedTestCounts": {
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\generation-launch-final.json",
+        "sha256": "003c700ac893ad832139b62ff1c92c838ab814c782a70308d843f9793caf43ad",
+        "bytes": 1386
+      },
+      "schema": "mir2.game-profile.validation-command.v1",
+      "name": "generation-launch-final",
+      "startedAtUtc": "2026-11-01T15:25:03.117599+00:00",
+      "completedAtUtc": "2026-11-01T15:25:03.628471+00:00",
+      "elapsedSeconds": 0.5032557000085944,
+      "cwd": "E:\\mir2-player-journey",
+      "argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "generation_launch::tests",
+        "--",
+        "--nocapture"
+      ],
+      "environmentOverrides": {
+        "CARGO_TARGET_DIR": "E:/mir2-release/windows-ui-shop-pointer-20261101/test-target",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TERM_COLOR": "never"
+      },
+      "inputManifestSha256": "2bb24cb307d66c38a1180e18dabd42a403817bcbfd04fab0a9c68e2a632fff9f",
+      "exitCode": 0,
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\generation-launch-final.log",
+        "sha256": "3e04e176e710e8dd652d07a9954109bb27f7b2152c29cb7c42b7e3d31d8f398e",
+        "bytes": 46583
+      },
+      "testSummaryLines": [
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1213 filtered out; finished in 0.09s"
+      ],
+      "compilerSummaryLines": [
+        "    Finished `test` profile [optimized + debuginfo] target(s) in 0.35s"
+      ],
+      "inputFilesUnchangedAfterCommand": true,
+      "executedTestCounts": {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\capture-adjacent-final.json",
+        "sha256": "90c962238b7715a9e4f041e3d1a77743d21005ee412040ae551bc5b244b9fffc",
+        "bytes": 1376
+      },
+      "schema": "mir2.game-profile.validation-command.v1",
+      "name": "capture-adjacent-final",
+      "startedAtUtc": "2026-11-01T15:25:03.630318+00:00",
+      "completedAtUtc": "2026-11-01T15:25:04.109556+00:00",
+      "elapsedSeconds": 0.47016070000245236,
+      "cwd": "E:\\mir2-player-journey",
+      "argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "capture::tests",
+        "--",
+        "--nocapture"
+      ],
+      "environmentOverrides": {
+        "CARGO_TARGET_DIR": "E:/mir2-release/windows-ui-shop-pointer-20261101/test-target",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TERM_COLOR": "never"
+      },
+      "inputManifestSha256": "2bb24cb307d66c38a1180e18dabd42a403817bcbfd04fab0a9c68e2a632fff9f",
+      "exitCode": 0,
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\capture-adjacent-final.log",
+        "sha256": "0627527cb0231c98d810beea4cc671b2ba279c8f9be701da54a6b205c8c5357e",
+        "bytes": 47448
+      },
+      "testSummaryLines": [
+        "test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 1200 filtered out; finished in 0.06s"
+      ],
+      "compilerSummaryLines": [
+        "    Finished `test` profile [optimized + debuginfo] target(s) in 0.34s"
+      ],
+      "inputFilesUnchangedAfterCommand": true,
+      "executedTestCounts": {
+        "passed": 22,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\game-check-final.json",
+        "sha256": "686df97600c9e1a409095aada368c2b72e25cd70302c7fdbe13ec1ad067f1d10",
+        "bytes": 1206
+      },
+      "schema": "mir2.game-profile.validation-command.v1",
+      "name": "game-check-final",
+      "startedAtUtc": "2026-11-01T15:25:04.111335+00:00",
+      "completedAtUtc": "2026-11-01T15:26:00.719089+00:00",
+      "elapsedSeconds": 56.598857400007546,
+      "cwd": "E:\\mir2-player-journey",
+      "argv": [
+        "cargo",
+        "+1.95.0",
+        "check",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows"
+      ],
+      "environmentOverrides": {
+        "CARGO_TARGET_DIR": "E:/mir2-release/windows-ui-shop-pointer-20261101/test-target",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TERM_COLOR": "never"
+      },
+      "inputManifestSha256": "2bb24cb307d66c38a1180e18dabd42a403817bcbfd04fab0a9c68e2a632fff9f",
+      "exitCode": 0,
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\game-check-final.log",
+        "sha256": "c4f4b936a49857faa90c0c24fcb3b19261200d168676b420cb6b0515b88117d4",
+        "bytes": 55403
+      },
+      "testSummaryLines": [],
+      "compilerSummaryLines": [
+        "    Finished `dev` profile [optimized + debuginfo] target(s) in 56.54s"
+      ],
+      "inputFilesUnchangedAfterCommand": true
+    }
+  ],
+  "sourceChecks": [
+    {
+      "argv": [
+        "rustfmt",
+        "+1.95.0",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "mir2-web3/apps/game-client/platform-windows/src/capture.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads_tests.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/generation_launch_tests.rs"
+      ],
+      "cwd": "E:\\mir2-player-journey",
+      "exitCode": 0,
+      "elapsedSeconds": 0.06780639999487903,
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\format-check.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "mir2-web3/apps/game-client/platform-windows/src/capture.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads_tests.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/generation_launch_tests.rs"
+      ],
+      "cwd": "E:\\mir2-player-journey",
+      "exitCode": 0,
+      "elapsedSeconds": 0.03827850001107436,
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\diff-check.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    }
+  ],
+  "preservedInitialAttempts": [
+    {
+      "name": "resource-reads-attempt-01",
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\resource-reads-attempt-01.log",
+        "sha256": "468d40c1cb9b92f69129bfe755a680532ff62129cabbbd731f47c3141b66f643",
+        "bytes": 61829
+      },
+      "exitCodeObservedInTool": 0,
+      "historicalOnly": true,
+      "note": "Initial historical seven-test pass before shared dependency repack addition; no complete input manifest was captured for that run.",
+      "testSummaryLines": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1215 filtered out; finished in 0.09s"
+      ],
+      "compilerSummaryLines": [
+        "    Finished `test` profile [optimized + debuginfo] target(s) in 6m 35s"
+      ]
+    },
+    {
+      "name": "generation-launch-attempt-01",
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\generation-launch-attempt-01.log",
+        "sha256": "6c7e2ed090d148ad6458ffd9590299157478cb0c43a41ae463c71cc33bc198df",
+        "bytes": 40680
+      },
+      "exitCodeObservedInTool": 101,
+      "historicalOnly": true,
+      "note": "Compile E0583: resource-pack declared pub mod repack before repack.rs was present. No tests executed.",
+      "testSummaryLines": [],
+      "compilerSummaryLines": []
+    },
+    {
+      "name": "game-check-attempt-01",
+      "rawCombinedOutput": {
+        "path": "E:\\mir2-release\\windows-five-minute-20261101\\game-profile-validation\\game-check-attempt-01.log",
+        "sha256": "0ccebd1970e1c1b2d0d3250968b021d0fc942e72d41590eecf317f4514b94969",
+        "bytes": 10817
+      },
+      "exitCodeObservedInTool": 101,
+      "historicalOnly": true,
+      "note": "Same transient missing repack.rs E0583. Compile did not complete.",
+      "testSummaryLines": [],
+      "compilerSummaryLines": []
+    }
+  ],
+  "testExecutable": {
+    "path": "E:\\mir2-release\\windows-ui-shop-pointer-20261101\\test-target\\debug\\deps\\mir2_platform_windows-1fb61a6a449d4ff6.exe",
+    "sha256": "ff450b5c1f23e364d4ab9af1f79ef5feb370f4071ad02d4f133dbb067a5a54d1",
+    "bytes": 207883264
+  },
+  "implementationContracts": [
+    "Existing valid MIR2_NATIVE_CAPTURE_DIR is the only opt-in; normal startup uses unprofiled PackStore.",
+    "Profiled opening authenticates all packs and runs unchanged twenty required startup resource reads before mount.",
+    "Capture request freezes cumulative verified successful reads and failure/overflow/poison counters; later reads do not mutate that snapshot.",
+    "Separate resource-reads diagnostic binds the authenticated generation/catalog, request frame/scene and final PNG SHA256.",
+    "Diagnostic is create-only using fsynced private bytes and atomic no-clobber hard-link publication; collision does not replace earlier evidence.",
+    "Diagnostic failure does not alter original capture v1/draft schema, eligibility checks or final completion marker.",
+    "Successful read observations are a diagnostic lower bound, never a complete boot/map closure or streaming permission."
+  ],
+  "notRun": [
+    "GPU capture",
+    "normal Game launch",
+    "login or map interaction",
+    "cold download or 300-second acceptance",
+    "resource QA/full packaging",
+    "deployment"
+  ],
+  "releaseArtifactProduced": false,
+  "publicServiceChanged": false,
+  "gitCommitCreatedByThisWorker": false,
+  "gameStreamingAudit": {
+    "path": "E:\\mir2-release\\windows-five-minute-20261101\\GAME-STREAMING-AUDIT.json",
+    "sha256": "a4a4994cfc418b5d8f0329bf44021242a7a0f58d1c42776c3aa15c65cb5570b5",
+    "bytes": 28192
+  },
+  "noRemainingCargoOwnedByThisWorker": true
+}

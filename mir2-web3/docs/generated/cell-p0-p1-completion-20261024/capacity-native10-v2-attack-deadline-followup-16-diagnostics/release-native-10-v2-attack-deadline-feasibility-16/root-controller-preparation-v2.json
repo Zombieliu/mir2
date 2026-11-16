@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v2.mjs",
+    "bytes": 13330,
+    "sha256": "0378790828b92a6f585afd25013ddec7076452ffe3f3571f22e9e5d2f3e33f14"
+  },
+  "readme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\ROOT-CONTROLLER-v2.md",
+    "bytes": 3253,
+    "sha256": "c337fb216e5256d7882102a290fd177ba7a01f1299b6d0d43ea89c8ac5859419"
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-v1\\verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "b715c67e7e0b3e764df11a885aff386b909d9f5dc81828eff89f51898660d395"
+    }
+  ],
+  "syntax": {
+    "command": "node --check root-seal-and-guard-v2.mjs",
+    "exitCode": 0,
+    "executed": true
+  },
+  "inputInterface": {
+    "preparedFile": "explicit --prepared-file absolute canonical path, runtime-prepared-vN.json within this runtime root",
+    "preparedSha256": "explicit --prepared-sha256, independently reviewed exact raw SHA",
+    "reviewFile": "explicit --review-file absolute public canonical path under external evidence root",
+    "reviewSha256": "explicit --review-sha256 exact raw SHA",
+    "reviewSchema": {
+      "schemaVersion": 1,
+      "prepared": "exact {file,bytes,sha256} with path.resolve(file)",
+      "controller": "exact {file,bytes,sha256} with path.resolve(file)",
+      "verdict": {
+        "preparedContractPassed": true,
+        "eligibleForSealNow": true,
+        "blockingFindingIds": []
+      }
+    }
+  },
+  "sourceSealInterface": {
+    "state": "final-source-bound-not-executed",
+    "backendInputCount": 44,
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "files": "canonical deduplicated reviewed local/external sources plus explicit controller/preparation/readme/full16-validator/prepared/review inputs",
+    "sourceSha256": "SHA256(JSON.stringify(files))",
+    "maximumUniqueSourceFiles": 128
+  },
+  "sealPreflight": {
+    "ownVerifyReleaseCalled": false,
+    "newFull16ValidateCandidate": true,
+    "originalLocationStrict44RequireFrozen": true,
+    "driverEvidenceAndSixDeclarations": true,
+    "sceneAndWireSource": true
+  },
+  "mutationScope": {
+    "newControllerFilesOnly": true,
+    "existingRuntimeSourcesModified": false,
+    "historicalPreparedRevisionsModified": false,
+    "rootExecutionRequired": true
+  },
+  "sealExecuted": false,
+  "readonlyGuardExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-controller-v2-exact-inverse-proof.json",
+    "bytes": 1866,
+    "sha256": "62a2c6f5c07c725e44fda09c446481c2df5b8ea761c49b28ff3dc541bb6c10d0"
+  },
+  "previousControllerPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-controller-preparation-v1.json",
+    "bytes": 2754,
+    "sha256": "bd02c0a78d55ffc9b930bbbc850cbdf2927610d22b3d73f7cc5d096a4008cda9"
+  },
+  "semanticChange": "Only full16 validator input.repository to input.project; PREP and README use independent v2 companions. Existing frozen/prepared runtime sources are unchanged."
+}

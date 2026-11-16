@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T09:28:08.5056882Z",
+  "scope": "Independent read-only final integration review of the actual four-test-file200-case capacity-tooling suite and exact nine current source pins. This reviewer did not execute or repeat tests.",
+  "fullExecutionReceipt": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-verification-v1/full-current-receipt-v1.json",
+    "bytes": 4682,
+    "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+  },
+  "fullLog": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-verification-v1/full-current-v1.log",
+    "bytes": 53991,
+    "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+  },
+  "actualExecution": {
+    "node": "v22.18.0",
+    "args": [
+      "--test",
+      "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+    ],
+    "elapsedMs": 311114,
+    "exitCode": 0,
+    "signal": null,
+    "error": null,
+    "tapTests": 200,
+    "tapPass": 200,
+    "tapFail": 0,
+    "tapCancelled": 0,
+    "tapSkipped": 0,
+    "topLevelOkRows": 200,
+    "topLevelNotOkRows": 0,
+    "logHashAndBytesMatchReceipt": true,
+    "footerAndReceiptCountsMatch": true
+  },
+  "currentSourceClosure": {
+    "fileCount": 9,
+    "allCurrentFileRawBytesAndSha256MatchRun": true,
+    "sourceBeforeAfterExact": true,
+    "sourceAggregateRecomputed": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "sourceAggregateMatchesReceipt": true,
+    "aggregateSerialization": "SHA256 UTF8 compact JSON of the ordered nine {file,bytes,sha256} records; independently recomputed without product import",
+    "main": {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    "test": {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+    },
+    "oldSevenSourceFreeze": {
+      "path": "C:/mir2-build/p01-completion-20261024/capacity-native-witness-approach-driver-frozen-v1.json",
+      "bytes": 41896,
+      "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+    },
+    "otherSevenCurrentBytesAndHashesUnchanged": true
+  },
+  "priorIndependentReviews": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-independent-review-v1/source-review-v1.json",
+      "bytes": 7006,
+      "sha256": "62bade1cc1a842453274f19371adf7b7ca6cb197405560cabedb66253c8f67bd"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-independent-review-v1/test-review-v1.json",
+      "bytes": 6437,
+      "sha256": "95682bf8c45ae2784405f0ca423b0bf309402d79a4145e3784347f4ab271dcfd"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-independent-review-v1/test-review-v2.json",
+      "bytes": 7722,
+      "sha256": "e405722272174429c6794acff574d8efe120dd3dbe411fd66c4fd4f76f68d6d3"
+    }
+  ],
+  "reviewConclusions": [
+    "Main source8-rule inverse exactly restored original144416/2251 raw bytes. The preference only reorders original first4, retains adjacent witnessed attack priority, does not become a hard claim, and preserves original path and pursuit budgets.",
+    "Final test candidate has13new cases; original187-test224817-byte prefix remains exactde493. Two revision2 changes uniquely invert to the prior238437/2c95 candidate. Finite future receipt coverage is present; the baseline/native threshold fixture separately retains native18/12 and baseline12/3.",
+    "Previously reviewed old-main red4pass/9AssertionError fail -> finally exact restore -> current13pass provides actual behavioral discrimination, rather than an import/type/syntax failure. All historical failed focused receipts and preimages remain.",
+    "The final full200 executed with the same final1cf9 main and5c6e test. Every current source pin and ordered aggregate matches sourceBefore/sourceAfter; other seven driver inputs match the previous frozen source bytes."
+  ],
+  "sourceSwapExecutor": {
+    "path": "C:/mir2-build/p01-completion-20261024/verify-native-chase-preference-v1.mjs",
+    "bytes": 5993,
+    "sha256": "d8adc932974cf844200143922baf8f9af49e8dff6b08e2095c388035df57ac48"
+  },
+  "verdict": {
+    "integrationEvidenceConsistent": true,
+    "blockingFindingIds": [],
+    "fullCapacityToolRegressionPassed": true,
+    "sourceAndTestsReadyForCoordinatorCheckpoint": true,
+    "testsRepeatedByReviewer": false,
+    "freshGameOrCapacityProbePerformed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2ImplementationPermitted": false,
+    "frontendAccepted": false
+  },
+  "limits": [
+    "This is the bounded200-case Node capacity-tool suite, not whole-game/workspace acceptance, native UI acceptance or a new real-server capacity result.",
+    "The prior formal25 failure remains a failure; the new preference has not yet been assessed in an authorized fresh probe. It does not guarantee18launched/12positive per minute,100actors or7200-second soak.",
+    "No new driver freeze or commit is fabricated by this receipt. Coordinator owns code/evidence checkpoint and only then new manifest/probe binding.",
+    "The receipt does not claim an independent current backend41-source scan; backend/runtime/scenario files are outside this product change and were not modified by this reviewer."
+  ]
+}

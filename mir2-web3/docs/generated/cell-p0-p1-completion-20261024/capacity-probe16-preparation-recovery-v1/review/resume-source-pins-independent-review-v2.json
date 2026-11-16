@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T17:26:18.622Z",
+  "scope": "Read-only final resume-v3 ACL correction. Reviewer did not execute imports, ACL queries, seeding, preparation, recovery, tests or services.",
+  "script": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v3.mjs",
+    "bytes": 18943,
+    "sha256": "587e954260768c9f6f54340ca741ae8d96fe7889c22d0bceabe49ec4ecfa82bd"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v3-inverse-proof.json",
+    "bytes": 5470,
+    "sha256": "4cd238ade8e464462dd39441889837d9f3c0cbc99e5a9d271137c73c71bae7d8"
+  },
+  "previousReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-runtime-independent-review-v1\\resume-source-pins-independent-review-v1.json",
+    "bytes": 3685,
+    "sha256": "8247bd2cbd194b4dd7e2a19a738c80d7963c7ad0d0ffb61b8774a304973138c3"
+  },
+  "previousReviewEligibilitySupersededForAclAssumption": true,
+  "actualV2FailedExecutionLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-root-resume-source-pins-actual-v1.log",
+    "bytes": 3356,
+    "sha256": "458d1c61a62cb128b8add3b703d2ca91862c7aba4ad078c00d936fd0e52adda2"
+  },
+  "originalFailedPreparationLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-prepare-actual-v1.log",
+    "bytes": 924,
+    "sha256": "5f76607cbfb3371018ba1a7df418bf200e6f3697674b437c3309d002d7e9eb84"
+  },
+  "sourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\launcher-source-frozen-v1.json",
+    "bytes": 40976,
+    "sha256": "a22ff77e310680b4f95d0daf5cc630bdc9c899032a265eefa890212ba39e356c"
+  },
+  "seederSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\bin\\seed_capacity_accounts.rs",
+    "bytes": 20499,
+    "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+  },
+  "sourceEvidence": {
+    "secureDirectoryCalls": [
+      67,
+      68,
+      69
+    ],
+    "windowsOwnerOnlyAclConstruction": 162,
+    "seederTightensPrivateParent": true,
+    "seederDoesNotProcessRecordings": true
+  },
+  "aclContract": {
+    "private": {
+      "exactAllowedSidRoles": [
+        "current-owner"
+      ],
+      "allowedPrincipalCount": 1
+    },
+    "recordings": {
+      "exactAllowedSidRoles": [
+        "current-owner",
+        "SYSTEM"
+      ],
+      "allowedPrincipalCount": 2
+    },
+    "ownerSidMustMatchCurrentOwner": true,
+    "exactDistinctSidSet": true,
+    "rulesMustAllBeAllow": true,
+    "fullControlRequired": true,
+    "protectedAclRequired": true,
+    "noInheritedRules": true,
+    "normalContainerObjectInheritanceFlagsNotRejected": true,
+    "onlyGetAclReadUsed": true,
+    "originalSummaryKeysPreserved": [
+      "ownerOnlyVerified",
+      "allowedPrincipalCount"
+    ],
+    "countsRecordActual1And2": true,
+    "rawPrivateValuesOrCredentialFilesRead": false,
+    "aclWritten": false
+  },
+  "checks": {
+    "singleAclBlockExactInverseToV2": true,
+    "originalSourcePinTailRawExact": true,
+    "originalTailBytes": 3500,
+    "remainingRelativeDynamicImports": 0,
+    "otherRuntimeReleaseDriverAndPublicProvisioningChecksUnchanged": true,
+    "frozen99UnchangedByCorrection": true,
+    "rootOnlySourcePinsWxUnchanged": true,
+    "externalNoteAndReceiptWxUnchanged": true,
+    "noAccountPreparationOrSeedRepetition": true,
+    "noPrivateOrRuntimeMutationAdded": true
+  },
+  "outputsObservedAbsent": [
+    "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\source-pins.json",
+    "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\execution.lock",
+    "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\realm-process.json",
+    "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-partial-state-v1.json",
+    "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-execution-v1.json"
+  ],
+  "priorFailurePreservation": {
+    "v2FailedAtReadOnlyAclCheck": true,
+    "rootReportedAclCountsPrivate1Recordings2": true,
+    "originalPreparationStillFailedNotRelabeled": true,
+    "v2FailedExecutionLogPreserved": true
+  },
+  "verdict": {
+    "resumeSourceContractPassed": true,
+    "eligibleForRootResume": true,
+    "blockingFindingIds": []
+  },
+  "limitations": [
+    "Static eligibility applies only to the exact v3 script. Root performs the actual recovery separately.",
+    "Actual ACL observations are Root reports plus source contract; reviewer did not run Get-Acl.",
+    "Source-pin recovery is not gameplay, probe or capacity acceptance."
+  ],
+  "resumeExecutedByReviewer": false,
+  "accountsAddedByReviewer": 0,
+  "realmStartedByReviewer": false,
+  "capacityAccepted": false
+}

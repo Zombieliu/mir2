@@ -1,0 +1,5243 @@
+{
+  "boundedSwitchCycles": 30,
+  "captures": 14,
+  "cases": [
+    {
+      "image": "shell-zh-TW-login.png",
+      "locale": "zh-TW",
+      "opaqueIdentity": "Gold",
+      "screen": "login",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            435.0,
+            384.0,
+            52.0,
+            12.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            435.0,
+            361.0,
+            22.0,
+            12.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            3.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            457.0,
+            361.0,
+            3.0,
+            12.0
+          ],
+          "text": "|"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            554.0,
+            470.0,
+            20.0,
+            12.0
+          ],
+          "text": "取消"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            438.0,
+            470.0,
+            40.0,
+            12.0
+          ],
+          "text": "安全鍵盤"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            352.0,
+            378.0,
+            77.0,
+            21.0
+          ],
+          "text": "密碼"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            352.0,
+            355.0,
+            77.0,
+            21.0
+          ],
+          "text": "帳號"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            438.0,
+            444.0,
+            40.0,
+            12.0
+          ],
+          "text": "建立帳號"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            24.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            368.0,
+            286.0,
+            288.0,
+            28.0
+          ],
+          "text": "登入"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            586.0,
+            370.0,
+            20.0,
+            12.0
+          ],
+          "text": "確定"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            544.0,
+            444.0,
+            40.0,
+            12.0
+          ],
+          "text": "變更密碼"
+        }
+      ]
+    },
+    {
+      "image": "shell-zh-TW-registration.png",
+      "locale": "zh-TW",
+      "opaqueIdentity": "Cancel",
+      "screen": "registration",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            285.0,
+            57.0,
+            14.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            311.0,
+            57.0,
+            14.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            259.0,
+            35.0,
+            14.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            369.0,
+            198.0,
+            22.0
+          ],
+          "text": "出生日期（選填）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            655.0,
+            586.0,
+            20.0,
+            12.0
+          ],
+          "text": "取消"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            343.0,
+            198.0,
+            22.0
+          ],
+          "text": "姓名（選填）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            404.0,
+            198.0,
+            22.0
+          ],
+          "text": "安全問題（選填）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            430.0,
+            198.0,
+            22.0
+          ],
+          "text": "安全答案（選填）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            283.0,
+            198.0,
+            22.0
+          ],
+          "text": "密碼"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            257.0,
+            198.0,
+            22.0
+          ],
+          "text": "帳號"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            159.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            233.0,
+            494.0,
+            300.0,
+            70.0
+          ],
+          "text": "帳號：3–15 位英文字母或數字。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            88.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            238.0,
+            178.0,
+            548.0,
+            30.0
+          ],
+          "text": "建立帳號"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            381.0,
+            586.0,
+            20.0,
+            12.0
+          ],
+          "text": "確定"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            309.0,
+            198.0,
+            22.0
+          ],
+          "text": "確認密碼"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            465.0,
+            198.0,
+            22.0
+          ],
+          "text": "電子郵件（選填）"
+        }
+      ]
+    },
+    {
+      "image": "shell-zh-TW-create.png",
+      "locale": "zh-TW",
+      "opaqueIdentity": "Gold",
+      "screen": "create",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            543.0,
+            422.0,
+            240.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            683.0,
+            586.0,
+            20.0,
+            12.0
+          ],
+          "text": "取消"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            638.0,
+            533.0,
+            137.0,
+            30.0
+          ],
+          "text": "女"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            418.0,
+            586.0,
+            20.0,
+            12.0
+          ],
+          "text": "建立"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            88.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            238.0,
+            168.0,
+            548.0,
+            32.0
+          ],
+          "text": "建立角色"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            510.0,
+            278.0,
+            19.0
+          ],
+          "text": "性別"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "戰士"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            591.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "法師"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            169.0,
+            32.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            224.0,
+            278.0,
+            170.0
+          ],
+          "text": "法師掌握強大的元素魔法。\n擅長遠距法術，需留意站位。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            533.0,
+            137.0,
+            30.0
+          ],
+          "text": "男"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            451.0,
+            278.0,
+            19.0
+          ],
+          "text": "職業"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            399.0,
+            278.0,
+            19.0
+          ],
+          "text": "角色名稱"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            685.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "道士"
+        }
+      ]
+    },
+    {
+      "image": "shell-zh-TW-select.png",
+      "locale": "zh-TW",
+      "opaqueIdentity": "Gold",
+      "screen": "select",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            62.0,
+            75.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            54.0,
+            13.0
+          ],
+          "text": "上次上線："
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            490.0,
+            743.0,
+            40.0,
+            12.0
+          ],
+          "text": "刪除角色"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            43.0,
+            13.0
+          ],
+          "text": "尚未登入"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            336.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "建立"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "法師"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            70.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "空角色欄位"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            70.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "空角色欄位"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "等級 7"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "等級 8"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            654.0,
+            743.0,
+            40.0,
+            12.0
+          ],
+          "text": "製作名單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "道士"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            88.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "選擇角色"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            172.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "開始"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            828.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "離開"
+        }
+      ]
+    },
+    {
+      "image": "shell-en-login.png",
+      "locale": "en",
+      "opaqueIdentity": "Gold",
+      "screen": "login",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            435.0,
+            384.0,
+            43.0,
+            12.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            352.0,
+            355.0,
+            77.0,
+            21.0
+          ],
+          "text": "Account"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            548.0,
+            470.0,
+            32.0,
+            12.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            82.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            523.0,
+            444.0,
+            82.0,
+            12.0
+          ],
+          "text": "Change Password"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            435.0,
+            361.0,
+            22.0,
+            12.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            24.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            368.0,
+            286.0,
+            288.0,
+            28.0
+          ],
+          "text": "Login"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            59.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            429.0,
+            444.0,
+            59.0,
+            12.0
+          ],
+          "text": "New Account"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            15.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            589.0,
+            370.0,
+            15.0,
+            12.0
+          ],
+          "text": "OK"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            352.0,
+            378.0,
+            77.0,
+            21.0
+          ],
+          "text": "Password"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            438.0,
+            470.0,
+            41.0,
+            12.0
+          ],
+          "text": "Safe Key"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            3.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            457.0,
+            361.0,
+            3.0,
+            12.0
+          ],
+          "text": "|"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-en-registration.png",
+      "locale": "en",
+      "opaqueIdentity": "Cancel",
+      "screen": "registration",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            285.0,
+            48.0,
+            14.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            311.0,
+            48.0,
+            14.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            257.0,
+            198.0,
+            22.0
+          ],
+          "text": "Account"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            148.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            233.0,
+            494.0,
+            300.0,
+            70.0
+          ],
+          "text": "Account: 3–15 letters or digits."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            369.0,
+            198.0,
+            22.0
+          ],
+          "text": "Birth Date (optional)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            259.0,
+            35.0,
+            14.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            586.0,
+            32.0,
+            12.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            309.0,
+            198.0,
+            22.0
+          ],
+          "text": "Confirm Password"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            465.0,
+            198.0,
+            22.0
+          ],
+          "text": "Email (optional)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            86.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            343.0,
+            198.0,
+            22.0
+          ],
+          "text": "Name (optional)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            129.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            238.0,
+            178.0,
+            548.0,
+            30.0
+          ],
+          "text": "New Account"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            15.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            384.0,
+            586.0,
+            15.0,
+            12.0
+          ],
+          "text": "OK"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            283.0,
+            198.0,
+            22.0
+          ],
+          "text": "Password"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            140.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            430.0,
+            198.0,
+            22.0
+          ],
+          "text": "Security Answer (optional)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            404.0,
+            198.0,
+            22.0
+          ],
+          "text": "Security Question (optional)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-en-create.png",
+      "locale": "en",
+      "opaqueIdentity": "Gold",
+      "screen": "create",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            677.0,
+            586.0,
+            32.0,
+            12.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            89.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            399.0,
+            278.0,
+            19.0
+          ],
+          "text": "Character Name"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            451.0,
+            278.0,
+            19.0
+          ],
+          "text": "Class"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            413.0,
+            586.0,
+            31.0,
+            12.0
+          ],
+          "text": "Create"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            169.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            238.0,
+            168.0,
+            548.0,
+            32.0
+          ],
+          "text": "Create Character"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            638.0,
+            533.0,
+            137.0,
+            30.0
+          ],
+          "text": "Female"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            510.0,
+            278.0,
+            19.0
+          ],
+          "text": "Gender"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            543.0,
+            422.0,
+            240.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            533.0,
+            137.0,
+            30.0
+          ],
+          "text": "Male"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            685.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "Taoist"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "Warrior"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            38.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            591.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "Wizard"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 90,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            263.0,
+            47.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            224.0,
+            278.0,
+            170.0
+          ],
+          "text": "Wizards command powerful elemental magic.\nThey favor ranged spells and careful positioning."
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-en-select.png",
+      "locale": "en",
+      "opaqueIdentity": "Gold",
+      "screen": "select",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            331.0,
+            743.0,
+            31.0,
+            12.0
+          ],
+          "text": "Create"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            658.0,
+            743.0,
+            32.0,
+            12.0
+          ],
+          "text": "Credits"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            76.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            743.0,
+            76.0,
+            12.0
+          ],
+          "text": "Delete Character"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            68.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Empty Slot"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            68.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Empty Slot"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            830.0,
+            743.0,
+            17.0,
+            12.0
+          ],
+          "text": "Exit"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            57.0,
+            13.0
+          ],
+          "text": "Last Online:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            62.0,
+            75.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Lv. 7"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Lv. 8"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            29.0,
+            13.0
+          ],
+          "text": "Never"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            164.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Select Character"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            171.0,
+            743.0,
+            22.0,
+            12.0
+          ],
+          "text": "Start"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Taoist"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Wizard"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-pt-BR-login.png",
+      "locale": "pt-BR",
+      "opaqueIdentity": "Gold",
+      "screen": "login",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            435.0,
+            384.0,
+            43.0,
+            12.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            534.0,
+            444.0,
+            60.0,
+            12.0
+          ],
+          "text": "Alterar senha"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            544.0,
+            470.0,
+            41.0,
+            12.0
+          ],
+          "text": "Cancelar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            352.0,
+            355.0,
+            77.0,
+            21.0
+          ],
+          "text": "Conta"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            434.0,
+            444.0,
+            49.0,
+            12.0
+          ],
+          "text": "Criar conta"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            55.0,
+            24.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            368.0,
+            286.0,
+            288.0,
+            28.0
+          ],
+          "text": "Entrar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            435.0,
+            361.0,
+            22.0,
+            12.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            15.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            589.0,
+            370.0,
+            15.0,
+            12.0
+          ],
+          "text": "OK"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            352.0,
+            378.0,
+            77.0,
+            21.0
+          ],
+          "text": "Senha"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            68.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            424.0,
+            470.0,
+            68.0,
+            12.0
+          ],
+          "text": "Teclado seguro"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            3.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            457.0,
+            361.0,
+            3.0,
+            12.0
+          ],
+          "text": "|"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-pt-BR-registration.png",
+      "locale": "pt-BR",
+      "opaqueIdentity": "Cancel",
+      "screen": "registration",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            285.0,
+            48.0,
+            14.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            311.0,
+            48.0,
+            14.0
+          ],
+          "text": "***********"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            447.0,
+            259.0,
+            35.0,
+            14.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            645.0,
+            586.0,
+            41.0,
+            12.0
+          ],
+          "text": "Cancelar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            89.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            309.0,
+            198.0,
+            22.0
+          ],
+          "text": "Confirmar senha"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            257.0,
+            198.0,
+            22.0
+          ],
+          "text": "Conta"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            155.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            233.0,
+            494.0,
+            300.0,
+            70.0
+          ],
+          "text": "Conta: 3–15 letras ou números."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            238.0,
+            178.0,
+            548.0,
+            30.0
+          ],
+          "text": "Criar conta"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            91.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            465.0,
+            198.0,
+            22.0
+          ],
+          "text": "E-mail (opcional)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            120.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            369.0,
+            198.0,
+            22.0
+          ],
+          "text": "Nascimento (opcional)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            89.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            343.0,
+            198.0,
+            22.0
+          ],
+          "text": "Nome (opcional)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            15.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            384.0,
+            586.0,
+            15.0,
+            12.0
+          ],
+          "text": "OK"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            148.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            404.0,
+            198.0,
+            22.0
+          ],
+          "text": "Pergunta secreta (opcional)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            150.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            430.0,
+            198.0,
+            22.0
+          ],
+          "text": "Resposta secreta (opcional)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            239.0,
+            283.0,
+            198.0,
+            22.0
+          ],
+          "text": "Senha"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-pt-BR-create.png",
+      "locale": "pt-BR",
+      "opaqueIdentity": "Gold",
+      "screen": "create",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            673.0,
+            586.0,
+            41.0,
+            12.0
+          ],
+          "text": "Cancelar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            451.0,
+            278.0,
+            19.0
+          ],
+          "text": "Classe"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            417.0,
+            586.0,
+            22.0,
+            12.0
+          ],
+          "text": "Criar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            238.0,
+            168.0,
+            548.0,
+            32.0
+          ],
+          "text": "Criar personagem"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            50.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            638.0,
+            533.0,
+            137.0,
+            30.0
+          ],
+          "text": "Feminino"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            543.0,
+            422.0,
+            240.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            51.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "Guerreiro"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            591.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "Mago"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 87,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            232.0,
+            47.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            224.0,
+            278.0,
+            170.0
+          ],
+          "text": "Magos dominam a magia elemental.\nUsam feitiços à distância e precisam se posicionar bem."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            55.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            533.0,
+            137.0,
+            30.0
+          ],
+          "text": "Masculino"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            119.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            399.0,
+            278.0,
+            19.0
+          ],
+          "text": "Nome do personagem"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            497.0,
+            510.0,
+            278.0,
+            19.0
+          ],
+          "text": "Sexo"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            685.0,
+            474.0,
+            90.0,
+            30.0
+          ],
+          "text": "Taoísta"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    },
+    {
+      "image": "shell-pt-BR-select.png",
+      "locale": "pt-BR",
+      "opaqueIdentity": "Gold",
+      "screen": "select",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            335.0,
+            743.0,
+            22.0,
+            12.0
+          ],
+          "text": "Criar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            38.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            655.0,
+            743.0,
+            38.0,
+            12.0
+          ],
+          "text": "Créditos"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            462.0,
+            735.0,
+            45.0,
+            16.0
+          ],
+          "text": "English"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Espaço vazio"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Espaço vazio"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            89.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            466.0,
+            743.0,
+            89.0,
+            12.0
+          ],
+          "text": "Excluir personagem"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            17.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            169.0,
+            743.0,
+            27.0,
+            12.0
+          ],
+          "text": "Iniciar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            62.0,
+            75.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Mago"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            31.0,
+            13.0
+          ],
+          "text": "Nunca"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Nv. 7"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Nv. 8"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            108.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            529.0,
+            735.0,
+            108.0,
+            16.0
+          ],
+          "text": "Português (Brasil)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            829.0,
+            743.0,
+            18.0,
+            12.0
+          ],
+          "text": "Sair"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            233.0,
+            27.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Selecionar personagem"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            42.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Taoísta"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            70.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            70.0,
+            13.0
+          ],
+          "text": "Último acesso:"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            388.0,
+            735.0,
+            52.0,
+            16.0
+          ],
+          "text": "繁體中文"
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "extraPortuguesePanels": [
+    {
+      "image": "panel-pt-BR-keyboard.png",
+      "locale": "pt-BR",
+      "screen": "keyboard",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            289.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            325.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            361.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D3"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            397.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D4"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            433.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D5"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            469.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D6"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            505.0,
+            120.0,
+            16.0
+          ],
+          "text": "  D7"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            307.0,
+            120.0,
+            16.0
+          ],
+          "text": "  NumPad1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            343.0,
+            120.0,
+            16.0
+          ],
+          "text": "  NumPad2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            379.0,
+            120.0,
+            16.0
+          ],
+          "text": "  NumPad3"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            415.0,
+            120.0,
+            16.0
+          ],
+          "text": "  NumPad4"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            451.0,
+            120.0,
+            16.0
+          ],
+          "text": "  NumPad5"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            616.0,
+            487.0,
+            120.0,
+            16.0
+          ],
+          "text": "  NumPad6"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            663.0,
+            241.0,
+            23.0,
+            12.0
+          ],
+          "text": "Atual"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            291.0,
+            264.0,
+            200.0,
+            20.0
+          ],
+          "text": "Cinto"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            152.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            436.0,
+            210.0,
+            152.0,
+            16.0
+          ],
+          "text": "Configurações do teclado"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            289.0,
+            100.0,
+            15.0
+          ],
+          "text": "D1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            325.0,
+            100.0,
+            15.0
+          ],
+          "text": "D2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            361.0,
+            100.0,
+            15.0
+          ],
+          "text": "D3"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            397.0,
+            100.0,
+            15.0
+          ],
+          "text": "D4"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            433.0,
+            100.0,
+            15.0
+          ],
+          "text": "D5"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            469.0,
+            100.0,
+            15.0
+          ],
+          "text": "D6"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            505.0,
+            100.0,
+            15.0
+          ],
+          "text": "D7"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            289.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            307.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 1 Alt"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            325.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            343.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 2 Alt"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            361.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 3"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            379.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 3 Alt"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            397.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 4"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            415.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 4 Alt"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            433.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 5"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            451.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 5 Alt"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            469.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 6"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            487.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 6 Alt"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            276.0,
+            505.0,
+            200.0,
+            15.0
+          ],
+          "text": "Espaço de cinto 7"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            351.0,
+            241.0,
+            34.0,
+            12.0
+          ],
+          "text": "Função"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            307.0,
+            100.0,
+            15.0
+          ],
+          "text": "NumPad1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            343.0,
+            100.0,
+            15.0
+          ],
+          "text": "NumPad2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            379.0,
+            100.0,
+            15.0
+          ],
+          "text": "NumPad3"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            415.0,
+            100.0,
+            15.0
+          ],
+          "text": "NumPad4"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            451.0,
+            100.0,
+            15.0
+          ],
+          "text": "NumPad5"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            487.0,
+            100.0,
+            15.0
+          ],
+          "text": "NumPad6"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            519.0,
+            241.0,
+            33.0,
+            12.0
+          ],
+          "text": "Padrão"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            296.0,
+            576.0,
+            41.0,
+            12.0
+          ],
+          "text": "Redefinir"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            376.0,
+            573.0,
+            300.0,
+            20.0
+          ],
+          "text": "Regra: estrita"
+        }
+      ]
+    },
+    {
+      "image": "panel-pt-BR-ranking.png",
+      "locale": "pt-BR",
+      "screen": "ranking",
+      "texts": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            382.0,
+            262.0,
+            55.0,
+            15.0
+          ],
+          "text": "1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            382.0,
+            277.0,
+            55.0,
+            15.0
+          ],
+          "text": "2"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            602.0,
+            277.0,
+            50.0,
+            15.0
+          ],
+          "text": "7"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            602.0,
+            262.0,
+            50.0,
+            15.0
+          ],
+          "text": "8"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            68.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            558.0,
+            585.0,
+            100.0,
+            16.0
+          ],
+          "text": "Apenas online"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            437.0,
+            277.0,
+            95.0,
+            15.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            546.0,
+            246.0,
+            31.0,
+            12.0
+          ],
+          "text": "Classe"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            74.0,
+            16.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            583.0,
+            203.0,
+            74.0,
+            16.0
+          ],
+          "text": "Fora da lista"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            437.0,
+            262.0,
+            95.0,
+            15.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            46.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            532.0,
+            262.0,
+            70.0,
+            15.0
+          ],
+          "text": "Guerreiro"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            13.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            532.0,
+            277.0,
+            70.0,
+            15.0
+          ],
+          "text": "Mago"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            464.0,
+            246.0,
+            27.0,
+            12.0
+          ],
+          "text": "Nome"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            611.0,
+            246.0,
+            23.0,
+            12.0
+          ],
+          "text": "Nível"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            377.0,
+            246.0,
+            36.0,
+            12.0
+          ],
+          "text": "Posição"
+        }
+      ]
+    }
+  ],
+  "fontBaseline": {
+    "atlasBytes": 16777216,
+    "atlasPages": 16,
+    "atlasSourceIds": [
+      1,
+      2
+    ],
+    "gpuImages": 88,
+    "imageAssets": 88,
+    "pinnedHandles": 3,
+    "registeredFontAssets": 4,
+    "retainedSourceIds": [
+      1,
+      2,
+      4
+    ]
+  },
+  "fontCheckpoints": [
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 1
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 2
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 3
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 4
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 5
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 6
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 7
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 8
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 9
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 10
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 11
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 12
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 13
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 14
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 15
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 16
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 17
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 18
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 19
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 20
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 21
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 22
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 23
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 24
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 25
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 26
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 27
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 28
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 29
+    },
+    {
+      "counts": {
+        "atlasBytes": 16777216,
+        "atlasPages": 16,
+        "atlasSourceIds": [
+          1,
+          2
+        ],
+        "gpuImages": 88,
+        "imageAssets": 88,
+        "pinnedHandles": 3,
+        "registeredFontAssets": 4,
+        "retainedSourceIds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "cycle": 30
+    }
+  ],
+  "kind": "offline_production_native_i18n_shell_gpu_fixture",
+  "limits": [
+    "Offline rendering does not validate live account or gameplay flows",
+    "Bounded font identity and atlas checks do not replace a long-duration soak",
+    "Text bounds are retained for independent screenshot review; input text remains literal"
+  ],
+  "liveAcceptance": false,
+  "locales": 3,
+  "passed": true,
+  "playerSaveModified": false,
+  "screens": 4,
+  "serverConnected": false,
+  "viewport": [
+    1024,
+    768
+  ],
+  "windowCreated": false
+}

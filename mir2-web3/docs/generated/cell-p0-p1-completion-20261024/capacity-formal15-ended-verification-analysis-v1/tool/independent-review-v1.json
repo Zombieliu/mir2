@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T00:50:08.668459+00:00",
+  "scope": "Independent final source-only review of the actual-ended Formal15 verifier. No target import, mode, replay, raw/monitor/trace scan, test, private state or executable read.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\preparation-v1.json",
+    "bytes": 7073,
+    "sha256": "b3e8d06dbb5fbb797c7c62c09e836ce9153f212e3a4a6163fe166a5fa371d57f"
+  },
+  "sourceEvidence": {
+    "main": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\verify-ended-formal15-v1.mjs",
+      "bytes": 41893,
+      "sha256": "4ea12ad4e9abb3271ad3aa8a5b861df54d8670a6c22a49169f5e121671f3e77c"
+    },
+    "finalDerivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\derivation-final-v1.json",
+      "bytes": 10841,
+      "sha256": "5192c844355d29f8fd90b23cb403b0d504bd88eac36db34d3b991c15bc9790d5"
+    },
+    "preservedPendingPreparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\preparation-pending-v2.json",
+      "bytes": 5661,
+      "sha256": "badb2b4f7a6fd52f4c8b1aae84f72f0f2397bfb0f152f721ec0aaf1bf1367ecf"
+    },
+    "preservedDraft": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\verify-ended-formal15-draft-v2.mjs",
+      "bytes": 39254,
+      "sha256": "84fe768ff4883b1ecdb64ef217878739974627d59361d30b66885790374a3677"
+    },
+    "originalFormal12Derivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\derivation-draft-v1.json",
+      "bytes": 30508,
+      "sha256": "b77e8b30f279f8a231115590e85e2f33b0aaa3803dbfe270677ad04a83ff3ab5"
+    },
+    "storeChildCorrection": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\store-child-delta-v2.json",
+      "bytes": 1153,
+      "sha256": "0d747c3f19ef9d97f7c3af9e6faa42c9f6ab30e0ff2d767dbf5f797f5268ad0a"
+    }
+  },
+  "sourceClosure": {
+    "preparedInputs": 9,
+    "rawPinsAndOrderedAggregateMatched": true,
+    "sourceSha256": "5f868cc5e8ba5810daf514b6d5f308c96d6648beced7a6a837682ef769893533",
+    "futureToolSealedInputsIncludingPreparationAndReview": 11,
+    "finalMainFiveRulesForwardInverseRawExact": true,
+    "unchangedFiveExecutablePolicySourcesMatchEarlierReviewedPendingPins": true,
+    "actualFinalMainNodeCheck": {
+      "exitCode": 0,
+      "kind": "author Node --check only; not rerun by reviewer"
+    },
+    "originalFull146WindowCounterNativeContinuousHpMemoryPassFailureAlgorithmsUnchanged": true
+  },
+  "actualBindingChecks": {
+    "runId": "1792974410829-a5288349",
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "backendInputs": 50,
+    "nodeNineFullRegressionTests": 226,
+    "current9472Prior9465Prior6759Historical19099RolesPreserved": true,
+    "rootActualFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 7547,
+      "sha256": "ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1"
+    },
+    "rootFactsExactLocalCopy": true,
+    "rootCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-independent-cleanup-v1.json",
+      "bytes": 401,
+      "sha256": "2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de"
+    },
+    "ownedPids": [
+      67304,
+      59024
+    ],
+    "rootCleanupActualShapeExact": true,
+    "allEightRootCommandLogsRawPinsChecked": true,
+    "fourConsumerNamesAndEightLogPinsMatchRootActualFacts": true,
+    "originalReport": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\reports\\1792974410829-a5288349.report.json",
+      "bytes": 424421,
+      "sha256": "e938a814eed311b80281ffcd6cadf16e57d36c78f48a1f35ad4caf68d90355a3"
+    },
+    "originalReportOk": false,
+    "originalFormalRunExitCode": 1,
+    "stageNames": [
+      "stage-2",
+      "stage-10",
+      "stage-25"
+    ],
+    "stagePassed": [
+      true,
+      true,
+      false
+    ],
+    "stage25WindowPassed": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "fiftyHundredAndTwoHourNotExecuted": true,
+    "preparedFileCount": 367,
+    "preparedSourceConfigSha256": "9d1f72da7a7bb49156285a132c2c714bd39605dd6e86e4ca0a9193d5fc3e9a32",
+    "admittedFileCount": 372,
+    "admittedSourceConfigSha256": "5c8be7bc19d26ecf69326c19224f6f657d469099f00f606bed042a3912b40b8a",
+    "preparedAndAdmittedRoleAggregatesCheckedSeparately": true,
+    "noSourceClosurePayloadRehashClaimed": true
+  },
+  "contractChecks": {
+    "fiveMeasuredCohorts": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakActors": 100,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "completeMinuteWindows": 146,
+    "minimumMemoryObservationSeconds": 1800,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "actualElapsedRateDenominatorsPreserved": true,
+    "failedPartialBranchesPreserved": true,
+    "zeroHpEventsNeverDoseProof": true,
+    "legacyWireIdentityDistinctFromCurrent226": true,
+    "storeChildBasePlusStoreDiagnostics": true,
+    "storeSeparateNonGameDataset": true,
+    "independentPerRequestTyped900msPacketReplayNotClaimed": true,
+    "sealerRunnerExplicitEndedOnlyWxAndBeforeAfterClosureChecks": true,
+    "existingFinalSealAndResultAbsent": true
+  },
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": []
+  },
+  "limitations": [
+    "This verdict permits Root to seal and perform the one actual replay. No replay or final consistency result is prefilled by this source review.",
+    "Formal15 original game report remains failed; a future independent consistency PASS cannot promote it to capacity/P0/production acceptance. P2 remains frozen.",
+    "Historical Root facts independentWindowAdjudicationPending is retained as its earlier point in time.",
+    "Readline whole-line aggregation before the64MiB line check and unrecorded memory warmup cutoff limitations remain explicitly documented."
+  ]
+}

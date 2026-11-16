@@ -1,0 +1,193 @@
+{
+  "label": "baseline-before-final-start",
+  "at": "2026-10-28T15:05:55.337Z",
+  "schemaVersion": 11,
+  "storeSha256": "e3f6b099716311be30b285191da8c929446f9354a0d8aa4188eea5355a22ef96",
+  "gold": {
+    "wallet": 2011280,
+    "escrow": 0,
+    "pending": 0,
+    "total": 2011280
+  },
+  "instances": [
+    {
+      "account": "sellqa1028",
+      "character": "1",
+      "location": "inventory_items_json",
+      "item": {
+        "key": "crystal-item-245",
+        "name": "DragonSword",
+        "icon": 48,
+        "slot": 0,
+        "unique_id": 1028024501,
+        "container": "bag1",
+        "quantity": 1,
+        "description": "Crystal native account item: DragonSword.",
+        "durability_current": 31400,
+        "durability_max": 34000,
+        "weight": 58,
+        "equip_slot": "weapon",
+        "grade": "rare",
+        "added_attack": 3,
+        "added_defence": 0,
+        "added_stats": [
+          {
+            "stat": 4,
+            "value": 2
+          },
+          {
+            "stat": 5,
+            "value": 3
+          }
+        ],
+        "socketed": [],
+        "user_item_metadata": {
+          "item_index": 245,
+          "awake_type": 0,
+          "awake_values": [],
+          "refined_value": 1,
+          "refine_added": 2,
+          "refine_success_chance": 0,
+          "wedding_ring": -1,
+          "expire_info": null,
+          "rental_information": null,
+          "sealed_info": null,
+          "slots": [],
+          "is_shop_item": false,
+          "gm_made": false,
+          "live_socketed_at_capture": true,
+          "socket_layout_hydrated": true,
+          "captured_socket_positions": [],
+          "captured_socket_position": null
+        },
+        "cursed": false,
+        "socket_slots": 0,
+        "gem_count": 0,
+        "identified": true,
+        "soul_bound_id": null,
+        "sealed_expiry_time_binary_datetime": 0,
+        "sealed_next_time_binary_datetime": 0,
+        "rental_binding_flags": 0,
+        "rental_owner_name": "",
+        "rental_expiry_binary_datetime": 0,
+        "rental_locked": false,
+        "attack": 22,
+        "defence": 0,
+        "heal_hp": 0,
+        "heal_mp": 0
+      }
+    }
+  ],
+  "actors": {
+    "buyqa1028": {
+      "characters": [
+        {
+          "index": "0",
+          "gold": 2000000,
+          "credit": 0,
+          "revision": 6,
+          "inventoryItems": []
+        }
+      ],
+      "procurement": {
+        "absence_inbox": {},
+        "bindings": {},
+        "credits": {
+          "explicit-isolated-acceptance-test": {
+            "id": "explicit-isolated-acceptance-test",
+            "source": "Test",
+            "granted": 10,
+            "reserved": 0,
+            "consumed": 0,
+            "expires_at_ms": 1793283273723,
+            "payment_order_id": null
+          }
+        },
+        "orders": {},
+        "locks": {},
+        "outbox": {},
+        "deliveries": {},
+        "chain_inbox": {},
+        "cursors": {},
+        "requests": {},
+        "quotes": {}
+      }
+    },
+    "sellqa1028": {
+      "characters": [
+        {
+          "index": "1",
+          "gold": 10000,
+          "credit": 0,
+          "revision": 4,
+          "inventoryItems": [
+            {
+              "key": "crystal-item-245",
+              "name": "DragonSword",
+              "icon": 48,
+              "slot": 0,
+              "unique_id": 1028024501,
+              "container": "bag1",
+              "quantity": 1,
+              "description": "Crystal native account item: DragonSword.",
+              "durability_current": 31400,
+              "durability_max": 34000,
+              "weight": 58,
+              "equip_slot": "weapon",
+              "grade": "rare",
+              "added_attack": 3,
+              "added_defence": 0,
+              "added_stats": [
+                {
+                  "stat": 4,
+                  "value": 2
+                },
+                {
+                  "stat": 5,
+                  "value": 3
+                }
+              ],
+              "socketed": [],
+              "user_item_metadata": {
+                "item_index": 245,
+                "awake_type": 0,
+                "awake_values": [],
+                "refined_value": 1,
+                "refine_added": 2,
+                "refine_success_chance": 0,
+                "wedding_ring": -1,
+                "expire_info": null,
+                "rental_information": null,
+                "sealed_info": null,
+                "slots": [],
+                "is_shop_item": false,
+                "gm_made": false,
+                "live_socketed_at_capture": true,
+                "socket_layout_hydrated": true,
+                "captured_socket_positions": [],
+                "captured_socket_position": null
+              },
+              "cursed": false,
+              "socket_slots": 0,
+              "gem_count": 0,
+              "identified": true,
+              "soul_bound_id": null,
+              "sealed_expiry_time_binary_datetime": 0,
+              "sealed_next_time_binary_datetime": 0,
+              "rental_binding_flags": 0,
+              "rental_owner_name": "",
+              "rental_expiry_binary_datetime": 0,
+              "rental_locked": false,
+              "attack": 22,
+              "defence": 0,
+              "heal_hp": 0,
+              "heal_mp": 0
+            }
+          ]
+        }
+      ],
+      "procurement": null
+    }
+  },
+  "testOnly": true
+}

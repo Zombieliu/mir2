@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T16:20:52.692Z",
+  "scope": "Cross-check JavaScript static Rust-geometry mirror against previously recorded ordinary initial public snapshot; no new service, test, login or gameplay",
+  "observedFile": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/accessibility-actual-spawn.json",
+  "observedSha256": "27c77727ed4b92dd7648c9b7758a6420775d841bf03b92a98fa7d383f3b6aa9f",
+  "staticFile": "C:/mir2-build/p01-completion-20261024/map0-supply-static-v1.json",
+  "staticSha256": "403894228fcac8835e9a4058b33e3afa32b7d5ef64377ddd7e8a49542a92c60b",
+  "samples": 15,
+  "exactMatches": 15,
+  "rows": [
+    {
+      "objectId": 206302,
+      "name": "Deer",
+      "observed": {
+        "x": 287,
+        "y": 611
+      },
+      "canonical": {
+        "x": 287,
+        "y": 611
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206324,
+      "name": "Deer",
+      "observed": {
+        "x": 289,
+        "y": 604
+      },
+      "canonical": {
+        "x": 289,
+        "y": 604
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206339,
+      "name": "Deer",
+      "observed": {
+        "x": 280,
+        "y": 609
+      },
+      "canonical": {
+        "x": 280,
+        "y": 609
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206515,
+      "name": "Deer",
+      "observed": {
+        "x": 284,
+        "y": 611
+      },
+      "canonical": {
+        "x": 284,
+        "y": 611
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206524,
+      "name": "Deer",
+      "observed": {
+        "x": 294,
+        "y": 606
+      },
+      "canonical": {
+        "x": 294,
+        "y": 606
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206530,
+      "name": "Deer",
+      "observed": {
+        "x": 288,
+        "y": 603
+      },
+      "canonical": {
+        "x": 288,
+        "y": 603
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206536,
+      "name": "Deer",
+      "observed": {
+        "x": 291,
+        "y": 600
+      },
+      "canonical": {
+        "x": 291,
+        "y": 600
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206604,
+      "name": "Scarecrow",
+      "observed": {
+        "x": 275,
+        "y": 600
+      },
+      "canonical": {
+        "x": 275,
+        "y": 600
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206626,
+      "name": "Scarecrow",
+      "observed": {
+        "x": 286,
+        "y": 628
+      },
+      "canonical": {
+        "x": 286,
+        "y": 628
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206632,
+      "name": "Scarecrow",
+      "observed": {
+        "x": 286,
+        "y": 623
+      },
+      "canonical": {
+        "x": 286,
+        "y": 623
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206641,
+      "name": "Scarecrow",
+      "observed": {
+        "x": 287,
+        "y": 616
+      },
+      "canonical": {
+        "x": 287,
+        "y": 616
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206644,
+      "name": "Scarecrow",
+      "observed": {
+        "x": 293,
+        "y": 614
+      },
+      "canonical": {
+        "x": 293,
+        "y": 614
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206711,
+      "name": "Deer",
+      "observed": {
+        "x": 276,
+        "y": 603
+      },
+      "canonical": {
+        "x": 276,
+        "y": 603
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206714,
+      "name": "Deer",
+      "observed": {
+        "x": 275,
+        "y": 611
+      },
+      "canonical": {
+        "x": 275,
+        "y": 611
+      },
+      "exactMatch": true
+    },
+    {
+      "objectId": 206717,
+      "name": "Deer",
+      "observed": {
+        "x": 288,
+        "y": 624
+      },
+      "canonical": {
+        "x": 288,
+        "y": 624
+      },
+      "exactMatch": true
+    }
+  ],
+  "capacityAccepted": false
+}

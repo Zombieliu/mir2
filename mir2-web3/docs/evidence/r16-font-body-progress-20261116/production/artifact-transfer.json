@@ -1,0 +1,31 @@
+{
+  "id": 14194778566,
+  "bytes": 95700080,
+  "sha256": "4f3f294faed5b12e5a5580117bcbd854c28e5fa35d64eb501dd837ca7cee51f0",
+  "workflowRun": 43795056603,
+  "source": "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+  "attempt": 2,
+  "startedAt": "2026-11-16T03:34:41.318859+00:00",
+  "completedAt": "2026-11-16T03:38:09.607479+00:00",
+  "workflowSuccessVerified": true,
+  "githubDigestMatched": true,
+  "originalPartialRetained": true,
+  "originalPrefixBytes": 67059712,
+  "originalPrefixSha256": "16632508ddf89c4865721b22d21d4d3721ed7a126c7d154a4245c6005721ee06",
+  "resumeRequests": [
+    {
+      "ordinal": 1,
+      "offset": 67059712,
+      "complete": false,
+      "receivedBytes": 24444928
+    },
+    {
+      "ordinal": 2,
+      "offset": 91504640,
+      "complete": true,
+      "receivedBytes": 4195440
+    }
+  ],
+  "redirectCredentialKeptInMemoryOnly": true,
+  "allAppAndPublicGameGatesUnchanged": true
+}

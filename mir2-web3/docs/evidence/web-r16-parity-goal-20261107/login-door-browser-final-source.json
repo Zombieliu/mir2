@@ -1,0 +1,62 @@
+{
+  "schema": "mir2.r16.character-create-ui.v1",
+  "branch": "codex/windows-player-journey",
+  "scope": "isolated File, real browser controls and Gateway",
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "primaryRealm": "platinum_fiveclass",
+  "passed": false,
+  "checks": {
+    "coldDoor": {
+      "heldAtFrame0": true,
+      "noLoginOrSelectControls": true,
+      "noFocus": true,
+      "noSelectionCommands": true,
+      "duplicateAckDidNotReveal": true,
+      "stalePointerReleaseIgnored": true,
+      "firstFrame": 1,
+      "lastFrame": 18,
+      "durationMs": 1820
+    },
+    "five": {
+      "classes": 5,
+      "genders": 2,
+      "captionsVisible": true,
+      "classClear": true,
+      "genderClear": true,
+      "labels": [
+        "性别",
+        "职业"
+      ],
+      "realCreateAndWorld": true
+    },
+    "classic": {
+      "classes": 3,
+      "genders": 2,
+      "captionsVisible": true,
+      "classClear": true,
+      "genderClear": true,
+      "labels": [
+        "Gênero",
+        "Classe"
+      ],
+      "realCreate": true
+    },
+    "disconnect": {
+      "oldSocketClosed": true,
+      "oldDecodeDidNotReveal": true,
+      "editablePasswordCleared": true,
+      "newSocketReadBothRoles": true
+    },
+    "artFailure": {
+      "failedFrame": true,
+      "authorizedRosterRevealed": true,
+      "noPartialAnimation": true
+    }
+  },
+  "pageErrors": [],
+  "failure": {
+    "phase": "exit-while-world-bootstrap-is-held",
+    "label": "TimeoutError",
+    "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-action.exit button')\u001b[22m\n\u001b[2m    - locator resolved to <button title=\"离开\" type=\"button\" aria-label=\"离开\" class=\"sprite-button\" data-r16-auth-button=\"true\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  - element was detached from the DOM, retrying\u001b[22m\n"
+  }
+}

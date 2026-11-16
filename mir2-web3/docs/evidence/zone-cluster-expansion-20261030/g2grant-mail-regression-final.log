@@ -1,0 +1,122 @@
+    Finished `test` profile [unoptimized] target(s) in 0.28s
+
+running 90 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test config::config_refresh_fail_closed_tests::source_of_truth_mail_on_empty_store_never_creates_demo ... ok
+test config::config_refresh_fail_closed_tests::system_mail_persist_fault_keeps_live_store_bytes_unchanged ... ok
+test config::config_refresh_fail_closed_tests::system_mail_unknown_file_publication_freezes_writes_without_live_publish ... ok
+test config::stage5_mail_attachment_origin_tests::stage5_mail_attachment_origin_explicit_canonical_kinds_round_trip ... ok
+test config::stage5_mail_attachment_origin_tests::stage5_mail_attachment_origin_legacy_text_does_not_authorize_a_grant_or_transfer ... ok
+test config::tests::stage5_system_mail_delivery_persists_to_character_save ... ok
+test db_projection::tests::derives_mail_auction_and_npc_state ... ok
+test runtime::billing_monthly_card::tests::ordinary_allocation_and_mail_normalization_skip_permanent_card_namespace ... ok
+test runtime::game_shop_gift::tests::external_mail_merge_conflict_does_not_publish_unrelated_earlier_mail ... ok
+test runtime::game_shop_gift::tests::external_mail_merge_preserves_gift_union_and_rekeys_ordinary_collision ... ok
+test runtime::intelligent_creature_item_tests::creature_blackstone_uses_mail_when_bag_is_full_and_does_not_repeat_same_second ... ok
+test runtime::npc_purchase_transaction::tests::actual_external_mail_is_merged_into_complete_purchase_checkpoint_and_published_live ... ok
+test runtime::packets::mail_body_validation_tests::mail_body_allows_line_endings_within_utf16_limit_but_rejects_controls ... ok
+test runtime::packets::mail_body_validation_tests::mail_body_limit_matches_crystal_dotnet_utf16_string_length ... ok
+mail transaction failed: injected account-store persistence failure
+test runtime::packets::mail_parcel_tests::parcel_consumes_one_owned_stamp_and_allows_five_items_atomically ... ok
+mail transaction failed: parcel stamp or fee changed before commit
+test runtime::packets::mail_parcel_tests::parcel_forged_stamp_never_discounts_and_durable_stamp_change_rejects_send ... ok
+test runtime::packets::mail_parcel_tests::parcel_no_mail_template_is_rejected_live_and_from_durable_inventory ... ok
+test runtime::packets::mail_parcel_tests::parcel_quote_is_pure_and_charges_source_gold_and_item_insurance ... ok
+test runtime::packets::mail_parcel_tests::parcel_rejects_duplicate_unknown_stamp_attachment_and_unstamped_extra_slots ... ok
+test runtime::packets::mail_status_transaction_tests::legacy_mail_projection_does_not_invent_a_send_timestamp ... ok
+test runtime::packets::mail_status_transaction_tests::ordinary_multiline_mail_is_durable_and_preserves_the_body_verbatim ... ok
+mail status transaction rejected: injected account-store persistence failure
+mail status transaction rejected: injected account-store persistence failure
+mail status transaction rejected: injected account-store persistence failure
+test runtime::packets::mail_status_transaction_tests::status_persist_failure_does_not_mutate_world_store_or_file ... ok
+test runtime::refine_durable_tests::overweight_refine_cancel_returns_to_empty_source_cell_and_never_manufactures_mail ... ok
+test runtime::save::character_save_item_validation_tests::overbudget_mail_attachment_is_rejected_before_disk_or_world_changes ... ok
+test runtime::save::save_fail_closed_tests::canonical_account_switch_with_colliding_index_cannot_refresh_foreign_mail ... ok
+test runtime::save::save_fail_closed_tests::canonical_cross_account_send_mail_commits_sender_and_exact_target ... ok
+test runtime::save::save_fail_closed_tests::canonical_identity_still_commits_mail_transaction_and_full_save ... ok
+mail status transaction rejected: active character durable save identity mismatch before transaction
+mail status transaction rejected: active character durable save identity mismatch before transaction
+mail status transaction rejected: active character durable save identity mismatch before transaction
+test runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_all_private_mail_transactions ... ok
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+test runtime::save::save_fail_closed_tests::noncanonical_live_identity_cannot_read_merge_or_mutate_either_mailbox ... ok
+test runtime::save::save_fail_closed_tests::send_mail_target_durable_identity_mismatch_is_silent_and_atomic ... ok
+test runtime::save::stale_mail_status_merge_tests::same_nonce_mail_merge_rejects_every_origin_change_without_publication ... ok
+test runtime::save::stale_mail_status_merge_tests::stale_snapshot_can_only_strengthen_mail_lock ... ok
+test runtime::save::stale_mail_status_merge_tests::stale_snapshot_cannot_remove_newer_durable_mail_lock ... ok
+test runtime::save::stale_mail_status_merge_tests::stale_unlocked_snapshot_cannot_delete_newer_durable_locked_mail ... ok
+test runtime::save::stale_mail_status_merge_tests::status_only_mail_merge_preserves_canonical_custody_origin ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_stage_captures_durable_mail_and_protected_journals_in_exact_expected_image ... ok
+test runtime::session::tests::collect_self_mail_is_durable_before_success ... ok
+test runtime::session::tests::collision_refresh_keeps_visible_local_id_and_claim_targets_original_mail ... ok
+simulation packet execution rejected; details suppressed
+simulation packet execution rejected; details suppressed
+test runtime::session::tests::concurrent_same_account_mail_transactions_have_no_lost_update ... ok
+test runtime::session::tests::concurrent_sessions_cannot_claim_the_same_durable_mail_twice ... ok
+test runtime::session::tests::cross_account_send_mail_commits_sender_recipient_and_reload_once ... ok
+mail transaction failed: injected account-store failure before persist
+mail transaction failed: injected account-store persistence failure
+test runtime::session::tests::cross_account_send_mail_faults_leave_live_store_and_file_unchanged ... ok
+test runtime::session::tests::crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery ... ok
+test runtime::session::tests::expired_rental_item_is_removed_and_mailed_back_to_owner ... ok
+test runtime::session::tests::game_shop_balance_mail_capacity_and_world_phase_rejections_are_atomic ... ok
+test runtime::session::tests::game_shop_packet_credit_and_gold_mail_product_count_times_quantity ... ok
+test runtime::session::tests::identical_mail_content_with_distinct_delivery_nonces_is_never_deduplicated ... ok
+mail status transaction rejected: mail status request targets deleted mail
+test runtime::session::tests::mail_friend_packets_preserve_crystal_ack_surface ... ok
+test runtime::session::tests::mail_send_rejection_preserves_attachment_and_gold ... ok
+test runtime::session::tests::mail_send_to_blocked_friend_uses_crystal_blacklist_rejection ... ok
+test runtime::session::tests::mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exact_item ... ok
+game-shop transaction failed: injected account-store persistence failure
+mail transaction failed: injected account-store persistence failure
+test runtime::session::tests::online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status ... ok
+test runtime::session::tests::online_session_refreshes_admin_delivered_mail_before_save ... ok
+test runtime::session::tests::same_mail_id_with_different_content_rekeys_local_and_preserves_both ... ok
+mail transaction failed: injected account-store persistence failure
+test runtime::session::tests::self_send_mail_is_all_or_nothing_and_persists_once ... ok
+test runtime::session::tests::send_mail_client_stamp_never_waives_postage ... ok
+test runtime::session::tests::send_mail_rejects_invalid_text_and_every_ambiguous_or_ineligible_attachment_atomically ... ok
+test runtime::session::tests::send_mail_requires_real_account_and_active_character_without_demo_scout_fallback ... ok
+test runtime::session::tests::stage5_credit_shop_mails_purchase_and_claim_transfers_attachment ... ok
+test runtime::session::tests::stage5_missing_mail_trade_item_and_auction_use_not_found ... ok
+test runtime::session::tests::stage5_social_group_guild_mail_persist_across_reload ... ok
+test runtime::session::tests::stale_online_recipient_save_cannot_overwrite_committed_external_mail ... ok
+mail transaction failed: parcel ownership or postage changed before commit
+test runtime::session::tests::stale_sender_cannot_mail_attachment_missing_from_authoritative_save ... ok
+test runtime::session::tests::unlocked_active_mail_stays_unlocked_after_save_and_reload ... ok
+mail status transaction rejected: mail status request targets deleted mail
+mail status transaction rejected: mail status request targets deleted mail
+test runtime::stage5::game_shop_validation_tests::native_game_shop_hidden_ledger_is_not_player_mail_or_mutable ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_stale_session_mail_merge_preserves_all_replay_keys ... ok
+game-shop transaction failed: injected account-store persistence failure
+test runtime::stage5::game_shop_validation_tests::typed_failures_cover_currency_mail_capacity_and_persist_failure ... ok
+test runtime::stage5::game_shop_validation_tests::typed_success_uses_the_committed_mail_id_for_gold_and_credit ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_changed_touched_delivery_rejects_without_publishing_reserved_assets ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_commit_merges_unrelated_new_mail_and_advances_private_revision ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_committed_source_with_failed_private_revision_publication_freezes_without_retry ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_direct_stage5_claim_uses_the_same_issuer_and_unavailable_never_falls_back ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_existing_custody_rejects_live_reserved_and_other_source_child_owners ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_existing_custody_rejects_zero_duplicate_and_key_only_instances_without_mint ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_existing_custody_transfers_complete_identity_without_issuer_or_receipt_conflict ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_initially_stale_claim_uses_canonical_assets_and_retains_stale_revision_gate ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_keyed_fresh_grant_never_merges_into_bound_or_cursed_stack ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_legacy_mount_bells_resolved_protocol_position_outranks_local_and_captured_zero ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_maximum_private_planning_floor_rejects_before_issuer_without_escaping ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_mixed_ledger_card_and_fresh_tree_batch_preserves_card_carrier_and_consumes_once ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_monthly_card_authorization_keeps_deterministic_identity_without_ordinary_mint ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_partial_reservation_failure_discards_batch_then_retry_uses_new_complete_tree ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_sidecarless_ambiguous_socket_positions_reject_before_real_issuer ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_sidecarless_child_reservation_failure_preserves_unclaimed_complete_tree ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_sidecarless_same_template_sockets_keep_positions_and_all_live_fields ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_synthetic_keyed_attachment_is_legacy_only_and_never_enters_durable_issuer ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_unknown_freezes_source_clones_and_never_reissues_or_publishes_plan ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_unknown_origin_and_live_forged_origin_never_authorize_durable_attachments ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_whole_batch_rejects_bad_later_exact_json_before_real_issuance ... ok
+test runtime::stage5::stage5_item_carrier_validation_tests::stage5_mail_attachment_reuses_complete_carrier_budget ... ok
+
+test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 3138 filtered out; finished in 36.82s

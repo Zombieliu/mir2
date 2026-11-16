@@ -1,0 +1,557 @@
+{
+  "schema": "mir2-r16-social-budget-page-ui/1",
+  "originalWholeRunPassed": false,
+  "scopedOrdinaryUiAndReadbackPassed": true,
+  "scope": "Independent positive components with all three original false runs preserved; not a single all-green session.",
+  "build": {
+    "pageSha256": "5fc2fe55f2c5131de3dc6e9956c1ca4a404afeeed31023dba377053d14f4720b",
+    "hostSha256": "0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977",
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "runtimeManifestSha256": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+    "actualLoadedModule": {
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "matchesFrozenRuntime": true
+    },
+    "legacyIsolatedGatewaySha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+    "gatewayExactCurrentSourceClaimed": false
+  },
+  "isolation": {
+    "loopbackOnly": true,
+    "ordinaryAccountsReused": 2,
+    "newRegistrations": 0,
+    "newCharacters": 0,
+    "publicTestUsed": false,
+    "originalWorldUsed": false,
+    "modelCalls": 0,
+    "gmOrGrantCommands": 0,
+    "finalDeliveryOrGoldOfferTested": false
+  },
+  "group": {
+    "name": "ordinary-dom-two-player-shared-party",
+    "passed": true,
+    "authoritativeMembers": 2,
+    "bothClientsAgree": true,
+    "assetsUnchanged": true,
+    "actualNativeBridgeCalls": 19,
+    "proof": "browser-r2/proof.json"
+  },
+  "guild": {
+    "name": "ordinary-guild-window-membership-gate",
+    "passed": true,
+    "realMembership": false,
+    "mutationEditors": 0,
+    "onlyCloseButton": true,
+    "noGuildMutationCommands": true,
+    "guildRulesOnlyControllerVerified": true,
+    "proof": "browser-r3/proof.json",
+    "membershipMutationNotTested": true
+  },
+  "deposit": {
+    "name": "deposit-pending-cancel-real-server-restores-assets",
+    "passed": true,
+    "heldPacket": "DepositTradeItem",
+    "from": 4,
+    "to": 0,
+    "heldMs": 753,
+    "realSuccess": true,
+    "terminalUnlock": false,
+    "exactUidSlotQuantityAndGoldRestored": true,
+    "retrievalSlotMoveExpected": false,
+    "lateAckReleasedUnmodified": true,
+    "noResurrection": true,
+    "noRepeatedEconomicCommands": true,
+    "proof": "browser-r3/proof.json"
+  },
+  "retrievePrimary": {
+    "schema": 1,
+    "passed": true,
+    "scope": "Primary UI terminal cancel and unchanged exact assets after original delayed retrieve ACK; original r3 peer-uncertain failure retained.",
+    "ordinaryItemOperationCount": 1,
+    "ordinaryCancelCount": 1,
+    "heldPacket": "RetrieveTradeItem",
+    "from": 0,
+    "to": 3,
+    "heldMs": 16025,
+    "realSuccess": true,
+    "terminalUnlock": false,
+    "oldAckReleasedUnmodified": true,
+    "rawSha256": "d2c742eec224411e9a62290fc755091a22ccedc5228886b03ee3393446942ec2",
+    "windowStillClosed": true,
+    "exactPrimaryUidQuantityGoldAndExpectedSlot": true,
+    "peerAssetsUnchanged": true,
+    "newEconomicCommandIssuedByThisCheck": false,
+    "originalProofStillFalse": true,
+    "checkedAt": "2026-11-09T00:02:41.600Z",
+    "proof": "browser-r3/retrieve-primary-late-ack-proof.json"
+  },
+  "auxiliaryPeer": {
+    "originalObservationGatePassed": false,
+    "originalFailure": "PEER_TRADE_NOT_CLOSED",
+    "sameConnectionRawSnapshotExplicitTradeNull": true,
+    "projectionActive": false,
+    "projectionUncertain": true,
+    "cachedFramesExamined": 128,
+    "rawWorldSnapshotsInCache": 4,
+    "terminalTradeCancelPacketsInRetainedCache": 0,
+    "earlierPacketOrderingProven": false,
+    "noObserverRuleRelaxed": true,
+    "proof": "browser-r3/peer-cached-frames-readonly.json"
+  },
+  "pageBridge": {
+    "passivePreciseCoverage": true,
+    "bridgeOrGameActionInjected": false,
+    "group": {
+      "stage": "ordinary-dom-shared-party",
+      "bridge": [
+        {
+          "path": "http://127.0.0.1:19482/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+          "calls": 19
+        }
+      ],
+      "bridgeCalls": 19,
+      "host": [
+        {
+          "method": "receive",
+          "calls": 14
+        },
+        {
+          "method": "reserve",
+          "calls": 1
+        },
+        {
+          "method": "validate",
+          "calls": 1
+        },
+        {
+          "method": "enter",
+          "calls": 1
+        }
+      ]
+    },
+    "trade": {
+      "stage": "failure",
+      "bridge": [
+        {
+          "path": "http://127.0.0.1:19482/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+          "calls": 43
+        }
+      ],
+      "bridgeCalls": 43,
+      "host": [
+        {
+          "method": "receive",
+          "calls": 16
+        },
+        {
+          "method": "snapshot",
+          "calls": 5
+        },
+        {
+          "method": "reserve",
+          "calls": 7
+        },
+        {
+          "method": "validate",
+          "calls": 5
+        },
+        {
+          "method": "enter",
+          "calls": 5
+        }
+      ]
+    },
+    "actualCallsTotal": 62,
+    "rendererPackage": "webgpu",
+    "controllerThreePackageEvidenceSeparate": "../social-budget-r1/wasm-browser-r1/proof.json"
+  },
+  "assets": {
+    "primaryBefore": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 4,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "primaryReadback": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "peerBefore": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "peerReadback": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "allOwnedUidsAndQuantitiesAndGoldMatch": true,
+    "expectedCandleSlotMove": {
+      "from": 4,
+      "to": 3
+    }
+  },
+  "readback": {
+    "primaryUi": true,
+    "peerOrdinaryProtocol": true,
+    "normalLogoutSuccessPrimary": 2,
+    "normalLogoutSuccessPeer": 2,
+    "noTradeReplay": true,
+    "primaryProof": "browser-r3/primary-ui-readback.json",
+    "peerProof": "browser-r3/peer-ordinary-readback.json"
+  },
+  "preservedFalseRuns": [
+    {
+      "proof": "browser-r1/proof.json",
+      "reason": "Synchronous DOM roster count before React paint; both server rosters and the subsequent screenshot already show two."
+    },
+    {
+      "proof": "browser-r2/proof.json",
+      "reason": "Guild snapshot had an empty-name default object; the helper incorrectly demanded null. Actual ordinary shared party passed."
+    },
+    {
+      "proof": "browser-r3/proof.json",
+      "reason": "Auxiliary observation remained uncertain after primary retrieve cancel. Raw peer trade null and fresh asset readback proven separately."
+    }
+  ],
+  "browserErrors": {
+    "group": {
+      "http": 0,
+      "page": 0,
+      "console": 0
+    },
+    "trade": {
+      "http": 0,
+      "page": 0,
+      "console": 0
+    }
+  },
+  "cleanup": {
+    "checkedAt": "2026-11-09T00:19:09.7698786Z",
+    "listeningPorts": [],
+    "ownedNodeProcesses": [],
+    "ownedPidStillAlive": [],
+    "allStopped": true,
+    "inspectorClosed": true,
+    "originalLauncherNextExitCodeOnlyFlag": false,
+    "originalLauncherFlagNotProcessLiveness": true,
+    "oldServicesNotRestarted": true,
+    "sourcePinsUnchanged": true,
+    "proof": "cleanup-verified.json"
+  },
+  "privacy": {
+    "forbiddenValueMatches": 0,
+    "publicArtifactFilesScanned": 39,
+    "credentialInputsBlackMasked": true,
+    "publicAuthFramesIncluded": false,
+    "privateStoreAndKeysExcluded": true
+  },
+  "safeImages": [
+    "browser-r2/02-ordinary-shared-party.png",
+    "browser-r3/03-guild-no-membership.png",
+    "browser-r3/deposit-pending-cancel-enabled.png",
+    "browser-r3/retrieve-pending-cancel-enabled.png",
+    "browser-r3/retrieve-primary-late-ack-confirmed.png",
+    "browser-r3/primary-ui-relogin-verified.png"
+  ],
+  "checksums": [
+    {
+      "path": "browser-r1/01-primary-in-town.png",
+      "bytes": 1246367,
+      "sha256": "e82bb714644c53ad7d2a6d11803ee832fb2e4091b32f68d139f023fb2264f3bd"
+    },
+    {
+      "path": "browser-r1/browser-closed.json",
+      "bytes": 69,
+      "sha256": "70012dd63a4626dc94c3e46d63d5c4b831703b94cdbd225e045894ce531cae13"
+    },
+    {
+      "path": "browser-r1/failure.png",
+      "bytes": 1385180,
+      "sha256": "804962b54feb9eb3f28bc97d3e37935bfd9d02684b0629f25d7ad9b476cad17e"
+    },
+    {
+      "path": "browser-r1/ordinary-cleanup.json",
+      "bytes": 227,
+      "sha256": "f1d9c6b6593072956ec3da38ebe1b8147883ef4f0aa746cb6a1989b385576664"
+    },
+    {
+      "path": "browser-r1/proof.json",
+      "bytes": 9275,
+      "sha256": "42c9ffebdcf4c14fcd095e0f5549071b3bc509a1d5c9ba49e55b77942dbbb9f0"
+    },
+    {
+      "path": "browser-r2/01-primary-in-town.png",
+      "bytes": 1244156,
+      "sha256": "8f112d0f5d32bdc80dd87e49a9521ad9188a6463a762d1ae924492e9fafde1d5"
+    },
+    {
+      "path": "browser-r2/02-ordinary-shared-party.png",
+      "bytes": 1390748,
+      "sha256": "d9f1ed647e65680959fcce3d8d6fd68ac81492540fdc6a6689d395ce402218bd"
+    },
+    {
+      "path": "browser-r2/browser-closed.json",
+      "bytes": 69,
+      "sha256": "cb8050f5e590c25e94664673e693b93fcbd9c9d5c4cb3c07470dccf9cee9730b"
+    },
+    {
+      "path": "browser-r2/failure.png",
+      "bytes": 1434750,
+      "sha256": "014d7fc0e41c250a43c68dedab48de5e4e5257dfac80d4453ed0f346f38c96b3"
+    },
+    {
+      "path": "browser-r2/ordinary-cleanup.json",
+      "bytes": 92,
+      "sha256": "75cfd1374f536d2d900cfec9ad20d307fdea613cae041d5c754b1c6512423917"
+    },
+    {
+      "path": "browser-r2/proof.json",
+      "bytes": 9536,
+      "sha256": "b02458c3d5fdc54084b08db5be24dfd98914434925c405c4e4f45892e15ce49e"
+    },
+    {
+      "path": "browser-r3/01-primary-in-town.png",
+      "bytes": 1252712,
+      "sha256": "d03c657c6a7374fce165e72fc5790e3fa5276ef067da007ad367da290a1a6114"
+    },
+    {
+      "path": "browser-r3/03-guild-no-membership.png",
+      "bytes": 1044428,
+      "sha256": "bd336577de74571b27a4b8bbf00a6278256608048524f384a29b1b0f828f16f0"
+    },
+    {
+      "path": "browser-r3/browser-closed.json",
+      "bytes": 69,
+      "sha256": "8a1dd88895c0295969cc953909cf2b8041203b12133d7db49984d3eb9723f3c8"
+    },
+    {
+      "path": "browser-r3/deposit-cancelled-after-old-ack.png",
+      "bytes": 1333196,
+      "sha256": "ebc173e670c85c23ceafe5bc0802414f2e91aa0ab2d2bd86617a58349b530b78"
+    },
+    {
+      "path": "browser-r3/deposit-pending-cancel-enabled.png",
+      "bytes": 1220129,
+      "sha256": "eae40aebb03471c7853c5b448946fc70674ee462324fb622412cc1d83843f596"
+    },
+    {
+      "path": "browser-r3/failure.png",
+      "bytes": 1338872,
+      "sha256": "870237537db5885a0d3cf64404f9edfb36d8cf54e667f1fe795caa1f2ab6690d"
+    },
+    {
+      "path": "browser-r3/peer-cached-frames-readonly.json",
+      "bytes": 3169,
+      "sha256": "b43d3a5e3514b4e925101162e6860bc8cbc508c5291fc350cc5e7c9b0d436b12"
+    },
+    {
+      "path": "browser-r3/peer-ordinary-readback.json",
+      "bytes": 1306,
+      "sha256": "806e8f136a6ccb542a82e89362139493a0edfa215b535b3e6c02e1e8d652a2ae"
+    },
+    {
+      "path": "browser-r3/primary-after-late-ack-readonly.json",
+      "bytes": 2022,
+      "sha256": "209d7c9559eed3a490867d14b41ca1284fd940cad82bc44e89b8d6914d4006d8"
+    },
+    {
+      "path": "browser-r3/primary-ui-readback.json",
+      "bytes": 1541,
+      "sha256": "46b5c16d0c49591d53570a0e97bf0db32333f14f3c1fafbc67a6b062e93a3139"
+    },
+    {
+      "path": "browser-r3/primary-ui-relogin-verified.png",
+      "bytes": 1427532,
+      "sha256": "5002522c3a22857d7e2acde29d78183917a7a8edfb6dff6d245c2ce8982fe5b2"
+    },
+    {
+      "path": "browser-r3/proof.json",
+      "bytes": 17855,
+      "sha256": "8ca683a87457ee8b2e65b981a11225789eff817bb0c94f258d623919cefd34bf"
+    },
+    {
+      "path": "browser-r3/retrieve-pending-cancel-enabled.png",
+      "bytes": 1204440,
+      "sha256": "ef407dbc7ceb7406e5cb6387eed86e0855173857c93032aac08b5e13536d1d42"
+    },
+    {
+      "path": "browser-r3/retrieve-primary-late-ack-confirmed.png",
+      "bytes": 1340590,
+      "sha256": "cbb1aff4b681ff0c125c92766689c7efb21310db08615fae4f7951ab87fa3159"
+    },
+    {
+      "path": "browser-r3/retrieve-primary-late-ack-proof.json",
+      "bytes": 737,
+      "sha256": "434608ad66d4fa0d3d86e30551d38b8699ca643e0672fa0112e4abe1058b6127"
+    },
+    {
+      "path": "cleanup-group-r1.mjs",
+      "bytes": 2212,
+      "sha256": "7e43943017347ced0523e473d496bbb8b9545f9f42bdc51371c1d8f4831899c8"
+    },
+    {
+      "path": "cleanup-verified.json",
+      "bytes": 187,
+      "sha256": "1ec027539a5cb79d7681fce26fc01c33e2c1a52333b9af7b7c774343be181152"
+    },
+    {
+      "path": "launch-isolated.mjs",
+      "bytes": 7110,
+      "sha256": "1e1efea702728cccedf4d176355f00b0c86e3b7d5ce53b16e0f2ec191365f88a"
+    },
+    {
+      "path": "logout-current-r2.mjs",
+      "bytes": 1074,
+      "sha256": "bfbf3492f9f8d24ef3ced30ec5c0fee557fbbbb600494c622baaea12ea419785"
+    },
+    {
+      "path": "ordinary-peer-readback.mjs",
+      "bytes": 4338,
+      "sha256": "403ad7d77d6337a014f796030f731654a394ec4bbf975082d8f9e238a61340f8"
+    },
+    {
+      "path": "primary-ui-readback.mjs",
+      "bytes": 5360,
+      "sha256": "62b28b0c5a3c17f655646e0aab0e320fa0fad61b5891bca3a7fcea420115e714"
+    },
+    {
+      "path": "prove-primary-late-ack.mjs",
+      "bytes": 2644,
+      "sha256": "a05f4877ff6d61c123d69ed7617f62fc5a8b7219f0dc85981c91f7a085eeab1c"
+    },
+    {
+      "path": "public-config.json",
+      "bytes": 130,
+      "sha256": "49cbe7c337af9fc2caf5be5b2996b8755feb9b1757c4eecbfadec02d257811ea"
+    },
+    {
+      "path": "read-owned-peer-cache.mjs",
+      "bytes": 4361,
+      "sha256": "1566e09213aea1c0fdfb3de4d3598d413d10e42c09b883f4ed6d5b1a4eddaa58"
+    },
+    {
+      "path": "seal-public-receipt.mjs",
+      "bytes": 7812,
+      "sha256": "5f8e923fb0dea4187933b1cf0e8d1d46a084137927154a669e4460d056484c29"
+    },
+    {
+      "path": "shutdown.json",
+      "bytes": 322,
+      "sha256": "53863caa41e6db236e45796735c06c30a724c90b827c9cf62cb5c76c172c059f"
+    },
+    {
+      "path": "social-ui.mjs",
+      "bytes": 26415,
+      "sha256": "417d84fd76180dcb2850fd4082622f9ccadaec10796cc8746ad35f8895b00458"
+    },
+    {
+      "path": "startup.json",
+      "bytes": 793,
+      "sha256": "98e74ab976d2eb67480a8f7aa9f2e775224013bc29af1167911c838c3bd76056"
+    }
+  ]
+}

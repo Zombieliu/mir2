@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {open,readFile,writeFile,copyFile,constants} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const base=import.meta.dirname,repo='E:/mir2-player-journey/mir2-web3',target='D:/mir2-builds/web-newcomer-30-20261107/cargo-gateway-fresh';
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const files=['Cargo.lock','apps/gateway/Cargo.toml','apps/gateway/src/web.rs','apps/gateway/src/session.rs','apps/gateway/src/web_transport.rs','apps/gateway/src/web_reconnect_handoff.rs','apps/gateway/src/web_reconnect_handoff_tests.rs','apps/gateway/src/web_reconnect_handoff_store_tests.rs','apps/gateway/src/web_reconnect_persistence_wait_tests.rs'];
+const pins=Object.fromEntries(await Promise.all(files.map(async file=>[file,hash(await readFile(repo+'/'+file))])));
+await writeFile(base+'/candidate-source-before.json',JSON.stringify({scope:'Changed and directly related source only; not a full release source manifest',pins},null,2)+'\n',{flag:'wx'});
+const args=['+1.95.0','build','-p','mir2-gateway','--bin','mir2-gateway','--offline','--locked','--target-dir',target];
+const log=await open(base+'/candidate-build.log','wx');let child;
+try{child=spawn('cargo',args,{cwd:repo,windowsHide:true,stdio:['ignore',log.fd,log.fd]});}finally{await log.close();}
+const code=await new Promise(resolve=>{child.once('error',()=>resolve(1));child.once('exit',code=>resolve(code));});
+assert.equal(code,0,'Candidate build failed; inspect the scoped build log');
+for(const[file,expected]of Object.entries(pins))assert.equal(hash(await readFile(repo+'/'+file)),expected);
+const from=target+'/debug/mir2-gateway.exe',to=base+'/mir2-gateway-r16-reconnect.exe';
+await copyFile(from,to,constants.COPYFILE_EXCL);const bytes=await readFile(to);assert.equal(hash(bytes),hash(await readFile(from)));
+await copyFile(target+'/debug/mir2-gateway.d',base+'/candidate-build.d',constants.COPYFILE_EXCL);
+const result={schema:'mir2.r16.reconnect.candidate.v1',createdAt:new Date().toISOString(),command:['cargo',...args],exitCode:code,sourceBeforeAfterStable:true,sourcePins:pins,profile:'dev/debug',exeSha256:hash(bytes),exeBytes:bytes.length,originalGatewayCopiesAndWindowsExeUntouched:true,fullReleaseBuild:false};
+await writeFile(base+'/candidate-build.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({built:true,profile:result.profile,sha256:result.exeSha256,bytes:result.exeBytes,sourceBeforeAfterStable:true}));

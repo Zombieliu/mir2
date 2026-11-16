@@ -1,0 +1,103 @@
+{
+  "schema": "mir2.usdc-direct.public-static-assets.v1",
+  "stage": "after",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "observedAtUtc": "2026-10-30T17:55:47.627416+00:00",
+  "readOnly": true,
+  "requestCount": 3,
+  "methods": [
+    "GET"
+  ],
+  "cookiesSent": false,
+  "authorizationSent": false,
+  "ordersCreated": false,
+  "walletActions": false,
+  "responsesContainNoPrivateSession": true,
+  "results": [
+    {
+      "route": "pay",
+      "url": "https://billing-playtest.165.154.65.136.sslip.io/v1/billing/sui-usdc/pay",
+      "status": 200,
+      "bytes": 6513,
+      "sha256": "f293bd7e3a72dcfcf7e8dbac86e545753a6a432fff931df80b5a2621058ecacf",
+      "canonicalLfSha256": "f293bd7e3a72dcfcf7e8dbac86e545753a6a432fff931df80b5a2621058ecacf",
+      "expectedCanonicalLfSha256": "f293bd7e3a72dcfcf7e8dbac86e545753a6a432fff931df80b5a2621058ecacf",
+      "localIncludeMatchesPinnedCommit": true,
+      "headers": {
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; script-src 'self'; connect-src 'self' wss://relay.walletconnect.com https://relay.walletconnect.com; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "server": "Caddy",
+        "x-content-type-options": "nosniff"
+      },
+      "checks": {
+        "http200": true,
+        "canonicalLfShaMatches868": true,
+        "noStore": true,
+        "cspMatchesRestrictedPolicy": true,
+        "referrerNoReferrer": true,
+        "noSniff": true,
+        "contentType": true
+      },
+      "passed": true
+    },
+    {
+      "route": "pay.js",
+      "url": "https://billing-playtest.165.154.65.136.sslip.io/v1/billing/sui-usdc/pay.js",
+      "status": 200,
+      "bytes": 14621,
+      "sha256": "2c39c73e014269044e782674a60cd38fbdd1ee98be5e636176e8c58384edfaee",
+      "canonicalLfSha256": "2c39c73e014269044e782674a60cd38fbdd1ee98be5e636176e8c58384edfaee",
+      "expectedCanonicalLfSha256": "2c39c73e014269044e782674a60cd38fbdd1ee98be5e636176e8c58384edfaee",
+      "localIncludeMatchesPinnedCommit": true,
+      "headers": {
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; script-src 'self'; connect-src 'self' wss://relay.walletconnect.com https://relay.walletconnect.com; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+        "content-type": "text/javascript; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "server": "Caddy",
+        "x-content-type-options": "nosniff"
+      },
+      "checks": {
+        "http200": true,
+        "canonicalLfShaMatches868": true,
+        "noStore": true,
+        "cspMatchesRestrictedPolicy": true,
+        "referrerNoReferrer": true,
+        "noSniff": true,
+        "contentType": true
+      },
+      "passed": true
+    },
+    {
+      "route": "dubhe-wallet.js",
+      "url": "https://billing-playtest.165.154.65.136.sslip.io/v1/billing/sui-usdc/dubhe-wallet.js",
+      "status": 200,
+      "bytes": 492776,
+      "sha256": "09dff44b9c46b53258550328391657e46be1365213ba85735e896bc0407b454a",
+      "canonicalLfSha256": "09dff44b9c46b53258550328391657e46be1365213ba85735e896bc0407b454a",
+      "expectedCanonicalLfSha256": "09dff44b9c46b53258550328391657e46be1365213ba85735e896bc0407b454a",
+      "localIncludeMatchesPinnedCommit": true,
+      "headers": {
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; script-src 'self'; connect-src 'self' wss://relay.walletconnect.com https://relay.walletconnect.com; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+        "content-type": "text/javascript; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "server": "Caddy",
+        "x-content-type-options": "nosniff"
+      },
+      "checks": {
+        "http200": true,
+        "canonicalLfShaMatches868": true,
+        "noStore": true,
+        "cspMatchesRestrictedPolicy": true,
+        "referrerNoReferrer": true,
+        "noSniff": true,
+        "contentType": true
+      },
+      "passed": true
+    }
+  ],
+  "allPassed": true
+}

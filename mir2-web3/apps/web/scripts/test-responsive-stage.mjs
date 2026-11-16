@@ -57,6 +57,16 @@ const layoutRequire = (specifier) => {
   if (specifier === "../../lib/original-ui") {
     return { ORIGINAL_UI: { game: { sceneWidth: 1024, sceneHeight: 768 } } };
   }
+  if (specifier === "../../lib/crystal-world-depth") {
+    const depthPath = new URL("../lib/crystal-world-depth.ts", import.meta.url);
+    const depth = ts.transpileModule(readFileSync(depthPath, "utf8"), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+      fileName: fileURLToPath(depthPath),
+    });
+    const depthModule = { exports: {} };
+    new Function("exports", "module", depth.outputText)(depthModule.exports, depthModule);
+    return depthModule.exports;
+  }
   throw new Error(`unexpected layout dependency: ${specifier}`);
 };
 new Function("exports", "module", "require", compiledLayout.outputText)(
@@ -127,6 +137,12 @@ assert.equal(iphoneSelectPresentation.top, 0.5);
 assert.equal(iphoneSelectPresentation.virtualWidth, 1024);
 assert.equal(iphoneSelectPresentation.virtualHeight, 768);
 assert.equal(iphoneSelectPresentation.wideMobile, false);
+assert.deepEqual(calculateMir2StagePresentation({ ...iphoneSelect, screen: "openingLogin" }), iphoneSelectPresentation);
+const iphoneWideAuth = { ...iphoneSelect, wideMobile: true };
+assert.deepEqual(
+  calculateMir2StagePresentation({ ...iphoneWideAuth, screen: "openingLogin" }),
+  calculateMir2StagePresentation(iphoneWideAuth),
+);
 
 const iphoneGame = { ...iphoneSelect, screen: "game" };
 const iphoneGamePresentation = calculateMir2StagePresentation(iphoneGame);
@@ -213,6 +229,11 @@ assert.equal(wideViewportLayout.tileLeftOrigin, 799);
 
 const regularTouchControls = calculateMir2TouchControlMetrics(iphoneGame.cssHeight);
 assert.equal(regularTouchControls.actionSize, 44);
+assert.equal(regularTouchControls.panelSize, 44);
+for (const height of [320, 359.3, 360]) {
+  assert.equal(calculateMir2TouchControlMetrics(height).panelSize, 40);
+}
+assert.equal(calculateMir2TouchControlMetrics(wideMobile.cssHeight).panelSize, 44);
 
 const desktop = {
   cssWidth: 1440,

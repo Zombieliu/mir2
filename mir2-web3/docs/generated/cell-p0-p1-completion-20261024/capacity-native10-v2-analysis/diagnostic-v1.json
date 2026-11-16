@@ -1,0 +1,949 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T19:08:06.550Z",
+  "runId": "1792867932194-8f125fe4",
+  "scope": "Read-only posthoc diagnosis of preserved failed05. No replay, test, service, private log/account read, source edit or verdict reclassification.",
+  "originalVerdict": {
+    "ok": false,
+    "playableCapacityAccepted": false,
+    "error": "Continuous activity window failed, regardless of the measured stage",
+    "safetyStopped": true,
+    "stagePassed": true
+  },
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\reports\\1792867932194-8f125fe4.samples.jsonl",
+    "bytes": 6526962,
+    "sha256": "0af342b13ce094882af03b8ff2b57b7adb1ab57c613fbb41ee0a765b09043d06"
+  },
+  "rawRows": 11100,
+  "rawTypeCounts": {
+    "monitor": 156,
+    "phaseStarted": 3,
+    "action": 4399,
+    "coverage": 322,
+    "playerLifecycle": 1196,
+    "admitted": 10,
+    "selfTransform": 3631,
+    "fanoutDistribution": 1184,
+    "combatArrival": 1,
+    "pendingAttackEvidence": 127,
+    "continuousWindow": 56,
+    "phaseEnded": 3,
+    "stageComplete": 1,
+    "movementCorrection": 5,
+    "window": 3,
+    "continuousFailure": 1,
+    "safetyStop": 1,
+    "finished": 1
+  },
+  "recording": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\recordings\\0-498018.jsonl",
+    "bytes": 65400503,
+    "sha256": "f1a46f60a2dd52e56261519334d8a7cbd879ae06f5cf4da0a01643e378bbf186"
+  },
+  "recordingFrames": 1232,
+  "sources": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\reports\\1792867932194-8f125fe4.report.json",
+      "bytes": 46569,
+      "sha256": "bfef3722ec1661d93a6159de32075e6257b43c1d625346c53619c826477d5d7a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\source-pins-admitted-v2.json",
+      "bytes": 15750,
+      "sha256": "c6f41d0a88753a2576bfad0e756bcdc57088756e58b4e05a387b98a90e30a475"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\gateway-build-pin.json",
+      "bytes": 1168,
+      "sha256": "4b8b9ed6f90ca0a748a0e3ab18bb8a3207a0e0c437fc82292246e33906fca390"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\realm-process.json",
+      "bytes": 1022,
+      "sha256": "257f070e37562fac7bd6139a41a382d63e007f66ade2323637574d40919185e7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\realm-cleanup.json",
+      "bytes": 1810,
+      "sha256": "651380cf2c2894cba14fc24de5ef53c200e0be0c80d82c34ec1610b43a3ddf7c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+    }
+  ],
+  "verifiedCurrentSource": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 123835,
+      "sha256": "66813571dc8b220dcd8d6d4a7c96caf764a27ea74bc3597bddfde93e8175f7f4"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "failedWindow": {
+    "previousWindowRawLine": 8901,
+    "previousWindowObservedAtMs": 1792868198070,
+    "failedWindowRawLine": 11060,
+    "failedWindowObservedAtMs": 1792868258381,
+    "seconds": 60.310827500000016,
+    "boundaryRule": "Exact raw line order between successive same-actor continuousWindow markers; wall markers are emission times, not invented exact wire-send times.",
+    "movementRequests": 19,
+    "correctedMovement": 2,
+    "movementCorrectionRatio": 0.10526315789473684,
+    "unchangedMaximumCorrectionRatio": 0.05,
+    "attackV2Requests": 30,
+    "launched": 30,
+    "positiveDualEndHits": 30,
+    "notLaunched": 0,
+    "timeouts": 0,
+    "nativeActivityPassed": true,
+    "activityPassed": true,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "rawFailure": {
+      "rawLine": 11061,
+      "type": "continuousFailure",
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "Ldd155c05",
+        "role": "combat",
+        "phases": [
+          "soak"
+        ],
+        "seconds": 60.310827500000016,
+        "final": false,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 54,
+          "gaps": 0,
+          "moves": 17,
+          "attacks": 30,
+          "hits": 30,
+          "damage": 85,
+          "lastSuccessAt": 1792868257634,
+          "runs": 8,
+          "cells": 25,
+          "nativeOpportunities": 54,
+          "nativeCompleted": 52,
+          "offeredDurationMs": 60240,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 0.9629629629629629,
+          "runRatio": 0.47058823529411764,
+          "cellsPerMinute": 24.871156012575014,
+          "positiveHitsPerMinute": 29.845387215090017,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 60240,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": true,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0.10526315789473684,
+        "movementCorrectionRatio": 0.10526315789473684,
+        "attackRejectionRatio": 0,
+        "metrics": {
+          "attack": {
+            "count": 30,
+            "status": {
+              "success": 30
+            },
+            "fromSend": {
+              "count": 30,
+              "p50Ms": 79,
+              "p95Ms": 113,
+              "p99Ms": 113,
+              "maxMs": 112.31809999997495
+            },
+            "fromPlan": {
+              "count": 30,
+              "p50Ms": 90,
+              "p95Ms": 139,
+              "p99Ms": 142,
+              "maxMs": 141.3811000000569
+            },
+            "attackV2Requests": 30,
+            "attackV2NotLaunched": 0
+          },
+          "walk": {
+            "count": 10,
+            "status": {
+              "success": 9,
+              "corrected": 1
+            },
+            "fromSend": {
+              "count": 10,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.5038999999524094
+            },
+            "fromPlan": {
+              "count": 10,
+              "p50Ms": 11,
+              "p95Ms": 29,
+              "p99Ms": 29,
+              "maxMs": 28.85690000001341
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.5542000000132248
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 10,
+              "p95Ms": 11,
+              "p99Ms": 11,
+              "maxMs": 10.977000000013504
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.5542000000132248
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.5542000000132248
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "run": {
+            "count": 9,
+            "status": {
+              "success": 8,
+              "corrected": 1
+            },
+            "fromSend": {
+              "count": 9,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.7076000000233762
+            },
+            "fromPlan": {
+              "count": 9,
+              "p50Ms": 20,
+              "p95Ms": 33,
+              "p99Ms": 33,
+              "maxMs": 32.65520000003744
+            }
+          },
+          "fanout-run": {
+            "count": 3,
+            "status": {
+              "success": 3
+            },
+            "fromSend": {
+              "count": 3,
+              "p50Ms": 2,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.971799999999348
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-walk": {
+            "count": 5,
+            "status": {
+              "success": 5
+            },
+            "fromSend": {
+              "count": 5,
+              "p50Ms": 2,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.3121000000392087
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "turn": {
+            "count": 3,
+            "status": {
+              "success": 3
+            },
+            "fromSend": {
+              "count": 3,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.2334999999729916
+            },
+            "fromPlan": {
+              "count": 3,
+              "p50Ms": 29,
+              "p95Ms": 32,
+              "p99Ms": 32,
+              "maxMs": 31.593300000065938
+            }
+          },
+          "fanout-turn": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.6009000000194646
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      },
+      "at": 1792868258381
+    }
+  },
+  "findings": [
+    {
+      "classificationRecordedAtMs": 1792868213330,
+      "classificationRecordedAtUtc": "2026-10-24T18:56:53.330Z",
+      "rawActionLine": 9429,
+      "rawCorrectionLine": 9428,
+      "kind": "run",
+      "actor": "Ldd155c05",
+      "chaseTargetId": 206602,
+      "chaseTargetName": "Scarecrow",
+      "origin": {
+        "x": 248,
+        "y": 644
+      },
+      "first": {
+        "x": 248,
+        "y": 645
+      },
+      "plannedDestination": {
+        "x": 248,
+        "y": 646
+      },
+      "receivedActual": {
+        "x": 248,
+        "y": 644
+      },
+      "intendedDirectionDerivedFromPlan": "Down",
+      "receivedDirection": "Down",
+      "sentMonotonicMs": 294477.1457,
+      "receiptMonotonicMs": 294477.501,
+      "receiptSequence": 3929,
+      "latencyMs": 0.3552999999956228,
+      "classification": "Real fixed-rule movement correction: received UserLocation endpoint equals origin, differs from expected endpoint and (for Run) permitted first step.",
+      "classificationSource": "Frozen soak.mjs action1110-1124; movementCorrection receipt projection is retained, not a complete wire movement trace.",
+      "ownHpObservedAtCorrection": 30,
+      "postReceiptNearbyOccupants": [
+        {
+          "objectId": 50004,
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206537,
+          "kind": "monster",
+          "x": 252,
+          "y": 647,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206602,
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206620,
+          "kind": "monster",
+          "x": 245,
+          "y": 640,
+          "dead": true,
+          "hidden": false
+        },
+        {
+          "objectId": 206614,
+          "kind": "monster",
+          "x": 245,
+          "y": 639,
+          "dead": true,
+          "hidden": false
+        },
+        {
+          "objectId": 206709,
+          "kind": "monster",
+          "x": 250,
+          "y": 638,
+          "dead": false,
+          "hidden": false
+        }
+      ],
+      "sameDestinationObserver": {
+        "actor": "Ldd155c04",
+        "objectId": 50004,
+        "rawActionLine": 9426,
+        "sentMonotonicMs": 294475.7812,
+        "lastPriorOwnReceipt": {
+          "rawLine": 9400,
+          "type": "selfTransform",
+          "actor": "Ldd155c04",
+          "connection": 5,
+          "at": 1792868212554,
+          "sequence": 3572,
+          "monotonicMs": 293730.6659,
+          "phase": "soak",
+          "source": "UserLocation",
+          "mapFileName": "0",
+          "wire": {
+            "x": 248,
+            "y": 648,
+            "direction": "Down"
+          },
+          "before": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 248,
+              "y": 646
+            },
+            "direction": "Up"
+          },
+          "after": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 248,
+              "y": 648
+            },
+            "direction": "Down"
+          }
+        },
+        "sameDestinationOwnReceipt": {
+          "rawLine": 9425,
+          "type": "selfTransform",
+          "actor": "Ldd155c04",
+          "connection": 5,
+          "at": 1792868213300,
+          "sequence": 3577,
+          "monotonicMs": 294477.4638,
+          "phase": "soak",
+          "source": "UserLocation",
+          "mapFileName": "0",
+          "wire": {
+            "x": 248,
+            "y": 646,
+            "direction": "Up"
+          },
+          "before": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 248,
+              "y": 648
+            },
+            "direction": "Down"
+          },
+          "after": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 248,
+              "y": 646
+            },
+            "direction": "Up"
+          }
+        },
+        "sendPrecedesFighterByMs": 1.364499999966938,
+        "ownReceiptAfterFighterSendMs": 0.3181000000331551,
+        "ownReceiptRelativeToFighterReceiptMs": -0.0371999999624677
+      },
+      "spectatorFrameReferences": [
+        {
+          "recordingLine": 1054,
+          "sequence": 1054,
+          "capturedAtMs": 1792868212880
+        },
+        {
+          "recordingLine": 1055,
+          "sequence": 1055,
+          "capturedAtMs": 1792868213144
+        },
+        {
+          "recordingLine": 1056,
+          "sequence": 1056,
+          "capturedAtMs": 1792868213409
+        },
+        {
+          "recordingLine": 1057,
+          "sequence": 1057,
+          "capturedAtMs": 1792868213673
+        }
+      ],
+      "causeAssessment": "Strong evidence consistent with concurrent ordinary clients competing for the same destination: observer4 sends first, both are sent before its own acknowledgement, and post-receipt occupancy records show it in the rejected destination.",
+      "causeNotProved": "No retained full fighter remote-ObjectRun/send-time snapshot or server movement-rejection reason. Cross-WebSocket receipt order and250ms spectator samples do not establish exact authoritative commit/fanout order."
+    },
+    {
+      "classificationRecordedAtMs": 1792868214823,
+      "classificationRecordedAtUtc": "2026-10-24T18:56:54.823Z",
+      "rawActionLine": 9485,
+      "rawCorrectionLine": 9484,
+      "kind": "walk",
+      "actor": "Ldd155c05",
+      "chaseTargetId": 206602,
+      "chaseTargetName": "Scarecrow",
+      "origin": {
+        "x": 249,
+        "y": 645
+      },
+      "first": {
+        "x": 248,
+        "y": 646
+      },
+      "plannedDestination": {
+        "x": 248,
+        "y": 646
+      },
+      "receivedActual": {
+        "x": 249,
+        "y": 645
+      },
+      "intendedDirectionDerivedFromPlan": "DownLeft",
+      "receivedDirection": "DownRight",
+      "sentMonotonicMs": 295970.2003,
+      "receiptMonotonicMs": 295970.7002,
+      "receiptSequence": 3938,
+      "latencyMs": 0.49989999999525025,
+      "classification": "Real fixed-rule movement correction: received UserLocation endpoint equals origin, differs from expected endpoint and (for Run) permitted first step.",
+      "classificationSource": "Frozen soak.mjs action1110-1124; movementCorrection receipt projection is retained, not a complete wire movement trace.",
+      "ownHpObservedAtCorrection": 30,
+      "postReceiptNearbyOccupants": [
+        {
+          "objectId": 50004,
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206602,
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206537,
+          "kind": "monster",
+          "x": 252,
+          "y": 647,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206620,
+          "kind": "monster",
+          "x": 245,
+          "y": 640,
+          "dead": true,
+          "hidden": false
+        },
+        {
+          "objectId": 206614,
+          "kind": "monster",
+          "x": 245,
+          "y": 639,
+          "dead": true,
+          "hidden": false
+        }
+      ],
+      "sameDestinationObserver": {
+        "actor": "Ldd155c04",
+        "objectId": 50004,
+        "rawActionLine": 9482,
+        "sentMonotonicMs": 295968.6479,
+        "lastPriorOwnReceipt": {
+          "rawLine": 9453,
+          "type": "selfTransform",
+          "actor": "Ldd155c04",
+          "connection": 5,
+          "at": 1792868214052,
+          "sequence": 3581,
+          "monotonicMs": 295228.7264,
+          "phase": "soak",
+          "source": "UserLocation",
+          "mapFileName": "0",
+          "wire": {
+            "x": 246,
+            "y": 646,
+            "direction": "Left"
+          },
+          "before": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 248,
+              "y": 646
+            },
+            "direction": "Up"
+          },
+          "after": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 246,
+              "y": 646
+            },
+            "direction": "Left"
+          }
+        },
+        "sameDestinationOwnReceipt": {
+          "rawLine": 9481,
+          "type": "selfTransform",
+          "actor": "Ldd155c04",
+          "connection": 5,
+          "at": 1792868214794,
+          "sequence": 3590,
+          "monotonicMs": 295970.7569,
+          "phase": "soak",
+          "source": "UserLocation",
+          "mapFileName": "0",
+          "wire": {
+            "x": 248,
+            "y": 646,
+            "direction": "Right"
+          },
+          "before": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 246,
+              "y": 646
+            },
+            "direction": "Left"
+          },
+          "after": {
+            "playerObjectId": 1000,
+            "position": {
+              "x": 248,
+              "y": 646
+            },
+            "direction": "Right"
+          }
+        },
+        "sendPrecedesFighterByMs": 1.5524000000441447,
+        "ownReceiptAfterFighterSendMs": 0.5565999999525957,
+        "ownReceiptRelativeToFighterReceiptMs": 0.056699999957345426
+      },
+      "spectatorFrameReferences": [
+        {
+          "recordingLine": 1060,
+          "sequence": 1060,
+          "capturedAtMs": 1792868214468
+        },
+        {
+          "recordingLine": 1061,
+          "sequence": 1061,
+          "capturedAtMs": 1792868214731
+        },
+        {
+          "recordingLine": 1062,
+          "sequence": 1062,
+          "capturedAtMs": 1792868214996
+        },
+        {
+          "recordingLine": 1063,
+          "sequence": 1063,
+          "capturedAtMs": 1792868215260
+        }
+      ],
+      "causeAssessment": "Strong evidence consistent with concurrent ordinary clients competing for the same destination: observer4 sends first, both are sent before its own acknowledgement, and post-receipt occupancy records show it in the rejected destination.",
+      "causeNotProved": "No retained full fighter remote-ObjectRun/send-time snapshot or server movement-rejection reason. Cross-WebSocket receipt order and250ms spectator samples do not establish exact authoritative commit/fanout order."
+    }
+  ],
+  "otherRecordedCorrections": [
+    {
+      "rawLine": 4826,
+      "type": "movementCorrection",
+      "actor": "Ldd155c06",
+      "connection": 7,
+      "at": 1792868082794,
+      "monotonicMs": 163942.273,
+      "sequence": 2119,
+      "phase": "soak",
+      "kind": "walk",
+      "mapFileName": "0",
+      "origin": {
+        "x": 266,
+        "y": 648
+      },
+      "first": {
+        "x": 267,
+        "y": 648
+      },
+      "target": {
+        "x": 267,
+        "y": 648
+      },
+      "actual": {
+        "x": 266,
+        "y": 648
+      },
+      "ownHp": 18,
+      "temporaryAvoidance": {
+        "x": 267,
+        "y": 648,
+        "ttlMs": 3000
+      },
+      "nearbyOccupants": [
+        {
+          "objectId": 206608,
+          "kind": "monster",
+          "x": 267,
+          "y": 648,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206534,
+          "kind": "monster",
+          "x": 264,
+          "y": 649,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206701,
+          "kind": "monster",
+          "x": 261,
+          "y": 649,
+          "dead": false,
+          "hidden": false
+        }
+      ],
+      "nearbyOccupantCount": 3,
+      "occupantsTruncated": false
+    },
+    {
+      "rawLine": 7177,
+      "type": "movementCorrection",
+      "actor": "Ldd155c06",
+      "connection": 7,
+      "at": 1792868147294,
+      "monotonicMs": 228441.1298,
+      "sequence": 2777,
+      "phase": "soak",
+      "kind": "run",
+      "mapFileName": "0",
+      "origin": {
+        "x": 266,
+        "y": 650
+      },
+      "first": {
+        "x": 266,
+        "y": 649
+      },
+      "target": {
+        "x": 266,
+        "y": 648
+      },
+      "actual": {
+        "x": 266,
+        "y": 650
+      },
+      "ownHp": 18,
+      "temporaryAvoidance": null,
+      "nearbyOccupants": [
+        {
+          "objectId": 206608,
+          "kind": "monster",
+          "x": 266,
+          "y": 649,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206534,
+          "kind": "monster",
+          "x": 264,
+          "y": 649,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206701,
+          "kind": "monster",
+          "x": 261,
+          "y": 649,
+          "dead": false,
+          "hidden": false
+        }
+      ],
+      "nearbyOccupantCount": 3,
+      "occupantsTruncated": false
+    },
+    {
+      "rawLine": 9171,
+      "type": "movementCorrection",
+      "actor": "Ldd155c07",
+      "connection": 8,
+      "at": 1792868205988,
+      "monotonicMs": 287135.3798,
+      "sequence": 3034,
+      "phase": "soak",
+      "kind": "run",
+      "mapFileName": "0",
+      "origin": {
+        "x": 279,
+        "y": 661
+      },
+      "first": {
+        "x": 280,
+        "y": 661
+      },
+      "target": {
+        "x": 281,
+        "y": 661
+      },
+      "actual": {
+        "x": 279,
+        "y": 661
+      },
+      "ownHp": 18,
+      "temporaryAvoidance": null,
+      "nearbyOccupants": [
+        {
+          "objectId": 206645,
+          "kind": "monster",
+          "x": 280,
+          "y": 661,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206704,
+          "kind": "monster",
+          "x": 282,
+          "y": 662,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206507,
+          "kind": "monster",
+          "x": 283,
+          "y": 666,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206513,
+          "kind": "monster",
+          "x": 274,
+          "y": 662,
+          "dead": false,
+          "hidden": false
+        }
+      ],
+      "nearbyOccupantCount": 4,
+      "occupantsTruncated": false
+    }
+  ],
+  "summary": [
+    "两次fighter corrected都是真实收回原地坐标，按原目标/Run首步比较规则正确计入纠正，2/19=10.526%超过原5%。",
+    "两次均与observer4几乎同时抢同一格(248,646)相符；observer4先发送1.3645/1.5524ms，收到其自身确认前fighter已发送。后置occupancy两次均明确玩家50004在该格。",
+    "现有记录支持并发目的地竞争的强相容解释，缺fighter逐包remote movement/送前完整快照及server拒绝原因，不能宣称已证明精确服务器执行顺序。",
+    "失败窗口30个V2请求均launched且原双端正伤害命中；无NotLaunched或timeout。该失败不能当攻击协议失败或物理机容量上限。"
+  ],
+  "unchanged": {
+    "originalFailureRetained": true,
+    "gameplayThresholdsChanged": false,
+    "sourceChanged": false,
+    "newRealmStarted": false,
+    "capacityAccepted": false
+  },
+  "projections": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\05-analysis\\selected-events-v1.json",
+      "bytes": 44886,
+      "sha256": "97a294c4f61604d956eddeb5e5205cffcc89780eda198127e8ec9ca250cdea46"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\05-analysis\\spectator-window-v1.json",
+      "bytes": 48655,
+      "sha256": "e4fc15b89b845365dc1ffbcf82a5dc38be3719b02b636c9c9d7f6c662bbc02ca"
+    }
+  ]
+}

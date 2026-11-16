@@ -1,0 +1,17 @@
+{
+  "files": [
+    ".github/scripts/test-numeron-r16-domain.mjs",
+    ".github/scripts/test-numeron-r16-release.mjs",
+    ".github/scripts/test-numeron-release-entry.mjs"
+  ],
+  "exitCode": 0,
+  "counts": {
+    "tests": 68,
+    "pass": 68,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "logSha256": "c2afca5ff2580149a08f350d11412865236605afeafc1e23712da4e0f895f0cc",
+  "helperSha256": "694be5daca3fdae13bc3fac43a8894af05473aa58e54a655e9a717fed7140f49"
+}

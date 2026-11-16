@@ -1,0 +1,138 @@
+{
+  "schema": "mir2.world-snapshot-gzip-candidate.v1",
+  "localCandidatePassed": true,
+  "sourceBaseRevision": "40d1662f83a52511d2e845ca237180fc6201dec8",
+  "sourceSnapshotSha256": "3282dab684009b3ed4d70ec9c67cb67dc485f8a16d486285c430a91bfbd31dfe",
+  "ownedOverlayFiles": [
+    {
+      "path": "mir2-web3/packages/protocol/src/world_snapshot_transport.rs",
+      "bytes": 5391,
+      "sha256": "5b929b88f970c9821db796e46532156f4dffe14c19bfa80c9f207a3c12b1f2d4"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/lib.rs",
+      "bytes": 2116,
+      "sha256": "3c893988e27c54fc18e6335216144769fa8056cea339f07d1600120927b1166f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-web/src/gateway_catalog.rs",
+      "bytes": 1433,
+      "sha256": "8933ceea1a2d36926e00f9a57fb21a2a336bcfcf6295cd853507865f020c7739"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-web/src/lib.rs",
+      "bytes": 4209,
+      "sha256": "128f24c7febc5b84f32abf31dd60eedb49ccc535ca6667d1dbe3d364750d84a5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web/world_snapshot_transport.rs",
+      "bytes": 5428,
+      "sha256": "62b06cc8a9b4a2e6f2cf4ba234bcb93269be72db9459229c05475713bae044bc"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 966468,
+      "sha256": "30a1c13eeb498dd216036043948419d9680377d9ef0f75a767d2c204827b4900"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_transport.rs",
+      "bytes": 27152,
+      "sha256": "e27873d708aeb19081b92cf6217c7b9f3b86fc5cb380b5b874046860ebeac777"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/gateway-catalog-transport.ts",
+      "bytes": 5245,
+      "sha256": "a28f1aaf47f99daa6aee225aec5e949d1e249aa036f008f7b31bb2536512f69e"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "bytes": 1205810,
+      "sha256": "ba62119f6e2e7cf8bb889ed7d29b151f520bad25a9b427c581fc09f509e6a748"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-gateway-catalog-transport.mjs",
+      "bytes": 15138,
+      "sha256": "b9d25892dbc82b1f9f2f1b86290284c9ee2535c053c122c66939e904675238b6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web/catalog_transport.rs",
+      "sha256": "5eb9be5baf5df700fcd9fa77236a9f09085c8baa04eed8fd6434f463c500356f",
+      "bytes": 34668
+    }
+  ],
+  "unrelatedWipCopied": false,
+  "protocolTests": 100,
+  "gatewayTests": 35,
+  "webCoreTests": 59,
+  "totalDistinctChecks": 194,
+  "fullWorkspaceTestsClaimed": false,
+  "realTlsWs": {
+    "passed": true,
+    "fixtureCatalogEnvelopes": 502,
+    "legacyCatalogStringsExactlyEqual": true,
+    "snapshots": 4,
+    "originalTextBytes": 167824,
+    "compressedMessagePayloadBytes": 38070,
+    "reductionFraction": 0.7731552102202307,
+    "excludesWsAndTlsFraming": true,
+    "ordinaryTurnAckWithinEightSeconds": true,
+    "normalLoginCharacterStartLogout": true,
+    "public529GateChanged": false
+  },
+  "webBuild": {
+    "passed": true,
+    "buildId": "wBO16WGldRpPirWZxFGa1",
+    "label": "40d1662f83a5-world-snapshot-gzip-candidate",
+    "compiledCoreManifestMatches": true,
+    "renderer": "bevy-0c553a754308e5b8",
+    "tsconfigCopy": "tsconfig.world-snapshot-gzip.json"
+  },
+  "nativeGatewayForNextLocalUi": {
+    "profile": "debug",
+    "buildPassed": true,
+    "bytes": 147920384,
+    "sha256": "c5a6a71809d94e2cae99c143521bbfa24bdf58bb199731c3d2cd24d2ddc61098",
+    "productionArtifactOrInstallerClaimed": false
+  },
+  "productionDeployed": false,
+  "publicAckLatencyFixedClaimed": false,
+  "fullGameBrowserWithCompressedSnapshotPassed": true,
+  "wholeParityCandidateOrAccepted": false,
+  "fullGameBrowserLocalSessions": 4,
+  "pairedBrowserBuild": {
+    "buildId": "KQ7eN1Lo2uNQhIxqKTlt7",
+    "label": "40d1662f83a5-world-snapshot-gzip-candidate",
+    "renderer": "bevy-0c553a754308e5b8",
+    "assetRelease": "20261108-r16-08ec86d5105c"
+  },
+  "linuxCi": {
+    "runId": 43582710524,
+    "workflowSucceeded": true,
+    "releasePackageAndMapLocallyVerified": true,
+    "publicRollout": false
+  },
+  "fullLegacyServerBrowserPassed": true,
+  "qualifiedSourceRevision": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "integratedHeadAtReview": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "integratedGatewayQualificationClaimed": true,
+  "integratedQualification": {
+    "sourceRevision": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+    "gatewayTests": 38,
+    "releaseGuardTests": 75,
+    "mergedBrowserSessions": 4,
+    "legacyBrowserSessions": 2,
+    "linuxWorkflowRunId": 43587682763,
+    "linuxWorkflowSucceeded": true,
+    "linuxPackageVerificationPending": false,
+    "publicReleased": false,
+    "releasePackageAndMapLocallyVerified": true,
+    "gatewayLinuxSha256": "6c42314b92de52114260d3233ac0df013b0fae460be843a49b5c04de345c5553"
+  },
+  "legacyServerBrowserScope": {
+    "artifactSha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+    "sessions": 2,
+    "mode": "compatibility",
+    "language": "en-US",
+    "currentPublicGatewayClaimed": false
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.promotion-target-leader-enrollment.readonly.v1",
+  "observedAtUtc": "2026-10-30T20:12:30.781397+00:00",
+  "targetLeaderAccountSha256": "12691db5723c0d8a153c2e1a8b766d3870ba635d42da6b4b692ef20667554100",
+  "targetLeaderRegisteredAtMs": 1793381130814,
+  "targetLeaderRegisteredAtUtc": "2026-10-30T17:25:30.814+00:00",
+  "targetLeaderRegisteredAtAsiaShanghai": "2026-10-31T01:25:30.814+08:00",
+  "leaderRecordPresent": true,
+  "status": "approved",
+  "acceptedTermsVersion": "numeron-windows-playtest-20261030-v1",
+  "currentTermsVersion": "numeron-windows-playtest-20261030-v1",
+  "currentTermsAccepted": true,
+  "enrolledAtMs": 1793391026068,
+  "enrolledAtUtc": "2026-10-30T20:10:26.068+00:00",
+  "writesPerformed": false,
+  "servicesChanged": false
+}

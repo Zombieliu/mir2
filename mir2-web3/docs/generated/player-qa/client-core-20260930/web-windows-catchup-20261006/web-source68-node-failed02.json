@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "sourceGeneration": "Source68 generation02",
+  "kind": "actual original Node five-script regression failed",
+  "capturedAt": "2026-10-11T13:15:00.894Z",
+  "execution": {
+    "owner": "Root",
+    "builderPid": 70608,
+    "exitCode": 1,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 29832
+  },
+  "originalCaller": {
+    "json": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source47-original-existing-builder-template-data01.json",
+      "bytes": 5007,
+      "sha256": "75dcd81559d98ceee80dc5b096b85a9f2917072f718668a71a15769cbe1b2f81"
+    },
+    "utf8Bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "configuration": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved02/node-tests02-config.json",
+    "bytes": 5428,
+    "sha256": "ab791a0d2a17555fd68213ee8aa373d50d468f6e0377867deb89e45d2e1fc088"
+  },
+  "inputReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved02/source-review02.json",
+    "bytes": 6327,
+    "sha256": "2580858ebc38afda07a039b6e49f4c16d6120da2cd2eaed0223df866ad21cfbc"
+  },
+  "inputCount": 36369,
+  "logs": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/node-tests02/outer.json",
+      "bytes": 565,
+      "sha256": "f4c9f69c0a3a0433c6d5343887397029af7743fd8a349c5600da6fbe585c6cf9"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/node-tests02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/node-tests02/stdout.log",
+      "bytes": 67658,
+      "sha256": "639ea297d484e9fab04fa4931b474881437fe5379d87571505b0e3956fcf9221"
+    }
+  ],
+  "counts": {
+    "tests": 257,
+    "pass": 256,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "stderrBytes": 0,
+  "failure": {
+    "script": "scripts/test-stage5-adapters.mjs",
+    "fixture": "pearlNpcDomFixture actual NpcShopWindow",
+    "type": "ReferenceError",
+    "detail": "npcShopBuyBlockedTitle is not defined",
+    "newStorageGroupsReached": false,
+    "adapterGroupsCompleted": null
+  },
+  "scope": {
+    "nodeRegressionAccepted": false,
+    "nextExecuted": false,
+    "thinExecuted": false,
+    "runtimeUpdated": false,
+    "storageTooltipAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "previousFailuresPreserved": [
+    "web-source68-node-failed01.json"
+  ],
+  "mainTsconfigUnchanged": true,
+  "privateConfigurationReadOrRestored": false
+}

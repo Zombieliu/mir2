@@ -1,0 +1,50 @@
+{
+  "projectedReport": {
+    "buildExitCode": 0,
+    "cargoVersion": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+    "completedUtc": "2026-10-29T06:49:27.9184538+00:00",
+    "executable": {
+      "sha256": "F3B0E756A2DF5747EFB0D2A3613E2FADD4687D982CF8CF280EA99BF0654AA25C",
+      "size": 115909632
+    },
+    "packedRelease": "1",
+    "passed": true,
+    "remapPathPrefixAdded": false,
+    "reproducibleBuild": false,
+    "schema": "mir2.windows.packed-native-build.v1",
+    "sourceAfter": {
+      "clean": true,
+      "revision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+      "sourceFilesChecked": 1302,
+      "sourceInventorySha256": "49EFD187AC24E837D9BD90094A47E7428A37BC5626F0E10FFA3CC10D72C6BEC7",
+      "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    "sourceBefore": {
+      "clean": true,
+      "revision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+      "sourceFilesChecked": 1302,
+      "sourceInventorySha256": "49EFD187AC24E837D9BD90094A47E7428A37BC5626F0E10FFA3CC10D72C6BEC7",
+      "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    "sourceRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+    "startedUtc": "2026-10-29T06:49:24.7905892+00:00",
+    "target": "x86_64-pc-windows-msvc",
+    "toolchain": "1.95.0",
+    "tools": [
+      {
+        "sha256": "D91F510135D4C72FE0540F949ED38E88405DCF78BDECE4491F16E47776D3E0EE"
+      },
+      {
+        "sha256": "753F64A54BC98F03D900057FB58BB98BF9BBB9EE6A871CF1FBCE94F4340D20B1"
+      },
+      {
+        "sha256": "E1DDE2A0B4E59A2B1F02EF9A69F8E4B652B7104D3DB00B7D565E6C1437C860EB"
+      }
+    ]
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "native-build",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "E831E3B00E7B91906F2E07EF8A9FC1480E854FE645556F2C4A5E908F7808AF5A",
+  "sourceSize": 3322
+}

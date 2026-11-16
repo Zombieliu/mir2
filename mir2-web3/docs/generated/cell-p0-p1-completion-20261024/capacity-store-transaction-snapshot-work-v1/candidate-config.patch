@@ -1,0 +1,33 @@
+diff --git a/mir2-web3/apps/simulation/src/config.rs b/mir2-web3/apps/simulation/src/config.rs
+index 004c0b34e..997a6805a 100644
+--- a/mir2-web3/apps/simulation/src/config.rs
++++ b/mir2-web3/apps/simulation/src/config.rs
+@@ -5286 +5286 @@ impl SimulationConfig {
+-        let original_store = live_store.clone();
++        let original_store = &*live_store;
+@@ -5288 +5288 @@ impl SimulationConfig {
+-        let mut staged_store = original_store.clone();
++        let mut staged_store = AccountStore::clone(original_store);
+@@ -5426,5 +5426,11 @@ impl SimulationConfig {
+-        // Fail serialization before touching either repository.  The file
+-        // backend repeats this encoding for its pretty snapshot, while this
+-        // preflight also protects PostgreSQL mirror-first ordering.
+-        serde_json::to_vec(&staged_store)
+-            .map_err(|error| format!("failed to encode account-store transaction: {error}"))?;
++        // Retain preflight encoding for File and mirror-first ordering. A pure
++        // PostgreSQL source encodes its scoped mutations inside one SQL
++        // transaction, so a discarded complete-file encoding adds no protection.
++        let postgres_source_only = self.account_store_database_mode
++            == AccountStoreDatabaseMode::SourceOfTruth
++            && self.account_store_path.is_none()
++            && self.account_store_database_url.is_some();
++        if !postgres_source_only {
++            serde_json::to_vec(&staged_store)
++                .map_err(|error| format!("failed to encode account-store transaction: {error}"))?;
++        }
+@@ -5531 +5537 @@ impl SimulationConfig {
+-                        (original_store.clone(), rollback_plan.clone())
++                        (AccountStore::clone(original_store), rollback_plan.clone())
+@@ -5576 +5582 @@ impl SimulationConfig {
+-                                let mut restored=original_store.clone();restored.guild_clock=Some(clock.record);restored.source_guild_clock_version=Some(clock.version);
++                                let mut restored=AccountStore::clone(original_store);restored.guild_clock=Some(clock.record);restored.source_guild_clock_version=Some(clock.version);

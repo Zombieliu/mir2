@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "cloneMarker": "r16-numeron-isolated-clone-qa-20261108",
+  "passed": true,
+  "finishedAt": "2026-11-08T14:27:44.930Z",
+  "scope": "Four selected existing roles; ordinary WebSocket login, StartGame, snapshot, LogOut, and fresh signed re-login. Nine explicit network projection groups only.",
+  "ordinals": [
+    3,
+    4,
+    5,
+    6
+  ],
+  "groups": [
+    "character",
+    "experience",
+    "wallet",
+    "inventory",
+    "belt",
+    "equipment",
+    "storage",
+    "skills",
+    "quests"
+  ],
+  "baseline": {
+    "realmId": "r16-clone-qa-e911",
+    "profile": {
+      "profileId": "platinum_176",
+      "profileVersion": 27,
+      "bundleHash": "4b95ee1a25df34185d94240613c36673a093a8ee27ca80509bbe0b7acb5beaf4"
+    },
+    "passed": true,
+    "roles": 4,
+    "logins": 8,
+    "startGames": 8,
+    "normalLogouts": 8,
+    "keepAlives": 42,
+    "expectedGroupComparisons": 72,
+    "reloginGroupComparisons": 36,
+    "finishedAt": "2026-11-08T14:21:42.938Z"
+  },
+  "candidate": {
+    "realmId": "r16-clone-qa-candidate",
+    "profile": {
+      "profileId": "platinum_fiveclass",
+      "profileVersion": 1,
+      "bundleHash": "a7d5126c0418536e30a835667e101687a5f54700060985349205f6b93f7262da"
+    },
+    "passed": true,
+    "roles": 4,
+    "logins": 8,
+    "startGames": 8,
+    "normalLogouts": 8,
+    "keepAlives": 45,
+    "expectedGroupComparisons": 72,
+    "reloginGroupComparisons": 36,
+    "finishedAt": "2026-11-08T14:25:23.923Z"
+  },
+  "crossEndpointComparisons": 72,
+  "crossEndpointMismatches": 0,
+  "totalOrdinaryLogins": 16,
+  "totalNormalLogouts": 16,
+  "mutationCommands": 0,
+  "retries": 0,
+  "socketsClosedByRunner": true,
+  "serviceStateChangedByThisWorker": false,
+  "inputAndSourcePreservation": {
+    "connectionUnchanged": true,
+    "baselineDraftUnchanged": true,
+    "candidateDraftUnchanged": true,
+    "baselineConfigUnchanged": true,
+    "candidateConfigUnchanged": true,
+    "original43ExportUnchanged": true,
+    "driverSourceUnchanged": true,
+    "coreSourceUnchanged": true,
+    "signerSourceUnchanged": true
+  },
+  "driverSourceSha256": "3e7ae304054b3e597c5e0dc8a4f19ce6be0344e91f57e9fb03a5f10a8fe2ca98",
+  "coreSourceSha256": "012d2d5f13cc4be08211b17079dc29c6a5c33a195b12975610f6650f47bed0c7",
+  "signerSourceSha256": "1b198db9ed0cf88bf2847027fa0c3b86dc72f7a3c0bbd86b0fd435271306cd6e",
+  "unverifiedByThisNetworkRun": [
+    "Other 39 exported roles",
+    "Raw save fields outside the nine projection groups",
+    "Browser rendering and UI input",
+    "Gameplay mutation paths"
+  ]
+}

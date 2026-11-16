@@ -1,0 +1,39 @@
+{
+  "application": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "cohort": "public-r2",
+  "observer": "passive service-worker CDP network events",
+  "sourceFileSha256": "0f2c63faa281cd90700c013da457a09ffe048771269f0cd1f7e593d18e4cdfd1",
+  "droppedRequests": 0,
+  "observerErrors": 0,
+  "decodedPrefixCountUnobserved": true,
+  "rows": [
+    {
+      "source": "service-worker-upstream",
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 29920,
+      "status": 200,
+      "headersAtMs": 32244,
+      "finishedAtMs": 67058,
+      "durationMs": 37138,
+      "encodedBodyBytes": 13702384,
+      "encodedBytesComplete": false,
+      "netError": "net::ERR_ABORTED",
+      "encoding": "br",
+      "edgePop": "SIN"
+    },
+    {
+      "source": "service-worker-upstream",
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 120519,
+      "status": 200,
+      "headersAtMs": 120706,
+      "finishedAtMs": 138252,
+      "durationMs": 17733,
+      "encodedBodyBytes": 14167569,
+      "encodedBytesComplete": true,
+      "netError": null,
+      "encoding": "br",
+      "edgePop": "SIN"
+    }
+  ]
+}

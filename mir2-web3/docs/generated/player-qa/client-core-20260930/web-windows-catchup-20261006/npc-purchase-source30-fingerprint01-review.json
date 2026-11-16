@@ -1,0 +1,17 @@
+{
+  "owner": "Root",
+  "kind": "Independently rehashed bounded source/data preflight",
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-fingerprint01-snapshot.json",
+    "bytes": 19882,
+    "sha256": "6b5b9768e51aca116275848cb9091139dc30d137f49c9b52970078db52b6c376"
+  },
+  "checked": 64,
+  "drift": [],
+  "accepted": true,
+  "fullBundleRegressionRun": false,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "goalComplete": false
+}

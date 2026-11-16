@@ -1,0 +1,254 @@
+{
+  "gatewaySha256": "60dbb6b2ad9df5165dc1472dc64c7c0281e6094a1c1208c161dfccf35f5ea974",
+  "ordinaryCommandsOnly": true,
+  "phase": "done",
+  "rounds": [
+    {
+      "sourceUid": "3",
+      "receiverHadSourceUid": true,
+      "pre": [
+        {
+          "point": {
+            "x": 288,
+            "y": 616
+          },
+          "gold": 0,
+          "candleCount": 1,
+          "candles": [
+            {
+              "uid": "3",
+              "qty": 1
+            }
+          ],
+          "inventoryStale": false
+        },
+        {
+          "point": {
+            "x": 287,
+            "y": 617
+          },
+          "gold": 0,
+          "candleCount": 1,
+          "candles": [
+            {
+              "uid": "3",
+              "qty": 1
+            }
+          ],
+          "inventoryStale": false
+        }
+      ],
+      "after": [
+        {
+          "point": {
+            "x": 290,
+            "y": 617
+          },
+          "gold": 0,
+          "candleCount": 0,
+          "candles": [],
+          "inventoryStale": false
+        },
+        {
+          "point": {
+            "x": 289,
+            "y": 616
+          },
+          "gold": 0,
+          "candleCount": 1,
+          "candles": [
+            {
+              "uid": "3",
+              "qty": 1
+            }
+          ],
+          "inventoryStale": false
+        }
+      ],
+      "hadDropOnTile": true,
+      "dropObjectId": 50002,
+      "pickup": {
+        "changed": false,
+        "confirmed": false
+      },
+      "visibleAfter": [
+        true,
+        true
+      ],
+      "receipts": [
+        {
+          "slot": 0,
+          "packet": "DropItem",
+          "uid": "3",
+          "count": 1,
+          "success": true
+        },
+        {
+          "slot": 1,
+          "packet": "ObjectRemove",
+          "objectId": 50002
+        }
+      ]
+    },
+    {
+      "sourceUid": "3",
+      "receiverHadSourceUid": false,
+      "pre": [
+        {
+          "point": {
+            "x": 289,
+            "y": 616
+          },
+          "gold": 0,
+          "candleCount": 1,
+          "candles": [
+            {
+              "uid": "3",
+              "qty": 1
+            }
+          ],
+          "inventoryStale": false
+        },
+        {
+          "point": {
+            "x": 290,
+            "y": 617
+          },
+          "gold": 0,
+          "candleCount": 0,
+          "candles": [],
+          "inventoryStale": false
+        }
+      ],
+      "after": [
+        {
+          "point": {
+            "x": 293,
+            "y": 617
+          },
+          "gold": 0,
+          "candleCount": 0,
+          "candles": [],
+          "inventoryStale": false
+        },
+        {
+          "point": {
+            "x": 292,
+            "y": 616
+          },
+          "gold": 0,
+          "candleCount": 1,
+          "candles": [
+            {
+              "uid": "3",
+              "qty": 1
+            }
+          ],
+          "inventoryStale": false
+        }
+      ],
+      "hadDropOnTile": true,
+      "dropObjectId": 50003,
+      "pickup": {
+        "changed": true
+      },
+      "visibleAfter": [
+        true,
+        false
+      ],
+      "receipts": [
+        {
+          "slot": 1,
+          "packet": "DropItem",
+          "uid": "3",
+          "count": 1,
+          "success": true
+        },
+        {
+          "slot": 0,
+          "packet": "GainedItem",
+          "uid": "3",
+          "index": 722,
+          "count": 1
+        },
+        {
+          "slot": 0,
+          "packet": "ObjectRemove",
+          "objectId": 50003
+        }
+      ]
+    }
+  ],
+  "initial": [
+    {
+      "point": {
+        "x": 288,
+        "y": 616
+      },
+      "gold": 0,
+      "candleCount": 1,
+      "candles": [
+        {
+          "uid": "3",
+          "qty": 1
+        }
+      ],
+      "inventoryStale": false
+    },
+    {
+      "point": {
+        "x": 287,
+        "y": 617
+      },
+      "gold": 0,
+      "candleCount": 1,
+      "candles": [
+        {
+          "uid": "3",
+          "qty": 1
+        }
+      ],
+      "inventoryStale": false
+    }
+  ],
+  "collision": {
+    "sourceRemoved": true,
+    "receiverGained": false,
+    "objectRemovedEverywhere": false,
+    "sentGainedItem": false
+  },
+  "control": {
+    "sourceRemoved": true,
+    "receiverGained": true,
+    "objectRemovedEverywhere": false,
+    "sentGainedItem": true
+  },
+  "relog": [
+    {
+      "point": {
+        "x": 292,
+        "y": 616
+      },
+      "gold": 0,
+      "candleCount": 1,
+      "candles": [
+        {
+          "uid": "3",
+          "qty": 1
+        }
+      ],
+      "inventoryStale": false
+    },
+    {
+      "point": {
+        "x": 293,
+        "y": 617
+      },
+      "gold": 0,
+      "candleCount": 0,
+      "candles": [],
+      "inventoryStale": false
+    }
+  ],
+  "success": true
+}

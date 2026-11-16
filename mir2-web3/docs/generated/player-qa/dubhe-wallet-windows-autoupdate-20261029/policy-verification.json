@@ -1,0 +1,118 @@
+{
+  "schema": "mir2.windows.character-creation-policy-verification.v1",
+  "checkedUtc": "2026-10-28T18:04:40.6872473+00:00",
+  "sourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+  "sourceFrozenAndMatches": true,
+  "allowedCreationClasses": [
+    "Warrior",
+    "Wizard",
+    "Taoist"
+  ],
+  "oldConfigDefaultClasses": 5,
+  "existingAssassinArcherRosterAndStartGameCovered": true,
+  "backendChanged": false,
+  "serverConnected": false,
+  "accountCreated": false,
+  "realPhoneSignatureAcceptance": false,
+  "dockerStarted": false,
+  "testArtifactRoot": "C:/Users/Administrator/AppData/Local/Temp/mir2-wallet-windows-release-20261029/policy-target",
+  "toolchain": "Rust 1.95.0",
+  "testSuites": [
+    {
+      "log": "shared-creation-policy.log",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 1,
+      "sha256": "6d458d07886bb2ab82e751ce73497473a2e2a99901097d34a68d681dc7162e00"
+    },
+    {
+      "log": "shared-native-shell-regression.log",
+      "passed": 86,
+      "failed": 0,
+      "ignored": 5,
+      "sha256": "cca209041bdb5d8ed504cbb49130880d6186b89f7a4e94120d05056ffa531ac0"
+    },
+    {
+      "log": "creation-policy-offscreen.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sha256": "f3e56339e5f8e58131ea457861e75a3a35df462e2f487c00ff266c4363a5b067"
+    },
+    {
+      "log": "native-creation-policy.log",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "sha256": "a60be1dfee01011e6f57d63093b3a7d85ea748bb2db0f67d1de0a841155a8036"
+    },
+    {
+      "log": "native-session_config-regression.log",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "sha256": "b61ef4d6ae2c805ee0860112ebe7bc38242da9515f2c8de1ceda8d9af3e4c34f"
+    },
+    {
+      "log": "native-shell_bridge-regression.log",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0,
+      "sha256": "9970b0d6115de0a8dca63f8e22b09ae964cabb7a7410c3a55bfadac397525157"
+    },
+    {
+      "log": "native-wallet_login-regression.log",
+      "passed": 21,
+      "failed": 0,
+      "ignored": 1,
+      "sha256": "e070acfc3a295d3f281ecfecf8992536908fdf424246a55acfda35dad5642370"
+    }
+  ],
+  "candidateConfigurationSelfTestPassed": true,
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "sha256": "8436ad7e1f305af5ef5c357e7c8f413a1c4ea62e1a1b435b73badf268281609e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "c479b5d526fb5151587023fdf24bca79488caa7480538d11bf6abfe04a81f5ef"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "sha256": "2e5bc9c56c3c989d6308801f3ec46505f2f6a3d30ed3073110df28170920c9cb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/session_config.rs",
+      "sha256": "1f42ed232c1e149e7916f3e34111f5eeb78d69f86c14359687ce7e9d269e1b37"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "sha256": "58f8181d03adf8a1197e075fb4fe957cf15d4a0f3a7edde54650cb92e69eca75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "sha256": "dabb7fb5ff6c33bc52f8e8d8b836ec0a3ecab8b2a2f42c154ec29bd0648140d4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "sha256": "00ae6fa1e87bf7014e8806e519ab9c2bcaf0f555a5840a21fdfa4ea4b326b38f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "sha256": "cb486dac282100714ba668063f522b699b1d5ab1b880ab142660a323593ffc46"
+    }
+  ],
+  "screenshot": {
+    "path": "classic-ui-01/creation-policy-three-class.png",
+    "sha256": "6ca2f3731a2d8bd524f838acca557c6cc223ecde85d33b1433ee77268c058da9",
+    "visuallyInspected": true,
+    "selectableClassButtonIndices": [
+      0,
+      1,
+      2
+    ],
+    "originalEnglishFrameHasTwoGreyNoninteractiveSlots": true,
+    "liveAcceptance": false
+  }
+}

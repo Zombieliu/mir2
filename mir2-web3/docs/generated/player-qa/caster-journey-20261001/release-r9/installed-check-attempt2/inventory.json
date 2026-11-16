@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.r9.installed-retry-evidence.v1",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "passed": true,
+  "files": [
+    {
+      "path": "actual-native-update-process-attempt2.json",
+      "bytes": 330,
+      "sha256": "F985F78723C79493D477243FDDC113CE7E9836745CCC41BFABA7ECCFB0DED80A"
+    },
+    {
+      "path": "actual-native-update-attempt2.log",
+      "bytes": 1446,
+      "sha256": "CF02579E761ED4F924327195AEEC55605A3602B77F0BF47E2FB31ABE5C13B33A"
+    },
+    {
+      "path": "native-installed-update-r9-attempt2.py",
+      "bytes": 8671,
+      "sha256": "1CBE303038F7F6EC2D8B6A3D086E458B846710E3500B962C67B2613E6ED1AD5C"
+    },
+    {
+      "path": "run-actual-native-update-attempt2.ps1",
+      "bytes": 2256,
+      "sha256": "2A3D82E973C2CCBCDD8B4CE9747DDD66C459E9A62A83D3CF408F26D23A7F1DDA"
+    },
+    {
+      "path": "actual-native-https-update-report-attempt2.json",
+      "bytes": 1659,
+      "sha256": "A784BE80F5EDBA7F15855DB2C272FF9D339489DE59D4960F0E75B1D250E59C06"
+    }
+  ],
+  "createdUtc": "2026-10-01T19:49:02.979998+00:00"
+}

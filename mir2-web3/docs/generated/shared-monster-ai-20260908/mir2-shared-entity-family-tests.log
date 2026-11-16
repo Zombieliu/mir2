@@ -1,0 +1,224 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:767:5
+    |
+760 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+767 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4258:8
+     |
+3188 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4258 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:59:15
+   |
+59 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_accepts_struck` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:62:15
+   |
+62 | pub(super) fn hell_accepts_struck(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:65:15
+   |
+65 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 17 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.82s
+     Running tests\shared_monster_hugger_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_hugger_ai-c30ee30a73be7489.exe)
+
+running 11 tests
+test hugger_blocked_first_player_stops_later_owned_monster_blast ... FAILED
+test hugger_green_death_clears_observer_mask_and_cannot_poison_reused_id ... ok
+test hugger_keeps_a_real_owned_target_and_uses_300ms_melee ... ok
+test hugger_max_poison_resistance_blocks_green_without_blocking_blast_damage ... ok
+test hugger_scans_at_completion_and_clears_old_player_life ... ok
+test hugger_successful_explosion_applies_real_green_status_and_expires_it ... ok
+test hugger_tagged_suicide_awards_once_and_never_rewards_expired_or_offline_owner ... ok
+test poison_hugger_captures_actual_owned_monster_and_finishes_after_500ms ... ok
+test poison_hugger_captures_victims_on_death_and_restores_delayed_damage ... ok
+test poison_hugger_real_template_does_not_invent_damage_from_zero_dc ... ok
+test poison_hugger_retired_owned_target_does_not_receive_captured_blast ... ok
+
+failures:
+
+---- hugger_blocked_first_player_stops_later_owned_monster_blast stdout ----
+
+thread 'hugger_blocked_first_player_stops_later_owned_monster_blast' (44768) panicked at apps\simulation\tests\shared_monster_hugger_ai.rs:519:5:
+assertion `left == right` failed
+  left: Bool(false)
+ right: true
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    hugger_blocked_first_player_stops_later_owned_monster_blast
+
+test result: FAILED. 10 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+error: test failed, to rerun pass `-p mir2-simulation --test shared_monster_hugger_ai`
+     Running tests\shared_monster_meow_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_meow_ai-677c76717fe235f0.exe)
+
+running 6 tests
+test meow_old_player_anchor_cannot_hit_same_id_after_leave_join ... ok
+test meow_pet_only_melee_uses_real_ac_and_delayed_incarnation_checkpoint ... FAILED
+test meow_range_hits_real_pet_and_player_once_in_same_burst ... FAILED
+test meow_ranged_hit_is_delayed_and_checkpointed ... ok
+test meow_shield_changes_actual_armour_without_stacking ... ok
+test meow_slaves_spawn_after_sixty_seconds_with_six_cap ... ok
+
+failures:
+
+---- meow_pet_only_melee_uses_real_ac_and_delayed_incarnation_checkpoint stdout ----
+
+thread 'meow_pet_only_melee_uses_real_ac_and_delayed_incarnation_checkpoint' (40608) panicked at apps\simulation\tests\shared_monster_meow_ai.rs:293:5:
+actual loss 0, attack type 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- meow_range_hits_real_pet_and_player_once_in_same_burst stdout ----
+
+thread 'meow_range_hits_real_pet_and_player_once_in_same_burst' (41664) panicked at apps\simulation\tests\shared_monster_meow_ai.rs:329:5:
+assertion failed: (235..=240).contains(&(before - pet_hp(&z, pet)))
+
+
+failures:
+    meow_pet_only_melee_uses_real_ac_and_delayed_incarnation_checkpoint
+    meow_range_hits_real_pet_and_player_once_in_same_burst
+
+test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+error: test failed, to rerun pass `-p mir2-simulation --test shared_monster_meow_ai`
+     Running tests\shared_monster_mud_boulder_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_mud_boulder_ai-847361c47eb085ad.exe)
+
+running 15 tests
+test boulder_dies_immediately_then_explodes_300ms_later_once_for_all_observers ... ok
+test boulder_direct_kill_awards_once_per_incarnation_and_allocates_fresh_drop_ids ... ok
+test boulder_does_not_treat_unowned_wild_monster_as_an_opponent ... ok
+test boulder_explosion_uses_impact_positions_and_ignores_hiding_after_activation ... ok
+test boulder_owned_monster_triggers_delayed_blast_without_visible_player ... ok
+test boulder_pending_checkpoint_cannot_be_cancelled_by_personal_refresh_or_repeated_ticks ... ok
+test boulder_without_visible_targets_stands_and_real_zero_stats_are_not_fabricated ... ok
+test mud_checkpoint_and_dead_attacker_keep_launched_actions_without_new_incarnation_overwrite ... ok
+test mud_line_combines_first_native_tile_and_second_player_tile ... ok
+test mud_line_hits_two_tiles_at_550_and_600ms_and_is_shared_once ... ok
+test mud_line_reaches_real_owned_monster_at_550ms_and_restores_pending ... ok
+test mud_mac_can_absorb_the_ranged_hit_and_absorbed_hits_do_not_apply_green ... ok
+test mud_pending_hit_cannot_cross_leave_rejoin_vital_revive_or_packet_revive ... ok
+test mud_pending_native_target_is_invalidated_by_real_retirement ... ok
+test mud_ranged_uses_mac_delay_extra_cooldown_and_keeps_chasing_during_cooldown ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests\shared_monster_thunder_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_thunder_ai-1de7212950cd300b.exe)
+
+running 5 tests
+test successful_repulsion_can_kill_thunder_and_rewards_exactly_once ... ok
+test thunder_acquires_real_pet_and_bursts_at_300ms_without_fake_player_damage ... ok
+test thunder_burst_is_delayed_shared_aoe_and_checkpoint_resumes_once ... ok
+test thunder_kills_real_pet_without_awarding_the_pet_owner_a_kill ... ok
+test thunder_rejects_ordinary_lethal_damage_without_a_reward ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+error: 2 targets failed:
+    `-p mir2-simulation --test shared_monster_hugger_ai`
+    `-p mir2-simulation --test shared_monster_meow_ai`

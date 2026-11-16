@@ -1,0 +1,24 @@
+{
+  "phase": "journey-class-attempts-final",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 2,
+  "bytes": 226930,
+  "entries": [
+    {
+      "path": "journey-class-attempts-final/forest-class-v19-r11/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r11/onboarding-forest-browser-proof.json",
+      "bytes": 217054,
+      "sha256": "3a86b02971e85427853392e957156343152899fd3ac60de53fe9554dea471e5b"
+    },
+    {
+      "path": "journey-class-attempts-final/forest-class-v19-root-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-root-r1/onboarding-forest-browser-proof.json",
+      "bytes": 9876,
+      "sha256": "29bdc9819af49428264dcf1e5e98966d01185b87f89e18788902d6f2c7c95d21"
+    }
+  ]
+}

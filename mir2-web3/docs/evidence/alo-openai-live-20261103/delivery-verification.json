@@ -1,0 +1,1298 @@
+{
+  "passed": true,
+  "appliedAt": "2026-11-03T07:40:20.708Z",
+  "target": "F:\\mir2-builds\\alo-r16-20261103",
+  "backup": "F:/mir2-builds/alo-openai-20261103/live-update-backup",
+  "filesVerified": 367,
+  "changed": [
+    {
+      "path": "apps/ai-player/README.md",
+      "oldHash": "a8e9b15fc7b53a13268ddfc05034f0715f73522727e6ef549c3ee2a2441e43ef",
+      "newHash": "6fc50675d3a1f608ff8968091a5e2372ee115b49522b58c82c7c59b55988c462"
+    },
+    {
+      "path": "apps/ai-player/model-settings/README.md",
+      "oldHash": "fd501a547ac2a3b87859bc9f1db0a41a7280c779aeaad6cc3cb65168b78ec8d0",
+      "newHash": "e5f97631e169871d6debdde61826ef20289d12649dc0b5a2d1fe85b70bb27f05"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/lib.rs",
+      "oldHash": "9e8b442c6647f15b90d7a7bca306fb34f5316480e813d0dc72449a79e0bd6489",
+      "newHash": "2879f27a0f82d486ee9729414d8373afaeb0502d1bdf65d6b5915d1e68120282"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/windows.rs",
+      "oldHash": "fcfd70521c6fdc797d27a9d7f2e1f473a8d2d53cd667329bad82fefe6cd9aeba",
+      "newHash": "7c70285b6af8293759a7af04718268e5931896baea8008ca74a05859e14ba346"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/package.mjs",
+      "oldHash": "367f445a2eab166e926514c4ee8869570ea566c190c552d5ef2b5d3c2f61348b",
+      "newHash": "8eb677122c43f0f8dc09720cc3364d50e851003fc9a2a6c682c421e498a89b31"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/LICENSE",
+      "oldHash": null,
+      "newHash": "a6db8096b2707bc0102d256917d4d33f298ba36d8c3f25de067a2b5bb379db27"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/README.md",
+      "oldHash": null,
+      "newHash": "2c963a2f4d040fb3d18202bb3f23cf0e33f15fdbb16f0f07c5c4c9fc265b4b32"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Agent.md",
+      "oldHash": null,
+      "newHash": "e77f5a46d93d27a70c33f3533e4fffb9d3ff75d002e314c29998cfc718c02156"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/BalancedPool.md",
+      "oldHash": null,
+      "newHash": "eadeec57b37da6bcb7bdff5127269149318380ed037b3a2137781c2945b88a69"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/CacheStorage.md",
+      "oldHash": null,
+      "newHash": "37e458d8baff658682379bf4196a9085fd7bae0aa76560a23896a9f5d447e498"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/CacheStore.md",
+      "oldHash": null,
+      "newHash": "c2df38ab5a312e7b7b0cdb941a0fd34b51612b3d13f2d70b89a6bcb47366387a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Client.md",
+      "oldHash": null,
+      "newHash": "a540c06c59d01c2014fa38fa893ae2d6a5022cd792f0f3d59227b0fec3dc1bdd"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/ClientStats.md",
+      "oldHash": null,
+      "newHash": "a568b57ed687a80393f3059937e941f9f5368772c7829e4c9685a2fa745c106e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Connector.md",
+      "oldHash": null,
+      "newHash": "c363feda8c4bb65f09379df7f2d0164f88336a2487b3043876c275b2d04a01ed"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/ContentType.md",
+      "oldHash": null,
+      "newHash": "b7418622c803d210b744fa1e705505a1c62829ec95b557fbc3071cc68b4fdcbd"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Cookies.md",
+      "oldHash": null,
+      "newHash": "5510c1cac6d2b79b81ce74a664b98012099013ff160b294e1b9caf33b23e8e4b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Debug.md",
+      "oldHash": null,
+      "newHash": "e2097e6df91877e52b575b926ff3d43962aa778e6eca34f748a0c63f918dcff2"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/DiagnosticsChannel.md",
+      "oldHash": null,
+      "newHash": "770d93dfd812f62037c29059ff91753a4aab0b97d865a8009a3c7d3b278d5179"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Dispatcher.md",
+      "oldHash": null,
+      "newHash": "0ab6e9a16ac733bb2e2c6021d68cc6eaedda6b59155d68af734d83d6d0e3cb3d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/EnvHttpProxyAgent.md",
+      "oldHash": null,
+      "newHash": "a0eb830a46a3b42bc813462c6998cb6c568d918f1438401c11a96b94529293f2"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Errors.md",
+      "oldHash": null,
+      "newHash": "2ce5a5d33c4960b94f441e62bc313fd30c8427afcf87c5fcd057c78d35eec9ea"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/EventSource.md",
+      "oldHash": null,
+      "newHash": "4f6abf7c96d473ffb15fe5224df7bc994fe03ae22b5903dbf8bd8f6fee6a9ab6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Fetch.md",
+      "oldHash": null,
+      "newHash": "0b861a7836a78316ce7415533735c4319e3b882cc982ef7d2735d29d6a2a3c2a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/GlobalInstallation.md",
+      "oldHash": null,
+      "newHash": "b2f8d71146d8fe804a489ef9e4f780214ba816f6f45f19ca94bde732266e89b5"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/H2CClient.md",
+      "oldHash": null,
+      "newHash": "bf1f6bf6a0073158e748693a6ae527053c2e85ec8e87d2411c525fdd1aa82d39"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/MockAgent.md",
+      "oldHash": null,
+      "newHash": "2410634ae6cae9b353d55144c93326d3317df7a05f03d55cbda8c7a81a0cbfb6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/MockCallHistory.md",
+      "oldHash": null,
+      "newHash": "b059d5b2a953cd8d44237f95f2927e47fcd475177599832716f2534705daa02d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/MockCallHistoryLog.md",
+      "oldHash": null,
+      "newHash": "3fe81715f164747a9156904a704ae3b5c15b25d9c8415df77a4400621b8c1320"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/MockClient.md",
+      "oldHash": null,
+      "newHash": "ef57c87aab22d39f1549cd8bd178317f6a1188f57b4b891356c4c6c0e058a5db"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/MockErrors.md",
+      "oldHash": null,
+      "newHash": "862b81346856a128b577cb7825500cb5b09095203f97f6e01dcb3a583b50947b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/MockPool.md",
+      "oldHash": null,
+      "newHash": "eadb07b70b40f1d9ccad70a878787f2c99e1bb83d4f06155456e4ea059c8894a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Pool.md",
+      "oldHash": null,
+      "newHash": "4919c5265b241d0067bc8068c92cb2e30793c3bdb7139f1323a4e116d2b611e5"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/PoolStats.md",
+      "oldHash": null,
+      "newHash": "eae89aa388a6cb3b0a96c30736f6f5e6f4df81eaea706485b7fad5ea3f7253f2"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/ProxyAgent.md",
+      "oldHash": null,
+      "newHash": "daff25867159019e49bf0c3a60624fabad94e92bae84c1224329f02632890cd9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/RedirectHandler.md",
+      "oldHash": null,
+      "newHash": "0bf06eb4c1895f4eda3efcc6ad59d8a3f354c1a54832e3e2120e052e430deac3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/RetryAgent.md",
+      "oldHash": null,
+      "newHash": "4b2b419ff9d278e8c1a20a418b9babcff971c9c948556e04e6e8d6e33e3deb91"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/RetryHandler.md",
+      "oldHash": null,
+      "newHash": "390712a1791393ba727c464cd0e7913975e77c9ed25dfd99b33930574e52c0a6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/RoundRobinPool.md",
+      "oldHash": null,
+      "newHash": "1b796f65d4126bd75d3fdc1765f077759da1bf9dd9fbec637e559a25f22a6e7d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/SnapshotAgent.md",
+      "oldHash": null,
+      "newHash": "83ae2c7e9df88c9f951df5f4f37ceddfcdcff7d31d131a8aa005843d324fec86"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Socks5ProxyAgent.md",
+      "oldHash": null,
+      "newHash": "c335f2224671d055841cb4b63563ba5bcc35dabc2ca76b2489d6a6da17e48f47"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/Util.md",
+      "oldHash": null,
+      "newHash": "c61bedd14de49978130b2a390bde9e83b79c7ed34a0decdb4a3c4eec1f925fb9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/WebSocket.md",
+      "oldHash": null,
+      "newHash": "9c4e9e208c803e0d893392609f5d2156a8b1216e792ea3dbe4b2ac98d1a2fc69"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/api/api-lifecycle.md",
+      "oldHash": null,
+      "newHash": "315bef8bb747c29b2690ffcbc79713df854b5e43a4616de93ae5f842c9f75621"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/best-practices/client-certificate.md",
+      "oldHash": null,
+      "newHash": "f04bc4291917e454069c88f1a81326f0935a205930034930c01096b5d37e566b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/best-practices/crawling.md",
+      "oldHash": null,
+      "newHash": "e29aef651867d2c66928d2da7401b81fb69939ac88f9b5374091f73b70ef62d2"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/best-practices/mocking-request.md",
+      "oldHash": null,
+      "newHash": "71bd60cfc22c379fa679704bfe27622e4b316b43de0b9b190a7784ba31b4989f"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/best-practices/proxy.md",
+      "oldHash": null,
+      "newHash": "e37e207295e581d9984557f485316060785bc0aaae4b94c02fcd46356bdb1591"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/best-practices/undici-vs-builtin-fetch.md",
+      "oldHash": null,
+      "newHash": "255b781d22e486e30fc32f8d893c1a4d292f6a6b98eb74d6343781e3e803cfa8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/docs/docs/best-practices/writing-tests.md",
+      "oldHash": null,
+      "newHash": "4c0d5a920208aa6395f58134077b40a5e201c645b28007276743b53e82696d91"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/index-fetch.js",
+      "oldHash": null,
+      "newHash": "155df504376841f714239ffbb43c7fbbfe3532c44aafe19ca7fd1615a18d5f1d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/index.d.ts",
+      "oldHash": null,
+      "newHash": "b3fb72492a07a76f7bfa29ecadd029eea081df11512e4dfe6f930a5a9cb1fb75"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/index.js",
+      "oldHash": null,
+      "newHash": "dca95e2bbf4bae18325a4e5d9c887427a8a63a1345ed92a46f1067360dec0ffa"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/abort-signal.js",
+      "oldHash": null,
+      "newHash": "46ac3527affb69036384c8baec5bf34ba567adb336921c7a62e8f471bb827f37"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/api-connect.js",
+      "oldHash": null,
+      "newHash": "d8ca4a5cbff898afb26573cca18b9aab2928d8113d5d8897b5fc193ef343fcf0"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/api-pipeline.js",
+      "oldHash": null,
+      "newHash": "46265a16bb621e8723a98da72824cb92a43cb27b912f336919e5c73049710772"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/api-request.js",
+      "oldHash": null,
+      "newHash": "93474854999d0a80815ed132640d50e3ed2cbc74b3bc9ec84704b923c7ca6a35"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/api-stream.js",
+      "oldHash": null,
+      "newHash": "9da4d699b6746216898b44a1beabb6e65de8c6aab825df51890da563f42d8aff"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/api-upgrade.js",
+      "oldHash": null,
+      "newHash": "86659d0e904788981bd2d3de9a391f35630099ba21b8b898619eac62c514b429"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/index.js",
+      "oldHash": null,
+      "newHash": "a7b4b74ea6b81b2401f8659c138df54fd3f2c45450741682c026abb4cf133096"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/api/readable.js",
+      "oldHash": null,
+      "newHash": "ee3cbcc13aad446dad1c2fe3105f21fb2c7761776c2c6634980a760c4cdd4669"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/cache/memory-cache-store.js",
+      "oldHash": null,
+      "newHash": "531953d14bf94d58df4997b73c03683854ad206fd62585ba54261b28292fdec7"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/cache/sqlite-cache-store.js",
+      "oldHash": null,
+      "newHash": "cac3e06815ba09fd686755476b6dd683905fb630c3e39df49c78238fa26db3b6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/connect.js",
+      "oldHash": null,
+      "newHash": "8835a2e706fcee60c8fd0bb46ff5482690e762a4b57875334eaf0b6e55399823"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/constants.js",
+      "oldHash": null,
+      "newHash": "feeb46180cfa4623da75627c9c3a5d5f38945644c30b7afe37415437ed71bca2"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/diagnostics.js",
+      "oldHash": null,
+      "newHash": "907ce2d66cede91b860a1c1318ebdf0d9577c0f747a3b35510162c63489f28bc"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/errors.js",
+      "oldHash": null,
+      "newHash": "c69b7a060b711e4cd97f3ff05eb18cf4ec7a08ce5d618c54a567baf6f1a47481"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/request.js",
+      "oldHash": null,
+      "newHash": "3352c955f070baa991c4c7bd648c63732b120ebddd10cae01b2ee848cd172bbb"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/socks5-client.js",
+      "oldHash": null,
+      "newHash": "5ee3d782919a74b4c0fc0aac0da1d39abd759f7c017f7b3d4b932ccafddd1be7"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/socks5-utils.js",
+      "oldHash": null,
+      "newHash": "830467b148e86786f41c356667625721dfd9bef27fd85ada0fb498bda9a19016"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/symbols.js",
+      "oldHash": null,
+      "newHash": "c627771d811b9b9014e837934bd2e4fdb5f5b1e9313fe129a1d6268c6b3cf707"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/tree.js",
+      "oldHash": null,
+      "newHash": "c9fc9938718f33d77a6ed1abac5e564531ac9f9436cde2867243d50cd6c0b4e8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/core/util.js",
+      "oldHash": null,
+      "newHash": "a53177756a60479215b577b895867e92e3ce0d61ab479fb642cd4420e84cc165"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/agent.js",
+      "oldHash": null,
+      "newHash": "1b05aeaae1a23bcde54c200211d6292991b30f3a8c39c2dfca3efaa439caf5d7"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/balanced-pool.js",
+      "oldHash": null,
+      "newHash": "90989fe532a02854d88c5f4af9c8bbec33f24d2318d3b4534f1128e273e5463d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/client-h1.js",
+      "oldHash": null,
+      "newHash": "fa69241601d9e1444898b9e2923e7a2064294f8b13a90ab058d886c11c6d256e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/client-h2.js",
+      "oldHash": null,
+      "newHash": "e992a732c30c582676caf23193fb58097b4233ab328d0a77b7ff2c0338ad1eca"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/client.js",
+      "oldHash": null,
+      "newHash": "84205dc96cb9bf7432c4b3e80f0babaa11d6f4faf24ead3e7d9660e9d8fee0b3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/dispatcher-base.js",
+      "oldHash": null,
+      "newHash": "a7df3add59b3cb9297373fba95ccd41851474b00c0f60e4b8ccc1394fe350d19"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/dispatcher.js",
+      "oldHash": null,
+      "newHash": "39907c123fd59f712111e719ba43426525c17ba0fcd279f6e892f829264dda0a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/env-http-proxy-agent.js",
+      "oldHash": null,
+      "newHash": "1f572709bc4f0e0469579c37192c0d6376c1b4875b7667b80513706fbc13b41a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/fixed-queue.js",
+      "oldHash": null,
+      "newHash": "5d72c9de20e74d2437afc97f9f9e8e202d79983a77d2a598ac9ab1e0a8d0052d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/h2c-client.js",
+      "oldHash": null,
+      "newHash": "80188685d9c10d6904d8857668e835dbe16515b17b7e7bfa02b043f67be7afa4"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/pool-base.js",
+      "oldHash": null,
+      "newHash": "aa257609b208a90e73e110ac3b7c75b5599b310bb2b9bd15464c36216a94613a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/pool.js",
+      "oldHash": null,
+      "newHash": "1c8056214b32004c8e38cdda2bbd67c4edd1aec1fed0a3681aad7b22d35273a1"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/proxy-agent.js",
+      "oldHash": null,
+      "newHash": "40f18bbc8b5c9512d4bdbf7bde47a787cbefe98d19f40d5703f5286a67bf5f53"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/retry-agent.js",
+      "oldHash": null,
+      "newHash": "465e9429750441852cb0ed19bd669dbe2eca2b531ce6966040551a9b6550ae30"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/round-robin-pool.js",
+      "oldHash": null,
+      "newHash": "af12924b9556033697f61a2671318fbde98c84536e991bd0700c076e8467fc92"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/dispatcher/socks5-proxy-agent.js",
+      "oldHash": null,
+      "newHash": "9a7a9cb6cbbaccc867a6c36541ff95f89fa3863dcb5548eb46c449b2333174b3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/encoding/index.js",
+      "oldHash": null,
+      "newHash": "7ea8fe81ff3c9d054f3ef8bb67bfe260b2e930c51d5d5563ca2ef19a218a5909"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/global.js",
+      "oldHash": null,
+      "newHash": "d8e78f218c7bbefdec657f3ae81e31a7f811df511fe951e3a35e3dac1e368e21"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/cache-handler.js",
+      "oldHash": null,
+      "newHash": "70cca7b93d3686c5e40fb0718c2c3c5b0c00972d09db7f52c533ca03830a9ce1"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/cache-revalidation-handler.js",
+      "oldHash": null,
+      "newHash": "85a375bc55f22471cfa3d900d6f901a004a580fc68ca9aeb9c2885f330c7b01e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/decorator-handler.js",
+      "oldHash": null,
+      "newHash": "a3c2f832c5e58c7f8e33388c7b1a10880906caca9a077492b73d7f8a1c6963e3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/deduplication-handler.js",
+      "oldHash": null,
+      "newHash": "37b403ac8c5ae1b5dadc7117e925e7844cb50ec4239043559d897806282277c3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/redirect-handler.js",
+      "oldHash": null,
+      "newHash": "da8da5ea976b2273d21f13d55ce1f020418f3abb98773a6b94fbe457e1eb5d6c"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/retry-handler.js",
+      "oldHash": null,
+      "newHash": "7ca077f088a84e4e4c1bb3bdc6524808b90e4aa21ec36382a03cb14080f727a8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/unwrap-handler.js",
+      "oldHash": null,
+      "newHash": "618c664b488381f63ea43b8b3b1d26c3ee3a0272259941ab79410c0d6d8eaae0"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/handler/wrap-handler.js",
+      "oldHash": null,
+      "newHash": "d8a2903c97106d27840633053f007e916744f4091c6ebf0756b368f147ae13a8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/cache.js",
+      "oldHash": null,
+      "newHash": "cb7c1a724c51b1a1834a9e8fe2e6f1bd84312e55a4e7c7099b941085b2d6ff62"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/decompress.js",
+      "oldHash": null,
+      "newHash": "551e0d10a87cad93332e61b73d3866c4b43efb1fb2ac75c779a395e853a898df"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/deduplicate.js",
+      "oldHash": null,
+      "newHash": "ff08e37261e35221586120cdc85ce08981064e7b1726e1089c116c70bfe20627"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/dns.js",
+      "oldHash": null,
+      "newHash": "fd57881ded93891ffc1590c4bfbd906bae084b02f3e9c86f52118df1cec540a9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/dump.js",
+      "oldHash": null,
+      "newHash": "30d035bae71552ef4cd19b264728482abb9a7b5f82af47ffb9ad81e2541ea4bc"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/redirect.js",
+      "oldHash": null,
+      "newHash": "07e2ba6095945d7d374dfd6dd17450676f55cbd088400c19b9a1bf8a0010599e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/response-error.js",
+      "oldHash": null,
+      "newHash": "9cb06334d1c1f791784005789cc5afb9daea396c7f5e0c962af90538b4843e10"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/interceptor/retry.js",
+      "oldHash": null,
+      "newHash": "488cf270ae143cc13a6ecf82ba523314fdbb17fd9ee08677c4488d4410f047c3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/.gitkeep",
+      "oldHash": null,
+      "newHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/constants.d.ts",
+      "oldHash": null,
+      "newHash": "9a9b4b9f5e08bd6c88bb2ad56007441e20b34b103dad02883d84e6e7c5c04e03"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/constants.js",
+      "oldHash": null,
+      "newHash": "90c4858736745781548d464e51224ce9353162cd87bc8142be803bc2937184ba"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/llhttp-wasm.js",
+      "oldHash": null,
+      "newHash": "344f7ae80c983694372d9234584a1261ef5492ab219d6e573e933f5d1c715b00"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/llhttp_simd-wasm.js",
+      "oldHash": null,
+      "newHash": "52c16227482700834512f2c2257eb44652f39b11f868600562274f476025e4bd"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/utils.d.ts",
+      "oldHash": null,
+      "newHash": "c79b06274bc1e38c70aa5259a1279290afd5b914fc01438efb0ea54a617a9ffb"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/llhttp/utils.js",
+      "oldHash": null,
+      "newHash": "e21afcaf44b0fec37acfff86945e4526541e990ac0efd2f1efa2ea9f2b259b6b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-agent.js",
+      "oldHash": null,
+      "newHash": "f612291584fede3068afa88c7bbf0821248d4809925f6dcac32bd7d0fdbd3274"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-call-history.js",
+      "oldHash": null,
+      "newHash": "da183e702da0f0066ea534681118d65b5ac97415662df6b74f978ae831b1674b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-client.js",
+      "oldHash": null,
+      "newHash": "108d91ef5f916d094a78d92a4d81f2cd4bfe20708ae6307d8197de81d826ce5c"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-errors.js",
+      "oldHash": null,
+      "newHash": "b5bd959401de99d8129ba272dddfdb62708247f684a8186aa4d858e2780d64ee"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-interceptor.js",
+      "oldHash": null,
+      "newHash": "f2ac4fe03eb49b31afb0f4c8636e4b63c5ca2f17c8ac34cb613028ab08f072ea"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-pool.js",
+      "oldHash": null,
+      "newHash": "763d77ce68f6315f384b5e897b87ea2e2034b69d29e2d6d2da37ae8a0679197c"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-symbols.js",
+      "oldHash": null,
+      "newHash": "b90b7dc21d5a18c2e5255b0916bf75e880eef32ca45ab312a581547041638e20"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/mock-utils.js",
+      "oldHash": null,
+      "newHash": "4720ec7096039fb8f0044e8dd3b22d4eaebd8e7ce61f814908b92bac406f6444"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/pending-interceptors-formatter.js",
+      "oldHash": null,
+      "newHash": "9d3737f40ba601fd7a9c6dd28a328e6797686ff08da712dcd0a0f011d5639f8d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/snapshot-agent.js",
+      "oldHash": null,
+      "newHash": "54f61cfe219a66dc2b17d0535c06429093105f321d9a60bf4b439225c028f6c1"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/snapshot-recorder.js",
+      "oldHash": null,
+      "newHash": "9bf63c8b207b6f6e7fe4400b32d8322cfc185735d6ecfbd87a2691a8fba82922"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/mock/snapshot-utils.js",
+      "oldHash": null,
+      "newHash": "0971c847787d90abcb0bf4e1d76161a2f82651169cc8e637b26875fecab666f8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/util/cache.js",
+      "oldHash": null,
+      "newHash": "3c4dc94325aa355f99d20f3ea878c13299dbc73986f1caaaf8d0d3cd8dffce5d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/util/date.js",
+      "oldHash": null,
+      "newHash": "153ad641cbdb4cc5acacc8b50b79684166e29b838192bf98b2d32e2871ff7522"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/util/promise.js",
+      "oldHash": null,
+      "newHash": "123edb8cf7eb03156beb04a3482c5cb86bddf3f8348b857edb263cae38bc482b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/util/runtime-features.js",
+      "oldHash": null,
+      "newHash": "eda04942c74b6c80341e3df2112968bcd1810271aab9215261306811c3ee60a4"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/util/stats.js",
+      "oldHash": null,
+      "newHash": "d62ae00eaf72f33cc990a3a835d70b9c7d2f10d47acffa0e631ea82145b7c34e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/util/timers.js",
+      "oldHash": null,
+      "newHash": "4e5ef13ce9e1ca6de8a656b95e2425602bacbd6010af1da3ce573f8d8f573119"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cache/cache.js",
+      "oldHash": null,
+      "newHash": "60015d174411d4094837ce8f1d44a4ad0b4946c26a49d28e5d95f6d840ac4f82"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cache/cachestorage.js",
+      "oldHash": null,
+      "newHash": "f9cccd19fbc185edac7624e542b0864412d71c2083177f3c6902b34d2b07d461"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cache/util.js",
+      "oldHash": null,
+      "newHash": "638d5c2424a730e6d2400ac518765b3fc9b50e2b3816b65fb7b46f93c66a5930"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cookies/constants.js",
+      "oldHash": null,
+      "newHash": "85a24ae49eb5954e15363049bbc68967f01aae7260246daa3f49ad375429acb4"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cookies/index.js",
+      "oldHash": null,
+      "newHash": "a50afdf4011c253e6e64b231a9914e7c516ce0352be9fe40ec60651fb2d7c4e8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cookies/parse.js",
+      "oldHash": null,
+      "newHash": "e944335c29c178fb565d330b6b2ff51ada12e36c408a5b42b886cb89d7f56b13"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/cookies/util.js",
+      "oldHash": null,
+      "newHash": "a753d4774e7f75a01cf846c00ab6d14f1438698502344883e1ffa83aceb74769"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/eventsource/eventsource-stream.js",
+      "oldHash": null,
+      "newHash": "975c5c6430fe441579cfd1f684684409ec53a616f04b1c5bf0424f7c73e1864f"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/eventsource/eventsource.js",
+      "oldHash": null,
+      "newHash": "b93ba8f94f140fec3f9b8d4a923a075c58a87c948576c41d838b4bb89f0301fc"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/eventsource/util.js",
+      "oldHash": null,
+      "newHash": "40be55b091614715abc90794a686016e3139273f8dafcc6cac1bb7afa7db4643"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/LICENSE",
+      "oldHash": null,
+      "newHash": "a21d6c8d3fc631198b97e57584697f7f9c37805c71c6cf9a12e4442b40394b88"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/body.js",
+      "oldHash": null,
+      "newHash": "fd7e1fe68e263f3296ecf0f4f799b3099717ecd8c9626db9bab73b7a4db7eb7d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/constants.js",
+      "oldHash": null,
+      "newHash": "030e21057cdd1758db16eb0e86806be93b7616e5f46d9a93b90a9a8e99672423"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/data-url.js",
+      "oldHash": null,
+      "newHash": "acd2ae8c00e035a8b3c816c8a5f75eebfe12ab7db61158488cc350f92785fcd4"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/formdata-parser.js",
+      "oldHash": null,
+      "newHash": "d5d048201a040865a4376e423fd78b102ad164cb51ad7b0ade56897c7318bd6b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/formdata.js",
+      "oldHash": null,
+      "newHash": "957184704f2ef215849411f702bdb9bcff1f42d81dfc0f69b16ff62670bf936a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/global.js",
+      "oldHash": null,
+      "newHash": "6b38813b82ec8d5002009640515d35f83ab96d4f8e0066d71fae89324079a289"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/headers.js",
+      "oldHash": null,
+      "newHash": "0ca9bcb1cb174a19311b27f55b954d53e5adc06d6aa935c42df96c9a4453d0a7"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/index.js",
+      "oldHash": null,
+      "newHash": "2cf8903bb2c17d83794edbd800adac4e8077cf9a21d315acf812d2f614e24bd6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/request.js",
+      "oldHash": null,
+      "newHash": "b4b36815f3c0d082ab8f413a27085f0b197f8cdf04880db15bf7d1f0084d780a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/response.js",
+      "oldHash": null,
+      "newHash": "0c376c359711217831d095d8139fb62b290c77dca1fe93e708d1b081074812fc"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/fetch/util.js",
+      "oldHash": null,
+      "newHash": "765b5cfb803401dbb591b1e28d22fd6a9fd6db4c0bf2ec5f86dc89e39429e016"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/infra/index.js",
+      "oldHash": null,
+      "newHash": "6be7dbc932b91c3eb012bd404c7608fed97861646162f76d9448b173e5b0091c"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/subresource-integrity/Readme.md",
+      "oldHash": null,
+      "newHash": "0d3da607c6e6d7420679c47e869bdc926266cc94d39fb243d9cd3f9a217986f8"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/subresource-integrity/subresource-integrity.js",
+      "oldHash": null,
+      "newHash": "ac59fabbef7d6ad839d723ba3ed1690953d0849ad231970a8bfdfbc0df6d1ae9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/webidl/index.js",
+      "oldHash": null,
+      "newHash": "3242d1bfd31cac178a66dd4113da3dbf1d4e886439853be233f71922dd9853c0"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/connection.js",
+      "oldHash": null,
+      "newHash": "97657a119b4e6c47ac97c34752af8400ddb2584f3dea60b2ce51410f1b4e6def"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/constants.js",
+      "oldHash": null,
+      "newHash": "e7b6d0550a367ba9edfb68b14bd3fbe44fd3042faf76901567b8c3ffc2ccfa84"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/events.js",
+      "oldHash": null,
+      "newHash": "d88278a61f86bf66e3be1722d13a469e4af7bb8f767241f7f0aab104b92bc38b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/frame.js",
+      "oldHash": null,
+      "newHash": "d848070d5865bcec4e85d8b5785b6dd3ab4fbc388b28e3cfcad9805c1a83a789"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/permessage-deflate.js",
+      "oldHash": null,
+      "newHash": "da8d8dc29515bce2ba4def5c3f811f8644eeb5d4819bc521d5811fbbdda4afb7"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/receiver.js",
+      "oldHash": null,
+      "newHash": "49af2273aed723f96415a6685866dfcced1bb55fa016d87913880ea735e1703d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/sender.js",
+      "oldHash": null,
+      "newHash": "5c5e162f1252d9c91d5cd30ae59c722f1e1cd7df86f03bf45fe085915c2d72e9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/stream/websocketerror.js",
+      "oldHash": null,
+      "newHash": "41fafec8f19753c6718b024c95afec6e6407197250ffbe56d81549d715bb0bcc"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/stream/websocketstream.js",
+      "oldHash": null,
+      "newHash": "b059a716dc53fccde7443ed89567dfbcf0ffa019e41d5f71a09fe98e0e33430d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/util.js",
+      "oldHash": null,
+      "newHash": "bb4a7bd7f2bf57e45245e41e05cc8d0bdb55feabfd16bbaff7a381863ba5907f"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/lib/web/websocket/websocket.js",
+      "oldHash": null,
+      "newHash": "afdb5256fc5d0e8873fb4aca42b1787e15aca4ef39966ca255464c571e1edf2a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/package.json",
+      "oldHash": null,
+      "newHash": "0e62f63508558cd8bc44dbf61baee562907ff4bbd147bf837ded998c2bf62a28"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/scripts/strip-comments.js",
+      "oldHash": null,
+      "newHash": "72257817367403f268d17f35d61030ec57698063c14e15b7133ac28850d9c7b5"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/README.md",
+      "oldHash": null,
+      "newHash": "c8cced6ec588c55b07e35733258cb7d6b63e3426ee7490aa9267aab4bda0fb20"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/agent.d.ts",
+      "oldHash": null,
+      "newHash": "7befaf0e76b5671be1d47b77fcc65f2b0aad91cc26529df1904f4a7c46d216e9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/api.d.ts",
+      "oldHash": null,
+      "newHash": "8aee8b6d4f9f62cf3776cda1305fb18763e2aade7e13cea5bbe699112df85214"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/balanced-pool.d.ts",
+      "oldHash": null,
+      "newHash": "4d327f7d72ad0918275cea3eee49a6a8dc8114ae1d5b7f3f5d0774de75f7439a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/cache-interceptor.d.ts",
+      "oldHash": null,
+      "newHash": "98498b101803bb3dde9f76a56e65c14b75db1cc8bec5f4db72be541570f74fc5"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/cache.d.ts",
+      "oldHash": null,
+      "newHash": "c46e079fe54c76f95c67fb89081b3e399da2c7d109e7dca8e4b58d83e332e605"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/client-stats.d.ts",
+      "oldHash": null,
+      "newHash": "68834d631c8838c715f225509cfc3927913b9cc7a4870460b5b60c8dbdb99baf"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/client.d.ts",
+      "oldHash": null,
+      "newHash": "bf67c9351f30264c3e720afc837bd7dd6276eeddcf4aa2bf36a9f10de3a1ef2c"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/connector.d.ts",
+      "oldHash": null,
+      "newHash": "14e9acf826baba0ef4b5665704084896e7bcc06f65a9ab13af7e93d27d6b7069"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/content-type.d.ts",
+      "oldHash": null,
+      "newHash": "2e85db9e6fd73cfa3d7f28e0ab6b55417ea18931423bd47b409a96e4a169e8e6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/cookies.d.ts",
+      "oldHash": null,
+      "newHash": "59af37caec41ecf7b2e76059c9672a49e682c1a2aa6f9d7dc78878f53aa284d6"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/diagnostics-channel.d.ts",
+      "oldHash": null,
+      "newHash": "12950411eeab8563b349cb7959543d92d8d02c289ed893d78499a19becb5a8cc"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/dispatcher.d.ts",
+      "oldHash": null,
+      "newHash": "171b96f31e3fbdb55fe570f2a29a5ee47223fdca95a84ea2142e4cc4feaf9dfe"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/env-http-proxy-agent.d.ts",
+      "oldHash": null,
+      "newHash": "80aae6afc67faa5ac0b32b5b8bc8cc9f7fa299cff15cf09cc2e11fd28c6ae29e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/errors.d.ts",
+      "oldHash": null,
+      "newHash": "eec76bf6b9346f3f95fa402621b889489e96930e72295b0369022f332e9b4a6a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/eventsource.d.ts",
+      "oldHash": null,
+      "newHash": "adf27937dba6af9f08a68c5b1d3fce0ca7d4b960c57e6d6c844e7d1a8e53adae"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/fetch.d.ts",
+      "oldHash": null,
+      "newHash": "3ac40516c33b87f751f7507346933081a26cdb8a3e11a6b3aa07d23f803c85db"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/formdata.d.ts",
+      "oldHash": null,
+      "newHash": "4ac80270b6787c2b77a2d98a9714a71f4363c24b5890314f3ba582c94bfbe779"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/global-dispatcher.d.ts",
+      "oldHash": null,
+      "newHash": "ea6bc8de8b59f90a7a3960005fd01988f98fd0784e14bc6922dde2e93305ec7d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/global-origin.d.ts",
+      "oldHash": null,
+      "newHash": "36107995674b29284a115e21a0618c4c2751b32a8766dd4cb3ba740308b16d59"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/h2c-client.d.ts",
+      "oldHash": null,
+      "newHash": "e85d7f8068f6a26710bff0cc8c0fc5e47f71089c3780fbede05857331d2ddec9"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/handlers.d.ts",
+      "oldHash": null,
+      "newHash": "d243db6b25788f439e7e2f03c05688e92f46764351673bb0e7b2f3631232e186"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/header.d.ts",
+      "oldHash": null,
+      "newHash": "23cd712e2ce083d68afe69224587438e5914b457b8acf87073c22494d706a3d0"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/index.d.ts",
+      "oldHash": null,
+      "newHash": "114f493b30f364255290472111b5a4791d5902c308645670cd0401429cbc6930"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/interceptors.d.ts",
+      "oldHash": null,
+      "newHash": "1d5e86e300d9fdeb1e3e88aa4f24d780f045195fcb2dbc24b68bf49c9f816c5e"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/mock-agent.d.ts",
+      "oldHash": null,
+      "newHash": "9666f2f84b985b62400d2e5ab0adae9ff44de9b2a34803c2c5bd3c8325b17dc0"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/mock-call-history.d.ts",
+      "oldHash": null,
+      "newHash": "0b6e25234b4eec6ed96ab138d96eb70b135690d7dd01f3dd8a8ab291c35a683a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/mock-client.d.ts",
+      "oldHash": null,
+      "newHash": "40cd35c95e9cf22cfa5bd84e96408b6fcbca55295f4ff822390abb11afbc3dca"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/mock-errors.d.ts",
+      "oldHash": null,
+      "newHash": "40b463c6766ca1b689bfcc46d26b5e295954f32ad43e37ee6953c0a677e4ae2b"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/mock-interceptor.d.ts",
+      "oldHash": null,
+      "newHash": "0a60a292b89ca7218b8616f78e5bbd1c96b87e048849469cccb4355e98af959a"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/mock-pool.d.ts",
+      "oldHash": null,
+      "newHash": "b1616b8959bf557feb16369c6124a97a0e74ed6f49d1df73bb4b9ddf68acf3f3"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/patch.d.ts",
+      "oldHash": null,
+      "newHash": "addf417b9eb3f938fddf8d81e96393a165e4be0d4a8b6402292f9c634b1cb00d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/pool-stats.d.ts",
+      "oldHash": null,
+      "newHash": "914a0ae30d96d71915fc519ccb4efbf2b62c0ddfb3a3fc6129151076bc01dc60"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/pool.d.ts",
+      "oldHash": null,
+      "newHash": "9c32412007b5662fd34a8eb04292fb5314ec370d7016d1c2fb8aa193c807fe22"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/proxy-agent.d.ts",
+      "oldHash": null,
+      "newHash": "249b9cab7f5d628b71308c7d9bb0a808b50b091e640ba3ed6e2d0516f4a8d91d"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/readable.d.ts",
+      "oldHash": null,
+      "newHash": "156a859e21ef3244d13afeeba4e49760a6afa035c149dda52f0c45ea8903b338"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/retry-agent.d.ts",
+      "oldHash": null,
+      "newHash": "499e5b055a5aba1e1998f7311a6c441a369831c70905cc565ceac93c28083d53"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/retry-handler.d.ts",
+      "oldHash": null,
+      "newHash": "f473cd2288991ff3221165dcf73cd5d24da30391f87e85b3dd4d0450c787a391"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/round-robin-pool.d.ts",
+      "oldHash": null,
+      "newHash": "6ebe8ebb8659aaa9d1acbf3710d7dae3e923e97610238b9511c25dc39023a166"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/snapshot-agent.d.ts",
+      "oldHash": null,
+      "newHash": "5b03a034c72146b61573aab280f295b015b9168470f2df05f6080a2122f9b4df"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/socks5-proxy-agent.d.ts",
+      "oldHash": null,
+      "newHash": "d33ce35e3f9cfcc1d94eca415bdd3bde94d5b153ffdd33e6c4455c029986c630"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/util.d.ts",
+      "oldHash": null,
+      "newHash": "5d0375ca7310efb77e3ef18d068d53784faf62705e0ad04569597ae0e755c401"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/utility.d.ts",
+      "oldHash": null,
+      "newHash": "cdcf9ea426ad970f96ac930cd176d5c69c6c24eebd9fc580e1572d6c6a88f62c"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/webidl.d.ts",
+      "oldHash": null,
+      "newHash": "091907b3f314415dc5827fd7e846e38d2c52b83b8f18f43e86b3c155917368a4"
+    },
+    {
+      "path": "apps/ai-player/node_modules/undici/types/websocket.d.ts",
+      "oldHash": null,
+      "newHash": "436d7b4543b340b0f3eef4310d524242e41369b9652aa9c70428767c4dcac455"
+    },
+    {
+      "path": "apps/ai-player/package-lock.json",
+      "oldHash": null,
+      "newHash": "fef3097035ffaa4ab9ac8fc8d9159724b16839c8f424c3bcb457c7879bf24f25"
+    },
+    {
+      "path": "apps/ai-player/package.json",
+      "oldHash": "b18daa74e9c0702091b8e1952213144c8846266effa8887b9db518eb184d1eba",
+      "newHash": "c032c0beb332d617315de29115cfe4c13d76da474ea1ccb16b5e96729786e858"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-trial-fixture.mjs",
+      "oldHash": "7be9d80cb51e445d679c031df8b8828a2ae1996133adeafc16c785f00adf9595",
+      "newHash": "f3669ef0f7ad2ea84fcd8ecc8b5aa29855f7737bf81f71207f4bcb24bf92b3fd"
+    },
+    {
+      "path": "apps/ai-player/scripts/native-resource-input.mjs",
+      "oldHash": "fc22debb68e3b2f50f64cb05f75d0db53624fd7e7a9f403805eb3f035079fe63",
+      "newHash": "1c2390a4c49ffd6d713cf5fea528a38b857a88d2c8328e95a22b1379ba0c6af4"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-model-companion-acceptance.mjs",
+      "oldHash": "c1944bd45667511d03cab243c63a6b1b14585832e0175f55ee3413a8f3f388f2",
+      "newHash": "75739a1932945cb67ad8a2ec333e275377b1761fd6b5267fb7b55377d506d372"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-native-experience-fixture.mjs",
+      "oldHash": "059f076584c281f545bca147083ecc3d9620bd64079ef355aa4d4296eabc1bf1",
+      "newHash": "5e2b6d1ec0a32ec9ee73a8bdd3fa6e4441edb196e902a74b038a218f7ed4362a"
+    },
+    {
+      "path": "apps/ai-player/scripts/trial-actor-fixture.mjs",
+      "oldHash": "64a0e972a880bbf5cc9fa9e30b384fc6595fd2c9f6ac347e1af50b43d6ccc088",
+      "newHash": "2351f5ce60bbd6b33ec7eaef94af29181975ac42218b923496653fbb1c4c4c06"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "oldHash": "e7d00fe6e56942b0d480f1c49d168bb52c658d661545d8fcc75486bf4d6ae8f0",
+      "newHash": "d514b1d864782f1bf09855d2c217340845ecb432c9afc5222763913c3388be25"
+    },
+    {
+      "path": "apps/ai-player/src/model-runtime-environment.mjs",
+      "oldHash": null,
+      "newHash": "d69eff6918b126deb3db1319671c7bdf50e424222421d57152107d3b1c6490ab"
+    },
+    {
+      "path": "apps/ai-player/src/model/companion-model-runtime.mjs",
+      "oldHash": "7975b18eed294bd6539924bc8a23a33d35bb3087c3ac82ee16217311f1affbc5",
+      "newHash": "1aa17c39816cec3eca4fa8879f4371a9abb8bcb315ea73e35f12fd3bc5faf40f"
+    },
+    {
+      "path": "apps/ai-player/src/model/http-transport.mjs",
+      "oldHash": null,
+      "newHash": "0926ec0a38f751a78d332cabfc9e24268e698be09b890a1b5b1d6ee98133820c"
+    },
+    {
+      "path": "apps/ai-player/src/model/openai-client.mjs",
+      "oldHash": "a3a5f3e0f7f90bcc47cd0700668770290a5bb0d94211c3aaad7a5a0d5e57ef74",
+      "newHash": "173bf1f23e7bf09085056c5f5b7a2a514a0ffcd3d15b25b79520aaa449665acf"
+    },
+    {
+      "path": "apps/ai-player/src/model/plan.mjs",
+      "oldHash": "d8edb9ec574cbad342d6e98d78285a71f4ac85b2b76358bfcc8c50b4c1a0f00e",
+      "newHash": "a7721c3d81bf38f00f16d8ce8c448780fc73f057c8b5797bd3afd125ba4b5378"
+    },
+    {
+      "path": "apps/ai-player/tests/model-http-transport.test.mjs",
+      "oldHash": null,
+      "newHash": "d38179aacbbef990dc568176a0e7088ad97121d5ac2dfe53391a92008a247b21"
+    },
+    {
+      "path": "apps/ai-player/tests/model-runtime-environment.test.mjs",
+      "oldHash": null,
+      "newHash": "3ad7cef8579efecd69780d02ae77815f192067e2240b1d6de664aee05f6eff49"
+    },
+    {
+      "path": "apps/ai-player/tests/model-runtime.test.mjs",
+      "oldHash": "70e1fb74be21e36e4e8e740cc871b7fc6413cd8134a1357b55ad7a688b31f50e",
+      "newHash": "4724818abeb2d8cc18940e0015e656248ccd0d05d5e613dc703a19f483a0e7a2"
+    },
+    {
+      "path": "apps/ai-player/tests/openai-client.test.mjs",
+      "oldHash": "dcab9df8461690588f4028e709f108df3012ab47e7932edcabb4cf0769d541de",
+      "newHash": "14fc769d783bedf8504de3b8b55eb1b1fbd6a2fadc9adb620c95b865012be1d9"
+    },
+    {
+      "path": "docs/ALO-OPENAI-20261103.zh-CN.md",
+      "oldHash": "d1568277ca1288f3937039a10d008b37af29c243826bbf726176e58f9bdf5736",
+      "newHash": "e317f03a41395c32f1c211fc83e1a07221058ac91c6f126a9f676fb4859a252a"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/01-native-teaching-v2.png",
+      "oldHash": null,
+      "newHash": "95186898183c2853258821fa64c03628d751b016673ccdc50346d57a1b7562c5"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/02-openai-ready-zero-calls.png",
+      "oldHash": null,
+      "newHash": "c27b5a593a688939fbc5ecee65ddb0f6dc0ec29548fdb2233a1bf3b001aea3f3"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/03-native-real-model-planning.png",
+      "oldHash": null,
+      "newHash": "e1d9f31163553c2825acb1e3637feb09df62e6941261fd892ba7b32a317f83a7"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/04-native-server-progress-1-of-2.png",
+      "oldHash": null,
+      "newHash": "9aeaad078fe1e2c882d974ac6b2c15cf5e18096adc8bdbfa7fb1c05af8577ef6"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/05-native-real-model-completed.png",
+      "oldHash": null,
+      "newHash": "3e0ab695ef7e43f489cacb34966ce00e8e4cd9fb2a1e5a0ff68bb2275e7d8a7c"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/06-restarted-same-memory-2-of-2-paused.png",
+      "oldHash": null,
+      "newHash": "214679e1ed5b1b6811e5b4e5fa4e89145f341645e60389667da8766210ad2de0"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/07-restarted-model-cites-real-kills.png",
+      "oldHash": null,
+      "newHash": "c908d0b0897168af6f68e0da0939426450647e00b387dd7bcf4704494237c1ed"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/08-restarted-follow-plan-real-memory.png",
+      "oldHash": null,
+      "newHash": "c908d0b0897168af6f68e0da0939426450647e00b387dd7bcf4704494237c1ed"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/09-real-request-id-and-usage-after-restart.png",
+      "oldHash": null,
+      "newHash": "4a5f5f09877d1f15e78dcdeabeadc3871d85bd4244450f55819ffddf1eab811f"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/10-before-next-follow-movement.png",
+      "oldHash": null,
+      "newHash": "fa7526e71303492c60575a4bf8207c49876bc3fdca7be303b169aa8fbe805459"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/11-restarted-next-adventure-following.png",
+      "oldHash": null,
+      "newHash": "4792ca11c11dfe0cfe483e48bbc1e392619fe00f58a38a3037cd64088b09a364"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/12-new-follow-goal-actual-movement.png",
+      "oldHash": null,
+      "newHash": "b8b7cc09961bb92754a813379334ff5ac6e74caa20aaeef109468496889e7931"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/README.md",
+      "oldHash": null,
+      "newHash": "1ec75a7da7e2dcf9261b1df1520324ce4c72d4b9d28f0e67dfa12f7a4e7692a6"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/live-verification.json",
+      "oldHash": null,
+      "newHash": "ddc8b6e44727ffabaa1cadcf436f12bf16fe45ff21eebd76fac6c7a959590436"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/native-live-model-events.json",
+      "oldHash": null,
+      "newHash": "25a7bf931668002aefe777cb258dd71b723fc0faa4a4cdcfa6af19c883ae5d92"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/real-network-openai.json",
+      "oldHash": null,
+      "newHash": "0331d12ca2c164b305175572689a559ced42564768dd62d527d87441fc4dec58"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/source-inputs.json",
+      "oldHash": null,
+      "newHash": "c42b038d64cbf7bc7c70a88ac6087ef32733ce9b3655e1c5923d029033d735b2"
+    },
+    {
+      "path": "docs/evidence/alo-openai-live-20261103/test-groups.json",
+      "oldHash": null,
+      "newHash": "0530f1ebb42c6003978545962125bc6e0e1cafcf3b031365304b83b063e635dd"
+    },
+    {
+      "path": "BUILD.json",
+      "oldHash": "1be539e23589b486871e53041220344a1e67c9dc81e582a9fd9231b3332f9810",
+      "newHash": "200379671ec62096590b63be15a15fe8e7a01f53a7dfbb401b1d41ad94b84c69"
+    }
+  ],
+  "credentialIncludedInPayload": false,
+  "existingPrivateSettingsPreserved": true,
+  "originalCharacterStateHash": "818e64d81a8e28867fef229891326809176e8d68fc7aec6e2119d9fbc992a931",
+  "liveModelApiValidated": true,
+  "originalGameStopped": false,
+  "finalizedAt": "2026-11-03T07:43:01.608Z",
+  "originalUserProcessesCheckedAlive": [
+    60840,
+    54924,
+    51520,
+    63464
+  ],
+  "bundledNodeVersion": "22.18.0",
+  "bundledModelTransport": "undici@7.30.1",
+  "coldBundleImportAndVaultReadPassed": true,
+  "coldCheckModelCalls": 0,
+  "keyConfiguredInCurrentUserVault": true,
+  "plaintextKeyIncludedInEvidenceOrPackage": false,
+  "systemProxyChanged": false,
+  "tlsValidationDisabled": false,
+  "keyRotationRecommendedBecauseUserPastedKeyInChat": true,
+  "acceptance": {
+    "actualOpenAIModelCalls": 3,
+    "model": "gpt-6-luna",
+    "serverConfirmedTwoKillsAndReturn": true,
+    "separateProcessRetainsIdentityHabitsAndProgress": true,
+    "nextModelCitesRealPastKills": true,
+    "subsequentFollowExecuted": true
+  }
+}

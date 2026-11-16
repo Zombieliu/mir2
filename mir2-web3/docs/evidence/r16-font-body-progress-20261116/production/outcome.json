@@ -1,0 +1,143 @@
+{
+  "checkedAt": "2026-11-16T04:11:20.829Z",
+  "source": "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+  "controller": "133d1c790d2069a31ac8698d418034fa609b1176",
+  "attemptedDeployment": "dpl_AKHVPVfrzTisZ2838JhDZPy9vbsu",
+  "attemptedPublication": true,
+  "retainedInProduction": false,
+  "backendRun": 43795056603,
+  "artifact": {
+    "id": 14194778566,
+    "bytes": 95700080,
+    "sha256": "4f3f294faed5b12e5a5580117bcbd854c28e5fa35d64eb501dd837ca7cee51f0",
+    "first600sTransferFailureRetained": true,
+    "resumedOriginalPrefixBytes": 67059712
+  },
+  "linuxQualification": {
+    "shared": 310,
+    "nativePG": 216,
+    "filesSha": 1841,
+    "sourceMatched": true
+  },
+  "oldSnapshotRestoredInIsolatedClone": true,
+  "canaryOrdinaryProtocol": true,
+  "canaryMoveMs": 106.792,
+  "originalPublicCohorts": {
+    "r1": {
+      "accepted": false,
+      "failureCode": "APPROVED_WALLET_LOGIN_NOT_OBSERVED",
+      "walletApproved": true,
+      "gameplayReached": false,
+      "bothBrowsersClosed": true
+    },
+    "r2": {
+      "executed": false,
+      "reason": "R1 original acceptance failed"
+    }
+  },
+  "performanceOfNewFontFixMeasuredInPublic": false,
+  "originalClassifierUnchanged": true,
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "rollback": {
+    "bothEnds": true,
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "pid": 1754094,
+    "databaseRestored": false,
+    "preexistingRows": {
+      "accounts": {
+        "preexistingRows": 320,
+        "currentRows": 320,
+        "preexistingCanonicalBytes": 2383181,
+        "preexistingSha256": "5379b75e784b303e4553b9983445d35633b47b4bf367ed1594ea394926b2115b",
+        "preexistingRowsUnchanged": true
+      },
+      "characters": {
+        "preexistingRows": 232,
+        "currentRows": 232,
+        "preexistingCanonicalBytes": 78394,
+        "preexistingSha256": "722d367ea1be7ee349b150d199046dae560864ba85082446808f7ebe5ddc69f5",
+        "preexistingRowsUnchanged": true
+      },
+      "character_saves": {
+        "preexistingRows": 232,
+        "currentRows": 232,
+        "preexistingCanonicalBytes": 2691743,
+        "preexistingSha256": "71d671c082e8256fccdebb9f7b20b07a73a477e990f5a6d9f218e8929ca3e7dd",
+        "preexistingRowsUnchanged": true
+      }
+    },
+    "originalConfigurationFilesUnchanged": 24,
+    "ownedCanariesStopped": true
+  },
+  "independentFinal": {
+    "alias": {
+      "alias": "numeron.obelisk.build",
+      "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "checkedAt": "2026-11-16T04:09:56.740Z"
+    },
+    "http": [
+      {
+        "url": "https://numeron.obelisk.build/version",
+        "status": 200,
+        "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+      },
+      {
+        "url": "https://165.154.65.136.sslip.io/playtest/health",
+        "status": 200,
+        "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+      }
+    ]
+  },
+  "postRollbackQr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "pollsAfterCancel": 0,
+      "browserClosed": true,
+      "scope": "Unsigned actual QR pixels/pending/cancel; no approved login assertion."
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "pollsAfterCancel": 0,
+      "browserClosed": true,
+      "scope": "Unsigned actual QR pixels/pending/cancel; no approved login assertion."
+    }
+  ],
+  "signedLoginHandoffStillOpen": true,
+  "allLocalHandlesClosed": true,
+  "rawForeignWipPreserved": 29,
+  "privateFactoryOverlaysRestored": true,
+  "goal": "active"
+}

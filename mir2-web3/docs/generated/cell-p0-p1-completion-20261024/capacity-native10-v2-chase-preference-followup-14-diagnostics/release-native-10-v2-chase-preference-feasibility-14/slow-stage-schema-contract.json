@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "scope": "Strict metadata-only diagnostic projection; no identity, request/action ID, credentials or game payload.",
+  "producerPrefix": "[gateway-slow-stage]",
+  "wireGrammar": {
+    "legacy": "[gateway-slow-stage] stage=<label> duration_ms=<canonical safeuint>",
+    "scoped": "[gateway-slow-stage] stage=<allowed scoped label> duration_ms=<canonical safeuint> connection=<canonical positive safeuint>",
+    "queue": "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=<canonical safeuint> connection=<canonical positive safeuint> queued_phase=<phase> phase_elapsed_ms=<canonical safeuint> input_class=<class>"
+  },
+  "normalizedKeys": {
+    "legacy": [
+      "observedAtMs",
+      "stage",
+      "durationMs"
+    ],
+    "scoped": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "connection"
+    ],
+    "queue": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "connection",
+      "queuedPhase",
+      "phaseElapsedMs",
+      "inputClass"
+    ]
+  },
+  "legacyStages": [
+    "serial_gate.zone_outbound_wait",
+    "socket_input.queue_residence",
+    "serial_gate.input_wait",
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush",
+    "flush.responses",
+    "flush.external_state",
+    "flush.save",
+    "snapshot.build_and_send",
+    "zone_owner.in_process.execute_request",
+    "zone_owner.hosted.runtime_lock_wait",
+    "zone_owner.hosted.execute_request",
+    "zone_cadence.total",
+    "zone_cadence.gate_wait",
+    "zone_cadence.manager_tick",
+    "zone_cadence.dispatch",
+    "shared_session.predrain.monster_activation",
+    "shared_session.predrain.shared_entity_projection",
+    "shared_session.predrain.pending_lock_wait",
+    "shared_session.predrain.journey_reposition",
+    "shared_session.predrain",
+    "shared_session.inner_execute",
+    "shared_session.reconcile",
+    "shared_session.tail"
+  ],
+  "newContextStages": [
+    "socket_turn.input",
+    "socket_turn.chat",
+    "socket_turn.injection",
+    "socket_turn.spectator",
+    "socket_turn.ai_live",
+    "runtime_tick.total",
+    "runtime_tick.identity_cache",
+    "runtime_tick.identity_database",
+    "runtime_tick.resume_credential",
+    "runtime_tick.owner_heartbeat",
+    "runtime_tick.serial_gate_wait",
+    "runtime_tick.preflight",
+    "socket_turn.input_owner_heartbeat"
+  ],
+  "allowedLegacyStages": [
+    "serial_gate.zone_outbound_wait",
+    "socket_input.queue_residence",
+    "serial_gate.input_wait",
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush",
+    "flush.responses",
+    "flush.external_state",
+    "flush.save",
+    "snapshot.build_and_send",
+    "zone_owner.in_process.execute_request",
+    "zone_owner.hosted.runtime_lock_wait",
+    "zone_owner.hosted.execute_request",
+    "zone_cadence.total",
+    "zone_cadence.gate_wait",
+    "zone_cadence.manager_tick",
+    "zone_cadence.dispatch",
+    "shared_session.predrain.monster_activation",
+    "shared_session.predrain.shared_entity_projection",
+    "shared_session.predrain.pending_lock_wait",
+    "shared_session.predrain.journey_reposition",
+    "shared_session.predrain",
+    "shared_session.inner_execute",
+    "shared_session.reconcile",
+    "shared_session.tail",
+    "socket_turn.input",
+    "socket_turn.chat",
+    "socket_turn.injection",
+    "socket_turn.spectator",
+    "socket_turn.ai_live",
+    "runtime_tick.total",
+    "runtime_tick.identity_cache",
+    "runtime_tick.identity_database",
+    "runtime_tick.resume_credential",
+    "runtime_tick.owner_heartbeat",
+    "runtime_tick.serial_gate_wait",
+    "runtime_tick.preflight",
+    "socket_turn.input_owner_heartbeat"
+  ],
+  "allowedNonQueueScopedStages": [
+    "serial_gate.input_wait",
+    "serial_gate.zone_outbound_wait",
+    "socket_turn.input",
+    "socket_turn.chat",
+    "socket_turn.injection",
+    "socket_turn.spectator",
+    "socket_turn.ai_live",
+    "runtime_tick.total",
+    "runtime_tick.identity_cache",
+    "runtime_tick.identity_database",
+    "runtime_tick.resume_credential",
+    "runtime_tick.owner_heartbeat",
+    "runtime_tick.serial_gate_wait",
+    "runtime_tick.preflight",
+    "socket_turn.input_owner_heartbeat"
+  ],
+  "allowedQueuedPhases": [
+    "select_wait",
+    "input",
+    "input_gate",
+    "input_owner_heartbeat",
+    "chat",
+    "injection",
+    "spectator",
+    "ai_live",
+    "runtime_tick",
+    "identity_cache",
+    "identity_database",
+    "resume_credential",
+    "owner_heartbeat",
+    "tick_gate",
+    "preflight"
+  ],
+  "allowedInputClasses": [
+    "move",
+    "attack_v2",
+    "other"
+  ],
+  "numeric": {
+    "canonical": "0 or a nonzero decimal digit followed by zero or more decimal digits; no sign, decimal point, exponent or leading zero",
+    "maximum": 9007199254740991,
+    "minimumDurationMs": 0,
+    "minimumObservedAtMs": 0,
+    "minimumPhaseElapsedMs": 0,
+    "minimumConnection": 1
+  },
+  "inputClassMeaning": {
+    "move": "Walk, Run or Turn",
+    "attack_v2": "Typed ordinary attack request; no requestId retained",
+    "other": "Any other input including identity/authentication commands; payload never retained"
+  },
+  "limits": {
+    "lineBytes": 8192,
+    "totalPublicBytes": 33554432,
+    "prewriteQueueBytes": 1048576,
+    "writerHighWaterMarkBytes": 1048576,
+    "finishWaitMs": 15000
+  },
+  "parsingRules": [
+    "ASCII whole line only, anchored fixed field order, CRLF supported; partial EOF never emitted.",
+    "All40 labels may use legacy format, including context-counter exhaustion fallback; other old labels cannot acquire a connection field.",
+    "Queue context is all four fields together; a bare queue connection or a partial/extra/reordered metadata set is discarded without legacy downgrade.",
+    "Unknown labels/phases/classes, non-ASCII, signed/floating/scientific numeric tokens, extra text and malformed whole lines are filtered without public output, as with prior stderr noise filtering.",
+    "Digit-shaped noncanonical/unsafe duration, connection or phase age on an otherwise allowed whole record makes capture incomplete and requests normal stop once.",
+    "Existing line/byte/write caps, write backpressure, read/write/finalize error or incomplete EOF make capture incomplete and request normal stop once; original private stderr is independently drained.",
+    "observedAtMs is collector receive wall clock. queuedPhase and phaseElapsedMs were sampled at queue construction, not when dequeued; neither field proves an exact span start/end or a cause.",
+    "No CRC or new transport protocol; original source/raw SHA evidence binding remains external to this metadata parser."
+  ],
+  "newFailureReasons": [
+    "noncanonical-connection",
+    "unsafe-connection",
+    "noncanonical-phase-elapsed",
+    "unsafe-phase-elapsed"
+  ],
+  "historicalCompatibility": {
+    "legacyHelperUntouched": true,
+    "legacyEvidenceUntouched": true,
+    "originalFourteenScenariosRetained": true,
+    "inventoryFixtureExtendedForNewProducerApiAnd40Labels": true,
+    "remainingThirteenOldTestBodiesExactAfterLfNormalization": true,
+    "originalSource": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    }
+  },
+  "consumerRequirements": [
+    "Future collector/verifier must accept exactly3/4/7 normalized key sets and validate the corresponding fixed label/phase/class sets and numeric ranges.",
+    "Future collector status allowlist must include the four new fixed numeric failure reasons.",
+    "A new41-input backend, matching Release and functional acceptance must be bound before any new launcher/realm is prepared; the old855b binary is not a producer of these new diagnostics."
+  ]
+}

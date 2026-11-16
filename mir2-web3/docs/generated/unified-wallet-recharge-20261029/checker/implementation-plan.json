@@ -1,0 +1,167 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": false,
+  "curatedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "producerReceipt": {
+    "filename": "unified-final-targeted-checker-implementation-plan.json",
+    "bytes": 9150,
+    "sha256": "302fbd69c14a1d72c3dde5ff911d7fffb8042d8c89b224295a2d1a7162dde580"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.final-targeted-checker-plan.v1",
+    "draftOnly": true,
+    "executed": false,
+    "candidate": "WN-CANDIDATE-20261029-unified-11",
+    "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "projectRoot": "F:/mu/mir2-web3",
+    "actualCandidateInspected": false,
+    "stopsProcesses": false,
+    "editsSource": false,
+    "requiredActualFlag": "-RunFinalTarget -ControlPath <reviewed-new-control.json> -ControlSha256 <reviewed-uppercase-SHA256>",
+    "controlSchema": "mir2.unified.final-targeted-control.v1",
+    "receiptSchema": "mir2.unified.final-targeted-receipt.v1",
+    "fullSourcePins": {
+      "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1": "700189B06951EB36D5BF57B4467B1CEB3130CB07202FE5235BCEA22A8297AF8E",
+      "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1": "F012D13B91268E29583A25A81C3F89B08445C22F50AA0D6CF390E20AC14BB516",
+      "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1": "C45B2CDF15CC4D1C2C54CE4BD6A9669BF5F70472B9780E097D1A6B3753B1B2A1",
+      "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1": "3A030F590E93D360CE159BD294AED46F11BE38F5827D6F5B2AC6CCC961025846",
+      "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1": "00AE6FA1E87BF7014E8806E519AB9C2BCAF0F555A5840A21FDFA4EA4B326B38F",
+      "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1": "05D7FDC54459DC3F7A2838D70465B4ACC2948C27B72CBFA4AEFFA4996840CDBE",
+      "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1": "3B641381BCDFB6ADEB0245DD541713515296875D85F39C780E7C59AF4CFEC479",
+      "apps/game-client/platform-windows/scripts/simplified-document-layout.ps1": "1CFB6396BE32E73612D02725DAF718F30B0134CDFB48A16F6814B43659942D24",
+      "apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py": "7F21F9B31180A39BCA68B0C393AF432B937D641B4EC408B5F956659EF07CC945",
+      "apps/web/scripts/asset-pipeline/five-class-skill-requirements.json": "B7AB10218D1992984E978AF7A1CEF951A4CA49E4A35A82B7B200279628272CAB",
+      "packages/game-data/data/content_profiles/platinum_fiveclass.json": "9FC2D6875C78691F7E34650EAE8E8DF868690A1EE6E5960BECC113CAE0E9D4AC"
+    },
+    "exactAstImports": {
+      "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1": [
+        "Get-TextSha256",
+        "Get-ByteSha256",
+        "ConvertFrom-JsonPreservingDateStrings",
+        "Get-OrdinalSortedStrings",
+        "Get-ManifestCanonicalText",
+        "Initialize-Pkcs",
+        "Normalize-Thumbprint",
+        "Test-CodeSigningCertificate",
+        "Test-DetachedCmsSignature",
+        "New-ReleaseStatementText",
+        "Invoke-GitBytes",
+        "ConvertFrom-NulUtf8",
+        "Test-PathWithin",
+        "Test-IsReparsePoint",
+        "Assert-NoReparseAncestors",
+        "Assert-NoReparseTree",
+        "Initialize-NativeStreamEnumerator",
+        "Assert-NoAlternateDataStreams",
+        "Get-RelativeUnixPath",
+        "Test-PathContainsDangerousDotToken",
+        "Test-PackageRelativeFileAllowed",
+        "Test-PackageRelativeDirectoryAllowed",
+        "Assert-PackageAllowlist",
+        "Get-WorktreeState",
+        "Assert-CurrentCandidateSourceState",
+        "Get-FiveClassPackageSoundPolicy"
+      ],
+      "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1": [
+        "Test-CandidateActorFileAllowed",
+        "Test-CandidateActorDirectoryAllowed"
+      ],
+      "apps/game-client/platform-windows/scripts/simplified-document-layout.ps1": [
+        "Get-SimplifiedDocumentNames",
+        "Get-SimplifiedDocumentPackagePath",
+        "Test-SimplifiedLegalFile"
+      ]
+    },
+    "wrapperSha256": "0DDA29B019601FF245E0119B22263B13E6BB6A2339FDA642BC2D9E15444C5D88",
+    "expectedVersionSha256": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+    "expectedManifestSha256": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+    "originalReport": "Byte-identical; requireCurrentSource=false and original stage GUID path remain unchanged; fresh external copy only after all checks pass.",
+    "checks": [
+      "producer returned through same-process call operator and success guard, pinned fresh logs/report/post-move summary",
+      "final reparse ancestors/tree and native plus provider ADS and exact original file/directory allowlist before and after Python",
+      "metadata control pins and original canonical statement/CMS trusted signer verification before and after Python",
+      "unchanged Python full-payload SHA256, metadata hashes, file closure and no links/hardlinks",
+      "current clean exact source digest and pinned Cargo/rustc before and after Python",
+      "all original sources/control/evidence re-pinned after Python"
+    ],
+    "python": {
+      "sourceSha256": "7F21F9B31180A39BCA68B0C393AF432B937D641B4EC408B5F956659EF07CC945",
+      "executable": "C:/Python313/python.exe",
+      "executableSha256": "91566DC8BB9A336C36C607EE0D5A5135E54DDCE2418E2CD7728A49C8F098904A",
+      "outputReason": "Original script fixes output paths to its own directory; future run uses a fresh byte-identical external copy, no companions/imports."
+    },
+    "prerequisite": "Root separately reviews checker/control and stops only its duplicate readonly verifier after original producer has returned successfully. No actual target run is authorized by this draft.",
+    "limitation": "Receipt relies on root-confirmed exclusive package ownership through later installer consumption; no signing/private key/truststore/game launch/build/deploy.",
+    "controlTemplate": {
+      "schema": "mir2.unified.final-targeted-control.v1",
+      "rootReviewed": false,
+      "candidate": "WN-CANDIDATE-20261029-unified-11",
+      "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "signerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+      "projectRoot": "F:/mu/mir2-web3",
+      "finalRoot": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-unified-11",
+      "originalStagingRoot": "<ROOT-OBSERVED-EXACT-CURRENT-STAGING-GUID-PATH>",
+      "exclusiveOwnershipConfirmed": false,
+      "originalReport": {
+        "path": "F:\\mu\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261029-unified-11-verification.json",
+        "sha256": "<ROOT-PIN-ONLY-AFTER-PRODUCER-RETURN>"
+      },
+      "producerSummary": {
+        "path": "F:\\mu\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261029-unified-11-package-summary.json",
+        "sha256": "<ROOT-PIN-ONLY-AFTER-PRODUCER-RETURN>"
+      },
+      "producerReturnProof": {
+        "kind": "pinned-sequential-wrapper-and-fresh-duplicate-log",
+        "samePowerShellProcess": false,
+        "producerReturnedSuccessfully": false,
+        "packageCommandGuardPassed": false,
+        "duplicateVerifierStoppedByRoot": false,
+        "wrapperPid": 0,
+        "producerInvocationStartedUtc": "<ACTUAL-UTC-INVOCATION-START>",
+        "wrapper": {
+          "path": "C:\\mir2-build\\unified-20261029\\run-unified-package.ps1",
+          "sha256": "0DDA29B019601FF245E0119B22263B13E6BB6A2339FDA642BC2D9E15444C5D88"
+        },
+        "producerLog": {
+          "path": "C:\\mir2-build\\unified-20261029\\unified-package.log",
+          "sha256": "<ROOT-PIN>"
+        },
+        "duplicateVerifierLog": {
+          "path": "C:\\mir2-build\\unified-20261029\\unified-package-verification.log",
+          "sha256": "<ROOT-PIN-AFTER-ROOT-STOPS-ONLY-THAT-READER>"
+        }
+      },
+      "metadataSha256": {
+        "PACKAGE-MANIFEST.json": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+        "VERSION.json": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+        "BUILD-ATTESTATION.json": "<ROOT-PIN>",
+        "RELEASE-STATEMENT.json": "<ROOT-PIN>",
+        "RELEASE-STATEMENT.p7s": "<ROOT-PIN>"
+      },
+      "outputs": {
+        "originalReportCopy": "C:\\mir2-build\\unified-20261029\\unified-package-verification.json",
+        "receipt": "C:\\mir2-build\\unified-20261029\\unified-final-targeted-receipt.json",
+        "pythonWorkDir": "C:\\mir2-build\\unified-20261029\\unified-final-targeted-payload"
+      }
+    },
+    "checkerSha256": "0CD66BD23670E3DD9FB73DB32D996F3E8A09AC6E3DACC927716ED21C6C2AEEAD",
+    "selftest": {
+      "latestReport": "C:/mir2-build/unified-20261029/unified-final-targeted-checker-selftest-r5.json",
+      "latestReportSha256": "D257CCC5AE5045B4638ED060A6C789F5BF180148579B6334E48E5DF75C43E105",
+      "latestLog": "C:/mir2-build/unified-20261029/unified-final-targeted-checker-selftest-r5.log",
+      "latestLogSha256": "7CA066783004BF9DBD486D58F8C4CEC710261D200C068A411C1A5EB1A122F912",
+      "passedCases": 21,
+      "fixtureOnly": true,
+      "actualCandidateInspected": false,
+      "positiveCms": "not run; exact original CMS function exercised for invalid signature rejection; actual independent CMS remains mandatory",
+      "priorRuns": "Initial/r2/r3 failed during source-path or fixture-cleanup setup and remain preserved; r4 passed 19 cases; r5 passed 21 cases"
+    },
+    "executionStatus": "Ready for root review; no actual-target execution authorized or performed"
+  },
+  "phase": "Frozen reviewed-plan input only; draftOnly/executed=false preserved; no actual Candidate acceptance",
+  "checkerReceipt": {
+    "filename": "unified-final-targeted-checker.ps1",
+    "bytes": 33593,
+    "sha256": "0cd66bd23670e3dd9fb73db32d996f3e8a09ac6e3dacc927716ed21c6c2aeead"
+  }
+}

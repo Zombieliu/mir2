@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T06:43:59.371Z",
+  "priorCopyReceipt": {
+    "file": "public-copy-receipt-v1.json",
+    "bytes": 17272,
+    "sha256": "2fc09e8ce34bfac5d63a05f24377c6b28c6d67dc5457e8d9b46d1a699cd9ca66"
+  },
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe12-independent-verification-v1\\static-and-preparation-public-closure-review-v1.json",
+      "target": "probe12-independent-verification-v1/static-and-preparation-public-closure-review-v1.json",
+      "bytes": 38838,
+      "sha256": "0718051ee2f83c9542f96a4bc7e4926932f317d3e9a7e9ee1a1c3d30e3507290"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe12-independent-verification-v1\\analysis-public-closure-review-v1.json",
+      "target": "probe12-independent-verification-v1/analysis-public-closure-review-v1.json",
+      "bytes": 25746,
+      "sha256": "cce62cbe4c951937b0cf8337d252fb61242cc0aeec475c71e6d42f6800ba4437"
+    }
+  ],
+  "originalsAndV1ReceiptUnchanged": true,
+  "scope": "Append exact independent closure receipts; v1 review counts refer to the public set before this append.",
+  "capacityAccepted": false
+}

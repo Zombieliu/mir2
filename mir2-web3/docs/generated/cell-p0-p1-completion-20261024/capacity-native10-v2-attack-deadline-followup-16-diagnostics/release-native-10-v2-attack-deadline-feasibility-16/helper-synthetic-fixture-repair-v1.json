@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "scope": "External test fixture correction only; producer helper unchanged.",
+  "firstExecution": {
+    "tests": 30,
+    "passed": 24,
+    "failed": 6,
+    "durationMs": 148.4349,
+    "stdoutSavedAsSeparateRawLog": false,
+    "reason": "One stale15-row expected count and five newfixture finish calls omitted required gatewayExited context."
+  },
+  "preimage": {
+    "file": "slow-stage-public.test.failed-v1.mjs.txt",
+    "bytes": 22794,
+    "sha256": "082af3cbbe63e9fe86aea1ed2e491af58e5e3afcc6cbff6d90a5e848c318cbb2"
+  },
+  "changes": [
+    [
+      "assert.equal(f.rows().length, 15);",
+      "assert.equal(f.rows().length, 20);"
+    ],
+    [
+      "f.capture.finish();assert.equal(result.complete,true);",
+      "f.capture.finish({gatewayExited:true});assert.equal(result.complete,true);"
+    ]
+  ],
+  "finalTest": {
+    "file": "slow-stage-public.test.mjs",
+    "bytes": 22894,
+    "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+  },
+  "old25AssertionsPreservedExceptScopedCardinalityExpectations": true,
+  "thresholdsChanged": false
+}

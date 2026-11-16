@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T17:19:49.455Z",
+  "scope": "Read-only source-pin reconstruction after actual partial preparation; no target import or execution by reviewer.",
+  "script": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v2.mjs",
+    "bytes": 18298,
+    "sha256": "9256c6881e9da04087e481320e8563c6f7ca35debb36d115b2447d3e8057d104"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v2-inverse-proof.json",
+    "bytes": 1552,
+    "sha256": "e9b12c789f1eaa76e2aa73f64a00e3571d89ac4211de28e97101de557530f22d"
+  },
+  "originalPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\prepare-inputs.mjs",
+    "bytes": 11638,
+    "sha256": "33f1801a462608e385a64acfa197688cf3c73b29936e957ee3dbdde78abf5dd6"
+  },
+  "actualFailedPreparationLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-prepare-actual-v1.log",
+    "bytes": 924,
+    "sha256": "5f76607cbfb3371018ba1a7df418bf200e6f3697674b437c3309d002d7e9eb84"
+  },
+  "syntaxArtifactActualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-missing-syntax-artifact-actual-v1.json",
+    "bytes": 20969,
+    "sha256": "48e9b7ef38f902ea11f19f82c1865e963542fbc500312b75d67b2b7b338fbce4"
+  },
+  "syntaxArtifact": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\launcher-syntax-check.log",
+    "bytes": 15666,
+    "sha256": "000af7b498805ed65a9ebb2222ec2d3f6d6cfa277b8f9eb6b10dd20fc826ff9a"
+  },
+  "checks": {
+    "singleNecessaryRelocatedImportFixed": true,
+    "exactInverseToPreservedUnexecutedV1": true,
+    "originalReadOnlyValidationBytes": 3273,
+    "originalReadOnlyValidationExactAfterInverse": true,
+    "originalSourcePinTailBytes": 3500,
+    "originalSourcePinTailRawExact": true,
+    "remainingRelativeDynamicImports": 0,
+    "frozen99AndGuardRawPinsCheckedBeforeImports": true,
+    "newReleaseFull16DriverSceneWireAndSixDeclarationsRechecked": true,
+    "existingProvisioningStrict10Accounts0Characters0Grants": true,
+    "ownedBinary1980AndPublicBuildBindingRechecked": true,
+    "aclRecoveryReadOnlyOriginalTwoSummaryKeys": true,
+    "osProcessAndReservedListenerQueriesReadOnly": true,
+    "privatePoolOrCredentialsNotRead": true,
+    "seederNotInvoked": true,
+    "accountPreparationNotRepeated": true,
+    "privateAclOrMetadataNotWritten": true,
+    "rootOnlySourcePinsWriteUsesWx": true,
+    "additionalNoteAndExecutionReceiptWxInExternalBase": true,
+    "firstPreparationFailureNotReclassifiedAsOriginalSuccess": true,
+    "actualSyntax30PassesAnd99UnchangedReceiptObserved": true
+  },
+  "outputsObservedAbsent": [
+    "source-pins.json",
+    "execution.lock",
+    "realm-execution.json",
+    "realm-process.json",
+    "realm-cleanup.json"
+  ],
+  "sourceConfigSchemaUnchanged": true,
+  "gameplayThresholdsUnchanged": true,
+  "reviewLimitations": [
+    "Review did not execute resume, imports, OS/ACL queries, account seeder, binary hashing, or any game service.",
+    "Root must execute the exact reviewed v2 explicitly. Existing partial preparation, original failed log and lock remain preserved.",
+    "This approves source-pin-only recovery, not probe success, capacity/P0 acceptance or P2 implementation."
+  ],
+  "verdict": {
+    "resumeSourceContractPassed": true,
+    "eligibleForRootResume": true,
+    "blockingFindingIds": []
+  },
+  "resumeExecutedByReviewer": false,
+  "accountsAddedByReviewer": 0,
+  "realmStartedByReviewer": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "commit": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "bindings": [
+    {
+      "path": "apps/game-client/client-bevy/src/native_procurement.rs",
+      "producerRawSha256": "4437b87005fb9e5d930b804936f8f891ffc6666ec7a32fabb3b0e38bd60fef09",
+      "workingRawSha256": "4437b87005fb9e5d930b804936f8f891ffc6666ec7a32fabb3b0e38bd60fef09",
+      "workingMatchesProducer": true,
+      "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "gitBlobSha256": "4437b87005fb9e5d930b804936f8f891ffc6666ec7a32fabb3b0e38bd60fef09",
+      "workingLfSha256": "4437b87005fb9e5d930b804936f8f891ffc6666ec7a32fabb3b0e38bd60fef09",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "producerRawSha256": "a615636684eb032d096c9fe0312c2319f082fc3615c1a43dc16b4e2333e17101",
+      "workingRawSha256": "a615636684eb032d096c9fe0312c2319f082fc3615c1a43dc16b4e2333e17101",
+      "workingMatchesProducer": true,
+      "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "gitBlobSha256": "38f1be83e35a61291940de57c62e6018677fcb5af1105527ed5fb1165255959e",
+      "workingLfSha256": "38f1be83e35a61291940de57c62e6018677fcb5af1105527ed5fb1165255959e",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "producerRawSha256": "9148e7608b4bde95c99f8d35ca242b970db625293350c302012a97ba7141c1c6",
+      "workingRawSha256": "9148e7608b4bde95c99f8d35ca242b970db625293350c302012a97ba7141c1c6",
+      "workingMatchesProducer": true,
+      "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "gitBlobSha256": "d4540eb9ba9f77871829022452e75a4643ccd7c41fe2c62bf30b51b855f69537",
+      "workingLfSha256": "d4540eb9ba9f77871829022452e75a4643ccd7c41fe2c62bf30b51b855f69537",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/procurement.json",
+      "producerRawSha256": "4df365308a4a3aee547d8e1016b9bb43500c6f63f2cdab95ecd88d1a592b2023",
+      "workingRawSha256": "4df365308a4a3aee547d8e1016b9bb43500c6f63f2cdab95ecd88d1a592b2023",
+      "workingMatchesProducer": true,
+      "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "gitBlobSha256": "ca954bb3f3a210c66371901a696c07212a310a3f19ef66f7a1466012cd5ad878",
+      "workingLfSha256": "ca954bb3f3a210c66371901a696c07212a310a3f19ef66f7a1466012cd5ad878",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "producerRawSha256": "258912c2376484cc145965dd1bca550897d7ea6e53e20a5e71a0ecb208fe5f6c",
+      "workingRawSha256": "258912c2376484cc145965dd1bca550897d7ea6e53e20a5e71a0ecb208fe5f6c",
+      "workingMatchesProducer": true,
+      "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "gitBlobSha256": "258912c2376484cc145965dd1bca550897d7ea6e53e20a5e71a0ecb208fe5f6c",
+      "workingLfSha256": "258912c2376484cc145965dd1bca550897d7ea6e53e20a5e71a0ecb208fe5f6c",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "producerRawSha256": "1f66f6bb038cf46a0326c51ac1da8dd27190f6ff689d2d20f21443c5540bacfd",
+      "workingRawSha256": "1f66f6bb038cf46a0326c51ac1da8dd27190f6ff689d2d20f21443c5540bacfd",
+      "workingMatchesProducer": true,
+      "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "gitBlobSha256": "1f66f6bb038cf46a0326c51ac1da8dd27190f6ff689d2d20f21443c5540bacfd",
+      "workingLfSha256": "1f66f6bb038cf46a0326c51ac1da8dd27190f6ff689d2d20f21443c5540bacfd",
+      "matchesCommittedLfBytes": true
+    }
+  ],
+  "scope": "Exact producer source raw bytes and committed LF blobs independently compared; no Cargo rerun"
+}

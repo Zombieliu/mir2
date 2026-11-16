@@ -1,0 +1,47 @@
+{
+  "schema": "mir2.graduation.local-cleanup.v1",
+  "candidates": [
+    {
+      "className": "Warrior",
+      "pid": 124208,
+      "port": 19244,
+      "stoppedAfterNormalLogout": true,
+      "method": "Stop-Process on pinned isolated process"
+    },
+    {
+      "className": "Wizard",
+      "pid": 125416,
+      "port": 19245,
+      "stoppedAfterNormalLogout": true,
+      "method": "Stop-Process on pinned isolated process"
+    },
+    {
+      "className": "Taoist",
+      "pid": 129204,
+      "port": 19246,
+      "stoppedAfterNormalLogout": true,
+      "method": "Stop-Process on pinned isolated process"
+    }
+  ],
+  "ownedPortsClosed": true,
+  "sourceGateways": [
+    {
+      "role": "warrior",
+      "port": 19231,
+      "preexistingSourceProcessStillAlive": true
+    },
+    {
+      "role": "wizard",
+      "port": 19232,
+      "preexistingSourceProcessStillAlive": true
+    },
+    {
+      "role": "taoist-retest",
+      "port": 19235,
+      "preexistingSourceProcessStillAlive": true
+    }
+  ],
+  "nextStopped": true,
+  "stagingAndEvidenceRetained": true,
+  "recordedAt": "2026-11-07T06:33:07.0833927Z"
+}

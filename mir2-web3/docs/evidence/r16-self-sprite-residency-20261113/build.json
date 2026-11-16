@@ -1,0 +1,85 @@
+{
+  "parent": "d269c56b33a4a1481622c022534d6b307277736b",
+  "candidate": "d269c56b33a4-self-sprite-a5631224",
+  "sourceRoot": "C:\\r16-ui-asset-recovery-20261113\\source",
+  "sourceArchiveSha256": "995458ccb096d9d682d3c0d67324e0a9962e0856f49647c17fa3875dbe52db00",
+  "sourceOverlayReceiptSha256": "8b61ba77fc8325ddfa60eb0c10a889d05cf3483b1b874d3a6ddee97b2a66967e",
+  "version": "20261108-r16-08ec86d5105c",
+  "runtime": "bevy-0c553a754308e5b8",
+  "status": {
+    "code": 0,
+    "signal": null
+  },
+  "builtId": "o002pet0mgqR7-DvdF6kl",
+  "dist": ".next-self-residency-r2",
+  "tsconfigPath": "tsconfig.self-residency-r2.json",
+  "changedFiles": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+      "bytes": 4549,
+      "sha256": "230c2b0feda9b270fdbca4239b37cfb6fe3a1dde68892c4e97619716cd88ca99"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "bytes": 62240,
+      "sha256": "d4af6fa724f5d5bc5d36569e9c4925313bf60d4b0bb086f666da33de83e878e0"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx",
+      "bytes": 42778,
+      "sha256": "e7d750764b9d5213f46d6eddc59c343b01c9e58729b90a87953e9f8720b60abc"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/self-sprite-image.ts",
+      "bytes": 4547,
+      "sha256": "b394662b43381cd41feebb50244b81ef397f89dbb54d1df2f2087552c0e89441"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/self-sprite-residency.ts",
+      "bytes": 7931,
+      "sha256": "262d9491b056855cab583f6f07222f66a99220727b9aa7d7b5626bd481e15955"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-self-sprite-residency.mjs",
+      "bytes": 11631,
+      "sha256": "d94c403ea1024cd8611c578c93c74c8286e059653c73c7777692ca5c47d10fb4"
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "bytes": 23082,
+      "sha256": "a8d07ba0bc1170c1b48e3ceb730e0dbb6ffb33c7bb5fcd984f34e5a01e7cd114"
+    }
+  ],
+  "generatedInputs": {
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+    "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+    "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+    "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+    "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+    "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+    "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+    "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+    "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+    "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+    "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+    "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+    "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+    "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+  },
+  "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+  "buildConfigSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+  "durationMs": 33731
+}

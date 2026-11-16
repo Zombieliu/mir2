@@ -1,0 +1,52 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "observedAt": "2026-11-15T22:50:41.113Z",
+  "observations": [
+    {
+      "cohort": "r1",
+      "originalClassifierAccepted": true,
+      "firstDiary": {
+        "renderer": "ordinary-react-fallback",
+        "passed": true,
+        "owner": null,
+        "zeroWorldCommands": true
+      },
+      "hudGateDiary": {
+        "renderer": "ordinary-shared-native",
+        "passed": true,
+        "owner": "bevy",
+        "zeroWorldCommands": true
+      },
+      "nativeAfterFirstFrameMs": 47939,
+      "runtimeBodyAfterFirstFrameMs": 16322,
+      "nativeHudGateWithinOriginalBudget": true
+    },
+    {
+      "cohort": "r2",
+      "originalClassifierAccepted": true,
+      "firstDiary": {
+        "renderer": "ordinary-react-fallback",
+        "passed": true,
+        "owner": null,
+        "zeroWorldCommands": true
+      },
+      "hudGateDiary": {
+        "renderer": "ordinary-shared-native",
+        "passed": true,
+        "owner": "bevy",
+        "zeroWorldCommands": true
+      },
+      "nativeAfterFirstFrameMs": 42927,
+      "runtimeBodyAfterFirstFrameMs": 7601,
+      "nativeHudGateWithinOriginalBudget": true
+    }
+  ],
+  "bothFirstDiariesActuallyNative": false,
+  "bothHudGateDiariesActuallyNative": true,
+  "originalClassifierUnmodified": true,
+  "observationOnly": true,
+  "scope": "Records the two actual Q phases separately. The legacy classifier sharedNativeQuest label alone does not prove Native ownership. No gate, clock, UI owner, bytes or runtime behavior was modified.",
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false
+}

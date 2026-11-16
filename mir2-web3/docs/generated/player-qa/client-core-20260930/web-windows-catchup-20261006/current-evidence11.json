@@ -1,0 +1,553 @@
+{
+  "schemaVersion": 3,
+  "id": "Source25-current-static-evidence11",
+  "generatedAtUtc": "2026-10-07T07:44:27.332Z",
+  "currentSourceEpoch": "Source25 current accepted finite configurations and Next08/Thin08",
+  "parentCommit": "6562c474a67cf1c377a600ae254997be744879b4",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "matrix": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.json",
+    "bytes": 3228933,
+    "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+  },
+  "matrixMd": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.md",
+    "bytes": 30862,
+    "sha256": "8caad49ea7f980ad3ee392485095f35dc41a8489ddc70df06b73d28edfa084e3"
+  },
+  "documents": [
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+      "bytes": 855346,
+      "sha256": "0ebb31808816b4fff65ee9947715bdbe09332594d34ff07d67eeea2dc79c682b"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 975112,
+      "sha256": "0186d02e8d11605221a26ad4b29183285a28dc6953c6a390f42620bd713ac51f"
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+      "bytes": 518064,
+      "sha256": "6b517de38507816f0396510351cec33f6f8ffdcd53270339e85f32760bf95cf7"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+      "bytes": 460593,
+      "sha256": "fb98ad3ecccff4cfa1954d737a0a3d2755a5b9e93a5669ff90a65d892fb56718"
+    },
+    {
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 176752,
+      "sha256": "b8e3942b7465d16c9eeda7c24e5293abef5c9416ec02c6403aeb9cc2a9aa25c8"
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+      "bytes": 596871,
+      "sha256": "9d172d67f6ad8bc46f92a885c98feb40a8fc3bf9178e3cf8925a63f26d85e040"
+    },
+    {
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 50242,
+      "sha256": "37c7939676988469411bd5422f4c9e2ee246d62df8fc1e540e137f2e889f4998"
+    },
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+      "bytes": 237226,
+      "sha256": "0ac33cb9b84e42561d22a2287a9eb59b5a87fdba46cc5b508d5d3b6203615a69"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\README.md",
+      "bytes": 44804,
+      "sha256": "1d75bb940a55d05af87f51d7ba92e92da8121d902ca692a634f4a480df8338f0"
+    }
+  ],
+  "evidence": {
+    "client": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\ranking-source25-client-finite-result01.json",
+      "bytes": 20273,
+      "sha256": "426aec5294277e8d9873f3f1fcd52a2fe76ac6a0a7fb8ad2ebb3678fcc8e5f22"
+    },
+    "web": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\ranking-source25-web-finite-result01.json",
+      "bytes": 7191,
+      "sha256": "2723819ea56cce2812d6b462b491ed2dbbca4e669fd065c19aad57fa7d623f4e"
+    },
+    "backend": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\ranking-source25-backend-finite-result01.json",
+      "bytes": 36508,
+      "sha256": "d8d2c1724271df7772d35d7a165d436f9ba331dd8df286ecec1f907bd5fd4f90"
+    },
+    "native": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\ranking-source25-native-build-result01.json",
+      "bytes": 6695,
+      "sha256": "d004522c9ca0932f9df6f63d45367d273f291e624ea9abaf0321455aaad339d4"
+    },
+    "combinedBuild": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\ranking-source25-combined-build-result01.json",
+      "bytes": 36498,
+      "sha256": "247bbb46dbf992475b9797e147e53afbe756bec9410d85e83db2a52f5a74780f"
+    },
+    "source24Publication": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\pearl-source24-publication01.json",
+      "bytes": 4934,
+      "sha256": "6b2a8ac3df0eef063eb67295b1cc07dd09b4009bac572afbe15b379c78a82030"
+    }
+  },
+  "classification": {
+    "legacy": 206,
+    "common limitation": 8,
+    "shared": 103,
+    "open": 0
+  },
+  "rawCounts": {
+    "records": 317,
+    "categories": {
+      "legacy": 179,
+      "open": 27,
+      "common limitation": 8,
+      "shared": 103
+    },
+    "namedFixtureRowAssociations": 172,
+    "uniqueNamedFixtureDeclarations": 84,
+    "confirmedRawOpenRecords": 27
+  },
+  "fixtureAssociationCounts": {
+    "rowAssociations": 358,
+    "uniqueDeclarations": 226,
+    "rowDeduplicatedAssociations": 357
+  },
+  "fixtureAssociationAlgorithm": "Actual fields flatten finiteChecks.declaration object/array plus finiteChecks.declarations; exclude historical fields. Identity path+(name or declaration); per-row dedup separate. Original F01.safe-key.open duplicate retained. Associations are not execution or acceptance counts.",
+  "rankingFiniteDeclarations": [
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "line": 48,
+      "declaration": "ranking_inspect_exact_cooldown_boundary_preserves_zero_identity_and_pure_clock",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "line": 69,
+      "declaration": "ranking_inspect_unknown_closed_loading_and_pending_pages_never_admit",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "line": 83,
+      "declaration": "ranking_inspect_raw_player_id_is_checked_without_truncation",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/game-client/platform-web/src/ranking_inspect.rs",
+      "line": 69,
+      "declaration": "ranking_inspect_abi_object_and_seven_field_array_preserve_raw_zero_id_and_clock",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/game-client/platform-web/src/ranking_inspect.rs",
+      "line": 100,
+      "declaration": "ranking_inspect_abi_rejects_missing_extra_duplicate_and_malformed_facts",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "line": 157,
+      "declaration": "shared_ranking_inspect_zero_id_keeps_expected_name_literal_flags_and_strict_clock",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "line": 185,
+      "declaration": "shared_ranking_inspect_closed_loading_pending_missing_and_invalid_ids_do_not_mutate",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "line": 17202,
+      "declaration": "ranking_inspect_browser_command_preserves_zero_id_and_requires_literal_namespace_flags",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "line": 17221,
+      "declaration": "ranking_inspect_event_preserves_target_fourteen_slots_uid_zero_and_actual_tooltip_carrier",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/ranking_inspect.rs",
+      "line": 853,
+      "declaration": "ranking_inspect_rejects_weapon_in_armour_offline_and_online",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/ranking_inspect.rs",
+      "line": 893,
+      "declaration": "ranking_inspect_rejects_duplicate_socket_uid_across_roots",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/ranking_inspect.rs",
+      "line": 1001,
+      "declaration": "ranking_inspect_saved_facts_resolve_current_partner_name_and_reject_ambiguity",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/resources.rs",
+      "line": 1152,
+      "declaration": "ranking_inspect_game_generation_retires_and_never_wraps",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/simulation/tests/ranking_shared_presence.rs",
+      "line": 243,
+      "declaration": "ranking_inspect_runtime_online_none_and_unknown_never_fall_back_to_valid_save",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/simulation/tests/ranking_shared_presence.rs",
+      "line": 357,
+      "declaration": "ranking_inspect_disconnect_retires_requester_and_old_ticket_even_after_exact_checkpoint_restore",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/tests/ranking_shared_presence.rs",
+      "line": 245,
+      "declaration": "ranking_inspect_factory_reads_current_target_from_another_local_zone",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/tests/ranking_shared_presence.rs",
+      "line": 273,
+      "declaration": "ranking_inspect_factory_offline_uses_explicit_other_character_save",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/tests/ranking_shared_presence.rs",
+      "line": 364,
+      "declaration": "ranking_inspect_factory_failed_disconnect_save_retires_projection_but_retains_recovery_presence",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/tests/ranking_shared_presence.rs",
+      "line": 443,
+      "declaration": "ranking_inspect_gateway_claimed_auth_cannot_replace_login_and_start_game",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/tests/ranking_shared_presence.rs",
+      "line": 467,
+      "declaration": "ranking_inspect_gateway_ranking_flag_precedes_hero_at_actual_query_entry",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "line": 30228,
+      "declaration": "ranking_inspect_registry_fence_rejects_replaced_arc_and_changed_replica_set",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "line": 30278,
+      "declaration": "ranking_inspect_tick_refreshes_real_personal_level_without_full_zone_snapshot",
+      "actualPassed": true
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 7368,
+      "declaration": "Ranking actual Page inspect gesture sends exact four raw fields UID0 through one final proof claim",
+      "actualPassed": "internal group covered by actual Stage5 file pass"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 7392,
+      "declaration": "Ranking actual Page receiver rejects wrong target Hero and oldsocket before draining actual pending",
+      "actualPassed": "internal group covered by actual Stage5 file pass"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 7416,
+      "declaration": "Ranking actual Page tooltip uses actual requester viewer and inspected carrier references without template stats",
+      "actualPassed": "internal group covered by actual Stage5 file pass"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 7435,
+      "declaration": "Ranking actual Page binds Ranking onInspect receiver and readonly fourteen-position Inspect window",
+      "actualPassed": "internal group covered by actual Stage5 file pass"
+    }
+  ],
+  "preservation": {
+    "onlyChangedRow": "F11.RANKING.INSPECT",
+    "other316WholeRowsUnchanged": true,
+    "ordered317IdsPreserved": true,
+    "nativeOriginalAuditPlayerVerificationPreserved": true,
+    "source24HistoricalUpdatePreserved": true
+  },
+  "actualCurrentRust": {
+    "selectedClientPassed": 240,
+    "selectedBackendPassed": 80,
+    "newDistinctExecuted": 68,
+    "countsAreCrossConfigurationExecutions": true,
+    "backendEffectiveInputQualification": "Simulation63 were actual executed on Backend03; Gateway unit5 actual on Backend05; subsequent changes are exclusively unrelated Gateway cfg fixtures/integration harness constructors, not production or effective inputs of those earlier jobs. Gatewaychain05 freshly executes all12 on Backend06. No claim all80 rerun on Backend06."
+  },
+  "actualWeb": {
+    "originalNodeScripts": 11,
+    "nodeTests": 220,
+    "nodePassed": 220,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "stage5InternalGroups": 440,
+    "stage5PreviousGroups": 392,
+    "stage5AddedGroups": 48,
+    "stage5CountQualification": "440 internal groups are contained in one Node file-level test; never add440to220.",
+    "combatDeclarations": 23,
+    "storageDeclarations": 67,
+    "storageOriginalBaseDeclarations": 65,
+    "storagePriorSource24PearlDeclarations": 2,
+    "strictCodeOnlyTscExitCode": 0,
+    "tscIncremental": false,
+    "tscStrict": true
+  },
+  "next": {
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-08",
+    "source": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-next01-snapshot.json",
+      "bytes": 9777848,
+      "sha256": "a6ac6c1641aa96de9f555e9a321082b38bf91f8e94ab1efe2559cfab84eebd8a"
+    },
+    "output": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-next01-output-snapshot.json",
+      "bytes": 7820667,
+      "sha256": "761d2850626e65945165a7ef391e95edd3ccf44953d107fa0cd09d707cc47009"
+    },
+    "nftClosure": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-next01-nft-closure.json",
+      "bytes": 25658084,
+      "sha256": "fb34eb64140275b24adca43af3a4db854d6b4fde9e72ba3044390f91807d3407"
+    },
+    "actualOuter": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 124328,
+      "kind": "Source25 original immutable Next08 static production builder; prepared not execution",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 142075,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-next01.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-next01.config.json",
+      "bytes": 3764,
+      "sha256": "c8aa65fe0f2dd5377ed7b4cb44d5473616bbfa92f6e9c8bdbcb4ba9005cb9e99"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-next01.outer.json",
+      "bytes": 542,
+      "sha256": "d138e2f7259c508624e71377a68f0693f04c398d7a6393cfc2a10f4bb1fa04c0"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-next01.stdout.log",
+      "bytes": 2258,
+      "sha256": "382ad812e8eec38152840aa8b44e747be37a132213ce7865a9246ecb6097ece4"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-next01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "declaredSources": 27454,
+    "regularFiles": 19007,
+    "directoriesIncludingRoot": 308,
+    "bytes": 610069210,
+    "declaredJunctions": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-08\\standalone\\mir2-web3\\apps\\web\\node_modules",
+        "relativePath": "standalone/mir2-web3/apps/web/node_modules",
+        "target": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules",
+        "traversed": false
+      }
+    ],
+    "linksTraversed": 0,
+    "strictTypeScriptSeconds": 20.9,
+    "staticPages": 13,
+    "metadataAllowanceChecks": [
+      {
+        "relativePath": "apps/web/tsconfig.json",
+        "before": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+          "bytes": 4810,
+          "sha256": "a01029cab462de2729f08f3e974d9eab8db2523baeeb8bc3b87856fbc7c38609"
+        },
+        "after": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+          "bytes": 4932,
+          "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+        },
+        "allowedExactDataChange": true
+      },
+      {
+        "relativePath": "apps/web/next-env.d.ts",
+        "before": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/next-env.d.ts",
+          "bytes": 285,
+          "sha256": "37fdd5b0fde9ebbc6c2bf250390f3da2aa0d285a10dcf4c6bde02d33fff5639e"
+        },
+        "after": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/next-env.d.ts",
+          "bytes": 285,
+          "sha256": "6f9878005867a3b5f8c6bc6110c97923f5c093d41bdbf8de24fc0ee14a7ec743"
+        },
+        "allowedExactDataChange": true
+      }
+    ]
+  },
+  "thin": {
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-08",
+    "input": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-thin01-source-snapshot.json",
+      "bytes": 23805077,
+      "sha256": "e95b239c2acaff8b4dcda746a26d85be2f2d402d3998c2289e20bd9679b4641a"
+    },
+    "inputReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-thin01-source-review.json",
+      "bytes": 2287,
+      "sha256": "4a750094effdddc5bafc9536fe1db4e591bb2feb0c2168b8c096ab54b1668c88"
+    },
+    "canonicalUniqueInputs": 63203,
+    "output": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-thin01-output-snapshot.json",
+      "bytes": 2922799,
+      "sha256": "64dab7071a3166bf1332a2771e194d7f56bd28ed95b83c412533eb6d692e559f"
+    },
+    "actualOuter": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 127076,
+      "kind": "Source25 original immutable Thin08 standalone builder; build-only",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 38386,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-thin01.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-thin01.config.json",
+      "bytes": 4047,
+      "sha256": "be5bfe7b4ff07cdd00b3f04f7044fda8f0415d1e963a4adf9209d2f4bfa8324f"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-thin01.outer.json",
+      "bytes": 522,
+      "sha256": "ca86edc3625382efa4ae903671f05cfddc2ccf99115e538fcba55610fe5710a7"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-thin01.stdout.log",
+      "bytes": 21896,
+      "sha256": "99a391b446253fb35c78329be0b824d5f39175891523c47ef9c5ef04a2e4c449"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-thin01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "report": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-thin01-size-report.json",
+      "bytes": 21896,
+      "sha256": "99a391b446253fb35c78329be0b824d5f39175891523c47ef9c5ef04a2e4c449"
+    },
+    "stats": {
+      "exists": true,
+      "bytes": 373130249,
+      "files": 7301,
+      "directories": 776,
+      "links": 0
+    },
+    "capBytes": 377487360,
+    "headroomBytes": 4357111,
+    "staticCopyResult": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-ranking-source25-thin01-static-copy-result.json",
+      "bytes": 168624,
+      "sha256": "808961e0b0efea1cef3765ca6442d3aed0a011a66c8e18a73c6e163b4d122095"
+    },
+    "selectedRuntimeCopies": 11,
+    "jsonActualSourceAndPackagedPairs": 231,
+    "jsonPairsIdenticalSource24": true,
+    "historicalTokenConclusion": "Qualified historical carry only from identical 231 actual source/output byte+hash pairs; no new parser/lexer execution.",
+    "warningCount": 44,
+    "warningMultisetIdenticalSource24": true,
+    "remoteAssetOriginRequired": "Configure MIR2_R2_PROXY_BASE to serve omitted original-ui media paths through the same-origin miss proxy from an immutable asset origin.",
+    "remoteMediaRoots": [
+      "Mount",
+      "Pet",
+      "Gate"
+    ]
+  },
+  "staticReview": {
+    "reviewer": "/root/source24_actual_result_review",
+    "accepted": true,
+    "confirmedBlockers": 0,
+    "sourceOnly": true,
+    "actualPostThinInputsRead": 63203,
+    "actualNextOutputFilesRead": 19007,
+    "actualThinOutputFilesRead": 7301,
+    "actualRuntimeCopiesMatched": 11,
+    "actualJsonPairsMatched": 231,
+    "fullWarningMultisetMatched": 44,
+    "uiOperated": false,
+    "wasmApiUsed": false,
+    "networkUsed": false
+  },
+  "combinedRecordIndependentReview": {
+    "reviewer": "/root/source24_actual_result_review",
+    "accepted": true,
+    "confirmedBlockers": 0,
+    "directPinReferences": 85,
+    "uniqueReferencedPaths": 82
+  },
+  "sourcePublication": {
+    "source24": "6562c474a67cf1c377a600ae254997be744879b4 actually remote verified",
+    "source25": "pending at this evidence creation; subsequent Root actual Git result is reported separately"
+  },
+  "remainingConfirmedRawGapIds": [],
+  "limitations": [
+    "Static source/build evidence only; no current UI, HTTP, socket, WASM API/instance or player execution.",
+    "No overall project percentage or Candidate100; 317-row matrix is a bounded audit.",
+    "Ranking online projection supports current known local owners only; remote-owned targets are Unknown, Observe remains disabled; offline strict full raw carrier validation is required.",
+    "Inspect legacy wire has no request nonce; name/lifecycle fences do not supply server wire correlation.",
+    "Cross-currency NPC purchase receipts/recovery and stock pending remain open work; entered/flushed/unknown is not delivery confirmation.",
+    "Original asset origin and release doctor/browser smoke remain unverified; Mount/Pet/Gate omitted media require immutable origin.",
+    "Mobile hardware and final frontend/player acceptance remain not-run."
+  ],
+  "scope": "Bounded source/finite CPU/static build result only; no frontend/player completion inference.",
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalStatus": "active",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkGameUsed": false,
+  "wasmApiUsed": false,
+  "playerAccepted": false,
+  "mobileAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

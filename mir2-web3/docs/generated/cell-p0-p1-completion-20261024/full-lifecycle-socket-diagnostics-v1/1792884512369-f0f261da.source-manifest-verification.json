@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "sourceManifestSha256": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "sourceManifestFileSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+  "matchedRawInputs": 41,
+  "matchedRawDriverPins": 6,
+  "releaseSha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "scope": "This fresh41-input socket-diagnostics Release only; historical source/binary proofs remain unchanged"
+}

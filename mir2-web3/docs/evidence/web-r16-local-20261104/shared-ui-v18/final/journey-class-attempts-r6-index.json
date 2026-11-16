@@ -1,0 +1,18 @@
+{
+  "phase": "journey-class-attempts-r6",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 1,
+  "bytes": 209954,
+  "entries": [
+    {
+      "path": "journey-class-attempts-r6/forest-class-v19-r6/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r6/onboarding-forest-browser-proof.json",
+      "bytes": 209954,
+      "sha256": "dbe09532d03c2b68de29399c65c9ef8bb0f0cb51e402264bb8eacc9983289a69"
+    }
+  ]
+}

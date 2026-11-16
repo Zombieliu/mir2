@@ -1,0 +1,8 @@
+{
+  "passed": false,
+  "boundary": "before repository or selected-source writes",
+  "assertion": "tracked working bytes equal Git blob",
+  "path": "scripts/archive-update-release.py",
+  "cause": "text:auto checkout CRLF compared against LF Git blob",
+  "originalHelperSha256": "189de7102a685d20f3b39e2cac0a6a9544e43d0f774b3fa0f9235b73e200f284"
+}

@@ -1,0 +1,762 @@
+{
+  "schemaVersion": 1,
+  "scope": "ordinary isolated v20 Wizard WebSocket journey",
+  "className": "Wizard",
+  "runtime": {
+    "schema": "r16-v20-wizard-isolated-gateway-startup/1",
+    "gatewayPid": 114080,
+    "websocket": "ws://127.0.0.1:19132/ws",
+    "tcp": "127.0.0.1:19102",
+    "scope": "isolated-loopback-file-store",
+    "gatewaySha256": "c70aef2d2733635964a44c5973ad48cdb87919e4758a6336058106af3a51c063",
+    "profileDeclared": {
+      "schema": 1,
+      "cadence": "newcomer-v2",
+      "contentProfile": "platinum_fiveclass"
+    },
+    "realmObserved": {
+      "realmId": "r16-v20-ordinary-qa-wizard",
+      "profileId": "platinum_fiveclass"
+    },
+    "ordinaryNewAccountAccepted": true,
+    "privateCredentialPath": "protocol-private/Wizard.private.json",
+    "runnerPath": "apps/web/scripts/quest-agent/run-protocol-journey.mjs",
+    "registrationResult": 8
+  },
+  "evidenceScope": {
+    "protocolOnly": true,
+    "ordinaryOriginalDeadlinePreserved": true,
+    "browserVisualAccepted": false
+  },
+  "status": "paused",
+  "ordinaryElapsedMs": 6330141,
+  "inWorldElapsedMs": 2072203,
+  "initial": {
+    "level": 1,
+    "map": "0",
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "direction": "Down",
+    "gold": 0,
+    "experience": 0,
+    "completedQuestIds": []
+  },
+  "finalAuthoritative": {
+    "level": 27,
+    "map": "0",
+    "position": {
+      "x": 328,
+      "y": 264
+    },
+    "direction": "Up",
+    "gold": 35500,
+    "experience": 9879,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2120015,
+      2120020,
+      2120025
+    ]
+  },
+  "lastCompleteAt": 17506,
+  "disk": {
+    "level": 27,
+    "map": "0",
+    "position": {
+      "x": 328,
+      "y": 264
+    },
+    "direction": "Up",
+    "gold": 35500,
+    "experience": 9879,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2120015,
+      2120020,
+      2120025
+    ]
+  },
+  "diskMatchesFinal": true,
+  "completed": {
+    "main": 19,
+    "mainTotal": 22,
+    "growth": 3,
+    "growthTotal": 4,
+    "uniqueCompleted": 22,
+    "total": 26,
+    "level30": false
+  },
+  "deliveries": [
+    {
+      "questId": 2110001,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 769,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110002,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 802,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110003,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 1712,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110004,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 2379,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110005,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 2958,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110006,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 3055,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110007,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 4923,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110008,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 6015,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110009,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 6543,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110010,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 7321,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110011,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 8113,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110012,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 9125,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110013,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 9865,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110014,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 2321,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110015,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 2426,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110016,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 10929,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110017,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 10982,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110018,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 12534,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110019,
+      "kind": "main",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 13867,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2110020,
+      "kind": "main",
+      "finished": 0,
+      "matchingSuccessAcks": 0,
+      "completionPacketSequence": null,
+      "completionRunId": null,
+      "settled": false,
+      "unique": null
+    },
+    {
+      "questId": 2110021,
+      "kind": "main",
+      "finished": 0,
+      "matchingSuccessAcks": 0,
+      "completionPacketSequence": null,
+      "completionRunId": null,
+      "settled": false,
+      "unique": null
+    },
+    {
+      "questId": 2110022,
+      "kind": "main",
+      "finished": 0,
+      "matchingSuccessAcks": 0,
+      "completionPacketSequence": null,
+      "completionRunId": null,
+      "settled": false,
+      "unique": null
+    },
+    {
+      "questId": 2120015,
+      "kind": "growth",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 4954,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2120020,
+      "kind": "growth",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 9158,
+      "completionRunId": "2026-11-06T10-20-26-799Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2120025,
+      "kind": "growth",
+      "finished": 1,
+      "matchingSuccessAcks": 1,
+      "completionPacketSequence": 10960,
+      "completionRunId": "2026-11-06T11-31-18-923Z",
+      "settled": true,
+      "unique": true
+    },
+    {
+      "questId": 2120030,
+      "kind": "growth",
+      "finished": 0,
+      "matchingSuccessAcks": 0,
+      "completionPacketSequence": null,
+      "completionRunId": null,
+      "settled": false,
+      "unique": null
+    }
+  ],
+  "traceRuns": [
+    {
+      "runId": "2026-11-06T10-20-26-799Z",
+      "status": "paused",
+      "first": {
+        "level": 1,
+        "map": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "direction": "Down",
+        "gold": 0,
+        "experience": 0,
+        "completedQuestIds": []
+      },
+      "final": {
+        "level": 21,
+        "map": "D401",
+        "position": {
+          "x": 34,
+          "y": 178
+        },
+        "direction": "UpLeft",
+        "gold": 20460,
+        "experience": 4744,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2120015,
+          2120020
+        ]
+      },
+      "ordinaryElapsedMs": 1988764,
+      "pause": {
+        "questId": 2110014,
+        "reason": "operationFailed"
+      },
+      "sentLogout": 17763,
+      "ackLogout": 17765,
+      "originalReportSha256": "c12c74fd972664230b9540afb6af9e0d938f73e068c7ad30ffef7e9a89b49d68",
+      "originalTraceSha256": "acf9a52dd7c7865d629ec91445185f432a5e795c738fe54e157bccada12483dc"
+    },
+    {
+      "runId": "2026-11-06T10-59-04-792Z",
+      "status": "paused",
+      "first": {
+        "level": 21,
+        "map": "D401",
+        "position": {
+          "x": 34,
+          "y": 178
+        },
+        "direction": "UpLeft",
+        "gold": 20460,
+        "experience": 4744,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2120015,
+          2120020
+        ]
+      },
+      "final": {
+        "level": 21,
+        "map": "0",
+        "position": {
+          "x": 373,
+          "y": 295
+        },
+        "direction": "DownRight",
+        "gold": 19460,
+        "experience": 4744,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2120015,
+          2120020
+        ]
+      },
+      "ordinaryElapsedMs": 2357472,
+      "pause": {
+        "questId": 2110014,
+        "reason": "awaitingSafeSupplies"
+      },
+      "sentLogout": 945,
+      "ackLogout": 946,
+      "originalReportSha256": "f58d8f4388e0b97d928ce47bf635aba78de4e506faddc40b2a35998fc97931ba",
+      "originalTraceSha256": "a56e6659c4fad34625107307a7530da44a1f623226a81b91292f1d48ec001075"
+    },
+    {
+      "runId": "2026-11-06T11-11-26-260Z",
+      "status": "paused",
+      "first": {
+        "level": 21,
+        "map": "0",
+        "position": {
+          "x": 373,
+          "y": 295
+        },
+        "direction": "DownRight",
+        "gold": 19460,
+        "experience": 4744,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2120015,
+          2120020
+        ]
+      },
+      "final": {
+        "level": 21,
+        "map": "D401",
+        "position": {
+          "x": 84,
+          "y": 176
+        },
+        "direction": "DownLeft",
+        "gold": 16810,
+        "experience": 5144,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2120015,
+          2120020
+        ]
+      },
+      "ordinaryElapsedMs": 3591758,
+      "pause": {
+        "questId": 2110014,
+        "reason": "operationFailed"
+      },
+      "sentLogout": 5098,
+      "ackLogout": 5099,
+      "originalReportSha256": "31044e4dd007aef4ce389a527bacf7bdc07caa1884cb9e60dade499c31caf10d",
+      "originalTraceSha256": "fd4f7549642ace06223d527f8e0602232748ce8cb39a07cb93960cc758812555"
+    },
+    {
+      "runId": "2026-11-06T11-31-18-923Z",
+      "status": "paused",
+      "first": {
+        "level": 21,
+        "map": "D401",
+        "position": {
+          "x": 84,
+          "y": 176
+        },
+        "direction": "DownLeft",
+        "gold": 16810,
+        "experience": 5144,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2120015,
+          2120020
+        ]
+      },
+      "final": {
+        "level": 27,
+        "map": "0",
+        "position": {
+          "x": 328,
+          "y": 264
+        },
+        "direction": "Up",
+        "gold": 35500,
+        "experience": 9879,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004,
+          2110005,
+          2110006,
+          2110007,
+          2110008,
+          2110009,
+          2110010,
+          2110011,
+          2110012,
+          2110013,
+          2110014,
+          2110015,
+          2110016,
+          2110017,
+          2110018,
+          2110019,
+          2120015,
+          2120020,
+          2120025
+        ]
+      },
+      "ordinaryElapsedMs": 6330141,
+      "pause": {
+        "questId": 2110020,
+        "reason": "deathRecoveryLimit"
+      },
+      "sentLogout": 17496,
+      "ackLogout": 17507,
+      "originalReportSha256": "82e43fbc8ffebcc03ad1fa0a9252608cba62d7969aaee59c01bf748d03544ca7",
+      "originalTraceSha256": "f9fa8b78821547bf2ee7b8e6e31cf2907195f9c2824aa20fa2146d2be88bacbd"
+    }
+  ],
+  "ordinaryLogout": {
+    "sent": 17496,
+    "ack": 17507
+  },
+  "ordinaryRelogin": {
+    "sameRole": false,
+    "normalStart": false,
+    "match": false,
+    "projection": null,
+    "unexpectedRewardPackets": 0,
+    "normalLogout": false,
+    "performed": false
+  },
+  "actionCounts": {
+    "deaths": 2,
+    "revives": 3,
+    "dealtHits": 342,
+    "firstOwnedAttackMs": 13814,
+    "firstOwnedStruckMs": 13862,
+    "firstLearnedSkillMs": 106865,
+    "unknownCommands": 0
+  },
+  "pause": {
+    "questId": 2110020,
+    "reason": "deathRecoveryLimit",
+    "at": "2026-11-06T12:05:56.940Z"
+  },
+  "attempts": [
+    {
+      "questId": 2110014,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:31:24.738Z",
+      "completedAt": "2026-11-06T11:34:52.675Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2110015,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:34:52.675Z",
+      "completedAt": "2026-11-06T11:34:57.352Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2110016,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:34:57.352Z",
+      "completedAt": null,
+      "interruptedByDeath": true
+    },
+    {
+      "questId": 2110016,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:35:12.878Z",
+      "completedAt": "2026-11-06T11:53:05.907Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2120025,
+      "kind": "growth",
+      "startedAt": "2026-11-06T11:53:05.908Z",
+      "completedAt": "2026-11-06T11:53:07.355Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2110017,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:53:07.355Z",
+      "completedAt": "2026-11-06T11:53:08.793Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2110018,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:53:08.793Z",
+      "completedAt": "2026-11-06T11:57:35.257Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2110019,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:57:35.257Z",
+      "completedAt": "2026-11-06T11:59:26.562Z",
+      "interruptedByDeath": false
+    },
+    {
+      "questId": 2110020,
+      "kind": "main",
+      "startedAt": "2026-11-06T11:59:26.562Z",
+      "completedAt": null,
+      "interruptedByDeath": true
+    },
+    {
+      "questId": 2110020,
+      "kind": "main",
+      "startedAt": "2026-11-06T12:00:24.665Z",
+      "completedAt": null,
+      "interruptedByDeath": false
+    }
+  ],
+  "rawEvidencePins": {
+    "currentReportSha256": "82e43fbc8ffebcc03ad1fa0a9252608cba62d7969aaee59c01bf748d03544ca7",
+    "reloginTraceSha256": null
+  },
+  "passed": false
+}

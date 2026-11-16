@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.windows.package-preflight.v4",
+  "candidate": "WN-CANDIDATE-20261029-invited-09",
+  "packageRoot": "F:\\m9\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-invited-09",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "worktreeDirty": false,
+  "buildAttestationSha256": "3209853348A4BFB05B4353CDC33703C099ED5E56E743B5191F6ADCF0D0714125",
+  "packageManifestSha256": "AB86B5E083473C003863EAD5C2EF09112CADC655684176E7AD757F7C60EB80ED",
+  "packageManifestAggregateSha256": "2CA14D2C5EC7D2BCCF5CBE5D9C2A3540233F070C9B9A68B93ABC1368B59A1DDC",
+  "packageManifestFileCount": 255023,
+  "signerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+  "staged": true,
+  "builtByPackagingScript": false,
+  "visual": false,
+  "accepted": false
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public derivative originals only; no full raw JSONL, recordings, account pool, store or private data is copied.",
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/raw-selected-v1.json",
+      "bytes": 1212291,
+      "sha256": "6f9a54abc74fc732867ebd4bb80f4045755d84c27f077dcd86b7c36a6bc01bfb"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap82-to83-moves-v1.json",
+      "bytes": 68203,
+      "sha256": "bf2ca3edb798b94991c16771b949cc91f4c306f3d1bbcbeb079ac54d1a00eb0d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-deferral-observer-geometry-v1.json",
+      "bytes": 18586,
+      "sha256": "2d251b1da5cc4626bc87541cf2ca277d86520181eab09c704ed5f2223941bbf5"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/stage10-window-actor-matrix-v1.json",
+      "bytes": 73037,
+      "sha256": "10e3fe1e0e8e7d8710d0118ed77b21d4f4e8ce2086edd80be4b8c91631ffb06c"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-movement-origin-projection-v1.json",
+      "bytes": 44057,
+      "sha256": "2a581d7082682a8c193cc292d000066608e6859819c35bb4c4109e8415393931"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/summary-v1.json",
+      "bytes": 21261,
+      "sha256": "249f0fc07ae343adc92d6549d73507038afe6443913ff306c1294d78bfbc4ac4"
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "canonicalHead": "8d07597646e01deced968aac180b248a1eb616a3",
+  "productionSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "originalTrackedWip": 33,
+  "rawSha256AllMatched": true,
+  "files": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "status": " M",
+      "sha256": "e80072eff58555cdfaa8963eaf21ce5556da247507ae49b564222484138a2437"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+      "status": " M",
+      "sha256": "cfc9755f516ec7a16bc2bfcd202e240ffa7b0be8246b93d0cb2b030475a712df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "status": " M",
+      "sha256": "556acc585807ca76d8e0fa0c0374ca5066f6d5b22f1aad44329b98d21fadc967"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_layout.rs",
+      "status": " M",
+      "sha256": "89e767b5f26e6db984e29eb71f23e8f96ba34c64aa79d7b6aa95cb2175c94da0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_reference.rs",
+      "status": " M",
+      "sha256": "f3ad121ea8cb02cdb7b109553b5ae31c9bd2867f5684fd120a74a657a9dde803"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "status": " M",
+      "sha256": "94bcc11c7ebd58ca099da00c6006f6dbae6f83c10973729b8b43963115ffa7f4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "status": " M",
+      "sha256": "2085337d2c1fa164f9e98796a40d307d82c585cb2e5e367adaa9e9f234192321"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "status": " M",
+      "sha256": "e5cc1662c8e3fa2c072bbcbe6e6700524ac8a284219d435a76c1b3894c5df6b8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/pc_login.rs",
+      "status": " M",
+      "sha256": "1e033f4ca776f9225d98aadcf020f7d35323e7d659b4ab98053dd3ea9ab9b353"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "status": " M",
+      "sha256": "d04466e3bafb3a201e399ff9dbc3ffecaf6a13c31ca1f3044c95fa3f8f3ab9ef"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "status": " M",
+      "sha256": "b47681702030a30f1d99673a79e2b5d350aee4b1541d7173c2c15cd2f48ade69"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "status": " M",
+      "sha256": "f99a8d5f2922036aa807f01f10a706a1935290f8eb7fae633d3770f4dd93b3e5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "status": " M",
+      "sha256": "d7f9f0574a43394facb4da476397e6a367c1ba5852312e46e2ee66caaa7e5014"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "status": " M",
+      "sha256": "15676c18c1812c4293087b98768a97be9a909fcab7de22aa2d390b227ffaea85"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+      "status": " M",
+      "sha256": "930028511aee30592d94dda85e8175d76149cc38d3400d9c333fc94d6d4bdf21"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "status": " M",
+      "sha256": "adc33b2398789a77a6608a978911d32c2d7667d55010ab53e842b7818c7cc176"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "status": " M",
+      "sha256": "b3e0623cdebbcb2194635c75f9fff9f7c90b8a7519eef683b3a5656a23ac72b3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/hud_layout_pointer_input_tests.rs",
+      "status": " M",
+      "sha256": "6bf7506b8a8f559c847b53560105de9b703e12b8e9f9c1a471ee26d160bf7455"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "status": " M",
+      "sha256": "e316672a3b346272b5b621ce9a84af7c8a98aca678acd5c7e65fea427ba35a05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "status": " M",
+      "sha256": "f71773dcd52bc8e16b2a772e0ab3bf19547c839088e751e82ab2e05c6532a397"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud.rs",
+      "status": " M",
+      "sha256": "9c8ce9950bd113bf2e454bd448a67c6de96ff939f5a09ce6e7cd5a60f25f63e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud_visual_tests.rs",
+      "status": " M",
+      "sha256": "51de89e50c1bba193a8e6b7d18b9d3a209e166ed476b45a8310c80167fba2839"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "status": " M",
+      "sha256": "729b843d671a2dbe70407168b0a528591bb99ca28a92c6d77df0016525633713"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "status": " M",
+      "sha256": "5a0c186b891228f99fc35642408249391f58d243021851c574b14c38c0241c35"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "status": " M",
+      "sha256": "dbfb577db9395086576fc1d9da0f7c458f1836eb69356a12cdca4b384e69fbce"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "status": " M",
+      "sha256": "2fc240a525efe5c699e92015bd3e5c8606c9f96fe130e5268aa7f4d8779ca2d1"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/original-ui/gdi-text/manifest.json",
+      "status": " M",
+      "sha256": "e77c5973ca98b709629c5cfd52ce7d26af009fe550bc9a9a1779598d10e9c1a1"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+      "status": " M",
+      "sha256": "32ec79ce9b7a10c13c3a638ed4c8258137945ca7af4f594b76701dfce59bfa7d"
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "status": " M",
+      "sha256": "024cd7215baa87027f5ae3e9d9d116593a9d088c1957cb844cb29f690dae1068"
+    },
+    {
+      "path": "mir2-web3/docs/PC-UI-INTEGRATION-20261109.zh-CN.md",
+      "status": " M",
+      "sha256": "a7fd33032c54a32fc36282f032dc6bbfa059885deed798752cf264ad470379e2"
+    },
+    {
+      "path": "mir2-web3/docs/evidence/r16-walking-recovery-20261114/protocol-evidence.json",
+      "status": " M",
+      "sha256": "ab8764ab3a3b3845acc2c166b8eb3ed384a8d8f5519c4c1cb6762c8dc6b3592b"
+    },
+    {
+      "path": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/.crystal-gdi-text-output",
+      "status": " M",
+      "sha256": "fb7191bce7cab2d26d1547c8135bdb9b3da4a1ba9210315fc1fb5a3075aea910"
+    },
+    {
+      "path": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/manifest.json",
+      "status": " M",
+      "sha256": "e77c5973ca98b709629c5cfd52ce7d26af009fe550bc9a9a1779598d10e9c1a1"
+    }
+  ],
+  "draftInputs": [
+    {
+      "path": "mir2-web3/apps/web/scripts/lib/auth-wire-observer.mjs",
+      "sha256": "95519f0daa5888e896f4bda2fa7a812da5130dede5ce0f9216755aa8aee984e2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-auth-wire-observer.mjs",
+      "sha256": "6273f33f86734c7d3911069714d5b77b8f0c55a3ba0062749c9220568192a74e"
+    }
+  ],
+  "applicationBehaviorChanged": false,
+  "deployed": false,
+  "privateOverlaysActive": false,
+  "liveOwnedProcesses": [],
+  "qaNewRoles": 2,
+  "qaRolesRetained": true,
+  "noDatabaseRestore": true,
+  "noProductionSshThisRound": true,
+  "uniqueFocusedChecks": {
+    "total": 10,
+    "wireObserver": 8,
+    "existingBodyPrivacy": 2,
+    "skipped": 0
+  },
+  "cohorts": [
+    {
+      "id": "r1",
+      "functionalPassed": false,
+      "strictAccepted": false,
+      "authPassed": true,
+      "exitCode": 1
+    },
+    {
+      "id": "r2",
+      "functionalPassed": true,
+      "strictAccepted": false,
+      "authPassed": true,
+      "exitCode": 0
+    }
+  ],
+  "goal": "active",
+  "wholeParityCandidate": false,
+  "humanAccepted": false,
+  "next": [
+    "Retain failed f05 cohort; capture a failing approval request/header/body boundary before attributing its cause.",
+    "Inspect first Native admission and startup scheduling against the original 120-second gate; later Worker readiness is separate.",
+    "Locate authoritative first-walk delay across transport and session/Zone without raising the original eight-second budget."
+  ],
+  "observerCodePins": [
+    {
+      "path": "mir2-web3/apps/web/scripts/lib/auth-wire-observer.mjs",
+      "rawWorkingSha256": "95519f0daa5888e896f4bda2fa7a812da5130dede5ce0f9216755aa8aee984e2",
+      "gitBlob": "b7779f3c4950e2a34dddd21baed3f177c236b2e0",
+      "lfNormalizedSha256": "95519f0daa5888e896f4bda2fa7a812da5130dede5ce0f9216755aa8aee984e2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-auth-wire-observer.mjs",
+      "rawWorkingSha256": "6273f33f86734c7d3911069714d5b77b8f0c55a3ba0062749c9220568192a74e",
+      "gitBlob": "2016d6ed93f3954fb25ca1db20bf911b9896301d",
+      "lfNormalizedSha256": "6273f33f86734c7d3911069714d5b77b8f0c55a3ba0062749c9220568192a74e"
+    }
+  ]
+}

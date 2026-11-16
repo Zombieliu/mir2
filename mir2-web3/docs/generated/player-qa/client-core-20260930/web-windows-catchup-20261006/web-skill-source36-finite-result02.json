@@ -1,0 +1,1365 @@
+{
+  "owner": "Root",
+  "kind": "Source36 skill checkpoint and readiness actual limited regression result",
+  "generatedAtUtc": "2026-10-08T00:45:07.892Z",
+  "parentCommit": "e068bbe9e0c5397255598edde7528d472fd6f08d",
+  "windowsFunctionalBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "source": {
+    "initial": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust01-snapshot.json",
+      "bytes": 275327,
+      "sha256": "5ecae1bef019966f42a8fa834a672b952f7fb91a2622c0c3c1e0dc3a07f4b2c4"
+    },
+    "final": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust02-snapshot.json",
+      "bytes": 274991,
+      "sha256": "a54e8bb684806720b14e6be8bd9939e492ac22e3f1ae5497ac53ff977b23d7e4"
+    },
+    "initialChange": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-change01.json",
+      "bytes": 2493700,
+      "sha256": "139058d1cdf61b72f61b959f0d83383564582a3d81f661dffdeb117ec6ff62ac"
+    },
+    "finalChange": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-change02.json",
+      "bytes": 2496106,
+      "sha256": "5ba2276ed9b1bf8d8d7fe584d9277a9d2740a15faafe3d3684155980a71528aa"
+    },
+    "initialReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source01-review.json",
+      "bytes": 2107,
+      "sha256": "0f0a2e9b70748e3f80c84725503caad70a59b52070db99c76228d59ed34a9c05"
+    },
+    "finalReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source02-review.json",
+      "bytes": 3183,
+      "sha256": "49b823eb5ea0b1c01b0865c39705332e4fa3fea7da792f4e9b44d522277bf6cc"
+    },
+    "nativeFeatureEquivalence": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-feature-equivalence01.json",
+      "bytes": 1093,
+      "sha256": "a2778344fcb411639e8afe32ea64ebf02934a23bb9419ad700879204b62c93de"
+    }
+  },
+  "changedFiles": [
+    {
+      "relativePath": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_purchase_economy.rs",
+        "bytes": 109944,
+        "sha256": "45e9edb037e2f5451f6497ede24507b8d15e09b19ba6ff46adeae623e4f9847f"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_purchase_economy.rs",
+        "bytes": 127787,
+        "sha256": "fa2131b6c1d9dfd5cf487a1d5ce636b5a150cbb0c61573d357c7cdfcceb00b39"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway.rs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+        "bytes": 679654,
+        "sha256": "7af3a4282186ecfa90fd514d92d3956e020c8d6859410e12a16c6f4dc464197e"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+        "bytes": 682126,
+        "sha256": "85ed511ea167847757293eff4c7151a512b259879d844e3df2c6e1ba72ecdbfb"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/skill_model.rs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_model.rs",
+        "bytes": 26210,
+        "sha256": "0c81025f3e4794532e07cc562cfda006105e043010e946931cf6cda12b83507d"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_model.rs",
+        "bytes": 30919,
+        "sha256": "534e43debc36e62e302495cf1b99f05d947547c520b99b0a8eab5c9ec7cbc348"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gameplay_bridge.rs",
+        "bytes": 360984,
+        "sha256": "bada4f46375a0212591fbeadfdb5d596c25237e022c7b8eedb6c6f08834541ea"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gameplay_bridge.rs",
+        "bytes": 361046,
+        "sha256": "f21c79324c19046cb423407d2856a0ea3ec5bbb4e53062633b4236cab327b58b"
+      }
+    }
+  ],
+  "implementation": [
+    "One exact Native canonical skill producer moved to Runtime and reused by host/owner checkpoint decoder",
+    "Fresh complete checkpoint verifies ordered learned contents and associated bindings; explicit owner authority/ACK matches, absent host epoch refresh preserved",
+    "Native readiness validates immutable learned descriptors plus existing authority, retains latest packet clocks/key/level/MP/ACK without rewind",
+    "Optional Native catalog feature boundary restored; disabled owner capability fails Incomplete, no fake Applied"
+  ],
+  "declaredInputs": {
+    "rust": 897,
+    "changed": 4,
+    "protected": 893,
+    "webSource35Rehashed": 17120,
+    "webChangedOnlySameRust4": 4,
+    "webProtected": 17116,
+    "notFullWorkspaceOrToolchain": true,
+    "finalRustPinsMatched": true
+  },
+  "actualCargoCalls": [
+    {
+      "id": "bevy-skill-test01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.config.json",
+        "bytes": 4214,
+        "sha256": "09d9f6d1285a42c7bf86724058d02137032887997fdb8ef059d8ea3ffd4c59cf"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.policy.json",
+        "bytes": 2325,
+        "sha256": "7eab5b56ea80516420b87a7e4cadb5e9ca0bb63a228a3b05689239609b8c310a"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust01-snapshot.json",
+        "bytes": 275327,
+        "sha256": "5ecae1bef019966f42a8fa834a672b952f7fb91a2622c0c3c1e0dc3a07f4b2c4"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source01-review.json",
+        "bytes": 2107,
+        "sha256": "0f0a2e9b70748e3f80c84725503caad70a59b52070db99c76228d59ed34a9c05"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.stdout.log",
+        "bytes": 1496,
+        "sha256": "48e3db492f7831448e93f725aa2419eaa2736ef00d8f2d11eff39453af79976b"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.stderr.log",
+        "bytes": 720,
+        "sha256": "21bf2638e3b9a3509f1a5efd0f9e38ce08dbcdb43da566fbef686bc9b3d37d64"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.outer.json",
+        "bytes": 452,
+        "sha256": "04b0a3229ec4c1a26abd7c5841be44782f9bec0584b124ac5cb244bc9555bd6a"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01-cargo-receipts\\b66f78a4ce1d4596bbcc8334f8c0998e\\after.json",
+          "bytes": 320,
+          "sha256": "07457257f05ad04d72db083e47dace2eb3962b890273c674aec97c25bb3e9fa8"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01-cargo-receipts\\b66f78a4ce1d4596bbcc8334f8c0998e\\before.json",
+          "bytes": 1031,
+          "sha256": "1526bd6b83e337fa594b03a8b63f88b43c1aa81c4152ed03debf2fb585e8e1f6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01-cargo-receipts\\b66f78a4ce1d4596bbcc8334f8c0998e\\probe-process.json",
+          "bytes": 443,
+          "sha256": "df7d95797580a1cecaf89e3c39217d2b75ff306c144c000b18a3ea25ef802722"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01-cargo-receipts\\b66f78a4ce1d4596bbcc8334f8c0998e\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01-cargo-receipts\\b66f78a4ce1d4596bbcc8334f8c0998e\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "bfc943fae2dcf0437ff6daadcad8ae651511d825c445a3161a942315321456e9"
+        }
+      ],
+      "guard": {
+        "id": "bevy-skill-test01",
+        "nonce": "b66f78a4ce1d4596bbcc8334f8c0998e",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "b66f78a4ce1d4596bbcc8334f8c0998e",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.policy.json",
+          "policySha": "7eab5b56ea80516420b87a7e4cadb5e9ca0bb63a228a3b05689239609b8c310a",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/client-bevy/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--lib",
+            "skill_model::tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T00:21:20.8757840Z",
+            "sampleEndUtc": "2026-10-08T00:21:21.6363028Z",
+            "remainingBytes": "277366677504",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 155492,
+          "probeLaunchMs": 89.99390000000001,
+          "probeEndMs": 1069.4905,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 156048,
+          "childStartedUtc": "/Date(1791418881698)/",
+          "childStartMs": 1090.7517,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791418899191)/",
+          "completionMs": 18583.6817,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 155492,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791418880698)/",
+          "probeEndUtc": "/Date(1791418881677)/",
+          "probeLaunchMs": 89.99390000000001,
+          "probeEndMs": 1069.4905,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 157936,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 18630,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-bevy-skill-test01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 63
+      },
+      "actualPassed": 15,
+      "passingNames": [
+        "skill_model::tests::cooldown_and_mp_metadata_survive_deserialization",
+        "skill_model::tests::duplicate_hotkey_uses_first_learned_entry_and_does_not_duplicate_loser",
+        "skill_model::tests::explicit_experience_sidecar_overrides_only_fields_it_supplies",
+        "skill_model::tests::invalid_explicit_hotkeys_fail_closed_instead_of_filling_shortcuts",
+        "skill_model::tests::learned_skills_and_bindings_share_one_deterministic_bound",
+        "skill_model::tests::missing_hotkeys_remain_unassigned",
+        "skill_model::tests::name_and_key_only_skill_has_no_authoritative_spell_for_f1",
+        "skill_model::tests::only_explicit_server_hotkeys_are_resolved",
+        "skill_model::tests::original_skill_experience_is_optional_and_round_trips_without_fabrication",
+        "skill_model::tests::oversized_skill_and_sidecar_payloads_keep_the_same_prefix_and_order",
+        "skill_model::tests::rich_server_skill_json_is_backward_compatible_and_selectable",
+        "skill_model::tests::source36_skill_descriptors_preserve_later_runtime_key_and_clock_fields",
+        "skill_model::tests::source36_skill_descriptors_reject_same_count_identity_and_binding_splices",
+        "skill_model::tests::toggle_definition_and_authoritative_enabled_state_remain_independent",
+        "skill_model::tests::unknown_or_missing_cast_kind_fails_closed"
+      ],
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "runtime-skill-test01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.config.json",
+        "bytes": 4287,
+        "sha256": "6116fc8f06f6476d6a9f48abff70e1f84914f57c35f26169d92ef17cb85b4a61"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.policy.json",
+        "bytes": 2328,
+        "sha256": "da61502384cbd9386a7cdcdfac572a85799891054b2e48d6d51706e8af7c3030"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust01-snapshot.json",
+        "bytes": 275327,
+        "sha256": "5ecae1bef019966f42a8fa834a672b952f7fb91a2622c0c3c1e0dc3a07f4b2c4"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source01-review.json",
+        "bytes": 2107,
+        "sha256": "0f0a2e9b70748e3f80c84725503caad70a59b52070db99c76228d59ed34a9c05"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.stdout.log",
+        "bytes": 3894,
+        "sha256": "4a74e46d69406a651cc29aff834896572189fa89567a4425e8062e25cd5fb356"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.stderr.log",
+        "bytes": 1704,
+        "sha256": "e18f2b670c233c0c03c2a579ff5241940f12132fef41c809be7c60c41cd5243f"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.outer.json",
+        "bytes": 455,
+        "sha256": "ebd63215bd9a62e0be4a8005a9975444f876e127dc154b9fb4963f4e2cd0b49d"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01-cargo-receipts\\f3602f53e7094132ab15cd7313687390\\after.json",
+          "bytes": 329,
+          "sha256": "2c9cafb9264c84bd7a002b55635b045918a62fb6f7cdb62ec6bc07c1b06935d2"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01-cargo-receipts\\f3602f53e7094132ab15cd7313687390\\before.json",
+          "bytes": 1071,
+          "sha256": "2910b061166809377e352b45388ccf2ee8730a5d2ed39aaaa072805d08a58d3c"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01-cargo-receipts\\f3602f53e7094132ab15cd7313687390\\probe-process.json",
+          "bytes": 441,
+          "sha256": "2b7375187b4e1129d76992e4f057c832517dbbc205493edb680f3c644e8bac40"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01-cargo-receipts\\f3602f53e7094132ab15cd7313687390\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01-cargo-receipts\\f3602f53e7094132ab15cd7313687390\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "5eb40d88b084b3c1403a2fd164126ecda3e89638479c821f365f580e68d485ea"
+        }
+      ],
+      "guard": {
+        "id": "runtime-skill-test01",
+        "nonce": "f3602f53e7094132ab15cd7313687390",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "f3602f53e7094132ab15cd7313687390",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.policy.json",
+          "policySha": "da61502384cbd9386a7cdcdfac572a85799891054b2e48d6d51706e8af7c3030",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--features",
+            "native-npc-economy",
+            "--lib",
+            "npc_purchase_economy::tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T00:22:40.9540724Z",
+            "sampleEndUtc": "2026-10-08T00:22:41.5864234Z",
+            "remainingBytes": "277361438720",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 160132,
+          "probeLaunchMs": 89.3835,
+          "probeEndMs": 919.6709000000001,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 148484,
+          "childStartedUtc": "/Date(1791418961648)/",
+          "childStartMs": 940.1822000000001,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791418995652)/",
+          "completionMs": 34943.1455,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 160132,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791418960797)/",
+          "probeEndUtc": "/Date(1791418961628)/",
+          "probeLaunchMs": 89.3835,
+          "probeEndMs": 919.6709000000001,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 150768,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 34987,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 63
+      },
+      "actualPassed": 34,
+      "passingNames": [
+        "npc_purchase_economy::tests::native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_all_models_predecode_before_any_mutation",
+        "npc_purchase_economy::tests::native_npc_economy_bounded_completion_refuses_mutation_when_full",
+        "npc_purchase_economy::tests::native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains",
+        "npc_purchase_economy::tests::native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced",
+        "npc_purchase_economy::tests::native_npc_economy_duplicate_and_escaped_duplicate_are_rejected",
+        "npc_purchase_economy::tests::native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime",
+        "npc_purchase_economy::tests::native_npc_economy_item_metadata_mismatch_rejects_before_application",
+        "npc_purchase_economy::tests::native_npc_economy_mail_content_flags_and_concrete_attachment_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_mandatory_source_domains_cannot_use_defaults",
+        "npc_purchase_economy::tests::native_npc_economy_missing_public_hero_city_and_character_domains_never_apply",
+        "npc_purchase_economy::tests::native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate",
+        "npc_purchase_economy::tests::native_npc_economy_partial_tooltip_cannot_default_into_source_authority",
+        "npc_purchase_economy::tests::native_npc_economy_partial_wrong_actor_scope_and_max_rejected",
+        "npc_purchase_economy::tests::native_npc_economy_public_fingerprint_does_not_invent_private_checkpoint_fields",
+        "npc_purchase_economy::tests::native_npc_economy_real_item_vectors_reject_null_missing_slot_and_unknown_container",
+        "npc_purchase_economy::tests::native_npc_economy_reset_clears_source_and_retires_old_ack",
+        "npc_purchase_economy::tests::native_npc_economy_retirement_fences_prepared_bundle",
+        "npc_purchase_economy::tests::native_npc_economy_revision_history_survives_reset_and_fresh_binding",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_gold_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_inventory_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_mail_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_pearls_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_refine_clock_refresh_retains_original_source",
+        "npc_purchase_economy::tests::native_npc_economy_sparse_named_equipment_uses_crystal_slots",
+        "npc_purchase_economy::tests::native_npc_economy_uid_zero_belt_and_equipment_are_complete",
+        "npc_purchase_economy::tests::native_npc_economy_wallet_xp_level_capacity_and_storage_mismatch_rejected",
+        "npc_purchase_economy::tests::source36_skill_checkpoint_explicit_authority_ack_match_but_absent_epoch_is_not_zeroed",
+        "npc_purchase_economy::tests::source36_skill_checkpoint_same_count_wrong_content_never_applies_or_acknowledges",
+        "npc_purchase_economy::tests::source36_skill_checkpoint_sidecar_reassociation_and_row_order_are_verified",
+        "npc_purchase_economy::tests::source36_skill_owner_bounds_and_native_null_zero_catalog_contract_are_preserved"
+      ],
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "native-skill-test01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.config.json",
+        "bytes": 4963,
+        "sha256": "1a3057fd6633738a082eeb33b25061d60da05579245925cbc9d0caf73f835a16"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.policy.json",
+        "bytes": 2327,
+        "sha256": "a9cebefd7a1bbee9e375f7c2d47efcbfbdcb7709e740b8d70cc3b7eb0324178a"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust01-snapshot.json",
+        "bytes": 275327,
+        "sha256": "5ecae1bef019966f42a8fa834a672b952f7fb91a2622c0c3c1e0dc3a07f4b2c4"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source01-review.json",
+        "bytes": 2107,
+        "sha256": "0f0a2e9b70748e3f80c84725503caad70a59b52070db99c76228d59ed34a9c05"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.stdout.log",
+        "bytes": 866,
+        "sha256": "2d5cf949f839b9ef190e6debe5fca113159164d25ce823200081915fd2ede291"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.stderr.log",
+        "bytes": 47620,
+        "sha256": "edf01981853310efaac2b005b4470f57892634de93ad5a4ff72963b03b7c95bb"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.outer.json",
+        "bytes": 455,
+        "sha256": "72ec2b75e4f9a849d7acfa1a6080a5dcb11edb0d38507ae9b3eb96d33e19cbc1"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01-cargo-receipts\\7b8db82ca5ad4688b4f52290e05f232f\\after.json",
+          "bytes": 320,
+          "sha256": "388019fdf6474bfbeaba57b8a9309ead64dc6951a1ad6cbd4eefffb9b952257f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01-cargo-receipts\\7b8db82ca5ad4688b4f52290e05f232f\\before.json",
+          "bytes": 1739,
+          "sha256": "98e76177c6187db7fbe3976ba1e6cafe3b76164616750dbf3d432e2a1dcd970b"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01-cargo-receipts\\7b8db82ca5ad4688b4f52290e05f232f\\probe-process.json",
+          "bytes": 452,
+          "sha256": "ce866f9c9bc176fdc79d03e142ceb9c1480c692b52116114de906bae5f02757d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01-cargo-receipts\\7b8db82ca5ad4688b4f52290e05f232f\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01-cargo-receipts\\7b8db82ca5ad4688b4f52290e05f232f\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "ff015c462fdeb6c87506aeb482ccef6a791a0cb049350122cec2f29b15a07bb1"
+        }
+      ],
+      "guard": {
+        "id": "native-skill-test01",
+        "nonce": "7b8db82ca5ad4688b4f52290e05f232f",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "7b8db82ca5ad4688b4f52290e05f232f",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.policy.json",
+          "policySha": "a9cebefd7a1bbee9e375f7c2d47efcbfbdcb7709e740b8d70cc3b7eb0324178a",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/platform-windows/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--bin",
+            "mir2-platform-windows",
+            "--",
+            "--test-threads=1",
+            "--exact",
+            "gateway::tests::actual_server_skill_fixture_keeps_authoritative_spell_and_optional_mp_cost",
+            "gateway::tests::skill_receipt_retry_keeps_its_own_keys_before_latest_snapshot",
+            "gateway::tests::real_magic_icons_override_catalog_snapshots_and_reset_at_session_boundary",
+            "gateway::ownership_tests::full_source_models_apply_before_world_stamp_and_map_only_never_readies",
+            "gateway::ownership_tests::source36_skill_correct_authority_wrong_descriptors_keep_source_pending",
+            "gateway::ownership_tests::source36_skill_later_packets_and_exact_ack_activate_without_rewind",
+            "gateway::ownership_tests::handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T00:23:32.0956141Z",
+            "sampleEndUtc": "2026-10-08T00:23:32.7208281Z",
+            "remainingBytes": "277354635264",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 145604,
+          "probeLaunchMs": 86.99600000000001,
+          "probeEndMs": 905.5495000000001,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 158364,
+          "childStartedUtc": "/Date(1791419012784)/",
+          "childStartMs": 926.9618,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791419605125)/",
+          "completionMs": 593267.8133,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 145604,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791419011944)/",
+          "probeEndUtc": "/Date(1791419012763)/",
+          "probeLaunchMs": 86.99600000000001,
+          "probeEndMs": 905.5495000000001,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 154184,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 593310,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-native-skill-test01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 65
+      },
+      "actualPassed": 7,
+      "passingNames": [
+        "gateway::ownership_tests::full_source_models_apply_before_world_stamp_and_map_only_never_readies",
+        "gateway::ownership_tests::handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities",
+        "gateway::ownership_tests::source36_skill_correct_authority_wrong_descriptors_keep_source_pending",
+        "gateway::ownership_tests::source36_skill_later_packets_and_exact_ack_activate_without_rewind",
+        "gateway::tests::actual_server_skill_fixture_keeps_authoritative_spell_and_optional_mp_cost",
+        "gateway::tests::real_magic_icons_override_catalog_snapshots_and_reset_at_session_boundary",
+        "gateway::tests::skill_receipt_retry_keeps_its_own_keys_before_latest_snapshot"
+      ],
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "runtime-default-skill-test02",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.config.json",
+        "bytes": 4357,
+        "sha256": "11da8f39f4cd716e777130ad363d96134a1a238709a0e97ff0dfe8e499bae81f"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.policy.json",
+        "bytes": 2336,
+        "sha256": "7db57aa13b5a8349126ec95cfaa3b093925a4671db54c9db9ab3dfa9794dd3c7"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust02-snapshot.json",
+        "bytes": 274991,
+        "sha256": "a54e8bb684806720b14e6be8bd9939e492ac22e3f1ae5497ac53ff977b23d7e4"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source02-review.json",
+        "bytes": 3183,
+        "sha256": "49b823eb5ea0b1c01b0865c39705332e4fa3fea7da792f4e9b44d522277bf6cc"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.stdout.log",
+        "bytes": 219,
+        "sha256": "7f3d485d980ca3d5ad692c9da2e818c93bcdd78e2b9135b457a6398fd3612207"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.stderr.log",
+        "bytes": 1603,
+        "sha256": "862cc6b1d31ae7774de3755e351c841fac6782121354077b5ff9f615f47ec178"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.outer.json",
+        "bytes": 463,
+        "sha256": "e07788c7b467eff77c39abb914fbc33392dd675f3ac507a4acc7ffa713e5b5a7"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02-cargo-receipts\\bb92c6c4dae144f8bed55091ab0f2178\\after.json",
+          "bytes": 319,
+          "sha256": "4e8665fbd8b4593e21d25eeb50341822bab896605075672c2995e83f7d77c19c"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02-cargo-receipts\\bb92c6c4dae144f8bed55091ab0f2178\\before.json",
+          "bytes": 1119,
+          "sha256": "c1d574ea48af16f2f0785f2fa2486911d89afe69b214f7e307eb3ab811a836e3"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02-cargo-receipts\\bb92c6c4dae144f8bed55091ab0f2178\\probe-process.json",
+          "bytes": 442,
+          "sha256": "5bd7133105ffc503d792f4ed3a393d2163e27f78ac99471317f277f0213a5238"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02-cargo-receipts\\bb92c6c4dae144f8bed55091ab0f2178\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02-cargo-receipts\\bb92c6c4dae144f8bed55091ab0f2178\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "658fdc5e376f1b557ff352c50c27f421ad4ce6e1b676de5669a8b3e08f685c70"
+        }
+      ],
+      "guard": {
+        "id": "runtime-default-skill-test02",
+        "nonce": "bb92c6c4dae144f8bed55091ab0f2178",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "bb92c6c4dae144f8bed55091ab0f2178",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.policy.json",
+          "policySha": "7db57aa13b5a8349126ec95cfaa3b093925a4671db54c9db9ab3dfa9794dd3c7",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--lib",
+            "npc_purchase_economy::tests::source36_skill_disabled_native_catalog_rejects_owner_checkpoint",
+            "--",
+            "--exact",
+            "--test-threads=1"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T00:37:44.1644440Z",
+            "sampleEndUtc": "2026-10-08T00:37:44.8550412Z",
+            "remainingBytes": "276368027648",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 159248,
+          "probeLaunchMs": 88.81230000000001,
+          "probeEndMs": 970.1104,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 160272,
+          "childStartedUtc": "/Date(1791419864917)/",
+          "childStartMs": 991.3255,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791419890321)/",
+          "completionMs": 26396.0901,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 159248,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791419864014)/",
+          "probeEndUtc": "/Date(1791419864895)/",
+          "probeLaunchMs": 88.81230000000001,
+          "probeEndMs": 970.1104,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 157704,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 26439,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-default-skill-test02.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 63
+      },
+      "actualPassed": 1,
+      "passingNames": [
+        "npc_purchase_economy::tests::source36_skill_disabled_native_catalog_rejects_owner_checkpoint"
+      ],
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "runtime-skill-test02",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.config.json",
+        "bytes": 4280,
+        "sha256": "8c6a7943dcd9ba478169ad3c65e31120a55d659f24cbf60611a75dd119ae71d1"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.policy.json",
+        "bytes": 2328,
+        "sha256": "82286c48cc39fa6f52028ba730476cb42285ad111d88ff713e0d683f1c15b371"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-rust02-snapshot.json",
+        "bytes": 274991,
+        "sha256": "a54e8bb684806720b14e6be8bd9939e492ac22e3f1ae5497ac53ff977b23d7e4"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-source02-review.json",
+        "bytes": 3183,
+        "sha256": "49b823eb5ea0b1c01b0865c39705332e4fa3fea7da792f4e9b44d522277bf6cc"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.stdout.log",
+        "bytes": 3894,
+        "sha256": "b439d4115accbda7e157fe6ddb4d259910f73d9d7d2a3921d5910fc41be1b413"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.stderr.log",
+        "bytes": 1603,
+        "sha256": "97edfd76de3bad82047facaaa5f856320f6fb1b80bd4a6681dc421683a0bea09"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.outer.json",
+        "bytes": 455,
+        "sha256": "8b3bbd1b599f83a244f5d8bbafa8957219c6ab1eac81030fed396262a55be40d"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02-cargo-receipts\\3e858ef87222400ca4b7563ca0ed751d\\after.json",
+          "bytes": 329,
+          "sha256": "5df0c7f1732f89b63f47bfedec39d3d843fd4ad2c82f12e5e4afd75f8b349f13"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02-cargo-receipts\\3e858ef87222400ca4b7563ca0ed751d\\before.json",
+          "bytes": 1071,
+          "sha256": "584d95fbf199287c9960f4ff9ddd7514dbcd7d34052a5e023661ebbdee1773bc"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02-cargo-receipts\\3e858ef87222400ca4b7563ca0ed751d\\probe-process.json",
+          "bytes": 441,
+          "sha256": "454d28c71c17ce0b09cf791f354fc3fe963d9eefb483e8a9afcac38fe56733b2"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02-cargo-receipts\\3e858ef87222400ca4b7563ca0ed751d\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02-cargo-receipts\\3e858ef87222400ca4b7563ca0ed751d\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "543c459be08e6ab10bcb767a031530ec9b7a180cc283ca6fb1f2e4a8590caad2"
+        }
+      ],
+      "guard": {
+        "id": "runtime-skill-test02",
+        "nonce": "3e858ef87222400ca4b7563ca0ed751d",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "3e858ef87222400ca4b7563ca0ed751d",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.policy.json",
+          "policySha": "82286c48cc39fa6f52028ba730476cb42285ad111d88ff713e0d683f1c15b371",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--features",
+            "native-npc-economy",
+            "--lib",
+            "npc_purchase_economy::tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T00:39:17.1039977Z",
+            "sampleEndUtc": "2026-10-08T00:39:17.7192093Z",
+            "remainingBytes": "276203020288",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 157124,
+          "probeLaunchMs": 86.50030000000001,
+          "probeEndMs": 893.0249,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 156288,
+          "childStartedUtc": "/Date(1791419957782)/",
+          "childStartMs": 915.6048000000001,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791419983025)/",
+          "completionMs": 26157.7311,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 157124,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791419956953)/",
+          "probeEndUtc": "/Date(1791419957760)/",
+          "probeLaunchMs": 86.50030000000001,
+          "probeEndMs": 893.0249,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 160076,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 26199,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-runtime-skill-test02.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 64
+      },
+      "actualPassed": 34,
+      "passingNames": [
+        "npc_purchase_economy::tests::native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_all_models_predecode_before_any_mutation",
+        "npc_purchase_economy::tests::native_npc_economy_bounded_completion_refuses_mutation_when_full",
+        "npc_purchase_economy::tests::native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains",
+        "npc_purchase_economy::tests::native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced",
+        "npc_purchase_economy::tests::native_npc_economy_duplicate_and_escaped_duplicate_are_rejected",
+        "npc_purchase_economy::tests::native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime",
+        "npc_purchase_economy::tests::native_npc_economy_item_metadata_mismatch_rejects_before_application",
+        "npc_purchase_economy::tests::native_npc_economy_mail_content_flags_and_concrete_attachment_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_mandatory_source_domains_cannot_use_defaults",
+        "npc_purchase_economy::tests::native_npc_economy_missing_public_hero_city_and_character_domains_never_apply",
+        "npc_purchase_economy::tests::native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate",
+        "npc_purchase_economy::tests::native_npc_economy_partial_tooltip_cannot_default_into_source_authority",
+        "npc_purchase_economy::tests::native_npc_economy_partial_wrong_actor_scope_and_max_rejected",
+        "npc_purchase_economy::tests::native_npc_economy_public_fingerprint_does_not_invent_private_checkpoint_fields",
+        "npc_purchase_economy::tests::native_npc_economy_real_item_vectors_reject_null_missing_slot_and_unknown_container",
+        "npc_purchase_economy::tests::native_npc_economy_reset_clears_source_and_retires_old_ack",
+        "npc_purchase_economy::tests::native_npc_economy_retirement_fences_prepared_bundle",
+        "npc_purchase_economy::tests::native_npc_economy_revision_history_survives_reset_and_fresh_binding",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_gold_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_inventory_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_mail_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_pearls_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_refine_clock_refresh_retains_original_source",
+        "npc_purchase_economy::tests::native_npc_economy_sparse_named_equipment_uses_crystal_slots",
+        "npc_purchase_economy::tests::native_npc_economy_uid_zero_belt_and_equipment_are_complete",
+        "npc_purchase_economy::tests::native_npc_economy_wallet_xp_level_capacity_and_storage_mismatch_rejected",
+        "npc_purchase_economy::tests::source36_skill_checkpoint_explicit_authority_ack_match_but_absent_epoch_is_not_zeroed",
+        "npc_purchase_economy::tests::source36_skill_checkpoint_same_count_wrong_content_never_applies_or_acknowledges",
+        "npc_purchase_economy::tests::source36_skill_checkpoint_sidecar_reassociation_and_row_order_are_verified",
+        "npc_purchase_economy::tests::source36_skill_owner_bounds_and_native_null_zero_catalog_contract_are_preserved"
+      ],
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  ],
+  "actualTests": {
+    "allRoundExecutions": 91,
+    "allRoundUniqueNames": 57,
+    "currentValidationCount": 57,
+    "currentSource02Fresh": 35,
+    "source01EffectiveBodyCarry": 22,
+    "source01Runtime34Superseded": true,
+    "newUniqueTests": 9,
+    "newPassingNames": [
+      "skill_model::tests::source36_skill_descriptors_preserve_later_runtime_key_and_clock_fields",
+      "skill_model::tests::source36_skill_descriptors_reject_same_count_identity_and_binding_splices",
+      "gateway::ownership_tests::source36_skill_correct_authority_wrong_descriptors_keep_source_pending",
+      "gateway::ownership_tests::source36_skill_later_packets_and_exact_ack_activate_without_rewind",
+      "npc_purchase_economy::tests::source36_skill_disabled_native_catalog_rejects_owner_checkpoint",
+      "npc_purchase_economy::tests::source36_skill_checkpoint_explicit_authority_ack_match_but_absent_epoch_is_not_zeroed",
+      "npc_purchase_economy::tests::source36_skill_checkpoint_same_count_wrong_content_never_applies_or_acknowledges",
+      "npc_purchase_economy::tests::source36_skill_checkpoint_sidecar_reassociation_and_row_order_are_verified",
+      "npc_purchase_economy::tests::source36_skill_owner_bounds_and_native_null_zero_catalog_contract_are_preserved"
+    ],
+    "currentPassingNames": [
+      "skill_model::tests::cooldown_and_mp_metadata_survive_deserialization",
+      "skill_model::tests::duplicate_hotkey_uses_first_learned_entry_and_does_not_duplicate_loser",
+      "skill_model::tests::explicit_experience_sidecar_overrides_only_fields_it_supplies",
+      "skill_model::tests::invalid_explicit_hotkeys_fail_closed_instead_of_filling_shortcuts",
+      "skill_model::tests::learned_skills_and_bindings_share_one_deterministic_bound",
+      "skill_model::tests::missing_hotkeys_remain_unassigned",
+      "skill_model::tests::name_and_key_only_skill_has_no_authoritative_spell_for_f1",
+      "skill_model::tests::only_explicit_server_hotkeys_are_resolved",
+      "skill_model::tests::original_skill_experience_is_optional_and_round_trips_without_fabrication",
+      "skill_model::tests::oversized_skill_and_sidecar_payloads_keep_the_same_prefix_and_order",
+      "skill_model::tests::rich_server_skill_json_is_backward_compatible_and_selectable",
+      "skill_model::tests::source36_skill_descriptors_preserve_later_runtime_key_and_clock_fields",
+      "skill_model::tests::source36_skill_descriptors_reject_same_count_identity_and_binding_splices",
+      "skill_model::tests::toggle_definition_and_authoritative_enabled_state_remain_independent",
+      "skill_model::tests::unknown_or_missing_cast_kind_fails_closed",
+      "gateway::ownership_tests::full_source_models_apply_before_world_stamp_and_map_only_never_readies",
+      "gateway::ownership_tests::handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities",
+      "gateway::ownership_tests::source36_skill_correct_authority_wrong_descriptors_keep_source_pending",
+      "gateway::ownership_tests::source36_skill_later_packets_and_exact_ack_activate_without_rewind",
+      "gateway::tests::actual_server_skill_fixture_keeps_authoritative_spell_and_optional_mp_cost",
+      "gateway::tests::real_magic_icons_override_catalog_snapshots_and_reset_at_session_boundary",
+      "gateway::tests::skill_receipt_retry_keeps_its_own_keys_before_latest_snapshot",
+      "npc_purchase_economy::tests::source36_skill_disabled_native_catalog_rejects_owner_checkpoint",
+      "npc_purchase_economy::tests::native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond",
+      "npc_purchase_economy::tests::native_npc_economy_all_models_predecode_before_any_mutation",
+      "npc_purchase_economy::tests::native_npc_economy_bounded_completion_refuses_mutation_when_full",
+      "npc_purchase_economy::tests::native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains",
+      "npc_purchase_economy::tests::native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced",
+      "npc_purchase_economy::tests::native_npc_economy_duplicate_and_escaped_duplicate_are_rejected",
+      "npc_purchase_economy::tests::native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond",
+      "npc_purchase_economy::tests::native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime",
+      "npc_purchase_economy::tests::native_npc_economy_item_metadata_mismatch_rejects_before_application",
+      "npc_purchase_economy::tests::native_npc_economy_mail_content_flags_and_concrete_attachment_correspond",
+      "npc_purchase_economy::tests::native_npc_economy_mandatory_source_domains_cannot_use_defaults",
+      "npc_purchase_economy::tests::native_npc_economy_missing_public_hero_city_and_character_domains_never_apply",
+      "npc_purchase_economy::tests::native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond",
+      "npc_purchase_economy::tests::native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate",
+      "npc_purchase_economy::tests::native_npc_economy_partial_tooltip_cannot_default_into_source_authority",
+      "npc_purchase_economy::tests::native_npc_economy_partial_wrong_actor_scope_and_max_rejected",
+      "npc_purchase_economy::tests::native_npc_economy_public_fingerprint_does_not_invent_private_checkpoint_fields",
+      "npc_purchase_economy::tests::native_npc_economy_real_item_vectors_reject_null_missing_slot_and_unknown_container",
+      "npc_purchase_economy::tests::native_npc_economy_reset_clears_source_and_retires_old_ack",
+      "npc_purchase_economy::tests::native_npc_economy_retirement_fences_prepared_bundle",
+      "npc_purchase_economy::tests::native_npc_economy_revision_history_survives_reset_and_fresh_binding",
+      "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_gold_conflicts",
+      "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_inventory_conflicts",
+      "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_mail_conflicts",
+      "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_pearls_conflicts",
+      "npc_purchase_economy::tests::native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh",
+      "npc_purchase_economy::tests::native_npc_economy_same_revision_refine_clock_refresh_retains_original_source",
+      "npc_purchase_economy::tests::native_npc_economy_sparse_named_equipment_uses_crystal_slots",
+      "npc_purchase_economy::tests::native_npc_economy_uid_zero_belt_and_equipment_are_complete",
+      "npc_purchase_economy::tests::native_npc_economy_wallet_xp_level_capacity_and_storage_mismatch_rejected",
+      "npc_purchase_economy::tests::source36_skill_checkpoint_explicit_authority_ack_match_but_absent_epoch_is_not_zeroed",
+      "npc_purchase_economy::tests::source36_skill_checkpoint_same_count_wrong_content_never_applies_or_acknowledges",
+      "npc_purchase_economy::tests::source36_skill_checkpoint_sidecar_reassociation_and_row_order_are_verified",
+      "npc_purchase_economy::tests::source36_skill_owner_bounds_and_native_null_zero_catalog_contract_are_preserved"
+    ],
+    "qualification": "Source02 default1+feature34 freshly executed. Source01 Bevy15 and Native7 carried only under exact unchanged effective feature-tested body proof; not full897 zero drift or current Native EXE build."
+  },
+  "guardSummary": {
+    "actualCalls": 5,
+    "actualNonceFiles": 25,
+    "minRequiredBytes": "53687091200",
+    "minActualRemainingBytes": "276203020288",
+    "maxFreshnessUpperMs": 65,
+    "policyBAllClosed": true,
+    "originalGuardAndProbePins": [
+      {
+        "id": "guardSource",
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.cs",
+        "bytes": 20309,
+        "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689"
+      },
+      {
+        "id": "callee",
+        "declaredPath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "linkTarget": "rustup.exe",
+        "path": "C:\\Users\\Administrator\\.cargo\\bin\\rustup.exe",
+        "bytes": 12814336,
+        "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+      },
+      {
+        "id": "resolvedRustup",
+        "path": "C:\\Users\\Administrator\\.cargo\\bin\\rustup.exe",
+        "bytes": 12814336,
+        "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+      },
+      {
+        "id": "powerShell",
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "bytes": 495616,
+        "sha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e"
+      },
+      {
+        "id": "probe",
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\probe-volume-C.ps1",
+        "bytes": 772,
+        "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      {
+        "id": "license",
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\LICENSE.0BSD.txt",
+        "bytes": 661,
+        "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d"
+      },
+      {
+        "id": "guardExe",
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+        "bytes": 37376,
+        "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+      }
+    ]
+  },
+  "typescript": {
+    "thisRound": "not-rerun",
+    "source35LimitedCarry": "Strict TS5.9.3 noEmit/nonincremental prior actual result only under unchanged effective TS input subset;4 explicit Rust graph changes",
+    "priorResult": {
+      "actualExitCode": 0,
+      "strict": true,
+      "version": "5.9.3",
+      "noEmit": true,
+      "incremental": false,
+      "stdoutEmpty": true,
+      "stderrEmpty": true,
+      "userTsconfig": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+        "bytes": 4932,
+        "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+      }
+    }
+  },
+  "nodeTestsThisRound": "not-rerun; Rust/Native-only changes, no Web TS/MJS source change",
+  "buildsThisRound": {
+    "productionExe": "not-run",
+    "renderers": "not-run",
+    "corePresentationNpc": "not-run",
+    "fullWeb": "not-run"
+  },
+  "publishedWeb": "Source25 Next08/Thin08 remains accepted public package; Source26-36 source changes are not in latest complete accepted Web package",
+  "publishedManifests": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\bevy_runtime_version.json",
+      "bytes": 1711,
+      "sha256": "a2dc7560bebacdabe990e54c226122da738a678fecdc3b443cb1e0f85d0075d3"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\client_core_runtime.json",
+      "bytes": 1039,
+      "sha256": "0a15a8d436cd660d171762d2c0558f05ebfb6ad868b86de97b3760baf3e486e5"
+    }
+  ],
+  "featureMatrix": {
+    "records": 317,
+    "shared": 103,
+    "legacy": 206,
+    "common": 8,
+    "rawOpen": 0,
+    "implementedRecordCoverage": 0.9747634069400631,
+    "overallPercentage": null,
+    "candidate100": false,
+    "allRowsPlayerVerification": "not-run",
+    "pin": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.json",
+      "bytes": 3228933,
+      "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+    }
+  },
+  "remaining": [
+    "Complete current-source matching Web Next/Thin delivery and original full-module/name/normalized imports-exports/default-gzip/initialization gates remain not-run; original helper WASM API prohibited, no bypass",
+    "Native whole readiness/flush/normal handshake/keepalive write deadline still open; next read-only proposal only",
+    "Wide UID action ABI and WASM Hero adapter drain/setter ABI remain open",
+    "Legacy engine packet-only unsafe dates and calendar-vs-transport limits retained",
+    "NewMagic immutable descriptor changes conservatively await matching full producer",
+    "Actual login/combat/save/relogin/resources/mobile/player acceptance not-run"
+  ],
+  "nextTransportProposal": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-next-transport-plan01.json",
+    "bytes": 2788,
+    "sha256": "f8ada6a0c72ba76068f7b1b95a2091772038175363db1710377887b428714805"
+  },
+  "source35PublicationCarry": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-storage-source35-publication01.json",
+    "bytes": 9953,
+    "sha256": "4df4824cc93f5ed982c634621aede9baeddd81d03574b71862c40e6c340df9c9"
+  },
+  "dataReaderCorrections": [
+    "s30Pin refused original cargo.exe link; explicit readlink/realpath proved same declared rustup and original SHA, no template/policy change",
+    "functions.store rejected undefined completed session_id; recovered original saved outer/log/nonce proof, no execution restart",
+    "All-at-once17120 pin read hit EMFILE; bounded64 data reads succeeded, no product/test assertion or process change",
+    "First documentation data-edit script rejected before evaluation because generic var before collided with persistent binding; no file write, corrected to task-prefixed lexical locals."
+  ],
+  "independentReviewStatus": "Accepted actual61 raw files/73 nested pins/5 original executions/57 current validation and all25 nonce files; still no full delivery or playable acceptance",
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-skill-source36-raw-evidence01.json",
+    "bytes": 7668513,
+    "sha256": "195ed983a6a57ff1522c31d53acfdc767d2c247857c2f0f3f70efc4ad63a0a84"
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalStatus": "active",
+  "qualification": "Only bounded code/static compilation and pure-memory regression.57 is test coverage count;97.5% is existing implemented-record checklist coverage, not overall parity or playable proof.",
+  "actualIndependentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-skill-source36-actual-review01.json",
+    "bytes": 2026,
+    "sha256": "0eaa0aa2c5f1122f52f771093fc873c521b1af131079662c948deaa68b750086"
+  },
+  "supersededResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-skill-source36-finite-result01.json",
+    "bytes": 67300,
+    "sha256": "844162f595f38717109095e85d80eb751f8d969bfc076c589607a4bca150b548"
+  },
+  "docs": [
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 275875,
+        "sha256": "e050b2328cd47cb0bb81242f9d7da7dbc29181bf40c045c77ed73465f2cbf6d6"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 278531,
+        "sha256": "3dbe320493670345505312f3b1f564318fdaf7feed6741e21a5587af7bf70ab0"
+      }
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 893995,
+        "sha256": "0a89dd89d2df04ee89581fd9dbf95105001aa1fb5129017e15b0948bf703ca9f"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 896651,
+        "sha256": "8eb2cd56ec03d513e9a52b3cd0e96bb743cd81471e510e454b9e014d9f827a57"
+      }
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1013761,
+        "sha256": "0579a4ca2d6ba2577e6e4ffd9586d2888b4c1bd6ccce8098474459be342fb183"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1016417,
+        "sha256": "1021ca8ba3f1b60da9b9e128f9e05717f1b5c6a0d858d0e1641d7c484bb232ea"
+      }
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 635520,
+        "sha256": "2e2084d1d0e3074841a7187e7fe5221e7e5a1721ab91bf3051c2238d9396dd20"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 638176,
+        "sha256": "fe35371d1a6ac11a8884812f93492551ee1c49be9c769404c73e265ff919dcab"
+      }
+    },
+    {
+      "relativePath": "docs/PLAYER-QA-PLAYTHROUGH.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 30848,
+        "sha256": "1e5b9675213ec78b538dc6be8b12816268496a073cbd7db613fabbca5c329a11"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 33504,
+        "sha256": "2241ce70cfd7b7c1c317fa5387923352588f90c841c8b74d2f6e1ebc3e39098d"
+      }
+    },
+    {
+      "relativePath": "docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 49872,
+        "sha256": "88fa28fd348a8a5ed943d3b2299a5bfa6af70a10c140604449257d0e6f7763e5"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 52528,
+        "sha256": "db4e6d8fbbe966371c2ad8047d29f7f1c0284360a9745ed03e67b9a17dcb40d3"
+      }
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 556734,
+        "sha256": "56581c3c06bbbc8b803ba81420eebf1b8ddb9ae2d3d803b28cba828318e5dbff"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 557280,
+        "sha256": "7040825462a0abbfdcfd2bb95638bced9ac3e1db9864b62875e2dc2c061eb0ac"
+      }
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 499263,
+        "sha256": "f09495bd2e8437c092aa7628cfb5ae7a2854d9d4947d8bbac81b0e0b8229e2d4"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 499809,
+        "sha256": "233be1cc3442cab2f1b8a9c70d22cf5c7aea6f958189cf06d56c710736e15c50"
+      }
+    }
+  ]
+}

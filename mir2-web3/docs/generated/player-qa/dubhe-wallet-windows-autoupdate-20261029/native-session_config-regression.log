@@ -1,0 +1,20 @@
+
+running 15 tests
+test session_config::tests::client_toml_accepts_wss_and_display_size ... ok
+test session_config::tests::client_toml_creation_policy_is_explicit_and_old_configs_keep_five_classes ... ok
+test session_config::tests::client_toml_creation_policy_rejects_empty_duplicate_unknown_and_nonarray_values ... ok
+test session_config::tests::client_toml_persists_newcomer_guidance_without_launch_environment ... ok
+test session_config::tests::client_toml_rejects_credentials_and_unknown_sections ... ok
+test session_config::tests::client_toml_rejects_non_loopback_ws ... ok
+test session_config::tests::debug_output_redacts_the_auto_login_password ... ok
+test session_config::tests::explicit_character_index_is_only_an_auto_login_option ... ok
+test session_config::tests::explicit_credentials_enable_opt_in_auto_login_without_auto_start ... ok
+test session_config::tests::invalid_character_index_and_gateway_scheme_are_rejected ... ok
+test session_config::tests::missing_credentials_open_the_interactive_login_flow ... ok
+test session_config::tests::native_entry_loads_invited_wss_and_keeps_explicit_local_overrides ... ok
+test session_config::tests::partial_or_empty_credentials_are_rejected ... ok
+test session_config::tests::plaintext_gateway_is_limited_to_loopback_and_url_credentials_are_rejected ... ok
+test session_config::tests::wallet_auth_uses_only_an_explicit_secure_origin_with_environment_precedence ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 1170 filtered out; finished in 0.06s
+

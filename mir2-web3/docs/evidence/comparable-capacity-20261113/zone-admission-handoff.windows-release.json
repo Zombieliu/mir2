@@ -1,0 +1,219 @@
+{
+  "schema": "mir2.clean-zone-admission-handoff-windows-release.v1",
+  "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "codeIntegrationRevision": "1cac973aa7dfc5a563a05012182341cd0fa22a49",
+  "sourceWorktree": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-build-v1\\source",
+  "sourceBeforeClean": true,
+  "sourceBranchName": "codex/ccu-zone-admission-handoff",
+  "sourceBranchRole": "canonical-integrated-release",
+  "canonicalIntegrationPending": false,
+  "canonicalBranch": "codex/windows-player-journey",
+  "compiledScopesEqualCanonicalIntegration": true,
+  "compiledInputGitObjects": [
+    {
+      "path": "mir2-web3/apps/gateway",
+      "sourceGitObject": "1f3f7658b6b8334f201d49d1096ae728bc1856ce",
+      "integrationGitObject": "1f3f7658b6b8334f201d49d1096ae728bc1856ce",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation",
+      "sourceGitObject": "2b7cbafd7b50072002d2b77bae283a2ad1e58060",
+      "integrationGitObject": "2b7cbafd7b50072002d2b77bae283a2ad1e58060",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/packages/game-data",
+      "sourceGitObject": "ab13d4cf5479b5d17bbed04a8d20f3b067138933",
+      "integrationGitObject": "ab13d4cf5479b5d17bbed04a8d20f3b067138933",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/packages/production",
+      "sourceGitObject": "7ef96a9ada44c95b569432a7319dfc14c759ba11",
+      "integrationGitObject": "7ef96a9ada44c95b569432a7319dfc14c759ba11",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/packages/protocol",
+      "sourceGitObject": "656c47ab69d5b51bac4a45f7eabb232c59643fd9",
+      "integrationGitObject": "656c47ab69d5b51bac4a45f7eabb232c59643fd9",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/vendor/dubhe-network-core",
+      "sourceGitObject": "c62d2581d3fdabfae58152f092de7c54e8a8b640",
+      "integrationGitObject": "c62d2581d3fdabfae58152f092de7c54e8a8b640",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-wire",
+      "sourceGitObject": "d8d9e98022a9de50f964aec193a3912436b6319f",
+      "integrationGitObject": "d8d9e98022a9de50f964aec193a3912436b6319f",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "sourceGitObject": "8c0567acb253eec7f94fad349d0d7de2883b8c16",
+      "integrationGitObject": "8c0567acb253eec7f94fad349d0d7de2883b8c16",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "sourceGitObject": "a5d1d50d7ba8701e08e3a5a9e0e47b9287251fa3",
+      "integrationGitObject": "a5d1d50d7ba8701e08e3a5a9e0e47b9287251fa3",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/scripts",
+      "sourceGitObject": "84d93298ed1abeac0bd3d2801257de6e2e0c9f81",
+      "integrationGitObject": "84d93298ed1abeac0bd3d2801257de6e2e0c9f81",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/infra",
+      "sourceGitObject": "c0a0392de151feca82ff0259c3b0dab282662245",
+      "integrationGitObject": "c0a0392de151feca82ff0259c3b0dab282662245",
+      "equal": true
+    },
+    {
+      "path": ".github/workflows",
+      "sourceGitObject": "c177421a53b0b9fdfd9f6ffe7d9df9685d260ecd",
+      "integrationGitObject": "c177421a53b0b9fdfd9f6ffe7d9df9685d260ecd",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack",
+      "sourceGitObject": "4095e707e1602a09503deeb2a34cab9e62f35423",
+      "integrationGitObject": "4095e707e1602a09503deeb2a34cab9e62f35423",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-CATALOG.v0.2.json",
+      "sourceGitObject": "c2e639404a1ed9f287f34b393a78585404e5235d",
+      "integrationGitObject": "c2e639404a1ed9f287f34b393a78585404e5235d",
+      "equal": true
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/health-authority-05/source-vectors.csv",
+      "sourceGitObject": "1934a03e6cf83acf48ac7a41a85bc63956405dd0",
+      "integrationGitObject": "1934a03e6cf83acf48ac7a41a85bc63956405dd0",
+      "equal": true
+    }
+  ],
+  "testedSourcesSha256": {
+    "mir2-web3/apps/gateway/src/routing.rs": "d855ed2e27d405404d1336a12f15848621d206eef5070388b24b572499b70281",
+    "mir2-web3/apps/gateway/src/shared_experience_profiles.rs": "0f0eee7c4abde72edc63a505db04d825472e26e49ae7c807b6fc28f088610d8a",
+    "mir2-web3/apps/gateway/src/zone_experience_admission_handoff_tests.rs": "741134e61950c5022b6c05cb69bce89a4d98da817827e831697082952ee411c1"
+  },
+  "buildProfile": "release",
+  "packageOptOverrides": {},
+  "normalReleaseCommand": [
+    "rustup",
+    "run",
+    "1.95.0",
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway",
+    "--message-format=json"
+  ],
+  "nativeEvidence": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\RESULTS.json",
+    "bytes": 21823,
+    "sha256": "7c1b3f66f3e914d83922fbd63e8cacb55a1e5ebaeb1aa3078fb34610a9c4b64a"
+  },
+  "nativeEvidencePending": false,
+  "currentCandidateNativeCounts": {
+    "gateway": 34,
+    "zoneRpc": 1,
+    "simulation": 0,
+    "total": 35
+  },
+  "priorSimulation84": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-release-v1\\SIMULATION-NATIVE-84-VERIFIED.json",
+    "bytes": 1958,
+    "sha256": "65d470fb1d5f457bb253193902809b954ba2d49b1257ac4558ab68f944f7242e",
+    "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+    "uniqueRegularPasses": 84,
+    "historicalNotReexecutedForCandidate": true
+  },
+  "priorSimulation84ReexecutedOrRelabelledForCandidate": false,
+  "childGameEnvironmentScrubbed": true,
+  "fixedDayEnvironmentSet": false,
+  "controlledCompileEnvironment": {
+    "CARGO_TARGET_DIR": "E:\\mir2-capacity-target-zone-admission-v1",
+    "CARGO_BUILD_JOBS": "1",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_RELEASE_DEBUG": "0"
+  },
+  "normalReleaseCandidate": true,
+  "capacityQualified": false,
+  "gameExecuted": false,
+  "compilerClosureStillOwnedByRoot": false,
+  "sourceAfterClean": true,
+  "actualCargoExitCode": 0,
+  "binaryPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-release-prep-v1\\release\\mir2-gateway.exe",
+  "binarySha256": "6ea6b90f67f8ab0225baf60fc978a0a794088d06f59861e51d1cf25ae926a0db",
+  "binarySizeBytes": 99823616,
+  "compilerArtifactOriginalPath": "E:\\mir2-capacity-target-zone-admission-v1\\release\\mir2-gateway.exe",
+  "originalStatAndHashStable": true,
+  "exactIndependentCopyVerified": true,
+  "peX64HeaderVerified": true,
+  "gatewayCompilerProfile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": false,
+    "overflow_checks": false,
+    "test": false
+  },
+  "gatewayFeatures": [
+    "default"
+  ],
+  "simulationCompilerProfile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": false,
+    "overflow_checks": false,
+    "test": false
+  },
+  "simulationFeatures": [
+    "default"
+  ],
+  "actualCargoPackageRoots": [
+    "mir2-web3/apps/game-client/client-wire",
+    "mir2-web3/apps/gateway",
+    "mir2-web3/apps/simulation",
+    "mir2-web3/packages/game-data",
+    "mir2-web3/packages/production",
+    "mir2-web3/packages/protocol",
+    "mir2-web3/vendor/dubhe-network-core"
+  ],
+  "publicServiceDeployed": false,
+  "createdAtUtc": "2026-11-15T02:01:06.143269+00:00",
+  "compileJobReceipt": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-release-prep-v1\\compile-job\\job-result.json",
+    "bytes": 1218,
+    "sha256": "40b48cf901f31db061d722eb7af3cd92be123352d312fb2d55267c0946f51050"
+  },
+  "compileWrapperExitCode": 1,
+  "compileAllOwnedMembersClosedBeforeGame": true,
+  "compileHelperCleanupWasForced": true,
+  "compileNormalEnvelopePassed": false,
+  "killAppliedByClose": false,
+  "exactOwnedCompilerHelperCleanup": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-release-helper-cleanup-prep-v1\\owned-helper-cleanup.after.json",
+    "bytes": 896,
+    "sha256": "189f6908065c10f451380fe1fb9b3afe092624d6fa2447f7c09c77ecf9df2799"
+  },
+  "diagnosticOnly": false,
+  "nativeUniquePassedForCandidate": 35,
+  "simulationNativeExecutionsForCandidate": 0,
+  "priorFailedAttemptsNotReclassified": true,
+  "noNewGameOrNetworkAuthYet": true
+}

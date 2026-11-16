@@ -1,0 +1,40 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-packed-s2026102912/release/VERIFY-PACKED-GENERATION.json",
+    "bytes": 1104,
+    "sha256": "e84cf702c757bd565220c2a9b38a7992579751c233f2b86277cfad2cc169a2e3"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.packed-generation-verification.v1",
+    "passed": true,
+    "cmsVerified": true,
+    "fullResourceVerified": true,
+    "metadataOnly": false,
+    "sourceClean": true,
+    "published": false,
+    "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "sequence": 2026102912,
+    "catalogSha256": "1466EE20A770D5E2EEF87D27EAE5EB8B78AC4F8A539248679DC5A9629EEF17F7",
+    "feedSha256": "6D2C2FB0F01155047D56BA42157658D49DEF40C8C23B33AB9F34725C416A204C",
+    "feedSignatureSha256": "914B27A2AD91320F7209F959E8901F555267ADDC150EA56F4F754CA2F3F19F65",
+    "generationSignatureSha256": "62A34E51582D0C0E857B3B10D213B0E16FED3EA0C04F49316C2A82ECFF34459D",
+    "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "packVerifierSha256": "AC731A9D407E14AEDEDCC958E4A244750E7F1BFACCDC57D552CF8F1F11031A0D",
+    "resourceCount": 255063,
+    "uniquePayloads": 247477,
+    "logicalBytes": 1086916989,
+    "uniquePayloadBytes": 1053192997,
+    "packCount": 33,
+    "packBytes": 1069032581,
+    "verifiedUnix": 1793293161
+  },
+  "phase": "Independent actual signed-generation full verification, metadataOnly=false",
+  "installed": false,
+  "gameLaunched": false,
+  "publicFeedModified": false
+}

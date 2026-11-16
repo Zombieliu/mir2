@@ -1,0 +1,178 @@
+{
+  "schema": "mir2.five-minute.g0-real-login-resource-observation.v1",
+  "verifiedAtUtc": "2026-11-01T17:41:40.673154+00:00",
+  "diagnosticOnly": true,
+  "gameSourceRevision": "262cf6f962eb72d2660fa81deb60639a402a7279",
+  "engineSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "sameSourceUnifiedRelease": false,
+  "manifest": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/g0-installed-01/generations/d613eb62669adcca182f6d480bb9e8199bf7eb383a711bb96081cf5368e8f31c/GENERATION.json",
+    "bytes": 6993,
+    "sha256": "d613eb62669adcca182f6d480bb9e8199bf7eb383a711bb96081cf5368e8f31c"
+  },
+  "uiReceipt": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/g0-login-01/UI-OBSERVATION.json",
+    "bytes": 7071,
+    "sha256": "e622b4ad4ae58fade349a9edc98d401f0f8e06647a5212dc92a87569f54e62d2"
+  },
+  "normalCmsFullPackVerification": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/payload-g0-112/VERIFY-PACKED-GENERATION.json",
+    "bytes": 1104,
+    "sha256": "64bc316b7531600c11d1d2b496b2d9b54c7ddbf3f6e861795f37c04500bd1607"
+  },
+  "rootCaptureChecker": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/check-g0-capture.py",
+    "bytes": 9673,
+    "sha256": "2ccacca2ea99312cfb589df02a0c78ede0ba44bd00f4df671ba0115c0b6875a5"
+  },
+  "actualRootCheckerArgv": [
+    "C:\\Python313\\python.exe",
+    "E:\\mir2-release\\windows-five-minute-20261101\\diagnostic-plan\\check-g0-capture.py",
+    "--manifest",
+    "E:\\mir2-release\\windows-five-minute-20261101\\diagnostic-plan\\g0-installed-01\\generations\\d613eb62669adcca182f6d480bb9e8199bf7eb383a711bb96081cf5368e8f31c\\GENERATION.json",
+    "--verification-receipt",
+    "E:\\mir2-release\\windows-five-minute-20261101\\diagnostic-plan\\payload-g0-112\\VERIFY-PACKED-GENERATION.json",
+    "--verification-sha256",
+    "64bc316b7531600c11d1d2b496b2d9b54c7ddbf3f6e861795f37c04500bd1607",
+    "--png",
+    "E:\\mir2-release\\windows-five-minute-20261101\\diagnostic-plan\\g0-login-01\\captures\\g0-login-1793550615861-1.png"
+  ],
+  "actualRootCheckerExitCode": 0,
+  "rootCheckerRawOutput": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/G0-ROOT-CAPTURE-CHECK.actual.log",
+    "bytes": 1162,
+    "sha256": "7aa4af63e314da0584d84372e55e9dbce9e51df455a6834ffb68f011564a8178"
+  },
+  "rootChecker": {
+    "schema": "mir2.g0.capture-binding-inspection.v1",
+    "captureBindingValid": true,
+    "gameSourceRevision": "262cf6f962eb72d2660fa81deb60639a402a7279",
+    "engineSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "sequence": 2026110112,
+    "manifestSha256": "d613eb62669adcca182f6d480bb9e8199bf7eb383a711bb96081cf5368e8f31c",
+    "catalogSha256": "45fde1922c1435069d0a8e7389e2da1a08a22b7dcd290276dbc012f29db8e311",
+    "pngSha256": "8431c3201a92567d1e802862f3655aeeef9132b0ff2eb48c37ff5f97c88791bf",
+    "captureMarkerSha256": "5f635f44c50d58c97717ffd436fa0050d83fb3df73c9583147ebffd8f172f290",
+    "resourceReadsSha256": "3db9434fc194a3a017103d632aaca2ad606090d9fcadfd0710c24a7cb912c6a2",
+    "selectorSha256": "9b6f6a0f9500ec28ef7651a115baf2190f2e8ec535c372cf2923cbacb780e829",
+    "readResourceCount": 231,
+    "successfulReadOperations": 542,
+    "failedReadOperations": 0,
+    "logicalReadBytes": 110321434,
+    "uniquePayloadReadBytes": 110321434,
+    "touchedPackCount": 33,
+    "touchedPackBytes": 1069032581,
+    "cmsIndependentlyVerifiedByThisTool": false,
+    "realReadyOrProcessIdentityProvenByThisTool": false,
+    "jobMembershipProvenByThisTool": false,
+    "humanLoginOrMapAccepted": false,
+    "completeBootClosureClaimed": false,
+    "fiveMinuteAcceptance": false
+  },
+  "nativePng": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/g0-login-01/captures/g0-login-1793550615861-1.png",
+    "bytes": 2111030,
+    "sha256": "8431c3201a92567d1e802862f3655aeeef9132b0ff2eb48c37ff5f97c88791bf"
+  },
+  "rootNativePngVisuallyInspected": true,
+  "visualObservation": "Actual1024x768login, empty credentials, Dubhe Wallet entry; no authenticated map gameplay. Original draft capture eligible=false retained.",
+  "resourceReadSetLowerBoundOnly": true,
+  "topObservedResources": [
+    {
+      "path": "original-ui/Sound/Login2.wav",
+      "bytes": 12094764,
+      "reads": 1
+    },
+    {
+      "path": "generated/native-map-keyed/manifest.json",
+      "bytes": 11320827,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/Sound/Select2.wav",
+      "bytes": 6345596,
+      "reads": 1
+    },
+    {
+      "path": "bevy-entity-atlases/manifest.json",
+      "bytes": 3402450,
+      "reads": 2
+    },
+    {
+      "path": "original-ui/ChrSel/4.png",
+      "bytes": 2508062,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/3.png",
+      "bytes": 2505951,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/8.png",
+      "bytes": 2504967,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/6.png",
+      "bytes": 2504835,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/5.png",
+      "bytes": 2504048,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/7.png",
+      "bytes": 2503934,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/0.png",
+      "bytes": 2497741,
+      "reads": 1
+    },
+    {
+      "path": "original-ui/ChrSel/2.png",
+      "bytes": 2496790,
+      "reads": 1
+    }
+  ],
+  "jobClosedRawEvents": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/g0-login-01/events.jsonl",
+    "bytes": 2929,
+    "sha256": "092d1b1689b57ba9e1e86633a1a075964af50135a26cd693edbb7dc121441d76"
+  },
+  "actualClosed": {
+    "activeProcessesRetained": 0,
+    "actualLimits": {
+      "affinityMask": "0x55",
+      "breakawayAllowed": false,
+      "flags": 528,
+      "jobMemoryBytes": 8589934592,
+      "killOnJobClose": false,
+      "limitsMatch": true,
+      "logicalCpuCount": 4,
+      "memoryMeaning": "aggregate process committed virtual memory; not physical RAM",
+      "peakJobMemoryBytes": 2395561984
+    },
+    "event": "closed",
+    "monotonicNs": 96530920431900,
+    "processesKilled": false,
+    "utc": "2026-11-01T16:34:36.811819+00:00"
+  },
+  "sdkNormalExitRawLog": {
+    "path": "E:/mir2-release/windows-five-minute-20261101/diagnostic-plan/g0-installed-01/.update/last-run.jsonl",
+    "bytes": 611,
+    "sha256": "9c13106974f6a9c638b07197652f1c09ae24e1bbf615155e3de5f82b0dcdcb0e"
+  },
+  "liveJobMembershipEvidence": "Prior actual controller read in root tool history, reproduced as rootReportedLiveRead by UI receipt; not a separate persisted raw live-query file.",
+  "physicalFourCore8GiBMachine": false,
+  "coldDownload": false,
+  "installerBenchmark": false,
+  "mapOperation": false,
+  "firstPlayClosureComplete": false,
+  "fiveMinuteAcceptance": false,
+  "publicPromotion": false
+}

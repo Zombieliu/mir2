@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-26T00:48:57.516Z",
+  "files": [
+    {
+      "path": "verify-ended-formal15-v1.mjs",
+      "bytes": 41893,
+      "sha256": "4ea12ad4e9abb3271ad3aa8a5b861df54d8670a6c22a49169f5e121671f3e77c"
+    },
+    {
+      "path": "formal-contract-v1.mjs",
+      "bytes": 6143,
+      "sha256": "5bfc446cae0a3da263cf74fce8078b73173da9b55619487fd9f831e36afd54aa"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "path": "run-ended-formal15-v1.mjs",
+      "bytes": 2259,
+      "sha256": "e0488f9d726e5588f1a75dd140849d82487a3dd3df6a48a7cac268914f176fe2"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-final-v1.json",
+      "bytes": 10841,
+      "sha256": "5192c844355d29f8fd90b23cb403b0d504bd88eac36db34d3b991c15bc9790d5"
+    },
+    {
+      "path": "root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 7547,
+      "sha256": "ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1"
+    },
+    {
+      "path": "syntax-check-final-v1.log",
+      "bytes": 91,
+      "sha256": "eae7637bc657ecfaa5eb75b5cd43d2036db030d0a501662fb5fc2e575e047b01"
+    }
+  ],
+  "sourceSha256": "5f868cc5e8ba5810daf514b6d5f308c96d6648beced7a6a837682ef769893533",
+  "basisPreparation": {
+    "path": "preparation-pending-v2.json",
+    "bytes": 5661,
+    "sha256": "badb2b4f7a6fd52f4c8b1aae84f72f0f2397bfb0f152f721ec0aaf1bf1367ecf"
+  },
+  "actualBinding": {
+    "state": "FINAL_ACTUAL_ENDED_RUN_AND_CLEANUP_BOUND",
+    "runId": "1792974410829-a5288349",
+    "ownedPids": [
+      67304,
+      59024
+    ],
+    "rootCleanupSha256": "2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de",
+    "rootCleanupShape": "schema1-ownedPids-remainingArrays-observedAt-scope",
+    "consumerTerminalPins": [
+      {
+        "phase": "base-collection",
+        "exitCode": 0,
+        "stdout": {
+          "path": "formal15-root-base-collection-stdout-v1.log",
+          "bytes": 132864,
+          "sha256": "771d39ed7ceae3afa532ff8c349cd717472a65b65ee5662a6a6757e1960c486c"
+        },
+        "stderr": {
+          "path": "formal15-root-base-collection-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "phase": "base-verification",
+        "exitCode": 0,
+        "stdout": {
+          "path": "formal15-root-base-verification-stdout-v1.log",
+          "bytes": 5021,
+          "sha256": "2d14695283ed759c6df829d6754ccbbfa413cf0cf0251919f5795ee7a0841466"
+        },
+        "stderr": {
+          "path": "formal15-root-base-verification-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "phase": "store-collection",
+        "exitCode": 0,
+        "stdout": {
+          "path": "formal15-root-store-collection-stdout-v1.log",
+          "bytes": 396,
+          "sha256": "476a9d2f30c54f767d567d55d3e98c9693e8d43e7978f92a105a4cf99ce4caf0"
+        },
+        "stderr": {
+          "path": "formal15-root-store-collection-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "phase": "store-verification",
+        "exitCode": 0,
+        "stdout": {
+          "path": "formal15-root-store-verification-stdout-v1.log",
+          "bytes": 1243,
+          "sha256": "32d4c4e635eec0406b512d14a251c69b537c57f61a371521bbaa9dbe1f7bea59"
+        },
+        "stderr": {
+          "path": "formal15-root-store-verification-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    ],
+    "rootActualFacts": {
+      "path": "formal15-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 7547,
+      "sha256": "ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1"
+    },
+    "report": {
+      "path": "release-native-v2-scout-anti-convergence-ladder-15/reports/1792974410829-a5288349.report.json",
+      "bytes": 424421,
+      "sha256": "e938a814eed311b80281ffcd6cadf16e57d36c78f48a1f35ad4caf68d90355a3"
+    },
+    "admittedSourceConfigSha256": "5c8be7bc19d26ecf69326c19224f6f657d469099f00f606bed042a3912b40b8a",
+    "admittedSourceFileCount": 372
+  },
+  "scope": {
+    "originalFullFormalStages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "requiredCompleteWindows": 146,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "minimumMemoryObservationSeconds": 1800,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "actualMeasuredSecondsRates": true,
+    "failedOrPartialNotPromoted": true,
+    "storeNotGameConjunct": true,
+    "independentPerRequestTyped900PacketReplay": false
+  },
+  "actualHistoricalRootOutcome": {
+    "runExitCode": 1,
+    "reportOk": false,
+    "capacityAccepted": false,
+    "stage25WindowVerdicts": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "fiftyHundredAndTwoHourSoakExecuted": false
+  },
+  "syntax": {
+    "kind": "Node --check only, not import or behavior test",
+    "finalMainPassed": 1,
+    "finalMainFailed": 0,
+    "log": {
+      "path": "syntax-check-final-v1.log",
+      "bytes": 91,
+      "sha256": "eae7637bc657ecfaa5eb75b5cd43d2036db030d0a501662fb5fc2e575e047b01"
+    },
+    "priorFiveSources": {
+      "path": "syntax-check-v1.log",
+      "bytes": 443,
+      "sha256": "41784dcda1b37253ad32fe5883ddab533f4aca7d08c7c4d66f0fd9e7902db182"
+    },
+    "priorStoreChildSource": {
+      "path": "syntax-check-v2.log",
+      "bytes": 97,
+      "sha256": "3ca43b80f34a1f146f1f5349c2e880c9b5d16153dd7132a92a0188e41a2d37ba"
+    }
+  },
+  "requiresRootActions": [
+    "Independent source review exact preparation pin",
+    "Root source seal, then once actual runner replay",
+    "Original formal FAILED remains; no capacity/P0/P2 promotion"
+  ],
+  "limitations": [
+    "readline aggregates before64MiB check; trusted SHA-bound frozen producer, not malicious-line strict bound",
+    "Original memory warmup cutoff not recorded; retain suffix arithmetic and1800s/32MiBhr gates, no timing relaxation",
+    "No independent per-request typed-result/dual-positive900ms packet replay",
+    "Store completed spans are separate diagnostics, not gameplay credit or proof of absence"
+  ],
+  "actualRawReplayExecuted": false,
+  "actualToolSealExecuted": false,
+  "privateDataRead": false,
+  "sourceOrSceneChanged": false,
+  "rootP0AcceptanceAdjudicated": false,
+  "capacityAccepted": false
+}

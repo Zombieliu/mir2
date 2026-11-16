@@ -1,0 +1,22 @@
+{
+  "CheckedAt": "2026-10-24T12:46:29.5484488Z",
+  "Pid": 49716,
+  "IsRunning": false,
+  "Executable": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\mir2-gateway.exe",
+  "LastCleanDrainReport": "1792845858629-b969ae9c.report.json",
+  "CapacityAtLastOrdinaryLogout": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "State": "Cleanly drained; coordinator owns process cleanup. Focused runner did not stop or change service."
+}

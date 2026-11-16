@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "boundAt": "2026-10-25T05:55:15.098Z",
+  "state": "final-compact-static-scene-bound-not-executed",
+  "profile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "rootApprovedFreshProbe": true,
+  "formalCapacityApproved": false,
+  "staticOnly": true,
+  "dynamicSupplyVerified": false,
+  "capacityAccepted": false,
+  "probeScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+    "bytes": 804,
+    "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+  },
+  "formalScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+    "bytes": 5844,
+    "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+  },
+  "analysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+    "bytes": 20628,
+    "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+  },
+  "collection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+    "bytes": 7084,
+    "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+  },
+  "validation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+    "bytes": 7220826,
+    "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+  },
+  "staticSourceClosure": [
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    }
+  ],
+  "independentFirst10": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+    "bytes": 11639,
+    "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+  },
+  "independent100": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+    "bytes": 13583,
+    "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+  },
+  "reviewAddendum": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+    "bytes": 3473,
+    "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+  },
+  "scope": "Historical compact geometry proof unchanged; actual c743/source50/dae Release bound, fresh full16 remains PENDING, no workload or capacity acceptance.",
+  "explicitSceneChanges": {
+    "patrolSpan": [
+      4,
+      2
+    ],
+    "body": [
+      "5x5",
+      "3x3"
+    ],
+    "staticHalo": [
+      "7x7",
+      "5x5"
+    ],
+    "homes": "New compact pair; only nearest-v3 actor92 repair moves227531 to229534, first10 byte-exact."
+  },
+  "unchangedRuntime": {
+    "map": "0",
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "freshWarrior": true,
+    "grants": false,
+    "spawnRulesModified": false,
+    "trafficThresholdsModified": false,
+    "resourceProfileModified": false,
+    "backendRebuilt": false
+  },
+  "liveRisks": [
+    "100representative tour886unitsteps is not an actual complete online tour.",
+    "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+    "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression."
+  ],
+  "historicalStaticEvidenceOnly": true,
+  "activeBackendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "activeDriverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "activeExecutionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "actualExecutionOccurred": false,
+  "currentDriverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634"
+}

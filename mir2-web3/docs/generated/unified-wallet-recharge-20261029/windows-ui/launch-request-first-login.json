@@ -1,0 +1,34 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "windows-live/installed-process-first-login.json",
+    "bytes": 931,
+    "sha256": "cc8727463df67ccd0cfe2c20cf3566e9aff222ec02710eef5313f2c7d5855472"
+  },
+  "producerReport": {
+    "phase": "first-login",
+    "mode": "login",
+    "launcherPid": 85456,
+    "launcher": "F:/mir2-build/unified-20261029/installed-validation/Mir2Launcher.exe",
+    "launcherSha256": "e6442339ec5786f4350f694fa058c0e9d4363d0e3d50bdb27f2c3ae65fca6d96",
+    "expectedGameExe": "F:/mir2-build/unified-20261029/installed-validation/game/mir2-platform-windows.exe",
+    "gameSha256": "85879bfeb1b44d4c759e6a338338bb58a383b7701f886d1090a96b6267f00c6f",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "updaterSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "launcherArguments": [],
+    "directGameLaunch": false,
+    "startedAtUtc": "2026-10-29T17:09:07.966Z",
+    "installedAssets": true,
+    "assetRootOverride": false,
+    "isolatedProfile": true,
+    "installerSeed": "zh-CN",
+    "endpoint": "ws://127.0.0.1:17931/ws",
+    "syntheticUiFixture": false,
+    "paymentsAttempted": false,
+    "phoneWalletSigningPerformed": false
+  },
+  "phase": "Launcher request receipt only; actual process chain, screenshots and actual-ui-summary are separate observation proofs",
+  "syntheticFlagMeaning": "Login-mode syntheticUiFixture=false is launch request metadata; actual server uses the separate synthetic UI store, not historical paid-order store"
+}

@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T00:17:59.892Z",
+  "scope": "New41 socket diagnostics Release and one fresh enabled50 ordinary full16 functional run raw-byte integration archive only. No test/build/service or gameplay is repeated by this archive; no existing tracked evidence is modified.",
+  "sourceBefore": {
+    "head": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "trackedTreeClean": true
+  },
+  "sourceAfter": {
+    "head": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "trackedTreeClean": true
+  },
+  "hashMode": "raw-bytes-no-normalization",
+  "copiedFiles": 37,
+  "derivedFilesExcludingThisReceipt": 1,
+  "files": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json",
+      "target": "backend-source-socket-diagnostics-v1.json",
+      "kind": "exact-41-input-source-manifest",
+      "sourceBytes": 14000,
+      "sourceSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "targetBytes": 14000,
+      "targetSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\release-socket-diagnostics-v1.json",
+      "target": "release-socket-diagnostics-v1.json",
+      "kind": "new-release-record",
+      "sourceBytes": 1920,
+      "sourceSha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f",
+      "targetBytes": 1920,
+      "targetSha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1-build-receipt.json",
+      "target": "socket-queue-diagnostics-release-v1/socket-diagnostics-v1-build-receipt.json",
+      "kind": "actual-owned-build-receipt",
+      "sourceBytes": 2095,
+      "sourceSha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd",
+      "targetBytes": 2095,
+      "targetSha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-socket-diagnostics-v1-release-build.log",
+      "target": "socket-queue-diagnostics-release-v1/p0-socket-diagnostics-v1-release-build.log",
+      "kind": "complete-actual-cargo-log",
+      "sourceBytes": 55560,
+      "sourceSha256": "b03df3d3eee471d5dd2070fbd9a59dd2057249e2c3114347e79c7dfac4f56eac",
+      "targetBytes": 55560,
+      "targetSha256": "b03df3d3eee471d5dd2070fbd9a59dd2057249e2c3114347e79c7dfac4f56eac",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-run-socket-release-v1.ps1",
+      "target": "socket-queue-diagnostics-release-v1/root-run-socket-release-v1.ps1",
+      "kind": "actual-root-build-wrapper",
+      "sourceBytes": 1031,
+      "sourceSha256": "93992de2a9d41bb5105ab9b2f70746faa3ff28e3f9177f711ef548875bc6fc81",
+      "targetBytes": 1031,
+      "targetSha256": "93992de2a9d41bb5105ab9b2f70746faa3ff28e3f9177f711ef548875bc6fc81",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-socket-release-build-v1.log",
+      "target": "socket-queue-diagnostics-release-v1/root-socket-release-build-v1.log",
+      "kind": "actual-root-build-outer-log",
+      "sourceBytes": 1460,
+      "sourceSha256": "114aaa241d0153e95b90ed643c39b03d0f77eccdf376c240ac152ec7bcddb1d3",
+      "targetBytes": 1460,
+      "targetSha256": "114aaa241d0153e95b90ed643c39b03d0f77eccdf376c240ac152ec7bcddb1d3",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\build-socket-diagnostics-v2.mjs",
+      "target": "socket-queue-diagnostics-release-v1/tools/build-socket-diagnostics-v2.mjs",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 4269,
+      "sourceSha256": "f17d598a90c52dcc06c41e424870192aee7be5a5696119ecab6b8b4de5bc75bb",
+      "targetBytes": 4269,
+      "targetSha256": "f17d598a90c52dcc06c41e424870192aee7be5a5696119ecab6b8b4de5bc75bb",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\capture-socket-diagnostics-release-v2.mjs",
+      "target": "socket-queue-diagnostics-release-v1/tools/capture-socket-diagnostics-release-v2.mjs",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 2965,
+      "sourceSha256": "afc56ab662755155fdcc214b87fad6560967970a33f3dc909a1b5d89fda2305b",
+      "targetBytes": 2965,
+      "targetSha256": "afc56ab662755155fdcc214b87fad6560967970a33f3dc909a1b5d89fda2305b",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\pin-socket-diagnostics-build-v2.mjs",
+      "target": "socket-queue-diagnostics-release-v1/tools/pin-socket-diagnostics-build-v2.mjs",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 985,
+      "sourceSha256": "28719db17c2fa52e0091ad132a77f8252a9dcb8bd3068dd51b400716a219d648",
+      "targetBytes": 985,
+      "targetSha256": "28719db17c2fa52e0091ad132a77f8252a9dcb8bd3068dd51b400716a219d648",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\source-lib.mjs",
+      "target": "socket-queue-diagnostics-release-v1/tools/source-lib.mjs",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 10176,
+      "sourceSha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298",
+      "targetBytes": 10176,
+      "targetSha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\prepare-catalog-v2.mjs",
+      "target": "socket-queue-diagnostics-release-v1/tools/prepare-catalog-v2.mjs",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 4571,
+      "sourceSha256": "852ce300d0a069129421eb84ea8015fabd014884b58b08793f7b929f6902ec87",
+      "targetBytes": 4571,
+      "targetSha256": "852ce300d0a069129421eb84ea8015fabd014884b58b08793f7b929f6902ec87",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\prepared-v2.json",
+      "target": "socket-queue-diagnostics-release-v1/tools/prepared-v2.json",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 5595,
+      "sourceSha256": "019574d8632656e3f4dc653552bf06ae47eb93abe61c8a8dd413245129986af5",
+      "targetBytes": 5595,
+      "targetSha256": "019574d8632656e3f4dc653552bf06ae47eb93abe61c8a8dd413245129986af5",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\README-prepared-v2.md",
+      "target": "socket-queue-diagnostics-release-v1/tools/README-prepared-v2.md",
+      "kind": "preserved-v2-tool-or-prepared-metadata",
+      "sourceBytes": 4043,
+      "sourceSha256": "2f41d6be22da78926bcfff155bbcc5172fb953054ca3b427e6a9ba48fc7021a4",
+      "targetBytes": 4043,
+      "targetSha256": "2f41d6be22da78926bcfff155bbcc5172fb953054ca3b427e6a9ba48fc7021a4",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.audit-source.mjs",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.audit-source.mjs",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 9030,
+      "sourceSha256": "1815198d61651a9537aa342371d3af821fa10ee21e241b639be98adce8a79dd0",
+      "targetBytes": 9030,
+      "targetSha256": "1815198d61651a9537aa342371d3af821fa10ee21e241b639be98adce8a79dd0",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.backend-source.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.backend-source.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 14000,
+      "sourceSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "targetBytes": 14000,
+      "targetSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.independent-audit.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.independent-audit.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 1737,
+      "sourceSha256": "dddad626b4d3a7dac126128b7b3453b91704915a898c9b35eecb860b5a431591",
+      "targetBytes": 1737,
+      "targetSha256": "dddad626b4d3a7dac126128b7b3453b91704915a898c9b35eecb860b5a431591",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.prepared-profile.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.prepared-profile.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 4094,
+      "sourceSha256": "74d0c18ee922c333765ef618bf456f4621123a70b7b541410bb26b91f08dcdcd",
+      "targetBytes": 4094,
+      "targetSha256": "74d0c18ee922c333765ef618bf456f4621123a70b7b541410bb26b91f08dcdcd",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.realm-evidence.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.realm-evidence.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 34880,
+      "sourceSha256": "a168b05660a6057af4becc473062617a7391b162d353e24339d3adb436e09e23",
+      "targetBytes": 34880,
+      "targetSha256": "a168b05660a6057af4becc473062617a7391b162d353e24339d3adb436e09e23",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.release-input.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.release-input.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 1920,
+      "sourceSha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f",
+      "targetBytes": 1920,
+      "targetSha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.runner-source.mjs",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.runner-source.mjs",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 14364,
+      "sourceSha256": "080e61086a45d7022f125e50e334da5962c432dc28a022fa00abff12e85d2d78",
+      "targetBytes": 14364,
+      "targetSha256": "080e61086a45d7022f125e50e334da5962c432dc28a022fa00abff12e85d2d78",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.source-manifest-verification.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.source-manifest-verification.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 563,
+      "sourceSha256": "a674d3a01850c63124b67e116f08390628dcec1ee7e85f3588acbd7b0894135f",
+      "targetBytes": 563,
+      "targetSha256": "a674d3a01850c63124b67e116f08390628dcec1ee7e85f3588acbd7b0894135f",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884512369-f0f261da.zone-metrics.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.zone-metrics.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 23590,
+      "sourceSha256": "cc04e06ba8eff448398d8bbc34286c48dc166d8808e0f66498fc7fee93190344",
+      "targetBytes": 23590,
+      "targetSha256": "cc04e06ba8eff448398d8bbc34286c48dc166d8808e0f66498fc7fee93190344",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602-a.trace.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602-a.trace.jsonl",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 1007421,
+      "sourceSha256": "b285f68fbb67192880cae727c52c62f64c8f4e211e29a11201c42005debf171c",
+      "targetBytes": 1007421,
+      "targetSha256": "b285f68fbb67192880cae727c52c62f64c8f4e211e29a11201c42005debf171c",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602-b.trace.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602-b.trace.jsonl",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 927396,
+      "sourceSha256": "7a8b0aedbf23db15e1a8e58ffd787471774b0e8d31340ee1b1339de334a06410",
+      "targetBytes": 927396,
+      "targetSha256": "7a8b0aedbf23db15e1a8e58ffd787471774b0e8d31340ee1b1339de334a06410",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602-guard-newCharacter.trace.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602-guard-newCharacter.trace.jsonl",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 3476,
+      "sourceSha256": "1f63902bfa157682db055c83fdbf1038e717eb177c8f3b8f2406a4592a6343cb",
+      "targetBytes": 3476,
+      "targetSha256": "1f63902bfa157682db055c83fdbf1038e717eb177c8f3b8f2406a4592a6343cb",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602-guard-startGame.trace.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602-guard-startGame.trace.jsonl",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 3440,
+      "sourceSha256": "ca32f989651e50475ddd0b984cee14441a2b20acfd0b91770cdc7317b291bc75",
+      "targetBytes": 3440,
+      "targetSha256": "ca32f989651e50475ddd0b984cee14441a2b20acfd0b91770cdc7317b291bc75",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602-relogin-0.trace.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602-relogin-0.trace.jsonl",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 684254,
+      "sourceSha256": "b7ce6162bed5b64b7521139cef8ae2c76f6bbcea9b371b8961fb54a395efba10",
+      "targetBytes": 684254,
+      "targetSha256": "b7ce6162bed5b64b7521139cef8ae2c76f6bbcea9b371b8961fb54a395efba10",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602-relogin-1.trace.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602-relogin-1.trace.jsonl",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 680205,
+      "sourceSha256": "7222929a25f9122214dde3c05eaba480e697352d07078d2bda169ae582d63a87",
+      "targetBytes": 680205,
+      "targetSha256": "7222929a25f9122214dde3c05eaba480e697352d07078d2bda169ae582d63a87",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public\\1792884517374-04264602.report.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/1792884517374-04264602.report.json",
+      "kind": "exact-public-full16-result",
+      "sourceBytes": 109569,
+      "sourceSha256": "807ff88ea4ef362e2035410c814e06ea927a0072b9b0fa774bae35998bd41774",
+      "targetBytes": 109569,
+      "targetSha256": "807ff88ea4ef362e2035410c814e06ea927a0072b9b0fa774bae35998bd41774",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\root-independent-cleanup-v1.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/root-independent-cleanup-v1.json",
+      "kind": "independent-root-cleanup",
+      "sourceBytes": 104,
+      "sourceSha256": "aeb01bcab24719af898492dabe61267c310517988a2a18d2ee4b99e5e5ea3c74",
+      "targetBytes": 104,
+      "targetSha256": "aeb01bcab24719af898492dabe61267c310517988a2a18d2ee4b99e5e5ea3c74",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\run-command-v1.log",
+      "target": "full-lifecycle-socket-diagnostics-v1/run-command-v1.log",
+      "kind": "actual-root-full16-run-log-with-initial-no-loot-attempt",
+      "sourceBytes": 1825,
+      "sourceSha256": "1bfaeb9ecf533f796b55f84cfec7b0b0e25cbb67fac253e443ebd8e6eeb4d897",
+      "targetBytes": 1825,
+      "targetSha256": "1bfaeb9ecf533f796b55f84cfec7b0b0e25cbb67fac253e443ebd8e6eeb4d897",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\launcher-final-binding-v1.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/launcher-final-binding-v1.json",
+      "kind": "pre-execution-full16-v2-launcher-binding",
+      "sourceBytes": 1360,
+      "sourceSha256": "8590785f6d419e754dbf8fefda5abcccdbd80268166c00eed9cea2248c98a2da",
+      "targetBytes": 1360,
+      "targetSha256": "8590785f6d419e754dbf8fefda5abcccdbd80268166c00eed9cea2248c98a2da",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full16-socket-diagnostics-offline-v1\\extract-offline.mjs",
+      "target": "full-lifecycle-socket-diagnostics-v1/offline-diagnostics/extract-offline.mjs",
+      "kind": "offline-strict-whitelist-derived-evidence-not-original-receive-time",
+      "sourceBytes": 8184,
+      "sourceSha256": "8835d90327f307dcf82eac708ba5167567f71a5e1b563e285761d68c6722c39e",
+      "targetBytes": 8184,
+      "targetSha256": "8835d90327f307dcf82eac708ba5167567f71a5e1b563e285761d68c6722c39e",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full16-socket-diagnostics-offline-v1\\extraction-verification.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/offline-diagnostics/extraction-verification.json",
+      "kind": "offline-strict-whitelist-derived-evidence-not-original-receive-time",
+      "sourceBytes": 1414,
+      "sourceSha256": "ae56b77cb4ca7eb11833d96b8e89713710978c76ba008bff0ca6759e649f74d8",
+      "targetBytes": 1414,
+      "targetSha256": "ae56b77cb4ca7eb11833d96b8e89713710978c76ba008bff0ca6759e649f74d8",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full16-socket-diagnostics-offline-v1\\offline-aggregate.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/offline-diagnostics/offline-aggregate.json",
+      "kind": "offline-strict-whitelist-derived-evidence-not-original-receive-time",
+      "sourceBytes": 6455,
+      "sourceSha256": "d99fcb4f09c5518263e5041ce5b041c116999e6639e9441adce3fdaef4956568",
+      "targetBytes": 6455,
+      "targetSha256": "d99fcb4f09c5518263e5041ce5b041c116999e6639e9441adce3fdaef4956568",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full16-socket-diagnostics-offline-v1\\offline-extraction-status.json",
+      "target": "full-lifecycle-socket-diagnostics-v1/offline-diagnostics/offline-extraction-status.json",
+      "kind": "offline-strict-whitelist-derived-evidence-not-original-receive-time",
+      "sourceBytes": 2168,
+      "sourceSha256": "13f999bcc3f75abc50096e82033fbc905700a70e6740466289d0b15f3916160c",
+      "targetBytes": 2168,
+      "targetSha256": "13f999bcc3f75abc50096e82033fbc905700a70e6740466289d0b15f3916160c",
+      "rawByteEqual": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full16-socket-diagnostics-offline-v1\\offline-read-whitelisted-slow-stage.jsonl",
+      "target": "full-lifecycle-socket-diagnostics-v1/offline-diagnostics/offline-read-whitelisted-slow-stage.jsonl",
+      "kind": "offline-strict-whitelist-derived-evidence-not-original-receive-time",
+      "sourceBytes": 4198,
+      "sourceSha256": "98b51cd80e46188a5c9b0d9ba8567809cd58d25084dd017742f5fedee970c624",
+      "targetBytes": 4198,
+      "targetSha256": "98b51cd80e46188a5c9b0d9ba8567809cd58d25084dd017742f5fedee970c624",
+      "rawByteEqual": true
+    }
+  ],
+  "derived": [
+    {
+      "target": "socket-queue-diagnostics-release-v1/build-execution-binding.json",
+      "bytes": 2368,
+      "sha256": "56ab9f6206ccdf2c25496de299cd941a47bac5abd2ecd44203b1fb5323b9e763",
+      "kind": "posthoc-build-artifact-binding"
+    }
+  ],
+  "full16": {
+    "sourceDirectory": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2",
+    "archiveDirectory": "full-lifecycle-socket-diagnostics-v1",
+    "archiveEdition": 1,
+    "sourceLauncherTemplateVersion": 2,
+    "templateRenamedOrClaimedV1Executed": false,
+    "runId": "1792884517374-04264602",
+    "realmStamp": "1792884512369-f0f261da",
+    "all16Passed": true,
+    "ordinarySentCommands": 353,
+    "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendInputs": 41,
+    "backendSourceAggregate": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+    "binarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+    "sixCountersZeroBeforeAndAfter": true,
+    "normalExitCode": 0,
+    "independentProcessAbsent": true,
+    "independentPortsFree": true,
+    "initialNoLootAttemptPreserved": true,
+    "capacityAccepted": false,
+    "frontendAccepted": false,
+    "twoComputerAccepted": false,
+    "cellAccepted": false,
+    "globalGhostCensusAccepted": false
+  },
+  "offlineDiagnostics": {
+    "rawPrivateStderrCopied": false,
+    "rawPrivateStderrReadDuringArchive": false,
+    "rows": 47,
+    "scopedRows": 16,
+    "queueContextRows": 0,
+    "observedAtMs": "Offline extractor read time only; never original run receive time and never07 causal evidence."
+  },
+  "privacyScope": "Only the explicit previously reviewed public full16 set, public build/tool/cleanup logs, and five strict-whitelist offline derivatives were copied. No credentials/store/private stderr/raw recording/EXE payload was copied. Original audit credential-value checks are preserved; this archive does not reread configured private values.",
+  "requiredRootUpdates": [
+    {
+      "action": "Append third entry to existing additional-release-bindings.json",
+      "entry": {
+        "manifest": "backend-source-socket-diagnostics-v1.json",
+        "build": "release-socket-diagnostics-v1.json"
+      },
+      "performed": false
+    },
+    {
+      "action": "Regenerate final whole-topic raw artifact index and verify matching additional release/full16 plus unchanged failed-capacity records",
+      "performed": false
+    }
+  ],
+  "verificationProposal": "Read-only verifyAdditionalRelease(topic, repository, proposed third binding) then root-owned final topic index/verifyTopic after additional-release-bindings is updated. Existing verifier discovers .report.json and matching same-run realm/source/paired trace by filename, so this new archive directory name is supported.",
+  "sourceOrEvidenceTrackedFilesEdited": false,
+  "gitAddOrCommitRun": false
+}

@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "network": "testnet",
+  "environmentTag": "isolated-test",
+  "fullnodeUrl": "https://fullnode.testnet.sui.io:443",
+  "chainIdentifier": "4c78adac",
+  "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+  "networkHash": "0xb55d4afda0318ec0a264cc5f46c4e61c96da8000e9ea1bdf04878266867c6246",
+  "frameworkPackageId": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995",
+  "oraclePublicKey": "0xb11554329aaaffb0d2a7af5c9d088ee67ab23ff475160a49c2591be537eeb9d1",
+  "oracleKeyId": "1",
+  "gasBudgetMist": "50000000",
+  "maxGasBudgetMist": "50000000",
+  "dailyGasBudgetMist": "980000000",
+  "packageId": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880",
+  "configId": "0xbfbcb135da63537ab67e537ab92f65b30b59df97bcd3138a7a37dc581e2615ea",
+  "dappStorageId": "0x712f0a2decbbe2e7c8ce4294bc478da9346d35b6ce22f274ad054a03638be0c9",
+  "startCheckpoint": "400174093"
+}

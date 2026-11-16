@@ -1,0 +1,107 @@
+{
+  "schema": "mir2.promotion-realtime-public-browser.v1",
+  "verifiedAtUtc": "2026-10-30T11:16:33.939Z",
+  "origin": "https://mir2.obelisk.build",
+  "expectedSourceSha": "0a05d9e1fcd61a9427c40e18e5fcf177960a7bd5",
+  "expectedSourceShaAuthority": "root verified deployment metadata; browser verifies rendered behavior",
+  "anonymousIsolatedContext": true,
+  "fixtureResponses": 0,
+  "userCookiesRead": false,
+  "realBusinessPosts": 0,
+  "observations": {
+    "websiteRevision": {
+      "status": 200,
+      "revision": "0a05d9e1fcd61a9427c40e18e5fcf177960a7bd5",
+      "cache": {
+        "cache-control": "no-store",
+        "age": "0",
+        "x-vercel-cache": "MISS",
+        "cf-cache-status": "DYNAMIC"
+      }
+    },
+    "anonymousEarnings": {
+      "status": 200,
+      "initialApiReadCount": 1,
+      "additionalApiReads": 0,
+      "realObservationMs": 11383,
+      "desktopOverflow": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      },
+      "mobileOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "authenticatedControls": false,
+      "paymentTimingCopyVisible": true,
+      "ssrFooter": {
+        "timezonePlaceholder": "—",
+        "serverOrBrowserZoneEmbedded": false
+      },
+      "browserTimezone": "Asia/Shanghai",
+      "clientFooterTimezone": "Asia/Shanghai"
+    },
+    "utcHydration": {
+      "status": 200,
+      "ssrFooter": {
+        "timezonePlaceholder": "—",
+        "serverOrBrowserZoneEmbedded": false
+      },
+      "browserTimezone": "UTC",
+      "clientFooterTimezone": "UTC",
+      "hydrationErrors": 0
+    },
+    "mainNavigation": {
+      "status": 200,
+      "headerPromotionLinks": 2,
+      "footerPromotionLinks": 1,
+      "mobilePromotionVisible": true,
+      "desktopOverflow": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      },
+      "mobileOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "promotionHref": "https://mir2.obelisk.build/promotions?lang=zh-CN"
+    },
+    "gameEntry": {
+      "status": 200,
+      "url": "https://mir2.obelisk.build/game",
+      "title": "Legend of Mir 2",
+      "canvasCount": 3,
+      "inputCount": 4,
+      "loginOrGameSurfaceVisible": true
+    },
+    "readOnlyAndConsole": {
+      "blockedWriteCount": 0,
+      "consoleErrorCount": 0,
+      "userCookiesRead": false,
+      "fixtureResponses": 0,
+      "realBusinessPosts": 0
+    }
+  },
+  "errors": [],
+  "blockedWrites": [],
+  "promotionReads": [
+    {
+      "page": "promotions",
+      "method": "GET",
+      "path": "/api/promotions/bootstrap",
+      "atMs": 1793358956594
+    },
+    {
+      "page": "promotionsUTC",
+      "method": "GET",
+      "path": "/api/promotions/bootstrap",
+      "atMs": 1793358970511
+    }
+  ],
+  "failures": [],
+  "passed": true
+}

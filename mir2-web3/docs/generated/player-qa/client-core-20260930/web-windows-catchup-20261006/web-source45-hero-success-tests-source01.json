@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "kind": "Source45 seven Hero successful-result regression groups source handoff; not executed",
+  "owner": "audit_transport_state",
+  "generatedAtUtc": "2026-10-08T14:47:09.033Z",
+  "soleRepositoryWrite": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+    "bytes": 738080,
+    "sha256": "8353102c15461c62f540ca630a5783e58e6113672dc3e33e937fcabf4e1b2629"
+  },
+  "baseline": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+    "bytes": 719838,
+    "sha256": "02ca191dab829467667ab64646cc3897a9146b0de78b4cf786c701ce4ec70c9c",
+    "logicalGroups": 494
+  },
+  "insertion": {
+    "byteOffset": 719775,
+    "bytes": 18242,
+    "beforeOriginalFinalCounter": true,
+    "allOriginalBytesRecoveredExactlyAfterRemovingInsertion": true,
+    "original477AndSource44SeventeenBlocksUnchanged": true
+  },
+  "newGroups": [
+    {
+      "line": 8433,
+      "name": "Hero shared Equip succeeds through actual Page single claim exact ACK and authoritative swap custody"
+    },
+    {
+      "line": 8455,
+      "name": "Hero shared Remove null resolves the actual free bag cell then exact ACK and complete authority move the same UID"
+    },
+    {
+      "line": 8473,
+      "name": "Hero shared Merge exact source target ACK retires only after complete authority consumes the source and increases target count"
+    },
+    {
+      "line": 8492,
+      "name": "Hero shared Transfer successful exact ACK requires both full domains before personal UID becomes Hero custody"
+    },
+    {
+      "line": 8510,
+      "name": "Hero shared TakeBack successful exact ACK requires both full domains before Hero stack becomes personal custody"
+    },
+    {
+      "line": 8528,
+      "name": "Hero shared AutoPotValue HP and MP exact echoes wait for full authority with the requested changed threshold"
+    },
+    {
+      "line": 8543,
+      "name": "Hero shared AutoPotItem HP MP selection and clear settle only with exact numeric echoes and final changed config"
+    }
+  ],
+  "expectedLogicalGroups": 501,
+  "intendedPositiveScenarios": 11,
+  "composition": [
+    "Existing real BevyHeroHost fixture with separate Prepared then Ready fake publications",
+    "Actual Page dispatchBevyHeroIntent and submitHeroAction declarations extracted from current Page AST",
+    "Existing actual Page preflight and final claim-through-socket-send slices",
+    "Only the original HeroPlayerOperations instance; real HeroPlayerAuthority and original Page receipt/snapshot observers",
+    "Explicit literal wire/ACK and concrete authority-result fixtures; no new renderer, wire protocol, clock or ledger"
+  ],
+  "assertions": [
+    "One exact transport entry after the original unique claim",
+    "Old serialized semantic cannot replay",
+    "No ACK, wrong tuple, old physical owner and pre-ACK complete model keep pending",
+    "Mismatched Page player/map snapshots rejected before authority mutation",
+    "Higher-serial old-owner model and incomplete post-ACK read model cannot clear the operation",
+    "Cross operations require newer personal authority as well as Hero information",
+    "Successful complete result asserts exact UID/slot/count/carrier custody or changed HP/MP config",
+    "Old proof/duplicate ACK cannot retire a different new unsent operation; no same-tuple late-ACK guarantee claimed"
+  ],
+  "resultCases": {
+    "equip": "UID504 replaces equipment slot3; displaced UID505 returns to source bag4",
+    "remove": "Rust null automatic destination resolves bag3, UID505 preserves custody",
+    "merge": "UID502 count3 consumed, UID501 count1 becomes4 in belt0",
+    "transfer": "UID601 personal3 moves to Hero3; success:true receipt",
+    "takeBack": "UID502 Hero2 count3 moves to personal4",
+    "autoPotValue": "HP55 and MP65 each change only their configured threshold",
+    "autoPotItem": "HP/MP selecting real itemIndex10 and clearing0 each changes only selected config"
+  },
+  "sourceReview": {
+    "otherSource44PinsUnchanged": [
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/portable_hero_ui.rs",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hero-ui.ts",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hero-host.ts",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/use-bevy-hero-ui.ts",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/original-client-shell.tsx",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-npc-shop-surface-integration.mjs",
+        "unchanged": true
+      }
+    ],
+    "matrixUnchanged": true,
+    "matrixSha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1",
+    "serviceSwapSemanticsRead": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/hero_inventory.rs",
+      "line": 354,
+      "endLine": 376
+    }
+  },
+  "execution": {
+    "testsRun": false,
+    "cliRun": false,
+    "productImportedOrEvaluatedDuringAuthoring": false,
+    "wasmApiUsed": false,
+    "uiUsed": false,
+    "networkUsed": false
+  },
+  "limitations": [
+    "Root still needs to run the original CLI under its finite verification policy; source only has not been parsed or executed by this writer.",
+    "Prepared/Ready publications and socket are finite ports; no actual World paint/WASM/server acceptance.",
+    "Except MagicKey, the existing ledger confirms exact ACK plus newer complete model; it does not itself compare resulting item/config values. These tests assert supplied authoritative results independently.",
+    "Legacy same-tuple late ACK ambiguity remains unchanged.",
+    "No Matrix11/category/actionChainClosed promotion."
+  ]
+}

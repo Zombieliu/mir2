@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "id": "fishing-source23-finite-result01",
+  "generatedAtUtc": "2026-10-07T01:59:47.008Z",
+  "parentCommit": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "row": "F02.world.fishing-click",
+  "source": {
+    "clientRust": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-snapshot.json",
+      "bytes": 148546,
+      "sha256": "37211548ac2b7a6b81d8e7462e660a60ecc7eeca3154ecf1d64d450432723753"
+    },
+    "backend": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-backend01-snapshot.json",
+      "bytes": 145500,
+      "sha256": "5c5dfba040a433c7502977d31f7dd28316cfc6586c7967f17f6158b421791bcf"
+    },
+    "nodeAtRun": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node05-snapshot.json",
+      "bytes": 9776291,
+      "sha256": "996468bae73436afa857edc1265a4894a0e79104a028fb24e66492cc95641e0f"
+    },
+    "postNextTsc": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06-source-snapshot.json",
+      "bytes": 9755741,
+      "sha256": "a339e5863446bdac31c2221bc2e0261f0d38e85e06424489cf6325441933d1c8"
+    }
+  },
+  "rust": {
+    "backend": {
+      "evidence": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-backend-finite01.json",
+        "bytes": 43362,
+        "sha256": "a2c276f5c65046101ca07b567f75f78b672259a0ccae212266ccf6f8e92aaa4a"
+      },
+      "actualPassingExecutions": 242,
+      "actualJobs": 7,
+      "newDistinctTests": 6,
+      "allFinalBackendInputsMatched": true
+    },
+    "currentAffectedPui": {
+      "evidence": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui-finite07.json",
+        "bytes": 7508,
+        "sha256": "3963424782707a9445bcd1591e7fc75a7ec705a6895d067ddfbbe9b3801ea919"
+      },
+      "passed": 64,
+      "failed": 0,
+      "ignored": 0,
+      "newManualDecodeOracles": 6,
+      "allOriginalFishTooltipBagTestsBytePreserved": true
+    },
+    "historicalSelectedClient": {
+      "evidence": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-client-finite04.json",
+        "bytes": 34573,
+        "sha256": "96ffe3aab62c2eb87cba02bf29ae4703d3a5757a2d1e90880e90e13be2f4fe4f"
+      },
+      "rust04ActualPassingExecutions": 266,
+      "oldIgnored": 3,
+      "selectedCore": 141,
+      "priorPuiSuperseded": 58,
+      "default": 44,
+      "nativeFishing": 6,
+      "runtimeAnimation": 17,
+      "nativeInputHistorical133": {
+        "actualConfiguration": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-input02.config.json",
+          "bytes": 3988,
+          "sha256": "0f7336f57248e461c488fb9b176bfbd3e7a846230f7ef931e359e0d446b24226"
+        },
+        "actualOuter": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-input02.outer.json",
+          "bytes": 448,
+          "sha256": "cd20d345946e14161c621e72632beed1f8b78b8b30fdf8440dda2bf727f5704a"
+        },
+        "actualPassed": 133,
+        "filteredOut": 725,
+        "sourceSnapshot": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust03-snapshot.json",
+          "bytes": 143038,
+          "sha256": "f3ff3a56e65665624dc43c76be03f8d04c4d35043bad4047d06d16650db911ad"
+        },
+        "scope": "Prior actual native-input02 is historical133, not freshly executed against Rust04. Its Native input/map source and shared fishing algorithm are unchanged; the new sorted animation storage is tested separately in currentCore141/PUI58/Runtime17 and futureNativebuild. No blanket432-source inheritance."
+      },
+      "qualification": "FinalRust07 PUI64 is a newactual CPU run of whole PUI suite. Prior Rust04 Core141/default44+3oldignored/Native-fishing6/Runtime-animation17 and prior Rust03 Native-input133 are historical actual executions; final epochs only modified presentation-ui-gated codecs whose source consumption is separate from these unchanged effective configurations. Do not claim all432 or all executions freshly rerun in Rust07."
+    },
+    "newFullSuiteClaim": false
+  },
+  "web": {
+    "original11Node05": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-web-finite06.json",
+      "bytes": 11505,
+      "sha256": "8b3789784af980d4f41be6d25e60b8966d3874f923551f8c9fb6cc79ebe11c1a"
+    },
+    "actualTests": 218,
+    "passed": 218,
+    "failed": 0,
+    "skipped": 0,
+    "stage5": {
+      "oldGroups": 318,
+      "newNamedDeclarations": 39,
+      "currentInternalGroups": 357,
+      "globalFileLevelTests": 1,
+      "declarations": [
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5781,
+          "declaration": "Fishing optional ABI forwards exact raw geometry clocks and nullable facts without host arithmetic"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5795,
+          "declaration": "Fishing adapters reject coerced raw coordinates clocks directions and malformed outputs"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5820,
+          "declaration": "Fishing optional ABI custody rejects getter replacement and reentrant input mutation before and after calls"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5836,
+          "declaration": "WorldFishingSource preserves raw own facts and rejects foreign or stale owner packets"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5847,
+          "declaration": "WorldFishingSource unknown intervals cannot revive from ordinary snapshots or partial actions"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5863,
+          "declaration": "WorldFishingSource initial unknown bootstrap is once while malformed raw facts stay unknown"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5873,
+          "declaration": "WorldFishingSource complete normal actions preserve bootstrap continuity and raw transform zero"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5885,
+          "declaration": "WorldFishingSource equivalent full snapshots retain exact immutable authority and revision"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5895,
+          "declaration": "WorldFishingSource own Harvest retires authority until a fresh complete canonical action"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5914,
+          "declaration": "Owned animation optional facade lazily owns one bridge and preserves actual method receiver"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5922,
+          "declaration": "Owned animation optional facade rejects changed ABI bridge methods and bounded payloads"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5937,
+          "declaration": "Owned animation optional facade burns construction attempt and rejects ABI and method reentry"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5956,
+          "declaration": "Core actual fishing and animation facade forwards optional presentation capabilities independently"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5974,
+          "declaration": "Animation action peek is read only exact authority revision and fresh shared pose without standing fallback"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5990,
+          "declaration": "Animation action peek rejects getter replacement and does not advance or resolve an animation world"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5995,
+          "declaration": "Animation renderer forwards exact clock and canonical action tokens while missing event facts remain unknown"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6017,
+          "declaration": "WorldFishingSource captures immutable canonical action evidence without invented receive clocks"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6028,
+          "declaration": "WorldFishingSource UserLocation updates transform but cannot heal unknown or fabricate standing"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6046,
+          "declaration": "Animation own transient authority rejects missing receive time old timestamps and metadata mismatch"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6061,
+          "declaration": "Animation own descriptor cache preserves canonical token after selector standing and rejects reused old event"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6072,
+          "declaration": "Animation action peek binds exact captured layout clock and independent bridge authority counters"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6078,
+          "declaration": "Animation action peek rejects reentrant commit context owner source and getter mutation"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6160,
+          "declaration": "Fishing Page actual raw UID-zero rod and normalized map sends one exact cast through consumed socket proof"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6175,
+          "declaration": "Fishing Page actual all-three blockers typed water and readonly standing gates never invent cast facts"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6188,
+          "declaration": "Fishing Page actual final getter and synchronous listener reentry reject changed source owner gates and bridge counters"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6211,
+          "declaration": "Fishing Page equivalent full snapshot preserves current gesture while Harvest and old commit cleanup retire only their owner"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6277,
+          "declaration": "Fishing Shell actual short primary pointer terminal burns custody before real Page sink and one cast"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6288,
+          "declaration": "Fishing Shell actual geometry terminal quarantine and lifecycle retirement keep old pointer proof spent"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6318,
+          "declaration": "Fishing Shell actual shared animation advances only in committed layout with captured clock and successor cleanup"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6326,
+          "declaration": "Fishing Page final physical callback sees new equipment NPC and composer pending before irreversible entry"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6336,
+          "declaration": "Fishing Page final actual ingress getter reentry cannot replace owner source or create pending after a captured gate"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6362,
+          "declaration": "Fishing Page actual equipment both NPC and composer reserve prefixes retire gesture before reentrant Core call"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6374,
+          "declaration": "Fishing Page required facing pose unknown permanently spends gesture despite exact getter and commit recovery"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6387,
+          "declaration": "Fishing Page optional targets and decision ABI loss permanently spends gesture after exact facade recovery"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6398,
+          "declaration": "Fishing Page final cast peek loss permanently spends held gesture before socket entry and survives getter restoration"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6408,
+          "declaration": "Fishing Page known nonstanding and valid cooldown none preserve held retry without new physical gesture"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6419,
+          "declaration": "Fishing Page wrong facing uses actual turn branch and socket proof with known water and unavailable owned pose"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6428,
+          "declaration": "Fishing Shell unknown physical geometry cannot revive old pointer after repaint but fresh down owns a new cast"
+        },
+        {
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 6436,
+          "declaration": "Fishing Page unknown water spends either facing gesture while known nonwater retains valid none"
+        }
+      ],
+      "scope": "Each group executes only actual extracted product functions or pure data modules with explicit in-memory DOM/ABI/mock transport sinks. No actual WASM, browser, server, login/game/ACK. Wrong-facing Turn fixture uses opaque turn sink, not complete actualsendCrystalTurn execution."
+    },
+    "strictTsc05": {
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 103668,
+        "kind": "Source23 current original strict code-only nonincremental TypeScript05",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 7386,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc05.outer.json",
+        "bytes": 528,
+        "sha256": "47bfd04c4c50c4b4d08b6becf54b0e1638e017396e7563a92fb7f341c0bd0298"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc05.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc05.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "strict": true,
+      "incremental": false,
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-web-code-tsconfig01.json",
+        "--pretty",
+        "false"
+      ]
+    },
+    "postNextStrictTsc06": {
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06.config.json",
+        "bytes": 3945,
+        "sha256": "5ede5dec6140c9c007ab949a5f550523f936216ec7325423ed42ffd634a8121f"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06-source-snapshot.json",
+        "bytes": 9755741,
+        "sha256": "a339e5863446bdac31c2221bc2e0261f0d38e85e06424489cf6325441933d1c8"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 111996,
+        "kind": "Source23 post-Next06 original strict code-only nonincremental TypeScript06",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 7246,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06.outer.json",
+        "bytes": 532,
+        "sha256": "debfb04fc82339e39cb117b25c7b824eaee89e934fd2778454d5850077733af2"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "strict": true,
+      "incremental": false
+    },
+    "fixtureIntegrity": {
+      "reviewer": "/root/w2b_final_source_review",
+      "sourceOnly": true,
+      "execution": false,
+      "accepted": true,
+      "audits": [
+        {
+          "name": "combat",
+          "rel": "apps/web/scripts/test-bevy-combat-input.mjs",
+          "beforePin": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fixture-before-combat01.json",
+            "bytes": 68985,
+            "sha256": "14a3f4476a349c36994ff15c2a71ee9e37059332a5619cdd536456bfd4678096"
+          },
+          "currentPin": {
+            "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs",
+            "bytes": 70365,
+            "sha256": "0e39a0d94a129ab6f7e6aef0bf1bbbf5151a3658178da3bbd53a9ea18ad1db56"
+          },
+          "beforeKeys": [
+            "path",
+            "sourceText",
+            "bytes",
+            "sha256"
+          ],
+          "sameTestNamesOrder": true,
+          "changedLineRange": [
+            84,
+            336,
+            354
+          ],
+          "removedAssertStartingLines": [
+            " assert.equal(statements[authClaimIndex+4],socketTry,'no executable external callback between final proof gates and sole socket send');",
+            " assert.equal(socketIndex,authClaimIndex+4);",
+            " assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-3),["
+          ],
+          "matchedStringLiteralTestLabels": [
+            30,
+            30
+          ],
+          "literalTestCallCounts": [
+            31,
+            31
+          ]
+        },
+        {
+          "name": "quest",
+          "rel": "apps/web/scripts/test-bevy-quest-ui.mjs",
+          "beforePin": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fixture-before-quest01.json",
+            "bytes": 71892,
+            "sha256": "cfdbb6b3de25b4cb85d132ec42440f6f58b3ed259a8bd2b5aa4c8a45a0a3b0e1"
+          },
+          "currentPin": {
+            "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-quest-ui.mjs",
+            "bytes": 69545,
+            "sha256": "b167db1673c6832b80f6319fdbb22a78b4cdc838d904f8d7c56a4d09d30a9758"
+          },
+          "beforeKeys": [
+            "path",
+            "sourceText",
+            "bytes",
+            "sha256"
+          ],
+          "sameTestNamesOrder": true,
+          "changedLineRange": [
+            759,
+            758,
+            759
+          ],
+          "removedAssertStartingLines": [],
+          "matchedStringLiteralTestLabels": [
+            23,
+            23
+          ],
+          "literalTestCallCounts": [
+            23,
+            23
+          ]
+        },
+        {
+          "name": "storage",
+          "rel": "apps/web/scripts/test-storage-page-gate.mjs",
+          "beforePin": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fixture-before-storage01.json",
+            "bytes": 140364,
+            "sha256": "26fe1dd0e470143ba069345b06d62065f565629a0ed206f42db7eeaa80002bb7"
+          },
+          "currentPin": {
+            "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs",
+            "bytes": 138133,
+            "sha256": "656cc86ebfb99c6891bd5800d7c50d4b1d09e49deb10205e63c9d3e23c94c54e"
+          },
+          "beforeKeys": [
+            "path",
+            "sourceText",
+            "bytes",
+            "sha256"
+          ],
+          "sameTestNamesOrder": true,
+          "changedLineRange": [
+            8,
+            342,
+            370
+          ],
+          "removedAssertStartingLines": [
+            "    assert.equal(statements[index - 1].getText(pageAst), \"observeEquipmentSnapshot(snapshot, connectionGeneration);\");"
+          ],
+          "matchedStringLiteralTestLabels": [
+            66,
+            66
+          ],
+          "literalTestCallCounts": [
+            67,
+            67
+          ]
+        }
+      ],
+      "necessaryChanges": [
+        "Combat original Auth/Repair/Bag proof retained; WorldFishing refusal exact, no else, return false, socket +4→+5, last IF suffix3→4",
+        "Storage Equipment snapshot (-1)→(-2) followed by explicit Fishing (-1), original Social retained",
+        "Quest old no-fishing fixture adds empty worldFishingQueuedRef only"
+      ],
+      "testCountMethods": {
+        "literalTestCallCounts": "Count all lexical text matches /\\btest\\(/g, including calls with variable names; not AST expansion or executed tests.",
+        "matchedStringLiteralTestLabels": "Extract /\\btest\\(\\s*([quote])([^newline]*?)\\1/g labels; excludes calls with non-string variable labels; same labels/order compared only within this method."
+      }
+    }
+  },
+  "retainedFailures": {
+    "node04": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node-failure04.json",
+      "bytes": 5007,
+      "sha256": "f0f191a0647284fb8d8508ed24fd7cc3849c0020a0f09d4cc24d6bd6a691d4d7"
+    },
+    "priorWebRetirement": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-web-retirement-finite01.json",
+      "bytes": 5883,
+      "sha256": "16325480ab6c5e2e2c4e13739f745533b008ffa378d6da6e4433c87a8d647260"
+    },
+    "threeActualBudgetFailures": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-budget-failures01.json",
+      "bytes": 32754,
+      "sha256": "d002b4e2c90241e170ac16df3d043fad3f13caa65b5f382925704779834712d8"
+    },
+    "bagOracleActual63pass1fail": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui-failure06.json",
+      "bytes": 6520,
+      "sha256": "af90afcfd7b00e4fd6a5ce749e51709e8bb3f80c7f591aeb042822e8f52bc30a"
+    },
+    "manualBagCorrection": "Production SourceInput legacy array length2..=3→exact3 follows actual serde DTO. All7 existing/current Bag tests unchanged; new full-facts oracle retained and final64 passed.",
+    "preparedCoreBuild04Executed": false
+  },
+  "countsQualification": "No overall percentage or complete acceptance denominator. Do not add218Node+357internal groups,242backend+client/configuration counts as distinct scenarios, or fixture associations/player acceptance. Historical unaffected effective configuration carry is qualified, not fresh finalRust07 rerun.",
+  "finiteCpuAccepted": true,
+  "productionBuildAccepted": false,
+  "sourcePublication": "pending Root scoped commit/push at evidence creation",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

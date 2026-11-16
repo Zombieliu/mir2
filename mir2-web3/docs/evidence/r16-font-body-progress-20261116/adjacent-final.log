@@ -1,0 +1,392 @@
+TAP version 13
+# (node:119424) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a renderer burst admits six logical images and starts queued deadlines only on dispatch
+ok 1 - a renderer burst admits six logical images and starts queued deadlines only on dispatch
+  ---
+  duration_ms: 34.5794
+  type: 'test'
+  ...
+# Subtest: queued critical HUD images precede runtime and background work, with FIFO within each tier
+ok 2 - queued critical HUD images precede runtime and background work, with FIFO within each tier
+  ---
+  duration_ms: 5.1406
+  type: 'test'
+  ...
+# Subtest: a source fallback keeps its logical admission instead of rejoining a burst
+ok 3 - a source fallback keeps its logical admission instead of rejoining a burst
+  ---
+  duration_ms: 12.3941
+  type: 'test'
+  ...
+# Subtest: cancelling a queued direct image starts no fetch and leaves admitted readers alive
+ok 4 - cancelling a queued direct image starts no fetch and leaves admitted readers alive
+  ---
+  duration_ms: 3.968
+  type: 'test'
+  ...
+# Subtest: coalesced image ownership, complete cache bodies and fonts stay independent of image admission
+ok 5 - coalesced image ownership, complete cache bodies and fonts stay independent of image admission
+  ---
+  duration_ms: 14.6948
+  type: 'test'
+  ...
+# Subtest: a queued image retains its release sources across a later Worker configuration
+ok 6 - a queued image retains its release sources across a later Worker configuration
+  ---
+  duration_ms: 3.7393
+  type: 'test'
+  ...
+# Subtest: the real deferred HUD manifest admits all fifteen late images in pack order ahead of ordinary scene work
+ok 7 - the real deferred HUD manifest admits all fifteen late images in pack order ahead of ordinary scene work
+  ---
+  duration_ms: 28.9671
+  type: 'test'
+  ...
+# Subtest: a later HUD configuration promotes already queued reads without admitting more than six
+ok 8 - a later HUD configuration promotes already queued reads without admitting more than six
+  ---
+  duration_ms: 7.2657
+  type: 'test'
+  ...
+# Subtest: a simultaneous DOM HUD burst reads foundation images before earlier hover/control requests
+ok 9 - a simultaneous DOM HUD burst reads foundation images before earlier hover/control requests
+  ---
+  duration_ms: 51.5219
+  type: 'test'
+  ...
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 10 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 240.82
+  type: 'test'
+  ...
+# Subtest: actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+ok 11 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+  ---
+  duration_ms: 146.0566
+  type: 'test'
+  ...
+# Subtest: actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+ok 12 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+  ---
+  duration_ms: 118.6215
+  type: 'test'
+  ...
+# Subtest: the actual Page header callback releases its real document coordinator without starting the full-family prewarm early
+ok 13 - the actual Page header callback releases its real document coordinator without starting the full-family prewarm early
+  ---
+  duration_ms: 106.0798
+  type: 'test'
+  ...
+# Subtest: the actual Page cleanup retires its real pending document coordinator
+ok 14 - the actual Page cleanup retires its real pending document coordinator
+  ---
+  duration_ms: 100.0228
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+ok 15 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 92.8541
+  type: 'test'
+  ...
+# Subtest: leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+ok 16 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+  ---
+  duration_ms: 110.3714
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 17 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 468.7493
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure never starts fonts and keeps the retry boundary
+ok 18 - actual retryable module failure never starts fonts and keeps the retry boundary
+  ---
+  duration_ms: 87.8597
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads prevents late fonts and boot
+ok 19 - leaving while the runtime downloads prevents late fonts and boot
+  ---
+  duration_ms: 88.7252
+  type: 'test'
+  ...
+# Subtest: Page defers fonts through finite binary recovery and cancels both owners after successful boot
+ok 20 - Page defers fonts through finite binary recovery and cancels both owners after successful boot
+  ---
+  duration_ms: 109.2947
+  type: 'test'
+  ...
+# Subtest: only the final fallback backend starts fonts, once, before its single boot
+ok 21 - only the final fallback backend starts fonts, once, before its single boot
+  ---
+  duration_ms: 87.3348
+  type: 'test'
+  ...
+# Subtest: leaving during fallback cannot start fonts from a late module
+ok 22 - leaving during fallback cannot start fonts from a late module
+  ---
+  duration_ms: 87.3538
+  type: 'test'
+  ...
+# Subtest: an already booted runtime is reused without another module or font prewarm
+ok 23 - an already booted runtime is reused without another module or font prewarm
+  ---
+  duration_ms: 87.8146
+  type: 'test'
+  ...
+# Subtest: Page spends recovery once per entry/source and preserves it across same-game effect reruns
+ok 24 - Page spends recovery once per entry/source and preserves it across same-game effect reruns
+  ---
+  duration_ms: 332.7822
+  type: 'test'
+  ...
+# (node:116076) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: actual Page starts one primary font on valid headers before the pending runtime body, once
+ok 25 - actual Page starts one primary font on valid headers before the pending runtime body, once
+  ---
+  duration_ms: 83.2803
+  type: 'test'
+  ...
+# Subtest: actual Page admits one primary font after the shared eight-second header budget, without waiting for a slow retry
+ok 26 - actual Page admits one primary font after the shared eight-second header budget, without waiting for a slow retry
+  ---
+  duration_ms: 89.0099
+  type: 'test'
+  ...
+# Subtest: primary header-timeout admission cannot survive owner retirement or a skipped/reused runtime
+ok 27 - primary header-timeout admission cannot survive owner retirement or a skipped/reused runtime
+  ---
+  duration_ms: 609.5828
+  type: 'test'
+  ...
+# Subtest: one early primary font survives a backend fallback without spending another font admission
+ok 28 - one early primary font survives a backend fallback without spending another font admission
+  ---
+  duration_ms: 82.9217
+  type: 'test'
+  ...
+# Subtest: leaving before or after headers cancels the primary owner and ignores late callbacks
+ok 29 - leaving before or after headers cancels the primary owner and ignores late callbacks
+  ---
+  duration_ms: 160.9021
+  type: 'test'
+  ...
+# Subtest: primary failure cannot fail the runtime, and runtime failure cannot publish late primary completion
+ok 30 - primary failure cannot fail the runtime, and runtime failure cannot publish late primary completion
+  ---
+  duration_ms: 186.5413
+  type: 'test'
+  ...
+# Subtest: primary prewarm reads only the original SC body and waits for all bytes
+ok 31 - primary prewarm reads only the original SC body and waits for all bytes
+  ---
+  duration_ms: 12.7669
+  type: 'test'
+  ...
+# Subtest: failed early SC read does not poison the later full six-family pass
+ok 32 - failed early SC read does not poison the later full six-family pass
+  ---
+  duration_ms: 474.7488
+  type: 'test'
+  ...
+# Subtest: cancelling a primary read cannot start any other family
+ok 33 - cancelling a primary read cannot start any other family
+  ---
+  duration_ms: 0.59
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 34 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 0.9453
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 35 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 1.2148
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 36 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.5742
+  type: 'test'
+  ...
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 37 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 469.7799
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 38 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 1.7087
+  type: 'test'
+  ...
+# Subtest: selection streams and compiles without glue, then game adopts the same in-flight body
+ok 39 - selection streams and compiles without glue, then game adopts the same in-flight body
+  ---
+  duration_ms: 21.6276
+  type: 'test'
+  ...
+# Subtest: a completed selection compilation remains reusable without retaining a network reader
+ok 40 - a completed selection compilation remains reusable without retaining a network reader
+  ---
+  duration_ms: 2.4386
+  type: 'test'
+  ...
+# Subtest: cancel before headers aborts selection and suppresses late header admission
+ok 41 - cancel before headers aborts selection and suppresses late header admission
+  ---
+  duration_ms: 1.4674
+  type: 'test'
+  ...
+# Subtest: retiring the game consumer also cancels the selection body, with no late initializer
+ok 42 - retiring the game consumer also cancels the selection body, with no late initializer
+  ---
+  duration_ms: 1.2835
+  type: 'test'
+  ...
+# Subtest: invalid prepared bytes stay terminal on adoption without a hidden fresh download
+ok 43 - invalid prepared bytes stay terminal on adoption without a hidden fresh download
+  ---
+  duration_ms: 1.8594
+  type: 'test'
+  ...
+# Subtest: changing the immutable package discards only its obsolete preparation
+ok 44 - changing the immutable package discards only its obsolete preparation
+  ---
+  duration_ms: 0.9795
+  type: 'test'
+  ...
+# Subtest: an already retired consumer cannot take or cancel someone else's preparation
+ok 45 - an already retired consumer cannot take or cancel someone else's preparation
+  ---
+  duration_ms: 0.8332
+  type: 'test'
+  ...
+# Subtest: a header observer exception cannot alter the compiled body or initialize twice
+ok 46 - a header observer exception cannot alter the compiled body or initialize twice
+  ---
+  duration_ms: 0.8382
+  type: 'test'
+  ...
+# Subtest: actual Page preparation runs at selection, survives the game transition and does not start fonts or HUD
+ok 47 - actual Page preparation runs at selection, survives the game transition and does not start fonts or HUD
+  ---
+  duration_ms: 7.6624
+  type: 'test'
+  ...
+# Subtest: actual Page skips login, direct-game entry, disabled/touch/invalid packages, missing GPU and existing runtime loads
+ok 48 - actual Page skips login, direct-game entry, disabled/touch/invalid packages, missing GPU and existing runtime loads
+  ---
+  duration_ms: 40.8503
+  type: 'test'
+  ...
+# Subtest: a late capability result after leaving selection cannot create a preparation
+ok 49 - a late capability result after leaving selection cannot create a preparation
+  ---
+  duration_ms: 2.2732
+  type: 'test'
+  ...
+# Subtest: a decoded QR gets a paint opportunity before any preparation and sends no approval URL
+ok 50 - a decoded QR gets a paint opportunity before any preparation and sends no approval URL
+  ---
+  duration_ms: 44.0585
+  type: 'test'
+  ...
+# Subtest: a cached decoded image follows the same two-frame rule, once
+ok 51 - a cached decoded image follows the same two-frame rule, once
+  ---
+  duration_ms: 9.8071
+  type: 'test'
+  ...
+# Subtest: cancelling before either frame leaves no downloads or late readiness
+ok 52 - cancelling before either frame leaves no downloads or late readiness
+  ---
+  duration_ms: 16.346
+  type: 'test'
+  ...
+# Subtest: a broken or undecoded QR image cannot initiate prefetch
+ok 53 - a broken or undecoded QR image cannot initiate prefetch
+  ---
+  duration_ms: 5.4142
+  type: 'test'
+  ...
+# Subtest: unconfirmed Worker waits briefly without a direct uncached font request, then starts once
+ok 54 - unconfirmed Worker waits briefly without a direct uncached font request, then starts once
+  ---
+  duration_ms: 6.7827
+  type: 'test'
+  ...
+# Subtest: Worker confirmation after the original image retires cannot start a font reader
+ok 55 - Worker confirmation after the original image retires cannot start a font reader
+  ---
+  duration_ms: 6.1149
+  type: 'test'
+  ...
+# Subtest: missing Worker confirmation has an eight-second background limit
+ok 56 - missing Worker confirmation has an eight-second background limit
+  ---
+  duration_ms: 4.8152
+  type: 'test'
+  ...
+# Subtest: retirement aborts the QR foreground reader and suppresses a late result
+ok 57 - retirement aborts the QR foreground reader and suppresses a late result
+  ---
+  duration_ms: 7.0737
+  type: 'test'
+  ...
+# Subtest: an old image retirement or result cannot cancel or complete a newer reader
+ok 58 - an old image retirement or result cannot cancel or complete a newer reader
+  ---
+  duration_ms: 7.2088
+  type: 'test'
+  ...
+# Subtest: invalid, duplicate and ineligible lifecycle events cannot create extra work
+ok 59 - invalid, duplicate and ineligible lifecycle events cannot create extra work
+  ---
+  duration_ms: 4.6828
+  type: 'test'
+  ...
+# Subtest: unmount removes readiness listeners and pending confirmation timers
+ok 60 - unmount removes readiness listeners and pending confirmation timers
+  ---
+  duration_ms: 10.8129
+  type: 'test'
+  ...
+# Subtest: actual Page primes only the original primary font after visible QR and confirmed own Worker
+ok 61 - actual Page primes only the original primary font after visible QR and confirmed own Worker
+  ---
+  duration_ms: 13.1413
+  type: 'test'
+  ...
+# Subtest: actual Page skips expired/nonpending QR, disabled/missing runtime, touch and unconfirmed/foreign Worker
+ok 62 - actual Page skips expired/nonpending QR, disabled/missing runtime, touch and unconfirmed/foreign Worker
+  ---
+  duration_ms: 97.0156
+  type: 'test'
+  ...
+# Subtest: actual Page rechecks the current QR before a late Worker confirmation
+ok 63 - actual Page rechecks the current QR before a late Worker confirmation
+  ---
+  duration_ms: 6.2462
+  type: 'test'
+  ...
+1..63
+# tests 63
+# suites 0
+# pass 63
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4861.4485

@@ -348,6 +348,7 @@ pub fn gameplay_event_sink_status(
 fn command_kind_label(kind: &WorldCommandKind) -> String {
     match kind {
         WorldCommandKind::ClientPacket(name) => format!("client.{name}"),
+        WorldCommandKind::NpcPurchaseOwner(action) => format!("npcPurchaseOwner.{action}"),
         WorldCommandKind::PasskeyLogin => "runtime.passkeyLogin".to_string(),
         WorldCommandKind::MoveTo => "runtime.moveTo".to_string(),
         WorldCommandKind::Attack => "runtime.attack".to_string(),
@@ -361,11 +362,15 @@ fn command_kind_label(kind: &WorldCommandKind) -> String {
         WorldCommandKind::CastSkill => "runtime.castSkill".to_string(),
         WorldCommandKind::TransferMap => "runtime.transferMap".to_string(),
         WorldCommandKind::ApplyHandoffTransform => "runtime.applyHandoffTransform".to_string(),
+        WorldCommandKind::ReplayRetainedStartGameBootstrap => {
+            "runtime.replayRetainedStartGameBootstrap".to_string()
+        }
         WorldCommandKind::Stage5Command(action) => format!("stage5.{action}"),
         WorldCommandKind::GrantOnchainOre => "onchain.grantOre".to_string(),
         WorldCommandKind::CreditGoldFromOre => "onchain.creditGold".to_string(),
         WorldCommandKind::ItemRentalRequest => "runtime.itemRentalRequest".to_string(),
         WorldCommandKind::SetLanguage => "runtime.setLanguage".to_string(),
+        WorldCommandKind::Billing => "runtime.billing".to_string(),
         WorldCommandKind::Tick => "runtime.tick".to_string(),
     }
 }

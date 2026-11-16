@@ -1,0 +1,26 @@
+{
+  "source": "Source65",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 90,
+    "builderPid": 56924,
+    "kind": "Source65 Root accepted Gateway npc_purchase tests attempt02 original caller/Guard",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 80,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test02-config02.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "cargoForwarded": false,
+  "testsExecuted": false,
+  "reason": "Policy contained boolean preparation metadata; unchanged Guard accepts strict flat string-only policy. Successful Source62 actual policy schema will be used.",
+  "thresholdBytes": 53687091200,
+  "guardUnchanged": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

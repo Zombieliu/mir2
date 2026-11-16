@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "capturedAt": "2026-10-11T11:56:45.049Z",
+  "localURL": "http://127.0.0.1:19205/",
+  "owner": "Root",
+  "originalCaller": {
+    "bodyBytes": 4569,
+    "bodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "sessionId": 89985,
+    "running": true
+  },
+  "newWeb": {
+    "pid": 57108,
+    "parentPid": 65388,
+    "checks": {
+      "exactlyOneOwnedChild": true,
+      "parentMatched": true,
+      "executableMatched": true,
+      "exactSingleServerArgumentMatched": true,
+      "parentConfigPathMatched": true,
+      "parentConfigShaMatched": true,
+      "publicConfigShaMatched": true,
+      "onlyOwnedLoopbackListener": true
+    },
+    "originalCallerRunning": true,
+    "running": true,
+    "exited": false,
+    "disposed": false,
+    "rawCommandLineDisplayed": false,
+    "GatewayQueried": false
+  },
+  "oldWeb": {
+    "normalCloseInventoryAndAltX": true,
+    "loginScreenReturned": true,
+    "identityChecksPassed": 8,
+    "intentionallyStopped": true,
+    "originalCallerExitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "logsPreserved": true
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/web-start01-config.json",
+    "bytes": 2927,
+    "sha256": "0e825a359300bc33cbbf0a89635a61c79842b34a56897c1cc94fe34c0a63ccb3"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/web-runtime-source-review01.json",
+    "bytes": 6949,
+    "sha256": "a6349bb1001d9d0543cfff1655adebb8bdb7c4273e1222358e8c005ebba6e73e"
+  },
+  "package": {
+    "files": 4066,
+    "ordinaryDirectoriesIncludingRoot": 513,
+    "links": 0,
+    "bytes": 284883638,
+    "capBytes": 377487360,
+    "capPassed": true,
+    "fullHashDifferences": 0,
+    "packageCopyDifferences": 0,
+    "fullFileAndDirectoryMembershipDifferences": 0,
+    "ordinaryAncestors": 1036,
+    "ancestorDifferences": 0,
+    "controls": 8,
+    "controlDifferences": 0
+  },
+  "diagnostics": {
+    "dependencyWarnings": 59,
+    "all59WarningDetailsUntruncated": true
+  },
+  "ui": {
+    "ordinaryBrowserReloadLoadedLegendAndLoginControls": true,
+    "normalLoginSubmitted": true,
+    "startGamePending": true,
+    "storageDepositAndWithdrawSaveReloginPending": true
+  },
+  "unchanged": {
+    "GatewayPrivateConfigReadOrChanged": false,
+    "GatewayRestarted": false,
+    "compiledWS": "ws://127.0.0.1:19110/ws",
+    "immutableMediaProxyOrigin": true
+  },
+  "acceptance": {
+    "runtimeCopyAccepted": true,
+    "runtimeStarted": true,
+    "storageLiveUiAccepted": false,
+    "candidate100": false,
+    "overallPercentage": null,
+    "humanFrontendAccepted": false,
+    "goalComplete": false
+  }
+}

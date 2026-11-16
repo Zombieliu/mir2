@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: AOI received state clears a ghost clock during the actual in-range interval between polls
+ok 1 - AOI received state clears a ghost clock during the actual in-range interval between polls
+  ---
+  duration_ms: 1.622
+  type: 'test'
+  ...
+# Subtest: AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications
+ok 2 - AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications
+  ---
+  duration_ms: 0.2075
+  type: 'test'
+  ...
+# Subtest: AOI received state clears missing only for exactly one entry or no longer required visibility
+ok 3 - AOI received state clears missing only for exactly one entry or no longer required visibility
+  ---
+  duration_ms: 0.5852
+  type: 'test'
+  ...
+# Subtest: AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair
+ok 4 - AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair
+  ---
+  duration_ms: 0.1346
+  type: 'test'
+  ...
+# Subtest: AOI received state hook follows real decoded owner peer Join Leave snapshot and map state
+ok 5 - AOI received state hook follows real decoded owner peer Join Leave snapshot and map state
+  ---
+  duration_ms: 2.3555
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 88.9596

@@ -1,0 +1,3 @@
+Timeout, server github.com not responding.
+send-pack: unexpected disconnect while reading sideband packet
+fatal: the remote end hung up unexpectedly

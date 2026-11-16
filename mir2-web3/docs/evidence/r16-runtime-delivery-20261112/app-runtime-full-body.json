@@ -1,0 +1,16 @@
+{
+  "kind": "complete-versioned-application-runtime-body",
+  "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+  "checkedAt": "2026-11-12T14:03:03.238Z",
+  "exit": 0,
+  "stdout": "200 6431849",
+  "stderr": "",
+  "elapsedMs": 55745,
+  "decodedBytes": 31441753,
+  "sha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+  "expectedSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+  "expectedBytes": 31441753,
+  "productionAtProbe": "72c00d20ae",
+  "scope": "unchanged fixed runtime content on versioned app route; independent full body, not a browser latency guarantee",
+  "passed": true
+}

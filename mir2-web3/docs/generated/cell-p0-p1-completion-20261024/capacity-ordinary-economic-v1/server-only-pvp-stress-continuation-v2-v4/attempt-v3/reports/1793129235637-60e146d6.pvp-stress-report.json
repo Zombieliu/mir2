@@ -1,0 +1,670 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793129235637-60e146d6",
+  "reportPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v3\\reports\\1793129235637-60e146d6.pvp-stress-report.json",
+  "samplesPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v3\\reports\\1793129235637-60e146d6.pvp-stress-samples.jsonl",
+  "startedAt": "2026-10-27T19:27:15.637Z",
+  "scope": "server-only-preconfigured-all-fighter-pvp",
+  "preseeded": true,
+  "ordinaryEvidence": false,
+  "ordinaryP0Qualification": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "attackResults": "v2",
+  "legacyFallback": false,
+  "diagnosticContinuation": true,
+  "anyFailedStage": false,
+  "count": 500,
+  "stagesRequested": [
+    25,
+    50,
+    100,
+    250,
+    500
+  ],
+  "stageSeconds": 300,
+  "soakSeconds": 0,
+  "finiteWallSeconds": 3600,
+  "loginConcurrency": 1,
+  "startGameConcurrency": 2,
+  "authAndPoolWritesSerialized": true,
+  "stationaryGroups": true,
+  "movingPvpTested": false,
+  "hotspotTested": false,
+  "clientAuthBudget": 600,
+  "serverAuthProfileVerification": "Root owned wrapper responsibility; fixture declaration alone is not runtime proof",
+  "stages": [],
+  "cleanupErrors": [
+    {
+      "actorIndex": 14,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 15,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 16,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 17,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 18,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 19,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 20,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 21,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 22,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 23,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 24,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 5,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 8,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 9,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 10,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 11,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 12,
+      "step": "normal-drain-incomplete"
+    },
+    {
+      "actorIndex": 13,
+      "step": "normal-drain-incomplete"
+    }
+  ],
+  "healthBefore": {
+    "capacity": {
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "loadTestLogin": {
+      "testOnly": true,
+      "loginPeerLimit": 600,
+      "loginDeviceLimit": 600,
+      "windowSeconds": 900
+    }
+  },
+  "ok": false,
+  "error": "Fresh fixture position/health/held inventory differs",
+  "totals": [
+    {
+      "actorIndex": 0,
+      "activeElapsedMs": 30695,
+      "role": "fighter",
+      "seconds": 30.695,
+      "requests": 25,
+      "launched": 25,
+      "notLaunched": 0,
+      "positive": 18,
+      "positiveDamage": 140,
+      "launchedPerMinute": 48.86789379377749,
+      "positivePerMinute": 35.184883531519795,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 25,
+        "p50Ms": 270,
+        "p95Ms": 383,
+        "p99Ms": 387,
+        "maxMs": 386.15479999999934
+      },
+      "positiveHitLatency": {
+        "count": 18,
+        "p50Ms": 247,
+        "p95Ms": 399,
+        "p99Ms": 399,
+        "maxMs": 398.0547000000006
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 1,
+      "activeElapsedMs": 30696,
+      "role": "fighter",
+      "seconds": 30.696,
+      "requests": 21,
+      "launched": 20,
+      "notLaunched": 1,
+      "positive": 10,
+      "positiveDamage": 61,
+      "launchedPerMinute": 39.09304143862392,
+      "positivePerMinute": 19.54652071931196,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 21,
+        "p50Ms": 328,
+        "p95Ms": 475,
+        "p99Ms": 518,
+        "maxMs": 517.1075000000019
+      },
+      "positiveHitLatency": {
+        "count": 10,
+        "p50Ms": 284,
+        "p95Ms": 476,
+        "p99Ms": 476,
+        "maxMs": 475.26270000000295
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 2,
+      "activeElapsedMs": 25732,
+      "role": "fighter",
+      "seconds": 25.732,
+      "requests": 23,
+      "launched": 23,
+      "notLaunched": 0,
+      "positive": 18,
+      "positiveDamage": 121,
+      "launchedPerMinute": 53.629721747240794,
+      "positivePerMinute": 41.97108658479714,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 23,
+        "p50Ms": 274,
+        "p95Ms": 369,
+        "p99Ms": 519,
+        "maxMs": 518.1798999999992
+      },
+      "positiveHitLatency": {
+        "count": 18,
+        "p50Ms": 268,
+        "p95Ms": 469,
+        "p99Ms": 469,
+        "maxMs": 468.52490000000034
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 3,
+      "activeElapsedMs": 25732,
+      "role": "fighter",
+      "seconds": 25.732,
+      "requests": 19,
+      "launched": 19,
+      "notLaunched": 0,
+      "positive": 11,
+      "positiveDamage": 65,
+      "launchedPerMinute": 44.30281361728587,
+      "positivePerMinute": 25.64899735737603,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 19,
+        "p50Ms": 292,
+        "p95Ms": 550,
+        "p99Ms": 550,
+        "maxMs": 549.1389999999992
+      },
+      "positiveHitLatency": {
+        "count": 11,
+        "p50Ms": 266,
+        "p95Ms": 524,
+        "p99Ms": 524,
+        "maxMs": 523.1890000000021
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 4,
+      "activeElapsedMs": 20778,
+      "role": "fighter",
+      "seconds": 20.778,
+      "requests": 14,
+      "launched": 14,
+      "notLaunched": 0,
+      "positive": 6,
+      "positiveDamage": 41,
+      "launchedPerMinute": 40.42737510828761,
+      "positivePerMinute": 17.326017903551836,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 14,
+        "p50Ms": 325,
+        "p95Ms": 410,
+        "p99Ms": 410,
+        "maxMs": 409.6320999999989
+      },
+      "positiveHitLatency": {
+        "count": 6,
+        "p50Ms": 363,
+        "p95Ms": 527,
+        "p99Ms": 527,
+        "maxMs": 526.9565999999977
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 5,
+      "activeElapsedMs": 20778,
+      "role": "fighter",
+      "seconds": 20.778,
+      "requests": 15,
+      "launched": 14,
+      "notLaunched": 0,
+      "positive": 8,
+      "positiveDamage": 53,
+      "launchedPerMinute": 40.42737510828761,
+      "positivePerMinute": 23.10135720473578,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 14,
+        "p50Ms": 281,
+        "p95Ms": 476,
+        "p99Ms": 476,
+        "maxMs": 475.55609999999797
+      },
+      "positiveHitLatency": {
+        "count": 8,
+        "p50Ms": 263,
+        "p95Ms": 477,
+        "p99Ms": 477,
+        "maxMs": 476.0616999999984
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 6,
+      "activeElapsedMs": 15846,
+      "role": "fighter",
+      "seconds": 15.846,
+      "requests": 12,
+      "launched": 12,
+      "notLaunched": 0,
+      "positive": 7,
+      "positiveDamage": 51,
+      "launchedPerMinute": 45.43733434305187,
+      "positivePerMinute": 26.505111700113595,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 12,
+        "p50Ms": 284,
+        "p95Ms": 436,
+        "p99Ms": 436,
+        "maxMs": 435.3127999999997
+      },
+      "positiveHitLatency": {
+        "count": 7,
+        "p50Ms": 295,
+        "p95Ms": 403,
+        "p99Ms": 403,
+        "maxMs": 402.0036
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 7,
+      "activeElapsedMs": 15846,
+      "role": "fighter",
+      "seconds": 15.846,
+      "requests": 14,
+      "launched": 12,
+      "notLaunched": 1,
+      "positive": 9,
+      "positiveDamage": 63,
+      "launchedPerMinute": 45.43733434305187,
+      "positivePerMinute": 34.078000757288905,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 13,
+        "p50Ms": 278,
+        "p95Ms": 553,
+        "p99Ms": 553,
+        "maxMs": 552.8004999999976
+      },
+      "positiveHitLatency": {
+        "count": 9,
+        "p50Ms": 276,
+        "p95Ms": 553,
+        "p99Ms": 553,
+        "maxMs": 552.4209999999985
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 8,
+      "activeElapsedMs": 10668,
+      "role": "fighter",
+      "seconds": 10.668,
+      "requests": 8,
+      "launched": 8,
+      "notLaunched": 0,
+      "positive": 5,
+      "positiveDamage": 31,
+      "launchedPerMinute": 44.99437570303712,
+      "positivePerMinute": 28.1214848143982,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 8,
+        "p50Ms": 311,
+        "p95Ms": 504,
+        "p99Ms": 504,
+        "maxMs": 503.2533999999978
+      },
+      "positiveHitLatency": {
+        "count": 5,
+        "p50Ms": 290,
+        "p95Ms": 476,
+        "p99Ms": 476,
+        "maxMs": 475.2978000000003
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 9,
+      "activeElapsedMs": 10668,
+      "role": "fighter",
+      "seconds": 10.668,
+      "requests": 8,
+      "launched": 7,
+      "notLaunched": 0,
+      "positive": 4,
+      "positiveDamage": 27,
+      "launchedPerMinute": 39.37007874015748,
+      "positivePerMinute": 22.49718785151856,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 7,
+        "p50Ms": 291,
+        "p95Ms": 448,
+        "p99Ms": 448,
+        "maxMs": 447.9464999999982
+      },
+      "positiveHitLatency": {
+        "count": 4,
+        "p50Ms": 256,
+        "p95Ms": 312,
+        "p99Ms": 312,
+        "maxMs": 311.0781999999999
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 10,
+      "activeElapsedMs": 5293,
+      "role": "fighter",
+      "seconds": 5.293,
+      "requests": 5,
+      "launched": 5,
+      "notLaunched": 0,
+      "positive": 3,
+      "positiveDamage": 20,
+      "launchedPerMinute": 56.678632155677306,
+      "positivePerMinute": 34.00717929340639,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 5,
+        "p50Ms": 326,
+        "p95Ms": 412,
+        "p99Ms": 412,
+        "maxMs": 411.59860000000117
+      },
+      "positiveHitLatency": {
+        "count": 3,
+        "p50Ms": 339,
+        "p95Ms": 398,
+        "p99Ms": 398,
+        "maxMs": 397.4480000000003
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 11,
+      "activeElapsedMs": 5293,
+      "role": "fighter",
+      "seconds": 5.293,
+      "requests": 5,
+      "launched": 3,
+      "notLaunched": 1,
+      "positive": 2,
+      "positiveDamage": 15,
+      "launchedPerMinute": 34.00717929340639,
+      "positivePerMinute": 22.67145286227092,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 4,
+        "p50Ms": 233,
+        "p95Ms": 280,
+        "p99Ms": 280,
+        "maxMs": 279.3911999999982
+      },
+      "positiveHitLatency": {
+        "count": 2,
+        "p50Ms": 131,
+        "p95Ms": 279,
+        "p99Ms": 279,
+        "maxMs": 278.67719999999827
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    }
+  ],
+  "normalDrains": [
+    {
+      "actorIndex": 6,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1248,
+        "at": 1793129271357,
+        "map": "0",
+        "x": 272,
+        "y": 56,
+        "hp": 653,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 4,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1378,
+        "at": 1793129271365,
+        "map": "0",
+        "x": 104,
+        "y": 56,
+        "hp": 663,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 1,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1516,
+        "at": 1793129271350,
+        "map": "0",
+        "x": 105,
+        "y": 32,
+        "hp": 667,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 3,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1416,
+        "at": 1793129271363,
+        "map": "0",
+        "x": 297,
+        "y": 32,
+        "hp": 574,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 0,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1482,
+        "at": 1793129271366,
+        "map": "0",
+        "x": 104,
+        "y": 32,
+        "hp": 653,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 2,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1433,
+        "at": 1793129271360,
+        "map": "0",
+        "x": 296,
+        "y": 32,
+        "hp": 630,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 7,
+      "normalLogout": true,
+      "final": {
+        "sequence": 1215,
+        "at": 1793129271800,
+        "map": "0",
+        "x": 273,
+        "y": 56,
+        "hp": 623,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    }
+  ],
+  "finishedAt": "2026-10-27T19:27:52.795Z",
+  "totalElapsedMs": 37158,
+  "finiteWallExceeded": false,
+  "cleanupComplete": false,
+  "resourceMonitorStopped": true,
+  "resourceStopReason": "Fresh fixture position/health/held inventory differs",
+  "serverOnlyMeasuredProfilePassed": false
+}

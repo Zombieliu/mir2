@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-11-07T22:22:08.5873660Z",
+  "ownedPortsClosed": [
+    19253,
+    19283,
+    19353
+  ],
+  "gatewayGracefulShutdownExitCode": 0,
+  "nextStoppedByOwnedLauncherSignal": true,
+  "originalGateways": [
+    {
+      "port": 19235,
+      "pid": 129280,
+      "image": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+    },
+    {
+      "port": 19232,
+      "pid": 128444,
+      "image": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+    },
+    {
+      "port": 19231,
+      "pid": 126788,
+      "image": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+    }
+  ],
+  "originalWindowsSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "originalServicesAndExeRetained": true,
+  "originalLiveFileBytesClaimedUnchanged": false,
+  "privateFixturesAndFailedRunsRetained": true,
+  "desktopControlled": false,
+  "publicDeployment": false,
+  "liveModelCalled": false
+}

@@ -71,6 +71,98 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0011_game_economy_trade_projections",
         include_str!("../../../infra/postgres/migrations/0011_game_economy_trade_projections.sql"),
     ),
+    (
+        "0012_shared_guild_authority",
+        include_str!("../../../infra/postgres/migrations/0012_shared_guild_authority.sql"),
+    ),
+    (
+        "0013_shared_guild_clock",
+        include_str!("../../../infra/postgres/migrations/0013_shared_guild_clock.sql"),
+    ),
+    (
+        "0014_shared_hero_authority",
+        include_str!("../../../infra/postgres/migrations/0014_shared_hero_authority.sql"),
+    ),
+    (
+        "0015_sealed_stone_authority",
+        include_str!("../../../infra/postgres/migrations/0015_sealed_stone_authority.sql"),
+    ),
+    (
+        "0016_shared_conquest_authority",
+        include_str!("../../../infra/postgres/migrations/0016_shared_conquest_authority.sql"),
+    ),
+    (
+        "0017_sealed_stone_authority",
+        include_str!("../../../infra/postgres/migrations/0017_sealed_stone_authority.sql"),
+    ),
+    (
+        "0018_procurement_authority_guard",
+        include_str!("../../../infra/postgres/migrations/0018_procurement_authority_guard.sql"),
+    ),
+    (
+        "0019_sui_usdc_billing_authority",
+        include_str!("../../../infra/postgres/migrations/0019_sui_usdc_billing_authority.sql"),
+    ),
+    (
+        "0017_promotion_program",
+        include_str!("../../../infra/postgres/migrations/0017_promotion_program.sql"),
+    ),
+    (
+        "0018_promotion_payment_provenance",
+        include_str!("../../../infra/postgres/migrations/0018_promotion_payment_provenance.sql"),
+    ),
+    (
+        "0019_promotion_game_sources",
+        include_str!("../../../infra/postgres/migrations/0019_promotion_game_sources.sql"),
+    ),
+    (
+        "0020_promotion_payout_execution",
+        include_str!("../../../infra/postgres/migrations/0020_promotion_payout_execution.sql"),
+    ),
+    (
+        "0021_promotion_live_readiness",
+        include_str!("../../../infra/postgres/migrations/0021_promotion_live_readiness.sql"),
+    ),
+    (
+        "0022_promotion_production_approval",
+        include_str!("../../../infra/postgres/migrations/0022_promotion_production_approval.sql"),
+    ),
+    (
+        "0023_promotion_revenue_share",
+        include_str!("../../../infra/postgres/migrations/0023_promotion_revenue_share.sql"),
+    ),
+    (
+        "0024_sui_usdc_native_transfer_authority",
+        include_str!(
+            "../../../infra/postgres/migrations/0024_sui_usdc_native_transfer_authority.sql"
+        ),
+    ),
+    (
+        "0025_promotion_attribution_migration",
+        include_str!("../../../infra/postgres/migrations/0025_promotion_attribution_migration.sql"),
+    ),
+    (
+        "0020_zone_character_save_operations",
+        include_str!("../../../infra/postgres/migrations/0020_zone_character_save_operations.sql"),
+    ),
+    (
+        "0021_zone_player_drop_operations",
+        include_str!("../../../infra/postgres/migrations/0021_zone_player_drop_operations.sql"),
+    ),
+    (
+        "0022_zone_player_drop_recovery_receipts",
+        include_str!(
+            "../../../infra/postgres/migrations/0022_zone_player_drop_recovery_receipts.sql"
+        ),
+    ),
+    (
+        "0023_zone_player_drop_admissions",
+        include_str!("../../../infra/postgres/migrations/0023_zone_player_drop_admissions.sql"),
+    ),
+    (
+        "0024_mail_item_transfer_receipts",
+        include_str!("../../../infra/postgres/migrations/0024_mail_item_transfer_receipts.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.
@@ -711,6 +803,49 @@ mod tests {
     use crate::config::CharacterRecord;
     use mir2_protocol::{MirClass, MirGender};
 
+    #[test]
+    fn migration_union_preserves_both_historical_stone_ids_and_new_authority_guards() {
+        let versions: Vec<_> = MIGRATIONS.iter().map(|(version, _)| *version).collect();
+        assert_eq!(
+            versions
+                .iter()
+                .copied()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            versions.len(),
+            "full migration IDs, including historical aliases, must remain unique"
+        );
+        let position = |version| versions.iter().position(|v| *v == version).unwrap();
+        let legacy = position("0015_sealed_stone_authority");
+        let conquest = position("0016_shared_conquest_authority");
+        let current = position("0017_sealed_stone_authority");
+        assert!(legacy < conquest && conquest < current);
+        assert_eq!(
+            MIGRATIONS[legacy].1.replace("\r\n", "\n"),
+            MIGRATIONS[current].1.replace("\r\n", "\n"),
+            "historical aliases must have identical SQL after Windows line-ending normalization"
+        );
+        assert!(current < position("0018_procurement_authority_guard"));
+        assert!(
+            position("0018_procurement_authority_guard")
+                < position("0019_sui_usdc_billing_authority")
+        );
+        assert!(
+            position("0019_sui_usdc_billing_authority")
+                < position("0024_sui_usdc_native_transfer_authority")
+        );
+        assert!(
+            position("0023_promotion_revenue_share")
+                < position("0024_sui_usdc_native_transfer_authority")
+        );
+        let transfer = MIGRATIONS[position("0024_sui_usdc_native_transfer_authority")].1;
+        assert!(
+            !transfer.contains("UPDATE accounts"),
+            "V14 migration must preserve historical account rows"
+        );
+        assert!(transfer.contains("FROM sui_usdc_payment_receipts ON CONFLICT DO NOTHING"));
+    }
+
     fn sample_save() -> CharacterSaveRecord {
         let mut save = CharacterSaveRecord::new(CharacterRecord {
             index: 0,
@@ -738,6 +873,7 @@ mod tests {
         let mut systems = Stage5SystemsState::default();
         systems.guild.name = "Heroes".to_string();
         systems.mail.push(crate::config::Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 1,
             delivery_nonce: "projection-fixture-mail-1".to_string(),
             from: "GM".to_string(),
@@ -753,6 +889,7 @@ mod tests {
             deleted: false,
         });
         systems.auction.push(crate::config::Stage5AuctionListing {
+            item_state_json: None,
             id: 5,
             seller: "Hero".to_string(),
             item_key: "iron-sword".to_string(),

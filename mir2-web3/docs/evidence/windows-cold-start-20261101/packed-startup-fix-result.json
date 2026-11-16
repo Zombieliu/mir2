@@ -1,0 +1,53 @@
+{
+  "schema": "mir2.r17.packed-startup-fix-local-validation.v1",
+  "atUtc": "2026-11-01T09:38:55.323145+00:00",
+  "baseHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+  "frozenFailedSource": "3b3072c48e857b7a36163093a3fe52d21a1b78b4",
+  "originalGameInstallerStagedFilesUnchanged": true,
+  "concurrentOtherStagedDifferencesNotModifiedByThisWorker": [
+    "mir2-web3/apps/website/.env.production",
+    "mir2-web3/apps/website/README.md"
+  ],
+  "rootCause": "Generation child unconditionally required GameGuard.excluded for an absent legacy EXE; actual Windows NotFound returns is_running=false with excluded=false before mounting PackStore",
+  "fix": "Only genuine NotFound with no LegacyV4 previous selection permits no legacy handle after authenticated generation and selector/attempt/quarantine checks; any existing legacy EXE retains its real lifetime guard",
+  "packIntegrity": "CMS/catalog/EXE/GameLease/DirectoryLease/config checks retained; mandatory startup resources read via PackStore before global mount; no loose or R2 substitute",
+  "authenticationScope": "Selector fixtures exercise post-authentication local policy; they do not claim new real signed end-to-end GUI acceptance",
+  "fileSha256": {
+    "assets.rs": "891E88FC80EC3A1761ECDE73880C620BE10E7435285D639C0BDFCA9F346D0CEF",
+    "generation_launch.rs": "39D812A521B0085E2849BFD8B30D8B1D5DB57B9D1F0A86DF3C2CFB7AD1256C90",
+    "generation_launch_tests.rs": "66005A40C3D598F413F5A1E6C38F3E1E73489954CFCA4F4BB6E427D9D7EC7930"
+  },
+  "logs": {
+    "packed-startup-native-tests.log": {
+      "sha256": "8702EBB7210EE2C10BD316E9E1937B0A03AF60F17CAA18529F7BE5F2743705C5",
+      "bytes": 47555,
+      "summaries": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 0.10s\r"
+      ]
+    },
+    "packed-startup-assets-regression.log": {
+      "sha256": "A2CC97C8065F072C2BA912CE68293647E0486271EEB4A36ECD2DEB8D49615A6E",
+      "bytes": 47796,
+      "summaries": [
+        "test result: ok. 11 passed; 0 failed; 1 ignored; 0 measured; 1201 filtered out; finished in 0.19s\r"
+      ]
+    }
+  },
+  "focused": {
+    "passed": 7,
+    "failed": 0,
+    "ignored": 0
+  },
+  "adjacent": {
+    "passed": 11,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredReason": "Existing offline asset timing fixture needs MIR2_ASSET_PROBE_ROOT"
+  },
+  "target": "E:/mir2-release/windows-ui-shop-pointer-20261101/test-target",
+  "attestedTargetTouched": false,
+  "mainRsChanged": false,
+  "gameLaunched": false,
+  "publicDeployment": false,
+  "committed": false
+}

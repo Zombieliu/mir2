@@ -1,0 +1,384 @@
+{
+  "run": "quest-after-r1",
+  "source": null,
+  "localCandidate": "31e9b6a74661-entry-recovery-2bfdd3ba",
+  "renderer": "compatibility",
+  "passed": false,
+  "originalReceiptSha256": "6fd2dc867051d473992c96dd34e70750a87353793023314c0ad52f7049d2aed8",
+  "failure": {
+    "stage": "verify-hosted-font-policy-and-wait-native-hud",
+    "message": "the actually completed exact package script and binary must be observed"
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "sameEntryRecoveryPassed": false,
+  "startGame": {
+    "acknowledgedAt": 1794555602666,
+    "bootstrapAt": 1794555602948,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "map": "0"
+  },
+  "firstPlayable": {
+    "epochMs": 1794555613885,
+    "observedAt": 1794555613886
+  },
+  "earlyWalks": {
+    "passed": true,
+    "firstPlayableAt": 1794555613885,
+    "rows": [
+      {
+        "key": "ArrowRight",
+        "direction": "Right",
+        "to": {
+          "x": 289,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794555616094,
+        "wireAt": 1794555616110,
+        "ackAt": 1794555616119,
+        "renderedAt": 1794555616156,
+        "ackMs": 9,
+        "inputToRenderedMs": 62,
+        "rendered": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      {
+        "key": "ArrowLeft",
+        "direction": "Left",
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794555616157,
+        "wireAt": 1794555616709,
+        "ackAt": 1794555616710,
+        "renderedAt": 1794555616738,
+        "ackMs": 1,
+        "inputToRenderedMs": 581,
+        "rendered": {
+          "x": 288,
+          "y": 616
+        }
+      }
+    ],
+    "returnedToSpawn": true
+  },
+  "continuousWalk": {
+    "startedAt": 1794555616738,
+    "rows": [
+      {
+        "step": 0,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555617698
+      },
+      {
+        "step": 0,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555618296
+      },
+      {
+        "step": 1,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555618888
+      },
+      {
+        "step": 1,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555619501
+      },
+      {
+        "step": 2,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555620091
+      },
+      {
+        "step": 2,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555620693
+      },
+      {
+        "step": 3,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555621284
+      },
+      {
+        "step": 3,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555621920
+      },
+      {
+        "step": 4,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555622512
+      },
+      {
+        "step": 4,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555623117
+      },
+      {
+        "step": 5,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555623703
+      },
+      {
+        "step": 5,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555624323
+      },
+      {
+        "step": 6,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555624915
+      },
+      {
+        "step": 6,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555625564
+      },
+      {
+        "step": 7,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555626156
+      },
+      {
+        "step": 7,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555626758
+      }
+    ],
+    "endedAt": 1794555626758
+  },
+  "npcRecovery": {
+    "reads": [
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555591874,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555611875
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555612077,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555632076
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555633079,
+        "status": 200,
+        "bytes": 313909,
+        "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "headersAt": 1794555633079,
+        "finishedAt": 1794555633079,
+        "closedAt": 1794555633079
+      }
+    ]
+  },
+  "controlledRuntimeDelivery": {
+    "kind": "Playwright fixed-byte response; not a WAN cold-download result",
+    "version": "bevy-0c553a754308e5b8",
+    "deliveries": [
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "at": 1794555613975,
+        "status": 200,
+        "bytes": 141747,
+        "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+        "controlledHeaderDelayMs": 0
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 1,
+        "requestedAt": 1794555613977,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555621975
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 2,
+        "requestedAt": 1794555621975,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555621975,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794555636978
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 3,
+        "requestedAt": 1794555636980,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555636980,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794555651995
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 4,
+        "requestedAt": 1794555653005,
+        "bytes": 31452436,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555653005,
+        "status": 200,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "finishedAt": 1794555653010,
+        "closedAt": 1794555653010
+      }
+    ]
+  },
+  "runtimeAttempts": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 503,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    }
+  ],
+  "native": null,
+  "worker": null,
+  "warm": null,
+  "scope": "Resources recovered but exact-byte observer omitted the owned mirror path; retained instrumentation failure."
+}

@@ -1,0 +1,172 @@
+{
+  "schema": "numeron.rules-adjacent-single-run/1",
+  "finishedAt": "2026-11-03T10:02:16.156Z",
+  "passed": true,
+  "scope": "Current Node source with previously verified R16 Gateway; this is not new-Gateway acceptance.",
+  "gatewaySha256": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+  "newGatewayValidated": false,
+  "originalSourceSha256": "6734436f88ee73e9b1bc9f4b493bcb4e4680156adc031969f1812fe5ad256950",
+  "sourceStillUnchanged": true,
+  "timerStepOrAssertionChanges": false,
+  "reportPath": "F:\\mir2-builds\\alo-cultivation-20261103\\private\\rules-fixtures\\companion-dafd7943-f873-4c50-bda8-11c1c19a1027\\summary.json",
+  "exitCode": 0,
+  "checkpoints": [
+    "shared-party-passed",
+    "follow-passed",
+    "before-teaching-passed",
+    "combat-and-training-passed",
+    "waiting-31s-for-existing-route-lease",
+    "waiting-16s-for-existing-bootstrap-grace",
+    "restart-and-next-adventure-passed",
+    "field-damage-observation",
+    "natural-field-damage-passed",
+    "owned-potion-consumed",
+    "potion-recovery-passed",
+    "potion-and-danger-withdrawal-passed"
+  ],
+  "failure": null,
+  "teachingBeforeAfter": true,
+  "restartRemembersTeaching": true,
+  "exactOwnedPotionConsumed": true,
+  "timedActualHpRecovery": true,
+  "autonomousDangerRetreatAlive": true,
+  "potionReceipts": [
+    {
+      "at": 1793700073555,
+      "payload": {
+        "grid": "Inventory",
+        "success": true,
+        "uniqueId": 2
+      }
+    }
+  ],
+  "potionDecisions": [
+    {
+      "at": 1793700073568,
+      "result": {
+        "kind": "usePotion",
+        "reason": "health-low-use-owned-potion",
+        "policyVersion": 2,
+        "uniqueId": 2,
+        "grid": "inventory",
+        "performed": true,
+        "confirmed": true
+      }
+    }
+  ],
+  "finalSafeObservation": {
+    "at": 1793700116723,
+    "phase": "retreat-authoritative-safety",
+    "player": {
+      "x": 288,
+      "y": 616
+    },
+    "hp": 18,
+    "inSafeZone": true
+  },
+  "modelCalls": 0,
+  "modelCallEvidence": "Rules-only profile, no runtimeService/provider credentials; read-only count of durable model-call episodes in this new private fixture.",
+  "episodeCounts": {
+    "decision": 18,
+    "inventory-change": 3,
+    "feedback": 1,
+    "item-use": 1
+  },
+  "memoryError": null,
+  "ownedProcesses": {
+    "parentExitCode": 0,
+    "processes": [
+      {
+        "pid": 56292,
+        "role": "explicit-old-r16-gateway",
+        "exitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "aliveAtParentExit": false
+      },
+      {
+        "pid": 2712,
+        "role": "current-source-rules-companion",
+        "exitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "aliveAtParentExit": false
+      },
+      {
+        "pid": 65188,
+        "role": "current-source-rules-companion",
+        "exitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "aliveAtParentExit": false
+      }
+    ]
+  },
+  "allOwnedProcessesExited": true,
+  "privateOutputRoot": "F:/mir2-builds/alo-cultivation-20261103/private/rules-fixtures",
+  "privateMemoryPath": "F:\\mir2-builds\\alo-cultivation-20261103\\private\\rules-fixtures\\companion-dafd7943-f873-4c50-bda8-11c1c19a1027\\alo.sqlite",
+  "originalUserStateOrCredentialsRead": false,
+  "originalGameProcessesTargeted": false,
+  "sourceChecks": [
+    {
+      "path": "apps/ai-player/src/resident-actor.mjs",
+      "sha256": "274ba33fa581145a2197e3477eb9d75cb9f0c0f55220653dd8d2d08225313c60",
+      "finalSha256": "274ba33fa581145a2197e3477eb9d75cb9f0c0f55220653dd8d2d08225313c60",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/src/companion-controller.mjs",
+      "sha256": "addbed26e31435c2dc61394b14114739704cb652073cccfd37b141314e26c412",
+      "finalSha256": "addbed26e31435c2dc61394b14114739704cb652073cccfd37b141314e26c412",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/src/companion-policy.mjs",
+      "sha256": "6daeaddaff312fd8f7e16e28f96ccdc8424d175e163e1f7b9eeb1ef0aa16a168",
+      "finalSha256": "6daeaddaff312fd8f7e16e28f96ccdc8424d175e163e1f7b9eeb1ef0aa16a168",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/src/gateway-client.mjs",
+      "sha256": "186c7f527f34f5fc41966e04f72ef56ed8c94acb5bbd735852ae51d71c4641f3",
+      "finalSha256": "186c7f527f34f5fc41966e04f72ef56ed8c94acb5bbd735852ae51d71c4641f3",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/src/observation.mjs",
+      "sha256": "06de007c8b6d7decfac1b3cf585a6a1ee82ebebacd484ffe5a99b7444d38fc6d",
+      "finalSha256": "06de007c8b6d7decfac1b3cf585a6a1ee82ebebacd484ffe5a99b7444d38fc6d",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/src/memory/companion-store.mjs",
+      "sha256": "783d133f7bd1c0be3b69798184265c28c00464c11c243b5808db4b5198ce4298",
+      "finalSha256": "783d133f7bd1c0be3b69798184265c28c00464c11c243b5808db4b5198ce4298",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/src/skills/navigation.mjs",
+      "sha256": "5a896ab99352132dd551dd9fc3c3f125868ea14ecd9e923b05667f2ccba94470",
+      "finalSha256": "5a896ab99352132dd551dd9fc3c3f125868ea14ecd9e923b05667f2ccba94470",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-fixture.mjs",
+      "sha256": "452cb5889d22047c854be11e7b7cf7d99a0c219a306a9b0128d0ca7446832de4",
+      "finalSha256": "452cb5889d22047c854be11e7b7cf7d99a0c219a306a9b0128d0ca7446832de4",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/scripts/field-encounter.mjs",
+      "sha256": "5457a88918f7663bf0e1252ea35b73f369aa95235a7f23d47ba93cb826423022",
+      "finalSha256": "5457a88918f7663bf0e1252ea35b73f369aa95235a7f23d47ba93cb826423022",
+      "unchangedSinceRecordedStage": true
+    },
+    {
+      "path": "apps/ai-player/scripts/local-gateway.mjs",
+      "sha256": "d6489acd201240c61dcbb26600e27240fd192d910443f597d8ae6bed0d45f97f",
+      "finalSha256": "d6489acd201240c61dcbb26600e27240fd192d910443f597d8ae6bed0d45f97f",
+      "unchangedSinceRecordedStage": true
+    }
+  ]
+}

@@ -1,0 +1,1537 @@
+diff --git a/mir2-web3/apps/simulation/src/runtime/npc_script.rs b/mir2-web3/apps/simulation/src/runtime/npc_script.rs
+index e41322633..09429b24a 100644
+--- a/mir2-web3/apps/simulation/src/runtime/npc_script.rs
++++ b/mir2-web3/apps/simulation/src/runtime/npc_script.rs
+@@ -3,6 +3,7 @@ use bevy_ecs::{
+     prelude::{Resource, World},
+ };
+ use serde::{Deserialize, Serialize};
++use sha2::{Digest, Sha256};
+ 
+ use crate::config::{
+     CurrencyKind, ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition,
+@@ -118,6 +119,8 @@ pub(super) struct CrystalNpcExecutionState {
+     pub(super) script_key: Option<String>,
+     pub(super) section_label: Option<String>,
+     pub(super) line_number: usize,
++    // Set only after the complete original script proof is checked at dispatch.
++    pub(super) verified_classic_route_legacy: bool,
+ }
+ 
+ #[derive(Debug, Clone, PartialEq, Eq)]
+@@ -763,12 +766,114 @@ pub(super) fn run_crystal_npc_script(
+     run_crystal_npc_script_impl(world, context, &script, start_label)
+ }
+ 
++const CLASSIC_STONE_SCRIPT: &str = "MongchonProvince/StoneTemple/Stone";
++const CLASSIC_BIG_TAOIST_SCRIPT: &str = "WoomyonWoods/TaoistVillage/BigTaoist";
++
++fn classic_route_script_sha256(bytes: impl AsRef<[u8]>) -> String {
++    Sha256::digest(bytes.as_ref()).iter().map(|byte| format!("{byte:02x}")).collect()
++}
++
++/// Both original raw text and the complete imported execution representation
++/// are bound. A forged path, condition, parsed section or source edit cannot
++/// inherit the reviewed compatibility. Original source/manifests are unchanged.
++fn verified_classic_route_legacy_script(script: &CrystalNpcScript) -> Result<bool, ()> {
++    const PROOFS: [(&str, &str, &str, &str); 2] = [
++        (CLASSIC_STONE_SCRIPT, "MongchonProvince/StoneTemple/Stone.txt",
++         "249ff6c6810c7f06cd52f551c2534a2e24e7cead835d6948b72101146cf154c2",
++         "f86465391544e7633c1999aea856636266456d650bbd0d56af5d66322dc39d0d"),
++        (CLASSIC_BIG_TAOIST_SCRIPT, "WoomyonWoods/TaoistVillage/BigTaoist.txt",
++         "911a5edd4dc638eedf54819d0314cbcf2b438f32ba02d6d951091146ece02ebd",
++         "e186e61b616cfb28f48611eeca19aba568cf9d9c6f39362ed932b133bcef3111"),
++    ];
++    let raw_hash = classic_route_script_sha256(script.raw_text.as_bytes());
++    let Some(&(key, path, raw_sha, execution_sha)) = PROOFS.iter().find(|(key, path, raw_sha, _)| {
++        script.script_key.eq_ignore_ascii_case(key)
++            || script.relative_path.eq_ignore_ascii_case(path) || raw_hash == *raw_sha
++    }) else { return Ok(false); };
++    let execution = serde_json::to_vec(script).map_err(|_| ())?;
++    if script.script_key != key || script.relative_path != path || raw_hash != raw_sha
++        || classic_route_script_sha256(execution) != execution_sha {
++        return Err(());
++    }
++    Ok(true)
++}
++
++fn classic_route_quest_condition(world: &World, condition: &str, state: &CrystalNpcExecutionState) -> Option<bool> {
++    if !state.verified_classic_route_legacy { return None; }
++    let (quest_id, current) = match (state.script_key.as_deref(), state.section_label.as_deref(), condition) {
++        (Some(CLASSIC_STONE_SCRIPT), Some("@MAIN"), "CHECKQUEST 135 0") => (135, true),
++        (Some(CLASSIC_STONE_SCRIPT), Some("@Check2"), "CHECKQUEST 153 1") => (153, false),
++        (Some(CLASSIC_BIG_TAOIST_SCRIPT), Some("@Next1"), "CHECKQUEST 146 1") => (146, false),
++        _ => return None,
++    };
++    Some(world.resource::<QuestResource>().quests.iter().any(|quest| {
++        quest.quest_id == quest_id && if current {
++            matches!(quest.stage, QuestStage::InProgress | QuestStage::ReadyToTurnIn)
++        } else { quest.stage == QuestStage::Completed }
++    }))
++}
++
++fn is_verified_classic_stone_item_line(state: &CrystalNpcExecutionState, line: &str, command: &str) -> bool {
++    state.verified_classic_route_legacy && state.script_key.as_deref() == Some(CLASSIC_STONE_SCRIPT)
++        && state.section_label.as_deref() == Some("@stonetomba")
++        && line == format!("{command} StoneHeart 1")
++}
++
++fn is_canonical_classic_stoneheart(item: &ItemState) -> bool {
++    item.key == "crystal-item-1080" && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
++        && validate_committed_item_state_carrier(item).is_ok()
++        && try_user_item_from_item_state(item).is_ok_and(|carrier| carrier.item_index == 1080 && carrier.unique_id != 0)
++}
++
++#[cfg(test)]
++mod classic_late_route_source_proof_tests {
++    use super::*;
++
++    #[test]
++    fn classic_late_route_source_proof_binds_complete_original_and_parsed_script() {
++        for key in [CLASSIC_STONE_SCRIPT, CLASSIC_BIG_TAOIST_SCRIPT] {
++            let original = crystal_npc_script_by_key(key).unwrap();
++            assert_eq!(verified_classic_route_legacy_script(&original), Ok(true));
++            let mut changed = original.clone();
++            changed.raw_text.push(' ');
++            assert_eq!(verified_classic_route_legacy_script(&changed), Err(()));
++            let mut forged = original.clone();
++            forged.sections[0].lines.push("SET [999] 1".into());
++            assert_eq!(verified_classic_route_legacy_script(&forged), Err(()));
++            let mut wrong_path = original.clone();
++            wrong_path.relative_path = "Other/Stone.txt".into();
++            assert_eq!(verified_classic_route_legacy_script(&wrong_path), Err(()));
++            let mut unknown_key = original.clone();
++            unknown_key.script_key = "Other/Unknown".into();
++            assert_eq!(verified_classic_route_legacy_script(&unknown_key), Err(()));
++        }
++    }
++
++    #[test]
++    fn classic_late_route_unrelated_script_and_numeric_stage_contract_remain_unchanged() {
++        let unrelated = crystal_npc_script_by_key("MongchonProvince/MudWall/MonDelegate").unwrap();
++        assert_eq!(verified_classic_route_legacy_script(&unrelated), Ok(false));
++        assert_eq!(crystal_npc_quest_stage_value(QuestStage::Available), 0);
++        assert_eq!(crystal_npc_quest_stage_value(QuestStage::InProgress), 1);
++        assert_eq!(crystal_npc_quest_stage_value(QuestStage::ReadyToTurnIn), 2);
++        assert_eq!(crystal_npc_quest_stage_value(QuestStage::Completed), 3);
++        let unverified = CrystalNpcExecutionState { script_key: Some(CLASSIC_STONE_SCRIPT.into()),
++            section_label: Some("@stonetomba".into()), ..Default::default() };
++        assert!(!is_verified_classic_stone_item_line(&unverified, "CHECKITEM StoneHeart 1", "CHECKITEM"));
++    }
++}
++
+ pub(super) fn run_crystal_npc_script_impl(
+     world: &mut World,
+     context: &NpcInteractionContext,
+     script: &CrystalNpcScript,
+     start_label: &str,
+ ) -> Option<CrystalNpcRunResult> {
++    // Candidate playability repair: inferred legacy Jev numeric intent for
++    // ONLY these two supplied route scripts. This is not the modern C# rule
++    // (which treats all non-ACTIVE CHECKQUEST tokens as Completed), and does
++    // not reinterpret numeric quest stages in any unrelated script.
++    let verified_classic_route_legacy = verified_classic_route_legacy_script(script).ok()?;
+     let mut label = start_label.to_string();
+     let mut packets = Vec::new();
+     let context_state = CrystalNpcContextState {
+@@ -776,6 +881,7 @@ pub(super) fn run_crystal_npc_script_impl(
+     };
+     let mut execution_state = CrystalNpcExecutionState {
+         script_key: Some(script.script_key.clone()),
++        verified_classic_route_legacy,
+         label_args: context.args.clone(),
+         input: context.input.clone(),
+         ..CrystalNpcExecutionState::default()
+@@ -946,6 +1052,7 @@ pub(super) fn execute_crystal_npc_section(
+                     world,
+                     &if_conditions,
+                     context_state,
++                    execution_state,
+                 ));
+             }
+             continue;
+@@ -1232,11 +1339,20 @@ pub(super) fn evaluate_crystal_npc_conditions(
+     world: &mut World,
+     conditions: &[String],
+     context_state: &CrystalNpcContextState,
++    execution_state: &CrystalNpcExecutionState,
+ ) -> bool {
+     !conditions.is_empty()
+         && conditions
+             .iter()
+-            .all(|condition| evaluate_crystal_npc_condition(world, condition, context_state))
++            .all(|condition| {
++                if let Some(result) = classic_route_quest_condition(world, condition, execution_state) { return result; }
++                // Source-specific carrier repair: the normal q135 reward is a
++                // canonical item1080, not the old unvalidated name-only key.
++                if is_verified_classic_stone_item_line(execution_state, condition, "CHECKITEM") {
++                    return world.resource::<InventoryResource>().inventory_items.iter().any(is_canonical_classic_stoneheart);
++                }
++                evaluate_crystal_npc_condition(world, condition, context_state)
++            })
+ }
+ 
+ pub(super) fn evaluate_crystal_npc_condition(
+@@ -2108,6 +2224,15 @@ pub(super) fn execute_crystal_npc_action_line(
+             CrystalNpcActionControl::Continue
+         }
+         "TAKEITEM" => {
++            if is_verified_classic_stone_item_line(execution_state, line, "TAKEITEM") {
++                let mut inventory = world.resource_mut::<InventoryResource>();
++                let Some(index) = inventory.inventory_items.iter().rposition(is_canonical_classic_stoneheart) else {
++                    // Do not execute the following MOVE without its exact debit.
++                    return CrystalNpcActionControl::Break;
++                };
++                inventory.inventory_items.remove(index); // original stack_size=1
++                return CrystalNpcActionControl::Continue;
++            }
+             let _ = crystal_npc_take_item(world, &parts[1..]);
+             CrystalNpcActionControl::Continue
+         }
+diff --git a/mir2-web3/apps/simulation/tests/classic_late_route_gates.rs b/mir2-web3/apps/simulation/tests/classic_late_route_gates.rs
+new file mode 100644
+index 000000000..9abca4c70
+--- /dev/null
++++ b/mir2-web3/apps/simulation/tests/classic_late_route_gates.rs
+@@ -0,0 +1,296 @@
++//! Prepared LOCAL fixtures exercising ordinary ClientPacket NPC paths.
++//! These seeded levels, quests and items are not a natural player journey,
++//! source-item acquisition, public Gateway or native acceptance receipt.
++use mir2_game_data::{crystal_item_by_name, crystal_map_respawns_by_file_name};
++use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point, ServerPacket};
++use mir2_simulation::{AccountRecord, CharacterRecord, CharacterSaveRecord, SimulationConfig, SimulationSession};
++use serde_json::{json, Value};
++
++const ACCOUNT: &str = "classic-late-route-local-fixture";
++const STONE: u32 = 1142;
++const BIG_TAOIST: u32 = 843;
++
++fn prepared_session(map: &str, position: Point, level: u16, quests: &[(i32, &str)], hearts: u32) -> SimulationSession {
++    prepared_session_with(MirClass::Warrior, map, position, level, quests, hearts, |_| {})
++}
++
++fn prepared_session_with(class: MirClass, map: &str, position: Point, level: u16, quests: &[(i32, &str)], hearts: u32,
++    customize: impl FnOnce(&mut CharacterSaveRecord)) -> SimulationSession {
++    let character = CharacterRecord { index: 0, name: "PreparedClassicGate".into(), level,
++        class, gender: MirGender::Male };
++    let mut save = CharacterSaveRecord::new(character.clone());
++    save.map_file_name = map.into();
++    save.map_title = map.into();
++    save.position = position;
++    save.direction = MirDirection::Right;
++    save.quest_states_json = quests.iter().map(|(id, stage)| json!({
++        "quest_id": id, "title": "Prepared gate fixture", "summary": "Not a natural quest journey",
++        "reward_preview": "", "required": 1, "current": if *stage == "completed" {1} else {0},
++        "stage": stage, "task_progress": {}
++    }).to_string()).collect();
++    // BigTaoist's source first-visit flag is prepared explicitly. The tested
++    // quest predicate and visible eight-page sequence remain normal packets.
++    save.npc_flag_states_json = vec![json!({"index": 530, "value": true}).to_string()];
++    if hearts > 0 {
++        save.inventory_items_json = (0..hearts).map(|slot| json!({
++            "key": "crystal-item-1080", "name": "StoneHeart", "icon": 448, "slot": slot,
++            "unique_id": 1080001 + slot, "container": "bag1", "quantity": 1,
++            "description": "Prepared local gate item", "durability_current": null,
++            "durability_max": null, "weight": 1, "equip_slot": null,
++            "attack": 0, "defence": 0, "heal_hp": 0, "heal_mp": 0,
++            "user_item_metadata": {"item_index": 1080}
++        }).to_string()).collect();
++    }
++    customize(&mut save);
++    let config = SimulationConfig::default().with_crystal_world_runtime().with_platinum_176_profile();
++    let mut account = AccountRecord::empty();
++    account.characters.push(character);
++    account.saves.insert(0, save);
++    config.account_store.lock().unwrap().accounts.insert(ACCOUNT.into(), account);
++    let mut session = SimulationSession::new(config);
++    assert!(session.handle_packet(ClientPacket::Login { account_id: ACCOUNT.into(), password: "demo".into() })
++        .iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
++    let start = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
++    assert!(start.iter().any(|packet| matches!(packet, ServerPacket::MapInformation { info } if info.file_name == map)), "prepared StartGame {start:?}");
++    session
++}
++
++fn stone(quests: &[(i32, &str)], level: u16, hearts: u32) -> SimulationSession {
++    prepared_session("D715", Point { x: 271, y: 85 }, level, quests, hearts)
++}
++
++fn call(session: &mut SimulationSession, id: u32, key: &str) -> Vec<ServerPacket> {
++    session.handle_packet(ClientPacket::CallNpc { object_id: id, key: key.into() })
++}
++
++fn has_link(session: &SimulationSession, target: &str) -> bool {
++    session.world_snapshot().active_npc_dialog.as_ref()
++        .is_some_and(|dialog| dialog.links.iter().any(|link| link.target.eq_ignore_ascii_case(target)))
++}
++
++fn saved_flag(session: &SimulationSession, flag: u32) -> bool {
++    session.active_character_checkpoint().unwrap().npc_flag_states_json.iter().any(|encoded| {
++        let value: Value = serde_json::from_str(encoded).unwrap();
++        value["index"] == flag && value["value"] == true
++    })
++}
++
++fn hearts(session: &SimulationSession) -> u32 {
++    session.world_snapshot().inventory_items.iter().filter(|item| item.name == "StoneHeart")
++        .map(|item| item.quantity).sum()
++}
++
++#[test]
++fn stone_q135_only_current_accepted_states_find_the_stone() {
++    for (stage, expected) in [("available", false), ("inProgress", true), ("readyToTurnIn", true), ("completed", false)] {
++        let mut session = stone(&[(135, stage)], 40, 0);
++        call(&mut session, STONE, "@Main");
++        assert_eq!(saved_flag(&session, 525), expected, "q135 {stage}: Available/Completed are not CurrentQuests");
++    }
++    let mut absent = stone(&[], 40, 0);
++    call(&mut absent, STONE, "@Main");
++    assert!(!saved_flag(&absent, 525));
++}
++
++#[test]
++fn completed_q153_exposes_a_real_stone_link_and_committed_map_transfer() {
++    let mut session = stone(&[(153, "completed")], 40, 2);
++    call(&mut session, STONE, "@Main");
++    let dialog = session.world_snapshot().active_npc_dialog.expect("actual source NPC dialog");
++    assert_eq!(dialog.npc_object_id, STONE);
++    assert!(dialog.body.iter().any(|line| line.contains("Mysterious Stone")));
++    assert!(has_link(&session, "@stonetomba"), "completed q153 must expose the actual source link");
++    let packets = call(&mut session, STONE, "@stonetomba");
++    assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::MapInformation { info } if info.file_name == "D710A")), "normal NPC action needs a committed MapInformation receipt");
++    let saved = session.active_character_checkpoint().unwrap();
++    assert_eq!(saved.map_file_name, "D710A");
++    assert_eq!(saved.position, Point { x: 29, y: 17 });
++    assert_eq!(hearts(&session), 1);
++    // The old NPC and link cannot debit a second item after leaving its map.
++    let replay = call(&mut session, STONE, "@stonetomba");
++    assert!(!replay.iter().any(|packet| matches!(packet, ServerPacket::MapInformation { .. })));
++    assert_eq!(hearts(&session), 1);
++    assert!(session.handle_packet(ClientPacket::LogOut).iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
++    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
++    assert_eq!(session.active_character_checkpoint().unwrap().map_file_name, "D710A");
++    assert_eq!(hearts(&session), 1, "normal logout/relogin must retain exactly-one debit");
++}
++
++#[test]
++fn q153_incomplete_or_absent_never_grants_the_ancient_entrance() {
++    for quests in [vec![], vec![(153, "available")], vec![(153, "inProgress")], vec![(153, "readyToTurnIn")]] {
++        let mut session = stone(&quests, 40, 1);
++        call(&mut session, STONE, "@Main");
++        assert!(!has_link(&session, "@stonetomba"), "q153 {quests:?} must not be completed");
++        call(&mut session, STONE, "@stonetomba");
++        assert_eq!(session.active_character_checkpoint().unwrap().map_file_name, "D715");
++        assert_eq!(hearts(&session), 1);
++    }
++}
++
++#[test]
++fn stone_source_numeric_level_window_is_22_through_42() {
++    for (level, eligible) in [(21, false), (22, true), (42, true), (43, false)] {
++        let mut session = stone(&[(153, "completed")], level, 1);
++        call(&mut session, STONE, "@Main");
++        assert_eq!(has_link(&session, "@stonetomba"), eligible, "source LEVEL >21 AND <43 at level{level}");
++    }
++}
++
++#[test]
++fn stone_item_count_zero_one_two_is_authoritative() {
++    for count in [0, 1, 2] {
++        let mut session = stone(&[(153, "completed")], 40, count);
++        call(&mut session, STONE, "@Main");
++        assert!(has_link(&session, "@stonetomba"));
++        let packets = call(&mut session, STONE, "@stonetomba");
++        let transferred = packets.iter().any(|packet| matches!(packet, ServerPacket::MapInformation { info } if info.file_name == "D710A"));
++        assert_eq!(transferred, count > 0);
++        assert_eq!(hearts(&session), count.saturating_sub(1));
++        assert_eq!(session.active_character_checkpoint().unwrap().map_file_name, if count > 0 {"D710A"} else {"D715"});
++    }
++}
++
++#[test]
++fn stone_wrong_object_and_out_of_range_do_not_grant_or_debit() {
++    let mut session = stone(&[(135, "inProgress"), (153, "completed")], 40, 1);
++    call(&mut session, BIG_TAOIST, "@Main");
++    call(&mut session, BIG_TAOIST, "@stonetomba");
++    assert!(!saved_flag(&session, 525));
++    assert_eq!(hearts(&session), 1);
++    let mut distant = prepared_session("D715", Point { x: 250, y: 85 }, 40, &[(135, "inProgress"), (153, "completed")], 1);
++    call(&mut distant, STONE, "@Main");
++    call(&mut distant, STONE, "@stonetomba");
++    assert!(!saved_flag(&distant, 525));
++    assert_eq!(distant.active_character_checkpoint().unwrap().map_file_name, "D715");
++    assert_eq!(hearts(&distant), 1);
++}
++
++#[test]
++fn big_taoist_completed_q146_exposes_and_consumes_only_current_dialog_links() {
++    // Prepared inside D10061: this does not validate its missing ordinary inbound entry.
++    let mut session = prepared_session("D10061", Point { x: 11, y: 17 }, 40, &[(146, "completed")], 0);
++    call(&mut session, BIG_TAOIST, "@Main");
++    assert!(has_link(&session, "@Quest1"), "completed q146 must expose the source live first page");
++    for index in 1..=8 {
++        let target = format!("@Quest{index}");
++        assert!(has_link(&session, &target), "only observed {target} may be selected");
++        call(&mut session, BIG_TAOIST, &target);
++    }
++    assert!(saved_flag(&session, 531));
++    assert!(session.handle_packet(ClientPacket::LogOut).iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
++    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
++    assert!(saved_flag(&session, 531));
++    assert_eq!(session.active_character_checkpoint().unwrap().map_file_name, "D10061");
++}
++
++#[test]
++fn big_taoist_incomplete_q146_never_exposes_or_executes_the_completion_sequence() {
++    for quests in [vec![], vec![(146, "available")], vec![(146, "inProgress")], vec![(146, "readyToTurnIn")]] {
++        let mut session = prepared_session("D10061", Point { x: 11, y: 17 }, 40, &quests, 0);
++        call(&mut session, BIG_TAOIST, "@Main");
++        assert!(!has_link(&session, "@Quest1"), "incomplete q146 {quests:?}");
++        call(&mut session, BIG_TAOIST, "@Quest8");
++        assert!(!saved_flag(&session, 531));
++    }
++}
++
++#[test]
++fn normal_q135_reward_is_a_valid_carried_stoneheart_after_logout() {
++    let mut session = prepared_session_with(MirClass::Warrior, "3", Point { x: 330, y: 333 }, 40, &[(135, "readyToTurnIn")], 0, |save| {
++        let mut quest: Value = serde_json::from_str(&save.quest_states_json[0]).unwrap();
++        quest["current"] = json!(1); quest["task_progress"] = json!({"flag:525":1});
++        save.quest_states_json = vec![quest.to_string()];
++        save.npc_flag_states_json.push(json!({"index":525,"value":true}).to_string());
++    });
++    call(&mut session, 926, "@Main");
++    assert!(has_link(&session, "@quest:finish:135"));
++    let finish = call(&mut session, 926, "@quest:finish:135");
++    assert!(finish.iter().any(|packet| matches!(packet, ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&135))));
++    let item = session.world_snapshot().inventory_items.into_iter().find(|item| item.name == "StoneHeart").expect("normal q135 reward, not a GiveItem command");
++    assert_eq!(item.key, "crystal-item-1080");
++    assert_eq!(item.quantity, 1);
++    let unique_id = item.unique_id;
++    assert_ne!(unique_id, 0);
++    assert!(session.handle_packet(ClientPacket::LogOut).iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
++    let start = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
++    assert!(start.iter().any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })), "real reward must pass saved-carrier validation");
++    assert!(session.world_snapshot().inventory_items.iter().any(|item| item.unique_id == unique_id && item.quantity == 1));
++}
++
++#[test]
++fn another_valid_item_cannot_substitute_for_stoneheart() {
++    let mut session = prepared_session_with(MirClass::Warrior, "D715", Point {x:271,y:85}, 40, &[(153,"completed")], 1, |save| {
++        let mut item: Value = serde_json::from_str(&save.inventory_items_json[0]).unwrap();
++        let potion = crystal_item_by_name("TownTeleport").unwrap();
++        item["key"] = json!(format!("crystal-item-{}", potion.item_index));
++        item["name"] = json!(potion.name);
++        item["user_item_metadata"]["item_index"] = json!(potion.item_index);
++        save.inventory_items_json = vec![item.to_string()];
++    });
++    call(&mut session, STONE, "@Main");
++    assert!(has_link(&session, "@stonetomba"));
++    let packets = call(&mut session, STONE, "@stonetomba");
++    assert!(!packets.iter().any(|packet| matches!(packet, ServerPacket::MapInformation { .. })));
++    assert_eq!(session.active_character_checkpoint().unwrap().map_file_name, "D715");
++    assert!(session.world_snapshot().inventory_items.iter().any(|item| item.unique_id == 1080001));
++}
++
++fn book_session(class: MirClass, level: u16, name: &str) -> SimulationSession {
++    let info = crystal_item_by_name(name).expect("actual imported book");
++    prepared_session_with(class, "0", Point {x:288,y:616}, level, &[], 0, |save| {
++        save.inventory_items_json = vec![json!({
++            "key": format!("crystal-item-{}", info.item_index), "name": info.name,
++            "icon": info.image, "slot": 0, "unique_id": 71080, "container": "bag1", "quantity": 1,
++            "description": "Prepared ordinary UseItem gate only", "durability_current": null,
++            "durability_max": null, "weight": info.weight, "equip_slot": null,
++            "attack": 0, "defence": 0, "heal_hp": 0, "heal_mp": 0,
++            "user_item_metadata": {"item_index": info.item_index}
++        }).to_string()];
++    })
++}
++
++#[test]
++fn late_book_use_rejects_underlevel_wrong_class_and_nonowned_identity_without_consumption() {
++    for (class, level, uid) in [(MirClass::Warrior,46,71080), (MirClass::Wizard,50,71080), (MirClass::Warrior,50,99999)] {
++        let mut session = book_session(class,level,"CounterAttack");
++        let before = session.world_snapshot().inventory_items;
++        let packets = session.handle_packet(ClientPacket::UseItem { unique_id:uid, grid:MirGridType::Inventory });
++        assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::UseItem { success:false, .. })));
++        assert!(!packets.iter().any(|packet| matches!(packet, ServerPacket::NewMagic { .. })));
++        assert_eq!(session.world_snapshot().inventory_items.len(), before.len());
++        assert!(session.world_snapshot().inventory_items.iter().any(|item| item.unique_id == 71080 && item.quantity == 1));
++    }
++}
++
++#[test]
++fn prepared_late_book_learning_has_real_newmagic_one_debit_and_normal_save_but_is_not_a_drop() {
++    for (class, name) in [(MirClass::Warrior,"CounterAttack"), (MirClass::Wizard,"Blink"), (MirClass::Taoist,"Plague")] {
++        let mut session = book_session(class,50,name);
++        let packets = session.handle_packet(ClientPacket::UseItem { unique_id:71080, grid:MirGridType::Inventory });
++        assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::UseItem { success:true, .. })), "{name} UseItem");
++        assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::NewMagic { .. })), "{name} NewMagic");
++        assert!(!session.world_snapshot().inventory_items.iter().any(|item| item.unique_id == 71080));
++        let replay = session.handle_packet(ClientPacket::UseItem { unique_id:71080, grid:MirGridType::Inventory });
++        assert!(!replay.iter().any(|packet| matches!(packet, ServerPacket::NewMagic { .. })));
++        let skills = session.active_character_checkpoint().unwrap().skill_states_json;
++        assert!(skills.iter().any(|encoded| encoded.to_ascii_lowercase().contains(&name.to_ascii_lowercase())));
++        assert!(session.handle_packet(ClientPacket::LogOut).iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
++        session.handle_packet(ClientPacket::StartGame { character_index:0 });
++        assert!(session.active_character_checkpoint().unwrap().skill_states_json.iter().any(|encoded| encoded.to_ascii_lowercase().contains(&name.to_ascii_lowercase())));
++    }
++}
++
++#[test]
++fn supplied_great_tao_needmove_is_not_bypassed_by_an_ordinary_walk() {
++    let source = crystal_map_respawns_by_file_name("D10051").unwrap();
++    let target = crystal_map_respawns_by_file_name("D10061").unwrap();
++    assert!(source.movements.iter().any(|movement| movement.map_index == target.map_index
++        && movement.source == Point { x:178, y:53 } && movement.need_move && !movement.need_hole));
++    let mut session = prepared_session("D10051", Point { x:177, y:53 }, 50, &[], 0);
++    let packets = session.handle_packet(ClientPacket::Walk { direction:MirDirection::Right });
++    assert!(!packets.iter().any(|packet| matches!(packet, ServerPacket::MapInformation { info } if info.file_name == "D10061")));
++    let saved = session.active_character_checkpoint().unwrap();
++    assert_eq!(saved.map_file_name, "D10051", "supplied unbound NeedMove remains a defect");
++    assert_eq!(saved.position, Point {x:178,y:53}, "prepared adjacent ordinary walk reaches the actual source cell; this is not a full Red Moon journey");
++}
+diff --git a/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs b/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs
+new file mode 100644
+index 000000000..4a1a7fa54
+--- /dev/null
++++ b/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs
+@@ -0,0 +1,174 @@
++import fs from 'node:fs/promises';
++import { createHash } from 'node:crypto';
++
++// Source-exact v27 resource baseline. This controller is a Candidate gameplay
++// diagnostic, not a new balance profile, original-C# parity or visual approval.
++export const sha256 = value => createHash('sha256').update(value).digest('hex');
++export const SOURCE_HASHES = Object.freeze({
++  profile: 'f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9',
++  npcScripts: '7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93',
++  npcs: 'dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105',
++  maps: '5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3',
++  mapEvents: 'd68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29',
++  monsters: '5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec',
++  drops: 'c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7',
++  items: 'b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7',
++  quests: '13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6',
++  magics: 'ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d',
++});
++const DATA = new URL('../../../../packages/game-data/data/', import.meta.url);
++export const SOURCE_URLS = Object.freeze({
++  profile: new URL('content_profiles/platinum_176.json', DATA),
++  ...Object.fromEntries(Object.entries({ npcScripts: 'npc', npcs: 'npc_info', maps: 'respawn',
++    mapEvents: 'map_event', monsters: 'monster', drops: 'drop', items: 'item', quests: 'quest_packet', magics: 'magic' })
++    .map(([key, stem]) => [key, new URL(`generated/crystal_${stem}_manifest.json`, DATA)])),
++});
++export const CLASSES = Object.freeze(['Warrior', 'Wizard', 'Taoist']);
++export const COMMANDS = new Set(['clientVersion', 'login', 'startGame', 'keepAlive', 'walk', 'run', 'turn',
++  'attack', 'attackDirection', 'magic', 'spellToggle', 'interact', 'selectNpcDialog', 'acceptQuest',
++  'finishQuest', 'pickUp', 'equipItem', 'moveItem', 'useItem', 'buyItem', 'logOut']);
++export const ROUTES = Object.freeze({
++  stone: Object.freeze(['0','2','3','D710','D711','D712','D713','D714','D715','D71601','D71621','D71608','D71605','D71625','D716','D717']),
++  'stone-return': Object.freeze(['D717','D716','D71625','D71623','D71601','D715','D714','D713','D712','D711','D710','3','2','0']),
++  zuma: Object.freeze(['0','2','3','0157','D501','D502','D503','D504','D505','D5061','D5068','D5071','D5072','D5073','D5074','D515']),
++  'zuma-return': Object.freeze(['D515','D5074','D5073','D5072','D5071','D5068','D5061','D505','D504','D503','D502','D501','0157','3','2','0']),
++  redmoon: Object.freeze(['0','1','11','12','D10011','D1002','D10031','D1004','D10052','D10062']),
++  'redmoon-return': Object.freeze(['D10062','D10052','D1004','D10031','D1002','D10011','12','11','1','0']),
++});
++export const EXPECTED_DIRECTED_HOPS = Object.values(ROUTES).reduce((count, chain) => count + chain.length - 1, 0); //76
++export const SOURCE_ONLY_ROOM = 'D71653';
++export const PRESERVED_DEFECT = Object.freeze({ from: 'D10051', to: 'D10061', source: {x:178,y:53}, destination:{x:20,y:25}, needMove:true });
++export const LEGACY_POLICY = Object.freeze([
++  Object.freeze({ key:'MongchonProvince/StoneTemple/Stone', path:'MongchonProvince/StoneTemple/Stone.txt',
++    rawSha256:'249ff6c6810c7f06cd52f551c2534a2e24e7cead835d6948b72101146cf154c2',
++    executionSha256:'f86465391544e7633c1999aea856636266456d650bbd0d56af5d66322dc39d0d',
++    conditions:[{section:'@MAIN',line:4,raw:'CHECKQUEST 135 0',intent:'currentAccepted'},
++      {section:'@Check2',line:15,raw:'CHECKQUEST 153 1',intent:'completed'},
++      {section:'@stonetomba',line:39,raw:'CHECKITEM StoneHeart 1',intent:'canonicalItem1080'},
++      {section:'@stonetomba',line:41,raw:'TAKEITEM StoneHeart 1',intent:'canonicalDebit1080'}] }),
++  Object.freeze({ key:'WoomyonWoods/TaoistVillage/BigTaoist', path:'WoomyonWoods/TaoistVillage/BigTaoist.txt',
++    rawSha256:'911a5edd4dc638eedf54819d0314cbcf2b438f32ba02d6d951091146ece02ebd',
++    executionSha256:'e186e61b616cfb28f48611eeca19aba568cf9d9c6f39362ed932b133bcef3111',
++    conditions:[{section:'@Next1',line:15,raw:'CHECKQUEST 146 1',intent:'completed'}] }),
++]);
++export const BOSSES = Object.freeze({
++  WhiteBoar: {map:'D717',respawns:[2797,2798],dropPath:'MongchonProvince/StoneTomb/WhiteBoar'},
++  EvilSnake: {map:'D717',respawns:[2799],dropPath:'MongchonProvince/StoneTomb/EvilSnake'},
++  ZumaTaurus: {map:'D515',respawns:[3966],dropPath:'MongchonProvince/Zuma/ZumaTaurus'},
++  RedMoonEvil: {map:'D10062',respawns:[1688],dropPath:'TaoVillage/TreePath/RedValley/RedMoonEvil'},
++});
++export const LATE_BOOKS = Object.freeze({Warrior:['CounterAttack'],Wizard:['Blink','MagicBooster'],Taoist:['Plague','PetEnhancer','HealingCircle']});
++
++function requireValue(condition, message) { if (!condition) throw new Error(message); }
++export function assertCommand(command) {
++  requireValue(COMMANDS.has(command?.type), `Forbidden classic route command: ${command?.type}`);
++  for (const value of Object.values(command)) requireValue(typeof value !== 'string' || !/^(?:crystal:|qa\.|event\.)/.test(value), 'Forbidden private/debug argument');
++}
++export function validateEndpoint(url) {
++  const endpoint = new URL(url);
++  requireValue(!endpoint.username && !endpoint.password && !endpoint.search && !endpoint.hash, 'Gateway URL must not contain credentials/query/fragment');
++  requireValue(endpoint.protocol === 'wss:' || (endpoint.protocol === 'ws:' && ['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname)), 'Use WSS or explicit loopback WS');
++  return endpoint;
++}
++export function assertLegacySource(script) {
++  const proof = LEGACY_POLICY.find(candidate => candidate.key === script?.script_key);
++  requireValue(proof && script.relative_path === proof.path && sha256(script.raw_text) === proof.rawSha256
++    && sha256(JSON.stringify(script)) === proof.executionSha256, 'Unknown/changed legacy route source proof');
++  for (const condition of proof.conditions) {
++    requireValue(script.raw_text.split('\n')[condition.line - 1] === condition.raw, 'Changed complete reviewed raw condition');
++    requireValue(script.sections.some(section => section.label === condition.section && section.lines.includes(condition.raw)), 'Changed parsed route condition');
++  }
++  return proof;
++}
++export async function loadClassicSources(urls = SOURCE_URLS) {
++  const entries = await Promise.all(Object.entries(SOURCE_HASHES).map(async ([key, expected]) => {
++    const bytes = await fs.readFile(urls[key]);
++    requireValue(sha256(bytes) === expected, `Classic source hash mismatch: ${key}`);
++    return [key, JSON.parse(bytes)];
++  }));
++  const sources = Object.fromEntries(entries);
++  requireValue(sources.profile.profileId === 'platinum_176' && sources.profile.version === 27
++    && sources.profile.mapWhitelist.length === 208 && !sources.profile.mapWhitelist.includes(SOURCE_ONLY_ROOM), 'Wrong classic runtime profile identity/scope');
++  for (const proof of LEGACY_POLICY) assertLegacySource(sources.npcScripts.scripts.find(script => script.script_key === proof.key));
++  sources.hashes = {...SOURCE_HASHES};
++  sources.portals = Object.fromEntries(Object.entries(ROUTES).map(([id, chain]) => [id, chain.slice(0,-1).map((from,index) => {
++    const map = sources.maps.maps.find(map => map.map_file_name === from);
++    const to = chain[index+1];
++    const destination = sources.maps.maps.find(map => map.map_file_name === to);
++    const portals = (map?.movements ?? []).filter(move => move.map_index === destination?.map_index && !move.need_hole && !move.need_move);
++    requireValue(portals.length > 0, `Missing ordinary source route ${from}->${to}`);
++    return {from,to,portals};
++  })]));
++  return sources;
++}
++export function validateScenario(input) {
++  requireValue(CLASSES.includes(input?.className), 'Use a declared Warrior/Wizard/Taoist account');
++  requireValue(typeof input.accountId === 'string' && input.accountId.length && typeof input.password === 'string' && input.password.length, 'Authenticated account credentials required');
++  requireValue(typeof input.characterName === 'string' && input.characterName.length, 'Exact character name required');
++  requireValue(Number.isSafeInteger(input.characterIndex) && input.characterIndex >= 0, 'Character index required');
++  validateEndpoint(input.gatewayUrl);
++  requireValue(input.startingState?.preparedLevel === true || input.startingState?.preparedLevel === false, 'Declare starting level provenance');
++  requireValue(Number.isInteger(input.startingState?.level) && input.startingState.level > 0 && input.startingState.level <= 255, 'Declare exact starting level');
++  requireValue(['main-round-trips','stone-entry','great-tao-defect'].includes(input.lane), 'Unknown bounded classic route lane');
++  const timeoutMs = input.timeoutMs ?? 120*60_000;
++  requireValue(Number.isInteger(timeoutMs) && timeoutMs >= 1000 && timeoutMs <= 120*60_000, 'Route deadline must stay within120 minutes');
++  const maxKillsPerTarget = input.maxKillsPerTarget ?? 0;
++  requireValue(Number.isInteger(maxKillsPerTarget) && maxKillsPerTarget >= 0 && maxKillsPerTarget <= 3, 'Natural kills must be0-3 per target');
++  const spawnWaitMs = input.spawnWaitMs ?? 60*60_000;
++  requireValue(Number.isInteger(spawnWaitMs) && spawnWaitMs >= 0 && spawnWaitMs <= 150*60_000, 'Natural spawn wait exceeds150 minutes');
++  requireValue(!input.qa && !input.debug && !input.relocation && input.dropMultiplier == null, 'No runtime QA, relocation or drop overrides');
++  return {...input, timeoutMs, maxKillsPerTarget, spawnWaitMs};
++}
++export function assertPair(pair, health, scenario) {
++  requireValue(pair?.schema === 'mir2.classic-paired-gateway-attestation.v1', 'Root-issued paired Gateway receipt required');
++  requireValue(/^[a-f0-9]{40}$/.test(pair.sourceRevision) && /^[a-f0-9]{64}$/.test(pair.gatewayExecutableSha256), 'Missing source/executable pair identity');
++  requireValue(health?.ok === true && health.ws === 'ready' && health.revision === pair.sourceRevision, 'Live health revision differs from paired deployment receipt');
++  requireValue(pair.gatewayUrl === scenario.gatewayUrl && pair.profileId === 'platinum_176' && pair.profileVersion === 27, 'Paired endpoint/profile identity mismatch');
++  for (const [key, hash] of Object.entries(SOURCE_HASHES)) requireValue(pair.sourceHashes?.[key] === hash, `Paired source hash mismatch: ${key}`);
++  requireValue(pair.qaNaturalKillDropMultiplier === 1 && pair.profileDropMultiplier === 1 && pair.debugWorldMutationEnabled === false, 'Unverified natural-drop/QA configuration');
++  requireValue(pair.namedLegacyPolicy === 'source-bound-stone-big-taoist-v1', 'Pair predates reviewed named legacy repair');
++  // Health revision is observed. Executable/config identity remains an explicit
++  // root deployment attestation, never inferred from a caller's revision label.
++  return {observedHealthRevision:health.revision, executableIdentitySource:'root-deployment-attestation', gatewayExecutableSha256:pair.gatewayExecutableSha256};
++}
++export function freshSnapshot(events, after, map) {
++  return events.find(event => event.direction === 'received' && event.sequence > after && event.type === 'worldSnapshot'
++    && event.payload?.mapFileName === map && !event.payload?.mapSnapshotPending) ?? null;
++}
++export function exactNpc(snapshot, template) {
++  return (snapshot?.entities ?? []).find(entity => String(entity.kind).toLowerCase() === 'npc'
++    && Number(entity.objectId) === Number(template.loaded_object_id) && entity.name === template.name
++    && Number(entity.x) === template.location.x && Number(entity.y) === template.location.y
++    && snapshot.mapFileName === template.map_file_name && !snapshot.mapSnapshotPending) ?? null;
++}
++export function npcLink(snapshot, id, target) {
++  const dialog = snapshot?.activeNpcDialog;
++  requireValue(!snapshot?.mapSnapshotPending && Number(dialog?.npcObjectId) === Number(id), 'Stale or wrong NPC dialog');
++  const link = dialog.links?.find(link => String(link.target).toLowerCase() === String(target).toLowerCase());
++  requireValue(link && Array.isArray(dialog.body), `Live dialog does not expose ${target}`);
++  return link;
++}
++export function bagCount(snapshot, uid) {
++  return (snapshot?.inventoryItems ?? []).filter(item => String(item.uniqueId) === String(uid)).reduce((n,item) => n+Number(item.quantity),0);
++}
++export function redactEvidence(value, secrets = []) {
++  const visit = (value, key='') => {
++    if (/password|secret|token|accountId/i.test(key)) return '[redacted]';
++    if (typeof value === 'string') return secrets.filter(Boolean).reduce((safe, secret) => safe.split(String(secret)).join('[redacted]'),value);
++    if (Array.isArray(value)) return value.map(entry=>visit(entry));
++    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,visit(v,k)]));
++    return value;
++  };
++  return visit(value);
++}
++export function bossCatalog(sources, name) {
++  const policy = BOSSES[name]; requireValue(policy, 'Unknown bounded natural Boss');
++  const monster = sources.monsters.monsters.find(monster=>monster.name===name);
++  requireValue(monster && monster.drop_path.replaceAll('\\','/')===policy.dropPath, 'Wrong monster DropPath');
++  const table = sources.drops.tables.find(table=>table.table_key===policy.dropPath);
++  requireValue(table?.total_entries > 0, 'Boss uses actual nested DropPath, not empty same-name placeholder');
++  const map = sources.maps.maps.find(map=>map.map_file_name===policy.map);
++  const spawns = map.respawns.filter(spawn=>policy.respawns.includes(spawn.respawn_index) && spawn.monster_name===name);
++  requireValue(spawns.length===policy.respawns.length, 'Missing original source spawn');
++  return {policy,monster,table,spawns};
++}
+diff --git a/mir2-web3/apps/web/scripts/quest-agent/run-classic-late-route.mjs b/mir2-web3/apps/web/scripts/quest-agent/run-classic-late-route.mjs
+new file mode 100644
+index 000000000..082009d68
+--- /dev/null
++++ b/mir2-web3/apps/web/scripts/quest-agent/run-classic-late-route.mjs
+@@ -0,0 +1,335 @@
++import fs from 'node:fs/promises';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { parseArgs } from 'node:util';
++import { applyProtocolObservation, hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
++import { createNavigator, selfPlayer } from './protocol-play.mjs';
++import { createMapTraveler } from './protocol-travel.mjs';
++import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
++import { clearTravelBlockingMonster } from './protocol-combat.mjs';
++import { combatAction, combatApproachRange, useSupplies, useClassRecovery } from './protocol-loadout.mjs';
++import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
++import { sha256, SOURCE_HASHES, ROUTES, PRESERVED_DEFECT, SOURCE_ONLY_ROOM, BOSSES, LATE_BOOKS,
++  loadClassicSources, validateScenario, validateEndpoint, assertPair, assertCommand, freshSnapshot,
++  exactNpc, npcLink, bagCount, bossCatalog, redactEvidence } from './classic-late-route-policy.mjs';
++
++const sleep = ms => new Promise(resolve=>setTimeout(resolve,ms));
++const mapName = client => String(client.snapshot?.mapFileName ?? '');
++const receivedAfter = (client, after, predicate) => client.events.find(event=>event.direction==='received' && event.sequence>after && predicate(event));
++const mapPacketName = event => event.payload?.info?.fileName ?? event.payload?.fileName;
++const skillKnown = (snapshot,name) => (snapshot?.knownSkills??[]).some(skill=>[skill.name,skill.key].some(value=>String(value??'').replaceAll('-','').toLowerCase()===name.replaceAll('-','').toLowerCase()));
++
++/** Separate transport because the existing newcomer ProtocolClient explicitly
++ * limits itself to loopback. No fake URL or bypass of that class's guard. */
++export class ClassicProtocolClient {
++  constructor(url, output, {WebSocketImpl=globalThis.WebSocket, appendFile=fs.appendFile, secrets=[], now=Date.now,
++    setTimeoutImpl=setTimeout,clearTimeoutImpl=clearTimeout}={}) {
++    validateEndpoint(url); this.url=url; this.output=output; this.WebSocketImpl=WebSocketImpl;
++    this.appendFile=appendFile; this.secrets=secrets; this.now=now; this.events=[]; this.sequence=0;
++    this.snapshot=null; this.writeQueue=Promise.resolve(); this.questDefinitions=new Map();
++    this.scheduleTimeout=setTimeoutImpl;this.cancelTimeout=clearTimeoutImpl;this.lastVitalsRefreshAt=null;this.vitalsTimer=null;
++  }
++  record(direction,value) {
++    const event={...redactEvidence(structuredClone(value),this.secrets), movementDirection:value.direction,
++      sequence:++this.sequence, at:new Date(this.now()).toISOString(), direction};
++    this.events.push(event); if(this.events.length>10000)this.events.splice(0,1000);
++    this.writeQueue=this.writeQueue.then(()=>this.appendFile(this.output,JSON.stringify(event)+'\n'));
++    this.writeQueue.catch(error=>{this.failure=error;});
++    return event;
++  }
++  observeGatewayMessage(message) {
++    this.snapshot=applyProtocolObservation(this.snapshot,message); this.record('received',message);
++    if(message.packet==='NewQuestInfo')this.questDefinitions.set(Number(message.payload?.info?.index),message.payload.info);
++    if(message.type==='error')this.failure=new Error(`Gateway rejected ordinary command: ${message.message??'unknown'}`);
++    if(message.packet==='DamageIndicator'&&Number(message.payload?.objectId)===Number(this.snapshot?.playerObjectId))this.refreshDamageVitals();
++  }
++  refreshDamageVitals() {
++    if(this.ws?.readyState!==1)return;
++    const elapsed=this.lastVitalsRefreshAt==null?500:this.now()-this.lastVitalsRefreshAt;
++    if(elapsed>=500&&this.vitalsTimer==null){this.lastVitalsRefreshAt=this.now();this.send({type:'clientVersion'});return;}
++    if(this.vitalsTimer!=null)return;
++    this.vitalsTimer=this.scheduleTimeout(()=>{this.vitalsTimer=null;if(this.ws?.readyState!==1||this.failure)return;
++      this.lastVitalsRefreshAt=this.now();this.send({type:'clientVersion'});},Math.max(0,500-elapsed));
++  }
++  questDefinition(id) {return this.questDefinitions.get(Number(id))??null;}
++  async connect() {
++    this.record('lifecycle',{type:'connection',url:this.url});
++    this.ws=new this.WebSocketImpl(this.url);
++    this.ws.addEventListener('message',event=>{try{this.observeGatewayMessage(JSON.parse(event.data));}catch(error){this.failure=error;}});
++    this.ws.addEventListener('error',()=>{this.failure=new Error('Classic Gateway transport failed');});
++    this.ws.addEventListener('close',()=>{this.closed=true;});
++    await this.wait(()=>this.ws.readyState===1,'authenticated transport open');
++    this.send({type:'clientVersion'});
++    this.timer=setInterval(()=>{if(this.ws.readyState===1)this.send({type:'keepAlive',time:this.now()});},2000);
++    this.stopHandler=()=>{this.failure=new Error('Classic journey interrupted; normal logout cleanup is required');};
++    process.once('SIGINT',this.stopHandler);process.once('SIGTERM',this.stopHandler);
++  }
++  send(command) {
++    assertCommand(command);
++    if(this.failure)throw this.failure;
++    if(this.ws?.readyState!==1)throw new Error('Classic transport is not open');
++    this.record('sent',command); this.ws.send(JSON.stringify(command));
++  }
++  async wait(predicate,label,timeout=20000) {
++    const deadline=this.now()+timeout;
++    while(this.now()<deadline) {
++      if(this.failure)throw this.failure;
++      const result=predicate();if(result)return result;
++      if(this.closed)throw new Error(`Connection closed waiting for ${label}`);
++      await sleep(40);
++    }
++    throw new Error(`Timeout waiting for ${label}`);
++  }
++  async request(command,packet,timeout) {
++    const after=this.sequence;this.send(command);
++    return this.wait(()=>receivedAfter(this,after,event=>event.packet===packet),packet,timeout);
++  }
++  async close() {clearInterval(this.timer);if(this.vitalsTimer!=null)this.cancelTimeout(this.vitalsTimer);
++    if(this.stopHandler){process.removeListener('SIGINT',this.stopHandler);process.removeListener('SIGTERM',this.stopHandler);}
++    if(this.ws?.readyState===1)this.ws.close();await this.writeQueue;}
++}
++
++export async function refreshSnapshot(client,map=mapName(client)) {
++  const after=client.sequence;client.send({type:'clientVersion'});
++  return client.wait(()=>freshSnapshot(client.events,after,map),`fresh source snapshot ${map}`);
++}
++
++/** A static portal is only a constraint. The hop requires a fresh live
++ * transfer, real movement, a server map packet and a settled destination. */
++export async function executeClassicHop(client,travel,edge,routeId,index) {
++  if(edge.from===SOURCE_ONLY_ROOM||edge.to===SOURCE_ONLY_ROOM)throw new Error('Resource-only D71653 is not a player route');
++  if(mapName(client)!==edge.from||client.snapshot?.mapSnapshotPending)throw new Error('Wrong/stale hop origin');
++  const source=await refreshSnapshot(client,edge.from);
++  const transfers=(source.payload.mapTransfers??[]).filter(transfer=>transfer.toMapFileName===edge.to &&
++    edge.portals.some(portal=>portal.source.x>=transfer.bounds?.minX && portal.source.x<=transfer.bounds?.maxX &&
++      portal.source.y>=transfer.bounds?.minY && portal.source.y<=transfer.bounds?.maxY));
++  if(!transfers.length)throw new Error(`No live walking transfer ${edge.from}->${edge.to}`);
++  const before=client.sequence;
++  const traversed=await travel(edge.to,{preferredTransferSource:edge.portals[0].source,resolveBlockingMonster:false,
++    navigationOptions:{detectPositionCycles:true}});
++  if(traversed.length!==1||traversed[0].fromMapFileName!==edge.from||traversed[0].toMapFileName!==edge.to)throw new Error('Unexpected intermediate route/landing cannot be credited');
++  const transition=receivedAfter(client,before,event=>['MapChanged','MapInformation'].includes(event.packet)&&mapPacketName(event)===edge.to);
++  if(!transition)throw new Error('No authoritative fresh map transition packet');
++  let settled=freshSnapshot(client.events,transition.sequence,edge.to);
++  if(!settled)settled=await refreshSnapshot(client,edge.to);
++  const actor=settled.payload.entities?.find(actor=>actor.objectId===settled.payload.playerObjectId);
++  if(!actor||!edge.portals.some(portal=>Number(actor.x)===portal.destination.x && Number(actor.y)===portal.destination.y))throw new Error('Wrong destination position after real transition');
++  const movements=client.events.filter(event=>event.direction==='sent'&&event.sequence>before&&event.sequence<transition.sequence&&['walk','run'].includes(event.type));
++  if(!movements.length)throw new Error('Transition without ordinary walking/running cannot be credited');
++  const sourcePosition=receivedAfter(client,before,event=>event.sequence<transition.sequence && event.packet==='UserLocation' &&
++    edge.portals.some(portal=>Number(event.payload?.location?.x)===portal.source.x && Number(event.payload?.location?.y)===portal.source.y));
++  return {routeId,index,from:edge.from,to:edge.to,status:'observed',beforeSequence:before,sourceSnapshotSequence:source.sequence,
++    transitionSequence:transition.sequence,destinationSnapshotSequence:settled.sequence,afterSequence:client.sequence,
++    sourcePositionSequence:sourcePosition?.sequence??null,sourcePositionProof:sourcePosition?'direct-UserLocation':'transition-implied-not-direct'};
++}
++
++export async function observeClassicNpc(client,navigate,template,target=null) {
++  if(mapName(client)!==template.map_file_name)throw new Error('NPC is not in the current authoritative map');
++  await navigate(template.location,1);
++  const snapshot=await refreshSnapshot(client,template.map_file_name);
++  const npc=exactNpc(snapshot.payload,template);
++  if(!npc)throw new Error('Missing fresh exact live NPC identity');
++  const actor=snapshot.payload.entities?.find(actor=>actor.objectId===snapshot.payload.playerObjectId);
++  if(!actor||Math.max(Math.abs(actor.x-npc.x),Math.abs(actor.y-npc.y))>1)throw new Error('NPC needs an ordinary adjacent player');
++  const before=client.sequence;client.send({type:'interact',objectId:npc.objectId});
++  const dialog=await client.wait(()=>receivedAfter(client,before,event=>event.type==='worldSnapshot'&&event.payload?.mapFileName===template.map_file_name
++    &&event.payload?.activeNpcDialog?.npcObjectId===npc.objectId),'fresh actual NPC body/links');
++  const link=target?npcLink(dialog.payload,npc.objectId,target):null;
++  return {npcObjectId:npc.objectId,scriptKey:template.script_key,map:template.map_file_name,sourceSnapshotSequence:snapshot.sequence,
++    dialogSequence:dialog.sequence,body:dialog.payload.activeNpcDialog.body,links:dialog.payload.activeNpcDialog.links,
++    ...(link?{target:link.target}:{})};
++}
++
++export async function useNaturallyPickedUpBook(client,pickup,className,sources) {
++  if(!pickup||pickup.status!=='pickedUp'||pickup.provenance!=='fresh-kill-associated-ground-item')throw new Error('Book requires its own observed ground/pickup receipt');
++  const before=await refreshSnapshot(client);
++  const item=before.payload.inventoryItems?.find(item=>String(item.uniqueId)===String(pickup.uniqueId));
++  const template=sources.items.items.find(template=>template.item_index===Number(item?.tooltipSource?.info?.index??item?.key?.replace('crystal-item-','')));
++  const actor=selfPlayer(client);
++  if(!template||template.item_type!==20||!LATE_BOOKS[className]?.includes(template.name)||!sources.profile.itemWhitelist.includes(template.name)
++    ||!(template.required_class & ({Warrior:1,Wizard:2,Taoist:4}[className]))||template.required_type!==0||actor.level<template.required_amount
++    ||skillKnown(before.payload,template.name)||bagCount(before.payload,pickup.uniqueId)<1)throw new Error('Late book class/profile/level/owned/unknown-skill eligibility failed');
++  const ack=await client.request({type:'useItem',grid:'inventory',uniqueId:pickup.uniqueId},'UseItem');
++  if(ack.payload?.success!==true||String(ack.payload?.uniqueId)!==String(pickup.uniqueId))throw new Error('Owned late book UseItem ACK failed');
++  const after=await refreshSnapshot(client);
++  const magic=receivedAfter(client,before.sequence,event=>event.packet==='NewMagic'&&event.payload?.magic?.spell===template.name);
++  if(bagCount(after.payload,pickup.uniqueId)!==bagCount(before.payload,pickup.uniqueId)-1||!skillKnown(after.payload,template.name)||!magic)throw new Error('Book needs one debit, NewMagic and learned authority');
++  return {spell:template.name,itemIndex:template.item_index,uniqueId:pickup.uniqueId,pickupId:pickup.id,
++    beforeSnapshotSequence:before.sequence,useAckSequence:ack.sequence,newMagicSequence:magic.sequence,afterSnapshotSequence:after.sequence,
++    status:'learned',activationAccepted:false};
++}
++
++export async function normalLogoutRelogin(client,scenario) {
++  const before=await refreshSnapshot(client);
++  const logout=await client.request({type:'logOut'},'LogOutSuccess',20000);
++  const start=await client.request({type:'startGame',characterIndex:scenario.characterIndex},'StartGame');
++  if(Number(start.payload?.result)!==4)throw new Error('Normal saved character restart rejected');
++  const after=await refreshSnapshot(client,before.payload.mapFileName);
++  const a=before.payload.entities?.find(entity=>entity.objectId===before.payload.playerObjectId);
++  const b=after.payload.entities?.find(entity=>entity.objectId===after.payload.playerObjectId);
++  if(a?.name!==scenario.characterName||b?.name!==scenario.characterName||a?.x!==b?.x||a?.y!==b?.y)throw new Error('Normal logout/relogin transform identity differs');
++  for(const item of before.payload.inventoryItems??[])if(bagCount(before.payload,item.uniqueId)!==bagCount(after.payload,item.uniqueId))throw new Error('Normal save lost/changed a held unique-ID item');
++  for(const skill of before.payload.knownSkills??[])if(!skillKnown(after.payload,skill.name??skill.key))throw new Error('Normal save lost a learned skill');
++  const finalLogout=await client.request({type:'logOut'},'LogOutSuccess',20000);
++  return {mechanism:'normal-LogOutSuccess-and-public-relogin',beforeSnapshotSequence:before.sequence,
++    logoutSequence:logout.sequence,startSequence:start.sequence,reloginSnapshotSequence:after.sequence,finalLogoutSequence:finalLogout.sequence,
++    rawDurableStoreBytesVerified:false,status:'observed'};
++}
++
++async function attemptNaturalBoss(client,navigate,name,sources,scenario,report,checkDeadline) {
++  const catalog=bossCatalog(sources,name);
++  for(let ordinal=0;ordinal<scenario.maxKillsPerTarget;ordinal++) {
++    checkDeadline();const attempt={id:`${name}-${ordinal+1}`,name,map:catalog.policy.map,ordinal:ordinal+1,
++      startedAt:new Date().toISOString(),beforeSequence:client.sequence,status:'running',outcome:'notObservedWithinBudget',
++      sourceDropPath:catalog.policy.dropPath,sourceRespawnIndexes:catalog.policy.respawns,dropDenominatorsUnchanged:true,
++      naturalSpawnAccepted:false,combatAccepted:false,groundDropSequences:[],pickupIds:[]};
++    report.bossAttempts.push(attempt);
++    try {
++      let target;const waitUntil=Math.min(report.deadlineMs,Date.now()+scenario.spawnWaitMs);
++      while(Date.now()<waitUntil&&!target) {
++        checkDeadline();await refreshSnapshot(client,catalog.policy.map);
++        target=client.snapshot.entities?.find(entity=>entity.name===name&&String(entity.kind).toLowerCase()==='monster'&&!entity.dead&&Number(entity.hp)>0);
++        if(!target)await sleep(Math.min(2000,Math.max(1,waitUntil-Date.now())));
++      }
++      if(!target){attempt.status='incomplete';attempt.outcome='absentWithinBudget';continue;}
++      attempt.objectId=target.objectId;attempt.observedTarget=structuredClone(target);
++      // Current public snapshots may not expose source respawn identity. That
++      // missing field is recorded, never supplied from static nearby spawn data.
++      attempt.sourceRespawnIndex=target.sourceRespawnIndex??target.respawnIndex??null;
++      attempt.naturalSpawnAccepted=catalog.policy.respawns.includes(Number(attempt.sourceRespawnIndex));
++      if(Number(target.hp)!==catalog.monster.hp)throw new Error('Boss was already damaged or lacks exact imported initial HP');
++      const dropsBefore=new Set((client.snapshot.groundDrops??[]).map(drop=>String(drop.objectId)));
++      const killed=await clearTravelBlockingMonster(client,target,navigate,{action:combatAction,approachRange:combatApproachRange,
++        sustain:async owner=>{await useSupplies(owner,{hpThreshold:0.75,mpThreshold:0.4});await useClassRecovery(owner,{hpThreshold:0.7});},
++        sleep:async ms=>{checkDeadline();await sleep(Math.min(ms,Math.max(1,report.deadlineMs-Date.now())));},
++        maxAttackAttempts:120,attackCadenceMs:650,refreshWhileWaiting:refreshCombatWorldSnapshot});
++      const death=receivedAfter(client,attempt.beforeSequence,event=>event.packet==='ObjectDied'&&Number(event.payload?.info?.objectId)===Number(target.objectId));
++      if(!killed.cleared||!death)throw new Error('Disappearance/AOI remove cannot substitute for actual ObjectDied');
++      attempt.deathSequence=death.sequence;attempt.outcome='observedKill';attempt.status='observed';
++      const settled=await refreshSnapshot(client,catalog.policy.map);
++      attempt.settlementSnapshotSequence=settled.sequence;
++      const drops=(settled.payload.groundDrops??[]).filter(drop=>!dropsBefore.has(String(drop.objectId))&&drop.sourceMonster===name);
++      attempt.noDrop=drops.length===0;attempt.groundDropSequences=drops.map(drop=>({objectId:drop.objectId,snapshotSequence:settled.sequence,kind:drop.loot?.kind,name:drop.name}));
++      for(const drop of drops.filter(drop=>drop.loot?.kind==='item')) {
++        if(Number(drop.ownerObjectId)!==Number(client.snapshot.playerObjectId))continue; // outsider/group ownership is a separate lane
++        await navigate(drop,0);
++        const before=await refreshSnapshot(client,catalog.policy.map);const beforeIds=new Set((before.payload.inventoryItems??[]).map(item=>String(item.uniqueId)));
++        const pickAfter=client.sequence;client.send({type:'pickUp',objectId:drop.objectId});
++        const after=await refreshSnapshot(client,catalog.policy.map);
++        const item=after.payload.inventoryItems?.find(item=>!beforeIds.has(String(item.uniqueId))&&(item.key===drop.loot?.key||item.name===drop.name)&&Number(item.quantity)===Number(drop.quantity));
++        const pickup={id:`${attempt.id}-drop-${drop.objectId}`,attemptId:attempt.id,groundObjectId:drop.objectId,groundSnapshotSequence:settled.sequence,
++          beforeSnapshotSequence:before.sequence,afterSnapshotSequence:after.sequence,beforeSequence:pickAfter,provenance:'fresh-kill-associated-ground-item',
++          // Public name association is useful evidence but not exact source-kill
++          // ownership proof. Root's independent server journal gate remains open.
++          sourceKillIdentityAccepted:false,ownershipAccepted:Number(drop.ownerObjectId)===Number(before.payload.playerObjectId),
++          status:item?'pickedUp':'failedPickup',uniqueId:item?.uniqueId??null,itemName:drop.name,quantity:drop.quantity};
++        report.pickups.push(pickup);attempt.pickupIds.push(pickup.id);
++        const itemTemplate=sources.items.items.find(template=>`crystal-item-${template.item_index}`===item?.key);
++        if(item&&LATE_BOOKS[scenario.className]?.includes(itemTemplate?.name)) {
++          try {report.books.push(await useNaturallyPickedUpBook(client,pickup,scenario.className,sources));}
++          catch(error){report.books.push({pickupId:pickup.id,status:'failed',error:error.message});}
++        }
++      }
++    } catch(error){attempt.status='failed';attempt.error=error.message;attempt.outcome=hasAuthoritativePlayerDeath(client.snapshot)?'playerDeath':'failedCombat';}
++    finally {attempt.finishedAt=new Date().toISOString();attempt.afterSequence=client.sequence;}
++    if(hasAuthoritativePlayerDeath(client.snapshot))throw new Error('Player death retained; no automatic revive/reset/retry-to-pass');
++  }
++}
++
++export async function runClassicLateRoute({input,output,mapPackRoot,pairReceiptFile,pairReceiptSha256},dependencies={}) {
++  const scenario=validateScenario(input);const sources=await loadClassicSources();
++  const pairBytes=await fs.readFile(pairReceiptFile);
++  if(!/^[a-f0-9]{64}$/.test(pairReceiptSha256??'')||sha256(pairBytes)!==pairReceiptSha256)throw new Error('Root paired receipt hash mismatch');
++  const pair=JSON.parse(pairBytes);
++  const endpoint=validateEndpoint(scenario.gatewayUrl);endpoint.protocol=endpoint.protocol==='wss:'?'https:':'http:';endpoint.pathname='/health';
++  const healthResponse=await (dependencies.fetch??fetch)(endpoint,{signal:AbortSignal.timeout(10000)});
++  if(!healthResponse.ok)throw new Error(`Paired Gateway health HTTP${healthResponse.status}`);
++  const health=await healthResponse.json();const pairIdentity=assertPair(pair,health,scenario);
++  const root=path.resolve(output);await fs.mkdir(root,{recursive:true});
++  const reportFile=path.join(root,'report.json');
++  try{await fs.access(reportFile);throw new Error('Use a NEW evidence directory; never overwrite an old run');}catch(error){if(error.code!=='ENOENT')throw error;}
++  const report={schema:'mir2.classic-late-route-run.v1',className:scenario.className,lane:scenario.lane,startingState:scenario.startingState,
++    gatewayUrl:scenario.gatewayUrl,accountFingerprint:sha256(scenario.accountId),sourceHashes:{...SOURCE_HASHES},pairedReceiptSha256:pairReceiptSha256,pairIdentity,health,
++    declaredNaturalKillLimit:scenario.maxKillsPerTarget,spawnWaitMs:scenario.spawnWaitMs,timeoutMs:scenario.timeoutMs,
++    startedAt:new Date().toISOString(),deadlineMs:Date.now()+scenario.timeoutMs,status:'running',
++    freshLevelJourneyAccepted:false,runtimeGameplayAccepted:false,nativeVisualAccepted:false,
++    routes:[],npcActions:[],bossAttempts:[],pickups:[],books:[],failures:[],deaths:[],save:null,preservedDefects:[]};
++  const redact=value=>redactEvidence(value,[scenario.password,scenario.accountId]);
++  const write=()=>fs.writeFile(reportFile,JSON.stringify(redact(report),null,2));
++  const checkDeadline=()=>{if(Date.now()>=report.deadlineMs)throw new Error('Original ordinary route deadline exhausted');};
++  const client=dependencies.client??new ClassicProtocolClient(scenario.gatewayUrl,path.join(root,'trace.jsonl'),{secrets:[scenario.password,scenario.accountId]});
++  const bounded=new Proxy(client,{get(target,key){
++    if(['send','request','wait'].includes(key))return(...args)=>{checkDeadline();if(key!=='wait')assertCommand(args[0]);
++      if(key==='wait')return target.wait(args[0],args[1],Math.min(args[2]??20000,Math.max(1,report.deadlineMs-Date.now())));
++      return target[key](...args);};
++    const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
++  }});
++  const loadCollisionMap=id=>loadProtocolCollisionMap(id,mapPackRoot?{packagedMapRoot:mapPackRoot}:{});
++  const navigate=dependencies.navigate??createNavigator(bounded,{loadCollisionMap});
++  const travel=dependencies.travel??createMapTraveler(bounded,navigate,{loadCollisionMap,maxBlockingMonsterClears:8}); // NO relocation callback
++  let started=false;
++  try {
++    await client.connect();await bounded.request({type:'login',accountId:scenario.accountId,password:scenario.password},'LoginSuccess');
++    const start=await bounded.request({type:'startGame',characterIndex:scenario.characterIndex},'StartGame');
++    if(Number(start.payload?.result)!==4)throw new Error('Authenticated StartGame did not accept');
++    started=true;const initial=await refreshSnapshot(bounded,scenario.lane==='main-round-trips'?'0':scenario.lane==='stone-entry'?'D715':'D10051');
++    const actor=selfPlayer(client);
++    if(actor?.name!==scenario.characterName||actor?.class!==scenario.className||Number(actor?.level)!==scenario.startingState.level)throw new Error('Prepared/ordinary starting identity differs');
++    report.initialSnapshotSequence=initial.sequence;
++    if(scenario.lane==='main-round-trips') {
++      for(const family of ['stone','zuma','redmoon']) {
++        for(let i=0;i<sources.portals[family].length;i++) {checkDeadline();report.routes.push(await executeClassicHop(bounded,travel,sources.portals[family][i],family,i));await write();}
++        for(const [name,boss] of Object.entries(BOSSES))if(boss.map===mapName(client))await attemptNaturalBoss(bounded,navigate,name,sources,scenario,report,checkDeadline);
++        const returnId=`${family}-return`;
++        for(let i=0;i<sources.portals[returnId].length;i++) {checkDeadline();report.routes.push(await executeClassicHop(bounded,travel,sources.portals[returnId][i],returnId,i));await write();}
++      }
++    } else if(scenario.lane==='stone-entry') {
++      const template=sources.npcs.npcs.find(npc=>npc.loaded_object_id===1142);
++      const action=await observeClassicNpc(bounded,navigate,template,'@stonetomba');report.npcActions.push(action);
++      const before=await refreshSnapshot(bounded,'D715');const count=snapshot=>(snapshot.inventoryItems??[]).filter(item=>item.key==='crystal-item-1080').reduce((n,item)=>n+Number(item.quantity),0);
++      if(count(before.payload)<1)throw new Error('No lawful owned canonical StoneHeart');
++      const selected=client.sequence;bounded.send({type:'selectNpcDialog',target:action.target});
++      const transition=await bounded.wait(()=>receivedAfter(client,selected,event=>['MapChanged','MapInformation'].includes(event.packet)&&mapPacketName(event)==='D710A'),'ordinary Stone entry');
++      const after=await refreshSnapshot(bounded,'D710A');const landed=selfPlayer(client);
++      if(landed?.x!==29||landed?.y!==17||count(after.payload)!==count(before.payload)-1)throw new Error('Stone entry lacks exact destination/one-item debit');
++      Object.assign(action,{selectionAfterSequence:selected,transitionSequence:transition.sequence,beforeItemSnapshotSequence:before.sequence,afterItemSnapshotSequence:after.sequence,status:'entryObserved'});
++      report.preservedDefects.push({id:'ANCIENT-OUTER-WALKING-EXIT',status:'sourceHasNoOuterWalkingEdge',walkingExitAccepted:false,
++        note:'D710A-D713A have internal bidirectional edges only. Ordinary owned escape item is a separate return mechanism, never a fabricated walking exit.'});
++    } else {
++      await navigate(PRESERVED_DEFECT.source,0);const source=await refreshSnapshot(bounded,'D10051');
++      const landed=selfPlayer(client);
++      if(landed?.x!==178||landed?.y!==53)throw new Error('Unbound source coordinate was not actually reached');
++      if(source.payload.mapTransfers?.some(transfer=>transfer.toMapFileName==='D10061'))throw new Error('Unexpected repaired D10061 binding changes frozen defect policy');
++      report.preservedDefects.push({id:'D10061-UNBOUND-NEEDMOVE',status:'observedNoEntry',sourceSnapshotSequence:source.sequence,entryAccepted:false});
++    }
++    report.status='observed';
++  } catch(error){report.status='incomplete';report.failures.push({at:new Date().toISOString(),sequence:client.sequence,message:error.message});}
++  finally {
++    if(hasAuthoritativePlayerDeath(client.snapshot))report.deaths.push({sequence:client.sequence,map:mapName(client),at:new Date().toISOString()});
++    if(started&&!client.closed) {
++      // Cleanup is allowed beyond the diagnostic deadline to save normally;
++      // those extra seconds cannot extend route/combat acceptance.
++      const priorFailure=client.failure;client.failure=null;
++      try {report.save=await normalLogoutRelogin(client,scenario);}catch(error){report.failures.push({phase:'normal-save',message:error.message});}
++      finally {client.failure??=priorFailure;}
++    }
++    try {await client.close();}catch(error){report.failures.push({phase:'trace-close',message:error.message});}
++    report.finishedAt=new Date().toISOString();report.elapsedMs=Date.parse(report.finishedAt)-Date.parse(report.startedAt);
++    await write();await fs.copyFile(pairReceiptFile,path.join(root,'paired-gateway-receipt.json'));
++  }
++  return report;
++}
++
++if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
++  const {values}=parseArgs({options:{input:{type:'string'},output:{type:'string'},'map-pack-root':{type:'string'},
++    'pair-receipt':{type:'string'},'pair-sha256':{type:'string'},plan:{type:'boolean',default:false}}});
++  if(values.plan) {
++    await loadClassicSources();console.log(JSON.stringify({schema:'mir2.classic-late-route-plan.v1',routes:ROUTES,sourceHashes:SOURCE_HASHES,
++      plannedOnly:true,executed:false,runtimeGameplayAccepted:false,preservedDefect:PRESERVED_DEFECT,resourceOnlyExcluded:SOURCE_ONLY_ROOM},null,2));
++  } else {
++    if(!values.input||!values.output||!values['pair-receipt'])throw new Error('--input, --output, --pair-receipt, --pair-sha256 are required');
++    const report=await runClassicLateRoute({input:JSON.parse(await fs.readFile(values.input)),output:values.output,mapPackRoot:values['map-pack-root'],
++      pairReceiptFile:values['pair-receipt'],pairReceiptSha256:values['pair-sha256']});
++    console.log(JSON.stringify({status:report.status,runtimeGameplayAccepted:false,reportFile:path.resolve(values.output,'report.json')}));
++  }
++}
+diff --git a/mir2-web3/apps/web/scripts/quest-agent/test-classic-late-route.mjs b/mir2-web3/apps/web/scripts/quest-agent/test-classic-late-route.mjs
+new file mode 100644
+index 000000000..d19ab1fbf
+--- /dev/null
++++ b/mir2-web3/apps/web/scripts/quest-agent/test-classic-late-route.mjs
+@@ -0,0 +1,250 @@
++// Synthetic receipt/controller fixtures only. No Gateway connection, player
++// route, natural drop, source state mutation or human acceptance is performed.
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { SOURCE_HASHES, ROUTES, EXPECTED_DIRECTED_HOPS, LEGACY_POLICY, sha256, loadClassicSources,
++  assertLegacySource, validateScenario, assertPair, assertCommand, validateEndpoint, bossCatalog, redactEvidence, exactNpc, npcLink } from './classic-late-route-policy.mjs';
++import { ClassicProtocolClient, executeClassicHop, observeClassicNpc, useNaturallyPickedUpBook } from './run-classic-late-route.mjs';
++import { verifyClassicEvidence, verifyClassicCohort } from './verify-classic-late-route-evidence.mjs';
++
++const sources=await loadClassicSources();
++const gatewayUrl='wss://classic-fixture.invalid/ws';
++const pair={schema:'mir2.classic-paired-gateway-attestation.v1',gatewayUrl,sourceRevision:'a'.repeat(40),gatewayExecutableSha256:'b'.repeat(64),
++  profileId:'platinum_176',profileVersion:27,sourceHashes:{...SOURCE_HASHES},qaNaturalKillDropMultiplier:1,profileDropMultiplier:1,
++  debugWorldMutationEnabled:false,namedLegacyPolicy:'source-bound-stone-big-taoist-v1'};
++const health={ok:true,ws:'ready',revision:pair.sourceRevision};
++const scenario={gatewayUrl,className:'Warrior',accountId:'fixture-account',password:'fixture-secret',characterName:'ReceiptFixture',characterIndex:0,
++  lane:'main-round-trips',startingState:{preparedLevel:true,level:50}};
++const actor=(x,y)=>({objectId:101,kind:'selfPlayer',name:scenario.characterName,class:'Warrior',level:50,x,y,hp:400,maxHp:400});
++const world=(map,x=1,y=1)=>({mapFileName:map,mapSnapshotPending:false,playerObjectId:101,playerHp:400,
++  entities:[actor(x,y)],mapTransfers:[],inventoryItems:[{uniqueId:701,key:'crystal-item-719',name:'TownTeleport',quantity:1}],knownSkills:[],groundDrops:[]});
++
++function fixture({sourceAck=true,boss=false,book=false}={}) {
++  const events=[];const at=Date.parse('2026-10-04T00:00:00Z');
++  const add=(direction,value)=>{const event={...structuredClone(value),direction,sequence:events.length+1,at:new Date(at+(events.length+1)*100).toISOString()};events.push(event);return event;};
++  add('sent',{type:'login',accountId:'[redacted]',password:'[redacted]'});add('received',{packet:'LoginSuccess'});
++  add('sent',{type:'startGame',characterIndex:0});add('received',{packet:'StartGame',payload:{result:4}});
++  const initial=add('received',{type:'worldSnapshot',payload:world('0')});
++  const report={schema:'mir2.classic-late-route-run.v1',className:'Warrior',lane:'main-round-trips',startingState:{preparedLevel:true,level:50},
++    gatewayUrl,health:structuredClone(health),sourceHashes:{...SOURCE_HASHES},pairedReceiptSha256:sha256(JSON.stringify(pair)),accountFingerprint:sha256('fixture-one'),
++    initialSnapshotSequence:initial.sequence,timeoutMs:120*60_000,spawnWaitMs:60*60_000,declaredNaturalKillLimit:boss?1:0,
++    startedAt:new Date(at).toISOString(),status:'observed',freshLevelJourneyAccepted:false,runtimeGameplayAccepted:false,nativeVisualAccepted:false,
++    routes:[],npcActions:[],bossAttempts:[],pickups:[],books:[],deaths:[],failures:[],preservedDefects:[]};
++  let latest=initial.payload;
++  let carried=structuredClone(latest.inventoryItems),skills=[];
++  const currentWorld=(map,x,y)=>({...world(map,x,y),inventoryItems:structuredClone(carried),knownSkills:structuredClone(skills)});
++  for(const [routeId,edges] of Object.entries(sources.portals)) {
++    for(const [index,edge]of edges.entries()) {
++      const portal=edge.portals[0],before=currentWorld(edge.from,portal.source.x-1,portal.source.y);
++      before.mapTransfers=[{key:`${edge.from}-${edge.to}`,mapFileName:edge.from,toMapFileName:edge.to,
++        bounds:{minX:portal.source.x,maxX:portal.source.x,minY:portal.source.y,maxY:portal.source.y}}];
++      const source=add('received',{type:'worldSnapshot',payload:before});
++      add('sent',{type:'walk',movementDirection:'Right'});
++      const sourcePosition=sourceAck?add('received',{packet:'UserLocation',payload:{location:portal.source}}):null;
++      const transition=add('received',{packet:'MapChanged',payload:{fileName:edge.to,location:portal.destination}});
++      const destination=add('received',{type:'worldSnapshot',payload:currentWorld(edge.to,portal.destination.x,portal.destination.y)});latest=destination.payload;
++      report.routes.push({routeId,index,from:edge.from,to:edge.to,status:'observed',beforeSequence:source.sequence,sourceSnapshotSequence:source.sequence,
++        sourcePositionSequence:sourcePosition?.sequence??null,transitionSequence:transition.sequence,destinationSnapshotSequence:destination.sequence,afterSequence:destination.sequence});
++    }
++    if(boss&&routeId==='stone') {
++      const beforeSequence=events.at(-1).sequence;
++      const observation=structuredClone(latest);observation.entities.push({objectId:880,name:'WhiteBoar',kind:'monster',hp:bossCatalog(sources,'WhiteBoar').monster.hp,x:100,y:100});
++      add('received',{type:'worldSnapshot',payload:observation});add('sent',{type:'attack',objectId:880});
++      add('received',{packet:'DamageIndicator',payload:{objectId:880,amount:20}});
++      const died=add('received',{packet:'ObjectDied',payload:{info:{objectId:880}}});
++      const bookInfo=sources.items.items.find(item=>item.name==='CounterAttack'&&item.item_type===20);
++      if(book)latest.groundDrops=[{objectId:990,name:'CounterAttack',quantity:1,sourceMonster:'WhiteBoar',ownerObjectId:101,
++        loot:{kind:'item',key:`crystal-item-${bookInfo.item_index}`}}];
++      const settlement=add('received',{type:'worldSnapshot',payload:latest});
++      report.bossAttempts.push({id:'WhiteBoar-1',name:'WhiteBoar',map:'D717',objectId:880,ordinal:1,beforeSequence,afterSequence:settlement.sequence,
++        startedAt:events[beforeSequence-1].at,finishedAt:settlement.at,status:'observed',outcome:'observedKill',naturalSpawnAccepted:false,combatAccepted:false,
++        deathSequence:died.sequence,settlementSnapshotSequence:settlement.sequence,noDrop:!book,
++        groundDropSequences:book?[{objectId:990,snapshotSequence:settlement.sequence,kind:'item',name:'CounterAttack'}]:[],pickupIds:book?['pickup-book']:[]});
++      if(book) {
++        const beforePickup=add('received',{type:'worldSnapshot',payload:latest});add('sent',{type:'pickUp',objectId:990});
++        carried.push({uniqueId:17001,key:`crystal-item-${bookInfo.item_index}`,name:'CounterAttack',quantity:1});
++        latest={...structuredClone(latest),groundDrops:[],inventoryItems:structuredClone(carried)};
++        const afterPickup=add('received',{type:'worldSnapshot',payload:latest});
++        report.pickups.push({id:'pickup-book',attemptId:'WhiteBoar-1',groundObjectId:990,groundSnapshotSequence:settlement.sequence,
++          beforeSnapshotSequence:beforePickup.sequence,afterSnapshotSequence:afterPickup.sequence,provenance:'fresh-kill-associated-ground-item',
++          sourceKillIdentityAccepted:false,ownershipAccepted:true,status:'pickedUp',uniqueId:17001,itemName:'CounterAttack',quantity:1});
++        const beforeUse=add('received',{type:'worldSnapshot',payload:latest});add('sent',{type:'useItem',grid:'inventory',uniqueId:17001});
++        const ack=add('received',{packet:'UseItem',payload:{success:true,uniqueId:17001}});
++        const magic=add('received',{packet:'NewMagic',payload:{magic:{spell:'CounterAttack'}}});
++        carried=carried.filter(item=>item.uniqueId!==17001);skills=[{name:'CounterAttack',key:'CounterAttack'}];
++        latest={...structuredClone(latest),inventoryItems:structuredClone(carried),knownSkills:structuredClone(skills)};
++        const afterUse=add('received',{type:'worldSnapshot',payload:latest});
++        report.books.push({spell:'CounterAttack',itemIndex:bookInfo.item_index,uniqueId:17001,pickupId:'pickup-book',
++          beforeSnapshotSequence:beforeUse.sequence,useAckSequence:ack.sequence,newMagicSequence:magic.sequence,afterSnapshotSequence:afterUse.sequence,
++          status:'learned',activationAccepted:false});
++      }
++    }
++  }
++  const before=add('received',{type:'worldSnapshot',payload:latest});const logout=add('received',{packet:'LogOutSuccess'});
++  const start=add('received',{packet:'StartGame',payload:{result:4}});const relog=add('received',{type:'worldSnapshot',payload:latest});
++  const finalLogout=add('received',{packet:'LogOutSuccess'});
++  report.save={status:'observed',mechanism:'normal-LogOutSuccess-and-public-relogin',beforeSnapshotSequence:before.sequence,
++    logoutSequence:logout.sequence,startSequence:start.sequence,reloginSnapshotSequence:relog.sequence,finalLogoutSequence:finalLogout.sequence};
++  return {report,events,pair:structuredClone(pair),sources,pairReceiptSha256:report.pairedReceiptSha256};
++}
++const verdict=value=>verifyClassicEvidence(value);
++
++test('actual v27 data binds208 runtime maps, all76 main directed hops and correct nested Boss DropPaths',()=>{
++  assert.equal(sources.profile.mapWhitelist.length,208);assert.ok(!sources.profile.mapWhitelist.includes('D71653'));
++  assert.equal(EXPECTED_DIRECTED_HOPS,76);assert.equal(Object.values(ROUTES).reduce((n,chain)=>n+chain.length-1,0),76);
++  for(const [name,count]of [['WhiteBoar',122],['EvilSnake',140],['ZumaTaurus',179],['RedMoonEvil',155]])assert.equal(bossCatalog(sources,name).table.total_entries,count);
++  assert.throws(()=>bossCatalog(sources,'WhiteBoar0'),/Unknown/);
++});
++for(const change of ['raw','parsed','path','key','condition'])test(`legacy compatibility fails closed on changed${change} source proof`,()=>{
++  const script=structuredClone(sources.npcScripts.scripts.find(script=>script.script_key===LEGACY_POLICY[0].key));
++  if(change==='raw')script.raw_text+='\n';if(change==='parsed')script.sections[0].lines.push('SET [999] 1');
++  if(change==='path')script.relative_path='Other/Stone.txt';if(change==='key')script.script_key='Other/Stone';
++  if(change==='condition')script.raw_text=script.raw_text.replace('CHECKQUEST 135 0','CHECKQUEST 135 1');
++  assert.throws(()=>assertLegacySource(script),/Unknown\/changed/);
++});
++test('only declared normal endpoints, finite deadlines and natural kill budgets are accepted',()=>{
++  assert.equal(validateScenario(scenario).maxKillsPerTarget,0);assert.equal(validateEndpoint('ws://127.0.0.1:3001/ws').hostname,'127.0.0.1');
++  for(const url of ['ws://remote.invalid/ws','wss://name:password@remote.invalid/ws','wss://remote.invalid/ws?token=secret','wss://remote.invalid/ws#token'])assert.throws(()=>validateEndpoint(url));
++  for(const changed of [{timeoutMs:121*60_000},{maxKillsPerTarget:4},{spawnWaitMs:151*60_000},{qa:true},{relocation:true},{dropMultiplier:100},{className:'Assassin'}])assert.throws(()=>validateScenario({...scenario,...changed}));
++});
++test('paired revision, exact actual data hashes and unchanged QA configuration are mandatory',()=>{
++  assert.equal(assertPair(pair,health,scenario).executableIdentitySource,'root-deployment-attestation');
++  for(const changed of [{sourceRevision:'c'.repeat(40)},{profileVersion:26},{qaNaturalKillDropMultiplier:10},{debugWorldMutationEnabled:true},
++    {sourceHashes:{...SOURCE_HASHES,maps:'0'.repeat(64)}},{namedLegacyPolicy:'old'}])assert.throws(()=>assertPair({...pair,...changed},health,scenario));
++});
++test('ordinary command allowlist excludes admin/public raw warp paths',()=>{
++  assertCommand({type:'walk',direction:'Right'});
++  for(const command of [{type:'MoveTo',x:1,y:1},{type:'Stage5Command'},{type:'event.spawn'},{type:'qa.giveItem'},
++    {type:'interact',target:'crystal:D71653:1:1'}])assert.throws(()=>assertCommand(command),/Forbidden/);
++});
++test('transport redacts nested credentials without changing actual sent login payload',async()=>{
++  const lines=[],sent=[];const client=new ClassicProtocolClient(gatewayUrl,'unused',{appendFile:async(_file,line)=>lines.push(line),secrets:['fixture-secret','fixture-account']});
++  client.ws={readyState:1,send:value=>sent.push(value)};
++  client.send({type:'login',accountId:'fixture-account',password:'fixture-secret'});
++  client.record('diagnostic',{nested:{password:'fixture-secret',token:'token-value'},message:'fixture-account fixture-secret'});
++  await client.writeQueue;
++  assert.match(sent[0],/fixture-secret/);assert.ok(!lines.join('').includes('fixture-secret'));assert.ok(!lines.join('').includes('fixture-account'));assert.ok(!lines.join('').includes('token-value'));
++  assert.throws(()=>client.send({type:'MoveTo'}),/Forbidden/);
++  assert.deepEqual(redactEvidence({nested:{secretAnswer:'x'}}),{nested:{secretAnswer:'[redacted]'}});
++});
++test('WSS controller refreshes own damage vitals with a bounded500ms cadence, not every hit or observer hit',async()=>{
++  let now=1000,scheduled=null;const sent=[];
++  const client=new ClassicProtocolClient(gatewayUrl,'unused',{appendFile:async()=>{},now:()=>now,
++    setTimeoutImpl:(callback,ms)=>{scheduled={callback,ms};return 1;},clearTimeoutImpl:()=>{scheduled=null;}});
++  client.ws={readyState:1,send:value=>sent.push(JSON.parse(value)),close:()=>{}};client.snapshot=world('D717');
++  client.observeGatewayMessage({packet:'DamageIndicator',payload:{objectId:101,amount:5}});
++  assert.deepEqual(sent.map(command=>command.type),['clientVersion']);
++  now=1100;client.observeGatewayMessage({packet:'DamageIndicator',payload:{objectId:101,amount:5}});
++  assert.equal(sent.length,1);assert.equal(scheduled.ms,400);
++  client.observeGatewayMessage({packet:'DamageIndicator',payload:{objectId:880,amount:5}});assert.equal(sent.length,1);
++  now=1500;scheduled.callback();assert.equal(sent.length,2);await client.close();
++});
++
++function hopClient(mode='good') {
++  const edge=sources.portals.stone[0],portal=edge.portals[0];const data=world(edge.from,portal.source.x-1,portal.source.y);
++  data.mapTransfers=[{key:'live',toMapFileName:edge.to,bounds:{minX:portal.source.x,maxX:portal.source.x,minY:portal.source.y,maxY:portal.source.y}}];
++  const client={snapshot:data,events:[],sequence:0};
++  const add=(direction,value)=>{const event={...structuredClone(value),direction,sequence:++client.sequence,at:new Date().toISOString()};client.events.push(event);return event;};
++  client.send=command=>{assertCommand(command);add('sent',command);if(command.type==='clientVersion')add('received',{type:'worldSnapshot',payload:client.snapshot});};
++  client.wait=async(predicate,label)=>{const value=predicate();if(!value)throw new Error(`Fixture timeout ${label}`);return value;};
++  const travel=async()=>{
++    if(mode!=='static'){client.send({type:'walk',direction:'Right'});add('received',{packet:'UserLocation',payload:{location:portal.source}});
++      add('received',{packet:'MapChanged',payload:{fileName:mode==='wrong-map'?'3':edge.to}});
++      client.snapshot=world(edge.to,mode==='wrong-position'?0:portal.destination.x,portal.destination.y);add('received',{type:'worldSnapshot',payload:client.snapshot});}
++    return [{fromMapFileName:edge.from,toMapFileName:edge.to}];
++  };
++  return {client,travel,edge};
++}
++test('prepared hop controller requires fresh live transfer, actual map packet and exact landing',async()=>{
++  const {client,travel,edge}=hopClient();const observed=await executeClassicHop(client,travel,edge,'stone',0);
++  assert.equal(observed.sourcePositionProof,'direct-UserLocation');
++  for(const mode of ['static','wrong-map','wrong-position']){const value=hopClient(mode);await assert.rejects(()=>executeClassicHop(value.client,value.travel,value.edge,'stone',0));}
++  const missing=hopClient();missing.client.snapshot.mapTransfers=[];await assert.rejects(()=>executeClassicHop(missing.client,missing.travel,missing.edge,'stone',0),/No live/);
++  const orphan=hopClient();await assert.rejects(()=>executeClassicHop(orphan.client,orphan.travel,{...orphan.edge,to:'D71653'},'stone',0),/Resource-only/);
++});
++test('NPC matching rejects template-only, stale, wrong-kind/id/position and unexposed link',()=>{
++  const template=sources.npcs.npcs.find(npc=>npc.loaded_object_id===1142),data=world('D715',271,85);
++  const npc={kind:'npc',objectId:1142,name:template.name,x:272,y:85};data.entities.push(npc);
++  assert.equal(exactNpc(data,template)?.objectId,1142);
++  for(const changed of [{kind:'monster'},{objectId:926},{x:273}])assert.equal(exactNpc({...data,entities:[{...npc,...changed}]},template),null);
++  assert.equal(exactNpc({...data,mapSnapshotPending:true},template),null);
++  data.activeNpcDialog={npcObjectId:1142,body:['actual page'],links:[{target:'@stonetomba',text:'enter'}]};
++  assert.equal(npcLink(data,1142,'@stonetomba').target,'@stonetomba');
++  assert.throws(()=>npcLink(data,926,'@stonetomba'),/wrong/);assert.throws(()=>npcLink(data,1142,'@Quest8'),/expose/);
++});
++test('unpicked or prepared/vendor book cannot be credited as a naturally acquired use',async()=>{
++  await assert.rejects(()=>useNaturallyPickedUpBook({},null,'Warrior',sources),/own observed/);
++  await assert.rejects(()=>useNaturallyPickedUpBook({},{status:'pickedUp',provenance:'vendor'},'Warrior',sources),/own observed/);
++});
++test('complete synthetic receipt structure is accepted only in its bounded lane, never fresh levels/whole world/native',()=>{
++  const checked=verdict(fixture());assert.equal(checked.routeTransitionsAccepted,true);assert.equal(checked.sourcePositionsAccepted,true);
++  assert.equal(checked.normalRouteAccepted,true);assert.equal(checked.directedHopsObserved,76);assert.equal(checked.preparedLevel,true);
++  assert.equal(checked.completeClassicWorld,false);assert.equal(checked.freshLevelJourneyAccepted,false);assert.equal(checked.runtimeGameplayAccepted,false);assert.equal(checked.nativeVisualAccepted,false);
++});
++test('transition-implied source position remains pending instead of claiming direct source authority',()=>{
++  const checked=verdict(fixture({sourceAck:false}));assert.equal(checked.routeTransitionsAccepted,true);assert.equal(checked.sourcePositionsAccepted,false);assert.equal(checked.normalRouteAccepted,false);
++});
++for(const failure of ['source-hash','static-hop','stale-hop','duplicate-hop','wrong-position','no-intent','missing-save','wrong-save-count','fresh-level','visual','whole-world','deadline','d71653','teleport','other-player'])test(`receipt verifier rejects${failure} false acceptance`,()=>{
++  const value=fixture(),hop=value.report.routes[0];
++  if(failure==='source-hash')value.report.sourceHashes.maps='0'.repeat(64);
++  if(failure==='static-hop')value.events.find(e=>e.sequence===hop.transitionSequence).packet='StaticGraph';
++  if(failure==='stale-hop')hop.sourceSnapshotSequence=hop.destinationSnapshotSequence;
++  if(failure==='duplicate-hop')value.report.routes.push({...hop});
++  if(failure==='wrong-position')value.events.find(e=>e.sequence===hop.destinationSnapshotSequence).payload.entities[0].x=0;
++  if(failure==='no-intent')value.events.find(e=>e.sequence===hop.beforeSequence+1).type='keepAlive';
++  if(failure==='missing-save')value.report.save=null;
++  if(failure==='wrong-save-count')value.events.find(e=>e.sequence===value.report.save.reloginSnapshotSequence).payload.inventoryItems=[];
++  if(failure==='fresh-level')value.report.freshLevelJourneyAccepted=true;
++  if(failure==='visual')value.report.nativeVisualAccepted=true;
++  if(failure==='whole-world')value.report.runtimeGameplayAccepted=true;
++  if(failure==='deadline')value.events.find(e=>e.sequence===hop.transitionSequence).at='2026-10-05T00:00:00Z';
++  if(failure==='d71653')hop.to='D71653';
++  if(failure==='teleport')value.events.find(e=>e.sequence===hop.beforeSequence+1).type='useItem';
++  if(failure==='other-player')value.events.find(e=>e.sequence===hop.sourceSnapshotSequence).payload.entities[0].name='Other';
++  assert.throws(()=>verdict(value));
++});
++test('source spawn identity and no-drop outcomes stay separate; no target item is a retained result',()=>{
++  const value=fixture({boss:true}),checked=verdict(value);
++  assert.equal(checked.bossAttempts[0].combatObserved,true);assert.equal(checked.bossAttempts[0].naturalSpawnAccepted,false);
++  assert.equal(checked.bossAttempts[0].combatAccepted,false);assert.equal(checked.bossAttempts[0].noDrop,true);
++  value.report.bossAttempts[0].naturalSpawnAccepted=true;assert.throws(()=>verdict(value),/not actually exposed/);
++});
++test('omitting no-drop, missing ObjectDied, pretending absence is killed, death removal and bigger kill budget are rejected',()=>{
++  for(const failure of ['no-drop','died','absent','death','budget']){
++    const value=fixture({boss:true}),attempt=value.report.bossAttempts[0];
++    if(failure==='no-drop')delete attempt.noDrop;
++    if(failure==='died')value.events.find(e=>e.sequence===attempt.deathSequence).packet='ObjectRemove';
++    if(failure==='absent'){attempt.outcome='absentWithinBudget';attempt.combatAccepted=true;}
++    if(failure==='death')value.events.find(e=>e.sequence===attempt.settlementSnapshotSequence).payload.playerHp=0;
++    if(failure==='budget')value.report.declaredNaturalKillLimit=4;
++    assert.throws(()=>verdict(value),failure);
++  }
++});
++test('owned pickup/book learning and saved skill are observable, while missing exact source-kill link stays unaccepted',()=>{
++  const checked=verdict(fixture({boss:true,book:true}));
++  assert.equal(checked.pickups[0].pickupObserved,true);assert.equal(checked.pickups[0].ownershipAccepted,true);
++  assert.equal(checked.pickups[0].naturalAcquisitionAccepted,false);assert.equal(checked.books[0].learnAccepted,true);
++  assert.equal(checked.books[0].activationAccepted,false);assert.equal(checked.books[0].naturalAcquisitionAccepted,false);
++});
++for(const failure of ['wrong-owner','preexisting-uid','no-newmagic','failed-ack','wrong-class-book','book-not-debited','book-skill-unsaved','forged-kill-link','learn-is-activation'])test(`item/book receipt rejects${failure}`,()=>{
++  const value=fixture({boss:true,book:true}),pickup=value.report.pickups[0],book=value.report.books[0];
++  const eventAt=sequence=>value.events.find(event=>event.sequence===sequence);
++  if(failure==='wrong-owner')eventAt(pickup.groundSnapshotSequence).payload.groundDrops[0].ownerObjectId=999;
++  if(failure==='preexisting-uid')eventAt(pickup.beforeSnapshotSequence).payload.inventoryItems.push({uniqueId:17001,quantity:1});
++  if(failure==='no-newmagic')eventAt(book.newMagicSequence).packet='ObjectMagic';
++  if(failure==='failed-ack')eventAt(book.useAckSequence).payload.success=false;
++  if(failure==='wrong-class-book'){const info=sources.items.items.find(item=>item.name==='Blink'&&item.item_type===20);book.itemIndex=info.item_index;}
++  if(failure==='book-not-debited')eventAt(book.afterSnapshotSequence).payload.inventoryItems.push({uniqueId:17001,quantity:1});
++  if(failure==='book-skill-unsaved')eventAt(value.report.save.reloginSnapshotSequence).payload.knownSkills=[];
++  if(failure==='forged-kill-link')pickup.sourceKillIdentityAccepted=true;
++  if(failure==='learn-is-activation')book.activationAccepted=true;
++  assert.throws(()=>verdict(value));
++});
++test('three-class aggregation needs independent accounts and one exact pair and cannot imply complete classic world',()=>{
++  const checked=verdict(fixture()),reports=[{accountFingerprint:'one',pairedReceiptSha256:'same'},{accountFingerprint:'two',pairedReceiptSha256:'same'},{accountFingerprint:'three',pairedReceiptSha256:'same'}];
++  const verdicts=['Warrior','Wizard','Taoist'].map(className=>({...checked,className}));
++  assert.equal(verifyClassicCohort(verdicts,reports).plannedDirectedHops,228);
++  assert.equal(verifyClassicCohort(verdicts,reports).runtimeGameplayAccepted,false);
++  assert.throws(()=>verifyClassicCohort(verdicts,[reports[0],reports[0],reports[2]]),/distinct/);
++  assert.throws(()=>verifyClassicCohort(verdicts,[reports[0],reports[1],{...reports[2],pairedReceiptSha256:'other'}]),/different/);
++});
+diff --git a/mir2-web3/apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs b/mir2-web3/apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs
+new file mode 100644
+index 000000000..ea0db078c
+--- /dev/null
++++ b/mir2-web3/apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs
+@@ -0,0 +1,262 @@
++import fs from 'node:fs/promises';
++import { createReadStream } from 'node:fs';
++import readline from 'node:readline';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { parseArgs } from 'node:util';
++import { sha256, SOURCE_HASHES, ROUTES, EXPECTED_DIRECTED_HOPS, SOURCE_ONLY_ROOM, PRESERVED_DEFECT,
++  BOSSES, CLASSES, LATE_BOOKS, assertCommand, assertPair, loadClassicSources, exactNpc, npcLink, bagCount, bossCatalog } from './classic-late-route-policy.mjs';
++
++const requireValue=(condition,message)=>{if(!condition)throw new Error(message);};
++const transitionName=event=>event?.payload?.info?.fileName??event?.payload?.fileName;
++const own=snapshot=>snapshot?.entities?.find(entity=>Number(entity.objectId)===Number(snapshot.playerObjectId));
++const known=(snapshot,name)=>(snapshot?.knownSkills??[]).some(skill=>[skill.key,skill.name].some(value=>String(value??'').replaceAll('-','').toLowerCase()===String(name).replaceAll('-','').toLowerCase()));
++const itemIndex=item=>Number(item?.tooltipSource?.info?.index??String(item?.key??'').replace('crystal-item-',''));
++
++function indexTrace(events) {
++  let previous=0;const indexed=new Map();
++  for(const event of events) {
++    requireValue(Number.isSafeInteger(event.sequence)&&event.sequence>previous,'Trace sequence missing/reordered/duplicated');
++    requireValue(Number.isFinite(Date.parse(event.at)),'Trace event timestamp missing');previous=event.sequence;
++    if(event.direction==='sent')assertCommand(event);
++    requireValue(!['MoveTo','Stage5Command','qa.giveItem','event.spawn','disconnectedRegionRelocation'].includes(event.type),'Private relocation/QA event in counted ledger');
++    indexed.set(event.sequence,event);
++  }
++  return indexed;
++}
++function packet(indexed,sequence,name) {
++  const event=indexed.get(sequence);requireValue(event?.direction==='received'&&event.packet===name,`Missing real ${name} packet at${sequence}`);return event;
++}
++function snapshot(indexed,sequence,map) {
++  const event=indexed.get(sequence);requireValue(event?.direction==='received'&&event.type==='worldSnapshot'
++    &&!event.payload?.mapSnapshotPending&&(!map||event.payload.mapFileName===map),`Missing fresh settled snapshot at${sequence}`);return event.payload;
++}
++function verifyHop(hop,indexed,sources,events) {
++  requireValue(hop.status==='observed'&&hop.from!==SOURCE_ONLY_ROOM&&hop.to!==SOURCE_ONLY_ROOM,'Static/resource-only hop is not runtime evidence');
++  const edge=sources.portals[hop.routeId]?.[hop.index];
++  requireValue(edge&&edge.from===hop.from&&edge.to===hop.to,'Hop does not match exact bound ordinary route');
++  const before=snapshot(indexed,hop.sourceSnapshotSequence,edge.from);
++  requireValue(hop.sourceSnapshotSequence<=hop.beforeSequence&&hop.beforeSequence<hop.transitionSequence
++    &&hop.transitionSequence<hop.destinationSnapshotSequence&&hop.destinationSnapshotSequence<=hop.afterSequence,'Stale or unordered hop receipt');
++  requireValue((before.mapTransfers??[]).some(transfer=>transfer.toMapFileName===edge.to&&edge.portals.some(portal=>
++    portal.source.x>=transfer.bounds?.minX&&portal.source.x<=transfer.bounds?.maxX&&portal.source.y>=transfer.bounds?.minY&&portal.source.y<=transfer.bounds?.maxY)),'No actual source live transfer');
++  const transition=indexed.get(hop.transitionSequence);
++  requireValue(transition?.direction==='received'&&['MapChanged','MapInformation'].includes(transition.packet)&&transitionName(transition)===edge.to,'No actual matching map transition');
++  const after=snapshot(indexed,hop.destinationSnapshotSequence,edge.to), actor=own(after);
++  requireValue(actor&&edge.portals.some(portal=>actor.x===portal.destination.x&&actor.y===portal.destination.y),'Destination differs from source geometry');
++  const interval=events.filter(event=>event.sequence>hop.beforeSequence&&event.sequence<hop.transitionSequence);
++  requireValue(interval.some(event=>event.direction==='sent'&&['walk','run'].includes(event.type)),'Map change lacks an ordinary movement intent');
++  requireValue(!interval.some(event=>event.direction==='sent'&&!['walk','run','turn','keepAlive','clientVersion'].includes(event.type)),'Teleport/NPC/combat command cannot substitute for this walking hop');
++  requireValue(!interval.some(event=>event.direction==='received'&&['MapChanged','MapInformation'].includes(event.packet)&&transitionName(event)!==edge.to),'Unexpected intermediate map erased from hop');
++  let sourcePositionAccepted=false;
++  if(hop.sourcePositionSequence!=null) {
++    const location=packet(indexed,hop.sourcePositionSequence,'UserLocation');
++    requireValue(location.sequence>hop.beforeSequence&&location.sequence<hop.transitionSequence
++      &&edge.portals.some(portal=>location.payload?.location?.x===portal.source.x&&location.payload?.location?.y===portal.source.y),'Forged committed source coordinate');
++    sourcePositionAccepted=true;
++  }
++  return {routeId:hop.routeId,index:hop.index,transitionAccepted:true,sourcePositionAccepted};
++}
++function verifyNpc(action,indexed,sources) {
++  const template=sources.npcs.npcs.find(npc=>Number(npc.loaded_object_id)===Number(action.npcObjectId));
++  requireValue(template&&template.script_key===action.scriptKey&&template.map_file_name===action.map,'Wrong imported NPC proof');
++  const before=snapshot(indexed,action.sourceSnapshotSequence,action.map);
++  requireValue(exactNpc(before,template),'Source NPC template was not observed as an exact live object');
++  const actor=own(before);
++  requireValue(actor&&Math.max(Math.abs(actor.x-template.location.x),Math.abs(actor.y-template.location.y))<=1,'NPC player was not adjacent');
++  const page=snapshot(indexed,action.dialogSequence,action.map);
++  requireValue(action.sourceSnapshotSequence<action.dialogSequence&&page.activeNpcDialog?.npcObjectId===action.npcObjectId,'NPC dialog is stale/wrong object');
++  requireValue(JSON.stringify(page.activeNpcDialog.body)===JSON.stringify(action.body)
++    &&JSON.stringify(page.activeNpcDialog.links)===JSON.stringify(action.links),'Reported NPC body/links differ from actual received page');
++  if(action.target)npcLink(page,action.npcObjectId,action.target);
++  if(action.status==='entryObserved') {
++    requireValue(action.scriptKey==='MongchonProvince/StoneTemple/Stone'&&String(action.target).toLowerCase()==='@stonetomba','Only reviewed Stone entry belongs to this lane');
++    const prior=snapshot(indexed,action.beforeItemSnapshotSequence,'D715');
++    const after=snapshot(indexed,action.afterItemSnapshotSequence,'D710A');
++    const count=s=>(s.inventoryItems??[]).filter(item=>itemIndex(item)===1080).reduce((n,item)=>n+Number(item.quantity),0);
++    const quest=prior.questLog?.find(quest=>Number(quest.questId)===153);
++    requireValue(quest?.stage==='completed'&&own(prior)?.level>=22&&own(prior)?.level<=42,'Stone real quest/level gate was not observed');
++    requireValue(count(prior)>=1&&count(after)===count(prior)-1&&own(after)?.x===29&&own(after)?.y===17,'Stone canonical one-item debit/landing differs');
++    const transition=indexed.get(action.transitionSequence);
++    requireValue(transition?.direction==='received'&&['MapChanged','MapInformation'].includes(transition.packet)&&transitionName(transition)==='D710A'
++      &&action.selectionAfterSequence<transition.sequence&&transition.sequence<action.afterItemSnapshotSequence,'Missing fresh Stone map receipt');
++  }
++  return {npcObjectId:action.npcObjectId,liveDialogAccepted:true,entryAccepted:action.status==='entryObserved'};
++}
++function verifySave(save,indexed) {
++  if(!save)return false;
++  requireValue(save.status==='observed'&&save.mechanism==='normal-LogOutSuccess-and-public-relogin','Normal save receipt required');
++  const before=snapshot(indexed,save.beforeSnapshotSequence);
++  packet(indexed,save.logoutSequence,'LogOutSuccess');const start=packet(indexed,save.startSequence,'StartGame');
++  requireValue(start.payload?.result===4,'Saved character StartGame was not accepted');
++  const after=snapshot(indexed,save.reloginSnapshotSequence,before.mapFileName);packet(indexed,save.finalLogoutSequence,'LogOutSuccess');
++  requireValue(save.beforeSnapshotSequence<save.logoutSequence&&save.logoutSequence<save.startSequence
++    &&save.startSequence<save.reloginSnapshotSequence&&save.reloginSnapshotSequence<save.finalLogoutSequence,'Save receipt order invalid');
++  requireValue(own(before)?.name===own(after)?.name&&own(before)?.x===own(after)?.x&&own(before)?.y===own(after)?.y,'Normal saved transform differs');
++  for(const item of before.inventoryItems??[])requireValue(bagCount(before,item.uniqueId)===bagCount(after,item.uniqueId),'Saved unique-ID count differs');
++  for(const skill of before.knownSkills??[])requireValue(known(after,skill.key??skill.name),'Learned skill missing after normal relogin');
++  return true;
++}
++function verifyAttempts(report,indexed,events,sources) {
++  const result=[];const ids=new Set();const counts={};
++  for(const attempt of report.bossAttempts??[]) {
++    requireValue(!ids.has(attempt.id)&&BOSSES[attempt.name]&&attempt.map===BOSSES[attempt.name].map,'Duplicate/unknown Boss attempt');ids.add(attempt.id);
++    counts[attempt.name]=(counts[attempt.name]??0)+1;requireValue(counts[attempt.name]<=report.declaredNaturalKillLimit&&counts[attempt.name]<=3,'Natural kill budget widened');
++    requireValue(Number.isFinite(Date.parse(attempt.startedAt))&&Number.isFinite(Date.parse(attempt.finishedAt))&&attempt.beforeSequence<=attempt.afterSequence,'Failed/absent attempt was not retained');
++    requireValue(['observedKill','absentWithinBudget','failedCombat','playerDeath'].includes(attempt.outcome),'Drop/engagement outcome omitted');
++    if(attempt.outcome!=='observedKill'){requireValue(attempt.combatAccepted!==true,'Failed/absent combat claimed accepted');result.push({id:attempt.id,combatAccepted:false,outcome:attempt.outcome});continue;}
++    const died=packet(indexed,attempt.deathSequence,'ObjectDied');
++    requireValue(Number(died.payload?.info?.objectId)===Number(attempt.objectId),'Wrong Boss ObjectDied');
++    requireValue(events.some(event=>event.direction==='sent'&&event.sequence>attempt.beforeSequence&&event.sequence<attempt.deathSequence
++      &&['attack','attackDirection','magic'].includes(event.type)),'Boss lacks an ordinary combat action');
++    const catalog=bossCatalog(sources,attempt.name);
++    requireValue(events.some(event=>event.direction==='received'&&event.type==='worldSnapshot'&&event.sequence>attempt.beforeSequence&&event.sequence<attempt.deathSequence
++      &&event.payload?.mapFileName===attempt.map&&event.payload?.entities?.some(actor=>Number(actor.objectId)===Number(attempt.objectId)
++        &&actor.name===attempt.name&&Number(actor.hp)===catalog.monster.hp)),'Boss lacks an observed original full-HP identity');
++    requireValue(events.some(event=>event.direction==='received'&&event.sequence>attempt.beforeSequence&&event.sequence<attempt.deathSequence
++      &&((event.packet==='DamageIndicator'&&Number(event.payload?.objectId)===Number(attempt.objectId)&&Number(event.payload?.amount)>0)
++        ||(event.packet==='ObjectHealth'&&Number(event.payload?.objectId)===Number(attempt.objectId)))),'Boss lacks received target vitals/damage');
++    requireValue(typeof attempt.noDrop==='boolean'&&Array.isArray(attempt.groundDropSequences),'No-drop result omitted; probability is not a guarantee');
++    const settlement=snapshot(indexed,attempt.settlementSnapshotSequence,attempt.map);
++    for(const drop of attempt.groundDropSequences)requireValue(drop.snapshotSequence===attempt.settlementSnapshotSequence
++      &&settlement.groundDrops?.some(actual=>actual.objectId===drop.objectId&&actual.sourceMonster===attempt.name),'Ground-drop receipt invented');
++    requireValue(attempt.noDrop===(attempt.groundDropSequences.length===0),'No-drop ledger contradicts actual count');
++    // A static spawn index copied into a report is not a live spawn receipt.
++    const observation=events.find(event=>event.direction==='received'&&event.type==='worldSnapshot'&&event.sequence>attempt.beforeSequence&&event.sequence<attempt.deathSequence
++      &&event.payload?.mapFileName===attempt.map&&event.payload?.entities?.some(actor=>Number(actor.objectId)===Number(attempt.objectId)
++        &&actor.name===attempt.name&&BOSSES[attempt.name].respawns.includes(Number(actor.sourceRespawnIndex??actor.respawnIndex))));
++    const naturalSpawnAccepted=Boolean(observation);
++    requireValue(!attempt.naturalSpawnAccepted||naturalSpawnAccepted,'Source spawn index was not actually exposed live');
++    result.push({id:attempt.id,combatObserved:true,naturalSpawnAccepted,combatAccepted:naturalSpawnAccepted,outcome:attempt.outcome,noDrop:attempt.noDrop});
++  }
++  requireValue(result.length<=12,'Total natural sample budget widened');return result;
++}
++function verifyAcquisition(report,indexed,events,sources) {
++  const pickups=[];
++  for(const pickup of report.pickups??[]) {
++    const attempt=report.bossAttempts.find(attempt=>attempt.id===pickup.attemptId);
++    requireValue(attempt?.outcome==='observedKill'&&pickup.provenance==='fresh-kill-associated-ground-item','Pickup has no real kill/drop provenance ledger');
++    const ground=snapshot(indexed,pickup.groundSnapshotSequence,attempt.map).groundDrops?.find(drop=>drop.objectId===pickup.groundObjectId);
++    requireValue(ground?.loot?.kind==='item'&&ground.sourceMonster===attempt.name,'Gold/preexisting/vendor item cannot count as a natural gear/book drop');
++    const before=snapshot(indexed,pickup.beforeSnapshotSequence,attempt.map),after=snapshot(indexed,pickup.afterSnapshotSequence,attempt.map);
++    requireValue(events.some(event=>event.direction==='sent'&&event.type==='pickUp'&&Number(event.objectId)===Number(ground.objectId)
++      &&event.sequence>pickup.beforeSnapshotSequence&&event.sequence<pickup.afterSnapshotSequence),'Missing ordinary actual ground pickup intent');
++    const owner=Number(ground.ownerObjectId)===Number(before.playerObjectId);
++    requireValue(!pickup.ownershipAccepted||owner,'Wrong live drop ownership');
++    if(pickup.status==='pickedUp') {
++      requireValue(bagCount(before,pickup.uniqueId)===0&&bagCount(after,pickup.uniqueId)===Number(pickup.quantity),'Natural new unique-ID/count delta absent');
++      const learned=(report.books??[]).some(book=>book.pickupId===pickup.id&&book.status==='learned');
++      if(report.save&&!learned)requireValue(bagCount(snapshot(indexed,report.save.reloginSnapshotSequence),pickup.uniqueId)===Number(pickup.quantity),'Acquired gear/book was not retained through normal save');
++    }
++    // Exact source-kill linkage is not exposed by sourceMonster name alone.
++    // Require a real linked ID in the authoritative ground snapshot; do not
++    // grant an inferred nearby monster or a report-only server flag.
++    const exactKillLink=Number(ground.sourceMonsterObjectId)===Number(attempt.objectId);
++    requireValue(!pickup.sourceKillIdentityAccepted||exactKillLink,'Exact kill link is absent from public authoritative ground evidence');
++    pickups.push({id:pickup.id,pickupObserved:pickup.status==='pickedUp',ownershipAccepted:owner,naturalAcquisitionAccepted:owner&&exactKillLink&&pickup.status==='pickedUp'});
++  }
++  const books=[];
++  for(const book of report.books??[]) {
++    if(book.status==='failed'){books.push({pickupId:book.pickupId,learnAccepted:false});continue;}
++    const pickup=report.pickups.find(pickup=>pickup.id===book.pickupId);
++    requireValue(pickup?.status==='pickedUp'&&String(pickup.uniqueId)===String(book.uniqueId),'Book unique-ID does not link to its pickup');
++    const before=snapshot(indexed,book.beforeSnapshotSequence),after=snapshot(indexed,book.afterSnapshotSequence);
++    const info=sources.items.items.find(item=>item.item_index===book.itemIndex);
++    requireValue(info?.item_type===20&&LATE_BOOKS[report.className]?.includes(info.name)&&sources.profile.itemWhitelist.includes(info.name)
++      &&(info.required_class&({Warrior:1,Wizard:2,Taoist:4}[report.className]))&&own(before)?.level>=info.required_amount,'Book eligibility was not observed');
++    requireValue(!known(before,book.spell)&&known(after,book.spell)&&bagCount(after,book.uniqueId)===bagCount(before,book.uniqueId)-1,'Book skill/debit authority inconsistent');
++    const ack=packet(indexed,book.useAckSequence,'UseItem'),magic=packet(indexed,book.newMagicSequence,'NewMagic');
++    requireValue(ack.payload?.success===true&&String(ack.payload.uniqueId)===String(book.uniqueId)&&magic.payload?.magic?.spell===book.spell,'Book needs success ACK+NewMagic');
++    requireValue(book.beforeSnapshotSequence<book.useAckSequence&&book.useAckSequence<book.afterSnapshotSequence&&book.newMagicSequence>book.beforeSnapshotSequence
++      &&book.newMagicSequence<book.afterSnapshotSequence,'Stale book ACK/skill receipt');
++    const acquisition=pickups.find(entry=>entry.id===book.pickupId);
++    requireValue(report.save&&known(snapshot(indexed,report.save.reloginSnapshotSequence),book.spell),'Newly learned book skill was not retained through normal save');
++    books.push({pickupId:book.pickupId,spell:book.spell,learnAccepted:true,naturalAcquisitionAccepted:acquisition?.naturalAcquisitionAccepted===true,activationAccepted:false});
++    requireValue(book.activationAccepted!==true,'Learning alone cannot prove ordinary skill activation/damage');
++  }
++  return {pickups,books};
++}
++
++export function verifyClassicEvidence({report,events,pair,sources,pairReceiptSha256}) {
++  requireValue(report?.schema==='mir2.classic-late-route-run.v1'&&CLASSES.includes(report.className),'Unknown classic evidence schema/class');
++  for(const [key,hash]of Object.entries(SOURCE_HASHES))requireValue(report.sourceHashes?.[key]===hash&&sources.hashes?.[key]===hash,`Actual source hash mismatch:${key}`);
++  requireValue(report.pairedReceiptSha256===pairReceiptSha256,'Changed paired deployment receipt');
++  assertPair(pair,report.health,report);
++  requireValue(report.freshLevelJourneyAccepted===false&&report.runtimeGameplayAccepted===false&&report.nativeVisualAccepted===false,'Bounded/prepared/static evidence cannot claim whole gameplay, fresh levels or visuals');
++  requireValue(report.startingState?.preparedLevel===true||report.startingState?.preparedLevel===false,'Starting-state provenance absent');
++  requireValue(report.timeoutMs<=120*60_000&&report.spawnWaitMs<=150*60_000&&report.declaredNaturalKillLimit<=3,'Frozen route/sample deadline widened');
++  const indexed=indexTrace(events);
++  const initial=snapshot(indexed,report.initialSnapshotSequence);
++  requireValue(own(initial)?.class===report.className&&own(initial)?.level===report.startingState.level,'Starting class/level was not actually observed');
++  requireValue(events.some(event=>event.direction==='received'&&event.packet==='LoginSuccess'&&event.sequence<report.initialSnapshotSequence)
++    &&events.some(event=>event.direction==='received'&&event.packet==='StartGame'&&event.payload?.result===4&&event.sequence<report.initialSnapshotSequence), 'No authenticated LoginSuccess/accepted StartGame bootstrap');
++  const hops=(report.routes??[]).map(hop=>verifyHop(hop,indexed,sources,events));
++  let previousMap=initial.mapFileName, previousSequence=report.initialSnapshotSequence;
++  for(const hop of report.routes??[]) {
++    requireValue(hop.from===previousMap&&hop.sourceSnapshotSequence>previousSequence,'Disjoint/reordered hops cannot be joined into one player journey');
++    const actor=own(snapshot(indexed,hop.sourceSnapshotSequence,hop.from));
++    requireValue(actor?.name===own(initial)?.name&&actor?.class===report.className,'Hop belongs to another character');
++    previousMap=hop.to;previousSequence=hop.destinationSnapshotSequence;
++  }
++  if(report.lane==='main-round-trips') {
++    const allowedTransition=event=>(report.routes??[]).some(hop=>event.sequence>hop.beforeSequence&&event.sequence<=hop.destinationSnapshotSequence&&transitionName(event)===hop.to)
++      ||(report.save&&event.sequence>report.save.startSequence&&event.sequence<=report.save.reloginSnapshotSequence&&transitionName(event)===previousMap);
++    requireValue(!events.some(event=>event.direction==='received'&&event.sequence>report.initialSnapshotSequence
++      &&['MapChanged','MapInformation'].includes(event.packet)&&!allowedTransition(event)), 'Uncredited/intermittent teleport erased between walking hops');
++  }
++  const identities=new Set(hops.map(hop=>`${hop.routeId}:${hop.index}`));requireValue(identities.size===hops.length,'Duplicate walking hop credited');
++  const routeTransitionsAccepted=Object.entries(ROUTES).every(([id,chain])=>chain.slice(0,-1).every((_,index)=>identities.has(`${id}:${index}`)))
++    &&hops.length===EXPECTED_DIRECTED_HOPS;
++  const sourcePositionsAccepted=routeTransitionsAccepted&&hops.every(hop=>hop.sourcePositionAccepted);
++  const npcs=(report.npcActions??[]).map(action=>verifyNpc(action,indexed,sources));
++  const saveAccepted=verifySave(report.save,indexed);
++  if(report.status==='observed')requireValue(saveAccepted,'Observed run omitted normal logout/relogin/save receipt');
++  const attempts=verifyAttempts(report,indexed,events,sources);const acquisition=verifyAcquisition(report,indexed,events,sources);
++  const originalDeadline=Date.parse(report.startedAt)+report.timeoutMs;
++  const counted=[...(report.routes??[]).map(hop=>hop.transitionSequence),...(report.bossAttempts??[]).map(attempt=>attempt.deathSequence).filter(Boolean)];
++  requireValue(counted.every(sequence=>Date.parse(indexed.get(sequence)?.at)<=originalDeadline),'Counted route/kill happened after original deadline');
++  const observedDeaths=events.filter(event=>event.direction==='received'&&event.type==='worldSnapshot'&&(own(event.payload)?.dead===true||event.payload?.playerHp===0));
++  requireValue(!observedDeaths.length||(report.deaths??[]).length>0,'Authoritative death erased from retry ledger');
++  for(const defect of report.preservedDefects??[]) {
++    requireValue(defect.entryAccepted!==true&&defect.walkingExitAccepted!==true,'Preserved source defect claimed as ordinary reachability');
++    if(defect.id==='D10061-UNBOUND-NEEDMOVE'&&defect.status==='observedNoEntry') {
++      const source=snapshot(indexed,defect.sourceSnapshotSequence,PRESERVED_DEFECT.from);
++      requireValue(own(source)?.x===178&&own(source)?.y===53&&!source.mapTransfers?.some(transfer=>transfer.toMapFileName===PRESERVED_DEFECT.to),'Unbound entry defect was not actually reached/observed');
++    }
++  }
++  return {schema:'mir2.classic-late-route-verdict.v1',evidenceValidationPassed:true,className:report.className,
++    preparedLevel:report.startingState.preparedLevel,freshLevelJourneyAccepted:false,routeTransitionsAccepted,sourcePositionsAccepted,
++    normalRouteAccepted:routeTransitionsAccepted&&sourcePositionsAccepted&&saveAccepted&&report.status==='observed'&&!observedDeaths.length,
++    directedHopsObserved:hops.length,plannedDirectedHops:EXPECTED_DIRECTED_HOPS,saveAccepted,rawDurableStoreBytesVerified:false,
++    liveNpcs:npcs,bossAttempts:attempts,...acquisition,legacyQuestJourneyAccepted:false,ordinarySkillActivationAccepted:false,
++    completeClassicWorld:false,runtimeGameplayAccepted:false,nativeVisualAccepted:false,
++    remaining:['Full authenticated route cohort not implied by fixtures','D10061 supplied-source NeedMove entry remains unbound',
++      'D710A-D713A have no authored outer walking exit','Direct committed source coordinate missing if only transition-implied',
++      'Exact natural spawn/source-kill linkage missing when omitted by public snapshots','Boss non-drops and failed attempts remain outcomes',
++      'Raw durable save bytes, ordinary acquired-book activation and native visuals are separate gates']};
++}
++export function verifyClassicCohort(verdicts,reports) {
++  requireValue(verdicts.length===3&&CLASSES.every(className=>verdicts.some(verdict=>verdict.className===className)),'Three independent classes required');
++  requireValue(new Set(reports.map(report=>report.accountFingerprint)).size===3,'Three distinct authenticated accounts required');
++  requireValue(reports.every(report=>report.pairedReceiptSha256===reports[0].pairedReceiptSha256),'Cohort uses different Gateway pairs');
++  return {classes:CLASSES,normalRoutesAccepted:verdicts.every(verdict=>verdict.normalRouteAccepted),
++    directedHopsObserved:verdicts.reduce((count,verdict)=>count+verdict.directedHopsObserved,0),plannedDirectedHops:228,
++    completeClassicWorld:false,runtimeGameplayAccepted:false,nativeVisualAccepted:false};
++}
++export async function verifyClassicEvidenceDirectory(directory) {
++  const root=path.resolve(directory),reportBytes=await fs.readFile(path.join(root,'report.json')),
++    pairBytes=await fs.readFile(path.join(root,'paired-gateway-receipt.json'));
++  const events=[];const lines=readline.createInterface({input:createReadStream(path.join(root,'trace.jsonl')),crlfDelay:Infinity});
++  for await(const line of lines){if(line){requireValue(line.length<=16*1024*1024,'Overlarge protocol trace line');events.push(JSON.parse(line));requireValue(events.length<=1000000,'Protocol trace event budget exceeded');}}
++  const sources=await loadClassicSources(),pairReceiptSha256=sha256(pairBytes);
++  return {...verifyClassicEvidence({report:JSON.parse(reportBytes),events,pair:JSON.parse(pairBytes),sources,pairReceiptSha256}),
++    reportSha256:sha256(reportBytes),pairedReceiptSha256:pairReceiptSha256,actualSourceHashes:{...sources.hashes},traceEvents:events.length};
++}
++
++if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
++  const {values}=parseArgs({options:{input:{type:'string'},output:{type:'string'}}});
++  if(!values.input)throw new Error('--input evidence directory required');
++  const verdict=await verifyClassicEvidenceDirectory(values.input);
++  if(values.output)await fs.writeFile(values.output,JSON.stringify(verdict,null,2),{flag:'wx'});
++  console.log(JSON.stringify(verdict,null,2));
++}

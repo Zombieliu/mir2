@@ -1,0 +1,10 @@
+{
+  "startedAt": "2026-11-12T23:14:41.247Z",
+  "scope": "Independent full-body read after the signed browser flow ended; does not replace any failed browser or HUD qualification.",
+  "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+  "expectedSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+  "passed": true,
+  "bytes": 31441753,
+  "sha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+  "finishedAt": "2026-11-12T23:15:06.280Z"
+}

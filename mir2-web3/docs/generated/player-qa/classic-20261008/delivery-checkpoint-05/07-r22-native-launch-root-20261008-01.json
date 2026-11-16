@@ -1,0 +1,14 @@
+{
+  "schema": "mir2.r22.native-manual-launch.v1",
+  "launchedAtUtc": "2026-10-08T12:15:44.2096006Z",
+  "pid": 187896,
+  "executable": "C:/mir2-playtest-releases/20261008-classic-r22/packages-03/WN-CANDIDATE-20261008-invited-22/mir2-platform-windows.exe",
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "binarySha256": "8ebb7e8e32fbf2a577b90e2341767cc34b467a021e23406003d55597b077bc22",
+  "autoLogin": false,
+  "credentialsRemovedFromChild": true,
+  "priorNativeProcessAbsent": true,
+  "existingDInstallModified": false,
+  "humanWheelAccepted": false,
+  "nativeVisualAcceptance": false
+}

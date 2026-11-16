@@ -1,0 +1,45 @@
+{
+  "codeFiles": [
+    {
+      "sha256": "847e1081466e0fafb5163706305df2a08c52d1c3197078048063997e18c0bcc3",
+      "relativePath": "apps/gateway/src/routing.rs"
+    },
+    {
+      "sha256": "0da9fd79b789266e4552b330cfbef5c0cee52fa372665bbba46a412bc7379654",
+      "relativePath": "apps/gateway/src/routing/tests/crowded_fixture_transport_tests.rs"
+    },
+    {
+      "sha256": "cf2a6af82bda88d7f4b6b7114389f709ca41c201017bc276f452ec793429b47a",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime.rs"
+    },
+    {
+      "sha256": "6978dc640c01311f7fc8d59640c32c9a2fcdda2219934c7eda3fcdb866f91718",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/crowded_fixture.rs"
+    },
+    {
+      "sha256": "8605cd33de8abac34e75523c89b3902d9bb82baf45ae11dcf3e7b8da9c22c846",
+      "relativePath": "apps/simulation/src/runtime/zone/collision.rs"
+    },
+    {
+      "sha256": "bd0f4213da65fe9ff3485fd156edd2d757ca4d1913eeaf27256a0451fd9e4612",
+      "relativePath": "apps/simulation/src/runtime/map.rs"
+    },
+    {
+      "sha256": "634fb5d0689afd94ecde8d9a82fc67b52d62d81575ac16d4bcec6aed6c3d70f2",
+      "relativePath": "apps/simulation/src/runtime/session.rs"
+    },
+    {
+      "sha256": "915717a74455d17faef0a8cea80ff2f7ef103c956ed830a00fcfe08690aabeb1",
+      "relativePath": "apps/simulation/src/world_runtime.rs"
+    },
+    {
+      "sha256": "4e59cf053a4e88396967b881448826f35fa8f4ed1bf53349011bc49f957f3cce",
+      "relativePath": "scripts/qa/run-cold-crowded-fixture.mjs"
+    }
+  ],
+  "productionR18BinaryUsed": false,
+  "sourceBase": "1f688f303c1d3dd918a5372f87f18c5770497634",
+  "binarySha256": "6b974a767384b3b199738f676c1883e809a454a5a4ee280295ef7b493d453cb9",
+  "kind": "owned-qa-test-binary",
+  "nativePairAcceptance": false
+}

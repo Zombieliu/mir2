@@ -1,0 +1,72 @@
+{
+  "analyzedAt": "2026-10-24T12:42:52.104Z",
+  "runId": "1792845654430-cb5de189",
+  "sourceTrace": "1792845654430-cb5de189-victim.trace.jsonl",
+  "throughSequence": 856,
+  "owner": {
+    "x": 286,
+    "y": 612
+  },
+  "target": {
+    "x": 287,
+    "y": 611
+  },
+  "goalRadius": 0,
+  "plannerFailure": "No walk path on 0 from 286,612 to 287,611",
+  "targetOccupants": [
+    {
+      "kind": "ObjectMonster",
+      "name": "Deer",
+      "objectId": 206302,
+      "x": 287,
+      "y": 611,
+      "dead": false,
+      "spawnSequence": 636,
+      "lastSequence": 636
+    }
+  ],
+  "liveCatsInPacketReplay": [
+    {
+      "kind": "ObjectMonster",
+      "name": "RakingCat",
+      "objectId": 206013,
+      "x": 301,
+      "y": 596,
+      "dead": false,
+      "spawnSequence": 841,
+      "lastSequence": 841,
+      "distance": 16
+    }
+  ],
+  "adjacentLiveCatsInPacketReplay": [],
+  "replanReceipts": [
+    {
+      "sequence": 845,
+      "start": {
+        "x": 286,
+        "y": 612
+      },
+      "target": {
+        "x": 287,
+        "y": 611
+      },
+      "desiredDistance": 0,
+      "obstacleCount": 112
+    },
+    {
+      "sequence": 851,
+      "start": {
+        "x": 286,
+        "y": 612
+      },
+      "target": {
+        "x": 287,
+        "y": 611
+      },
+      "desiredDistance": 0,
+      "obstacleCount": 112
+    }
+  ],
+  "cause": "An exact radius-0 goal is blocked by a currently observed live Deer. All non-dead entity positions are dynamic obstacles in createNavigator. This does not imply every approach tile or the broader death path is unreachable.",
+  "limitations": "Reconstruction from retained public spawn/move/remove packets; bulky worldSnapshot entities were summarized by the frozen recorder. This is historical evidence at the failed step, not a new live realm query."
+}

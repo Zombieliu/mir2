@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T16:27:46.693Z",
+  "scope": "New explicit public child only; all23 originals raw-byte copied after actual complete210 terminal confirmation.",
+  "targetDirectory": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-attack-deadline-poll-fix-v1",
+  "copies": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/playtest-capacity-soak.mjs.before.txt",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\before\\playtest-capacity-soak.mjs.before.txt",
+      "relative": "before/playtest-capacity-soak.mjs.before.txt",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/playtest-capacity-soak.test.mjs.before.txt",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\before\\playtest-capacity-soak.test.mjs.before.txt",
+      "relative": "before/playtest-capacity-soak.test.mjs.before.txt",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/before-source-pins-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\before\\before-source-pins-v1.json",
+      "relative": "before/before-source-pins-v1.json",
+      "bytes": 637,
+      "sha256": "e2a0eb379a52c86af7d371a510cc5a80e93bd52f135a79ce6109545f00d93280",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\current\\playtest-capacity-soak.mjs.txt",
+      "relative": "current/playtest-capacity-soak.mjs.txt",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\current\\playtest-capacity-soak.test.mjs.txt",
+      "relative": "current/playtest-capacity-soak.test.mjs.txt",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-regression-before-fix-v1.log",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\focused\\deadline-regression-before-fix-v1.log",
+      "relative": "focused/deadline-regression-before-fix-v1.log",
+      "bytes": 8417,
+      "sha256": "bb3e184c31a892c169ded0624042c8dabe07b62762aeca0c63f99caf9811e96b",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-regression-after-fix-v1.log",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\focused\\deadline-regression-after-fix-v1.log",
+      "relative": "focused/deadline-regression-after-fix-v1.log",
+      "bytes": 2685,
+      "sha256": "9360c7cc4ae662080e4a5a90f0f29234c83e4cb60917f9bc417858a2edd29c5e",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-independent-review-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\independent\\attack-deadline-poll-fix-independent-review-v1.json",
+      "relative": "independent/attack-deadline-poll-fix-independent-review-v1.json",
+      "bytes": 7102,
+      "sha256": "33279fc5a562af27b791a15081bb90c3e4de03ee91a30cceae24a808c6512124",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-independent-review-count-addendum-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\independent\\attack-deadline-poll-fix-independent-review-count-addendum-v1.json",
+      "relative": "independent/attack-deadline-poll-fix-independent-review-count-addendum-v1.json",
+      "bytes": 2174,
+      "sha256": "66437d1a875f02cc6038e213c26ba0b7ebb937b97992d6577ac2b1c77f0f201f",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-final-integration-review-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\independent\\attack-deadline-poll-fix-final-integration-review-v1.json",
+      "relative": "independent/attack-deadline-poll-fix-final-integration-review-v1.json",
+      "bytes": 5368,
+      "sha256": "ae1758f29e44022a5893a18408833422a24003a61781d423c586a2235e57ea84",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-public-archive-v1/archive-plan-prepared-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\preparation\\archive-plan-prepared-v1.json",
+      "relative": "preparation/archive-plan-prepared-v1.json",
+      "bytes": 3760,
+      "sha256": "228725879ff8965760baa037f30b78aa0857e1ec6cfc64273d5c2297e48a9102",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/frozen-full-driver-before-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\full\\frozen-full-driver-before-v1.json",
+      "relative": "full/frozen-full-driver-before-v1.json",
+      "bytes": 2263,
+      "sha256": "7803a67d751e1ce75821cbd3a16ad1eeafc46f2d326c189f4eb437fbda7a91f1",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/run-frozen-full-driver-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\full\\run-frozen-full-driver-v1.mjs",
+      "relative": "full/run-frozen-full-driver-v1.mjs",
+      "bytes": 3318,
+      "sha256": "653d2fa1b8b0deb3d26ae7a5d63a23d2cf9d512562b5a2fa682f8d6829ada9bf",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\full\\frozen-full-driver-receipt-v1.json",
+      "relative": "full/frozen-full-driver-receipt-v1.json",
+      "bytes": 4758,
+      "sha256": "c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/frozen-full-driver-v1.log",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\full\\frozen-full-driver-v1.log",
+      "relative": "full/frozen-full-driver-v1.log",
+      "bytes": 56491,
+      "sha256": "537f26b4a6037136470083a6a90acbf9ccc432f47f38cdeb82aace539b65dfb0",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-driver-full-suite-v1.log",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\preliminary\\deadline-driver-full-suite-v1.log",
+      "relative": "preliminary/deadline-driver-full-suite-v1.log",
+      "bytes": 51148,
+      "sha256": "87436298254515774234874a6fa49df36e36a2a0d45d0991087bf9838103f75a",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-adjacent-full-suite-v1.log",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\preliminary\\deadline-adjacent-full-suite-v1.log",
+      "relative": "preliminary/deadline-adjacent-full-suite-v1.log",
+      "bytes": 6719,
+      "sha256": "4cbaaf5f7e8f8910bfc50b6ccf349c90c674e5c1eb2e7fc449e356797cf841a7",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/run-integration-rustfmt-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\integration\\run-integration-rustfmt-v1.mjs",
+      "relative": "integration/run-integration-rustfmt-v1.mjs",
+      "bytes": 2066,
+      "sha256": "620a46058fe645a41d3817cf489384e53ef48468a00885606242e2547cf87d30",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/integration-rustfmt-v1.log",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\integration\\integration-rustfmt-v1.log",
+      "relative": "integration/integration-rustfmt-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/integration-rustfmt-execution-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\integration\\integration-rustfmt-execution-v1.json",
+      "relative": "integration/integration-rustfmt-execution-v1.json",
+      "bytes": 1063,
+      "sha256": "dd9246da118a1afb860c0d54aca11c9e6ed304eca1c033d1d09c1b319f6dd99d",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-validation-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\integration\\root-attack-deadline-functional-validation-v1.json",
+      "relative": "integration/root-attack-deadline-functional-validation-v1.json",
+      "bytes": 7819,
+      "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-validation-v1.mjs",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\integration\\root-attack-deadline-functional-validation-v1.mjs",
+      "relative": "integration/root-attack-deadline-functional-validation-v1.mjs",
+      "bytes": 5185,
+      "sha256": "478f9abf05899539d2dc6ede1345f35c4b57adcd13ea66246be9558752d66941",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-independent-review-v1.json",
+      "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-attack-deadline-poll-fix-v1\\independent\\root-attack-deadline-functional-independent-review-v1.json",
+      "relative": "independent/root-attack-deadline-functional-independent-review-v1.json",
+      "bytes": 4103,
+      "sha256": "a596e20d0ca8a0275fa675c8ef3e15f972c8be7c776b5d513dfec6ebe87bb552",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    }
+  ],
+  "originalCopyCount": 23,
+  "totalCopiedBytes": 955354,
+  "whitelist": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-public-archive-v1/public-whitelist-v1.json",
+    "bytes": 7630,
+    "sha256": "cc37661a8dec755fb98cfc2143735d745508572eb466b48c6306d036485f1c00"
+  },
+  "publicWhitelist": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-attack-deadline-poll-fix-v1/public-whitelist-v1.json",
+    "bytes": 7630,
+    "sha256": "cc37661a8dec755fb98cfc2143735d745508572eb466b48c6306d036485f1c00"
+  },
+  "readme": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-attack-deadline-poll-fix-v1/README.md",
+    "bytes": 2370,
+    "sha256": "d611c71eb79bae881525d6ef8b45f27bc4819e89bb893d8d27cde946fccd096d"
+  },
+  "relativeLinksChecked": [
+    "full/frozen-full-driver-receipt-v1.json",
+    "full/frozen-full-driver-v1.log",
+    "full/frozen-full-driver-before-v1.json",
+    "independent/attack-deadline-poll-fix-final-integration-review-v1.json",
+    "independent/attack-deadline-poll-fix-independent-review-count-addendum-v1.json",
+    "focused/deadline-regression-before-fix-v1.log",
+    "focused/deadline-regression-after-fix-v1.log",
+    "integration/root-attack-deadline-functional-validation-v1.json",
+    "independent/root-attack-deadline-functional-independent-review-v1.json",
+    "public-whitelist-v1.json"
+  ],
+  "sourceAfterVerified": true,
+  "allDestinationBytesVerified": true,
+  "old175MainPrefixPreserved": true,
+  "preliminary185And25NotPresentedAsSame210Run": true,
+  "protectedCollectorDirectoriesUntouched": true,
+  "productSourceUntouched": true,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2ImplementationPermitted": false
+}

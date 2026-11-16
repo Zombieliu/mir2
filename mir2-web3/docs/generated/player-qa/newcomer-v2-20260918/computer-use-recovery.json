@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-09-17T20:32:58.7954789Z",
+  "runtime": "documented node_repl + @oai/sky",
+  "operation": "list_windows",
+  "operationSucceeded": true,
+  "mirClientWindowCount": 0,
+  "visualAccepted": false,
+  "priorUnavailableCheckpointPreserved": true,
+  "otherApplicationDetailsOmitted": true
+}

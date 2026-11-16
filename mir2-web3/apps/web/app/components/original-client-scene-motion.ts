@@ -229,6 +229,8 @@ export function refreshEntityMotionSnapshots(
         fromY: previousY,
         toX: entity.x,
         toY: entity.y,
+        sortX: previous?.toX ?? entity.x,
+        sortY: previous?.toY ?? entity.y,
         animationState,
         frameCount,
         startedAt: packetStartedAt,

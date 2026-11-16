@@ -85,6 +85,7 @@ fn config_with_mail_parcel(filled_slots: u8) -> SimulationConfig {
 
     let mut systems = Stage5SystemsState::default();
     systems.mail.push(Stage5MailMessage {
+        attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 1,
         delivery_nonce: "social-economy-fixture-mail-1".to_string(),
         from: "Bichon Administrator".to_string(),

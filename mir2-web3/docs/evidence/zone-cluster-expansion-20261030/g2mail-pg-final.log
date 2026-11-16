@@ -1,0 +1,14 @@
+    Finished `test` profile [unoptimized] target(s) in 44.87s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 4 tests
+mail transaction failed: ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN: commit outcome unavailable; live AccountStore was not published
+mail transaction failed: account-store writes are frozen until explicit durable reconciliation: ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN: commit outcome unavailable; live AccountStore was not published
+test economy::player_drop::pg_tests::mail_transfer_pg_tests::player_drop_mail_transfer_pg_failed_commit_freezes_and_fresh_binding_can_retry ... ok
+mail transaction failed: stale postgres account-store write for transfer-recipient: expected store_version 4, found 5
+test economy::player_drop::pg_tests::mail_transfer_pg_tests::player_drop_mail_transfer_pg_independent_runtime_competition_has_one_withdrawal_and_receipt ... ok
+mail transaction failed: postgres character save upsert failed for transfer-recipient/2: db error
+test economy::player_drop::pg_tests::mail_transfer_pg_tests::player_drop_mail_transfer_pg_late_source_rejection_rolls_back_and_retries_without_freeze ... ok
+test economy::player_drop::pg_tests::mail_transfer_pg_tests::player_drop_mail_transfer_pg_public_send_freezes_original_receipt_and_claim_stays_closed ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1563 filtered out; finished in 27.44s

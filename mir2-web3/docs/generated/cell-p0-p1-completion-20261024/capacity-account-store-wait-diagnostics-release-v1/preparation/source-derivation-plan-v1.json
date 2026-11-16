@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARATION_IN_PROGRESS_PENDING_FUNCTIONAL_SUMMARY_SCHEMA",
+  "scope": "Strict new50 backend input Release tools; draft only, no capture/build",
+  "baseline": {
+    "path": "C:/mir2-build/p01-completion-20261024/backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e",
+    "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "sourceInputCount": 44,
+    "sourceManifestSha256": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2"
+  },
+  "newInputCount": 50,
+  "oldChangedPaths": [
+    "mir2-web3/apps/simulation/src/lib.rs"
+  ],
+  "addedInputPaths": [
+    "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+    "mir2-web3/apps/simulation/src/config_file_authority.rs",
+    "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+    "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+    "mir2-web3/apps/simulation/src/config.rs",
+    "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs"
+  ],
+  "otherOriginalInputsUnchanged": 43,
+  "allowedSourcePins": [
+    {
+      "path": "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "currentDriverCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "currentDriverFreeze": {
+    "path": "C:/mir2-build/p01-completion-20261024/capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "currentDriverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "actual210RegressionReused": true,
+  "backendHead": null,
+  "rootFunctionalValidation": null,
+  "actualSourceCaptureExecuted": false,
+  "actualBuildExecuted": false,
+  "actualReleaseCaptured": false,
+  "fullLifecyclePassed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

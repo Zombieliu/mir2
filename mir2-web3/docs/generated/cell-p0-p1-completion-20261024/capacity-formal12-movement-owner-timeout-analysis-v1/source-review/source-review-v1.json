@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:07:26.816Z",
+  "state": "READ_ONLY_SOURCE_BOUNDARY_REVIEW_NOT_ROOT_CAUSE_ADJUDICATION",
+  "runId": "1792951023370-34757a8d",
+  "basis": {
+    "codeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "codeCommitProvidedByRoot": true,
+    "sourcePins": [
+      {
+        "path": "apps/gateway/src/routing.rs",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      {
+        "path": "apps/gateway/src/web.rs",
+        "bytes": 857503,
+        "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+      },
+      {
+        "path": "apps/gateway/src/shared_experience_profiles.rs",
+        "bytes": 14157,
+        "sha256": "b708dae35e005998bec260ea146b905c3d53ada676565b98429b9f12a7a1add9"
+      },
+      {
+        "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+        "bytes": 75946,
+        "sha256": "fe7767bec9d255e9fbf6e727bc7ab9a380f29166417f3c2a50085e0083ace190"
+      }
+    ],
+    "rawEvidence": "Root/capacity reported two matching ProtocolError messages; reviewer did not re-read raw, monitor, recording, binary or private inputs."
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        8851,
+        8852,
+        9850,
+        9886,
+        9890,
+        9903
+      ],
+      "fact": "Only Walk/Run/Turn enters SharedZoneMovementIngress.try_execute. It obtains a presence epoch then try_send into a bounded64 request queue. A full queue returns Ok(None) fallback; a disconnected queue has a distinct unavailable error. The exact timed-out-after-5000ms literal is generated only by sync response Receiver.recv_timeout(Duration::from_secs(5)) after successful queue submission.",
+      "scope": "The5s starts at response receive, after initial session lock and successful try_send; it does not itself distinguish queue delay, owner processing, locks or receiver scheduling. This is not a Zone collision/occupancy refusal."
+    },
+    {
+      "id": "S2",
+      "source": "apps/gateway/src/web.rs",
+      "lines": [
+        5217,
+        5233,
+        5247,
+        5264,
+        5650,
+        5678,
+        6233,
+        6238
+      ],
+      "fact": "Reader holds an acquired serial read guard while awaiting spawn_blocking(ingress.try_execute). The blocking closure waits for owner response. On error the reader enqueues ParsedSocketInput::ProtocolError to the ordinary socket queue; the main loop later sends that error. The message contains no movement request or action identity.",
+      "scope": "A fresh client wait may observe an error caused by an earlier accepted ingress request. The latest raw Walk/rejected row is not sufficient to identify the source request. Reader cannot parse another packet while awaiting this branch, though other connection/mainloop/outbound tasks exist."
+    },
+    {
+      "id": "S3",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        9995,
+        10020,
+        10035,
+        10042,
+        10048,
+        10105,
+        10113,
+        10130
+      ],
+      "fact": "Each shared Zone uses a dedicated std thread. The owner loop first locks Zone state to read the pending movement deadline. When maintenance/movement is due, it processes a cadence turn before receiving queued movement. A mutation capture, when configured, obtains the per-Zone mutation gate and calls the synchronous observer after tick execution. Only the receive branch executes a queued request and sends its one response.",
+      "scope": "Owner inability to reach or finish that receive branch can let successfully enqueued requests exceed5s. Source alone does not identify which branch or lock stalled in this run."
+    },
+    {
+      "id": "S4",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        10035,
+        10049,
+        10188,
+        10200,
+        10213,
+        10220,
+        10235,
+        10240
+      ],
+      "fact": "The loop opening Zone lock precedes zone_cadence.total. Tick authority discovery also locks Zone before the work metric. If experience authority is configured, its admission callback takes Zone state before SharedZoneWorkMetric starts. OwnerTickDeadlineLag is recorded only inside the locked tick body.",
+      "scope": "Low recorded ZoneWork excludes neither Zone-mutex wait nor experience-authority admission wait. A missing completed slow span also cannot exclude a stall before that span or a still-active span."
+    },
+    {
+      "id": "S5",
+      "source": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "lines": [
+        491,
+        515,
+        539
+      ],
+      "fact": "with_shared_zone_experience_admission first validates writable authority, then locks the AccountStore mutex; while holding that lock it executes the supplied callback. routing10195 callback then locks Zone state. The gateway rebase routine explicitly works against already-admitted authority and does not enter another personal lane.",
+      "scope": "This conditional AccountStore→Zone boundary is an unseparated waiting candidate in cadence.total. The review does not establish that this run stalled on it or prove an AccountStore/Zone cycle."
+    },
+    {
+      "id": "S6",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        9808,
+        9842,
+        10290,
+        10310,
+        11056,
+        11075,
+        11139,
+        11155,
+        11300,
+        11311,
+        11948,
+        11963,
+        12473,
+        12494,
+        12891,
+        12903,
+        13909,
+        13923
+      ],
+      "fact": "The inspected double-lock movement/register/transfer/teardown paths take Zone before session-state. Paths that first inspect session-state clone the needed key or explicitly drop the guard before acquiring Zone. The inspected code did not establish an opposite held-session→Zone edge.",
+      "scope": "Bounded inspection, not an exhaustive lock-order proof. No deadlock root cause is claimed."
+    },
+    {
+      "id": "S7",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        9878,
+        9899,
+        10115,
+        10130,
+        10370,
+        10383,
+        12478,
+        12492
+      ],
+      "fact": "Response timeout does not dequeue or cancel the previously submitted movement request. Owner execution dispatches authoritative movement outbounds before responding; the caller may already have dropped its receiver. Teardown code explicitly retires presence epochs so old queued requests cannot revive after thaw.",
+      "scope": "Late UserLocation alongside or after a timeout is compatible with this source contract. It does not prove which raw action caused the timeout or that the rejected action physically moved."
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "hypothesis": "Shared Zone mutex holder prevented the owner opening deadline read or executing a dequeued movement.",
+      "testableEvidence": "A named Zone-lock wait duration or thread/lock ownership evidence covering the same interval. Existing zone_cadence.total does not cover the opening read lock.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "H2",
+      "hypothesis": "A cadence mutation-gate, experience-authority admission, tick body or synchronous capture observer delayed owner queue service.",
+      "testableEvidence": "Correlate completed cadence.total/gate_wait/manager_tick/dispatch spans and monitor intervals. If still ambiguous, separate admission/Zone-lock/observer spans without altering scheduling or policy.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "H3",
+      "hypothesis": "An enqueued movement waited behind earlier owner work or owner scheduling long enough to exceed its5s response bound.",
+      "testableEvidence": "Enqueue timestamp, owner dequeue timestamp, execution completion and reply-send outcome using monotonic durations and fixed anonymous classes. Existing error text lacks these distinctions.",
+      "status": "NOT_PROVEN"
+    }
+  ],
+  "proposedMinimumDiagnosticsOnly": {
+    "implementationAuthorized": false,
+    "fields": "Fixed stage plus duration; distinguish ingress enqueue→dequeue, Zone lock wait, authority admission and owner execution→reply. Reuse existing opaque connection context only if separately approved; no account/name/payload or request semantic changes.",
+    "mustPreserve": "Original5s/2s/900ms bounds, queue64, gameplay ordering, occupancy, ACK, failure verdict and opportunity denominator."
+  },
+  "limitations": [
+    "This source-only review does not prove collision, machine saturation, spectator involvement, a deadlock or exact offending movement.",
+    "No tests, compilation, service, game or source mutation were performed.",
+    "No private data or active/closed raw payload was scanned by this review."
+  ],
+  "sourceOrSceneChanged": false,
+  "actualProductTestsExecuted": false,
+  "capacityAccepted": false,
+  "rootP0Accepted": false,
+  "P2ImplementationStarted": false
+}

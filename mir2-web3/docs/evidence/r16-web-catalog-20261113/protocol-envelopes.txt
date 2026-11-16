@@ -1,0 +1,23 @@
+   Compiling mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.86s
+     Running tests\catalog_envelopes.rs (C:/r16-web-catalog-20261113/target-protocol\debug\deps\catalog_envelopes-df4b5e579fdc70bc.exe)
+
+running 16 tests
+test version_one_magic_and_limits_remain_the_shared_wire_contract ... ok
+test bad_magic_and_short_outer_headers_are_rejected_without_payload_diagnostics ... ok
+test full_four_catalog_structs_validate_in_original_order ... ok
+test concatenated_members_empty_second_member_padding_and_garbage_are_rejected ... ok
+test original_strings_preserve_unicode_whitespace_escapes_i64_and_unknown_info_fields ... ok
+test payload_and_info_duplicates_keep_current_value_last_wins_contract ... ok
+test entry_boundaries_empty_invalid_utf8_and_trailing_decoded_bytes_are_rejected ... ok
+test exactly_sixty_four_full_catalogs_pass_and_bad_count_headers_fail ... ok
+test exactly_132k_wire_bytes_with_valid_optional_gzip_headers_pass_and_one_more_fails ... ok
+test top_level_extra_and_duplicate_fields_are_rejected ... ok
+test exactly_128k_decoded_bytes_pass_and_one_more_is_rejected ... ok
+test invalid_second_catalog_rejects_whole_batch_without_returning_first ... ok
+test quest_derived_fields_and_optional_presentation_shapes_match_native_rules ... ok
+test full_struct_validation_rejects_missing_wrong_typed_and_out_of_range_fields ... ok
+test declared_length_mismatches_and_expansion_bomb_cannot_release_texts ... ok
+test every_truncation_and_both_gzip_trailer_checksums_are_rejected ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s

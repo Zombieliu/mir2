@@ -1,0 +1,20 @@
+{
+  "candidate": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+  "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "predecessorSha256": "74f3de0989cefc89e2d9fe2b068a13476aedb12ca2f043540301d5be43c66748",
+  "preparationSha256": "f696b8e7e68d8ff0c4fc4918aefdb28f3d4e76059ada25ece1def01ba4fc0afc",
+  "changedScripts": [
+    "run.mjs",
+    "desktop-qr-city-direct-cdp.mjs",
+    "scene-gate.mjs",
+    "perf-probe.mjs",
+    "r16-static-waterfall.mjs"
+  ],
+  "unchangedScripts": 16,
+  "addedScripts": [
+    "r16-static-transport.mjs"
+  ],
+  "sourceClosureInputs": 6,
+  "original8And120SecondBudgetsUnchanged": true,
+  "scope": "Same21 full-flow helpers plus one passive page-CDP static cache/priority observer. Original8s move/120s Native gates, complete six fonts113, shared Q, Worker restart and logout retained. No routing/cache override, physical camera or global parity claim."
+}

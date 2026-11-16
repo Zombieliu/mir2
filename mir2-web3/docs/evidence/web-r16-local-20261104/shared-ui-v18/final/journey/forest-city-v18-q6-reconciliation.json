@@ -1,0 +1,91 @@
+{
+  "schema": "r16-v18-q6-browser-evidence-reconciliation/1",
+  "gameplayVerified": true,
+  "originalRun": {
+    "path": "D:\\mir2-builds\\forest-quest-driver-20261106\\forest-city-v18-r1\\onboarding-forest-browser-proof.json",
+    "sha256": "35865a82d8985b538cd239766a32e115897c6ef381df539f8aa75ac25200065e",
+    "passed": false,
+    "diagnostic": "The driver required optional numeric progress fields on ChangeQuest itself. The packet gave taken/completed, and the captured authoritative quest state independently gave 1/1."
+  },
+  "purchase": {
+    "operationCount": 1,
+    "receiptSequence": 630,
+    "loseGold": {
+      "sequence": 627,
+      "gold": 40
+    },
+    "matchingGainedItemSequence": 628,
+    "gold": [
+      180,
+      140
+    ],
+    "smallHp": [
+      5,
+      6
+    ]
+  },
+  "quest": {
+    "changeQuestSequence": 629,
+    "taken": true,
+    "completedInPacket": true,
+    "numericPacketFieldsPresent": false,
+    "authoritativeReady": {
+      "questId": 2110006,
+      "stage": "readyToTurnIn",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    "ordinaryFinishAck": 643,
+    "reward": {
+      "questId": 2110006,
+      "goldDelta": 300,
+      "items": [
+        {
+          "name": "(HP)DrugSmall",
+          "count": 10
+        },
+        {
+          "name": "RandomTeleport",
+          "count": 2
+        }
+      ],
+      "matchingAck": true
+    }
+  },
+  "checkpoint": {
+    "gold": 440,
+    "smallHp": 16,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006
+    ],
+    "position": {
+      "x": 328,
+      "y": 264
+    },
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "followup": {
+    "additionalActionsFromThisReconciliation": 0,
+    "priorOperationReplayed": false,
+    "rewardClaimReplayed": false
+  },
+  "errors": {
+    "http": 0,
+    "failedRequests": 0,
+    "console": 0
+  }
+}

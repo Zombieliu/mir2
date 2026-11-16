@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "finishedAt": "2026-10-26T12:02:35.029Z",
+  "original": {
+    "file": "C:/mir2-build/p01-completion-20261024/protocol-navigation-workspace-v1/protocol-navigation.mjs.before-workspace-v1.txt",
+    "bytes": 18249,
+    "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+  },
+  "candidate": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+    "bytes": 19998,
+    "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+  },
+  "randomExactPathCases": 3005,
+  "errorEdgeCases": 3,
+  "priorReturnedPathsChecked": 74,
+  "allComparisonsPassed": true,
+  "realMap": {
+    "width": 700,
+    "height": 700,
+    "mapFileName": "0"
+  },
+  "benchmark": {
+    "queries": 200,
+    "maxExpanded": 4000,
+    "original": {
+      "durationMs": 249.61829999999998,
+      "totalPoints": 2433
+    },
+    "candidate": {
+      "durationMs": 45.13069999999999,
+      "totalPoints": 2433
+    },
+    "informationalOnly": true,
+    "isolatedProcesses": false,
+    "capacityClaim": false
+  },
+  "p0Accepted": false
+}

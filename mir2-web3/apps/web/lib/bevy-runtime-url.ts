@@ -1,4 +1,4 @@
-export type BevyRuntimeUrlBackend = "webgpu" | "webgl2";
+export type BevyRuntimeUrlBackend = "webgpu" | "webgl2" | "webgl2-shared";
 
 export type BevyRuntimeUrls = {
   moduleUrl: string;
@@ -32,7 +32,8 @@ export function createBevyRuntimeUrls(
   assetBaseUrl?: string | null,
 ): BevyRuntimeUrls {
   const encodedVersion = encodeURIComponent(version.trim() || "local");
-  const packageDir = backend === "webgpu" ? "pkg-webgpu" : "pkg-webgl2";
+  const packageDir = backend === "webgpu" ? "pkg-webgpu"
+    : backend === "webgl2-shared" ? "pkg-webgl2-shared" : "pkg-webgl2";
   const releaseBase = normalizeAssetBaseUrl(assetBaseUrl);
   const base = `${releaseBase}/bevy-runtime/v/${encodedVersion}/${packageDir}`;
   return {

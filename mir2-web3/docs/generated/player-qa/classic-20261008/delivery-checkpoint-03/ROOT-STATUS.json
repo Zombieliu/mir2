@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.r22.s17.stage-only-status.v1",
+  "publisherCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "stageRunId": 37739769708,
+  "stageArtifactId": 11533237847,
+  "stageReceiptSha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f",
+  "verifiedObjectCount": 40,
+  "verifiedPublicBytes": 1052247716,
+  "workerBytes": 508704,
+  "workerSha256": "7a82fc2cb251e726923fb8cb2eb392d199f368586e1cfd8f3acb3d32f15e9a74",
+  "originImmutableAppendComplete": true,
+  "publicAliasesChanged": false,
+  "gatewayChanged": false,
+  "promoteDispatched": false,
+  "currentPublicFeedSequence": 16,
+  "candidateFeedSequence": 17,
+  "unresolvedNativeAcceptance": true,
+  "bootstrapAndEngineReused": true,
+  "backgroundPlayUpdateImplemented": false
+}

@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.r16.v13.continuation-evidence.v1",
+  "copies": [
+    {
+      "source": "onboarding-v13-browser-r7/onboarding-v11-browser-proof.json",
+      "path": "v13-r7-native-purchase.json",
+      "bytes": 82083,
+      "sha256": "c26a94c82af8bb5d02bff2d666619e79c61e2a35f7ddef193e7effba9bc34f2c"
+    },
+    {
+      "source": "onboarding-v13-browser-r8/onboarding-v11-browser-proof.json",
+      "path": "v13-r8-hunt-and-persistence.json",
+      "bytes": 138597,
+      "sha256": "d4457a1cd8e9f03c4d7ac15e35b1f399abe884cb89fad30226ce5c158130f359"
+    },
+    {
+      "source": "onboarding-v13-browser-r8/onboarding-v13-scoped-receipt.json",
+      "path": "v13-r8-scoped-receipt.json",
+      "bytes": 12281,
+      "sha256": "63e0a6db1165b8c07ac16945dd4da574af83ab4caf16663e384ca13ba7edb1f9"
+    },
+    {
+      "source": "onboarding-v13-browser-r7/04-ordinary-merchant-before-real-gold-purchase.png",
+      "path": "native-shop-before-purchase.png",
+      "bytes": 1146537,
+      "sha256": "ee5de9b894787c3e8099df28a7c2b32792a6bc2ffdc3e703ca9cf51bb9ed990f"
+    },
+    {
+      "source": "onboarding-v13-browser-r8/04-bounded-natural-hunt-incomplete.png",
+      "path": "v13-r8-natural-hunt.png",
+      "bytes": 991206,
+      "sha256": "d80da385042c6bb3cf4937a7010a9a8d9842d994198346e5ae67f8da48c40e7f"
+    },
+    {
+      "source": "onboarding-v13-browser-r8/06-saved-progress-native-diary.png",
+      "path": "v13-r8-saved-diary.png",
+      "bytes": 1149163,
+      "sha256": "08e7e7eeb47a909a7300f20b20fccb08f3a5b74fc3bb1095031f5693d6217ccc"
+    }
+  ],
+  "rootVisuallyInspectedImages": true,
+  "secretValueMatches": 0,
+  "scope": "R7 ordinary merchant purchase and R8 bounded partial continuation; both raw overall flags preserved. Any later explicit finishing run is recorded separately."
+}

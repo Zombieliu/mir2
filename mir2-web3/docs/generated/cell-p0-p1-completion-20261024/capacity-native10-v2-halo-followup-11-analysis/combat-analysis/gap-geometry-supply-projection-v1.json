@@ -1,0 +1,911 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792902924884-3b7017e1",
+  "rawPin": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.samples.jsonl",
+    "bytes": 12851216,
+    "sha256": "feade9aa051be0492b3264315da19a46aa4924b12e1d84ac35b88a6c726e983f",
+    "rows": 20632
+  },
+  "scope": "Actual controlled peer owner-receipt geometry at the only chase deferral; snapshot membership and the exact previous plan-time state are not fully retained.",
+  "deferral": {
+    "line": 17747,
+    "type": "combatChaseDeferred",
+    "actor": "L80cd4c05",
+    "phase": "stage-10",
+    "at": 1792903564416,
+    "targetId": 206715,
+    "mapFileName": "0",
+    "nonImprovingMoves": 3,
+    "elapsedMs": 6000,
+    "pursuitMs": 13536,
+    "confirmedMoves": 8,
+    "reason": "no-progress",
+    "ttlMs": 30000,
+    "actual": {
+      "x": 279,
+      "y": 667
+    },
+    "target": {
+      "x": 285,
+      "y": 669
+    },
+    "attacksSent": 0
+  },
+  "peers": [
+    {
+      "actor": "L80cd4c08",
+      "position": {
+        "x": 279,
+        "y": 674
+      },
+      "rawLine": 17718,
+      "at": 1792903563789,
+      "ageMs": 627,
+      "distanceToOwner": 7,
+      "distanceToTarget": 6,
+      "anyProspectiveNeighborWithinSix": true
+    },
+    {
+      "actor": "L80cd4c07",
+      "position": {
+        "x": 269,
+        "y": 671
+      },
+      "rawLine": 17721,
+      "at": 1792903563825,
+      "ageMs": 591,
+      "distanceToOwner": 10,
+      "distanceToTarget": 16,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c06",
+      "position": {
+        "x": 266,
+        "y": 654
+      },
+      "rawLine": 17741,
+      "at": 1792903564228,
+      "ageMs": 188,
+      "distanceToOwner": 13,
+      "distanceToTarget": 19,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c03",
+      "position": {
+        "x": 260,
+        "y": 665
+      },
+      "rawLine": 17725,
+      "at": 1792903563914,
+      "ageMs": 502,
+      "distanceToOwner": 19,
+      "distanceToTarget": 25,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c09",
+      "position": {
+        "x": 260,
+        "y": 654
+      },
+      "rawLine": 17732,
+      "at": 1792903564007,
+      "ageMs": 409,
+      "distanceToOwner": 19,
+      "distanceToTarget": 25,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c01",
+      "position": {
+        "x": 259,
+        "y": 672
+      },
+      "rawLine": 17743,
+      "at": 1792903564387,
+      "ageMs": 29,
+      "distanceToOwner": 20,
+      "distanceToTarget": 26,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c02",
+      "position": {
+        "x": 255,
+        "y": 666
+      },
+      "rawLine": 17736,
+      "at": 1792903564134,
+      "ageMs": 282,
+      "distanceToOwner": 24,
+      "distanceToTarget": 30,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c00",
+      "position": {
+        "x": 254,
+        "y": 669
+      },
+      "rawLine": 17723,
+      "at": 1792903563913,
+      "ageMs": 503,
+      "distanceToOwner": 25,
+      "distanceToTarget": 31,
+      "anyProspectiveNeighborWithinSix": false
+    },
+    {
+      "actor": "L80cd4c04",
+      "position": {
+        "x": 251,
+        "y": 654
+      },
+      "rawLine": 17715,
+      "at": 1792903563757,
+      "ageMs": 659,
+      "distanceToOwner": 28,
+      "distanceToTarget": 34,
+      "anyProspectiveNeighborWithinSix": false
+    }
+  ],
+  "actualSixGeometryCandidates": 0,
+  "prospectiveSixGeometryCandidates": 1,
+  "gapMovementGroups": {
+    "scout-home-7": {
+      "count": 10,
+      "fromAt": 1792903550163,
+      "toAt": 1792903561416,
+      "first": {
+        "x": 274,
+        "y": 655
+      },
+      "last": {
+        "x": 275,
+        "y": 669
+      }
+    },
+    "chase-206715": {
+      "count": 8,
+      "fromAt": 1792903550910,
+      "toAt": 1792903564416,
+      "first": {
+        "x": 274,
+        "y": 657
+      },
+      "last": {
+        "x": 279,
+        "y": 667
+      }
+    },
+    "scout-home-8": {
+      "count": 13,
+      "fromAt": 1792903562165,
+      "toAt": 1792903573384,
+      "first": {
+        "x": 273,
+        "y": 667
+      },
+      "last": {
+        "x": 260,
+        "y": 651
+      }
+    },
+    "scout-home-0": {
+      "count": 9,
+      "fromAt": 1792903574170,
+      "toAt": 1792903580170,
+      "first": {
+        "x": 260,
+        "y": 653
+      },
+      "last": {
+        "x": 251,
+        "y": 668
+      }
+    },
+    "scout-home-1": {
+      "count": 3,
+      "fromAt": 1792903580891,
+      "toAt": 1792903582394,
+      "first": {
+        "x": 253,
+        "y": 668
+      },
+      "last": {
+        "x": 255,
+        "y": 669
+      }
+    },
+    "scout-home-2": {
+      "count": 4,
+      "fromAt": 1792903583893,
+      "toAt": 1792903586167,
+      "first": {
+        "x": 255,
+        "y": 668
+      },
+      "last": {
+        "x": 252,
+        "y": 664
+      }
+    },
+    "scout-home-3": {
+      "count": 2,
+      "fromAt": 1792903586920,
+      "toAt": 1792903587667,
+      "first": {
+        "x": 253,
+        "y": 664
+      },
+      "last": {
+        "x": 255,
+        "y": 662
+      }
+    },
+    "scout-home-4": {
+      "count": 6,
+      "fromAt": 1792903588415,
+      "toAt": 1792903592163,
+      "first": {
+        "x": 255,
+        "y": 660
+      },
+      "last": {
+        "x": 252,
+        "y": 652
+      }
+    },
+    "scout-home-5": {
+      "count": 6,
+      "fromAt": 1792903592909,
+      "toAt": 1792903596657,
+      "first": {
+        "x": 254,
+        "y": 652
+      },
+      "last": {
+        "x": 263,
+        "y": 651
+      }
+    },
+    "chase-206701": {
+      "count": 1,
+      "fromAt": 1792903597404,
+      "toAt": 1792903597404,
+      "first": {
+        "x": 262,
+        "y": 650
+      },
+      "last": {
+        "x": 262,
+        "y": 650
+      }
+    }
+  },
+  "observedSupply": {
+    "targetIdsStruck": 14,
+    "targets": [
+      {
+        "objectId": 206642,
+        "name": "Scarecrow",
+        "positiveAttackCount": 8,
+        "firstHitAt": 1792903302643,
+        "lastHitAt": 1792903313459,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 5,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206642,
+          "x": 258,
+          "y": 672,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 20
+        }
+      },
+      {
+        "objectId": 206648,
+        "name": "Scarecrow",
+        "positiveAttackCount": 7,
+        "firstHitAt": 1792903317154,
+        "lastHitAt": 1792903325754,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 4,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206648,
+          "x": 254,
+          "y": 671,
+          "dead": false,
+          "hp": 4,
+          "maxHp": 20
+        }
+      },
+      {
+        "objectId": 206639,
+        "name": "Scarecrow",
+        "positiveAttackCount": 8,
+        "firstHitAt": 1792903327964,
+        "lastHitAt": 1792903337953,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 3,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206639,
+          "x": 253,
+          "y": 671,
+          "dead": false,
+          "hp": 3,
+          "maxHp": 20
+        }
+      },
+      {
+        "objectId": 206501,
+        "name": "Deer",
+        "positiveAttackCount": 10,
+        "firstHitAt": 1792903343167,
+        "lastHitAt": 1792903356044,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 4,
+        "maxHpLastCached": 25,
+        "positionLastObserved": {
+          "objectId": 206501,
+          "x": 249,
+          "y": 670,
+          "dead": false,
+          "hp": 4,
+          "maxHp": 25
+        }
+      },
+      {
+        "objectId": 206602,
+        "name": "Scarecrow",
+        "positiveAttackCount": 7,
+        "firstHitAt": 1792903363548,
+        "lastHitAt": 1792903372866,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 5,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206602,
+          "x": 253,
+          "y": 654,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 20
+        }
+      },
+      {
+        "objectId": 206608,
+        "name": "Scarecrow",
+        "positiveAttackCount": 6,
+        "firstHitAt": 1792903377268,
+        "lastHitAt": 1792903384368,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 4,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206608,
+          "x": 262,
+          "y": 652,
+          "dead": false,
+          "hp": 4,
+          "maxHp": 20
+        }
+      },
+      {
+        "objectId": 206534,
+        "name": "Deer",
+        "positiveAttackCount": 9,
+        "firstHitAt": 1792903388068,
+        "lastHitAt": 1792903399368,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 5,
+        "maxHpLastCached": 25,
+        "positionLastObserved": {
+          "objectId": 206534,
+          "x": 264,
+          "y": 649,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 25
+        }
+      },
+      {
+        "objectId": 206701,
+        "name": "Deer",
+        "positiveAttackCount": 20,
+        "firstHitAt": 1792903403848,
+        "lastHitAt": 1792903610845,
+        "observedDeaths": 2,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 3,
+        "maxHpLastCached": 25,
+        "positionLastObserved": {
+          "objectId": 206701,
+          "x": 261,
+          "y": 649,
+          "dead": false,
+          "hp": 3,
+          "maxHp": 25
+        }
+      },
+      {
+        "objectId": 206712,
+        "name": "Deer",
+        "positiveAttackCount": 11,
+        "firstHitAt": 1792903422566,
+        "lastHitAt": 1792903617562,
+        "observedDeaths": 1,
+        "lastKnownEvent": "positive-damage",
+        "positionLastObserved": {
+          "objectId": 206712,
+          "x": 261,
+          "y": 657,
+          "dead": false
+        }
+      },
+      {
+        "objectId": 206537,
+        "name": "Deer",
+        "positiveAttackCount": 9,
+        "firstHitAt": 1792903441268,
+        "lastHitAt": 1792903452652,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 5,
+        "maxHpLastCached": 25,
+        "positionLastObserved": {
+          "objectId": 206537,
+          "x": 252,
+          "y": 647,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 25
+        }
+      },
+      {
+        "objectId": 206504,
+        "name": "Deer",
+        "positiveAttackCount": 9,
+        "firstHitAt": 1792903466052,
+        "lastHitAt": 1792903477364,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 4,
+        "maxHpLastCached": 25,
+        "positionLastObserved": {
+          "objectId": 206504,
+          "x": 268,
+          "y": 668,
+          "dead": false,
+          "hp": 4,
+          "maxHp": 25
+        }
+      },
+      {
+        "objectId": 206627,
+        "name": "Scarecrow",
+        "positiveAttackCount": 7,
+        "firstHitAt": 1792903486241,
+        "lastHitAt": 1792903495446,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 4,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206627,
+          "x": 278,
+          "y": 672,
+          "dead": false,
+          "hp": 4,
+          "maxHp": 20
+        }
+      },
+      {
+        "objectId": 206528,
+        "name": "Deer",
+        "positiveAttackCount": 9,
+        "firstHitAt": 1792903528345,
+        "lastHitAt": 1792903539640,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 5,
+        "maxHpLastCached": 25,
+        "positionLastObserved": {
+          "objectId": 206528,
+          "x": 273,
+          "y": 653,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 25
+        }
+      },
+      {
+        "objectId": 206645,
+        "name": "Scarecrow",
+        "positiveAttackCount": 6,
+        "firstHitAt": 1792903541753,
+        "lastHitAt": 1792903548852,
+        "observedDeaths": 1,
+        "lastKnownEvent": "death-packet",
+        "hpLastCached": 6,
+        "maxHpLastCached": 20,
+        "positionLastObserved": {
+          "objectId": 206645,
+          "x": 274,
+          "y": 655,
+          "dead": false,
+          "hp": 6,
+          "maxHp": 20
+        }
+      }
+    ],
+    "deaths": [
+      {
+        "rawLine": 4896,
+        "requestId": "8",
+        "at": 1792903313459,
+        "targetId": 206642,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 1301,
+          "monotonicMs": 400377.2056,
+          "atMs": 1792903313431,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206642,
+            "location": {
+              "x": 258,
+              "y": 672
+            },
+            "direction": "UpRight"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 5530,
+        "requestId": "15",
+        "at": 1792903325754,
+        "targetId": 206648,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 1477,
+          "monotonicMs": 412685.9475,
+          "atMs": 1792903325739,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206648,
+            "location": {
+              "x": 254,
+              "y": 671
+            },
+            "direction": "Down"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 6089,
+        "requestId": "23",
+        "at": 1792903337953,
+        "targetId": 206639,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 1632,
+          "monotonicMs": 424884.0811,
+          "atMs": 1792903337938,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206639,
+            "location": {
+              "x": 253,
+              "y": 671
+            },
+            "direction": "Right"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 6984,
+        "requestId": "33",
+        "at": 1792903356044,
+        "targetId": 206501,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 1913,
+          "monotonicMs": 442975.8828,
+          "atMs": 1792903356029,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206501,
+            "location": {
+              "x": 249,
+              "y": 670
+            },
+            "direction": "UpRight"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 7859,
+        "requestId": "40",
+        "at": 1792903372866,
+        "targetId": 206602,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 2253,
+          "monotonicMs": 459797.2213,
+          "atMs": 1792903372851,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206602,
+            "location": {
+              "x": 253,
+              "y": 654
+            },
+            "direction": "DownRight"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 8460,
+        "requestId": "46",
+        "at": 1792903384368,
+        "targetId": 206608,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 2458,
+          "monotonicMs": 471284.3118,
+          "atMs": 1792903384338,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206608,
+            "location": {
+              "x": 262,
+              "y": 652
+            },
+            "direction": "DownLeft"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 9160,
+        "requestId": "55",
+        "at": 1792903399368,
+        "targetId": 206534,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 2674,
+          "monotonicMs": 486294.0583,
+          "atMs": 1792903399348,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206534,
+            "location": {
+              "x": 264,
+              "y": 649
+            },
+            "direction": "Down"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 9947,
+        "requestId": "65",
+        "at": 1792903416653,
+        "targetId": 206701,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 2905,
+          "monotonicMs": 503584.428,
+          "atMs": 1792903416638,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206701,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "UpRight"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 10952,
+        "requestId": "75",
+        "at": 1792903436042,
+        "targetId": 206712,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 3283,
+          "monotonicMs": 522976.402,
+          "atMs": 1792903436030,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206712,
+            "location": {
+              "x": 261,
+              "y": 657
+            },
+            "direction": "Up"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 11800,
+        "requestId": "84",
+        "at": 1792903452652,
+        "targetId": 206537,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 3540,
+          "monotonicMs": 539583.1724,
+          "atMs": 1792903452637,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206537,
+            "location": {
+              "x": 252,
+              "y": 647
+            },
+            "direction": "DownRight"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 13087,
+        "requestId": "93",
+        "at": 1792903477364,
+        "targetId": 206504,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 4036,
+          "monotonicMs": 564280.8575,
+          "atMs": 1792903477334,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206504,
+            "location": {
+              "x": 268,
+              "y": 668
+            },
+            "direction": "DownLeft"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 14020,
+        "requestId": "100",
+        "at": 1792903495446,
+        "targetId": 206627,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 4253,
+          "monotonicMs": 582378.8525,
+          "atMs": 1792903495432,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206627,
+            "location": {
+              "x": 278,
+              "y": 672
+            },
+            "direction": "DownLeft"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 16381,
+        "requestId": "109",
+        "at": 1792903539640,
+        "targetId": 206528,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 4973,
+          "monotonicMs": 626571.9493,
+          "atMs": 1792903539625,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206528,
+            "location": {
+              "x": 273,
+              "y": 653
+            },
+            "direction": "DownRight"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 16903,
+        "requestId": "115",
+        "at": 1792903548852,
+        "targetId": 206645,
+        "name": "Scarecrow",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 5099,
+          "monotonicMs": 635782.8564,
+          "atMs": 1792903548836,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206645,
+            "location": {
+              "x": 274,
+              "y": 655
+            },
+            "direction": "Up"
+          }
+        },
+        "bothEndpoints": true
+      },
+      {
+        "rawLine": 20225,
+        "requestId": "125",
+        "at": 1792903610845,
+        "targetId": 206701,
+        "name": "Deer",
+        "ownerDeathWire": {
+          "receiver": "owner",
+          "sequence": 6076,
+          "monotonicMs": 697776.0355,
+          "atMs": 1792903610830,
+          "packet": "ObjectDied",
+          "payload": {
+            "objectId": 206701,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownRight"
+          }
+        },
+        "bothEndpoints": true
+      }
+    ],
+    "observedDeathCount": 15,
+    "bothEndpointDeaths": 15,
+    "globalLiveTargetsKnown": false
+  },
+  "limits": [
+    "A current cached target.hp may be stale relative to percentage health packets; no global live count is inferred from it.",
+    "A target with a later successful positive-damage packet after a recorded death is observed again alive, but this does not reveal its exact respawn instant.",
+    "These own-receipt positions are not complete monster/NPC AOI states or an original A* frontier.",
+    "The approach prefilter checks prospective attack tiles before send; a changed target/peer at the later movement ACK does not by itself prove a plan-time guard violation."
+  ]
+}

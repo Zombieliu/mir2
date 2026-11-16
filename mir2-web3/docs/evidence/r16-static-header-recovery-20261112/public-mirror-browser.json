@@ -1,0 +1,187 @@
+{
+  "scope": "Fault-injected isolated origins, actual Service Worker and unchanged page prewarm function; real public fixed R2 fallback but not public gameplay acceptance",
+  "passed": true,
+  "rows": [
+    {
+      "label": "candidate",
+      "workerSha256": "a3ee48352fd28d992d677b68ec17867280fb68895794fbff2800c4f70e759e71",
+      "origin": "http://127.0.0.1:64202",
+      "mirror": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "originalNetworkStalled": true,
+      "ordinaryBrowser": true,
+      "requestInterception": false,
+      "productionNetworkOverridden": false,
+      "passed": true,
+      "reads": [
+        {
+          "path": "/original-ui/Prguse/1.png",
+          "ok": true,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+          "attempts": [
+            {
+              "attempt": 1,
+              "phase": "complete",
+              "status": 200,
+              "bytes": 66374,
+              "durationMs": 7648
+            }
+          ],
+          "elapsedMs": 7649
+        },
+        {
+          "path": "/original-ui/Prguse/4.png",
+          "ok": true,
+          "bytes": 11776,
+          "sha256": "ae4c41ead8c2ce9eed73d021c59902b793586d30237e1db9d070c61eebcf038e",
+          "attempts": [
+            {
+              "attempt": 1,
+              "phase": "complete",
+              "status": 200,
+              "bytes": 11776,
+              "durationMs": 7608
+            }
+          ],
+          "elapsedMs": 7608
+        },
+        {
+          "path": "/original-ui/Prguse/6.png",
+          "ok": true,
+          "bytes": 10938,
+          "sha256": "00e7c0ba38a1866e8d40aa696e04975339bb0197503657bcc97d533d67740c67",
+          "attempts": [
+            {
+              "attempt": 1,
+              "phase": "complete",
+              "status": 200,
+              "bytes": 10938,
+              "durationMs": 7657
+            }
+          ],
+          "elapsedMs": 7657
+        },
+        {
+          "path": "/original-ui/Prguse/8.png",
+          "ok": true,
+          "bytes": 2578,
+          "sha256": "dfca5edbca559509d20fd0cade0b5d8d906c06773b1d926326e042ec1fd9be1e",
+          "attempts": [
+            {
+              "attempt": 1,
+              "phase": "complete",
+              "status": 200,
+              "bytes": 2578,
+              "durationMs": 7532
+            }
+          ],
+          "elapsedMs": 7532
+        }
+      ],
+      "elapsedMs": 7660,
+      "remainingInflight": [],
+      "publicMirrorResources": [
+        {
+          "path": "/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse/1.png",
+          "start": 7015.799999952316,
+          "duration": 638.2000000476837,
+          "responseEnd": 7654
+        },
+        {
+          "path": "/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse/4.png",
+          "start": 7015.899999976158,
+          "duration": 597.8999999761581,
+          "responseEnd": 7613.799999952316
+        },
+        {
+          "path": "/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse/6.png",
+          "start": 7016,
+          "duration": 647.2999999523163,
+          "responseEnd": 7663.299999952316
+        },
+        {
+          "path": "/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse/8.png",
+          "start": 7016.199999928474,
+          "duration": 521.7000000476837,
+          "responseEnd": 7537.899999976158
+        }
+      ],
+      "cached": [
+        {
+          "path": "/original-ui/Prguse/1.png",
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        {
+          "path": "/original-ui/Prguse/4.png",
+          "bytes": 11776,
+          "sha256": "ae4c41ead8c2ce9eed73d021c59902b793586d30237e1db9d070c61eebcf038e"
+        },
+        {
+          "path": "/original-ui/Prguse/6.png",
+          "bytes": 10938,
+          "sha256": "00e7c0ba38a1866e8d40aa696e04975339bb0197503657bcc97d533d67740c67"
+        },
+        {
+          "path": "/original-ui/Prguse/8.png",
+          "bytes": 2578,
+          "sha256": "dfca5edbca559509d20fd0cade0b5d8d906c06773b1d926326e042ec1fd9be1e"
+        }
+      ],
+      "progress": {
+        "ok": true,
+        "bytes": 66374,
+        "elapsedMs": 8067,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "browserClosed": true,
+      "serversClosed": true,
+      "events": [
+        {
+          "kind": "origin-stall",
+          "path": "/original-ui/Prguse/1.png",
+          "at": 1794448705503
+        },
+        {
+          "kind": "origin-stall",
+          "path": "/original-ui/Prguse/4.png",
+          "at": 1794448705504
+        },
+        {
+          "kind": "origin-stall",
+          "path": "/original-ui/Prguse/6.png",
+          "at": 1794448705505
+        },
+        {
+          "kind": "origin-stall",
+          "path": "/original-ui/Prguse/8.png",
+          "at": 1794448705505
+        },
+        {
+          "kind": "origin-close",
+          "path": "/original-ui/Prguse/1.png",
+          "aborted": true,
+          "at": 1794448712514
+        },
+        {
+          "kind": "origin-close",
+          "path": "/original-ui/Prguse/8.png",
+          "aborted": true,
+          "at": 1794448712515
+        },
+        {
+          "kind": "origin-close",
+          "path": "/original-ui/Prguse/6.png",
+          "aborted": true,
+          "at": 1794448712515
+        },
+        {
+          "kind": "origin-close",
+          "path": "/original-ui/Prguse/4.png",
+          "aborted": true,
+          "at": 1794448712515
+        }
+      ]
+    }
+  ]
+}

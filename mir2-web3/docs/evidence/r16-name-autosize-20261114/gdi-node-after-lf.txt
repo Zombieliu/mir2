@@ -1,0 +1,1 @@
+Crystal GDI text asset tests passed: 11 exact full-string assets.

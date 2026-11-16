@@ -1,0 +1,211 @@
+{
+  "schema": "mir2.r23-missing-assets.preflight.v1",
+  "utc": "2026-10-09T17:33:00.518587+00:00",
+  "euid": 0,
+  "mutations": false,
+  "directories": [
+    {
+      "path": "/",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o755",
+      "size": 4096,
+      "directory": true,
+      "regular": false,
+      "symlink": false
+    },
+    {
+      "path": "/srv",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o755",
+      "size": 4096,
+      "directory": true,
+      "regular": false,
+      "symlink": false
+    },
+    {
+      "path": "/srv/mir2-client-updates",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o755",
+      "size": 4096,
+      "directory": true,
+      "regular": false,
+      "symlink": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o755",
+      "size": 4096,
+      "directory": true,
+      "regular": false,
+      "symlink": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o755",
+      "size": 4096,
+      "directory": true,
+      "regular": false,
+      "symlink": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets",
+      "exists": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated",
+      "exists": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed",
+      "exists": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui",
+      "exists": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Prguse",
+      "exists": false
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Title",
+      "exists": false
+    }
+  ],
+  "resources": [
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/coverage-audit.json",
+      "exists": false,
+      "expectedSize": 723520,
+      "expectedSha256": "014c18e1e49666877ebcda9e21935c22b46d8950aa2bd1b35a67824946cae42b"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/resource-input-provenance.json",
+      "exists": false,
+      "expectedSize": 32275,
+      "expectedSha256": "e8ca68605b5c27e925476cae6e055cceb9552157075d6e45b8aa9d4cb76f05a8"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Prguse/1002.png",
+      "exists": false,
+      "expectedSize": 15671,
+      "expectedSha256": "72f73b42bc7b95a91144fe0f135ede2ad343fbfed488c75095f98ed427caf497"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Title/18.png",
+      "exists": false,
+      "expectedSize": 697,
+      "expectedSha256": "3b8a6097b20b32fc1bb8d371efdefffe564af7bf1c75bc098bfd10be097c02ad"
+    }
+  ],
+  "packageManifest": {
+    "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/PACKAGE-MANIFEST.json",
+    "exists": true,
+    "uid": 0,
+    "mode": "0o444",
+    "size": 31538315,
+    "directory": false,
+    "regular": true,
+    "symlink": false,
+    "sha256": "2012c0163c8ec418ed09ed9d3953337db1a246bb1b2d3191abe6b0ba485eb03e"
+  },
+  "releaseMetadata": [
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o444",
+      "size": 1221,
+      "directory": false,
+      "regular": true,
+      "symlink": false,
+      "sha256": "d8c2e7d380c4b37e90695c825e89e1c75ecf6738ce04e67780b4439a002957ee"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/BUILD-ATTESTATION.json",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o444",
+      "size": 2416,
+      "directory": false,
+      "regular": true,
+      "symlink": false,
+      "sha256": "62254955d4376366dfdbe2976c93bcaf4a688cca8e6b283ac1ed61b5ab85ff90"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/README-START.txt",
+      "exists": true,
+      "uid": 0,
+      "mode": "0o444",
+      "size": 49328,
+      "directory": false,
+      "regular": true,
+      "symlink": false,
+      "sha256": "5bc26223994015306280ee17952cafe2d30d61b1649f8a0ff7f1de3cc40b8bbd"
+    }
+  ],
+  "publisherLock": {
+    "path": "/var/backups/mir2-client-updates/.publisher.lock",
+    "exists": true,
+    "uid": 0,
+    "mode": "0o600",
+    "size": 0,
+    "directory": false,
+    "regular": true,
+    "symlink": false
+  },
+  "feedPointer": {
+    "path": "/srv/mir2-client-updates/feed-current",
+    "exists": true,
+    "uid": 0,
+    "mode": "0o755",
+    "size": 4096,
+    "directory": true,
+    "regular": false,
+    "symlink": false
+  },
+  "feedPayload": {
+    "path": "/srv/mir2-client-updates/feed-current/latest.json",
+    "exists": true,
+    "uid": 0,
+    "mode": "0o444",
+    "size": 1159,
+    "directory": false,
+    "regular": true,
+    "symlink": false,
+    "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2"
+  },
+  "feedSequence": 18,
+  "caddy": {
+    "path": "/etc/caddy/Caddyfile",
+    "exists": true,
+    "uid": 0,
+    "mode": "0o644",
+    "size": 4717,
+    "directory": false,
+    "regular": true,
+    "symlink": false,
+    "sha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d",
+    "hasSiteAnchor": true,
+    "publicRoutingLines": [
+      "@mir2_native_updates path /client-updates /client-updates/*",
+      "@mir2_native_discovery path /client-updates/latest.json /client-updates/latest.p7s",
+      "uri strip_prefix /client-updates",
+      "root * /srv/mir2-client-updates/feed-current",
+      "header Cache-Control \"no-store\"",
+      "@mir2_native_payload path /client-updates/releases/* /client-updates/feeds/* /client-updates/installers/*",
+      "uri strip_prefix /client-updates",
+      "root * /srv/mir2-client-updates",
+      "header Cache-Control \"public, max-age=31536000, immutable\"",
+      "@mir2_non_download_compression not path /client-updates /client-updates/*"
+    ]
+  },
+  "services": "MainPID=0\nExecMainStartTimestampMonotonic=0\nId=mir2-playtest-gateway.service\nActiveState=inactive\nSubState=dead\n\nMainPID=2107428\nExecMainStartTimestampMonotonic=6238264578119\nId=caddy.service\nActiveState=active\nSubState=running\n"
+}

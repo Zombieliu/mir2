@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "target": "F:/mir2-builds/alo-r16-20261103",
+  "backup": "F:\\mir2-builds\\npc-row-order-20261103\\installed-backup",
+  "oldNativeSha256": "6b7d4efac65a55dfce33353b428b4945f534d666f77d171f2431d296087a0e8a",
+  "nativeSha256": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+  "appliedAt": "2026-11-03T08:16:33.027Z",
+  "originalCharacterStateAndModelSettingsPreserved": true,
+  "modelCallsThisRound": 0,
+  "originalGameStopped": false,
+  "publicDeployment": false
+}

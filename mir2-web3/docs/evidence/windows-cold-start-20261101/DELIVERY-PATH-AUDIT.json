@@ -1,0 +1,187 @@
+{
+  "schema": "mir2.windows.delivery-path-audit.v1",
+  "recordedUtc": "2026-11-01T14:23:10.592848+00:00",
+  "conclusion": "没有证据证明精确当前 R19 reader 存在足以解释 6.68Mbps 的代码瓶颈；没有一个已有证据、值得立即实施的局部吞吐修改。",
+  "provenReaderThroughputDefect": false,
+  "evidenceSupportedLocalChange": null,
+  "recommendCodeChange": false,
+  "readerProvenOptimal": false,
+  "deployment": {
+    "receipt": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\publication-prep\\R19-READER-DEPLOYMENT.json",
+      "sha256": "26bbab5f7e6a19f5dc1a657f083b3748fd81820b1aa4dd35cbefcad3f3ea2af9"
+    },
+    "deploymentId": "0d8725db48a047e584c0d9db197ba539",
+    "scriptEtag": "6e2bba4d7a6e2c49e9b0a8f6bb81b012a64cfc73c4ba3e9156a46477d3ee3c78",
+    "latestApiCheck": {
+      "source": "Root supplied read-only API observation; not a network call by this auditor",
+      "etagStillMatchesOriginalDeployment": true,
+      "modifiedOn": "2026-11-01T12:55:29.652972Z",
+      "routeId": "08c5b5bae6b047f5ab033943f208cc33",
+      "routeStillTargetsThisReader": true
+    },
+    "retainedModuleSha256": {
+      "facade-index.mjs": "95fdb6d52c8b9f1d477c4bb4a57179eb671c0107721e6ce8aaba44fb968d419d",
+      "storage-facade.mjs": "e311508209a0e52991ca72d3748d2104e4b3dbb211342c66fbb513681b05d546",
+      "release.mjs": "d37286f1b822ad3cef9dc13ad5023e4a8a0d00d98561629abb36c96fbb3094ec",
+      "src/index.mjs": "ff1f7af7f7d22cc1acfddabe5787a5fa406d292800233926280c35c302312ebc",
+      "src/reader.mjs": "d53be8584c0734277e2180386fe996341d31df4a474061237cca5ddbe0f55bf7"
+    },
+    "allFivePreparedModulesByteEqualRetainedDeployment": true,
+    "canonicalReaderByteEqualDeployedModule": true
+  },
+  "release": {
+    "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "installerRecipeSourceRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+    "installerSha256": "859f18bd68f3968fd24af3aead32a6ab53ca1d12b72fcce380a5a90782fafe8e",
+    "installerBytes": 1040065902,
+    "parts": 16
+  },
+  "coldFailure": {
+    "receipt": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\COLD-RESULT.json",
+      "sha256": "2bf5ab9482b47e38bb71bf1f0f57c468197ea91efdf87330f46a4aa1de4c0c97"
+    },
+    "passed": false,
+    "phase": "download",
+    "bytes": 400858816,
+    "seconds": 480.003216,
+    "payloadMbps": 6.6809355043987875,
+    "timeFirstByteSeconds": 1.579361,
+    "curlExit": 28,
+    "firstChunkCache": "MISS",
+    "normalTls": true,
+    "proxyUsed": false,
+    "retries": 0,
+    "installerStarted": false,
+    "coldAccepted": false
+  },
+  "readerFindings": [
+    {
+      "code": "src/reader.mjs:230-266",
+      "finding": "Cache writes use an independent stream and waitUntil; client pulls never await cache.put or fill.task. Queue is 1MiB and overflow disables further fills. No whole64MiB cache buffer or cache-writer wait exists on the client path."
+    },
+    {
+      "code": "src/reader.mjs:269-287",
+      "finding": "Partial misses issue one exact R2 range and do not start cacheFill. Native whole-object SHA/custom SHA/source/size/range/ETag/identity guards remain mandatory."
+    },
+    {
+      "code": "src/reader.mjs:299,330,334,350,386",
+      "finding": "First/next part open and each source read are sequential. EOF is checked before the final chunk is emitted; no unrequested remainder is drained. HWM0 applies normal client backpressure. There is no sleep, timer, bandwidth limiter or full-part hashing loop."
+    },
+    {
+      "code": "src/reader.mjs:214-226;435-467",
+      "finding": "The full response uses a streaming FixedLengthStream bridge; no installer arrayBuffer/blob or full-body materialization. HEAD does not read R2/cache."
+    },
+    {
+      "code": "storage-facade.mjs",
+      "finding": "The facade masks only exact default full-range metadata and delegates native getters/methods using original receivers; body is the original stream, not copied or buffered."
+    }
+  ],
+  "decisiveBoundedObservation": {
+    "receipt": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\cdn-tail8m.curl.json",
+      "sha256": "6ef4c304293761342125daa5ec75e94cacab6c2cca2c84cb1603daba968f57a8"
+    },
+    "range": [
+      1031677294,
+      1040065901
+    ],
+    "bytes": 8388608,
+    "seconds": 30.258667,
+    "timeFirstByteSeconds": 1.000011,
+    "payloadMbps": 2.2178394044919427,
+    "cache": "MISS",
+    "intersectedParts": 1,
+    "cacheWriteOnThisCodePath": false,
+    "partTransitionsOnThisCodePath": 0,
+    "progressEvidence": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\cdn-tail8m.stderr",
+      "sha256": "398c1d0d8e6bdd6d65d36444b621626e06905004d772ddb7dda89c6662e2e58b"
+    },
+    "approxMiBAsPrintedByCurl": {
+      "t5": 0.772,
+      "t10": 2.2,
+      "t15": 3.52,
+      "t20": 5.33,
+      "t25": 6.45,
+      "t29": 7.7
+    },
+    "inference": "Low throughput is spread through this single-part partial body, not merely header wait or final EOF. Cache-writer serialization and cross-part opening cannot explain this probe."
+  },
+  "otherExistingMeasurements": {
+    "http2Tail8MiB": {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\h2-tail8m.result.json",
+        "sha256": "3f1f961ea4c9ddee7914842731bcb9feecb65bae4517a3f157385d9bc6c5dc2e"
+      },
+      "seconds": 21.8894503,
+      "payloadMbps": 3.065808555274684,
+      "hashMatches": true,
+      "serverTimingAsObserved": "cfEdge;dur=50,cfOrigin;dur=0,cfWorker;dur=157",
+      "serverTimingNotTreatedAsCompleteBodyTiming": true
+    },
+    "eightCapped": {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\cdn-eight-ranges\\RESULT.json",
+        "sha256": "c516ba125e9212385927231194551147021171f6695b5c5d742f6c2db70a1961"
+      },
+      "aggregateMbps": 11.418932516688503,
+      "allRangeHashesMatch": true
+    },
+    "eightUncapped": {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\cdn-eight-unlimited-probe\\RESULT.json",
+        "sha256": "9ebe456b94e1ecf341a4eba6dc4f5f1e4033802b56071d9368022afd04336c6d"
+      },
+      "aggregateMbps": 8.582217077918408,
+      "allRangeHashesMatch": true
+    },
+    "originOutsideWorker": {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\origin-tail8m.curl.json",
+        "sha256": "b296e91c3221a7e4f1d001329a28a40ed969aa5b149368354ee8b106a77f0cc3"
+      },
+      "bytes": 6995968,
+      "seconds": 60.012839,
+      "exitcode": 28
+    },
+    "githubOutsideWorker": {
+      "receipt": {
+        "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\existing-github-api8m.result.json",
+        "sha256": "ee1a1b787a3b611bd50676a23ddcb75b3197518c153b59b089f779f056276b74"
+      },
+      "hostname": "release-assets.githubusercontent.com",
+      "bytes": 1407760,
+      "seconds": 45.359303,
+      "exitcode": 28
+    },
+    "interpretation": "Other delivery paths were also slow, but these observations do not isolate a specific ISP/CDN/R2/Windows cause. CN/LAX is an observed classification only; no client IP is included."
+  },
+  "verification": {
+    "canonicalGuardPassed": true,
+    "maintainedBranch": "codex/windows-player-journey",
+    "maintainedHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+    "freshInMemoryReaderTests": {
+      "command": "node --test mir2-web3/infra/cloudflare/mir2-full-installer-downloads/test/reader.test.mjs",
+      "passed": 27,
+      "failed": 0,
+      "coverage": "Blocked/rejected cache, bounded queue abandonment, lazy client-driven streams, exact8MiB ranges, cancellation, short/extra body and fixed-length bridge contracts. Synthetic fixtures only, no real Cloudflare throughput claim."
+    }
+  },
+  "remainingUncertainty": [
+    "No per-pull R2 read/EOF, Cache API lookup, FixedLengthStream/native writer timing or production CPU profile is available.",
+    "Serial cache.match and next-part opening could add header/boundary latency; no measured evidence makes them a worthwhile fix for sustained body slowness.",
+    "Passing Node stream fixtures does not prove the native Workers pipeline is optimal or rule out every runtime/backpressure effect."
+  ],
+  "decision": "Do not change reader or implement a new multithreaded downloader from these data. Preserve R19 FAIL; Root continues the separate mirror/configuration decision.",
+  "actions": {
+    "newNetworkRequests": 0,
+    "largePublicArtifactReads": 0,
+    "codeOrEnvironmentChanged": false,
+    "buildOrDeploymentPerformed": false,
+    "newDownloaderImplemented": false,
+    "existingEvidenceModified": false,
+    "onlyPersistentOutput": "mir2-web3/docs/evidence/windows-cold-start-20261101/DELIVERY-PATH-AUDIT.json"
+  }
+}

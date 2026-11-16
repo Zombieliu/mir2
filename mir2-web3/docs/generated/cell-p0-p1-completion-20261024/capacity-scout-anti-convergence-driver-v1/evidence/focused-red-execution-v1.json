@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T22:59:00.824Z",
+  "endedAt": "2026-10-25T22:59:00.958Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "--test-name-pattern=^scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting$",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs"
+  ],
+  "exitCode": 1,
+  "signal": null,
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-v1.stdout.log",
+    "bytes": 1219,
+    "sha256": "2b3a65d264d9218eaad5838f1d4e051bab57f5cabe1668db438cce016bfa80ed"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-v1.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "testSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+    "bytes": 261077,
+    "sha256": "14bb246417da0f7c75e733f094e9a50a54136f8a5d950b9816663d9de335da03"
+  },
+  "scope": "Actual focused pre-fix execution; expected preference failure only after both alternative reachability preconditions."
+}

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 2,
+  "reviewedAt": "2026-10-25T09:22:24.3112254Z",
+  "scope": "Final static test delta and existing execution-evidence review, without executing tests, source swaps, product imports, realm or capacity load.",
+  "priorReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-independent-review-v1/test-review-v1.json",
+    "bytes": 6437,
+    "sha256": "95682bf8c45ae2784405f0ca423b0bf309402d79a4145e3784347f4ab271dcfd"
+  },
+  "mainSourceReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-independent-review-v1/source-review-v1.json",
+    "bytes": 7006,
+    "sha256": "62bade1cc1a842453274f19371adf7b7ca6cb197405560cabedb66253c8f67bd"
+  },
+  "finalTestSource": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "bytes": 238892,
+    "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+  },
+  "old187Original": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/before-187.test.mjs.txt",
+    "bytes": 224817,
+    "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+  },
+  "original187ActualPrefix": {
+    "bytes": 224817,
+    "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+    "rawMatchesOriginalPreimage": true,
+    "normalizationPerformed": false,
+    "oldCasesModified": false
+  },
+  "deltaProof": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/append-receipt-v2.json",
+    "bytes": 2943,
+    "sha256": "b16a417a9d5cf3a758e4ae41e66240b80896948c414f66d92bc6194666bea3af"
+  },
+  "previousCandidatePreimage": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/before-focused-revision-v2.test.mjs.txt",
+    "bytes": 238437,
+    "sha256": "2c95cccec9d2aadf3b4a59bc5e48894ade2951fc50c8c26a1ddd48b903ad24b5"
+  },
+  "independentExactInverse": {
+    "mutations": 2,
+    "uniqueAfterOccurrences": [
+      1,
+      1
+    ],
+    "recoveredBytes": 238437,
+    "recoveredSha256": "2c95cccec9d2aadf3b4a59bc5e48894ade2951fc50c8c26a1ddd48b903ad24b5",
+    "rawMatchesPreviousCandidatePreimage": true,
+    "normalizationPerformed": false
+  },
+  "finalDeltaReview": [
+    {
+      "change": "Finite future receipt",
+      "conclusion": "N1 closed",
+      "evidence": "The existing invalid-peer parameter group first records a valid ACK at1000, mutates coordinationLastReceiptMonoMs to2000, then plans the other fighter at1500 and requires original target900. This directly tests last>now without changing test count or the original187 prefix."
+    },
+    {
+      "change": "Native versus baseline policy fixture",
+      "conclusion": "Corrected invalid cross-profile equality rather than weakening either profile",
+      "evidence": "The final case separately asserts native18launched/12positive and baseline12launched/3positive. deepEqual snapshots require both policy objects to remain unchanged by selection. The shared movement/latency/lag/correction gates are still compared.",
+      "correctionToPriorReview": "The v1 static review missed that the first candidate incorrectly required native and baseline combat thresholds to be equal. The real initial focused run12pass/1fail preserved that fixture error. The final assertions repair the test assumption; production gates are unchanged."
+    }
+  ],
+  "existingExecutionEvidence": {
+    "initialFailedFocusedReceipt": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/focused-green-v1.json",
+      "bytes": 2542,
+      "sha256": "ecd06a6a78d3db2dd703c2559359c6d73927b5ae17b23134a387ff6fd055552a"
+    },
+    "initialFailedFocusedLog": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/focused-green-v1.log",
+      "bytes": 4653,
+      "sha256": "f4ceaac9a5dfb800449e2c1f209d4018517510bfb0e5d57103332f4b958ecdc2"
+    },
+    "initialFailedFocusedCounts": {
+      "tests": 13,
+      "pass": 12,
+      "fail": 1
+    },
+    "finalAuthorFocusedReceipt": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/focused-green-v2.json",
+      "bytes": 3059,
+      "sha256": "9976a73394861674d9cc354adc7ff1bad49eec13619222dc861028539771ca2d"
+    },
+    "finalAuthorFocusedLog": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-tests-v1/focused-green-v2.log",
+      "bytes": 3688,
+      "sha256": "c51e4a795321a80fc79a0402682177644a1c41fae3e6adc44e51f9353f3ecc41"
+    },
+    "finalAuthorFocusedCounts": {
+      "tests": 13,
+      "pass": 13,
+      "fail": 0
+    },
+    "redGreenReceipt": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-verification-v1/red-green-receipt-v1.json",
+      "bytes": 5650,
+      "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+    },
+    "redLog": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-verification-v1/old-red-v1.log",
+      "bytes": 12333,
+      "sha256": "d3895e8a707f76dbd5ccef72a59d562582a3ea6d730509ba8f56b75ebb660712"
+    },
+    "greenLog": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-verification-v1/current-green-v1.log",
+      "bytes": 3691,
+      "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+    },
+    "exchangeExecutor": {
+      "path": "C:/mir2-build/p01-completion-20261024/verify-native-chase-preference-v1.mjs",
+      "bytes": 5993,
+      "sha256": "d8adc932974cf844200143922baf8f9af49e8dff6b08e2095c388035df57ac48"
+    },
+    "redCounts": {
+      "tests": 13,
+      "pass": 4,
+      "fail": 9,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "greenCounts": {
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "redAssertionErrorCount": 9,
+    "redSyntaxReferenceTypeOrImportErrorCount": 0,
+    "currentMainPreimage": {
+      "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-verification-v1/main-current-before-red-v1.mjs.txt",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    "oldMainRawPin": {
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    "currentMainRestored": true,
+    "sourceBeforeAfterExact": true,
+    "sourceAggregate": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "executionReview": "Read TAP and exact logs/receipt. Same final13 tests run against original2251 main:4pass9fail, all AssertionError. Executor restores current1cf9 in finally before current green13pass. Nine-source closure pins are identical before/after. No result was independently re-executed by this reviewer."
+  },
+  "verdict": {
+    "staticTestQualityReviewed": true,
+    "blockingFindingIds": [],
+    "closedFindingIds": [
+      "N1"
+    ],
+    "mainContractPassed": true,
+    "finalFocusedEvidenceConsistent": true,
+    "redGreenEvidenceConsistent": true,
+    "testsExecutedByReviewer": false,
+    "complete200ResultReviewed": false,
+    "capacityAccepted": false,
+    "p2ImplementationPermitted": false
+  },
+  "validationBoundary": "The complete200 integration run is separately owned by root and was still pending at task assignment. This receipt neither awaits nor asserts its result, and no new game workload or capacity acceptance follows from13 focused tests."
+}

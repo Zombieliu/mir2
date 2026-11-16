@@ -1,0 +1,325 @@
+{
+  "kind": "r16-static-consumer-cancellation-and-cache-identity",
+  "localValidationPassed": true,
+  "productionDeployed": false,
+  "parent": "1571489d6337aadccf21155f95daca02953e8c5c",
+  "candidate": "1571489d6337-r16-cache-repair-5877802d",
+  "buildReceiptSha256": "1830ff4fefa4695084fe6dfe2e6ed66317b9da0e609cb9c8821f37c4fa4df6b7",
+  "buildId": "xGnnzeAiJOSdSP_neEF4f",
+  "scopedTests": {
+    "passed": 75,
+    "failed": 0,
+    "oldImplementationCancellationTestFailed": true,
+    "adjacentPreexisting": {
+      "baseline": "1571489d6337aadccf21155f95daca02953e8c5c",
+      "actualAdjacentCommandFailed": true,
+      "newlyIntroduced": false,
+      "checks": [
+        {
+          "name": "test-asset-startup-budget: mobile runtime failures",
+          "file": "mir2-web3/apps/web/app/page.tsx",
+          "pattern": "new Request\\(runtimeWasmPath, \\{ signal: controller\\.signal \\}\\)",
+          "baselineMatches": false,
+          "candidateMatches": false
+        },
+        {
+          "name": "test-map-render-routing: remote fallback source assertion",
+          "file": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+          "pattern": "for \\(const remoteRequest of createRemoteAssetRequests\\(request\\)\\)",
+          "baselineMatches": false,
+          "candidateMatches": false
+        }
+      ]
+    }
+  },
+  "changes": {
+    "isolatedStaticFetchSignal": true,
+    "canonicalAtlasStatsDurationOnly": true,
+    "stableJsonRawSizeDiagnosticOnly": true,
+    "prewarmFailureDiagnostics": true,
+    "headerDeadlineMs": 10000,
+    "bodyIdleDeadlineMs": 15000,
+    "nativeDeadlineMs": 120000,
+    "oneTimeCacheRolloverExpected": true,
+    "cacheMigrationImplemented": false,
+    "sourceOfPreviousFourFailuresNotUniquelyProven": true
+  },
+  "wip": {
+    "verified": {
+      "revision": "1571489d6337aadccf21155f95daca02953e8c5c",
+      "unchangedFiles": 62,
+      "unchangedRows": 38
+    },
+    "foreignAdditionalChanges": [
+      "mir2-web3/apps/gateway/src/web.rs",
+      "mir2-web3/apps/gateway/src/web_peer_close_ack_tests.rs"
+    ],
+    "ownedFiles": [
+      "mir2-web3/apps/web/app/api/asset-manifest/route.ts",
+      "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "mir2-web3/apps/web/lib/asset-prewarm-request.ts",
+      "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "mir2-web3/apps/web/scripts/test-asset-manifest-identity.mjs",
+      "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs"
+    ]
+  },
+  "runs": [
+    {
+      "run": "quest-after-r1",
+      "mode": "compatibility",
+      "renderer": "bevy-84ef836460a84e03",
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 22804,
+        "hud": [
+          {
+            "name": "hud-core",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": []
+          }
+        ],
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1443,
+        "hud": [
+          {
+            "name": "hud-core",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": []
+          }
+        ],
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "warmSaved": {
+        "verified": true
+      },
+      "fontsBeforeWarm": [
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "present": true
+        },
+        {
+          "name": "NotoSansTC.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "present": true
+        }
+      ],
+      "hostedHudPaths": [
+        "/original-ui/Prguse/1.png",
+        "/original-ui/Prguse/6.png",
+        "/original-ui/Prguse/4.png",
+        "/original-ui/Prguse/8.png"
+      ],
+      "browserRestart": {
+        "firstProcessCount": 8,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 8
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "rawReceiptSha256": "a4c1da4706b16cdddb12abda36fa148188d212a31bc434387d938a98a8463226"
+    },
+    {
+      "run": "quest-after-r2",
+      "mode": "webgl2",
+      "renderer": "bevy-84ef836460a84e03",
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 52865,
+        "hud": [
+          {
+            "name": "hud-core",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": []
+          }
+        ],
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1215,
+        "hud": [
+          {
+            "name": "hud-core",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": []
+          }
+        ],
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "warmSaved": {
+        "verified": true
+      },
+      "fontsBeforeWarm": [
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "present": true
+        },
+        {
+          "name": "NotoSansTC.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "present": true
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "present": true
+        }
+      ],
+      "hostedHudPaths": [
+        "/original-ui/Prguse/1.png",
+        "/original-ui/Prguse/6.png",
+        "/original-ui/Prguse/4.png",
+        "/original-ui/Prguse/8.png"
+      ],
+      "browserRestart": {
+        "firstProcessCount": 8,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 8
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "rawReceiptSha256": "02bd726af5c52e8d21ed1ce38823ab12c0fa1527ed1787935472ce7b6d26cc43"
+    }
+  ]
+}

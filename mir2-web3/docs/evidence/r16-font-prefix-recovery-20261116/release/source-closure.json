@@ -1,0 +1,817 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "baseSource": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "sourceCommits": [
+    "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+    "3a1d96c91abaadbad3801207562c925f8da63e90",
+    "7468b3337ac448baf18dc1b362b87acbac5fa635",
+    "e0ceea22964c03041d45e49e506b3a8badd6984e"
+  ],
+  "changedFiles": [
+    {
+      "filename": ".github/scripts/numeron-r16-release.mjs",
+      "sha": "e248cae311800cf8205edb0a5543aaa912f1cf99",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+      "sha": "dfd6ceb1567157e94e9822aa785a3f9d58932027",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/scripts/test-numeron-r16-release.mjs",
+      "sha": "3b4d98f321d5d5688db089a4635b8021f8ce0e64",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/workflows/cross-platform-client.yml",
+      "sha": "2c1b4e7ca2d08d497f716b8a201822e3c929cf93",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/workflows/developer-handoff.yml",
+      "sha": "bba10169b4e9a2d05964dd260ea651bbd0d9e1e4",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/workflows/home-agent.yml",
+      "sha": "f97f0e22681794c5e94403da841e27b0780f599a",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/workflows/mir2-candidate-gate.yml",
+      "sha": "6b26a21fbbc045f0169abc5f91aa971091bb6332",
+      "status": "modified"
+    },
+    {
+      "filename": ".github/workflows/promotion-website-release.yml",
+      "sha": "12897bb5692b2a71cc885bbdc1063c8c01bdec4f",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "cffb3b59b45c9390cacbcedac3d8e49850809eea",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+      "sha": "fa91b98fcc08e5aa423274e7d61ee0928cadbe11",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+      "sha": "5442da208cbc1d7be7c750fac2cea8834c71cd30",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "7096f65763c5c4dc1517c7392e72012aeed5b614",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "280ed67591538d63554996b9dba3c5f32922880f",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "65f507a5f661dc9fc2ace7f9aed969c21227ba3a",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+      "sha": "87543f0ee8a1b77d80c65de7b78169c0881a014d",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/README.md",
+      "sha": "982c3643379c26b0050e444820ce78a8982dbbbd",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/adjacent-tests.log",
+      "sha": "22cfb5dd1169514073220e6e4cff8aff9bd0898f",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-baseline.json",
+      "sha": "3468d34d79381fbab972ef79442dba947d1edc64",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-candidate.json",
+      "sha": "68a1f9e6289bb9403aa28ed1e72ec05c8c8dd2d1",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/private-evidence-pins.json",
+      "sha": "4454031e37f938dd67e7ac74a4148c34b39ddb4c",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/public-r2-font-interruption.json",
+      "sha": "24a81d02ee129ab9512f2f0e381fbda62820e5fb",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/remaining-worker-tests.log",
+      "sha": "ce5db5132b091afea176cb0611967e3fa83f2aa5",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/six-original-fonts-after-restart.png",
+      "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/validation.json",
+      "sha": "568a66e54c8d50dc40b567291c921f1a072498ec",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r1-native-quest.png",
+      "sha": "07bbd57c1f185084e8842a08ad0a2a843a0cc210",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r2-native-quest.png",
+      "sha": "8617308529d74fb73e81c571ae758e531f08cb3c",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/README.md",
+      "sha": "4586fcdefefa533a906b1ac0fd9ec0e3807b3f53",
+      "status": "modified"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/README.md",
+      "sha": "a8716cac03f256147cbcce7b93ddb217560416ae",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/private-evidence-pins.json",
+      "sha": "25ef3928f58b8309bc4b38671b84f7d3550e5252",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-cn-receipt.json",
+      "sha": "9ba5ac56e8fe875b8c7773080f919a0059b84579",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-tw-receipt.json",
+      "sha": "568cdbd8dcc90f38f3ba5e9a00a47289e03114bb",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-acceptance.json",
+      "sha": "369848b42f022b553bbb01b6a5fc3eb4f211592f",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-fonts.json",
+      "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-public-hud-after-worker-restart.png",
+      "sha": "2674475702398eb1bd13bae24f40218a1e443e77",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-quest-shared-zh-TW.png",
+      "sha": "29fb89eadf2b8315352facf98f7db96bd42b8d56",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-acceptance.json",
+      "sha": "c3798ff4ff091b78c4a16cad0ba3bc5d9b811044",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-fonts.json",
+      "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-public-hud-after-worker-restart.png",
+      "sha": "def0ed1e37fbfe51e95ab38b77feea4e122bff78",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-quest-shared-zh-TW.png",
+      "sha": "e96a2d641980e61da5aae315be978b55f5d48a6c",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/verification.json",
+      "sha": "a6b738135d44552174d6a12da59722624e5c4ecb",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/README.md",
+      "sha": "4752c1fac6eeb10ca73195b9a34b7d98db6ee3e8",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/all-release-guards.log",
+      "sha": "21d3d0520ade4cdff61985512412d1cd4e812298",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-pin.json",
+      "sha": "b1f26ba28a67c1282409909fe53511cd0a167353",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-validation.json",
+      "sha": "a4d589015963c87f5b0288891e66d6c58fdee277",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/source-closure.json",
+      "sha": "95375d481c31c4bcf21d45425beac7cf3f3bf210",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/README.md",
+      "sha": "f381d66c1885b40c96f3ea0599a2ef23b9f1fecb",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/checkout-receipt.json",
+      "sha": "8dfa7f76b375a5f328d8a35f1636105c6be3a39e",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/hosted-checkout.json",
+      "sha": "a7c67d941a59e5e5461387e91b369ec766d35a92",
+      "status": "added"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/workflow-verification.json",
+      "sha": "968a929301b793539db6ed97467a4b307017e909",
+      "status": "added"
+    }
+  ],
+  "sourceCheckpoints": [
+    {
+      "baseSource": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+      "source": "7468b3337ac448baf18dc1b362b87acbac5fa635",
+      "sourceCommits": [
+        "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+        "3a1d96c91abaadbad3801207562c925f8da63e90",
+        "7468b3337ac448baf18dc1b362b87acbac5fa635"
+      ],
+      "changedFiles": [
+        {
+          "filename": ".github/scripts/numeron-r16-release.mjs",
+          "sha": "e248cae311800cf8205edb0a5543aaa912f1cf99",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+          "sha": "dfd6ceb1567157e94e9822aa785a3f9d58932027",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/scripts/test-numeron-r16-release.mjs",
+          "sha": "3b4d98f321d5d5688db089a4635b8021f8ce0e64",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/workflows/cross-platform-client.yml",
+          "sha": "2c1b4e7ca2d08d497f716b8a201822e3c929cf93",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/workflows/developer-handoff.yml",
+          "sha": "bba10169b4e9a2d05964dd260ea651bbd0d9e1e4",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/workflows/home-agent.yml",
+          "sha": "f97f0e22681794c5e94403da841e27b0780f599a",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/workflows/mir2-candidate-gate.yml",
+          "sha": "6b26a21fbbc045f0169abc5f91aa971091bb6332",
+          "status": "modified"
+        },
+        {
+          "filename": ".github/workflows/promotion-website-release.yml",
+          "sha": "12897bb5692b2a71cc885bbdc1063c8c01bdec4f",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+          "sha": "a1d2fa6e2b077d8a4e319c87e1bbe9afd2028a49",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+          "sha": "86defd3fa8d44aa057e5c8026a1d72f0f2f3b5b2",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+          "sha": "293e7e119171517929fdc3a3c66707b5d974686b",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+          "sha": "cf9fbcc0019340d8f0ac4ae80a739a524acd0720",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/README.md",
+          "sha": "4586fcdefefa533a906b1ac0fd9ec0e3807b3f53",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/README.md",
+          "sha": "a8716cac03f256147cbcce7b93ddb217560416ae",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/private-evidence-pins.json",
+          "sha": "25ef3928f58b8309bc4b38671b84f7d3550e5252",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-cn-receipt.json",
+          "sha": "9ba5ac56e8fe875b8c7773080f919a0059b84579",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-tw-receipt.json",
+          "sha": "568cdbd8dcc90f38f3ba5e9a00a47289e03114bb",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-acceptance.json",
+          "sha": "369848b42f022b553bbb01b6a5fc3eb4f211592f",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-fonts.json",
+          "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-public-hud-after-worker-restart.png",
+          "sha": "2674475702398eb1bd13bae24f40218a1e443e77",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-quest-shared-zh-TW.png",
+          "sha": "29fb89eadf2b8315352facf98f7db96bd42b8d56",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-acceptance.json",
+          "sha": "c3798ff4ff091b78c4a16cad0ba3bc5d9b811044",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-fonts.json",
+          "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-public-hud-after-worker-restart.png",
+          "sha": "def0ed1e37fbfe51e95ab38b77feea4e122bff78",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-quest-shared-zh-TW.png",
+          "sha": "e96a2d641980e61da5aae315be978b55f5d48a6c",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/verification.json",
+          "sha": "a6b738135d44552174d6a12da59722624e5c4ecb",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/README.md",
+          "sha": "4752c1fac6eeb10ca73195b9a34b7d98db6ee3e8",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/all-release-guards.log",
+          "sha": "21d3d0520ade4cdff61985512412d1cd4e812298",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-pin.json",
+          "sha": "b1f26ba28a67c1282409909fe53511cd0a167353",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-validation.json",
+          "sha": "a4d589015963c87f5b0288891e66d6c58fdee277",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/source-closure.json",
+          "sha": "95375d481c31c4bcf21d45425beac7cf3f3bf210",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/README.md",
+          "sha": "f381d66c1885b40c96f3ea0599a2ef23b9f1fecb",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/checkout-receipt.json",
+          "sha": "8dfa7f76b375a5f328d8a35f1636105c6be3a39e",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/hosted-checkout.json",
+          "sha": "a7c67d941a59e5e5461387e91b369ec766d35a92",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/workflow-verification.json",
+          "sha": "968a929301b793539db6ed97467a4b307017e909",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "baseSource": "7468b3337ac448baf18dc1b362b87acbac5fa635",
+      "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "sourceCommits": [
+        "e0ceea22964c03041d45e49e506b3a8badd6984e"
+      ],
+      "changedFiles": [
+        {
+          "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+          "sha": "cffb3b59b45c9390cacbcedac3d8e49850809eea",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+          "sha": "fa91b98fcc08e5aa423274e7d61ee0928cadbe11",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+          "sha": "5442da208cbc1d7be7c750fac2cea8834c71cd30",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+          "sha": "7096f65763c5c4dc1517c7392e72012aeed5b614",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+          "sha": "280ed67591538d63554996b9dba3c5f32922880f",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+          "sha": "65f507a5f661dc9fc2ace7f9aed969c21227ba3a",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+          "sha": "87543f0ee8a1b77d80c65de7b78169c0881a014d",
+          "status": "modified"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/README.md",
+          "sha": "982c3643379c26b0050e444820ce78a8982dbbbd",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/adjacent-tests.log",
+          "sha": "22cfb5dd1169514073220e6e4cff8aff9bd0898f",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-baseline.json",
+          "sha": "3468d34d79381fbab972ef79442dba947d1edc64",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-candidate.json",
+          "sha": "68a1f9e6289bb9403aa28ed1e72ec05c8c8dd2d1",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/private-evidence-pins.json",
+          "sha": "4454031e37f938dd67e7ac74a4148c34b39ddb4c",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/public-r2-font-interruption.json",
+          "sha": "24a81d02ee129ab9512f2f0e381fbda62820e5fb",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/remaining-worker-tests.log",
+          "sha": "ce5db5132b091afea176cb0611967e3fa83f2aa5",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/six-original-fonts-after-restart.png",
+          "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/validation.json",
+          "sha": "568a66e54c8d50dc40b567291c921f1a072498ec",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r1-native-quest.png",
+          "sha": "07bbd57c1f185084e8842a08ad0a2a843a0cc210",
+          "status": "added"
+        },
+        {
+          "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r2-native-quest.png",
+          "sha": "8617308529d74fb73e81c571ae758e531f08cb3c",
+          "status": "added"
+        }
+      ]
+    }
+  ],
+  "proof": {
+    "base": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+    "commits": [
+      "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+      "3a1d96c91abaadbad3801207562c925f8da63e90",
+      "7468b3337ac448baf18dc1b362b87acbac5fa635",
+      "e0ceea22964c03041d45e49e506b3a8badd6984e"
+    ],
+    "changedFiles": [
+      {
+        "filename": ".github/scripts/numeron-r16-release.mjs",
+        "sha": "e248cae311800cf8205edb0a5543aaa912f1cf99",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+        "sha": "dfd6ceb1567157e94e9822aa785a3f9d58932027",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/test-numeron-r16-release.mjs",
+        "sha": "3b4d98f321d5d5688db089a4635b8021f8ce0e64",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/workflows/cross-platform-client.yml",
+        "sha": "2c1b4e7ca2d08d497f716b8a201822e3c929cf93",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/workflows/developer-handoff.yml",
+        "sha": "bba10169b4e9a2d05964dd260ea651bbd0d9e1e4",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/workflows/home-agent.yml",
+        "sha": "f97f0e22681794c5e94403da841e27b0780f599a",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/workflows/mir2-candidate-gate.yml",
+        "sha": "6b26a21fbbc045f0169abc5f91aa971091bb6332",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/workflows/promotion-website-release.yml",
+        "sha": "12897bb5692b2a71cc885bbdc1063c8c01bdec4f",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha": "cffb3b59b45c9390cacbcedac3d8e49850809eea",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+        "sha": "fa91b98fcc08e5aa423274e7d61ee0928cadbe11",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+        "sha": "5442da208cbc1d7be7c750fac2cea8834c71cd30",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "7096f65763c5c4dc1517c7392e72012aeed5b614",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "280ed67591538d63554996b9dba3c5f32922880f",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "65f507a5f661dc9fc2ace7f9aed969c21227ba3a",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "87543f0ee8a1b77d80c65de7b78169c0881a014d",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/README.md",
+        "sha": "982c3643379c26b0050e444820ce78a8982dbbbd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/adjacent-tests.log",
+        "sha": "22cfb5dd1169514073220e6e4cff8aff9bd0898f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-baseline.json",
+        "sha": "3468d34d79381fbab972ef79442dba947d1edc64",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-candidate.json",
+        "sha": "68a1f9e6289bb9403aa28ed1e72ec05c8c8dd2d1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/private-evidence-pins.json",
+        "sha": "4454031e37f938dd67e7ac74a4148c34b39ddb4c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/public-r2-font-interruption.json",
+        "sha": "24a81d02ee129ab9512f2f0e381fbda62820e5fb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/remaining-worker-tests.log",
+        "sha": "ce5db5132b091afea176cb0611967e3fa83f2aa5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/six-original-fonts-after-restart.png",
+        "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/validation.json",
+        "sha": "568a66e54c8d50dc40b567291c921f1a072498ec",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r1-native-quest.png",
+        "sha": "07bbd57c1f185084e8842a08ad0a2a843a0cc210",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r2-native-quest.png",
+        "sha": "8617308529d74fb73e81c571ae758e531f08cb3c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/README.md",
+        "sha": "4586fcdefefa533a906b1ac0fd9ec0e3807b3f53",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/README.md",
+        "sha": "a8716cac03f256147cbcce7b93ddb217560416ae",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/private-evidence-pins.json",
+        "sha": "25ef3928f58b8309bc4b38671b84f7d3550e5252",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-cn-receipt.json",
+        "sha": "9ba5ac56e8fe875b8c7773080f919a0059b84579",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-tw-receipt.json",
+        "sha": "568cdbd8dcc90f38f3ba5e9a00a47289e03114bb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-acceptance.json",
+        "sha": "369848b42f022b553bbb01b6a5fc3eb4f211592f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-fonts.json",
+        "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-public-hud-after-worker-restart.png",
+        "sha": "2674475702398eb1bd13bae24f40218a1e443e77",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-quest-shared-zh-TW.png",
+        "sha": "29fb89eadf2b8315352facf98f7db96bd42b8d56",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-acceptance.json",
+        "sha": "c3798ff4ff091b78c4a16cad0ba3bc5d9b811044",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-fonts.json",
+        "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-public-hud-after-worker-restart.png",
+        "sha": "def0ed1e37fbfe51e95ab38b77feea4e122bff78",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-quest-shared-zh-TW.png",
+        "sha": "e96a2d641980e61da5aae315be978b55f5d48a6c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/verification.json",
+        "sha": "a6b738135d44552174d6a12da59722624e5c4ecb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/README.md",
+        "sha": "4752c1fac6eeb10ca73195b9a34b7d98db6ee3e8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/all-release-guards.log",
+        "sha": "21d3d0520ade4cdff61985512412d1cd4e812298",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-pin.json",
+        "sha": "b1f26ba28a67c1282409909fe53511cd0a167353",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-validation.json",
+        "sha": "a4d589015963c87f5b0288891e66d6c58fdee277",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/source-closure.json",
+        "sha": "95375d481c31c4bcf21d45425beac7cf3f3bf210",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/README.md",
+        "sha": "f381d66c1885b40c96f3ea0599a2ef23b9f1fecb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/checkout-receipt.json",
+        "sha": "8dfa7f76b375a5f328d8a35f1636105c6be3a39e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/hosted-checkout.json",
+        "sha": "a7c67d941a59e5e5461387e91b369ec766d35a92",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/workflow-verification.json",
+        "sha": "968a929301b793539db6ed97467a4b307017e909",
+        "status": "added"
+      }
+    ],
+    "checkpoints": [
+      {
+        "base": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+        "source": "7468b3337ac448baf18dc1b362b87acbac5fa635",
+        "commits": 3,
+        "files": 35
+      },
+      {
+        "base": "7468b3337ac448baf18dc1b362b87acbac5fa635",
+        "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+        "commits": 1,
+        "files": 18
+      }
+    ]
+  },
+  "independentGitHubComparisons": true,
+  "baseline": "dpl_G8iq4UBFibrWSEaSbwahtboeAom3",
+  "checkpointIsProduction": false
+}

@@ -1,0 +1,1317 @@
+{
+  "kind": "r16-passive-network-and-critical-font-order",
+  "sourceBase": "99110428632b43e945c2341e8ca9058a8324937a",
+  "candidate": "99110428632b-font-critical-29aef945",
+  "buildReceiptSha256": "6bdf88a5e38c0471a00337660d2bf92d3def0d20736809f4aab509db9c5487e9",
+  "tests": {
+    "passed": 133,
+    "failed": 0,
+    "duplicatedRunsNotAdded": true
+  },
+  "preservation": {
+    "count": 65,
+    "unchanged": true
+  },
+  "rows": [
+    {
+      "run": "quest-after-r1",
+      "scope": "committed 991104 baseline, old font order",
+      "passed": true,
+      "mode": "compatibility",
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "source": {
+        "revision": "32259b1435b0-font-overlap-2dbaf38a",
+        "buildReceiptSha256": "69d910b774b0420afeea7dd88602df160d3849657fbad79909e0b6a4f68f2471",
+        "id": "AZmSgd2NkoFseK3664CjI",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "renderer": "bevy-84ef836460a84e03"
+      },
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 73007,
+        "coldFailure": null,
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "immediateMoves": [
+          {
+            "index": 0,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 1,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 2,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 3,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 4,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 5,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 6,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 7,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          }
+        ]
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 867,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "saved": true
+      },
+      "firstSave": {
+        "passed": true,
+        "originalFields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "noInjectedAppFontOrHudStalls": true,
+      "network": {
+        "workerTargets": 1,
+        "errors": [],
+        "logicalMaxActive": 225,
+        "logicalRequestsAreNotPhysicalConnections": true,
+        "upstreamTimings": [
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794486390316.439,
+            "sendStartMs": 304.155,
+            "receiveHeadersStartMs": 477.558,
+            "bodyMs": 20645.520999998553,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 11941968,
+            "encodedBytes": 7606145,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794486407732.31,
+            "sendStartMs": 0.238,
+            "receiveHeadersStartMs": 3707.18,
+            "bodyMs": 364.71399999572895,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"f53b83ff53f1d2632bf4d26382469b44\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 621572,
+            "encodedBytes": 313954,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794486407732.493,
+            "sendStartMs": 0.16,
+            "receiveHeadersStartMs": 4091.943,
+            "bodyMs": 93.72799999982817,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"53ef84da2e0f1a7b49fffe7485395722\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 243520,
+            "encodedBytes": 102128,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794486411826.0369,
+            "sendStartMs": 0.189,
+            "receiveHeadersStartMs": 7080.593,
+            "bodyMs": 18.534999995608814,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"62bf7ee514e48d83a95dcf1b3d8b0efd\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 37780,
+            "encodedBytes": 19530,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794486411927.813,
+            "sendStartMs": 0.346,
+            "receiveHeadersStartMs": 6997.526,
+            "bodyMs": 176.60199999954784,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"22e156b807f3147bb7dcafadc52ab721\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 234892,
+            "encodedBytes": 97965,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "priority": "High",
+            "requestedEpochMs": 1794486418927.53,
+            "sendStartMs": 0.103,
+            "receiveHeadersStartMs": 342.516,
+            "bodyMs": 61130.402000002505,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"6d30d01b9b25bd766898ecba71d5cd3d\"",
+              "content-type": "font/otf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 16437364,
+            "encodedBytes": 13613977,
+            "failure": null
+          }
+        ]
+      },
+      "rawReceipt": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r1\\entry-visual-receipt.json",
+        "sha256": "f2a331f444aad5f2b351e88deba509bc518c6928e59f7d531026cc6428d37351"
+      },
+      "rawNetwork": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r1\\network-cold.json",
+        "sha256": "4fba29515aaf9b16827e7bfac01528e00a984a102662d14e0f4c8d5a6d4fe853"
+      }
+    },
+    {
+      "run": "quest-after-r2",
+      "scope": "large CJK first candidate",
+      "passed": true,
+      "mode": "compatibility",
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "source": {
+        "revision": "99110428632b-font-critical-29aef945",
+        "buildReceiptSha256": "6bdf88a5e38c0471a00337660d2bf92d3def0d20736809f4aab509db9c5487e9",
+        "id": "XrmhUIFPrWTJIAe506gwJ",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "renderer": "bevy-84ef836460a84e03"
+      },
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 23605,
+        "coldFailure": null,
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "immediateMoves": [
+          {
+            "index": 0,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 1,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 2,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 3,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 4,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 5,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 6,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 7,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          }
+        ]
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 828,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "saved": true
+      },
+      "firstSave": {
+        "passed": true,
+        "originalFields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "noInjectedAppFontOrHudStalls": true,
+      "network": {
+        "workerTargets": 1,
+        "errors": [],
+        "logicalMaxActive": 225,
+        "logicalRequestsAreNotPhysicalConnections": true,
+        "upstreamTimings": [
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487350609.8071,
+            "sendStartMs": 357.83,
+            "receiveHeadersStartMs": 605.958,
+            "bodyMs": 8025.507999998808,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 11941968,
+            "encodedBytes": 7606339,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "priority": "High",
+            "requestedEpochMs": 1794487368035.87,
+            "sendStartMs": 0.281,
+            "receiveHeadersStartMs": 223.099,
+            "bodyMs": 23021.29600000626,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"6d30d01b9b25bd766898ecba71d5cd3d\"",
+              "content-type": "font/otf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 16437364,
+            "encodedBytes": 13614075,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487368081.9531,
+            "sendStartMs": 0.23,
+            "receiveHeadersStartMs": 839.744,
+            "bodyMs": 1372.0769999999902,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"f53b83ff53f1d2632bf4d26382469b44\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 621572,
+            "encodedBytes": 313874,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487370302.191,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487378303.726,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "http://127.0.0.1:20631/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487386304.6428,
+            "sendStartMs": 0.654,
+            "receiveHeadersStartMs": 4.354,
+            "bodyMs": 8.126000000629574,
+            "status": 200,
+            "protocol": "http/1.1",
+            "headers": {
+              "content-encoding": "gzip",
+              "etag": "W/\"3b740-1a1c8542480\"",
+              "content-type": "font/ttf"
+            },
+            "decodedBytes": 243520,
+            "encodedBytes": 103646,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487386324.842,
+            "sendStartMs": 0.146,
+            "receiveHeadersStartMs": 3866.599,
+            "bodyMs": 11.6180000040913,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"62bf7ee514e48d83a95dcf1b3d8b0efd\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 37780,
+            "encodedBytes": 19530,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487386816.76,
+            "sendStartMs": 0.394,
+            "receiveHeadersStartMs": 4463.182,
+            "bodyMs": 96.19900000689086,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"22e156b807f3147bb7dcafadc52ab721\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 234892,
+            "encodedBytes": 97950,
+            "failure": null
+          }
+        ]
+      },
+      "rawReceipt": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r2\\entry-visual-receipt.json",
+        "sha256": "26c377e77f3cacf256af459920c7ace34d9901f532aefc065f8e422906a299ba"
+      },
+      "rawNetwork": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r2\\network-cold.json",
+        "sha256": "906ebc80211359c87b941e7e006994f9cd1f3096706870f92e39e4b123d315b1"
+      }
+    },
+    {
+      "run": "quest-after-r3",
+      "scope": "large CJK first candidate",
+      "passed": true,
+      "mode": "webgl2",
+      "backend": "webgl2",
+      "packageId": "webgl2-shared",
+      "source": {
+        "revision": "99110428632b-font-critical-29aef945",
+        "buildReceiptSha256": "6bdf88a5e38c0471a00337660d2bf92d3def0d20736809f4aab509db9c5487e9",
+        "id": "XrmhUIFPrWTJIAe506gwJ",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "renderer": "bevy-84ef836460a84e03"
+      },
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 76961,
+        "coldFailure": null,
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "immediateMoves": [
+          {
+            "index": 0,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 1,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 2,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 3,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 4,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 5,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "index": 6,
+            "key": "ArrowLeft",
+            "from": {
+              "x": 289,
+              "y": 616
+            },
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "arrived": {
+              "x": 288,
+              "y": 616
+            }
+          },
+          {
+            "index": 7,
+            "key": "ArrowRight",
+            "from": {
+              "x": 288,
+              "y": 616
+            },
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "arrived": {
+              "x": 289,
+              "y": 616
+            }
+          }
+        ]
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 903,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "saved": true
+      },
+      "firstSave": {
+        "passed": true,
+        "originalFields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "noInjectedAppFontOrHudStalls": true,
+      "network": {
+        "workerTargets": 1,
+        "errors": [],
+        "logicalMaxActive": 220,
+        "logicalRequestsAreNotPhysicalConnections": true,
+        "upstreamTimings": [
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487732479.403,
+            "sendStartMs": 314.777,
+            "receiveHeadersStartMs": 521.492,
+            "bodyMs": 60462.320999999065,
+            "status": 200,
+            "protocol": "h2",
+            "headers": {
+              "content-encoding": "gzip",
+              "cf-cache-status": "HIT",
+              "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+              "content-type": "font/ttf",
+              "x-mir2-edge-cache": "HIT"
+            },
+            "decodedBytes": 11941968,
+            "encodedBytes": 7606517,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "priority": "High",
+            "requestedEpochMs": 1794487749915.917,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "priority": "High",
+            "requestedEpochMs": 1794487757916.421,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "http://127.0.0.1:20631/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "priority": "High",
+            "requestedEpochMs": 1794487765917.114,
+            "sendStartMs": 0.346,
+            "receiveHeadersStartMs": 3.177,
+            "bodyMs": 347.90899999643443,
+            "status": 200,
+            "protocol": "http/1.1",
+            "headers": {
+              "content-encoding": "gzip",
+              "etag": "W/\"fad074-1a1c8542480\"",
+              "content-type": "font/otf"
+            },
+            "decodedBytes": 16437364,
+            "encodedBytes": 13661344,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487766309.528,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487774311.6938,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "http://127.0.0.1:20631/original-ui/fonts/NotoSans-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487782312.65,
+            "sendStartMs": 0.221,
+            "receiveHeadersStartMs": 3.016,
+            "bodyMs": 11.269999995420221,
+            "status": 200,
+            "protocol": "http/1.1",
+            "headers": {
+              "content-encoding": "gzip",
+              "etag": "W/\"97c04-1a1c8542480\"",
+              "content-type": "font/ttf"
+            },
+            "decodedBytes": 621572,
+            "encodedBytes": 316669,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487782329.726,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487790330.8452,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487793539.722,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "http://127.0.0.1:20631/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487798331.362,
+            "sendStartMs": 0.249,
+            "receiveHeadersStartMs": 2.957,
+            "bodyMs": 2.909999995608814,
+            "status": 200,
+            "protocol": "http/1.1",
+            "headers": {
+              "content-encoding": "gzip",
+              "etag": "W/\"3b740-1a1c8542480\"",
+              "content-type": "font/ttf"
+            },
+            "decodedBytes": 243520,
+            "encodedBytes": 103646,
+            "failure": null
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487798339.448,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487801540.117,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487806339.808,
+            "bodyMs": null,
+            "failure": "net::ERR_ABORTED"
+          },
+          {
+            "path": "http://127.0.0.1:20631/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487809541.102,
+            "sendStartMs": 0.208,
+            "receiveHeadersStartMs": 2.828,
+            "bodyMs": -0.003999994078185409,
+            "status": 200,
+            "protocol": "http/1.1",
+            "headers": {
+              "content-encoding": "gzip",
+              "etag": "W/\"9394-1a1c8542480\"",
+              "content-type": "font/ttf"
+            },
+            "decodedBytes": 37780,
+            "encodedBytes": 19823,
+            "failure": null
+          },
+          {
+            "path": "http://127.0.0.1:20631/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "priority": "High",
+            "requestedEpochMs": 1794487814340.5508,
+            "sendStartMs": 0.218,
+            "receiveHeadersStartMs": 2.834,
+            "bodyMs": 3.5829999978886917,
+            "status": 200,
+            "protocol": "http/1.1",
+            "headers": {
+              "content-encoding": "gzip",
+              "etag": "W/\"3958c-1a1c8542480\"",
+              "content-type": "font/ttf"
+            },
+            "decodedBytes": 234892,
+            "encodedBytes": 98934,
+            "failure": null
+          }
+        ]
+      },
+      "rawReceipt": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r3\\entry-visual-receipt.json",
+        "sha256": "77140e14e04fc3ed339dfe0ca9b40804f13a3556cc62168d8bc01d50ded4e606"
+      },
+      "rawNetwork": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r3\\network-cold.json",
+        "sha256": "e0380eeef68dd146446dbb41c84119c8de7c0af0b65ee5983fed9c340b4acc73"
+      }
+    }
+  ],
+  "limits": [
+    "isolated same-save browser fixture with real release CDN font/runtime reads; static map delay and initial dynamic 503 fixture retained",
+    "page service-worker response headers include whole-body buffering; use worker upstream timing for actual network latency",
+    "sequential ordinary-network samples are not a controlled speed comparison or a latency guarantee",
+    "prior injected application-source stalls remain failed cold gates; recovery is recorded separately",
+    "all six font bytes, Unicode fallback coverage, two consumers and original budgets unchanged; no global 1:1 claim"
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "schema": "mir2.r16.session-return.browser.v1",
+  "mode": "cold",
+  "locale": "en",
+  "passed": true,
+  "renderer": "bevy-db5e53a91f4d11de",
+  "startedAt": "2026-11-07T10:32:54.472Z",
+  "phases": [
+    "normal-login",
+    "cold-entry-single-q",
+    "normal-logout-to-selection",
+    "explicit-selection-exit",
+    "complete"
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "keepAlive": 1,
+    "logOut": 1
+  },
+  "sockets": [
+    {
+      "id": 1,
+      "closed": true
+    }
+  ],
+  "coldKeys": [
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "before"
+    }
+  ],
+  "keyboard": [
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "before",
+      "phase": "cold-entry-single-q"
+    },
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "after",
+      "phase": "cold-entry-single-q"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    }
+  ],
+  "entries": [
+    {
+      "role": "original",
+      "index": 1,
+      "level": 30,
+      "completedMainAndGrowth": 26,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "stamp": {
+        "generation": 2,
+        "revision": 2,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    }
+  ],
+  "returns": [
+    {
+      "index": 1,
+      "selectedPosition": 0,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    }
+  ],
+  "screenshots": [
+    "01-first-q-native-diary.png",
+    "02-logout-selection.png"
+  ],
+  "network": {
+    "errors": [],
+    "failed": []
+  },
+  "pageErrors": [],
+  "releases": [
+    "bevy-db5e53a91f4d11de"
+  ],
+  "errors": [],
+  "browser": {
+    "version": "156.0.8078.80",
+    "kind": "installed-chrome-headless",
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 4318,
+          "deviceId": 11269,
+          "vendorString": "",
+          "deviceString": "NVIDIA GeForce RTX 5070 Ti"
+        },
+        {
+          "vendorId": 4318,
+          "deviceId": 11269,
+          "vendorString": "",
+          "deviceString": "NVIDIA GeForce RTX 5070 Ti"
+        },
+        {
+          "vendorId": 4318,
+          "deviceId": 11269,
+          "vendorString": "",
+          "deviceString": "NVIDIA GeForce RTX 5070 Ti"
+        },
+        {
+          "vendorId": 5140,
+          "deviceId": 140,
+          "vendorString": "",
+          "deviceString": "Microsoft Basic Render Driver"
+        }
+      ],
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1074)",
+      "backend": "(gl=egl-angle,angle=d3d11)",
+      "features": {
+        "2d_canvas": "enabled",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "enabled",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "enabled_on",
+        "rasterization": "enabled",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "enabled",
+        "video_encode": "enabled",
+        "webgl": "enabled",
+        "webgpu": "enabled",
+        "webnn": "disabled_off"
+      }
+    }
+  },
+  "requestedBackend": "webgl2-shared",
+  "coldOpen": {
+    "singlePhysicalQ": true,
+    "trigger": "visible-world",
+    "before": {
+      "questReady": false,
+      "hudReady": false,
+      "questOpen": false
+    },
+    "after": {
+      "questReady": true,
+      "hudReady": true,
+      "questOpen": true,
+      "locale": "en"
+    },
+    "elapsedMs": 2766
+  },
+  "beforeLogout": [
+    null
+  ],
+  "exit": {
+    "socketClosed": true,
+    "additionalLogoutCommands": 0,
+    "loginVisible": true
+  },
+  "finishedAt": "2026-11-07T10:33:17.248Z"
+}

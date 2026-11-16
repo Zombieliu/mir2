@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.cloud-tcp-readonly-pins.v1",
+  "templateOnly": true,
+  "rootReviewedIdentityPins": false,
+  "target": {
+    "pid": 1092834,
+    "startTicks": 1549795188,
+    "invocationId": "f5d9c02fa6ff464fb6e7612cf65768d0",
+    "revision": "7403bc5ee5cbb472477db101b8be603136049dcf"
+  },
+  "caddy": {
+    "pid": 2107428,
+    "startTicks": 623826457
+  },
+  "provenance": {
+    "statusReceiptSha256": null,
+    "statusSourceSha256": null
+  }
+}

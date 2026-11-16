@@ -1,0 +1,194 @@
+{
+  "accountsSeeded": 0,
+  "auditRuntimeClockBusinessProof": {
+    "shared_conquests": {
+      "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+      "count": 1,
+      "metadataOnly": true,
+      "table": "shared_conquests"
+    },
+    "shared_guild_clock": {
+      "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+      "count": 1,
+      "metadataOnly": true,
+      "table": "shared_guild_clock"
+    }
+  },
+  "candidateSchemaMigrations": {
+    "count": 26,
+    "sha256": "bd40740d2b2b36f7da318be03889267234a5a0b309e634e712159702f0e8a494"
+  },
+  "cloneAuditBinarySha256": "c518246ccb7d6865935d0a7f7b84ad3167bb12e8459bd5a73760d1779d914a08",
+  "credentialBindingKeysUnchanged": true,
+  "database": "mir2_promotion_windows_acceptance_050950f5b977",
+  "environment": "test",
+  "expectedAuthTablesChanged": [
+    "identity_audit_events",
+    "identity_credentials",
+    "identity_sessions",
+    "promotion_audit_log",
+    "promotion_idempotency",
+    "promotion_outbox",
+    "promotion_payout_addresses"
+  ],
+  "externalNetworkDenied": true,
+  "externalProvidersEnabled": false,
+  "financialAcceptanceScope": "native PG regression plus synthetic clone proof; no real mobile signature, recharge, or chain payout",
+  "gatewayBinarySha256": "de996bb177e9ed1a5fddb31a19de1346c0ff24aa6a004bce29de9acd583e3ae6",
+  "historicalAccountsUnchanged": true,
+  "historicalCharactersUnchanged": true,
+  "historicalItemsUnchanged": true,
+  "historicalOrdersUnchanged": true,
+  "historicalSavesUnchanged": true,
+  "idempotentPaymentAttribution": true,
+  "missingEvidence": [],
+  "nativePgEvidence": {
+    "checks": {
+      "cloneAudit": {
+        "logSha256": "82cbd5a246f7465bdabfc23b607e231bd5e1f5c06c84ea42173aa197d1265a58",
+        "passed": true,
+        "testsExecuted": 6
+      },
+      "idempotentPaymentAttribution": {
+        "logSha256": "02af4a0ca264dade831c877b188af86d41b8eb6ad777f13b23c89c0ff50147af",
+        "passed": true,
+        "testsExecuted": 35
+      },
+      "noHistoricalRevenueInferred": {
+        "logSha256": "02af4a0ca264dade831c877b188af86d41b8eb6ad777f13b23c89c0ff50147af",
+        "passed": true,
+        "testsExecuted": 35
+      },
+      "walletIdentityRegression": {
+        "logSha256": "00fe73cba8dcf5f7e44b08cc0d158ead1b5f62bb4968391ba33265a291a172cc",
+        "passed": true,
+        "testsExecuted": 8
+      }
+    },
+    "ciJob": {
+      "conclusion": "success",
+      "id": 124076231501,
+      "name": "backend",
+      "stepName": "Run native PostgreSQL promotion and billing regressions"
+    },
+    "jobName": "backend",
+    "logs": {
+      "CLONE-CLI-TESTS.log": {
+        "logSha256": "82cbd5a246f7465bdabfc23b607e231bd5e1f5c06c84ea42173aa197d1265a58",
+        "passed": true,
+        "testsExecuted": 6
+      },
+      "NATIVE-PG-TESTS.log": {
+        "logSha256": "02af4a0ca264dade831c877b188af86d41b8eb6ad777f13b23c89c0ff50147af",
+        "passed": true,
+        "testsExecuted": 35
+      },
+      "WALLET-IDENTITY-TESTS.log": {
+        "logSha256": "00fe73cba8dcf5f7e44b08cc0d158ead1b5f62bb4968391ba33265a291a172cc",
+        "passed": true,
+        "testsExecuted": 8
+      }
+    },
+    "receiptSha256": "9800c3900a942a3b1fe0f281f410f0439bc74cbe599d147490f0adeefd3ddd5b",
+    "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+    "stepName": "Run native PostgreSQL promotion and billing regressions",
+    "testsExecuted": 49,
+    "verified": true,
+    "workflowRunId": "41059751540"
+  },
+  "noHistoricalRevenueInferred": true,
+  "originalBackupSha256": "c80467b70dfd82907570289fa6b4583eea7b7242c50e396be682e101ed73d9f7",
+  "originalNoWrites": true,
+  "originalProtectedDataUnchanged": true,
+  "originalSchemaMigrations": {
+    "count": 19,
+    "sha256": "a503b5389d1353d78194e6d5fd6d939617bd950cea61dbe92e15410a3fb5749a"
+  },
+  "originalUnchangedMeaning": "No helper writes/restarts to original realm; protected history preserved; background clock metadata may advance.",
+  "passed": true,
+  "path": "/var/backups/mir2-windows-promotion-bridge-20261030/050950f5b9773a36901861a1a95c18b8058793a5/CLONE-ACCEPTANCE-20261030T140912Z-31d83869.json",
+  "payoutRemainsOff": true,
+  "phase": "clone-acceptance",
+  "realMobileSignature": false,
+  "runtimeClockBusinessProof": {
+    "shared_conquests": {
+      "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+      "count": 1,
+      "metadataOnly": true,
+      "table": "shared_conquests"
+    },
+    "shared_guild_clock": {
+      "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+      "count": 1,
+      "metadataOnly": true,
+      "table": "shared_guild_clock"
+    }
+  },
+  "runtimeClockTablesMayAdvance": [
+    "shared_conquests",
+    "shared_guild_clock"
+  ],
+  "schema": "mir2.windows-promotion-clone-acceptance.v1",
+  "schemaAudit": {
+    "accounts": 120,
+    "accountsSeeded": 0,
+    "allPersistedFieldsRetained": true,
+    "characterSaves": 36,
+    "characters": 36,
+    "cloneOnly": true,
+    "expectedMigrations": 26,
+    "financialRowsWritten": 0,
+    "migrationsAppliedTwice": true,
+    "originalRowsPreserved": true,
+    "originalRowsSha256": "2fc1377052fb3c5aeb6893aca0143092295971561386a5000f35547e20b39129",
+    "typedRowsWithEmptyDefaultNormalization": 0
+  },
+  "sha256": "5a59c9fa694d8d3f2306d39aaad5950c023cefc8c0c040c3cb7101432a04742f",
+  "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+  "syntheticServerProof": true,
+  "unchangedHistoricalHashes": {
+    "_billing": {
+      "count": 4,
+      "sha256": "7ccfa7d0bb50d33ffa23712df2970b55fd7b0a496bbaed55d2650f3dda081434"
+    },
+    "_historicalOrders": {
+      "count": 13,
+      "sha256": "2813af44df26cfc33cbe731f1204f258aef2b410a037af6f828b4c83b5793033"
+    },
+    "accounts": {
+      "count": 120,
+      "sha256": "6e36e8bd8a41bd2d507543f38019eef3bad6ad16c6ff058a18fa2078fddcdbac"
+    },
+    "character_items": {
+      "count": 215,
+      "sha256": "bd21f358a5d2912852709582088ade4145adb5e4b8fdece88d4367912a0e8fe7"
+    },
+    "character_mail": {
+      "count": 8,
+      "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+    },
+    "character_saves": {
+      "count": 36,
+      "sha256": "c2a193678ec0f8b5aeaecb6bab2ebcac14b4f1bc381b8ccf6d179c60ebb7ca41"
+    },
+    "characters": {
+      "count": 36,
+      "sha256": "97a912df6931f7c70bfb3bdd934ff05c15ff641998421563a09f5e71c25956e8"
+    }
+  },
+  "walletHttp": {
+    "accountIdMatchesOriginal": true,
+    "accountIdSha256": "2d305292dd23aa9f12d3b6367d80ec06a3ff78cf553a41b542b7bd999caa61c6",
+    "characterListMatchesOriginal": true,
+    "characterListSha256": "5b432c5d235c0c2a67bd7499822fd7b990d5675bfcba4f0e32758fbc368f0a56",
+    "characters": 1,
+    "credentialIdMatchesOriginal": true,
+    "payoutRemainsOff": true,
+    "realMobileSignature": false,
+    "singleUseReplayRejected": true,
+    "successfulExchanges": 2,
+    "syntheticServerProof": true,
+    "wrongSecretRejected": true
+  },
+  "walletIdentityMappedWithoutAccountMerge": true
+}

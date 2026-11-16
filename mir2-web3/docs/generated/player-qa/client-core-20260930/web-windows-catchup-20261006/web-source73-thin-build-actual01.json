@@ -1,0 +1,71 @@
+{
+  "owner": "Root",
+  "kind": "Source73 actual original Thin export and complete DATA acceptance",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/thin-build01-config.json",
+    "bytes": 6412,
+    "sha256": "42ce11f7058d6800b09ace78b1a7bfa02b7eabf4f4c1a91628c7b6d314a26469"
+  },
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/standalone-preparation03/full-source-snapshot01.json",
+    "bytes": 75824066,
+    "sha256": "3e51721c2b684acbb4cfb6a608f135b997ba51094c1adaf77c6ac4cfc4806b52"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 87132,
+    "kind": "Source73 original Thin export after strict Next03 and final portable25",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 44227,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/thin-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/thin-build01/stdout.log",
+    "bytes": 83383,
+    "sha256": "eb23b8d24a4dfccf153dd6ddb8122a90a665e1d4ee4822da7deb2cafb271c7e1"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/thin-build01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sizeReport": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/thin-build01/size-report.json",
+    "bytes": 83383,
+    "sha256": "eb23b8d24a4dfccf153dd6ddb8122a90a665e1d4ee4822da7deb2cafb271c7e1"
+  },
+  "physicalManifest": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/source73-thin-output-manifest01.json",
+    "bytes": 2321233,
+    "sha256": "c8ba3ca218d9c62461179185590d6cd3de5a0b457918c77a2f2f325c48758a1d"
+  },
+  "package": {
+    "files": 4419,
+    "bytes": 315382564,
+    "directoriesIncludingRoot": 752
+  },
+  "capBytes": 377487360,
+  "capPassed": true,
+  "canonicalWarehouseSkinsHashMatched": 16,
+  "localMapFramesHashMatched": 116,
+  "coreLeavesHashMatched": 6,
+  "uiJsonParsedCompared": 229,
+  "uiJsonParsedDifferences": 0,
+  "dependencyWarningCount": 59,
+  "dependencyWarningMultisetUnchangedAfterExactRootsNormalized": true,
+  "unchangedOriginalCaller": true,
+  "originalCallerClosed": true,
+  "originalCallerPostguardCompleted": true,
+  "accepted": true,
+  "uiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

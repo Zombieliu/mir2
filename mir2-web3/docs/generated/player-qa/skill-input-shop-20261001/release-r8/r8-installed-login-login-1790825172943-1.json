@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "mir2-native-visual-capture-v1",
+  "producer": "windows-native",
+  "runId": "r8-3f5e615-installed-login-20261001",
+  "scene": "login",
+  "capturedAt": "2026-10-01T03:26:12.943Z",
+  "imagePath": "r8-installed-login-login-1790825172943-1.png",
+  "imageSha256": "6ffa8ce7a990c7ec6786ca7a6ee10904440c3795cfe7336c219cf4f7b2eb695f",
+  "logicalSize": {
+    "width": 1024,
+    "height": 768
+  },
+  "dpiScale": 1.0,
+  "uiState": "shell=login;screen=InGame;panel=None;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+  "world": null,
+  "build": {
+    "sourceRevision": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+    "executableSha256": "23356513e9f8dce3b3e12a2fad9f89ba5f775fba643fbce14763f2c7f6d88431",
+    "assetManifestSha256": "d8e0f3ce3518ab1c2d8f9b020dcf5957e5194cdc1adaffb848c9b09443cef9e0"
+  }
+}

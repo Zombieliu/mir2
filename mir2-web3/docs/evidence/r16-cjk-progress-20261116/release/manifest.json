@@ -1,0 +1,31 @@
+{
+  "files": [
+    {
+      "name": "release-pin.json",
+      "bytes": 1048,
+      "sha256": "bc12f49c08e61f45ce13facf64fdc9d4679b0bc06dedf5df0e668c5e3aec1540",
+      "sourceSha256": "bc12f49c08e61f45ce13facf64fdc9d4679b0bc06dedf5df0e668c5e3aec1540"
+    },
+    {
+      "name": "source-closure.json",
+      "bytes": 39779,
+      "sha256": "667516be1f058734105efdfea32b7e074898eaec82fa338caae808dced3b4dc4",
+      "sourceSha256": "667516be1f058734105efdfea32b7e074898eaec82fa338caae808dced3b4dc4"
+    },
+    {
+      "name": "baseline-readback.json",
+      "bytes": 414,
+      "sha256": "e7c51c88a4d2d526b976cc5d9ed721e5ed8a0f0c23bb9d1bd130ebe0360f23eb",
+      "sourceSha256": "e7c51c88a4d2d526b976cc5d9ed721e5ed8a0f0c23bb9d1bd130ebe0360f23eb"
+    },
+    {
+      "name": "release-guards.log",
+      "bytes": 18328,
+      "sha256": "2af39a8bf8b3bf16fcf19e417e440dd76f8b91c1e179fc59e5c680fd2fa1a2db",
+      "sourceSha256": "d0e8e1cf4f0c6fece8e3ad716971fd607e5b12cbaa5e15d80cf535af5a5294b5"
+    }
+  ],
+  "productionDeployment": false,
+  "backendRun": 43782096198,
+  "backendOutcomeClaimed": false
+}

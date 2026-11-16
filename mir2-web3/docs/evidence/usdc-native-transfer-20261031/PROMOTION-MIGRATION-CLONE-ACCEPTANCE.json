@@ -1,0 +1,86 @@
+{
+  "audit": {
+    "binarySha256": "790b9dc25d6632e3f8d211c1d479ba83ddc04f8a9cad1e350631ca3f275f5d14",
+    "migrationCount": 28,
+    "mode": "--audit-clone",
+    "newTablesEmpty": true,
+    "oldMigrationRowsPreserved": 27
+  },
+  "boundary": "Clone-only preparation. Original staging needs a fresh preview using the exact Gateway target DSN; clone proof and connection transport cannot be promoted.",
+  "connectionTransportNotPromoted": true,
+  "docker": false,
+  "negativeProof": {
+    "allRowsUnchanged": true,
+    "rejected": true
+  },
+  "noMemberConfirmationPerformed": true,
+  "noOriginalWrites": true,
+  "noPaymentOperations": true,
+  "passed": true,
+  "preview": {
+    "reviewedSnapshotSha256": "ba7ac394fcb1bce43ad02ddf37c0157f0cf439aaa0665f86e366b9fa0b488d71",
+    "snapshotSha256": "ba7ac394fcb1bce43ad02ddf37c0157f0cf439aaa0665f86e366b9fa0b488d71",
+    "sourceFinalBoundAndAuditVerified": true,
+    "sourceRelationSha256": "8f68a02a90eaceb17bee9affa8a9789a383003359931b09bb26499a37eb34977",
+    "targetLeaderCurrentTermsApproved": true
+  },
+  "proofCloneOnly": true,
+  "replay": {
+    "financialRowsUnchanged": true,
+    "newAttributions": 0,
+    "newCandidates": 0,
+    "newConfirmations": 0,
+    "newEvidence": 0,
+    "newPaymentClaims": 0,
+    "oldRowsPreserved": true,
+    "sameCandidateId": true,
+    "sameIdempotencyKey": true,
+    "sameMigrationId": true
+  },
+  "schema": "mir2.promotion-attribution-migration.clone-acceptance.v1",
+  "scopeSha256": "b4386e3ff730f4901d036ba40074e9509593483d122703367a9610192a76ee4b",
+  "sourceRealm": {
+    "backupSha256": "258407ff7afd7f57ae701973d76066ca0707bc01e70adcae1921de75f0e38ba3",
+    "baselineRowsSha256": "e08ee0020e7e45e1ce411cb31b8fd4129dd69ed1c9408ce8866de7fcf9ea5a47",
+    "database": "mir2_promotion_windows_acceptance_66b470c23f08",
+    "databaseIdentitySha256": "02af835615145b61084424dbfbc64fe44d27bc70f97e1a935578813bfe531c19",
+    "fullOldRowsPreserved": true,
+    "preservedOldRowsSha256": "e08ee0020e7e45e1ce411cb31b8fd4129dd69ed1c9408ce8866de7fcf9ea5a47",
+    "readOnly": true,
+    "roleSha256": "eb21ccfd88174a54465d7671b5d6473191933af11f9ab7f56c6d5582523510b6"
+  },
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "stage": {
+    "accountRowsAfterSha256": "4050fec8d6ea15c244da487fc07b9cbbce8e354d69bf55bb7dd0e60473ddd518",
+    "accountRowsBeforeSha256": "4050fec8d6ea15c244da487fc07b9cbbce8e354d69bf55bb7dd0e60473ddd518",
+    "attributionCountDelta": 0,
+    "auditCountDelta": 1,
+    "candidateCountDelta": 1,
+    "characterRowsAfterSha256": "57eb499e24c98531cadd9840bf90ec6e99f48cd7c3551b54ccbd008ec1dca361",
+    "characterRowsBeforeSha256": "57eb499e24c98531cadd9840bf90ec6e99f48cd7c3551b54ccbd008ec1dca361",
+    "cliBinarySha256": "e20c85e2ec26f8379811b77e55fc9d5308bdac51c21db3a4144cec35c45794f7",
+    "confirmationCountDelta": 0,
+    "evidenceCountDelta": 1,
+    "exactNewRowLinksVerified": true,
+    "financialRowsAfterSha256": "3d5498864ea1ed3444f0336f83445591c0c52e69779c5b89f56df54dede97a42",
+    "financialRowsBeforeSha256": "3d5498864ea1ed3444f0336f83445591c0c52e69779c5b89f56df54dede97a42",
+    "idempotencyCountDelta": 1,
+    "outboxCountDelta": 1,
+    "paymentClaimCountDelta": 0,
+    "reservedMicroUsdDelta": 0,
+    "snapshotSha256": "ba7ac394fcb1bce43ad02ddf37c0157f0cf439aaa0665f86e366b9fa0b488d71",
+    "sourceRowsAfterSha256": "e08ee0020e7e45e1ce411cb31b8fd4129dd69ed1c9408ce8866de7fcf9ea5a47",
+    "sourceRowsBeforeSha256": "e08ee0020e7e45e1ce411cb31b8fd4129dd69ed1c9408ce8866de7fcf9ea5a47",
+    "status": "pending_member_confirmation"
+  },
+  "targetRealm": {
+    "backupSha256": "27ad71b82d37b9199e59fe5962ccaba6bab0efc3d6d5c7a90d9309068203c013",
+    "baselineRowsSha256": "67db99ec8219e6fac6e3255f5e5bc5ea120e22bea8333029ea3cb0467735facb",
+    "database": "mir2_promotion_windows_acceptance_1b483b753a72",
+    "databaseIdentitySha256": "d184aa3a003c399f77a41990b65b4340a4b29c0956fd2252dee891db31787877",
+    "fullOldRowsPreserved": true,
+    "preservedOldRowsSha256": "67db99ec8219e6fac6e3255f5e5bc5ea120e22bea8333029ea3cb0467735facb",
+    "readOnly": false,
+    "roleSha256": "c408435663e49c123acedae833ffb7d02a21e25231821def03a73f6c545d8d55"
+  }
+}

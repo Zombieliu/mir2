@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: ground route keeps its goal after a rejected second step and resumes from authoritative location
+ok 1 - ground route keeps its goal after a rejected second step and resumes from authoritative location
+  ---
+  duration_ms: 2.6023
+  type: 'test'
+  ...
+# Subtest: map route keeps its goal after a rejected second step and resumes from authoritative location
+ok 2 - map route keeps its goal after a rejected second step and resumes from authoritative location
+  ---
+  duration_ms: 0.646
+  type: 'test'
+  ...
+# Subtest: quest route keeps its goal after a rejected second step and resumes from authoritative location
+ok 3 - quest route keeps its goal after a rejected second step and resumes from authoritative location
+  ---
+  duration_ms: 0.2614
+  type: 'test'
+  ...
+# Subtest: a live rejected Run endpoint leaves the first legal Walk open
+ok 4 - a live rejected Run endpoint leaves the first legal Walk open
+  ---
+  duration_ms: 0.3023
+  type: 'test'
+  ...
+# Subtest: Classic short steps, pickup approaches and unknown sends never gain retry authority
+ok 5 - Classic short steps, pickup approaches and unknown sends never gain retry authority
+  ---
+  duration_ms: 0.6428
+  type: 'test'
+  ...
+# Subtest: wrong scene, disabled NewMove, retired map and Q sources, and unproven corrections stop
+ok 6 - wrong scene, disabled NewMove, retired map and Q sources, and unproven corrections stop
+  ---
+  duration_ms: 1.3559
+  type: 'test'
+  ...
+# Subtest: a ground owner retired during prediction cannot enter the socket
+ok 7 - a ground owner retired during prediction cannot enter the socket
+  ---
+  duration_ms: 0.1619
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 582.8856

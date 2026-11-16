@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "scope": "Description-only ledgerSource correction; actual source copy/plan/code were always W15, no tool or gameplay behavior changed.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\prepare-config-before-ledger-reference-correction-v1.json",
+    "bytes": 8209,
+    "sha256": "f828b90d341b0ef91d685b6f23608348b63285aba5ea7abb4740df74202e2371"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\prepare-config-pending-v1.json",
+    "bytes": 8209,
+    "sha256": "bb61014ac6a88ab588c3fa7dde029cd05a9dfae343b29d6a0d45d677feea5930"
+  },
+  "field": "authOrigin.ledgerSource",
+  "oldValue": "Latest actual W14 traffic ledger exact bytes",
+  "newValue": "Latest actual W15 traffic ledger exact bytes",
+  "rawForwardAndInverseExact": true,
+  "priorPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\preparation-v1.json",
+    "bytes": 3685,
+    "sha256": "92ae661202af767e4fa0a1e828901326e7590e36a1edc8076d10fc36c1407cd1"
+  },
+  "priorDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\derivation-v1.json",
+    "bytes": 36177,
+    "sha256": "67ff371c859c3a80b1a8850b8b69f2f7b94f4f752862cde4212fe0bf9389ae0f"
+  },
+  "toolsUnchanged": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

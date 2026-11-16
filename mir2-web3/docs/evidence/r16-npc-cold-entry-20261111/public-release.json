@@ -1,0 +1,247 @@
+{
+  "release": {
+    "productRevision": "534322e790c7feccbc21e48541119f340a2e40ee",
+    "releaseControlRevision": "d5ba89c613b7ffd72de300263760e797066b41d4",
+    "includesPlayerFeedback": "6997f810ed1d88d1dac9220b851a0935a893145d",
+    "alias": "numeron.obelisk.build",
+    "deployment": "dpl_CyJSy2BZbYwkbXmnGaAxBEdZhRNR",
+    "checkedAt": "2026-11-10T16:27:25.7634795Z",
+    "exactPublicVersion": true,
+    "rollbackTarget": "dpl_DEzGSSF6rTt1fdPUuSuNgsYwiz9f",
+    "stageRun": 42851726987,
+    "promotionRun": 42853991899,
+    "candidateQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "publicQrCanary": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "hashes": {
+      "aliasReceipt": "867e68d76fe94c9540eb7cc17fb782889258dfffd152016850d0d27da74e16af",
+      "stageReceipt": "c5f6340260d309063b3a0c6f72373c11f3fc4f705bfe5ac1e863ca17b8f364c3",
+      "promotionReceipt": "74c2ff05a7b7fb170ee8ac055154d05f91dd3ec50ffbb75a8c97227e23051496"
+    }
+  },
+  "ordinaryBrowserQr": {
+    "results": [
+      {
+        "locale": "zh-CN",
+        "passed": true,
+        "browserClosed": true,
+        "createAttempts": 1,
+        "matrix": true,
+        "pending": true,
+        "cancel": true,
+        "pollingStopped": true,
+        "noPreauthGameChunks": true,
+        "failure": null
+      },
+      {
+        "locale": "zh-TW",
+        "passed": true,
+        "browserClosed": true,
+        "createAttempts": 1,
+        "matrix": true,
+        "pending": true,
+        "cancel": true,
+        "pollingStopped": true,
+        "noPreauthGameChunks": true,
+        "failure": null
+      }
+    ],
+    "receiptSha256": "05f40aa1e399eacfc9b0ca361e71aea938f888915630eaec3aa6d809522ea7ef"
+  },
+  "servedLocaleChunks": {
+    "reductionPercentDecoded": 27.92,
+    "rows": [
+      {
+        "name": "r16-gameplay-locales",
+        "id": 8541,
+        "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+        "headersMs": 748,
+        "status": 200,
+        "encoding": "br",
+        "mimeType": "application/javascript; charset=utf-8",
+        "edgeCache": "MISS",
+        "functionCache": "MISS",
+        "cacheControl": "public, max-age=31536000",
+        "bodyMs": 6561,
+        "encodedBytes": 752975,
+        "decodedBytes": 3336037,
+        "decodedSha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+        "gameplaySha256": "287ba8aff6fe8b2c08bee5981928d7f3e8e1018d65d72c966bc47162f5ffa8ba",
+        "domains": {
+          "system": 4901,
+          "npc": 1,
+          "both": 90,
+          "keyed": 110,
+          "billing": 62
+        },
+        "entries": 5164,
+        "retainsKnownEagerNpcEntry": true,
+        "exactFrozenLocalMatch": true
+      },
+      {
+        "name": "r16-npc-locales",
+        "id": 9630,
+        "path": "/_next/static/chunks/r16-npc-locales.b5b4388782bb8789.js",
+        "headersMs": 733,
+        "status": 200,
+        "encoding": "br",
+        "mimeType": "application/javascript; charset=utf-8",
+        "edgeCache": "MISS",
+        "functionCache": "MISS",
+        "cacheControl": "public, max-age=31536000",
+        "bodyMs": 6858,
+        "encodedBytes": 451565,
+        "decodedBytes": 1292350,
+        "decodedSha256": "f731458f23c49ae458ec30bd0106e7a0b9e318066fb68ba3ae42a71bd1c65c01",
+        "gameplaySha256": "287ba8aff6fe8b2c08bee5981928d7f3e8e1018d65d72c966bc47162f5ffa8ba",
+        "domains": {
+          "npc": 2085
+        },
+        "entries": 2085,
+        "retainsKnownEagerNpcEntry": false,
+        "exactFrozenLocalMatch": true
+      }
+    ],
+    "receiptSha256": "4b4ec9734a9fd1c4f2182b7f5eb2aeb76868a5c012a3e75c0c8a0ab4e19c3cae"
+  },
+  "signedReplay": {
+    "completeFirstPlayable": false,
+    "returnedToSelect": true,
+    "walletVersion": "dubhe-web@0.6.13",
+    "walletRevision": "c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b",
+    "defaultBrowserNetwork": true,
+    "customBrowserNetworkSettings": false,
+    "testOnlySystemProxyBypass": false,
+    "authenticQrImage": true,
+    "testnetWalletCreated": true,
+    "oneAuthorizedLoginSignature": true,
+    "exchangeHttpStatuses": [
+      200
+    ],
+    "protocol": {
+      "gameSockets": 1,
+      "passkeyLogin": 1,
+      "loginSuccess": 1,
+      "newCharacter": 1,
+      "newCharacterSuccess": 1,
+      "startGame": 1,
+      "startGameResult": 4,
+      "logOut": 1,
+      "logOutSuccess": 1,
+      "unexpectedMutation": 0
+    },
+    "timing": {
+      "clockEpochMs": 1794328098812,
+      "startIntentMs": 104009,
+      "startAckMs": 107898,
+      "authoritativeStarterMapMs": 107904,
+      "authoritativeSelfMs": 107906,
+      "logoutIntentMs": 228119,
+      "logoutAckMs": 229241,
+      "manifestAttemptsBeforeStart": 1,
+      "manifestAttemptsAtOrAfterStart": 0,
+      "starterRegionRequestMs": 108110,
+      "starterRegionHeadersMs": 112456,
+      "starterRegionBodyMs": null,
+      "sceneSpritesReadyMs": null,
+      "localeRequestMs": 73135,
+      "localeBodyMs": 92919,
+      "localeReadyMs": 92945,
+      "firstPlayableFrameMs": null,
+      "rendererBodyMs": null
+    },
+    "authoritativeMapReplyMs": 107904,
+    "mapRequestAttempts": [
+      {
+        "scope": "crystalRegion",
+        "release": "20261108-r16-08ec86d5105c",
+        "starter": true,
+        "geometry": {
+          "x": 296,
+          "y": 620,
+          "width": 56,
+          "height": 72
+        },
+        "path": "/api/scene/crystal",
+        "requestedMs": 108110,
+        "decodedBytes": 458475,
+        "encodedBytes": 0,
+        "status": 200,
+        "ttfbMs": 4346,
+        "headersMs": 112456,
+        "protocol": "h2",
+        "serviceWorker": true,
+        "diskCache": false,
+        "contentEncoding": "br",
+        "edgeCache": "DYNAMIC",
+        "functionCache": "MISS",
+        "sceneCache": "miss",
+        "missingAssetCount": 0,
+        "firstDataMs": 115818,
+        "lastDataMs": 119652,
+        "failure": "net::ERR_ABORTED",
+        "failureMs": 120458
+      },
+      {
+        "scope": "crystalRegion",
+        "release": "20261108-r16-08ec86d5105c",
+        "starter": true,
+        "geometry": {
+          "x": 296,
+          "y": 620,
+          "width": 56,
+          "height": 72
+        },
+        "path": "/api/scene/crystal",
+        "requestedMs": 120663,
+        "decodedBytes": 0,
+        "encodedBytes": 0,
+        "status": 200,
+        "ttfbMs": 2969,
+        "headersMs": 123632,
+        "protocol": "h2",
+        "serviceWorker": false,
+        "diskCache": false,
+        "contentEncoding": "br",
+        "edgeCache": "DYNAMIC",
+        "functionCache": "HIT",
+        "sceneCache": "miss",
+        "missingAssetCount": 0,
+        "failure": "net::ERR_ABORTED",
+        "failureMs": 131635
+      }
+    ],
+    "gameplayLocale": {
+      "scope": "gameplayLocale",
+      "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+      "requestedMs": 73135,
+      "decodedBytes": 3336037,
+      "encodedBytes": 753839,
+      "status": 200,
+      "ttfbMs": 19789,
+      "headersMs": 92924,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "br",
+      "edgeCache": "MISS",
+      "functionCache": "MISS",
+      "firstDataMs": 92924,
+      "lastDataMs": 92925,
+      "transferMs": 19784,
+      "bodyCompleteMs": 92919,
+      "totalEncodedBytes": 754140
+    },
+    "firstPlayableFailure": "FIRST_PLAYABLE_SCENE_NOT_OBSERVED",
+    "walk": "not-reached",
+    "sourceReceiptSha256": "9273c86544b334bde8a934b6a5c86d1d34c405480488bd8c99f54576b0db481d",
+    "desktopReceiptSha256": "f6d25c57ddc4f555f4f6b61466b054876bd814c653e088c4d154a4c801f1cdea"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-11-14T23:15:14.038Z",
+  "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "scope": "Unpaired read-only Node HTTP checks of three previously unobserved-recovery paths, against app and two current-release paths. No browser, credentials, game account, cache injection or production write; not a reproduction of the historical cohort or a browser performance measurement.",
+  "configVersion": "20261108-r16-08ec86d5105c",
+  "rows": [
+    {
+      "url": "https://numeron.obelisk.build/original-ui/Prguse/1656.png",
+      "status": 200,
+      "bytes": 794,
+      "sha256": "e3f0d75de8f816a9af7889e1c4e642d0f33c055a0d559650f95acd2869037c1c",
+      "matchesFrozenLocal": true,
+      "durationMs": 1347
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse/1656.png",
+      "status": 200,
+      "bytes": 794,
+      "sha256": "e3f0d75de8f816a9af7889e1c4e642d0f33c055a0d559650f95acd2869037c1c",
+      "matchesFrozenLocal": true,
+      "durationMs": 891
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse/1656.png",
+      "status": 200,
+      "bytes": 794,
+      "sha256": "e3f0d75de8f816a9af7889e1c4e642d0f33c055a0d559650f95acd2869037c1c",
+      "matchesFrozenLocal": true,
+      "durationMs": 639
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/Prguse2/1202.png",
+      "status": 200,
+      "bytes": 13684,
+      "sha256": "f071ab4b78e34e2e5fb11ed5e69f6b19a8a433d8d469102a0af5a365ee698b4e",
+      "matchesFrozenLocal": true,
+      "durationMs": 568
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse2/1202.png",
+      "status": 200,
+      "bytes": 13684,
+      "sha256": "f071ab4b78e34e2e5fb11ed5e69f6b19a8a433d8d469102a0af5a365ee698b4e",
+      "matchesFrozenLocal": true,
+      "durationMs": 1278
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Prguse2/1202.png",
+      "status": 200,
+      "bytes": 13684,
+      "sha256": "f071ab4b78e34e2e5fb11ed5e69f6b19a8a433d8d469102a0af5a365ee698b4e",
+      "matchesFrozenLocal": true,
+      "durationMs": 230
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/Title/516.png",
+      "status": 200,
+      "bytes": 251,
+      "sha256": "1b4b23d93c46de53b8eb1ac80756fb84ca0a5bc65221eba9c32e219f28242c22",
+      "matchesFrozenLocal": true,
+      "durationMs": 804
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/Title/516.png",
+      "status": 200,
+      "bytes": 251,
+      "sha256": "1b4b23d93c46de53b8eb1ac80756fb84ca0a5bc65221eba9c32e219f28242c22",
+      "matchesFrozenLocal": true,
+      "durationMs": 575
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/Title/516.png",
+      "status": 200,
+      "bytes": 251,
+      "sha256": "1b4b23d93c46de53b8eb1ac80756fb84ca0a5bc65221eba9c32e219f28242c22",
+      "matchesFrozenLocal": true,
+      "durationMs": 250
+    }
+  ]
+}

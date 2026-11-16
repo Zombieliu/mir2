@@ -1,0 +1,93 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-host-focused-results.json",
+    "bytes": 2413,
+    "sha256": "9dc0bda0d027f418b8021096398b76a1189ebdf8b6c4635118d5c90517189dec"
+  },
+  "producerReport": [
+    {
+      "filter": "wallet_login::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:12:47.9867282Z",
+      "elapsedSeconds": 32.8958565,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-01-wallet-login-tests.log",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "wallet_login_http::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:20.9188993Z",
+      "elapsedSeconds": 0.4333613,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-02-wallet-login-http-tests.log",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "shell_bridge::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:21.3548168Z",
+      "elapsedSeconds": 0.4201827,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-03-shell-bridge.log",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_protocol::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:21.7766912Z",
+      "elapsedSeconds": 0.418497,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-04-native-protocol-tests.log",
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "billing_browser::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:22.1968965Z",
+      "elapsedSeconds": 0.4197525,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-05-billing-browser-tests.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_fonts::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:22.6184645Z",
+      "elapsedSeconds": 0.4800389,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-06-native-fonts-tests.log",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_locale::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:23.1047387Z",
+      "elapsedSeconds": 0.5053899,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-07-native-locale-tests.log",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "packed_assets::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:13:23.6123765Z",
+      "elapsedSeconds": 0.4394567,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-08-packed-assets-tests.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

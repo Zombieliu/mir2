@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH44_SOURCE_AND_RELEASE",
+  "sourceCommit": null,
+  "backendInputCount": 44,
+  "backendSourceManifest": null,
+  "releaseRecord": null,
+  "binary": null,
+  "buildReceipt": null,
+  "buildLog": null,
+  "rootFunctionalValidation": null,
+  "reason": "Root must bind a real new committed diagnostic44-source Release and fresh binary first. Historical5c2/d879,468/a430 and461f/855b cannot satisfy this template. No finalization, account creation, registration or realm execution is authorized by preparation."
+}

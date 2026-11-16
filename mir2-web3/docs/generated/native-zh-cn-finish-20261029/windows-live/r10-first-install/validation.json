@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "kind": "actual-r10-first-silent-install-execution-only",
+  "execution": "execution.json",
+  "sourceReceipt": {
+    "filename": "installer-r10-first-execution.json",
+    "bytes": 791,
+    "sha256": "fea90adc17479e5d23ea5ebfe9adc0e22c8335b25c5638b66fb4949a9f3748f0",
+    "included": false
+  },
+  "setupSha256": "6a196bc8010b95bed6c94ee9472ee56897bc7a23ac5e02e0bc72eb65176b16c8",
+  "exitCode": 0,
+  "elapsedSeconds": 328.7634611,
+  "installedCompleteFileVerificationPendingAtThisPhase": true,
+  "actualLauncherUpdaterGameNotYetVerifiedAtThisPhase": true,
+  "normalInstallerActuallyInstalledByThisReport": false,
+  "r9FailureNotRelabeledPassed": true
+}

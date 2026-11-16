@@ -1,0 +1,8 @@
+
+running 3 tests
+test runtime::zone::runtime::player_magic_cooldown_tests::accepted_soulfire_uses_zone_clock_until_exact_spell_ready_time ... ok
+test runtime::zone::runtime::player_magic_cooldown_tests::uncast_and_rejected_magic_do_not_create_or_extend_cooldown ... ok
+test runtime::zone::runtime::player_magic_cooldown_tests::cooldown_getter_includes_global_gate_without_cross_owner_leakage ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1860 filtered out; finished in 0.11s
+

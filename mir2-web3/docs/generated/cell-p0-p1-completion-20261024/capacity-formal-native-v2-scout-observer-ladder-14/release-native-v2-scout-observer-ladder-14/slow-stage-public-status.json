@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "reasons": [],
+  "stopRequested": false,
+  "stderrEnded": true,
+  "writerFinished": true,
+  "rowsQueued": 1145,
+  "bytesQueued": 108391,
+  "maxBufferedLineBytes": 204,
+  "lineLimitBytes": 8192,
+  "totalLimitBytes": 33554432,
+  "writeLimitBytes": 1048576,
+  "writeHighWaterMarkBytes": 1048576,
+  "maxQueuedWriteBytes": 1849,
+  "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+  "thresholdMs": 50,
+  "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public.jsonl"
+}

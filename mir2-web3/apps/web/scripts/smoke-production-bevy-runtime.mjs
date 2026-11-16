@@ -1,4 +1,5 @@
 import runtimeManifest from "../lib/generated/bevy_runtime_version.json" with { type: "json" };
+import { verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
 import productionAssets from "../../../config/production-web-assets.json" with { type: "json" };
 
 const args = parseArgs(process.argv.slice(2));
@@ -7,22 +8,13 @@ const runtimeVersion = String(args.runtimeVersion ?? runtimeManifest.version ?? 
 if (!/^bevy-[a-f0-9]{16}$/i.test(runtimeVersion)) {
   throw new Error(`Invalid Bevy runtime version: ${runtimeVersion || "empty"}`);
 }
-const BEVY_RUNTIME_BACKENDS = [
-  {
-    label: "webgpu",
-    paths: [
-      `/bevy-runtime/v/${runtimeVersion}/pkg-webgpu/mir2_bevy_runtime.js`,
-      `/bevy-runtime/v/${runtimeVersion}/pkg-webgpu/mir2_bevy_runtime_bg.wasm`,
-    ],
-  },
-  {
-    label: "webgl2",
-    paths: [
-      `/bevy-runtime/v/${runtimeVersion}/pkg-webgl2/mir2_bevy_runtime.js`,
-      `/bevy-runtime/v/${runtimeVersion}/pkg-webgl2/mir2_bevy_runtime_bg.wasm`,
-    ],
-  },
-];
+const BEVY_RUNTIME_BACKENDS = verifyBevyRuntimeVersion(runtimeManifest).packages.map((entry) => ({
+  label: entry.id,
+  paths: [
+    `/bevy-runtime/v/${runtimeVersion}/${entry.packageDir}/mir2_bevy_runtime.js`,
+    `/bevy-runtime/v/${runtimeVersion}/${entry.packageDir}/mir2_bevy_runtime_bg.wasm`,
+  ],
+}));
 
 const runtimeBaseUrl = normalizeBaseUrl(
   args.runtimeBaseUrl ??

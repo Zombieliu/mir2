@@ -1,0 +1,157 @@
+{
+  "schema": "r16-v18-quest-footer-focused-scoped-receipt/1",
+  "passed": true,
+  "createdAt": "2026-11-06T00:41:36.040Z",
+  "releaseReportedByCoordinator": {
+    "buildId": "-WCOg-GmVTGJ9mSZugKL0",
+    "renderer": "bevy-a46905128c316656"
+  },
+  "sourceProof": {
+    "file": "display-v18-footer-browser-proof.json",
+    "sha256": "40db7b92e280d40f44cecc89511537a3edd3c9512e2cf1eee2ede911e6eaf78a"
+  },
+  "checks": [
+    {
+      "name": "adjacent-full-fencing-hover-and-leave-ru",
+      "passed": true
+    },
+    {
+      "name": "current-diary-and-real-footer-controls-ru",
+      "passed": true
+    },
+    {
+      "name": "current-diary-and-real-footer-controls-id",
+      "passed": true
+    }
+  ],
+  "images": [
+    {
+      "file": "01-quest-diary-ru.png",
+      "bytes": 105464,
+      "sha256": "57c698fa47066e98da48724a5f2c1b78443cec78fe931eb63e23396ce8c86af9"
+    },
+    {
+      "file": "02-quest-footer-ru.png",
+      "bytes": 20063,
+      "sha256": "794d451b94a63446516055d600cffc1202a023e9c4d778bd273df3100b6812ee"
+    },
+    {
+      "file": "03-adjacent-fencing-hover-ru.png",
+      "bytes": 1017563,
+      "sha256": "60425f14d986893b5cca8cee0ad9443994c1b074c859ef3e40befdb882bfd9ed"
+    },
+    {
+      "file": "04-quest-diary-id.png",
+      "bytes": 103396,
+      "sha256": "4961c125a472200093a5a464d56bc075002457d936213a4749275bb10dd47a78"
+    },
+    {
+      "file": "05-quest-footer-id.png",
+      "bytes": 19567,
+      "sha256": "1ab35f187ba4820eefc054ad8776ca38672a31ab8195de094e45e72be1912e95"
+    }
+  ],
+  "actualAuthority": {
+    "fingerprint": "c121e8031e318d7b4c11942665423540ebb478cdcf83984081559d4cf0cfb55a",
+    "position": {
+      "x": 325,
+      "y": 290
+    },
+    "map": "0",
+    "level": 9,
+    "gold": 180,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005
+    ],
+    "activeQuests": [
+      {
+        "questId": 2110006,
+        "stage": "inProgress",
+        "current": 0,
+        "required": 1
+      }
+    ],
+    "chapter": {
+      "id": "forest",
+      "done": 1,
+      "total": 5
+    },
+    "sequence": 594
+  },
+  "visualReview": [
+    {
+      "language": "ru",
+      "allThreeFooterCaptionsPresent": true,
+      "previousAndNextCompleteOnOneLine": true,
+      "clippedGlyphsObserved": false,
+      "actualChapterText": "Эта глава 1/5",
+      "actualFooterCaptions": {
+        "ui.previous": "Предыдущее",
+        "ui.next": "Следующий",
+        "ui.close": "Закрыть"
+      },
+      "actualPageCounter": "1/1",
+      "previousNextPhysicallyClicked": true,
+      "pageChangeClaim": false,
+      "normalFooterClose": true
+    },
+    {
+      "language": "id",
+      "allThreeFooterCaptionsPresent": true,
+      "previousAndNextCompleteOnOneLine": true,
+      "clippedGlyphsObserved": false,
+      "actualChapterText": "Bab ini 1/5",
+      "actualFooterCaptions": {
+        "ui.previous": "Sebelumnya",
+        "ui.next": "Berikutnya",
+        "ui.close": "Tutup"
+      },
+      "actualPageCounter": "1/1",
+      "previousNextPhysicallyClicked": true,
+      "pageChangeClaim": false,
+      "normalFooterClose": true
+    }
+  ],
+  "adjacentFencing": {
+    "language": "ru",
+    "sourceComplete": true,
+    "exactFullBody": true,
+    "level": 0,
+    "nextThreshold": 7,
+    "visuallyPresent": true,
+    "clearedOnPointerLeave": true
+  },
+  "network": {
+    "failed": 0,
+    "httpErrors": 0,
+    "cancellations": 10,
+    "consoleErrors": 0,
+    "warningEvents": 10
+  },
+  "mutationScope": {
+    "normalUiLoginOnly": true,
+    "gameplayEconomicQuestActions": 0,
+    "authorityFingerprintUnchanged": true,
+    "originalOwnerOrAloAccess": false,
+    "modelInstructions": 0
+  },
+  "privateEvidence": {
+    "scannedRawTextFiles": 2,
+    "privateValueMatches": 0,
+    "fixedIdentityMaskOnly": true
+  },
+  "cleanup": {
+    "ordinaryLogouts": 2,
+    "chineseRestored": true,
+    "browserClosed": true,
+    "qaReleased": true
+  },
+  "limitations": [
+    "Focused ru/id follow-up only; v17 ten-locale evidence and its original failed runs remain unchanged.",
+    "The existing diary has one page; native footer captures and clicks do not establish a page transition."
+  ]
+}

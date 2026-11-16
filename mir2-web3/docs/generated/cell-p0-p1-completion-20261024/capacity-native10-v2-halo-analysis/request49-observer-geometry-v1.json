@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792891029840-02155527",
+  "requestId": "49",
+  "scope": "Public original driver receipts and historical source only. No additional raw or recording scan occurred while making this addendum.",
+  "pins": {
+    "originalRaw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.samples.jsonl",
+      "bytes": 8938171,
+      "sha256": "0c7d4f33b2e0a50dfc9a16c5331e5a6b3b25feb150cda01972a7244bec96443f",
+      "rows": 14021
+    },
+    "selected": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\selected-events-v1.json",
+      "bytes": 293598,
+      "sha256": "40c77dd1f91cc4426e4b9da372c1701e3c723d69f6795a67e86f683265e4fff7"
+    },
+    "attackTrace": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\request49-witness-loss-v1.json",
+      "bytes": 7778,
+      "sha256": "1596d9217b6028c18725f56df96bba859094b55839194da609ac0c81aa4674bb"
+    }
+  },
+  "sourceProof": {
+    "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+    "gitPath": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "gitBlobSha1": "9ba2882051e22984a4a166a6f2b5a8f5f61f732f",
+    "gitBlobBytes": 132218,
+    "gitBlobSha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55",
+    "historicalRawInput": {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+    },
+    "driverAggregateSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+    "driverManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-phase-window-timing-driver-frozen-v1.json",
+      "bytes": 15970,
+      "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+    },
+    "currentWorkingSourceUsed": false
+  },
+  "identityProof": {
+    "actor": "L26466201",
+    "rawLine": 12414,
+    "at": 1792891566340,
+    "sequence": 8059,
+    "packet": "ObjectRemove",
+    "peer": {
+      "objectId": 50005,
+      "name": "L26466205"
+    },
+    "matchesPendingTraceReceiver": "observer"
+  },
+  "atSend": {
+    "sentAtWallMs": 1792891566304,
+    "sentAtMonotonicMs": 544592.4156,
+    "owner": {
+      "name": "L26466205",
+      "x": 274,
+      "y": 654
+    },
+    "target": {
+      "objectId": 206528,
+      "x": 273,
+      "y": 653
+    },
+    "observer": {
+      "name": "L26466201",
+      "lastOwnerReceipt": {
+        "rawLine": 12380,
+        "at": 1792891565594,
+        "sequence": 8033,
+        "packet": "UserLocation",
+        "monotonicMs": 543883.2418,
+        "x": 259,
+        "y": 669
+      },
+      "declaredHome": {
+        "x": 256,
+        "y": 668
+      },
+      "patrolSpan": 4,
+      "insideDeclaredBody": true
+    },
+    "chebyshevObserverToOwner": 15,
+    "chebyshevObserverToTarget": 16
+  },
+  "nextWitnessMovement": {
+    "actionRawLine": 12419,
+    "kind": "run",
+    "sentAtMonotonicMs": 544628.1733,
+    "sendAfterAttackMs": 35.75770000007469,
+    "from": {
+      "x": 259,
+      "y": 669
+    },
+    "plannedTarget": {
+      "x": 257,
+      "y": 671
+    },
+    "actual": {
+      "x": 257,
+      "y": 671
+    },
+    "status": "success",
+    "ownerReceipt": {
+      "rawLine": 12415,
+      "at": 1792891566340,
+      "sequence": 8060,
+      "packet": "UserLocation"
+    },
+    "insideDeclaredBody": true,
+    "chebyshevObserverToOwner": 17,
+    "chebyshevObserverToTarget": 18
+  },
+  "lossAndReturn": [
+    {
+      "rawLine": 12414,
+      "at": 1792891566340,
+      "actor": "L26466201",
+      "sequence": 8059,
+      "packet": "ObjectRemove",
+      "objectId": 50005
+    },
+    {
+      "pendingTrace": true,
+      "at": 1792891566340,
+      "actor": "L26466201",
+      "sequence": 8064,
+      "packet": "ObjectRemove",
+      "objectId": 206528
+    },
+    {
+      "rawLine": 12417,
+      "at": 1792891566340,
+      "actor": "L26466205",
+      "sequence": 3540,
+      "packet": "ObjectRemove",
+      "objectId": 50001
+    },
+    {
+      "rawLine": 12447,
+      "at": 1792891567088,
+      "actor": "L26466201",
+      "sequence": 8081,
+      "packet": "ObjectPlayer",
+      "objectId": 50005
+    },
+    {
+      "rawLine": 12449,
+      "at": 1792891567089,
+      "actor": "L26466201",
+      "sequence": 8082,
+      "packet": "UserLocation",
+      "x": 259,
+      "y": 669
+    }
+  ],
+  "historicalRule": {
+    "combatObserverCandidateMargin": 16,
+    "nativeStableFanoutRangeForNonChat": 6,
+    "stableFanoutRangeAppliedToOldAttackWitnessSelection": false,
+    "selection": "combatPlan takes the first combatObservers peer with target and owner identities; its default nearbyObservers margin is 16. The separate action fanout probe uses stableFanoutRange.",
+    "sourceSections": [
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 799,
+        "toLine": 806,
+        "text": "function nearbyObservers(client, context, margin = 16) {\n  return context.clients.filter(other => other !== client && other.inGame && !other.closed && !other.paused &&\n    other.snapshot?.mapFileName === client.snapshot.mapFileName && self(other) && distance(self(other), self(client)) <= margin);\n}\nfunction combatObservers(client, context) {\n  const coverage = activeCombatCoverage(client, context);\n  return nearbyObservers(client, context).filter(other => !coverage || coverage.entries.some(entry => entry.observer === other));\n}"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 999,
+        "toLine": 1008,
+        "text": "export function stableFanoutRange(kind, policy) {\n  // Both owners may already have a two-cell Run in flight. Complete AOI\n  // membership is still checked at range 16 by AoiCoverage; only action-latency\n  // probes use this explicitly narrower, stable initial geometry.\n  // During the full 2s receipt deadline a native peer can finish its already\n  // in-flight run and three more two-cell steps. Keep that geometry explicit;\n  // the independent AOI sampler still covers the complete 16-cell window.\n  if (policy?.activityMode === 'native') return kind === 'chat' ? 8 : 6;\n  return kind === 'chat' ? 14 : 12;\n}"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 1020,
+        "toLine": 1038,
+        "text": "  for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);\n  let candidates = combatCandidates(client, context);\n  const observers = combatObservers(client, context);\n  const witness = target => observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId &&\n    (!native || (ordinaryCombatMonster(entity, context) && entity.name === target.name))) &&\n    (!native || Number.isInteger(observedPlayerId(other, client.label))));\n  if (native) {\n    const pursuit = client.combatPursuit;\n    const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)\n      ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;\n    if (!selected && !livePursuitTarget(client, context, pursuit)) client.combatPursuit = null;\n    const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));\n    candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,\n      ...(selected ? [selected] : []), ...candidates])];\n  }\n  for (const target of candidates.slice(0, 4)) {\n    const observer = witness(target);\n    if (distance(owner, target) === 1 && observer) {\n      if (native && !client.pending) rememberCombatTarget(client, target);"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 1128,
+        "toLine": 1138,
+        "text": "    if (native) recordNavigationBlocked(client, context, phase);\n    context.add({ actor: client.label, phase, kind: 'walk', status: 'navigation-blocked', plannedGameplay: true, ...nativeMeta }); return;\n  }\n  const command = plan.command, kind = command.type;\n  if (client.budget.remainingWait()) { context.add({ actor: client.label, phase, kind, status: 'budget-gap', plannedGameplay: true, ...nativeMeta }); return; }\n  const observers = nearbyObservers(client, context, stableFanoutRange(kind, context.policy)).map(peer => ({ peer, cursor: peer.sequence,\n    objectId: observedPlayerId(peer, client.label) }));\n  const observerCursor = plan.observer?.sequence, cursor = client.sequence, sentAt = performance.now();\n  if (sentAt - plannedAt > context.policy.maximumSendLatenessMs) {\n    context.add({ actor: client.label, phase, kind, status: 'plan-gap', plannedGameplay: true, sendLatenessMs: sentAt - plannedAt, ...nativeMeta }); return;\n  }"
+      }
+    ]
+  },
+  "conclusion": {
+    "observerLeftDeclaredHome": false,
+    "observerAtAoiBoundary": true,
+    "lossWasObserved": true,
+    "originalStrictMissUnchanged": true,
+    "noHistoricHitPromotion": true,
+    "fatalAttackerIdentified": false
+  },
+  "limits": [
+    "Positions are the latest actual driver-owned UserLocation receipts, not a continuous server pose trace.",
+    "The exact server execution order is not inferred from coincident wall timestamps.",
+    "Owner positive damage and launched receipt do not substitute for the missing mandatory observer Struck/Damage proof.",
+    "Native six-cell stability was not implemented in historical attack witness selection; any such new restriction is a new harness contract.",
+    "Other peers may be closer by owner receipts, but immediate visibility of both attack objects is not established here."
+  ]
+}

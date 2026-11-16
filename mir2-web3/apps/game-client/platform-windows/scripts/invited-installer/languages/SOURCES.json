@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "upstream": [
+    {
+      "file": "Hindi.islu",
+      "bytes": 34753,
+      "sha256": "fbb1045f3b25842bb926bdd5400d07875f4c8572b04ffab14bb7add9882cc19b",
+      "sourceUrl": "https://raw.githubusercontent.com/jrsoftware/issrc/e85c7287bcabdc82932ce7b2d5968ddc5bfe7f49/Files/Languages/Unofficial/Hindi.islu",
+      "sourceCommit": "e85c7287bcabdc82932ce7b2d5968ddc5bfe7f49",
+      "status": "community-contributed translation in official Inno Setup repository"
+    },
+    {
+      "file": "Indonesian.isl",
+      "bytes": 19404,
+      "sha256": "06232efff765902ddf7be78e39f1c5471b7e35f4c7c537deeb76692f3b5e208d",
+      "sourceUrl": "https://raw.githubusercontent.com/jrsoftware/issrc/e85c7287bcabdc82932ce7b2d5968ddc5bfe7f49/Files/Languages/Unofficial/Indonesian.isl",
+      "sourceCommit": "e85c7287bcabdc82932ce7b2d5968ddc5bfe7f49",
+      "status": "community-contributed translation in official Inno Setup repository"
+    },
+    {
+      "file": "Vietnamese.isl",
+      "bytes": 26442,
+      "sha256": "1ed7f5580df3a302a6955c72ddbfa8e3c3e24d5ed22ea85f55bad548859b3a19",
+      "sourceUrl": "https://raw.githubusercontent.com/jrsoftware/issrc/e85c7287bcabdc82932ce7b2d5968ddc5bfe7f49/Files/Languages/Unofficial/Vietnamese.isl",
+      "sourceCommit": "e85c7287bcabdc82932ce7b2d5968ddc5bfe7f49",
+      "status": "community-contributed translation in official Inno Setup repository",
+      "preservedAs": "Vietnamese.upstream.isl"
+    }
+  ]
+}

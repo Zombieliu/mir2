@@ -1,0 +1,110 @@
+{
+  "schema": "mir2.mentor-parse-dense100-public-summary-proposed.v1",
+  "proposalOnly": false,
+  "published": true,
+  "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "codeIntegrationRevision": "33c75002cf6a78c1bd2005c9ace0476d34816c7a",
+  "binarySha256": "7d2a6c817b009d6a7e1d0a75cd6b7847fe8cbc5aa2cb57efa8c3d1032a784ff8",
+  "adapterSourceManifestSha256": "3fbe7649ff36946c4e7979307ee8e1d0b7dd223987b287e3b1d4582a846a9e50",
+  "planSha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+  "window": {
+    "startUtc": "2026-11-14T21:05:53.733Z",
+    "endUtc": "2026-11-14T21:10:53.733Z",
+    "durationMs": 300000
+  },
+  "outcome": "FAIL",
+  "totals": {
+    "offered": 16000,
+    "completed": 15366,
+    "timeouts": 81,
+    "notSent": 553,
+    "passedWindows": 167,
+    "totalWindows": 500
+  },
+  "timeoutClassificationReportLevel": {
+    "bothOwnerAndPeerLate": 26,
+    "peerLateOnly": 25,
+    "ownerLateOnly": 30
+  },
+  "notSentReasons": {
+    "previousActionPending": 392,
+    "preconditionFailed": 161
+  },
+  "resource": {
+    "server": {
+      "sampleRows": 3508,
+      "coverageMs": 300000.0,
+      "maxIntersectingSampleGapMs": 1053,
+      "meanCpuCores": 1.1680231176900586,
+      "durationWeightedCpuP95Cores": 2.5559883154819865,
+      "maximumOverlappingIntervalCpuCores": 3.936648832684825,
+      "fullRunJobPeakCommitBytes": 2647703552,
+      "fullRunJobPeakCommitMiB": 2525.046875,
+      "allRowsResourceQualified": true,
+      "logicalCpuBudget": 4,
+      "commitBudgetBytes": 8589934592,
+      "affinityMaskHex": "0xf",
+      "peakCommitIsRAMorRSS": false
+    },
+    "injector": {
+      "sampleRows": 3506,
+      "coverageMs": 300000.0,
+      "maxIntersectingSampleGapMs": 1065,
+      "meanCpuCores": 0.2210874231993486,
+      "durationWeightedCpuP95Cores": 0.39441747572815533,
+      "maximumOverlappingIntervalCpuCores": 0.5319795719844358,
+      "fullRunJobPeakCommitBytes": 314769408,
+      "fullRunJobPeakCommitMiB": 300.1875,
+      "allRowsResourceQualified": true,
+      "logicalCpuBudget": 8,
+      "commitBudgetBytes": 4294967296,
+      "affinityMaskHex": "0xff0",
+      "peakCommitIsRAMorRSS": false
+    },
+    "cpuMethod": "Cumulative JobCPU delta per adjacent atUnixMs interval, linearly assigned to UTC steady-window overlap. P95 weighted by overlap duration. No driver/controller monotonic mixing. Full-run peak Job commit is not RSS/RAM."
+  },
+  "applicationBytes": {
+    "scope": "JSON WebSocket payload bytes submitted/received; excludes WS framing/control/TCP/IP; no deflate",
+    "method": "per-frame epoch<=atMs<epoch+durationMs",
+    "clientTxBytes": 1166460,
+    "clientRxBytes": 186979603,
+    "clientTxMbps": 0.031105599999999997,
+    "clientRxMbps": 4.986122746666667,
+    "clientRxDecimalMBps": 0.6232653433333334,
+    "allLifecycleConnections": 114,
+    "allLifecycleClientTxBytes": 5265494,
+    "allLifecycleClientRxBytes": 319380241,
+    "socketOrNICBytes": false,
+    "jsonlSizeUsedAsTraffic": false
+  },
+  "closure": {
+    "actualExitCodes": [
+      1,
+      1,
+      0
+    ],
+    "allOwnedNormallyClosedNoKill": true,
+    "gearAll3ReportedPassed": true,
+    "normalLogoutCloseAll100ReportedPassed": true,
+    "fresh0And99ReportedPassed": true,
+    "fileAndEnhancedActualExitCodes": [
+      1,
+      1
+    ],
+    "fileSamples": 0,
+    "privateStoreNotOpened": true,
+    "allActorDiskProofEstablished": false
+  },
+  "inputHashes": {
+    "modern.report.json": "2dafb6f0bec90ecce7004d7e2b155429e1347fb9c5a2c0d419c606b41bda0f2e",
+    "controller-result.json": "18b0153ccdf55f2795b3138d8e8c993a3ae26a708ddc7c4270e444d69decde2c",
+    "service-result.json": "62c047348b4d99c5614c9ca904f1e8e15f53644c6213b7db5d4fa5217c2e5d29",
+    "DENSE100-CLOSED-FAIL.json": "a4afda3046997954259ed98c5e076831bb6d13dd2cb99581048fee3313f36a49",
+    "DENSE100-STRICT-GATES.json": "cdc3ed66df935a02bb36b79dfb4970369bc27e4a19a040be22be39b430671856",
+    "resources.jsonl": "bc937723749503f590b884fc353f65180a1043d5c75473cad05909758d8d186e",
+    "injector-resources.jsonl": "3f73e76412a0338772e544a02c0940b68b2839954517e94b3ff63c9a27d86c3f"
+  },
+  "causalConclusion": null,
+  "capacityQualified": false,
+  "singleRunComparisonProvesImprovement": false
+}

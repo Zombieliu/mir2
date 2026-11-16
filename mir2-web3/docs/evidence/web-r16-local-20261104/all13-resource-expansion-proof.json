@@ -1,0 +1,45 @@
+{
+  "schema": "mir2.r16.all13-raw-resource-expansion.v1",
+  "reason": "Actual final browser renderer used single-image entity sources, so the thirteen allowlisted libraries require their complete physical raw frame catalogs.",
+  "oldManifestSha256": "b8ab7aa87ff3959347b93f3e2d2cbe4beb35a58826408efc4d3fbb4e58ce52fa",
+  "newManifestSha256": "c0eb872342c2040256df8e55c31b14c803ad435de03b3d8b98c77f18b0688b90",
+  "allOldPinsRetained": true,
+  "oldFiles": 19959,
+  "newFiles": 21019,
+  "addedFiles": 1060,
+  "oldBytes": 261605355,
+  "newBytes": 266020592,
+  "addedBytes": 4415237,
+  "rawFrames": 2602,
+  "monsterLibraries": [
+    "Monster/000",
+    "Monster/003",
+    "Monster/004",
+    "Monster/005",
+    "Monster/006",
+    "Monster/007",
+    "Monster/009",
+    "Monster/010",
+    "Monster/011",
+    "Monster/012",
+    "Monster/013",
+    "Monster/014",
+    "Monster/139"
+  ],
+  "manifestFileCountBound": {
+    "old": 20000,
+    "new": 22000,
+    "reason": "Smallest thousand above the measured finite 21019-file catalog."
+  },
+  "assetByteBudget": {
+    "bytes": 377487360,
+    "unchanged": true,
+    "passed": true
+  },
+  "manifestByteBound": {
+    "bytes": 8388608,
+    "unchanged": true,
+    "passed": true
+  },
+  "thinByteBudgetRaised": false
+}

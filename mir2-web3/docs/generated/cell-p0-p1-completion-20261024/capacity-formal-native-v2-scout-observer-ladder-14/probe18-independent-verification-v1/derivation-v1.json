@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T22:11:20.747Z",
+  "scope": "Exact source derivation only. No target imports, raw scan, tests or actual verification performed by this author script. Probe18 C/H/H, actual219 array schema, actual121 launcher, real Root OS schema and standalone stream-helper raw pin are explicit; all activity/window/continuous/HP/Store/Wire algorithms remain inherited.",
+  "rows": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\verify-ended-probe17-v1.mjs",
+        "bytes": 34205,
+        "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      },
+      "rules": [
+        {
+          "before": "release-native-10-v2-account-store-wait-feasibility-17",
+          "after": "release-native-10-v2-scout-observer-feasibility-18",
+          "count": 1
+        },
+        {
+          "before": "capacity-native10-v2-account-store-wait-followup-17-diagnostics",
+          "after": "capacity-native10-v2-scout-observer-followup-18-diagnostics",
+          "count": 1
+        },
+        {
+          "before": "probe17",
+          "after": "probe18",
+          "count": 3
+        },
+        {
+          "before": "1792956759820-08151b82",
+          "after": "1792965008290-fc5e2eed",
+          "count": 1
+        },
+        {
+          "before": " const freezeName='capacity-attack-deadline-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,6759);assert.equal(freezePin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');const frozen=await read(BASE,freezeName);\n assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');assert.equal(frozen.driverSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(frozen.backendSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(frozen.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');assert.equal(frozen.files.length,9);assert.equal(crypto.createHash('sha256').update(JSON.stringify(frozen.files)).digest('hex'),frozen.sourceSha256);\n const declarationBasisName='capacity-native-chase-preference-driver-frozen-v1.json',declarationBasisPin=await pin(BASE,declarationBasisName);assert.equal(declarationBasisPin.bytes,19099);assert.equal(declarationBasisPin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');assert.equal(frozen.priorFreeze.bytes,declarationBasisPin.bytes);assert.equal(frozen.priorFreeze.sha256,declarationBasisPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,declarationBasisName)));const declarationBasis=await read(BASE,declarationBasisName);\n const regressionName='attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,4758);assert.equal(regressionPin.sha256,'c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4');assert.equal(frozen.fullRegression.receipt.bytes,regressionPin.bytes);assert.equal(frozen.fullRegression.receipt.sha256,regressionPin.sha256);assert.ok(samePath(frozen.fullRegression.receipt.path,path.join(BASE,regressionName)));const regression=await read(BASE,regressionName);assert.equal(regression.exitCode,0);assert.equal(regression.signal,null);assert.equal(regression.sourcePinsUnchangedAfterRun,true);assert.deepEqual(regression.sourceBefore,regression.sourceAfter);assert.deepEqual(regression.sourceBefore.files,frozen.files);assert.equal(regression.sourceBefore.sourceSha256,frozen.sourceSha256);assert.deepEqual(regression.counts,{tests:210,pass:210,fail:0,cancelled:0,skipped:0,todo:0});assert.equal(frozen.fullRegression.finalSourceFullRegressionPerformed,true);assert.equal(frozen.fullRegression.sourcePinsUnchangedAfterRun,true);assert.equal(frozen.fullRegression.exactSourceSha256,frozen.sourceSha256);\n",
+          "after": " const freezeName='capacity-scout-observer-preference-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,9465);assert.equal(freezePin.sha256,'1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e');const frozen=await read(BASE,freezeName);\r\n assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');for(const k of ['actualCodeCommit','driverSourceCommit','executionSourceCommit'])assert.equal(frozen[k],'3a6d8c862d03ded3133605472a8f38bc6258af52');for(const k of ['backendSourceCommit','backendBuildCommit'])assert.equal(frozen[k],'c743122af05faca43d9535d8c6c2a4bfb01b924f');assert.equal(frozen.sourceSha256,'445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634');assert.equal(frozen.files.length,9);assert.equal(crypto.createHash('sha256').update(JSON.stringify(frozen.files)).digest('hex'),frozen.sourceSha256);assert.equal(frozen.capacityAccepted,false);\r\n const priorName='capacity-attack-deadline-driver-frozen-v1.json',priorPin=await pin(BASE,priorName);assert.equal(priorPin.bytes,6759);assert.equal(priorPin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');assert.equal(frozen.priorFreeze.bytes,priorPin.bytes);assert.equal(frozen.priorFreeze.sha256,priorPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,priorName)));const prior=await read(BASE,priorName);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');\r\n const declarationBasisName='capacity-native-chase-preference-driver-frozen-v1.json',declarationBasisPin=await pin(BASE,declarationBasisName);assert.equal(declarationBasisPin.bytes,19099);assert.equal(declarationBasisPin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');assert.equal(prior.priorFreeze.bytes,declarationBasisPin.bytes);assert.equal(prior.priorFreeze.sha256,declarationBasisPin.sha256);assert.ok(samePath(prior.priorFreeze.path,path.join(BASE,declarationBasisName)));const declarationBasis=await read(BASE,declarationBasisName);\r\n const regressionName='scout-observer-preference-root-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,5378);assert.equal(regressionPin.sha256,'00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1');assert.equal(frozen.fullRegression.receipt.bytes,regressionPin.bytes);assert.equal(frozen.fullRegression.receipt.sha256,regressionPin.sha256);assert.ok(samePath(frozen.fullRegression.receipt.path,path.join(BASE,regressionName)));const regression=await read(BASE,regressionName);assert.equal(regression.exitCode,0);assert.equal(regression.signal,null);assert.equal(regression.sourcePinsUnchangedAfterRun,true);assert.deepEqual(regression.sourceBefore,regression.sourceAfter);assert.deepEqual(regression.sourceBefore,frozen.files);assert.equal(regression.sourceSha256,frozen.sourceSha256);assert.deepEqual(regression.counts,{tests:219,passed:219,failed:0,cancelled:0,skipped:0,todo:0});assert.equal(frozen.fullRegression.finalSourceFullRegressionPerformed,true);assert.equal(frozen.fullRegression.sourcePinsUnchangedAfterRun,true);assert.equal(frozen.fullRegression.exactSourceSha256,frozen.sourceSha256);\r\n const regressionLogPin=await pin(BASE,path.relative(BASE,frozen.fullRegression.log.path)),regressionStderrPin=await pin(BASE,path.relative(BASE,frozen.fullRegression.stderr.path));assert.deepEqual(regressionLogPin,{path:safeRelative(path.relative(BASE,frozen.fullRegression.log.path)),bytes:frozen.fullRegression.log.bytes,sha256:frozen.fullRegression.log.sha256});assert.equal(regressionStderrPin.bytes,0);assert.equal(regressionStderrPin.sha256,frozen.fullRegression.stderr.sha256);const regressionText=await fs.readFile(await safeFile(BASE,regressionLogPin.path),'utf8');for(const[k,n]of[['tests',219],['pass',219],['fail',0],['cancelled',0],['skipped',0],['todo',0]])assert.ok(new RegExp('^# '+k+' '+n+'\\\\r?$','m').test(regressionText));\r\n",
+          "count": 1
+        },
+        {
+          "before": "assert.equal(catalog.run.driverSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(catalog.run.coreCodeEvidenceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(catalog.run.driverSourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');",
+          "after": "assert.equal(catalog.run.driverSourceCommit,'3a6d8c862d03ded3133605472a8f38bc6258af52');assert.equal(catalog.run.executionSourceCommit,'3a6d8c862d03ded3133605472a8f38bc6258af52');assert.equal(catalog.run.coreCodeEvidenceCommit,'3a6d8c862d03ded3133605472a8f38bc6258af52');assert.equal(catalog.run.driverSourceSha256,'445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634');",
+          "count": 1
+        },
+        {
+          "before": "ad1b57c6cad02f36ddc8640f58d5e3ce4a3dc322b492a81eea0d4b2ac1f7c00c",
+          "after": "ce15097005c6a7abd3e861b3f4b8fd1708f95d1145096d58e747462e57c87f07",
+          "count": 1
+        },
+        {
+          "before": "assert.equal(launcher.files.length,69)",
+          "after": "assert.equal(launcher.files.length,121)",
+          "count": 1
+        },
+        {
+          "before": "bytes:33193,sha256:'6c5610464c3ddf69c607ad882b36e42b316fbe1f8dab17c38c0457b591db5b16'",
+          "after": "bytes:66405,sha256:'75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6'",
+          "count": 1
+        },
+        {
+          "before": "actualFull210Regression:regressionPin",
+          "after": "historicalPrior210Freeze:priorPin,actualFull219Regression:regressionPin,actualRegressionLog:regressionLogPin,actualRegressionStderr:regressionStderrPin",
+          "count": 1
+        },
+        {
+          "before": "coreCodeEvidenceCommit:catalog.run.coreCodeEvidenceCommit,",
+          "after": "coreCodeEvidenceCommit:catalog.run.coreCodeEvidenceCommit,executionSourceCommit:catalog.run.executionSourceCommit,",
+          "count": 1
+        },
+        {
+          "before": "frozen Node d240/210 source",
+          "after": "frozen Node H/219 source",
+          "count": 1
+        },
+        {
+          "before": "original fresh17 probe",
+          "after": "original fresh18 probe",
+          "count": 1
+        },
+        {
+          "before": " const api=await import(pathToFileURL(await safeFile(TOPIC,'evidence-tools/verify-evidence.mjs')));",
+          "after": " const streamVerifierPin=await pin(TOPIC,'evidence-tools/verify-evidence.mjs');assert.deepEqual(streamVerifierPin,{path:'evidence-tools/verify-evidence.mjs',bytes:46895,sha256:'5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58'});pins.streamVerifier=streamVerifierPin;assert.equal(pins.rootCleanup.sha256,'1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af');\r\n const api=await import(pathToFileURL(await safeFile(TOPIC,'evidence-tools/verify-evidence.mjs')));",
+          "count": 1
+        }
+      ],
+      "rawExact": false,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      },
+      "rules": [
+        {
+          "before": "probe17",
+          "after": "probe18",
+          "count": 2
+        },
+        {
+          "before": "export function assertRootCleanup(value,runId){assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.equal(value.gatewayPid,62088);assert.equal(value.monitorPid,61104);assert.equal(value.processesAbsent,true);assert.equal(value.portsFree,true);assert.equal(value.readOnlyIndependentCheck,true);assert.equal(value.capacityAccepted,false);assert.deepEqual(value.processes,[]);assert.deepEqual(value.listeningPorts,[]);assert.ok(typeof value.verifiedAt==='string'&&Number.isFinite(Date.parse(value.verifiedAt)));}\n",
+          "after": "export function assertRootCleanup(value,runId){assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.deepEqual(value.ownedPids,[70676,45472]);assert.deepEqual(value.remainingOwnedProcesses,[]);assert.deepEqual(value.remainingOwnedPortListeners,[]);assert.ok(typeof value.observedAt==='string'&&Number.isFinite(Date.parse(value.observedAt)));assert.equal(typeof value.scope,'string');}\r\n",
+          "count": 1
+        }
+      ],
+      "rawExact": false,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\run-ended-probe17-v1.mjs",
+        "bytes": 2257,
+        "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      },
+      "rules": [
+        {
+          "before": "probe17",
+          "after": "probe18",
+          "count": 2
+        }
+      ],
+      "rawExact": false,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "originalSourcesModified": false,
+  "capacityAccepted": false
+}

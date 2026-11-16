@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "deployedGatewayRevision": "20aeb345f8bf584582acddef5c4ac3f4874458a1",
+  "testMountingRevision": "a7cff7d50",
+  "runtimeChangedByFinalFixtures": false,
+  "files": {
+    "localOrdinary": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\local-protocol\\reports\\1790616199270-ff0bb4fa.report.json",
+      "sha256": "7acc0b6da839f26b92ac2dad9a557cc7ca26156e33c7b2f859013fed6336ac4e"
+    },
+    "publicOrdinary": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\public-protocol\\reports\\1790617673458-79ff1564.report.json",
+      "sha256": "a9054685f6eee6803228183ff81381b110d0b90a2fb0a12b66c3df7480a7dc83"
+    },
+    "publicNativeResume": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\public-protocol\\native-resume\\1790618755549-5288c645.report.json",
+      "sha256": "ebbd1a41172bdd845e0d6036fb6aadf9fd0a6c8676679e1213ef6d51dc06640f"
+    },
+    "publicNativeResumePriorHarnessFailure": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\public-protocol\\native-resume\\1790618580579-3da5d554.report.json",
+      "sha256": "cc5b75ab3584a256dc5a5374644569bdd8e9cc4e4b2006fb84f734e71f17b5b8"
+    },
+    "redisLua": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\local-protocol\\playtest-owned-route-redis-results.json",
+      "sha256": "5d3c8a6bf0eb44612823a9d15cd5292636e9af53b62fbfa6fbc586022c55eede"
+    },
+    "gatewayFull": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\local-protocol\\gateway-full-tests-restored.log",
+      "sha256": "bdd8b9608f3a2183aa1a9eab123c35b4b3940d3bb0e134689f966c216b3bd168"
+    },
+    "gatewayProfileFixture": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\local-protocol\\realm-profile-26-fixture-tests.log",
+      "sha256": "40e1acac701927a061471fea86d73c79550dfb835e165e58466f74b9dd4762bc"
+    },
+    "gatewayV2": {
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\local-protocol\\restored-zone_journey_event_bridge-v2-isolated.log",
+      "sha256": "a3a5c2174c5d218cb51aa2f4ffa9586942dc72119393cf6308a16a94c8c6a1ce"
+    }
+  },
+  "limits": {
+    "nativeUiAcceptance": false,
+    "twoPhysicalComputers": false,
+    "concurrentLoad": false,
+    "serverRestartResume": false
+  },
+  "gatewayRegression": {
+    "initialFull": {
+      "passed": 805,
+      "failed": 1,
+      "ignored": 15
+    },
+    "onlyFailure": "obsolete profileVersion fixture 25; compiled profile and bundle already 26 from 7e1bd7b68",
+    "focusedProfileAfterTestOnlyCorrection": 1,
+    "isolatedV2FormerlyIgnoredPassed": 7,
+    "uniquePassed": 813,
+    "stillIgnored": [
+      "channel_identity::tests::postgres_store_is_shared_across_gateway_instances",
+      "economy::prepared_kill::tests::prepared_kill_postgres_actual_runtime_source_and_ledger_retry_relogin",
+      "economy::prepared_kill::tests::prepared_kill_postgres_commit_error_is_never_a_definite_retry_receipt",
+      "economy::prepared_kill::tests::prepared_kill_postgres_mirror_file_failure_keeps_committed_ledger_and_durable_fence",
+      "economy::prepared_kill::tests::prepared_kill_postgres_source_guild_ledger_rollback_and_exact_checkpoint_replay",
+      "economy::prepared_kill::tests::prepared_kill_postgres_source_of_truth_runtime_and_ledger_retry_relogin",
+      "economy::prepared_kill::tests::prepared_kill_postgres_two_connections_only_publish_source_once",
+      "economy::prepared_kill::tests::prepared_kill_postgres_zero_xp_still_commits_source_and_fences_new_writes"
+    ],
+    "note": "Resolved across recorded runs; no claim of a second full-suite pass."
+  },
+  "evidenceRedaction": {
+    "knownPasswordsAbsent": true,
+    "nativeResumeCredentialsMasked": true,
+    "filesChecked": 13
+  }
+}

@@ -1,0 +1,14 @@
+file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs:62
+function requireValue(condition, message) { if (!condition) throw new Error(message); }
+                                                                  ^
+
+Error: Missing ordinary source route 0->2
+    at requireValue (file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs:62:67)
+    at file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs:98:5
+    at Array.map (<anonymous>)
+    at file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs:94:107
+    at Array.map (<anonymous>)
+    at loadClassicSources (file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs:94:63)
+    at async file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/[eval1]:1:97
+
+Node.js v22.18.0

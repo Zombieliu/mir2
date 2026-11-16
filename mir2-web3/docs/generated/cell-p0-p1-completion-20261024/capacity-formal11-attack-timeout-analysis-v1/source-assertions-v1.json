@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792942371568-1e322224",
+  "input": {
+    "source": "committed Git blob; not the later modified working tree",
+    "commit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "bytes": 148409,
+    "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+  },
+  "driverFreeze": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-chase-preference-driver-frozen-v1.json",
+    "bytes": 19099,
+    "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+  },
+  "sourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "fragments": {
+    "wait": {
+      "start": 367,
+      "end": 378,
+      "text": "  async wait(predicate, label, timeoutMs = 15000) {\n    const deadline = Date.now() + timeoutMs;\n    while (Date.now() < deadline) {\n      if (!this.draining) this.context.guard.assert();\n      if (this.failure) throw this.failure;\n      const result = predicate(); if (result) return result;\n      if (this.closed) throw new Error(`${this.label} transport closed during ${label}`);\n      await sleep(20);\n    }\n    throw new Error(`${this.label} timed out waiting for ${label}`);\n  }\n  async request(command, name, timeoutMs = 15000) {"
+    },
+    "freshPredicate": {
+      "start": 1270,
+      "end": 1287,
+      "text": "    const receipt = await client.wait(() => {\n      const own = fresh(client, cursor, sentAt).filter(event => !v2Attack || event.monotonicMs <= sentAt + 900);\n      const rejection = own.find(event => event.type === 'error');\n      if (rejection) { const error = new Error('Public gameplay command rejected'); error.code = 'PUBLIC_COMMAND_REJECTED'; throw error; }\n      if (kind === 'attack') {\n        if (v2Attack) {\n          const result = matchAttackResultV2(own, wireCommand);\n          if (!result) return null;\n          row.attackResult = result.result;\n          if (['unavailable', 'unknown'].includes(result.result)) {\n            const error = new Error(`attackV2 ${result.result}: ${result.code}; no retry`);\n            error.terminalAttackResult = true; throw error;\n          }\n          if (result.result === 'notLaunched') return { ...result, notLaunched: true };\n          if (native && client.combatPursuit?.objectId === command.objectId) client.combatPursuit.attackSent = true;\n        }\n        return verifiedCombatHit(own, fresh(plan.observer, observerCursor, sentAt)\n          .filter(event => !v2Attack || event.monotonicMs <= sentAt + 900), command.objectId, owner.objectId, plan.peerAttackerId);"
+    },
+    "catchClassification": {
+      "start": 1342,
+      "end": 1368,
+      "text": "  } catch (error) {\n    const swung = kind === 'attack' && (v2Attack ? row.attackResult === 'launched' :\n      fresh(client, cursor, sentAt).some(event => event.packet === 'ObjectAttack' && event.payload?.objectId === owner.objectId));\n    if (kind === 'attack' && !(error instanceof SafetyStop)) {\n      const prior = client.failedTargets.get(command.objectId);\n      // The protocol has no strike request ID. Even an observed swing followed\n      // by silence may have damage in flight. Native mode cannot re-use this\n      // actor/target pair later and mistake that old damage for a new attack.\n      client.failedTargets.set(command.objectId, { failures: (prior?.failures ?? 0) + 1,\n        until: native ? Infinity : Date.now() + (prior ? 30000 : 3000), ambiguous: native });\n      if (client.failedTargets.size > 64) {\n        if (native) context.guard.stop('Native ambiguous-attack quarantine exceeded 64 targets; no old strike identities are evicted');\n        else client.failedTargets.delete(client.failedTargets.keys().next().value);\n      }\n    }\n    attackOutcome = actionFailureStatus(error, swung, client.closed);\n    context.add({ ...row, status: attackOutcome,\n      latencyMs: performance.now() - sentAt, plannedLatencyMs: performance.now() - plannedAt, error: sanitize(error.message, client.secrets),\n      targetStillAdjacent: kind === 'attack' ? client.snapshot.entities.some(entity => entity.objectId === command.objectId && !entity.dead && distance(entity, self(client)) === 1) : undefined,\n      ambiguousTargetQuarantined: kind === 'attack' && native && !(error instanceof SafetyStop) });\n    if (error instanceof SafetyStop || client.closed || error.terminalAttackResult) throw error;\n  } finally {\n    releaseNavigationHint(client, navigationHint);\n    client.waitReason = null;\n    if (kind === 'attack') {\n      try { finishPendingAttackEvidence(client, context, attackOutcome); }\n      finally { if (context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }"
+    }
+  },
+  "assertions": [
+    "The loop checks Date.now()<deadline before evaluating predicate, sleeps20ms, and throws after loop without a final predicate call.",
+    "V2 action filters owner and observer recorded monotonic timestamps to <=sentAt+900; row.attackResult is set only while evaluating the predicate.",
+    "The timeout/miss distinction uses row.attackResult===launched, so an unpolled timely typed result can still leave timeout classification."
+  ],
+  "scope": "Historical run code only; this receipt does not execute, alter or validate a later fix."
+}

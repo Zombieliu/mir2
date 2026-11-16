@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.unified.public-packed-live-healthy.v1",
+  "observedAtUtc": "2026-10-29T19:52:16.375697+00:00",
+  "actualGenerationExeSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+  "state": {
+    "schema": "mir2.windows.active-generation.v1",
+    "active": {
+      "kind": "generation",
+      "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+      "sequence": 2026102912
+    },
+    "previous": {
+      "kind": "legacyV4",
+      "candidate": "WN-CANDIDATE-20261029-wallet-28",
+      "versionSha256": "C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F",
+      "exeSha256": "CE8A604A5A2F0A1185FA279E0299232DAB0E09F6498FBA9BE959F9D6A1F75440"
+    },
+    "health": "healthy",
+    "attempt": "DEE690374E49ACEB6CD37EC3F0C7C71FF10CB79BF4E7C1BF7F6C5FDCDA2FFA27",
+    "launchStarted": false
+  },
+  "legacyExeConcurrentRead": "EBUSY caused by active packed GameGuard; check unchanged legacy bytes after normal close",
+  "readyMessageDirectlyCaptured": false,
+  "readyTimingMeasured": false
+}

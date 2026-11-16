@@ -1,0 +1,41 @@
+{
+  "verifiedAtUtc": "2026-10-29T07:43:37.143Z",
+  "readOnly": true,
+  "network": "sui:testnet",
+  "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+  "income": {
+    "digest": "FQzCWJjhofsBwgBsUSsE3i4mZ76UXqFrvMFy48pqMcjw",
+    "checkpoint": "400452807",
+    "successful": true,
+    "usdcDeltas": {
+      "0x6ffdc48a5bd9c5ed0c2299ba324f6709734ec0e6e0ed7466be0a5d754395a77e": "10000000",
+      "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33": "-10000000"
+    }
+  },
+  "rebate": {
+    "digest": "eRhD2reuEHyE1cNFLY22598uKWJPYdvCcS7T9cgCU7x",
+    "checkpoint": "400454295",
+    "successful": true,
+    "usdcDeltas": {
+      "0x01929c47553bc2541c1164238199b6226ccaef2bd9308bd81ba0bc0420511042": "5",
+      "0x6ffdc48a5bd9c5ed0c2299ba324f6709734ec0e6e0ed7466be0a5d754395a77e": "-5"
+    }
+  },
+  "balances": [
+    {
+      "address": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "balanceAtomic": "8990000"
+    },
+    {
+      "address": "0x6ffdc48a5bd9c5ed0c2299ba324f6709734ec0e6e0ed7466be0a5d754395a77e",
+      "balanceAtomic": "9999995"
+    },
+    {
+      "address": "0x01929c47553bc2541c1164238199b6226ccaef2bd9308bd81ba0bc0420511042",
+      "balanceAtomic": "5"
+    }
+  ],
+  "keysRead": false,
+  "signed": false,
+  "submitted": false
+}

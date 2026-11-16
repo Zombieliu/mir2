@@ -1,0 +1,42 @@
+{
+  "verifiedAt": "2026-11-03T01:07:31.133Z",
+  "nativeSha256": "6b7d4efac65a55dfce33353b428b4945f534d666f77d171f2431d296087a0e8a",
+  "gatewaySha256": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+  "resourceInput": {
+    "candidate": "WN-CANDIDATE-20261101-unified-16",
+    "cmsVerified": true,
+    "verifiedResourceCount": 255063
+  },
+  "independentFixture": true,
+  "originalUserGamePid": 60840,
+  "qaGamePid": 62184,
+  "originalGameStopped": false,
+  "checks": [
+    "ordinary login to Bichon and exact private enrolled companion",
+    "ordinary group invitation accepted",
+    "original teaching saved v1 to v2, all three habits true",
+    "private tab clearly states API unconfigured and rules mode",
+    "21-character Chinese instruction renders and counts correctly",
+    "Enter refuses an unconfigured model without public chat or owner instruction persistence",
+    "ordinary chat opens empty after closing companion panel",
+    "normal native exit saved, only synthetic fixture stopped"
+  ],
+  "unconfiguredEnterDatabaseCheck": {
+    "ownerInstructionRows": 0,
+    "modelCallRows": 0,
+    "teachingRows": 1
+  },
+  "screenshots": [
+    "01-original-teaching-v2.png",
+    "02-private-model-unconfigured.png",
+    "03-private-chinese-draft.png",
+    "04-unconfigured-enter-stays-private.png",
+    "05-original-chat-empty.png"
+  ],
+  "liveModelApiValidated": false,
+  "realHumanTrial": false,
+  "tempCleanup": {
+    "retained": true,
+    "reason": "automatic approval rejected cleanup of one unrelated synthetic SQLite temp file: blocked by policy"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "digest": "6jkPhuqRG5BhGGooitQiyheNmQ6UbLUNSJwVa79qhRni",
+  "checkpoint": "400174332",
+  "effects": {
+    "status": {
+      "status": "success",
+      "error": null
+    },
+    "gasUsed": {
+      "computationCost": "1000000",
+      "storageCost": "3579600",
+      "storageRebate": "3579242",
+      "nonRefundableStorageFee": "358"
+    }
+  },
+  "events": [
+    {
+      "type": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::PublicationChanged",
+      "parsedJson": null,
+      "id": {
+        "txDigest": "6jkPhuqRG5BhGGooitQiyheNmQ6UbLUNSJwVa79qhRni",
+        "eventSeq": "0"
+      },
+      "bcs": "v7yxNdpjU3q2flN6uS9lswtZ35e80xOKejfcWB4mFeoB"
+    }
+  ],
+  "objectChanges": [
+    {
+      "type": "mutated",
+      "objectId": "0x3a6401294afd546661ecf135a18504c48e54a58a8ac3edda13efda9351d8a5df",
+      "objectType": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::AdminCap",
+      "version": "1070151248",
+      "digest": "mFZG2eqgBnb3x8fuGqRC9E36qurjfzzqQ1VWUPvkrtS"
+    },
+    {
+      "type": "mutated",
+      "objectId": "0xbfbcb135da63537ab67e537ab92f65b30b59df97bcd3138a7a37dc581e2615ea",
+      "objectType": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::Config",
+      "version": "1070151248",
+      "digest": "3rTxrAazu2qd2VzhwZukMqpRW3hXwRVM4VZHqP3bkqLY"
+    }
+  ]
+}

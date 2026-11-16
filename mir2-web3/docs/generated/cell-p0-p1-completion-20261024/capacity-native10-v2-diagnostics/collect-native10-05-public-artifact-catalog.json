@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T19:03:22.767Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Independent explicit public allowlist for the authentic failed V2 native10 probe05. Original movement correction failure retained. No capacity acceptance; no private store, secret, EXE or recording payload copied.",
+  "files": [
+    {
+      "path": "release-native-10-v2-feasibility-05/gateway-build-pin.json",
+      "bytes": 1168,
+      "sha256": "4b8b9ed6f90ca0a748a0e3ab18bb8a3207a0e0c437fc82292246e33906fca390",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/source-pins.json",
+      "bytes": 15255,
+      "sha256": "12bb4d727b08de79d9b1e0187ffe4ffc309080833335131bd9331b8309bb6434",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/source-pins-admitted-v2.json",
+      "bytes": 15750,
+      "sha256": "c6f41d0a88753a2576bfad0e756bcdc57088756e58b4e05a387b98a90e30a475",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/realm-process.json",
+      "bytes": 1022,
+      "sha256": "257f070e37562fac7bd6139a41a382d63e007f66ade2323637574d40919185e7",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/realm-cleanup.json",
+      "bytes": 1810,
+      "sha256": "651380cf2c2894cba14fc24de5ef53c200e0be0c80d82c34ec1610b43a3ddf7c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/resource-profile.json",
+      "bytes": 1182,
+      "sha256": "e2a697a99649d489bfaa9e6c64f6d4f49f48ea85ed931dd54790f668a0519824",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/run-options.json",
+      "bytes": 729,
+      "sha256": "ff8de9b8b371566b14c0c6ae10ed4e1b578f35558a567a4a6aae557beed5d2fc",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/run-options-admitted-v2.json",
+      "bytes": 1111,
+      "sha256": "a2c0e2cc833c7cba8f76b31bb5622a75a6d73923f904fc694c0718e58e956d56",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/provisioning.json",
+      "bytes": 330,
+      "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/spectator-health-before.json",
+      "bytes": 650,
+      "sha256": "aa98ed928d2cb36132143ecdf8ab693c49c933e5d36683d7cec1bba19c3fda2a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/spectator-health-after.json",
+      "bytes": 658,
+      "sha256": "50ea0c34b0059fb0d7e401141eccc86847eddbc077d38c1f7d8fcf36da38053d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/monitor-options.json",
+      "bytes": 680,
+      "sha256": "d48c3c094296feccb75840483a1bfa80a01963086f502d11584173c20936bfae",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/monitor-process.json",
+      "bytes": 223,
+      "sha256": "11a5d049e084b2f07ae92e9c62190b00f97e95b9f23d00282c6bfd7aea8dd259",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/launcher-source-frozen-v1.json",
+      "bytes": 4191,
+      "sha256": "f464468db979ab1aa828b3fd1740a872ab08ba252743425d6b1a1d72b3cacfe2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/preparation-plan.json",
+      "bytes": 3739,
+      "sha256": "9e01e4041f4b2a7f1bb4a32c26b882bf88a14fb0c15b99a7b51d101edbbd8619",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/launcher-syntax-check.log",
+      "bytes": 98,
+      "sha256": "3e278394218faf17e71e23ac198fd162003f1ff2e00613deb8d50cbc83d7e3fe",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/run-command.log",
+      "bytes": 1526,
+      "sha256": "485c19dd3fd0252fa226ce5feb6ba462bb35758cafcb489a84036e436faf42c6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/input-lib.mjs",
+      "bytes": 11005,
+      "sha256": "931f4a84122756246bc059df6937c8611ff22d8a06e5d558ac54c455039d206f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/prepare-inputs.mjs",
+      "bytes": 7700,
+      "sha256": "95c0c9c94b4792e542728db3d10cebba9b73159791a77cbe4c12de029b69e617",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/run-owned.mjs",
+      "bytes": 13855,
+      "sha256": "8876cfb6316defd4f4c2f6e9a7a43f0266111c41e6687be748cab5c49ad4a939",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/reports/1792867932194-8f125fe4.report.json",
+      "bytes": 46569,
+      "sha256": "bfef3722ec1661d93a6159de32075e6257b43c1d625346c53619c826477d5d7a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-attack-v2.json",
+      "bytes": 1139,
+      "sha256": "d27ff7ef91c979d7884aa99047c27a820d845850d63786ea30fd88d786eb197f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "backend-source-native-attack-v2.json",
+      "bytes": 11716,
+      "sha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-attack-v2-driver-frozen-v1.json",
+      "bytes": 6123,
+      "sha256": "6c8bc4eef07b455a7a7cf76cea98874a010811d720834de8897279d403ec403b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-attack-v2-full-regression-source-pins-v1.json",
+      "bytes": 2021,
+      "sha256": "046d29f2535019c3a0d224279537620f995866848618712006b954256897769c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-native10-05-recordings-metadata.json",
+      "bytes": 1026,
+      "sha256": "ec1d9ad8569c22a58f06a2af61325b321408039dbd0e951f40fdf12b8512f0b9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-native10-05-monitor-endpoints.json",
+      "bytes": 4569,
+      "sha256": "8ac70c7f8df526bbe4850b032ab6b416659874e286fdbd0b31104a0c1f64d5cc",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "release-native-10-v2-feasibility-05/reports/1792867932194-8f125fe4.samples.jsonl",
+      "bytes": 6526962,
+      "sha256": "0af342b13ce094882af03b8ff2b57b7adb1ab57c613fbb41ee0a765b09043d06",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/monitor-history.jsonl",
+      "bytes": 1426108,
+      "sha256": "ec6425983c54de03ca520ea0c02ac0e48bdc25976983118febfe43d6ea9559b6",
+      "rows": 160,
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-v2-feasibility-05/recordings/0-498018.jsonl",
+      "bytes": 65400503,
+      "sha256": "f1a46f60a2dd52e56261519334d8a7cbd879ae06f5cf4da0a01643e378bbf186",
+      "frames": 1232,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792867932194-8f125fe4",
+    "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "gatewaySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+    "backendInputCount": 39,
+    "realGameplayAttempt": true,
+    "report": "release-native-10-v2-feasibility-05/reports/1792867932194-8f125fe4.report.json",
+    "raw": "release-native-10-v2-feasibility-05/reports/1792867932194-8f125fe4.samples.jsonl",
+    "peakControlledActors": 10,
+    "completedStageSeconds": 30,
+    "stagePassed": true,
+    "soakIntervalSeconds": 219.218,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 3,
+    "passed60SecondSoakWindows": 2,
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "failureWindow": {
+      "actor": "Ldd155c05",
+      "phases": [
+        "soak"
+      ],
+      "seconds": 60.310827500000016,
+      "successfulMoves": 17,
+      "correctedMoves": 2,
+      "offeredMoves": 19,
+      "movementCorrectionRatio": 0.10526315789473684,
+      "attackRejectionRatio": 0,
+      "timeoutRatio": 0,
+      "launchedAttacks": 30,
+      "positiveHits": 30,
+      "damage": 85,
+      "v2Requests": 30,
+      "notLaunched": 0
+    },
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true,
+    "normalGatewayExit": 0,
+    "normalMonitorExit": 0
+  },
+  "limitations": [
+    "The quoted30 attacks/hits belong to the failing continuous window, not the entire run.",
+    "The original30s measured stage passed; the360s soak did not complete. Completed shorter windows never substitute for all six required windows.",
+    "Typed Launched proves only this command launched a swing. The original driver still requires paired positive damage/health evidence for a hit.",
+    "The first/last monitor projection is a summary. Full raw monitor bytes and spectator payloads remain external and independently SHA-bound.",
+    "This File/loopback single-host probe does not certify production storage/RPO, TLS/NIC bandwidth, frontend acceptance or Cell scheduling."
+  ]
+}

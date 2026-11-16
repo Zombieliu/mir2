@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "scope": "Read-only syntax and bounded source review; helpers not executed by curator and source not copied to Git.",
+  "launchHelper": {
+    "filename": "launch-installed-native-default-assets-r10.mjs",
+    "bytes": 2804,
+    "sha256": "9a593c8f1cb8e32c06bd81f45a7ba259c6904629993200fd06714ac933b4709a",
+    "sourceIncluded": false
+  },
+  "reinstallVerifier": {
+    "filename": "verify-reinstall-r10.py",
+    "bytes": 4105,
+    "sha256": "49c057b0f28d392fc7575ce685b065e38ac9e46aa564281be45bbfc66dea0053",
+    "sourceIncluded": false
+  },
+  "nodeSyntaxPassed": true,
+  "pythonAstParsed": true,
+  "inheritedMir2VariablesCleared": true,
+  "isolatedAppdata": true,
+  "launcherNoArguments": true,
+  "assetRootOverrideRemoved": true,
+  "privateCredentialValuesNotCollected": true,
+  "reinstallContentHashScopeExplicit": "Complete paths; selected7 payload hashes,4 metadata,9 updater files,3 profile hashes. Full content hashes remain first phase evidence."
+}

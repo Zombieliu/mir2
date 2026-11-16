@@ -1,0 +1,108 @@
+{
+  "owner": "Root",
+  "kind": "Source78 code-parent scope review preserving existing Main line ending changes",
+  "parent": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "files": [
+    {
+      "relativePath": "apps/web/lib/bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "parentGitOid": "bdd990120fcdeec9f403a0db26a81d300aac3700",
+      "beforeGitOid": "bdd990120fcdeec9f403a0db26a81d300aac3700",
+      "byteExactBeforeParent": true,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/lib/use-bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 2823,
+        "sha256": "780e587c8d87bb50cc280e29b90d9a1467e03c723e58cbf4719bf6e1f0dbec94"
+      },
+      "parentGitOid": "0ff195d80725268a9500704330c7e116230875b7",
+      "beforeGitOid": "0ff195d80725268a9500704330c7e116230875b7",
+      "byteExactBeforeParent": true,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 12404,
+        "sha256": "68ef1d3e4304c39eeda5e105517eef8f0a7ff6145043ffe3f17221bf80631a29"
+      },
+      "parentGitOid": "a6d36df6d9c935f2f5206bd055c31028429485bf",
+      "beforeGitOid": "a6d36df6d9c935f2f5206bd055c31028429485bf",
+      "byteExactBeforeParent": true,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 2790,
+        "sha256": "27efb2dd14c35fde07264019ecd22ce7b940b369a3bbc3c4214d57016059edae"
+      },
+      "parentGitOid": "4323a4bac1e924c7ece04939159d91e68ef46f6b",
+      "beforeGitOid": "4323a4bac1e924c7ece04939159d91e68ef46f6b",
+      "byteExactBeforeParent": true,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\app\\page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      },
+      "parentGitOid": "e2b8f9f670076dfe52d288435423e7cd814ad974",
+      "beforeGitOid": "968d20fc62d358252aa6e99878148af4d8a2c330",
+      "byteExactBeforeParent": false,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      },
+      "parentGitOid": "8f97ce43297635238197f7854ed71aaea33da821",
+      "beforeGitOid": "cd941d0f04efed18adfb774cb6a688cc6e08e666",
+      "byteExactBeforeParent": false,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-page-gate.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 9600,
+        "sha256": "d10cad9061efccc7d55a8e3902cecf763f2fffcd54787fd40e2ac48972921c3e"
+      },
+      "parentGitOid": "9bda9554327a6c14dd4a03631fd7cb6b1b9e848a",
+      "beforeGitOid": "9bda9554327a6c14dd4a03631fd7cb6b1b9e848a",
+      "byteExactBeforeParent": true,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\before\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 6550,
+        "sha256": "2da5b3773f58bedcb16b005083eaa6cf5063e51864d128a50229ae294ac49a58"
+      },
+      "parentGitOid": "c67553b3fa7dd5531557f379306af58f7168458b",
+      "beforeGitOid": "c67553b3fa7dd5531557f379306af58f7168458b",
+      "byteExactBeforeParent": true,
+      "equivalentParentAfterExistingCrLfNormalization": true
+    }
+  ],
+  "sharedPageAndShellExistingMainLineEndingsWillRemainUntouched": true,
+  "publicationPlan": "stage only owned Source78 changes against raw LF parent; main CRLF differences not staged",
+  "foreignTsconfigWillNotBeStaged": true,
+  "semanticForeignBeforeChanges": 0,
+  "goalComplete": false
+}

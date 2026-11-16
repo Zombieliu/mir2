@@ -1,0 +1,24 @@
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2634 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 105 warnings (run `cargo fix --lib -p mir2-simulation --tests` to apply 9 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 0.28s
+     Running unittests src\lib.rs (C:/r16-targeted-spells-20261110/cargo\debug\deps\mir2_simulation-fbd46dff1eda8db6.exe)
+
+running 9 tests
+test runtime::zone::runtime::soulfire_practice_tests::fireball_practice_pending_metadata_survives_checkpoint_and_legacy_defaults_only_soulfire ... ok
+test runtime::zone::runtime::soulfire_practice_tests::fireball_practice_positive_primary_hit_is_spell_typed_and_not_launch_reward ... ok
+test runtime::zone::runtime::soulfire_practice_tests::fireball_practice_rejects_zero_invalid_target_and_changed_owner_but_keeps_lawful_caster_death ... ok
+test runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_does_not_extend_other_magic_or_reward_departed_owner ... ok
+test runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_is_resolved_positive_hit_evidence_including_lethal_remainder ... ok
+test runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_lawful_projectile_survives_caster_death_until_presence_changes ... ok
+test runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_pending_cast_metadata_survives_zone_checkpoint ... ok
+test runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_rejects_changed_presence_and_revived_life ... ok
+test runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_zero_missing_dead_or_moved_target_is_not_awarded ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 3381 filtered out; finished in 0.33s

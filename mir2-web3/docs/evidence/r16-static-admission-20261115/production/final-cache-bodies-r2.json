@@ -1,0 +1,748 @@
+{
+  "scope": "Read-only exact current-namespace cache bodies after the original gameplay/logout path; no fetch, seeding or recovery. Not part of the original timing classifier.",
+  "observed": true,
+  "namespace": "20261108-r16-08ec86d5105c-f9dd269e4a71",
+  "cacheCount": 3,
+  "expectedPaths": 92,
+  "matched": 92,
+  "missing": 0,
+  "mismatched": 0,
+  "rows": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "present": true,
+      "status": 200,
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1656.png",
+      "present": true,
+      "status": 200,
+      "bytes": 794,
+      "sha256": "e3f0d75de8f816a9af7889e1c4e642d0f33c055a0d559650f95acd2869037c1c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1657.png",
+      "present": true,
+      "status": 200,
+      "bytes": 807,
+      "sha256": "b41aec7bb1b5a8f8013d7b917fe0b31ec33b597b071a3d1b8b788a9348a92cee",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1658.png",
+      "present": true,
+      "status": 200,
+      "bytes": 856,
+      "sha256": "2727ac1016dbdc1a0245928a39f4f4c7e62a065d9c3ae6a62db6ecfbd0eed37a",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1901.png",
+      "present": true,
+      "status": 200,
+      "bytes": 823,
+      "sha256": "9254413deebda329157399ce0bc5c0a56de48f2bb81909cb6cf771439a95054d",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1902.png",
+      "present": true,
+      "status": 200,
+      "bytes": 717,
+      "sha256": "51e6a8fb793521abfd1649935e551f669fbfd3fde54d037de5724b70ee471678",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1904.png",
+      "present": true,
+      "status": 200,
+      "bytes": 946,
+      "sha256": "7fc680851b7b978c5ddaba6f9bdf089f55705addad09c884ad0cd91242ef7467",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1905.png",
+      "present": true,
+      "status": 200,
+      "bytes": 833,
+      "sha256": "e82f4238039f6d406710f1e43b56a75fee50b39b6bdd1dad44232124b49e8ff6",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1907.png",
+      "present": true,
+      "status": 200,
+      "bytes": 773,
+      "sha256": "0a1563c1258c540ff822517ab74187ac183e0529c0fdc931a7b454f34139a1c0",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1908.png",
+      "present": true,
+      "status": 200,
+      "bytes": 615,
+      "sha256": "73bc226aff8b8fae41d16f3ae3dd6e20201a5f2183ee6cc61ad192c35faa4f7a",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1910.png",
+      "present": true,
+      "status": 200,
+      "bytes": 863,
+      "sha256": "086e1d53c670c3cc4a0fd91d2bf1b9523c13cd3a0bcc9384fd95a975320bdf91",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1911.png",
+      "present": true,
+      "status": 200,
+      "bytes": 710,
+      "sha256": "a8e83b541810241005bb6ec5f1a59bdb157422f26cd83e55a30881e2ffbc97b4",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1913.png",
+      "present": true,
+      "status": 200,
+      "bytes": 861,
+      "sha256": "94f6a391a454712f6deb58ed2dc8227cf182b1200e2855205e4eab5d0c128885",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1914.png",
+      "present": true,
+      "status": 200,
+      "bytes": 744,
+      "sha256": "f7197caa6925e7583e9afb169abaea3d36d785b5c0fb9215e36fdbf595535a14",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1961.png",
+      "present": true,
+      "status": 200,
+      "bytes": 3097,
+      "sha256": "fa31db11016eeaaab240cf094f1d1c7955b1d81bd88af4a5ae02d574b40cb53a",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/1962.png",
+      "present": true,
+      "status": 200,
+      "bytes": 3088,
+      "sha256": "cf1a347b538a85e7014197582fe0bfbf3cb6029472cd1e5d329061b0f2ba4865",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/360.png",
+      "present": true,
+      "status": 200,
+      "bytes": 41470,
+      "sha256": "694f7db11a46a99732c9e3ab8f413ddc6e87c3271ed603c6bf60cf7f719877db",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/710.png",
+      "present": true,
+      "status": 200,
+      "bytes": 27770,
+      "sha256": "5301c0b0001913ead001863433f4aec189e96947cb2691fee8c80d319950f52e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/917.png",
+      "present": true,
+      "status": 200,
+      "bytes": 265,
+      "sha256": "087e10d0cc56faed445ff7a4077633c3611d04a496a407aada917eb18f929d64",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/918.png",
+      "present": true,
+      "status": 200,
+      "bytes": 300,
+      "sha256": "275b3f99e3472b9792552c43abba55806031e73492aea13e357add00706f1442",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/919.png",
+      "present": true,
+      "status": 200,
+      "bytes": 255,
+      "sha256": "cd50aec8339a49fd46eecaff6aa11688eb69add45ce93d39e4cccd1f20972f72",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/950.png",
+      "present": true,
+      "status": 200,
+      "bytes": 83525,
+      "sha256": "6d12bea8f919538c548abc31f7c4684f781204794853b2be91fb13b951b08e15",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/951.png",
+      "present": true,
+      "status": 200,
+      "bytes": 618,
+      "sha256": "f934d4de62d80f0506458570f64267625a9261edc3f3ccd5d8876e9c0272c635",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/956.png",
+      "present": true,
+      "status": 200,
+      "bytes": 1194,
+      "sha256": "4ed358b5c0f1c6575bebce3acb1753a6cc89a6de2019dd155ed92eae1884f662",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/957.png",
+      "present": true,
+      "status": 200,
+      "bytes": 625,
+      "sha256": "929e53f6a2bf667a592527d5a7276aea9d1f4c59cb1cf5a7eb251e4bc80a7b66",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/960.png",
+      "present": true,
+      "status": 200,
+      "bytes": 90746,
+      "sha256": "6801dd2737fca3a43a5669955e7dfbf2bcda3a1390bf3a74d9e5ef040ad5f3f2",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/961.png",
+      "present": true,
+      "status": 200,
+      "bytes": 85739,
+      "sha256": "77eee235ca7baf4e9cda9230907ac11e67cd11df26a754405639610eaf161547",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/965.png",
+      "present": true,
+      "status": 200,
+      "bytes": 358,
+      "sha256": "5dc76781e2fdafea4495193c0071a635de4d04db17cb8443970b6d09ead1b8aa",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/966.png",
+      "present": true,
+      "status": 200,
+      "bytes": 552,
+      "sha256": "a6be762c515ffe5a08cc8352107f61bb7f888a190e7f6e6549f90370ffe92eb5",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/979.png",
+      "present": true,
+      "status": 200,
+      "bytes": 285,
+      "sha256": "c1948ab6733b0283ddf505dbf2982feaf42e2fc6ead9f10b87b1f4b52353dd9d",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/989.png",
+      "present": true,
+      "status": 200,
+      "bytes": 295,
+      "sha256": "79c0669971276da6a3fd4a4abfb9ede8835a8743f89bf3f6f95d9b6b5c5a0dc0",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/995.png",
+      "present": true,
+      "status": 200,
+      "bytes": 27177,
+      "sha256": "f9f658d6b40c6d4ef0a3d18a0842c073ad9adf537063e0608f7089bcad276978",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse/997.png",
+      "present": true,
+      "status": 200,
+      "bytes": 237,
+      "sha256": "c027f5c7b996fe5769fe82e22087d6684781a592a15bad7290c97ca5a1f6c1ad",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1202.png",
+      "present": true,
+      "status": 200,
+      "bytes": 13684,
+      "sha256": "f071ab4b78e34e2e5fb11ed5e69f6b19a8a433d8d469102a0af5a365ee698b4e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1203.png",
+      "present": true,
+      "status": 200,
+      "bytes": 15720,
+      "sha256": "d7a3e6a83089fc586b5d994f7e783e47cf83b8fe1ec3b67e38a387bf032fca4f",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1204.png",
+      "present": true,
+      "status": 200,
+      "bytes": 24613,
+      "sha256": "956b010c3c5abb893a8134097e138e625d85180b04d0978d13f942608a3cc947",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1205.png",
+      "present": true,
+      "status": 200,
+      "bytes": 25377,
+      "sha256": "d79edc797081849f6ee1b4376b63a8aaaf2fd353132d94a07802025dda46374d",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1290.png",
+      "present": true,
+      "status": 200,
+      "bytes": 148,
+      "sha256": "d22313a4d47f674927b7173926b058afa2da2d72fbef85907a1fcf20414acdf4",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1291.png",
+      "present": true,
+      "status": 200,
+      "bytes": 144,
+      "sha256": "9c373a20085f33ff99b1edae95f7b38a131365d85dc4d447cfb93fe1a3be74ca",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1292.png",
+      "present": true,
+      "status": 200,
+      "bytes": 144,
+      "sha256": "44f8f9487fa3d866ca5f6f63987ff35b6108befd595a80cbf510d05ffb934ad7",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1293.png",
+      "present": true,
+      "status": 200,
+      "bytes": 142,
+      "sha256": "ed09aab7fe1ce020f07a8e47ffdddc081afac7b9cae9d8d47316e99887c86652",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1294.png",
+      "present": true,
+      "status": 200,
+      "bytes": 144,
+      "sha256": "744bd18ad44e7217a118b48486b725bcf68b4ea2f662ae143f76f11a61df900e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1295.png",
+      "present": true,
+      "status": 200,
+      "bytes": 143,
+      "sha256": "9206887761743b473b44f42c5449403033e735ee97facbbfdc2e93a64c82df56",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1296.png",
+      "present": true,
+      "status": 200,
+      "bytes": 144,
+      "sha256": "278a9f3adf7e914386cc82758233f685fdf1bed079d44f476243692f66cc4ea7",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1297.png",
+      "present": true,
+      "status": 200,
+      "bytes": 140,
+      "sha256": "e51aff79ebee3ac1377218c9ad141b95d49cd49beeb02ffd0c71b801a5a50d42",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1298.png",
+      "present": true,
+      "status": 200,
+      "bytes": 140,
+      "sha256": "a1ece15f1641a210c88dc2c89f0766ba164544ad86e9d3930aab7819b21015c6",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1299.png",
+      "present": true,
+      "status": 200,
+      "bytes": 139,
+      "sha256": "d7a286287aa70211f50da16e2c2381cda39de16107e6c9da08428335112a0ac7",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1300.png",
+      "present": true,
+      "status": 200,
+      "bytes": 140,
+      "sha256": "2e07e21d43f703dc09f5f7cc43ce38961924f3f9fc5a0dc456481f542c353268",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1301.png",
+      "present": true,
+      "status": 200,
+      "bytes": 138,
+      "sha256": "a0dd96446c824140d94c943f1940719e68ceb29ae0fb6f8edb54e3b882641071",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1302.png",
+      "present": true,
+      "status": 200,
+      "bytes": 138,
+      "sha256": "7d6ec64f40a4a1aec0d0725acc1b61c7b5439ada49eb241b2e250cccc3f683d6",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1303.png",
+      "present": true,
+      "status": 200,
+      "bytes": 138,
+      "sha256": "5efc21beb35a1a13e04847a17997e22f8999c535c65201114c78a025b0cd7e01",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1304.png",
+      "present": true,
+      "status": 200,
+      "bytes": 137,
+      "sha256": "771278d79dd4b102cf24eabf301560970b4e330a276e9976f8435b00b4e4d9d2",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1305.png",
+      "present": true,
+      "status": 200,
+      "bytes": 134,
+      "sha256": "61c0805cf43fa899ff5178857c8a178b7cced3c38953c12e6d8b649cc719216c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1306.png",
+      "present": true,
+      "status": 200,
+      "bytes": 133,
+      "sha256": "ea09740b49f858cdc6c7bd5aa110f14b39292e022a90763e08fb6041b6856fec",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1307.png",
+      "present": true,
+      "status": 200,
+      "bytes": 132,
+      "sha256": "83f960376f5199ed1c8fe82a40b7f11fd6ef6c3f58a3d4f6a6e501491d0f89e1",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1308.png",
+      "present": true,
+      "status": 200,
+      "bytes": 133,
+      "sha256": "198eb0b3251405cee3efef47d227d5abe0f9c1ef3a546736351cda04cd0615b8",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1309.png",
+      "present": true,
+      "status": 200,
+      "bytes": 129,
+      "sha256": "0ecfa4fbe8b32262c2652c6629cd3ec2868606242f999deaa0912eca489a87cf",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1310.png",
+      "present": true,
+      "status": 200,
+      "bytes": 131,
+      "sha256": "bc61fcdb3a4f4f2b0059e6358ef96282ad49f0d96710aa102d2884e08b295edd",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1311.png",
+      "present": true,
+      "status": 200,
+      "bytes": 130,
+      "sha256": "26b072ba321c12ab3bef6a440de1f912db6d709780da1c687fb1ce83151c542a",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1312.png",
+      "present": true,
+      "status": 200,
+      "bytes": 130,
+      "sha256": "d66c5aa29d092e5f0516e870fdc9506658c7804ec1ae428918f6c4d694e83030",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1313.png",
+      "present": true,
+      "status": 200,
+      "bytes": 126,
+      "sha256": "dd91af5d42e4b30674772b830f65a9940f9dea41ee7cf141f0b992cafcef411c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1314.png",
+      "present": true,
+      "status": 200,
+      "bytes": 126,
+      "sha256": "a6318ff5d95f5990b18f6e2a42e92a37f05e6c53db74379eaadd01fe43c5f07e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1315.png",
+      "present": true,
+      "status": 200,
+      "bytes": 126,
+      "sha256": "fee35b4c35112dac3b455d2f70be8671a53a6e3df12f3a184826930bd1911b08",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1316.png",
+      "present": true,
+      "status": 200,
+      "bytes": 126,
+      "sha256": "11f96814d725c91b1e0b022cfd12ce1a37311b91f157175b2c02dc51502b499f",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1317.png",
+      "present": true,
+      "status": 200,
+      "bytes": 122,
+      "sha256": "8e1c15eff403dd702dd134682b62534edeb66828583969b70571a09265ec0230",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1318.png",
+      "present": true,
+      "status": 200,
+      "bytes": 122,
+      "sha256": "9ba219d49b7cbc4b493eb4c950ec7d08c0df23b0d01651321be99473bdff5b42",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1319.png",
+      "present": true,
+      "status": 200,
+      "bytes": 123,
+      "sha256": "74488e4a451b5ce361edad27622bb621ebeef8ebaf9c16cd6b12391f56952ea0",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1320.png",
+      "present": true,
+      "status": 200,
+      "bytes": 122,
+      "sha256": "8af1b84475108225139e65d5dea2415b7fdd14f30e771e70539ba4e39439bfa3",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1321.png",
+      "present": true,
+      "status": 200,
+      "bytes": 119,
+      "sha256": "27608b03871ed121be5645a5c5d4ed4bb517e73659f2f646658a365dbc3d0884",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1322.png",
+      "present": true,
+      "status": 200,
+      "bytes": 119,
+      "sha256": "200515a823cd945789a6cadf1e06b869cc5b9d48ea64d1f59ae1391fb969667e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1323.png",
+      "present": true,
+      "status": 200,
+      "bytes": 111,
+      "sha256": "1ff148b8a7661a9b42b670e5fd4979a45f45d9a61b2a4e5ddae6c2c6077db43e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Prguse2/1324.png",
+      "present": true,
+      "status": 200,
+      "bytes": 102,
+      "sha256": "b825b7b5f20a358c449c2fe02bc5689f93cb6335df937538f372c74f587c4110",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/14.png",
+      "present": true,
+      "status": 200,
+      "bytes": 776,
+      "sha256": "dde9d5bd146dce4974bdcbf735fbc746c01fb047e7f24c753386859a7e63738c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/15.png",
+      "present": true,
+      "status": 200,
+      "bytes": 1184,
+      "sha256": "0a8ea4658362cf87153d1c7c2b972cd7ead2f1badf14afd0e47431cc24410022",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/156.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2346,
+      "sha256": "0547a8d2e8f4551ca9a23b8cba1794b71cf0981b2cdb7a09fa61e28332813c11",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/157.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2403,
+      "sha256": "d8b51b7bfeef81758d54573f25626ce25f4a7cc19ea048b6d9840fdef588487e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/158.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2080,
+      "sha256": "651166714b01c11bb89391b691395a766cef187478c675f45cdb3acc953b1e64",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/16.png",
+      "present": true,
+      "status": 200,
+      "bytes": 776,
+      "sha256": "dde9d5bd146dce4974bdcbf735fbc746c01fb047e7f24c753386859a7e63738c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/17.png",
+      "present": true,
+      "status": 200,
+      "bytes": 1518,
+      "sha256": "151e538769635ee4c9f84d55a685bda3794fe1f4f0c0cce9f40ad6696e4fbf87",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/193.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2016,
+      "sha256": "44c3ff55587d05a3cb9decf945c7c6bf18c814bb86a1d47ef7d3e0da5941283c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/206.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2045,
+      "sha256": "980af8c55b5dc40cbf6e52855d42a167a9fa9a152200caf4a2109c7285c8c2da",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/210.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2075,
+      "sha256": "cf7ff2470dbecd88472dae406f969670a4d02b4e98e592b63526fce53fb8efb5",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/270.png",
+      "present": true,
+      "status": 200,
+      "bytes": 1982,
+      "sha256": "3b0f3cb5ce151a3be6edb0853a0edae7bde05037ec0781a0dfd897367b7341c8",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/273.png",
+      "present": true,
+      "status": 200,
+      "bytes": 1982,
+      "sha256": "59200dbc82fd73373a4a1aadfbcb21143d4471b2852c2f61221da6faf0e4764b",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/276.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2016,
+      "sha256": "44c3ff55587d05a3cb9decf945c7c6bf18c814bb86a1d47ef7d3e0da5941283c",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/287.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2138,
+      "sha256": "b913466d5571f31e8c609e15236174d855c7be38b6e0b7f934c0ff4e9b98681e",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/288.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2670,
+      "sha256": "35273e8af55fc529d3f73a847dcd597902a558b32ecd50f00b92d923b9efb2b2",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/289.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2122,
+      "sha256": "e42a6e7305e3ecd91e71ba207a8e49f3cc5cb4bea9c443ecff93d60eea6959d2",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/516.png",
+      "present": true,
+      "status": 200,
+      "bytes": 251,
+      "sha256": "1b4b23d93c46de53b8eb1ac80756fb84ca0a5bc65221eba9c32e219f28242c22",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/517.png",
+      "present": true,
+      "status": 200,
+      "bytes": 325,
+      "sha256": "d0aa03122974731fd082c8db73085efa6dd5cdd9e6e48af4fc881849136e2c06",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/530.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2943,
+      "sha256": "09e1320bc05ebbb6402acfd7a97fba23ee586afd06f034f47026303ca792d1d0",
+      "matches": true
+    },
+    {
+      "path": "/original-ui/Title/616.png",
+      "present": true,
+      "status": 200,
+      "bytes": 2143,
+      "sha256": "8a1c3a0cc7ddf8d2a506d5bee82f102089e59eb5781bdb81221ba7dff5c6737b",
+      "matches": true
+    }
+  ]
+}

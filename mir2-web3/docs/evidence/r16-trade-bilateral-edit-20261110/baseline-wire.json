@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "scope": "two ordinary WebSockets, isolated File, opposing locked quote edits",
+  "sourceHead": "870fdd4baa5ad205a91e39481d43f9a9416ecf32",
+  "mode": "baseline",
+  "binarySha256": "b39dad51be46d1fee7c89c6002fe79dc15621df2f75666a512559c74bded2b46",
+  "gatewayPid": 215296,
+  "httpPort": 52088,
+  "tcpPort": 52089,
+  "passed": true,
+  "steps": [
+    {
+      "adjacent": true,
+      "mutualFacing": true
+    }
+  ],
+  "assetsBefore": {
+    "primary": {
+      "gold": 1000,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    },
+    "peer": {
+      "gold": 700,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    }
+  },
+  "firstPrepare": {
+    "role": "peer",
+    "firstOfferHeld": true,
+    "deliveriesOrTerminal": 0
+  },
+  "itemEditAccepted": false,
+  "goldEditAccepted": false,
+  "assetsAfter": {
+    "primary": {
+      "gold": 922,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    },
+    "peer": {
+      "gold": 778,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    }
+  },
+  "received": {
+    "primary": {
+      "itemIndex": 221,
+      "count": 1,
+      "fromUidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "toUidHash": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+      "bagSlot": 3,
+      "normalizedCollision": true,
+      "debit": 137,
+      "credit": 59,
+      "creditOrder": 38,
+      "itemOrder": 39,
+      "terminalOrder": 40
+    },
+    "peer": {
+      "itemIndex": 722,
+      "count": 1,
+      "fromUidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+      "toUidHash": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+      "bagSlot": 0,
+      "normalizedCollision": true,
+      "debit": 59,
+      "credit": 137,
+      "creditOrder": 42,
+      "itemOrder": 43,
+      "terminalOrder": 44
+    }
+  },
+  "exactAssets": true,
+  "totalGold": 1700,
+  "sameCharacterReadback": true,
+  "ownedGatewayStopped": true,
+  "sourceFixtureUnchanged": true
+}

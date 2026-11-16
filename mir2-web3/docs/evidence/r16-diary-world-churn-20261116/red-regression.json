@@ -1,0 +1,11 @@
+{
+  "source": "bf97cdd479c25d71bcb7f51438740fc5d3ee95c8",
+  "command": "node --test --test-name-pattern=\"diary close survives|diary close waits\" scripts/test-bevy-quest-ui.mjs",
+  "exitCode": 1,
+  "passed": 1,
+  "failed": 1,
+  "firstFailure": "diary close survives ordinary world changes before and after the next snapshot is submitted",
+  "reason": "an ordinary update cannot trap the current diary: false !== true",
+  "testSha256": "21b54e39738dfdd10c198d8d763267650a6500b781a727c23ffccb7d7d186c9d",
+  "scope": "Executed before modifying the production hook; original failed output retained in tool history. Not a public R1 root-cause claim."
+}

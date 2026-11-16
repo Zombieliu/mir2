@@ -1,0 +1,676 @@
+{
+  "schema": 1,
+  "kind": "walking-local-failure-preservation-digest",
+  "status": "FIVE_FAILED_LOCAL_RUNS_ANIMATION_UNQUALIFIED",
+  "sourceQualification": {
+    "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+    "base": "f6e30a0ee8021d745ecce35e295edf5f60e39964",
+    "localCandidate": "f6e30a0ee802-walking-recovery-668d1d43",
+    "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+    "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+    "qualifiedLocalSessions": 0,
+    "actualAnimation": false,
+    "qualifiedPinRef": "qualifiedSourcePin",
+    "supersededPinRef": "supersededSourcePin",
+    "supersededMetadataExcluded": [
+      "localCandidate",
+      "checks",
+      "sessions",
+      "historical build hash"
+    ]
+  },
+  "commonPayload": {
+    "scriptBytes": 764839,
+    "scriptSha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+    "jsonBytes": 764724,
+    "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "images": 240
+  },
+  "hypotheses": {
+    "gpuOnlyExplanation": {
+      "status": "SUPERSEDED",
+      "reason": "r2 onward recorded actual decoded visible DOM monster bodies with GPU renderer flags false."
+    },
+    "safeZoneContext": {
+      "status": "DIAGNOSTIC_CONTEXT_RULE_REVIEW_OPEN",
+      "run": "r5",
+      "map": "0",
+      "center": {
+        "x": 288,
+        "y": 616
+      },
+      "size": 10,
+      "source": "Root diagnostic: the recorded player/target retreat remained in this map0 safe zone. No C# or shared-rule equivalence is asserted."
+    }
+  },
+  "runs": [
+    {
+      "run": "r1",
+      "passed": false,
+      "source": {
+        "observedRevision": "f6e30a0ee802-walking-recovery-668d1d43",
+        "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+        "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5"
+      },
+      "evidence": [
+        "r1Main",
+        "r1Walking"
+      ],
+      "failure": {
+        "stage": "one-real-step-after-native-fonts-ready",
+        "message": "actual game animation remains a required separately observed gate",
+        "animationStatus": "not-observed",
+        "animationReason": "No naturally authoritative monster with two exact decoded packed walking frames in bounded observation"
+      },
+      "walking": {
+        "completeCompiledTransportAndPinnedPayload": true,
+        "originalJsonBodyObserved": false,
+        "originalJsonAttempts": [
+          {
+            "attempt": 1,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          },
+          {
+            "attempt": 2,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          }
+        ],
+        "probeRows": 0,
+        "probeRequests": 4,
+        "captures": 0,
+        "dropped": 0,
+        "observedNetworkRows": 3,
+        "diagnosticSamples": 0,
+        "finalDomCounts": null,
+        "finalRenderer": null,
+        "recordedAuthorityCounts": null,
+        "recordedMonsterMovementCandidates": null,
+        "snapshotMonsterPositionDeltas": null,
+        "collectorCaveat": "Historical collector omitted ObjectWalk/ObjectRun; absent counts are not proof of no authoritative movement."
+      },
+      "trigger": null,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true
+    },
+    {
+      "run": "r2",
+      "passed": false,
+      "source": {
+        "observedRevision": "f6e30a0ee802-walking-recovery-668d1d43",
+        "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+        "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+        "invocationCandidate": "f6e30a0ee802-walking-recovery-668d1d43",
+        "sourceInputsSha256": "cbcca7feea3d1169907f5020f0819083c7ea2db6d03e84cc534e7c162d0a5fa4"
+      },
+      "evidence": [
+        "r2Main",
+        "r2Walking"
+      ],
+      "failure": {
+        "stage": "one-real-step-after-native-fonts-ready",
+        "message": "actual game animation remains a required separately observed gate",
+        "animationStatus": "not-observed",
+        "animationReason": "No naturally authoritative monster with two exact decoded packed walking frames in bounded observation"
+      },
+      "walking": {
+        "completeCompiledTransportAndPinnedPayload": true,
+        "originalJsonBodyObserved": false,
+        "originalJsonAttempts": [
+          {
+            "attempt": 1,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          },
+          {
+            "attempt": 2,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          }
+        ],
+        "probeRows": 0,
+        "probeRequests": 4,
+        "captures": 0,
+        "dropped": 0,
+        "observedNetworkRows": 3,
+        "diagnosticSamples": 95,
+        "finalDomCounts": {
+          "stacks": 21,
+          "bodies": 21,
+          "allowedPath": 0,
+          "packed": 21,
+          "decoded": 21,
+          "visible": 17
+        },
+        "finalRenderer": {
+          "enabled": false,
+          "rawWebGl2Enabled": false
+        },
+        "recordedAuthorityCounts": {
+          "ObjectWalk": 0,
+          "ObjectRun": 0,
+          "ObjectTurn": 0,
+          "UserLocation": 34
+        },
+        "recordedMonsterMovementCandidates": 0,
+        "snapshotMonsterPositionDeltas": null,
+        "collectorCaveat": "Historical collector omitted ObjectWalk/ObjectRun; absent counts are not proof of no authoritative movement."
+      },
+      "trigger": null,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true
+    },
+    {
+      "run": "r3",
+      "passed": false,
+      "source": {
+        "observedRevision": "f6e30a0ee802-walking-recovery-668d1d43",
+        "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+        "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+        "invocationCandidate": "f6e30a0ee802-walking-recovery-668d1d43",
+        "sourceInputsSha256": "cbcca7feea3d1169907f5020f0819083c7ea2db6d03e84cc534e7c162d0a5fa4"
+      },
+      "evidence": [
+        "r3Main",
+        "r3Walking",
+        "r3Trigger"
+      ],
+      "failure": {
+        "stage": "one-real-step-after-native-fonts-ready",
+        "message": "one ordinary surviving Deer hit and manual cancel must succeed",
+        "animationStatus": "not-observed",
+        "animationReason": "No naturally authoritative monster with two exact decoded packed walking frames in bounded observation"
+      },
+      "walking": {
+        "completeCompiledTransportAndPinnedPayload": true,
+        "originalJsonBodyObserved": false,
+        "originalJsonAttempts": [
+          {
+            "attempt": 1,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          },
+          {
+            "attempt": 2,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          }
+        ],
+        "probeRows": 0,
+        "probeRequests": 4,
+        "captures": 0,
+        "dropped": 0,
+        "observedNetworkRows": 3,
+        "diagnosticSamples": 71,
+        "finalDomCounts": {
+          "stacks": 21,
+          "bodies": 21,
+          "allowedPath": 0,
+          "packed": 21,
+          "decoded": 21,
+          "visible": 17
+        },
+        "finalRenderer": {
+          "enabled": false,
+          "rawWebGl2Enabled": false
+        },
+        "recordedAuthorityCounts": {
+          "ObjectWalk": 0,
+          "ObjectRun": 0,
+          "ObjectTurn": 0,
+          "UserLocation": 34
+        },
+        "recordedMonsterMovementCandidates": 0,
+        "snapshotMonsterPositionDeltas": 0,
+        "collectorCaveat": "Reported captured rows only; not an independent server-rule equivalence proof."
+      },
+      "trigger": {
+        "passed": false,
+        "error": "a real visible Deer nameplate must be physically clickable without forcing hidden UI",
+        "attacks": 0,
+        "singleRecordedAttack": false,
+        "inputEvents": 0,
+        "trustedInputEvents": 0,
+        "target": null,
+        "damagePercentAtStop": null,
+        "finalHealthPercent": null,
+        "damageIndicators": [],
+        "ownerAcceptedStop": false,
+        "stopFrom": null,
+        "requestedStop": null,
+        "acceptedStop": null,
+        "finalPlayerPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "ownerPositions": [],
+        "recordedPackets": {
+          "sent": {
+            "attackV2": null,
+            "walk": 33,
+            "run": 1
+          },
+          "received": {
+            "ObjectWalk": null,
+            "ObjectRun": null,
+            "ObjectAttack": null,
+            "ObjectStruck": null,
+            "DamageIndicator": null,
+            "UserLocation": 34
+          }
+        }
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true
+    },
+    {
+      "run": "r4",
+      "passed": false,
+      "source": {
+        "observedRevision": "f6e30a0ee802-walking-recovery-668d1d43",
+        "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+        "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+        "invocationCandidate": "f6e30a0ee802-walking-recovery-668d1d43",
+        "sourceInputsSha256": "cbcca7feea3d1169907f5020f0819083c7ea2db6d03e84cc534e7c162d0a5fa4"
+      },
+      "evidence": [
+        "r4Main",
+        "r4Walking",
+        "r4Trigger"
+      ],
+      "failure": {
+        "stage": "one-real-step-after-native-fonts-ready",
+        "message": "one ordinary surviving Deer hit and manual cancel must succeed",
+        "animationStatus": "not-observed",
+        "animationReason": "No naturally authoritative monster with two exact decoded packed walking frames in bounded observation"
+      },
+      "walking": {
+        "completeCompiledTransportAndPinnedPayload": true,
+        "originalJsonBodyObserved": false,
+        "originalJsonAttempts": [
+          {
+            "attempt": 1,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          },
+          {
+            "attempt": 2,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          }
+        ],
+        "probeRows": 0,
+        "probeRequests": 4,
+        "captures": 0,
+        "dropped": 0,
+        "observedNetworkRows": 3,
+        "diagnosticSamples": 81,
+        "finalDomCounts": {
+          "stacks": 26,
+          "bodies": 26,
+          "allowedPath": 0,
+          "packed": 25,
+          "decoded": 26,
+          "visible": 21
+        },
+        "finalRenderer": {
+          "enabled": false,
+          "rawWebGl2Enabled": false
+        },
+        "recordedAuthorityCounts": {
+          "ObjectWalk": 0,
+          "ObjectRun": 0,
+          "ObjectTurn": 0,
+          "UserLocation": 39
+        },
+        "recordedMonsterMovementCandidates": 0,
+        "snapshotMonsterPositionDeltas": 0,
+        "collectorCaveat": "Reported captured rows only; not an independent server-rule equivalence proof."
+      },
+      "trigger": {
+        "passed": false,
+        "error": "ordinary cancel step did not reach its accepted tile under8s",
+        "attacks": 1,
+        "singleRecordedAttack": true,
+        "inputEvents": 4,
+        "trustedInputEvents": 4,
+        "target": {
+          "ai": 2,
+          "initialHp": 25,
+          "maxHp": 25,
+          "position": {
+            "x": 287,
+            "y": 611
+          }
+        },
+        "damagePercentAtStop": 96,
+        "finalHealthPercent": null,
+        "damageIndicators": [
+          {
+            "packet": "DamageIndicator",
+            "numeric": {
+              "damage": 1,
+              "damageType": 0
+            }
+          }
+        ],
+        "ownerAcceptedStop": false,
+        "stopFrom": {
+          "x": 286,
+          "y": 612
+        },
+        "requestedStop": {
+          "x": 286,
+          "y": 613
+        },
+        "acceptedStop": null,
+        "finalPlayerPosition": {
+          "x": 286,
+          "y": 612
+        },
+        "ownerPositions": [],
+        "recordedPackets": {
+          "sent": {
+            "attackV2": 1,
+            "walk": 37,
+            "run": 1
+          },
+          "received": {
+            "ObjectWalk": null,
+            "ObjectRun": null,
+            "ObjectAttack": 1,
+            "ObjectStruck": 1,
+            "DamageIndicator": 1,
+            "UserLocation": 39
+          }
+        }
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true
+    },
+    {
+      "run": "r5",
+      "passed": false,
+      "source": {
+        "observedRevision": "f6e30a0ee802-walking-recovery-668d1d43",
+        "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+        "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+        "invocationCandidate": "f6e30a0ee802-walking-recovery-668d1d43",
+        "sourceInputsSha256": "cbcca7feea3d1169907f5020f0819083c7ea2db6d03e84cc534e7c162d0a5fa4"
+      },
+      "evidence": [
+        "r5Main",
+        "r5Walking",
+        "r5Trigger"
+      ],
+      "failure": {
+        "stage": "one-real-step-after-native-fonts-ready",
+        "message": "actual selected Deer walking animation remains a required separately observed gate",
+        "animationStatus": "not-observed",
+        "animationReason": "No naturally authoritative monster with two exact decoded packed walking frames in bounded observation"
+      },
+      "walking": {
+        "completeCompiledTransportAndPinnedPayload": true,
+        "originalJsonBodyObserved": false,
+        "originalJsonAttempts": [
+          {
+            "attempt": 1,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          },
+          {
+            "attempt": 2,
+            "bytes": 699188,
+            "expectedBytes": 764724,
+            "prefixBytes": 699188,
+            "intentionallyPartial": true
+          }
+        ],
+        "probeRows": 0,
+        "probeRequests": 4,
+        "captures": 0,
+        "dropped": 0,
+        "observedNetworkRows": 3,
+        "diagnosticSamples": 75,
+        "finalDomCounts": {
+          "stacks": 23,
+          "bodies": 23,
+          "allowedPath": 0,
+          "packed": 23,
+          "decoded": 23,
+          "visible": 21
+        },
+        "finalRenderer": {
+          "enabled": false,
+          "rawWebGl2Enabled": false
+        },
+        "recordedAuthorityCounts": {
+          "ObjectWalk": 0,
+          "ObjectRun": 0,
+          "ObjectTurn": 0,
+          "UserLocation": 40
+        },
+        "recordedMonsterMovementCandidates": 0,
+        "snapshotMonsterPositionDeltas": 0,
+        "collectorCaveat": "Reported captured rows only; not an independent server-rule equivalence proof."
+      },
+      "trigger": {
+        "passed": true,
+        "error": null,
+        "attacks": 1,
+        "singleRecordedAttack": true,
+        "inputEvents": 4,
+        "trustedInputEvents": 4,
+        "target": {
+          "ai": 2,
+          "initialHp": 25,
+          "maxHp": 25,
+          "position": {
+            "x": 287,
+            "y": 611
+          }
+        },
+        "damagePercentAtStop": 96,
+        "finalHealthPercent": 96,
+        "damageIndicators": [
+          {
+            "packet": "DamageIndicator",
+            "numeric": {
+              "damage": 1,
+              "damageType": 0
+            }
+          }
+        ],
+        "ownerAcceptedStop": true,
+        "stopFrom": {
+          "x": 286,
+          "y": 612
+        },
+        "requestedStop": {
+          "x": 286,
+          "y": 613
+        },
+        "acceptedStop": {
+          "x": 286,
+          "y": 613
+        },
+        "finalPlayerPosition": {
+          "x": 286,
+          "y": 613
+        },
+        "ownerPositions": [
+          {
+            "x": 286,
+            "y": 613
+          }
+        ],
+        "recordedPackets": {
+          "sent": {
+            "attackV2": 1,
+            "walk": 38,
+            "run": 1
+          },
+          "received": {
+            "ObjectWalk": null,
+            "ObjectRun": null,
+            "ObjectAttack": 1,
+            "ObjectStruck": 1,
+            "DamageIndicator": 1,
+            "UserLocation": 40
+          }
+        }
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true
+    }
+  ],
+  "references": {
+    "qualifiedSourcePin": {
+      "path": "../release/source-pin-qualified.json",
+      "sha256": "1e38a769cc4852c64f3e977d98e7e09f7941759769530d208f68eb6f5bbd98d8"
+    },
+    "supersededSourcePin": {
+      "path": "../release/source-pin.json",
+      "sha256": "7c293494794c5c616b74e57ee0d2a046b0994f4f1149d12162e2d539f460e7df"
+    },
+    "buildReceipt": {
+      "path": "../build-receipt.json",
+      "sha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5"
+    },
+    "offlineObserverReceipt": {
+      "path": "../public-observer-tests/receipt-r2.json",
+      "sha256": "719cc99bb02d8d70757b9caa06b3ea04fa922d1740cd5d3aa5b539b97fc7158d"
+    },
+    "r1Main": {
+      "path": "../game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "8dc66bd7f5928896e37064180c32ef4c08f396853cdee6f2325d1151d8b08b78"
+    },
+    "r1Walking": {
+      "path": "../game-full/quest-after-r1/walking-compiled-recovery.json",
+      "sha256": "a0e027c29033af1545c6afe6887853080e16455db48bf256be3670900082b8a5"
+    },
+    "r1Summary": {
+      "path": "../first-browser-attempt.json",
+      "sha256": "1aa3292d4563a3f9c60222638f3d6ead6688f4baab830eb9b285f5de410372f0"
+    },
+    "r2Main": {
+      "path": "../fixture-r2/game-full/quest-after-r2/entry-visual-receipt.json",
+      "sha256": "1ba8d1f49bf1fc5ccb217b230c1438c2e9497367202a42d0c5788a8b7d412028"
+    },
+    "r2Walking": {
+      "path": "../fixture-r2/game-full/quest-after-r2/walking-compiled-recovery.json",
+      "sha256": "4fbeebba52065988778806eab6ae5d51a37a151735d2c9dee6269d979c2adec4"
+    },
+    "r2Invocation": {
+      "path": "../fixture-r2/game-full/quest-after-r2-invocation.json",
+      "sha256": "d63dc68674465c668f449611e16f261e80941a47476a94c587dd7bc0faa6aef8"
+    },
+    "r3Main": {
+      "path": "../fixture-r3/game-full/quest-after-r3/entry-visual-receipt.json",
+      "sha256": "8240aed9f746a642cfcf102f98ee1c6c05f2341393ed2852ac908322ec99d830"
+    },
+    "r3Walking": {
+      "path": "../fixture-r3/game-full/quest-after-r3/walking-compiled-recovery.json",
+      "sha256": "9385b1ac39b675a5a3b8dd2cb802fae6c19e864055f820a5a054e3f0ed3907ac"
+    },
+    "r3Invocation": {
+      "path": "../fixture-r3/game-full/quest-after-r3-invocation.json",
+      "sha256": "58219e1717a50924101364d5ba64c93d2552a5c8b1fc3d97dee2765cdee898d9"
+    },
+    "r3Trigger": {
+      "path": "../fixture-r3/game-full/quest-after-r3/ordinary-deer-flee-trigger.json",
+      "sha256": "26b08a00019528341248ab4c9c764707ee257af5246447b911a1528f37c8ff1a"
+    },
+    "r4Main": {
+      "path": "../fixture-r4/game-full/quest-after-r4/entry-visual-receipt.json",
+      "sha256": "db96fb1a4c322281bbd4dd86d50cb8acff12efbfc2a45c5ba7b641fbdf960ecd"
+    },
+    "r4Walking": {
+      "path": "../fixture-r4/game-full/quest-after-r4/walking-compiled-recovery.json",
+      "sha256": "c99168d14e1bc4c6b24e8307f277c440151ea05519658edcb3d06c9a9f1ee1c4"
+    },
+    "r4Invocation": {
+      "path": "../fixture-r4/game-full/quest-after-r4-invocation.json",
+      "sha256": "98a74f3b82fa0cca84f3093d82b4f8058408f1509b4f285ab839df4523e7c0cf"
+    },
+    "r4Trigger": {
+      "path": "../fixture-r4/game-full/quest-after-r4/ordinary-deer-flee-trigger.json",
+      "sha256": "d6604854d387b81a531776c8e3291bcd47d95d555d1e7f949a23873b99bc82f7"
+    },
+    "r5Main": {
+      "path": "../fixture-r5/game-full/quest-after-r5/entry-visual-receipt.json",
+      "sha256": "67dbf9286d30999bdf074bfce660c9d662a6afb2564cd58617432a213d183281"
+    },
+    "r5Walking": {
+      "path": "../fixture-r5/game-full/quest-after-r5/walking-compiled-recovery.json",
+      "sha256": "68e003736f8cc8d544a52f1f03f21b4652b66a201853dedc461a6fbbcf9d9914"
+    },
+    "r5Invocation": {
+      "path": "../fixture-r5/game-full/quest-after-r5-invocation.json",
+      "sha256": "3d12603bd99633c8dede698d646f785c6852c51ecce25bc01752aa28d20beda8"
+    },
+    "r5Trigger": {
+      "path": "../fixture-r5/game-full/quest-after-r5/ordinary-deer-movement-trigger.json",
+      "sha256": "1cfe8b5d9549d228644f5f55d70e2dfce792f102c42e93130e520d30fea997e8"
+    }
+  },
+  "offlineObserverSummary": {
+    "reference": "offlineObserverReceipt",
+    "rerun": false
+  },
+  "boundaries": {
+    "actualAnimationPassed": false,
+    "anyLocalSessionQualified": false,
+    "publicOrProductionPassClaimed": false,
+    "csharpEquivalenceAssessed": false,
+    "actions": "Existing local JSON read and allowlisted projection only; no QA run/browser/network/auth/deployment or repository/source changes."
+  },
+  "preservation": {
+    "rawEvidenceReadOnly": true,
+    "allRecordedInputHashesRechecked": true
+  }
+}

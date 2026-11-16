@@ -1,0 +1,216 @@
+{
+  "schema": "mir2-bounded-source-review/1",
+  "reviewer": "/root/five_class_content_audit",
+  "createdUtc": "2026-10-11T07:56:06.301739+00:00",
+  "acceptedForFocusedTests": true,
+  "acceptedForRelease": false,
+  "scope": [
+    {
+      "path": ".github/workflows/gateway-release.yml",
+      "sha256": "0947068a4334b044d489b9808c9aea34ce4556fee46b76b08ef392196f835cb7"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/main.rs",
+      "sha256": "338fb1e97967d93317c08a91d3d7cce139b4afc1ebab804b6a2dc699be165a6e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/owner_wire_ids.rs",
+      "sha256": "e60b383f89b4374cc0b7d92d6bc9938168f58f52329996ec1893d82673505643"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "sha256": "7ded0292dfec0bc93f3142d9d3da9aacce6791057c1e6ba4ee1f7a3e0b5b9c79"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/five_class.rs",
+      "sha256": "c2104fc70e3fd956d65a1e42f04a9c3b0d052b7664f4b8875f3d4c8c0c10eb08"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/five_class_receipt_tests.rs",
+      "sha256": "2e7d180e4c11c02e7e8d1ab9b7ffd47e1a0d896076ebf9498bd465927aa1fee0"
+    }
+  ],
+  "supportingReadOnlyNodeDependencyScope": [
+    {
+      "path": "mir2-web3/.nvmrc",
+      "sha256": "333b9d8fed3f87c469d5b483f4b562fc108185baff26c7dda766ba234f0e7a69"
+    },
+    {
+      "path": "mir2-web3/apps/web/package.json",
+      "sha256": "965ca76bc961165e925733bbc92a64dba0128042610db40f804e4660c850bc97"
+    },
+    {
+      "path": "mir2-web3/apps/web/package-lock.json",
+      "sha256": "f163649fe600918bddcbe53a68294c4ea1cc02068cf85f00a603baf043e9aacf"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/asset-pipeline/five-class-skill-closure.test.mjs",
+      "sha256": "9f0999614ed840e174d07a28763395326724c922e9f888f32b746db7e3d5cb4b"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/asset-pipeline/five-class-sprite-closure.test.mjs",
+      "sha256": "a5ea9df89f61f59d9d45d141c573a2e1f7830c6a12837dd2e8fa33229b677ce2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/asset-pipeline/five-class-skill-closure.mjs",
+      "sha256": "56d25b5b4d05f37ffcc31557edd31ff0e87d0fc2447c649296ccc1f8626b1c28"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/asset-pipeline/five-class-sprite-closure.mjs",
+      "sha256": "7a8508422a7dfe8859592a875d0f50ee9af3fcffd6077de4c357790748127be7"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/asset-pipeline/five-class-skill-source.mjs",
+      "sha256": "bfe7cd3c02c3e9d096f02fe77ee20a74b71bd403eab0ca021a5a134833e6db5b"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/asset-pipeline/item-icon-closure.mjs",
+      "sha256": "f5a521b3183a69cb312b2bc81b7b5396387bd8bd68a7f5d24c537edd2c3594a9"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/export-crystal-magic-effects.mjs",
+      "sha256": "5c07558dcf440d253c2d32ac6a07caa10d19a999365b45ce88ad2e39aea9387e"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/crystal-library.mjs",
+      "sha256": "68f2893b237a652c3c7a685c486c8451f79b32bc3e2f1c4ff1e51fc7d8316a4b"
+    }
+  ],
+  "independentReviewReferences": [
+    {
+      "path": "work/fiveclass-20261010/simulation-integration-review09.json",
+      "sha256": "74dfc2fa0840cc6f23a47ffcd587c00af0ef18aa77065e95fa6130b7f94cf01c"
+    },
+    {
+      "path": "work/fiveclass-20261010/workflow-before-node-deps01.yml",
+      "sha256": "d1c80e1345244efbab452f19adb0008bb1e22303adbff309d2cd91c462457092"
+    }
+  ],
+  "checks": [
+    {
+      "name": "workflow_old_linux_gates_preserved",
+      "accepted": true,
+      "evidence": {
+        "baselineCommit": "64b6b10c05732048da9c6bf5ccb0a491d2d053d3",
+        "baselineWorkflowSha256": "262939a665ed9e96c9b913407e7a9c1ec90098563fad980e774eba81d6c26160",
+        "removeAddedThreeStepsRestoresEntireBaselineAfterOnlyCRLFNormalization": true,
+        "oldJobsPermissionsTestsPackageAndPublishUnchanged": true,
+        "newStepLines": [
+          125,
+          143
+        ]
+      }
+    },
+    {
+      "name": "node_dependency_blocker_closed",
+      "accepted": true,
+      "evidence": {
+        "nodeVersion": "22.18.0",
+        "nodeVersionFile": "mir2-web3/.nvmrc",
+        "setupNodePinnedAction": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+        "pinAlsoUsedByExistingCandidateAndCrossPlatformWorkflows": true,
+        "npmWorkingDirectory": "mir2-web3/apps/web",
+        "npmCommand": "npm ci --no-audit --no-fund",
+        "devDependenciesNotOmitted": true,
+        "sharpVersion": "0.35.3",
+        "sharpNodeRequirement": ">=20.9.0",
+        "lockfileIncludesLinuxX64SharpAndLibvipsOptionalDependencies": true,
+        "removeOnlyNodeSetupAndInstallRestoresBeforeNodeDepsWorkflow": true
+      }
+    },
+    {
+      "name": "node_resource_checks_do_not_require_local_crystal_source",
+      "accepted": true,
+      "evidence": {
+        "testDefinitions": {
+          "skillClosure": 8,
+          "spriteClosure": 6
+        },
+        "fixtures": "synthetic profile/catalogue/contract metadata and os.tmpdir files",
+        "sourceExportEntryPoints": "guarded CLI main functions; imported tests do not invoke exporter main",
+        "sharpImports": "item-icon-closure.mjs:4, five-class-sprite-closure.mjs:6, export-crystal-magic-effects.mjs:8",
+        "windowsDefaultSourcePath": "export-crystal-magic-effects.mjs:29 is a CLI fallback selected only inside guarded main, not a test fixture dependency",
+        "scopeLimit": "static inspection of added test execution/import paths, not an asset export run"
+      }
+    },
+    {
+      "name": "five_class_practice_authority_and_teardown",
+      "accepted": true,
+      "evidence": {
+        "gatewayProducerPath": "routing.rs:4706 typed ZoneOutbound routing, not public client receipt decoding",
+        "ownerChecks": [
+          "authenticated account",
+          "character index",
+          "current session ID",
+          "nonzero Zone object ID",
+          "current ZoneKey",
+          "current life generation",
+          "real learned skill mask"
+        ],
+        "personalCommitChecks": "session.rs:1300 validates in-world active account/index, actual class and map, and real learned skill before Source progression",
+        "watermark": "independent highest_five_class_practice_sequence; identity/learned/fence checked before watermark",
+        "teardown": "only closed batch captured under the fence-establishing lock may use captured_before_teardown; owner/life/learned/sequence checks remain; late ordinary dispatch refused",
+        "realGatewayTests": "owner/replay, invalid identity, unlearned/wrong class, out-of-order, death/revive life, real LogOut/StartGame new object, pre-fence capture versus late receipt"
+      }
+    },
+    {
+      "name": "five_class_mana_absolute_settlement_and_independent_ordering",
+      "accepted": true,
+      "evidence": {
+        "shape": "nonzero sequence, nonnegative before/after, changed amount, after <= actual trusted max_mp",
+        "authority": "current presence object/life and teardown fence before sequence advancement",
+        "watermark": "highest_mana_sequence independent of HP and practice high-water marks",
+        "application": "force_authoritative_player_vitals(None, Some(mp_after)); no stale personal HP overwrite",
+        "spendAndCooldown": "normal native accepted Magic launch uses trusted learned Source cost and exact delay metadata; Zone action clock owns ms admission; rejected launch does not commit personal MP/cooldown; accepted DoubleSlash reads only authoritative Zone MP",
+        "focusAcceptance": "RangeAttack is owner-only; AOI observers receive ObjectRangeAttack with actor ID, so observer Focus is not an owner acceptance",
+        "teardownSnapshot": "captured practice saved, final frozen Zone absolute HP/maxHP/MP/death snapshot closes mana after fence without accepting late receipt",
+        "realGatewayTests": "actual MPEater production, replay after MP spend, invalid shape/object/life/fence non-poisoning, teardown save, death/revive, HP and practice watermarks cannot consume first mana sequence"
+      }
+    },
+    {
+      "name": "owner_wire_projection_and_profile_isolation",
+      "accepted": true,
+      "evidence": {
+        "profile": "main.rs accepts platinum_fiveclass explicitly; platinum_176 default and crystal_full existing routes remain",
+        "ownerRemaps": [
+          "SetConcentration",
+          "SetElemental",
+          "SetBindingShot",
+          "RemoveDelayedExplosion",
+          "MPEater effect_type attacker ObjectID",
+          "projectile source/destination IDs",
+          "backstep/dash actor IDs"
+        ],
+        "observerIds": "remap remains constrained to exact own Zone ID; unrelated actor IDs left unchanged",
+        "classicIngress": "no new raw account login, QA/admin, personal-world movement fallback or client-supplied combat stat route introduced in bounded diff"
+      }
+    },
+    {
+      "name": "rust_1_89_static_compatibility",
+      "accepted": true,
+      "evidence": {
+        "newRustTests": "explicit cargo +1.89.0 --locked, serial test execution",
+        "manifestAndLockDelta": "no change to gateway Cargo.toml or workspace Cargo.lock in reviewed diff",
+        "newCode": "standard let-else, match/or patterns, is_some_and, serde defaults and existing collection/method APIs; no feature gates or identified post-1.89 APIs introduced by bounded Gateway changes",
+        "scopeLimit": "source compatibility review only; neither Rust 1.89 Linux compilation nor Linux linking executed by reviewer"
+      }
+    }
+  ],
+  "findings": [],
+  "nonBlockingNotes": [
+    {
+      "path": "mir2-web3/apps/gateway/src/main.rs",
+      "line": 45,
+      "note": "Unsupported profile diagnostic still lists platinum_176 or crystal_full, omitting the newly supported platinum_fiveclass. Valid profile routing is correct; this diagnostic wording is not a bounded test blocker."
+    }
+  ],
+  "limitations": [
+    "Static source/CI review only. acceptedForFocusedTests authorizes exact reviewed source checks; it does not certify a Linux build, release, publication, public-server play or frontend acceptance.",
+    "Bounded five-class candidate targets Source Assassin/Archer skills with initial learning levels <=50; Source >50 active skills are not covered by this release gate.",
+    "Reviewer ran no Cargo, Node test, npm installation, build or live account operation and edited no product or test file."
+  ],
+  "cargoStarted": false,
+  "nodeTestsStarted": false,
+  "productWrittenByReviewer": false,
+  "sourceDrift": []
+}

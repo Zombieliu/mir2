@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:03:58.610351+00:00",
+  "producerReceipt": {
+    "filename": "unified-installer-normal-compile.json",
+    "bytes": 1053,
+    "sha256": "f8805a13912b2d71395d3845cdbdfb0ee2f5214778266b47c96785af876e7b8c"
+  },
+  "producerReport": {
+    "passed": true,
+    "kind": "normal",
+    "exe": "F:\\mir2-build\\unified-20261029\\installer-normal-output-r11\\Numeron-Legend-of-Rebirth-20261029-unified-r11-Setup.exe",
+    "bytes": 1024372943,
+    "sha256": "387FD7140A1457C3977032C4577AD1914DE2F70C8402FF4312FAF1A0BC4F647F",
+    "fileVersion": "2026.10.29.11       ",
+    "elapsedSeconds": 58.5145485,
+    "pinnedCompilerEngine": "7.1.1",
+    "compilerSha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+    "recipeSha256": "CE9FFFE7F203DD7DB97F95AE6D37D27D386B365014DA7F3C1D0E01EC3B5BAE91",
+    "payloadIncludeSha256": "7F80C75F094D22401C5FCCB7E16F4629573E61CCFC2BF1F61A2F7C9D8CC5C15B",
+    "updaterIncludeSha256": "F36DCADD53B4A7EBB81551A7B74C2449889A46171BB99DAA3843CB10CF82EAAD",
+    "arguments": [
+      "/Qp",
+      "/OF:/mir2-build/unified-20261029/installer-normal-output-r11",
+      "F:\\mir2-build\\unified-20261029\\installer-r11\\Mir2-Invite.iss"
+    ],
+    "publicRelease": false,
+    "authenticodeStatus": "NotSigned",
+    "installation": "not performed by this helper"
+  },
+  "phase": "Actual normal/isolated full Inno compile admitted after final Candidate proof; original historical pending receipts preserved",
+  "installationByThisPhase": false,
+  "guiByThisPhase": false
+}

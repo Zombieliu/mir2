@@ -1,0 +1,1917 @@
+{
+  "schemaVersion": 1,
+  "kind": "ordinary-return-path-public-scalar-diagnostic",
+  "runId": "1793052124616-e760d348",
+  "scope": "Actual V4 report/samples and public raw recording only. Static geometry analysis is not a load rerun or proof of a complete walkable route.",
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\reports\\1793052124616-e760d348.preparation-report.json",
+      "bytes": 18120,
+      "sha256": "d39fa7b6dba73518b7e9d0d1dddca48742d045b47911ef8d4f657d07d1839a62"
+    },
+    "samples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\reports\\1793052124616-e760d348.preparation.jsonl",
+      "bytes": 238039,
+      "sha256": "5f0daee2c8a45004e91534f277fda2b7f7afe5afcc2c3d1650177288bc71fb4a"
+    },
+    "recording": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\recordings\\0-498070.jsonl",
+      "bytes": 5199687,
+      "sha256": "5410f682082dbdcebe4fdb36c0bb3bfd5af514b47b12cd193dc71e5c813c05e6",
+      "rows": 114
+    },
+    "canonicalMap": {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    "episodeReceipt": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\preparation-episode-receipt-v1.json"
+  },
+  "originalVerdict": {
+    "ok": false,
+    "error": "No walk path on 0 from 304,613 to 289,617",
+    "preparedCount": 4,
+    "cleanupComplete": true,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "failedActor": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "purchased": 12,
+    "soldVenison": 2,
+    "goldEarned": 495,
+    "goldSpent": 480,
+    "recovery": {
+      "status": "verified",
+      "doses": 1,
+      "elapsedMs": 190.54420000000027,
+      "beforeHp": 12,
+      "afterHp": 18,
+      "maxHp": 18,
+      "consumedQuantity": 1,
+      "measurementCredit": false
+    },
+    "failureSampleAtMs": 1793052165411,
+    "commands": 42,
+    "movementCommands": 29,
+    "commandCounts": {
+      "clientVersion": 4,
+      "run": 22,
+      "walk": 7,
+      "interact": 3,
+      "selectNpcDialog": 3,
+      "sellItem": 2,
+      "buyItem": 1
+    },
+    "commandRowsTruncated": true,
+    "pathHazardCount": 0,
+    "pathHazards": []
+  },
+  "recordingSelection": {
+    "ownerFrames": 94,
+    "windowStartMs": 1793052153411,
+    "windowEndMs": 1793052165411,
+    "selectedStateChanges": [
+      {
+        "recordSequence": 69,
+        "capturedAtMs": 1793052153471,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 318,
+          "y": 612,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206117,
+            "name": "HookingCat",
+            "x": 321,
+            "y": 588,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 30,
+            "maxHp": 30,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 24
+          },
+          {
+            "objectId": 206129,
+            "name": "HookingCat",
+            "x": 342,
+            "y": 600,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 30,
+            "maxHp": 30,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 24
+          },
+          {
+            "objectId": 206136,
+            "name": "HookingCat",
+            "x": 339,
+            "y": 591,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 30,
+            "maxHp": 30,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 21
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206026,
+            "name": "RakingCat",
+            "x": 320,
+            "y": 589,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 23
+          },
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 17
+          }
+        ]
+      },
+      {
+        "recordSequence": 71,
+        "capturedAtMs": 1793052153994,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 316,
+          "y": 614,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206136,
+            "name": "HookingCat",
+            "x": 339,
+            "y": 591,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 30,
+            "maxHp": 30,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 23
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 19
+          }
+        ]
+      },
+      {
+        "recordSequence": 73,
+        "capturedAtMs": 1793052154519,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 315,
+          "y": 614,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206136,
+            "name": "HookingCat",
+            "x": 339,
+            "y": 591,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 30,
+            "maxHp": 30,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 24
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 19
+          }
+        ]
+      },
+      {
+        "recordSequence": 76,
+        "capturedAtMs": 1793052155307,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 313,
+          "y": 616,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 15
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 21
+          }
+        ]
+      },
+      {
+        "recordSequence": 78,
+        "capturedAtMs": 1793052155835,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 312,
+          "y": 617,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 14
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 22
+          }
+        ]
+      },
+      {
+        "recordSequence": 81,
+        "capturedAtMs": 1793052156624,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 310,
+          "y": 617,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 14
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 22
+          }
+        ]
+      },
+      {
+        "recordSequence": 83,
+        "capturedAtMs": 1793052157146,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 308,
+          "y": 617,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 14
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 15
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 22
+          }
+        ]
+      },
+      {
+        "recordSequence": 86,
+        "capturedAtMs": 1793052157909,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 307,
+          "y": 617,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 14
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 14
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 22
+          }
+        ]
+      },
+      {
+        "recordSequence": 88,
+        "capturedAtMs": 1793052158438,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 306,
+          "y": 616,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 15
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 13
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 21
+          }
+        ]
+      },
+      {
+        "recordSequence": 91,
+        "capturedAtMs": 1793052159220,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 616,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 17
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 21
+          }
+        ]
+      },
+      {
+        "recordSequence": 102,
+        "capturedAtMs": 1793052162083,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 615,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 17
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 20
+          }
+        ]
+      },
+      {
+        "recordSequence": 105,
+        "capturedAtMs": 1793052162871,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 613,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 16
+          },
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206026,
+            "name": "RakingCat",
+            "x": 320,
+            "y": 589,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 24
+          },
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          }
+        ]
+      },
+      {
+        "recordSequence": 110,
+        "capturedAtMs": 1793052164186,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 613,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 16
+          },
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          }
+        ]
+      }
+    ],
+    "endingFrames": [
+      {
+        "recordSequence": 112,
+        "capturedAtMs": 1793052164710,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 613,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 16
+          },
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          }
+        ]
+      },
+      {
+        "recordSequence": 113,
+        "capturedAtMs": 1793052164974,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 613,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 16
+          },
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          }
+        ]
+      },
+      {
+        "recordSequence": 114,
+        "capturedAtMs": 1793052165239,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 304,
+          "y": 613,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorWorld": {
+          "playerObjectId": null,
+          "playerHp": null,
+          "playerMaxHp": null,
+          "inSafeZone": false,
+          "ownerBindingConfirmed": false
+        },
+        "ownerStaticVillageMembership": false,
+        "nearbyNamed": [
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 16
+          },
+          {
+            "objectId": 206623,
+            "name": "Scarecrow",
+            "x": 321,
+            "y": 631,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          },
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 20,
+            "maxHp": 20,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 11
+          }
+        ],
+        "otherLivingHostiles": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "aiPresent": true,
+            "ai": 0,
+            "ownerNamePresent": true,
+            "ownerName": null,
+            "hp": 32,
+            "maxHp": 32,
+            "dead": false,
+            "kind": "monster",
+            "disposition": "hostile",
+            "ownerChebyshevDistance": 18
+          }
+        ]
+      }
+    ],
+    "lastObservedOwner": {
+      "recordSequence": 114,
+      "capturedAtMs": 1793052165239,
+      "map": "0",
+      "owner": {
+        "objectId": 1000,
+        "name": "L370e2a04",
+        "x": 304,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "spectatorWorld": {
+        "playerObjectId": null,
+        "playerHp": null,
+        "playerMaxHp": null,
+        "inSafeZone": false,
+        "ownerBindingConfirmed": false
+      },
+      "ownerStaticVillageMembership": false,
+      "nearbyNamed": [
+        {
+          "objectId": 206610,
+          "name": "Scarecrow",
+          "x": 300,
+          "y": 597,
+          "aiPresent": true,
+          "ai": 0,
+          "ownerNamePresent": true,
+          "ownerName": null,
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "kind": "monster",
+          "disposition": "hostile",
+          "ownerChebyshevDistance": 16
+        },
+        {
+          "objectId": 206623,
+          "name": "Scarecrow",
+          "x": 321,
+          "y": 631,
+          "aiPresent": true,
+          "ai": 0,
+          "ownerNamePresent": true,
+          "ownerName": null,
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "kind": "monster",
+          "disposition": "hostile",
+          "ownerChebyshevDistance": 18
+        },
+        {
+          "objectId": 206644,
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "aiPresent": true,
+          "ai": 0,
+          "ownerNamePresent": true,
+          "ownerName": null,
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "kind": "monster",
+          "disposition": "hostile",
+          "ownerChebyshevDistance": 11
+        }
+      ],
+      "otherLivingHostiles": [
+        {
+          "objectId": 206032,
+          "name": "RakingCat",
+          "x": 322,
+          "y": 595,
+          "aiPresent": true,
+          "ai": 0,
+          "ownerNamePresent": true,
+          "ownerName": null,
+          "hp": 32,
+          "maxHp": 32,
+          "dead": false,
+          "kind": "monster",
+          "disposition": "hostile",
+          "ownerChebyshevDistance": 18
+        }
+      ]
+    },
+    "lastMovementEvents": [
+      {
+        "recordSequence": 78,
+        "capturedAtMs": 1793052155835,
+        "atMs": 1793052155835,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 313,
+          "y": 616
+        },
+        "to": {
+          "x": 312,
+          "y": 617
+        }
+      },
+      {
+        "recordSequence": 81,
+        "capturedAtMs": 1793052156624,
+        "atMs": 1793052156624,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 312,
+          "y": 617
+        },
+        "to": {
+          "x": 310,
+          "y": 617
+        }
+      },
+      {
+        "recordSequence": 83,
+        "capturedAtMs": 1793052157146,
+        "atMs": 1793052157146,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 310,
+          "y": 617
+        },
+        "to": {
+          "x": 308,
+          "y": 617
+        }
+      },
+      {
+        "recordSequence": 86,
+        "capturedAtMs": 1793052157909,
+        "atMs": 1793052157909,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 308,
+          "y": 617
+        },
+        "to": {
+          "x": 307,
+          "y": 617
+        }
+      },
+      {
+        "recordSequence": 88,
+        "capturedAtMs": 1793052158438,
+        "atMs": 1793052158438,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 307,
+          "y": 617
+        },
+        "to": {
+          "x": 306,
+          "y": 616
+        }
+      },
+      {
+        "recordSequence": 91,
+        "capturedAtMs": 1793052159220,
+        "atMs": 1793052159220,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 306,
+          "y": 616
+        },
+        "to": {
+          "x": 304,
+          "y": 616
+        }
+      },
+      {
+        "recordSequence": 102,
+        "capturedAtMs": 1793052162083,
+        "atMs": 1793052162083,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 304,
+          "y": 616
+        },
+        "to": {
+          "x": 304,
+          "y": 615
+        }
+      },
+      {
+        "recordSequence": 105,
+        "capturedAtMs": 1793052162871,
+        "atMs": 1793052162871,
+        "kind": "move",
+        "objectId": 1000,
+        "from": {
+          "x": 304,
+          "y": 615
+        },
+        "to": {
+          "x": 304,
+          "y": 613
+        }
+      }
+    ],
+    "lastAuthoritativeTransforms": [
+      {
+        "at": 1793052155740,
+        "sequence": 749,
+        "monotonicMs": 31208.8677,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 313,
+          "y": 616
+        },
+        "to": {
+          "x": 312,
+          "y": 617
+        },
+        "direction": "DownLeft"
+      },
+      {
+        "at": 1793052156392,
+        "sequence": 754,
+        "monotonicMs": 31860.4934,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 312,
+          "y": 617
+        },
+        "to": {
+          "x": 310,
+          "y": 617
+        },
+        "direction": "Left"
+      },
+      {
+        "at": 1793052157053,
+        "sequence": 764,
+        "monotonicMs": 32521.224,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 310,
+          "y": 617
+        },
+        "to": {
+          "x": 308,
+          "y": 617
+        },
+        "direction": "Left"
+      },
+      {
+        "at": 1793052157704,
+        "sequence": 772,
+        "monotonicMs": 33172.3952,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 308,
+          "y": 617
+        },
+        "to": {
+          "x": 307,
+          "y": 617
+        },
+        "direction": "Left"
+      },
+      {
+        "at": 1793052158358,
+        "sequence": 780,
+        "monotonicMs": 33826.5645,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 307,
+          "y": 617
+        },
+        "to": {
+          "x": 306,
+          "y": 616
+        },
+        "direction": "UpLeft"
+      },
+      {
+        "at": 1793052159019,
+        "sequence": 784,
+        "monotonicMs": 34487.2257,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 306,
+          "y": 616
+        },
+        "to": {
+          "x": 304,
+          "y": 616
+        },
+        "direction": "Left"
+      },
+      {
+        "at": 1793052162080,
+        "sequence": 835,
+        "monotonicMs": 37548.8617,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 304,
+          "y": 616
+        },
+        "to": {
+          "x": 304,
+          "y": 615
+        },
+        "direction": "Up"
+      },
+      {
+        "at": 1793052162745,
+        "sequence": 838,
+        "monotonicMs": 38213.1935,
+        "source": "UserLocation",
+        "map": "0",
+        "ownerObjectId": 1000,
+        "from": {
+          "x": 304,
+          "y": 615
+        },
+        "to": {
+          "x": 304,
+          "y": 613
+        },
+        "direction": "Up"
+      }
+    ]
+  },
+  "geometry": {
+    "mapFileName": "0",
+    "runtimeProfileId": "platinum_176",
+    "canonicalVillage": {
+      "location": {
+        "x": 288,
+        "y": 616
+      },
+      "size": 10,
+      "start_point": true
+    },
+    "inclusiveBounds": {
+      "minX": 278,
+      "maxX": 298,
+      "minY": 606,
+      "maxY": 626
+    },
+    "from": {
+      "x": 304,
+      "y": 613
+    },
+    "target": {
+      "x": 289,
+      "y": 617
+    },
+    "fromInsideVillage": false,
+    "targetInsideVillage": true,
+    "observedBlocker": {
+      "objectId": 206644,
+      "name": "Scarecrow",
+      "x": 293,
+      "y": 614,
+      "aiPresent": true,
+      "ai": 0,
+      "ownerNamePresent": true,
+      "ownerName": null,
+      "hp": 20,
+      "maxHp": 20,
+      "dead": false,
+      "kind": "monster",
+      "disposition": "hostile",
+      "ownerChebyshevDistance": 11
+    },
+    "conservativeHalo": {
+      "radius": 8,
+      "bounds": {
+        "minX": 285,
+        "maxX": 301,
+        "minY": 606,
+        "maxY": 622
+      }
+    },
+    "nativeAcquisitionRectangle": {
+      "halfWidth": 8,
+      "halfHeight": 6,
+      "sourceSymbol": "ZoneRuntime::nearest_native_monster_target",
+      "existingTypedTargetMayPersistWithin16": true
+    },
+    "directCellAnalysis": [
+      {
+        "x": 303,
+        "y": 614,
+        "insideStaticVillage": false,
+        "scarecrowDistance": 10,
+        "insideConservativeRadius8": false,
+        "nativeAggroRectangle": false,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 302,
+        "y": 615,
+        "insideStaticVillage": false,
+        "scarecrowDistance": 9,
+        "insideConservativeRadius8": false,
+        "nativeAggroRectangle": false,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 301,
+        "y": 616,
+        "insideStaticVillage": false,
+        "scarecrowDistance": 8,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": true
+      },
+      {
+        "x": 300,
+        "y": 617,
+        "insideStaticVillage": false,
+        "scarecrowDistance": 7,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": true
+      },
+      {
+        "x": 299,
+        "y": 617,
+        "insideStaticVillage": false,
+        "scarecrowDistance": 6,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": true
+      },
+      {
+        "x": 298,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 5,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 297,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 4,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 296,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 295,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 294,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 293,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 292,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 291,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 290,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 3,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      },
+      {
+        "x": 289,
+        "y": 617,
+        "insideStaticVillage": true,
+        "scarecrowDistance": 4,
+        "insideConservativeRadius8": true,
+        "nativeAggroRectangle": true,
+        "occupiedByThisScarecrow": false,
+        "blockedByThisThreatUnderCurrentRule": false
+      }
+    ],
+    "firstDirectBlockedCell": {
+      "x": 301,
+      "y": 616,
+      "insideStaticVillage": false,
+      "scarecrowDistance": 8,
+      "insideConservativeRadius8": true,
+      "nativeAggroRectangle": true,
+      "occupiedByThisScarecrow": false,
+      "blockedByThisThreatUnderCurrentRule": true
+    },
+    "straightReturnRejectedByThisThreat": true,
+    "onePossibleGeometricDetourOnly": {
+      "waypoint": {
+        "x": 304,
+        "y": 623
+      },
+      "villageEntry": {
+        "x": 298,
+        "y": 623
+      },
+      "allOutsideApproachCellsBeyondThisCrowRadius8": true,
+      "staticWalkabilityNotChecked": true,
+      "otherCurrentOrRememberedThreatsNotDischarged": true
+    }
+  },
+  "interpretation": {
+    "proved": [
+      "Actor remained alive with exact entity HP18/18 on map0 at the final recorded position304613; target289617 is inside authored village bounds.",
+      "Observed Scarecrow206644 at293614 is normal hostile AI0 and unowned. Its radius8 halo extends to x301 while village protection begins at x298 on this approach.",
+      "Direct physical cells301616,300617,299617 are outside static village protection and within this threat radius8.",
+      "pathHazardCount is0; original failure is planner NoPath, not an emitted beforeMovement/send safety hazard.",
+      "Recorded purchase proof reports12 ordinary HP658 bought; recovery was verified before the return attempt."
+    ],
+    "notProved": [
+      "A globally feasible route or a unique root cause for planner NoPath: planner hostile-memory/rejected/static-obstacle sets are not recorded in this raw evidence.",
+      "Spectator world.inSafeZone belongs to this actor: raw world.playerObjectId is null, so only coordinate-derived static membership is asserted.",
+      "No HookingCat anywhere: absence only describes the final public visible view.",
+      "Protection against poison or already released attacks, or termination of retained target relations."
+    ],
+    "minimalVerifiableDirection": "Keep the original radius8 and physical-cell/send guards. Diagnose the caller planner obstacle set for this exact source/target; verify an ordinary walkable boundary detour (for example south of the observed Scarecrow halo) before changing routing. Do not project an inside-safe-zone target exemption onto the outside approach, suppress NoPath, or count the actor as prepared."
+  },
+  "codeChanged": false,
+  "storeChanged": false,
+  "testsRun": false,
+  "loadRun": false
+}

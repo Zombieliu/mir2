@@ -1,0 +1,10 @@
+{
+  "startedUtc": "2026-10-04T15:45:48.5171185Z",
+  "testSource": "frozen updater 4c60 with test-only exact authenticated path, deletion and unique content-cache expectations",
+  "gameSource": "321316b791120a6fe549e4006623e63333a5543f",
+  "gameLaunched": false,
+  "protectedInstallationTouched": false,
+  "originalFailedAttemptsPreserved": true,
+  "completedUtc": "2026-10-04T16:01:02.8829914Z",
+  "cargoExitCode": 0
+}

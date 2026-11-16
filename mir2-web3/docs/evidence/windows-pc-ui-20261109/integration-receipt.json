@@ -1,0 +1,37 @@
+{
+  "schema": "windows-pc-ui-local-integration-v1",
+  "isolatedCommit": "98386038dfbbef0ca5053a1cd79d9028ba0e8327",
+  "canonicalParent": "8a8fd7a8a3028a467e447c1d0af72b863ce453a7",
+  "canonicalCodeCommit": "6ffea13f2215b2d1f7fe8502eebaa696535a45f7",
+  "canonicalBranch": "codex/windows-player-journey",
+  "unifiedCodeLinePassed": true,
+  "clientAndDependencySourceEqual": true,
+  "integrationConflict": false,
+  "pushed": false,
+  "deployed": false,
+  "focusedAfterIntegration": {
+    "crystalUiPassed": 977,
+    "walletIgnored": 1,
+    "crystalUiIgnored": 6,
+    "walletPassed": 21,
+    "hudPointerPassed": 10
+  },
+  "windowsSuite": {
+    "passed": 1254,
+    "ignored": 9,
+    "failed": 2
+  },
+  "sharedNativeUiSuite": {
+    "passed": 1821,
+    "ignored": 20,
+    "failed": 2
+  },
+  "knownFailingTests": [
+    "effects::tests::crystal_foreground_scene_and_actor_effects_render_after_selected_redraw",
+    "shell_bridge::tests::billing_scope_stays_local_and_closing_cancels_the_exact_request",
+    "quest_hunt_regions::tests::wooma_practice_uses_three_actual_footholds_even_after_kill_quota",
+    "quest_ui::periodic_quest_ui_tests::periodic_nine_language_catalog_covers_actual_server_copy_without_losing_reset_rules"
+  ],
+  "failureBaselineRerun": false,
+  "newConcurrentUncommittedChangesCovered": false
+}

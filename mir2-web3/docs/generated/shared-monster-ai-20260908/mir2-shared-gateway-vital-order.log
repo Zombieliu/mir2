@@ -1,0 +1,6 @@
+
+running 1 test
+test routing::tests::signed_zone_vitals_preserve_heal_then_damage_for_current_and_remote_sessions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 699 filtered out; finished in 2.76s
+

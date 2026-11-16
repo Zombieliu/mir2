@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.wallet.real-launcher-aborted-attempt.v1",
+  "passed": false,
+  "actualLegacyLauncherExecuted": true,
+  "actualEngineBinaryExecuted": true,
+  "enginePid": 67752,
+  "checkerPid": 72320,
+  "abortedAtParentRequest": true,
+  "gameLaunched": false,
+  "activationCompleted": false,
+  "sequenceStillAccepted": 21,
+  "candidateStillInstalled": "WN-CANDIDATE-20261011-invited-25",
+  "transactionPhase": "accepted",
+  "newHealthAccepted": false,
+  "observedIssue": "optional DELIVERY CDN request failed, final origin fallback returned 404; primary CDN failure detail was masked",
+  "originalCdnFailureCauseConfirmed": false,
+  "logPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\REAL-LEGACY-LAUNCHER-PUBLIC-S22-ATTEMPT1-ABORTED.jsonl",
+  "logSha256": "BE8905CAE6B816E05B7BDAF069E98C9812D8246E403583E7B4335DFA86093F91",
+  "cdnProbeResult": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\operations\\native-http-probe\\result.jsonl"
+}

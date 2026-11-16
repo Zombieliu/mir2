@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "constructors": 1,
+      "beforeSha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "afterSha256": "2f146768fe307ee7b193dee488e97e72c2d4efa6c168b1c0cced128d2bff8abe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/equipment.rs",
+      "constructors": 1,
+      "beforeSha256": "5dff2b5879a7aff4fbf11de0c9376dd1819fe5649194121726920a62ca998589",
+      "afterSha256": "d8eca2841cdee48d96827b24bcdaf0b11caf898c4cc8ade61070530f6a0711a4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "constructors": 4,
+      "beforeSha256": "8400a25e3767fcffdcd8dad5a2d1c9cd62ebed78c25b38f7ef8ba2781875d151",
+      "afterSha256": "ec310e2dfe6e48044b889703b1f99077b863205a3b2ac463cd8fb915a64eb2c8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "constructors": 2,
+      "beforeSha256": "bf2556bb355e0afff5a996c684d72737a49489a430f66e5b82cd51ce6a4212e2",
+      "afterSha256": "668756cdb0286bdf83a48cdb3937806677121cc22de8a8480681e99bd2eff1aa"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "constructors": 20,
+      "beforeSha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+      "afterSha256": "256efb20539d3e77401c45264eaaa66babd879b48fd507030206994be4abc3a0"
+    }
+  ]
+}

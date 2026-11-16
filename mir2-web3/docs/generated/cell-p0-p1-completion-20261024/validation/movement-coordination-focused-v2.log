@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 1 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 3.4294
+  type: 'test'
+  ...
+# Subtest: navigation coordination is native-only and preserves the baseline obstacle and send path
+ok 2 - navigation coordination is native-only and preserves the baseline obstacle and send path
+  ---
+  duration_ms: 0.5599
+  type: 'test'
+  ...
+# Subtest: navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+ok 3 - navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+  ---
+  duration_ms: 0.8799
+  type: 'test'
+  ...
+# Subtest: navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+ok 4 - navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+  ---
+  duration_ms: 2.9858
+  type: 'test'
+  ...
+# Subtest: navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+ok 5 - navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+  ---
+  duration_ms: 1.5379
+  type: 'test'
+  ...
+# Subtest: navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+ok 6 - navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+  ---
+  duration_ms: 1.0197
+  type: 'test'
+  ...
+# Subtest: native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+ok 7 - native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+  ---
+  duration_ms: 1.0359
+  type: 'test'
+  ...
+# Subtest: attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback
+ok 8 - attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback
+  ---
+  duration_ms: 0.9322
+  type: 'test'
+  ...
+# Subtest: active observer coverage binds only declared living movement clients and never borrows a future home
+ok 9 - active observer coverage binds only declared living movement clients and never borrows a future home
+  ---
+  duration_ms: 5.9627
+  type: 'test'
+  ...
+# Subtest: scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+ok 10 - scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+  ---
+  duration_ms: 1.1416
+  type: 'test'
+  ...
+# Subtest: temporary observer coverage loss and restore do not wash a live pursuit movement budget
+ok 11 - temporary observer coverage loss and restore do not wash a live pursuit movement budget
+  ---
+  duration_ms: 0.8791
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 12 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 0.5848
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 13 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 10.5562
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 14 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.4796
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 15 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.7224
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 16 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.4259
+  type: 'test'
+  ...
+# Subtest: native hunt defers an authoritative position loop even when replanned routes claim progress
+ok 17 - native hunt defers an authoritative position loop even when replanned routes claim progress
+  ---
+  duration_ms: 0.3881
+  type: 'test'
+  ...
+# Subtest: native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+ok 18 - native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+  ---
+  duration_ms: 0.2683
+  type: 'test'
+  ...
+# Subtest: native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+ok 19 - native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+  ---
+  duration_ms: 0.8891
+  type: 'test'
+  ...
+# Subtest: native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+ok 20 - native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+  ---
+  duration_ms: 1.0808
+  type: 'test'
+  ...
+# Subtest: native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+ok 21 - native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+  ---
+  duration_ms: 25.2359
+  type: 'test'
+  ...
+# Subtest: native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+ok 22 - native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+  ---
+  duration_ms: 1.1326
+  type: 'test'
+  ...
+# Subtest: a complete bounded socket probe produces real movement samples but cannot claim 50-player or combat acceptance
+ok 23 - a complete bounded socket probe produces real movement samples but cannot claim 50-player or combat acceptance
+  ---
+  duration_ms: 69031.1796
+  type: 'test'
+  ...
+# Subtest: native real sockets never reclaim an unresolved attack target when old damage arrives after the prior retry window
+ok 24 - native real sockets never reclaim an unresolved attack target when old damage arrives after the prior retry window
+  ---
+  duration_ms: 8484.8375
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 77665.4274

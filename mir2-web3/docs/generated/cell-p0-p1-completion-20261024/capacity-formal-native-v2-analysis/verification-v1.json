@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T20:09:50.939Z",
+  "runId": "1792871143682-f3d8c161",
+  "latestVersion": 2,
+  "checks": {
+    "nineFrozenDriverInputsStillMatch": true,
+    "originalFirstFailureExactlyMatched": true,
+    "fiveFailedWindowsPreserved": true,
+    "allFourTimeoutActionsBeforeFirstFailure": true,
+    "completeRawHas41601Rows": true,
+    "cleanupChecksAllTrue": true,
+    "trackedFilesWritten": false,
+    "testsOrBuildsRun": false,
+    "realmStarted": false,
+    "privateRead": false,
+    "recordingPayloadRead": false
+  },
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\diagnostic-v2.json",
+      "bytes": 1085736,
+      "sha256": "a37b9f304b7e4e0bacd06827fe01bbd5bbe56c520587f9b0f5a41e70d651eb1f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\selected-events-v2.json",
+      "bytes": 160669,
+      "sha256": "41519a68be82ff013ece653c54bfdf5ac4a4992c7586376fa79b4854fa1d2fc1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\summary-v2.json",
+      "bytes": 79151,
+      "sha256": "b1e19a4f971ce7bab41de9c61c233d399280d08204728be7d89cf4ad93ed7b41"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\README-v2.md",
+      "bytes": 1704,
+      "sha256": "da54f5f5b4aeffbffad4e3b8ae9a65f5d21b477b2dc2bcf2a3796027f2f5f496"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\analyze-formal02-v2.mjs",
+      "bytes": 16690,
+      "sha256": "0e466ba2bcc33688fe0b81aa2a6de5038280cbde3d56b863b4346b0a5ddad333"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\summarize-formal02-v2.mjs",
+      "bytes": 8902,
+      "sha256": "11325929c8532ee2882569ba830a0378377e53093df6c073dc01b2049fe59355"
+    }
+  ],
+  "rawInput": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\reports\\1792871143682-f3d8c161.samples.jsonl",
+    "bytes": 23491464,
+    "rows": 41601,
+    "sha256": "a392e3ea07cec4a5d39ade40988d6675afdb7ce1d3486741b51a946e0bcc8b8e"
+  },
+  "standaloneMonitor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\monitor-history.jsonl",
+    "bytes": 4335811,
+    "rows": 478,
+    "sha256": "42f233ea4acfb1cf163fef7e8a0a544628ce57bc2e3d29ea3a7b75b560982cab"
+  },
+  "versionNote": "Version2 fixes a diagnostic metadata label: episode.firstTimeoutAt is the earliest attack timeout1792872121893, while episode.firstFanoutTimeoutAt correctly names1792872123053. Original v1 artifacts remain, and raw bytes/failures/selected event projection are unchanged. Version2 is the final review set.",
+  "followUp": {
+    "reasonToTreatLowerN2hAsReplacementForFailedFormal02": false,
+    "reason": "The server-side deadline/handler stall is observed; neither a driver-lag safety stop nor aggregate resource guard explains it.10 passing300s does not establish a long-run capacity limit. A separate low-N run can add evidence but cannot bypass this failure or complete the original100 objective.",
+    "prospectivePlan": "Keep existing backend/driver/policy; a separately frozen follow-up may enable existing50ms slow-stage timing with strict public stage/duration/received-at metadata to separate queue/serial-gate/execute/predrain/save residence. No speculative spectator rewrite or old timeout reclassification."
+  }
+}

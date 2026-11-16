@@ -1,0 +1,4995 @@
+{
+  "schema": "mir2-life-acceptance/1",
+  "passed": true,
+  "verificationMode": "short-ordinary-cancel-return",
+  "realTime": true,
+  "fakeClock": false,
+  "syntheticPrivateWorld": true,
+  "humanTrial": false,
+  "durationSeconds": 1200,
+  "fatal": null,
+  "failurePhase": null,
+  "failureCode": null,
+  "failureHint": null,
+  "failedAssertion": null,
+  "driverPid": 12308,
+  "parentPid": 72396,
+  "gatewaySha256": "952a69c65fd99ca817916df5efab65ec4472839e2a5d3d2b08fc3f6b3670167f",
+  "elapsedWallMs": 335151,
+  "modelConfigured": false,
+  "configuredModel": "rules",
+  "completedProviderCalls": [],
+  "funding": {
+    "source": "ordinary-owned-starter-resale",
+    "initialGold": 0,
+    "finalGold": 85,
+    "sales": [
+      {
+        "merchantName": "Blacksmith_Smith",
+        "itemName": "WoodenSword",
+        "itemUniqueIdHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "quantity": 1,
+        "observedUnitValue": 25,
+        "beforeGold": 0,
+        "afterGold": 25,
+        "exactInventoryRemoval": true
+      },
+      {
+        "merchantName": "Merchant_Whitney",
+        "itemName": "BaseDress(M)",
+        "itemUniqueIdHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "quantity": 1,
+        "observedUnitValue": 60,
+        "beforeGold": 25,
+        "afterGold": 85,
+        "exactInventoryRemoval": true
+      }
+    ],
+    "preservedHpPotions": 1,
+    "preservedCandles": 1,
+    "actualPreparationPosition": {
+      "x": 288,
+      "y": 616
+    },
+    "syntheticOnly": true,
+    "productSellingCapabilityAdded": false,
+    "questOrCombatRevenueClaimed": false
+  },
+  "giftProof": {
+    "ownerBeforeGold": 85,
+    "ownerAfterGold": 35,
+    "actorBeforeGold": 0,
+    "actorAfterGold": 50,
+    "receivedGold": 50,
+    "giftTaskCompleted": true,
+    "ownerFinalTradeObserved": true,
+    "actorPaidAssets": false,
+    "modelCallsBeforeLife": 0
+  },
+  "activationProof": {
+    "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+    "startedAtMs": 1793730209376,
+    "expiresAtMs": 1793731409376,
+    "durationSeconds": 1200,
+    "budgetGold": 50,
+    "ownerWasOutsideActorView": true,
+    "actorPositionAtActivation": {
+      "x": 288,
+      "y": 616
+    },
+    "modelEnabled": false
+  },
+  "finalProof": {
+    "kind": "short-ordinary-cancel-return",
+    "actualElapsedSinceGrantMs": 154587,
+    "before": {
+      "label": "short-before-owner-cancel",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 641
+        },
+        "hp": 24,
+        "maxHp": 24,
+        "dead": false,
+        "gold": 36,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 51,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 8,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    "final": {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "cancelled",
+        "phase": "cancelled",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "本次生活已撤销，已观察到回家。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    "actualArrivalDistance": 1,
+    "expired": false,
+    "originalDeadlinePreserved": true,
+    "fullTwentyMinuteExpiryClaimed": false
+  },
+  "checkpoints": [
+    {
+      "phase": "gift-confirmed",
+      "ownerBeforeGold": 85,
+      "ownerAfterGold": 35,
+      "actorBeforeGold": 0,
+      "actorAfterGold": 50,
+      "receivedGold": 50,
+      "giftTaskCompleted": true,
+      "ownerFinalTradeObserved": true,
+      "actorPaidAssets": false,
+      "modelCallsBeforeLife": 0
+    }
+  ],
+  "sampledCheckpoints": [
+    {
+      "label": "actor-before-owner-gift",
+      "phase": "ordinary-owner-gift-facing",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "hpPotions": 1,
+        "freeBagSlots": 38,
+        "currentWeight": 2,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": null,
+      "receipts": [],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "ready-for-mutual-facing-trade",
+      "phase": "ordinary-owner-gift-facing",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "hpPotions": 1,
+        "freeBagSlots": 38,
+        "currentWeight": 2,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": null,
+      "receipts": [],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "owner-gift-completed",
+      "phase": "ordinary-owner-gift-confirm",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 50,
+        "hpPotions": 1,
+        "freeBagSlots": 38,
+        "currentWeight": 2,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": null,
+      "receipts": [],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "owner-outside-actual-actor-view",
+      "phase": "owner-ordinary-walk-outside-actor-AOI",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 50,
+        "hpPotions": 1,
+        "freeBagSlots": 38,
+        "currentWeight": 2,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": null,
+      "receipts": [],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "life-server-activated",
+      "phase": "authorize-real-twenty-minute-life",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 50,
+        "hpPotions": 1,
+        "freeBagSlots": 38,
+        "currentWeight": 2,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "patrolling",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 0,
+        "purchasedQuantity": 0,
+        "childSupplyClaimed": false,
+        "killsObserved": 0,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "已明确授权在固定比奇路线独立生活。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": null
+      },
+      "receipts": [],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 610
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 50,
+        "hpPotions": 1,
+        "freeBagSlots": 38,
+        "currentWeight": 2,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "supplying",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 0,
+        "purchasedQuantity": 0,
+        "childSupplyClaimed": true,
+        "killsObserved": 0,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "只执行本次已授权的一瓶药补给。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 610
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 10,
+        "hpPotions": 2,
+        "freeBagSlots": 38,
+        "currentWeight": 3,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "supplying",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 0,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "只执行本次已授权的一瓶药补给。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 616
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 10,
+        "hpPotions": 2,
+        "freeBagSlots": 38,
+        "currentWeight": 3,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 0,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 291,
+          "y": 614
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 10,
+        "hpPotions": 2,
+        "freeBagSlots": 38,
+        "currentWeight": 3,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 2,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 611
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 10,
+        "hpPotions": 2,
+        "freeBagSlots": 38,
+        "currentWeight": 3,
+        "maxWeight": 50,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 2,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 285,
+          "y": 611
+        },
+        "hp": 24,
+        "maxHp": 24,
+        "dead": false,
+        "gold": 10,
+        "hpPotions": 2,
+        "freeBagSlots": 38,
+        "currentWeight": 3,
+        "maxWeight": 51,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 3,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-observe-real-away-route",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 285,
+          "y": 611
+        },
+        "hp": 24,
+        "maxHp": 24,
+        "dead": false,
+        "gold": 10,
+        "hpPotions": 2,
+        "freeBagSlots": 38,
+        "currentWeight": 3,
+        "maxWeight": 51,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 4,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-before-owner-cancel",
+      "phase": "independent-life-with-owner-logged-out",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 641
+        },
+        "hp": 24,
+        "maxHp": 24,
+        "dead": false,
+        "gold": 36,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 51,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "running",
+        "phase": "hunting",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 8,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "在授权范围内处理当前真实可见的小型猎物。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 640
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 640
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 641
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 642
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 643
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 643
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 644
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 290,
+          "y": 644
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 291,
+          "y": 644
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 291,
+          "y": 644
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 292,
+          "y": 643
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 293,
+          "y": 642
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 294,
+          "y": 641
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 294,
+          "y": 641
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 295,
+          "y": 640
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 296,
+          "y": 639
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 297,
+          "y": 638
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 298,
+          "y": 637
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 298,
+          "y": 637
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 298,
+          "y": 636
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 298,
+          "y": 635
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 297,
+          "y": 634
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 297,
+          "y": 634
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 296,
+          "y": 633
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 295,
+          "y": 632
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 294,
+          "y": 631
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 294,
+          "y": 631
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 293,
+          "y": 630
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": true,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 292,
+          "y": 629
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 291,
+          "y": 628
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 291,
+          "y": 628
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 290,
+          "y": 627
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 626
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": false,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 626
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 625
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 624
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 623
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 623
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 622
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 621
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 620
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 620
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 619
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 618
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "returning",
+        "phase": "returning-home",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "owner-revoked",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    },
+    {
+      "label": "short-cancel-return",
+      "phase": "short-owner-cancel-and-return",
+      "snapshot": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 30,
+        "maxHp": 30,
+        "dead": false,
+        "gold": 106,
+        "hpPotions": 2,
+        "freeBagSlots": 36,
+        "currentWeight": 12,
+        "maxWeight": 53,
+        "inventoryCurrent": true,
+        "inSafeZone": true,
+        "ownerVisible": false,
+        "tradeActive": false,
+        "tradeUncertain": false
+      },
+      "life": {
+        "startedAtMs": 1793730209376,
+        "expiresAtMs": 1793731409376,
+        "durationSeconds": 1200,
+        "status": "cancelled",
+        "phase": "cancelled",
+        "activationPending": false,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "spentGold": 40,
+        "purchasedQuantity": 1,
+        "childSupplyClaimed": true,
+        "killsObserved": 9,
+        "modelDecisionsUsed": 0,
+        "expired": false,
+        "navigation": {
+          "waypointIndex": null,
+          "noPathCount": 0,
+          "failedWaypoints": [],
+          "returning": false,
+          "homeNoPathCount": 0
+        },
+        "reason": "本次生活已撤销，已观察到回家。",
+        "lifeIdHash": "f52226b3cc605fdafea74d16b2da7ec2618cc2bb6e2ffadada0ee011e52231ae",
+        "childSupplyIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+      },
+      "receipts": [
+        {
+          "operationHash": "90d4370020282444550a121c0b8a0c5a06fbcfbdc05023168f84b12730eb3d3c",
+          "attempted": true,
+          "receiptRevision": "13",
+          "committed": true,
+          "chargedGold": 40,
+          "quantity": 1,
+          "currency": "gold",
+          "source": "trade",
+          "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+          "permitIdHash": "63d891da790dd2b5e2e724827b5f38c4f9ece09071740cd4b6319d8a292a33a3"
+        }
+      ],
+      "model": {
+        "configured": false,
+        "provider": "rules",
+        "model": "rules",
+        "modelCalls": 0,
+        "lifePlanStatus": "idle",
+        "reply": null,
+        "ordinal": null,
+        "lastCall": {
+          "model": "rules",
+          "status": null,
+          "requestId": null,
+          "responseId": null,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      }
+    }
+  ],
+  "commands": {
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "changeAMode": 1,
+    "equipItem": 2,
+    "switchGroup": 1,
+    "companionRuntimeRegister": 1,
+    "attackDirection": 76,
+    "keepAlive": 20,
+    "tradeReply": 1,
+    "companionRuntimeReply": 9,
+    "tradeConfirm": 1,
+    "companionControl": 1,
+    "walk": 143,
+    "interact": 1,
+    "selectNpcDialog": 1,
+    "clientCapabilities": 1,
+    "npcPurchaseOwner": 3,
+    "pickUpTile": 4,
+    "logOut": 1
+  },
+  "proofCounts": {
+    "UserLocation": 221,
+    "ObjectAttack": 80,
+    "ObjectStruck": 77,
+    "ObjectDied": 10,
+    "ObjectWalk": 38,
+    "GainedItem": 3,
+    "HealthChanged": 10,
+    "ObjectItem": 2
+  },
+  "proofDropped": 0,
+  "limits": [],
+  "scope": "Ordinary local /ws economy, real away route and explicit cancellation return; this short slice does not claim a twenty-minute expiry or restart.",
+  "cleanup": {
+    "attempted": true,
+    "returned": true,
+    "fixtureClosed": true,
+    "ownerClosed": true,
+    "actors": [
+      {
+        "pid": 60200,
+        "exited": true
+      }
+    ],
+    "actorPids": [
+      60200
+    ],
+    "originalUserStateTouched": false
+  },
+  "sourceScripts": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\run-life-acceptance.mjs",
+      "sha256": "fca4a882279697b535a926890b8c0d8757827327e433fe79f15492bccd6f2d88"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\trial-actor-fixture.mjs",
+      "sha256": "2351f5ce60bbd6b33ec7eaef94af29181975ac42218b923496653fbb1c4c4c06"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\supply-acceptance-funding.mjs",
+      "sha256": "bba0520cc2ff7134a82b685e7e7747169459d1bfbf19cfa9a991e031a5a5ccdf"
+    }
+  ]
+}

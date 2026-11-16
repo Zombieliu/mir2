@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "phase": "after",
+  "observedAtMs": 1792862726710,
+  "scope": "Whitelisted public health counters from this owned fresh realm only; no entity or replay payload",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "gatewayPid": 46476,
+  "defaultEnabledExpectedFromFrozenSource": true,
+  "defaultPublicExpectedFromFrozenSource": true,
+  "dataDir": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/recordings",
+  "dataDirMatches": true,
+  "metrics": {
+    "recordingEnabled": true,
+    "activeViewers": 0,
+    "activeMaps": 1,
+    "bufferedFrames": 557,
+    "publishedFramesTotal": 557,
+    "persistedFramesTotal": 557,
+    "droppedFramesTotal": 0,
+    "recordingErrorsTotal": 0
+  }
+}

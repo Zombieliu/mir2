@@ -1,0 +1,2 @@
+# Raw test output retains the original terminal blank lines.
+*.log -whitespace

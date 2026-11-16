@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_FRESH_PROBE20_BOUND_UNSEALED_NOT_EXECUTED",
+  "scope": "Formal16 current source provenance. Existing static derivation receipts retain full donor/raw mappings; no historical result is promoted.",
+  "derivations": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\template-derivation-v1.json",
+      "bytes": 99163,
+      "sha256": "00a9c3406c961b6f79b0f646985db9124fb831201251b04f1c9f3a65b73a71ff"
+    }
+  ],
+  "canonicalGeometryProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2563,
+    "sha256": "1e03413bc5a3133e2b44f4a8ebb334cafa07600c48a964186567f59d1c7eaaee"
+  },
+  "policyScenarioResourceUnchanged": true,
+  "actualProbe20IndependentEnded": {
+    "path": "probe20-independent-verification-v1/final-verification.json",
+    "bytes": 442311,
+    "sha256": "bd4897fb45dc67d1d65e2fe488021081bcf599e745febb9d66b83659cd4b5df0"
+  },
+  "eligibleForSealNow": false
+}

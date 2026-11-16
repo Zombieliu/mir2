@@ -4,6 +4,7 @@ export type SceneAssetPreloadResult = {
   interactionReady: boolean;
   visualReady: boolean;
   status: "ready" | "timeout" | "loading";
+  aborted: boolean;
   total: number;
   loaded: number;
   failed: number;
@@ -13,6 +14,7 @@ export type SceneAssetPreloadResult = {
 };
 
 export type SceneAssetPreloadOptions = {
+  signal?: AbortSignal;
   allowPartialReady?: boolean;
   minLoaded?: number;
   concurrency?: number;
@@ -23,6 +25,7 @@ export type SceneAssetPreloadOptions = {
 
 const DEFAULT_MINIMUM_LOADED = 24;
 const DEFAULT_CONCURRENCY = 8;
+const MINIMUM_IMAGE_ATTEMPT_MS = 250;
 const SHARED_IMAGE_LOAD_TIMEOUT_MS = 30_000;
 const SUCCESSFUL_IMAGE_LOAD_MAX_ENTRIES = 4_096;
 const inFlightSceneImageLoads = new Map<string, Promise<boolean>>();
@@ -46,6 +49,8 @@ export async function preloadSceneAssetUrls(
   const concurrency = Math.max(1, Math.min(urls.length || 1, Math.floor(options.concurrency ?? DEFAULT_CONCURRENCY)));
   const resolveCandidates = options.resolveCandidates ?? ((url: string) => [url]);
   const loadCandidate = options.loadCandidate ?? preloadSceneImageCandidate;
+  const admission = new AbortController();
+  const deadlineMs = startedAt + timeoutMs;
   let loaded = 0;
   let completed = 0;
   let nextIndex = 0;
@@ -53,17 +58,18 @@ export async function preloadSceneAssetUrls(
   const failedUrls: string[] = [];
 
   return await new Promise<SceneAssetPreloadResult>((resolve) => {
-    const build = (timedOut: boolean): SceneAssetPreloadResult => {
+    const build = (timedOut: boolean, aborted: boolean): SceneAssetPreloadResult => {
       const partialReady =
         options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
       const pending = Math.max(0, urls.length - completed);
-      const ready = (pending === 0 && failedUrls.length === 0) || partialReady;
+      const ready = !aborted && ((pending === 0 && failedUrls.length === 0) || partialReady);
       return {
         key: "scene-assets",
         ready,
         interactionReady: ready,
-        visualReady: pending === 0 && failedUrls.length === 0,
+        visualReady: !aborted && pending === 0 && failedUrls.length === 0,
         status: ready ? "ready" : timedOut ? "timeout" : "loading",
+        aborted,
         total: urls.length,
         loaded,
         failed: failedUrls.length,
@@ -72,12 +78,17 @@ export async function preloadSceneAssetUrls(
         failedUrls: failedUrls.slice(0, 20),
       };
     };
-    const finish = (timedOut: boolean) => {
+    const finish = (timedOut: boolean, aborted = false) => {
       if (finished) return;
       finished = true;
       clearTimeout(timer);
-      resolve(build(timedOut));
+      options.signal?.removeEventListener("abort", abort);
+      // Retire this caller's queue/fallbacks. A live Image may still be shared
+      // with another scene or the Worker cache, so do not abort its body here.
+      admission.abort();
+      resolve(build(timedOut, aborted));
     };
+    const abort = () => finish(false, true);
     const launchNext = () => {
       if (finished) return;
       if (options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded) {
@@ -89,10 +100,15 @@ export async function preloadSceneAssetUrls(
         if (completed >= urls.length) finish(false);
         return;
       }
-      nextIndex += 1;
       const url = urls[index];
-      const remainingMs = Math.max(1, timeoutMs - (now() - startedAt));
-      void preloadSceneImage(url, remainingMs, resolveCandidates, loadCandidate).then((result) => {
+      const remainingMs = deadlineMs - now();
+      const cacheReady = loadCandidate === preloadSceneImageCandidate && successfulSceneImageLoads.has(url);
+      if (remainingMs <= 0 || (remainingMs < MINIMUM_IMAGE_ATTEMPT_MS && !cacheReady)) {
+        finish(true);
+        return;
+      }
+      nextIndex += 1;
+      void preloadSceneImage(url, deadlineMs, resolveCandidates, loadCandidate, now, admission.signal).then((result) => {
         completed += 1;
         if (result.loaded) loaded += 1;
         else failedUrls.push(result.url);
@@ -100,6 +116,11 @@ export async function preloadSceneAssetUrls(
       });
     };
     const timer = setTimeout(() => finish(true), Math.max(1, timeoutMs));
+    if (options.signal?.aborted) {
+      abort();
+      return;
+    }
+    options.signal?.addEventListener("abort", abort, { once: true });
     if (urls.length === 0) {
       finish(false);
       return;
@@ -112,17 +133,20 @@ export async function preloadSceneAssetUrls(
 
 async function preloadSceneImage(
   url: string,
-  timeoutMs: number,
+  deadlineMs: number,
   resolveCandidates: (url: string) => string[],
   loadCandidate: (url: string, timeoutMs: number) => Promise<boolean>,
+  now: () => number,
+  signal: AbortSignal,
 ): Promise<{ url: string; loaded: boolean }> {
-  const startedAt = defaultNow();
   const candidates = Array.from(new Set(resolveCandidates(url)));
 
   for (const candidate of candidates) {
-    const remainingMs = timeoutMs - (defaultNow() - startedAt);
-    if (remainingMs <= 0) break;
-    if (await loadCandidate(candidate, Math.max(250, remainingMs))) {
+    const remainingMs = deadlineMs - now();
+    if (signal.aborted || remainingMs <= 0) break;
+    const cacheReady = loadCandidate === preloadSceneImageCandidate && successfulSceneImageLoads.has(candidate);
+    if (remainingMs < MINIMUM_IMAGE_ATTEMPT_MS && !cacheReady) continue;
+    if (await loadCandidate(candidate, remainingMs)) {
       return { url, loaded: true };
     }
   }

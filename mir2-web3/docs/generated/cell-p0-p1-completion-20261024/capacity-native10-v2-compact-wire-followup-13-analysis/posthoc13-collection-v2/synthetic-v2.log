@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: only the supplementary16-window clock/schema projection is validated, never a game capacity verdict
+ok 1 - only the supplementary16-window clock/schema projection is validated, never a game capacity verdict
+  ---
+  duration_ms: 1.8188
+  type: 'test'
+  ...
+# Subtest: 59.999s cannot be relabelled as a complete minute even when the report agrees
+ok 2 - 59.999s cannot be relabelled as a complete minute even when the report agrees
+  ---
+  duration_ms: 0.607
+  type: 'test'
+  ...
+# Subtest: actual raw assessment differences are rejected even with the same passing boolean
+ok 3 - actual raw assessment differences are rejected even with the same passing boolean
+  ---
+  duration_ms: 0.7999
+  type: 'test'
+  ...
+# Subtest: missing, extra and reordered window records cannot produce a complete projection
+ok 4 - missing, extra and reordered window records cannot produce a complete projection
+  ---
+  duration_ms: 0.4853
+  type: 'test'
+  ...
+# Subtest: phase and elapsed boundary substitutions fail closed
+ok 5 - phase and elapsed boundary substitutions fail closed
+  ---
+  duration_ms: 0.2564
+  type: 'test'
+  ...
+# Subtest: unrelated records are ignored without recording additional data
+ok 6 - unrelated records are ignored without recording additional data
+  ---
+  duration_ms: 0.1965
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 49.5563

@@ -1,0 +1,11 @@
+# Probe07 failed delivery-window diagnosis
+
+Run `1792878747018-da931241` remains **failed**. Both 300-second stages passed; the full 360.098-second soak completed. The one failed per-actor final continuous segment is combat actor `La809f605`: 50 native opportunities, 46 completed (92%), two timeouts (4%), 22 launched attacks and 22 verified positive hits. Latency and fanout assessments in that segment passed; whole-cohort aggregate ratios do not replace the per-actor verdict.
+
+The failures happened before stopping load: attack V2 request 300 was sent at `1792879777785` and timed out after 901.522ms without a matched typed result (bounded trace: zero packets, not truncated). A following Walk timed out after 2025.448ms. They were recorded 38.462s and 35.940s before offered load ended, so the later final-window settlement did not manufacture either timeout. The attack is neither a correlated launched/no-damage miss nor an explicit unknown/unavailable outcome.
+
+Public slow-stage logs record input queue residence of 3356ms and 2132ms with estimated starts within about 1ms of those sends. Adjacent cumulative histogram differences show a new 3368.839ms immediate-handler maximum and 2136.134ms movement-admission maximum. The selected 61 owner-tick zone-work samples have no over-50ms work; that narrow timer excludes other command/lock/snapshot waits. Critical driver loop samples peak at 36.241ms and the whole run at 78.643ms, below the original 250ms driver guard.
+
+These are correlated delivery/queue delays, **not an established upstream root cause**. Slow records contain no connection/request identity and launcher timestamps are receive times. Low aggregate process CPU/IO cannot establish disk saturation, absence of lock waits, spectator causation or a physical-host capacity ceiling. Keep formal04 frozen pending the separate queue/serial-loop source audit.
+
+`summary-v1.json` contains compact findings, the complete 128-row slow-stage census, critical resource samples and source/input hashes. `selected-events-v1.json` preserves bounded public actions, the original failure window, owner transforms, failed pending trace and adjacent raw histogram samples. `analyze-v1.mjs` streams and hashes the original 28,640-row, 17,377,188-byte raw JSONL; it does not read credentials, private stores or recordings, start a realm, run tests or alter source.

@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-08T11:26:23.777Z",
+  "files": {
+    "app/page.tsx": "8a3f299fa0c89c5ee839d5687096fbe4298c72ee51d8a9a0b0483618f6bea236",
+    "app/components/original-client-guild-window.tsx": "f6a27264811c9185aad867ef78c1b25f98af84ff548b7e6f6511b7c9d3e7795d",
+    "lib/world-model/types.ts": "12c4833c19b6df6a1d79e88348c0628f74c9d9ee32df289ef9ee4bcda25562cb",
+    "lib/guild-status-presentation.ts": "265a0fcc8b00e3ccccb456148d3b3b8beb2b8283ae23b61d7a817fa47f1c4c5a",
+    "scripts/test-guild-status-presentation.mjs": "b0360ef0854576077f678dd3965e83d8a5bb6aca4842a1cc2b2ffd706236a837"
+  },
+  "node": {
+    "passed": 12,
+    "failed": 0,
+    "log": "stats-unit-r2.log",
+    "logSha256": "e0bb5f94be633aeaa0511d1e9b5e2de888db9ffa9906f6ff3950afc480965272"
+  },
+  "typecheck": {
+    "scope": "isolated staging whole app/lib",
+    "command": "node realm/apps/web/node_modules/typescript/bin/tsc --project realm/apps/web/tsconfig.json --noEmit --incremental false",
+    "exitCode": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "runs": [
+    {
+      "name": "stats-webgl-r1",
+      "backend": "webgl2-shared",
+      "runtimeBackends": [
+        {
+          "actor": "owner",
+          "phase": "ordinary-readonly-guild-stats",
+          "backend": "webgl2"
+        }
+      ],
+      "authoritative": {
+        "level": 1,
+        "memberCount": 3,
+        "maxMembers": 5,
+        "experience": 0,
+        "maxExperience": 700000,
+        "gold": 0,
+        "sparePoints": 0
+      },
+      "rendered": {
+        "level": "1",
+        "members": "3/5",
+        "experience": "0%"
+      },
+      "worldSnapshotsObserved": 8,
+      "normalLogout": true,
+      "worldOrMutationCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "screenshots": [
+        {
+          "name": "en-stats-authority-matches",
+          "sha256": "446a91703beeb4b7f832fe890232d233986cb3efbcf7756e070e86afc1499a49",
+          "clip": {
+            "x": 345,
+            "y": 264,
+            "width": 590,
+            "height": 432
+          },
+          "viewport": {
+            "width": 1280,
+            "height": 960
+          }
+        }
+      ],
+      "proofSha256": "4d331f42e4f8b134f16eb1222baedb063cc4321ed0d205bbb7cb255b3e1edc62"
+    },
+    {
+      "name": "stats-webgpu-r1",
+      "backend": "webgpu",
+      "runtimeBackends": [
+        {
+          "actor": "owner",
+          "phase": "ordinary-readonly-guild-stats",
+          "backend": "webgpu"
+        }
+      ],
+      "authoritative": {
+        "level": 1,
+        "memberCount": 3,
+        "maxMembers": 5,
+        "experience": 0,
+        "maxExperience": 700000,
+        "gold": 0,
+        "sparePoints": 0
+      },
+      "rendered": {
+        "level": "1",
+        "members": "3/5",
+        "experience": "0%"
+      },
+      "worldSnapshotsObserved": 8,
+      "normalLogout": true,
+      "worldOrMutationCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "screenshots": [
+        {
+          "name": "en-stats-authority-matches",
+          "sha256": "446a91703beeb4b7f832fe890232d233986cb3efbcf7756e070e86afc1499a49",
+          "clip": {
+            "x": 345,
+            "y": 264,
+            "width": 590,
+            "height": 432
+          },
+          "viewport": {
+            "width": 1280,
+            "height": 960
+          }
+        }
+      ],
+      "proofSha256": "6e39e312ff88c93bf77fca958b82dacd5206ea90ae56be158cc9bdcd953816d6"
+    }
+  ],
+  "actionPreservation": {
+    "schema": 1,
+    "unchangedActionAndAuthorityFunctions": [
+      "sendRaw",
+      "createGuildRank",
+      "readGuildRankEditSource",
+      "socialRosterProofCurrent",
+      "guildDepositGold",
+      "guildWithdrawGold",
+      "currentGuildBuffSource",
+      "submitGuildBuffAction",
+      "currentSocialReplyOwner"
+    ],
+    "rankCardUnchanged": true,
+    "stage5WindowAdapterUnmodifiedThisTask": true
+  },
+  "resolved": "GUILD_STATS_LEVEL_NOT_PROJECTED",
+  "priorEvidencePreserved": true,
+  "priorEvidenceBoundary": "Earlier 99/dual-backend rank mutation evidence applies to the earlier pinned source. This increment changes presentation only and is validated by the focused tests, typecheck and two readonly browser entries.",
+  "originalPrivateDataUnchanged": true,
+  "originalPrivateQaUnchanged": true,
+  "productionModified": false,
+  "desktopControlled": false
+}

@@ -1,0 +1,12 @@
+!*.log
+!*.json
+!*.png
+!*.jpg
+!*.jpeg
+!**/*.log
+!**/*.json
+!**/*.png
+!**/*.jpg
+!**/*.jpeg
+!windows-live/screenshots/
+!windows-live/screenshots/**

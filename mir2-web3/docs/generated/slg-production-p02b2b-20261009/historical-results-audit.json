@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.production-drops-history.v1",
+  "actualHistoricalRuns": 1,
+  "runs": [
+    {
+      "run": "drop-uid-tests-01",
+      "exitCode": 101,
+      "actualPassed": 10,
+      "actualFailed": 1,
+      "includedInFinalTotal": false,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "note": "New carried fixture inherited template description while incoming used a drop description; original functional identity correctly refused merge. Only fixture descriptions unified; all original assertions retained, positive merge checks added."
+    }
+  ],
+  "serialPreflightOrWaitCount": 1,
+  "serialPreflightCargoStarted": false,
+  "serialPreflightTests": 0,
+  "serialPreflightNonces": 0
+}

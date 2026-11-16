@@ -1,0 +1,11 @@
+
+running 6 tests
+test web::web_explicit_leave_route_tests::explicit_leave_cache_failure_keeps_captured_owner_for_retry_without_reentering_world ... ok
+test web::web_explicit_leave_route_tests::explicit_leave_failed_save_preserves_identity_lease_and_refresh ... ok
+test web::web_explicit_leave_route_tests::explicit_leave_logout_failed_packet_never_claims_completed_leave ... ok
+test web::web_explicit_leave_route_tests::explicit_leave_old_owner_cannot_delete_new_lease_even_before_new_record_is_published ... ok
+test web::web_explicit_leave_route_tests::explicit_leave_old_owner_cannot_delete_new_record_or_refresh_it_back ... ok
+test web::web_explicit_leave_route_tests::explicit_leave_releases_captured_route_after_identity_cleared_before_relogin ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1774 filtered out; finished in 12.32s
+

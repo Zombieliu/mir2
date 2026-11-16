@@ -219,6 +219,7 @@ fn boss_spawn() -> ZoneMonsterSpawn {
         .find(|monster| monster.name == BOSS_NAME)
         .expect("RedMoonEvil should exist in the Crystal monster manifest");
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: BOSS_OBJECT_ID,
         name: template.name.clone(),
         name_colour_argb: -1,

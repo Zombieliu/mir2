@@ -1,0 +1,17 @@
+{
+  "operation": "final native Windows debug build with restored original Guild frame424 drawing",
+  "command": "cargo +1.95.0 build --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "workdir": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "startedUtc": "2026-10-28T11:34:46.1340959Z",
+  "endedUtc": "2026-10-28T11:36:00.2402431Z",
+  "elapsedSeconds": 74.1061472,
+  "exitCode": 0,
+  "log": "C:/mir2-build/guild-pixel-parity-20261028/native-build-v4.log",
+  "targetDirectory": "C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "gpuTestRun": false,
+  "exe": {
+    "path": "C:/mir2-build/guild-pixel-parity-20261028/target-native/debug/mir2-platform-windows.exe",
+    "bytes": 131709952,
+    "sha256": "d355d71967340320f50d70ba729eb0e7db624629425558a51c5dea39b1d5f0e7"
+  }
+}

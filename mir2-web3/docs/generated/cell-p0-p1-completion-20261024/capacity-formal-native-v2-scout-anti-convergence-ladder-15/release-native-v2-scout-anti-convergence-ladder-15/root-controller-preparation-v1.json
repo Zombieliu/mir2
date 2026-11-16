@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-seal-and-guard-v1.mjs",
+    "bytes": 16520,
+    "sha256": "656b9d822ee22e8f68aace6c83238891a9144c655257d263182cfa003192de8d"
+  },
+  "syntax": {
+    "exitCode": 0,
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-seal-and-guard-v1.mjs",
+      "bytes": 16520,
+      "sha256": "656b9d822ee22e8f68aace6c83238891a9144c655257d263182cfa003192de8d"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\syntax-check-v1.json",
+      "bytes": 11443,
+      "sha256": "4c81d4367b962e479402375ef5711bb6536b001fc43ceb0c68fd8ee5423e6b21"
+    },
+    "reusedUnchangedActualSyntax": true
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\verify-inputs.mjs",
+      "bytes": 14299,
+      "sha256": "b4cab9ac8d3edc96dffee3d4576bb5d535aba6f38f5eb2c11491c30850b650e2"
+    }
+  ],
+  "rootExecutionRequired": true,
+  "sealExecuted": false,
+  "guardExecuted": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

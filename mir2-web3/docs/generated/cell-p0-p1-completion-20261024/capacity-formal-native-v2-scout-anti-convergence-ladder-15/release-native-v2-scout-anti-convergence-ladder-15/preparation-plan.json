@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_UNSEALED_NOT_EXECUTED",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "backendInputCount": 50,
+  "actualDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+    "bytes": 9472,
+    "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+  },
+  "formalScope": {
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "wallSeconds": 18000,
+    "completeMinuteWindows": 146
+  },
+  "sourceOnly": true,
+  "rootExecutionRequired": true,
+  "eligibleForSealNow": false,
+  "freshProbe19Bound": true,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "futureConsumerSchemaValidated": true,
+  "missing": [
+    "independent final source QA",
+    "Root explicit seal/readonly guard/prepare/run and full formal acceptance"
+  ],
+  "rootModesInvoked": false,
+  "actualSharedProbe19Sources": {
+    "evidence": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\driver-evidence-contract.mjs",
+      "bytes": 7450,
+      "sha256": "b7c9cfabe12a4d56da0e1764cdc38d082b47ee1ba7f82cb82f0be6b7103430dd"
+    },
+    "canonicalGeometryProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2526,
+      "sha256": "51bfb7919a9d1108ddcf28a6ec76bd7ed128ac0be4e66f060bf2e50e85a99ea7"
+    }
+  },
+  "actualRuntimeGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d8de777412955cb68dac020e84c8156bd792acc0fcb7bfe77cd74d884008a141"
+  },
+  "actualRuntimeGuardExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-readonly-guard-execution-v1.json",
+    "bytes": 2814,
+    "sha256": "1f76dc58190543287e6506ca5dbd7a9931d5c440b1600fcc483e7ef7303d3623"
+  },
+  "actualFull16Facts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-actual-independent-facts-v1.json",
+    "bytes": 6348,
+    "sha256": "04f4cf042228d098e8d3fc910c3a1b9830dec4d052f03d0b2b89320372cbfdf9"
+  },
+  "full16PublicPrerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+    "bytes": 9348,
+    "sha256": "9e21969af766c6a11983354af92b0c71722ae991719f15c80724f0aae8694b26"
+  },
+  "probe19SealedSourceClosure": null,
+  "probe19EndedIndependentResult": {
+    "path": "probe19-independent-verification-v1/final-verification.json",
+    "bytes": 455554,
+    "sha256": "7a8adbf0a67f312344acba4eedfce01d9c87eff26e5a348390e92a3beae16acc"
+  },
+  "actualProbe19RunId": "1792971941351-af013515",
+  "actualProbe19Independent": {
+    "path": "probe19-independent-verification-v1/final-verification.json",
+    "bytes": 455554,
+    "sha256": "7a8adbf0a67f312344acba4eedfce01d9c87eff26e5a348390e92a3beae16acc"
+  },
+  "independentSourceClosure": {
+    "path": "probe19-independent-verification-v1/tool-source-frozen-v1.json",
+    "bytes": 2785,
+    "sha256": "419abe39e5b5ec71f47cbefd52a9c4e541eb9a92d86df5ea77f6504e6bd63c51"
+  },
+  "eligibleForIndependentFinalSourceReview": true,
+  "probe19SourceSeal": {
+    "path": "probe19-independent-verification-v1/tool-source-frozen-v1.json",
+    "bytes": 2785,
+    "sha256": "419abe39e5b5ec71f47cbefd52a9c4e541eb9a92d86df5ea77f6504e6bd63c51"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "failedCheck": "animation-only ticks must reuse the stable Bevy entity-atlas source set",
+  "source": "mir2-web3/apps/web/app/original-client-shell.tsx",
+  "baselineEqualsCandidate": true,
+  "sourceSha256": "be204ab94a9c156cd7313f44c9b79e788e256b2deb0cd22347344ff940d6538b",
+  "sourceUntouched": true,
+  "testRunPassed": 8,
+  "testRunFailed": 1,
+  "globalRegressionSuitePassed": false
+}

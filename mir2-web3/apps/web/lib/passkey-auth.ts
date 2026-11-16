@@ -265,11 +265,13 @@ async function exchangeChannelSession(
     | "directGuest"
     | "itch",
   credential: string,
+  signal?: AbortSignal,
 ): Promise<SuiLoginToken> {
   const response = await fetch("/api/channels/session/exchange", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ provider, credential }),
+    signal,
   });
   const body = (await response.json().catch(() => null)) as
     | SuiLoginToken
@@ -292,8 +294,9 @@ export function requestChannelSessionToken(
     | "directGuest"
     | "itch",
   credential: string,
+  signal?: AbortSignal,
 ) {
-  return exchangeChannelSession(provider, credential);
+  return exchangeChannelSession(provider, credential, signal);
 }
 
 export async function requestGuestChannelSessionToken(

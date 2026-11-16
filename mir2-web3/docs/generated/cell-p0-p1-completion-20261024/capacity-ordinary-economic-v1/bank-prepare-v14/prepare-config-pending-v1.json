@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 14,
+  "packageId": "ordinary-capacity-bank-prepare-v14",
+  "state": "PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN",
+  "purpose": "ordinary-capacity-bank-preparation-only",
+  "actors": 100,
+  "maxPrepared": 100,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "maxPrepared": 100,
+    "finiteWallSeconds": 18000,
+    "targetHp": 12,
+    "attackResults": "v2"
+  },
+  "scenarioSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+    "bytes": 22813,
+    "sha256": "116fd663f0b49403975d9c48368f59b39daa2c74a66c4567e8ba2edccc2021fc"
+  },
+  "routeSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "bytes": 2661153,
+    "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+  },
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\resource-profile-v1.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  },
+  "fixedGateway": {
+    "tcp": "127.0.0.1:17500",
+    "web": "127.0.0.1:17510",
+    "tokioWorkers": 4,
+    "maxActiveSessions": 100,
+    "maxWsConnections": 128,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "contentProfile": "platinum_176",
+    "zoneDeliveryTrace": true
+  },
+  "monitorWallSeconds": 18300,
+  "authOrigin": {
+    "mode": "copiedExistingLedgerNoOverride",
+    "existingLedgerOverrideAllowed": false,
+    "loginNotBeforeAllowed": false,
+    "loginBudgetWindowMs": 901000,
+    "ordinaryAdmissionLimit": 25,
+    "verificationLimit": 5,
+    "sourceAddressRotation": false,
+    "scope": "Exact latest actual W13 ledger with complete W13 coldStore/pool4secrets/current4controls, same100 identities/17510; original25+5/901000ms, no loginNotBefore/time/origin override/reset/rollback",
+    "ledgerSource": "Latest actual W13 traffic ledger exact bytes"
+  },
+  "sourceQualification": {
+    "state": "ACTUAL_CURRENT_HELPER_JS_QUALIFIED_WITH_EXACT_REUSED_V6_BACKEND",
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "backendBuildCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "driverSourceCommit": "ca426258a560d04510e7883216b1c8806b3fea28",
+    "executionSourceCommit": "ca426258a560d04510e7883216b1c8806b3fea28",
+    "reusedRelease": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    "reusedRootRustReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    "reusedRustTestsPassed": 32,
+    "freshRustTestsPerformed": false,
+    "newRustBuildPerformed": false,
+    "newRootJsReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v14\\root-focused-receipt-v1.json",
+      "bytes": 22006,
+      "sha256": "70c2820afb02e664e9464de1921a8911fe09becfbe3b93991b7cd3375a027550"
+    },
+    "plannedRootJsReceiptFile": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v14\\root-focused-receipt-v1.json",
+    "freshNodeTestsPassed": null,
+    "qualificationScope": "Future actual new HEAD/currentRootJSreceipt only; historical767c/724 is not current qualification. StrictV6/55/Rust32 historical reuse; ordinaryfull16 requires separate complete14-source equality, not fresh-run attribution."
+  },
+  "progress": {
+    "counts": [
+      25,
+      50,
+      100
+    ],
+    "coldCheckpoint": false,
+    "meaning": "Progress only after ordinary preparation and normal logout. Only final Gateway/monitor/driver normalcleanup allows a cold bank; formal ordinary100relogin remains later work."
+  },
+  "formalReference": {
+    "scenario": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "stages": "2,10,25,50,100",
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "executed": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "sustainableTwoHourStockProven": false,
+  "scope": "Continue whole actual W13 normally closed cold Store/pool/four secrets/latest traffic ledger/current4controls by exclusive raw bytes. Original false29prepared/30ready70registered retained; failed30 navigation successful-step budget222/172commands161moves~108.245s remains unprepared. No seed, grant, Store/pool/auth/time/origin edits. Same immutable V6 ee06/55backend/Rust32 historical reuse; future current HEAD/Root receipt/count and current backend verification remain unknown. Original100/1worker/18000wall/600sactor/target12/3cmd and all gates unchanged.",
+  "staticProofSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\static-staging-proof-v2.json",
+    "bytes": 25000,
+    "sha256": "9fe1834dd3d7adac7cf1246e95952221b19b88c37de21ae8e5f7fbbf06bc3232"
+  },
+  "stagingSelection": {
+    "candidatePolicy": "fresh-unoccupied-distinct-saved-v1",
+    "staticCandidates": 335,
+    "preferredPoints": 100,
+    "actualPointsFrom": "Original production report.preparedIndex after final normal save",
+    "formalMustReuseActualSavedPoints": true
+  },
+  "reusedPartialOrdinaryBank": true,
+  "freshZeroCharacterPool": false,
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\source-bank-plan-pending-v1.json",
+    "bytes": 15068,
+    "sha256": "3b450538f6107db972c749a40ba090b55e4c5cacf42df74c5292459ffa1c85de"
+  },
+  "sourcePartialBank": {
+    "controlledAccounts": 100,
+    "readyCharacters": 30,
+    "registeredAccounts": 70,
+    "preparedActors": 29,
+    "sourceEligibilityInherited": false,
+    "first4MustBeOrdinarilyReloggedAndReuseActualStock": true,
+    "first4ReuseScope": "Fresh before/after HP stock>=12 and no hunting/harvest/pickup/sale/purchase; verify actual raw ordinaryPreparation commandCounts. Only first4 dedicated field; no eligibility inherited.",
+    "failedThirtiethNotPrepared": true
+  },
+  "ordinaryRecovery": {
+    "performedBy": "Current production runPreparationBank before equip/preparation",
+    "wrapperSendsRecoveryCommands": false,
+    "configurationOverrides": false,
+    "qualificationPending": true,
+    "scope": "Current production recovery bound to future actual JS qualification; backend V6 UseItem wake Rust32 remains historical reuse. No wrapper recovery command, QA, edits, revival or old-failure promotion."
+  },
+  "actualV13PartialBankContinuation": true
+}

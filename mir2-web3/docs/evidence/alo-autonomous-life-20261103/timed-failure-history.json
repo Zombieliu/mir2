@@ -1,0 +1,201 @@
+{
+  "schema": "mir2-life-timed-incomplete-history/1",
+  "runs": [
+    {
+      "run": "lf-b804a4e757",
+      "passed": false,
+      "gatewaySha256": "3cadee8d70793892b01db654a88c6e6f5b1ca1d5ac4f163d6ca83c31854febbf",
+      "realElapsedWallMs": 1554449,
+      "failurePhase": "observe-real-expiry-and-safe-return",
+      "failureHint": "A bounded ordinary life observation did not arrive.",
+      "actualGift": {
+        "ownerBeforeGold": 85,
+        "ownerAfterGold": 35,
+        "actorBeforeGold": 0,
+        "actorAfterGold": 50,
+        "receivedGold": 50,
+        "giftTaskCompleted": true,
+        "ownerFinalTradeObserved": true,
+        "actorPaidAssets": false,
+        "modelCallsBeforeLife": 0
+      },
+      "actualRestart": {
+        "firstPid": 78820,
+        "secondPid": 78668,
+        "differentProcess": true,
+        "actualLeaseWaitMs": 31000,
+        "sameMemoryPath": true,
+        "sameLifeIdHash": "8abd0b89d754bf1c219cc58429a314e0d8badb963b577068b3909028f45b733f",
+        "sameOriginalDeadline": true,
+        "childSupplyClaimed": true,
+        "spentGoldBeforeResume": 40,
+        "modelCallsBeforeResume": 2,
+        "pausedObservationMs": 5000,
+        "noAutomaticNewSpending": true,
+        "noAutomaticModelCall": true,
+        "ownerExplicitlyResumed": true
+      },
+      "lastSample": {
+        "position": {
+          "x": 289,
+          "y": 626
+        },
+        "inSafeZone": true,
+        "lifeStatus": "returning",
+        "killsObserved": 16,
+        "spentGold": 40,
+        "purchasedQuantity": 1
+      },
+      "cleanupReturned": true,
+      "correctionPending": "See the subsequent run; these results are not a complete loop pass."
+    },
+    {
+      "run": "lf-0b967cc689",
+      "passed": false,
+      "gatewaySha256": "3cadee8d70793892b01db654a88c6e6f5b1ca1d5ac4f163d6ca83c31854febbf",
+      "realElapsedWallMs": 1554574,
+      "failurePhase": "observe-real-expiry-and-safe-return",
+      "failureHint": "A bounded ordinary life observation did not arrive.",
+      "actualGift": {
+        "ownerBeforeGold": 85,
+        "ownerAfterGold": 35,
+        "actorBeforeGold": 0,
+        "actorAfterGold": 50,
+        "receivedGold": 50,
+        "giftTaskCompleted": true,
+        "ownerFinalTradeObserved": true,
+        "actorPaidAssets": false,
+        "modelCallsBeforeLife": 0
+      },
+      "actualRestart": {
+        "firstPid": 53436,
+        "secondPid": 59684,
+        "differentProcess": true,
+        "actualLeaseWaitMs": 31000,
+        "sameMemoryPath": true,
+        "sameLifeIdHash": "cde4fcf8e9b72236362da8aa91c5982a824153f3994f936a51ff245574499b95",
+        "sameOriginalDeadline": true,
+        "childSupplyClaimed": true,
+        "spentGoldBeforeResume": 40,
+        "modelCallsBeforeResume": 2,
+        "pausedObservationMs": 5000,
+        "noAutomaticNewSpending": true,
+        "noAutomaticModelCall": true,
+        "ownerExplicitlyResumed": true
+      },
+      "lastSample": {
+        "position": {
+          "x": 290,
+          "y": 631
+        },
+        "inSafeZone": false,
+        "lifeStatus": "returning",
+        "killsObserved": 15,
+        "spentGold": 40,
+        "purchasedQuantity": 1
+      },
+      "cleanupReturned": true,
+      "correctionPending": "See the subsequent run; these results are not a complete loop pass."
+    },
+    {
+      "run": "lf-867ae595c4",
+      "passed": false,
+      "gatewaySha256": "ae3d15d4dd2172140c8feef072e2b253f23ca4f41d2185180a6fb679a5f28459",
+      "realElapsedWallMs": 1554074,
+      "failurePhase": "observe-real-expiry-and-safe-return",
+      "failureHint": "A bounded ordinary life observation did not arrive.",
+      "actualGift": {
+        "ownerBeforeGold": 85,
+        "ownerAfterGold": 35,
+        "actorBeforeGold": 0,
+        "actorAfterGold": 50,
+        "receivedGold": 50,
+        "giftTaskCompleted": true,
+        "ownerFinalTradeObserved": true,
+        "actorPaidAssets": false,
+        "modelCallsBeforeLife": 0
+      },
+      "actualRestart": {
+        "firstPid": 79372,
+        "secondPid": 77912,
+        "differentProcess": true,
+        "actualLeaseWaitMs": 31000,
+        "sameMemoryPath": true,
+        "sameLifeIdHash": "c2c0ae0b0d092d370268237c3ae3ea0ec91b8c5870c26ffbec8c5ef21ec0d90d",
+        "sameOriginalDeadline": true,
+        "childSupplyClaimed": true,
+        "spentGoldBeforeResume": 40,
+        "modelCallsBeforeResume": 3,
+        "pausedObservationMs": 5000,
+        "noAutomaticNewSpending": true,
+        "noAutomaticModelCall": true,
+        "ownerExplicitlyResumed": true
+      },
+      "lastSample": {
+        "position": {
+          "x": 290,
+          "y": 631
+        },
+        "inSafeZone": false,
+        "lifeStatus": "returning",
+        "killsObserved": 10,
+        "spentGold": 40,
+        "purchasedQuantity": 1
+      },
+      "cleanupReturned": true,
+      "correctionPending": "Static-path homeward progress and confirmed movement rejection recovery"
+    },
+    {
+      "run": "lf-44cc9d5021",
+      "passed": false,
+      "gatewaySha256": "952a69c65fd99ca817916df5efab65ec4472839e2a5d3d2b08fc3f6b3670167f",
+      "realElapsedWallMs": 1383090,
+      "failurePhase": "observe-real-expiry-and-safe-return",
+      "failedAssertion": {
+        "operator": "strictEqual",
+        "actual": "paused",
+        "expected": "completed"
+      },
+      "actualGift": {
+        "ownerBeforeGold": 85,
+        "ownerAfterGold": 35,
+        "actorBeforeGold": 0,
+        "actorAfterGold": 50,
+        "receivedGold": 50,
+        "giftTaskCompleted": true,
+        "ownerFinalTradeObserved": true,
+        "actorPaidAssets": false,
+        "modelCallsBeforeLife": 0
+      },
+      "actualRestart": {
+        "firstPid": 78368,
+        "secondPid": 70128,
+        "differentProcess": true,
+        "actualLeaseWaitMs": 31000,
+        "sameMemoryPath": true,
+        "sameLifeIdHash": "26713ed66e7c0cc895c4cc52243c599e8d50a8e26091b5d0b191c330be155806",
+        "sameOriginalDeadline": true,
+        "childSupplyClaimed": true,
+        "spentGoldBeforeResume": 40,
+        "modelCallsBeforeResume": 2,
+        "pausedObservationMs": 5000,
+        "noAutomaticNewSpending": true,
+        "noAutomaticModelCall": true,
+        "ownerExplicitlyResumed": true
+      },
+      "lastSample": {
+        "position": {
+          "x": 288,
+          "y": 637
+        },
+        "inSafeZone": false,
+        "lifeStatus": "paused",
+        "killsObserved": 13,
+        "spentGold": 40,
+        "purchasedQuantity": 1
+      },
+      "cleanupReturned": true,
+      "correctionPending": "Final version uses actual live occupancy for homeward feasible-path progress."
+    }
+  ]
+}

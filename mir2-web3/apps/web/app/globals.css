@@ -1,4 +1,17 @@
+/* Same local font files as Windows R16; no third-party font request. */
+@font-face { font-family: "Noto Sans"; src: url("/original-ui/fonts/NotoSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans"; src: url("/original-ui/fonts/NotoSans-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Numeron Login SC"; src: url("./login-fonts/r16-login-sc.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Numeron Login TC"; src: url("./login-fonts/r16-login-tc.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Devanagari"; src: url("/original-ui/fonts/NotoSansDevanagari-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Devanagari"; src: url("/original-ui/fonts/NotoSansDevanagari-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Noto Sans Thai"; src: url("/original-ui/fonts/NotoSansThai-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Thai"; src: url("/original-ui/fonts/NotoSansThai-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Noto Sans Arabic"; src: url("/original-ui/fonts/NotoSansArabic-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Arabic"; src: url("/original-ui/fonts/NotoSansArabic-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
 :root {
+  --mir2-ui-font: "Noto Sans", sans-serif;
   color-scheme: dark;
   --bg: #070503;
   --ink: #e8dbc2;
@@ -28,8 +41,25 @@ body {
   min-height: 100%;
   background: #000;
   color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--mir2-ui-font);
 }
+
+html:lang(zh-CN), html:lang(zh-SG), html:lang(zh-Hans) { --mir2-ui-font: "Noto Sans CJK SC", sans-serif; }
+html:lang(zh-TW), html:lang(zh-HK), html:lang(zh-Hant) { --mir2-ui-font: "Noto Sans TC", sans-serif; }
+html[data-mir2-login-font]:is(:lang(zh-CN), :lang(zh-SG), :lang(zh-Hans)) {
+  --mir2-ui-font: "Numeron Login SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+html[data-mir2-login-font]:is(:lang(zh-TW), :lang(zh-HK), :lang(zh-Hant)) {
+  --mir2-ui-font: "Numeron Login TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+}
+html[data-mir2-login-font]:is(:lang(zh-CN), :lang(zh-SG), :lang(zh-Hans), :lang(zh-TW), :lang(zh-HK), :lang(zh-Hant))
+  [data-r16-auth="login"] {
+  font-family: var(--mir2-ui-font);
+}
+html:lang(hi) { --mir2-ui-font: "Noto Sans Devanagari", "Noto Sans", sans-serif; }
+html:lang(th) { --mir2-ui-font: "Noto Sans Thai", "Noto Sans", sans-serif; }
+html:lang(ar) { --mir2-ui-font: "Noto Sans Arabic", "Noto Sans", sans-serif; }
+[data-r16-auth], [data-r16-auth] button, [data-r16-auth] input { font-family: var(--mir2-ui-font); }
 
 body {
   overflow: hidden;
@@ -74,6 +104,34 @@ html[data-display-mode="standalone"] .mir-client-page {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.r16-stage-exit-dialog {
+  width: min(22rem, calc(100% - 2rem));
+  border: 1px solid #b99b5f;
+  padding: 1rem;
+  background: #21190e;
+  color: #efd697;
+  text-align: center;
+}
+
+.r16-stage-exit-dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.r16-stage-exit-actions {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+
+.r16-stage-exit-actions button {
+  border: 1px solid #9a783e;
+  padding: .35rem .9rem;
+  background: #392714;
+  color: inherit;
+  font: inherit;
 }
 
 /* A contained 4:3 client is the safest way to preserve Crystal's original
@@ -146,6 +204,103 @@ html[data-display-mode="standalone"] .mir-client-page {
 #mir2-web3-canvas.bevy-canvas-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* WebGL2 prototype: the primary GL surface is a fixed stage child for its
+   entire lifetime, laid out for UI while the DOM scene owns world painting. */
+#mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+
+#mir2-web3-canvas.bevy-shared-ui-canvas.shared-quest-ui-visible {
+  visibility: visible;
+}
+
+/* A second Window of the same Bevy App keeps shared UI above DOM world
+   lighting/weather/nameplates without lifting the world renderer over HUD. */
+#mir2-quest-ui-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
+  background: transparent;
+  visibility: hidden;
+  touch-action: none;
+}
+
+#mir2-quest-ui-canvas.shared-quest-ui-visible {
+  visibility: visible;
+}
+
+.hud-bar-draw-plan {
+  position: absolute;
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  image-rendering: pixelated;
+  background: transparent;
+}
+
+.client-stage-frame[data-experience-bar-owner="canvas2d"] .hud-bar-draw-plan-experience,
+.client-stage-frame[data-weight-bar-owner="canvas2d"] .hud-bar-draw-plan-weight {
+  visibility: visible;
+}
+
+/* A ready HUD image painter sits between retained HUD artwork and its contents.
+   The UI canvas stays non-interactive until Bag/Quest owns input. */
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .game-ui-scene,
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud-shell {
+  z-index: auto;
+}
+
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud > :not(.hud-base):not(.hud-cap) {
+  z-index: 10;
+}
+
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .hud-base,
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .hud-cap {
+  z-index: 8;
+}
+
+.client-stage-frame[data-hp-orb-owner="bevy"] .hud-orb-fill.hp {
+  visibility: hidden;
+}
+
+.client-stage-frame[data-mp-orb-owner="bevy"] .hud-orb-fill.mp {
+  visibility: hidden;
+}
+
+/* Touch quest sheets use the full readable height, including the desktop HUD
+   area. Keep their footer and close controls above the retained HUD. */
+[data-shared-touch-quest-open="true"] #mir2-quest-ui-canvas {
+  z-index: 40;
+}
+
+[data-shared-touch-quest-open="true"] #mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 40;
+}
+
+/* The active touch bag owns this canvas above the mobile control deck. */
+[data-shared-touch-bag-open="true"] #mir2-quest-ui-canvas {
+  z-index: 90;
+}
+
+[data-shared-touch-bag-open="true"] #mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 90;
+}
+
+[data-shared-touch-bag-open="true"] .mir-mobile-controls {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="true"]) .mir-pwa-shell {
+  visibility: hidden;
 }
 
 .webgl2-entity-atlas-canvas {
@@ -278,7 +433,8 @@ html[data-display-mode="standalone"] .mir-client-page {
 
 .login-transition-overlay {
   z-index: 19;
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .client-scene-background {
@@ -380,8 +536,10 @@ html[data-display-mode="standalone"] .mir-client-page {
 .viewport-drop-overlay {
   /* Ground-item labels must remain physically clickable even when a corpse or
      live actor occupies the same tile. Keep the full overlay pass-through so
-     map/entity input is unchanged outside the actual marker buttons. */
-  z-index: 32762;
+     map/entity input is unchanged outside the actual marker buttons. Crystal's
+     camera-relative object depth reaches 3,083,120; this label-only pass stays
+     above it, inside the isolated world (and below the separate game UI). */
+  z-index: 4000000;
   pointer-events: none;
 }
 
@@ -530,8 +688,7 @@ html[data-display-mode="standalone"] .mir-client-page {
   pointer-events: none;
 }
 
-/* Intentional loading screen over the black stage while map tiles preload (see
-   original-client-shell.tsx). Auto-dismisses when sceneInteractionReady flips true. */
+/* Covers map data and tile preparation. Dismissed when the scene is interactive. */
 .scene-loading-overlay {
   position: absolute;
   inset: 0;
@@ -564,6 +721,15 @@ html[data-display-mode="standalone"] .mir-client-page {
   opacity: 0.92;
 }
 
+.scene-loading-retry {
+  padding: 8px 18px;
+  border: 1px solid #9d733b;
+  background: linear-gradient(#4c341b, #23190d);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 @keyframes scene-loading-spin {
   to {
     transform: rotate(360deg);
@@ -571,7 +737,8 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .viewport-entity-overlay {
-  z-index: 32761;
+  /* DrawNames follows world sprites/effects; drop labels retain their higher layer. */
+  z-index: 3500000;
   pointer-events: none;
 }
 
@@ -733,6 +900,8 @@ html[data-display-mode="standalone"] .mir-client-page {
   background: transparent;
   pointer-events: auto;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 12px;
   gap: 0;
   text-align: center;
   box-shadow: none;
@@ -756,6 +925,8 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .entity-nameplate strong {
+  justify-self: center;
+  white-space: pre;
   font-size: 11px;
   line-height: 12px;
   color: var(--entity-name-color, #ffffff);
@@ -794,6 +965,7 @@ html[data-display-mode="standalone"] .mir-client-page {
 .game-ui-scene .chat-filter-bar,
 .game-ui-scene .belt-dialog,
 .game-ui-scene .mini-map-panel,
+.game-ui-scene .big-map-viewport,
 .game-ui-scene .dura-panel,
 .game-ui-scene .dura-status-panel,
 .game-ui-scene .npc-dialog-panel,
@@ -1011,6 +1183,69 @@ html[data-display-mode="standalone"] .mir-client-page {
   margin-top: 5px;
 }
 
+.login-wallet-qr-option { margin-bottom: 6px; }
+.dubhe-wallet-qr-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.72);
+  pointer-events: auto;
+}
+.dubhe-wallet-qr-panel {
+  width: min(340px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid #b18c4e;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #2a1d12, #120d09);
+  box-shadow: inset 0 0 0 1px rgba(229, 180, 91, 0.12), 0 14px 40px rgba(0, 0, 0, 0.7);
+  color: #eadcbc;
+  text-align: center;
+  overscroll-behavior: contain;
+}
+.dubhe-wallet-qr-heading { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.dubhe-wallet-qr-heading h2 { margin: 0; color: #f0d58e; font-size: 16px; line-height: 22px; }
+.dubhe-wallet-qr-description { margin: 10px 0 14px; font-size: 12px; line-height: 1.6; color: #cdbb9a; }
+.dubhe-wallet-qr-code {
+  width: min(240px, 100%);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid #665235;
+  background: rgba(0, 0, 0, 0.2);
+  color: #d7c29c;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.dubhe-wallet-qr-code.ready { padding: 0; border: 0; background: #fff; }
+.dubhe-wallet-qr-code img { display: block; width: 100%; height: auto; }
+.dubhe-wallet-qr-status { margin: 12px 0 0; font-size: 12px; line-height: 1.6; color: #f3d494; }
+.dubhe-wallet-qr-expiry { margin: 4px 0 0; font-size: 11px; color: #c1ad88; font-variant-numeric: tabular-nums; }
+.dubhe-wallet-qr-error { margin: 8px 0 0; font-size: 12px; line-height: 1.6; color: #f2af98; }
+.dubhe-wallet-qr-device-link { display: inline-block; margin-top: 12px; color: #edcd86; font-size: 12px; line-height: 1.6; text-underline-offset: 3px; }
+.dubhe-wallet-qr-actions { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+.dubhe-wallet-qr-actions button {
+  min-height: 40px;
+  min-width: 88px;
+  padding: 6px 12px;
+  border: 1px solid #a38049;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #50341d, #25180e);
+  color: #f4dcaf;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.dubhe-wallet-qr-actions button:hover { border-color: #e6be6f; color: #fff0bc; }
+.dubhe-wallet-qr-panel :is(button, a):focus-visible,
+.login-wallet-qr-option:focus-visible { outline: 2px solid #f5cf82; outline-offset: 3px; }
+
 .login-account-panel,
 .select-credits-panel,
 .chat-settings-panel {
@@ -1095,6 +1330,105 @@ html[data-display-mode="standalone"] .mir-client-page {
   top: calc(50% + 154px);
   min-width: 196px;
   transform: translateX(-50%);
+}
+
+
+/* Ordinary account forms are host-controlled; the backdrop keeps their focus and scrolling local. */
+.login-utility-actions {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 116px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.login-utility-actions button,
+.login-auth-panel button {
+  border: 1px solid rgba(190, 157, 99, 0.64);
+  background: linear-gradient(180deg, rgba(78, 45, 21, 0.98), rgba(30, 18, 10, 0.98));
+  color: #f4dcaf;
+  font: inherit;
+  text-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+}
+
+.login-utility-actions button { min-height: 28px; padding: 4px 10px; font-size: 11px; }
+.login-auth-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.58);
+  pointer-events: auto;
+}
+
+.login-auth-panel {
+  position: relative;
+  isolation: isolate;
+  width: min(440px, 100%);
+  max-width: calc(100vw - 24px);
+  max-height: min(100%, calc(100dvh - 24px));
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid #947546;
+  background: #17100a;
+  color: #eadcbc;
+  text-shadow: 1px 1px 0 #000;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+  overscroll-behavior: contain;
+}
+
+.login-auth-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.login-auth-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.login-auth-header h2 { margin: 0; font-size: 16px; color: #f0d69b; }
+.login-auth-panel .login-auth-close { min-width: 44px; min-height: 44px; padding: 4px; font-size: 22px; }
+.login-auth-fields { display: grid; gap: 10px; }
+.login-auth-field { display: grid; grid-template-columns: minmax(110px, 0.85fr) minmax(0, 1.15fr); align-items: center; gap: 8px; font-size: 12px; }
+.login-auth-field input {
+  min-width: 0;
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #66533a;
+  background: rgba(10, 7, 4, 0.85);
+  padding: 5px 8px;
+  color: #f4e3c1;
+  font: inherit;
+  color-scheme: dark;
+}
+.login-auth-field.active input { border-color: #c19b56; }
+.login-auth-panel button:focus-visible,
+.login-auth-field input:focus-visible,
+.login-input:focus-visible,
+.login-utility-actions button:focus-visible { outline: 2px solid #f5cf82; outline-offset: 2px; }
+.login-auth-panel button:disabled,
+.login-auth-field input:disabled,
+.login-utility-actions button:disabled { opacity: 0.5; cursor: default; }
+.login-auth-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.login-auth-actions button,
+.login-safe-key-tools button { min-height: 44px; padding: 6px 14px; }
+.login-auth-notice { margin-top: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; color: #f1d493; }
+.login-safe-key-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin-top: 14px; }
+.login-safe-key-grid button { min-width: 0; min-height: 44px; padding: 4px; font-size: 16px; }
+.login-safe-key-tools { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
+
+@media (max-width: 520px) {
+  .login-auth-panel { padding: 10px; }
+  .login-auth-field { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .login-auth-field input { min-height: 44px; }
+  .login-auth-actions button { flex: 1; }
 }
 
 .login-runtime-stamp {
@@ -1822,6 +2156,14 @@ html[data-display-mode="standalone"] .mir-client-page {
   white-space: nowrap;
   overflow: hidden;
 }
+
+.chat-frame[data-chat-size="1"] .chat-feed { height: 91px; }
+.chat-frame[data-chat-size="2"] .chat-feed { height: 143px; }
+.chat-frame[data-chat-size] .chat-feed { overflow: hidden; }
+.chat-frame[data-chat-size="1"] .chat-scroll-buttons { grid-template-rows: 8px 78px 6px 8px; }
+.chat-frame[data-chat-size="2"] .chat-scroll-buttons { grid-template-rows: 8px 126px 6px 8px; }
+.chat-frame[data-chat-size] .chat-position-knob { cursor: ns-resize; }
+.chat-settings-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .chat-feed-line.system {
   color: #c00000;
@@ -2634,13 +2976,6 @@ html[data-display-mode="standalone"] .mir-client-page {
   height: 372px;
 }
 
-.system-feature-panel-fishing {
-  left: 414px;
-  top: 168px;
-  width: 196px;
-  height: 286px;
-}
-
 .system-feature-panel-social {
   left: 266px;
   top: 96px;
@@ -2723,8 +3058,7 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .creature-feature-actions button,
-.mount-feature-ride,
-.fishing-feature-status button {
+.mount-feature-ride {
   min-width: 58px;
   height: 22px;
   border: 1px solid #705932;
@@ -2743,8 +3077,7 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .creature-feature-slots span,
-.mount-feature-slots span,
-.fishing-feature-slots span {
+.mount-feature-slots span {
   display: block;
   width: 34px;
   height: 34px;
@@ -2793,38 +3126,6 @@ html[data-display-mode="standalone"] .mir-client-page {
   display: grid;
   grid-template-columns: repeat(5, 34px);
   gap: 20px;
-}
-
-.fishing-feature-water {
-  position: absolute;
-  left: 17px;
-  top: 38px;
-  width: 158px;
-  height: 142px;
-  border: 1px solid #3f3120;
-  background: linear-gradient(180deg, #10252a, #1d392f 58%, #322716);
-}
-
-.fishing-feature-slots {
-  position: absolute;
-  left: 17px;
-  top: 203px;
-  display: grid;
-  grid-template-columns: repeat(4, 34px);
-  gap: 4px 6px;
-}
-
-.fishing-feature-slots span:first-child {
-  grid-column: 1;
-}
-
-.fishing-feature-status {
-  position: absolute;
-  left: 28px;
-  top: 248px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .system-social-panel {
@@ -3450,8 +3751,10 @@ html[data-display-mode="standalone"] .mir-client-page {
 }
 
 .storage-window {
-  top: 82px;
-  left: 16px;
+  /* This dialog is nested in the bag; place it beside that bag. */
+  top: 0;
+  left: auto;
+  right: calc(100% + 5px);
   width: 384px;
   height: 344px;
   border: 1px solid rgba(190, 157, 99, 0.5);
@@ -3544,6 +3847,12 @@ html[data-display-mode="standalone"] .mir-client-page {
 .storage-grid {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+.storage-grid > .storage-slot,
+.storage-grid > .storage-item-card {
+  pointer-events: auto;
 }
 
 .inventory-slot,
@@ -3692,6 +4001,9 @@ html[data-display-mode="standalone"] .mir-client-page {
   bottom: calc(100% + 6px);
 }
 
+.trade-item-card:hover .original-item-tooltip,
+.trade-item-card:focus .original-item-tooltip,
+.trade-item-card:focus-visible .original-item-tooltip,
 .inventory-item-card:hover .original-item-tooltip,
 .inventory-item-card:focus .original-item-tooltip,
 .inventory-item-card:focus-visible .original-item-tooltip,
@@ -3701,12 +4013,19 @@ html[data-display-mode="standalone"] .mir-client-page {
 .character-slot-card:hover .original-item-tooltip,
 .character-slot-card:focus .original-item-tooltip,
 .character-slot-card:focus-visible .original-item-tooltip,
+[data-fishing-slot]:hover .original-item-tooltip,
+[data-fishing-slot]:focus-visible .original-item-tooltip,
 .belt-item:hover .original-item-tooltip,
 .belt-item:focus .original-item-tooltip,
 .belt-item:focus-visible .original-item-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+:is([data-fishing-slot], [data-fishing-bag-item])[aria-pressed="true"] > img {
+  filter: brightness(0.412);
+  opacity: 0.8;
 }
 
 .original-item-tooltip strong {
@@ -3850,10 +4169,12 @@ html[data-display-mode="standalone"] .mir-client-page {
 
 .storage-window-page-tabs {
   inset: 0;
+  pointer-events: none;
 }
 
 .storage-page-tab {
   position: absolute;
+  pointer-events: auto;
   min-width: 64px;
   height: 22px;
   border: 1px solid rgba(190, 157, 99, 0.52);
@@ -4173,6 +4494,7 @@ html[data-display-mode="standalone"] .mir-client-page {
   left: 0;
   width: 264px;
   text-align: center;
+  pointer-events: none;
 }
 
 .character-guild {
@@ -4629,10 +4951,14 @@ button.character-spell-value:hover {
 .hud-exp-bar {
   left: 9px;
   top: 143px;
+  width: 1004px;
   height: 8px;
-  overflow: hidden;
   pointer-events: none;
 }
+
+.hud-exp-bar-clip { height: 8px; overflow: hidden; }
+.client-stage-frame[data-experience-bar-owner="bevy"] .hud-exp-bar-fill,
+.client-stage-frame[data-experience-bar-owner="canvas2d"] .hud-exp-bar-fill { visibility: hidden; }
 
 .hud-exp-bar-fill {
   display: block;
@@ -4660,6 +4986,8 @@ button.character-spell-value:hover {
   height: 12px;
   max-width: none;
 }
+.client-stage-frame[data-weight-bar-owner="bevy"] .hud-weight-bar-fill,
+.client-stage-frame[data-weight-bar-owner="canvas2d"] .hud-weight-bar-fill { visibility: hidden; }
 
 .hud-cap { display: none; bottom: 0; }
 .hud-cap.left { left: -67px; }
@@ -4676,6 +5004,9 @@ button.character-spell-value:hover {
 
 .hud-orb-fill.hp {
   left: 0;
+  /* Native Crystal moves the clipped destination down as HP drains. Keep the
+     full 80px child image at its fixed layout origin for host measurement. */
+  transform: translateY(calc(80px - 100%));
 }
 
 .hud-orb-fill.hp-only {
@@ -5142,6 +5473,14 @@ button.character-spell-value:hover {
   overscroll-behavior: none;
 }
 
+/* Short landscape stages put the centered HUD Quest button under the lower
+   left action. Keep both touch actions reachable by stacking Approach above Pick. */
+@media (orientation: landscape) and (max-height: 430px) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-action.approach {
+    bottom: calc(var(--mir-mobile-pick-bottom, 48px) + var(--mir-mobile-action-size, 44px) + 8px);
+  }
+}
+
 /* Experimental wide-mobile shell: keep the captured 4:3 HUD cluster centered
    while edge-anchored controls (mini-map, status, etc.) can use the expanded
    virtual stage. The flag is opt-in and does not alter the default client. */
@@ -5151,6 +5490,12 @@ button.character-spell-value:hover {
   .mir-client-page[data-wide-mobile="true"] .game-ui-scene .chat-filter-bar,
   .mir-client-page[data-wide-mobile="true"] .game-ui-scene .belt-dialog.horizontal {
     transform: translateX(var(--mir-wide-hud-offset-x, 0px));
+  }
+
+  /* transform would isolate the HUD labels behind the shared image layer. */
+  .mir-client-page[data-wide-mobile="true"] :is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud-shell {
+    left: var(--mir-wide-hud-offset-x, 0px);
+    transform: none;
   }
 }
 
@@ -5364,7 +5709,7 @@ button.character-spell-value:hover {
 }
 
 .entity-nameplate > .entity-nameplate-gdi {
-  justify-self: center;
+  justify-self: start;
 }
 
 .chat-feed-line > .crystal-gdi-text,

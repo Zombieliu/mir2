@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_ONLY_AWAITING_ACTUAL_FULL210_TERMINAL",
+  "targetChild": "capacity-attack-deadline-poll-fix-v1",
+  "preparedAt": "2026-10-25T16:17:24.750Z",
+  "stableExplicitEntries": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/playtest-capacity-soak.mjs.before.txt",
+      "destination": "before/playtest-capacity-soak.mjs.before.txt",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/playtest-capacity-soak.test.mjs.before.txt",
+      "destination": "before/playtest-capacity-soak.test.mjs.before.txt",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/before-source-pins-v1.json",
+      "destination": "before/before-source-pins-v1.json",
+      "bytes": 637,
+      "sha256": "e2a0eb379a52c86af7d371a510cc5a80e93bd52f135a79ce6109545f00d93280"
+    },
+    {
+      "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "destination": "current/playtest-capacity-soak.mjs.txt",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    {
+      "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "destination": "current/playtest-capacity-soak.test.mjs.txt",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-regression-before-fix-v1.log",
+      "destination": "focused/deadline-regression-before-fix-v1.log",
+      "bytes": 8417,
+      "sha256": "bb3e184c31a892c169ded0624042c8dabe07b62762aeca0c63f99caf9811e96b"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-regression-after-fix-v1.log",
+      "destination": "focused/deadline-regression-after-fix-v1.log",
+      "bytes": 2685,
+      "sha256": "9360c7cc4ae662080e4a5a90f0f29234c83e4cb60917f9bc417858a2edd29c5e"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-independent-review-v1.json",
+      "destination": "independent/attack-deadline-poll-fix-independent-review-v1.json",
+      "bytes": 7102,
+      "sha256": "33279fc5a562af27b791a15081bb90c3e4de03ee91a30cceae24a808c6512124"
+    }
+  ],
+  "notCopied": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-driver-full-suite-v1.log",
+      "reason": "Root full210 is running; hash/copy only after Root actual terminal confirmation."
+    }
+  ],
+  "futureRequiredEvidence": [
+    "Root actual full210 execution receipt and completed log, with exact current two-file and 9-input before/after closure",
+    "Final integration QA addendum referencing actual full210 count/footer/source pins"
+  ],
+  "copyRequirements": [
+    "Copy only explicit public sources with exact raw-byte SHA/bytes checks and CreateNew/wx",
+    "Target new public child must not already exist",
+    "Do not write protected old collector child or original failure evidence",
+    "No private/accounts/credentials/binary/recording/raw/monitor payload",
+    "Preserve historical Formal11 failed verdict; no capacity/P0/P2 promotion"
+  ],
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2ImplementationPermitted": false
+}

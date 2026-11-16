@@ -1,0 +1,53 @@
+{
+  "restored": true,
+  "at": "2026-11-16T08:35:52.557Z",
+  "overlays": 24,
+  "rawWipUnchanged": 28,
+  "foreignShellInverseByteProof": true,
+  "results": [
+    {
+      "folder": "game-r1",
+      "passed": true,
+      "failure": null,
+      "backend": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "ackMs": 108,
+      "nativeMs": 31606,
+      "objectBodiesVerified": true,
+      "originalImages": 90,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "folder": "game-r2",
+      "passed": false,
+      "failure": {
+        "stage": "first-entry-independent-diary-Q-open-and-close",
+        "message": "configured Q opens actual diary"
+      },
+      "backend": {
+        "selectedBackend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "ackMs": 131,
+      "nativeMs": 28933,
+      "objectBodiesVerified": true,
+      "originalImages": 90,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "allLocalProcessesClosed": true,
+  "productionChanged": false,
+  "buildNotServableWithoutGuardedReapply": true
+}

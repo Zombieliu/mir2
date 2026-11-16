@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "manifestSha256": "05cd8adb07bedbf15bf95f26c08dd7232a987d80ce7b1543d92d52b1dc159490",
+  "manifestBytes": 7225666,
+  "assets": 42724,
+  "assetBytes": 336156477,
+  "addedAssets": 18462,
+  "addedBytes": 47293933,
+  "mapCoverage": {
+    "1": {
+      "width": 600,
+      "height": 600,
+      "drawable": 2953,
+      "already": 1573,
+      "added": 1380
+    },
+    "D401": {
+      "width": 200,
+      "height": 200,
+      "drawable": 856,
+      "already": 136,
+      "added": 720
+    },
+    "D021": {
+      "width": 100,
+      "height": 100,
+      "drawable": 366,
+      "already": 6,
+      "added": 360
+    },
+    "D022": {
+      "width": 500,
+      "height": 500,
+      "drawable": 391,
+      "already": 271,
+      "added": 120
+    }
+  },
+  "equipment": {
+    "CArmour/02": 1617,
+    "CArmour/03": 1617,
+    "CArmour/04": 1617,
+    "CArmour/05": 1617,
+    "CWeapon/05": 1,
+    "CWeapon/06": 833,
+    "CWeapon/07": 833,
+    "CWeapon/09": 833,
+    "CWeapon/10": 833,
+    "CWeapon/11": 833,
+    "CWeapon/16": 833,
+    "CWeapon/17": 833,
+    "CWeapon/18": 833
+  },
+  "monsters": {
+    "Monster/017": 225,
+    "Monster/018": 225,
+    "Monster/027": 265,
+    "Monster/029": 225,
+    "Monster/030": 225,
+    "Monster/031": 225,
+    "Monster/032": 281,
+    "Monster/033": 225,
+    "Monster/069": 313,
+    "Monster/070": 305,
+    "078": 235
+  },
+  "oldManifestSha256": "454f30224cdec496b0a5f9d69e1e4a51d29e80a8897b00c5c158baad9ece370a",
+  "preservedOriginalAssetRows": 24262,
+  "filesReadBack": true,
+  "byteBudget": 377487360,
+  "negativeChecksRejected": [
+    "drop-equipment-path",
+    "new-equipment-unpinned-hash",
+    "legacy-file-altered",
+    "path-traversal",
+    "missing-summon-frame",
+    "wrong-map-source",
+    "false-scope"
+  ]
+}

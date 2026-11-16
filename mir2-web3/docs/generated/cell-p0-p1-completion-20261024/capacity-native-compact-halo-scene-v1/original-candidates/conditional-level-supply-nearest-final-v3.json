@@ -1,0 +1,1324 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:18:13.810Z",
+  "scope": "Conditional ordinary starter-Warrior level/XP/positive-hit supply analysis for the proposed compact-v2 scene; no gameplay execution or acceptance",
+  "scenePin": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-nearest-ordered-final-v3.json",
+    "bytes": 5844,
+    "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436"
+  },
+  "validationPin": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-nearest-ordered-final-v3.json",
+    "bytes": 7233814,
+    "sha256": "358e1eb027306424d82324147374e9eb9d11d190a98cc86b9934ac536869a8de"
+  },
+  "parameters": {
+    "schemaVersion": 1,
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "bodySide": 3,
+    "haloSide": 5,
+    "bounds": {
+      "minX": 208,
+      "maxX": 376,
+      "minY": 512,
+      "maxY": 682
+    },
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "actors": 100,
+    "prefixes": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "fighterIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "maxExpanded": 4000,
+    "stableWitnessRange": 6,
+    "bodyExcludesCanonicalInitialMonsters": true,
+    "initialDangerHalfWidth": 8,
+    "initialDangerHalfHeight": 6,
+    "ordinaryProtocolOnly": true,
+    "freshWarrior": true,
+    "grants": false,
+    "newSpawnRules": false,
+    "productChanges": false,
+    "attacksPerFighterMinute": 18,
+    "positiveHitsPerFighterMinute": 12,
+    "minimumNativeCompletion": 0.95,
+    "minimumRunFraction": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "opportunityMs": 750,
+    "commandsPerSecond": 3,
+    "actualRuntimeLimitsUnchanged": {
+      "pathTargets": 4,
+      "adjacentGoals": 8,
+      "searchNodesPerPath": 4000,
+      "attackDeadlineMs": 900,
+      "chaseMoves": 40,
+      "chaseMs": 30000,
+      "visits": 3
+    },
+    "accepted": false,
+    "capacityAccepted": false,
+    "staticOnly": true
+  },
+  "nativeModel": {
+    "weapon": "WoodenSword",
+    "weaponDc": {
+      "min": 2,
+      "max": 4
+    },
+    "baseMinMaxDc": "floor(level/5)",
+    "baseAccuracy": 5,
+    "attackModel": "Independent uniform integer draw inside effective DC band, AC0, no added DC/Luck/critical/buffs/skills; effective original starter weapon remains equipped. Expected positive hits per kill computed by finite HP dynamic programming, including final overkill clipping.",
+    "targetTemplates": [
+      {
+        "name": "Deer",
+        "hp": 25,
+        "minAc": 0,
+        "maxAc": 0,
+        "level": 12,
+        "baseExperience": 18
+      },
+      {
+        "name": "Scarecrow",
+        "hp": 20,
+        "minAc": 0,
+        "maxAc": 0,
+        "level": 10,
+        "baseExperience": 15
+      }
+    ],
+    "normalEquipment": "The unchanged capacity driver ordinarily equips available starter inventory once. No automatic purchase, upgrade, grant, inventory refill or forced XP/level lock is performed.",
+    "skillScope": "These are starter-only conditional bands, not level-dependent upper bounds. Real learned skills such as Slaying, buffs, criticals and actual gear changes can alter effective attack; no such source is granted, locked or synthesized here.",
+    "healthScope": "BaseHealth is class/level only. Real gear, buffs, damage, regeneration, held finite HP potion, durability and actual snapshot health must be observed; no survival estimate is supplied.",
+    "ratePolicy": [
+      {
+        "minLevel": 1,
+        "maxLevel": 21,
+        "multiplier": 2
+      },
+      {
+        "minLevel": 22,
+        "maxLevel": 35,
+        "multiplier": 3
+      },
+      {
+        "minLevel": 36,
+        "maxLevel": 50,
+        "multiplier": 4
+      }
+    ]
+  },
+  "stages": [
+    {
+      "actors": 2,
+      "fighterCount": 0,
+      "targets": 0,
+      "targetCounts": {
+        "Deer": 0,
+        "Scarecrow": 0
+      },
+      "requiredAttacksPerMinute": 0,
+      "requiredPositiveHitsPerMinute": 0,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 20,
+          "ordinaryStarterMinDc": 6,
+          "ordinaryStarterMaxDc": 8,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 224,
+          "cumulativeNativeXpToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 25,
+          "ordinaryStarterMinDc": 7,
+          "ordinaryStarterMaxDc": 9,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 314,
+          "cumulativeNativeXpToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 30,
+          "ordinaryStarterMinDc": 8,
+          "ordinaryStarterMaxDc": 10,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 419,
+          "cumulativeNativeXpToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        }
+      ],
+      "ruleSupply": [],
+      "activeTargetIdsDeduplicated": true
+    },
+    {
+      "actors": 10,
+      "fighterCount": 1,
+      "targets": 28,
+      "targetCounts": {
+        "Deer": 21,
+        "Scarecrow": 7
+      },
+      "requiredAttacksPerMinute": 18,
+      "requiredPositiveHitsPerMinute": 12,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 57.722063220564486,
+          "aggregateRateMarginOverRequired": 45.722063220564486,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 85.49999999999999,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 45.50000000000001,
+          "idealInitialPositiveHitStock": 232.03600964171002,
+          "idealUniformTwoHourHitsIncludingInitial": 7158.6835961094475,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 44.09352232891327,
+          "aggregateRateMarginOverRequired": 32.09352232891327,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 59.29999999999999,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 33.10000000000001,
+          "idealInitialPositiveHitStock": 177.27892089620485,
+          "idealUniformTwoHourHitsIncludingInitial": 5468.501600365799,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 35.816186556927306,
+          "aggregateRateMarginOverRequired": 23.816186556927306,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 45.50000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 33.10000000000001,
+          "idealInitialPositiveHitStock": 144.00411522633746,
+          "idealUniformTwoHourHitsIncludingInitial": 4441.946502057615,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 30.787654320987638,
+          "aggregateRateMarginOverRequired": 18.787654320987638,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 33.10000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 26.200000000000006,
+          "idealInitialPositiveHitStock": 123.92592592592585,
+          "idealUniformTwoHourHitsIncludingInitial": 3818.444444444442,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 20,
+          "ordinaryStarterMinDc": 6,
+          "ordinaryStarterMaxDc": 8,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 224,
+          "cumulativeNativeXpToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 26.4753086419753,
+          "aggregateRateMarginOverRequired": 14.4753086419753,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 33.10000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 26.200000000000006,
+          "idealInitialPositiveHitStock": 106.29629629629626,
+          "idealUniformTwoHourHitsIncludingInitial": 3283.3333333333317,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 25,
+          "ordinaryStarterMinDc": 7,
+          "ordinaryStarterMaxDc": 9,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 314,
+          "cumulativeNativeXpToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 24.162962962962965,
+          "aggregateRateMarginOverRequired": 12.162962962962965,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 26.200000000000006,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 20.700000000000003,
+          "idealInitialPositiveHitStock": 97.2222222222222,
+          "idealUniformTwoHourHitsIncludingInitial": 2996.7777777777774,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 30,
+          "ordinaryStarterMinDc": 8,
+          "ordinaryStarterMaxDc": 10,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 419,
+          "cumulativeNativeXpToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 20.74814814814815,
+          "aggregateRateMarginOverRequired": 8.74814814814815,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 26.200000000000006,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 19.3,
+          "idealInitialPositiveHitStock": 84,
+          "idealUniformTwoHourHitsIncludingInitial": 2573.7777777777774,
+          "continuousWindowSupplyProven": false
+        }
+      ],
+      "ruleSupply": [
+        {
+          "ruleIndex": 63,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 7,
+          "objectIds": [
+            206313,
+            206327,
+            206328,
+            206331,
+            206334,
+            206335,
+            206338
+          ]
+        },
+        {
+          "ruleIndex": 65,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 11,
+          "objectIds": [
+            206502,
+            206503,
+            206514,
+            206517,
+            206518,
+            206521,
+            206527,
+            206532,
+            206533,
+            206539,
+            206548
+          ]
+        },
+        {
+          "ruleIndex": 66,
+          "name": "Scarecrow",
+          "hp": 20,
+          "delayMinutes": 5,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 5,
+          "deduplicatedStableSlots": 7,
+          "objectIds": [
+            206600,
+            206607,
+            206613,
+            206622,
+            206634,
+            206646,
+            206649
+          ]
+        },
+        {
+          "ruleIndex": 67,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 3,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 3,
+          "deduplicatedStableSlots": 3,
+          "objectIds": [
+            206706,
+            206708,
+            206710
+          ]
+        }
+      ],
+      "activeTargetIdsDeduplicated": true
+    },
+    {
+      "actors": 25,
+      "fighterCount": 2,
+      "targets": 33,
+      "targetCounts": {
+        "Deer": 24,
+        "Scarecrow": 9
+      },
+      "requiredAttacksPerMinute": 36,
+      "requiredPositiveHitsPerMinute": 24,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 67.06458101651927,
+          "aggregateRateMarginOverRequired": 43.06458101651927,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 99.24999999999999,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 52.75000000000001,
+          "idealInitialPositiveHitStock": 272.2207940298171,
+          "idealUniformTwoHourHitsIncludingInitial": 8319.970516012127,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 51.23376009754608,
+          "aggregateRateMarginOverRequired": 27.23376009754608,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 68.85,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 38.449999999999996,
+          "idealInitialPositiveHitStock": 207.99679926840417,
+          "idealUniformTwoHourHitsIncludingInitial": 6356.048010973937,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 41.61659807956105,
+          "aggregateRateMarginOverRequired": 17.61659807956105,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 52.75000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 38.449999999999996,
+          "idealInitialPositiveHitStock": 168.95884773662547,
+          "idealUniformTwoHourHitsIncludingInitial": 5162.950617283953,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 35.791358024691334,
+          "aggregateRateMarginOverRequired": 11.791358024691334,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 38.449999999999996,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 30.40000000000001,
+          "idealInitialPositiveHitStock": 145.48148148148144,
+          "idealUniformTwoHourHitsIncludingInitial": 4440.4444444444425,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 20,
+          "ordinaryStarterMinDc": 6,
+          "ordinaryStarterMaxDc": 8,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 224,
+          "cumulativeNativeXpToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 30.743827160493815,
+          "aggregateRateMarginOverRequired": 6.743827160493815,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 38.449999999999996,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 30.40000000000001,
+          "idealInitialPositiveHitStock": 124.62962962962959,
+          "idealUniformTwoHourHitsIncludingInitial": 3813.8888888888873,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 25,
+          "ordinaryStarterMinDc": 7,
+          "ordinaryStarterMaxDc": 9,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 314,
+          "cumulativeNativeXpToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 28.085185185185193,
+          "aggregateRateMarginOverRequired": 4.085185185185193,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 30.40000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 24.150000000000013,
+          "idealInitialPositiveHitStock": 114.1111111111111,
+          "idealUniformTwoHourHitsIncludingInitial": 3484.333333333333,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 30,
+          "ordinaryStarterMinDc": 8,
+          "ordinaryStarterMaxDc": 10,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 419,
+          "cumulativeNativeXpToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 24.181481481481494,
+          "aggregateRateMarginOverRequired": 0.18148148148149446,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 30.40000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 22.349999999999987,
+          "idealInitialPositiveHitStock": 98.88888888888889,
+          "idealUniformTwoHourHitsIncludingInitial": 3000.6666666666656,
+          "continuousWindowSupplyProven": false
+        }
+      ],
+      "ruleSupply": [
+        {
+          "ruleIndex": 63,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 8,
+          "objectIds": [
+            206313,
+            206327,
+            206328,
+            206330,
+            206331,
+            206334,
+            206335,
+            206338
+          ]
+        },
+        {
+          "ruleIndex": 65,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 13,
+          "objectIds": [
+            206502,
+            206503,
+            206514,
+            206517,
+            206518,
+            206521,
+            206527,
+            206529,
+            206532,
+            206533,
+            206539,
+            206547,
+            206548
+          ]
+        },
+        {
+          "ruleIndex": 66,
+          "name": "Scarecrow",
+          "hp": 20,
+          "delayMinutes": 5,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 5,
+          "deduplicatedStableSlots": 9,
+          "objectIds": [
+            206600,
+            206607,
+            206612,
+            206613,
+            206615,
+            206622,
+            206634,
+            206646,
+            206649
+          ]
+        },
+        {
+          "ruleIndex": 67,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 3,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 3,
+          "deduplicatedStableSlots": 3,
+          "objectIds": [
+            206706,
+            206708,
+            206710
+          ]
+        }
+      ],
+      "activeTargetIdsDeduplicated": true
+    },
+    {
+      "actors": 50,
+      "fighterCount": 5,
+      "targets": 62,
+      "targetCounts": {
+        "Deer": 40,
+        "Scarecrow": 22
+      },
+      "requiredAttacksPerMinute": 90,
+      "requiredPositiveHitsPerMinute": 60,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 122.35110953050285,
+          "aggregateRateMarginOverRequired": 62.35110953050285,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 180.50000000000006,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 95.49999999999997,
+          "idealInitialPositiveHitStock": 502.9588044580674,
+          "idealUniformTwoHourHitsIncludingInitial": 15185.091948118405,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 93.49254686785541,
+          "aggregateRateMarginOverRequired": 33.49254686785541,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 125.30000000000013,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 70.09999999999995,
+          "idealInitialPositiveHitStock": 384.40755982319746,
+          "idealUniformTwoHourHitsIncludingInitial": 11603.513183965855,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 75.94650205761319,
+          "aggregateRateMarginOverRequired": 15.946502057613188,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 95.49999999999997,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 70.09999999999995,
+          "idealInitialPositiveHitStock": 312.2770919067213,
+          "idealUniformTwoHourHitsIncludingInitial": 9425.85733882031,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 65.42962962962966,
+          "aggregateRateMarginOverRequired": 5.429629629629659,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 70.09999999999995,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 55.200000000000045,
+          "idealInitialPositiveHitStock": 269.43209876543193,
+          "idealUniformTwoHourHitsIncludingInitial": 8120.987654320992,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 20,
+          "ordinaryStarterMinDc": 6,
+          "ordinaryStarterMaxDc": 8,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 224,
+          "cumulativeNativeXpToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 55.98148148148139,
+          "aggregateRateMarginOverRequired": -4.018518518518611,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 70.09999999999995,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 55.200000000000045,
+          "idealInitialPositiveHitStock": 229.75308641975315,
+          "idealUniformTwoHourHitsIncludingInitial": 6947.530864197526,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 25,
+          "ordinaryStarterMinDc": 7,
+          "ordinaryStarterMaxDc": 9,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 314,
+          "cumulativeNativeXpToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 51.311111111111124,
+          "aggregateRateMarginOverRequired": -8.688888888888876,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 55.200000000000045,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 44.70000000000003,
+          "idealInitialPositiveHitStock": 211.18518518518516,
+          "idealUniformTwoHourHitsIncludingInitial": 6368.51851851852,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 30,
+          "ordinaryStarterMinDc": 8,
+          "ordinaryStarterMaxDc": 10,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 419,
+          "cumulativeNativeXpToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 44.600000000000016,
+          "aggregateRateMarginOverRequired": -15.399999999999984,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 55.200000000000045,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 40.29999999999997,
+          "idealInitialPositiveHitStock": 185.037037037037,
+          "idealUniformTwoHourHitsIncludingInitial": 5537.037037037039,
+          "continuousWindowSupplyProven": false
+        }
+      ],
+      "ruleSupply": [
+        {
+          "ruleIndex": 63,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 13,
+          "objectIds": [
+            206300,
+            206301,
+            206304,
+            206305,
+            206309,
+            206313,
+            206327,
+            206328,
+            206330,
+            206331,
+            206334,
+            206335,
+            206338
+          ]
+        },
+        {
+          "ruleIndex": 65,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 21,
+          "objectIds": [
+            206502,
+            206503,
+            206505,
+            206506,
+            206512,
+            206514,
+            206517,
+            206518,
+            206521,
+            206525,
+            206527,
+            206529,
+            206532,
+            206533,
+            206534,
+            206535,
+            206537,
+            206539,
+            206547,
+            206548,
+            206549
+          ]
+        },
+        {
+          "ruleIndex": 66,
+          "name": "Scarecrow",
+          "hp": 20,
+          "delayMinutes": 5,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 5,
+          "deduplicatedStableSlots": 22,
+          "objectIds": [
+            206600,
+            206601,
+            206602,
+            206607,
+            206608,
+            206612,
+            206613,
+            206614,
+            206615,
+            206616,
+            206618,
+            206620,
+            206622,
+            206625,
+            206629,
+            206634,
+            206635,
+            206637,
+            206638,
+            206646,
+            206647,
+            206649
+          ]
+        },
+        {
+          "ruleIndex": 67,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 3,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 3,
+          "deduplicatedStableSlots": 6,
+          "objectIds": [
+            206701,
+            206706,
+            206708,
+            206709,
+            206710,
+            206712
+          ]
+        }
+      ],
+      "activeTargetIdsDeduplicated": true
+    },
+    {
+      "actors": 100,
+      "fighterCount": 10,
+      "targets": 124,
+      "targetCounts": {
+        "Deer": 81,
+        "Scarecrow": 43
+      },
+      "requiredAttacksPerMinute": 180,
+      "requiredPositiveHitsPerMinute": 120,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 246.196108944047,
+          "aggregateRateMarginOverRequired": 126.19610894404701,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 363.3333333333331,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 192.33333333333346,
+          "idealInitialPositiveHitStock": 1007.58456536097,
+          "idealUniformTwoHourHitsIncludingInitial": 30551.11763864669,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 188.12143474063947,
+          "aggregateRateMarginOverRequired": 68.12143474063947,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 252.20000000000024,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 141.0666666666665,
+          "idealInitialPositiveHitStock": 770.0672153635098,
+          "idealUniformTwoHourHitsIncludingInitial": 23344.639384240243,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 152.8152720621856,
+          "aggregateRateMarginOverRequired": 32.81527206218561,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 192.33333333333346,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 141.0666666666665,
+          "idealInitialPositiveHitStock": 625.5679012345676,
+          "idealUniformTwoHourHitsIncludingInitial": 18963.40054869686,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 131.62798353909463,
+          "aggregateRateMarginOverRequired": 11.627983539094629,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 141.0666666666665,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 111.13333333333303,
+          "idealInitialPositiveHitStock": 539.6296296296293,
+          "idealUniformTwoHourHitsIncludingInitial": 16334.987654320954,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 20,
+          "ordinaryStarterMinDc": 6,
+          "ordinaryStarterMaxDc": 8,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 224,
+          "cumulativeNativeXpToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 112.67078189300425,
+          "aggregateRateMarginOverRequired": -7.329218106995754,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 141.0666666666665,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 111.13333333333303,
+          "idealInitialPositiveHitStock": 460.3703703703709,
+          "idealUniformTwoHourHitsIncludingInitial": 13980.864197530907,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 25,
+          "ordinaryStarterMinDc": 7,
+          "ordinaryStarterMaxDc": 9,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 314,
+          "cumulativeNativeXpToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 103.23209876543176,
+          "aggregateRateMarginOverRequired": -16.767901234568242,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 111.13333333333303,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 89.79999999999991,
+          "idealInitialPositiveHitStock": 422.99999999999955,
+          "idealUniformTwoHourHitsIncludingInitial": 12810.851851851858,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 30,
+          "ordinaryStarterMinDc": 8,
+          "ordinaryStarterMaxDc": 10,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 419,
+          "cumulativeNativeXpToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 89.63456790123459,
+          "aggregateRateMarginOverRequired": -30.36543209876541,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 111.13333333333303,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 81.20000000000002,
+          "idealInitialPositiveHitStock": 370.2222222222225,
+          "idealUniformTwoHourHitsIncludingInitial": 11126.370370370378,
+          "continuousWindowSupplyProven": false
+        }
+      ],
+      "ruleSupply": [
+        {
+          "ruleIndex": 62,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 2,
+          "objectIds": [
+            206203,
+            206205
+          ]
+        },
+        {
+          "ruleIndex": 63,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 27,
+          "objectIds": [
+            206300,
+            206301,
+            206302,
+            206303,
+            206304,
+            206305,
+            206307,
+            206309,
+            206310,
+            206313,
+            206316,
+            206318,
+            206319,
+            206320,
+            206323,
+            206325,
+            206326,
+            206327,
+            206328,
+            206329,
+            206330,
+            206331,
+            206333,
+            206334,
+            206335,
+            206338,
+            206339
+          ]
+        },
+        {
+          "ruleIndex": 65,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 4,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 4,
+          "deduplicatedStableSlots": 39,
+          "objectIds": [
+            206500,
+            206501,
+            206502,
+            206503,
+            206504,
+            206505,
+            206506,
+            206507,
+            206510,
+            206511,
+            206512,
+            206513,
+            206514,
+            206515,
+            206517,
+            206518,
+            206519,
+            206521,
+            206522,
+            206525,
+            206526,
+            206527,
+            206528,
+            206529,
+            206532,
+            206533,
+            206534,
+            206535,
+            206537,
+            206539,
+            206540,
+            206541,
+            206543,
+            206544,
+            206545,
+            206546,
+            206547,
+            206548,
+            206549
+          ]
+        },
+        {
+          "ruleIndex": 66,
+          "name": "Scarecrow",
+          "hp": 20,
+          "delayMinutes": 5,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 5,
+          "deduplicatedStableSlots": 43,
+          "objectIds": [
+            206600,
+            206601,
+            206602,
+            206604,
+            206605,
+            206607,
+            206608,
+            206609,
+            206611,
+            206612,
+            206613,
+            206614,
+            206615,
+            206616,
+            206617,
+            206618,
+            206619,
+            206620,
+            206622,
+            206624,
+            206625,
+            206626,
+            206627,
+            206629,
+            206630,
+            206631,
+            206632,
+            206633,
+            206634,
+            206635,
+            206636,
+            206637,
+            206638,
+            206639,
+            206641,
+            206642,
+            206643,
+            206644,
+            206645,
+            206646,
+            206647,
+            206648,
+            206649
+          ]
+        },
+        {
+          "ruleIndex": 67,
+          "name": "Deer",
+          "hp": 25,
+          "delayMinutes": 3,
+          "randomDelayMinutes": 0,
+          "corpseTtlSeconds": 180,
+          "conditionalEarliestRefreshMinutes": 3,
+          "deduplicatedStableSlots": 13,
+          "objectIds": [
+            206700,
+            206701,
+            206704,
+            206706,
+            206707,
+            206708,
+            206709,
+            206710,
+            206711,
+            206712,
+            206715,
+            206717,
+            206718
+          ]
+        }
+      ],
+      "activeTargetIdsDeduplicated": true
+    }
+  ],
+  "closedPoolProgression": {
+    "canonicalSlots": 124,
+    "scope": "Conditional closed124canonical-slot pool only, no external wandering-in targets/quest/other XP/positive bonuses, every slot killed immediately after due refresh; all rewards assigned to ONE actor at tier2 for the whole bound. Level penalties, shared allocation, travel and kill time omitted, so deliberately overgenerous.",
+    "twoHours": {
+      "minutes": 120,
+      "idealKillsIncludingInitial": 3716,
+      "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 127326
+    },
+    "entire18000SecondBudget": {
+      "minutes": 300,
+      "idealKillsIncludingInitial": 9104,
+      "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 312006
+    },
+    "requiredXpLevel20": 456900,
+    "requiredXpLevel25": 1896900,
+    "level20NotReachedEvenByThisOvergenerousClosedFiveHourModel": true
+  },
+  "relatedHistoricalRiskSummary": {
+    "path": "C:/mir2-build/p01-completion-20261024/halo-natural-progression-risk-summary-v2.json",
+    "bytes": 14916,
+    "sha256": "a60506cfbee21423c91f2469594f2daacc87aa01ab500a2f24737cce73ccfae5"
+  },
+  "conclusions": [
+    "FixedDamage10 is a sensitivity case, not actual fresh-player damage. Starter-only Warrior levels1/5/10/15 have DC2-4/3-5/4-6/5-7 against targetAC0.",
+    "Expected conditional supply is not a lower bound, runtime simulation, actual target census or per-fighter allocation proof. Shared IDs cannot be credited independently to ten fighters.",
+    "The new pool must not inherit the historical126slot XP number. This artifact recalculates124deduplicated stable slots and both2h/5h conditional XP bounds.",
+    "Failure of a fixed-D10 hypothetical rate does not establish that a fresh two-hour run fails. Conversely an expected aggregate rate over120/min does not prove every fighter and every60s window meets18attempts/12positivehits.",
+    "Real ordinary loot is not credited in this model. Existing held potion is finite; driver does not pick up, buy or equip dropped upgrades. Any real equipment/buff/XP source change invalidates simple starter-only bands.",
+    "Fresh early-density/actuallevel/damage/targetID/respawn/witness/scout data and unchanged full acceptance gates remain necessary. P0pending; no P2 authorization."
+  ],
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/stats.rs",
+      "bytes": 31065,
+      "sha256": "4e075d9af585560c0db0fadb29a75610e217858bcbc766e6e2ef4f1d04335ece"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/leveling.rs",
+      "bytes": 15932,
+      "sha256": "a2c16667440e9e53a1145d663243fb2d97ca54ce5a42c1532b02618653cd9e0c"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/experience.rs",
+      "bytes": 27325,
+      "sha256": "4f0fc16a9fcff965e4666b32110dee679e37ab8cd4433a34ffb8f28152948505"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 75946,
+      "sha256": "fe7767bec9d255e9fbf6e727bc7ab9a380f29166417f3c2a50085e0083ace190"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/config.rs",
+      "bytes": 342825,
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "bytes": 47571,
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "bytes": 190859,
+      "sha256": "69a73ae6d83b7a232ff635e0cc4cb128d7cc78b0f51db6e258eaf77208591fca"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-nearest-final-v3.mjs",
+      "bytes": 8407,
+      "sha256": "ace668519d08c3ed6323a2ebeb01fa47cdb0919db283c25d79dd924611d46cf1"
+    }
+  ],
+  "capacityAccepted": false,
+  "accepted": false
+}

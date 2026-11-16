@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "npc-regression",
+  "startedUtc": "2026-10-08T16:38:56.4426786Z",
+  "finishedUtc": "2026-10-08T16:39:32.2402544Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::npc_purchase_transaction::tests::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "8f97fb24de85e2ac933c0fc9495ad5690ba710259a22248f6f169ee306225542",
+  "declaredInputs": 460,
+  "sourceDrift": [],
+  "cargoLogSha256": "369359b0c1253cb24f65c344080cfdb08c2cd79ea059f1bef5084d991a52e111",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

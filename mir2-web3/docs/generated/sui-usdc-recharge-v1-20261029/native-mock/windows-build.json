@@ -1,0 +1,17 @@
+{
+  "evidenceKind": "native-test-build-not-release-package",
+  "createdAtUtc": "2026-10-28T18:58:59.2940022Z",
+  "buildExitCode": 0,
+  "executablePath": "C:/mir2-build/sui-usdc-recharge-20261029/native-client/bin-v2/mir2-platform-windows.exe",
+  "executableSha256": "4c8ab7bb76c842eaa3fd2166efe3316baa0887d3b085b362d30e65a3a25bab4b",
+  "executableBytes": 132312064,
+  "rustToolchain": "1.95.0",
+  "billingLogicPassed": 14,
+  "gpuTestsPassed": 1,
+  "gpuScreenshots": 10,
+  "gpuEvidenceKind": "offline-native-production-renderer",
+  "priorHostBillingTestsPassed": 7,
+  "hostTestSourceNote": "v1 host bridge, URL and correlation tests passed; host source unchanged by final v2 native UI reopen change, final production executable built against v2 client source",
+  "noLiveWalletSigning": true,
+  "noChainTransactions": true
+}

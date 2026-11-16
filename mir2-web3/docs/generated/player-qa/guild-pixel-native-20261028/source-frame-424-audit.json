@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "readOnlyCanonicalSourceAudit": true,
+  "createdAt": "2026-10-28T11:32:18.701Z",
+  "source": {
+    "file": "E:/mir2/Crystal/Build/Client/Debug/Data/Prguse2.Lib",
+    "bytes": 3557648,
+    "sha256": "510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861"
+  },
+  "exportedManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\manifest.generated.json",
+    "bytes": 45316197,
+    "sha256": "cea2c3044f370c442ab15bac3488da2c1f0c111551ef1a3f050bd7c7a2a1ed6f",
+    "declaredLibrary": {
+      "path": "Prguse2.Lib",
+      "sha256": "510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861",
+      "bytes": 3557648
+    },
+    "frame424Present": false
+  },
+  "parser": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\crystal-library.mjs",
+    "bytes": 11061,
+    "sha256": "68f2893b237a652c3c7a685c486c8451f79b32bc3e2f1c4ff1e51fc7d8316a4b"
+  },
+  "version": 3,
+  "count": 1602,
+  "headerBytes": 12,
+  "frames": [
+    {
+      "index": 423,
+      "tableByteOffset": 1704,
+      "recordOffset": 1017100,
+      "rawHeader17Hex": "0401160000000000000000000039020000",
+      "width": 260,
+      "height": 22,
+      "x": 0,
+      "y": 0,
+      "compressedLength": 569,
+      "parserFrame": {
+        "index": 423,
+        "width": 260,
+        "height": 22,
+        "x": 0,
+        "y": 0,
+        "shadowX": 0,
+        "shadowY": 0,
+        "shadow": 0,
+        "dataOffset": 1017117,
+        "dataLength": 569,
+        "maskRgba": false
+      }
+    },
+    {
+      "index": 424,
+      "tableByteOffset": 1708,
+      "recordOffset": 1017686,
+      "rawHeader17Hex": "04011600000000000000000000d0030000",
+      "width": 260,
+      "height": 22,
+      "x": 0,
+      "y": 0,
+      "compressedLength": 976,
+      "parserFrame": {
+        "index": 424,
+        "width": 260,
+        "height": 22,
+        "x": 0,
+        "y": 0,
+        "shadowX": 0,
+        "shadowY": 0,
+        "shadow": 0,
+        "dataOffset": 1017703,
+        "dataLength": 976,
+        "maskRgba": false
+      }
+    },
+    {
+      "index": 425,
+      "tableByteOffset": 1712,
+      "recordOffset": 1018679,
+      "rawHeader17Hex": "240021000000000000000000005a000000",
+      "width": 36,
+      "height": 33,
+      "x": 0,
+      "y": 0,
+      "compressedLength": 90,
+      "parserFrame": {
+        "index": 425,
+        "width": 36,
+        "height": 33,
+        "x": 0,
+        "y": 0,
+        "shadowX": 0,
+        "shadowY": 0,
+        "shadow": 0,
+        "dataOffset": 1018696,
+        "dataLength": 90,
+        "maskRgba": false
+      }
+    }
+  ],
+  "sourceMatchesCanonicalExport": true,
+  "zeroSizeFrame424Confirmed": false,
+  "renderContract": {
+    "sourceFile": "E:/mir2-player-journey/Crystal/Client/MirGraphics/MLibrary.cs",
+    "checkImageLines": [
+      557,
+      578
+    ],
+    "drawLines": [
+      675,
+      679
+    ],
+    "rule": "CheckImage rejects Width==0 or Height==0; Draw returns immediately. No substitute image is warranted."
+  },
+  "notPerformed": {
+    "gameplay": true,
+    "service": true,
+    "sourceMutation": true,
+    "pngFabrication": true
+  }
+}

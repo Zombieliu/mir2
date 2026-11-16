@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "source": "Source66",
+  "status": "blocked-normal-storage-mode",
+  "uiOrigin": "http://127.0.0.1:19205/",
+  "visible": {
+    "map": "Warehouse",
+    "position": {
+      "x": 2,
+      "y": 10
+    },
+    "gold": 180,
+    "bagItems": 5,
+    "storageItems": 0,
+    "prompt": "Choose a warehouse item, then click an inventory slot.",
+    "storeModeRetained": false,
+    "overlappingBagAndWarehouse": true
+  },
+  "observedActions": [
+    "ordinary Store Item click",
+    "ordinary visible Candle selection",
+    "ordinary Store Item click after selection"
+  ],
+  "readonlyDomHit": {
+    "button": {
+      "label": "Store Item",
+      "disabled": false,
+      "class": "storage-action-button store ",
+      "rect": {
+        "x": 775,
+        "y": 264,
+        "width": 52,
+        "height": 23
+      }
+    },
+    "centerHit": {
+      "tag": "DIV",
+      "class": "storage-grid "
+    }
+  },
+  "diagnosis": {
+    "directlyObserved": "The full-window transparent storage-grid receives the Store button center pointer hit.",
+    "sourceRiskOnly": "Shared Storage ownership may change while compatibility interaction is in progress; exact live branch has not been proved."
+  },
+  "noStorageDestinationClicked": true,
+  "storageDepositPassed": false,
+  "storageWithdrawPassed": false,
+  "saveReloginPassed": false,
+  "absenceClaims": false,
+  "screenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-storage-mode-blocked01.png",
+    "bytes": 114885,
+    "sha256": "4069270fa538e81193a01c1fcc394d330a90d3a4ec86ce2afefc1b45a0682de2"
+  },
+  "candidate100": false,
+  "overallPercentage": null
+}

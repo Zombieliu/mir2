@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-28T13:28:12.6508449Z",
+  "scope": "Read-only Windows services, PATH commands, standard PostgreSQL installation directories; no Docker command, environment URL read or connection attempt",
+  "services": [],
+  "tools": [
+    {
+      "Name": "node.exe",
+      "Source": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "Name": "npm.ps1",
+      "Source": "C:\\Program Files\\nodejs\\npm.ps1"
+    }
+  ],
+  "postgresProgramFilesExists": false,
+  "postgresProgramFilesX86Exists": false
+}

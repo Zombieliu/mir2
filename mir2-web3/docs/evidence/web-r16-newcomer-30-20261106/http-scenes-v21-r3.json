@@ -1,0 +1,135 @@
+{
+  "schema": "mir2.r16.newcomer-public-media.v1",
+  "passed": true,
+  "release": "v21-r3",
+  "assetPin": "05cd8adb07bedbf15bf95f26c08dd7232a987d80ce7b1543d92d52b1dc159490",
+  "previousUnique404Paths": 9,
+  "assetBodiesChecked": 248,
+  "failed": [],
+  "scenes": [
+    {
+      "map": "1",
+      "miniMapIndex": 102,
+      "miniMapMatchedOriginalPng": true,
+      "tiles": [
+        {
+          "x": 150,
+          "y": 190,
+          "status": 200,
+          "missing": 0,
+          "sprites": 217,
+          "miniMapIndex": 102
+        },
+        {
+          "x": 330,
+          "y": 320,
+          "status": 200,
+          "missing": 0,
+          "sprites": 131,
+          "miniMapIndex": 102
+        },
+        {
+          "x": 480,
+          "y": 520,
+          "status": 200,
+          "missing": 0,
+          "sprites": 197,
+          "miniMapIndex": 102
+        }
+      ]
+    },
+    {
+      "map": "D401",
+      "miniMapIndex": 8,
+      "miniMapMatchedOriginalPng": true,
+      "tiles": [
+        {
+          "x": 53,
+          "y": 161,
+          "status": 200,
+          "missing": 0,
+          "sprites": 490,
+          "miniMapIndex": 8
+        },
+        {
+          "x": 100,
+          "y": 100,
+          "status": 200,
+          "missing": 0,
+          "sprites": 352,
+          "miniMapIndex": 8
+        },
+        {
+          "x": 150,
+          "y": 50,
+          "status": 200,
+          "missing": 0,
+          "sprites": 411,
+          "miniMapIndex": 8
+        }
+      ]
+    },
+    {
+      "map": "D021",
+      "miniMapIndex": 44,
+      "miniMapMatchedOriginalPng": true,
+      "tiles": [
+        {
+          "x": 47,
+          "y": 46,
+          "status": 200,
+          "missing": 0,
+          "sprites": 320,
+          "miniMapIndex": 44
+        },
+        {
+          "x": 20,
+          "y": 60,
+          "status": 200,
+          "missing": 0,
+          "sprites": 217,
+          "miniMapIndex": 44
+        },
+        {
+          "x": 69,
+          "y": 74,
+          "status": 200,
+          "missing": 0,
+          "sprites": 147,
+          "miniMapIndex": 44
+        }
+      ]
+    },
+    {
+      "map": "D022",
+      "miniMapIndex": 6,
+      "miniMapMatchedOriginalPng": true,
+      "tiles": [
+        {
+          "x": 372,
+          "y": 345,
+          "status": 200,
+          "missing": 0,
+          "sprites": 148,
+          "miniMapIndex": 6
+        },
+        {
+          "x": 254,
+          "y": 220,
+          "status": 200,
+          "missing": 0,
+          "sprites": 193,
+          "miniMapIndex": 6
+        },
+        {
+          "x": 420,
+          "y": 384,
+          "status": 200,
+          "missing": 0,
+          "sprites": 6,
+          "miniMapIndex": 6
+        }
+      ]
+    }
+  ]
+}

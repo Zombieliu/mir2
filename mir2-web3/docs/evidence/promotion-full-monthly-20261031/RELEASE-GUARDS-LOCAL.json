@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.full-monthly.release-helper-local-tests.v1",
+  "observedAtUtc": "2026-10-30T22:03:38.716448+00:00",
+  "testsExecuted": 17,
+  "passed": 17,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "actualFunctionFixtures": true,
+  "externalIoMocked": true,
+  "remoteActions": false,
+  "docker": false,
+  "sourceSha256": "0f82ba1af6776be297f912b48bd53009b6f0f06987bf32da7979d8897e2dd2b8",
+  "testSourceSha256": "374fddc307a62518c9bb990726966996e28968e90d763bf17fd838f19e3d6b26"
+}

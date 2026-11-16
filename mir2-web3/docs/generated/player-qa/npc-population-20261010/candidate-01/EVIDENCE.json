@@ -1,0 +1,325 @@
+{
+  "createdUtc": "2026-10-09T19:54:34.770764+00:00",
+  "baseSource": "ecd81f6a1528e0a1a85bfd920356f607bc37a2a9",
+  "foundationImplemented": true,
+  "localTestsPassed": true,
+  "uniqueTestsPassed": 32,
+  "rawFinalExecutions": 40,
+  "finalTests": {
+    "09-final-source-selection-and-census": {
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "selectedPaths": 16,
+      "beforeAfterStableAndCurrent": true
+    },
+    "10-final-adjacent-manager": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "selectedPaths": 16,
+      "beforeAfterStableAndCurrent": true
+    },
+    "11-final-owner-epoch-exhaustion": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "selectedPaths": 16,
+      "beforeAfterStableAndCurrent": true
+    }
+  },
+  "initialFixtureFailure": {
+    "passed": 22,
+    "failed": 1,
+    "cause": "AOI test used generic-object visibility helper instead of ordinary ObjectPlayer outbounds",
+    "retained": true
+  },
+  "zeroSelection": {
+    "stem": "07-final-adjacent-manager",
+    "passed": 0,
+    "excluded": true,
+    "cause": "Manager adjacent tests are in parallel_tick_tests, not a tests module",
+    "correctedFilter": "zone::manager::"
+  },
+  "initialArchivePreparationFailuresRetained": true,
+  "sourceFileNames": {
+    "count": 464,
+    "allAscii": true,
+    "emptyNames": 1,
+    "metadataIsNotLoadedMapAuthority": true
+  },
+  "publicGateway": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "publicClient": "R23/sourcefaef/signedfeed18",
+  "gatewaySourceConsumerImplemented": false,
+  "successfulSourceMapProducerImplemented": false,
+  "newSourcePushed": false,
+  "exactLinuxPassed": false,
+  "gatewayPublished": false,
+  "humanAccepted": false,
+  "limits": [
+    "selected hashes, not whole Cargo/toolchain input closure",
+    "pure synthetic loaded records do not prove successful Source loading or ownership",
+    "count includes dead and out-of-AOI Player Nodes until actual Leave, not pets/Hero",
+    "actor predicate is not freshness; retained A-to-B-to-A can match an old binding",
+    "per-map unavailable/zero is not a full global Book census or Source map-load proof",
+    "ordinary NPC CHECKHUM still uses its prior fixed-one adapter; no production parity claim",
+    "full lease, sequence, presence epoch, actual NPC/page body, DefaultNPC phases and deterministic replay remain open",
+    "same-Source-CAS reservation/world outbox/application/recovery remains open"
+  ],
+  "archive": {
+    "file": "original-evidence.zip",
+    "entries": 61,
+    "bytes": 306663,
+    "sha256": "9f53410692bb0aa24a73bc73c0406d50295704b46876229a4d612932753456f4",
+    "everyEntryByteVerified": true
+  },
+  "entries": {
+    "local/01-source-selection-and-owner-nodes-after.json": {
+      "bytes": 4105,
+      "sha256": "558385eff598ab11791e8bf116bf03c81dd08adfc3f1952be67c039c9bf3caf6"
+    },
+    "local/01-source-selection-and-owner-nodes-before.json": {
+      "bytes": 4106,
+      "sha256": "4f6e913a46212f4d307197b9201324a4f29fc825c071347b2054b31063d716e3"
+    },
+    "local/01-source-selection-and-owner-nodes-result.json": {
+      "bytes": 227,
+      "sha256": "9826ce3e4100e6f531c784c409d72a0f5744e110c2e5975279d982657f6e9f9d"
+    },
+    "local/01-source-selection-and-owner-nodes.log": {
+      "bytes": 44797,
+      "sha256": "c2822fe840525db4a6f1f1f16e1823c901429c3a3eba6344bb99b4ac9465c76c"
+    },
+    "local/02-source-selection-and-owner-nodes-after.json": {
+      "bytes": 4105,
+      "sha256": "cd9e065ce9ec19560be94debc5967df2bad5a6b914003ef2ace22bdce04f4018"
+    },
+    "local/02-source-selection-and-owner-nodes-before.json": {
+      "bytes": 4106,
+      "sha256": "c629e7b6bf58ad8e0863fb88b5ba96cd25504003b9bec3f8eb16201eae68ed23"
+    },
+    "local/02-source-selection-and-owner-nodes-result.json": {
+      "bytes": 225,
+      "sha256": "26c1a19aa52721d384860d8e8264e9e5560628ee3d2d01123427ac9361908f2e"
+    },
+    "local/02-source-selection-and-owner-nodes.log": {
+      "bytes": 44102,
+      "sha256": "d100c9684de8e50c2a4458a26ce0d53a90975dc08b319bad35c1a187ba77e4cf"
+    },
+    "local/03-node-cold-transfer-and-source-selection-after.json": {
+      "bytes": 4105,
+      "sha256": "2fdd2d84904f762f64ef4a2df8d6cc5f7e3f05952b2e92b9a7d5ffcf2ba889e7"
+    },
+    "local/03-node-cold-transfer-and-source-selection-before.json": {
+      "bytes": 4106,
+      "sha256": "1834e43a6c892f86ba98ba033fa9b75d7f8b14ebf02b3d666993e40d34b38c96"
+    },
+    "local/03-node-cold-transfer-and-source-selection-result.json": {
+      "bytes": 232,
+      "sha256": "835d5de68875d8f72bd578cb3d06da94195dc507ef4e2f97fc9cbd4f30ef45d3"
+    },
+    "local/03-node-cold-transfer-and-source-selection.log": {
+      "bytes": 44499,
+      "sha256": "ec6e8cc280f900b462c4131130dc23a773baa05d2808e1f68f9d2fedaeac4f43"
+    },
+    "local/04-adjacent-manager-after.json": {
+      "bytes": 4113,
+      "sha256": "964a5ced41b71517a5d69eed0fb419deebd8ad18eaa435f83fedfc60f00e5173"
+    },
+    "local/04-adjacent-manager-before.json": {
+      "bytes": 4114,
+      "sha256": "c015f512e54b2295260a4303c8ec114132ff0dcd202ce5f1d62cb0a5e66ee8ad"
+    },
+    "local/04-adjacent-manager-result.json": {
+      "bytes": 209,
+      "sha256": "cf45458081eaf09927a65d73982c2e60970cc79b29f6836a947c66596c38d45b"
+    },
+    "local/04-adjacent-manager.log": {
+      "bytes": 42544,
+      "sha256": "4fd4925c285118407413c86c08be1d52285f4cce8a148ba2e34a48f99d88b63e"
+    },
+    "local/05-bidirectional-census-and-retained-map-after.json": {
+      "bytes": 4071,
+      "sha256": "4edf5c43975cd2a9c6a465e21fc4588bb9c1cc25513db7baed9b617c77a69c33"
+    },
+    "local/05-bidirectional-census-and-retained-map-before.json": {
+      "bytes": 4072,
+      "sha256": "c1e7c4f465765403945ab87e7dc70e310b2a4201f787e75110d81201834f4597"
+    },
+    "local/05-bidirectional-census-and-retained-map-result.json": {
+      "bytes": 230,
+      "sha256": "3f6b98b3606a99db0a7bed1a5a81098a92f4937fec3df07bffc94d8520e9b19c"
+    },
+    "local/05-bidirectional-census-and-retained-map.log": {
+      "bytes": 44737,
+      "sha256": "e937e5085f1bcfd2e41daf900ef899e5627a1933f27794e222393cce5062451b"
+    },
+    "local/06-final-source-selection-and-census-after.json": {
+      "bytes": 4107,
+      "sha256": "7864abfaedce24ff32ab8c9d1b3ae5510e266e65e757c669b4719c04d48fa5c3"
+    },
+    "local/06-final-source-selection-and-census-before.json": {
+      "bytes": 4108,
+      "sha256": "abcd95bb2a78cc42459b334b7609d83c2620d03a676071dcfacb906a4627303b"
+    },
+    "local/06-final-source-selection-and-census-result.json": {
+      "bytes": 226,
+      "sha256": "a2aa450405f0ac273602d86c884f9c8e725e39b7edcf1a45b22795e78ab5c5cb"
+    },
+    "local/06-final-source-selection-and-census.log": {
+      "bytes": 44614,
+      "sha256": "ad00ed1796c4a314800f7a07f2cb365405dcb3e872de0dd5f84af788edce9c8d"
+    },
+    "local/07-final-adjacent-manager-after.json": {
+      "bytes": 4111,
+      "sha256": "54a787c20824b81f64dfd6dff7009b33cf4c96d15ddebe9233869df446414a5f"
+    },
+    "local/07-final-adjacent-manager-before.json": {
+      "bytes": 4112,
+      "sha256": "9979b19f681a7438b46c1a0b9497adfaa7dbe91805457e2aed8bc257ce731ffc"
+    },
+    "local/07-final-adjacent-manager-result.json": {
+      "bytes": 215,
+      "sha256": "ee7a7bcbd8e9be8ec3c1db89dc74403077cf699f832dc93d9ee48ec91a2c4e95"
+    },
+    "local/07-final-adjacent-manager.log": {
+      "bytes": 41437,
+      "sha256": "b902fc5baccb2c4f5895dd42d97a571a6f938769a046049e9ec786704395f746"
+    },
+    "local/08-final-owner-epoch-exhaustion-after.json": {
+      "bytes": 4114,
+      "sha256": "0d4d64230ec9d825acc90f92b98f31511a11c9b843654c6d0a107da65ef4d61e"
+    },
+    "local/08-final-owner-epoch-exhaustion-before.json": {
+      "bytes": 4115,
+      "sha256": "95dce421cfc9272d717d8b452d9418a71e27509fda1c2b5fe8b9b063d30654c8"
+    },
+    "local/08-final-owner-epoch-exhaustion-result.json": {
+      "bytes": 221,
+      "sha256": "5027808f3daafdee1ce7b0a314a16bf7b47e7496448f086ca63d4e5b73d55086"
+    },
+    "local/08-final-owner-epoch-exhaustion.log": {
+      "bytes": 41543,
+      "sha256": "869aaad8bf749ba99db317898527f41889dd06980b7e2b07e173f12b48eba4c2"
+    },
+    "local/09-final-source-selection-and-census-after.json": {
+      "bytes": 4107,
+      "sha256": "c387f826a9d35ca293918c720b86b3a9b109a8098bb4099e4c6e59d4fbe9a7c4"
+    },
+    "local/09-final-source-selection-and-census-before.json": {
+      "bytes": 4108,
+      "sha256": "c2a44910facd487e9ec0b7e956faa32d450f74d949fdf1e4df904a823ad2e4ad"
+    },
+    "local/09-final-source-selection-and-census-result.json": {
+      "bytes": 226,
+      "sha256": "90b2413692a425ca186ef4e0b5f1335a537180e02cbb388d7fdbe7bc4493dcc0"
+    },
+    "local/09-final-source-selection-and-census.log": {
+      "bytes": 44614,
+      "sha256": "e6c60d1ef445ab8007b13ade5745137c5774778d8172eb0f52be39adbbb74141"
+    },
+    "local/10-final-adjacent-manager-after.json": {
+      "bytes": 4106,
+      "sha256": "2d296323e2bab2d1c5aef5700a98cc6fd5c39085e081e5ca7d53e2a279dc7c98"
+    },
+    "local/10-final-adjacent-manager-before.json": {
+      "bytes": 4107,
+      "sha256": "e6a7721a1a5b35e7bf15a4985cee6e53c8dc2d491e5d6dd3578f1654973287cf"
+    },
+    "local/10-final-adjacent-manager-result.json": {
+      "bytes": 215,
+      "sha256": "c4df4e13617bbf5cdb0e9e80d18938fd3ffb8dfc4cafe2e3cb1e6040c341ea74"
+    },
+    "local/10-final-adjacent-manager.log": {
+      "bytes": 42784,
+      "sha256": "6bf96bf6c5839b18801a463ecb07142c3e99e5384ca474e63278f543d52117ad"
+    },
+    "local/11-final-owner-epoch-exhaustion-after.json": {
+      "bytes": 4114,
+      "sha256": "64da0d02ad391735d890c6446e4b9c07654fca66815fa7812a8e9ae990a9c5f3"
+    },
+    "local/11-final-owner-epoch-exhaustion-before.json": {
+      "bytes": 4115,
+      "sha256": "496ed28e7664b45fc9ada0fdb1b827eb3812b00c8e99e86b90ab795698c2a357"
+    },
+    "local/11-final-owner-epoch-exhaustion-result.json": {
+      "bytes": 221,
+      "sha256": "d87927344c8c19a30beeb1580a8289eb061e27d162506d42cf13109958fe7dcd"
+    },
+    "local/11-final-owner-epoch-exhaustion.log": {
+      "bytes": 41543,
+      "sha256": "27b50b29065d032e391f630073a91ad42dcfc009e4751a4a7567a592cff5a74b"
+    },
+    "initial-archive-preparation/Archive-NpcBuffQualifiedLinux.py": {
+      "bytes": 6113,
+      "sha256": "e8271ac8a1603d03bcd6b91cae60554f9d02372187a5922001702aabf0b8f23a"
+    },
+    "initial-archive-preparation/Archive-NpcPopulationFoundation.py": {
+      "bytes": 6279,
+      "sha256": "99763cc4e6848d3bd33d4ea34c725e5f285f7439b593756dfd5fbfe6a597f457"
+    },
+    "initial-archive-preparation/FAILURES.json": {
+      "bytes": 804,
+      "sha256": "8ac1d88d6a613c668cff64fca8038f33df1fe9bfaa4d319e303a13938224cdae"
+    },
+    "final-source/.github/workflows/gateway-release.yml": {
+      "bytes": 9674,
+      "sha256": "f5568eee1120a0b8bb1c0307b377b2ad7d8fddd37f7a57ab50f6fb64935425b1"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/mod.rs": {
+      "bytes": 7194,
+      "sha256": "6313d250802d4b7a593a3c4937f91c9d3702a5b694e3cde73340e4e5d4e9924c"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/npc_population.rs": {
+      "bytes": 21128,
+      "sha256": "3489101bd6ce7b72d6b3f39a541be83f16c6eb5b502f36631ee0f305c4149fe4"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/zone/mod.rs": {
+      "bytes": 1862,
+      "sha256": "792cd7699b8f200b5059e91c59ea715de0a4dc6efa0fc9db66530abfc7808a2a"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/zone/manager.rs": {
+      "bytes": 45563,
+      "sha256": "1b4da0565827c3a05086ff02a80d834b15fa1bb67f1863ee40c5fde81e5cb57f"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/zone/npc_population.rs": {
+      "bytes": 14756,
+      "sha256": "1ef40985e23f0a182dae4df9108c10c953a835337bd7ca1ce8e54b58e476d413"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs": {
+      "bytes": 698982,
+      "sha256": "f78c7d728e15a8fa48546bb55f47e031da7db366d1471c03b21a2ba503cc67de"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/zone/online_identity.rs": {
+      "bytes": 6239,
+      "sha256": "d32b31b0cb3b69ef13c731ebd31a1ff184477bc9f3ddd0cb9a999bf681f5f7bd"
+    },
+    "runners/Run-NpcPopulationRoot.ps1": {
+      "bytes": 2316,
+      "sha256": "8d5d8dbea8f128ceb6023b116f9a4436a78e8f0ccd44884f6b68fa8dd785da6d"
+    },
+    "runners/Archive-NpcPopulationFoundation.py": {
+      "bytes": 6479,
+      "sha256": "912c16560bc419963315265664d3b581eace8bb317674beef2386f83e2b3389c"
+    },
+    "original-crystal/Server/MirObjects/NPC/NPCSegment.cs": {
+      "bytes": 217291,
+      "sha256": "3b0f136a196e6466d4fc1bf1e3c2c49b71730ab432b1bbefd650a41c96a0404a"
+    },
+    "original-crystal/Server/MirEnvir/Envir.cs": {
+      "bytes": 214372,
+      "sha256": "13595bbff0963d8f5ddcbaa10947def81d60b41fb77b1a734238772097bf203f"
+    },
+    "original-crystal/Server/MirDatabase/MapInfo.cs": {
+      "bytes": 12692,
+      "sha256": "b90a302b2f860ffbe6da1cf809c56f783acf16f230ee0aa0a6d4f82d196ba488"
+    },
+    "original-crystal/Server/MirEnvir/Map.cs": {
+      "bytes": 104536,
+      "sha256": "4df569012db86428b82b3c4994a1b0e982b1da7b5ed0b58dcf1930020ed4d5d1"
+    }
+  }
+}

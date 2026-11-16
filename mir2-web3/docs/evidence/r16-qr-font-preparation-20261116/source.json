@@ -1,0 +1,34 @@
+{
+  "parent": "1f08bfe4be38cb25ef8f3656048863a187cef8da",
+  "candidate": "r16-qr-font-8515912b",
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "24f0d3401eaae95aea6c708f18a403d789d5766d5e0ebb88121d783ed72f227f"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/dubhe-wallet-qr-login.tsx",
+      "sha256": "d9445566ea488f4d7634a23bc273fe9f79c12187a114d8a07e622effd3b929ab"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/wallet-qr-font-preparation.ts",
+      "sha256": "e8779d46dd854fa842ef7a0aee474dcda95d708fae61ae8f64b33197dddaacc8"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-wallet-qr-font-preparation.mjs",
+      "sha256": "029232354ff9999e0b4f83619e52b8653ed9ee842b08d3dd920c109302611667"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/smoke-wallet-qr-font-preparation.mjs",
+      "sha256": "d8ff910405611a1ab5cdf513d7df0e6189f7def9cb1aad4cd526c45fb8e64087"
+    },
+    {
+      "path": "mir2-web3/apps/web/package.json",
+      "sha256": "6d11d2a60e9bda9c2fcef10677e66d97b7de4c053c46c7a0458113d77da53afb"
+    }
+  ],
+  "applicationBuildInputsUnchangedAfterBuild": true,
+  "onlyPackageScriptsRegisteredAfterBuild": true,
+  "runtimeWasmAndSixOriginalFontPinsUnchanged": true,
+  "unrelatedWipExcluded": true
+}

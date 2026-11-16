@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "passed": true,
+  "startedAt": "2026-11-08T22:34:12.078Z",
+  "oldVersion": "bevy-a46905128c316656",
+  "newVersion": "bevy-0cd68510886134e0",
+  "installFileCount": 20,
+  "oldFlatBackup": "D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\installation-preservation\\flat-before",
+  "oldImmutableRetained": true,
+  "manifestPublishedLast": true,
+  "canonicalMatchesCandidate20": true,
+  "immutableSixPinsVerified": true,
+  "oldImmutableSevenPinsUnchanged": true,
+  "oldFlat12PreservedExternally": true,
+  "publication": [
+    {
+      "path": "lib/generated/bevy_runtime_version.json",
+      "bytes": 1711,
+      "sha256": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "bytes": 31429183,
+      "sha256": "6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.d.ts",
+      "bytes": 22978,
+      "sha256": "e677bcaac8cde36eba781d8ad6f15681e53e9c151bfc54237722cb845517ea56"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm.d.ts",
+      "bytes": 11284,
+      "sha256": "7299678f97a961b4fa22921c2c5b37c038c4d60f0103c51f7fcc6c12ea60d2c5"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "bytes": 117805,
+      "sha256": "6e105aa2fce2f29ff2c645766f4fc91fd992bcf42fe1199d2be025214b225f9b"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "bytes": 16601428,
+      "sha256": "5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.d.ts",
+      "bytes": 12955,
+      "sha256": "0ee591eeeb297f5d888898c2cf114fafc4fcd09cee63d9a2b723419565638622"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm.d.ts",
+      "bytes": 6138,
+      "sha256": "438f1a67a18fb7fef09090ec2378f31aea84e4f4e6d8df526a33b3df65ff7088"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "bytes": 139721,
+      "sha256": "916012e00e0a01130c2f1598cebfb0f7c8f233b7bd6986772b9c87bc620f47d1"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "bytes": 32357557,
+      "sha256": "9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.d.ts",
+      "bytes": 22742,
+      "sha256": "69c8fd072b952c3ec9f556e0be00b96b2d6ba375f58a8cfb58c4016c8d0db9c4"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm.d.ts",
+      "bytes": 11048,
+      "sha256": "30739a43a7c063481a3b99246f81851ffe31414c623d0103c95f6bd884c4e0c8"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "bytes": 31429183,
+      "sha256": "6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/pkg-webgl2/mir2_bevy_runtime.js",
+      "bytes": 117805,
+      "sha256": "6e105aa2fce2f29ff2c645766f4fc91fd992bcf42fe1199d2be025214b225f9b"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "bytes": 16601428,
+      "sha256": "5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "bytes": 139721,
+      "sha256": "916012e00e0a01130c2f1598cebfb0f7c8f233b7bd6986772b9c87bc620f47d1"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "bytes": 32357557,
+      "sha256": "9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0"
+    },
+    {
+      "path": "public/bevy-runtime-releases/bevy-0cd68510886134e0/runtime-manifest.json",
+      "bytes": 1711,
+      "sha256": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+    }
+  ],
+  "finishedAt": "2026-11-08T22:34:12.591Z"
+}

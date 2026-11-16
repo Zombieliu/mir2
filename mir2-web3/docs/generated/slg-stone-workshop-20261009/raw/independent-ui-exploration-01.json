@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent_stonecutting_ui_exploration",
+  "generatedDate": "2026-10-09",
+  "agent": "/root/stone_ui_explore",
+  "scope": {
+    "primaryProject": "mir2-web3",
+    "rootResolution": "Primary project resolved relative to the repository root. Source paths below are project-relative.",
+    "request": "Three-grade sealed raw-stone appraisal and cutting, fixed private generation outcomes, durable operations, physical stock or clear Materials tab, sidebar management, no movement blocker or inherited run/attack.",
+    "mode": "Read-only source exploration; only this report was written.",
+    "sourceEdits": false,
+    "cargoExecuted": false,
+    "testsExecuted": false,
+    "uiExecuted": false,
+    "screenshotCaptured": false,
+    "otherCodexThreadsMessaged": false
+  },
+  "instructionsRead": [
+    "AGENTS.md",
+    "mir2-web3/docs/AGENT-ORCHESTRATION.md:861-959",
+    "mir2-web3/docs/AGENT-TASK-QUEUE.md:3-37,133-146",
+    "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md:3-37,133-135",
+    "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md:3-45",
+    "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md:3-45"
+  ],
+  "constraints": [
+    {
+      "instruction": "Read-only explorer, bounded writer ownership, source-supported verification",
+      "refs": [
+        "docs/AGENT-ORCHESTRATION.md:912",
+        "docs/AGENT-ORCHESTRATION.md:926"
+      ]
+    },
+    {
+      "instruction": "Source50 web package is historical compiled evidence; preserve Source50 files and unrelated web work. Building does not establish live playability.",
+      "refs": [
+        "docs/AGENT-ORCHESTRATION.md:3",
+        "docs/AGENT-ORCHESTRATION.md:11"
+      ]
+    },
+    {
+      "instruction": "Current SLG recipes and normal routes remain disabled while remaining UID issuers, whole-history inventory, Postgres and unknown-commit coordination are open.",
+      "refs": [
+        "docs/AGENT-TASK-QUEUE.md:135",
+        "docs/AGENT-TASK-QUEUE.md:141",
+        "docs/AGENT-TASK-QUEUE.md:142",
+        "docs/CRYSTAL-SERVER-PARITY.md:35"
+      ]
+    },
+    {
+      "instruction": "Legacy first Zone MVP guidance does not justify moving personal stone inventory transactions into the shared movement authority.",
+      "refs": [
+        "AGENTS.md:55",
+        "apps/simulation/src/world_runtime.rs:46"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "shared_source",
+      "conclusion": "client-bevy is the shared presentational layer. It must only present authoritative state and emit intents. native_shell_ui controls login/character lifecycle; the in-game Windows hook is crystal_ui/overlays and an independent plugin.",
+      "refs": [
+        "apps/game-client/client-bevy/src/lib.rs:1",
+        "apps/game-client/client-bevy/src/lib.rs:10",
+        "apps/game-client/client-bevy/src/lib.rs:37",
+        "apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3875",
+        "apps/game-client/client-bevy/src/native_shell_ui.rs:262"
+      ]
+    },
+    {
+      "id": "real_inventory",
+      "conclusion": "Normal carried items already have server instance UID, template key, quantity, physical slot/container and raw tooltip source. Inventory capacity includes six Belt cells and up to two forty-cell Bag pages. A Materials tab can filter these real items and display their existing slot; it must not be a second stock counter.",
+      "refs": [
+        "apps/game-client/client-bevy/src/inventory.rs:215",
+        "apps/game-client/client-bevy/src/inventory.rs:223",
+        "apps/game-client/client-bevy/src/inventory.rs:232",
+        "apps/game-client/client-bevy/src/inventory.rs:289",
+        "apps/game-client/client-bevy/src/inventory.rs:373",
+        "apps/game-client/client-bevy/src/bag_ui.rs:44",
+        "apps/game-client/client-bevy/src/bag_ui.rs:53",
+        "apps/game-client/platform-windows/src/gateway.rs:7592"
+      ]
+    },
+    {
+      "id": "sealed_field_collision",
+      "conclusion": "Existing Crystal sealedInfo represents two seal dates, not resource-hidden outcomes. ItemInfo.grade is ordinary Crystal template grade. Define a dedicated public raw-stone grade/state projection and private outcome record; do not overload these fields or infer stone grade from display name.",
+      "refs": [
+        "apps/game-client/client-bevy/src/inventory.rs:27",
+        "apps/game-client/client-bevy/src/inventory.rs:127",
+        "apps/game-client/client-bevy/src/inventory.rs:178"
+      ]
+    },
+    {
+      "id": "native_menu",
+      "conclusion": "Native Menu is Crystal's 36x282 strip with fixed icon slots. Add a clearly named stone/production management extension or dedicated sidebar entry with its own panel; do not silently repurpose original icons. Existing Menu rendering and button dispatch are bounded hooks, while the panel should live in a new module.",
+      "refs": [
+        "apps/game-client/client-bevy/src/crystal_ui/overlays.rs:13273",
+        "apps/game-client/client-bevy/src/crystal_ui/overlays.rs:5022",
+        "apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3261"
+      ]
+    },
+    {
+      "id": "web_menu",
+      "conclusion": "Web system menu is DOM-owned and sends feature selection through GameUiScene. Existing features automatically join global quest/map modal state. Adding a stone feature through that generic path unchanged would violate the movement requirement.",
+      "refs": [
+        "apps/web/app/components/original-client-system-menu.tsx:78",
+        "apps/web/app/components/original-client-system-menu.tsx:119",
+        "apps/web/app/components/original-client-system-menu.tsx:138",
+        "apps/web/app/components/original-client-game-ui-scene.tsx:320",
+        "apps/web/app/components/original-client-game-ui-scene.tsx:343",
+        "apps/web/app/components/original-client-game-ui-scene.tsx:564"
+      ]
+    },
+    {
+      "id": "native_pointer",
+      "conclusion": "UiState blocks world clicks for any open UiPanel. Native Inventory has an explicit bounds-based exception; every new world gesture checks its original press position. Use those two patterns for the stone panel. Do not make pending appraisal/cut a global pointer or route blocker.",
+      "refs": [
+        "apps/game-client/ui-core/src/state.rs:750",
+        "apps/game-client/client-bevy/src/crystal_ui/overlays.rs:1712",
+        "apps/game-client/client-bevy/src/crystal_ui/overlays.rs:1750",
+        "apps/game-client/platform-windows/src/input.rs:1023",
+        "apps/game-client/platform-windows/src/input.rs:2401"
+      ]
+    },
+    {
+      "id": "native_ordering",
+      "conclusion": "Native world movement producers run in ordered PreUpdate before overlay Update. Input capture for a new stone UI press must therefore be visible in the PreUpdate hit-test using current public geometry, not rely only on a later button handler. Existing UI blocker branch clears attack intents.",
+      "refs": [
+        "apps/game-client/platform-windows/src/main.rs:303",
+        "apps/game-client/platform-windows/src/main.rs:319",
+        "apps/game-client/platform-windows/src/input.rs:2450",
+        "apps/game-client/platform-windows/src/input.rs:2452"
+      ]
+    },
+    {
+      "id": "web_pointer",
+      "conclusion": "Web Shell has existing per-surface pointer leases, terminal cancellation, UI combat holds, and clearing held keyboard run state. Reuse a dedicated stone channel plus precise input regions. On a stone UI press retire previous held movement/fishing/attack; do not reactivate it when panel closes. Fresh world-origin presses outside the sidebar remain valid.",
+      "refs": [
+        "apps/web/app/original-client-shell.tsx:1608",
+        "apps/web/app/original-client-shell.tsx:3768",
+        "apps/web/app/original-client-shell.tsx:3886",
+        "apps/web/app/original-client-shell.tsx:3910",
+        "apps/web/scripts/test-bevy-bag-shell.mjs:120",
+        "apps/web/scripts/test-bevy-bag-shell.mjs:131"
+      ]
+    },
+    {
+      "id": "typed_transport",
+      "conclusion": "There is no raw-stone player transport. BrowserCommand -> SessionAction -> production WorldCommand is the ordinary route, and Stage5Command is deliberately rejected. Add a dedicated versioned strict stonecutting envelope and route authenticated intent to the personal economic owner; never open stage5/QA.",
+      "refs": [
+        "apps/gateway/src/web.rs:1578",
+        "apps/gateway/src/web.rs:2258",
+        "apps/gateway/src/web.rs:7401",
+        "apps/gateway/src/web.rs:8588",
+        "apps/simulation/src/world_runtime.rs:147",
+        "apps/web/scripts/test-player-ui-stage5-guard.mjs:9"
+      ]
+    },
+    {
+      "id": "native_transport",
+      "conclusion": "Native normal packets serialize BrowserCommand-compatible NativeOutboundCommand through GatewayCommand::Wire and owned producer stamps. Durable NPC purchases add an independent connection-owner client and strict raw-frame path. Stonecutting can follow that architecture in a new module rather than growing forward_quest_ui_intents into a second transaction ledger.",
+      "refs": [
+        "apps/game-client/platform-windows/src/native_protocol.rs:31",
+        "apps/game-client/platform-windows/src/gateway.rs:248",
+        "apps/game-client/platform-windows/src/gateway.rs:277",
+        "apps/game-client/platform-windows/src/input.rs:262",
+        "apps/game-client/platform-windows/src/npc_purchase_gateway.rs:1",
+        "apps/game-client/platform-windows/src/npc_purchase_gateway.rs:113",
+        "apps/game-client/platform-windows/src/gateway.rs:4382"
+      ]
+    },
+    {
+      "id": "reconnect_and_numbers",
+      "conclusion": "Existing durable purchase client explicitly keeps entered Actor operations on disconnect and reconnect queries the original operation. Its wire uses canonical decimal u64 strings and rejects unknown fields. Web Bag still permits only safe-number UID projection, so a new stone operation must take the exact string UID from its strict public service frame instead of rounding through WorldItem JS numbers.",
+      "refs": [
+        "apps/game-client/platform-windows/src/npc_purchase_gateway.rs:146",
+        "apps/game-client/platform-windows/src/npc_purchase_client.rs:177",
+        "apps/game-client/platform-windows/src/npc_purchase_client.rs:195",
+        "apps/game-client/platform-windows/src/npc_purchase_client.rs:546",
+        "apps/game-client/client-wire/src/lib.rs:39",
+        "apps/game-client/client-wire/src/lib.rs:109",
+        "apps/web/lib/bevy-bag-model.ts:107",
+        "apps/web/lib/bevy-bag-model.ts:180"
+      ]
+    },
+    {
+      "id": "public_ingress",
+      "conclusion": "Native world snapshot transformation and web economy fingerprint/typed owner-frame application enumerate modeled domains. A new public stone domain requires explicit adapters and applied-model coverage; a backend field alone will not render or prove applied state. Plain socket acceptance is not success.",
+      "refs": [
+        "apps/game-client/platform-windows/src/gateway.rs:5072",
+        "apps/game-client/platform-windows/src/gateway.rs:7592",
+        "apps/game-client/runtime/src/native_ingest.rs:77",
+        "apps/web/app/page.tsx:9404",
+        "apps/web/app/page.tsx:6233",
+        "apps/web/app/page.tsx:6480",
+        "apps/web/lib/npc-purchase-client.ts:534"
+      ]
+    }
+  ],
+  "recommendedBoundedDesign": {
+    "presentationSource": "Implement the stone model, state reducer and panel once in client-bevy; host layers handle transport and input edges. Keep the public DTO separate from private generation/cut records.",
+    "modulesToAdd": [
+      "apps/game-client/client-bevy/src/stonecutting.rs: public read model, exact UID/action types, selection by current UID, pending/unknown display, Materials filter and public probability/fee formatting",
+      "apps/game-client/client-bevy/src/stonecutting_ui.rs: shared non-modal sidebar/panel with explicit rectangle, grade selector/list/detail/actions and Materials tab; native-ui and portable-quest-ui support",
+      "apps/game-client/runtime/src/stonecutting_ui_host.rs: strict public snapshot ingress, sink generation, frame/layout readiness, pointer-origin proof and one fenced intent sink, analogous to npc_shop_ui_host",
+      "apps/game-client/platform-windows/src/stonecutting_gateway.rs: strict connection-owner operation client/dispatch/receipt/public projection; preserve operation across disconnect and query, never automatically create a second cut",
+      "apps/web/lib/stonecutting-client.ts and bevy-stonecutting-ui.ts: exact public frame parser and transport plus shared renderer host adapter; host UI only formats authority",
+      "Dedicated typed request/reply DTO module in a public transport crate selected by Root; do not make client crates depend on packages/production or simulation"
+    ],
+    "hooksToModify": [
+      {
+        "path": "apps/game-client/client-bevy/src/lib.rs",
+        "purpose": "export new modules/features"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "purpose": "small sidebar/menu open/close hook; expose precise stone rectangle in existing pointer predicate, consume press edges without adding whole-panel modal state"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/main.rs",
+        "purpose": "install public model and transport systems in the established producer/UI ordering"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/input.rs",
+        "purpose": "bounds-based PreUpdate capture and original-press guard; clear stale held movement and attack only on actual UI interaction, permit fresh movement outside panel"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/gateway.rs",
+        "purpose": "own strict stone client in connected owner; classify personal stamp, intercept strict raw owner replies, receive public snapshot and exactly correlated receipts"
+      },
+      {
+        "path": "apps/game-client/runtime/src/lib.rs",
+        "purpose": "install shared host and export its capability/snapshot/intent/pointer methods"
+      },
+      {
+        "path": "apps/web/app/page.tsx",
+        "purpose": "typed operation/public projection hook under physical socket/owner fences and explicit applied witness; preserve Source50 behavior"
+      },
+      {
+        "path": "apps/web/app/original-client-shell.tsx",
+        "purpose": "stone input-region/lease/combat-hold channel and lifecycle cleanup; no whole-world modal while merely open"
+      },
+      {
+        "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+        "purpose": "sidebar entry and panel visibility; exclude stone-open from generic feature-panel global modal predicates"
+      },
+      {
+        "path": "apps/gateway/src/web.rs",
+        "purpose": "strict bounded request decode and serial authenticated owner routing; public reply projection; no supplied-account trust"
+      },
+      {
+        "path": "apps/simulation/src/world_runtime.rs",
+        "purpose": "typed stone owner capability and authenticated execution path, with unsupported runtimes fail closed; personal transaction stays distinct from Zone movement"
+      }
+    ],
+    "stock": "Prefer real normal Bag material outputs plus sidebar Materials filter. Show quantity, template identity and physical Bag slot. A pure projection must not mint stock or duplicate currency. If a true new material container is chosen, its durable inventory authority and capacity must be separately implemented before UI claims it.",
+    "publicFields": [
+      "policy/version and public three-grade names",
+      "possible material outputs and policy probabilities (integer basis points or exact weights)",
+      "appraisal/cutting gold fees supplied by server",
+      "stone UID as canonical decimal string, current Bag location, grade, state and allowed appraisal result",
+      "material entries from the authoritative committed inventory",
+      "correlated operation phase and bounded user-facing failure reason"
+    ],
+    "privateFieldsNeverProjected": [
+      "fixed hidden resource result before the authorized reveal",
+      "generation seed or secret randomness input",
+      "private outcome identifier, hidden quality/quantity, future result template",
+      "full saved production/raw-stone private record",
+      "private fields smuggled through tooltipSource, realInfo, debug snapshots, spectator state or generic raw payload"
+    ],
+    "operationalUx": [
+      "Opening/selecting/listing is read-only; only an explicit current action starts one operation.",
+      "Disable duplicate appraisal/cut for the selected UID while entered, awaiting applied authority or outcome unknown. Movement remains available.",
+      "Transport accepted/flushed is a pending phase. Show success only after the exact receipt and corresponding authoritative model have been applied.",
+      "On reconnect, recover/query the same operation and retain private/public stone state from durable authority; do not generate a new outcome or automatically resubmit mutation.",
+      "For full Bag, preserve stone and gold before commit or display authoritative pending delivery only if the backend deliberately commits such custody; retry delivery by original operation rather than reroll.",
+      "Render committed resource as item/resource output. Do not run local lottery animation that selects a result.",
+      "Reject old UI callback or stale owner/character/socket even when the UID or display name matches."
+    ]
+  },
+  "verificationPlan": {
+    "explorerExecution": "No test/build/game/UI was executed. The list below is proposed Root verification, not passing evidence.",
+    "meaningfulNewCoverage": [
+      "Strict DTO tests: decimal UID u64::MAX, unknown/duplicate/escaped duplicate fields, unsupported protocol version, oversized collections, private-result key injection and wrong actor/frame correlation.",
+      "Public serialization nonleakage: generate two stones with different hidden outcomes but identical public grade/state and assert pre-reveal output is indistinguishable apart from UID/location; snapshots, tooltipSource and owner replies must not include private fields.",
+      "Shared panel tests: all three grades, public distribution and fee rendering, selection only from current owned UID, resource-only outputs, Materials reflects committed Bag quantities, stale snapshot rebind clears selected gesture without clearing entered operation.",
+      "Native actual input tests: click/right-press panel then move outside while held cannot walk/run/attack; release and fresh outside press can move; panel stays open during movement; existing already-sent transform is not undone.",
+      "Web actual Shell helper tests following existing test-bevy-bag-shell: UI press dragged outside, keyboard/run latch retirement, pointercancel/blur/close/reconnect/HMR, second pointer, stale cleanup cannot clear successor lease, fresh outside movement with panel open.",
+      "Transport/owner tests: duplicate button/packet exactly once; timeout after socket entry is unknown; disconnect and new client query original operation; foreign account/character rejected; unsupported owner path no legacy fallback.",
+      "Transactional integration tests at backend owner: full Bag/weight/gold shortage leaves source and wallet unchanged, failure before/after commit, duplicate/reconnect/restart, exact quantity and template outputs plus physical Bag stock."
+    ],
+    "existingAdjacentChecks": [
+      "apps/web/scripts/test-player-ui-stage5-guard.mjs",
+      "apps/web/scripts/test-bevy-bag-shell.mjs",
+      "apps/web/scripts/test-npc-shop-surface-integration.mjs",
+      "apps/web/scripts/test-system-menu-quest-button.mjs",
+      "apps/web/scripts/test-bevy-combat-input.mjs",
+      "Selected Native press-origin/quest-pointer movement tests in platform-windows/src/input.rs",
+      "Existing exact canonical wire and reconnect/unknown tests in client-wire and native npc_purchase_client; preserve their bodies"
+    ],
+    "buildAndScreenshots": [
+      "Use existing repository guarded serial Cargo checks/tests with frozen source inputs; explorer must not launch competing Cargo.",
+      "Run strict project TypeScript without relaxing user tsconfig; all modified shared modules must compile in native and portable modes.",
+      "New shared host requires native EXE and matching web Core/renderer/Next package rebuild before claiming it is shipped; do not reuse Source50 compiled artifacts as proof of new source.",
+      "When GUI execution is authorized for this task, capture Windows and web selected stone grade/detail, appraisal before/after, cut resource receipt, full-Bag refusal, Materials quantities and panel-open fresh movement. Screenshots alone cannot prove durable outcomes.",
+      "Update player QA/frontend gaps only after actual tests/screenshots; keep live/human acceptance open until performed."
+    ]
+  },
+  "limits": [
+    "Explorer did not inspect the full original human stone rules or choose probabilities, fees, grade names, resource templates or appraisal reveal policy; Root must use the user's actual contract.",
+    "Backend/schema/item-template/UID exploration is owned by the other assigned explorer; this report identifies UI/transport boundaries only.",
+    "Source references and hashes describe the read interval; concurrent Root or unrelated writer changes after hashing require recheck.",
+    "Existing docs contain long historical appended/prepended evidence. The current relevant source and instruction sections were read; historical claims were not independently rerun.",
+    "No Candidate, online playability, screenshot, packaging, production rollout, Postgres durability or whole-game completion claim is made."
+  ],
+  "sourceHashes": [
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 4945,
+      "sha256": "a9b655974e1cbeb1ff2098f5c5363fa6861bdf1ba697ba94e3e14d6207b7dd88"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/inventory.rs",
+      "bytes": 32107,
+      "sha256": "f748995a9b28afff30ab6dba356de8155bba95c3e76047b1fecf9d1504c40af4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 897533,
+      "sha256": "2545ce7104060e3de7143983908f65165c57a881651d7e90942edc2e31e7b703"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "bytes": 40279,
+      "sha256": "138aca0904f37e7c4cbc14476cb6b16f6849e386f6ea0fbb926fc628fe6dcbd0"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/state.rs",
+      "bytes": 25125,
+      "sha256": "4ceef78bfb111542480b10c054d269fc8c5e57b8882c819fb099e5ef38fe0dc9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "bytes": 367623,
+      "sha256": "6d67ff71dc910e76f452ec468e42e9da15780e306ae7a35b01046da91c4f36c9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "bytes": 19805,
+      "sha256": "33a15d22b3e50c394627d379e8290baf11b7bfe2d8a7a6876f2aeb85e751b282"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "bytes": 82980,
+      "sha256": "b258df7ca548a7e104f5a9a17328083a856dc943269471eace8dbad02894aad8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 705092,
+      "sha256": "b2be25d36a894634119c7186fea154001b61e3ff1a7efa93fca72a6440b9f5c3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_client.rs",
+      "bytes": 41718,
+      "sha256": "e27c6f77f68331a92de64269be5babd3c476b1d2472dbcac8bf893c15306151d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "bytes": 76134,
+      "sha256": "85df7e8ed15bbd4597e717140e4831b8a1ee4c182978891528c2b9e3e6f3df16"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "bytes": 31911,
+      "sha256": "f5df4d937f9fb181422d3cbcca93807e725f44d0a368f3e1c7a19751ec9a2a02"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 133014,
+      "sha256": "e80975d48f6b3abc2f650319650c16cf106b7aadfd227bc5e867177a49a5fd14"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/lib.rs",
+      "bytes": 108194,
+      "sha256": "19a0fb610fbf007a9da75849c0cee64826af47a2422f2b9f250f42ac426170c9"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1057610,
+      "sha256": "aee83fbdd2e463bfb78b32a97e354a96b39d532769317e576bb442fa13512ef6"
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "bytes": 331360,
+      "sha256": "9e014ad2578dc6105462bcee2c73d7748ba7cab9650946c934da476a676a52bb"
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "bytes": 35540,
+      "sha256": "6e08111983ccb64a6355033ed3abed00e8bb89c5932e6fede64e6593a72c65d8"
+    },
+    {
+      "path": "apps/web/app/components/original-client-system-menu.tsx",
+      "bytes": 26261,
+      "sha256": "1c378514c429c61809abcafbd654ad54a006eb6a7c8a25a942ab48bab58f41c6"
+    },
+    {
+      "path": "apps/web/lib/bevy-npc-shop-ui.ts",
+      "bytes": 44076,
+      "sha256": "f46f8060e9b97a8b26ca9bb5c7d4038881f075f9df44b43c12e18b734785ec05"
+    },
+    {
+      "path": "apps/web/lib/bevy-bag-model.ts",
+      "bytes": 17534,
+      "sha256": "7d9df5bd7c8161f2080e782f2a9d10c4fd853107c1578562dd1810d69112db47"
+    },
+    {
+      "path": "apps/web/lib/npc-purchase-client.ts",
+      "bytes": 44843,
+      "sha256": "bd01035413866171b78bd6017a2b448adb7166b1796dbccb257847232e841a55"
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-bag-shell.mjs",
+      "bytes": 28107,
+      "sha256": "0299ebf2bff2ead1e9ee4d3cec811f966831ad5f9bf11d2562c387744a789a33"
+    },
+    {
+      "path": "apps/web/scripts/test-player-ui-stage5-guard.mjs",
+      "bytes": 1752,
+      "sha256": "8c5fd5a1f6963760efa7bae226a5e08d679ee02b930f20b2a1059e891fdc831f"
+    },
+    {
+      "path": "apps/simulation/src/world_runtime.rs",
+      "bytes": 61873,
+      "sha256": "d7bfcf3cddda49b26e56121eee78ca7d25b8c875a2ba66969746ba2279dd9dd2"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 775158,
+      "sha256": "72ab2a44818aaf81c373a2de843d0854404b399dea4c76f5be92a733480ca8f4"
+    }
+  ]
+}
+

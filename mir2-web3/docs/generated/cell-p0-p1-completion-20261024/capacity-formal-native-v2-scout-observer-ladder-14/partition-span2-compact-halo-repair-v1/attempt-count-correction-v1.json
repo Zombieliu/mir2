@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "scope": "Corrects an earlier assistant status message only; no rawtrial/result/source changed",
+  "earlierMessageClaimedActualTrials": 1,
+  "actualRecordedTrials": 2,
+  "first": {
+    "home": {
+      "x": 229,
+      "y": 533
+    },
+    "result": "failed, stilloutsidecoverage at244538",
+    "receipt": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    }
+  },
+  "second": {
+    "home": {
+      "x": 229,
+      "y": 534
+    },
+    "result": "passed representative100scout",
+    "receipt": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    }
+  },
+  "rankedCandidatePoints": 16,
+  "changedActors": 1
+}

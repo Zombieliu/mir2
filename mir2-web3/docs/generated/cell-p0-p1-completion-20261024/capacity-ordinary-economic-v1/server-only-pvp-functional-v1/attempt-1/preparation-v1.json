@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-27T15:24:45.890Z",
+  "source": {
+    "storeSha256": "f68202898e1cc762f12ff780952bc2cc5a42ac4253c79e256ebf867c3baa40d2",
+    "poolSha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5"
+  },
+  "copiedAccounts": 2,
+  "changes": [
+    "filter copied account map and copied pool to first two accounts",
+    "offline saved positions set to adjacent declared cells in isolated fixture only",
+    "copied pool endpoint and purpose set to isolated probe"
+  ],
+  "statsEquipmentPotionQuantitiesUnchanged": true,
+  "originalSourceChanged": false,
+  "actors": [
+    {
+      "actor": 0,
+      "characterLevel": 2,
+      "class": "Warrior",
+      "mapFileName": "0",
+      "oldPosition": {
+        "x": 244,
+        "y": 598
+      },
+      "position": {
+        "x": 234,
+        "y": 590
+      },
+      "hp": 24,
+      "maxHp": 24,
+      "hpStock": 12
+    },
+    {
+      "actor": 1,
+      "characterLevel": 2,
+      "class": "Warrior",
+      "mapFileName": "0",
+      "oldPosition": {
+        "x": 236,
+        "y": 592
+      },
+      "position": {
+        "x": 235,
+        "y": 590
+      },
+      "hp": 24,
+      "maxHp": 24,
+      "hpStock": 12
+    }
+  ],
+  "scope": "Functional protocol probe only. Offline fixture positioning excludes this result from ordinary growth/supply and P0 capacity acceptance.",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "prelaunchSchemaCorrection": "Copied pool keeps the existing isolated-load-actors validator schema purpose; the additive fixtureProfile and endpoint describe this independent probe. No source changed."
+}

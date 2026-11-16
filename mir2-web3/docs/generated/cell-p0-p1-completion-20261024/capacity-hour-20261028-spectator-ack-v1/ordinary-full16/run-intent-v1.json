@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-28T08:09:53.838Z",
+  "profile": "ordinary-full-lifecycle-16",
+  "backend": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v4/bin/mir2-gateway.exe",
+    "bytes": 87398400,
+    "sha256": "10066df8252d16c4a845d2124e71798f4b6733555357d661fa39cd6773c15b68"
+  },
+  "driver": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+    "bytes": 38923,
+    "sha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53"
+  },
+  "normalPasswordLogin": true,
+  "authenticationBucket": "fresh ordinary registrations; default authentication controls",
+  "normalCombatAndHealing": true,
+  "ordinaryFreshRegistrations": true,
+  "preseeded": false,
+  "ordinarySupplyAccepted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

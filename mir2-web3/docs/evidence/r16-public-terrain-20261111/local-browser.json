@@ -1,0 +1,116 @@
+{
+  "scope": "Exact hosted configuration build in loopback, real File gateway, browser inputs and authoritative ACKs.",
+  "product": "f90543561677ac7ba432077c461f58e5d407e4d8",
+  "buildId": "iYPkq12rsO8GjL1r_uzUl",
+  "buildCandidate": "9ab47adeedab-r16-entry-floor-dfe2d85d",
+  "buildReceiptSha256": "25e93d58bf8f35c9e0c64a49b7077c39c78d66d1b55022c4d747cfdcbd280dde",
+  "pack": {
+    "assetReleaseId": "20261108-r16-08ec86d5105c",
+    "sceneSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+    "mapFileName": "0.map",
+    "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+    "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+    "bytes": 439896,
+    "frameCount": 124
+  },
+  "focusedNodeTests": 41,
+  "releaseGuardTests": 68,
+  "lanes": [
+    {
+      "lane": "pack-with-covered-raw-pngs-blocked",
+      "receiptSha256": "f4bf76d8390938e25ffa5ab727d1576c9260f5b2081ce54e2a5b973393ecde1a",
+      "firstPlayableAfterAckMs": 1056,
+      "packBeforeStartClickMs": 2516,
+      "packAfterLoginMs": 12,
+      "packBodyFinishes": 1,
+      "coveredOrdinarySuccesses": 0,
+      "visibleFloor": 221,
+      "packedDecoded": 219,
+      "ordinaryDecoded": 2,
+      "sampledColourBuckets": [
+        31,
+        32,
+        29,
+        29,
+        26,
+        21
+      ],
+      "pixelScreenshotSha256": "e939bce0b6bc5985a5f0cdb3240d4ec8bce01abe4ac163c02234f3fe740c2a8f",
+      "movedTo": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 289,
+        "y": 616
+      },
+      "staticSceneCache": "r16-entry-static",
+      "workerControlled": true,
+      "fixtureUnchanged": true
+    },
+    {
+      "lane": "corrupt-pack-ordinary-pngs",
+      "receiptSha256": "dca55b8a7aaba080e03dd9d1e81a2cb6a25b90905c3b14dabbfff9ac34fb232b",
+      "firstPlayableAfterAckMs": 1085,
+      "packBeforeStartClickMs": 2469,
+      "packAfterLoginMs": 13,
+      "packBodyFinishes": 4,
+      "coveredOrdinarySuccesses": 104,
+      "visibleFloor": 221,
+      "packedDecoded": 0,
+      "ordinaryDecoded": 221,
+      "sampledColourBuckets": [
+        28,
+        32,
+        29,
+        29,
+        26,
+        21
+      ],
+      "pixelScreenshotSha256": "32d844cb7996d01ed75a6026acbf8d1666f86facbf6f0220aa3a0742ceaf3147",
+      "movedTo": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 289,
+        "y": 616
+      },
+      "staticSceneCache": "r16-entry-static",
+      "workerControlled": true,
+      "fixtureUnchanged": true
+    },
+    {
+      "lane": "unavailable-pack-does-not-block-ordinary-paint",
+      "receiptSha256": "318fde57dfec758cdba776fe86c30573f75b8adf1779654d37ad31e3f935165e",
+      "firstPlayableAfterAckMs": 1079,
+      "packBeforeStartClickMs": 2495,
+      "packAfterLoginMs": 15,
+      "packBodyFinishes": 0,
+      "coveredOrdinarySuccesses": 104,
+      "visibleFloor": 221,
+      "packedDecoded": 0,
+      "ordinaryDecoded": 221,
+      "sampledColourBuckets": [
+        31,
+        33,
+        29,
+        29,
+        26,
+        21
+      ],
+      "pixelScreenshotSha256": "8768767565f350c463d688942aa388771d4858f0d031955f75d4edeebf35afd4",
+      "movedTo": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 289,
+        "y": 616
+      },
+      "staticSceneCache": "r16-entry-static",
+      "workerControlled": true,
+      "fixtureUnchanged": true
+    }
+  ]
+}

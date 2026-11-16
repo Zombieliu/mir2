@@ -1,0 +1,96 @@
+
+running 91 tests
+test native_shell::tests::change_password_banned_is_not_treated_as_success ... ok
+test native_shell::tests::change_password_requires_account_and_matching_valid_fields ... ok
+test native_shell::tests::character_create_can_be_cancelled_without_gateway_success ... ok
+test native_shell::tests::character_delete_updates_selection ... ok
+test native_shell::tests::create_character_success_transitions_back_to_select ... ok
+test native_shell::tests::creation_policy_defaults_to_five_and_rejects_invalid_explicit_names ... ok
+test native_shell::tests::creation_policy_keeps_reset_default_and_keyboard_cycle_on_allowed_classes ... ok
+test native_shell::tests::creation_policy_never_filters_existing_assassin_or_archer_roster_and_start_game ... ok
+test native_shell::tests::creation_policy_rejects_every_disabled_create_intent_before_pending_state ... ok
+test native_shell::tests::debug_output_never_contains_password_and_login_clears_it ... ok
+test native_shell::tests::delete_confirmation_is_local_and_second_confirm_is_rejected ... ok
+test native_shell::tests::disconnect_and_retry_returns_to_connecting ... ok
+test native_shell::tests::disconnect_does_not_auto_reconnect_without_retry ... ok
+test native_shell::tests::disconnect_during_door_cannot_later_reveal_stale_characters ... ok
+test native_shell::tests::empty_login_fields_do_not_block_opening_the_new_account_dialog ... ok
+test native_shell::tests::empty_roster_is_supported_after_login_success ... ok
+test native_shell::tests::in_game_disconnect_clears_password_and_session_payload ... ok
+test native_shell::tests::in_game_logout_clears_password_and_does_not_auto_retry ... ok
+test native_shell::tests::logged_out_returns_to_character_select_with_server_roster ... ok
+test native_shell::tests::login_door_uses_original_frames_and_blocks_start_until_completion ... ok
+test native_shell::tests::login_failure_then_disconnect_retry ... ok
+test native_shell::tests::login_flow_transitions_to_character_select_after_success ... ok
+test native_shell::tests::logout_failure_keeps_character_and_allows_retry_then_switch ... ok
+test native_shell::tests::missing_fields_are_rejected_for_login ... ok
+test native_shell::tests::operation_failure_returns_starting_game_to_character_select ... ok
+test native_shell::tests::ordinary_player_bootstrap_requires_accepted_start_game_ack ... ok
+test native_shell::tests::registration_date_encoding_matches_dotnet_unspecified_datetime_ticks ... ok
+test native_shell::tests::registration_email_validation_matches_crystals_shared_pattern ... ok
+test native_shell::tests::registration_failure_keeps_the_dialog_and_late_receipts_are_ignored ... ok
+test native_shell::tests::registration_optional_fields_accept_empty_values_and_keep_their_bounds ... ok
+test native_shell::tests::registration_password_boundaries_and_production_weak_passwords_are_rejected ... ok
+test native_shell::tests::registration_password_policy_does_not_block_legacy_login_credentials ... ok
+test native_shell::tests::registration_requires_a_dedicated_validated_dialog_and_returns_to_login_on_success ... ok
+test native_shell::tests::safe_key_permutation_is_deterministic_and_complete ... ok
+test native_shell::tests::select_and_start_only_allow_valid_indices ... ok
+test native_shell::tests::start_game_ack_does_not_enter_game ... ok
+test native_shell::tests::start_game_ack_fact_is_reset_for_new_entry_logout_and_disconnect ... ok
+test native_shell::tests::verified_identity_login_rejects_empty_accounts_and_other_screens ... ok
+test native_shell::tests::verified_identity_login_uses_normal_roster_transition_without_a_password ... ok
+test native_shell_ui::i18n_visual_tests::guild_name_and_sabuk_npc_pages_render_offscreen ... ignored, explicit production Guild name and Sabuk NPC offline GPU fixture; run alone with real assets and fresh evidence output
+test native_shell_ui::i18n_visual_tests::monthly_card_nine_language_modal_renders_offscreen ... ignored, explicit monthly card nine-language offline GPU fixture; owned output and real asset root required
+test native_shell_ui::i18n_visual_tests::multilingual_shell_screens_and_font_switches_render_offscreen ... ignored, explicit real-asset offline GPU multilingual screenshots and bounded font switch checks; run alone
+test native_shell_ui::preview_visual_tests::all_character_previews_animate_and_wizard_glow_adds_offscreen ... ignored, explicit real-asset offscreen GPU screenshots; run alone with MIR2_PREVIEW_VISUAL_ASSET_ROOT and MIR2_PREVIEW_VISUAL_OUTPUT
+test native_shell_ui::preview_visual_tests::creation_policy_three_class_offscreen ... ignored, explicit real-asset offscreen three-class policy screenshot; run alone with MIR2_PREVIEW_VISUAL_ASSET_ROOT and MIR2_PREVIEW_VISUAL_OUTPUT
+test native_shell_ui::tests::auxiliary_fields_reject_invalid_name_and_password_characters ... ok
+test native_shell_ui::tests::change_password_submit_intent_contains_authoritative_account_and_all_fields ... ok
+test native_shell_ui::tests::composed_text_does_not_turn_control_shortcuts_into_text ... ok
+test native_shell_ui::tests::connection_lost_dialog_uses_crystal_message_box_and_ok_button_geometry ... ok
+test native_shell_ui::tests::connection_notice_localizes_server_errors_without_assuming_a_local_gateway ... ok
+test native_shell_ui::tests::connection_notice_truncation_is_unicode_safe ... ok
+test native_shell_ui::tests::creation_policy_ignores_disabled_pointer_class_selection ... ok
+test native_shell_ui::tests::creation_policy_keyboard_cycles_only_allowed_choices_and_blocks_injected_submit ... ok
+test native_shell_ui::tests::creation_policy_renders_only_three_classes_in_all_nine_locales ... ok
+test native_shell_ui::tests::delete_click_and_cancel_enqueue_no_gateway_packet ... ok
+test native_shell_ui::tests::door_waits_for_all_frames_then_updates_the_real_background_handle ... ok
+test native_shell_ui::tests::draining_does_not_reopen_a_request_before_its_ack ... ok
+test native_shell_ui::tests::duplicate_registration_submit_is_rejected_without_logging_password ... ok
+test native_shell_ui::tests::empty_composed_text_uses_logical_character_fallback ... ok
+test native_shell_ui::tests::expired_character_can_open_the_shared_billing_panel ... ok
+test native_shell_ui::tests::five_class_create_buttons_fit_the_frame_in_all_nine_locales ... ok
+test native_shell_ui::tests::focus_cycles_are_consistent ... ok
+test native_shell_ui::tests::localized_create_and_select_keep_protocol_identity_and_opaque_names ... ok
+test native_shell_ui::tests::localized_create_request_translates_only_typed_class_and_gender ... ok
+test native_shell_ui::tests::localized_delete_prompt_does_not_reinterpret_placeholders_in_player_names ... ok
+test native_shell_ui::tests::localized_shell_rebuilds_without_changing_form_input_or_validation ... ok
+test native_shell_ui::tests::logical_character_fallback_does_not_turn_control_shortcuts_into_text ... ok
+test native_shell_ui::tests::login_system_applies_an_entire_rapid_character_batch_in_one_update ... ok
+test native_shell_ui::tests::login_system_honors_backspace_and_delete_repeat_messages ... ok
+test native_shell_ui::tests::masks_password_without_plain_chars ... ok
+test native_shell_ui::tests::monthly_card_modal_is_localized_in_all_nine_languages_and_preserves_the_code ... ok
+test native_shell_ui::tests::new_character_class_and_gender_choices_cover_all_five_source_classes ... ok
+test native_shell_ui::tests::new_character_uses_crystal_geometry_assets_and_supported_control_bounds ... ok
+test native_shell_ui::tests::printable_chars_filter_control_chars ... ok
+test native_shell_ui::tests::rapid_keyboard_batch_consumes_text_and_logical_character_fallbacks_in_order ... ok
+test native_shell_ui::tests::registration_failure_releases_submission_for_recovery ... ok
+test native_shell_ui::tests::registration_focus_order_covers_every_crystal_dialog_control ... ok
+test native_shell_ui::tests::registration_invalid_email_never_queues_even_when_a_raw_intent_bypasses_the_button ... ok
+test native_shell_ui::tests::registration_keyboard_validation_and_editing_clear_only_stale_notices ... ok
+test native_shell_ui::tests::registration_password_colors_and_submit_agree_with_the_production_policy ... ok
+test native_shell_ui::tests::registration_renderer_enables_submit_only_for_a_valid_idle_form ... ok
+test native_shell_ui::tests::registration_submit_intent_preserves_every_supported_new_account_field ... ok
+test native_shell_ui::tests::repeated_character_create_submission_is_not_queued_twice ... ok
+test native_shell_ui::tests::rotates_class_and_gender_choices_and_dedups_gateway_intent_queue ... ok
+test native_shell_ui::tests::single_event_can_carry_multiple_composed_characters ... ok
+test native_shell_ui::tests::valid_registration_is_the_only_registration_intent_queued ... ok
+test native_shell_ui::tests::wallet_countdown_rerenders_without_shell_state_changes ... ok
+test native_shell_ui::tests::wallet_locale_only_redraws_real_text_and_preserves_active_challenge ... ok
+test native_shell_ui::tests::wallet_modal_blocks_login_edits_and_password_submission ... ok
+test native_shell_ui::tests::wallet_modal_blocks_underlying_registration_and_exit_buttons ... ok
+test native_shell_ui::tests::wallet_shortcut_opens_without_password_and_escape_cancels ... ok
+test native_shell_ui::tests::wallet_terminal_enter_refreshes_once_and_clears_old_image ... ok
+
+test result: ok. 86 passed; 0 failed; 5 ignored; 0 measured; 1523 filtered out; finished in 1.33s
+

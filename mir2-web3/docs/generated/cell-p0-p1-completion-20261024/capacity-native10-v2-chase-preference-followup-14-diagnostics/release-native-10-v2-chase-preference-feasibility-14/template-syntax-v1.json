@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "syntax": [
+    {
+      "name": "backend-driver-source-guard.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "collect-public.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "driver-binding-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "driver-evidence-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "driver-report-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "input-lib.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "measured-phase-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "monitor-owned.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "native-chase-report-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "passed-probe-window-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "passed-probe-window-contract.test.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "prepare-inputs.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "request-stop.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "run-adapter-synthetics.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "run-owned.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "scene-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "slow-stage-public.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "slow-stage-public.test.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "slow-stage-row-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "socket-build-source-lib.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "verify-full16-gate.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "verify-public.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "wire-diagnostics-adapter.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "wire-diagnostics-adapter.test.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "wire-diagnostics-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ],
+  "allPassed": true,
+  "sourceguardRun": false,
+  "productTestsRun": false,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "sealed": false,
+  "original13FilesUnchanged": 46
+}

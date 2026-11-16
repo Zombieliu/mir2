@@ -1,0 +1,129 @@
+{
+  "source": "Source60",
+  "observedAt": "2026-10-11T04:56:48.285Z",
+  "reloadAt": "2026-10-11T04:48:54.052Z",
+  "url": "http://127.0.0.1:19205/",
+  "normalLogin": true,
+  "normalStartGame": true,
+  "bagOwner": "bevy",
+  "bagOwnerRevision": "2",
+  "bagMove": {
+    "item": "Candle",
+    "tooltip": "Torch; W:1 Durability:8/8",
+    "fromCell": 3,
+    "toCell": 8,
+    "from": [
+      674,
+      131
+    ],
+    "to": [
+      570,
+      162
+    ],
+    "normalDrag": true,
+    "sourceCellEmpty": true,
+    "destinationVisible": true,
+    "sharedOwner": "bevy",
+    "savedReloginConfirmed": true
+  },
+  "gold": 200,
+  "position": [
+    292,
+    614
+  ],
+  "debugAdminOrDirectWasmCalls": false,
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "bagToBelt": {
+    "item": "(HP)DrugSmall",
+    "fromCell": 2,
+    "toBeltSlot": 1,
+    "quantity": 2,
+    "normalDrag": true,
+    "sourceCellEmpty": true,
+    "targetButtonObserved": true,
+    "postUpdateOwner": "bevy",
+    "savedReloginConfirmed": true
+  },
+  "normalBagXClosed": true,
+  "beltUse": {
+    "item": "(HP)DrugSmall",
+    "input": "normal key 2",
+    "before": 2,
+    "after": 1,
+    "hpBefore": "18/18",
+    "hpAfter": "18/18",
+    "consumptionVerified": true,
+    "healingVerified": false
+  },
+  "sustainedCombat": {
+    "targetObjectId": "206644",
+    "input": "one normal visible nameplate click",
+    "clickedAt": [
+      677,
+      318
+    ],
+    "observedHp": [
+      20,
+      17,
+      0
+    ],
+    "additionalCombatOrMoveInput": false,
+    "fallenVisible": true,
+    "sunPotionDropVisible": true,
+    "levelBefore": 1,
+    "levelAfter": 2,
+    "hpAfter": "24/24"
+  },
+  "pickup": {
+    "item": "SunPotion",
+    "input": "one normal visible drop label click",
+    "at": [
+      666,
+      328
+    ],
+    "gainedItemNotice": true,
+    "beltSunPotionBefore": 1,
+    "beltSunPotionAfter": 2
+  },
+  "normalCanvasFocusedIOpened": true,
+  "normalCanvasFocusedQOpened": true,
+  "questCompletionReadBack": [
+    "简助理的请求 完成",
+    "朱迪女工匠的请求 完成"
+  ],
+  "normalAltXReturnedToLogin": true,
+  "reloginCharacterLevel": 2,
+  "normalReloginAndStartGame": true,
+  "relogin": {
+    "position": [
+      292,
+      614
+    ],
+    "gold": 200,
+    "level": 2,
+    "hp": "24/24",
+    "bagOwner": "bevy",
+    "bagOwnerRevision": "9",
+    "candleCell": 8,
+    "candleTooltip": "Torch; W:1 Durability:8/8",
+    "emptyFormerCandleCell": 3,
+    "emptyFormerPotionCell": 2,
+    "sunPotionBeltQuantity": 2,
+    "hpDrugSmallBeltQuantity": 1,
+    "copperRingTooltipReadBack": true,
+    "goldenPendantTooltipReadBack": true
+  },
+  "consoleErrorCount": 0,
+  "consoleErrors": [],
+  "evidenceImages": [
+    "web-source60-bag-drag01.png",
+    "web-source60-bag-to-belt01.png",
+    "web-source60-sustained-kill01.png",
+    "web-source60-quest-current01.png",
+    "web-source60-relogin-inventory01.png",
+    "web-source60-relogin-reward01.png"
+  ],
+  "deliveryStatus": "Local playable bounded loop verified; full Windows parity and mobile/human acceptance remain open"
+}

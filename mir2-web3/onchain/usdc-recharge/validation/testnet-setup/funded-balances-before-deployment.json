@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-28T19:08:16.830Z",
+  "network": "testnet",
+  "operation": "read-only",
+  "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+  "rows": [
+    {
+      "role": "issuer",
+      "owner": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "suiMist": "1000000000",
+      "usdcMicros": "0",
+      "faucet": {
+        "digest": "DDEtqoV944rWtXnMwWP4MQGhNswbAkzAw4pfm7LX9t16",
+        "checkpoint": "400258837",
+        "success": true,
+        "amountMist": "1000000000"
+      }
+    },
+    {
+      "role": "buyer",
+      "owner": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "suiMist": "1000000000",
+      "usdcMicros": "20000000",
+      "faucet": {
+        "digest": "8w1Lf4ca6cfijzyTto8WPEuJTMLhLqxR8ddm5XkY2Xii",
+        "checkpoint": "400259098",
+        "success": true,
+        "amountMist": "1000000000"
+      }
+    }
+  ]
+}

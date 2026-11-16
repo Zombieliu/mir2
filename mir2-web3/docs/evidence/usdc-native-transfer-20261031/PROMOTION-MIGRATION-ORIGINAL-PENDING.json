@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.original-invitation.stage.v1",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "scopeSha256": "b4386e3ff730f4901d036ba40074e9509593483d122703367a9610192a76ee4b",
+  "status": "pending_member_confirmation",
+  "migrationId": "migration_87be916c85c9477e92213692c6049a76b0e2c47f59f304bda4a7065fbff2e050",
+  "candidateId": "migration_candidate_29f9333e2ad4ea497263a946b148a1bf510b813090eb71e1b0085e02c2e7708b",
+  "snapshotSha256": "a322289d5158f7cc6ce42c6cfc089b80431bd84d428fd3ce3df44dee4b06daa1",
+  "sourceOriginalTimeKeptSeparate": true,
+  "memberConfirmationPerformed": false,
+  "paymentOperationsPerformed": false,
+  "automaticRetryAllowed": false,
+  "stageCommitted": true,
+  "sourcePhysicalSelectOnlyRoleVerified": false,
+  "sourceReadOnlyBoundary": "existing exact source URL; core RepeatableRead read_only transactions",
+  "connectionTransportRewritten": false,
+  "adjacentWorkerProjection": {
+    "workerAuditRows": 0,
+    "projectionRunRows": 0,
+    "outboxState": "pending"
+  },
+  "verification": "passed",
+  "protectedAccountCharacterFinancialRowsPreserved": true,
+  "originalSourceBusinessRowsPreserved": true,
+  "fiveExactPendingRowsAndLinksVerified": true,
+  "originalResultSha256": "676048ae0e7a75e4dc63a92ad28fd2be89a715caf94306d38a0e2099cc20443e"
+}

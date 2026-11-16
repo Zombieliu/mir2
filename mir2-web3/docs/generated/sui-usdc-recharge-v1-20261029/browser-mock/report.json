@@ -1,0 +1,124 @@
+{
+  "passed": true,
+  "complete": true,
+  "evidenceKind": "offline-headless-browser-mock-gateway-mock-wallet-no-chain",
+  "noRealKeys": true,
+  "noRealWallet": true,
+  "noChainTransactions": true,
+  "noProductionBilling": true,
+  "createdAtUtc": "2026-10-28T19:11:28.879Z",
+  "sourcePins": [
+    {
+      "path": "apps/gateway/src/sui_usdc_checkout.html",
+      "bytes": 1977,
+      "sha256": "a3acd5d58b0da37c242bed686b1ffbfcc5606b643036dcc55eefd1d4951f95a6"
+    },
+    {
+      "path": "apps/gateway/src/sui_usdc_checkout.js",
+      "bytes": 9540,
+      "sha256": "0616f3df0a4b5507578ede6533d8955c993eb0a8664d1f92e5406a63cd11562e"
+    }
+  ],
+  "browser": "System Chrome headless isolated context; extensions disabled",
+  "browserVersion": "156.0.8078.49",
+  "playwrightVersion": "1.62.1",
+  "harnessSha256": "65e0b9aa67cead91537851a872fd993673bbdac915d066f54ed1fc042275ab65",
+  "results": [
+    {
+      "name": "fragment_removed_no_storage_no_autopay",
+      "passed": true,
+      "observations": {
+        "capabilityOnlyInAuthorization": true,
+        "historyFragmentRemoved": true,
+        "noStorage": true,
+        "noAutomaticWalletCall": true
+      }
+    },
+    {
+      "name": "explicit_wallet_bind_then_explicit_pay_then_distinct_delivery",
+      "passed": true,
+      "observations": {
+        "personalSignatures": 1,
+        "explicitPayments": 1,
+        "paidPendingDistinctFromApplied": true,
+        "desktopLayout": {
+          "viewport": 1280,
+          "document": 1280,
+          "detailsWidth": 714,
+          "detailsScroll": 714
+        }
+      }
+    },
+    {
+      "name": "wrong_wallet_network_blocks_signatures",
+      "passed": true
+    },
+    {
+      "name": "wrong_order_network_fails_closed_before_wallet_authorization",
+      "passed": true
+    },
+    {
+      "name": "network_rule_change_invalidates_existing_payment_authorization",
+      "passed": true
+    },
+    {
+      "name": "wrong_payer_has_visible_error_and_no_signature",
+      "passed": true
+    },
+    {
+      "name": "wallet_reject_stops_repeated_payment",
+      "passed": true
+    },
+    {
+      "name": "wallet_unknown_stops_repeated_payment",
+      "passed": true
+    },
+    {
+      "name": "untrusted_text_does_not_create_html",
+      "passed": true
+    },
+    {
+      "name": "wallet_account_event_invalidates_payment",
+      "passed": true
+    },
+    {
+      "name": "wallet_disconnect_invalidates_payment",
+      "passed": true
+    },
+    {
+      "name": "wallet_unregistration_invalidates_payment",
+      "passed": true
+    },
+    {
+      "name": "wallet_without_account_notifications_is_rejected",
+      "passed": true
+    },
+    {
+      "name": "wallet_change_during_personal_signature_does_not_bind_stale_payer",
+      "passed": true
+    },
+    {
+      "name": "wallet_change_during_payment_build_prevents_signing",
+      "passed": true
+    },
+    {
+      "name": "account_select_change_invalidates_payment",
+      "passed": true
+    },
+    {
+      "name": "invalid_capability_does_not_contact_session_api",
+      "passed": true
+    },
+    {
+      "name": "mobile_applied_layout_and_status",
+      "passed": true,
+      "observations": {
+        "viewport": 390,
+        "document": 390
+      }
+    }
+  ],
+  "browserErrorCount": 0,
+  "sourceReportSha256": "2d94b82f875d3fe9846456fdcc3aee887ee92a6ccecf186533f6effefa030710",
+  "redaction": "Detailed mock cases, request bodies and signatures intentionally omitted; outcome observations retained. No harness capability or game credential included."
+}

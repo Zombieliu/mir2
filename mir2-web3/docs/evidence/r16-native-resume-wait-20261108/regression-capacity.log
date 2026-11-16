@@ -1,0 +1,33 @@
+
+running 28 tests
+test beta::tests::readiness_fails_closed_without_finality_capacity_or_quorum ... ok
+test companion_supply::life::tests::companion_life_history_capacity_counts_parent_resume_cancel_and_child_without_eviction ... ok
+test companion_supply::tests::companion_supply_cancellation_capacity_counts_permanent_offline_tombstones ... ok
+test companion_supply::tests::companion_supply_capacity_never_evicts_history_to_make_room ... ok
+test consensus_log::tests::sui_finality_and_capacity_become_membership_only_after_commonware_quorum ... ok
+test control_plane::tests::expired_heartbeat_triggers_failover_and_capacity_is_enforced ... ok
+test control_plane::tests::registration_and_heartbeats_enforce_per_zone_capacity ... ok
+test economy::tests::durable_marked_pickup_bypasses_capacity_preflight_after_state_changes ... ok
+test hotspot::tests::hard_capacity_rejects_overflow_instead_of_overloading_a_line ... ok
+test node_security::tests::permissionless_admission_requires_sui_finality_and_trusted_capacity_issuer ... ok
+test operator::tests::remote_capacity_challenge_is_bounded_and_signed_by_node_identity ... ok
+test routing::shared_groups::tests::shared_party_rechecks_full_capacity_at_accept_and_obeys_invite_delay ... ok
+test routing::tests::pending_zone_packets_never_exceed_rpc_outbound_capacity ... ok
+test routing::tests::trade_completion_tests::receiver_capacity_rejection_refunds_both_sides_without_completion ... ok
+test routing::tests::trade_gold_tests::prepared_refund_overflow_retains_final_offer_until_capacity_allows_one_refund ... ok
+test tcp::tcp_save_fail_closed_tests::persistence_admission_is_finite_and_releases_capacity ... ok
+test topology::tests::checked_adaptive_route_rejects_capacity_exhaustion ... ok
+test web::game_shop_gift_tests::gift_binding_preserves_nonce_tuple_identity_and_full_capacity_replays ... ok
+test web::tests::action_capacity_waits_for_a_released_slot ... ok
+test web::tests::capacity_state_rejects_websocket_connections_over_limit ... ok
+test web::tests::capacity_state_tracks_account_command_inflight_limits ... ok
+test web::tests::capacity_state_tracks_active_sessions_and_reconnect_leases ... ok
+test web::tests::development_capacity_policy_is_unlimited_unless_explicitly_configured ... ok
+test web::tests::monthly_card_tests::monthly_card_expired_resume_discards_the_lease_and_capacity ... ok
+test web::tests::native_resume_expired_credential_with_live_lease_is_terminal_and_releases_capacity ... ok
+test web::tests::production_capacity_defaults_are_finite_and_environment_overrides_remain_explicit ... ok
+test web::web_reconnect_handoff_store_tests::capacity_wait_does_not_preserve_authorization_revoked_after_consumption ... ok
+test web::web_save_fail_closed_tests::persistence_admission_capacity_is_finite_and_permits_are_released ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 1752 filtered out; finished in 12.03s
+

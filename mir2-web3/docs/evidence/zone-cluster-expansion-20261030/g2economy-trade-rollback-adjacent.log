@@ -1,0 +1,26 @@
+    Finished `test` profile [unoptimized] target(s) in 0.36s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 4 tests
+gateway lifecycle session_id=gateway-71316-1793371011619-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371011619-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-71316-1793371011618-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371011618-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_rolls_back_item_rental_when_partner_cancels ... ok
+gateway lifecycle session_id=gateway-71316-1793371014047-4 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371014047-4 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-71316-1793371014046-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371014046-3 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_rolls_back_pending_trade_when_partner_cancels ... ok
+gateway lifecycle session_id=gateway-71316-1793371016121-6 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371016121-6 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-71316-1793371016121-5 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371016121-5 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_rolls_back_pending_trade_when_partner_disconnects ... ok
+gateway lifecycle session_id=gateway-71316-1793371018170-8 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371018170-8 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-71316-1793371018170-7 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71316-1793371018170-7 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_rolls_back_two_sided_trade_when_receiver_is_full ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1475 filtered out; finished in 12.16s

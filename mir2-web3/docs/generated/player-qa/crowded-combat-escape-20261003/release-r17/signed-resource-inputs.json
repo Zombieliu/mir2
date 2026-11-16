@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.windows.r17-resource-input-pins.v1",
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "sourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\r17\\mir2-player-journey\\mir2-web3\\dist\\r17",
+  "rootCmsGatePassed": true,
+  "files": {
+    "PACKAGE-MANIFEST.json": {
+      "size": 24360174,
+      "sha256": "ceae366bebca1c19c3f529eb22f016ccc80dff5b8655694e76682e31ab12cb18"
+    },
+    "VERSION.json": {
+      "size": 1221,
+      "sha256": "1409e21c9f1ae7a04b71603ce1220fe38c37f222d54859af2592cdd72ce99b16"
+    },
+    "RELEASE-STATEMENT.json": {
+      "size": 707,
+      "sha256": "e64a8ef4fc62e6e9f6fe16625321fc8a88a0c8c29a661aeda46025b08015da82"
+    },
+    "RELEASE-STATEMENT.p7s": {
+      "size": 1614,
+      "sha256": "bee84b574f43f6411eb1bc3ab23a3ce0c389b853fb0f8b63f6ad9bdb1287856e"
+    },
+    "mir2-platform-windows.exe": {
+      "size": 111013376,
+      "sha256": "d0780475efa9f9c1ecd730dfcfc11e38b9b0659f05b3b1f7d93b4f80c3d734e0"
+    },
+    "BUILD-ATTESTATION.json": {
+      "size": 1493,
+      "sha256": "7b360fed1fa6b06e8cdf2a292656e13657f8fae3bb7577a61590e6149ec1d6f5"
+    }
+  },
+  "canonicalProofPath": "C:\\Users\\Administrator\\.codex\\worktrees\\r17\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261004-invited-17-verification.json",
+  "createdUtc": "2026-10-04T02:25:28.0558934Z"
+}

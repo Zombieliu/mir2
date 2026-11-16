@@ -1,0 +1,58 @@
+{
+  "schema": "mir2.windows.real-public23-to24-admission.v1",
+  "passed": true,
+  "checkedUnix": 1793222886.2584362,
+  "installation": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\e2e-old23-installation",
+  "engineSourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+  "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+  "gameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+  "candidate": "WN-CANDIDATE-20261029-wallet-28",
+  "actualOld23Bridge": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\REAL-OLD9213-PUBLIC-BRIDGE-S23.json",
+    "sha256": "9629C2C90ACB4AAEB211987C4E304A680320901DC871CA102BAB23530FD698C3",
+    "sequence": 23,
+    "realOriginalGameHealthAccepted": true,
+    "originalGameObservedAliveSeconds": 10.94,
+    "healthSimulated": false
+  },
+  "actualSecond24CheckOnly": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\REAL-LEGACY-LAUNCHER-PUBLIC-S24.json",
+    "sha256": "B7A3167D4F1BB0341B377E02C1766F16EED3D919DBCF2923477B94528F7D1BEA",
+    "sequence": 24,
+    "activated": true,
+    "verifiedFileCount": 255069,
+    "verifiedPayloadBytes": 1202414057,
+    "personalAndLogsPreserved": true,
+    "gameLaunched": false,
+    "transactionPhase": "committed",
+    "firstLaunchHealthAccepted": false,
+    "elapsedSeconds": 1947.01,
+    "outcome": {
+      "activated": true,
+      "candidate": "WN-CANDIDATE-20261029-wallet-28",
+      "changedGameFiles": 101918,
+      "delivery": {
+        "bundles": 5,
+        "fallbacks": 0,
+        "patches": 0
+      },
+      "downloadedBytes": 332981956,
+      "downloadedFiles": 870,
+      "sequence": 24,
+      "wireBytes": 397833195
+    }
+  },
+  "originalNativeRunLog": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\REAL-PUBLIC23-24-last-run.jsonl",
+    "sha256": "3EC478681A0E92498024EC0B5C9118FBE14BCB009F54F63978B27E1A8A65C8F8"
+  },
+  "scriptSha256": {
+    "run_real_old_engine_bridge23.py": "F9E24AF936392A2E3C9591B140D28DBA14EE685EDCE8444DDA4ACF4FCD0C3293",
+    "check_real_legacy_launcher_s24.py": "338FF73FBAC20358945E5FF2EEA9289054D8CB3599B41A7403B555B6E52E6B65"
+  },
+  "remainingOwnFixtureProcesses": [],
+  "loginOrAccountActionsSubmitted": false,
+  "healthSimulated": false,
+  "dockerStarted": false,
+  "otherProcessesTerminated": false
+}

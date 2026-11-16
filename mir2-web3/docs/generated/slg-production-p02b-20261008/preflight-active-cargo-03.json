@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.production-preflight-history.v1",
+  "createdUtc": "2026-10-08T13:24:27.5990569Z",
+  "run": "before inventory-regression-02",
+  "result": "another Cargo/rustc invocation active at original preflight",
+  "toolChunk": "3f3a85",
+  "guardNonceCreated": false,
+  "cargoSpawned": false,
+  "testsRun": 0,
+  "consoleLog": "work/slg-production-p02b-20261008/inventory-regression-02-preflight-active-cargo.console.log",
+  "consoleSha256": "a7ad697fd8f9b9b6ba7114bb38d9a536d7429c2fc1c4473b51498db06ba23fc0",
+  "note": "No Cargo check started; preserve refusal. Normal concurrent work untouched."
+}

@@ -1,0 +1,71 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 265,
+      "y": 636
+    },
+    {
+      "x": 261,
+      "y": 643
+    }
+  ],
+  "patrolSpan": 2,
+  "monsterNames": [
+    "Scarecrow",
+    "Deer"
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        1
+      ],
+      "movementActorIndices": [
+        0
+      ]
+    }
+  ],
+  "generated": {
+    "staticOnly": true,
+    "staticProof": {
+      "homes": [
+        {
+          "x": 265,
+          "y": 636
+        },
+        {
+          "x": 261,
+          "y": 643
+        }
+      ],
+      "visitedCells": 10125,
+      "mapCells": 490000,
+      "footprintCells": 18
+    },
+    "observedNaturalTargets": [
+      {
+        "objectId": 206602,
+        "x": 263,
+        "y": 644,
+        "name": "Scarecrow",
+        "covered": true
+      },
+      {
+        "objectId": 206608,
+        "x": 262,
+        "y": 643,
+        "name": "Scarecrow",
+        "covered": true
+      },
+      {
+        "objectId": 206614,
+        "x": 261,
+        "y": 644,
+        "name": "Scarecrow",
+        "covered": true
+      }
+    ],
+    "source": "run03 navigationBlocked actual public occupants; no entity is spawned or edited",
+    "sustainableSupplyAccepted": false
+  }
+}

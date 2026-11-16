@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "nativeSha256": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+  "finalNativeSmoke": {
+    "passed": true,
+    "nativeSha256": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+    "processId": 36152,
+    "windowId": 96603886,
+    "coordinate": {
+      "x": 288,
+      "y": 614
+    },
+    "samePrivateCharacter": true,
+    "ordinaryAuthentication": true,
+    "npcUpperBodiesVisible": true,
+    "modelCallsThisRound": 0,
+    "originalGameStopped": false
+  },
+  "modelCallsThisRound": 0,
+  "samePrivateCharacterBeforeAfter": true,
+  "beforeCoordinate": {
+    "x": 288,
+    "y": 615
+  },
+  "afterCoordinate": {
+    "x": 288,
+    "y": 615
+  },
+  "normalWalkAfter": {
+    "x": 288,
+    "y": 614
+  },
+  "wholeMapRowBeforeLiveObjects": true,
+  "nextRowOcclusionRetained": true,
+  "legacyWebProducerUnchanged": true,
+  "signedR16ResourceCount": 255063,
+  "resourceCmsVerified": true,
+  "publicDeployment": false,
+  "humanAccepted": false,
+  "payloadFiles": [
+    "README.md",
+    "verification.json",
+    "source-inputs.json",
+    "wip-preservation.json",
+    "test-groups.json",
+    "04-market-comparison.png",
+    "02-private-before-288-615.jpg",
+    "03-private-after-288-615.jpg",
+    "05-private-after-normal-walk-288-614.jpg",
+    "final-world_depth-tests.log",
+    "final-atlas-tests.log",
+    "final-atlas-self_occlusion_redraw_tests.log",
+    "final-map_parser-tests.log",
+    "final-entity_presentation-tests.log",
+    "final-companion-tests.log",
+    "runtime-entity-final-tests.log",
+    "final-smoke.json",
+    "06-final-exe-market.jpg"
+  ]
+}

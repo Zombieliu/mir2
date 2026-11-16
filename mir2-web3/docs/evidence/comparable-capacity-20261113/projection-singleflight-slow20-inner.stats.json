@@ -1,0 +1,1493 @@
+{
+  "schema": "mir2.slow20-log-byte-range-statistics.v1",
+  "sourceLogPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-dense100-v1\\runs\\dense100-v1\\game-stderr.log",
+  "sourceLogBytes": 44075031,
+  "sourceLogSha256": "c584ae4b64bcc0095e246fa24e5efc93a99366f1d015e95a27e8d7fafbcead23",
+  "sourceLineCount": 545543,
+  "sourceIdentitySha256": "fcb721d047709a93813f31686ea1556520eeb4f1905c392bacb9d01f8c8a9382",
+  "singleLinkRegularFile": true,
+  "stableStatAndIdentity": true,
+  "fullFileHashed": true,
+  "ranges": [
+    {
+      "start": 33365739,
+      "endExclusive": 41383642
+    }
+  ],
+  "rangeMeaning": "byte offsets only; complete contained lines; no clock or WS attribution",
+  "measurementWindowImplied": false,
+  "selectedCompleteLines": 94623,
+  "boundaryCensoredLines": 0,
+  "boundaryCensoredSlowRows": 0,
+  "allFileSlowRowsSyntaxChecked": 543932,
+  "selectedSlowRows": 94622,
+  "unterminatedFinalLine": false,
+  "stages": [
+    {
+      "stage": "socket_turn.input",
+      "count": 2011,
+      "minMs": 20,
+      "p50Ms": 104,
+      "p95Ms": 1361,
+      "maxMs": 2653,
+      "sumOverlappingElapsedMs": 764142,
+      "topExamples": [
+        {
+          "durationMs": 2653,
+          "lineNumber": 425769,
+          "byteOffsetStart": 33981406,
+          "byteOffsetEndExclusive": 33981482,
+          "lineSha256": "3ff8c0463371c2e83983e98bdf596b7bda52672387c3797f5d93c0b60cfeca70"
+        },
+        {
+          "durationMs": 2189,
+          "lineNumber": 483760,
+          "byteOffsetStart": 38887708,
+          "byteOffsetEndExclusive": 38887784,
+          "lineSha256": "dee596fc2169e5bd509eb1341cde6e260e410ecf74f5bac70705908ef4200513"
+        },
+        {
+          "durationMs": 2133,
+          "lineNumber": 447918,
+          "byteOffsetStart": 35848006,
+          "byteOffsetEndExclusive": 35848082,
+          "lineSha256": "00aa427ba0d74b5089c8384dfcbfdc2222dde303a557fdf48ce9ebc17ece60b3"
+        }
+      ]
+    },
+    {
+      "stage": "session_action.execute",
+      "count": 2007,
+      "minMs": 20,
+      "p50Ms": 104,
+      "p95Ms": 1361,
+      "maxMs": 2653,
+      "sumOverlappingElapsedMs": 759226,
+      "topExamples": [
+        {
+          "durationMs": 2653,
+          "lineNumber": 425767,
+          "byteOffsetStart": 33981121,
+          "byteOffsetEndExclusive": 33981202,
+          "lineSha256": "9f7126422d48b7d697f170b39612d572c6fde6c3ea4bbf432b1c4c2a38872bb0"
+        },
+        {
+          "durationMs": 2188,
+          "lineNumber": 483759,
+          "byteOffsetStart": 38887627,
+          "byteOffsetEndExclusive": 38887708,
+          "lineSha256": "b44026840064b207ae8f84468dcb658864c9b361814cb01d1c364e29f1583601"
+        },
+        {
+          "durationMs": 2133,
+          "lineNumber": 447917,
+          "byteOffsetStart": 35847925,
+          "byteOffsetEndExclusive": 35848006,
+          "lineSha256": "217a05daa94f073ff39af054ecf481b03c9f4125443bed5c8a05cd66e0796cb2"
+        }
+      ]
+    },
+    {
+      "stage": "serial_gate.zone_outbound_wait",
+      "count": 9748,
+      "minMs": 20,
+      "p50Ms": 60,
+      "p95Ms": 934,
+      "maxMs": 2623,
+      "sumOverlappingElapsedMs": 2065541,
+      "topExamples": [
+        {
+          "durationMs": 2623,
+          "lineNumber": 425776,
+          "byteOffsetStart": 33981957,
+          "byteOffsetEndExclusive": 33982046,
+          "lineSha256": "aae1b51b60ac333ae886d618dbc87ba02a92b612f505f5bc49065109ba579f07"
+        },
+        {
+          "durationMs": 2506,
+          "lineNumber": 425261,
+          "byteOffsetStart": 33936418,
+          "byteOffsetEndExclusive": 33936507,
+          "lineSha256": "6ba980706b9d73ca6b2ff979bc0a747c9636d08fe7c3800ba2eaa543f884e543"
+        },
+        {
+          "durationMs": 2480,
+          "lineNumber": 425348,
+          "byteOffsetStart": 33944057,
+          "byteOffsetEndExclusive": 33944146,
+          "lineSha256": "f128da486ea0bc8fb6df04d351eda64aad865ece86dbd64db5b055e9ede877a1"
+        }
+      ]
+    },
+    {
+      "stage": "runtime_tick.total",
+      "count": 14162,
+      "minMs": 20,
+      "p50Ms": 31,
+      "p95Ms": 540,
+      "maxMs": 2506,
+      "sumOverlappingElapsedMs": 1578209,
+      "topExamples": [
+        {
+          "durationMs": 2506,
+          "lineNumber": 425247,
+          "byteOffsetStart": 33935126,
+          "byteOffsetEndExclusive": 33935203,
+          "lineSha256": "8a379f637e79fa6f519f8d35cfe0bd5636687f31004b0a5b47fd5ef840d82ba5"
+        },
+        {
+          "durationMs": 2486,
+          "lineNumber": 425327,
+          "byteOffsetStart": 33942224,
+          "byteOffsetEndExclusive": 33942301,
+          "lineSha256": "5812f6b4e8352643c9df01c0a9c5530a3cd3da616a1e0462762daa418d6e5edb"
+        },
+        {
+          "durationMs": 2274,
+          "lineNumber": 424774,
+          "byteOffsetStart": 33892110,
+          "byteOffsetEndExclusive": 33892187,
+          "lineSha256": "7d9b7077fd773d37e9d976b4addb2b7c46f9d436941c5e74083dcb40b5e362ff"
+        }
+      ]
+    },
+    {
+      "stage": "runtime_tick.execute",
+      "count": 14071,
+      "minMs": 20,
+      "p50Ms": 31,
+      "p95Ms": 530,
+      "maxMs": 2506,
+      "sumOverlappingElapsedMs": 1542104,
+      "topExamples": [
+        {
+          "durationMs": 2506,
+          "lineNumber": 425244,
+          "byteOffsetStart": 33934874,
+          "byteOffsetEndExclusive": 33934953,
+          "lineSha256": "cb6f8bcf06f0da729f46dfb42bc181b08b12a71b4af6a164866aa3cd1a0f2fd6"
+        },
+        {
+          "durationMs": 2486,
+          "lineNumber": 425325,
+          "byteOffsetStart": 33942078,
+          "byteOffsetEndExclusive": 33942157,
+          "lineSha256": "54c5beb870fba8204ce0649d0fb429ceaa10fec953266302b12734d2f1692399"
+        },
+        {
+          "durationMs": 2274,
+          "lineNumber": 424773,
+          "byteOffsetStart": 33892031,
+          "byteOffsetEndExclusive": 33892110,
+          "lineSha256": "3a39e9551cc018cb62598b4ea74baba9bd62e5aa585facc2057b7bb6b1c8daa3"
+        }
+      ]
+    },
+    {
+      "stage": "zone_owner.in_process.execute_request",
+      "count": 14521,
+      "minMs": 20,
+      "p50Ms": 31,
+      "p95Ms": 526,
+      "maxMs": 2506,
+      "sumOverlappingElapsedMs": 1602229,
+      "topExamples": [
+        {
+          "durationMs": 2506,
+          "lineNumber": 425243,
+          "byteOffsetStart": 33934792,
+          "byteOffsetEndExclusive": 33934874,
+          "lineSha256": "b158b22c54c03bfef0ef4066962507c240237bcda50f5448c8a859c6833244bf"
+        },
+        {
+          "durationMs": 2486,
+          "lineNumber": 425324,
+          "byteOffsetStart": 33941996,
+          "byteOffsetEndExclusive": 33942078,
+          "lineSha256": "d141014cc1bc6923282878888d4c25217c9635e8616108677237f988b503421a"
+        },
+        {
+          "durationMs": 2274,
+          "lineNumber": 424772,
+          "byteOffsetStart": 33891949,
+          "byteOffsetEndExclusive": 33892031,
+          "lineSha256": "023ceb83cdc906ec988ecb0eab30e94b0ea48c86f074da3155395922024d7956"
+        }
+      ]
+    },
+    {
+      "stage": "socket_input.queue_residence",
+      "count": 1122,
+      "minMs": 20,
+      "p50Ms": 208,
+      "p95Ms": 969,
+      "maxMs": 2391,
+      "sumOverlappingElapsedMs": 353114,
+      "topExamples": [
+        {
+          "durationMs": 2391,
+          "lineNumber": 425328,
+          "byteOffsetStart": 33942301,
+          "byteOffsetEndExclusive": 33942451,
+          "lineSha256": "998dbe0394a3b168562ceeaf9ef334dcbc62d00985832aeaeff4feba8d4d6fb4"
+        },
+        {
+          "durationMs": 1775,
+          "lineNumber": 425248,
+          "byteOffsetStart": 33935203,
+          "byteOffsetEndExclusive": 33935354,
+          "lineSha256": "4e53680ae6cc0cc360206f7df63121d4699968d94dc3cbd94d849d96acae9005"
+        },
+        {
+          "durationMs": 1755,
+          "lineNumber": 425359,
+          "byteOffsetStart": 33944960,
+          "byteOffsetEndExclusive": 33945112,
+          "lineSha256": "9836ce31fc66b3c9a84d0f2dd1fcd79b04d86687a81a04904b246122ea2c300e"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.reconcile",
+      "count": 854,
+      "minMs": 20,
+      "p50Ms": 93,
+      "p95Ms": 682,
+      "maxMs": 2267,
+      "sumOverlappingElapsedMs": 169522,
+      "topExamples": [
+        {
+          "durationMs": 2267,
+          "lineNumber": 425323,
+          "byteOffsetStart": 33941927,
+          "byteOffsetEndExclusive": 33941996,
+          "lineSha256": "7d221404c8730a8b23c0d0a44752157c9859f40d36323a70dc80a56fc7a86e45"
+        },
+        {
+          "durationMs": 2119,
+          "lineNumber": 425095,
+          "byteOffsetStart": 33922101,
+          "byteOffsetEndExclusive": 33922170,
+          "lineSha256": "63953a2458866df323dea0ea44d831e6611016c8dae0c9fd8111f788f8663a4d"
+        },
+        {
+          "durationMs": 1966,
+          "lineNumber": 424771,
+          "byteOffsetStart": 33891880,
+          "byteOffsetEndExclusive": 33891949,
+          "lineSha256": "04ac5b235a56ae53802cfa52ee19f60afc888d75f00ab32aed89284e2a240484"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain",
+      "count": 8262,
+      "minMs": 20,
+      "p50Ms": 39,
+      "p95Ms": 540,
+      "maxMs": 1717,
+      "sumOverlappingElapsedMs": 1074892,
+      "topExamples": [
+        {
+          "durationMs": 1717,
+          "lineNumber": 424438,
+          "byteOffsetStart": 33862022,
+          "byteOffsetEndExclusive": 33862090,
+          "lineSha256": "f6b5b37cf43f7b8deb02a96f0cba7c11c0f9ad9145f41bbfd3e01b5de951aefd"
+        },
+        {
+          "durationMs": 1491,
+          "lineNumber": 424672,
+          "byteOffsetStart": 33883581,
+          "byteOffsetEndExclusive": 33883649,
+          "lineSha256": "8334f252990fea3ca48603a29a3e7623e4d3853512617a981f110e3c9183acf3"
+        },
+        {
+          "durationMs": 1463,
+          "lineNumber": 499080,
+          "byteOffsetStart": 40191175,
+          "byteOffsetEndExclusive": 40191243,
+          "lineSha256": "640f6f6eef4155da3ce25ea98a5c6ee654085295a225d60c7a02f330d370683c"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.experience_context",
+      "count": 6576,
+      "minMs": 20,
+      "p50Ms": 45,
+      "p95Ms": 489,
+      "maxMs": 1462,
+      "sumOverlappingElapsedMs": 825269,
+      "topExamples": [
+        {
+          "durationMs": 1462,
+          "lineNumber": 499070,
+          "byteOffsetStart": 40190216,
+          "byteOffsetEndExclusive": 40190303,
+          "lineSha256": "2b11b87d61c750ead793c14eb572c808836e56b7795cbc263215ce7cfc231960"
+        },
+        {
+          "durationMs": 1401,
+          "lineNumber": 424178,
+          "byteOffsetStart": 33837775,
+          "byteOffsetEndExclusive": 33837862,
+          "lineSha256": "25247e81c1c212fea201b3b7bd68e7a731c615996e6e784439febed1ce43ee8d"
+        },
+        {
+          "durationMs": 1322,
+          "lineNumber": 466656,
+          "byteOffsetStart": 37432172,
+          "byteOffsetEndExclusive": 37432259,
+          "lineSha256": "e3d38625971045f1df5b80b1ee5fe951f7ed1bf4c7528f60f96054dddf0ae1c5"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.experience.owner_publication",
+      "count": 4587,
+      "minMs": 20,
+      "p50Ms": 59,
+      "p95Ms": 394,
+      "maxMs": 1461,
+      "sumOverlappingElapsedMs": 509699,
+      "topExamples": [
+        {
+          "durationMs": 1461,
+          "lineNumber": 499069,
+          "byteOffsetStart": 40190128,
+          "byteOffsetEndExclusive": 40190216,
+          "lineSha256": "ac68b791d3fa72bcf98395633fc1467d5086b55873de42c113c7688d0fb49206"
+        },
+        {
+          "durationMs": 1283,
+          "lineNumber": 424257,
+          "byteOffsetStart": 33844700,
+          "byteOffsetEndExclusive": 33844788,
+          "lineSha256": "c74bb58d92821d84bc9d32545f9bc1ec0b040dfe0483dccf78a92387ba4c0456"
+        },
+        {
+          "durationMs": 1281,
+          "lineNumber": 424133,
+          "byteOffsetStart": 33833336,
+          "byteOffsetEndExclusive": 33833424,
+          "lineSha256": "5c3000c746264954e6a589fd751038965bec7bddb99afa8fd829ddb94018fd18"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.experience.admission_capture",
+      "count": 2791,
+      "minMs": 20,
+      "p50Ms": 68,
+      "p95Ms": 404,
+      "maxMs": 1330,
+      "sumOverlappingElapsedMs": 334792,
+      "topExamples": [
+        {
+          "durationMs": 1330,
+          "lineNumber": 424177,
+          "byteOffsetStart": 33837687,
+          "byteOffsetEndExclusive": 33837775,
+          "lineSha256": "dad98775c722052c0dc62b1ecd906ce6240ab130d02083d9cae2dd8deab77f84"
+        },
+        {
+          "durationMs": 1138,
+          "lineNumber": 424356,
+          "byteOffsetStart": 33854275,
+          "byteOffsetEndExclusive": 33854363,
+          "lineSha256": "dd2cebaa6f4a64510d717f0f8157f2e7a3f0a0dec507abd690ce1a735f1d89fe"
+        },
+        {
+          "durationMs": 1074,
+          "lineNumber": 466655,
+          "byteOffsetStart": 37432084,
+          "byteOffsetEndExclusive": 37432172,
+          "lineSha256": "c0651f1a299d0a2726a87895f6941ed82e3e153d17f6566913d8b2d8b27abd56"
+        }
+      ]
+    },
+    {
+      "stage": "account_store.store_wait",
+      "count": 3349,
+      "minMs": 20,
+      "p50Ms": 81,
+      "p95Ms": 432,
+      "maxMs": 1329,
+      "sumOverlappingElapsedMs": 446247,
+      "topExamples": [
+        {
+          "durationMs": 1329,
+          "lineNumber": 424176,
+          "byteOffsetStart": 33837480,
+          "byteOffsetEndExclusive": 33837687,
+          "lineSha256": "abfd647e9055db6dfd10c6d50960fd8b51fd2b54be7378439047951793e128d0"
+        },
+        {
+          "durationMs": 1138,
+          "lineNumber": 424355,
+          "byteOffsetStart": 33854068,
+          "byteOffsetEndExclusive": 33854275,
+          "lineSha256": "4373ca56692e43ba9a9efdcb2431713dafb91c5ebbeb2921f4b5f597794dff33"
+        },
+        {
+          "durationMs": 1109,
+          "lineNumber": 475867,
+          "byteOffsetStart": 38220968,
+          "byteOffsetEndExclusive": 38221167,
+          "lineSha256": "6f8efb8857514e36e657a566ff2a68fce0af84e3a5dcc6201c67258690488aeb"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.inner_execute",
+      "count": 767,
+      "minMs": 20,
+      "p50Ms": 83,
+      "p95Ms": 452,
+      "maxMs": 1285,
+      "sumOverlappingElapsedMs": 106335,
+      "topExamples": [
+        {
+          "durationMs": 1285,
+          "lineNumber": 424262,
+          "byteOffsetStart": 33845259,
+          "byteOffsetEndExclusive": 33845332,
+          "lineSha256": "b406c51c274465fd12f28bf89f11e6d3b9c4a53d19baf71bb30b978d9ecac88c"
+        },
+        {
+          "durationMs": 818,
+          "lineNumber": 424373,
+          "byteOffsetStart": 33855950,
+          "byteOffsetEndExclusive": 33856022,
+          "lineSha256": "9b8db006feeab47f1d48ff4a9a668bfcc7ecfa20c70548a9a3290714c0513409"
+        },
+        {
+          "durationMs": 793,
+          "lineNumber": 466813,
+          "byteOffsetStart": 37446012,
+          "byteOffsetEndExclusive": 37446084,
+          "lineSha256": "73c200880f3c998cf6b598403831e1a8b36db3975e5d6ffca05808810143c5c0"
+        }
+      ]
+    },
+    {
+      "stage": "personal_tick.leaves",
+      "count": 290,
+      "minMs": 20,
+      "p50Ms": 95,
+      "p95Ms": 482,
+      "maxMs": 1284,
+      "sumOverlappingElapsedMs": 44856,
+      "topExamples": [
+        {
+          "durationMs": 1284,
+          "lineNumber": 424261,
+          "byteOffsetStart": 33845030,
+          "byteOffsetEndExclusive": 33845259,
+          "lineSha256": "ebf98e8ccc46e0a07eaea36ddd45ccb334db94bda84e385e998f2135b0e67084"
+        },
+        {
+          "durationMs": 775,
+          "lineNumber": 455910,
+          "byteOffsetStart": 36514569,
+          "byteOffsetEndExclusive": 36514795,
+          "lineSha256": "b7365e1a302c855e2332fa9e104c208b679ecf9cec3f281aa4fd8eb3e29e7f0a"
+        },
+        {
+          "durationMs": 744,
+          "lineNumber": 508397,
+          "byteOffsetStart": 40975911,
+          "byteOffsetEndExclusive": 40976137,
+          "lineSha256": "b2927d9f588d7af1fe6ba19a9a84b683f9ef0279e31cafe4be3cc6b1cc06f3c1"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.reconcile.experience_profiles",
+      "count": 472,
+      "minMs": 20,
+      "p50Ms": 91,
+      "p95Ms": 450,
+      "maxMs": 1283,
+      "sumOverlappingElapsedMs": 73743,
+      "topExamples": [
+        {
+          "durationMs": 1283,
+          "lineNumber": 424258,
+          "byteOffsetStart": 33844788,
+          "byteOffsetEndExclusive": 33844877,
+          "lineSha256": "afce96a5e6181259b650bd69d2abc7ef9697c21c66a5ccd2cd690ec7fee23fde"
+        },
+        {
+          "durationMs": 1281,
+          "lineNumber": 424134,
+          "byteOffsetStart": 33833424,
+          "byteOffsetEndExclusive": 33833513,
+          "lineSha256": "5802b34a4b79357e1f8efbf5fefdc7c511cd29ef0af1450f17efdabe1f882025"
+        },
+        {
+          "durationMs": 1038,
+          "lineNumber": 447012,
+          "byteOffsetStart": 35767107,
+          "byteOffsetEndExclusive": 35767196,
+          "lineSha256": "410b16d57f676580c5016065b463f0a9eeca2959840d620dcfafe95b8d21d277"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.mentor_accounting",
+      "count": 1490,
+      "minMs": 20,
+      "p50Ms": 74,
+      "p95Ms": 469,
+      "maxMs": 1059,
+      "sumOverlappingElapsedMs": 196528,
+      "topExamples": [
+        {
+          "durationMs": 1059,
+          "lineNumber": 424437,
+          "byteOffsetStart": 33861936,
+          "byteOffsetEndExclusive": 33862022,
+          "lineSha256": "5a2cbd01e64317ef6ce88bf96a38cff3b882ba22253c68bee1098e2d3180fb84"
+        },
+        {
+          "durationMs": 974,
+          "lineNumber": 424318,
+          "byteOffsetStart": 33850647,
+          "byteOffsetEndExclusive": 33850732,
+          "lineSha256": "bb8dabbd1134818b3ba672411f3bda3887a4f5df327201ff7e6f71e4d64595ee"
+        },
+        {
+          "durationMs": 927,
+          "lineNumber": 424471,
+          "byteOffsetStart": 33864953,
+          "byteOffsetEndExclusive": 33865038,
+          "lineSha256": "7f0f666f3057560e5499a74785062235bcdcce46af1e6e8966bad1aa86f93a3c"
+        }
+      ]
+    },
+    {
+      "stage": "zone_cadence.total",
+      "count": 192,
+      "minMs": 20,
+      "p50Ms": 39,
+      "p95Ms": 391,
+      "maxMs": 984,
+      "sumOverlappingElapsedMs": 19638,
+      "topExamples": [
+        {
+          "durationMs": 984,
+          "lineNumber": 508912,
+          "byteOffsetStart": 41023078,
+          "byteOffsetEndExclusive": 41023140,
+          "lineSha256": "c59ada2e04c911f6e0b4d534a048bd32ea02e50fd0645e7d01b6dc2e519ce164"
+        },
+        {
+          "durationMs": 585,
+          "lineNumber": 476288,
+          "byteOffsetStart": 38257392,
+          "byteOffsetEndExclusive": 38257454,
+          "lineSha256": "2a07742ec73860c8f2f30eaa88859c35b3b51db516d2a9fda6fe9355bd5fc851"
+        },
+        {
+          "durationMs": 562,
+          "lineNumber": 491118,
+          "byteOffsetStart": 39511249,
+          "byteOffsetEndExclusive": 39511311,
+          "lineSha256": "e3508232f6575cb4a463258a0d4c6975d01ca264927fe9cb71314880190bb4f0"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.reconcile.mentor_accounting",
+      "count": 404,
+      "minMs": 20,
+      "p50Ms": 106,
+      "p95Ms": 518,
+      "maxMs": 974,
+      "sumOverlappingElapsedMs": 66594,
+      "topExamples": [
+        {
+          "durationMs": 974,
+          "lineNumber": 466963,
+          "byteOffsetStart": 37459851,
+          "byteOffsetEndExclusive": 37459937,
+          "lineSha256": "7c164d6ca7a3a415c05c0c00d6cda1de7a2ed4f20c26cf508ff820bda3a9fad4"
+        },
+        {
+          "durationMs": 873,
+          "lineNumber": 423891,
+          "byteOffsetStart": 33810406,
+          "byteOffsetEndExclusive": 33810492,
+          "lineSha256": "4a8707a7c061f84c02fa3622621ade88c692fd9e235d87585637abd6d950720d"
+        },
+        {
+          "durationMs": 835,
+          "lineNumber": 424735,
+          "byteOffsetStart": 33888808,
+          "byteOffsetEndExclusive": 33888894,
+          "lineSha256": "bfabe1bde08539f7891657db5a76495f53354b5664160bdc7f0bdca94adec1f5"
+        }
+      ]
+    },
+    {
+      "stage": "runtime_tick.serial_gate_wait",
+      "count": 240,
+      "minMs": 20,
+      "p50Ms": 84,
+      "p95Ms": 373,
+      "maxMs": 964,
+      "sumOverlappingElapsedMs": 33525,
+      "topExamples": [
+        {
+          "durationMs": 964,
+          "lineNumber": 508914,
+          "byteOffsetStart": 41023227,
+          "byteOffsetEndExclusive": 41023313,
+          "lineSha256": "6c83849b76860e64651cab87ab5e2eb259a9aa3344699cb435484d1b5802f624"
+        },
+        {
+          "durationMs": 750,
+          "lineNumber": 508913,
+          "byteOffsetStart": 41023140,
+          "byteOffsetEndExclusive": 41023227,
+          "lineSha256": "5078c7f27686a84e94e8634e0af2684a8690bbc35452b449a6ad3bcdceff5c96"
+        },
+        {
+          "durationMs": 637,
+          "lineNumber": 508915,
+          "byteOffsetStart": 41023313,
+          "byteOffsetEndExclusive": 41023400,
+          "lineSha256": "bc5a5b483dfc469b11c0ad074dadc2cc3f617fffdb7776016744b23146f16ad8"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.tail",
+      "count": 228,
+      "minMs": 20,
+      "p50Ms": 86,
+      "p95Ms": 468,
+      "maxMs": 926,
+      "sumOverlappingElapsedMs": 33371,
+      "topExamples": [
+        {
+          "durationMs": 926,
+          "lineNumber": 498802,
+          "byteOffsetStart": 40166646,
+          "byteOffsetEndExclusive": 40166709,
+          "lineSha256": "c939742dd32c2b31312d200cb447b2005bd28df11488ca6f57ca4edb448a5e7d"
+        },
+        {
+          "durationMs": 738,
+          "lineNumber": 490627,
+          "byteOffsetStart": 39465978,
+          "byteOffsetEndExclusive": 39466041,
+          "lineSha256": "cc3a9d67fc9ef8f7799f33727b02729ea708925ef2ea82231e7d2c8ba8a69e1f"
+        },
+        {
+          "durationMs": 644,
+          "lineNumber": 467151,
+          "byteOffsetStart": 37476893,
+          "byteOffsetEndExclusive": 37476956,
+          "lineSha256": "7b05bc2004c87b558d3b49415b838c9c2b001c0a9f6f42a33ef11ba62af8dfc1"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.publish",
+      "count": 159,
+      "minMs": 20,
+      "p50Ms": 40,
+      "p95Ms": 173,
+      "maxMs": 204,
+      "sumOverlappingElapsedMs": 9856,
+      "topExamples": [
+        {
+          "durationMs": 204,
+          "lineNumber": 509287,
+          "byteOffsetStart": 41056903,
+          "byteOffsetEndExclusive": 41056964,
+          "lineSha256": "6eba5284903f38acda14a1a127bdc2757d24553ebf05d0894a1e4aed567a6563"
+        },
+        {
+          "durationMs": 193,
+          "lineNumber": 509290,
+          "byteOffsetStart": 41057106,
+          "byteOffsetEndExclusive": 41057167,
+          "lineSha256": "3c9c9ffbc91fdba1c2713fd7055774f49c235194ca0bc38583c8a11fbad45eb8"
+        },
+        {
+          "durationMs": 189,
+          "lineNumber": 509293,
+          "byteOffsetStart": 41057309,
+          "byteOffsetEndExclusive": 41057370,
+          "lineSha256": "2b62d4952c8bcc63b55fcf3b5da9786c91cd7c55d118deea7d40b6bb27ceb3e6"
+        }
+      ]
+    },
+    {
+      "stage": "socket_turn.spectator",
+      "count": 3013,
+      "minMs": 20,
+      "p50Ms": 24,
+      "p95Ms": 62,
+      "maxMs": 204,
+      "sumOverlappingElapsedMs": 92019,
+      "topExamples": [
+        {
+          "durationMs": 204,
+          "lineNumber": 509289,
+          "byteOffsetStart": 41057027,
+          "byteOffsetEndExclusive": 41057106,
+          "lineSha256": "264b30017bd7f9b5dd14bea9eca80ce9a52ed429a95c3580febd7d7da9d7ed30"
+        },
+        {
+          "durationMs": 200,
+          "lineNumber": 509292,
+          "byteOffsetStart": 41057230,
+          "byteOffsetEndExclusive": 41057309,
+          "lineSha256": "bec410a24643049948d422d3dd8c804e07b7344e9f4f20fc11aa6a544f8f9fde"
+        },
+        {
+          "durationMs": 200,
+          "lineNumber": 509295,
+          "byteOffsetStart": 41057433,
+          "byteOffsetEndExclusive": 41057512,
+          "lineSha256": "6149d14296cdc23d04c29d4307f93b453c79cc74b549d5818a0756af571ddaf6"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.experience.peer_projection_and_wars",
+      "count": 6,
+      "minMs": 25,
+      "p50Ms": 42,
+      "p95Ms": 195,
+      "maxMs": 195,
+      "sumOverlappingElapsedMs": 387,
+      "topExamples": [
+        {
+          "durationMs": 195,
+          "lineNumber": 422612,
+          "byteOffsetStart": 33688821,
+          "byteOffsetEndExclusive": 33688915,
+          "lineSha256": "8f52d9e242145e12a7027691bdb665b4f1a94ebc69e8f7077a99edc025d51a32"
+        },
+        {
+          "durationMs": 48,
+          "lineNumber": 419982,
+          "byteOffsetStart": 33479848,
+          "byteOffsetEndExclusive": 33479941,
+          "lineSha256": "6a32dc441909f0c11cc937a946a04e3776baa997d4245145ac4811a728920a0a"
+        },
+        {
+          "durationMs": 48,
+          "lineNumber": 422661,
+          "byteOffsetStart": 33692871,
+          "byteOffsetEndExclusive": 33692964,
+          "lineSha256": "6a32dc441909f0c11cc937a946a04e3776baa997d4245145ac4811a728920a0a"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.lock_wait",
+      "count": 113,
+      "minMs": 20,
+      "p50Ms": 50,
+      "p95Ms": 174,
+      "maxMs": 191,
+      "sumOverlappingElapsedMs": 8078,
+      "topExamples": [
+        {
+          "durationMs": 191,
+          "lineNumber": 509288,
+          "byteOffsetStart": 41056964,
+          "byteOffsetEndExclusive": 41057027,
+          "lineSha256": "96d3b0be27336be28182f4b7acf2d4312c52589d177aa07b614afec953ea752e"
+        },
+        {
+          "durationMs": 188,
+          "lineNumber": 509291,
+          "byteOffsetStart": 41057167,
+          "byteOffsetEndExclusive": 41057230,
+          "lineSha256": "aba6d23a8d1d913c771c39d26179fb442e48905b5474b7984cafdad19957678f"
+        },
+        {
+          "durationMs": 181,
+          "lineNumber": 509294,
+          "byteOffsetStart": 41057370,
+          "byteOffsetEndExclusive": 41057433,
+          "lineSha256": "b225e175c97685be35f5a5fa6ae0ebe2034ccb5254c960f10b4063e4057839c9"
+        }
+      ]
+    },
+    {
+      "stage": "runtime_tick.save_checkpoint",
+      "count": 2,
+      "minMs": 73,
+      "p50Ms": 73,
+      "p95Ms": 186,
+      "maxMs": 186,
+      "sumOverlappingElapsedMs": 259,
+      "topExamples": [
+        {
+          "durationMs": 186,
+          "lineNumber": 422569,
+          "byteOffsetStart": 33685053,
+          "byteOffsetEndExclusive": 33685140,
+          "lineSha256": "a81bb24fa82716ad917a0222ffb1d3c896739b82bbd3e8b8735628f201e5b036"
+        },
+        {
+          "durationMs": 73,
+          "lineNumber": 419590,
+          "byteOffsetStart": 33448639,
+          "byteOffsetEndExclusive": 33448725,
+          "lineSha256": "abffaf52226bcb138b98f4225e24242f345cc24432af7bd421320a313a9d0ed8"
+        }
+      ]
+    },
+    {
+      "stage": "account_store.driver_held",
+      "count": 22,
+      "minMs": 20,
+      "p50Ms": 22,
+      "p95Ms": 73,
+      "maxMs": 167,
+      "sumOverlappingElapsedMs": 797,
+      "topExamples": [
+        {
+          "durationMs": 167,
+          "lineNumber": 459782,
+          "byteOffsetStart": 36844510,
+          "byteOffsetEndExclusive": 36844706,
+          "lineSha256": "a750988e4eb1fee962bad12ca69a5420ad6fe44209bda789862898a27b721513"
+        },
+        {
+          "durationMs": 73,
+          "lineNumber": 424151,
+          "byteOffsetStart": 33835012,
+          "byteOffsetEndExclusive": 33835205,
+          "lineSha256": "bd3fa9a2ff9c01b4b63dfe8ade908a4c5b13609d5cef2a09fe833993a14a6880"
+        },
+        {
+          "durationMs": 69,
+          "lineNumber": 456595,
+          "byteOffsetStart": 36577417,
+          "byteOffsetEndExclusive": 36577610,
+          "lineSha256": "da62201ded233fc6a5da411e8a115c88ef07e09ae12e887129a2ac4a2617d235"
+        }
+      ]
+    },
+    {
+      "stage": "account_store.store_held",
+      "count": 214,
+      "minMs": 20,
+      "p50Ms": 24,
+      "p95Ms": 69,
+      "maxMs": 151,
+      "sumOverlappingElapsedMs": 6717,
+      "topExamples": [
+        {
+          "durationMs": 151,
+          "lineNumber": 459780,
+          "byteOffsetStart": 36844105,
+          "byteOffsetEndExclusive": 36844304,
+          "lineSha256": "e13763ee69b76fa7419199a13582a3873de5fbe745ef498cacfee56ab565d5bd"
+        },
+        {
+          "durationMs": 112,
+          "lineNumber": 425418,
+          "byteOffsetStart": 33949480,
+          "byteOffsetEndExclusive": 33949684,
+          "lineSha256": "77bbae68f3ead46991594d8c355385980eae309255cdda551fb005883e49217c"
+        },
+        {
+          "durationMs": 93,
+          "lineNumber": 491532,
+          "byteOffsetStart": 39547846,
+          "byteOffsetEndExclusive": 39548052,
+          "lineSha256": "48d76c9834d430c74749390a45b614366ea34f9816b251ee76d6aa0165bb109f"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.snapshot",
+      "count": 2257,
+      "minMs": 20,
+      "p50Ms": 24,
+      "p95Ms": 57,
+      "maxMs": 150,
+      "sumOverlappingElapsedMs": 65871,
+      "topExamples": [
+        {
+          "durationMs": 150,
+          "lineNumber": 476320,
+          "byteOffsetStart": 38260158,
+          "byteOffsetEndExclusive": 38260234,
+          "lineSha256": "e614ba41e48245f341989637f5077753acff4c7b2fe0c0eed33ccec3f9a3fefd"
+        },
+        {
+          "durationMs": 144,
+          "lineNumber": 424142,
+          "byteOffsetStart": 33834063,
+          "byteOffsetEndExclusive": 33834139,
+          "lineSha256": "2f868f2f2e13b0853b429ac1605c7770c91afc37581c60c7856ef8fc28dd4800"
+        },
+        {
+          "durationMs": 135,
+          "lineNumber": 436640,
+          "byteOffsetStart": 34896259,
+          "byteOffsetEndExclusive": 34896335,
+          "lineSha256": "50b51ab2cd9f882880131c36a62d34a9379bd907042abd27d1f8ea0169a276fd"
+        }
+      ]
+    },
+    {
+      "stage": "account_store.marker_begin_sync",
+      "count": 1,
+      "minMs": 138,
+      "p50Ms": 138,
+      "p95Ms": 138,
+      "maxMs": 138,
+      "sumOverlappingElapsedMs": 138,
+      "topExamples": [
+        {
+          "durationMs": 138,
+          "lineNumber": 459781,
+          "byteOffsetStart": 36844304,
+          "byteOffsetEndExclusive": 36844510,
+          "lineSha256": "3c441a09ac5ecc2b20ef89d41ecc2484b6c37a4707ddc732005acd7382938562"
+        }
+      ]
+    },
+    {
+      "stage": "serial_gate.input_wait",
+      "count": 28,
+      "minMs": 20,
+      "p50Ms": 44,
+      "p95Ms": 128,
+      "maxMs": 135,
+      "sumOverlappingElapsedMs": 1743,
+      "topExamples": [
+        {
+          "durationMs": 135,
+          "lineNumber": 436494,
+          "byteOffsetStart": 34883993,
+          "byteOffsetEndExclusive": 34884073,
+          "lineSha256": "39dc38ce119bda1d66b42d6020465b7ee19eca82ffc3e87dce2088449cd51895"
+        },
+        {
+          "durationMs": 128,
+          "lineNumber": 476142,
+          "byteOffsetStart": 38245448,
+          "byteOffsetEndExclusive": 38245529,
+          "lineSha256": "6e8596c8ff6899c5f767d74f1f1b5f7fc620deb56e1defaf6976591364aae281"
+        },
+        {
+          "durationMs": 119,
+          "lineNumber": 476137,
+          "byteOffsetStart": 38245030,
+          "byteOffsetEndExclusive": 38245110,
+          "lineSha256": "adba0e5c51c77c140b384755a071fe8e7d8edaa70b2ff8932715d2c1b82e6484"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.reconcile.player_kills",
+      "count": 30,
+      "minMs": 20,
+      "p50Ms": 31,
+      "p95Ms": 111,
+      "maxMs": 130,
+      "sumOverlappingElapsedMs": 1175,
+      "topExamples": [
+        {
+          "durationMs": 130,
+          "lineNumber": 509370,
+          "byteOffsetStart": 41062652,
+          "byteOffsetEndExclusive": 41062733,
+          "lineSha256": "4e80831975a4e53462bf13436645b078ba6bbb9c1494a5da06fc4a004ecc4b35"
+        },
+        {
+          "durationMs": 111,
+          "lineNumber": 435995,
+          "byteOffsetStart": 34839228,
+          "byteOffsetEndExclusive": 34839309,
+          "lineSha256": "0dae1b96a9292e85a68313dbecece33930e746288f1b1e8f0048d137e1408dff"
+        },
+        {
+          "durationMs": 85,
+          "lineNumber": 455962,
+          "byteOffsetStart": 36519533,
+          "byteOffsetEndExclusive": 36519613,
+          "lineSha256": "4b45f38c43d9b52d5c31bd9f1a0c859300a12bc4da4b3a02616e15fb5bb8d419"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.pending_drain",
+      "count": 301,
+      "minMs": 20,
+      "p50Ms": 28,
+      "p95Ms": 83,
+      "maxMs": 120,
+      "sumOverlappingElapsedMs": 10764,
+      "topExamples": [
+        {
+          "durationMs": 120,
+          "lineNumber": 500137,
+          "byteOffsetStart": 40287356,
+          "byteOffsetEndExclusive": 40287437,
+          "lineSha256": "e1752ae1dbcd6bf312410fed52a90e1549733530410e6206be95d6e00d8b455b"
+        },
+        {
+          "durationMs": 119,
+          "lineNumber": 435996,
+          "byteOffsetStart": 34839309,
+          "byteOffsetEndExclusive": 34839390,
+          "lineSha256": "33e2ebc08f21886c8ff0e38b4ade2d4dc2dc1f1a54b8d55a4e198e975269e5ed"
+        },
+        {
+          "durationMs": 112,
+          "lineNumber": 466739,
+          "byteOffsetStart": 37439492,
+          "byteOffsetEndExclusive": 37439573,
+          "lineSha256": "fd52af81738a1e064ac8f5d35d4ea7002b5e144aa9911cc8f43fc9659ff88501"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.pending_lock_wait",
+      "count": 147,
+      "minMs": 20,
+      "p50Ms": 30,
+      "p95Ms": 83,
+      "maxMs": 120,
+      "sumOverlappingElapsedMs": 5461,
+      "topExamples": [
+        {
+          "durationMs": 120,
+          "lineNumber": 500136,
+          "byteOffsetStart": 40287271,
+          "byteOffsetEndExclusive": 40287356,
+          "lineSha256": "63ac2f0d9cfdd9e06fbb452bce3640303683e3625f61bf149ddda617c789f5d5"
+        },
+        {
+          "durationMs": 112,
+          "lineNumber": 466738,
+          "byteOffsetStart": 37439407,
+          "byteOffsetEndExclusive": 37439492,
+          "lineSha256": "e9376f4865abcd3658b9c20d8f0d0537bb35fcf21d8d59eeab9d983e4c250d51"
+        },
+        {
+          "durationMs": 109,
+          "lineNumber": 457129,
+          "byteOffsetStart": 36625059,
+          "byteOffsetEndExclusive": 36625144,
+          "lineSha256": "efd65872adc939cf31cd81eaf39fa94ce05ba54fd95eccc4b4992d0ebf633c35"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.merge",
+      "count": 4,
+      "minMs": 21,
+      "p50Ms": 21,
+      "p95Ms": 118,
+      "maxMs": 118,
+      "sumOverlappingElapsedMs": 182,
+      "topExamples": [
+        {
+          "durationMs": 118,
+          "lineNumber": 483998,
+          "byteOffsetStart": 38908382,
+          "byteOffsetEndExclusive": 38908441,
+          "lineSha256": "cea696c91a1b173d10a8eaaba85a9b755811b039347d109565c01a6de3fd137b"
+        },
+        {
+          "durationMs": 22,
+          "lineNumber": 484175,
+          "byteOffsetStart": 38921571,
+          "byteOffsetEndExclusive": 38921629,
+          "lineSha256": "252a946361932954be9f993cd769ced96daeebd49f7889907564174cf3fd2e47"
+        },
+        {
+          "durationMs": 21,
+          "lineNumber": 483752,
+          "byteOffsetStart": 38887046,
+          "byteOffsetEndExclusive": 38887104,
+          "lineSha256": "1938ab4940377095d15b55879dee3f6cbf4a77e2f46e5a6030145d8046f836b1"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.sanitize",
+      "count": 24,
+      "minMs": 20,
+      "p50Ms": 25,
+      "p95Ms": 50,
+      "maxMs": 102,
+      "sumOverlappingElapsedMs": 728,
+      "topExamples": [
+        {
+          "durationMs": 102,
+          "lineNumber": 457517,
+          "byteOffsetStart": 36658652,
+          "byteOffsetEndExclusive": 36658714,
+          "lineSha256": "211058d8dc304da29649f4784432d4bb503e06c1af1d0d4ee8102e13b17f6479"
+        },
+        {
+          "durationMs": 50,
+          "lineNumber": 476150,
+          "byteOffsetStart": 38246208,
+          "byteOffsetEndExclusive": 38246269,
+          "lineSha256": "cd7e56bfd7912b852fa941aeae964eb19df34bc105bb8448d2199bba14236280"
+        },
+        {
+          "durationMs": 45,
+          "lineNumber": 500848,
+          "byteOffsetStart": 40347818,
+          "byteOffsetEndExclusive": 40347879,
+          "lineSha256": "9d7eb38a8930da01a6dfbaddf9d0b0c9f2ea848bb7666d71738ecc969fbd43f2"
+        }
+      ]
+    },
+    {
+      "stage": "owner_health.commit.zone_lock_wait",
+      "count": 73,
+      "minMs": 20,
+      "p50Ms": 32,
+      "p95Ms": 60,
+      "maxMs": 87,
+      "sumOverlappingElapsedMs": 2552,
+      "topExamples": [
+        {
+          "durationMs": 87,
+          "lineNumber": 507906,
+          "byteOffsetStart": 40929915,
+          "byteOffsetEndExclusive": 40929992,
+          "lineSha256": "ea724c67f966e0ef1d969ccc32d8bd3db24bcd36651526556eebdb817242e5a5"
+        },
+        {
+          "durationMs": 86,
+          "lineNumber": 490738,
+          "byteOffsetStart": 39476015,
+          "byteOffsetEndExclusive": 39476092,
+          "lineSha256": "2bd4efc402cf71cb9a3c86772fd442ad540d4f8440f640001ed053a3554d0397"
+        },
+        {
+          "durationMs": 68,
+          "lineNumber": 457302,
+          "byteOffsetStart": 36639830,
+          "byteOffsetEndExclusive": 36639907,
+          "lineSha256": "9445446cc7e2fc945088a7862ae67f477c27352369064f4aabea975ebd0171a2"
+        }
+      ]
+    },
+    {
+      "stage": "owner_health.prepare.zone_lock_wait",
+      "count": 17,
+      "minMs": 20,
+      "p50Ms": 29,
+      "p95Ms": 80,
+      "maxMs": 80,
+      "sumOverlappingElapsedMs": 553,
+      "topExamples": [
+        {
+          "durationMs": 80,
+          "lineNumber": 457322,
+          "byteOffsetStart": 36641393,
+          "byteOffsetEndExclusive": 36641471,
+          "lineSha256": "0c999e073304224bd8ee785441fa1d7765a347e7c4211cfa578671abb4738527"
+        },
+        {
+          "durationMs": 53,
+          "lineNumber": 499115,
+          "byteOffsetStart": 40194305,
+          "byteOffsetEndExclusive": 40194383,
+          "lineSha256": "0f46c8e12335a5318ae00f47ce1bd65f53ee891c9debc8c89b46cddb952de62a"
+        },
+        {
+          "durationMs": 41,
+          "lineNumber": 508962,
+          "byteOffsetStart": 41027706,
+          "byteOffsetEndExclusive": 41027784,
+          "lineSha256": "a71abc33b3bdf6b23d9936c7b490104a6747948d9294af0bc681a05376dbe657"
+        }
+      ]
+    },
+    {
+      "stage": "runtime_tick.owner_heartbeat",
+      "count": 3,
+      "minMs": 20,
+      "p50Ms": 21,
+      "p95Ms": 75,
+      "maxMs": 75,
+      "sumOverlappingElapsedMs": 116,
+      "topExamples": [
+        {
+          "durationMs": 75,
+          "lineNumber": 476144,
+          "byteOffsetStart": 38245615,
+          "byteOffsetEndExclusive": 38245700,
+          "lineSha256": "a9e112f259231b48d2a0c014e18bf74c10ead0f30733fb82e7debaebadf9a615"
+        },
+        {
+          "durationMs": 21,
+          "lineNumber": 512077,
+          "byteOffsetStart": 41295913,
+          "byteOffsetEndExclusive": 41295998,
+          "lineSha256": "9a0ef78598a63d97f1001b615fd3e7607c917b68f73d71c512b538a8b79723a9"
+        },
+        {
+          "durationMs": 20,
+          "lineNumber": 512245,
+          "byteOffsetStart": 41308992,
+          "byteOffsetEndExclusive": 41309077,
+          "lineSha256": "22a12f8ba1b141075eb14fe4b35e36fc9078b13b584b621df557c0bf0056c0a5"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.pet_context",
+      "count": 40,
+      "minMs": 20,
+      "p50Ms": 26,
+      "p95Ms": 57,
+      "maxMs": 70,
+      "sumOverlappingElapsedMs": 1221,
+      "topExamples": [
+        {
+          "durationMs": 70,
+          "lineNumber": 456541,
+          "byteOffsetStart": 36572839,
+          "byteOffsetEndExclusive": 36572917,
+          "lineSha256": "d45e4b1d8bcb6a8bfc7da5f346c22380148a1ab70063f5b169f56821e21c07f6"
+        },
+        {
+          "durationMs": 62,
+          "lineNumber": 443854,
+          "byteOffsetStart": 35487911,
+          "byteOffsetEndExclusive": 35487989,
+          "lineSha256": "3f7d627a20a881f27440be18a8c52b97621ea257a47b7cba912a14a6ba507ab2"
+        },
+        {
+          "durationMs": 57,
+          "lineNumber": 422536,
+          "byteOffsetStart": 33682362,
+          "byteOffsetEndExclusive": 33682440,
+          "lineSha256": "e0e2a0edd3c083e2a2118f9f17949d6cd148d1ace3963ecd5315970747ed7a35"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.previous_clone",
+      "count": 3,
+      "minMs": 20,
+      "p50Ms": 32,
+      "p95Ms": 60,
+      "maxMs": 60,
+      "sumOverlappingElapsedMs": 112,
+      "topExamples": [
+        {
+          "durationMs": 60,
+          "lineNumber": 425377,
+          "byteOffsetStart": 33946442,
+          "byteOffsetEndExclusive": 33946509,
+          "lineSha256": "b2fa9937a149dc3de62f2a20df4c810ef0be34ed1d485914462adc7ab3b32220"
+        },
+        {
+          "durationMs": 32,
+          "lineNumber": 482288,
+          "byteOffsetStart": 38752652,
+          "byteOffsetEndExclusive": 38752719,
+          "lineSha256": "f8e5b7763a6134c098ee6f44a7c2d921539d76fd4da6880dc2218ed15ca73288"
+        },
+        {
+          "durationMs": 20,
+          "lineNumber": 423820,
+          "byteOffsetStart": 33803981,
+          "byteOffsetEndExclusive": 33804048,
+          "lineSha256": "86e32844d53de460bda44211978cce98dff278ca1dce3a251c709d35ff3084b4"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.player_kills",
+      "count": 11,
+      "minMs": 20,
+      "p50Ms": 25,
+      "p95Ms": 54,
+      "maxMs": 54,
+      "sumOverlappingElapsedMs": 331,
+      "topExamples": [
+        {
+          "durationMs": 54,
+          "lineNumber": 453048,
+          "byteOffsetStart": 36260332,
+          "byteOffsetEndExclusive": 36260411,
+          "lineSha256": "53bdfc2402df53e504ec20606122666aa00f51e0907ee8a778653d9b9ec4c157"
+        },
+        {
+          "durationMs": 45,
+          "lineNumber": 445926,
+          "byteOffsetStart": 35667041,
+          "byteOffsetEndExclusive": 35667120,
+          "lineSha256": "7b13584164d75500f47feec3e78ce1cd55397804f8282c966ab28245d9ecb0bc"
+        },
+        {
+          "durationMs": 33,
+          "lineNumber": 427382,
+          "byteOffsetStart": 34122894,
+          "byteOffsetEndExclusive": 34122973,
+          "lineSha256": "f24f28a588910d45b3877cffa29e1b14f8eac6c8fa4d27f6c4781b53abda102d"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.vitals_sync",
+      "count": 5,
+      "minMs": 20,
+      "p50Ms": 25,
+      "p95Ms": 29,
+      "maxMs": 29,
+      "sumOverlappingElapsedMs": 124,
+      "topExamples": [
+        {
+          "durationMs": 29,
+          "lineNumber": 419151,
+          "byteOffsetStart": 33414014,
+          "byteOffsetEndExclusive": 33414092,
+          "lineSha256": "4223a296ccd68e76582c51c815f8f194ba37a351cfd956764cb04d9948e4b038"
+        },
+        {
+          "durationMs": 26,
+          "lineNumber": 421136,
+          "byteOffsetStart": 33572061,
+          "byteOffsetEndExclusive": 33572139,
+          "lineSha256": "befa8295708deba8ac14c60b60e53bd8ff4f6503a2ecf161973dba4ae83afb9a"
+        },
+        {
+          "durationMs": 25,
+          "lineNumber": 425869,
+          "byteOffsetStart": 33990303,
+          "byteOffsetEndExclusive": 33990381,
+          "lineSha256": "324608eed9d2ade43839eacc889e2039895e681b3c72abef2c8de4f507e46b9a"
+        }
+      ]
+    },
+    {
+      "stage": "shared_session.predrain.monster_activation",
+      "count": 1,
+      "minMs": 27,
+      "p50Ms": 27,
+      "p95Ms": 27,
+      "maxMs": 27,
+      "sumOverlappingElapsedMs": 27,
+      "topExamples": [
+        {
+          "durationMs": 27,
+          "lineNumber": 476223,
+          "byteOffsetStart": 38252197,
+          "byteOffsetEndExclusive": 38252282,
+          "lineSha256": "bfce97caa475dfc05b7deb94d2bb291314afee4b8aba0ab1854360055bc6a0da"
+        }
+      ]
+    },
+    {
+      "stage": "socket_turn.input_owner_heartbeat",
+      "count": 1,
+      "minMs": 26,
+      "p50Ms": 26,
+      "p95Ms": 26,
+      "maxMs": 26,
+      "sumOverlappingElapsedMs": 26,
+      "topExamples": [
+        {
+          "durationMs": 26,
+          "lineNumber": 489637,
+          "byteOffsetStart": 39372361,
+          "byteOffsetEndExclusive": 39372451,
+          "lineSha256": "10f6f5e873ba9febb9aa717bc15ed347c6ecd8b8917c92fd73652a196abaa727"
+        }
+      ]
+    },
+    {
+      "stage": "spectator.events",
+      "count": 1,
+      "minMs": 22,
+      "p50Ms": 22,
+      "p95Ms": 22,
+      "maxMs": 22,
+      "sumOverlappingElapsedMs": 22,
+      "topExamples": [
+        {
+          "durationMs": 22,
+          "lineNumber": 455606,
+          "byteOffsetStart": 36486166,
+          "byteOffsetEndExclusive": 36486225,
+          "lineSha256": "2fe760db37d874090cd6abfd52313f7434757ed80cc8926521624b4dd0a9cfe7"
+        }
+      ]
+    },
+    {
+      "stage": "flush.responses",
+      "count": 1,
+      "minMs": 20,
+      "p50Ms": 20,
+      "p95Ms": 20,
+      "maxMs": 20,
+      "sumOverlappingElapsedMs": 20,
+      "topExamples": [
+        {
+          "durationMs": 20,
+          "lineNumber": 422712,
+          "byteOffsetStart": 33697037,
+          "byteOffsetEndExclusive": 33697095,
+          "lineSha256": "51cc1d5cea2762983a23e6476f01122906eea440a08bfcadd9682d47fb167e09"
+        }
+      ]
+    },
+    {
+      "stage": "session_action.flush",
+      "count": 1,
+      "minMs": 20,
+      "p50Ms": 20,
+      "p95Ms": 20,
+      "maxMs": 20,
+      "sumOverlappingElapsedMs": 20,
+      "topExamples": [
+        {
+          "durationMs": 20,
+          "lineNumber": 422713,
+          "byteOffsetStart": 33697095,
+          "byteOffsetEndExclusive": 33697172,
+          "lineSha256": "0472905da2621be6c1e122d3fd682ced48cf37c540673b40623dc11881e2ed55"
+        }
+      ]
+    }
+  ],
+  "ranking": "max elapsed descending, p95 descending, count descending, stage name",
+  "percentiles": "nearest rank, ceil(q*n)-1; no interpolation",
+  "sumMeaning": "overlapping wall-clock spans; nested/concurrent/repeated work; NEVER CPU time",
+  "subthresholdDurations": "unknown; absent rows do not prove zero work",
+  "emitTimeOrSocketCauseInferred": false,
+  "capacityQualified": false,
+  "rootCauseEstablished": false,
+  "closedCase": {
+    "name": "dense100",
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-dense100-v1\\runs\\dense100-v1",
+    "controllerSha256": "b93e7f426e695f6f09799933d134f0c51a703997c9abb733262608ce75d1f0e4",
+    "reportSha256": "263dd5d86cb023fcab52070926044e8b2078b68047b089aba34e078405432ad0",
+    "runtimeSha256": "5dd8c812bda8b4012d685ff22a97256d7fbdfd25362bab27a713b650762496f9",
+    "sourceRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+    "binarySha256": "c155bb789e3c37bb4b9ed5b003c74dacef68e13240cdd9a364703945d1393e51",
+    "sourceProof": "owned-controller-receipt",
+    "normalBothJobsClosedNoKill": true,
+    "driverActualExitCode": 1,
+    "workloadOutcomeNotReclassified": true,
+    "diagnosticOnly": true
+  }
+}

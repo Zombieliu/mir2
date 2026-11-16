@@ -1,0 +1,71 @@
+▲ Next.js 16.2.11 (webpack)
+
+  Creating an optimized production build ...
+  Using tsconfig file: tsconfig.r16-delivery-physical-v2.local.json
+  Using tsconfig file: tsconfig.r16-delivery-physical-v2.local.json
+  Using tsconfig file: tsconfig.r16-delivery-physical-v2.local.json
+✓ Compiled successfully in 2.9min
+  Running next.config.js provided runAfterProductionCompile ...
+[mir2-full-pack-trace] {"target":"server/app/api/asset-manifest/route.js.nft.json","beforeSha256":"49d0fae460cedc57cef76cdf27130d26afeaf0e25590a1106abdaa2363ae25d4","afterSha256":"7463992e1561e09544098096841eeb2db9c838ee3d02470e028a04bf6d262fb2","rowsBefore":17,"rowsAfter":15,"removedDirectoryRows":1,"removedDescendantRows":1}
+✓ Completed runAfterProductionCompile in 13ms
+  Running TypeScript ...
+  Finished TypeScript in 48s ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/18) ...
+  Generating static pages using 31 workers (4/18) 
+  Generating static pages using 31 workers (8/18) 
+  Generating static pages using 31 workers (13/18) 
+✓ Generating static pages using 31 workers (18/18) in 1055ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /ai-live
+├ ƒ /api/ai-live/[...path]
+├ ƒ /api/asset-manifest
+├ ƒ /api/channels/guest
+├ ƒ /api/channels/identity/link
+├ ƒ /api/channels/session/exchange
+├ ƒ /api/debug-snapshots
+├ ƒ /api/identity/[...path]
+├ ƒ /api/movement-diagnostics
+├ ƒ /api/original-ui-meta
+├ ƒ /api/passkey/challenge
+├ ƒ /api/passkey/login
+├ ƒ /api/promotions/[...path]
+├ ƒ /api/promotions/auth/challenge
+├ ƒ /api/promotions/auth/logout
+├ ƒ /api/promotions/auth/password
+├ ƒ /api/promotions/auth/poll
+├ ƒ /api/promotions/billing/[operation]
+├ ƒ /api/promotions/bootstrap
+├ ƒ /api/promotions/game-session
+├ ƒ /api/qa/map-monster-scenes
+├ ƒ /api/r2-proxy/[...path]
+├ ƒ /api/remote-asset/[...path]
+├ ƒ /api/scene/collision
+├ ƒ /api/scene/crystal
+├ ƒ /api/scene/starter
+├ ƒ /api/wallet/dubhe/session
+├ ƒ /api/wallet/dubhe/session/status
+├ ○ /game
+├ ƒ /health
+├ ○ /manifest.webmanifest
+├ ○ /promotions
+├ ƒ /promotions/invite/[code]
+├ ○ /promotions/play
+├ ○ /qa/button-sounds
+├ ƒ /qa/map-monsters
+├ ○ /qa/webgl2-entity-renderer
+├ ○ /spectate
+├ ƒ /version
+└ ƒ /world-report
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "scope": "Anonymous public scalar projection. Not a CPU profile, exact planner replay, or capacity acceptance.",
+  "runId": "1793100785101-b0981e2a",
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\reports\\1793100785101-b0981e2a.report.json",
+    "bytes": 198978,
+    "sha256": "2ed3de2b10d0e273c21f9389974c6f1e139eaa1041fed92ad80fa340070091be"
+  },
+  "originalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\reports\\1793100785101-b0981e2a.samples.jsonl",
+    "bytes": 12588593,
+    "sha256": "ac4039892237778723ed50e694df9e4ac22730400b0cb8ca4eaf845d9e52ac50"
+  },
+  "stage25MeasurementPerformed": false,
+  "coverageLagSpikes": [
+    {
+      "at": 1793101498045,
+      "phase": "preparation",
+      "activeOwners": 11,
+      "rssBytes": 122449920,
+      "eventLoopLagP99Ms": 332.660735,
+      "eventLoopLagMaxMs": 332.660735
+    },
+    {
+      "at": 1793101499048,
+      "phase": "preparation",
+      "activeOwners": 11,
+      "rssBytes": 123383808,
+      "eventLoopLagP99Ms": 319.291391,
+      "eventLoopLagMaxMs": 319.291391
+    },
+    {
+      "at": 1793101500081,
+      "phase": "preparation",
+      "activeOwners": 11,
+      "rssBytes": 123559936,
+      "eventLoopLagP99Ms": 316.669951,
+      "eventLoopLagMaxMs": 316.669951
+    }
+  ],
+  "finalPreparation": {
+    "actorOrdinal": 11,
+    "status": "failed",
+    "before": {
+      "sequence": 680,
+      "x": 286,
+      "y": 613,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 12,
+      "gold": 80
+    },
+    "commands": 4,
+    "movementCommands": 0,
+    "elapsedMs": 2541.721099999966,
+    "commandRows": [
+      {
+        "type": "clientVersion",
+        "sendCursor": 671,
+        "sentAtMs": 712499.8035
+      },
+      {
+        "type": "clientVersion",
+        "sendCursor": 680,
+        "sentAtMs": 712832.3951
+      },
+      {
+        "type": "clientVersion",
+        "sendCursor": 683,
+        "sentAtMs": 713928.0419
+      },
+      {
+        "type": "clientVersion",
+        "sendCursor": 686,
+        "sentAtMs": 715014.0123
+      }
+    ],
+    "declaredStagingPoint": {
+      "x": 287,
+      "y": 614
+    },
+    "navigationNoPath": null,
+    "matchingTargetOccupancy": [
+      {
+        "objectId": 206515,
+        "reason": "planner-current-not-qualified",
+        "source": "planner-read",
+        "sequence": 686,
+        "observed": {
+          "name": "Deer",
+          "kind": "monster",
+          "x": 287,
+          "y": 614,
+          "hp": 25,
+          "dead": false,
+          "ai": 2,
+          "disposition": "neutral"
+        }
+      },
+      {
+        "objectId": 206515,
+        "reason": "raw-not-qualified",
+        "source": "worldSnapshot",
+        "sequence": 689,
+        "observed": {
+          "name": "Deer",
+          "kind": "monster",
+          "x": 287,
+          "y": 614,
+          "hp": 25,
+          "dead": false,
+          "ai": 2,
+          "disposition": "neutral"
+        }
+      }
+    ]
+  }
+}

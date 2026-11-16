@@ -1,0 +1,104 @@
+{
+  "owner": "Root",
+  "kind": "Source74 actual original strict Next02 complete acceptance",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\next-build02-config.json",
+    "bytes": 5298,
+    "sha256": "de11c541ad353393ee234f4d60ba494c86666aec2532789213b5278b8236d4a2"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-strict-final-snapshot02.json",
+    "bytes": 41214575,
+    "sha256": "d4a8eb4a471b7667ba0032cb0684a74c36f8df1eb65a9f0f79912774dc6daac4"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\next-source-review02.json",
+    "bytes": 4464,
+    "sha256": "d1195c05e657c7e619cb0953a12d2c7fd4cc56ee27c537fb7ab384fdeef25695"
+  },
+  "actualNodeProof": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\portable-tests-actual02.json",
+    "bytes": 2439,
+    "sha256": "23ba8dcaf6092b9fae041637738244157a5afe18a846541f88537906ec550e16"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 83288,
+    "kind": "Source74 original strict Next02 after reviewed generated controls and actual27 pass",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 57460,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\next-build02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\next-build02\\stdout.log",
+    "bytes": 2026,
+    "sha256": "e68a416d75750e6ffcf25fdcbe4bcf77de1bb4ecb7f833028847a873b77c803e"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\next-build02\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "pages": 13,
+  "compileSeconds": 13.3,
+  "strictTypeScriptSeconds": 18.5,
+  "warningCount": 0,
+  "output": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-next-output-manifest02.json",
+    "bytes": 13949140,
+    "sha256": "bc3c6fa91175df29d593ae665cb48a92454241be2df08ac181670391b5c208dc"
+  },
+  "nftClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-nft-physical-closure02.json",
+    "bytes": 70557414,
+    "sha256": "a59dbd008e7e6103d508dc5b6df91b5ec67743d482e197825da948d842a5f30e"
+  },
+  "nftCounts": {
+    "nftFiles": 61,
+    "rawReferences": 130518,
+    "uniquePhysicalTargets": 39332,
+    "malformed": 0,
+    "outside": 0,
+    "unknown": 0,
+    "missing": 0,
+    "hashDifferences": 0
+  },
+  "originalCallerClosed": true,
+  "originalCallerPostguardCompleted": true,
+  "sourceInputs": 36760,
+  "actualNextAccepted": true,
+  "physicalNftClosureAccepted": true,
+  "mainCodeOverlayMatched": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+      "bytes": 36920,
+      "sha256": "b1056f6b22b4502c145a6c4028b4ee6697165a0a792bd5b4446b12ec47a8abe3"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+      "bytes": 59634,
+      "sha256": "73999db384aa1b7cf3c8669b65d8d8eeaebe5dc5c50009ff3b6cf6d195041959"
+    }
+  ],
+  "mainTsconfigUnchanged": true,
+  "oldAttempt": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\next-guard-rejected01.json",
+    "bytes": 3434,
+    "sha256": "216d4db80ec74440dd27004e90fa240f9fb0accd2c4972581ceebc3fef501623"
+  },
+  "oldAttemptAccepted": false,
+  "dataRuntimeOOMRecoveredFromSavedInputs": true,
+  "productRerunForDataRecovery": false,
+  "packageAccepted": false,
+  "uiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

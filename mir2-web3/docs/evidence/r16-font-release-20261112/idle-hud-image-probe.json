@@ -1,0 +1,106 @@
+{
+  "kind": "read-only-current-production-image-bodies",
+  "checkedAt": "2026-11-12T13:28:03.152Z",
+  "rows": [
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/Prguse/1.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 1326
+    },
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/Prguse/4.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 11776,
+      "sha256": "ae4c41ead8c2ce9eed73d021c59902b793586d30237e1db9d070c61eebcf038e",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 986
+    },
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/Prguse/6.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 10938,
+      "sha256": "00e7c0ba38a1866e8d40aa696e04975339bb0197503657bcc97d533d67740c67",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 968
+    },
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/Prguse/12.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 2813,
+      "sha256": "a0dcd0d9e93cfef414ec240ead9eafd2f8fb9163b2ed70cf1cc64e3e2de9ca05",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 962
+    },
+    {
+      "origin": "https://numeron.obelisk.build",
+      "path": "/original-ui/Prguse/13.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 4434,
+      "sha256": "cef50154420b5e4e82324a333eb73dc3d5cb9ba23fcf74bc808d4c52cb3a8b3d",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 676
+    },
+    {
+      "origin": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "path": "/original-ui/Prguse/1.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 755
+    },
+    {
+      "origin": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "path": "/original-ui/Prguse/4.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 11776,
+      "sha256": "ae4c41ead8c2ce9eed73d021c59902b793586d30237e1db9d070c61eebcf038e",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 652
+    },
+    {
+      "origin": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "path": "/original-ui/Prguse/6.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 10938,
+      "sha256": "00e7c0ba38a1866e8d40aa696e04975339bb0197503657bcc97d533d67740c67",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 556
+    },
+    {
+      "origin": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "path": "/original-ui/Prguse/12.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 2813,
+      "sha256": "a0dcd0d9e93cfef414ec240ead9eafd2f8fb9163b2ed70cf1cc64e3e2de9ca05",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 647
+    },
+    {
+      "origin": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "path": "/original-ui/Prguse/13.png",
+      "status": 200,
+      "curlExit": 0,
+      "bytes": 4434,
+      "sha256": "cef50154420b5e4e82324a333eb73dc3d5cb9ba23fcf74bc808d4c52cb3a8b3d",
+      "pngSignature": "89504e470d0a1a0a",
+      "elapsedMs": 879
+    }
+  ]
+}

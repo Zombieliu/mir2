@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T13:10:04.9811367Z",
+  "source": {
+    "path": "C:/mir2-build/p01-completion-20261024/personal-monster-projection-functional-independent-review-v1.json",
+    "bytes": 9896,
+    "sha256": "4b89ad538a62b74003f1a09d49bca2c75238e2572322138cf91973d8c709818d"
+  },
+  "destination": "mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-personal-monster-projection-fix-v1/final-validation/personal-monster-projection-functional-independent-review-v1.json",
+  "copiedRawBytes": true,
+  "capacityAccepted": false,
+  "fixedCellStarted": false
+}

@@ -1,0 +1,135 @@
+{
+  "scope": "Raw account, store, profile and network records remain private; only safe excerpted facts and hashes are published.",
+  "files": [
+    {
+      "file": "product-commit.json",
+      "bytes": 5738,
+      "sha256": "668e544e93cf30a281fad4b6e60f36bcf1e2fd60123e05d613f29552cce02d2d"
+    },
+    {
+      "file": "candidate-source.json",
+      "bytes": 8709,
+      "sha256": "6be7e6d61f291c29aa53b73d7ff073a337451555a294dbe7942cbcdd43194a3d"
+    },
+    {
+      "file": "build-receipt-r1.json",
+      "bytes": 9128,
+      "sha256": "42826034a9643ddfd93b84aaebf85d24353387e72ac3c60f5110ea6de4f54d06"
+    },
+    {
+      "file": "built-chunks.json",
+      "bytes": 1671,
+      "sha256": "307ad277111c3e75e9bb6e744aa2b42c7bd506a53a1b99dc51d39ea556b29d32"
+    },
+    {
+      "file": "font-before.log",
+      "bytes": 1500,
+      "sha256": "1eca4d0a131d565151d2018748ee0e5da5b00a0f5174c2a5174f69ac23e75312"
+    },
+    {
+      "file": "initial-checks.log",
+      "bytes": 13283,
+      "sha256": "abbc35179096bda79cb965c47049c3c71ef5792ede9e9c69a2eb3f1375019430"
+    },
+    {
+      "file": "expanded-checks-r1.log",
+      "bytes": 66047,
+      "sha256": "d029589ed7e2692e4298c3ec5b3e6e7fc36dda9a89e0419661e5969005d76d93"
+    },
+    {
+      "file": "build-preparation-repair.json",
+      "bytes": 308,
+      "sha256": "d7b4757cb390627285451e8022c09a661061ee633365bc555fb2ac229d6160f6"
+    },
+    {
+      "file": "font-cache-audit/receipt.json",
+      "bytes": 1559,
+      "sha256": "7f0e804e4cf4537e63e79e0753c639bdf5fb4f8c27bbe7a318f1d88d70637a78"
+    },
+    {
+      "file": "font-range-probe.json",
+      "bytes": 1171,
+      "sha256": "813e9f6d924cd8314f88a507069b85744a37a33e48fab2ca5182b2bc40f1b9bd"
+    },
+    {
+      "file": "font-range-reference.json",
+      "bytes": 2717,
+      "sha256": "2a6a4b3db6aaa31955b42c340a448df75a243b240c53e3702427326d37324a81"
+    },
+    {
+      "file": "browser-r1/run-1/receipt.json",
+      "bytes": 43460,
+      "sha256": "2c3f32018d0bfea2e57bdf2b80a8e338c8481f5d28029fcb8f7664b8bd1af95e"
+    },
+    {
+      "file": "browser-r1/run-1/town-walking.json",
+      "bytes": 9408,
+      "sha256": "9436869021184c2820b7514d1e1d9060c4b118424207518cc1f1f56d3a7e59cb"
+    },
+    {
+      "file": "browser-r1/run-1/town-pack-network.json",
+      "bytes": 9015,
+      "sha256": "a73d3f57ec044a8bbaf1789b72ae9836ead977efacb51a129f8851fffadd6f32"
+    },
+    {
+      "file": "browser-r2/run-1/receipt.json",
+      "bytes": 22424,
+      "sha256": "972008f187e1f40c0ba33f2143b7f3b3d3bf5aab4fd07c59e7da1de4108e948f"
+    },
+    {
+      "file": "browser-r2/run-1/town-walking.json",
+      "bytes": 9442,
+      "sha256": "b6248ad425525c41671c5e6b031cd0cf4780c17dfceaf25f2c89a060bb16fc42"
+    },
+    {
+      "file": "browser-r2/run-1/town-pack-network.json",
+      "bytes": 8692,
+      "sha256": "b9291899f79ab98ca9ff59f16a7d0e337c0d96dfc5884f7ef37688a2e9ecbee5"
+    },
+    {
+      "file": "browser-r3/run-1/receipt.json",
+      "bytes": 40817,
+      "sha256": "201401df9429ea97a20381ebdcd448c97bb6b264d2bd0a2fbba531ef1b5c3cf6"
+    },
+    {
+      "file": "browser-r3/run-1/town-walking.json",
+      "bytes": 9621,
+      "sha256": "7bb79bc6eadfd89c28036094aaac87045980cba1e058d6658b432dc17e33a6b7"
+    },
+    {
+      "file": "browser-r3/run-1/town-pack-network.json",
+      "bytes": 9992,
+      "sha256": "db80aa86d5646d6455b57f47ba22a0d9cd78da273489bce3c45095c0a1f179d3"
+    },
+    {
+      "file": "browser-r3/run-2/receipt.json",
+      "bytes": 23152,
+      "sha256": "7a7b52648e2c42489c7ae16fdb3e73d2375abb5d9b98abf4f30d59168d433ce0"
+    },
+    {
+      "file": "browser-r3/run-2/town-walking.json",
+      "bytes": 9499,
+      "sha256": "24cba0aa510ef68151a0427028db801dc6c90eb2e332ea86022d2e1729524be5"
+    },
+    {
+      "file": "browser-r3/run-2/town-pack-network.json",
+      "bytes": 8269,
+      "sha256": "6dfff54359a4136a8ab31a8fd2ac05deaf49d974ff46df97575c9caf09644e73"
+    },
+    {
+      "file": "public-readback.json",
+      "bytes": 388,
+      "sha256": "7af270e366136ee8c1b291095371b47e9af64cbe200c9484dd457403b14503a7"
+    },
+    {
+      "file": "alias-readback.json",
+      "bytes": 228,
+      "sha256": "c462f177dda9465a45db7067c5195dc993c4aae7e52a5c935da5a33b532da2f1"
+    },
+    {
+      "file": "ssh-readonly-confirmation.json",
+      "bytes": 825,
+      "sha256": "0e8ce5e68065b88556ff5bce36a9e74cb33400aa3bb10ed1d6c3f5702c5a9fdf"
+    }
+  ]
+}

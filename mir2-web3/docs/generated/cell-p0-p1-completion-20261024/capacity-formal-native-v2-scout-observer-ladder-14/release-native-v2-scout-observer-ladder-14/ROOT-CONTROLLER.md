@@ -1,0 +1,1 @@
+Root-only formal controller is prepared, not executable while fresh18 is PENDING. It preserves formal128 source cap, policy/resource and146 windows. Actual seal/guard/prepare/run are separate Root-only steps after actual18 binding and independent QA. No mode executed.

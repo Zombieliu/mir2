@@ -1,0 +1,612 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-12T22:35:32.603Z",
+  "scope": "One bounded retry of transient pinned runtime transport before glue initialization; binary-format/size rejection fences Page and alternate-backend retries.",
+  "candidate": "a92d080debc8-runtime-body-bd956c1d",
+  "base": "a92d080debc893f7c804e70e89f5a8d4b9988aa6",
+  "status": "local candidate; production still previous source",
+  "published": false,
+  "publicVersionReadback": {
+    "revision": "8654cdcb36e20e114f3e1d34cd142d0b5396638a"
+  },
+  "publicFlowReplayedAfterThisCandidate": false,
+  "fullPublicAcceptancePassed": false,
+  "candidate100": false,
+  "humanAccepted": false,
+  "sourceFiles": [
+    "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+    "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
+    "mir2-web3/apps/web/app/page.tsx",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+    "mir2-web3/apps/web/scripts/smoke-bevy-runtime-download-recovery.mjs"
+  ],
+  "build": {
+    "passed": true,
+    "inputs": 80,
+    "sharedSources": 71,
+    "id": "xZ317rBnMpSYBi9fROx8p",
+    "receiptSha256": "761c5eb341288b3462b9e7864a217bd432dd0b30e474654478ffab76a8ccedb8"
+  },
+  "tests": {
+    "focusedNode": 85,
+    "realChromeCases": 6,
+    "browserPassed": true
+  },
+  "limits": {
+    "normalPinnedSources": 2,
+    "additionalRetries": 1,
+    "bodyIdleTimeoutMs": 15000,
+    "bodyTimeoutMs": 600000,
+    "maxDecodedBodyBytes": 33554432,
+    "terminalHeaderOrCompilerOrInitializationTimeoutMs": 120000,
+    "realGameWalkGateMs": 8000,
+    "realGameNativeGateMs": 120000,
+    "note": "Existing per-phase limits retained. A retry rereads the complete fixed-version binary; local fixed-byte recovery does not qualify WAN latency."
+  },
+  "runs": [
+    {
+      "name": "default",
+      "passed": true,
+      "rawReceiptSha256": "b11e3a6eef091e8b0e2afe5945d5d1aaf7a234bdc35bbe19bef5d8b0210236c1",
+      "coldNativeWaitMs": 26413,
+      "warmNativeWaitMs": 1317,
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794522408940,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794522408949,
+            "wireAt": 1794522408987,
+            "ackAt": 1794522409020,
+            "renderedAt": 1794522409049,
+            "ackMs": 33,
+            "inputToRenderedMs": 100,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794522409073,
+            "wireAt": 1794522409586,
+            "ackAt": 1794522409594,
+            "renderedAt": 1794522409634,
+            "ackMs": 8,
+            "inputToRenderedMs": 561,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "recovery": {
+        "passed": true,
+        "initialFailures": 2,
+        "firstSuccessfulAttempt": 3,
+        "originalHeaderDelayMs": 25000,
+        "successfulBytes": 31441753,
+        "successfulSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+        "scope": "fixed-byte two503 fault recovery, not WAN performance; original8s walk/120s Native gates unchanged"
+      },
+      "fonts": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "sharedQuest": {
+        "passed": true,
+        "renderer": "ordinary-shared-native",
+        "locale": "zh-TW",
+        "questOpened": true,
+        "qClosed": true,
+        "zeroWorldCommands": true
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "normalLogoutAndDiskReadbackPassed": true,
+      "browserCompletelyClosedAndReopened": true,
+      "catalog": {
+        "passed": true,
+        "sessions": [
+          {
+            "declared": true,
+            "binaryFrames": 10,
+            "wireBytes": 80448,
+            "decodedBytes": 633495,
+            "packets": {
+              "NewItemInfo": 145,
+              "NewQuestInfo": 200,
+              "NewRecipeInfo": 79,
+              "GameShopInfo": 105
+            }
+          },
+          {
+            "declared": true,
+            "binaryFrames": 10,
+            "wireBytes": 80448,
+            "decodedBytes": 633495,
+            "packets": {
+              "NewItemInfo": 145,
+              "NewQuestInfo": 200,
+              "NewRecipeInfo": 79,
+              "GameShopInfo": 105
+            }
+          }
+        ]
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true,
+      "bodyObserver": "CDP Network.getResponseBody complete bytes and SHA; supplemental Playwright body-read failures retained",
+      "supplementalBodyReadFailures": 2,
+      "completeBodies": [
+        {
+          "session": "cold",
+          "path": "/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 503,
+          "decodedBytes": 0,
+          "failure": "net::ERR_ABORTED"
+        },
+        {
+          "session": "cold",
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 503,
+          "decodedBytes": 0,
+          "failure": "net::ERR_ABORTED"
+        },
+        {
+          "session": "cold",
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "expectedBytes": 31441753,
+          "expectedSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+          "decodedBytes": 31441753,
+          "completeBodyBytes": 31441753,
+          "bodySha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82"
+        },
+        {
+          "session": "warm",
+          "path": "/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "expectedBytes": 31441753,
+          "expectedSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+          "decodedBytes": 31441753,
+          "completeBodyBytes": 31441753,
+          "bodySha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82"
+        }
+      ]
+    },
+    {
+      "name": "shared-webgl2",
+      "passed": true,
+      "rawReceiptSha256": "d91b4ddc78f251f481fd35aa3ed9781dcf7433b494114b201d8bb378bc194215",
+      "coldNativeWaitMs": 26486,
+      "warmNativeWaitMs": 1499,
+      "earlyWalks": {
+        "passed": true,
+        "firstPlayableAt": 1794522576067,
+        "rows": [
+          {
+            "key": "ArrowRight",
+            "direction": "Right",
+            "to": {
+              "x": 289,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794522576082,
+            "wireAt": 1794522576127,
+            "ackAt": 1794522576182,
+            "renderedAt": 1794522576228,
+            "ackMs": 55,
+            "inputToRenderedMs": 146,
+            "rendered": {
+              "x": 289,
+              "y": 616
+            }
+          },
+          {
+            "key": "ArrowLeft",
+            "direction": "Left",
+            "to": {
+              "x": 288,
+              "y": 616
+            },
+            "nativeHudReadyBeforeInput": false,
+            "inputAt": 1794522576256,
+            "wireAt": 1794522576726,
+            "ackAt": 1794522576743,
+            "renderedAt": 1794522576759,
+            "ackMs": 17,
+            "inputToRenderedMs": 503,
+            "rendered": {
+              "x": 288,
+              "y": 616
+            }
+          }
+        ],
+        "returnedToSpawn": true
+      },
+      "recovery": {
+        "passed": true,
+        "initialFailures": 2,
+        "firstSuccessfulAttempt": 3,
+        "originalHeaderDelayMs": 25000,
+        "successfulBytes": 32369572,
+        "successfulSha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+        "scope": "fixed-byte two503 fault recovery, not WAN performance; original8s walk/120s Native gates unchanged"
+      },
+      "fonts": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "sharedQuest": {
+        "passed": true,
+        "renderer": "ordinary-shared-native",
+        "locale": "zh-TW",
+        "questOpened": true,
+        "qClosed": true,
+        "zeroWorldCommands": true
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "normalLogoutAndDiskReadbackPassed": true,
+      "browserCompletelyClosedAndReopened": true,
+      "catalog": {
+        "passed": true,
+        "sessions": [
+          {
+            "declared": true,
+            "binaryFrames": 10,
+            "wireBytes": 80448,
+            "decodedBytes": 633495,
+            "packets": {
+              "NewItemInfo": 145,
+              "NewQuestInfo": 200,
+              "NewRecipeInfo": 79,
+              "GameShopInfo": 105
+            }
+          },
+          {
+            "declared": true,
+            "binaryFrames": 10,
+            "wireBytes": 80448,
+            "decodedBytes": 633495,
+            "packets": {
+              "NewItemInfo": 145,
+              "NewQuestInfo": 200,
+              "NewRecipeInfo": 79,
+              "GameShopInfo": 105
+            }
+          }
+        ]
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true,
+      "bodyObserver": "CDP Network.getResponseBody complete bytes and SHA; supplemental Playwright body-read failures retained",
+      "supplementalBodyReadFailures": 2,
+      "completeBodies": [
+        {
+          "session": "cold",
+          "path": "/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 503,
+          "decodedBytes": 0,
+          "failure": "net::ERR_ABORTED"
+        },
+        {
+          "session": "cold",
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 503,
+          "decodedBytes": 0,
+          "failure": "net::ERR_ABORTED"
+        },
+        {
+          "session": "cold",
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "expectedBytes": 32369572,
+          "expectedSha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+          "decodedBytes": 32369572,
+          "completeBodyBytes": 32369572,
+          "bodySha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490"
+        },
+        {
+          "session": "warm",
+          "path": "/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "expectedBytes": 32369572,
+          "expectedSha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+          "decodedBytes": 32369572,
+          "completeBodyBytes": 32369572,
+          "bodySha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490"
+        }
+      ]
+    }
+  ],
+  "frozenGameScripts": {
+    "invoke.mjs": "33685b646007a406fdcb1963f721174870101725bd989c90fad4c5f0850ebce7",
+    "profile.mjs": "54c18a4fe4220be5daa7b97d8ad08af701f19c5404d324c76e040440d075071d",
+    "run.mjs": "c43876592272ad5983b3b66596f953c1c11eb0b8b8e56ae2c2a2732a1869d2f1",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "67a8fc372c7a24ff37e84f33eec0922cba67bbd46fceff63aafded79d2393a1c"
+  },
+  "preservedPendingFiles": 131,
+  "retainedFailures": {
+    "firstChromeOverLimitWasWrappedAsNetwork": {
+      "passed": false,
+      "receiptSha256": "59b62e1758e8fed6c6196733da4fe39c55cdebb60bcaf3c30a1b5a42dfde1b1d",
+      "fixed": "Retain the original reader failure; the final Chrome run rejects oversized bytes at two requests with zero initialization and no alternate backend."
+    },
+    "firstLocalBuild": {
+      "passed": false,
+      "receiptSha256": "30f2a7c73ac18050083e825ec8da0b174eabf50e63c23cbf4566ea5e2025c7fc",
+      "fixed": "C-drive output required a parent node_modules junction for external Next module resolution; old log and receipt retained."
+    },
+    "public8654Native": {
+      "passed": false,
+      "evidence": "../r16-web-catalog-20261113/production/README.md",
+      "note": "Same-origin request and CDN body aborted; no App boot/shared HUD. Current candidate has not yet replayed production."
+    }
+  },
+  "rawEvidenceRoot": "C:/r16-runtime-body-recovery-20261113",
+  "rawEvidence": [
+    {
+      "file": "pending-before.json",
+      "bytes": 20004,
+      "sha256": "0a574498ba8d04000ed62f9fe6e2f08b7fe6efe8664cf87ed853b77d54ea3792"
+    },
+    {
+      "file": "focused-tests-r1.log",
+      "bytes": 19078,
+      "sha256": "b581f536d4464f21b8bb2cd3f887f60bd24e0d6ac1f430719190357ebfc57046"
+    },
+    {
+      "file": "focused-tests-final.log",
+      "bytes": 19355,
+      "sha256": "b6114ec7b8cd38dcb0ae3cf6e1fd4fa8fb5ce2c6a08ad4027fdfd697d42253ce"
+    },
+    {
+      "file": "build-receipt-r1.json",
+      "bytes": 40545,
+      "sha256": "30f2a7c73ac18050083e825ec8da0b174eabf50e63c23cbf4566ea5e2025c7fc"
+    },
+    {
+      "file": "production-build-r1.log",
+      "bytes": 2337,
+      "sha256": "d454ceae0e91a22bd756c3d0b9cc2f35a1976dcdd3b001da20360839c92302d5"
+    },
+    {
+      "file": "build-receipt-r2.json",
+      "bytes": 40833,
+      "sha256": "f76a89932291c0e16add32e4d6dc0e259f1b24a06fc70e01d58bfe870c65cff3"
+    },
+    {
+      "file": "build-receipt-r3.json",
+      "bytes": 41171,
+      "sha256": "761c5eb341288b3462b9e7864a217bd432dd0b30e474654478ffab76a8ccedb8"
+    },
+    {
+      "file": "browser-r1/receipt.json",
+      "bytes": 9502,
+      "sha256": "59b62e1758e8fed6c6196733da4fe39c55cdebb60bcaf3c30a1b5a42dfde1b1d"
+    },
+    {
+      "file": "browser-r2/receipt.json",
+      "bytes": 11353,
+      "sha256": "ec222e92bc8564b3858b85f4d86840aaa43d3660a9a310c511dcd9b7f3d4e5e6"
+    },
+    {
+      "file": "browser-r3/receipt.json",
+      "bytes": 11853,
+      "sha256": "504722265d32577a8afc8408974e00b4189e2a7ef8b4e66515668f6e3ef0aec5"
+    },
+    {
+      "file": "game-final/preparation.json",
+      "bytes": 998,
+      "sha256": "2b5534d59810fe9a4dd35fac636f39ae507121212a7eedfa2e7d718713f5a805"
+    },
+    {
+      "file": "game-final/quest-after-r3/entry-visual-receipt.json",
+      "bytes": 212161,
+      "sha256": "b11e3a6eef091e8b0e2afe5945d5d1aaf7a234bdc35bbe19bef5d8b0210236c1"
+    },
+    {
+      "file": "game-final/quest-after-r4/entry-visual-receipt.json",
+      "bytes": 198189,
+      "sha256": "d91b4ddc78f251f481fd35aa3ed9781dcf7433b494114b201d8bb378bc194215"
+    }
+  ],
+  "visualObservations": {
+    "fullVisualParityAccepted": false,
+    "capturedFrames": [
+      "NPC names incomplete",
+      "Quest guidance contains upstream English",
+      "HP text not visible inside the orb in captured frames"
+    ],
+    "next": "Compare pixel output and authoritative HUD state independently of runtime readiness."
+  }
+}

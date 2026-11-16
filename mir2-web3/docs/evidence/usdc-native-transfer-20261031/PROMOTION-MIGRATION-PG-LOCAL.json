@@ -1,0 +1,92 @@
+{
+  "fixture": {
+    "actualPostgres": true,
+    "newMigrationSqlAppliedTwiceInRollbackOnlySchema": true,
+    "stageReserveMicroUsd": 0,
+    "stageClaimCount": 0,
+    "originalAccountsAndAttributionPreserved": true,
+    "independentRandomSchemas": true,
+    "appendOnlyRejectedOperations": 9,
+    "stageAttributionCount": 0,
+    "authorityBoundary": "Explicit synthetic verified-receipt fixtures; actual typed billing/monthly APIs and SQL constraints",
+    "migrationRunnerAppliedTwice": true,
+    "sourceAuditSemanticsChecked": true,
+    "originalCandidateAndRegistrationConsistencyChecked": true,
+    "migrationOutboxEventsActuallyDrained": true
+  },
+  "ownedSourceFiles": [
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "canonicalSha256": "74eac98394baa94d9f0de34a6b3e77c66a97b4da352c8a54a180bfe264ac833d"
+    },
+    {
+      "path": "apps/simulation/tests/promotion_attribution_migration.rs",
+      "canonicalSha256": "f302f9fe81148db1a474c3812752027d0e20d97540f120385b6a6e2dd1e993bd"
+    },
+    {
+      "path": "infra/postgres/migrations/0025_promotion_attribution_migration.sql",
+      "canonicalSha256": "e130ee2c7dbccfc6e92a652d64f00981c9f42ecfc91d9acae4473a5d0690fd4e"
+    }
+  ],
+  "environment": [
+    "MIR2_RUN_PROMOTION_PG_TESTS=1",
+    "MIR2_PROMOTION_TEST_DATABASE_URL=<owned isolated loopback test database>",
+    "RUST_TEST_THREADS=1"
+  ],
+  "sourceCapture": "All seven integration source files captured before and after this passing run; canonical LF SHA256 hashes unchanged.",
+  "scope": {
+    "deploymentPerformed": false,
+    "realPayment": false,
+    "noDocker": true,
+    "externalProvider": false,
+    "commitPerformed": false,
+    "remoteDatabaseTouched": false,
+    "externalChainRpc": false,
+    "phoneSignature": false
+  },
+  "observedAtUtc": "2026-10-30T20:12:25.7693133Z",
+  "command": "cargo +1.89.0 test --locked --manifest-path mir2-web3/Cargo.toml -p mir2-simulation --test promotion_attribution_migration --offline --target-dir E:/mir2-bridge-check-target -- --nocapture --test-threads=1",
+  "baseSha": "95be43801fccff61f6219f62dad6f68284920b58",
+  "schema": "mir2-promotion-attribution-migration-local-v1",
+  "result": {
+    "logSha256": "40e3848b67d3f5b773d4c98cd2f21a6946eda3611adcc1519a238dac4bd67ecc",
+    "ignored": 0,
+    "passed": 14,
+    "skipped": 0,
+    "incrementalBuildSeconds": 3.7,
+    "failed": 0,
+    "filtered": 0,
+    "testSeconds": 33.01
+  },
+  "matchingSourceFiles": [
+    {
+      "path": "mir2-web3/apps/simulation/src/promotion/attribution_migration.rs",
+      "canonicalSha256": "47dcc74c5d04125d9b816bedf3ab25cb1c674cf95a11d0f3f4e07b7e91fbbe90"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/promotion/store.rs",
+      "canonicalSha256": "0d273ab9a074bfeb639c74f89f236810683dd5516748f2e7f00d3e4ef5c4c720"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/promotion/live_revenue.rs",
+      "canonicalSha256": "6f4d86266d4a3d473f4bb8cb73427aeadf11352d00c1540788acc0cf0c5f0be0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/promotion.rs",
+      "canonicalSha256": "d8ef84224213144b6a0a8b1926151cf62f84af20a1c70b32b2f733dd85091da7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "canonicalSha256": "74eac98394baa94d9f0de34a6b3e77c66a97b4da352c8a54a180bfe264ac833d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/promotion_attribution_migration.rs",
+      "canonicalSha256": "f302f9fe81148db1a474c3812752027d0e20d97540f120385b6a6e2dd1e993bd"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0025_promotion_attribution_migration.sql",
+      "canonicalSha256": "e130ee2c7dbccfc6e92a652d64f00981c9f42ecfc91d9acae4473a5d0690fd4e"
+    }
+  ],
+  "sourceUnchangedDuringRun": true
+}

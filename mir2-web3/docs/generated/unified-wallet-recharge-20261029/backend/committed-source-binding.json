@@ -1,0 +1,198 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "commit": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+  "bindings": [
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "producerRawSha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+      "workingRawSha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+      "workingLfSha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+      "producerRawSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+      "workingRawSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+      "workingLfSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "producerRawSha256": "1660fe03c32ce7bf48ef588b3a16ca3e6a54c5472f3a182fd70871f47d610bc9",
+      "workingRawSha256": "1660fe03c32ce7bf48ef588b3a16ca3e6a54c5472f3a182fd70871f47d610bc9",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "1660fe03c32ce7bf48ef588b3a16ca3e6a54c5472f3a182fd70871f47d610bc9",
+      "workingLfSha256": "1660fe03c32ce7bf48ef588b3a16ca3e6a54c5472f3a182fd70871f47d610bc9",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "producerRawSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "workingRawSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "workingLfSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/billing.rs",
+      "producerRawSha256": "53acf1e6274bc33d26482bb7b7dc6a9b30fd2919bbc3a9ab49b46fbf5f7076ab",
+      "workingRawSha256": "53acf1e6274bc33d26482bb7b7dc6a9b30fd2919bbc3a9ab49b46fbf5f7076ab",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "53acf1e6274bc33d26482bb7b7dc6a9b30fd2919bbc3a9ab49b46fbf5f7076ab",
+      "workingLfSha256": "53acf1e6274bc33d26482bb7b7dc6a9b30fd2919bbc3a9ab49b46fbf5f7076ab",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "producerRawSha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+      "workingRawSha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+      "workingLfSha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "producerRawSha256": "6c3274681e4a4ea5074e72559b9464a77f9d61dc838125d2d8693613969599d6",
+      "workingRawSha256": "6c3274681e4a4ea5074e72559b9464a77f9d61dc838125d2d8693613969599d6",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "6c3274681e4a4ea5074e72559b9464a77f9d61dc838125d2d8693613969599d6",
+      "workingLfSha256": "6c3274681e4a4ea5074e72559b9464a77f9d61dc838125d2d8693613969599d6",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "producerRawSha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780",
+      "workingRawSha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780",
+      "workingLfSha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/inventory.rs",
+      "producerRawSha256": "22d80f4e8ef0240edc3c0918f2b01a96260194419f778f0609a7a24011763f52",
+      "workingRawSha256": "22d80f4e8ef0240edc3c0918f2b01a96260194419f778f0609a7a24011763f52",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "22d80f4e8ef0240edc3c0918f2b01a96260194419f778f0609a7a24011763f52",
+      "workingLfSha256": "22d80f4e8ef0240edc3c0918f2b01a96260194419f778f0609a7a24011763f52",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/mod.rs",
+      "producerRawSha256": "3cd0019d808b60fbd106682c2be5c3e0b68e33e683fe065d18d535b2b2730b50",
+      "workingRawSha256": "3cd0019d808b60fbd106682c2be5c3e0b68e33e683fe065d18d535b2b2730b50",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "3cd0019d808b60fbd106682c2be5c3e0b68e33e683fe065d18d535b2b2730b50",
+      "workingLfSha256": "3cd0019d808b60fbd106682c2be5c3e0b68e33e683fe065d18d535b2b2730b50",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/production_tests.rs",
+      "producerRawSha256": "347c16bcd4c3ccbe0cd3ac265051c23da3fe15de1319bedec630594549b98b2b",
+      "workingRawSha256": "347c16bcd4c3ccbe0cd3ac265051c23da3fe15de1319bedec630594549b98b2b",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "347c16bcd4c3ccbe0cd3ac265051c23da3fe15de1319bedec630594549b98b2b",
+      "workingLfSha256": "347c16bcd4c3ccbe0cd3ac265051c23da3fe15de1319bedec630594549b98b2b",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/save.rs",
+      "producerRawSha256": "cf1d95f16af954d475c9f4afac43b747bccfe4b47379a3d5eeea6bae34cb3779",
+      "workingRawSha256": "cf1d95f16af954d475c9f4afac43b747bccfe4b47379a3d5eeea6bae34cb3779",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "cf1d95f16af954d475c9f4afac43b747bccfe4b47379a3d5eeea6bae34cb3779",
+      "workingLfSha256": "cf1d95f16af954d475c9f4afac43b747bccfe4b47379a3d5eeea6bae34cb3779",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/stones_tests.rs",
+      "producerRawSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f",
+      "workingRawSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f",
+      "workingLfSha256": "479e6f033deba46b9160ab10b7bdd0f793a9c991c4133d622d12f4a88e20608f",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/tests/activities.rs",
+      "producerRawSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29",
+      "workingRawSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29",
+      "workingLfSha256": "5e82d89e43a29c74224bdfeda3cea06da39730df04e90440b8f0a51f434d1d29",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/tests/activities_postgres.rs",
+      "producerRawSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3",
+      "workingRawSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3",
+      "workingLfSha256": "0cf0b97aa5fc81a443b716fc0e7a75d13a372a9345a36ec3f51226b4f9d96ce3",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/config_stones.rs",
+      "producerRawSha256": "4d2d00ff5a6f970037cf2a70a22192a56e58bc61c39ce20e6af6ad747ce52316",
+      "workingRawSha256": "4d2d00ff5a6f970037cf2a70a22192a56e58bc61c39ce20e6af6ad747ce52316",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "4d2d00ff5a6f970037cf2a70a22192a56e58bc61c39ce20e6af6ad747ce52316",
+      "workingLfSha256": "4d2d00ff5a6f970037cf2a70a22192a56e58bc61c39ce20e6af6ad747ce52316",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/config_schema_compat_tests.rs",
+      "producerRawSha256": "737e6942890c1a70108688c52d78ca70db4725b0a728fbb3cde4935238a026fb",
+      "workingRawSha256": "737e6942890c1a70108688c52d78ca70db4725b0a728fbb3cde4935238a026fb",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "737e6942890c1a70108688c52d78ca70db4725b0a728fbb3cde4935238a026fb",
+      "workingLfSha256": "737e6942890c1a70108688c52d78ca70db4725b0a728fbb3cde4935238a026fb",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "apps/simulation/src/config_schema_integration_tests.rs",
+      "producerRawSha256": "41af19bbf44943e330ee663f36fa95af044cc3498d8fe6bdbfba9b521e6f9513",
+      "workingRawSha256": "41af19bbf44943e330ee663f36fa95af044cc3498d8fe6bdbfba9b521e6f9513",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "41af19bbf44943e330ee663f36fa95af044cc3498d8fe6bdbfba9b521e6f9513",
+      "workingLfSha256": "41af19bbf44943e330ee663f36fa95af044cc3498d8fe6bdbfba9b521e6f9513",
+      "matchesCommittedLfBytes": true
+    },
+    {
+      "path": "infra/postgres/migrations/0015_sealed_stone_authority.sql",
+      "producerRawSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62",
+      "workingRawSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62",
+      "workingMatchesProducer": true,
+      "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+      "gitBlobSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62",
+      "workingLfSha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62",
+      "matchesCommittedLfBytes": true
+    }
+  ],
+  "scope": "Backend producer source snapshot matched committed merge and unchanged working bytes; no test rerun"
+}

@@ -1,0 +1,615 @@
+{
+  "schema": "mir2.r16.font-resume-qualification.v1",
+  "date": "2026-11-15",
+  "source": "4ad940554d3588bde9e4aceac282a923265dacfe",
+  "fontSource": "9eac66ed3290ed5c4e60eb8bea07cf88619a8847",
+  "status": "Candidate only; controlled restart and actual same-version recovery pass; original two-cohort qualification remains incomplete",
+  "sourceFiles": [
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "bytes": 61037,
+      "sha256": "23ad644b8a12deddbf552adbbef51f2387c3585c924c9b9d7f4df4bff9aa5adf"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "bytes": 1212482,
+      "sha256": "6a3b9de519f11aaaff7cfdc100d190aee11aee59edcc33ee61ec04fba5322f6f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "bytes": 24564,
+      "sha256": "a34cef395769e20835f06b7acab8d26d16be1228f008ce8417de1525e95248e8"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-font-range-pins.mjs",
+      "bytes": 1660,
+      "sha256": "8b04e32901223fbbf92c16e54f73cca8d7c4363100bd6d965923cda1c9e1d5f3"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+      "bytes": 14865,
+      "sha256": "02e91e4935223274a1ac8da19882916bfee2e89987908ee949f28e011e69ebf0"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+      "bytes": 9918,
+      "sha256": "a6a0f7474933d942b916726952ff175d79232972c72a73716a19f95f520318e1"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-login-first-visible-edit.mjs",
+      "bytes": 2927,
+      "sha256": "3a705d59da8491564c37e02de81579c3320bf296b5fd83d73b2ff8f9c18d02d0"
+    }
+  ],
+  "candidate100": false,
+  "accepted100": false,
+  "goalStatus": "active",
+  "frontendPublished": false,
+  "gatewayRestarted": false,
+  "transport": {
+    "fontBytes": 16437364,
+    "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "parts": 63,
+    "partBytes": 262144,
+    "wholeAndPartShaRequired": true,
+    "networkReaders": 2,
+    "partHeaderTimeoutMs": 8000,
+    "partBodyTimeoutMs": 15000,
+    "dedicatedPartialCache": true,
+    "fullFontCacheAtomic": true,
+    "partialReadSurvivesWorkerAndBrowserRestart": true
+  },
+  "checks": {
+    "fontSelected": 161,
+    "newFontCases": 20,
+    "loginSelected": 83,
+    "defaultEntrySelected": 23,
+    "countsOverlap": true,
+    "oldFontOneSelected": {
+      "passed": 0,
+      "failed": 1
+    },
+    "oldLoginSelected": {
+      "passed": 4,
+      "failed": 1
+    },
+    "inheritedSixFixtureFailuresClosed": false
+  },
+  "controlledBrowser": {
+    "passed": true,
+    "firstSavedParts": 62,
+    "resumedMissingOnly": true,
+    "sixFontsComplete": true,
+    "noCachePrefill": true,
+    "peakFontBodies": 2,
+    "browserClosures": [
+      true,
+      true
+    ],
+    "serversClosed": true,
+    "scope": "installed headless Edge, real font bytes, controlled local HTTP body stall and persistent profile restart, not public cold performance"
+  },
+  "builds": [
+    {
+      "source": "9eac66ed3290ed5c4e60eb8bea07cf88619a8847",
+      "builtId": "4ECD4IDogY_TpxNOVksd5",
+      "ms": 45678
+    },
+    {
+      "source": "4ad940554d3588bde9e4aceac282a923265dacfe",
+      "builtId": "MKOKOmUcXMoQoHIw7ySl2",
+      "ms": 45455
+    }
+  ],
+  "localCases": [
+    {
+      "name": "font-only-initial-login-failure",
+      "source": "9eac66ed3290ed5c4e60eb8bea07cf88619a8847",
+      "passed": false,
+      "loginInputBindingVerified": false,
+      "failure": {
+        "stage": "normal-password-login-with-reused-assets",
+        "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ ''\n- '[filtered]'\n"
+      },
+      "movement": null,
+      "native": null,
+      "delivery": null,
+      "sixFonts": null,
+      "prewarm": null,
+      "firstDiaryPassed": false,
+      "reopenedDiaryPassed": false,
+      "savedPosition": null,
+      "reopenedPosition": null,
+      "cacheConfiguration": [],
+      "rendererFontRequestObserver": {
+        "scope": "renderer request events only; zero Range rows do not measure Worker-origin transfers",
+        "rows": 0,
+        "rangeRows": 0
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "default-upgrade",
+      "source": "4ad940554d3588bde9e4aceac282a923265dacfe",
+      "passed": false,
+      "loginInputBindingVerified": true,
+      "failure": {
+        "stage": "reopened-independent-diary-Q-open-and-close",
+        "message": "configured Q closes actual diary"
+      },
+      "movement": {
+        "passed": true,
+        "ackMs": 166
+      },
+      "native": {
+        "ready": true,
+        "firstFrameToNativeMs": 49702
+      },
+      "delivery": {
+        "passed": true,
+        "fullBytes": 764724,
+        "fullSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngs": 240,
+        "naturalPng": "/original-ui/Monster/003/32.png"
+      },
+      "sixFonts": {
+        "passed": true,
+        "expected": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "cacheReadsOnly": true,
+        "rows": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "present": true,
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "present": true,
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "present": true,
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "present": true,
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "present": true,
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "present": true,
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "firstDiaryPassed": true,
+      "reopenedDiaryPassed": false,
+      "savedPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "reopenedPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "cacheConfiguration": [
+        {
+          "name": "serviceWorkerConfigured",
+          "epochMs": 1794733164989,
+          "deletedCaches": 5
+        }
+      ],
+      "rendererFontRequestObserver": {
+        "scope": "renderer request events only; zero Range rows do not measure Worker-origin transfers",
+        "rows": 6,
+        "rangeRows": 0
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "shared-tw-upgrade",
+      "source": "4ad940554d3588bde9e4aceac282a923265dacfe",
+      "passed": false,
+      "loginInputBindingVerified": true,
+      "failure": {
+        "stage": "ordinary-create-new-warrior-and-enter-original-town",
+        "message": "original shared Native120s"
+      },
+      "movement": {
+        "passed": true,
+        "ackMs": 103
+      },
+      "native": null,
+      "delivery": null,
+      "sixFonts": null,
+      "prewarm": null,
+      "firstDiaryPassed": false,
+      "reopenedDiaryPassed": false,
+      "savedPosition": null,
+      "reopenedPosition": null,
+      "cacheConfiguration": [],
+      "rendererFontRequestObserver": {
+        "scope": "renderer request events only; zero Range rows do not measure Worker-origin transfers",
+        "rows": 4,
+        "rangeRows": 0
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "resume-with-inapplicable-upgrade-fixture",
+      "source": "4ad940554d3588bde9e4aceac282a923265dacfe",
+      "passed": false,
+      "loginInputBindingVerified": true,
+      "failure": {
+        "stage": "verify-six-original-font-cache-bodies",
+        "message": "real cache cleanup must occur without discarding login"
+      },
+      "movement": {
+        "passed": true,
+        "ackMs": 94
+      },
+      "native": {
+        "ready": true,
+        "firstFrameToNativeMs": 47840
+      },
+      "delivery": {
+        "passed": true,
+        "fullBytes": 764724,
+        "fullSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngs": 240,
+        "naturalPng": "/original-ui/Monster/004/74.png"
+      },
+      "sixFonts": {
+        "passed": true,
+        "expected": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "cacheReadsOnly": true,
+        "rows": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "present": true,
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "present": true,
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "present": true,
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "present": true,
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "present": true,
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "present": true,
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "prewarm": null,
+      "firstDiaryPassed": true,
+      "reopenedDiaryPassed": false,
+      "savedPosition": null,
+      "reopenedPosition": null,
+      "cacheConfiguration": [
+        {
+          "name": "serviceWorkerConfigured",
+          "epochMs": 1794734380176,
+          "deletedCaches": 0
+        }
+      ],
+      "rendererFontRequestObserver": {
+        "scope": "renderer request events only; zero Range rows do not measure Worker-origin transfers",
+        "rows": 3,
+        "rangeRows": 0
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "same-version-resume",
+      "source": "4ad940554d3588bde9e4aceac282a923265dacfe",
+      "passed": true,
+      "loginInputBindingVerified": true,
+      "failure": null,
+      "movement": {
+        "passed": true,
+        "ackMs": 107
+      },
+      "native": {
+        "ready": true,
+        "firstFrameToNativeMs": 19419
+      },
+      "delivery": {
+        "passed": true,
+        "fullBytes": 764724,
+        "fullSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngs": 240,
+        "naturalPng": "/original-ui/Monster/003/32.png"
+      },
+      "sixFonts": {
+        "passed": true,
+        "expected": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "cacheReadsOnly": true,
+        "rows": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "present": true,
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "present": true,
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "present": true,
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "present": true,
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "present": true,
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "present": true,
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "firstDiaryPassed": true,
+      "reopenedDiaryPassed": true,
+      "savedPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "reopenedPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "cacheConfiguration": [
+        {
+          "name": "serviceWorkerConfigured",
+          "epochMs": 1794734913868,
+          "deletedCaches": 0
+        }
+      ],
+      "rendererFontRequestObserver": {
+        "scope": "renderer request events only; zero Range rows do not measure Worker-origin transfers",
+        "rows": 6,
+        "rangeRows": 0
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "failedSharedProfileAudit": {
+    "workerCodePresent": true,
+    "profileClonedReadOnly": true,
+    "fontNetworkRequests": 0,
+    "parts": 41,
+    "partBytes": 262144,
+    "completeFontPresent": false,
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "originalTwoCohortQualified": false,
+  "qualificationInvariants": {
+    "firstMoveMs": 8000,
+    "naturalWalkingMs": 65000,
+    "nativeMs": 120000,
+    "requiredFonts": 6,
+    "normalLogouts": 2
+  },
+  "localGateway": {
+    "source": "dca152cd15fc5ab9782fd28f2247d89c5faa9e6a",
+    "sha256": "13457688b5d414b525536b66a0ec4444584622857003d47a29c7f0d956a6754f",
+    "currentMergedGatewayQualified": false
+  },
+  "public": {
+    "checkedAt": "2026-11-15T09:35:31.205Z",
+    "passed": true,
+    "rows": [
+      {
+        "url": "https://numeron.obelisk.build/version",
+        "status": 200,
+        "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+        "passed": true
+      },
+      {
+        "url": "https://165.154.65.136.sslip.io/playtest/health",
+        "status": 200,
+        "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+        "passed": true
+      }
+    ]
+  },
+  "preservation": {
+    "initialForeignFiles": 29,
+    "rawUnchanged": 29,
+    "unrelatedNativeAnimationAndAssetWipExcluded": true
+  },
+  "open": [
+    "original shared TW Native120 cold failure",
+    "default upgrade reopened Q close failure, not reproduced by successful resume",
+    "edge-cache support for font ranges has not been implemented or measured",
+    "runtime partial-body combined fault",
+    "complete local and public two-cohort qualification",
+    "remaining maps, three classes1-30, Alo, languages/pixels, Native shared saves and final human acceptance"
+  ]
+}

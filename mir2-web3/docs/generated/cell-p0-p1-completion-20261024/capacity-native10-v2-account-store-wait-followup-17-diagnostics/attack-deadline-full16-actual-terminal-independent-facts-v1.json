@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:50:46.873Z",
+  "scope": "Post-exit read-only metadata and byte-pin cross-check of the new diagnostic Release and ordinary full16. No verifier/test/service was rerun and no private data or recording was read.",
+  "actualCodeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "release": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "manifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+  },
+  "backendSourceAggregate": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "backendInputCount": 44,
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87371264,
+    "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "independentlyRehashedByThisReview": false,
+    "existingIndependentStreamHashReview": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-actual-source-release-independent-review-v2.json",
+      "bytes": 2495,
+      "sha256": "e68d230c46e560826633ddd0df10459f4a46fdefd22ed49eb531e59915c8d810"
+    }
+  },
+  "build": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-v1-build-receipt.json",
+      "bytes": 2373,
+      "sha256": "c1c3259e50ac7eba1fe5cadbe77830a77549f700f98a8bc9deb15304f2c5b3f7"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-attack-deadline-diagnostics-v1-release-build.log",
+      "bytes": 55560,
+      "sha256": "e11129d2b8e266549a504fb3ee11994aec834518c7808a6665319c2a45c6ee29"
+    },
+    "exitCode": 0,
+    "durationMs": 118147,
+    "sourceUnchangedBeforeAfter": true
+  },
+  "driverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "sourceBindingReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-actual-source-binding-independent-review-v1.json",
+    "bytes": 6360,
+    "sha256": "b2ee13b28948671c07d0020e501ee7a2e0816dcef836bd9457cd64b87f249090"
+  },
+  "full16": {
+    "realmStamp": "1792946591077-812d0b0d",
+    "runId": "1792946599345-0034c2b9",
+    "report": {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9.report.json",
+      "bytes": 110777,
+      "sha256": "543e19e82e251161e4fae4c5344fd78a204287836819f0c3734b2b252ac02137"
+    },
+    "realmEvidence": {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.realm-evidence.json",
+      "bytes": 34980,
+      "sha256": "6fe76458e84cdac23e283e24ba388913d1872349f7f55a969f64cc26c1f2f316"
+    },
+    "audit": {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.independent-audit.json",
+      "bytes": 1746,
+      "sha256": "e32baec4d1b4484afe63dfe3890aa88cfc822008ad48faa46cecdc7c751b42ad"
+    },
+    "requiredChecks": [
+      "authGuards",
+      "twoAccounts",
+      "mutualVisibility",
+      "movement",
+      "turn",
+      "chat",
+      "chatLatency",
+      "sharedCombat",
+      "mapRoundTrip",
+      "logout",
+      "reloginPersistence",
+      "sharedKill",
+      "sharedDrop",
+      "uniquePickup",
+      "playerDeath",
+      "townRevive"
+    ],
+    "statuses": {
+      "authGuards": "passed",
+      "twoAccounts": "passed",
+      "mutualVisibility": "passed",
+      "movement": "passed",
+      "turn": "passed",
+      "chat": "passed",
+      "chatLatency": "passed",
+      "sharedCombat": "passed",
+      "mapRoundTrip": "passed",
+      "logout": "passed",
+      "reloginPersistence": "passed",
+      "sharedKill": "passed",
+      "sharedDrop": "passed",
+      "uniquePickup": "passed",
+      "playerDeath": "passed",
+      "townRevive": "passed"
+    },
+    "all16Passed": true,
+    "ordinarySentCommandCount": 357,
+    "firstNoLootAttemptPreserved": true,
+    "backendSourceAndBinaryMatchNewRelease": true,
+    "sixCountersZeroBeforeAfter": true,
+    "normalOwnedGatewayExitCode": 0,
+    "remainingOwnedPortListeners": 0,
+    "rootToolRunnerExecution": {
+      "id": 11257,
+      "closed": true,
+      "exitCode": 0,
+      "evidence": "Root observed actual tool terminal; no separate original outer command stdout file was supplied or fabricated."
+    },
+    "rootIndependentCleanup": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-full16-root-independent-cleanup-v1.json",
+      "bytes": 305,
+      "sha256": "b87b81759e8ffedab6999d6bf59eb2789793e16fc3a69aaf0f55c6e97ecedacb"
+    },
+    "rootOsProofPassed": true,
+    "independentOsQueryRepeatedByThisReviewer": false,
+    "publicFiles": [
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.audit-source.mjs",
+        "bytes": 9066,
+        "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.backend-source.json",
+        "bytes": 35581,
+        "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.independent-audit.json",
+        "bytes": 1746,
+        "sha256": "e32baec4d1b4484afe63dfe3890aa88cfc822008ad48faa46cecdc7c751b42ad"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.prepared-profile.json",
+        "bytes": 4333,
+        "sha256": "a099b0fca2123cb75c5f781a49746c007db8803e7662b3dc12ae8a18b7356398"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.realm-evidence.json",
+        "bytes": 34980,
+        "sha256": "6fe76458e84cdac23e283e24ba388913d1872349f7f55a969f64cc26c1f2f316"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.release-input.json",
+        "bytes": 3146,
+        "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.runner-source.mjs",
+        "bytes": 14389,
+        "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.source-manifest-verification.json",
+        "bytes": 572,
+        "sha256": "b569c318c3a80134f757781b87415ec51a524f2a6fb6708169a3a9b5bb4976a4"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.zone-metrics.json",
+        "bytes": 23601,
+        "sha256": "de19178f7f88d39fad653057405b79d12ec918bf88473b636f6703eee4f4735a"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-a.trace.jsonl",
+        "bytes": 980261,
+        "sha256": "9b84c0deb676ad52c820d98d8d156e722cd942c22303a26da08cd90dbbcc1d5f"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-b.trace.jsonl",
+        "bytes": 904691,
+        "sha256": "401c85bb6e09799fab4f73d47d8106d8134cb20fb5136d58df6778d8b1e51d0b"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-guard-newCharacter.trace.jsonl",
+        "bytes": 3478,
+        "sha256": "c10ebf8eba6069f273ccfea0946ea204691bfec12d4c4fb162d329ec828b024b"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-guard-startGame.trace.jsonl",
+        "bytes": 3439,
+        "sha256": "67f7d62fb74dff46667894b22b5700266d8b6842375ece88bc396a5e68df2e53"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-relogin-0.trace.jsonl",
+        "bytes": 684268,
+        "sha256": "ecf3474989d3d885a12e3fbe30d563f98b8d500d258b8dad3fa09030b1556eab"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-relogin-1.trace.jsonl",
+        "bytes": 681075,
+        "sha256": "c94599e5af708956184e016f17f834d4956e4126dd23c98041e2bd8a0e9b8f49"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9.report.json",
+        "bytes": 110777,
+        "sha256": "543e19e82e251161e4fae4c5344fd78a204287836819f0c3734b2b252ac02137"
+      }
+    ]
+  },
+  "limitations": [
+    "Original raw public traces are hashed for byte closure; this review relies on the completed independent ordinary receipt audit rather than replaying its packet assertions.",
+    "The immutable executable hash is supported by Root build/capture and the pinned independent stream-hash review; this review does not read the87MB executable again.",
+    "Preparation/PENDING documents and pre-execution binding state are historical records and must remain unchanged.",
+    "No separate pin/capture stdout or full16 outer shell transcript was supplied; original build log/exit receipt and public run/audit/cleanup remain the actual file evidence.",
+    "Ordinary full16 does not establish the new capacity profile or specialized attackV2 runtime acceptance; no100 actor or long soak result is claimed."
+  ],
+  "verdict": {
+    "releaseAndFull16FactsConsistent": true,
+    "blockingFindingIds": [],
+    "ordinaryFullLifecyclePassed": true,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

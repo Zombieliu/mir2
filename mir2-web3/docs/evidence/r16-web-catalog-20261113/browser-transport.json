@@ -1,0 +1,56 @@
+{
+  "scope": "loopback actual shared WASM/Chrome transport; no actual game, account or production latency claim",
+  "passed": true,
+  "policy": {
+    "abiVersion": 1,
+    "version": "486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24",
+    "sourceSha256": "b4af5fe2d0beede83dbe317e701ef1eea5b554fc80cab0433cbd0f74914f9732",
+    "files": {
+      "mir2_platform_web.js": {
+        "bytes": 6063,
+        "sha256": "3aef998b810fe329edf69a017308f3918151a320e733ff8ab9ff819b5efaf116"
+      },
+      "mir2_platform_web_bg.wasm": {
+        "bytes": 190701,
+        "sha256": "ea6be941a0d7467b63fccb7522e6f9f18691a2f4f99057c9157cac2ce44bed22"
+      }
+    }
+  },
+  "sourceSha256": "93b4c878ef540faeaf6e9053e7cbc13a8eaa42a2a1dc784b7fc3bf993a757ce2",
+  "closed": {
+    "browser": true,
+    "server": true,
+    "sockets": true
+  },
+  "browserVersion": "157.0.8103.78",
+  "result": {
+    "passed": true,
+    "directExactText": true,
+    "malformedBatchesRejected": 4,
+    "mixedOrder": true,
+    "noPartialApply": true,
+    "unnegotiatedRejected": true,
+    "retiredGenerationFenced": true,
+    "oversizeBeforeCopy": true,
+    "cases": [
+      {
+        "delivered": 4,
+        "rejected": 0
+      },
+      {
+        "delivered": 1,
+        "rejected": 1
+      },
+      {
+        "delivered": 1,
+        "rejected": 1
+      },
+      {
+        "delivered": 2,
+        "rejected": 0
+      }
+    ]
+  },
+  "loopbackRequests": 4,
+  "browserErrors": []
+}

@@ -105,3 +105,54 @@ function Assert-PlayerSpriteClosure {
     }
     return [pscustomobject]@{ familyCount = $FamilyNames.Count; libraryCount = $libraryCount; frameCount = $frameCount }
 }
+
+function Get-CandidateFishingEffectFrames {
+    return [ordered]@{
+        'original-effects/Effect' = @(640..645) + @(650..655) + @(665..676)
+        'original-effects/Prguse' = @(1350..1351)
+    }
+}
+
+function Get-CandidateFishingSoundIdentities {
+    return @(
+        [pscustomobject]@{ name='fishing_throw.wav'; size=43742; sha256='a011c7a62ab99d51a46999980eaa107cbba062d6e60a532049a722858a34fc8f' }
+        [pscustomobject]@{ name='fishing_pull.wav'; size=46132; sha256='44f4c0a27e733f8ae150f1c9e3f399c78b0da2e9f4b4afc6a003708be405aff8' }
+        [pscustomobject]@{ name='fishing.wav'; size=20696; sha256='630bd3c2d02b5f6b2572117810dff33c7701b82b7ab6e72c525616d3e4eb79e3' }
+    )
+}
+
+function Get-CandidateFishingRequiredFiles {
+    foreach ($rod in @('00', '01')) {
+        "original-ui/Fishing/$rod/meta.json"
+        foreach ($index in 0..351) { "original-ui/Fishing/$rod/$index.png" }
+    }
+    foreach ($effect in (Get-CandidateFishingEffectFrames).GetEnumerator()) {
+        "$($effect.Key)/meta.json"
+        foreach ($index in $effect.Value) { "$($effect.Key)/$index.png" }
+    }
+    foreach ($sound in Get-CandidateFishingSoundIdentities) { "original-ui/Sound/$($sound.name)" }
+}
+
+function Assert-CandidateFishingAssetClosure {
+    param([Parameter(Mandatory = $true)][string]$AssetRoot)
+
+    $rods = Assert-PlayerSpriteClosure -OriginalUiRoot (Join-Path $AssetRoot 'original-ui') -FamilyNames @('Fishing')
+    if ($rods.libraryCount -ne 2 -or $rods.frameCount -ne 704) { throw 'Fishing rod metadata must cover both complete libraries' }
+
+    foreach ($effect in (Get-CandidateFishingEffectFrames).GetEnumerator()) {
+        $meta = Get-Content -LiteralPath (Join-Path $AssetRoot "$($effect.Key)/meta.json") -Raw | ConvertFrom-Json
+        foreach ($index in $effect.Value) {
+            $relative = "$($effect.Key)/$index.png"
+            $property = $meta.frames.PSObject.Properties[[string]$index]
+            if ($null -eq $property -or $property.Value.path -cne "/$relative") { throw "Fishing effect metadata missing: $relative" }
+            $dimensions = Get-PlayerSpritePngDimensions -Path (Join-Path $AssetRoot $relative)
+            if ($dimensions.width -ne $property.Value.width -or $dimensions.height -ne $property.Value.height) { throw "Fishing effect dimensions mismatch: $relative" }
+        }
+    }
+
+    foreach ($sound in Get-CandidateFishingSoundIdentities) {
+        $soundPath = Join-Path $AssetRoot "original-ui/Sound/$($sound.name)"
+        if ((Get-Item -LiteralPath $soundPath).Length -ne $sound.size -or
+            (Get-FileHash -LiteralPath $soundPath -Algorithm SHA256).Hash -ine $sound.sha256) { throw "Fishing sound identity mismatch: $soundPath" }
+    }
+}

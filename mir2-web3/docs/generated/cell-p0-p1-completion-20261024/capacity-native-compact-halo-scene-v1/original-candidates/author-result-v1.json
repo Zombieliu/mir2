@@ -1,0 +1,2993 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:05:18.345Z",
+  "scope": "External static scene author only; no product source, gates or live realm changed",
+  "parameters": {
+    "schemaVersion": 1,
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "bodySide": 3,
+    "haloSide": 5,
+    "bounds": {
+      "minX": 208,
+      "maxX": 376,
+      "minY": 512,
+      "maxY": 682
+    },
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "actors": 100,
+    "prefixes": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "fighterIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "maxExpanded": 4000,
+    "stableWitnessRange": 6,
+    "bodyExcludesCanonicalInitialMonsters": true,
+    "initialDangerHalfWidth": 8,
+    "initialDangerHalfHeight": 6,
+    "ordinaryProtocolOnly": true,
+    "freshWarrior": true,
+    "grants": false,
+    "newSpawnRules": false,
+    "productChanges": false,
+    "attacksPerFighterMinute": 18,
+    "positiveHitsPerFighterMinute": 12,
+    "minimumNativeCompletion": 0.95,
+    "minimumRunFraction": 0.5,
+    "minimumDistinctCells": 80,
+    "opportunityMs": 750,
+    "commandsPerSecond": 3,
+    "actualRuntimeLimitsUnchanged": {
+      "pathTargets": 4,
+      "adjacentGoals": 8,
+      "searchNodesPerPath": 4000,
+      "attackDeadlineMs": 900,
+      "chaseMoves": 40,
+      "chaseMs": 30000,
+      "visits": 3
+    },
+    "accepted": false,
+    "capacityAccepted": false,
+    "staticOnly": true
+  },
+  "selectedCount": 100,
+  "selectedDraft": 4,
+  "selectedFirstTen": [
+    {
+      "x": 252,
+      "y": 579
+    },
+    {
+      "x": 266,
+      "y": 571
+    },
+    {
+      "x": 252,
+      "y": 570
+    },
+    {
+      "x": 245,
+      "y": 578
+    },
+    {
+      "x": 234,
+      "y": 575
+    },
+    {
+      "x": 252,
+      "y": 585
+    },
+    {
+      "x": 244,
+      "y": 589
+    },
+    {
+      "x": 239,
+      "y": 602
+    },
+    {
+      "x": 262,
+      "y": 596
+    },
+    {
+      "x": 270,
+      "y": 600
+    }
+  ],
+  "selectionScoreRule": "first10: fixedDamage5 all-nine-position stable target supply*10 minus actual4000-A* scout second-circuit steps*.045; outside first10: marginal all-nine stable target supply, reachable expansion in the same active cluster",
+  "draftSummaries": [
+    {
+      "seedIndex": 0,
+      "center": {
+        "x": 271,
+        "y": 597
+      },
+      "passed": true,
+      "score": 334.2933333333334,
+      "fighter": {
+        "x": 271,
+        "y": 597
+      },
+      "anchors": [
+        {
+          "x": 274,
+          "y": 597
+        },
+        {
+          "x": 275,
+          "y": 592
+        },
+        {
+          "x": 284,
+          "y": 579
+        },
+        {
+          "x": 275,
+          "y": 579
+        },
+        {
+          "x": 253,
+          "y": 582
+        },
+        {
+          "x": 271,
+          "y": 597
+        },
+        {
+          "x": 258,
+          "y": 590
+        },
+        {
+          "x": 262,
+          "y": 609
+        },
+        {
+          "x": 270,
+          "y": 605
+        },
+        {
+          "x": 283,
+          "y": 608
+        }
+      ],
+      "canonicalAllNineStableTargets": 27,
+      "counts": {
+        "Deer": 20,
+        "Scarecrow": 7
+      },
+      "targetIds": [
+        206302,
+        206316,
+        206320,
+        206323,
+        206324,
+        206339,
+        206511,
+        206514,
+        206515,
+        206521,
+        206526,
+        206545,
+        206604,
+        206613,
+        206619,
+        206631,
+        206634,
+        206643,
+        206646,
+        206700,
+        206706,
+        206707,
+        206708,
+        206710,
+        206711,
+        206714,
+        206718
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 102,
+        "secondCircuitSteps": 112
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 1,
+      "center": {
+        "x": 239,
+        "y": 596
+      },
+      "passed": true,
+      "score": 326.6350000000001,
+      "fighter": {
+        "x": 239,
+        "y": 596
+      },
+      "anchors": [
+        {
+          "x": 242,
+          "y": 596
+        },
+        {
+          "x": 234,
+          "y": 590
+        },
+        {
+          "x": 232,
+          "y": 578
+        },
+        {
+          "x": 237,
+          "y": 578
+        },
+        {
+          "x": 252,
+          "y": 585
+        },
+        {
+          "x": 239,
+          "y": 596
+        },
+        {
+          "x": 257,
+          "y": 590
+        },
+        {
+          "x": 255,
+          "y": 609
+        },
+        {
+          "x": 232,
+          "y": 613
+        },
+        {
+          "x": 239,
+          "y": 602
+        }
+      ],
+      "canonicalAllNineStableTargets": 28,
+      "counts": {
+        "Deer": 21,
+        "Scarecrow": 7
+      },
+      "targetIds": [
+        206313,
+        206327,
+        206328,
+        206331,
+        206334,
+        206335,
+        206338,
+        206502,
+        206503,
+        206514,
+        206517,
+        206518,
+        206521,
+        206527,
+        206532,
+        206533,
+        206539,
+        206548,
+        206600,
+        206607,
+        206613,
+        206622,
+        206634,
+        206646,
+        206649,
+        206706,
+        206708,
+        206710
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 92,
+        "secondCircuitSteps": 97
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 2,
+      "center": {
+        "x": 215,
+        "y": 588
+      },
+      "passed": true,
+      "score": 198.12500000000006,
+      "fighter": {
+        "x": 215,
+        "y": 588
+      },
+      "anchors": [
+        {
+          "x": 212,
+          "y": 586
+        },
+        {
+          "x": 215,
+          "y": 585
+        },
+        {
+          "x": 225,
+          "y": 577
+        },
+        {
+          "x": 233,
+          "y": 572
+        },
+        {
+          "x": 230,
+          "y": 576
+        },
+        {
+          "x": 215,
+          "y": 588
+        },
+        {
+          "x": 231,
+          "y": 599
+        },
+        {
+          "x": 231,
+          "y": 604
+        },
+        {
+          "x": 218,
+          "y": 596
+        },
+        {
+          "x": 215,
+          "y": 596
+        }
+      ],
+      "canonicalAllNineStableTargets": 19,
+      "counts": {
+        "Deer": 11,
+        "Scarecrow": 8
+      },
+      "targetIds": [
+        206301,
+        206305,
+        206309,
+        206313,
+        206338,
+        206505,
+        206517,
+        206518,
+        206533,
+        206535,
+        206548,
+        206600,
+        206601,
+        206607,
+        206615,
+        206616,
+        206625,
+        206637,
+        206649
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 69,
+        "secondCircuitSteps": 75
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 3,
+      "center": {
+        "x": 252,
+        "y": 585
+      },
+      "passed": true,
+      "score": 345.6316666666667,
+      "fighter": {
+        "x": 252,
+        "y": 585
+      },
+      "anchors": [
+        {
+          "x": 252,
+          "y": 579
+        },
+        {
+          "x": 266,
+          "y": 571
+        },
+        {
+          "x": 252,
+          "y": 570
+        },
+        {
+          "x": 245,
+          "y": 578
+        },
+        {
+          "x": 234,
+          "y": 575
+        },
+        {
+          "x": 252,
+          "y": 585
+        },
+        {
+          "x": 244,
+          "y": 589
+        },
+        {
+          "x": 239,
+          "y": 602
+        },
+        {
+          "x": 262,
+          "y": 596
+        },
+        {
+          "x": 270,
+          "y": 600
+        }
+      ],
+      "canonicalAllNineStableTargets": 30,
+      "counts": {
+        "Deer": 21,
+        "Scarecrow": 9
+      },
+      "targetIds": [
+        206313,
+        206323,
+        206327,
+        206330,
+        206331,
+        206334,
+        206335,
+        206502,
+        206514,
+        206517,
+        206527,
+        206529,
+        206532,
+        206533,
+        206544,
+        206545,
+        206547,
+        206600,
+        206604,
+        206607,
+        206612,
+        206613,
+        206622,
+        206634,
+        206646,
+        206649,
+        206700,
+        206708,
+        206710,
+        206711
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 107,
+        "secondCircuitSteps": 123
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 4,
+      "center": {
+        "x": 255,
+        "y": 651
+      },
+      "passed": true,
+      "score": 222.0900000000001,
+      "fighter": {
+        "x": 255,
+        "y": 651
+      },
+      "anchors": [
+        {
+          "x": 258,
+          "y": 651
+        },
+        {
+          "x": 255,
+          "y": 648
+        },
+        {
+          "x": 249,
+          "y": 642
+        },
+        {
+          "x": 239,
+          "y": 651
+        },
+        {
+          "x": 242,
+          "y": 637
+        },
+        {
+          "x": 255,
+          "y": 651
+        },
+        {
+          "x": 258,
+          "y": 646
+        },
+        {
+          "x": 268,
+          "y": 657
+        },
+        {
+          "x": 268,
+          "y": 662
+        },
+        {
+          "x": 251,
+          "y": 664
+        }
+      ],
+      "canonicalAllNineStableTargets": 20,
+      "counts": {
+        "Deer": 12,
+        "Scarecrow": 8
+      },
+      "targetIds": [
+        206501,
+        206504,
+        206513,
+        206522,
+        206525,
+        206528,
+        206534,
+        206537,
+        206543,
+        206602,
+        206605,
+        206608,
+        206614,
+        206620,
+        206639,
+        206642,
+        206648,
+        206701,
+        206709,
+        206712
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 87,
+        "secondCircuitSteps": 98
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 5,
+      "center": {
+        "x": 283,
+        "y": 573
+      },
+      "passed": true,
+      "score": 212.45333333333338,
+      "fighter": {
+        "x": 283,
+        "y": 573
+      },
+      "anchors": [
+        {
+          "x": 284,
+          "y": 570
+        },
+        {
+          "x": 275,
+          "y": 562
+        },
+        {
+          "x": 269,
+          "y": 571
+        },
+        {
+          "x": 275,
+          "y": 573
+        },
+        {
+          "x": 277,
+          "y": 576
+        },
+        {
+          "x": 283,
+          "y": 573
+        },
+        {
+          "x": 275,
+          "y": 590
+        },
+        {
+          "x": 284,
+          "y": 577
+        },
+        {
+          "x": 288,
+          "y": 574
+        },
+        {
+          "x": 291,
+          "y": 571
+        }
+      ],
+      "canonicalAllNineStableTargets": 18,
+      "counts": {
+        "Deer": 14,
+        "Scarecrow": 4
+      },
+      "targetIds": [
+        206203,
+        206316,
+        206319,
+        206320,
+        206323,
+        206326,
+        206511,
+        206526,
+        206529,
+        206541,
+        206544,
+        206545,
+        206609,
+        206619,
+        206631,
+        206643,
+        206707,
+        206718
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 59,
+        "secondCircuitSteps": 64
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 6,
+      "center": {
+        "x": 287,
+        "y": 618
+      },
+      "passed": true,
+      "score": 190.65666666666672,
+      "fighter": {
+        "x": 287,
+        "y": 618
+      },
+      "anchors": [
+        {
+          "x": 284,
+          "y": 618
+        },
+        {
+          "x": 290,
+          "y": 624
+        },
+        {
+          "x": 299,
+          "y": 633
+        },
+        {
+          "x": 290,
+          "y": 617
+        },
+        {
+          "x": 283,
+          "y": 608
+        },
+        {
+          "x": 287,
+          "y": 618
+        },
+        {
+          "x": 276,
+          "y": 600
+        },
+        {
+          "x": 271,
+          "y": 605
+        },
+        {
+          "x": 270,
+          "y": 600
+        },
+        {
+          "x": 281,
+          "y": 611
+        }
+      ],
+      "canonicalAllNineStableTargets": 16,
+      "counts": {
+        "Deer": 11,
+        "Scarecrow": 5
+      },
+      "targetIds": [
+        206302,
+        206320,
+        206324,
+        206339,
+        206515,
+        206545,
+        206546,
+        206604,
+        206626,
+        206632,
+        206641,
+        206644,
+        206700,
+        206711,
+        206714,
+        206717
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 72,
+        "secondCircuitSteps": 78
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 7,
+      "center": {
+        "x": 274,
+        "y": 587
+      },
+      "passed": true,
+      "score": 321.91000000000014,
+      "fighter": {
+        "x": 274,
+        "y": 587
+      },
+      "anchors": [
+        {
+          "x": 274,
+          "y": 582
+        },
+        {
+          "x": 283,
+          "y": 573
+        },
+        {
+          "x": 291,
+          "y": 571
+        },
+        {
+          "x": 271,
+          "y": 597
+        },
+        {
+          "x": 270,
+          "y": 605
+        },
+        {
+          "x": 274,
+          "y": 587
+        },
+        {
+          "x": 262,
+          "y": 596
+        },
+        {
+          "x": 256,
+          "y": 583
+        },
+        {
+          "x": 256,
+          "y": 570
+        },
+        {
+          "x": 266,
+          "y": 573
+        }
+      ],
+      "canonicalAllNineStableTargets": 27,
+      "counts": {
+        "Deer": 19,
+        "Scarecrow": 8
+      },
+      "targetIds": [
+        206203,
+        206316,
+        206319,
+        206323,
+        206330,
+        206511,
+        206514,
+        206526,
+        206529,
+        206541,
+        206544,
+        206545,
+        206547,
+        206604,
+        206609,
+        206612,
+        206613,
+        206619,
+        206631,
+        206643,
+        206646,
+        206700,
+        206707,
+        206708,
+        206711,
+        206714,
+        206718
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 94,
+        "secondCircuitSteps": 102
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 8,
+      "center": {
+        "x": 260,
+        "y": 670
+      },
+      "passed": true,
+      "score": 190.8000000000001,
+      "fighter": {
+        "x": 260,
+        "y": 670
+      },
+      "anchors": [
+        {
+          "x": 263,
+          "y": 676
+        },
+        {
+          "x": 253,
+          "y": 664
+        },
+        {
+          "x": 255,
+          "y": 653
+        },
+        {
+          "x": 260,
+          "y": 653
+        },
+        {
+          "x": 263,
+          "y": 653
+        },
+        {
+          "x": 260,
+          "y": 670
+        },
+        {
+          "x": 268,
+          "y": 662
+        },
+        {
+          "x": 273,
+          "y": 657
+        },
+        {
+          "x": 277,
+          "y": 660
+        },
+        {
+          "x": 272,
+          "y": 671
+        }
+      ],
+      "canonicalAllNineStableTargets": 17,
+      "counts": {
+        "Deer": 10,
+        "Scarecrow": 7
+      },
+      "targetIds": [
+        206501,
+        206504,
+        206507,
+        206513,
+        206525,
+        206528,
+        206534,
+        206602,
+        206624,
+        206627,
+        206639,
+        206642,
+        206645,
+        206648,
+        206701,
+        206704,
+        206712
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 56,
+        "secondCircuitSteps": 60
+      },
+      "adoptedAsLiveScene": false
+    },
+    {
+      "seedIndex": 9,
+      "center": {
+        "x": 277,
+        "y": 666
+      },
+      "passed": true,
+      "score": 202.9316666666667,
+      "fighter": {
+        "x": 277,
+        "y": 666
+      },
+      "anchors": [
+        {
+          "x": 280,
+          "y": 664
+        },
+        {
+          "x": 279,
+          "y": 671
+        },
+        {
+          "x": 263,
+          "y": 676
+        },
+        {
+          "x": 268,
+          "y": 662
+        },
+        {
+          "x": 259,
+          "y": 658
+        },
+        {
+          "x": 277,
+          "y": 666
+        },
+        {
+          "x": 263,
+          "y": 652
+        },
+        {
+          "x": 267,
+          "y": 653
+        },
+        {
+          "x": 277,
+          "y": 661
+        },
+        {
+          "x": 286,
+          "y": 655
+        }
+      ],
+      "canonicalAllNineStableTargets": 17,
+      "counts": {
+        "Deer": 12,
+        "Scarecrow": 5
+      },
+      "targetIds": [
+        206504,
+        206507,
+        206513,
+        206516,
+        206525,
+        206528,
+        206531,
+        206534,
+        206624,
+        206627,
+        206642,
+        206645,
+        206648,
+        206701,
+        206704,
+        206712,
+        206715
+      ],
+      "isolated": [],
+      "first2": true,
+      "tour": {
+        "passed": true,
+        "firstCircuitSteps": 71,
+        "secondCircuitSteps": 83
+      },
+      "adoptedAsLiveScene": false
+    }
+  ],
+  "failedBootstrapCandidates": [
+    {
+      "home": "227,523",
+      "proof": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "227,522",
+      "proof": {
+        "found": true,
+        "steps": 95,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "216,520",
+      "proof": {
+        "found": true,
+        "steps": 97,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "217,520",
+      "proof": {
+        "found": true,
+        "steps": 97,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "home": "212,567",
+      "proof": {
+        "found": true,
+        "steps": 79,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": "212,568",
+      "proof": {
+        "found": true,
+        "steps": 79,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": "212,569",
+      "proof": {
+        "found": true,
+        "steps": 79,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": "285,523",
+      "proof": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "286,523",
+      "proof": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "287,523",
+      "proof": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "288,523",
+      "proof": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "289,523",
+      "proof": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "251,532",
+      "proof": {
+        "found": true,
+        "steps": 85,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "251,531",
+      "proof": {
+        "found": true,
+        "steps": 86,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "215,520",
+      "proof": {
+        "found": true,
+        "steps": 97,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "215,519",
+      "proof": {
+        "found": true,
+        "steps": 98,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "216,519",
+      "proof": {
+        "found": true,
+        "steps": 98,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "home": "217,519",
+      "proof": {
+        "found": true,
+        "steps": 98,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": "285,525",
+      "proof": {
+        "found": true,
+        "steps": 92,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "286,525",
+      "proof": {
+        "found": true,
+        "steps": 92,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "285,524",
+      "proof": {
+        "found": true,
+        "steps": 93,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "286,524",
+      "proof": {
+        "found": true,
+        "steps": 93,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "287,525",
+      "proof": {
+        "found": true,
+        "steps": 92,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "287,524",
+      "proof": {
+        "found": true,
+        "steps": 93,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "288,525",
+      "proof": {
+        "found": true,
+        "steps": 92,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "288,524",
+      "proof": {
+        "found": true,
+        "steps": 93,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": "289,524",
+      "proof": {
+        "found": true,
+        "steps": 93,
+        "noTransfer": true,
+        "noInitialDanger": false,
+        "initialMonsterCrossings": 1
+      }
+    }
+  ],
+  "selections": [
+    {
+      "actorIndex": 0,
+      "home": {
+        "x": 252,
+        "y": 579
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 39,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 1,
+      "home": {
+        "x": 266,
+        "y": 571
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 46,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 2,
+      "home": {
+        "x": 252,
+        "y": 570
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 47,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 3,
+      "home": {
+        "x": 245,
+        "y": 578
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 46,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 4,
+      "home": {
+        "x": 234,
+        "y": 575
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 57,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 5,
+      "home": {
+        "x": 252,
+        "y": 585
+      },
+      "role": "combat",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 39,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 6,
+      "home": {
+        "x": 244,
+        "y": 589
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 47,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 7,
+      "home": {
+        "x": 239,
+        "y": 602
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 52,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 8,
+      "home": {
+        "x": 262,
+        "y": 596
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 29,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 9,
+      "home": {
+        "x": 270,
+        "y": 600
+      },
+      "role": "movement",
+      "source": "selected-first-ten-draft",
+      "bootstrap": {
+        "found": true,
+        "steps": 21,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 10,
+      "home": {
+        "x": 283,
+        "y": 608
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 5,
+      "bootstrap": {
+        "found": true,
+        "steps": 8,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 11,
+      "home": {
+        "x": 275,
+        "y": 592
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 4.1,
+      "bootstrap": {
+        "found": true,
+        "steps": 25,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 12,
+      "home": {
+        "x": 287,
+        "y": 618
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 4.066666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 2,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 13,
+      "home": {
+        "x": 235,
+        "y": 613
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 3.75,
+      "bootstrap": {
+        "found": true,
+        "steps": 56,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 14,
+      "home": {
+        "x": 276,
+        "y": 573
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 3.716666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 15,
+      "home": {
+        "x": 282,
+        "y": 572
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 2.916666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 45,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 16,
+      "home": {
+        "x": 288,
+        "y": 574
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 4.166666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 43,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 17,
+      "home": {
+        "x": 224,
+        "y": 568
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 3.3,
+      "bootstrap": {
+        "found": true,
+        "steps": 67,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 18,
+      "home": {
+        "x": 265,
+        "y": 609
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.916666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 26,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 19,
+      "home": {
+        "x": 274,
+        "y": 586
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 31,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 20,
+      "home": {
+        "x": 238,
+        "y": 617
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 53,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 21,
+      "home": {
+        "x": 225,
+        "y": 580
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 66,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 22,
+      "home": {
+        "x": 215,
+        "y": 586
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 4.55,
+      "bootstrap": {
+        "found": true,
+        "steps": 76,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 23,
+      "home": {
+        "x": 215,
+        "y": 596
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 76,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 24,
+      "home": {
+        "x": 224,
+        "y": 596
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 67,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 25,
+      "home": {
+        "x": 271,
+        "y": 597
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 20,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 26,
+      "home": {
+        "x": 241,
+        "y": 631
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 50,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 27,
+      "home": {
+        "x": 251,
+        "y": 641
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 3.716666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 52,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 28,
+      "home": {
+        "x": 258,
+        "y": 651
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 5.833333333333334,
+      "bootstrap": {
+        "found": true,
+        "steps": 63,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 29,
+      "home": {
+        "x": 268,
+        "y": 662
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 3.3,
+      "bootstrap": {
+        "found": true,
+        "steps": 53,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 30,
+      "home": {
+        "x": 279,
+        "y": 665
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 5.383333333333334,
+      "bootstrap": {
+        "found": true,
+        "steps": 50,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 31,
+      "home": {
+        "x": 251,
+        "y": 664
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.8499999999999996,
+      "bootstrap": {
+        "found": true,
+        "steps": 70,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "actorIndex": 32,
+      "home": {
+        "x": 286,
+        "y": 655
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.5,
+      "bootstrap": {
+        "found": true,
+        "steps": 39,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 33,
+      "home": {
+        "x": 234,
+        "y": 641
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 57,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 34,
+      "home": {
+        "x": 225,
+        "y": 639
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.8499999999999996,
+      "bootstrap": {
+        "found": true,
+        "steps": 66,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 35,
+      "home": {
+        "x": 255,
+        "y": 651
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 62,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 36,
+      "home": {
+        "x": 235,
+        "y": 653
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.5,
+      "bootstrap": {
+        "found": true,
+        "steps": 64,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 37,
+      "home": {
+        "x": 271,
+        "y": 605
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.6666666666666667,
+      "bootstrap": {
+        "found": true,
+        "steps": 20,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 38,
+      "home": {
+        "x": 247,
+        "y": 595
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 39,
+      "home": {
+        "x": 291,
+        "y": 571
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 46,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 40,
+      "home": {
+        "x": 260,
+        "y": 616
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 31,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 41,
+      "home": {
+        "x": 268,
+        "y": 657
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 53,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 42,
+      "home": {
+        "x": 232,
+        "y": 560
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 60,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 43,
+      "home": {
+        "x": 266,
+        "y": 562
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 55,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 44,
+      "home": {
+        "x": 225,
+        "y": 550
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 70,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 45,
+      "home": {
+        "x": 274,
+        "y": 597
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 20,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 46,
+      "home": {
+        "x": 226,
+        "y": 542
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 75,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 47,
+      "home": {
+        "x": 243,
+        "y": 559
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 58,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 48,
+      "home": {
+        "x": 254,
+        "y": 551
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 66,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "actorIndex": 49,
+      "home": {
+        "x": 263,
+        "y": 543
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 74,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "actorIndex": 50,
+      "home": {
+        "x": 227,
+        "y": 531
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 86,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 51,
+      "home": {
+        "x": 275,
+        "y": 535
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 82,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "actorIndex": 52,
+      "home": {
+        "x": 284,
+        "y": 541
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.5,
+      "bootstrap": {
+        "found": true,
+        "steps": 76,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 53,
+      "home": {
+        "x": 223,
+        "y": 666
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 84,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 54,
+      "home": {
+        "x": 218,
+        "y": 668
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.6,
+      "bootstrap": {
+        "found": true,
+        "steps": 89,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 55,
+      "home": {
+        "x": 261,
+        "y": 651
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 60,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 56,
+      "home": {
+        "x": 255,
+        "y": 648
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 59,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 57,
+      "home": {
+        "x": 258,
+        "y": 645
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 56,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 58,
+      "home": {
+        "x": 237,
+        "y": 572
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 54,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 59,
+      "home": {
+        "x": 290,
+        "y": 624
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 8,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 60,
+      "home": {
+        "x": 299,
+        "y": 633
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 1.25,
+      "bootstrap": {
+        "found": true,
+        "steps": 17,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 61,
+      "home": {
+        "x": 226,
+        "y": 607
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 65,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 62,
+      "home": {
+        "x": 217,
+        "y": 617
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 2.05,
+      "bootstrap": {
+        "found": true,
+        "steps": 74,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 63,
+      "home": {
+        "x": 279,
+        "y": 671
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 56,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 64,
+      "home": {
+        "x": 228,
+        "y": 620
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 63,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 65,
+      "home": {
+        "x": 284,
+        "y": 578
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 39,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 66,
+      "home": {
+        "x": 227,
+        "y": 670
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 81,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 67,
+      "home": {
+        "x": 263,
+        "y": 676
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0.8,
+      "bootstrap": {
+        "found": true,
+        "steps": 61,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 68,
+      "home": {
+        "x": 239,
+        "y": 605
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 52,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 69,
+      "home": {
+        "x": 236,
+        "y": 604
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 55,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 70,
+      "home": {
+        "x": 249,
+        "y": 582
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 42,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 71,
+      "home": {
+        "x": 244,
+        "y": 581
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 47,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 72,
+      "home": {
+        "x": 239,
+        "y": 596
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 52,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 73,
+      "home": {
+        "x": 277,
+        "y": 661
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 47,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 74,
+      "home": {
+        "x": 264,
+        "y": 651
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 57,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 75,
+      "home": {
+        "x": 281,
+        "y": 611
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 9,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 76,
+      "home": {
+        "x": 283,
+        "y": 575
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 42,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 77,
+      "home": {
+        "x": 244,
+        "y": 595
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 47,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 78,
+      "home": {
+        "x": 239,
+        "y": 599
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 52,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 79,
+      "home": {
+        "x": 225,
+        "y": 577
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 66,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 80,
+      "home": {
+        "x": 212,
+        "y": 586
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 79,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 81,
+      "home": {
+        "x": 209,
+        "y": 586
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 82,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 82,
+      "home": {
+        "x": 277,
+        "y": 597
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 20,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 83,
+      "home": {
+        "x": 272,
+        "y": 594
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 23,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 84,
+      "home": {
+        "x": 253,
+        "y": 582
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 38,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 85,
+      "home": {
+        "x": 291,
+        "y": 574
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 43,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 86,
+      "home": {
+        "x": 243,
+        "y": 584
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 48,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 87,
+      "home": {
+        "x": 273,
+        "y": 601
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 18,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 88,
+      "home": {
+        "x": 272,
+        "y": 590
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 27,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 89,
+      "home": {
+        "x": 277,
+        "y": 585
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 32,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 90,
+      "home": {
+        "x": 280,
+        "y": 586
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 31,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 91,
+      "home": {
+        "x": 274,
+        "y": 583
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 34,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 92,
+      "home": {
+        "x": 281,
+        "y": 583
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 34,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 93,
+      "home": {
+        "x": 247,
+        "y": 589
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 94,
+      "home": {
+        "x": 232,
+        "y": 578
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 59,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "actorIndex": 95,
+      "home": {
+        "x": 212,
+        "y": 589
+      },
+      "role": "combat",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 79,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 96,
+      "home": {
+        "x": 273,
+        "y": 573
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 97,
+      "home": {
+        "x": 269,
+        "y": 571
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 46,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "actorIndex": 98,
+      "home": {
+        "x": 242,
+        "y": 599
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 49,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "actorIndex": 99,
+      "home": {
+        "x": 245,
+        "y": 602
+      },
+      "role": "movement",
+      "newAllNineStableTargetWeight": 0,
+      "bootstrap": {
+        "found": true,
+        "steps": 46,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-v1.json",
+      "bytes": 5844,
+      "sha256": "e9d32adc434bbb81f5c7259dfd708e882add099c33442aa3305a638863856990"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-10-v1.json",
+      "bytes": 804,
+      "sha256": "ec95cf290915d87b1d8cbfdda7985fa78b2632ddff637323bd0176d900757d95"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11361,
+      "sha256": "3f559db681d0c606dae4db5bdbdd4474a21ff7f8ded128ba684fcaca9bf40df6"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-inventory-v1.json",
+      "bytes": 80949,
+      "sha256": "6af03d76e6e018f4d6a9e95ca8789b84296c7ed3a42cafbc927f6211e33ccca7"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/author-candidates.mjs",
+      "bytes": 11154,
+      "sha256": "995cfb9b003030447f0df64c06de284cd1b04cbc147ec304afbc96a663e1d447"
+    }
+  ],
+  "pathSearches": 996,
+  "capacityAccepted": false,
+  "accepted": false,
+  "limitations": [
+    "Selection optimizes pinned initial canonical geometry. Monsters can move, die and respawn at future positions; actual snapshot membership and active positions are mandatory in unchanged runtime.",
+    "A* scout routes use representative home occupancy and fixed initial terrain. No Run fraction, latency,95%completion or survival guarantee follows.",
+    "The second-circuit score is not a live movement count. Each actual runtime decision still has its original first-four goal/4000-node budget.",
+    "Scene construction is separate from independent validation. Neither the selected draft nor100homes are authorized for real load by this author result."
+  ]
+}

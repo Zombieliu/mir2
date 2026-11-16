@@ -1,0 +1,5 @@
+# Recorded logs and receipts retain their measured Windows bytes on all hosts.
+* -text
+** -text
+*.log -whitespace
+*.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

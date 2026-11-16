@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'routing::tests::zone_journey_event_bridge_tests::public_taoist_healing_commits_n4_flag_through_the_zone_journey_bridge' (56480) panicked at apps\gateway\src\routing\tests\zone_journey_event_bridge_tests.rs:278:5:
+the trusted Zone receipt must project the N4 flag to its owner: [ObjectPlayer { info: ObjectPlayerInfo { object_id: 50001, name: "JourneyHealingObserver", guild_name: "", guild_rank_name: "", name_colour_argb: -1, class: Warrior, gender: Male, level: 1, location: Point { x: 329, y: 269 }, direction: Down, hair: 0, light: 0, weapon: -1, weapon_effect: 0, armour: -1, poison: 0, dead: false, hidden: false, effect: 0, wing_effect: 0, extra: false, mount_type: -1, riding_mount: false, fishing: false, transform_type: 0, element_orb_effect: 0, element_orb_level: 0, element_orb_max: 0, buffs: [], level_effects: 0 } }, UserLocation { location: UserLocation { position: Point { x: 330, y: 270 }, direction: Right } }, ObjectMana { info: ObjectManaInfo { object_id: 1000, percent: 26 } }, ObjectEffect { info: ObjectEffectInfo { object_id: 1000, effect: 3, effect_type: 0, delay_time: 0, time: 0 } }, Magic { spell: Healing, target_id: 1000, target: Point { x: 330, y: 270 }, cast: true, level: 0, secondary_target_ids: [] }, ObjectMagic { object_id: 1000, location: Point { x: 330, y: 270 }, direction: Right, spell: Healing, target_id: 1000, target: Point { x: 330, y: 270 }, cast: true, level: 0, self_broadcast: false, secondary_target_ids: [] }, MagicLeveled { object_id: 1000, spell: Healing, level: 0, experience: 1 }, ChangeQuest { quest_id: 2110004, task_list: ["Kill Oma 0/2", "Complete your class practice 0/1"], taken: true, completed: false, new: false, quest_state: 1, track_quest: false }, GuildStatus { guild_name: "", guild_rank_name: "", level: 0, experience: 0, max_experience: 0, gold: 0, spare_points: 0, member_count: 0, max_members: 0, voting: false, item_count: 0, buff_count: 0, my_options: 0, my_rank_id: -1 }, GuildMemberChange { name: "", rank_index: 0, status: 255, ranks: [] }, GuildBuffList { remove: 0, active_buffs: [], guild_buffs: [] }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test routing::tests::zone_journey_event_bridge_tests::public_taoist_healing_commits_n4_flag_through_the_zone_journey_bridge ... FAILED
+
+failures:
+
+failures:
+    routing::tests::zone_journey_event_bridge_tests::public_taoist_healing_commits_n4_flag_through_the_zone_journey_bridge
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 791 filtered out; finished in 2.64s
+

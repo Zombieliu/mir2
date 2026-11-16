@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-11-13T23:08:22.618Z",
+  "publicAlias": "numeron.obelisk.build",
+  "deploymentId": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk",
+  "revision": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "sourceRef": "codex/windows-player-journey",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "state": "READY",
+  "target": "production",
+  "method": "authenticated final alias/deployment after successful second public cohort and static readbacks"
+}

@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "scope": "read-only verification of curated ordinary purchases",
+  "passed": true,
+  "cases": [
+    {
+      "className": "Wizard",
+      "case": "level9-hp-real-purchase",
+      "firstSequence": 2958,
+      "lastSequence": 2963,
+      "pool": "hp",
+      "before": 11,
+      "after": 12,
+      "paidGold": 40,
+      "passed": true
+    },
+    {
+      "className": "Taoist",
+      "case": "level9-hp-real-purchase",
+      "firstSequence": 3280,
+      "lastSequence": 3285,
+      "pool": "hp",
+      "before": 5,
+      "after": 6,
+      "paidGold": 40,
+      "passed": true
+    },
+    {
+      "className": "Wizard",
+      "case": "level15-hp-real-restock",
+      "firstSequence": 6687,
+      "lastSequence": 6702,
+      "pool": "hp",
+      "before": 2,
+      "after": 24,
+      "paidGold": 880,
+      "passed": true
+    },
+    {
+      "className": "Wizard",
+      "case": "level24-town-real-restock",
+      "firstSequence": 5221,
+      "lastSequence": 5225,
+      "pool": "townTeleport",
+      "before": 1,
+      "after": 2,
+      "paidGold": 1000,
+      "passed": true
+    },
+    {
+      "className": "Taoist",
+      "case": "level19-hp-real-restock",
+      "firstSequence": 3301,
+      "lastSequence": 3318,
+      "pool": "hp",
+      "before": 0,
+      "after": 24,
+      "paidGold": 2640,
+      "passed": true
+    },
+    {
+      "className": "Taoist",
+      "case": "level22-amulet-real-restock",
+      "firstSequence": 8439,
+      "lastSequence": 8453,
+      "pool": "amulet",
+      "before": 2,
+      "after": 100,
+      "paidGold": 2450,
+      "passed": true
+    },
+    {
+      "className": "Taoist",
+      "case": "level22-hp-real-restock",
+      "firstSequence": 759,
+      "lastSequence": 773,
+      "pool": "hp",
+      "before": 0,
+      "after": 24,
+      "paidGold": 2640,
+      "passed": true
+    }
+  ],
+  "visualAccepted": false,
+  "rewardItemsNotCountedAsPurchases": true
+}

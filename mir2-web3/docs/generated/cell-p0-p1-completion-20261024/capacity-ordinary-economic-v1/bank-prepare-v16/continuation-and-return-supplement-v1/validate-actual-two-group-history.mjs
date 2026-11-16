@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {pathToFileURL,fileURLToPath} from 'node:url';
+const B='C:/mir2-build/p01-completion-20261024',P='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3',D=path.join(B,'ordinary-capacity-bank-prepare-v16');
+const json=f=>JSON.parse(fs.readFileSync(f)),pin=file=>{const b=fs.readFileSync(file);return{file,bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex')}};
+const {validatePreparationContinuation}=await import(pathToFileURL(path.join(P,'apps/web/scripts/playtest-capacity-prepare.mjs'))),{loadProtocolCollisionMap}=await import(pathToFileURL(path.join(P,'apps/web/scripts/quest-agent/protocol-navigation.mjs')));
+const config=json(path.join(D,'prepare-config-pending-v1.json')),receipt=json(path.join(D,'episode/preparation-episode-receipt-v1.json')),first=config.options.continuation.evidence[0];
+const second={report:pin(receipt.rawOriginalReport.file),preparedIndex:pin(receipt.preparedIndexRecord.file),cleanup:pin(receipt.cleanupRecord.file),receipt:pin(path.join(D,'episode/preparation-episode-receipt-v1.json'))};
+const pool=json(path.join(D,'episode/private/capacity-pool.json')),scenario=json(config.scenarioSource.file),map=await loadProtocolCollisionMap('0',{packagedMapRoot:path.join(P,'apps/web/lib/generated/crystal-map-pack')});
+const args={pool,endpoint:config.options.endpoint,maxPrepared:100,targetHp:12,stagingPoints:scenario.preparation.stagingPoints,stagingCandidates:scenario.preparation.stagingCandidates,map};
+const run=evidence=>validatePreparationContinuation({mode:'historical-prepared-index-v1',evidence},args),h=await run([first,second]);
+if(h.historicalPreparedCount!==58||h.expectedThisRun!==42||h.remainingPoolIndices[0]!==58||h.remainingPoolIndices.at(-1)!==99||h.sourceOriginalVerdicts.length!==2||h.sourceOriginalVerdicts.some(r=>r.ok!==false)||!h.historicalNotFresh)throw Error('actual58/42 history differs');
+const negative=[];for(const[label,groups]of [['missing-first42',[second]],['reversed-groups',[second,first]],['duplicate-first-group',[first,first,second]],['combined-index-instead-of-current16',[first,{...second,preparedIndex:pin(receipt.combinedPreparedIndexRecord.file)}]]]){let rejected=false;try{await run(groups)}catch{rejected=true}if(!rejected)throw Error('expected rejection '+label);negative.push({label,rejected})}
+const result={schemaVersion:1,performedAt:new Date().toISOString(),scope:'Pure read-only production-validator preflight over actual W15 original42 plus W16 new16; no auth/current Store qualification or ordinary fresh relogin claimed.',tool:pin(fileURLToPath(import.meta.url)),evidence:[first,second],historicalPreparedCount:58,expectedThisRun:42,firstRemainingOriginalIndex1Based:59,lastRemainingOriginalIndex1Based:100,historicalNotFresh:true,originalFalseVerdictsRetained:true,negative,authPerformed:false,bankCopyPerformed:false,ownedExecutionPerformed:false,all100Fresh:false,capacityAccepted:false,p0Accepted:false};
+const output=path.join(path.dirname(fileURLToPath(import.meta.url)),'actual-two-group-history-receipt-v1.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(pin(output)));

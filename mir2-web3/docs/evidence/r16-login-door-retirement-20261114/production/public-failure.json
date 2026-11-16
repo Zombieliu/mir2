@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "source": "ea4b1c363eb9089bf0fbe57245660782cae3fe70",
+  "deploymentId": "dpl_CBiwpNGHSpWEy222DyppnBZnVULB",
+  "accepted": false,
+  "rawFunctionalPassed": false,
+  "failure": {
+    "phase": "verify-six-original-font-cache-bodies",
+    "code": "AUTOMATION_FAILED"
+  },
+  "timing": {
+    "clockEpochMs": 1794665340697,
+    "authoritativeLoginSuccessMs": 61107,
+    "startIntentMs": 91840,
+    "startAckMs": 95801,
+    "authoritativeStarterMapMs": 95810,
+    "authoritativeSelfMs": 95810,
+    "firstPlayableObservedMs": 98995,
+    "terrainPaintVerifiedMs": 170806,
+    "logoutIntentMs": 358034,
+    "logoutAckMs": 359052,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 61111,
+    "starterRegionWireHeadersMs": 67507.519,
+    "starterRegionResponseEventMs": 67526,
+    "starterRegionBodyMs": 67810,
+    "starterRegionCommitMs": 95947,
+    "sceneSpritesReadyMs": 95979,
+    "localeRequestMs": 61111,
+    "localeBodyMs": 67507,
+    "localeReadyMs": 67539,
+    "firstPlayableFrameMs": 98988,
+    "rendererBodyMs": null
+  },
+  "movement": {
+    "passed": true,
+    "ackWithinEightSeconds": true,
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 102942
+    },
+    "ackLatencyMs": 3746,
+    "wireAtMs": 99196
+  },
+  "prewarm": {
+    "passed": true,
+    "requested": 113,
+    "ok": 113,
+    "failed": 0,
+    "durationMs": 150571.09999999404
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": false,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "questPassed": true,
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "browsersClosed": true,
+  "wallet": {
+    "passed": true,
+    "officialPwa": true,
+    "mobileBrowserEmulation": true,
+    "virtualPasskey": true,
+    "approveUiClicks": 1,
+    "fundingGuardClear": true,
+    "physicalPhoneCameraTested": false
+  },
+  "static": {
+    "rows": 884,
+    "workerRows": 302,
+    "pending": 7,
+    "dropped": 0,
+    "doorFrameRows": 2,
+    "doorFrames": [
+      {
+        "ordinal": 29,
+        "url": "https://numeron.obelisk.build/original-ui/ChrSel/0.png",
+        "category": "ui",
+        "source": "page",
+        "resourceType": "image",
+        "requestAtMs": 61113,
+        "outcome": "finished",
+        "status": 200,
+        "headersAtMs": 62461,
+        "fromServiceWorker": true,
+        "finishedAtMs": 82436,
+        "observedDurationMs": 21323,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 0.057,
+          "responseStart": 1349.71,
+          "responseEnd": 21325.335
+        },
+        "requestToHeadersMs": 1349.653,
+        "headersToEndMs": 19975.625,
+        "browserReportedResponseBodyBytes": null,
+        "browserReportedResponseHeadersBytes": 716
+      },
+      {
+        "ordinal": 35,
+        "url": "https://numeron.obelisk.build/original-ui/ChrSel/1.png",
+        "category": "ui",
+        "source": "page",
+        "resourceType": "image",
+        "requestAtMs": 82438,
+        "outcome": "finished",
+        "status": 200,
+        "headersAtMs": 84517,
+        "fromServiceWorker": true,
+        "finishedAtMs": 104636,
+        "observedDurationMs": 22198,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 2.119,
+          "responseStart": 2079.296,
+          "responseEnd": 22197.89
+        },
+        "requestToHeadersMs": 2077.1769999999997,
+        "headersToEndMs": 20118.594,
+        "browserReportedResponseBodyBytes": null,
+        "browserReportedResponseHeadersBytes": 716
+      }
+    ],
+    "runtime": [
+      {
+        "ordinal": 265,
+        "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page",
+        "resourceType": "fetch",
+        "requestAtMs": 99091,
+        "outcome": "failed",
+        "finishedAtMs": 107092,
+        "observedDurationMs": 8001,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": -1,
+          "responseStart": -1,
+          "responseEnd": -1
+        },
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "ordinal": 307,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page",
+        "resourceType": "fetch",
+        "requestAtMs": 107092,
+        "outcome": "failed",
+        "finishedAtMs": 227113,
+        "observedDurationMs": 120021,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": -1,
+          "responseStart": -1,
+          "responseEnd": -1
+        },
+        "failure": "net::ERR_ABORTED"
+      }
+    ],
+    "doorFrameScope": "Page-owned opening frames 0..18 only; character-selection frames 20..35 and upstream duplicate rows excluded."
+  },
+  "wholeParityAccepted": false
+}

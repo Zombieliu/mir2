@@ -1,0 +1,420 @@
+{
+  "schema": "mir2.r16.fishing-reel-autocast-loss.v1",
+  "base": "2ea39c9e836bfaae9c0d14b32b378dea4edd6834",
+  "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "crystalSources": {
+    "wear": "Server/MirObjects/PlayerObject.cs:4476–4490",
+    "completion": "Server/MirObjects/PlayerObject.cs:11098–11232",
+    "clientSlot": "Client/MirScenes/Dialogs/FishingDialog.cs:317–344"
+  },
+  "sources": {
+    "mir2-web3/apps/web/app/components/original-client-fishing-windows.tsx": {
+      "verifiedSha256": "bdd6314ad241d4f7f215775933f3f708237d34c68848a2417aa12b4ff38061b1",
+      "gitLfSha256": "bdd6314ad241d4f7f215775933f3f708237d34c68848a2417aa12b4ff38061b1"
+    },
+    "mir2-web3/apps/web/app/page.tsx": {
+      "verifiedSha256": "7f912966b4ee24755f004c57a36f35a8994048297734a5c027df485256c615cb",
+      "gitLfSha256": "7f912966b4ee24755f004c57a36f35a8994048297734a5c027df485256c615cb"
+    },
+    "mir2-web3/apps/web/lib/world-fishing-panel.ts": {
+      "verifiedSha256": "9d818524572041bb5549a74c9fde2457da6943d58293f72dfa7c4019ebaedfea",
+      "gitLfSha256": "9d818524572041bb5549a74c9fde2457da6943d58293f72dfa7c4019ebaedfea"
+    },
+    "mir2-web3/apps/simulation/src/runtime/fishing.rs": {
+      "verifiedSha256": "55c9ae201faba3b3fd00e6028d323118b462081c367ca312dd13247f45add3e5",
+      "gitLfSha256": "55c9ae201faba3b3fd00e6028d323118b462081c367ca312dd13247f45add3e5"
+    },
+    "mir2-web3/apps/simulation/src/runtime/fishing_lifecycle_tests.rs": {
+      "verifiedSha256": "6f78194f77b59aa2c60217799e2a2ad76b9bac196b1fb025ad884fa8aeacf0b1",
+      "gitLfSha256": "6f78194f77b59aa2c60217799e2a2ad76b9bac196b1fb025ad884fa8aeacf0b1"
+    },
+    "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs": {
+      "verifiedSha256": "54ce0e865402a088a5a1d29a0b4aa06abfd4cff7bfabbd730cc01a61b3481691",
+      "gitLfSha256": "54ce0e865402a088a5a1d29a0b4aa06abfd4cff7bfabbd730cc01a61b3481691"
+    }
+  },
+  "checks": {
+    "simulationFishing": {
+      "passed": 42,
+      "log": "C:/r16-fishing-autocast-20261110/simulation-fishing-r1.log",
+      "sha256": "5af05cd31216fbdd7076d31c24f9d9ad99eb7adf1f6de972e13afa9756d440ac"
+    },
+    "gatewayFishing": {
+      "passed": 11,
+      "log": "C:/r16-fishing-autocast-20261110/gateway-fishing-r1.log",
+      "sha256": "742f2e5813def39b5ffb0c847558fbc9b474341aff8f894c59a24d6516ad5a93"
+    },
+    "sharedZone": {
+      "passed": 210,
+      "log": "C:/r16-fishing-autocast-20261110/shared-zone-r1.log",
+      "sha256": "64b546ad20764b64648339baac6945eaf52edae73e0225b3d651195106e4af78"
+    },
+    "webStage5": {
+      "passed": 520,
+      "log": "C:/r16-fishing-autocast-20261110/web-stage5-final.log",
+      "sha256": "64f68c11cd84bcab7f28c49cf045c922d09a6fd4f0048e6906addd16ea0e6721"
+    },
+    "webFocused": {
+      "passed": 21,
+      "log": "C:/r16-fishing-autocast-20261110/web-focused.log",
+      "sha256": "97b65ac3a5fef2ad90ea0b3205cdf2121e5a3d991dd2a545728ee7076b7dcf49"
+    },
+    "nativeReelSlotSync": {
+      "passed": 1,
+      "log": "C:/r16-fishing-autocast-audit-20261110/native-autocast-sync.log",
+      "sha256": "4e51bdff610a3d032a0f5d2fea1216299d8abefbb4bd3241dae9de7cf8879344"
+    },
+    "nativeEquipmentWire": {
+      "passed": 4,
+      "log": "C:/r16-fishing-autocast-audit-20261110/native-autocast-wire.log",
+      "sha256": "260c149b74af1b857e4e6e817240c31ab90008ef8ca5160ab859794c4125cce6"
+    },
+    "pinnedClientCore": {
+      "passed": true,
+      "sha256": "adee30eef5c4cd7862df0604dfc0a61f44f08869e2b667702b7c5b40e35a7dbb"
+    },
+    "pageLeaseProbe": {
+      "passed": 16,
+      "sha256": "c017ff50693276e749bfcfe4c363a0ea2d2ee15105eda728a2739f7041d0c490"
+    }
+  },
+  "builds": {
+    "candidateGateway": "1353a70a503827c7bc56d8d8211e3c9c83c3e0d03baccc7989770166ca928d1e",
+    "baselineGateway": "982ded92ad245cf99165d2845f823abb931c788032c362155fb45db7d566650a",
+    "gatewayReceiptSha256": "1b5da738e03833ca29cad0480cdcec8b88060b8b09055a20857aa71618e2d890",
+    "candidateWebBuildSha256": "1afa18386da3fb9ca1146a33a5bf0460e2ea70a5bed039f677cb1ca15f384620",
+    "webBuildId": "1IigqY5GQznEoJug9YAmT",
+    "webBaseArchiveSha256": "d528ef62ca9fdb7ebca0675638373315c9d269a0e0940cf9aad50059fa8a25b6",
+    "baselineWebBuildSha256": "3478321cdfeba361258e7db64afa2f0814a9353687c8158498c49f1be828db74"
+  },
+  "replay": {
+    "fixtureSha256": "f6292a2b1abf26b3b5abb9c578181c635b695dd112efde77ec0cd833fc547d80",
+    "fixturePreparationSha256": "307d36158ec8ad8b5e905454284786e7b36793a7d3723251cba537954714e0a5",
+    "evidenceRoot": "C:/r16-fishing-autocast-20261110",
+    "wireRoot": "C:/r16-fishing-low-reel-wire-20261110",
+    "provenance": "Two normal vendor buys, then only mounted Reel current durability changed from 6000 to 1 in a File clone."
+  },
+  "webRuns": [
+    {
+      "dir": "baseline-webgpu-r2",
+      "renderer": "webgpu",
+      "receiptSha256": "1803fd3d62c7219c63458102dce51fbb2741207a1177b3dd485c3395d466e12f",
+      "buildId": "tMe8tCSGfWibOta_Nvg92",
+      "runner": "run-autocast-browser-r2.mjs",
+      "runnerSha256": "fb3b49c3866beff4f4d0b4f268a16e28990831c5f0b55161b7dcfed5f5eef4d9",
+      "zero": {
+        "duraSeq": 660,
+        "terminalSeq": 661,
+        "snapshotSeq": 662,
+        "checkmarkRetained": true
+      },
+      "removal": {
+        "deleteSeq": 680,
+        "terminalSeq": 681,
+        "snapshotSeq": 682,
+        "offSeq": null,
+        "emptySlotAutoChecked": true
+      },
+      "replacement": {
+        "equipSeq": 693,
+        "ackSeq": 694,
+        "snapshotSeq": 695,
+        "checked": true,
+        "expiredBiteSeq": 719,
+        "terminalSeq": 734,
+        "unwantedRecastSeq": 738,
+        "relog": {
+          "snapshot": 1354,
+          "reelDurability": 6000,
+          "reelUid": "52559880",
+          "bait": 10,
+          "rod": 9995,
+          "oldRemoved": true,
+          "noDuplicate": true
+        }
+      },
+      "maxPhysicalPressesForOneCast": 1,
+      "allServicesClosed": true
+    },
+    {
+      "dir": "candidate-webgpu-r2",
+      "renderer": "webgpu",
+      "receiptSha256": "4b9d698fda54bbc56f821f5b250075dda891fd0ad2c432ad61d0410ac97df025",
+      "buildId": "1IigqY5GQznEoJug9YAmT",
+      "runner": "run-autocast-browser-r2.mjs",
+      "runnerSha256": "fb3b49c3866beff4f4d0b4f268a16e28990831c5f0b55161b7dcfed5f5eef4d9",
+      "zero": {
+        "duraSeq": 645,
+        "terminalSeq": 646,
+        "snapshotSeq": 647,
+        "checkmarkRetained": true
+      },
+      "removal": {
+        "deleteSeq": 671,
+        "terminalSeq": 672,
+        "snapshotSeq": 673,
+        "offSeq": 674,
+        "emptySlotAutoChecked": null
+      },
+      "replacement": {
+        "equipSeq": 686,
+        "ackSeq": 687,
+        "snapshotSeq": 688,
+        "checked": false,
+        "expiredBiteSeq": 739,
+        "terminalSeq": 753,
+        "unwantedRecastSeq": null,
+        "relog": {
+          "snapshot": 1365,
+          "reelDurability": 6000,
+          "reelUid": "52559880",
+          "bait": 10,
+          "rod": 9995,
+          "oldRemoved": true,
+          "noDuplicate": true
+        }
+      },
+      "maxPhysicalPressesForOneCast": 1,
+      "allServicesClosed": true
+    },
+    {
+      "dir": "candidate-webgl2-r3",
+      "renderer": "shared",
+      "receiptSha256": "c91a25617a6c3fc1ccaf906cbd5fcc3e8d70b63757e0db7990df48b6c456b2c9",
+      "buildId": "1IigqY5GQznEoJug9YAmT",
+      "runner": "run-autocast-browser-r3.mjs",
+      "runnerSha256": "1c58383b26a8606610502157325ebe33a9c613d3a8afbd31ff8cf6c892559c16",
+      "zero": {
+        "duraSeq": 639,
+        "terminalSeq": 640,
+        "snapshotSeq": 641,
+        "checkmarkRetained": true
+      },
+      "removal": {
+        "deleteSeq": 693,
+        "terminalSeq": 694,
+        "snapshotSeq": 695,
+        "offSeq": 696,
+        "emptySlotAutoChecked": null
+      },
+      "replacement": {
+        "equipSeq": 708,
+        "ackSeq": 709,
+        "snapshotSeq": 710,
+        "checked": false,
+        "expiredBiteSeq": 736,
+        "terminalSeq": 751,
+        "unwantedRecastSeq": null,
+        "relog": {
+          "snapshot": 1361,
+          "reelDurability": 6000,
+          "reelUid": "52559880",
+          "bait": 10,
+          "rod": 9995,
+          "oldRemoved": true,
+          "noDuplicate": true
+        }
+      },
+      "maxPhysicalPressesForOneCast": 1,
+      "allServicesClosed": true
+    }
+  ],
+  "diagnostics": [
+    {
+      "dir": "baseline-webgpu-r1",
+      "stage": "real-successful-reel-wears-1-to-0-and-keeps-auto-checked",
+      "receiptSha256": "0fc10b68d11eddfe439e1d0ab08def1da7273098449a9db5a07242c1410a1e12"
+    },
+    {
+      "dir": "candidate-webgpu-r1",
+      "stage": "real-successful-reel-wears-1-to-0-and-keeps-auto-checked",
+      "receiptSha256": "7723edc43590aadb9e8c8120b102cc97fdf6aa53539682741693819fedf6c792"
+    },
+    {
+      "dir": "candidate-webgl2-r1",
+      "stage": "real-successful-reel-wears-1-to-0-and-keeps-auto-checked",
+      "receiptSha256": "3b6ac8d3fbb67cd98403589a74b2bff644891d0212ef1239a93ce81f40f81217"
+    },
+    {
+      "dir": "candidate-webgl2-r2",
+      "stage": "spare-line-reel-installed-by-ordinary-mouse-drag",
+      "receiptSha256": "58e9a211d4f63b7d9931b10cdcb361dd58475977c3657356b47fddcbf946bdec"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "reel-autocast-mounted-zero.png",
+      "sha256": "33f0c89be36d88bf9e97d088609d46bd36a7ab1c60f6bceddf93240c0467f7c0"
+    },
+    {
+      "file": "reel-autocast-empty.png",
+      "sha256": "cc0d036965ea3d1382ec6c0cad9551662593192edc233e80ecb2ce115e4e186d"
+    },
+    {
+      "file": "reel-autocast-replacement.png",
+      "sha256": "ba5b1590516fe0800619744ee7a980bb8bfcf20175f769f8b187074fa4d29555"
+    }
+  ],
+  "wire": {
+    "closureSha256": "c19ff9feab9c8f20025ecc066dc3a39d95283d4ef7873a91f1ae665f4c9bba30",
+    "qualifiedRuns": [
+      {
+        "mode": "baseline",
+        "receipt": {
+          "path": "baseline-r3-wire-r2/ordinary-low-reel-wire-receipt.json",
+          "sha256": "3f3adbdc42b5018a542a66b674e8f172a73853c5ce17bb99256a746d8354fa92"
+        },
+        "exactGatewaySha": "982ded92ad245cf99165d2845f823abb931c788032c362155fb45db7d566650a",
+        "qualifiedLiveReelSequence": [
+          {
+            "oldMountedDurabilityAfterSuccess": 0,
+            "keptMounted": true,
+            "unsolicitedCast": false,
+            "rewardOrNotice": [
+              {
+                "packet": "Chat",
+                "label": "FishGotAway"
+              }
+            ]
+          },
+          {
+            "stillMountedZeroEarlyBite": 43,
+            "expiredAt": 93,
+            "observedExpiryMs": 3139,
+            "terminalProgress": 103,
+            "autoRecast": false,
+            "recastDelayMs": null
+          },
+          {
+            "laterWearDeletesOldReelOnce": true,
+            "confirmedEmptySlot": true,
+            "unsolicitedCast": false,
+            "rewardOrNotice": [
+              {
+                "packet": "Chat",
+                "label": "FishGotAway"
+              }
+            ]
+          }
+        ],
+        "remountControl": {
+          "autoLatchRemainsIfOffIsNotSent": true,
+          "ordinaryOffWhileReelAbsentHasNoAck": true,
+          "ordinaryOffPreventsNextRecastAfterRemount": true
+        },
+        "saved": {
+          "rod": 9994,
+          "hook": 7988,
+          "bait": 9,
+          "reel": 5999,
+          "sameOrdinarilyAcquiredSpareInBinaryTcpAndFreshWeb": true,
+          "noOldOrDuplicate": true
+        }
+      },
+      {
+        "mode": "candidate",
+        "receipt": {
+          "path": "candidate-r1-wire-r2/ordinary-low-reel-wire-receipt.json",
+          "sha256": "2d4f4b988f8ade5870487f56d272579ed903dbd61daf08f3217312b0095c022e"
+        },
+        "exactGatewaySha": "1353a70a503827c7bc56d8d8211e3c9c83c3e0d03baccc7989770166ca928d1e",
+        "qualifiedLiveReelSequence": [
+          {
+            "oldMountedDurabilityAfterSuccess": 0,
+            "keptMounted": true,
+            "unsolicitedCast": false,
+            "rewardOrNotice": [
+              {
+                "packet": "GainedItem",
+                "itemIndex": 805
+              }
+            ]
+          },
+          {
+            "stillMountedZeroEarlyBite": 33,
+            "expiredAt": 80,
+            "observedExpiryMs": 3009,
+            "terminalProgress": 103,
+            "autoRecast": true,
+            "recastDelayMs": 2
+          },
+          {
+            "laterWearDeletesOldReelOnce": true,
+            "confirmedEmptySlot": true,
+            "unsolicitedCast": false,
+            "rewardOrNotice": [
+              {
+                "packet": "Chat",
+                "label": "FishGotAway"
+              }
+            ]
+          }
+        ],
+        "remountControl": {
+          "autoLatchRemainsIfOffIsNotSent": true,
+          "ordinaryOffWhileReelAbsentHasNoAck": true,
+          "ordinaryOffPreventsNextRecastAfterRemount": true
+        },
+        "saved": {
+          "rod": 9991,
+          "hook": 7982,
+          "bait": 6,
+          "reel": 5998,
+          "sameOrdinarilyAcquiredSpareInBinaryTcpAndFreshWeb": true,
+          "noOldOrDuplicate": true
+        }
+      }
+    ],
+    "ordinaryAward": {
+      "itemIndex": 805,
+      "name": "SwordFish",
+      "liveGainedItem": true,
+      "persistedInventoryCountAfterCrossClientReentry": 1
+    },
+    "harness": {
+      "wireSourceSha256": "cb65067402757f18937e67dad0198b34c793e56d6d15911b4e284bf8e45bab92",
+      "binaryTcpReentrySha256": "bb9d5a3a29361ef620d52582e887f276859c1a1996d691b6d0cc91f86a19b414"
+    },
+    "rollControl": "Independent ordinary random attempts. The compared branch is the intentionally observed early real bite that expired naturally. Different attempt counts make final durability totals differ by ordinary play."
+  },
+  "nativeScope": "Existing optimized R16 state and typed-equipment wire checks. Windows game window and Hosted are still pending.",
+  "publicQr": {
+    "receiptSha256": "9d06ec78afeca45b3b94325725ddf30b75f46d993df8e0354d262f19a6ecbe84",
+    "liveRevision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "gameHttp": 200,
+    "relayHttp": 200,
+    "locales": [
+      {
+        "locale": "zh-CN",
+        "codeMs": 6431,
+        "pendingMs": 7286,
+        "matrix": {
+          "valid": true,
+          "width": 240,
+          "height": 240,
+          "matched": 2401,
+          "total": 2401
+        },
+        "closedNormally": true
+      },
+      {
+        "locale": "zh-TW",
+        "codeMs": 6430,
+        "pendingMs": 7296,
+        "matrix": {
+          "valid": true,
+          "width": 240,
+          "height": 240,
+          "matched": 2401,
+          "total": 2401
+        },
+        "closedNormally": true
+      }
+    ],
+    "candidateRevision": "c52ea9abb63cc016a736c856e4d9d5db3c0abb90",
+    "matchingDeployments": 0,
+    "independentReviewPending": true,
+    "newPublicSignedJourney": false,
+    "productionPromotion": false
+  }
+}

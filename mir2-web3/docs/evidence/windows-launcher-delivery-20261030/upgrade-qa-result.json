@@ -1,0 +1,69 @@
+{
+  "startedAtUtc": "2026-10-30T10:28:36.648860+00:00",
+  "passed": true,
+  "qaAppId": "4C1D0F03-627E-45CD-B863-045D54640F77",
+  "normalInstallerChanged": false,
+  "upgradeDirArgument": false,
+  "upgradeLanguageArgument": false,
+  "baselineRegistration": {
+    "DisplayName": "Numeron - Legend of Rebirth",
+    "DisplayVersion": "2026.10.29.11",
+    "InstallLocation": "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\",
+    "AppPath": "E:\\mir2-release\\windows-launcher-20261030\\qa-install",
+    "SelectedTasks": "",
+    "Language": "chinesesimplified"
+  },
+  "upgradeInstallerSha256": "481A8509E3CA5A79106D689060020CEE2F390AEBAFC7941AAAD3F6BBEF342C67",
+  "busyInstall": {
+    "exitCode": 7,
+    "elapsedSeconds": 15.050110699958168,
+    "arguments": [
+      "/VERYSILENT",
+      "/SUPPRESSMSGBOXES",
+      "/NORESTART",
+      "/SP-",
+      "/CURRENTUSER",
+      "/NOICONS",
+      "/MERGETASKS=!desktopicon",
+      "/LOG=E:\\mir2-release\\windows-launcher-20261030\\evidence\\qa-busy-install.log"
+    ],
+    "oldLauncherAndVersionPreserved": true
+  },
+  "upgradeInstall": {
+    "exitCode": 0,
+    "elapsedSeconds": 364.00557769997977,
+    "arguments": [
+      "/VERYSILENT",
+      "/SUPPRESSMSGBOXES",
+      "/NORESTART",
+      "/SP-",
+      "/CURRENTUSER",
+      "/NOICONS",
+      "/MERGETASKS=!desktopicon",
+      "/LOG=E:\\mir2-release\\windows-launcher-20261030\\evidence\\qa-upgrade-install.log"
+    ]
+  },
+  "upgradedRegistration": {
+    "DisplayName": "Numeron - Legend of Rebirth",
+    "DisplayVersion": "2026.10.30.12",
+    "InstallLocation": "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\",
+    "AppPath": "E:\\mir2-release\\windows-launcher-20261030\\qa-install",
+    "SelectedTasks": "",
+    "Language": "chinesesimplified"
+  },
+  "previousDirectoryRemembered": true,
+  "previousLanguageRemembered": true,
+  "settingsAndPersonalFilesPreserved": {
+    "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\validation-profile\\mir2-web3\\locale-seed.json": "108D3D7D3F4DE720733D8B60E1B103A2117A1BA8E9478FA09485B05D5F19ACB8",
+    "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\validation-profile\\mir2-web3\\locale.json": "108D3D7D3F4DE720733D8B60E1B103A2117A1BA8E9478FA09485B05D5F19ACB8",
+    "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\validation-profile\\mir2-web3\\display.json": "3F0C7040D5EB8A0AB028ED2F417821E35320E20B3F07FDB309C14F5B40B8196D",
+    "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\userdata\\launcher-upgrade-preserve.txt": "19EEC2E4D7F8740299476BED3EF26B8DEAFE267B6FD8342F9845C3D056CDCC8B"
+  },
+  "gameExeUnchanged": true,
+  "installedBundleMatchesSignedRelease": true,
+  "nativeVerifyOnlyExitCode": 0,
+  "protectedState": {
+    "filesAndPreferencesChecked": 20,
+    "ordinaryAndExistingValidationRegistrationUnchanged": true
+  }
+}

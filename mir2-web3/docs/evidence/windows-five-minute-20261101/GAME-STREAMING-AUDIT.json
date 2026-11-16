@@ -1,0 +1,497 @@
+{
+  "schema": "mir2.windows.game-streaming-audit.v1",
+  "auditedUtc": "2026-11-01T14:55:08.216Z",
+  "scope": {
+    "repositoryRoot": "E:/mir2-player-journey",
+    "primaryProject": "mir2-web3",
+    "mode": "read-only source/data audit; one new external report",
+    "networkRequests": 0,
+    "guiActions": 0,
+    "buildsOrGameLaunches": 0,
+    "canonicalGuardPassed": true,
+    "canonicalHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+    "canonicalBranch": "codex/windows-player-journey",
+    "sourceFiles": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\assets.rs",
+        "bytes": 41700,
+        "sha256": "891e88fc80ec3a1761ecde73880c620be10e7435285d639c0bdfca9f346d0cef"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\packed_assets.rs",
+        "bytes": 13141,
+        "sha256": "c03fe8262bfd84771066476ac5f53e69f6d7c9f0a6433a421009968858db3f1b"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\generation_launch.rs",
+        "bytes": 10014,
+        "sha256": "39d812a521b0085e2849bfd8b30d8b1d5db57b9d1f0a86df3c2cfb7ad1256c90"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\main.rs",
+        "bytes": 22640,
+        "sha256": "1d15a55d7b9b3cd1d93efdadf8c9e83183b142a8182e94415eeac3b7c3303b7e"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+        "bytes": 106975,
+        "sha256": "339dcd947ed5e9105b1e2ed30cc290b1a895c481e4edcc700b0d0b12897edd7c"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+        "bytes": 792196,
+        "sha256": "49d1bbf164eab10dd48ca3882cd71ca4b3e1d097531f8ea806874f7b10c3f891"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\atlas.rs",
+        "bytes": 150495,
+        "sha256": "fbdae2a4ed3e7d67e6247d46d2077a3ab66c80e533d2f6baa4bbbd51834b21ff"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\capture.rs",
+        "bytes": 74574,
+        "sha256": "dda9a55b20efa6ac822521e8999ff83f6a78c68ed827e0d788b733f9d8f08f7f"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\native_fonts.rs",
+        "bytes": 24561,
+        "sha256": "f2af7f962d5a7c3e1b654d7e123d6d57d86f4573c64da9da0786f3d34ffe9712"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\assets.rs",
+        "bytes": 5081,
+        "sha256": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\spec.rs",
+        "bytes": 17307,
+        "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\lib.rs",
+        "bytes": 34674,
+        "sha256": "c4ed87266709a2e44ce4ea9147f33bedf960d2413a4778fe0b8818f92d9fe56a"
+      }
+    ],
+    "dirtyAuditedFiles": [
+      "M mir2-web3/apps/game-client/platform-windows/src/assets.rs",
+      " M mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs",
+      " M mir2-web3/apps/game-client/resource-pack/src/lib.rs"
+    ],
+    "concurrentChange": "Root is adding opt-in read diagnostics in resource-pack. Strict full-pack authorization remains unchanged; new profiling implementation/tests are owned and reported by Root, not certified by this audit."
+  },
+  "target": {
+    "firstColdDownloadInstallAndWorldInteractiveSeconds": 300,
+    "subsequentUpdateToWorldInteractiveSeconds": 300,
+    "logicalCpuCount": 4,
+    "memoryGiB": 8,
+    "storage": "SSD",
+    "networkBaselineMbps": 20,
+    "globalRegions": "Only report actually measured regions/routes; no worldwide SLA inferred from one Windows host.",
+    "timing": "Single continuous D0 through actual authenticated world render, controls enabled and normal authoritative command ACK. Include all actual waits; do not substitute login/Healthy or deduct operator/network waits."
+  },
+  "residualProcessAudit": {
+    "observedUtc": "2026-11-01T14:35:02.6298884+00:00",
+    "ownedR18R19ControllersHelpersSetupLauncherGameProcesses": 0,
+    "screenshotTaken": false,
+    "sharedSkyRuntimeNotRestarted": true
+  },
+  "dataProvenance": {
+    "kind": "read-only remeasurement of preserved R19 signed catalog/artifacts, separate from current source working tree",
+    "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "installerRecipeSourceRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+    "generationManifestSha256": "aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47",
+    "catalogPath": "E:/mir2-release/windows-cold-start-20261101/r19/acceptance-audit/windows-https/r19-smoke-01/installed/generations/aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47/catalog.json",
+    "catalogSha256": "45fde1922c1435069d0a8e7389e2da1a08a22b7dcd290276dbc012f29db8e311",
+    "catalogShaActuallyChecked": true,
+    "selectedMetadataResourceShasActuallyChecked": true,
+    "wholePackRehashNotRepeated": true,
+    "freshPackageGateNotClaimed": true
+  },
+  "measurements": {
+    "catalogBytes": 68666544,
+    "resourceCount": 255063,
+    "packCount": 34,
+    "packBytes": 1069036665,
+    "startupExplicit": {
+      "resourceCount": 20,
+      "logicalBytes": 16643468,
+      "uniquePayloadBytes": 16643468,
+      "existingPackCount": 16,
+      "existingWholePackBytes": 532993731
+    },
+    "startupPaths": [
+      "bevy-entity-atlases/manifest.json",
+      "generated/map-atlas/manifest.json",
+      "generated/native-map-keyed/manifest.json",
+      "original-effects/effects.generated.json",
+      "original-ui/Items/meta.json",
+      "original-ui/Items/0.png",
+      "original-ui/Items/3792.png",
+      "original-ui/StateItem/meta.json",
+      "original-ui/StateItem/30.png",
+      "original-ui/StateItem/5152.png",
+      "original-ui/Prguse2/meta.json",
+      "original-ui/Prguse2/1202.png",
+      "original-ui/Prguse2/1203.png",
+      "original-ui/Prguse2/1204.png",
+      "original-ui/Prguse2/1205.png",
+      "original-ui/Cursors/Cursor_Default.png",
+      "original-ui/Cursors/Cursor_Normal_Atk.png",
+      "original-ui/Cursors/Cursor_Compulsion_Atk.png",
+      "original-ui/Cursors/Cursor_Npc.png",
+      "crystal-map-pack/0.map.gz"
+    ],
+    "uiStaticLiteralLowerBound": {
+      "resourceCount": 26,
+      "logicalBytes": 2599440,
+      "uniquePayloadBytes": 2592846,
+      "existingPackCount": 17,
+      "existingWholePackBytes": 562048082
+    },
+    "prefixGroups": {
+      "original-ui/ChrSel/": {
+        "resourceCount": 238,
+        "logicalBytes": 47547930,
+        "uniquePayloadBytes": 47547376,
+        "existingPackCount": 32,
+        "existingWholePackBytes": 1035485029
+      },
+      "bevy-entity-atlases/": {
+        "resourceCount": 9,
+        "logicalBytes": 17282380,
+        "uniquePayloadBytes": 17282380,
+        "existingPackCount": 8,
+        "existingWholePackBytes": 268321253
+      },
+      "generated/map-atlas/": {
+        "resourceCount": 547,
+        "logicalBytes": 150876158,
+        "uniquePayloadBytes": 150457180,
+        "existingPackCount": 33,
+        "existingWholePackBytes": 1069032581
+      },
+      "generated/native-map-keyed/": {
+        "resourceCount": 50949,
+        "logicalBytes": 269390192,
+        "uniquePayloadBytes": 258069365,
+        "existingPackCount": 33,
+        "existingWholePackBytes": 1069032581
+      },
+      "crystal-map-pack/": {
+        "resourceCount": 1620,
+        "logicalBytes": 42111309,
+        "uniquePayloadBytes": 29720801,
+        "existingPackCount": 33,
+        "existingWholePackBytes": 1069032581
+      },
+      "generated/crystal-map-pack/": {
+        "resourceCount": 0,
+        "logicalBytes": 0,
+        "uniquePayloadBytes": 0,
+        "existingPackCount": 0,
+        "existingWholePackBytes": 0
+      }
+    },
+    "mandatoryJsonBytes": [
+      {
+        "path": "bevy-entity-atlases/manifest.json",
+        "bytes": 3402450
+      },
+      {
+        "path": "generated/map-atlas/manifest.json",
+        "bytes": 418978
+      },
+      {
+        "path": "generated/native-map-keyed/manifest.json",
+        "bytes": 11320827
+      },
+      {
+        "path": "original-effects/effects.generated.json",
+        "bytes": 153634
+      },
+      {
+        "path": "original-ui/Items/meta.json",
+        "bytes": 459663
+      },
+      {
+        "path": "original-ui/StateItem/meta.json",
+        "bytes": 101775
+      },
+      {
+        "path": "original-ui/Prguse2/meta.json",
+        "bytes": 177013
+      }
+    ],
+    "shapes": {
+      "generated/map-atlas/manifest.json": {
+        "keys": [
+          "schemaVersion",
+          "kind",
+          "edgeExtrusion",
+          "pages",
+          "stats"
+        ],
+        "arrays": {
+          "pages": 545
+        },
+        "first_pages": {
+          "l": "ShandaMir2/SmTiles",
+          "p": 0,
+          "w": 1024,
+          "h": 64,
+          "b": 8406,
+          "u": "/generated/map-atlas/ShandaMir2-SmTiles/p0.0c93b20325d25997.png",
+          "r": 2
+        }
+      },
+      "generated/native-map-keyed/manifest.json": {
+        "keys": [
+          "schemaVersion",
+          "kind",
+          "mapFileName",
+          "mapFileNames",
+          "entries",
+          "stats"
+        ],
+        "arrays": {
+          "mapFileNames": 209,
+          "entries": 52333
+        },
+        "first_entries": {
+          "key": "WemadeMir2/Objects#100",
+          "imageUrl": "/generated/native-map-keyed/pages/8ef7671734f484a5858dbe7e67cf412538a3e043bf6633123e4db79340d213d2.png",
+          "width": 48,
+          "height": 375
+        }
+      },
+      "bevy-entity-atlases/manifest.json": {
+        "keys": [
+          "schemaVersion",
+          "kind",
+          "generatedAt",
+          "atlases",
+          "stats",
+          "pipeline"
+        ],
+        "arrays": {
+          "atlases": 2
+        },
+        "first_atlases": {
+          "key": "starter-bichon-base",
+          "label": "Entity atlas: starter-bichon-base",
+          "width": 2048,
+          "height": 2048,
+          "sourceCount": 10482,
+          "imageBytes": 1867769,
+          "rgbaBytes": 16777216,
+          "roots": 17,
+          "imageUrl": "/bevy-entity-atlases/starter-bichon-base.png",
+          "rects": 10482,
+          "pages": 7,
+          "contentHash": "6db74a8130230b71e02b3cba9ffb4c311de495b89257a025fd0d9e3392ebf8e2",
+          "category": "entities",
+          "padding": 1
+        }
+      }
+    },
+    "loginSpecAllButtonStates": {
+      "resourceCount": 20,
+      "missing": [],
+      "uniquePayloadBytes": 2574757,
+      "existingPackCount": 18,
+      "existingWholePackBytes": 593944026,
+      "paths": [
+        "original-ui/ChrSel/0.png",
+        "original-ui/Prguse/1084.png",
+        "original-ui/Title/30.png",
+        "original-ui/Title/31.png",
+        "original-ui/Title/32.png",
+        "original-ui/Title/320.png",
+        "original-ui/Title/321.png",
+        "original-ui/Title/322.png",
+        "original-ui/Title/323.png",
+        "original-ui/Title/324.png",
+        "original-ui/Title/325.png",
+        "original-ui/Title/326.png",
+        "original-ui/Title/327.png",
+        "original-ui/Title/328.png",
+        "original-ui/Title/329.png",
+        "original-ui/Title/330.png",
+        "original-ui/Title/331.png",
+        "original-ui/Title/332.png",
+        "original-ui/Title/333.png",
+        "original-ui/Title/334.png"
+      ]
+    },
+    "startupPlusLoginAllStates": {
+      "resourceCount": 40,
+      "uniquePayloadBytes": 19218225,
+      "existingPackCount": 26,
+      "existingWholePackBytes": 860708220,
+      "completeFirstPlayableClosure": false
+    },
+    "embeddedFontFilesBytes": 30700572,
+    "gameExeBytes": 133801984,
+    "normalSetupBytes": 1040065902,
+    "twentyMbpsBytesPerSecond": 2500000,
+    "theoreticalNetworkOnlySeconds": {
+      "normalSetup": 416.0263608,
+      "all34RawPacks": 427.614666,
+      "explicitStartupExistingPacksPlusRawExeAndFullCatalog": 294.1849036,
+      "startupAndLoginExistingPacksPlusRawExeAndFullCatalog": 425.2706992
+    },
+    "caveats": [
+      "20 explicit startup resources and 20 login art resources are not the full play closure; wallet/character selection/HUD/actors/effects/sounds/locale and actual map dependencies must be added.",
+      "Prefix totals are inventory measurements, not assertions that every file in a prefix is needed at boot.",
+      "Theoretical transfer times use declared raw sizes, no latency, setup, verification, decompression, installation, human auth, GPU or health wait. New encoded transport must budget its separately authenticated wire sizes.",
+      "No complete per-map/entity/skill/locale closure has been proven yet; request-time read profiles provide observational lower bounds only."
+    ]
+  },
+  "blockers": [
+    {
+      "id": "full-mount",
+      "functions": [
+        "platform-windows/src/generation_launch.rs::load_inner",
+        "resource-pack/src/lib.rs::PackStore::open/open_profiled",
+        "resource-pack/src/lib.rs::read_pack"
+      ],
+      "fact": "Game authenticates selected generation then opens every catalog pack, full-file hashes and validates every pack header/index and every catalog locator before mounting. Missing any object aborts. open_profiled retains this contract.",
+      "impact": "34 objects /1,069,036,665 raw pack bytes are a launch prerequisite. Updater-side full checks add their own earlier gates; see the separate updater audit."
+    },
+    {
+      "id": "hash-placement-amplification",
+      "functions": [
+        "resource-pack/src/lib.rs::build"
+      ],
+      "fact": "Fresh unique content is grouped in digest/BTreeMap order to a 32MiB target, 64MiB hard cap. Assets used together are dispersed. Existing build(previous) preserves old locators and reuses packs; it is not a full repack every update.",
+      "impact": "16.64MB explicit startup needs 533MB existing objects; direct startup+login art 19.22MB spans26 objects/860.71MB. Allowing missing outside scope alone is insufficient.",
+      "requiredChange": "A signed boot/domain/map placement policy must intentionally place required content compactly. Existing previous-locator reuse must not accidentally prevent that selected regrouping. Unchanged background packs and aliases should still reuse authenticated content."
+    },
+    {
+      "id": "metadata-and-fixed-map0",
+      "functions": [
+        "platform-windows/src/assets.rs::verify_packed_startup_assets",
+        "platform-windows/src/assets.rs::diagnose_asset_root/require_asset_root",
+        "platform-windows/src/main.rs::run_native_client",
+        "platform-windows/src/map_parser.rs::load_atlas_index/load_native_keyed_index/load_map"
+      ],
+      "fact": "Startup reads20 resources, including11.32MB native keyed index and3.40MB entity index, and hard-decodes map0 before constructing the Bevy app. Full catalog itself is68.67MB. Keyed index covers209 mapFileNames; map gz inventory contains1620 entries.",
+      "requiredChange": "V2 bootstrap readiness must be an authenticated materialized scope, not merely exists(logicalPath). Keep full catalog first if the measured budget permits; later signed shard roots can reduce metadata. Initial actual character destination must drive per-map scope instead of declaring map0 means all scenes ready."
+    },
+    {
+      "id": "missing-vs-corrupt",
+      "functions": [
+        "platform-windows/src/assets.rs::read_bytes/read_text",
+        "platform-windows/src/packed_assets.rs::read/record/read_if_present",
+        "platform-windows/src/atlas.rs::original_frame_geometry/original_frame_pixels"
+      ],
+      "fact": "Pack reads return Result internally but public assets APIs collapse errors to Option. Mounted-reader errors poison sticky FAILURE. Geometry/pixel caches can retain None. This currently assumes a fully materialized store.",
+      "requiredChange": "Distinguish authenticated NotInCatalog, DeclaredNotResident, Pending, Available and IntegrityFailure. Network/pending must not become permanent None or poison the generation; undeclared/mismatched bytes never become optional. Invalidate transient caches/reactively retry when the exact requested resource becomes available."
+    },
+    {
+      "id": "map-silent-degradation",
+      "functions": [
+        "platform-windows/src/map_parser.rs::build_map_render_state_with_indexes",
+        "platform-windows/src/map_parser.rs::disabled_map_render_state",
+        "platform-windows/src/map_parser.rs::has_local_map_atlas",
+        "platform-windows/src/gateway.rs::push_local_map_render_state"
+      ],
+      "fact": "Incomplete animation families fall back to the base frame; missing unresolved base frames are skipped and detailed missing reports are trace-only. Some nonempty partial map state can still return Some. Missing whole render state emits an explicit disabled destination, but early has_local_map_atlas=false returns without emitting it.",
+      "requiredChange": "Streaming missing residency must never select a different art path, silently skip terrain/actors, hold a stale prior map, or count partial content as a completed scene. Keep authored visual fallback separate from Pending. Gate destination presentation/input on the signed scope, explicit loading/failure UI and all required GPU dependencies."
+    },
+    {
+      "id": "login-not-world",
+      "functions": [
+        "platform-windows/src/packed_assets.rs::login_ready",
+        "platform-windows/src/generation_launch.rs::report_interactive_login"
+      ],
+      "fact": "Current readiness proves composed, visible login controls, glyphs and loaded login images, and updater then waits10s. It does not prove an authenticated map or an authoritative action. report_interactive_login returns immediately after ready_sent, so later sticky resource errors do not use that handler's pre-ready exit path.",
+      "requiredChange": "Retain loginReady and10s code health. Add a separate WorldInteractive receipt bound to current map/epoch/owner revision/rendered dependencies and input readiness. Continuous runtime asset error handling must remain active after login health."
+    },
+    {
+      "id": "unsafe-old-network-path",
+      "functions": [
+        "platform-windows/src/assets.rs::ensure_r2_cached/asset_path/batch_prefetch_bichon_town"
+      ],
+      "fact": "Loose/development fallback asynchronously downloads pathname-addressed data without the signed pack/resource checks. Packed mode explicitly never enters this path.",
+      "requiredChange": "Do not re-enable that fallback for streaming production. Add a new authenticated scheduler/store path with fixed trusted resource identities and approved immutable transport locations."
+    }
+  ],
+  "minimumCompleteDesign": {
+    "firstVersion": "New opt-in signed generation/content-profile capability with full authenticated catalog + signed required boot/per-map scopes + compact domain packing + PartialStore. Preserve the existing full V1 path; do not reinterpret existing missing-pack errors as permission.",
+    "signedScope": {
+      "bind": [
+        "generationManifestSha256",
+        "catalogSha256",
+        "game/engine source revisions",
+        "content profile/capability",
+        "scope name and normalized mapFileName",
+        "logical path + resourceSHA + byte size + locator",
+        "exact required pack/resource closure",
+        "decoder/layout/animation dependency versions"
+      ],
+      "authorization": "Declared content remains the namespace. Absence from local storage is permitted only by the authenticated V2 materialization contract; it does not authorize missing currently required content."
+    },
+    "hydration": {
+      "api": "Keep exists() as signed logical declaration, add explicit availability and require_scope()/async read APIs.",
+      "states": [
+        "NotInCatalog",
+        "DeclaredNotResident",
+        "Queued",
+        "Fetching",
+        "VerifiedResident",
+        "IntegrityFailed"
+      ],
+      "transport": "Deduplicate concurrent requests, prioritize boot/current map/visible actors/combat over background completion, bounded workers/memory/disk, bounded normal-TLS retry/resume per the updater contract, no blocking network on Bevy main thread.",
+      "publication": "Download outside admitted paths, verify exact size/hash/index before admission, atomic create-only publication, retain immutable handles/ancestor protections, prevent GC of mounted or pending active scopes.",
+      "fullCompletion": "Background can hydrate every original pack and publish a separate complete-content receipt only after full verification; code Healthy is not full-content completion."
+    },
+    "scopeContents": [
+      "Boot code/config/catalog/global metadata, actually selected locale/fonts, complete normal login/wallet/character UI dependencies and every interactive state used in acceptance.",
+      "Actual target map layout/collision/lighting/pathing, all needed terrain/keyed images and complete animation families, HUD/cursors/item/skill presentation needed immediately.",
+      "Player class/gender/equipment body/weapon/wings/pet states; map NPC/monster idle/walk/combat/death/effects/audio dependencies and a declared policy for remote-player cosmetics/new AOI entities.",
+      "An authenticated character-list/scene-offer can identify the destination scope before committing entry. Otherwise MapChange must hold explicit loading/input gates until scope is ready; never assume map0 for every resumed character."
+    ],
+    "runtime": {
+      "bevy": "PackedAssetReader::read is already async; it can await a verified scheduler result. Synchronous parser/atlas code needs staged readiness and retry notification rather than blocking or returning an undifferentiated None.",
+      "scene": "Use generation+mapFileName+scene/session epoch+owner revision identity. New destination invalidates old completion ACK; no previous-map image or old load result satisfies a new scene.",
+      "missingPresentation": "Visible loading/error status and retry/cancel; no invisible enemy, skipped map cell, arbitrary default image or silently wrong cosmetic. Anything essential keeps WorldInteractive false and relevant controls disabled.",
+      "authority": "Preserve personal Session vs shared authoritative Zone. Client resource readiness cannot invent movement, teleport, occupancy or save transforms. A server scene-offer/readiness extension needs its own synchronous lifecycle/reconnect/save contract review."
+    },
+    "updates": "Stage new generation B and its required active scope while A remains authentic/usable; no hot replacement of A's mounted catalog or source. Root's updater audit owns atomic selector/health/rollback/GC details. Any300s update claim is bounded by the actual changed required wire bytes plus verification/install/world-ready cost.",
+    "optionalLater": [
+      "Authenticated per-resource range/resource-CAS hydration could avoid whole-pack amplification: signed resource SHA/size authenticates exact bytes, strict206/Content-Range/length and bounds, no accepting a full200 blob as a tiny resource, coalesce bounded ranges, rehash before decode. This requires a distinct protocol/security proof and is not a shortcut through V1 read_pack.",
+      "Signed catalog shards/root manifest can avoid fetching/parsing68.67MB upfront; keep full namespace/source/alias/collision validation and membership proofs. Not necessary for the smallest first implementation if actual compact boot budget already fits."
+    ],
+    "compatibility": "Negotiate a new capability/schema/minEngine safely, while retaining a usable old engine/healthy-generation route. Old Game SDKs restrict Engine.version<=their compiled ENGINE_VERSION; blindly replacing global activeEngine with a higher version can break old play/rollback. Never widen old parsers or fake Healthy/previous to bypass this."
+  },
+  "diagnosticsIntegrationAuthorizedNext": {
+    "status": "Proposal only at this report; Root has now assigned a separate minimal Game integration, to be implemented and tested after writing this audit.",
+    "libraryApiFromRoot": [
+      "PackStore::open_profiled(root,catalog,expected) remains strict full-pack",
+      "read_profile_snapshot()->Option<ReadProfileSnapshot>",
+      "snapshot fields schema,catalogSha256,successfulReadOperations,failedReadOperations,resources(logicalPath->count),countersOverflowed,poisonRecovered"
+    ],
+    "gameOpen": "generation_launch::load_inner uses open_profiled only when the existing NativeCaptureConfig::from_env gate accepts MIR2_NATIVE_CAPTURE_DIR; enable before verify_packed_startup_assets. Default remains ordinary open, no profile.",
+    "requestFreeze": "capture.rs::capture_request freezes the mounted store's snapshot into private NativeCaptureRequest at the same request as world/build/scene; never take a later live snapshot in GPU readback completion.",
+    "separateDiagnostic": "Write sibling .resource-reads.json binding final PNG SHA, scene, captured_at/frame, authenticated generation/catalog and bounded snapshot. Create-only/fsync/atomic discipline; do not modify existing PNG/capture-v1 schema or loosen existing eligibility/completion marker truth.",
+    "limitations": "Successful read counts are a cumulative observational lower bound, not complete boot authorization. Prefetch/history can overcount a frame; unseen maps/actions/locales can undercount a release. Overflow/poison recovery or absent profile evidence cannot be hidden or treated as completeness.",
+    "privacy": "Only logical resource paths, hashes/counts/source identifiers; no raw resource bodies, account/session blobs, QR challenges, access tokens, environment dump or credential-bearing URLs."
+  },
+  "requiredValidationBeforeAnyClaim": [
+    "Unit: V1 still refuses every missing/corrupt pack; V2 only mounts authenticated allowed partial scope and refuses missing required/undeclared content.",
+    "Tamper/path: catalog, scope, hash/size/index alias mismatch, noncanonical path, redirect/range mismatch, symlink/hardlink/ancestor replacement, partial/corrupt CAS, admission/GC race.",
+    "Async: single-flight, cancellation, interrupted/resumed fetch, transient failure/retry, permanent integrity failure, subscriber wakeup, no negative-cache poison, bounded memory/disk.",
+    "Scene: missing atlas page/animation member/NPC/effect after login gives explicit Pending or error and no playable/old-map ACK; real destination+epoch only; disconnected/relogin/saved-map transitions preserve Zone/save authority.",
+    "Closure matrix: normal authenticated new and resumed characters across supported maps/classes/genders/locales, real NPC/combat/equipment effects, window/scene changes, common and rare AOI entrants. Success-read traces plus static dependencies and missing-resource checks.",
+    "Performance: fresh client/no preload, original4CPU8GiB SSD/20Mbps baseline, continuous D0 to real WorldInteractive and normal command ACK. Preserve all failures and waits, byte counts, TLS/proxy/route, source/recipe/capability identity, normal exit. Actual regional routes only, both first install and subsequent update.",
+    "Diagnostic-only integration: capture disabled leaves no profile; valid capture enables before20 startup reads; success/failure counters correct; request snapshot is immutable across later reads; diagnostic/PNG hash pairing and create-only collision/error paths; existing capture-v1 truth unchanged. No GPU needed for these unit tests."
+  ],
+  "notClaimed": [
+    "No partial streaming product implemented by this audit.",
+    "No complete minimal boot/map closure certified.",
+    "No300s, geography or20Mbps route acceptance.",
+    "No new GPU/UI/authentication/network/production action or package validation."
+  ]
+}

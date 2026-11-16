@@ -1,0 +1,116 @@
+TAP version 13
+# Subtest: complete map row precedes all same-row objects and the next row still occludes
+ok 1 - complete map row precedes all same-row objects and the next row still occludes
+  ---
+  duration_ms: 0.8156
+  type: 'test'
+  ...
+# Subtest: Web matches the native Bichon source-cell depth receipt
+ok 2 - Web matches the native Bichon source-cell depth receipt
+  ---
+  duration_ms: 0.0913
+  type: 'test'
+  ...
+# Subtest: camera translation and u16 map edges preserve composite f32 ordering
+ok 3 - camera translation and u16 map edges preserve composite f32 ordering
+  ---
+  duration_ms: 0.087
+  type: 'test'
+  ...
+# Subtest: malformed far outliers cannot escape their bounded row passes
+ok 4 - malformed far outliers cannot escape their bounded row passes
+  ---
+  duration_ms: 0.0606
+  type: 'test'
+  ...
+# Subtest: floating entity and drop labels stay above world drawing inside the isolated world
+not ok 5 - floating entity and drop labels stay above world drawing inside the isolated world
+  ---
+  duration_ms: 1.6275
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-crystal-world-depth.mjs:115:1'
+  failureType: 'testCodeFailure'
+  error: 'opaque map, actor and effect pixels cannot cover floating entity names'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-crystal-world-depth.mjs:129:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: walking sorts by its source tile until completion while grid position stays at the target
+ok 6 - walking sorts by its source tile until completion while grid position stays at the target
+  ---
+  duration_ms: 0.4664
+  type: 'test'
+  ...
+# Subtest: death, NPCs, stale target and malformed timing never borrow an old source tile
+ok 7 - death, NPCs, stale target and malformed timing never borrow an old source tile
+  ---
+  duration_ms: 0.2957
+  type: 'test'
+  ...
+# Subtest: fractional interpolation anchors cannot invent a source cell
+ok 8 - fractional interpolation anchors cannot invent a source cell
+  ---
+  duration_ms: 0.1
+  type: 'test'
+  ...
+# Subtest: real motion refresh records the previous authoritative target during a mid-glide retarget
+ok 9 - real motion refresh records the previous authoritative target during a mid-glide retarget
+  ---
+  duration_ms: 0.3993
+  type: 'test'
+  ...
+# Subtest: actual map producer orders right-hand stalls behind same-row NPCs but preserves next-row occlusion
+ok 10 - actual map producer orders right-hand stalls behind same-row NPCs but preserves next-row occlusion
+  ---
+  duration_ms: 0.7764
+  type: 'test'
+  ...
+# Subtest: atlas and standalone GPU producers apply the runtime map gain exactly once
+ok 11 - atlas and standalone GPU producers apply the runtime map gain exactly once
+  ---
+  duration_ms: 0.6475
+  type: 'test'
+  ...
+# Subtest: actual map draw positions and depths are invariant under a large camera/map translation
+ok 12 - actual map draw positions and depths are invariant under a large camera/map translation
+  ---
+  duration_ms: 0.335
+  type: 'test'
+  ...
+# Subtest: DOM entity and item producers use the same raw depth contract
+ok 13 - DOM entity and item producers use the same raw depth contract
+  ---
+  duration_ms: 0.8691
+  type: 'test'
+  ...
+# Subtest: persistent spell and mask remain below bodies while transient effects stay within the same column
+ok 14 - persistent spell and mask remain below bodies while transient effects stay within the same column
+  ---
+  duration_ms: 0.0943
+  type: 'test'
+  ...
+# Subtest: standalone depth policy passes strict focused TypeScript
+ok 15 - standalone depth policy passes strict focused TypeScript
+  ---
+  duration_ms: 223.4972
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 14
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 633.0727

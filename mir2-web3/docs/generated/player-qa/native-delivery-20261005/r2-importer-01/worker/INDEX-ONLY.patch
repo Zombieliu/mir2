@@ -1,0 +1,29 @@
+diff --git a/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts b/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts
+--- a/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts
++++ b/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts
+@@ -1,3 +1,5 @@
++import { nativeR17Fetch } from "./native-r17-publication.mjs";
++
+ export interface Env {
+   MIR2_ASSETS: R2Bucket;
+   MIR2_R2_UPLOAD_SECRET: string;
+@@ -7,6 +9,9 @@
+ 
+ export default {
+   async fetch(request: Request, env: Env): Promise<Response> {
++    if (new URL(request.url).pathname.startsWith("/upload/native-r17")) {
++      return nativeR17Fetch(request, env);
++    }
+     if (request.method !== "PUT") {
+       return json({ ok: false, error: "method_not_allowed" }, 405);
+     }
+@@ -24,6 +29,9 @@
+     const key = normalizeObjectKey(url.searchParams.get("key") ?? "");
+     if (!key) {
+       return json({ ok: false, error: "invalid_key" }, 400);
++    }
++    if (key.startsWith("mir2/native/windows-invited/")) {
++      return json({ ok: false, error: "reserved_native_prefix" }, 403);
+     }
+ 
+     const contentLength = Number(request.headers.get("content-length") ?? 0);

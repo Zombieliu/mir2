@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-13T09:28:32.132Z",
+  "stageRun": "43399952619",
+  "promoteRun": "43401010043",
+  "stage": {
+    "id": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+    "state": "READY",
+    "target": "production",
+    "url": "numeron-r16-dccgyo5l5-obelisk-labs.vercel.app",
+    "source": "2029b44abdee104445c569204477a219a1353f79",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "aliasAfterPromotion": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "baseline": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+}

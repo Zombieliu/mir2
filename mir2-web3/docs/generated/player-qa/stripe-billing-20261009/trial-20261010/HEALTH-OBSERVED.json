@@ -1,0 +1,17 @@
+{
+  "observedAtUtc": "2026-10-10T01:23:25.521045+00:00",
+  "counters": {
+    "recordCount": 0,
+    "staleRecordCount": 0,
+    "routeLeaseCount": 0,
+    "healthy": true,
+    "currentWsConnections": 1,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "localNativeMayRemainConnected": true,
+  "sixCounterDrainNotClaimed": true
+}

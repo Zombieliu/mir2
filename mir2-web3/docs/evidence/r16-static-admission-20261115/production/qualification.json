@@ -1,0 +1,38 @@
+{
+  "candidateSource": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+  "candidate": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+  "implementation": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+  "accepted": false,
+  "retained": false,
+  "rolledBack": true,
+  "currentFormalSource": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "currentFormalDeployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "cohorts": [
+    {
+      "cohort": "r1",
+      "accepted": true,
+      "moveAckMs": 207,
+      "nativeAfterFirstFrameMs": 58123,
+      "resourceErrors": 0
+    },
+    {
+      "cohort": "r2",
+      "accepted": false,
+      "moveAckMs": 133,
+      "nativeAfterFirstFrameMs": 189105,
+      "resourceErrors": 8,
+      "prewarmPassed": false
+    }
+  ],
+  "historical92CacheBodiesMatchedInR2": true,
+  "firstAuxiliaryCacheObservationInvalid": true,
+  "internalQaWalletsTotal": 2,
+  "internalQaRolesTotal": 2,
+  "physicalPhoneCameraTested": false,
+  "realFundsOrAssetTransactions": false,
+  "publicCrossMapTested": false,
+  "wholeParityAccepted": false,
+  "originalClassifierSha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402"
+}

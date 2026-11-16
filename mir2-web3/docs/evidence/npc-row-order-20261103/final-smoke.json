@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "nativeSha256": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+  "processId": 36152,
+  "windowId": 96603886,
+  "coordinate": {
+    "x": 288,
+    "y": 614
+  },
+  "samePrivateCharacter": true,
+  "ordinaryAuthentication": true,
+  "npcUpperBodiesVisible": true,
+  "modelCallsThisRound": 0,
+  "originalGameStopped": false
+}

@@ -1,0 +1,60 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling serde_core v1.0.228
+   Compiling zmij v1.0.21
+   Compiling serde v1.0.228
+   Compiling serde_json v1.0.149
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.0
+   Compiling syn v2.0.117
+   Compiling serde_derive v1.0.228
+   Compiling mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling mir2-game-data v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\game-data)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.52s
+     Running unittests src\lib.rs (C:\mir2-shared-game-data-20260909\x86_64-pc-windows-msvc\debug\deps\mir2_game_data-3c6c0f0c0d3a3dd6.exe)
+
+running 40 tests
+test crystal_item_image::tests::complete_catalogue_only_changes_the_three_source_stack_shapes ... ok
+test crystal_item_image::tests::every_wire_count_matches_the_source_image_bands ... ok
+test crystal_item_image::tests::guards_and_non_stack_previews_retain_the_catalogue_image ... ok
+test tests::crystal_base_stats_packet_manifest_loads ... ok
+test tests::crystal_buff_manifest_loads ... ok
+test tests::crystal_drop_entry_deserializes_group_shape ... ok
+test tests::crystal_drop_lookup_preserves_special_entry_shapes ... ok
+test tests::crystal_drop_manifest_loads ... ok
+test tests::crystal_game_shop_packet_manifest_loads ... ok
+test tests::crystal_guild_buff_packet_manifest_loads ... ok
+test tests::crystal_item_manifest_loads ... ok
+test tests::crystal_magic_manifest_contains_only_unique_enabled_spells ... ok
+test tests::crystal_magic_manifest_loads ... ok
+test tests::crystal_monster_ai_summary_classifies_manifest_families ... ok
+test tests::crystal_monster_drop_path_resolves_imported_drop_table ... ok
+test tests::crystal_monster_manifest_loads ... ok
+test tests::crystal_npc_command_summary_classifies_runtime_coverage ... ok
+test tests::crystal_npc_info_manifest_loads ... ok
+test tests::crystal_npc_manifest_loads ... ok
+test tests::crystal_quest_packet_manifest_loads ... ok
+test tests::crystal_random_item_stats_manifest_loads ... ok
+test tests::crystal_real_item_selection_matches_class_and_level_variants ... ok
+test tests::crystal_recipe_packet_manifest_loads ... ok
+test tests::crystal_recipes_decode_every_payload ... ok
+test tests::crystal_recipes_decode_per_ingredient_counts ... ok
+test tests::crystal_respawn_manifest_loads ... ok
+test tests::crystal_starter_region_respawns_include_expected_monsters ... ok
+test tests::localization_bundle_loads ... ok
+test tests::localization_formatter_replaces_placeholders ... ok
+test tests::localization_lookup_uses_selected_language ... ok
+test tests::monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility ... ok
+test tests::platinum_176_exposes_every_source_three_class_book_through_level_50 ... ok
+test tests::platinum_176_prajna_island_requires_the_visible_round_trip_sailor_scripts ... ok
+test tests::platinum_176_profile_bundle_matches_the_compiled_profile ... ok
+test tests::platinum_176_profile_is_reference_complete_and_has_a_1_to_50_curve ... ok
+test tests::portuguese_language_is_wired ... ok
+test tests::starter_map_collision_loads ... ok
+test tests::starter_runtime_data_maps_into_crystal_manifests ... ok
+test tests::starter_scene_loads ... ok
+test tests::starter_server_data_loads ... ok
+
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
+

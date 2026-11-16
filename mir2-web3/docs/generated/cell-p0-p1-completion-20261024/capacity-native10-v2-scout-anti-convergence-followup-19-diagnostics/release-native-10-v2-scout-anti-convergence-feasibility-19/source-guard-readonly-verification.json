@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T23:43:50.484Z",
+  "passed": true,
+  "readOnly": true,
+  "sourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\launcher-source-frozen-v1.json",
+    "bytes": 66317,
+    "sha256": "a2b9fa102a584cf7994ae5fc900f9232f86fe8174c19fc0a57bfd8c24dbde212"
+  },
+  "preparedReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\runtime-prepared-v3.json",
+    "bytes": 41625,
+    "sha256": "c79e49a3d439e18f97ac5ccbf85ef80227444d84f03d285a0ade750821757183"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-runtime-independent-review-v1\\preseal-independent-review-v3.json",
+    "bytes": 5305,
+    "sha256": "86d5bc3e710ac6e13bafc181ac6a2ca0338c1e005b9aa76bf185fb8b9505fe9e"
+  },
+  "rootSealExecutor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\root-seal-and-guard-v1.mjs",
+    "bytes": 17593,
+    "sha256": "06229ef67a7053c2e3f0a6d597a9952999a63255be3ea72987eacf98f284d455"
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendInputCount": 50,
+  "backendSourceUnchangedSinceBuild": true,
+  "rebuildPerformed": false,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "coreCodeEvidenceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "driverClosurePins": 45,
+  "full16RunId": "1792971074413-d1b0416a",
+  "full16Passed": true,
+  "wireSourcePins": 11,
+  "sceneSourceSha256": "2981bd5f36e6abd382ca2ae5f20e2da10a0381b46f444e623b9a5f7de46508a9",
+  "sceneStaticEvidenceNotRerun": true,
+  "prepareEntryPointInvoked": false,
+  "runEntryPointInvoked": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

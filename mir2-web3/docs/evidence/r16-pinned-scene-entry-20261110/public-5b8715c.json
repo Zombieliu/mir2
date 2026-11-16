@@ -1,0 +1,168 @@
+{
+  "gameRevision": "5b8715cafd05f572a6f7186ff8c46bb82c283400",
+  "walletRevision": "c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b",
+  "walletVersion": "0.6.13",
+  "productionDeployment": "dpl_DEzGSSF6rTt1fdPUuSuNgsYwiz9f",
+  "deployRun": 42839494434,
+  "qrLocaleChecks": [
+    {
+      "locale": "zh-cn",
+      "oneCreate": true,
+      "pending": true,
+      "cancelled": true,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-tw",
+      "oneCreate": true,
+      "pending": true,
+      "cancelled": true,
+      "browserClosed": true
+    }
+  ],
+  "browserDefaultNetwork": true,
+  "loopbackSystemProxyObserved": true,
+  "realQrImage": true,
+  "testnetApproval": true,
+  "loginSuccess": 1,
+  "startGameResult": 4,
+  "authority": {
+    "freshEmptyRoster": true,
+    "selfPacketMatches": true,
+    "starterMapPacket": true
+  },
+  "timing": {
+    "clockEpochMs": 1794324126582,
+    "startIntentMs": 75997,
+    "startAckMs": 79616,
+    "authoritativeStarterMapMs": 79621,
+    "authoritativeSelfMs": 79622,
+    "logoutIntentMs": 199846,
+    "logoutAckMs": 200940,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 79826,
+    "starterRegionHeadersMs": 86843,
+    "starterRegionBodyMs": null,
+    "sceneSpritesReadyMs": null,
+    "localeRequestMs": 45120,
+    "localeBodyMs": 173331,
+    "localeReadyMs": null,
+    "firstPlayableFrameMs": null,
+    "rendererBodyMs": null
+  },
+  "firstPlayable": false,
+  "failure": "FIRST_PLAYABLE_SCENE_NOT_OBSERVED",
+  "logoutAck": 1,
+  "returnedToSelect": true,
+  "browserClosed": true,
+  "sceneDelivery": [
+    {
+      "scope": "releaseManifest",
+      "path": "/api/asset-manifest",
+      "requestedMs": 13796,
+      "decodedBytes": 10005,
+      "encodedBytes": 2225,
+      "status": 200,
+      "ttfbMs": 5408,
+      "headersMs": 19204,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "br",
+      "edgeCache": "DYNAMIC",
+      "functionCache": "MISS",
+      "firstDataMs": 20408,
+      "lastDataMs": 21409,
+      "transferMs": 7612,
+      "bodyCompleteMs": 21408,
+      "totalEncodedBytes": 2428
+    },
+    {
+      "scope": "gameplayLocale",
+      "path": "/_next/static/chunks/r16-gameplay-locales.c0054dc124202cfd.js",
+      "requestedMs": 45120,
+      "decodedBytes": 4628025,
+      "encodedBytes": 1202233,
+      "status": 200,
+      "ttfbMs": 128218,
+      "headersMs": 173338,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "br",
+      "edgeCache": "MISS",
+      "functionCache": "MISS",
+      "firstDataMs": 173338,
+      "lastDataMs": 173338,
+      "transferMs": 128211,
+      "bodyCompleteMs": 173331,
+      "totalEncodedBytes": 1202585
+    },
+    {
+      "scope": "crystalRegion",
+      "release": "20261108-r16-08ec86d5105c",
+      "starter": true,
+      "geometry": {
+        "x": 296,
+        "y": 620,
+        "width": 56,
+        "height": 72
+      },
+      "path": "/api/scene/crystal",
+      "requestedMs": 79826,
+      "decodedBytes": 0,
+      "encodedBytes": 0,
+      "status": 503,
+      "ttfbMs": 7017,
+      "headersMs": 86843,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "failure": "net::ERR_ABORTED",
+      "failureMs": 86843
+    },
+    {
+      "scope": "crystalRegion",
+      "release": "20261108-r16-08ec86d5105c",
+      "starter": true,
+      "geometry": {
+        "x": 296,
+        "y": 620,
+        "width": 56,
+        "height": 72
+      },
+      "path": "/api/scene/crystal",
+      "requestedMs": 87047,
+      "decodedBytes": 0,
+      "encodedBytes": 0,
+      "failure": "net::ERR_ABORTED",
+      "failureMs": 95048
+    }
+  ],
+  "anonymousRead": {
+    "scope": "anonymous read outside the signed browser",
+    "rows": [
+      {
+        "kind": "map",
+        "status": 200,
+        "headersMs": 2469,
+        "bodyMs": 3038,
+        "decodedBytes": 458475,
+        "shape": {
+          "map": "0.map",
+          "cellCount": 6819,
+          "missing": 0
+        }
+      },
+      {
+        "kind": "locale",
+        "status": 200,
+        "headersMs": 1093,
+        "bodyMs": 9397,
+        "decodedBytes": 4628025,
+        "shape": null
+      }
+    ]
+  }
+}

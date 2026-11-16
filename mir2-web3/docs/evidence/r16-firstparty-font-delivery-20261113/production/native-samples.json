@@ -1,0 +1,2870 @@
+[
+  {
+    "observedAtMs": 3351,
+    "atMs": 2175.6000000089407,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 5342,
+    "atMs": 4168.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 7340,
+    "atMs": 6165.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 9353,
+    "atMs": 8178.4000000059605,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 11351,
+    "atMs": 10176.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 13343,
+    "atMs": 12169,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 15345,
+    "atMs": 14171,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Numeron Login TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 17341,
+    "atMs": 16166.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Numeron Login TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 19339,
+    "atMs": 18165.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 21341,
+    "atMs": 20166.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 23340,
+    "atMs": 22166.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 25341,
+    "atMs": 24167.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 27342,
+    "atMs": 26167.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 29342,
+    "atMs": 28168.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 31342,
+    "atMs": 30168.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 33342,
+    "atMs": 32168.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 35343,
+    "atMs": 34168.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 37343,
+    "atMs": 36169,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 39339,
+    "atMs": 38165,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 41339,
+    "atMs": 40165.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 43339,
+    "atMs": 42165.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 45340,
+    "atMs": 44165.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 47339,
+    "atMs": 46165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 49341,
+    "atMs": 48166.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 51340,
+    "atMs": 50165.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 53340,
+    "atMs": 52166.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 55341,
+    "atMs": 54166.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 57340,
+    "atMs": 56166.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 59341,
+    "atMs": 58166.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 61342,
+    "atMs": 60167.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 63342,
+    "atMs": 62167.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 65342,
+    "atMs": 64167.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 67343,
+    "atMs": 66168,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 69340,
+    "atMs": 68165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 71343,
+    "atMs": 70168.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 73343,
+    "atMs": 72168.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 75341,
+    "atMs": 74166.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 77344,
+    "atMs": 76169.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 79340,
+    "atMs": 78165.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 81340,
+    "atMs": 80165.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 83340,
+    "atMs": 82165.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 85340,
+    "atMs": 84165.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 87341,
+    "atMs": 86166,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 89341,
+    "atMs": 88166.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 91340,
+    "atMs": 90165.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 93341,
+    "atMs": 92166.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 95341,
+    "atMs": 94166.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 97342,
+    "atMs": 96167.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 99340,
+    "atMs": 98165.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 101343,
+    "atMs": 100167.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 103340,
+    "atMs": 102165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 105343,
+    "atMs": 104168.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 107343,
+    "atMs": 106168.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 109341,
+    "atMs": 108165.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 111341,
+    "atMs": 110166.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 113341,
+    "atMs": 112166.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 115344,
+    "atMs": 114169,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 117340,
+    "atMs": 116165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 119340,
+    "atMs": 118165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 121340,
+    "atMs": 120165.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 123340,
+    "atMs": 122164.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 125341,
+    "atMs": 124165.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 127341,
+    "atMs": 126166.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 129341,
+    "atMs": 128166.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 131342,
+    "atMs": 130166.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 133342,
+    "atMs": 132166.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 135340,
+    "atMs": 134165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 137342,
+    "atMs": 136167.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 139341,
+    "atMs": 138165.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 141340,
+    "atMs": 140165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 143343,
+    "atMs": 142168,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 145340,
+    "atMs": 144165,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 147343,
+    "atMs": 146168.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 149343,
+    "atMs": 148168.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 151344,
+    "atMs": 150168.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 153341,
+    "atMs": 152165.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 155340,
+    "atMs": 154165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 157340,
+    "atMs": 156165.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 159340,
+    "atMs": 158165.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 161340,
+    "atMs": 160165.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 163341,
+    "atMs": 162165.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 165341,
+    "atMs": 164166.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 167340,
+    "atMs": 166165.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 169341,
+    "atMs": 168166.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 171342,
+    "atMs": 170166.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 173342,
+    "atMs": 172167,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 175342,
+    "atMs": 174167.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 177341,
+    "atMs": 176165.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 179343,
+    "atMs": 178167.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 181340,
+    "atMs": 180164.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 183343,
+    "atMs": 182168,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 185340,
+    "atMs": 184164.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 187340,
+    "atMs": 186164.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 189340,
+    "atMs": 188165.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 191341,
+    "atMs": 190166,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 193340,
+    "atMs": 192164.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 195340,
+    "atMs": 194165.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 197340,
+    "atMs": 196165.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 199340,
+    "atMs": 198165.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 201341,
+    "atMs": 200165.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 203341,
+    "atMs": 202166.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 205340,
+    "atMs": 204165,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 207341,
+    "atMs": 206166.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 209341,
+    "atMs": 208166.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 211342,
+    "atMs": 210166.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 213343,
+    "atMs": 212167.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 215341,
+    "atMs": 214165.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 217342,
+    "atMs": 216167.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 219361,
+    "atMs": 218186,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 0,
+      "generation": 0,
+      "revision": 0
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 0,
+      "generation": 0,
+      "revision": 0,
+      "displayLanguage": null
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 221346,
+    "atMs": 220171,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 359,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 359,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 223352,
+    "atMs": 222176.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 805,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 805,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 225347,
+    "atMs": 224171.79999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 1242,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 1242,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 227346,
+    "atMs": 226171.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 1681,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 1681,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 229347,
+    "atMs": 228172.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 2122,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 2122,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 231348,
+    "atMs": 230173.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 2561,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 2561,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 233346,
+    "atMs": 232171.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 3003,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 3003,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 235350,
+    "atMs": 234174.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 3446,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 3446,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 237347,
+    "atMs": 236172.20000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 3892,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 3892,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 239345,
+    "atMs": 238170.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 4341,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 4341,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 241346,
+    "atMs": 240171,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 4784,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 4784,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 243347,
+    "atMs": 242171.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 5227,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 5227,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 245347,
+    "atMs": 244171.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 5671,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 5671,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 247350,
+    "atMs": 246174.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 6104,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 6104,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 249350,
+    "atMs": 248175.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 6549,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 6549,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 251344,
+    "atMs": 250169.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 6989,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 6989,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 253344,
+    "atMs": 252169.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 7433,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 7433,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 255347,
+    "atMs": 254171.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 7880,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 7880,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 257346,
+    "atMs": 256171,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 8326,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 8326,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 259345,
+    "atMs": 258170.29999999702,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 8766,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 8766,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 261346,
+    "atMs": 260170.70000000298,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 9207,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 9207,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 263347,
+    "atMs": 262172.200000003,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 9651,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 9651,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 265345,
+    "atMs": 264170,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 10096,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 10096,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 267364,
+    "atMs": 266188.799999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 10519,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 10519,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 269347,
+    "atMs": 268172.299999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 10952,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 10952,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 271347,
+    "atMs": 270171.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 11378,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 11378,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 273346,
+    "atMs": 272171.299999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 11786,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 11786,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 275347,
+    "atMs": 274172.60000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 12227,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 12227,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 277349,
+    "atMs": 276174.299999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 12667,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 12667,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 279345,
+    "atMs": 278170.40000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 13093,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 13093,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 281353,
+    "atMs": 280178,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 13521,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 13521,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 283351,
+    "atMs": 282176.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 13956,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 13956,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 285345,
+    "atMs": 284169.700000003,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 14388,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 14388,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 287344,
+    "atMs": 286169.299999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 14824,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 14824,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 289351,
+    "atMs": 288175.700000003,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 15263,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 15263,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 291411,
+    "atMs": 290236.299999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 15682,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 15682,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 293350,
+    "atMs": 292175.10000000894,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 15988,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 15988,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 295352,
+    "atMs": 294176.799999997,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 16388,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 16388,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 297351,
+    "atMs": 296176.5,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 16790,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 16790,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 299364,
+    "atMs": 298189.90000000596,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 17167,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 17167,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 301344,
+    "atMs": 300169.200000003,
+    "timeOrigin": 1794568548807.7,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 17550,
+      "generation": 3,
+      "revision": 4
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 17550,
+      "generation": 3,
+      "revision": 6,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  }
+]

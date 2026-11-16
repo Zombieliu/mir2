@@ -1,0 +1,294 @@
+TAP version 13
+# Subtest: send calls the original once with identical this/arguments and preserves its return
+not ok 1 - send calls the original once with identical this/arguments and preserves its return
+  ---
+  duration_ms: 2.7801
+  type: 'test'
+  location: 'C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs:26:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+    
+      {
+        cells: [
+          {
+            x: 242,
+            y: 596
+    ...
+        ],
+    -   connection: 1,
+        first: {
+          x: 243,
+          y: 596
+        },
+        kind: 'walk',
+    -   mapFileName: '0',
+        origin: {
+          x: 242,
+          y: 596
+        },
+        sendCursor: 0,
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    connection: 1
+    mapFileName: '0'
+    kind: 'walk'
+    origin:
+      x: 242
+      y: 596
+    first:
+      x: 243
+      y: 596
+    target:
+      x: 243
+      y: 596
+    cells:
+      0:
+        x: 242
+        y: 596
+      1:
+        x: 243
+        y: 596
+    sendCursor: 0
+    sentAtMs: 100
+  actual:
+    kind: 'walk'
+    origin:
+      x: 242
+      y: 596
+    first:
+      x: 243
+      y: 596
+    target:
+      x: 243
+      y: 596
+    cells:
+      0:
+        x: 242
+        y: 596
+      1:
+        x: 243
+        y: 596
+    sendCursor: 0
+    sentAtMs: 100
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-build/p01-completion-20261024/compact-navigation-wire-diagnostics-v1/wrapper.test.mjs:26:616)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: observe projects true before/after snapshots and records only after the one original fold
+ok 2 - observe projects true before/after snapshots and records only after the one original fold
+  ---
+  duration_ms: 0.549
+  type: 'test'
+  ...
+# Subtest: original send throw object is preserved after exactly one call, with no invented pending success
+ok 3 - original send throw object is preserved after exactly one call, with no invented pending success
+  ---
+  duration_ms: 0.5399
+  type: 'test'
+  ...
+# Subtest: original observe throw object is preserved after exactly one call
+ok 4 - original observe throw object is preserved after exactly one call
+  ---
+  duration_ms: 0.3645
+  type: 'test'
+  ...
+# Subtest: observer wrapper makes no additional client/message/hint mutation compared with the original
+ok 5 - observer wrapper makes no additional client/message/hint mutation compared with the original
+  ---
+  duration_ms: 1.2222
+  type: 'test'
+  ...
+# Subtest: send wrapper makes no additional client/command/hint mutation compared with original
+ok 6 - send wrapper makes no additional client/command/hint mutation compared with original
+  ---
+  duration_ms: 0.3454
+  type: 'test'
+  ...
+# Subtest: unknown motion retains numeric id/cause and before/after absence without synthesizing an entity
+ok 7 - unknown motion retains numeric id/cause and before/after absence without synthesizing an entity
+  ---
+  duration_ms: 0.2508
+  type: 'test'
+  ...
+# Subtest: a remembered regional monster Remove is recorded after it moved outside the region
+ok 8 - a remembered regional monster Remove is recorded after it moved outside the region
+  ---
+  duration_ms: 0.4057
+  type: 'test'
+  ...
+# Subtest: snapshot replacement deletion is distinguished from explicit ObjectRemove
+ok 9 - snapshot replacement deletion is distinguished from explicit ObjectRemove
+  ---
+  duration_ms: 0.4684
+  type: 'test'
+  ...
+# Subtest: map and geometric boundaries are fixed inclusive bounds; other-map samples are excluded
+ok 10 - map and geometric boundaries are fixed inclusive bounds; other-map samples are excluded
+  ---
+  duration_ms: 0.3679
+  type: 'test'
+  ...
+# Subtest: known player lifecycle is not emitted or kept as remembered monster after id reuse
+ok 11 - known player lifecycle is not emitted or kept as remembered monster after id reuse
+  ---
+  duration_ms: 0.2537
+  type: 'test'
+  ...
+# Subtest: navigation association copies the existing hint/cursor and observes release without classifying ACK success
+not ok 12 - navigation association copies the existing hint/cursor and observes release without classifying ACK success
+  ---
+  duration_ms: 0.4293
+  type: 'test'
+  location: 'C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs:37:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+    
+      {
+        cells: [
+          {
+            x: 242,
+            y: 596
+    ...
+        ],
+    -   connection: 1,
+        first: {
+          x: 243,
+          y: 596
+        },
+        kind: 'walk',
+    -   mapFileName: '0',
+        origin: {
+          x: 242,
+          y: 596
+        },
+        sendCursor: 0,
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    connection: 1
+    mapFileName: '0'
+    kind: 'walk'
+    origin:
+      x: 242
+      y: 596
+    first:
+      x: 243
+      y: 596
+    target:
+      x: 243
+      y: 596
+    cells:
+      0:
+        x: 242
+        y: 596
+      1:
+        x: 243
+        y: 596
+    sendCursor: 0
+    sentAtMs: 100
+  actual:
+    kind: 'walk'
+    origin:
+      x: 242
+      y: 596
+    first:
+      x: 243
+      y: 596
+    target:
+      x: 243
+      y: 596
+    cells:
+      0:
+        x: 242
+        y: 596
+      1:
+        x: 243
+        y: 596
+    sendCursor: 0
+    sentAtMs: 100
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-build/p01-completion-20261024/compact-navigation-wire-diagnostics-v1/wrapper.test.mjs:37:482)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: only actual connections one and two are captured; other clients still call originals once
+ok 13 - only actual connections one and two are captured; other clients still call originals once
+  ---
+  duration_ms: 0.3457
+  type: 'test'
+  ...
+# Subtest: entity projection caps32 with true totalCount/truncated and no false complete evidence
+ok 14 - entity projection caps32 with true totalCount/truncated and no false complete evidence
+  ---
+  duration_ms: 0.4166
+  type: 'test'
+  ...
+# Subtest: remembered lifecycle cache never exceeds64 and explicitly reports eviction
+ok 15 - remembered lifecycle cache never exceeds64 and explicitly reports eviction
+  ---
+  duration_ms: 4.2546
+  type: 'test'
+  ...
+# Subtest: each observational pending window logs at most64 events including explicit truncation marker
+ok 16 - each observational pending window logs at most64 events including explicit truncation marker
+  ---
+  duration_ms: 0.6876
+  type: 'test'
+  ...
+# Subtest: row cap is fixed12000 per connection including terminal marker and never skips an original fold
+ok 17 - row cap is fixed12000 per connection including terminal marker and never skips an original fold
+  ---
+  duration_ms: 30.4083
+  type: 'test'
+  ...
+# Subtest: strict projection never copies names, credentials, accounts, payloads or arbitrary source/direction strings
+ok 18 - strict projection never copies names, credentials, accounts, payloads or arbitrary source/direction strings
+  ---
+  duration_ms: 0.4319
+  type: 'test'
+  ...
+# Subtest: sink exception propagates after original once and marks incomplete, without changing original error precedence
+ok 19 - sink exception propagates after original once and marks incomplete, without changing original error precedence
+  ---
+  duration_ms: 0.2649
+  type: 'test'
+  ...
+# Subtest: projection exception cannot prevent original call; original error retains priority
+ok 20 - projection exception cannot prevent original call; original error retains priority
+  ---
+  duration_ms: 0.1869
+  type: 'test'
+  ...
+# Subtest: uninstall restores exact descriptors and duplicate installation cannot stack wrappers
+ok 21 - uninstall restores exact descriptors and duplicate installation cannot stack wrappers
+  ---
+  duration_ms: 0.1446
+  type: 'test'
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 19
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 99.1592

@@ -1,0 +1,189 @@
+{
+  "passed": true,
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "origin": "https://numeron.obelisk.build",
+  "checkedAt": "2026-11-13T06:38:41.421Z",
+  "chunks": [
+    {
+      "path": "/_next/static/chunks/1800.19c71628f8e82dd4.js",
+      "gender": "male",
+      "direction": 0,
+      "status": 200,
+      "bytes": 15162,
+      "sha256": "581a70514c3d4736a0bc75e6b1d0da117e06938a1e1737b75e0f97701860554a",
+      "sourcePayloadSha256": "25fa0d5ce010c43bc86dc382fbd2e1764e084db5124c477134d134244b45edce",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/2215.6ace83641d2454a7.js",
+      "gender": "female",
+      "direction": 2,
+      "status": 200,
+      "bytes": 12045,
+      "sha256": "ba09091f1378b906fa95fa522fbfcdd94f7a27c9f8fe10220babb096d8a3d189",
+      "sourcePayloadSha256": "2d2e2a4f15932a144c9ef6f75622f38594de7a723a64a834c268a1da4279751a",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/2220.0b4a1634da395aaf.js",
+      "gender": "female",
+      "direction": 7,
+      "status": 200,
+      "bytes": 13881,
+      "sha256": "32af02c4d93b2158eeadbf7348f63630fb69d3264c00afedf2541735a9ff7016",
+      "sourcePayloadSha256": "7e14dabb760a34a8ddb9c97d5625216c108fdc5a00bcebdc0fa79ed6a96f3f2c",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/3017.1d408f617d14e947.js",
+      "gender": "male",
+      "direction": 7,
+      "status": 200,
+      "bytes": 14682,
+      "sha256": "b9a1e9b96fe5a37539110747f31334bc64ece2d75e95493f1895f9f5936b60a0",
+      "sourcePayloadSha256": "d9773e077b405cf5f8e74350bbd997ad8cdf4fc802e785826707f9ec0908f3f1",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/3328.9dae2e402d18aee5.js",
+      "gender": "female",
+      "direction": 3,
+      "status": 200,
+      "bytes": 14189,
+      "sha256": "af9d282c3e08ec47328e6d37ef99451dd735e564d0bdf672dd14ff52855a5b9b",
+      "sourcePayloadSha256": "ba26b4a6769b994a831ea24872abeaff00151aaa06170415ce9a4a9ce77149dc",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/4894.9137a019630d6459.js",
+      "gender": "male",
+      "direction": 2,
+      "status": 200,
+      "bytes": 11615,
+      "sha256": "4da1ba6cb06ac7217f0280d7d64cf91c709d464d88afb8c76e40da66d1f5a6c0",
+      "sourcePayloadSha256": "3e3dec8e85c5241f8c32d43ce103e98de67085e8957541598ffcdc8be555e0e0",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/4947.e3fadecc4d490769.js",
+      "gender": "female",
+      "direction": 6,
+      "status": 200,
+      "bytes": 11797,
+      "sha256": "4c46c608c5547ac59e80bd85646fd3f3d3df891342b7ee08e61d9c0fcebb7b4e",
+      "sourcePayloadSha256": "c8bbe761ee26060ae7e3bac2de3b39bb67f646d69a2f3095c7433e303ad1ad76",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/5809.b25b9fe6a961911d.js",
+      "gender": "female",
+      "direction": 4,
+      "status": 200,
+      "bytes": 14605,
+      "sha256": "68f229d791507964c7960a91264e1bffde043ac48caa50632c8767bf239d1d4a",
+      "sourcePayloadSha256": "9281486cab6026c90532d9ba5e18085393fbfc4242a36a11add160087edc691e",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/6322.2aa571f0b44a6c4e.js",
+      "gender": "female",
+      "direction": 5,
+      "status": 200,
+      "bytes": 13805,
+      "sha256": "9363a6f02cd1fce776a7296ff478b439ae89cc20b39ca7ba63ba8d6ad3769776",
+      "sourcePayloadSha256": "3eceedc550f203def4baf10f0e4b52978231ac947011607d5e513677771f5c79",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/7014.fc532adcf7c10925.js",
+      "gender": "female",
+      "direction": 1,
+      "status": 200,
+      "bytes": 14172,
+      "sha256": "7b61741ed4bb01e1d9c90c0df1dde608ccb506d79b39c90d1b28511e579908ae",
+      "sourcePayloadSha256": "9f66d5c60bfbda2ce6cfc31f4a71fb08d297c6955705b3604422b96b54ca4e59",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/8251.f5df49eacdde2902.js",
+      "gender": "male",
+      "direction": 5,
+      "status": 200,
+      "bytes": 14199,
+      "sha256": "f8f22c2ccb6eb026de55bafc3ba441a843b91f86a6d99f309a59fae73baaa66a",
+      "sourcePayloadSha256": "7f843b54f30904499f6451e65f2ede8acafa10aeb606a4ff65f790613e36ed79",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/8276.6135a4ed55d62c7d.js",
+      "gender": "male",
+      "direction": 4,
+      "status": 200,
+      "bytes": 15100,
+      "sha256": "818eac72d768bfc8964b1670e29579c8ceec2813113d2dbbc1fc18e159074dfc",
+      "sourcePayloadSha256": "6867daf96438abc759c1acb4f9abe035f0f7ce695af45debcbfbb980035b7f20",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/8725.d54c9910c41e773f.js",
+      "gender": "female",
+      "direction": 0,
+      "status": 200,
+      "bytes": 14957,
+      "sha256": "be3720cc7b6412da7867c97d1af7af159a2eb90ce6d6413264668360e3bbf960",
+      "sourcePayloadSha256": "bdf2abb992e520416aebdab66643e491cd56ee47763c2e6710326d5426e3209e",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/9322.2e27199a5218d8c2.js",
+      "gender": "male",
+      "direction": 6,
+      "status": 200,
+      "bytes": 11815,
+      "sha256": "c7c92711b3e4a70458642b514d1f0acd950a3665178106bce3aa4aafeb3c09a9",
+      "sourcePayloadSha256": "9769b05cf18e4a04d66aba2aeafa9c62ba9801e3efc5ffbd3423c5141eaa313b",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/9517.afd74d727e2d0ea6.js",
+      "gender": "male",
+      "direction": 3,
+      "status": 200,
+      "bytes": 15007,
+      "sha256": "1aa0f9bfaefaaf439351d394eea8f9d507d549c697d202adec8d619dbb82c56c",
+      "sourcePayloadSha256": "510a9bf7ad4b3c5a3cec54ea6a61970efe469488c7d4cca8dfc7805e7b8b68ff",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    },
+    {
+      "path": "/_next/static/chunks/9839.86b119db0960837e.js",
+      "gender": "male",
+      "direction": 1,
+      "status": 200,
+      "bytes": 14167,
+      "sha256": "1fc8f6c53a9fdbc194ff0f346ed505fd00f724bf6c504dabd343755f98462698",
+      "sourcePayloadSha256": "6a702484ae02172e23b2b9eefd6ec21f2000775a1200c0a2b21f9e98409d644d",
+      "pngs": 8,
+      "sameJavaScriptBytesAsLocal": true
+    }
+  ],
+  "scope": "Actual deployment JS names resolved from its webpack loader; only static AST/JSON parsed, no remote JavaScript execution. All 16 full structured payloads and 128 PNGs exactly match the qualified source. Bundler wrappers/hash names may differ from local build.",
+  "allSixteenPayloadsMatchCandidate": true,
+  "noEagerHtmlPreload": true,
+  "performedAfterSignedColdBrowser": true,
+  "attemptRounds": 1
+}

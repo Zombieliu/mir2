@@ -1,0 +1,58 @@
+{
+  "base": "f0eb9ea6121080763ec1cad07dd316b10b6febe6",
+  "inputs": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 760767,
+      "sha256": "817296ab3f4083f971a859619d7f843ea5e4e072d982205a939621c97f7d9edd",
+      "gitBlob": "1474264f0fe21c09120055a6ce4665de0ea5cbcf",
+      "gitLfSha256": "817296ab3f4083f971a859619d7f843ea5e4e072d982205a939621c97f7d9edd"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "bytes": 8508,
+      "sha256": "05f3309307a6ba0bae08e5d8e735b34f98159c9ed67932ad5ea6d2473e609764",
+      "gitBlob": "22d35c4349920a3447ffbd72228c5281d724cc03",
+      "gitLfSha256": "05f3309307a6ba0bae08e5d8e735b34f98159c9ed67932ad5ea6d2473e609764"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+      "bytes": 13158,
+      "sha256": "7a9a16d12336555eb60d5ea947c82b299c69bbd8bf9c33d60b1220af435d7d47",
+      "gitBlob": "d36176bfefa09e01a13af2290f0bf5556df3d732",
+      "gitLfSha256": "7a9a16d12336555eb60d5ea947c82b299c69bbd8bf9c33d60b1220af435d7d47"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/idle_roam.rs",
+      "bytes": 16120,
+      "sha256": "9265787185b3fa966f6a81e96b5fffd24dc81774a8d8b04461d0460e62d85662",
+      "gitBlob": "d31455fc5880e2b22ae0b7c2bca1b6a4f5ee1af2",
+      "gitLfSha256": "9265787185b3fa966f6a81e96b5fffd24dc81774a8d8b04461d0460e62d85662"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_idle_roam.rs",
+      "bytes": 10548,
+      "sha256": "ebc2ca3e1a824a731e3195e462337571aee11ca5964434643946792e59fc814e",
+      "gitBlob": "50eab89284f697879a1d29bfbbb809447d912dd9",
+      "gitLfSha256": "ebc2ca3e1a824a731e3195e462337571aee11ca5964434643946792e59fc814e"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_passive_ai.rs",
+      "bytes": 6940,
+      "sha256": "27a5dff1902e382c77e2618bbd338a710d230b92385bb56c608ace8a526d3a13",
+      "gitBlob": "5e7bf1f4a4408d16d7746a63d2c444d038c927cf",
+      "gitLfSha256": "27a5dff1902e382c77e2618bbd338a710d230b92385bb56c608ace8a526d3a13"
+    }
+  ],
+  "compiler": "Rust 1.95.0 MSVC",
+  "sourceArchive": "source.tar",
+  "scope": "unowned neutral AI1/2; all other species unchanged",
+  "productionChanged": false,
+  "source": "dca152cd15fc5ab9782fd28f2247d89c5faa9e6a",
+  "tests": {
+    "integration": 246,
+    "idleUnit": 5,
+    "checkpoint": 19,
+    "allPassed": true
+  }
+}

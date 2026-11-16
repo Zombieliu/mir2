@@ -1,0 +1,546 @@
+{
+  "kind": "Source74 finite passive public UI/font/current-icon response observations",
+  "methods": [
+    "Network.responseReceived"
+  ],
+  "newNetworkDomainEnable": false,
+  "publicAllowlist": [
+    "/original-ui/Items/130.png",
+    "/original-ui/Items/145.png",
+    "/original-ui/Items/222.png",
+    "/original-ui/Prguse/24.png",
+    "/original-ui/Prguse/2443.png",
+    "/original-ui/Prguse/586.png",
+    "/original-ui/Prguse2/360.png",
+    "/original-ui/Prguse2/361.png",
+    "/original-ui/Prguse2/362.png",
+    "/original-ui/Prguse2/366.png",
+    "/original-ui/Prguse2/367.png",
+    "/original-ui/Prguse2/368.png",
+    "/original-ui/Title/0.png",
+    "/original-ui/Title/113.png",
+    "/original-ui/Title/114.png",
+    "/original-ui/Title/115.png",
+    "/original-ui/Title/168.png",
+    "/original-ui/Title/169.png",
+    "/original-ui/Title/196.png",
+    "/original-ui/Title/197.png",
+    "/original-ui/Title/198.png",
+    "/original-ui/Title/483.png",
+    "/original-ui/Title/484.png",
+    "/original-ui/Title/485.png",
+    "/original-ui/Title/737.png",
+    "/original-ui/Title/738.png",
+    "/original-ui/Title/739.png",
+    "/original-ui/Title/743.png",
+    "/original-ui/Title/744.png",
+    "/original-ui/Title/745.png",
+    "/original-ui/Title/746.png",
+    "/original-ui/UI_32bit/470.png",
+    "/original-ui/UI_32bit/471.png",
+    "/original-ui/fonts/NotoSansCJKsc-Regular.otf"
+  ],
+  "allowlistCount": 34,
+  "observedDistinctPaths": 34,
+  "positiveAllowedResponseCount": 189,
+  "paths": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "font/otf"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Items/130.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 11
+    },
+    {
+      "path": "/original-ui/Items/145.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 11
+    },
+    {
+      "path": "/original-ui/Items/222.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 11
+    },
+    {
+      "path": "/original-ui/Prguse/24.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Prguse/2443.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Prguse/586.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Prguse2/360.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Prguse2/361.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Prguse2/362.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Prguse2/366.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Prguse2/367.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Prguse2/368.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/0.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/113.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/114.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/115.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/168.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/169.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/196.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Title/197.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Title/198.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/483.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/484.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/485.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/737.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/738.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Title/739.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 12
+    },
+    {
+      "path": "/original-ui/Title/743.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/744.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/745.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/Title/746.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/UI_32bit/470.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    },
+    {
+      "path": "/original-ui/UI_32bit/471.png",
+      "statuses": [
+        200
+      ],
+      "mimeTypes": [
+        "image/png"
+      ],
+      "positiveResponseCount": 3
+    }
+  ],
+  "stages": [
+    {
+      "stage": "normal_reload_login",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "normal_credentials_login",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "normal_start_game",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "game_scene_settled",
+      "truncated": true,
+      "pages": 1,
+      "positiveAllowedResponses": 7
+    },
+    {
+      "stage": "ordinary_anthony_dialog",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "first_storage_open_before_compat_actions",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 37
+    },
+    {
+      "stage": "native_first_open_stable",
+      "truncated": true,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "native_candle_selected_for_cancel",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "native_cancel_then_empty_target",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "native_candle_store",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 10
+    },
+    {
+      "stage": "native_storage_close_after_store",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 10
+    },
+    {
+      "stage": "inspect_native_save_key_result",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 10
+    },
+    {
+      "stage": "native_deposit_ordinary_reload_login",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "deposit_relogin_start_game",
+      "truncated": true,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "deposit_relogin_after_scene_selector_deadline",
+      "truncated": true,
+      "pages": 1,
+      "positiveAllowedResponses": 7
+    },
+    {
+      "stage": "deposit_relogin_storage_open",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 12
+    },
+    {
+      "stage": "deposit_relogin_storage_settled",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 25
+    },
+    {
+      "stage": "native_candle_takeback",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 10
+    },
+    {
+      "stage": "native_close_after_takeback",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 10
+    },
+    {
+      "stage": "native_takeback_save_logout",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 10
+    },
+    {
+      "stage": "takeback_final_ordinary_reload_login",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "takeback_final_start_game",
+      "truncated": true,
+      "pages": 1,
+      "positiveAllowedResponses": 0
+    },
+    {
+      "stage": "takeback_final_scene_ready",
+      "truncated": true,
+      "pages": 1,
+      "positiveAllowedResponses": 4
+    },
+    {
+      "stage": "takeback_final_storage_open",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 20
+    },
+    {
+      "stage": "takeback_final_storage_settled",
+      "truncated": false,
+      "pages": 1,
+      "positiveAllowedResponses": 17
+    }
+  ],
+  "wholeIntervalComplete": false,
+  "httpStatusDoesNotProveDecodedBytes": true,
+  "bodyHashesRead": false,
+  "privateGatewayConfigurationRead": false,
+  "rawFramesRead": false,
+  "credentialsCaptured": false
+}

@@ -1,0 +1,10 @@
+
+running 5 tests
+test session::abnormal_teardown_persistence_tests::abnormal_teardown_updates_the_next_character_roster_last_access ... ok
+test session::abnormal_teardown_persistence_tests::db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint ... ok
+test session::abnormal_teardown_persistence_tests::db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibility ... ok
+test session::abnormal_teardown_persistence_tests::mismatched_or_switched_prepared_identity_is_rejected_without_persist_journal_or_cleanup ... ok
+test session::abnormal_teardown_persistence_tests::owner_lease_handoff_racing_prepare_is_rejected_before_cache_or_persistence ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1775 filtered out; finished in 4.94s
+

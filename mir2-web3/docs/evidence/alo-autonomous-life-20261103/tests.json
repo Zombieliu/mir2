@@ -1,0 +1,233 @@
+{
+  "schema": "mir2-life-test-evidence/1",
+  "groups": [
+    {
+      "suite": "Node all",
+      "file": "observation-revival-all-node.log",
+      "passed": 461,
+      "ignored": [],
+      "sha256": "fd7402eb2d742f408ff9d059d6a63cca075c92845ef50acc1203b76f2f036d4e"
+    },
+    {
+      "suite": "Bevy companion UI",
+      "file": "life-bevy-final-tests.log",
+      "passed": 53,
+      "sha256": "aa64b1f31961ef068e6d12e3e8451dd892a5152abc16586bac2ce2cb8f0ab9da",
+      "ignored": []
+    },
+    {
+      "suite": "Windows companion wiring",
+      "file": "life-native-tests.log",
+      "passed": 13,
+      "sha256": "3a216276c499ca732ee3233585cce9678b9503f5f9496fec0a49aaa5156eceaa",
+      "ignored": []
+    },
+    {
+      "suite": "Simulation action consumption",
+      "file": "simulation-life-action-boundary-tests.log",
+      "passed": 6,
+      "sha256": "3340124ecda7d07e610110a35df6b39be540f67f7d4ad8e134845c562755fa0f",
+      "ignored": []
+    },
+    {
+      "suite": "Simulation shared zone + security lifecycle",
+      "file": "simulation-shared-zone-security-lifecycle-tests.log",
+      "passed": 230,
+      "sha256": "c082bf2e226f24d529affc76564a5e914ded6340af54f1e77ca3c81d01f5ec86",
+      "ignored": []
+    },
+    {
+      "suite": "Gateway companion adjacent",
+      "file": "gateway-companion-adjacent-tests.log",
+      "passed": 115,
+      "sha256": "0e9a593071034fbd206ddcd27cf726d56b8cc55373e70e0095ac40573c491f74",
+      "ignored": []
+    },
+    {
+      "suite": "Gateway normal two-sided trade",
+      "file": "gateway-normal-two-sided-trade-tests.log",
+      "passed": 1,
+      "sha256": "13facb864cc8a022a1777c2a96473e4ae86f4573a41b5aef2566ea50cab13b2d",
+      "ignored": []
+    },
+    {
+      "suite": "Gateway normal trade economy boundary",
+      "file": "gateway-normal-trade-economy-boundary-tests.log",
+      "passed": 1,
+      "sha256": "ce4d5864d9c894a14d18833a3b7e8444dc3460bb254c06f77ba83c55379bcfc9",
+      "ignored": []
+    },
+    {
+      "suite": "Gateway snapshot regression",
+      "file": "life-snapshot-regression-tests.log",
+      "passed": 48,
+      "sha256": "27c845fa13b3060c10e5a1dfead1e4206088b6088dc2d1bf6450291af118ab61",
+      "ignored": [
+        "test routing::tests::zone_journey_event_bridge_tests::public_v2_pending_safe_zone_snapshot_follows_zone_before_private_tick ... ignored, requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"
+      ]
+    },
+    {
+      "suite": "Safety boundary scoped regression",
+      "file": "gateway-companion-safety-fixed-tests.log",
+      "results": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1699 filtered out; finished in 2.55s"
+      ],
+      "sha256": "d359d11c7569791f2dbdab913d9bb8b7538e6256676b6b7a0fb92b31be788b99",
+      "overlapsCompanionGroup": true
+    },
+    {
+      "suite": "Safety boundary scoped regression",
+      "file": "gateway-safety-companion-adjacent-tests.log",
+      "results": [
+        "test result: ok. 121 passed; 0 failed; 0 ignored; 0 measured; 1584 filtered out; finished in 22.66s"
+      ],
+      "sha256": "d5f4e4ae2fd1e8782d526f30c191fa2f1315a0c7cbad1b0f7e0a8db9df8ef1bc",
+      "overlapsCompanionGroup": true
+    },
+    {
+      "suite": "Safety boundary scoped regression",
+      "file": "gateway-safety-low-latency-tests.log",
+      "results": [
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1702 filtered out; finished in 0.85s"
+      ],
+      "sha256": "c543cbd42746ab9f4d1dde83747b8b8e048743f0d7d52d841e180d9cc5a38ce1",
+      "overlapsCompanionGroup": true
+    },
+    {
+      "suite": "Safety boundary scoped regression",
+      "file": "gateway-safety-profile-final-tests.log",
+      "results": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1700 filtered out; finished in 2.83s"
+      ],
+      "sha256": "59b2e39c837876e1c02b7349aa684356910f9ee1478712096c36b3b4ecb2cb11",
+      "overlapsCompanionGroup": true
+    },
+    {
+      "suite": "Safety boundary scoped regression",
+      "file": "gateway-safety-quest-snapshot-tests.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1704 filtered out; finished in 0.00s"
+      ],
+      "sha256": "7d41aad9d15d213bb7849045eba7ab6ce702a6d925750aab43966a0f5ded7cd5",
+      "overlapsCompanionGroup": true
+    },
+    {
+      "suite": "Safety boundary scoped regression",
+      "file": "gateway-safety-trade-snapshot-tests.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1704 filtered out; finished in 0.00s"
+      ],
+      "sha256": "e021a4012b4eb79c9af3a48b51bb83fd5ece581775c52d3e7f920bc9a140645b",
+      "overlapsCompanionGroup": true
+    },
+    {
+      "suite": "Isolated newcomer-v2 snapshot",
+      "file": "life-snapshot-isolated-cadence-tests.log",
+      "passed": 1,
+      "sha256": "eae246412f695ba9e3ca6244f666f273078320857810736c29a221136ba62d09",
+      "resolvesIgnoredCase": true
+    }
+  ],
+  "doNotSumOverlappingGroups": true,
+  "syntheticTestsAreNotLiveProviderCalls": true,
+  "finalRust": {
+    "uniquePassed": 383,
+    "simulationPassed": 242,
+    "gatewayPassed": 141,
+    "failed": 0,
+    "groupsMayOverlap": true,
+    "logs": [
+      {
+        "file": "gateway-live-homeward-companion-tests.log",
+        "results": [
+          "test result: ok. 133 passed; 0 failed; 0 ignored; 0 measured; 1584 filtered out; finished in 23.34s"
+        ],
+        "sha256": "228f5cf48840c3bb1f9af73d91bd57f064b44f395bff6d850c57a1ba85fb937e"
+      },
+      {
+        "file": "gateway-live-homeward-low-latency-tests.log",
+        "results": [
+          "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1714 filtered out; finished in 0.85s"
+        ],
+        "sha256": "ab60f1b209d77b80f069f37ed4b31d27d78de99c6d086886792ac55767a12c1f"
+      },
+      {
+        "file": "gateway-live-homeward-mask-path-tests.log",
+        "results": [
+          "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 1706 filtered out; finished in 0.50s"
+        ],
+        "sha256": "d8acbf8f4375ca00b0646b828a22540b185afbb9cfb767ff7249027c4b2c9230"
+      },
+      {
+        "file": "gateway-live-homeward-normal-economy-trade-tests.log",
+        "results": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1716 filtered out; finished in 3.03s"
+        ],
+        "sha256": "ec5575e5dfee6963e2df82bd5cad3c5433a87bcbf50d94d3d888e14040f26b73"
+      },
+      {
+        "file": "gateway-live-homeward-normal-two-sided-trade-tests.log",
+        "results": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1716 filtered out; finished in 3.27s"
+        ],
+        "sha256": "6ce5e7ff90d5be55e1fd0a280b52fb449d9089653d254e2a7b567274a2d14ab0"
+      },
+      {
+        "file": "gateway-live-homeward-quest-snapshot-tests.log",
+        "results": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1716 filtered out; finished in 0.00s"
+        ],
+        "sha256": "0716f217542d95491ea089c49ed851d1170ff60482dc775d2d49795e73fd99c2"
+      },
+      {
+        "file": "gateway-live-homeward-safety-profile-tests.log",
+        "results": [
+          "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1712 filtered out; finished in 2.87s"
+        ],
+        "sha256": "ea31ff5b678b0279fc04469330a1b86fb87c2e6c5b2d2aeaccaa350d2d7f929f"
+      },
+      {
+        "file": "gateway-live-homeward-trade-snapshot-tests.log",
+        "results": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1716 filtered out; finished in 0.00s"
+        ],
+        "sha256": "70042afca772d28d286c574ab925dee204915fa35e029cb464cc0f1b6b3fe660"
+      },
+      {
+        "file": "simulation-live-homeward-boundary-tests.log",
+        "results": [
+          "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 3368 filtered out; finished in 0.40s"
+        ],
+        "sha256": "4a89425db0afb7bc064665662fa88441224681f702dccdc225823882ff93d09b"
+      },
+      {
+        "file": "simulation-live-homeward-mask-boundary-tests.log",
+        "results": [
+          "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 3368 filtered out; finished in 0.39s"
+        ],
+        "sha256": "1c885c5c6587b59e6d79ca51d932b7a6dc41dc435614038c1681ea6ebfe7ca20"
+      },
+      {
+        "file": "simulation-live-homeward-security-tests.log",
+        "results": [
+          "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 51.14s"
+        ],
+        "sha256": "9f738e88c10efbf808485c0e607bf63a271efb4260b7c14f958a9b7d2fc47e9e"
+      },
+      {
+        "file": "simulation-live-homeward-shared-zone-tests.log",
+        "results": [
+          "test result: ok. 209 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.77s"
+        ],
+        "sha256": "084d80de14904f14ccb02eafe9336cfa1859c31544eb1043631695490cb0745c"
+      },
+      {
+        "file": "simulation-live-homeward-static-tests.log",
+        "results": [
+          "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3372 filtered out; finished in 0.46s"
+        ],
+        "sha256": "57a2163050d421f8bb78145e5c26d429f4c1a40ad89488580e72412d4d981987"
+      }
+    ]
+  }
+}

@@ -1,0 +1,563 @@
+{
+  "source": "da334834e0df566c4dafd6ac6c98e6fe29e75ee1",
+  "parent": "50fd4af3c91a5e8b577d967eecda10d9d83ac4f6",
+  "candidate": "50fd4af3c91a-quest-navigation-b3178e41",
+  "buildId": "YLjkVFbEiiQFCsXnSNkP-",
+  "buildStatus": {
+    "code": 0,
+    "signal": null
+  },
+  "buildDurationMs": 43491,
+  "qualifiedInputs": [
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "bytes": 1204475,
+      "sha256": "9c011931f2ebc6f20a77070d401f5ab68607d87a1d1c8aa07b215ade29b416b3"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "bytes": 374388,
+      "sha256": "88a69c9edd8b8884252a3d555ec8e798f4b0d7a1479b2f2f5909a349c10999de",
+      "partialOwnedShell": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/game-browser-defaults.ts",
+      "bytes": 2117,
+      "sha256": "570fa02964c4f0641f0365da091df5cfd49e00e50f7a4c1575b31f1b90e744a4"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/quest-collision-cache.ts",
+      "bytes": 6809,
+      "sha256": "1566b3d5f2b7db08d0b730ed2898991a114121ae796c1020cd01f563229dc4d8"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+      "bytes": 34750,
+      "sha256": "f9d0e5753db410a0443c4163b5b125fdded5cf28a4bbe109f27cb3cd62c2cf2d"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-game-browser-defaults.mjs",
+      "bytes": 7582,
+      "sha256": "be29bffebd76f0860aa6fcc54f6bc366a5abec254dd680d1c5662ce1883115d2"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation.mjs",
+      "bytes": 15482,
+      "sha256": "579b87cabddba22f9f9f7261bd23e560b0db01db722dfa7138ce910ae412fb31"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+      "bytes": 8282,
+      "sha256": "f6a1753c0b5ffc5b9431042ded8d34011d2c0a7dca06503399733739e7c7d597"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "bytes": 85341,
+      "sha256": "ef3f585817a0f4c72c7c35d1a34d988b63984a71fb171a0bd3e516aa61145e14"
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "bytes": 23987,
+      "sha256": "90a5cb4c8ea47914038a442a49ec36ea6f538d8600c39fc896d13991e3cbef14"
+    }
+  ],
+  "focusedChecks": 95,
+  "publishGuardChecks": 70,
+  "movementControllerPassed": true,
+  "skips": 0,
+  "cases": [
+    {
+      "run": "quest-after-r6",
+      "backend": "default",
+      "gender": "male",
+      "passed": true,
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "warmSaved": true,
+      "coldNativeReadyAfterFirstPlayableMs": 52313,
+      "warmNativeReadyAfterFirstPlayableMs": 1430,
+      "coldRightButton": true,
+      "warmRightButton": true,
+      "coldPrewarm": true,
+      "warmPrewarm": true,
+      "preparedQuest": {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "objectives": [
+          {
+            "current": 0,
+            "done": false,
+            "label": "Defeat 2 Scarecrow.",
+            "required": 2
+          },
+          {
+            "current": 0,
+            "done": false,
+            "label": "Defeat 2 RakingCat.",
+            "required": 2
+          }
+        ],
+        "ordinaryProtocolOnly": true
+      },
+      "hunt": {
+        "start": {
+          "x": 288,
+          "y": 616
+        },
+        "final": {
+          "x": 288,
+          "y": 616
+        },
+        "durationMs": 3554,
+        "chat": [
+          "[模式: 和平]",
+          "[寵物: 攻擊並移動]",
+          "正在規劃前往 (270, 625) 的路線…",
+          "你已到達 (270, 625) 附近的狩獵區域。請選擇任務目標怪物進行戰鬥。"
+        ],
+        "zeroMovement": true
+      },
+      "vendor": {
+        "destination": {
+          "x": 324,
+          "y": 291
+        },
+        "final": {
+          "x": 322,
+          "y": 293
+        },
+        "movementCommands": 189,
+        "dispatchSpanMs": 113554,
+        "firstDispatchToOwnerAckMs": 36,
+        "firstEightSecondGatePassed": true,
+        "everyProgressIntervalUnderEightSeconds": true,
+        "chat": [
+          "你已到達 (270, 625) 附近的狩獵區域。請選擇任務目標怪物進行戰鬥。",
+          "正在規劃前往 (324, 291) 的路線…",
+          "Online Players: 1",
+          "你已到達 (324, 291) 附近。請與 NPC 交談以繼續。"
+        ]
+      },
+      "collision": {
+        "requests": 9,
+        "peakConcurrent": 4,
+        "regions": [
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+            "status": 200,
+            "bounds": {
+              "minX": 0,
+              "maxX": 255,
+              "minY": 0,
+              "maxY": 255
+            },
+            "blockedCells": 23933,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+            "status": 200,
+            "bounds": {
+              "minX": 0,
+              "maxX": 255,
+              "minY": 256,
+              "maxY": 511
+            },
+            "blockedCells": 10702,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+            "status": 200,
+            "bounds": {
+              "minX": 0,
+              "maxX": 255,
+              "minY": 512,
+              "maxY": 699
+            },
+            "blockedCells": 21299,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+            "status": 200,
+            "bounds": {
+              "minX": 256,
+              "maxX": 511,
+              "minY": 0,
+              "maxY": 255
+            },
+            "blockedCells": 28325,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+            "status": 200,
+            "bounds": {
+              "minX": 256,
+              "maxX": 511,
+              "minY": 256,
+              "maxY": 511
+            },
+            "blockedCells": 14447,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+            "status": 200,
+            "bounds": {
+              "minX": 256,
+              "maxX": 511,
+              "minY": 512,
+              "maxY": 699
+            },
+            "blockedCells": 18480,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+            "status": 200,
+            "bounds": {
+              "minX": 512,
+              "maxX": 699,
+              "minY": 0,
+              "maxY": 255
+            },
+            "blockedCells": 23394,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+            "status": 200,
+            "bounds": {
+              "minX": 512,
+              "maxX": 699,
+              "minY": 256,
+              "maxY": 511
+            },
+            "blockedCells": 10372,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+            "status": 200,
+            "bounds": {
+              "minX": 512,
+              "maxX": 699,
+              "minY": 512,
+              "maxY": 699
+            },
+            "blockedCells": 12421,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          }
+        ]
+      },
+      "receiptSha256": "98247b210e95a6b2cbba7a21da5d51b323bac9af12c840f456f2413f28346ae6",
+      "routeReceiptSha256": "b4e21279861811c3cba57de4089431c845894e1b341a15221c3ec133b832f03b"
+    },
+    {
+      "run": "quest-after-r7",
+      "backend": "webgl2-shared",
+      "gender": "female",
+      "passed": true,
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "warmSaved": true,
+      "coldNativeReadyAfterFirstPlayableMs": 52311,
+      "warmNativeReadyAfterFirstPlayableMs": 1455,
+      "coldRightButton": true,
+      "warmRightButton": true,
+      "coldPrewarm": true,
+      "warmPrewarm": true,
+      "preparedQuest": {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "objectives": [
+          {
+            "current": 0,
+            "done": false,
+            "label": "Defeat 2 Scarecrow.",
+            "required": 2
+          },
+          {
+            "current": 0,
+            "done": false,
+            "label": "Defeat 2 RakingCat.",
+            "required": 2
+          }
+        ],
+        "ordinaryProtocolOnly": true
+      },
+      "hunt": {
+        "start": {
+          "x": 288,
+          "y": 616
+        },
+        "final": {
+          "x": 288,
+          "y": 616
+        },
+        "durationMs": 3279,
+        "chat": [
+          "[模式: 和平]",
+          "[寵物: 攻擊並移動]",
+          "正在規劃前往 (270, 625) 的路線…",
+          "你已到達 (270, 625) 附近的狩獵區域。請選擇任務目標怪物進行戰鬥。"
+        ],
+        "zeroMovement": true
+      },
+      "vendor": {
+        "destination": {
+          "x": 324,
+          "y": 291
+        },
+        "final": {
+          "x": 322,
+          "y": 293
+        },
+        "movementCommands": 189,
+        "dispatchSpanMs": 113503,
+        "firstDispatchToOwnerAckMs": 25,
+        "firstEightSecondGatePassed": true,
+        "everyProgressIntervalUnderEightSeconds": true,
+        "chat": [
+          "你已到達 (270, 625) 附近的狩獵區域。請選擇任務目標怪物進行戰鬥。",
+          "正在規劃前往 (324, 291) 的路線…",
+          "Online Players: 1",
+          "你已到達 (324, 291) 附近。請與 NPC 交談以繼續。"
+        ]
+      },
+      "collision": {
+        "requests": 9,
+        "peakConcurrent": 4,
+        "regions": [
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+            "status": 200,
+            "bounds": {
+              "minX": 0,
+              "maxX": 255,
+              "minY": 0,
+              "maxY": 255
+            },
+            "blockedCells": 23933,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+            "status": 200,
+            "bounds": {
+              "minX": 0,
+              "maxX": 255,
+              "minY": 256,
+              "maxY": 511
+            },
+            "blockedCells": 10702,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+            "status": 200,
+            "bounds": {
+              "minX": 0,
+              "maxX": 255,
+              "minY": 512,
+              "maxY": 699
+            },
+            "blockedCells": 21299,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+            "status": 200,
+            "bounds": {
+              "minX": 256,
+              "maxX": 511,
+              "minY": 0,
+              "maxY": 255
+            },
+            "blockedCells": 28325,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+            "status": 200,
+            "bounds": {
+              "minX": 256,
+              "maxX": 511,
+              "minY": 256,
+              "maxY": 511
+            },
+            "blockedCells": 14447,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+            "status": 200,
+            "bounds": {
+              "minX": 256,
+              "maxX": 511,
+              "minY": 512,
+              "maxY": 699
+            },
+            "blockedCells": 18480,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+            "status": 200,
+            "bounds": {
+              "minX": 512,
+              "maxX": 699,
+              "minY": 0,
+              "maxY": 255
+            },
+            "blockedCells": 23394,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+            "status": 200,
+            "bounds": {
+              "minX": 512,
+              "maxX": 699,
+              "minY": 256,
+              "maxY": 511
+            },
+            "blockedCells": 10372,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          },
+          {
+            "url": "http://127.0.0.1:20631/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+            "status": 200,
+            "bounds": {
+              "minX": 512,
+              "maxX": 699,
+              "minY": 512,
+              "maxY": 699
+            },
+            "blockedCells": 12421,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+          }
+        ]
+      },
+      "receiptSha256": "45b7bb4d1715822ab4f89457bc1b71971c29768f5885c67c7c498a1513751ac7",
+      "routeReceiptSha256": "813f4c06e1b2187b5f8b176a57d6e9f1d6454f36d23b14f51f56277f23dc97cf"
+    }
+  ],
+  "availableQuestMarkerCase": {
+    "run": "quest-after-r1",
+    "markerPrewarmPassed": true,
+    "wholeRunPassed": false,
+    "stoppedAt": "unprepared new role had no route button"
+  },
+  "publicCollisionRead": {
+    "passed": true,
+    "scope": "Read-only public collision API through actual candidate cache parser; no public player state or movement writes.",
+    "checkedAt": "2026-11-13T13:14:12.735Z",
+    "publicApiRevision": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+    "validationSource": "da334834e0df566c4dafd6ac6c98e6fe29e75ee1",
+    "durationMs": 8678,
+    "sourceSha256": "1566b3d5f2b7db08d0b730ed2898991a114121ae796c1020cd01f563229dc4d8",
+    "map": "0",
+    "width": 700,
+    "height": 700,
+    "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+    "blockedBytes": 61250,
+    "peakConcurrent": 4,
+    "requests": [
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "requestedAt": 1794575644059,
+        "headersAt": 1794575645660,
+        "status": 200,
+        "decodedBytes": 396235,
+        "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+        "finishedAt": 1794575646188
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+        "requestedAt": 1794575646194,
+        "headersAt": 1794575647847,
+        "status": 200,
+        "decodedBytes": 182087,
+        "sha256": "1c5117428d12286d7f396f02d1a3a33ee274730c1cfc971ecf7ec6496bc169fe",
+        "finishedAt": 1794575648197
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+        "requestedAt": 1794575646195,
+        "headersAt": 1794575649928,
+        "status": 200,
+        "decodedBytes": 366915,
+        "sha256": "09de35f86834510468e7f981994b0a2f4e18114acf22f509d9706a842346878f",
+        "finishedAt": 1794575650099
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+        "requestedAt": 1794575646197,
+        "headersAt": 1794575649884,
+        "status": 200,
+        "decodedBytes": 491344,
+        "sha256": "23b36c8fddd0b1b6d38842e0ae7bf849811f05e3403b80f2224a4fa27414c6ae",
+        "finishedAt": 1794575650404
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+        "requestedAt": 1794575646198,
+        "headersAt": 1794575649899,
+        "status": 200,
+        "decodedBytes": 260297,
+        "sha256": "b2ed3ae8b8d606f37138829aba3c4d11cca75ec45d08ddac3535dbb42bc6bb4e",
+        "finishedAt": 1794575650425
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+        "requestedAt": 1794575648199,
+        "headersAt": 1794575649743,
+        "status": 200,
+        "decodedBytes": 332891,
+        "sha256": "fed1e41d1fab61006e5e96fbbaaf1e315afcaa7029131aca01c6069a86294bae",
+        "finishedAt": 1794575649919
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+        "requestedAt": 1794575649920,
+        "headersAt": 1794575652018,
+        "status": 200,
+        "decodedBytes": 402119,
+        "sha256": "4a619f0b854c4e984a9a3232b80c4f88da728a21bc3b644dbb301b7829e12873",
+        "finishedAt": 1794575652397
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+        "requestedAt": 1794575650101,
+        "headersAt": 1794575651680,
+        "status": 200,
+        "decodedBytes": 186947,
+        "sha256": "f6e60d665059e9d61536fcd468a97c1c65dd258191f92ae0736e3234eac74e72",
+        "finishedAt": 1794575651732
+      },
+      {
+        "path": "/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+        "requestedAt": 1794575650406,
+        "headersAt": 1794575652328,
+        "status": 200,
+        "decodedBytes": 223829,
+        "sha256": "b9f99894981075172a7c45002160fe5fc562cf25e6927059075743a8ae2b4f08",
+        "finishedAt": 1794575652734
+      }
+    ]
+  },
+  "scope": "Two actual installed Edge backends, four sessions, only Warrior with two genders. No three-class30/physical phone/native-gesture acceptance claim."
+}

@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "mode": "observe",
+  "sourceHead": "8cd766e53eede54e8c79c93fbb2ec860fb7fab90",
+  "binarySha256": "d22478391fc3bf6bf89ff4757a72de8dc601c0800660d30fe7009de0d9ebfb31",
+  "tickMs": 5000,
+  "passed": false,
+  "steps": [],
+  "failure": {
+    "phase": "boot",
+    "type": "AssertionError",
+    "message": "Owned gateway exited before readiness"
+  },
+  "ownedGatewayStopped": true,
+  "sourceFixtureUnchanged": true
+}

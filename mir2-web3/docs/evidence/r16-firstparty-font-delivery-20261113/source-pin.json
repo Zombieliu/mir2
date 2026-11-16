@@ -1,0 +1,52 @@
+{
+  "source": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+  "base": "e10a84e129234092e1f6f69bcffdf14537789eb3",
+  "baseline": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "previousProductionSource": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "runtime": "bevy-0c553a754308e5b8",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "ef8002d167a1b5a75fd73c74c4a51d679d4cf976"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "f2a2a4402e9b948d4b705e8a4056d13363617841"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "43c76ddb72af02c8f74a34dde5cb08f598bed7b4"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "2975b686f7b206ca5566b1943800885b20e4ce74"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+      "sha": "60db8b36092f00a08432af7c95b22735fe67d12f"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs",
+      "sha": "33e20c6b761be35c9fe2e96edd3b0b4803453787"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "e64e80c1a12cf6eee648e73211b778343d86d5b4"
+    }
+  ],
+  "workerBytes": 41492,
+  "workerSha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800",
+  "localBuildReceiptSha256": "7e00cded257095d7b06efd155850b7aaf3fb1929f917554cf6ffff3752a9c2cc",
+  "noNewRuntimeOrAssetUpload": true,
+  "localCandidate": "e10a84e12923-firstparty-fonts-c84e5706",
+  "checks": 231,
+  "qualifiedLocalSessions": 4
+}

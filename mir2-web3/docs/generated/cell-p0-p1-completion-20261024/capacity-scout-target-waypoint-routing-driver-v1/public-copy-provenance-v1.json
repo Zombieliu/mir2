@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-26T04:14:04.024Z",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-driver-binding-v1\\public-whitelist-v2.json",
+    "bytes": 14980,
+    "sha256": "e8241d54cd31dd5098894cb46142edf8edf8f60d8f4186da436e5cb8da9a1712"
+  },
+  "copyTool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-driver-binding-v1\\copy-public-v2.mjs",
+    "bytes": 5266,
+    "sha256": "0d27fbc6d5f048fa745244cced0321c213fb4e1f814c75e7c7ce41f4d5686c62"
+  },
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1",
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\source-preservation-and-focused-receipt-v1.json",
+        "bytes": 11450,
+        "sha256": "3f073e4cf97dcd1d85ccefe24d37263477e5f63ef341c23273e7d864f0d082cc"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\evidence\\source-preservation-and-focused-receipt-v1.json",
+        "bytes": 11450,
+        "sha256": "3f073e4cf97dcd1d85ccefe24d37263477e5f63ef341c23273e7d864f0d082cc"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\production-mutation-v1.json",
+        "bytes": 3891,
+        "sha256": "d5b71b842eb8e610d15643cff9a3effe3999424c6a0212d8bbdd189996c43729"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\evidence\\production-mutation-v1.json",
+        "bytes": 3891,
+        "sha256": "d5b71b842eb8e610d15643cff9a3effe3999424c6a0212d8bbdd189996c43729"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\existing-test-search-count-maintenance-v1.json",
+        "bytes": 2777,
+        "sha256": "1119032c4e1b5acab94158ba006d6affc5f30cf1aeffe71bf57afab74be6c1df"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\evidence\\existing-test-search-count-maintenance-v1.json",
+        "bytes": 2777,
+        "sha256": "1119032c4e1b5acab94158ba006d6affc5f30cf1aeffe71bf57afab74be6c1df"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages-v1.json",
+        "bytes": 3268,
+        "sha256": "55d87e3c9932fece9b2e760035dfc3c7d70d273ace592c21368ad581f1aa459c"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\evidence\\preimages-v1.json",
+        "bytes": 3268,
+        "sha256": "55d87e3c9932fece9b2e760035dfc3c7d70d273ace592c21368ad581f1aa459c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\source-diff-v1.patch",
+        "bytes": 18959,
+        "sha256": "853daca27405db3bcacc926eb797ffc318f1adba9f3faca9bfc1a9f95605c413"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\evidence\\source-diff-v1.patch",
+        "bytes": 18959,
+        "sha256": "853daca27405db3bcacc926eb797ffc318f1adba9f3faca9bfc1a9f95605c413"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-red-execution-v1.json",
+        "bytes": 4457,
+        "sha256": "3b3abe47ad15fde3723e37f2b090a93575244bf0346b779fc3c2e2f65c8ad214"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\focused-red-execution-v1.json",
+        "bytes": 4457,
+        "sha256": "3b3abe47ad15fde3723e37f2b090a93575244bf0346b779fc3c2e2f65c8ad214"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-red-v1.stdout.log",
+        "bytes": 4766,
+        "sha256": "729848df76d14c9e96c7d2b408b1972201887e96cf0d519d68b7b80d2e6db463"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\focused-red-v1.stdout.log",
+        "bytes": 4766,
+        "sha256": "729848df76d14c9e96c7d2b408b1972201887e96cf0d519d68b7b80d2e6db463"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-red-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\focused-red-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-green-execution-v1.json",
+        "bytes": 4447,
+        "sha256": "0e85ea2f6d1ac74ff266db10ba0c44b3c3f50b78d9f7ef5a90bd8da9ba929fab"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\focused-green-execution-v1.json",
+        "bytes": 4447,
+        "sha256": "0e85ea2f6d1ac74ff266db10ba0c44b3c3f50b78d9f7ef5a90bd8da9ba929fab"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-green-v1.stdout.log",
+        "bytes": 1643,
+        "sha256": "ba45866537ea1eeca30b97c37065c6a1e631a8f2dab0d7eeda2d8392c9e60418"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\focused-green-v1.stdout.log",
+        "bytes": 1643,
+        "sha256": "ba45866537ea1eeca30b97c37065c6a1e631a8f2dab0d7eeda2d8392c9e60418"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-green-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\focused-green-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-initial-execution-v1.json",
+        "bytes": 4457,
+        "sha256": "e2b1719a5640a1fc027a45c29e8bca02862a890440836ba9196dd72ab675e74b"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\adjacent-initial-execution-v1.json",
+        "bytes": 4457,
+        "sha256": "e2b1719a5640a1fc027a45c29e8bca02862a890440836ba9196dd72ab675e74b"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-initial-v1.stdout.log",
+        "bytes": 19116,
+        "sha256": "5d6672236c29917e1da583639ee15e774c637514624aceb401a0937120c8994f"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\adjacent-initial-v1.stdout.log",
+        "bytes": 19116,
+        "sha256": "5d6672236c29917e1da583639ee15e774c637514624aceb401a0937120c8994f"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-initial-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\adjacent-initial-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-final-execution-v1.json",
+        "bytes": 4453,
+        "sha256": "26f76c32053ba0bf1ce2bcf33127a2765e04c9d67296f2633cf24bac8b564984"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\adjacent-final-execution-v1.json",
+        "bytes": 4453,
+        "sha256": "26f76c32053ba0bf1ce2bcf33127a2765e04c9d67296f2633cf24bac8b564984"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-final-v1.stdout.log",
+        "bytes": 16220,
+        "sha256": "9bc53b3d369ecdd11bf36ca4c9e805759e626d8be315af3b3fecb6212bdad857"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\adjacent-final-v1.stdout.log",
+        "bytes": 16220,
+        "sha256": "9bc53b3d369ecdd11bf36ca4c9e805759e626d8be315af3b3fecb6212bdad857"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-final-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\focused\\adjacent-final-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\syntax-and-diff-check-execution-v1.json",
+        "bytes": 6253,
+        "sha256": "b873918bed7b2e154fa8b88533bbb93e82a3e5c0ec257f7788f865e4acf22952"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\evidence\\syntax-and-diff-check-execution-v1.json",
+        "bytes": 6253,
+        "sha256": "b873918bed7b2e154fa8b88533bbb93e82a3e5c0ec257f7788f865e4acf22952"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 156391,
+        "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 156391,
+        "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+        "bytes": 278248,
+        "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+        "bytes": 278248,
+        "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/root-scout-target-waypoint-routing-validation-v1/run-full-driver-v1.mjs",
+        "bytes": 6368,
+        "sha256": "a0ad343b35cbc41358324dd196b64ad2b6c6609fdbcdc5b99fa1249c1c9913d4"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\root-scout-target-waypoint-routing-validation-v1\\run-full-driver-v1.mjs",
+        "bytes": 6368,
+        "sha256": "a0ad343b35cbc41358324dd196b64ad2b6c6609fdbcdc5b99fa1249c1c9913d4"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/root-scout-target-waypoint-routing-validation-v2/run-full-driver-v1.mjs",
+        "bytes": 6232,
+        "sha256": "b30fa82aec9d175a1675c9b8cb6c7802fe4b219a74c1df547ee62844c62827e9"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\root-scout-target-waypoint-routing-validation-v2\\run-full-driver-v1.mjs",
+        "bytes": 6232,
+        "sha256": "b30fa82aec9d175a1675c9b8cb6c7802fe4b219a74c1df547ee62844c62827e9"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v1\\runner-derivation-v1.json",
+        "bytes": 4010,
+        "sha256": "ff3e506c0b20bb58f481dc64239a4a2d1eaea883bc74f2016005778bcaaf6355"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\root-scout-target-waypoint-routing-validation-v1\\runner-derivation-v1.json",
+        "bytes": 4010,
+        "sha256": "ff3e506c0b20bb58f481dc64239a4a2d1eaea883bc74f2016005778bcaaf6355"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\runner-derivation-v2.json",
+        "bytes": 2113,
+        "sha256": "af94a6936468e2e972bc7207bb6700fbc85cd499cbe8086f2231f547824c2d97"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\root-scout-target-waypoint-routing-validation-v2\\runner-derivation-v2.json",
+        "bytes": 2113,
+        "sha256": "af94a6936468e2e972bc7207bb6700fbc85cd499cbe8086f2231f547824c2d97"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-full-root-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\first-failed-wrapper\\scout-target-waypoint-routing-full-root-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-full-root-stderr-v1.log",
+        "bytes": 428,
+        "sha256": "dd0dd7e830262f6626ad8b4e8ca4ae485936c165287571516a700bd82a077fa2"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\first-failed-wrapper\\scout-target-waypoint-routing-full-root-stderr-v1.log",
+        "bytes": 428,
+        "sha256": "dd0dd7e830262f6626ad8b4e8ca4ae485936c165287571516a700bd82a077fa2"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-before-v1.json",
+        "bytes": 2064,
+        "sha256": "b8f5a33d6a1841c21f11a41d538b8bd1ff4220dfcd46311f23cd2e7a38b2baea"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\actual237\\root-full-driver-before-v1.json",
+        "bytes": 2064,
+        "sha256": "b8f5a33d6a1841c21f11a41d538b8bd1ff4220dfcd46311f23cd2e7a38b2baea"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-v1.stdout.log",
+        "bytes": 63934,
+        "sha256": "f83d0f8989c8757a7f3b698788ca15f6483dd0d7d8a76336e824b998a54d529c"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\actual237\\root-full-driver-v1.stdout.log",
+        "bytes": 63934,
+        "sha256": "f83d0f8989c8757a7f3b698788ca15f6483dd0d7d8a76336e824b998a54d529c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\actual237\\root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-receipt-v1.json",
+        "bytes": 5729,
+        "sha256": "c2d41440e773116aa20c6a12595b79728b34290be3b1547b6f20fdf7df52b562"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\actual237\\root-full-driver-receipt-v1.json",
+        "bytes": 5729,
+        "sha256": "c2d41440e773116aa20c6a12595b79728b34290be3b1547b6f20fdf7df52b562"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-full-root-stdout-v2.log",
+        "bytes": 430,
+        "sha256": "217339c05561306bcee6d24b4b20855cc662a7e99381d9b6ec7aed3b35810444"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\actual237\\scout-target-waypoint-routing-full-root-stdout-v2.log",
+        "bytes": 430,
+        "sha256": "217339c05561306bcee6d24b4b20855cc662a7e99381d9b6ec7aed3b35810444"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-full-root-stderr-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\root\\actual237\\scout-target-waypoint-routing-full-root-stderr-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-driver-binding-v1\\current-source-snapshots\\playtest-capacity-soak.mjs",
+        "bytes": 157409,
+        "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\sources\\playtest-capacity-soak.mjs",
+        "bytes": 157409,
+        "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-driver-binding-v1\\current-source-snapshots\\playtest-capacity-soak.test.mjs",
+        "bytes": 286361,
+        "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\sources\\playtest-capacity-soak.test.mjs",
+        "bytes": 286361,
+        "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-independent-review-v1\\review-v1.json",
+        "bytes": 12512,
+        "sha256": "0623eb5c134c398af3aa1022c4b8d23b6052e99b4eecd260009cf75a43f301e0"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\review\\review-v1.json",
+        "bytes": 12512,
+        "sha256": "0623eb5c134c398af3aa1022c4b8d23b6052e99b4eecd260009cf75a43f301e0"
+      }
+    }
+  ],
+  "count": 35,
+  "totalBytes": 1088386,
+  "readme": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\README.md",
+    "bytes": 3648,
+    "sha256": "e70d21aaa30688230dd3de007eeff9a47754293ab8e0990834554daf9124e218"
+  },
+  "links": [
+    {
+      "relative": "sources/playtest-capacity-soak.mjs",
+      "exists": true
+    },
+    {
+      "relative": "sources/playtest-capacity-soak.test.mjs",
+      "exists": true
+    },
+    {
+      "relative": "evidence/source-preservation-and-focused-receipt-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/production-mutation-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/existing-test-search-count-maintenance-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "preimages/playtest-capacity-soak.mjs.txt",
+      "exists": true
+    },
+    {
+      "relative": "preimages/playtest-capacity-soak.test.mjs.txt",
+      "exists": true
+    },
+    {
+      "relative": "focused/focused-red-execution-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "focused/adjacent-final-execution-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "root/first-failed-wrapper/scout-target-waypoint-routing-full-root-stderr-v1.log",
+      "exists": true
+    },
+    {
+      "relative": "root/root-scout-target-waypoint-routing-validation-v2/runner-derivation-v2.json",
+      "exists": true
+    },
+    {
+      "relative": "root/actual237/root-full-driver-receipt-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "root/actual237/root-full-driver-v1.stdout.log",
+      "exists": true
+    },
+    {
+      "relative": "review/review-v1.json",
+      "exists": true
+    }
+  ],
+  "sourceAfterCopyRawExact": true,
+  "destinationReadbackRawExact": true,
+  "referenceOnlyNotCopied": true,
+  "privateRawTraceBinaryNotCopied": true,
+  "verifierRerun": false,
+  "testsRun": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

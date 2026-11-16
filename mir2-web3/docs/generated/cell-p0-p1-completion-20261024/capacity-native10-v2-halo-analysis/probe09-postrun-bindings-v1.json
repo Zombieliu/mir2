@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T01:45:31.283Z",
+  "runId": "1792891029840-02155527",
+  "scope": "Posthoc-only external binding of exactly six original public artifacts. Prepared for later root metadata integration; original frozen collector, allowlist, report and topic were not modified.",
+  "artifacts": {
+    "rootIndependentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-root-independent-cleanup-v1.json",
+      "bytes": 559,
+      "sha256": "e3b88c16e4902213cceb2c8549c9b3ae25b4ccd24891bc2c08147536e28c84a8"
+    },
+    "formal06ExpectedRejection": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal06-expected09-rejection-v1.json",
+      "bytes": 1190,
+      "sha256": "52ec8fad7c1980795bbb232b52575e40457d3e9715ed8cb9e91bca31d759bb9e"
+    },
+    "originalReport": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.report.json",
+      "bytes": 75433,
+      "sha256": "1cb07e72c7341b1d200c3145e4799604c0737c4a59c38f48ebf7100046106819"
+    },
+    "rawArtifactManifest": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-diagnostics\\raw-artifact-manifest.json",
+      "bytes": 640,
+      "sha256": "014255772502171bb74680b8c9d46a53f4e5837917b1fd0ab7a30d557df26f8a"
+    },
+    "publicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-diagnostics\\public-verification.json",
+      "bytes": 1079,
+      "sha256": "23795a2ddfa6559e57b1c2d09cc411187aad7e16161209c5c3c597484250dc63"
+    },
+    "runtimeFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\launcher-source-frozen-v1.json",
+      "bytes": 18552,
+      "sha256": "29d2fa876e6f61025d237fe267fe9b5c19388bd13abb292e8c141b0b12542cd5"
+    }
+  },
+  "rootIndependentCleanupSummary": {
+    "ownedPids": [
+      66332,
+      64532
+    ],
+    "ownedProcessesAbsent": true,
+    "portsFree": true,
+    "gatewayNormalExit": true,
+    "monitorNormalExit": true,
+    "sixCountersZero": true,
+    "allSevenChecksTrue": true,
+    "checkedAtUtc": "2026-10-25T01:30:39.8604834Z"
+  },
+  "formal06GateRejected": true,
+  "rejectedForSourceOrSchema": false,
+  "originalError": "Actor L26466205 died or lost presence; no automatic resurrection",
+  "stage10ProjectionCrossCheck": {
+    "source": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-diagnostics\\collection-verification.json",
+      "bytes": 251806,
+      "sha256": "3511fba3f53f171a4747e585b8681866c1b97ae55de61c4f054f0a8bbd4b61ab"
+    },
+    "recordedCompleteWindows": 2,
+    "recordedPassingWindows": 1,
+    "failedWindows": 1,
+    "actorMetricDetailAvailableInPreservedProjection": false,
+    "projectionEventTypes": [
+      "phaseStarted",
+      "phaseEnded",
+      "safetyStop",
+      "finished"
+    ],
+    "scope": "The existing public projection retains phase/stop/finished events and window counts, but not per-window actor metrics. No large raw sample scan was performed and no independent actor-metric attribution is claimed."
+  },
+  "posthocOnly": true,
+  "cimOrPortsReprobed": false,
+  "originalAllowlistModified": false,
+  "originalReportModified": false,
+  "originalRuntimeFreezeModified": false,
+  "topicModified": false,
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

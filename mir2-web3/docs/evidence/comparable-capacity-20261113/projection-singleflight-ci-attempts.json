@@ -1,0 +1,45 @@
+{
+  "schema": "mir2.projection-linux-ci-attempts.v1",
+  "windowsCodeSource": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "canonicalCiSource": "47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
+  "nativeGatewaySimulationProtocolAndPackagingSourceSameBetweenThem": true,
+  "attempts": [
+    {
+      "runId": 43607145500,
+      "source": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+      "playtestWalletNoDocker": false,
+      "outcome": "failed",
+      "reason": "ordinary broad release selected; simulation shared_pet_pvp32PASS6FAIL preserved; noGatewayartifact",
+      "logBytes": 843622
+    },
+    {
+      "runId": 43612459430,
+      "source": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+      "playtestWalletNoDocker": true,
+      "outcome": "sourcejobfailed thenobsolete remainingcompilecancellationrequested",
+      "reason": "sourcelegverify_unified_codeline--require-clean rejected snapshotbranch; guardnotchanged",
+      "guardJob": 132500247277
+    },
+    {
+      "runId": 43613343285,
+      "source": "47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
+      "playtestWalletNoDocker": true,
+      "branch": "codex/windows-player-journey",
+      "status": "completed",
+      "nativeJobId": 132502966243,
+      "walletLoginJobId": 132502966093,
+      "backendSourceJobId": 132502966432,
+      "outcome": "success",
+      "nativeJobOutcome": "success",
+      "backendSourceJobOutcome": "success",
+      "promotionBackendJobId": 132503254220,
+      "promotionBackendOutcome": "success",
+      "strictDownloadedArtifactVerificationPassed": false,
+      "capacityQualified": false
+    }
+  ],
+  "publishR2": false,
+  "numeronOperation": "off",
+  "anyCloudServiceDeployed": false,
+  "closureObservationNote": "Whole run and strict Gateway job success are CI facts. Downloaded archive, ELF/maps/fresh cloud identity verification remains separate; local100 remainsFAIL."
+}

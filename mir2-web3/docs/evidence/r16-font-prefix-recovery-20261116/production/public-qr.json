@@ -1,0 +1,18 @@
+[
+  {
+    "locale": "zh-CN",
+    "passed": true,
+    "createAttempts": 1,
+    "pollsAfterCancel": 0,
+    "realMatrix": true,
+    "browserClosed": true
+  },
+  {
+    "locale": "zh-TW",
+    "passed": true,
+    "createAttempts": 1,
+    "pollsAfterCancel": 0,
+    "realMatrix": true,
+    "browserClosed": true
+  }
+]

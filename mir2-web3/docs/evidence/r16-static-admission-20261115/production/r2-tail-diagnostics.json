@@ -1,0 +1,423 @@
+{
+  "runtime": [
+    {
+      "ordinal": 157,
+      "page": 1,
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "category": "runtime",
+      "source": "page-cdp",
+      "requestAtMs": 78747,
+      "outcome": "finished",
+      "initialPriority": "High",
+      "headersAtMs": 81236,
+      "status": 200,
+      "fromServiceWorker": false,
+      "fromDiskCache": false,
+      "protocol": "h2",
+      "cache": {
+        "age": 168052,
+        "cf-cache-status": "HIT",
+        "content-encoding": "gzip",
+        "cache-control": "public, max-age=31536000",
+        "cfPop": "SIN"
+      },
+      "networkTimingMs": {
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": 0.066,
+        "connectEnd": 656.215,
+        "sslStart": 0.713,
+        "sslEnd": 656.209,
+        "sendStart": 656.297,
+        "sendEnd": 656.361,
+        "receiveHeadersStart": 813.632,
+        "receiveHeadersEnd": 813.692
+      },
+      "finishedAtMs": 81236,
+      "browserReportedEncodedBytes": 21243
+    },
+    {
+      "ordinal": 158,
+      "page": 1,
+      "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "category": "runtime",
+      "source": "page-cdp",
+      "requestAtMs": 78747,
+      "outcome": "failed",
+      "initialPriority": "High",
+      "headersAtMs": 84269,
+      "status": 200,
+      "fromServiceWorker": false,
+      "fromDiskCache": false,
+      "protocol": "h2",
+      "cache": {
+        "age": 494,
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "HIT",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=31536000, immutable",
+        "cfPop": "SIN"
+      },
+      "networkTimingMs": {
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.249,
+        "sendEnd": 0.295,
+        "receiveHeadersStart": 5520.432,
+        "receiveHeadersEnd": 5520.458
+      },
+      "finishedAtMs": 99274,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "ordinal": 212,
+      "page": 1,
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "category": "runtime",
+      "source": "page-cdp",
+      "requestAtMs": 99272,
+      "outcome": "finished",
+      "initialPriority": "High",
+      "headersAtMs": 99420,
+      "status": 200,
+      "fromServiceWorker": false,
+      "fromDiskCache": false,
+      "protocol": "h2",
+      "cache": {
+        "age": 168015,
+        "cf-cache-status": "HIT",
+        "content-encoding": "gzip",
+        "cache-control": "public, max-age=31536000",
+        "cfPop": "SIN"
+      },
+      "networkTimingMs": {
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.099,
+        "sendEnd": 0.187,
+        "receiveHeadersStart": 143.344,
+        "receiveHeadersEnd": 143.412
+      },
+      "finishedAtMs": 169791,
+      "browserReportedEncodedBytes": 6444148
+    }
+  ],
+  "fontRows": [
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 71420,
+      "observedAtMs": 71418,
+      "encodedBodyBytes": 7671177,
+      "status": 200,
+      "protocol": "h2",
+      "headersAtMs": 72265,
+      "encodedBytes": 7671457,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 172972,
+      "durationMs": 101552
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 169601,
+      "observedAtMs": 169601,
+      "encodedBodyBytes": 13614253,
+      "status": 200,
+      "protocol": "h2",
+      "headersAtMs": 170416,
+      "encodedBytes": 13614385,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 257631,
+      "durationMs": 88030
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 172998,
+      "observedAtMs": 173004,
+      "encodedBodyBytes": 305283,
+      "status": 200,
+      "protocol": "h2",
+      "headersAtMs": 178060,
+      "encodedBytes": 305541,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 185766,
+      "durationMs": 12768
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 185768,
+      "observedAtMs": 185768,
+      "encodedBodyBytes": 99329,
+      "status": 200,
+      "protocol": "h2",
+      "headersAtMs": 192675,
+      "encodedBytes": 99619,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 194243,
+      "durationMs": 8475
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 194244,
+      "observedAtMs": 194244,
+      "encodedBodyBytes": 19787,
+      "status": 200,
+      "protocol": "h2",
+      "headersAtMs": 199590,
+      "encodedBytes": 20042,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 200116,
+      "durationMs": 5872
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 200117,
+      "observedAtMs": 200117,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 0,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 207119,
+      "durationMs": 7002
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 207119,
+      "observedAtMs": 207119,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 0,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 214120,
+      "durationMs": 7001
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 214120,
+      "observedAtMs": 214119,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 0,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 221122,
+      "durationMs": 7002
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 221121,
+      "observedAtMs": 221121,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 0,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 228121,
+      "durationMs": 7000
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 228122,
+      "observedAtMs": 228121,
+      "encodedBodyBytes": 20849,
+      "status": 404,
+      "protocol": "http/1.1",
+      "headersAtMs": 229847,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 20849,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 230074,
+      "durationMs": 1952
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 229847,
+      "observedAtMs": 229847,
+      "encodedBodyBytes": 27150,
+      "status": 404,
+      "protocol": "http/1.1",
+      "headersAtMs": 230074,
+      "encodedBytes": 27446,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 230125,
+      "durationMs": 278
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 230074,
+      "observedAtMs": 230073,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 0,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 237075,
+      "durationMs": 7001
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 237228,
+      "observedAtMs": 237227,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "encodedBytes": 0,
+      "encodedBytesComplete": false,
+      "finishedAtMs": 244244,
+      "durationMs": 7016
+    },
+    {
+      "source": "service-worker-upstream",
+      "workerGeneration": 1,
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 244244,
+      "observedAtMs": 244243,
+      "encodedBodyBytes": 97896,
+      "status": 200,
+      "protocol": "h2",
+      "headersAtMs": 250707,
+      "encodedBytes": 98001,
+      "encodedBytesComplete": true,
+      "finishedAtMs": 251439,
+      "durationMs": 7195
+    }
+  ],
+  "resourceErrors": [
+    {
+      "path": "/original-ui/Prguse/917.png",
+      "atMs": 216831,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/Title/15.png",
+      "atMs": 220469,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "atMs": 237074,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "atMs": 237074,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/Prguse/918.png",
+      "atMs": 242771,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/Prguse/997.png",
+      "atMs": 243196,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/Prguse/956.png",
+      "atMs": 243392,
+      "status": 504
+    },
+    {
+      "path": "/original-ui/Title/193.png",
+      "atMs": 243444,
+      "status": 504
+    }
+  ],
+  "prewarm": {
+    "passed": false,
+    "keys": [
+      "passed",
+      "status",
+      "failure"
+    ],
+    "lastRuntime": [
+      {
+        "observedAtMs": 271501,
+        "hud": {
+          "ready": true,
+          "error": null,
+          "frame": 22677,
+          "generation": 2,
+          "revision": 1
+        },
+        "quest": {
+          "ready": true,
+          "error": null,
+          "frame": 22677,
+          "generation": 2,
+          "revision": 4,
+          "displayLanguage": "zh-TW"
+        }
+      },
+      {
+        "observedAtMs": 273505,
+        "hud": {
+          "ready": true,
+          "error": null,
+          "frame": 23071,
+          "generation": 2,
+          "revision": 2
+        },
+        "quest": {
+          "ready": true,
+          "error": null,
+          "frame": 23071,
+          "generation": 2,
+          "revision": 5,
+          "displayLanguage": "zh-TW"
+        }
+      }
+    ],
+    "progress": []
+  },
+  "runtimeHeaderPriority": {
+    "scope": "Passive bounded priority milestones only; no auth or player data",
+    "milestones": [
+      {
+        "name": "runtimeHeaderPriorityBackground",
+        "atMs": 70101.59999999404,
+        "epochMs": 1794700641368,
+        "generation": 1,
+        "reason": "headers",
+        "waitedMs": 5604
+      }
+    ]
+  },
+  "scope": "Read-only diagnostics from failed second public cohort. Runtime response/body and font observations are distinct; complete cache bodies at final logout do not change the original deadline result."
+}

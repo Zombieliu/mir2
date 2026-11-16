@@ -1,0 +1,11 @@
+{
+  "time": "2026-11-07T19:46:28.487Z",
+  "variant": "native handoff with commit terminal guard; before final credential wall-clock refresh",
+  "pins": {
+    "apps/gateway/src/web.rs": "266943e27d7e674364437256325b39c381be8f006871f6ec7f4078ece0094579",
+    "apps/gateway/src/web_native_resume_handoff.rs": "be0a7476e7bf8d9217b469a4ba2a2848a8c4fb013e6a0981e3a6cc8f5d2b0307",
+    "apps/gateway/src/web_native_resume_handoff_tests.rs": "394ad534f3676e3f388ed542abd1696e3ea151b23ebb0fbe536c54f975a6ea1a",
+    "apps/gateway/src/web_native_resume_handoff_ws_tests.rs": "cbfd3facf7d6aff523ad5606a7357506a95183ccbad53936f070c39f3114e8c6",
+    "apps/gateway/src/web_reconnect_handoff.rs": "3fe45ab5222b898d69c367ae2693f3178f204eaa6dcc2bf2ec79e3e0bb8875a3"
+  }
+}

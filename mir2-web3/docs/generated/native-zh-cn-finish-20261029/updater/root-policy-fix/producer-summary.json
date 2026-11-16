@@ -1,0 +1,140 @@
+{
+  "schema": "mir2.windows.updater-root-policy-fix.v1",
+  "recordedUtc": "2026-10-29T11:18:31.9820490Z",
+  "passed": true,
+  "baselineRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "sourcePhase": "uncommitted focused patch, no release bundle built by this worker",
+  "failure": "Actual normal Launcher to Updater startup rejected legitimate signed Candidate with non-client payload; first sorted rejected path BILLING-HAN-SOURCE.json.",
+  "rootCause": "Runtime ROOT12 and archive GAME_ROOT_FILES omitted five root documents already required and strictly allowed by the Candidate packaging verifier.",
+  "explicitAddedRoots": [
+    "README.zh-CN.txt",
+    "BILLING-HAN-SOURCE.json",
+    "OFL-NotoSansSC-BillingHan.txt",
+    "SIMPLIFIED-SOURCE.json",
+    "OFL-NotoSansCJKsc.txt"
+  ],
+  "securityBoundary": "Exact five filenames only. Relative-path, root-case, executable-token, extension, bounds, CMS, metadata/payload binding and all other checks remain unchanged.",
+  "checks": {
+    "rustFocused": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 1
+    },
+    "rustRealSignedCandidate": {
+      "failed": 0,
+      "allFiveRootsPresent": true,
+      "pinnedCmsVerified": true,
+      "exeAndAttestationHashMatched": true,
+      "manifestBytes": 49703926,
+      "payloadTotalBytes": 1211263759,
+      "payloadFileCount": 255023,
+      "passed": 1
+    },
+    "rustAdjacentPathHashSecurity": {
+      "failed": 0,
+      "passed": 2
+    },
+    "pythonArchive": {
+      "exactNewRootAndNearMissChecks": true,
+      "cmsMockFixtureOnly": true,
+      "failed": 0,
+      "completeArchiveBinding": true,
+      "skipped": 3,
+      "total": 33,
+      "crossLanguageRootSetEquality": true,
+      "passed": 30
+    },
+    "actualManifestPythonPolicy": {
+      "paths": 255023,
+      "failures": 0
+    },
+    "diffWhitespaceCheck": "passed"
+  },
+  "candidate": {
+    "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "modified": false,
+    "identity": "WN-CANDIDATE-20261029-invited-09",
+    "manifestSha256": "ab86b5e083473c003863ead5c2ef09112cadc655684176e7ad757f7c60eb80ed"
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/game-client/windows-updater/src/model.rs",
+      "rawBytes": 15191,
+      "rawSha256": "24a87f5455f3812628fcd73ab7e0a1b1120f0dcb72e62785b494fa87e154cb72",
+      "normalizedLfBytes": 15191,
+      "normalizedLfSha256": "24a87f5455f3812628fcd73ab7e0a1b1120f0dcb72e62785b494fa87e154cb72"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model_regression.rs",
+      "rawBytes": 6875,
+      "rawSha256": "bfdaf0478880e3371f96c61bcb40ec9ce1276895dfbbc18a9c97f668dd7f59f7",
+      "normalizedLfBytes": 6875,
+      "normalizedLfSha256": "bfdaf0478880e3371f96c61bcb40ec9ce1276895dfbbc18a9c97f668dd7f59f7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "rawBytes": 25197,
+      "rawSha256": "818a8aec7bf944efd69d0ea581fb74474bc0a5582c1361926c22404153a1db6f",
+      "normalizedLfBytes": 24706,
+      "normalizedLfSha256": "b1481187c079044b9fbf001534a08e1082f9d0764a79a2496fc842d2655b053a"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "rawBytes": 19838,
+      "rawSha256": "54edfbf4ada99fb659757c28ffb8627575d7757ef242674c81c3db4aed264b03",
+      "normalizedLfBytes": 19483,
+      "normalizedLfSha256": "4937c7c0c191be84b4f749281e85ef6f2d8ddeb35f1c0f39e5c0eb56092132c5"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "updater-root-policy-rust-focused-final.log",
+      "bytes": 1014,
+      "sha256": "9383dde6d88e42fe4abd3c1129e9b6c16bd4244c1482350440b0a3b2bab83745"
+    },
+    {
+      "path": "updater-root-policy-signed-candidate.log",
+      "bytes": 741,
+      "sha256": "282c48813b8c8544d79cb588d1aee48f39449c8a62d46ab344e116d3ee36e1a7"
+    },
+    {
+      "path": "updater-root-policy-path-security.log",
+      "bytes": 478,
+      "sha256": "9ef8c13f22e6490ac9029c07bb4f88e00bb89a308381265acaf730201578ddba"
+    },
+    {
+      "path": "updater-root-policy-python.log",
+      "bytes": 4059,
+      "sha256": "4f3ecb73cf8560905364fff64ebe58ec1a492b2349b80926c8a7c92eca9c2b1a"
+    },
+    {
+      "path": "updater-root-policy-live-inventory.json",
+      "bytes": 1346,
+      "sha256": "3bef8a0cebb477d9c07a5b56eb98b1a91a3d69b99b2103a51e2001ff92f673c8"
+    },
+    {
+      "path": "updater-root-policy-fix.diff",
+      "bytes": 9066,
+      "sha256": "98d69a9e4453028961bb4f0eca49c8609c79f7d5d111458974d2e9d66a660268"
+    }
+  ],
+  "historicalAttempt": {
+    "retainedUnmodified": true,
+    "resolution": "Final ignored integration reads the immutable original Candidate directly, verifies real Windows pinned CMS and complete manifest bindings, executable and attestation; final test passed.",
+    "status": "failed before validation because first isolated installation had been removed during coordinator workflow",
+    "path": "updater-root-policy-signed-installation.log"
+  },
+  "limitations": [
+    "This patch is not yet committed or included in a rebuilt/re-signed updater or installer.",
+    "No game, GUI, installer, RPC or network transaction was launched by this fix worker.",
+    "Actual installed Launcher to Updater to Game acceptance must be rerun by the coordinator with the newly built updater; direct Game launch is not a substitute.",
+    "Python fixture archive tests intentionally do not authenticate CMS; the separate real Rust signed-Candidate test uses the production Windows verifier and pinned key."
+  ],
+  "releaseActionsPerformed": {
+    "gameLaunch": false,
+    "trustStoreChanged": false,
+    "newKeys": false,
+    "commit": false,
+    "buildBundle": false
+  }
+}

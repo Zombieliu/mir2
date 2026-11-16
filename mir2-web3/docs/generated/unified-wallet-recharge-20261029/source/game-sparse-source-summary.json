@@ -1,0 +1,172 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-game-sparse-source.json",
+    "bytes": 394862,
+    "sha256": "9a0bb09f463a9e21c6b371d2756f3369b97187a50af16989aaf8cd30f6b07b64"
+  },
+  "producerSummary": {
+    "schema": "mir2.unified-game-sparse-source.v1",
+    "recordedAt": "2026-10-29T16:50:19.546Z",
+    "taskOwned": true,
+    "sourceOnly": true,
+    "worktreeRoot": "F:/ug",
+    "projectRoot": "F:/ug/mir2-web3",
+    "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "detached": true,
+    "gitClean": true,
+    "sourceSnapshot": {
+      "root": "F:\\ug",
+      "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "clean": true,
+      "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "sourceFilesChecked": 1343,
+      "sourceInventorySha256": "346220A00CE2B5BF3FA94FBBF134127A3098330055A800AC7204247B842A827C"
+    },
+    "sourceSnapshotPassed": true,
+    "compilerInputCount": 1343,
+    "rawBeforeReceipt": {
+      "path": "C:/mir2-build/unified-20261029/unified-game-sparse-source-raw-before.json",
+      "sha256": "d359fb69a20146926ba4e29dd6cb4fc93d9a2ade52a0ad642ac4176fdfc39447"
+    },
+    "canonicalizedFiles": [
+      {
+        "path": "mir2-web3/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "98e2e96d5c6a74ad3b559845005c5a6598b8ddba",
+        "oldRawSha256": "4569349e470d448c645eeecef8fc6219d9e3e525d8c7d355a784ee694398291f",
+        "oldBytes": 250762,
+        "canonicalRawSha256": "c9a29ce120c99e6b865c4be3c0c13491284f72849a16a7050283372453085d9e",
+        "canonicalBytes": 240688
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "aae241f4c44eafbe8beb58e307b801a82c122568",
+        "oldRawSha256": "3de2eb07fad487338b0a05042b34c1151bbf652531051416b62074ff7ab6b263",
+        "oldBytes": 133231,
+        "canonicalRawSha256": "d2054e187c8af34028a88c4650b4da646451931a15a01e83ea405b3204ed88a8",
+        "canonicalBytes": 127952
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-core/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "3feff5dab0351d04c3469a74072633b78ba482b4",
+        "oldRawSha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8",
+        "oldBytes": 167,
+        "canonicalRawSha256": "a216ff6c6ef92ac18738544aa1c3e8cf76545838cbe0a8018caaba1aedd3da2a",
+        "canonicalBytes": 160
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-wire/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "ef7574e2d4d0817e4c04b7687a04840ff1a60418",
+        "oldRawSha256": "f1ea96a1afa008b565a1ee481ed4caa2c396b73bac80d68015dbe0fc7802d750",
+        "oldBytes": 2786,
+        "canonicalRawSha256": "b377e7d5f6fb809945a21c13ef34641e6ce69d53052952afca90dccd85bd631c",
+        "canonicalBytes": 2679
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "41e3004b082be6e94df2d63cf7a5d184b0b322e0",
+        "oldRawSha256": "96696031deb21302ff2164529a67ea2f3081395360610d832912e5f1c9373356",
+        "oldBytes": 126516,
+        "canonicalRawSha256": "bf3b3901c89e28b9309d31be4e322dd98994e66ee50c333b8a0d07ac1a099d22",
+        "canonicalBytes": 121424
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-web/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "e72538a9f023b261a4f055031ee4ed3137957fb0",
+        "oldRawSha256": "19e95c75dfe01023f937ff9190abd4ca0802d936144de2947cae459bdd53492e",
+        "oldBytes": 5243,
+        "canonicalRawSha256": "c8e1fda2fa320f180a1d5252962034f61266b2375f052198e717e40ab6e85155",
+        "canonicalBytes": 5041
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "6f063e5c8cf4e9e455a3bda72f622140e16802a9",
+        "oldRawSha256": "95dd64a397ef7407469870ff083b73b8d8d35c3d0d3c3d5fb7aed9a1590079d7",
+        "oldBytes": 158802,
+        "canonicalRawSha256": "50bb6fd9fa382be5ce2058ce75502c1bec2d54d379fbba9f6546f26be90fab85",
+        "canonicalBytes": 152442
+      },
+      {
+        "path": "mir2-web3/apps/game-client/resource-pack/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "db751fd05dfb4309acd034416eda82656d7a3a11",
+        "oldRawSha256": "33ae89df38707cf226da2866911e1a9a07cf046302b5bf1d54bd280fb4f82961",
+        "oldBytes": 7844,
+        "canonicalRawSha256": "2380464657c85a1c7b90a69d753d7d53bd8d268bdb350dcceec440210ca8df6c",
+        "canonicalBytes": 7552
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "683624d69fb3f58586227da8f969143dd4a4b65c",
+        "oldRawSha256": "6a7ed4ea789743298a6c9f25bd4464f1a06a34e9039ca2690933ec1be46b62fd",
+        "oldBytes": 131232,
+        "canonicalRawSha256": "e92a1a1f64aff9031e840a03bd1a81ad677d2079c9e60fbe92b00ae17d2e69dd",
+        "canonicalBytes": 125951
+      },
+      {
+        "path": "mir2-web3/apps/game-client/windows-updater/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "0546225af888cfe74d8ea4f43aa90986f0d980dc",
+        "oldRawSha256": "37634d0505086c0ae3aa8772846bd7e0c0ba107a14ad83f3011e111996a38c0f",
+        "oldBytes": 22796,
+        "canonicalRawSha256": "fe3b02d3fda1d685a5108e0921c5814b16ab46591a09600c866d69e9ab856c5c",
+        "canonicalBytes": 21945
+      },
+      {
+        "path": "mir2-web3/apps/mir2-launcher-tauri/src-tauri/Cargo.lock",
+        "mode": "100644",
+        "gitBlob": "4a98f89f84a49afe11d6b10e4900425530b18faa",
+        "oldRawSha256": "5e2bebfd8ec3433719d5323cefba462f334d033610304cb7b36b101a9f477bd4",
+        "oldBytes": 114177,
+        "canonicalRawSha256": "92b6c6f850984cc47f1431d403806badc2dcdadc3cfc8f4ed7563e886370808a",
+        "canonicalBytes": 109685
+      }
+    ],
+    "canonicalGitCompilerBytes": true,
+    "committedHistoricalCrlfBlobsPreserved": [
+      "mir2-web3/docs/generated/player-qa/cross-map-drop-20261005/original/frozen-source/apps/gateway/src/routing.rs"
+    ],
+    "sameOidIndexRefreshOnly": true,
+    "configuration": {
+      "scope": "--worktree",
+      "autocrlf": "file:E:/mir2/.git/worktrees/ug/config.worktree\tfalse",
+      "sharedConfigChanged": false
+    },
+    "protectedBefore": {
+      "coordinatorHead": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "gameBuildHead": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "engineBuildHead": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "sharedConfigSha256": "61aa4cccce3554462bf39345f0ccab31428997f14750433c27e64855479a575a"
+    },
+    "protectedAfter": {
+      "coordinatorHead": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "gameBuildHead": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "engineBuildHead": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "sharedConfigSha256": "61aa4cccce3554462bf39345f0ccab31428997f14750433c27e64855479a575a"
+    },
+    "protectedWorktreesUnchanged": true,
+    "trackedFileCount": 1377,
+    "pngPayloads": 0,
+    "buildOutputDirectories": 0,
+    "assetsCopied": false,
+    "gameBuiltHere": false,
+    "packPrepared": false,
+    "signed": false,
+    "applied": false,
+    "launched": false,
+    "commandsLog": {
+      "path": "C:/mir2-build/unified-20261029/unified-game-sparse-source-commands.json",
+      "sha256": "c898f9a373c347c6577cf451da758f64ce158f5b9b1b7d1b551aa2c63fa3341d"
+    }
+  },
+  "scope": "Compact source-only F:/ug proof; full1343 per-file/command input lists remain external, no binary/rebuild claim"
+}

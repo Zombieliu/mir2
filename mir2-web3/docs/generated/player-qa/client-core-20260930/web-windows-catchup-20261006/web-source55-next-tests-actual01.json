@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source55 actual original input tests and strict full Next build",
+  "observedAtUtc": "2026-10-11T02:21:06.003Z",
+  "changes": [
+    "shared canvas retains visible world object ID for original activate/pickup callbacks",
+    "cached combat diagnostics report gate state without added WASM calls"
+  ],
+  "tests": {
+    "originalRunner": "node --test scripts/test-bevy-combat-input.mjs",
+    "passed": 49,
+    "failed": 0,
+    "skipped": 0,
+    "actual": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 23680,
+      "kind": "Source55 original combat input test runner",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 3548,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/node-tests02/config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "firstAttempt": {
+      "passed": 47,
+      "failed": 2,
+      "reason": "new fixture omitted bevyQuestUiCapturesPointer=false",
+      "rawLog": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/node-tests01/stdout.log"
+    }
+  },
+  "next": {
+    "actual": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 58940,
+      "kind": "Source55 original full Next with normal shared world click fix",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 97269,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/next-build01/config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "strictTypeScript": true,
+    "staticPages": 13,
+    "completeSources": 19568,
+    "callerPrePostHashMatch": true,
+    "renderer": "bevy-201eff554f63b9a8",
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/next-build01/config.json",
+      "bytes": 4336,
+      "sha256": "75281db51af8a51af8859d4e49775103000f5da717bf25373650c40ba0250e42"
+    },
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/next-build01/full-snapshot.json",
+      "bytes": 4870565,
+      "sha256": "7a834b32e56630c1f8f0e20fefbc84a2859222b301d8910680f7e8a362d86d88"
+    }
+  },
+  "scope": "Build/test flags describe finite original caller only; actual browser verification separate",
+  "combatVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

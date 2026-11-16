@@ -1,0 +1,720 @@
+{
+  "schema": "mir2.r16.web-local-documentation-snapshot/1",
+  "snapshotLocalDate": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "status": "main-player-journey-under-acceptance",
+  "candidate100": false,
+  "humanAccepted": false,
+  "sourceWorktreeContainsWip": true,
+  "privacy": "No private state, account/credential file, owner export, database or model settings bundle was read or copied for this snapshot. QA source outcomes were reduced to selected public fields.",
+  "builds": {
+    "nextProduction": {
+      "source": "F:/mir2-builds/web-r16-20261104/next-production-build-v3.log",
+      "bytes": 2588,
+      "sha256": "16df2121064f11fd54a5544f1b9b8aea714114ca614b48a2ccc163f825af6ded",
+      "observedNextVersion": "16.2.11",
+      "compileLine": "✓ Compiled successfully in 97s",
+      "statusScope": "Successful compile/type generation in production build log; not whole player QA."
+    },
+    "coreLatestBuild": {
+      "source": "F:/mir2-builds/web-r16-20261104/build-core-final.log",
+      "bytes": 4296,
+      "sha256": "b1a67ea9136795a514c4dae9145a5d9fff53032faccc32179c83fdaa4477fe6e",
+      "verifiedLine": "[client-core] verified 3797298c65b4d93d17a836b17fe41e713f20a3c1643465d38bb4c42281a6cb21; wasm=249982 bytes; presentation=08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc; wasm=261983 bytes; npcPurchase=78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f; wasm=165791 bytes",
+      "packagedCoreVersion": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+      "packageMatchesLatestBuildNotAssumed": true
+    },
+    "rendererBuild": {
+      "source": "F:/mir2-builds/web-r16-20261104/build-renderer-bag-visibility.log",
+      "bytes": 38269,
+      "sha256": "a77f4d83dc8d2455ce11399b625524f8834cd978dfd08c8cfaa74943c107439b",
+      "runtimeVersion": "bevy-ebebc42dff6639fb",
+      "budgets": {
+        "wasmBytes": 32505856,
+        "gzipBytes": 7340032,
+        "jsBytes": 204800
+      },
+      "results": [
+        {
+          "packageId": "webgpu",
+          "wasmBytes": 29947465,
+          "wasmSha256": "494101bd32bf92f8df5829d8b4879ecf61503b088709c2eb3534c2211296d79f",
+          "gzipBytes": 6200992,
+          "jsBytes": 141118,
+          "metadataMatched": true,
+          "rendererInstantiatedByOptimizer": false,
+          "toolSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+          "toolVersion": "wasm-opt version 131 (version_131)",
+          "stages": [
+            {
+              "args": [
+                "-O1",
+                "--strip-debug"
+              ],
+              "metadataMatched": true,
+              "bytes": 31738765,
+              "sha256": "98b2710a616a761b99bb1430efeb4c7465849d2624be449ef75df18d94803fae"
+            },
+            {
+              "args": [
+                "--merge-similar-functions",
+                "--strip-debug"
+              ],
+              "metadataMatched": true,
+              "bytes": 29947465,
+              "sha256": "494101bd32bf92f8df5829d8b4879ecf61503b088709c2eb3534c2211296d79f"
+            }
+          ]
+        },
+        {
+          "packageId": "webgl2",
+          "wasmBytes": 16402082,
+          "wasmSha256": "105f6bb1f8965fe0273dc8b25569b4b377fb308fa795cb4c091e2020766730a5",
+          "gzipBytes": 4213985,
+          "jsBytes": 117176,
+          "metadataMatched": true,
+          "rendererInstantiatedByOptimizer": false,
+          "toolSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+          "toolVersion": "wasm-opt version 131 (version_131)",
+          "stages": [
+            {
+              "args": [
+                "-O1",
+                "--strip-debug"
+              ],
+              "metadataMatched": true,
+              "bytes": 17761595,
+              "sha256": "e709e88e4091076fb571c1eb6e330570ba0cf5caf737494895ad35809ece8545"
+            },
+            {
+              "args": [
+                "--merge-similar-functions",
+                "--strip-debug"
+              ],
+              "metadataMatched": true,
+              "bytes": 16402082,
+              "sha256": "105f6bb1f8965fe0273dc8b25569b4b377fb308fa795cb4c091e2020766730a5"
+            }
+          ]
+        },
+        {
+          "packageId": "webgl2-shared",
+          "wasmBytes": 30876146,
+          "wasmSha256": "29350a0ab88768a53c79d39eb7a7a36ab89d5e0d0bd5e989a81baea6552e1112",
+          "gzipBytes": 6541831,
+          "jsBytes": 139092,
+          "metadataMatched": true,
+          "rendererInstantiatedByOptimizer": false,
+          "toolSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+          "toolVersion": "wasm-opt version 131 (version_131)",
+          "stages": [
+            {
+              "args": [
+                "-O1",
+                "--strip-debug"
+              ],
+              "metadataMatched": true,
+              "bytes": 32700459,
+              "sha256": "449681006e14326675ed8dd4383f14f35944c754a9e4871bfe9e842b5a6040ca"
+            },
+            {
+              "args": [
+                "--merge-similar-functions",
+                "--strip-debug"
+              ],
+              "metadataMatched": true,
+              "bytes": 30876146,
+              "sha256": "29350a0ab88768a53c79d39eb7a7a36ab89d5e0d0bd5e989a81baea6552e1112"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tests": [
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/pre-integrated-ui-tests.log",
+      "bytes": 14394,
+      "sha256": "d656d09fbf7f4d46367e6b7abed02859001131f453ebb68b19f9fca7806950a6",
+      "runner": "node:test",
+      "tests": 57,
+      "passed": 57,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/r16-ui-service-tests.log",
+      "bytes": 14659,
+      "sha256": "a7ba6bc013ebb9f606198add3faf435d75ad39ca3bd84cb9d55ec98201dfebc9",
+      "runner": "node:test",
+      "tests": 60,
+      "passed": 60,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/companion-web-tests.log",
+      "bytes": 7104,
+      "sha256": "3985edebed409d87bce7f79b31ea3c7211626c1f65b0466d75769625d7b5fbbe",
+      "runner": "node:test",
+      "tests": 28,
+      "passed": 28,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/renderer-two-phase-tests.log",
+      "bytes": 9652,
+      "sha256": "6eed16cca364397a340f74e57d7a0a4dd22a54c6ab32f3718e4b1c1ed5e349aa",
+      "runner": "node:test",
+      "tests": 41,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/bag-shop-final-regression.log",
+      "bytes": 54572,
+      "sha256": "e5bf30ef9e46b36d579f174bcea12bdc8f8fbd625a217b050e0cd301206d0dda",
+      "runner": "node:test",
+      "tests": 210,
+      "passed": 210,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/alo-integrated-privacy-tests.log",
+      "bytes": 12570,
+      "sha256": "2cbaea957a3f4e82babb233397828a1d9335c34c218800339c00db3cc7780a68",
+      "runner": "node:test",
+      "tests": 49,
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/alo-page-host-tests.log",
+      "bytes": 3304,
+      "sha256": "221d113dbc9f520979edfe4d3ac9de6120125ce3480e454f97630ca02356381b",
+      "runner": "node:test",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/package-ui-supplement-tests.log",
+      "bytes": 2663,
+      "sha256": "02f77c7196e52c20eced57c2c281b6bcdc456b96df13c650940ff424cd4fa00b",
+      "runner": "node:test",
+      "tests": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/service-package-final-tests.log",
+      "bytes": 5456,
+      "sha256": "ed07f2c04d2b5626de68641b2dad149d068ef2d18b1dc9e4cfd2492bc1f1a9bb",
+      "runner": "node:test",
+      "tests": 21,
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/core-auth-tests.log",
+      "bytes": 1085,
+      "sha256": "1ef97c9f7f532ec6ea375ab59c59ba52f21581c1da7a2a99ef9482d050b14f05",
+      "runner": "cargo-test-log",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 191
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/platform-auth-tests.log",
+      "bytes": 1483,
+      "sha256": "bca7d487bd5943064729c85c68459b4b2a062150d96de4b170e06272604227fb",
+      "runner": "cargo-test-log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 62
+    }
+  ],
+  "qa": [
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/qa-bag-visibility-fixed-20261104/outcome.json",
+      "bytes": 23923,
+      "sha256": "70e6db20ea19ad77542d87940d3094ea861c359f85a34a12efed9ba38dfab833",
+      "run": "qa-bag-visibility-fixed-20261104",
+      "startedAt": "2026-11-03T21:34:09.803Z",
+      "finishedAt": "2026-11-03T21:34:51.468Z",
+      "passed": false,
+      "phase": "focused-bag-equip-diagnostic-complete",
+      "failureCode": null,
+      "failurePhase": null,
+      "checks": [
+        {
+          "name": "ordinary-account-registration-through-ui",
+          "passed": true
+        },
+        {
+          "name": "ordinary-new-character-through-ui",
+          "passed": true
+        },
+        {
+          "name": "login-selection-startgame-town",
+          "passed": true
+        },
+        {
+          "name": "focused-owned-sword-equip-diagnostic",
+          "passed": true
+        },
+        {
+          "name": "focused-native-bag-close-reopen-retains-exact-equipped-sword",
+          "passed": true
+        }
+      ],
+      "screenshotNames": [
+        "01-ordinary-town-entry.png",
+        "02-owned-sword-equipped.png",
+        "03-equipped-sword-retained-after-native-bag-reopen.png"
+      ]
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-complete-20261104/outcome.json",
+      "bytes": 16446,
+      "sha256": "705b8d19986f068aa121cd2c647393d43dddeb59bb4b0d08efeff523ac903d0a",
+      "run": "qa-r16-complete-20261104",
+      "startedAt": "2026-11-03T21:44:34.482Z",
+      "finishedAt": "2026-11-03T21:46:06.834Z",
+      "passed": false,
+      "phase": "ordinary-field-monster-combat-potion",
+      "failureCode": "ORDINARY_WALK_TARGET_OR_PLAYER_UNAVAILABLE",
+      "failurePhase": "ordinary-field-monster-combat-potion",
+      "checks": [
+        {
+          "name": "ordinary-account-registration-through-ui",
+          "passed": true
+        },
+        {
+          "name": "ordinary-new-character-through-ui",
+          "passed": true
+        },
+        {
+          "name": "login-selection-startgame-town",
+          "passed": true
+        },
+        {
+          "name": "ordinary-ui-owned-dress-resale-funds-trade",
+          "passed": true
+        }
+      ],
+      "screenshotNames": [
+        "01-ordinary-town-entry.png",
+        "02-owned-sword-equipped.png",
+        "03-ordinary-whitney-native-buy-owner.png",
+        "04-ordinary-whitney-owned-dress-sale-review.png",
+        "05-ordinary-whitney-owned-dress-sold.png",
+        "06-failure.png"
+      ]
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-ordered-journey-20261104/outcome.json",
+      "bytes": 24615,
+      "sha256": "bd39c6d87c21e08bacac7e3eb41ffa7f10a398cd7f679d76782c7f665f2ed2c4",
+      "run": "qa-r16-ordered-journey-20261104",
+      "startedAt": "2026-11-03T21:53:41.040Z",
+      "finishedAt": "2026-11-03T21:56:14.496Z",
+      "passed": false,
+      "phase": "real-monster-drop-ui-pickup",
+      "failureCode": "BOUNDED_DROP_HUNT_DID_NOT_STAY_IN_TOWN_SAFETY",
+      "failurePhase": "real-monster-drop-ui-pickup",
+      "checks": [
+        {
+          "name": "ordinary-account-registration-through-ui",
+          "passed": true
+        },
+        {
+          "name": "ordinary-new-character-through-ui",
+          "passed": true
+        },
+        {
+          "name": "login-selection-startgame-town",
+          "passed": true
+        },
+        {
+          "name": "real-monster-combat-and-owned-potion",
+          "passed": true
+        },
+        {
+          "name": "server-reported-hp-recovery-after-potion",
+          "passed": true
+        }
+      ],
+      "screenshotNames": [
+        "01-ordinary-town-entry.png",
+        "02-owned-sword-equipped.png",
+        "03-real-owned-potion-consumed.png",
+        "04-real-monster-death.png",
+        "05-failure.png"
+      ]
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-snapshot-aware-20261104/outcome.json",
+      "bytes": 24857,
+      "sha256": "f82906fa20b574fc23fb8f351ffb236af0061aa23584f77e57d9ac76e711dbf5",
+      "run": "qa-r16-snapshot-aware-20261104",
+      "startedAt": "2026-11-03T22:49:03.585Z",
+      "finishedAt": "2026-11-03T22:51:31.580Z",
+      "passed": false,
+      "phase": "real-monster-drop-ui-pickup",
+      "failureCode": "UI_WALK_NOT_ACKNOWLEDGED",
+      "failurePhase": "real-monster-drop-ui-pickup",
+      "checks": [
+        {
+          "name": "ordinary-account-registration-through-ui",
+          "passed": true
+        },
+        {
+          "name": "ordinary-new-character-through-ui",
+          "passed": true
+        },
+        {
+          "name": "login-selection-startgame-town",
+          "passed": true
+        },
+        {
+          "name": "real-monster-combat-and-owned-potion",
+          "passed": true
+        },
+        {
+          "name": "server-reported-hp-recovery-after-potion",
+          "passed": true
+        }
+      ],
+      "screenshotNames": [
+        "01-ordinary-town-entry.png",
+        "02-owned-sword-equipped.png",
+        "03-real-owned-potion-consumed.png",
+        "04-real-monster-death.png",
+        "05-failure.png"
+      ]
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-capture-journey-20261104/outcome.json",
+      "bytes": 18272,
+      "sha256": "c4a27bf5e72b608abf0a0af7bd7fb10c470051f4a6430dbe5fa37fe99930bae5",
+      "run": "qa-r16-capture-journey-20261104",
+      "startedAt": "2026-11-03T23:37:46.611Z",
+      "finishedAt": "2026-11-03T23:39:39.986Z",
+      "passed": false,
+      "phase": "ordinary-field-monster-combat-potion",
+      "failureCode": "NATIVE_BAG_OWNER_GEOMETRY_DID_NOT_STABILIZE",
+      "failurePhase": "ordinary-field-monster-combat-potion",
+      "checks": [
+        {
+          "name": "ordinary-account-registration-through-ui",
+          "passed": true
+        },
+        {
+          "name": "ordinary-new-character-through-ui",
+          "passed": true
+        },
+        {
+          "name": "login-selection-startgame-town",
+          "passed": true
+        }
+      ],
+      "screenshotNames": [
+        "01-ordinary-town-entry.png",
+        "02-owned-sword-equipped.png",
+        "03-failure.png"
+      ]
+    }
+  ],
+  "observedResale": {
+    "source": "F:/mir2-builds/web-r16-20261104/qa-r16-complete-20261104/ordinary-npc-resale-proof.json",
+    "bytes": 2925,
+    "sha256": "bce415ede590fe97dff52a2410f1f7e0ecc5807ef89c5a5d3b5f760cb48bf333",
+    "passed": true,
+    "itemName": "BaseDress(M)",
+    "itemKey": "crystal-item-317",
+    "quantity": 1,
+    "observedSaleValue": 60,
+    "goldBefore": 0,
+    "goldAfter": 60,
+    "potionAndCandlePreserved": true,
+    "combatRevenueClaimed": false,
+    "helperApiCalled": false,
+    "economicCommands": {
+      "sellItem": 1,
+      "buyItem": 0
+    },
+    "serverSaleSuccess": true,
+    "fullJourneyPassed": false,
+    "fullJourneyFailure": "ORDINARY_WALK_TARGET_OR_PLAYER_UNAVAILABLE"
+  },
+  "observedCombat": {
+    "sourceRun": "qa-r16-ordered-journey-20261104",
+    "combatCheckPassed": true,
+    "monster": "Scarecrow",
+    "monsterHpBefore": 18,
+    "potionName": "(HP)DrugSmall",
+    "potionBeforeQuantity": 1,
+    "potionAfterPresent": false,
+    "hpRecoveryCheckPassed": true,
+    "hpBefore": 14,
+    "hpAfter": 15,
+    "fullJourneyPassed": false,
+    "fullJourneyFailure": "BOUNDED_DROP_HUNT_DID_NOT_STAY_IN_TOWN_SAFETY"
+  },
+  "preparedPackageReports": [
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/prepared-web-v1-report.json",
+      "bytes": 1795996,
+      "sha256": "84cc1453dc1f03f0c7d5ba4c88475e88a0fcad0ff480b65cae55e75df370f592",
+      "ok": false,
+      "generatedAt": "2026-11-03T21:52:01.653Z",
+      "mode": "standalone-thin-client",
+      "serverEntry": "mir2-web3/apps/web/server.js",
+      "budgetBytes": 377487360,
+      "packageBytes": 555031037,
+      "packageFiles": 18830,
+      "overBudgetBytes": 177543677,
+      "excludedCompilerCacheBytes": 434832595,
+      "dependenciesBytes": 46509396,
+      "r16AssetManifestSha256": "f5ec1d9a7d09f76c56a45cb944edf15166ecf4bacb0d29857a5db1d3dbbf5a5e",
+      "r16AssetClosure": {
+        "files": 9468,
+        "bytes": 153042158,
+        "verified": true
+      },
+      "jsonCompactionFiles": 316,
+      "jsonCompactionSavedBytes": 45374414,
+      "packagedCoreVersion": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974"
+    },
+    {
+      "source": "F:/mir2-builds/web-r16-20261104/prepared-web-v2-report.json",
+      "bytes": 1795996,
+      "sha256": "c379d62374c7f86e9a836dd2453dd7fd8fa3e37851e984f3c3d5db3380a7426c",
+      "ok": false,
+      "generatedAt": "2026-11-03T22:53:54.727Z",
+      "mode": "standalone-thin-client",
+      "serverEntry": "mir2-web3/apps/web/server.js",
+      "budgetBytes": 377487360,
+      "packageBytes": 555031041,
+      "packageFiles": 18830,
+      "overBudgetBytes": 177543681,
+      "excludedCompilerCacheBytes": 459546877,
+      "dependenciesBytes": 46509396,
+      "r16AssetManifestSha256": "f5ec1d9a7d09f76c56a45cb944edf15166ecf4bacb0d29857a5db1d3dbbf5a5e",
+      "r16AssetClosure": {
+        "files": 9468,
+        "bytes": 153042158,
+        "verified": true
+      },
+      "jsonCompactionFiles": 316,
+      "jsonCompactionSavedBytes": 45374414,
+      "packagedCoreVersion": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974"
+    }
+  ],
+  "distribution": {
+    "source": "F:/mir2-builds/Numeron-Web-R16-20261104/package-manifest.json",
+    "bytes": 4464533,
+    "sha256": "77dc57cd5acf0bfb28f9378186807229027490a81777902760adbd7925a7de43",
+    "createdAt": "2026-11-03T22:11:59.002Z",
+    "nodeVersion": "22.18.0",
+    "undiciVersion": "7.30.1",
+    "serverRelative": "web/mir2-web3/apps/web/server.js",
+    "serviceRelative": "apps/web/scripts/r16-playable-service.mjs",
+    "gatewayRelative": "bin/mir2-gateway.exe",
+    "nodeRelative": "bin/node.exe",
+    "privateRelative": "private/world",
+    "privateExcludedFromDistribution": true,
+    "archivePolicy": "Only files[] and package-manifest.json; never private/.",
+    "defaults": {
+      "withAlo": true,
+      "modelProvider": "rules",
+      "gatewayPort": 19040,
+      "webPort": 19041
+    },
+    "modelSettingsCopied": false,
+    "manifestFileCount": 18992,
+    "manifestFilesBytes": 792985625,
+    "scope": "Public manifest snapshot only; excludes package-manifest.json, later supplement and private runtime data.",
+    "rendererManifest": {
+      "source": "F:/mir2-builds/Numeron-Web-R16-20261104/web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/runtime-manifest.json",
+      "bytes": 1711,
+      "sha256": "386f0445ebee8002994a86b8500d491c6f0f89cc92e980846a5025508a6ed165",
+      "value": {
+        "schemaVersion": 2,
+        "version": "bevy-ebebc42dff6639fb",
+        "packages": [
+          {
+            "id": "webgpu",
+            "backend": "webgpu",
+            "packageDir": "pkg-webgpu",
+            "questUiAbiVersion": 1,
+            "bagUiAbiVersion": 1,
+            "primarySharedUiCompiled": false
+          },
+          {
+            "id": "webgl2",
+            "backend": "webgl2",
+            "packageDir": "pkg-webgl2",
+            "questUiAbiVersion": 0,
+            "bagUiAbiVersion": 0,
+            "primarySharedUiCompiled": false
+          },
+          {
+            "id": "webgl2-shared",
+            "backend": "webgl2",
+            "packageDir": "pkg-webgl2-shared",
+            "questUiAbiVersion": 1,
+            "bagUiAbiVersion": 1,
+            "primarySharedUiCompiled": true
+          }
+        ],
+        "files": [
+          {
+            "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+            "sha256": "afa9d0d67e6fcc05bef3f506a5b3cb6d8e42becd28e65e63f3dd1c1e3653bf5e"
+          },
+          {
+            "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+            "sha256": "494101bd32bf92f8df5829d8b4879ecf61503b088709c2eb3534c2211296d79f"
+          },
+          {
+            "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+            "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d"
+          },
+          {
+            "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+            "sha256": "105f6bb1f8965fe0273dc8b25569b4b377fb308fa795cb4c091e2020766730a5"
+          },
+          {
+            "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+            "sha256": "5498a896f7968937053dc5fc8b9d7cfb729484c75918bcac1ef8231fdec4fdff"
+          },
+          {
+            "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+            "sha256": "29350a0ab88768a53c79d39eb7a7a36ab89d5e0d0bd5e989a81baea6552e1112"
+          }
+        ]
+      }
+    },
+    "packagedCore": {
+      "abiVersion": 1,
+      "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+      "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 250136,
+          "sha256": "c8f6c8e30166807aadab41321efdcb9bc86e13a657ffa14b5adf6889f6913bc0"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 261983,
+            "sha256": "a65ce72e278cbb31999922dafe629c0b1c57ce0e9be3bc8c859de7012798e0da"
+          }
+        }
+      },
+      "npcPurchase": {
+        "abiVersion": 1,
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 165791,
+            "sha256": "cdf685efc345dc45b389463947a1685c9632888e85f062d3fe14dba4f0c973dc"
+          }
+        }
+      }
+    }
+  },
+  "copiedEvidence": [
+    {
+      "path": "login-zh-r16-aligned.png",
+      "source": "F:/mir2-builds/web-r16-20261104/login-zh-r16-aligned.png",
+      "bytes": 1718464,
+      "sha256": "8f583a9965e42d9ee6cf0e818fe9bd0a90cb26805440331b09f062618283c350"
+    },
+    {
+      "path": "select-zh-r16-aligned.png",
+      "source": "F:/mir2-builds/web-r16-20261104/select-zh-r16-aligned.png",
+      "bytes": 268982,
+      "sha256": "40154c6962a5a93ac1fcd90dc714fcee64ce01f1767a35ef185375f446bf1262"
+    },
+    {
+      "path": "native-bag-equipped-after-reopen.png",
+      "source": "F:/mir2-builds/web-r16-20261104/qa-bag-visibility-fixed-20261104/03-equipped-sword-retained-after-native-bag-reopen.png",
+      "bytes": 911557,
+      "sha256": "e9f8925869ceebe314de28149438e986bd1ad463b927f8e00851cdc8976499a7"
+    },
+    {
+      "path": "npc-owned-dress-sale-review.png",
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-complete-20261104/04-ordinary-whitney-owned-dress-sale-review.png",
+      "bytes": 1035913,
+      "sha256": "5743e0be3656dd29b397828244ecd996f681a7dc9a6ac7afea102766e297ee3a"
+    },
+    {
+      "path": "npc-owned-dress-sold.png",
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-complete-20261104/05-ordinary-whitney-owned-dress-sold.png",
+      "bytes": 1037862,
+      "sha256": "549876012b2eee03dfb6fe6af46aa19a75a09642f2e8e02be1d79978b0f75b27"
+    },
+    {
+      "path": "real-owned-potion-consumed.png",
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-ordered-journey-20261104/03-real-owned-potion-consumed.png",
+      "bytes": 1027161,
+      "sha256": "c269886eb1b903cf31a5a246a3695e6b0e3bc27c095f0d9cc7ead4764966ee68"
+    },
+    {
+      "path": "real-monster-death.png",
+      "source": "F:/mir2-builds/web-r16-20261104/qa-r16-ordered-journey-20261104/04-real-monster-death.png",
+      "bytes": 1026477,
+      "sha256": "d5903ca9c7309820b31ceb3e0c687964d3a5ef88a8bcfa1a6e5c326490af4312"
+    },
+    {
+      "path": "alo-dev-ui-restart-proof.json",
+      "source": "F:/mir2-builds/web-r16-20261104/alo-dev-ui-restart-proof.json",
+      "bytes": 987,
+      "sha256": "faf7ca510a02fd7b4190052ed3293a72f1339f5211a98c9af73f7e8216e6585f"
+    },
+    {
+      "path": "full-local-ui-supplement-proof.json",
+      "source": "F:/mir2-builds/web-r16-20261104/full-local-ui-supplement-proof.json",
+      "bytes": 2975,
+      "sha256": "8d6e108da920a36657af77ee3adf4cac14f540416e164c531610527342f4e84c"
+    }
+  ],
+  "limits": [
+    "Independent QA checks are not one continuous completed journey.",
+    "All listed whole-run QA outcomes are false, including deliberately bounded bag diagnostics.",
+    "Alo web proof uses rules provider with zero model calls; no real-model or full Gateway restart proof.",
+    "The original 360 MiB thin-package gate remains false; no budget was raised.",
+    "The public distribution manifest snapshot predates later update/supplement work and is not a final all-file verification."
+  ]
+}

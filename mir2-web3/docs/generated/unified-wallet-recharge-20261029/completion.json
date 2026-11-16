@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "scope": "Bounded two-branch integration, source/module checks, actual full artifacts/isolated installation, display/navigation/locale restart and local production-library packed apply plus real authenticated healthy native launch.",
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "humanAccepted": false,
+  "languageMenuInputIsolationPassed": false,
+  "knownExistingP2": "windows-ui/known-language-input-p2.json",
+  "walletPhoneSignatureOrNewPaymentValidated": false,
+  "livePostgresValidated": false,
+  "fullRollbackOrPublicMigrationValidated": false,
+  "remoteOrCdnPerformanceValidated": false,
+  "publicFeedsChanged": false,
+  "pushTrackedOutsideArtifactManifest": true,
+  "reasonPushSeparate": "The post-commit remote receipt must not make this artifact hash itself."
+}

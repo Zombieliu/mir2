@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.production-p02b-independent-source-review.v1",
+  "acceptedForFocusedTests": true,
+  "reviewer": "/root/production_review",
+  "authoredSourcePath": "work/slg-production-p02b-20261008/authored-source-02.json",
+  "authoredSourceSha256": "0bd7eff73aa92654aba98ee5b143a5e2ed8d61d6c7960c83ff1b40accda62781",
+  "priorReviewPath": "work/slg-production-p02b-20261008/independent-source-review.json",
+  "baselineCommit": "fde81a0de5084d02b3daaa30bac4d4f1fde411f4",
+  "verifiedSourceFileCount": 14,
+  "allDeclaredSourceHashesAndLengthsMatch": true,
+  "changedSourceFileCountFromPriorManifest": 1,
+  "confirmedP0P1Blockers": [],
+  "rawFinal": "Accepted for repaired focused testing under the original CargoGuard, bound to authored-source-02.json. This bounded delta review confirms both new test calls use session.world_snapshot(), the existing public method at session.rs:701, instead of the nonexistent snapshot() method. All 14 declared current source hashes and lengths match; the other 13 source paths are unchanged from the previously accepted manifest. The prior review remains intact. No Cargo or UI was run by this reviewer. This is permission to test the repaired source, not a claim of compile/test success or public rollout acceptance. Normal gateway/catalog activation, remaining fresh-item issuers, deployment-wide census and PostgreSQL authority remain prerequisites.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true,
+  "scope": "Read-only verification of the two repaired test API calls and the 14-file manifest; only this separate work-directory review record was written."
+}

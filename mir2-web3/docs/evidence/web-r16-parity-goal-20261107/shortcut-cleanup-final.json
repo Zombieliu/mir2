@@ -1,0 +1,30 @@
+{
+  "schema": "mir2.r16.shortcut.cleanup.v1",
+  "checkedAt": "2026-11-07T12:21:51.7569010Z",
+  "ownedPorts": [
+    19248,
+    19249,
+    19278,
+    19350
+  ],
+  "ownedPortsClosed": true,
+  "sourceListeners": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19235,
+      "OwningProcess": 129280
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19232,
+      "OwningProcess": 128444
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19231,
+      "OwningProcess": 126788
+    }
+  ],
+  "ownedNativeSelectionProcessStopped": true,
+  "originalClientOrServerProcessesStopped": false
+}

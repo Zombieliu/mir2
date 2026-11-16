@@ -1,0 +1,208 @@
+{
+  "createdUtc": "2026-10-09T23:05:08.890192+00:00",
+  "source": "64b6b10c05732048da9c6bf5ccb0a491d2d053d3",
+  "sourceActuallyPushed": true,
+  "sourceFrozenClean": true,
+  "terrainLinuxRun": 38001876065,
+  "terrainLinuxStatus": "in_progress",
+  "terrainLinuxPassed": false,
+  "predecessorLinux": {
+    "schema": "mir2.gateway.npc-owner-linux-ci.v1",
+    "createdUtc": "2026-10-09T22:57:01.123220+00:00",
+    "runId": "37993166469",
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/37993166469",
+    "revision": "01e3d08791c2639b3375c39d46fbf4f00ca53f75",
+    "runConclusion": "success",
+    "jobs": [
+      {
+        "name": "siege-acceptance / siege-linux",
+        "conclusion": "success",
+        "databaseId": 114053775841
+      },
+      {
+        "name": "build-linux-x64",
+        "conclusion": "success",
+        "databaseId": 114053777021
+      }
+    ],
+    "githubArtifactDigest": "sha256:fb3e5155e2ef50166c94ca35a58945328091095339ace5db35815aa4c1a40240",
+    "githubArtifactBytes": 33806704,
+    "archiveSha256": "b34ee735a96a52f3944be2150633c5586c1402b10440aaf0c99ef251f7bd81c8",
+    "archiveBytes": 34251462,
+    "binarySha256": "6409a62b37b04dd8be92d1a74e520f4e039e9c8e8dce348f43a7bf3b32e958ca",
+    "binaryBytes": 83476912,
+    "zoneHostBinarySha256": "15085f94b37fc45e2218b278897498de3760a17461af0ca64739f1bbd60ab454",
+    "manifestSha256": "0707d2fb22a37e5a4ca97da136e6919fb43fd153a7e1b61dc68dae86d47c3c3a",
+    "logSha256": "ff73fe58cfe5d75e672f6d4778667f02f0f3339062b3288c823171127010ffbc",
+    "publicR2Upload": false,
+    "serverSwitched": false
+  },
+  "predecessorInfraFailureRetained": true,
+  "failedJobOnlyRerun": true,
+  "publicGateway": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "publicClient": "R23/sourcefaef/signedfeed18",
+  "rolloutHeldBeforeStaging": true,
+  "heldWsConnections": 1,
+  "serverSwitched": false,
+  "successfulMapLoadProducerImplemented": false,
+  "fullClassicCompleted": false,
+  "longPathWorktreeFailureRetained": true,
+  "shortNameT64SucceededWithoutGlobalGitConfigChange": true,
+  "archive": {
+    "file": "original-evidence.zip",
+    "entries": 37,
+    "bytes": 593489,
+    "sha256": "68b4190a649dcad515896e704214e796a47becdffa1a7094497b7ae111af08ef",
+    "everyEntryByteVerified": true
+  },
+  "entries": {
+    "git/exact-api/PUBLISHED-VERIFIED.json": {
+      "bytes": 760,
+      "sha256": "fb47a9f1202680bf2c6f8cd42a54fd185ee6f09b27ee0a6c555ec762ac052fa6"
+    },
+    "git/exact-api/REF-MCP-FRESH-READBACK.json": {
+      "bytes": 459,
+      "sha256": "a424c4c12b0a3347627e10fe7684a75c5874aca8da72284017490ba37a18a01b"
+    },
+    "git/exact-api/COMMIT-MCP-FRESH-READBACK.json": {
+      "bytes": 1163,
+      "sha256": "71784240e79ad7752ae68ea0d18a82c93f5975cba960090ab74e17c7dcedb3bd"
+    },
+    "git/exact-api/REF-MCP-RESULT.json": {
+      "bytes": 161,
+      "sha256": "0aad31566ba642e38c47f18ab55ad16470654eade0b74575427dd592d966998e"
+    },
+    "git/exact-api/TREE-MCP-RESULT.json": {
+      "bytes": 195,
+      "sha256": "cd9125f0ccbaa525a6d2e0059a2c243034384f84ee64577eb727f9366c32539b"
+    },
+    "git/LOCAL-COMMIT.json": {
+      "bytes": 1497,
+      "sha256": "b93ae279acca851039acbf9f225fa592e3385fbff376611ad6d56aeb193c845a"
+    },
+    "git/FROZEN-WORKTREE-COMPLETED.json": {
+      "bytes": 490,
+      "sha256": "62aa71275fc1fb274fe423d1bf76c33b9753c8bfc2a79e67768eb144cda09f04"
+    },
+    "git/WORKTREE-LONG-PATH-FAILURE.json": {
+      "bytes": 5570,
+      "sha256": "95f9c5f6605a67966302064c2126a12f08be4a46ccd0883a0d5eb199adbe9d40"
+    },
+    "terrain-ci/HELPERS-PREPARED.json": {
+      "bytes": 565,
+      "sha256": "8bd5fdadf683c5b9591a1485d13f32f0460233d0d40550aba245cc450612c251"
+    },
+    "terrain-ci/VERIFIER-PREPARED.json": {
+      "bytes": 476,
+      "sha256": "c515b764510daf48f88ffca28b5d677a4a39dbcd4e44db12807f012e34f9933c"
+    },
+    "terrain-ci/server-ci-01/DISPATCH-REQUEST.json": {
+      "bytes": 440,
+      "sha256": "f16ae6ec3f10db6dda5a2a5b970832278ec64d3d1aaae711ce165453d4201fd5"
+    },
+    "terrain-ci/server-ci-01/DISPATCH-RESULT.json": {
+      "bytes": 464,
+      "sha256": "45344322e9a9fe79ddb3727a9aa504b4ae73f01cbfe1ac01c1997f9298894d2f"
+    },
+    "terrain-ci/server-ci-01/snapshot-01.json": {
+      "bytes": 786,
+      "sha256": "4694921bc057a0be2d60f3900e4b763ae3e4980e61bb8297a3adca5ba81a8e10"
+    },
+    "terrain-ci/server-ci-01/snapshot-02.json": {
+      "bytes": 874,
+      "sha256": "672d883f3d47986718393b7ab9ed8aada2a7bbf97810fb8632b8cf10bf8a053a"
+    },
+    "terrain-ci/server-ci-01/snapshot-02-runs.json": {
+      "bytes": 119390,
+      "sha256": "00f86c1cdfd90949740c7de0ebca1e630e54720bf26251b7cda2ac901d653eae"
+    },
+    "terrain-ci/server-ci-01/snapshot-02-jobs.json": {
+      "bytes": 5672,
+      "sha256": "dd28e0c03cb2c8f14d966cd7a0bea17213d0efe91dfedf9656e01fbd3826cd57"
+    },
+    "predecessor-ci/server-ci-01/FAILED-JOB-RERUN-TOOL-RESULT.json": {
+      "bytes": 405,
+      "sha256": "ba73e3720bc6fba56e18e251627e8056ea1319da7beea415bb8d6be98a2b0249"
+    },
+    "predecessor-ci/server-ci-01/snapshot-12.json": {
+      "bytes": 805,
+      "sha256": "a5a10a59871ca52bf74e2abf3aa10f2b15508b82e595cbe01efe38167f1cc4ff"
+    },
+    "predecessor-ci/server-ci-01/snapshot-15.json": {
+      "bytes": 805,
+      "sha256": "543f85c632ef38aacb71c7437c3dd6c95782184802a3e01bdd4de5a3f627d4db"
+    },
+    "predecessor-ci/server-ci-01/snapshot-15-runs.json": {
+      "bytes": 107469,
+      "sha256": "6e50dbd3badc1b5f15cc8b841c1a750aa1445f4c405dda7c1487425e62ae59e8"
+    },
+    "predecessor-ci/server-ci-01/snapshot-15-jobs.json": {
+      "bytes": 6557,
+      "sha256": "1b24fea7773c1ad4063b9962b9991e7eaa6619b0c3fe774d4becc23be29f2280"
+    },
+    "predecessor-ci/server-ci-01/siege-job-02-api-original.log": {
+      "bytes": 5372,
+      "sha256": "7167165ff07d6c720b4e4efdc7b483ac2dfa56be450dcbfc09a476efa5aefe5f"
+    },
+    "predecessor-ci/server-ci-01/artifact-01/CI-VERIFIED.json": {
+      "bytes": 1224,
+      "sha256": "1a7ca0f800c03ef23678c3eaa414359c19ed06242611d3e63aee17dd113d4049"
+    },
+    "predecessor-ci/server-ci-01/artifact-01/ci-status-original.json": {
+      "bytes": 5319,
+      "sha256": "6b4b94ff3df0f5dedfb3b05eab263241398edc8ac662f063a65c53dbafd25b46"
+    },
+    "predecessor-ci/server-ci-01/artifact-01/ci-artifacts-original.json": {
+      "bytes": 751,
+      "sha256": "f59739da365273b845c84aa6706741734e2f59cf8f1c44d3cdffdcf15af010ed"
+    },
+    "predecessor-ci/server-ci-01/artifact-01/ci-log-original.txt": {
+      "bytes": 4756160,
+      "sha256": "ff73fe58cfe5d75e672f6d4778667f02f0f3339062b3288c823171127010ffbc"
+    },
+    "predecessor-ci/server-ci-01/artifact-01/latest-mir2-gateway-release.json": {
+      "bytes": 1715,
+      "sha256": "628e628a330eb6e04877eb266a1c792246442071b426ee224d93dc7e14c74ded"
+    },
+    "predecessor-ci/server-ci-01/artifact-01/VERIFIED-FILES.json": {
+      "bytes": 412,
+      "sha256": "0707d2fb22a37e5a4ca97da136e6919fb43fd153a7e1b61dc68dae86d47c3c3a"
+    },
+    "predecessor-ci/public-preflight-read-01.log": {
+      "bytes": 2894,
+      "sha256": "f1e3552f66713348a29f1e05baf5e36bc6ea01afc914cc8bb90cb965d44a6099"
+    },
+    "runners/Verify-SourceTerrainGitReadback.py": {
+      "bytes": 2163,
+      "sha256": "1de74cf3e7544ecc99cd3a29c4179b6615aed279956c207256af7efb595075d7"
+    },
+    "runners/Prepare-SourceTerrainCIHelpers.py": {
+      "bytes": 2114,
+      "sha256": "85a99d52fbb3758fd6b1646773d2c174a0117cbdd83e35102ce11f22b083cec9"
+    },
+    "runners/Dispatch-SourceTerrainGatewayCI.py": {
+      "bytes": 2244,
+      "sha256": "d591a5a3dc9fc9fec613c74c256279d9ae98ab06ee0b5c633a084cce02154a85"
+    },
+    "runners/Record-SourceTerrainGatewayCI.py": {
+      "bytes": 2547,
+      "sha256": "eb1b2c1772309a200ea33409a1f8cf333fc8ee9ed75bbbf83d4672dec5e23524"
+    },
+    "runners/Prepare-SourceTerrainLinuxVerifier.py": {
+      "bytes": 2174,
+      "sha256": "e7e0c6c345db5dd48edb7fdafdb7f419b4a42897de438e532d15c0bf08521589"
+    },
+    "runners/Download-SourceTerrainLinuxCI.py": {
+      "bytes": 7300,
+      "sha256": "ef0a22aa438d0c29dbcf1a2ee46ed99ac451bd2af5e3ba236204c0e430da9a1f"
+    },
+    "runners/Download-NpcOwnerLinuxCI.py": {
+      "bytes": 6874,
+      "sha256": "ae9d122087827fe681a96a2994ab2f411b31c80b5eab555dfd8ce286fdca35ae"
+    },
+    "runners/Write-SourceTerrainReleaseFollowup.py": {
+      "bytes": 7160,
+      "sha256": "59f14d622f03b8fd3f1191e587ca9e16140fa9f0ece1db5044021c85a0d0ff2f"
+    }
+  }
+}

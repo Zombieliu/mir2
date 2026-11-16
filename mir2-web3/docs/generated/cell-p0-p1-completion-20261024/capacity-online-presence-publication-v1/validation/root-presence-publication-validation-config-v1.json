@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    "mir2-web3/.cargo/config.toml",
+    "mir2-web3/Cargo.lock",
+    "mir2-web3/Cargo.toml",
+    "mir2-web3/apps/gateway/Cargo.toml",
+    "mir2-web3/apps/gateway/src/attack_protocol.rs",
+    "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+    "mir2-web3/apps/gateway/src/lib.rs",
+    "mir2-web3/apps/gateway/src/routing.rs",
+    "mir2-web3/apps/gateway/src/routing/owner_health.rs",
+    "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+    "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+    "mir2-web3/apps/gateway/src/session.rs",
+    "mir2-web3/apps/gateway/src/shared_experience_profiles.rs",
+    "mir2-web3/apps/gateway/src/spectator.rs",
+    "mir2-web3/apps/gateway/src/web.rs",
+    "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+    "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+    "mir2-web3/apps/gateway/src/zone_metrics.rs",
+    "mir2-web3/apps/gateway/src/zone_rpc.rs",
+    "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+    "mir2-web3/apps/simulation/Cargo.toml",
+    "mir2-web3/apps/simulation/src/config.rs",
+    "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+    "mir2-web3/apps/simulation/src/config_file_authority.rs",
+    "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+    "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+    "mir2-web3/apps/simulation/src/lib.rs",
+    "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/manager_presence_publication_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/presence_publication_fixtures.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+    "mir2-web3/apps/simulation/src/world_runtime.rs",
+    "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+    "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+    "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs"
+  ],
+  "checks": [
+    {
+      "name": "format",
+      "args": [
+        "run",
+        "1.95.0",
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "apps/gateway/src/shared_experience_profiles.rs",
+        "apps/simulation/src/runtime/zone/manager.rs",
+        "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+        "apps/simulation/src/runtime/zone/manager_presence_publication_tests.rs",
+        "apps/simulation/src/runtime/zone/runtime/presence_publication_fixtures.rs"
+      ],
+      "minimum": 0
+    },
+    {
+      "name": "manager-and-presence",
+      "crate": "mir2-simulation",
+      "filter": "runtime::zone::manager::",
+      "minimum": 6
+    },
+    {
+      "name": "zone_partition_contract",
+      "args": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "zone_partition_contract",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "minimum": 1
+    },
+    {
+      "name": "zone_partition_identity_contract",
+      "args": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "zone_partition_identity_contract",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "minimum": 1
+    },
+    {
+      "name": "zone_manager_admission_contract",
+      "args": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "zone_manager_admission_contract",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "minimum": 1
+    },
+    {
+      "name": "experience-profile",
+      "crate": "mir2-simulation",
+      "filter": "runtime::shared_experience_profile::tests::",
+      "minimum": 21
+    },
+    {
+      "name": "owner-health-live-fork",
+      "crate": "mir2-simulation",
+      "filter": "owner_health_transaction_fork_carries_fifo_but_checkpoint_never_replays_it",
+      "minimum": 1
+    },
+    {
+      "name": "owned-pet-modes",
+      "crate": "mir2-simulation",
+      "filter": "owned_pet_pmode_moves_attacks_searches_and_clears_targets_independently",
+      "minimum": 1
+    },
+    {
+      "name": "owned-pet-brown-clock",
+      "crate": "mir2-simulation",
+      "filter": "owned_pet_last_hitter_and_brown_have_distinct_strict_deadlines",
+      "minimum": 1
+    },
+    {
+      "name": "owned-pet-owner-death",
+      "crate": "mir2-simulation",
+      "filter": "owned_pet_owner_death_kills_pets_and_cancels_all_pending_authority",
+      "minimum": 1
+    },
+    {
+      "name": "vampire-death",
+      "crate": "mir2-simulation",
+      "filter": "vampire_ai::death_tests::",
+      "minimum": 1
+    },
+    {
+      "name": "web-live-overflow",
+      "crate": "mir2-gateway",
+      "filter": "web_live_overflow_tests::",
+      "minimum": 25
+    },
+    {
+      "name": "web-transport-close",
+      "crate": "mir2-gateway",
+      "filter": "web_transport_close_tests::",
+      "minimum": 4
+    },
+    {
+      "name": "store-durability",
+      "crate": "mir2-simulation",
+      "filter": "config::config_account_store_durability_tests::",
+      "minimum": 2
+    },
+    {
+      "name": "guild-clock-store",
+      "crate": "mir2-simulation",
+      "filter": "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+      "minimum": 1
+    },
+    {
+      "name": "admission-lock-order",
+      "crate": "mir2-gateway",
+      "filter": "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+      "minimum": 1
+    },
+    {
+      "name": "kill-award-commit",
+      "crate": "mir2-gateway",
+      "filter": "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+      "minimum": 1
+    },
+    {
+      "name": "guild-kill-source",
+      "crate": "mir2-gateway",
+      "filter": "guild_kill_source_",
+      "minimum": 2
+    }
+  ]
+}

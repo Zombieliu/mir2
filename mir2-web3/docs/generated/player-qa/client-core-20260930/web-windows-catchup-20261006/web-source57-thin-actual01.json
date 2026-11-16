@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "observedAtUtc": "2026-10-11T02:53:25.390Z",
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 60356,
+    "kind": "Source57 original full Thin after current fresh completed Next",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 21948,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/thin-build01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "inputCount": 55317,
+  "fullRootAndOriginalPrePostHashesPassed": true,
+  "package": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-source57-20261011-01",
+    "regularFiles": 7331,
+    "dirs": 778,
+    "links": 0,
+    "bytes": 374011189,
+    "capBytes": 377487360,
+    "marginBytes": 3476171
+  },
+  "runtimeCopy": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/web-runtime01",
+    "allFilesByteMatched": true,
+    "regularFiles": 7331
+  },
+  "warningsCount": 59,
+  "jsonCompaction": {
+    "files": 231,
+    "sourceBytes": 100349931,
+    "outputBytes": 68042309,
+    "savedBytes": 32307622,
+    "detailsPath": "C:\\mir2-cross-platform-storage-20261002\\web-source57-combat-source-20261011-01\\thin-build01\\size-report.json-compaction-details.json"
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/thin-build01/config.json",
+    "bytes": 5180,
+    "sha256": "b57d2b48c02642f4d75cf5c2d8cf5f4a6de8efddf6da04f32cc34838cfd4e1b1"
+  },
+  "report": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/thin-build01/size-report.json",
+    "bytes": 27887,
+    "sha256": "dab9d40f5100509ad5af7681af8c3586fbc537be91a8ea04b11e3bedeab8367c"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source57-combat-source-20261011-01\\thin-build01\\stdout.log",
+    "bytes": 27887,
+    "sha256": "dab9d40f5100509ad5af7681af8c3586fbc537be91a8ea04b11e3bedeab8367c"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source57-combat-source-20261011-01\\thin-build01\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "rendererVersion": "bevy-201eff554f63b9a8",
+  "currentCoreUnchanged": true,
+  "finiteBuildFlagsScope": "Actual service/browser checks qualified separately; original outer legacy flags describe finite builder only",
+  "combatActualPassed": false,
+  "quest2RewardPassed": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

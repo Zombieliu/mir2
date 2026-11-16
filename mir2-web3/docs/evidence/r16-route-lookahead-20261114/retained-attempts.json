@@ -1,0 +1,122 @@
+{
+  "attempts": [
+    {
+      "run": 1,
+      "passed": false,
+      "sha256": "dc91790b43fd087512df98a2205275d8c8d9ec817cc938b7ce5ac06109957c8e",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": null
+    },
+    {
+      "run": 2,
+      "passed": false,
+      "sha256": "731daf450379dd44be4423a9d662002ca8a73958ef993c53d79dea478b9b68f9",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": null
+    },
+    {
+      "run": 3,
+      "passed": false,
+      "sha256": "8def2d1f3c101cd9de07dcba7fd1e619da190bf94787bd20bb676e9e8845ec74",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": null
+    },
+    {
+      "run": 4,
+      "passed": false,
+      "sha256": "32604aa0c41932a7ea5ac64e57a65f8e026059aa7e8946e8c306bd8cbe6b0576",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": "trusted click sends normal interact to the same NPC"
+    },
+    {
+      "run": 5,
+      "passed": false,
+      "sha256": "92b36da7c81860eea4daa599adbde9b025bb4ffec4116bfacd92552cc3c4cad5",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": "normal server NPC response must be received"
+    },
+    {
+      "run": 6,
+      "passed": false,
+      "sha256": "10a5d283246f24a6f2cd71852843d701bc0cefb6d9c13c33b01eaecd566257e9",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": "locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.npc-dialog-panel') to be visible\u001b[22m\n"
+    },
+    {
+      "run": 7,
+      "passed": false,
+      "sha256": "36024575363f3b11a82e1906347018bd7a829c5554323d5fee35a13c1998a485",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": "actual Native NPC close button is published at the source-bound desktop rectangle"
+    },
+    {
+      "run": 8,
+      "passed": true,
+      "sha256": "6d5dad3f3cb40f66904faab5447e78f0b0f57e9a61efc7e3b144c48dc4c08db5",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": null
+    },
+    {
+      "run": 9,
+      "passed": true,
+      "sha256": "b55d7657ee8a1634fc57cf46f12f816ba07e9aed9a2cabd5d9114d26f910beb4",
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcFailure": null
+    }
+  ],
+  "scope": "Original immutable false runs1–7 remain false; only8/9 complete. R1 direct-DOM-hit assumption, R2 omitted observer fields, R3/R4 real wrong actor; R4 route independently passed. R5 expected packet instead of Web dialogue snapshot; R6 queried hidden React fallback; R7 expected full Native NPC X in world-guidance registry. R8/9 use real authoritative Web dialogue and physical source-bound Native X. All original gameplay/resource gates retained; no failed raw receipt rewritten."
+}

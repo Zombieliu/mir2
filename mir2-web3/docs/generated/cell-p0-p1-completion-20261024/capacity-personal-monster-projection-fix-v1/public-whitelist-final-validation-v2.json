@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "scope": "Actual completed bounded Rust validation append; original process and receipt remain intact.",
+  "files": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-remaining-adjacent-v2.log",
+        "bytes": 75656,
+        "sha256": "02467ff9aa3b0d86b9d409993b721cf985cf1a9165a41ef889da4496fc4d5571"
+      },
+      "destination": "final-validation/probe14-personal-projection-remaining-adjacent-v2.log",
+      "bytes": 75656,
+      "sha256": "02467ff9aa3b0d86b9d409993b721cf985cf1a9165a41ef889da4496fc4d5571",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-remaining-adjacent-execution-v2.json",
+        "bytes": 42271,
+        "sha256": "f69a2126c5f08794efa51e9f27b9eb252229162ab140b8e4490b877e44241183"
+      },
+      "destination": "final-validation/probe14-personal-projection-remaining-adjacent-execution-v2.json",
+      "bytes": 42271,
+      "sha256": "f69a2126c5f08794efa51e9f27b9eb252229162ab140b8e4490b877e44241183",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-isolated-quest-v1.log",
+        "bytes": 54774,
+        "sha256": "ae731d34e92fd5cfa18cd00a1293a919288aab55c9e08caf060b865e42c524fe"
+      },
+      "destination": "final-validation/probe14-personal-projection-isolated-quest-v1.log",
+      "bytes": 54774,
+      "sha256": "ae731d34e92fd5cfa18cd00a1293a919288aab55c9e08caf060b865e42c524fe",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.mjs",
+        "bytes": 7401,
+        "sha256": "efed401ca35fd2e58e1a26aa6d78a0b9291fedfbd1d02d67e52fe50cf60ece41"
+      },
+      "destination": "final-validation/root-personal-projection-functional-validation-v1.mjs",
+      "bytes": 7401,
+      "sha256": "efed401ca35fd2e58e1a26aa6d78a0b9291fedfbd1d02d67e52fe50cf60ece41",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json",
+        "bytes": 13454,
+        "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8"
+      },
+      "destination": "final-validation/root-personal-projection-functional-validation-v1.json",
+      "bytes": 13454,
+      "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8",
+      "sourceAfterMatched": true
+    }
+  ],
+  "reusedExistingOriginals": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-rustfmt39-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/probe14-personal-projection-rustfmt39-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "existingRawCopyReused": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-remaining-adjacent-v2.ps1",
+        "bytes": 4730,
+        "sha256": "6261c55919510c7a8d4de18390b33534f2753e4fea12bd338f45e8264a0f0b8c"
+      },
+      "destination": "root-scripts/root-personal-projection-remaining-adjacent-v2.ps1",
+      "bytes": 4730,
+      "sha256": "6261c55919510c7a8d4de18390b33534f2753e4fea12bd338f45e8264a0f0b8c",
+      "existingRawCopyReused": true
+    }
+  ],
+  "rootFunctionalSummary": {
+    "source": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json",
+      "bytes": 13454,
+      "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8"
+    },
+    "destination": "final-validation/root-personal-projection-functional-validation-v1.json",
+    "bytes": 13454,
+    "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8",
+    "sourceAfterMatched": true
+  },
+  "sourcePinMatchToArchivedFiveCandidates": true,
+  "capacityAccepted": false
+}

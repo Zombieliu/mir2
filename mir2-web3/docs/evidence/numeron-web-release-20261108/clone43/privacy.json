@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "reportSha256": "1db5b316fb3def3ac71a53306eaf68e5d7e84e96cf64c2934c5d75b5be143191",
+  "pathCount": 1922,
+  "pathSchemaViolations": 0,
+  "identityOrCredentialStringLeakCount": 0,
+  "uidLiteralsInPaths": 0,
+  "uidScanMinimumDigits": 7,
+  "uidCandidateCount": 6,
+  "allScalarValuesExcludedByReportSchema": true,
+  "privateValuesPrinted": false,
+  "inputFilesWritten": 0,
+  "passed": true
+}

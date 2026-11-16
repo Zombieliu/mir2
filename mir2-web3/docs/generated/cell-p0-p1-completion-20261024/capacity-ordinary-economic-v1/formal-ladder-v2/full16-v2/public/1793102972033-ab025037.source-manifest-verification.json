@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+  "driverSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+  "backendInputCount": 55,
+  "sourceManifestSha256": "9c46d4727a99500b373565e431843c82d2bfdf24815e5211b8142896de257ed2",
+  "sourceManifestFileSha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970",
+  "matchedRawInputs": 55,
+  "matchedRawDriverPins": 14,
+  "originalEntryRootCount": 6,
+  "releaseSha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6",
+  "scope": "Current execution complete55 raw/GitLF/object/closure equals original ee06 V6 Release; historical Rust32/build are strictly reused, not reexecuted"
+}

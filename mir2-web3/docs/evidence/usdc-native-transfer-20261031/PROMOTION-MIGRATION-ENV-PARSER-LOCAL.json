@@ -1,0 +1,45 @@
+{
+  "chainCalls": 0,
+  "command": "python test-prepared-migration-release-forward.py -v",
+  "coverage": [
+    "Repeated EnvironmentFiles preserves original order and duplicates.",
+    "Complete precheck reconstructs reviewed main and preserved environment metadata while retaining original STATE bytes.",
+    "Wrong STATE, reordered environment, unit semantics drift, bad backup size, and post-revision old-file ctime fail before start.",
+    "Preserved Caddy environment keeps observed original gid988/mode0640; incorrect ctime or full environment list rejects.",
+    "Successful mocked control flow archives original STATE before correction, writes forward barrier before Gateway start, and proves preservation before matching worker start."
+  ],
+  "docker": false,
+  "errors": 0,
+  "executedAtUtc": "2026-10-30T21:31:31.031635+00:00",
+  "failures": 0,
+  "limits": [
+    "Pure actual-function mocks and local temporary files; no live Linux service or database operation.",
+    "Despite the historical test function name containing worker_failure, that fixture verifies successful ordering, not an injected worker failure.",
+    "Stopped-service health capacity counters are not newly measured or fabricated."
+  ],
+  "linuxNoFollowSystemCallVerified": false,
+  "parentSourceSha256": "6fec1a9d2a3ded09fa70f013e5433a41789c788543d11811e645c3181820b36c",
+  "passed": true,
+  "postgresWrites": 0,
+  "remoteExecutionPerformed": false,
+  "schema": "mir2.migration-release-forward.local-verification.v1",
+  "serviceActions": 0,
+  "sourceFile": "prepared-migration-release-forward.py",
+  "sourceHashPinned": true,
+  "sourceSha256": "f3898f638e93d217b572b374eb968ef8ecc42e811bb6efb1e943ee2dc932d841",
+  "sshCalls": 0,
+  "testFile": "test-prepared-migration-release-forward.py",
+  "testFunctions": [
+    "test_backup_error_rejected_without_start",
+    "test_complete_precheck_preserves_history",
+    "test_config_drift_rejected_without_start",
+    "test_ctime_drift_rejected",
+    "test_environment_order_rejected_without_start",
+    "test_forward_order_and_worker_failure_preserves_barrier",
+    "test_preserved_missing_environment_is_exact_reconstructed_with_original_group",
+    "test_repeated_property_order",
+    "test_state_drift_rejected_without_start"
+  ],
+  "testSourceSha256": "f8b32e180e6ac360664ac9e2d4da7dea0f403907471ba633b6cab62f677180c6",
+  "testsExecuted": 9
+}

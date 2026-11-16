@@ -1,0 +1,1335 @@
+{
+  "schemaVersion": 1,
+  "offlineOnly": true,
+  "commandsSent": 0,
+  "productionSourceModified": false,
+  "inputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\frozen-source-v1.json",
+      "bytes": 134360,
+      "sha256": "4252ff13f253c9f5e98f41cc11f5eee560ef5652d9ee65ada7f62bf9375ce31c"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\capacity-ordinary-supplies.mjs",
+      "bytes": 82094,
+      "sha256": "32debb56c2685a4c53694b9dc8c91f9bf88212c7c74150c2d98a6fe4c1b42111"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\capacity-ordinary-protection.mjs",
+      "bytes": 7510,
+      "sha256": "5771297b83b379fd300883bf17ec71a32b594c5a38f757f3abafbeadebc67e87"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+      "bytes": 92721,
+      "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation.jsonl",
+      "bytes": 9699582,
+      "sha256": "811f1b8af81f6c150c6b4bc90b68e535e814add76eb0b258a896d5c25e28a268"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\recordings\\0-498081.jsonl",
+      "sourceFileBytes": 105576804,
+      "excerpt": "first UTF8 JSONL line excluding delimiter",
+      "excerptBytes": 34673,
+      "excerptSha256": "822985b027e3bfb4525dd4f8d89d45aedfdb8e5c0b4dadbbb158a6afa2663f89"
+    }
+  ],
+  "scriptPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\return-to-ruben-diagnostic-v1\\analyze-v1.mjs",
+    "bytes": 10551,
+    "sha256": "8a7bca13434ff9eb54b0fc2453c5cd4baaef56294c28d4f2820a1b629c0bc348"
+  },
+  "originalOutcome": {
+    "historicalPrepared": 42,
+    "currentPrepared": 16,
+    "combinedSaved": 58,
+    "originalFailedOrdinal": 59,
+    "originalError": "No walk path on 0 from 330,603 to 288,608",
+    "after": null,
+    "readiness": null
+  },
+  "actualPhase": {
+    "diagnosticState": "selling",
+    "phase": "After completed John sale, navigating to Ruben for a fresh quote before purchase",
+    "callChain": [
+      "runPreparationBank -> prepareCapacityActor -> ordinarySupplies.prepare",
+      "collectSafeFundingVenison completed:2hunts/4attempts",
+      "refresh -> sellUntil(requiredGold) -> shop(JOHN,true) ->2exact sales",
+      "goods=await shop(RUBEN) -> navigate(RUBEN,16)",
+      "shared createNavigator terminal NoPath -> helper navigate catch",
+      "waitForClosedPlannerHistory refuses state selling -> original NoPath rethrown"
+    ],
+    "nextStateAssignmentNotReached": "state=buying occurs only after awaited shop(RUBEN) returns",
+    "soldVenison": 2,
+    "goldEarned": 521,
+    "purchased": 0,
+    "proofs": [
+      {
+        "kind": "sale",
+        "sequence": 1383,
+        "monotonicMs": 2235273.304,
+        "ackSequence": 1381,
+        "quantity": 1,
+        "gold": 273
+      },
+      {
+        "kind": "sale",
+        "sequence": 1387,
+        "monotonicMs": 2235335.5638,
+        "ackSequence": 1385,
+        "quantity": 1,
+        "gold": 248
+      }
+    ],
+    "capitalLast": {
+      "sequence": 1291,
+      "monotonicMs": 2225370.2501,
+      "gold": 0,
+      "hpStock": 1,
+      "items": [
+        {
+          "uniqueId": 4,
+          "quantity": 1,
+          "sellValue": 273,
+          "value": 273
+        },
+        {
+          "uniqueId": 5,
+          "quantity": 1,
+          "sellValue": 248,
+          "value": 248
+        }
+      ],
+      "venisonItemCount": 2,
+      "itemsTruncated": false,
+      "capital": 521,
+      "initialHpPrice": 40,
+      "initialHpQuote": {
+        "sequence": 694,
+        "monotonicMs": 2100736.9975,
+        "price": 40
+      },
+      "quoteAgeMs": 124633.25259999977,
+      "requiredGold": 440,
+      "satisfied": true,
+      "planningOnly": true,
+      "preparationOnly": true,
+      "measurementCredit": false
+    },
+    "commands": 150,
+    "movementCommands": 88,
+    "commandCounts": {
+      "clientVersion": 24,
+      "interact": 2,
+      "selectNpcDialog": 2,
+      "run": 61,
+      "walk": 27,
+      "attackV2": 20,
+      "harvest": 12,
+      "sellItem": 2
+    },
+    "elapsedMs": 150461.5129999998,
+    "pathReplans": 0
+  },
+  "exactPlanningProjection": {
+    "sequence": 1508,
+    "rawSequence": 1508,
+    "from": {
+      "x": 330,
+      "y": 603
+    },
+    "target": {
+      "x": 288,
+      "y": 608
+    },
+    "range": 16,
+    "successfulSteps": 36,
+    "attempts": 24,
+    "shared11Points": [
+      {
+        "objectId": 206610,
+        "name": "Scarecrow",
+        "x": 300,
+        "y": 597,
+        "remainingMs": 7917,
+        "currentlyVisible": false,
+        "live": false,
+        "historyRemainingMs": 7915,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206013,
+        "name": "RakingCat",
+        "x": 301,
+        "y": 596,
+        "remainingMs": 8538,
+        "currentlyVisible": false,
+        "live": false,
+        "historyRemainingMs": 8536,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206644,
+        "name": "Scarecrow",
+        "x": 301,
+        "y": 613,
+        "remainingMs": 8538,
+        "currentlyVisible": false,
+        "live": false,
+        "historyRemainingMs": 8536,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206007,
+        "name": "RakingCat",
+        "x": 299,
+        "y": 590,
+        "remainingMs": 7324,
+        "currentlyVisible": false,
+        "live": false,
+        "historyRemainingMs": 7322,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206628,
+        "name": "Scarecrow",
+        "x": 305,
+        "y": 589,
+        "remainingMs": 9126,
+        "currentlyVisible": false,
+        "live": false,
+        "historyRemainingMs": 9124,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206026,
+        "name": "RakingCat",
+        "x": 320,
+        "y": 589,
+        "remainingMs": 20000,
+        "currentlyVisible": true,
+        "live": true,
+        "historyRemainingMs": 0,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206117,
+        "name": "HookingCat",
+        "x": 321,
+        "y": 588,
+        "remainingMs": 20000,
+        "currentlyVisible": true,
+        "live": true,
+        "historyRemainingMs": 0,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206623,
+        "name": "Scarecrow",
+        "x": 321,
+        "y": 631,
+        "remainingMs": 13696,
+        "currentlyVisible": false,
+        "live": false,
+        "historyRemainingMs": 13694,
+        "qualification": "wire"
+      },
+      {
+        "objectId": 206032,
+        "name": "RakingCat",
+        "x": 322,
+        "y": 595,
+        "remainingMs": 20000,
+        "currentlyVisible": true,
+        "live": true,
+        "historyRemainingMs": 0,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206136,
+        "name": "HookingCat",
+        "x": 339,
+        "y": 587,
+        "remainingMs": 20000,
+        "currentlyVisible": true,
+        "live": true,
+        "historyRemainingMs": 0,
+        "qualification": "raw"
+      },
+      {
+        "objectId": 206129,
+        "name": "HookingCat",
+        "x": 342,
+        "y": 600,
+        "remainingMs": 20000,
+        "currentlyVisible": true,
+        "live": true,
+        "historyRemainingMs": 0,
+        "qualification": "raw"
+      }
+    ],
+    "occupancy": [
+      {
+        "x": 314,
+        "y": 589,
+        "objectId": 206705,
+        "kind": "monster"
+      },
+      {
+        "x": 320,
+        "y": 589,
+        "objectId": 206026,
+        "kind": "monster"
+      },
+      {
+        "x": 321,
+        "y": 588,
+        "objectId": 206117,
+        "kind": "monster"
+      },
+      {
+        "x": 321,
+        "y": 598,
+        "objectId": 214501,
+        "kind": "monster"
+      },
+      {
+        "x": 322,
+        "y": 595,
+        "objectId": 206032,
+        "kind": "monster"
+      },
+      {
+        "x": 322,
+        "y": 587,
+        "objectId": 206208,
+        "kind": "monster"
+      },
+      {
+        "x": 325,
+        "y": 600,
+        "objectId": 206201,
+        "kind": "monster"
+      },
+      {
+        "x": 326,
+        "y": 599,
+        "objectId": 206220,
+        "kind": "monster"
+      },
+      {
+        "x": 328,
+        "y": 589,
+        "objectId": 206542,
+        "kind": "monster"
+      },
+      {
+        "x": 339,
+        "y": 587,
+        "objectId": 206136,
+        "kind": "monster"
+      },
+      {
+        "x": 342,
+        "y": 600,
+        "objectId": 206129,
+        "kind": "monster"
+      },
+      {
+        "x": 342,
+        "y": 606,
+        "objectId": 206703,
+        "kind": "monster"
+      },
+      {
+        "x": 342,
+        "y": 592,
+        "objectId": 206716,
+        "kind": "monster"
+      },
+      {
+        "x": 343,
+        "y": 592,
+        "objectId": 206214,
+        "kind": "monster"
+      },
+      {
+        "x": 344,
+        "y": 591,
+        "objectId": 210400,
+        "kind": "monster"
+      },
+      {
+        "x": 345,
+        "y": 599,
+        "objectId": 206719,
+        "kind": "monster"
+      }
+    ],
+    "transfers": [
+      {
+        "x": 347,
+        "y": 188
+      },
+      {
+        "x": 308,
+        "y": 264
+      },
+      {
+        "x": 326,
+        "y": 288
+      },
+      {
+        "x": 322,
+        "y": 247
+      },
+      {
+        "x": 354,
+        "y": 319
+      },
+      {
+        "x": 295,
+        "y": 251
+      },
+      {
+        "x": 295,
+        "y": 250
+      },
+      {
+        "x": 335,
+        "y": 299
+      },
+      {
+        "x": 335,
+        "y": 300
+      },
+      {
+        "x": 344,
+        "y": 308
+      },
+      {
+        "x": 345,
+        "y": 308
+      },
+      {
+        "x": 295,
+        "y": 284
+      },
+      {
+        "x": 295,
+        "y": 285
+      },
+      {
+        "x": 305,
+        "y": 276
+      },
+      {
+        "x": 307,
+        "y": 311
+      },
+      {
+        "x": 307,
+        "y": 310
+      },
+      {
+        "x": 317,
+        "y": 302
+      },
+      {
+        "x": 317,
+        "y": 301
+      },
+      {
+        "x": 289,
+        "y": 292
+      },
+      {
+        "x": 286,
+        "y": 296
+      },
+      {
+        "x": 278,
+        "y": 239
+      },
+      {
+        "x": 284,
+        "y": 236
+      },
+      {
+        "x": 271,
+        "y": 256
+      },
+      {
+        "x": 283,
+        "y": 268
+      },
+      {
+        "x": 396,
+        "y": 230
+      },
+      {
+        "x": 396,
+        "y": 229
+      },
+      {
+        "x": 400,
+        "y": 225
+      },
+      {
+        "x": 399,
+        "y": 225
+      },
+      {
+        "x": 404,
+        "y": 221
+      },
+      {
+        "x": 403,
+        "y": 221
+      },
+      {
+        "x": 414,
+        "y": 243
+      },
+      {
+        "x": 415,
+        "y": 241
+      },
+      {
+        "x": 416,
+        "y": 241
+      },
+      {
+        "x": 315,
+        "y": 613
+      },
+      {
+        "x": 266,
+        "y": 630
+      },
+      {
+        "x": 271,
+        "y": 621
+      },
+      {
+        "x": 295,
+        "y": 649
+      },
+      {
+        "x": 283,
+        "y": 636
+      },
+      {
+        "x": 282,
+        "y": 636
+      },
+      {
+        "x": 282,
+        "y": 635
+      },
+      {
+        "x": 274,
+        "y": 636
+      },
+      {
+        "x": 302,
+        "y": 622
+      },
+      {
+        "x": 311,
+        "y": 631
+      },
+      {
+        "x": 307,
+        "y": 627
+      },
+      {
+        "x": 314,
+        "y": 474
+      },
+      {
+        "x": 43,
+        "y": 111
+      },
+      {
+        "x": 664,
+        "y": 215
+      },
+      {
+        "x": 663,
+        "y": 215
+      },
+      {
+        "x": 324,
+        "y": 41
+      },
+      {
+        "x": 325,
+        "y": 42
+      },
+      {
+        "x": 326,
+        "y": 43
+      },
+      {
+        "x": 326,
+        "y": 42
+      },
+      {
+        "x": 325,
+        "y": 41
+      },
+      {
+        "x": 325,
+        "y": 40
+      },
+      {
+        "x": 326,
+        "y": 40
+      },
+      {
+        "x": 666,
+        "y": 86
+      },
+      {
+        "x": 667,
+        "y": 87
+      },
+      {
+        "x": 667,
+        "y": 88
+      },
+      {
+        "x": 316,
+        "y": 649
+      },
+      {
+        "x": 315,
+        "y": 650
+      },
+      {
+        "x": 316,
+        "y": 650
+      },
+      {
+        "x": 315,
+        "y": 649
+      },
+      {
+        "x": 315,
+        "y": 648
+      },
+      {
+        "x": 314,
+        "y": 649
+      },
+      {
+        "x": 310,
+        "y": 600
+      },
+      {
+        "x": 286,
+        "y": 296
+      },
+      {
+        "x": 347,
+        "y": 189
+      },
+      {
+        "x": 147,
+        "y": 33
+      },
+      {
+        "x": 148,
+        "y": 34
+      }
+    ],
+    "explicitReconstructedTotal": 1577,
+    "originalExplicitTotal": 1577,
+    "allPublishedPrefixCellsMatched": 128,
+    "originalExplicitPrefixTruncated": true,
+    "dynamicArrayTotal": 1662,
+    "noUnknownOrDisallowedSharedPoints": true,
+    "globalQuarantine": 0,
+    "baseline": {
+      "label": "actual-complete-retained-view",
+      "retainedIds": [
+        206610,
+        206013,
+        206644,
+        206007,
+        206628,
+        206026,
+        206117,
+        206623,
+        206032,
+        206136,
+        206129
+      ],
+      "explicitCount": 1577,
+      "pathFound": false,
+      "steps": null,
+      "path": null,
+      "endpoint": null,
+      "endpointDistance": null
+    },
+    "staticOnly": {
+      "found": true,
+      "steps": 28
+    },
+    "naturalExpiryProjections": [
+      {
+        "elapsedMs": 7325,
+        "removedOnlyPreviouslyClosedIds": [
+          206007
+        ],
+        "label": "original-closed-ttl-naturally-elapsed-live-held-fixed",
+        "retainedIds": [
+          206610,
+          206013,
+          206644,
+          206628,
+          206026,
+          206117,
+          206623,
+          206032,
+          206136,
+          206129
+        ],
+        "explicitCount": 1533,
+        "pathFound": false,
+        "steps": null,
+        "path": null,
+        "endpoint": null,
+        "endpointDistance": null
+      },
+      {
+        "elapsedMs": 7918,
+        "removedOnlyPreviouslyClosedIds": [
+          206610,
+          206007
+        ],
+        "label": "original-closed-ttl-naturally-elapsed-live-held-fixed",
+        "retainedIds": [
+          206013,
+          206644,
+          206628,
+          206026,
+          206117,
+          206623,
+          206032,
+          206136,
+          206129
+        ],
+        "explicitCount": 1504,
+        "pathFound": false,
+        "steps": null,
+        "path": null,
+        "endpoint": null,
+        "endpointDistance": null
+      },
+      {
+        "elapsedMs": 8539,
+        "removedOnlyPreviouslyClosedIds": [
+          206610,
+          206013,
+          206644,
+          206007
+        ],
+        "label": "original-closed-ttl-naturally-elapsed-live-held-fixed",
+        "retainedIds": [
+          206628,
+          206026,
+          206117,
+          206623,
+          206032,
+          206136,
+          206129
+        ],
+        "explicitCount": 1218,
+        "pathFound": true,
+        "steps": 28,
+        "path": [
+          {
+            "x": 330,
+            "y": 603
+          },
+          {
+            "x": 329,
+            "y": 604
+          },
+          {
+            "x": 328,
+            "y": 605
+          },
+          {
+            "x": 328,
+            "y": 606
+          },
+          {
+            "x": 328,
+            "y": 607
+          },
+          {
+            "x": 327,
+            "y": 608
+          },
+          {
+            "x": 326,
+            "y": 608
+          },
+          {
+            "x": 325,
+            "y": 608
+          },
+          {
+            "x": 324,
+            "y": 608
+          },
+          {
+            "x": 323,
+            "y": 608
+          },
+          {
+            "x": 322,
+            "y": 607
+          },
+          {
+            "x": 321,
+            "y": 606
+          },
+          {
+            "x": 320,
+            "y": 605
+          },
+          {
+            "x": 319,
+            "y": 604
+          },
+          {
+            "x": 318,
+            "y": 603
+          },
+          {
+            "x": 317,
+            "y": 602
+          },
+          {
+            "x": 316,
+            "y": 602
+          },
+          {
+            "x": 315,
+            "y": 602
+          },
+          {
+            "x": 314,
+            "y": 602
+          },
+          {
+            "x": 313,
+            "y": 602
+          },
+          {
+            "x": 312,
+            "y": 603
+          },
+          {
+            "x": 311,
+            "y": 604
+          },
+          {
+            "x": 310,
+            "y": 605
+          },
+          {
+            "x": 309,
+            "y": 606
+          },
+          {
+            "x": 308,
+            "y": 607
+          },
+          {
+            "x": 307,
+            "y": 607
+          },
+          {
+            "x": 306,
+            "y": 607
+          },
+          {
+            "x": 305,
+            "y": 608
+          },
+          {
+            "x": 304,
+            "y": 608
+          }
+        ],
+        "endpoint": {
+          "x": 304,
+          "y": 608
+        },
+        "endpointDistance": 16
+      },
+      {
+        "elapsedMs": 9127,
+        "removedOnlyPreviouslyClosedIds": [
+          206610,
+          206013,
+          206644,
+          206007,
+          206628
+        ],
+        "label": "original-closed-ttl-naturally-elapsed-live-held-fixed",
+        "retainedIds": [
+          206026,
+          206117,
+          206623,
+          206032,
+          206136,
+          206129
+        ],
+        "explicitCount": 1023,
+        "pathFound": true,
+        "steps": 28,
+        "path": [
+          {
+            "x": 330,
+            "y": 603
+          },
+          {
+            "x": 329,
+            "y": 604
+          },
+          {
+            "x": 328,
+            "y": 605
+          },
+          {
+            "x": 328,
+            "y": 606
+          },
+          {
+            "x": 328,
+            "y": 607
+          },
+          {
+            "x": 327,
+            "y": 608
+          },
+          {
+            "x": 326,
+            "y": 608
+          },
+          {
+            "x": 325,
+            "y": 608
+          },
+          {
+            "x": 324,
+            "y": 608
+          },
+          {
+            "x": 323,
+            "y": 608
+          },
+          {
+            "x": 322,
+            "y": 607
+          },
+          {
+            "x": 321,
+            "y": 606
+          },
+          {
+            "x": 320,
+            "y": 605
+          },
+          {
+            "x": 319,
+            "y": 604
+          },
+          {
+            "x": 318,
+            "y": 603
+          },
+          {
+            "x": 317,
+            "y": 602
+          },
+          {
+            "x": 316,
+            "y": 602
+          },
+          {
+            "x": 315,
+            "y": 602
+          },
+          {
+            "x": 314,
+            "y": 602
+          },
+          {
+            "x": 313,
+            "y": 602
+          },
+          {
+            "x": 312,
+            "y": 603
+          },
+          {
+            "x": 311,
+            "y": 604
+          },
+          {
+            "x": 310,
+            "y": 605
+          },
+          {
+            "x": 309,
+            "y": 606
+          },
+          {
+            "x": 308,
+            "y": 607
+          },
+          {
+            "x": 307,
+            "y": 607
+          },
+          {
+            "x": 306,
+            "y": 607
+          },
+          {
+            "x": 305,
+            "y": 608
+          },
+          {
+            "x": 304,
+            "y": 608
+          }
+        ],
+        "endpoint": {
+          "x": 304,
+          "y": 608
+        },
+        "endpointDistance": 16
+      },
+      {
+        "elapsedMs": 13697,
+        "removedOnlyPreviouslyClosedIds": [
+          206610,
+          206013,
+          206644,
+          206007,
+          206628,
+          206623
+        ],
+        "label": "original-closed-ttl-naturally-elapsed-live-held-fixed",
+        "retainedIds": [
+          206026,
+          206117,
+          206032,
+          206136,
+          206129
+        ],
+        "explicitCount": 802,
+        "pathFound": true,
+        "steps": 28,
+        "path": [
+          {
+            "x": 330,
+            "y": 603
+          },
+          {
+            "x": 329,
+            "y": 604
+          },
+          {
+            "x": 328,
+            "y": 605
+          },
+          {
+            "x": 328,
+            "y": 606
+          },
+          {
+            "x": 328,
+            "y": 607
+          },
+          {
+            "x": 327,
+            "y": 608
+          },
+          {
+            "x": 326,
+            "y": 608
+          },
+          {
+            "x": 325,
+            "y": 608
+          },
+          {
+            "x": 324,
+            "y": 608
+          },
+          {
+            "x": 323,
+            "y": 608
+          },
+          {
+            "x": 322,
+            "y": 607
+          },
+          {
+            "x": 321,
+            "y": 606
+          },
+          {
+            "x": 320,
+            "y": 605
+          },
+          {
+            "x": 319,
+            "y": 604
+          },
+          {
+            "x": 318,
+            "y": 603
+          },
+          {
+            "x": 317,
+            "y": 602
+          },
+          {
+            "x": 316,
+            "y": 602
+          },
+          {
+            "x": 315,
+            "y": 602
+          },
+          {
+            "x": 314,
+            "y": 602
+          },
+          {
+            "x": 313,
+            "y": 602
+          },
+          {
+            "x": 312,
+            "y": 603
+          },
+          {
+            "x": 311,
+            "y": 604
+          },
+          {
+            "x": 310,
+            "y": 605
+          },
+          {
+            "x": 309,
+            "y": 606
+          },
+          {
+            "x": 308,
+            "y": 607
+          },
+          {
+            "x": 307,
+            "y": 607
+          },
+          {
+            "x": 306,
+            "y": 607
+          },
+          {
+            "x": 305,
+            "y": 608
+          },
+          {
+            "x": 304,
+            "y": 608
+          }
+        ],
+        "endpoint": {
+          "x": 304,
+          "y": 608
+        },
+        "endpointDistance": 16
+      }
+    ],
+    "liveOnly": {
+      "label": "all-original-closed-points-naturally-expired-live-occupancy-transfers-unchanged",
+      "retainedIds": [
+        206026,
+        206117,
+        206032,
+        206136,
+        206129
+      ],
+      "explicitCount": 802,
+      "pathFound": true,
+      "steps": 28,
+      "path": [
+        {
+          "x": 330,
+          "y": 603
+        },
+        {
+          "x": 329,
+          "y": 604
+        },
+        {
+          "x": 328,
+          "y": 605
+        },
+        {
+          "x": 328,
+          "y": 606
+        },
+        {
+          "x": 328,
+          "y": 607
+        },
+        {
+          "x": 327,
+          "y": 608
+        },
+        {
+          "x": 326,
+          "y": 608
+        },
+        {
+          "x": 325,
+          "y": 608
+        },
+        {
+          "x": 324,
+          "y": 608
+        },
+        {
+          "x": 323,
+          "y": 608
+        },
+        {
+          "x": 322,
+          "y": 607
+        },
+        {
+          "x": 321,
+          "y": 606
+        },
+        {
+          "x": 320,
+          "y": 605
+        },
+        {
+          "x": 319,
+          "y": 604
+        },
+        {
+          "x": 318,
+          "y": 603
+        },
+        {
+          "x": 317,
+          "y": 602
+        },
+        {
+          "x": 316,
+          "y": 602
+        },
+        {
+          "x": 315,
+          "y": 602
+        },
+        {
+          "x": 314,
+          "y": 602
+        },
+        {
+          "x": 313,
+          "y": 602
+        },
+        {
+          "x": 312,
+          "y": 603
+        },
+        {
+          "x": 311,
+          "y": 604
+        },
+        {
+          "x": 310,
+          "y": 605
+        },
+        {
+          "x": 309,
+          "y": 606
+        },
+        {
+          "x": 308,
+          "y": 607
+        },
+        {
+          "x": 307,
+          "y": 607
+        },
+        {
+          "x": 306,
+          "y": 607
+        },
+        {
+          "x": 305,
+          "y": 608
+        },
+        {
+          "x": 304,
+          "y": 608
+        }
+      ],
+      "endpoint": {
+        "x": 304,
+        "y": 608
+      },
+      "endpointDistance": 16
+    }
+  },
+  "limitations": [
+    "This reconstructs only the final actual planning view, not earlier route states or exact receipt replay.",
+    "Transfers come from one earlier actual public recording frame (69 active protocol rows), not all72 authored declarations. Only first-line bytes were inspected, and only transfer coordinates retained.",
+    "Natural-expiry paths are offline counterfactuals with five current live positions and all16occupancy held fixed. Real later movement/newAOI can change the result.",
+    "Shared relative TTLs are diagnostic only. Production waits must use existing helper-owned trail expiresAt and row identity, never regenerate/extend trust or expiry from this JSON.",
+    "All11points were already raw/wire qualified in the actual helper view. Static safe-zone membership is a geometry calculation from the pinned spec; no new raw DTO or wire certificate was synthesized.",
+    "No cache was cleared and no live episode or test was run. Original failure and absent final purchase/readiness remain unchanged."
+  ]
+}

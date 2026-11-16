@@ -1,0 +1,885 @@
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unused imports: `GuildPixelText` and `rasterize_guild_text_uncached`
+ --> src\crystal_ui\guild_pixel_text.rs:5:27
+  |
+5 |     rasterize_guild_text, rasterize_guild_text_uncached, GuildPixelText, GuildPixelTextStyle,
+  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `mail_date_label`
+  --> src\crystal_ui\mail_page_shared.rs:11:25
+   |
+11 |     mail_claim_enabled, mail_date_label, mail_delete_enabled, MailMessage, MailModel,
+   |                         ^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:48:58
+   |
+48 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+49 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:51:51
+   |
+51 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:81:5
+   |
+81 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, `INVENTORY_WEIGHT_BAR_ORIGIN`, `INVENTORY_WEIGHT_BAR_SIZE`, `SKILL_ROW_ORIGIN`, `SKILL_ROW_SIZE`, and `SKILL_ROW_STEP_Y`
+   --> src\crystal_ui\overlays.rs:136:5
+    |
+136 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+137 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+141 |     INVENTORY_PAGE_SIZE, INVENTORY_PANEL_ORIGIN, INVENTORY_PANEL_SIZE, INVENTORY_WEIGHT_BAR_ORIGIN,
+    |                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+142 |     INVENTORY_WEIGHT_BAR_SIZE, NPC_DIALOG_PANEL_SIZE, NPC_DROP_PANEL_ORIGIN, NPC_DROP_PANEL_SIZE,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+143 |     NPC_GOODS_PANEL_ORIGIN, NPC_GOODS_PANEL_SIZE, NPC_SERVICE_INVENTORY_ORIGIN, SKILL_PAGE_SIZE,
+144 |     SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+    |                       ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unused imports: `crystal_character_gender_offset` and `crystal_character_state_item_frame`
+   --> src\crystal_ui\overlays.rs:443:5
+    |
+443 |     crystal_character_gender_offset, crystal_character_hair_frame,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+444 |     crystal_character_state_item_frame,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:9067:8
+     |
+9067 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+9068 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+9067 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+9068 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: unnecessary parentheses around type
+  --> src\crystal_ui\skill_page_shared.rs:68:20
+   |
+68 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+help: remove these parentheses
+   |
+68 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+68 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:166:9
+    |
+166 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:217:9
+    |
+217 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:234:9
+    |
+234 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:1106:5
+     |
+1106 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:8175:17
+     |
+8175 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:8176:28
+     |
+8176 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:8176:28
+     |
+8176 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:8612:18
+     |
+8612 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:9374:25
+     |
+9374 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:9375:36
+     |
+9375 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:9347:5
+     |
+9347 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:9375:36
+     |
+9375 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src\crystal_ui\overlays.rs:13061:9
+      |
+13061 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src\crystal_ui\overlays.rs:13062:9
+      |
+13062 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_parcel_tests.rs:969:9
+    |
+969 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `name`
+    --> src\native_i18n.rs:1006:28
+     |
+1006 |         if let Some((text, name)) = body.rsplit_once('/').filter(|(_, name)| colour(name)) {
+     |                            ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `guidance`
+   --> src\quest_turn_in.rs:503:13
+    |
+503 |         let guidance = QuestGuidance::from_profile_name("newcomer-v2");
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_guidance`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:2694:5
+     |
+2694 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::NativeNpcShopSource` is more private than the item `overlays::prepare_npc_shop_button_fixture`
+     --> src\crystal_ui\overlays.rs:26084:1
+      |
+26084 | / pub(super) fn prepare_npc_shop_button_fixture(
+26085 | |     app: &mut App,
+26086 | | ) -> Option<(crate::npc_shop_ui::NpcShopUiStamp, NativeNpcShopSource)> {
+      | |______________________________________________________________________^ function `overlays::prepare_npc_shop_button_fixture` is reachable at visibility `pub(in crate::crystal_ui)`
+      |
+note: but type `overlays::NativeNpcShopSource` is only usable at visibility `pub(self)`
+     --> src\crystal_ui\overlays.rs:1222:1
+      |
+ 1222 | struct NativeNpcShopSource {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+      = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayButton` is more private than the item `overlays::press_npc_shop_button_fixture`
+     --> src\crystal_ui\overlays.rs:26138:1
+      |
+26138 | pub(super) fn press_npc_shop_button_fixture(app: &mut App, action: OverlayButton) {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `overlays::press_npc_shop_button_fixture` is reachable at visibility `pub(in crate::crystal_ui)`
+      |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+     --> src\crystal_ui\overlays.rs:4103:1
+      |
+ 4103 | enum OverlayButton {
+      | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayInventory` is more private than the item `render_order`
+    --> src\crystal_ui\hero_cross_inventory.rs:302:1
+     |
+ 302 | / pub fn render_order(
+ 303 | |     mut commands: Commands,
+ 304 | |     state: Res<NativePlayerUiState>,
+ 305 | |     panels: Query<Entity, With<OverlayInventory>>,
+ 306 | | ) {
+     | |_^ function `render_order` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayInventory` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3931:1
+     |
+3931 | struct OverlayInventory;
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::hero_dialog::render::render`
+    --> src\crystal_ui\hero_dialog_render.rs:258:1
+     |
+ 258 | / pub fn render(
+ 259 | |     mut commands: Commands,
+ 260 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 261 | |     old: Query<Entity, With<HeroRoot>>,
+...    |
+ 266 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+ 267 | | ) {
+     | |_^ function `overlays::hero_dialog::render::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3928:1
+     |
+3928 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `skill_bars::host::render`
+    --> src\crystal_ui\skill_bars_host.rs:132:1
+     |
+ 132 | / pub fn render(
+ 133 | |     mut commands: Commands,
+ 134 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 135 | |     old: Query<Entity, With<SkillBarRoot>>,
+...    |
+ 139 | |     assets: Option<Res<AssetServer>>,
+ 140 | | ) {
+     | |_^ function `skill_bars::host::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3928:1
+     |
+3928 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::render`
+    --> src\crystal_ui\hero_buff_hud.rs:121:1
+     |
+ 121 | / pub fn render(
+ 122 | |     mut commands: Commands,
+ 123 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 124 | |     old: Query<Entity, With<HeroBuffRoot>>,
+...    |
+ 127 | |     assets: Option<Res<AssetServer>>,
+ 128 | | ) {
+     | |_^ function `hero_buff_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3928:1
+     |
+3928 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::hint`
+    --> src\crystal_ui\hero_buff_hud.rs:213:1
+     |
+ 213 | / pub fn hint(
+ 214 | |     mut commands: Commands,
+ 215 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 216 | |     old: Query<(Entity, &ComputedNode), With<HeroBuffHint>>,
+...    |
+ 219 | |     shell: Res<NativeShellModel>,
+ 220 | | ) {
+     | |_^ function `hero_buff_hud::hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3928:1
+     |
+3928 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::status_hud::render`
+    --> src\crystal_ui\status_hud.rs:407:1
+     |
+ 407 | / pub fn render(
+ 408 | |     mut commands: Commands,
+ 409 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 410 | |     old: Query<Entity, With<StatusRoot>>,
+...    |
+ 414 | |     assets: Option<Res<AssetServer>>,
+ 415 | | ) {
+     | |_^ function `overlays::status_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3928:1
+     |
+3928 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `render_hint`
+    --> src\crystal_ui\status_hud.rs:685:1
+     |
+ 685 | / pub fn render_hint(
+ 686 | |     mut commands: Commands,
+ 687 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 688 | |     old: Query<(Entity, &ComputedNode), With<StatusHint>>,
+...    |
+ 691 | |     shell: Res<NativeShellModel>,
+ 692 | | ) {
+     | |_^ function `render_hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3928:1
+     |
+3928 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayButton` is more private than the item `press_real_button`
+    --> src\crystal_ui\npc_shop_layout_tests.rs:147:1
+     |
+ 147 | pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `press_real_button` is reachable at visibility `pub(crate)`
+     |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:4103:1
+     |
+4103 | enum OverlayButton {
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_frame` is never used
+   --> src\crystal_ui\hud.rs:435:4
+    |
+435 | fn spawn_frame(
+    |    ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `spawn_frame_at` is never used
+   --> src\crystal_ui\hud.rs:467:4
+    |
+467 | fn spawn_frame_at(
+    |    ^^^^^^^^^^^^^^
+
+warning: function `spawn_vertical_centered_text` is never used
+   --> src\crystal_ui\hud.rs:731:4
+    |
+731 | fn spawn_vertical_centered_text<T: Component>(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `TEXT` is never used
+ --> src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:17:18
+   |
+17 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `render` and `render_at` are never used
+   --> src\crystal_ui\mail_editor.rs:644:19
+    |
+ 80 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+644 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+648 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src\crystal_ui\overlays.rs:4132:5
+     |
+4103 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+4132 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+4133 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+4134 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+4135 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+4136 |     ToggleInventory,
+4137 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+4138 |     ToggleShop,
+     |     ^^^^^^^^^^
+...
+4143 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+4148 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+4167 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+4168 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+4171 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+4175 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+4179 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+4180 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+4181 |     GuildKickMember(u8),
+4182 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+4185 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+4194 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+4257 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+4258 |     MailGoldFocus,
+4259 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+4260 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+4261 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+4298 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+4299 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+4312 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `overlay_compact_item_button` is never used
+     --> src\crystal_ui\overlays.rs:14632:4
+      |
+14632 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src\crystal_ui\overlays.rs:16340:4
+      |
+16340 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src\crystal_ui\overlays.rs:16577:4
+      |
+16577 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> src\crystal_ui\overlays.rs:16745:4
+      |
+16745 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: methods `reject_unsent_quote` and `invalidate_quote` are never used
+   --> src\crystal_ui\mail_parcel.rs:294:19
+    |
+106 | impl MailParcelUi {
+    | ----------------- methods in this implementation
+...
+294 |     pub(super) fn reject_unsent_quote(&mut self) {
+    |                   ^^^^^^^^^^^^^^^^^^^
+...
+328 |     pub(super) fn invalidate_quote(&mut self) {
+    |                   ^^^^^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src\native_shell_ui.rs:46:7
+   |
+46 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> src\native_shell_ui.rs:56:7
+   |
+56 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src\native_shell_ui.rs:410:5
+    |
+399 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+410 |     CycleClass,
+    |     ^^^^^^^^^^
+411 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+419 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+420 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> src\native_shell_ui.rs:2561:4
+     |
+2561 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src\native_shell_ui.rs:2681:4
+     |
+2681 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src\native_shell_ui.rs:2717:4
+     |
+2717 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src\native_shell_ui.rs:2813:4
+     |
+2813 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:98:7
+   |
+98 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> src\quest_ui.rs:1550:5
+     |
+1501 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1550 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1553 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:7272:4
+     |
+7272 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+     --> src\quest_ui.rs:10248:4
+      |
+10248 | fn tracker_quest_block(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+     --> src\quest_ui.rs:10489:4
+      |
+10489 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+     --> src\quest_ui.rs:10499:4
+      |
+10499 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+     --> src\quest_ui.rs:10513:4
+      |
+10513 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `parse_guild_member` is never used
+    --> src\social.rs:1447:4
+     |
+1447 | fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:8174:9
+     |
+8174 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:8175:9
+     |
+8175 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:8176:9
+     |
+8176 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:9373:17
+     |
+9373 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:9374:17
+     |
+9374 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:9375:17
+     |
+9375 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:826:5
+    |
+826 |     drop(compose);
+    |     ^^^^^-------^
+    |          |
+    |          argument has type `&overlays::MailComposeUi`
+    |
+    = note: `#[warn(dropping_references)]` on by default
+help: use `let _ = ...` to ignore the expression or result
+    |
+826 -     drop(compose);
+826 +     let _ = compose;
+    |
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:827:5
+    |
+827 |     drop(state);
+    |     ^^^^^-----^
+    |          |
+    |          argument has type `&overlays::NativePlayerUiState`
+    |
+help: use `let _ = ...` to ignore the expression or result
+    |
+827 -     drop(state);
+827 +     let _ = state;
+    |
+
+warning: `mir2-client-bevy` (lib test) generated 74 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 34 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 24s
+     Running unittests src\lib.rs (F:/mir2-builds/canonical-companion-native\release\deps\mir2_client_bevy-defd9cc01e23a799.exe)
+
+running 145 tests
+test crystal_ui::chat::tests::rendered_chat_pressed_guild_filters_rebuilt_text ... ok
+test crystal_ui::guild_pixel_text_view::tests::guild_gdi_is_english_only_without_touching_bundled_nonenglish_font_paths ... ok
+test crystal_ui::guild_pixel_text_view::tests::guild_image_cache_lru_drops_only_its_handle_and_stays_below_sixteen_mib ... ok
+test crystal_ui::guild_pixel_text_view::tests::guild_negative_cache_is_bounded_and_key_keeps_font_alignment_and_padding_policy ... ok
+test crystal_ui::guild_storage::tests::amount_box_starts_with_maximum_selected_and_clamps_numeric_input_without_overflow ... ok
+test crystal_ui::guild_storage::tests::constructor_keeps_source_index_one_but_initial_slots_zero_through_sixty_three ... ok
+test crystal_ui::guild_storage::tests::drag_matches_every_source_integer_y_including_nonreciprocal_snap_steps ... ok
+test crystal_ui::guild_storage::tests::every_visible_row_preserves_all_eight_columns_and_authoritative_slot_ids ... ok
+test crystal_ui::guild_storage::tests::storage_geometry_and_button_art_do_not_confuse_draw_size_with_hit_size ... ok
+test crystal_ui::guild_storage::tests::wheel_uses_truncated_notches_clamps_and_retains_the_source_zero_delta_update ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::acquisition_activation_and_permissions_use_authority_without_optimism ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::list_request_failure_retries_and_character_change_clears_authority ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::ordinary_deltas_preserve_catalog_and_other_buffs ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::scroll_drag_and_catalog_shrink_are_bounded_with_stable_ids ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::source_row_states_use_guildskill_icon_triplets ... ok
+test crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_a_full_protected_queue_rejects_new_ordinary_without_losing_any_request ... ok
+test crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_never_raises_the_eight_social_budget_to_match_twenty_four_queue_slots ... ok
+test crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_queued_permission_read_and_rename_survive_later_ordinary_overflow ... ok
+test crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_skips_all_mixed_protected_prefixes_and_preserves_fifo_among_ordinary_inputs ... ok
+test crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_stale_read_cannot_reenter_after_guild_change_or_same_name_rejoin ... ok
+test crystal_ui::overlays::guild_panel::guild_pending_eviction_tests::guild_pending_eviction_typed_read_duplicate_remains_rejected_after_queue_drain_without_new_pending ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_actual_overlay_handler_enforces_native_300ms_without_optimistic_options ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_actual_overlay_rejects_invalid_option_foreign_owner_or_revoked_rank_permission ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_builder_and_queue_reject_wrong_requester_or_forged_viewer ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_enqueues_only_typed_context_without_optimistic_permissions ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_full_transport_queue_rejects_before_creating_pending ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_generic_social_entry_rejects_both_naked_type5_and_typed_variant ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_map_keeps_pending_but_session_reset_retires_queue_and_context ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_nonleader_cannot_edit_a_higher_rank ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_other_bits_are_independent_but_keep_the_original_server_options ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_real_status7_releases_only_the_matching_bit_and_actor ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_rechecks_authority_after_request_creation_at_actual_queue_admission ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_same_name_leave_rejoin_cannot_reuse_old_scope ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_same_rank_bit_stays_unique_after_queue_drain_and_opposite_full_projection ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_flow_uses_the_same_finite_eight_budget_as_other_social_operations ... ok
+test crystal_ui::overlays::guild_panel::guild_permission_flow_tests::guild_permission_refresh_actual_panel_coalesces_unknown_member_until_complete_roster ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_cached_old_source_projection_does_not_ack_a_new_request ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_editor_releases_after_terminal_then_peer_delta_in_same_frame ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_foreign_actor_wrong_rank_or_text_does_not_release_request ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_full_queue_refuses_before_pending_and_input_follows_utf16_admission ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_hidden_timeout_is_strictly_after_five_seconds_and_keeps_other_pending ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_leave_and_rejoin_same_guild_scope_revokes_old_rename_only ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_matching_typed_terminal_releases_exact_pending_and_editor_before_deadline ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_metadata_255_matching_text_never_completes_request ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_new_membership_editor_keeps_actual_owner_and_clock_for_first_command ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_nonrename_status_does_not_ack_matching_text ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_same_name_source_terminal_still_completes ... ok
+test crystal_ui::overlays::guild_panel::guild_rank_flow_tests::guild_rank_scene_retains_pending_and_session_reset_retires_it ... ok
+test crystal_ui::overlays::guild_panel::tests::guild_buff_queue_failure_releases_list_retry_without_optimistic_unlock ... ok
+test crystal_ui::overlays::guild_panel::tests::guild_invitation_response_is_bound_to_exact_inviter_epoch ... ok
+test crystal_ui::overlays::guild_panel::tests::member_rank_change_is_only_sent_after_confirmation_with_original_fields ... ok
+test crystal_ui::overlays::guild_panel::tests::rank_rename_uses_type_three_and_cannot_edit_a_senior_rank ... ok
+test crystal_ui::overlays::guild_panel::tests::source_member_pages_advance_twenty_five_and_clamp_to_eighteen_visible_rows ... ok
+test crystal_ui::overlays::guild_panel::tests::source_notice_edit_and_submission_have_separate_limits ... ok
+test crystal_ui::overlays::guild_panel::tests::source_rank_edit_budget_is_twenty_utf16_and_selection_survives_sync ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_coalesced_control_a_release_then_digits_keeps_modifier_event_order ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_coalesced_digits_backspace_and_enter_submit_the_edited_not_old_amount ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_enter_on_invalid_uint_closes_silently_like_source_invoke_click ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_escape_drains_its_keyboard_batch_without_leaking_to_the_next_modal ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_modal_blocks_underlying_buttons_even_in_the_frame_it_closes ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_modal_submission_is_exact_nonoptimistic_deduplicated_and_throttled ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_mouse_buttons_keep_default_button_b_and_explicit_close_button_a ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_prompt_sync_cancels_changed_identity_revoked_rank_and_session_exit ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_real_keyboard_route_consumes_modal_keys_and_submits_only_on_enter ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_source_modal_has_exact_coin_input_button_geometry_and_invalid_ok_visibility ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_zero_and_stale_guild_rank_or_balance_do_not_send_mutations ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_alpha_true_size_centres_without_cropping_and_refreshes_same_handle ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_compressed_press_move_release_keeps_the_real_motion_before_ending_drag ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_current_stack_image_and_count_do_not_use_stale_tooltip_count_or_real_info ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_ecs_has_source_grid_background_hit_rects_and_separate_arrow_art ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_known_source_frame_zero_is_drawn_but_missing_source_is_not_guessed ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_original_images_keep_negative_odd_offsets_and_refresh_loaded_dimensions ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_real_original_pngs_follow_get_true_size_and_keep_full_draw_dimensions ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_scroll_persists_on_hide_but_session_reset_clears_pointer_and_gold_modal ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_source_tab_visibility_and_gold_withdraw_are_independent_rank_rules ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_thumb_drag_uses_source_grab_offset_scale_clamp_and_focus_release ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_wheel_is_window_cursor_modal_and_unit_scoped ... ok
+test crystal_ui::overlays::social_bond_dialog::host::tests::guild_creation_keyboard_enter_is_one_shot_and_escape_sends_no_name ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_cancel_and_stale_buttons_do_not_submit_or_restore ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_editor_applies_twenty_utf16_units_and_validates_before_submission ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_local_transport_failure_restores_only_current_authorization ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_map_npc_exit_and_session_boundaries_retire_queued_name ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_preserves_existing_bonds_and_never_handles_guild_war_as_sabuk ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_prompt_has_copy_in_all_nine_locales_without_translating_names ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::guild_name_requires_the_sent_original_npc_link_and_consumes_request_once ... ok
+test crystal_ui::overlays::tests::crystal_character_gender_class_and_guild_projection_is_exact ... ok
+test crystal_ui::overlays::tests::guild_notice_edit_publish_failure_retry_and_receipt_stay_authoritative ... ok
+test crystal_ui::overlays::tests::guild_notice_editor_consumes_real_keyboard_messages_before_chat ... ok
+test crystal_ui::overlays::tests::guild_notice_preserves_source_lines_and_leaves_200_line_rejection_to_server ... ok
+test crystal_ui::overlays::tests::guild_permission_aliases_accept_authoritative_bit_names ... ok
+test crystal_ui::overlays::tests::guild_storage_and_rank_intents_register_exact_authoritative_pending_keys ... ok
+test crystal_ui::overlays::tests::guild_tabs_request_the_matching_authoritative_page ... ok
+test crystal_ui::overlays::tests::npc_game_shop_guild_and_trade_cells_share_the_crystal_item_hint_lifecycle ... ok
+test native_shell_ui::i18n_visual_tests::guild_main_window_matches_independent_crystal_gdi_reference_96dpi ... ignored, explicit real-asset Guild main-window GPU/GDI pixel comparison; run alone with fresh output and independent C# reference
+test native_shell_ui::i18n_visual_tests::guild_name_and_sabuk_npc_pages_render_offscreen ... ignored, explicit production Guild name and Sabuk NPC offline GPU fixture; run alone with real assets and fresh evidence output
+test social::guild_pending_tests::guild_info_waits_for_a_fresh_status255_not_status_metadata_other_deltas_or_republication ... ok
+test social::guild_pending_tests::guild_kick_only_accepts_matching_status3_not_leave_online_or_a_fake_legacy_option_echo ... ok
+test social::guild_pending_tests::guild_member_move_status5_matches_exact_member_and_destination_and_ignores_fabricated_change_type ... ok
+test social::guild_pending_tests::guild_permission_actual_status7_survives_a_later_full_packet_in_the_same_ui_publication ... ok
+test social::guild_pending_tests::guild_permission_builder_requires_real_viewer_complete_roster_rights_and_an_actual_flip ... ok
+test social::guild_pending_tests::guild_permission_distinct_options_have_independent_pending_and_share_the_existing_eight_slots ... ok
+test social::guild_pending_tests::guild_permission_expected_false_requires_a_clear_bit_not_any_status7_reply ... ok
+test social::guild_pending_tests::guild_permission_full_broadcast_other_actor_other_rank_or_wrong_bit_are_not_acks ... ok
+test social::guild_pending_tests::guild_permission_retained_old_matching_cursor_cannot_ack_a_new_request_or_repeated_projection ... ok
+test social::guild_pending_tests::guild_permission_typed_status7_uses_nested_rank_index_and_the_exact_requested_bit ... ok
+test social::guild_pending_tests::guild_permission_user_information_uses_real_character_index_not_world_object_id ... ok
+test social::guild_pending_tests::guild_rename_only_has_the_strict_five_second_retry_exception_permission_does_not_expire ... ok
+test social::guild_pending_tests::guild_rename_uses_scope_fresh_actor_target_and_expected_name_not_any_rank_broadcast ... ok
+test social::guild_pending_tests::guild_same_viewer_refresh_preserves_pending_but_same_name_with_a_new_real_id_retires_it ... ok
+test social::guild_pending_tests::guild_scope_change_cancels_only_guild_work_map_preserves_pending_and_session_reset_clears_all ... ok
+test social::guild_pending_tests::native_guild_read_retains_fresh_full_receipt_before_a_new_incomplete_delta ... ok
+test social::guild_projection::tests::native_guild_projection_cursor_and_scope_overflow_fail_without_any_mutation ... ok
+test social::guild_projection::tests::native_guild_projection_full255_establishes_complete_and_stable_own_role ... ok
+test social::guild_projection::tests::native_guild_projection_full_missing_viewer_or_known_rank_revokes_old_permissions ... ok
+test social::guild_projection::tests::native_guild_projection_join_requests_full_without_fabricating_character_id ... ok
+test social::guild_projection::tests::native_guild_projection_keeps_existing_200_member_limit_and_accepts_real_zero_id ... ok
+test social::guild_projection::tests::native_guild_projection_online_empty_deltas_do_not_clear_the_roster ... ok
+test social::guild_projection::tests::native_guild_projection_own_peer_delta_waits_for_identity_verified_status8 ... ok
+test social::guild_projection::tests::native_guild_projection_peer_kick_and_leave_remove_only_the_target ... ok
+test social::guild_projection::tests::native_guild_projection_peer_rank_move_preserves_real_id_and_other_members ... ok
+test social::guild_projection::tests::native_guild_projection_rank_delta_cannot_rebind_an_existing_name_or_character_id ... ok
+test social::guild_projection::tests::native_guild_projection_rejects_missing_identity_duplicate_and_malformed_late_rows_atomically ... ok
+test social::guild_projection::tests::native_guild_projection_rejects_unknown_or_wrong_shape_status_without_partial_commit ... ok
+test social::guild_projection::tests::native_guild_projection_status6_inserts_and_renumbers_nested_flat_and_own_rank ... ok
+test social::guild_projection::tests::native_guild_projection_status6_partial_base_needs_roster_and_cannot_guess_positions ... ok
+test social::guild_projection::tests::native_guild_projection_status7_existing_index_updates_options_and_persists_cursor ... ok
+test social::guild_projection::tests::native_guild_projection_status7_unknown_index_never_creates_a_rank_or_cursor ... ok
+test social::guild_projection::tests::native_guild_projection_status8_new_verified_rank_is_partial_until255 ... ok
+test social::guild_projection::tests::native_guild_projection_status8_requires_both_viewer_name_and_character_id ... ok
+test social::guild_projection::tests::native_guild_projection_viewer_kick_or_leave_retires_guild_and_permissions ... ok
+test social::guild_rank_native_tests::guild_rank_raw_legal_spaces_and_twenty_utf16_survive_typed_status_and_delta ... ok
+test social::guild_rank_native_tests::guild_rank_source_reply_has_status7_nested_index_and_no_command_echo ... ok
+test social::guild_rank_native_tests::guild_rank_status255_remains_an_explicit_full_list_replacement ... ok
+test social::guild_rank_native_tests::guild_rank_status7_merges_one_nonzero_rank_retaining_three_ranks_four_members ... ok
+test social::guild_rank_native_tests::guild_rank_status7_rejects_multi_rank_and_unknown_delta_without_model_mutation ... ok
+test social::guild_rank_native_tests::guild_rank_status7_requires_actual_nested_index_options_and_member_list ... ok
+test social::guild_rank_native_tests::guild_rank_status7_updates_own_numeric_rank_and_source_options ... ok
+test social::tests::empty_guild_status_is_authoritative_leave_and_releases_guild_pending ... ok
+test social::tests::every_authoritative_group_and_guild_operation_releases_only_on_matching_state ... ok
+test social::tests::guild_invite_duplicate_and_roster_transition_are_idempotent ... ok
+test social::tests::guild_notice_receipt_does_not_optimistically_replace_content ... ok
+test social::tests::guild_packets_accept_server_packet_snake_case_and_camel_case_compatibility ... ok
+test social::tests::guild_permissions_follow_wire_bits_and_matching_rank_options ... ok
+test social::tests::guild_storage_packets_are_bounded_correlated_and_authoritative ... ok
+test social::tests::guild_unscoped_member_change_cannot_accept_a_fabricated_command_echo ... ok
+
+test result: ok. 143 passed; 0 failed; 2 ignored; 0 measured; 1665 filtered out; finished in 0.14s
+

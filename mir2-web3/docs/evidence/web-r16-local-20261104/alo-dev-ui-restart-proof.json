@@ -1,0 +1,34 @@
+{
+  "schema": "mir2.r16.web-companion-ui-proof/1",
+  "environment": "isolated-development-world",
+  "provider": "rules",
+  "modelCalls": 0,
+  "realBrowserUi": true,
+  "privateControlOnExistingAuthenticatedSocket": true,
+  "serverPartyRosterMembers": 2,
+  "initialPolicyVersion": 1,
+  "taughtPolicyVersion": 2,
+  "restartedPolicyVersion": 2,
+  "habits": {
+    "askBeforeLeaving": true,
+    "assistBeforeLoot": true,
+    "lootOnlyAfterCombat": true
+  },
+  "archiveIdSha256": "6dbfbad201f244e473473292d976fedda7b6bbcd6349334040385d4641d6f8f2",
+  "feedbackCount": 1,
+  "archiveDownloadAssembledAndSha256Checked": true,
+  "privateCommandHistoryLeak": false,
+  "privateGatewayHistoryLeak": false,
+  "pageErrors": 0,
+  "screenshots": [
+    "alo-dev-taught-v2.png",
+    "alo-dev-memory-v2.png",
+    "alo-dev-party-invite.png",
+    "alo-dev-restarted-memory.png"
+  ],
+  "limits": {
+    "realModelTested": false,
+    "newAdventureBehaviorTested": false,
+    "fullGatewayRestartTested": false
+  }
+}

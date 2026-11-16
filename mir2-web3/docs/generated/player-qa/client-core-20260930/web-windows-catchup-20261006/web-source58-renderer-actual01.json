@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Actual Source58 original complete three renderer builder",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 46520,
+    "kind": "Source58 original complete three renderer production build pending Root clock fix review",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 471992,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/bevy-full-build02-config02.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source58-combat-clock-20261011-01\\preparation\\source58-isolated-snapshot01.json",
+    "bytes": 486003,
+    "sha256": "a95e6bae639c1a6bcd6acb0bd6df36da1d1160d77953e8f0c7a2bc91e1376632"
+  },
+  "sourceInputs": 623,
+  "version": "bevy-cbaf32383ce0ff77",
+  "policyB": [
+    {
+      "childPid": 53856,
+      "childStartedUtc": "/Date(1791688825839)/",
+      "childStartMs": 977.4226000000001,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791688948161)/",
+      "completionMs": 123300.1818,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    },
+    {
+      "childPid": 58028,
+      "childStartedUtc": "/Date(1791688824779)/",
+      "childStartMs": 977.4083,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791688824820)/",
+      "completionMs": 1017.8561000000001,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    },
+    {
+      "childPid": 59872,
+      "childStartedUtc": "/Date(1791689008286)/",
+      "childStartMs": 966.8092,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791689062549)/",
+      "completionMs": 55230.167700000005,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    },
+    {
+      "childPid": 60272,
+      "childStartedUtc": "/Date(1791689104946)/",
+      "childStartMs": 967.4453000000001,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791689229467)/",
+      "completionMs": 125487.4303,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    }
+  ],
+  "budgets": [
+    {
+      "packageId": "webgpu",
+      "wasmBytes": 31463877,
+      "gzipBytes": 6172636,
+      "jsBytes": 141118,
+      "wasmSha256": "7c6844822dd207faef852cd84bbac57c4954b9630dd282a1e188176d20b30af6",
+      "metadataMatched": true,
+      "rendererInstantiated": false
+    },
+    {
+      "packageId": "webgl2",
+      "wasmBytes": 17750376,
+      "gzipBytes": 4224650,
+      "jsBytes": 117176,
+      "wasmSha256": "4fd49334d228d64e8c547e502b334e3b1f93406b53af3b9fb55ca6d69bc871d6",
+      "metadataMatched": true,
+      "rendererInstantiated": false
+    },
+    {
+      "packageId": "webgl2-shared",
+      "wasmBytes": 32424441,
+      "gzipBytes": 6513504,
+      "jsBytes": 139092,
+      "wasmSha256": "9d030491a4e2e8a81e0b61450a170cf38882378f283c4b9ba04682a82a014ba6",
+      "metadataMatched": true,
+      "rendererInstantiated": false
+    }
+  ],
+  "originalCaps": {
+    "wasmInclusive": 32505856,
+    "jsInclusive": 204800,
+    "defaultGzipInclusive": 7340032
+  },
+  "primaryPublication": {
+    "oldImmutableProtected": 264,
+    "newImmutable": 7,
+    "flatAndPointer": 13,
+    "pointerLast": true,
+    "oldMutableBackup": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/primary-publication-backup01"
+  },
+  "candidate100": false,
+  "goalComplete": false
+}

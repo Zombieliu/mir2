@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.r16.native-guild.candidate.v1",
+  "recordedAt": "2026-11-08T02:07:43.893Z",
+  "path": "D:\\mir2-builds\\r16-native-guild-20261108/candidate-final/mir2-platform-windows.exe",
+  "bytes": 135187968,
+  "sha256": "a63bd2a356bced6b95000c0e35f84e0355ea0d568dbe3aef2cd98b2f74372b0d",
+  "buildExitCode": 0,
+  "canonicalManifestsAndLocksUnchanged": true,
+  "directSourcePinsStable": 13,
+  "nativeExecuted": false,
+  "installed": false,
+  "standaloneInstaller": false,
+  "requiresExistingR16Resources": true,
+  "publicDeployment": false
+}

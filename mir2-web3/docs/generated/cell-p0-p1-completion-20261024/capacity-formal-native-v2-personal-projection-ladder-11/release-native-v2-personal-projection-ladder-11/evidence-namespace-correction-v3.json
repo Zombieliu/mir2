@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 3,
+  "previousPrepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\TEMPLATE-PREPARED-v2.json",
+    "bytes": 16379,
+    "sha256": "e3869511d80368abdc4749dac1cdef2ec956b79a109dade56c07fcb9a1f6f6c1"
+  },
+  "mutations": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\prepare-inputs.mjs",
+        "bytes": 11655,
+        "sha256": "535af9a50d625113d7490d7134ac2d478afb1c27e1b528f5652db2c4deed92ab"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\prepare-inputs.mjs",
+        "bytes": 11761,
+        "sha256": "ddc99ecb6dc546806350ce05f9a94e604dd381734f9bfec9e5a94a1686c0bab0"
+      },
+      "preimage": "before-core-namespace-v3/prepare-inputs.mjs.txt",
+      "exactSingleImportInverse": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\run-owned.mjs",
+        "bytes": 19752,
+        "sha256": "de6a8f077c8ea95ff0d02a77ce139e5d61a800c1933cb6ca5c25aafd66a35986"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\run-owned.mjs",
+        "bytes": 19858,
+        "sha256": "9603aa3268537601a10023913ae75869e3a913b7c867991a7cf683a8854b4724"
+      },
+      "preimage": "before-core-namespace-v3/run-owned.mjs.txt",
+      "exactSingleImportInverse": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\collect-public.mjs",
+        "bytes": 43387,
+        "sha256": "00a3c13e922ca9f2c910717f1cbffce18181144e7ea47ca454a8b589fd0d5cc5"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\collect-public.mjs",
+        "bytes": 43493,
+        "sha256": "23613532bfd35f04ddaa74b1742190e6d88ba4496d44e0df5f998f11159595d0"
+      },
+      "preimage": "before-core-namespace-v3/collect-public.mjs.txt",
+      "exactSingleImportInverse": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-public.mjs",
+        "bytes": 18952,
+        "sha256": "7a767f8e621a68501027fea266177934307cba6bfa28a8f654d87eca5e92873d"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-public.mjs",
+        "bytes": 19058,
+        "sha256": "86b140ddff064a08404b2073be37ae92a505d7390ea41316ece69c51ea7b72f7"
+      },
+      "preimage": "before-core-namespace-v3/verify-public.mjs.txt",
+      "exactSingleImportInverse": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+        "bytes": 13725,
+        "sha256": "e14f8df87d60b04ac0e6864b8ff8fc0c5485f1c17bc2b5d36e6dba138cfba96c"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+        "bytes": 13831,
+        "sha256": "a63d5195f80a977eaecdadbcab0372d3de85f95eea09a9e8818448686a48b484"
+      },
+      "preimage": "before-core-namespace-v3/verify-probe15-collected-evidence.mjs.txt",
+      "exactSingleImportInverse": true
+    }
+  ],
+  "scope": "Five external template modules only. Top-level coreCodeEvidenceCommit is current driver-report evidence b84d/db4e/13+200; wire identity retains its separate original6d70/187+wrapper28/adapter8 identity. No source or evidence is relabelled across those namespaces.",
+  "wireContractRawUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\wire-diagnostics-contract.mjs",
+    "bytes": 15767,
+    "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+  },
+  "driverReportContractRawUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\driver-report-contract.mjs",
+    "bytes": 9598,
+    "sha256": "fe239fbe349511f717dbe476b6c3a2e53c62bfcb7da5a71d0d7bfe3be3014d08"
+  },
+  "probe15ProducerConfirmedByAuthor": true,
+  "probe15ActualRunOrReceiptKnown": false,
+  "pendingContractUnchanged": true,
+  "noActualGateOrTests": true,
+  "capacityAccepted": false
+}

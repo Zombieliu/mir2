@@ -1,0 +1,82 @@
+{
+  "kind": "one-firstparty-tc-read-without-game",
+  "startedAt": "2026-11-13T10:18:16.784Z",
+  "origin": "https://numeron.obelisk.build",
+  "path": "/original-ui/fonts/NotoSansTC.ttf",
+  "expectedBytes": 11941968,
+  "expectedSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "passed": true,
+  "removedProxyEnvironmentNames": [
+    "ALL_PROXY",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "NO_PROXY"
+  ],
+  "budgets": {
+    "totalMs": 120000,
+    "positiveByteIdleMs": 15000,
+    "maxBytes": 33554432
+  },
+  "requests": [
+    {
+      "atMs": 1062,
+      "initialPriority": "High",
+      "bytes": 11941968,
+      "encodedDataBytes": 7671582,
+      "status": 200,
+      "headersMs": 1677,
+      "protocol": "h2",
+      "diskCache": false,
+      "serviceWorker": false,
+      "timing": {
+        "requestTime": 113490.381087,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": 0.121,
+        "connectEnd": 330.673,
+        "sslStart": 0.637,
+        "sslEnd": 330.668,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 330.833,
+        "sendEnd": 331.098,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 614.642,
+        "receiveHeadersEnd": 614.752
+      },
+      "headers": {
+        "content-type": "font/ttf",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=14400",
+        "age": "21292",
+        "cf-cache-status": "BYPASS",
+        "x-vercel-cache": "HIT",
+        "access-control-allow-origin": "*"
+      },
+      "firstDataMs": 1707,
+      "maxDataGapMs": 703,
+      "lastDataMs": 70026,
+      "finishMs": 70054,
+      "encodedTotalBytes": 7671988
+    }
+  ],
+  "browserClosed": true,
+  "scope": "One intentional firstparty object GET in a fresh default-network Chrome context after plain /version. No game, wallet, bootstrap, fonts registration, Worker, glue, compilation or App. Diagnostic only; no timeout/production gate change or protocol override.",
+  "versionBefore": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "read": {
+    "passed": true,
+    "bytes": 11941968,
+    "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+    "headerAfterMs": 616,
+    "durationMs": 68990
+  },
+  "workersObserved": 0,
+  "versionAfter": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "finishedAt": "2026-11-13T10:19:27.584Z"
+}

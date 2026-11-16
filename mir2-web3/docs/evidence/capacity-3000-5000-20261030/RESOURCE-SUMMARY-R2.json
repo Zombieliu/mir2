@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "run": "ordinary-two-r2",
+  "scope": "SSH forwarded private normal-client protocol on shared host; distinct PG database with shared PG process; not direct public network/TLS certification",
+  "gatewaySourceSha": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "gatewayCpuQuotaCores": 1,
+  "gatewayMemoryMaxBytes": 536870912,
+  "telemetrySourceSha256": "b463e2af21fee9838de24abb3b7f2f255b61eb4235ea9a1f3a83ea260d985319",
+  "deduplicatedSamples": 101,
+  "phases": [
+    {
+      "name": "bootstrap-2",
+      "completed": true,
+      "phaseSeconds": 21.901,
+      "resources": {
+        "samples": 11,
+        "firstAt": "2026-10-29T20:31:31.576Z",
+        "lastAt": "2026-10-29T20:31:51.580Z",
+        "sampleSpanSeconds": 20.004,
+        "observedGapsMaxMs": 2003,
+        "processCpuSecondsDelta": 7.21,
+        "averageProcessCpuCores": 0.3604279144171165,
+        "cgroupThrottledUsecDelta": 7807,
+        "maxCgroupCurrentBytes": 93876224,
+        "maxProcessRssBytes": 162131968,
+        "minimumHostAvailableBytes": 1436061696,
+        "minimumDiskAvailableBytes": 637198336,
+        "maximumGatewayOomKills": 0,
+        "peakActive": 2
+      }
+    },
+    {
+      "name": "stage-2",
+      "completed": true,
+      "phaseSeconds": 60.079,
+      "resources": {
+        "samples": 30,
+        "firstAt": "2026-10-29T20:31:53.581Z",
+        "lastAt": "2026-10-29T20:32:51.591Z",
+        "sampleSpanSeconds": 58.01,
+        "observedGapsMaxMs": 2002,
+        "processCpuSecondsDelta": 1.4,
+        "averageProcessCpuCores": 0.024133770039648336,
+        "cgroupThrottledUsecDelta": 0,
+        "maxCgroupCurrentBytes": 94351360,
+        "maxProcessRssBytes": 162394112,
+        "minimumHostAvailableBytes": 1427652608,
+        "minimumDiskAvailableBytes": 636973056,
+        "maximumGatewayOomKills": 0,
+        "peakActive": 2
+      }
+    },
+    {
+      "name": "soak",
+      "completed": false,
+      "phaseSeconds": 55.129,
+      "resources": {
+        "samples": 26,
+        "firstAt": "2026-10-29T20:32:53.591Z",
+        "lastAt": "2026-10-29T20:33:45.601Z",
+        "sampleSpanSeconds": 52.01,
+        "observedGapsMaxMs": 4003,
+        "processCpuSecondsDelta": 1.24,
+        "averageProcessCpuCores": 0.023841568929052107,
+        "cgroupThrottledUsecDelta": 0,
+        "maxCgroupCurrentBytes": 94425088,
+        "maxProcessRssBytes": 162525184,
+        "minimumHostAvailableBytes": 1429008384,
+        "minimumDiskAvailableBytes": 636735488,
+        "maximumGatewayOomKills": 0,
+        "peakActive": 2
+      }
+    }
+  ],
+  "noSaturationConclusion": true,
+  "bandwidthCapacityMeasured": false,
+  "capacityUpperBound": null
+}

@@ -1,0 +1,22 @@
+{
+  "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+  "workflowRun": 43739146537,
+  "artifact": 14172603180,
+  "downloadCompleted": true,
+  "artifactZipBytes": 95700089,
+  "artifactZipSha256LocallyComputed": "3e287371435fede7f5267fdb7513478a77047acbc4dad30a392e90659521c9a6",
+  "allPackageFilesShaVerified": 1841,
+  "sharedZoneTests": 310,
+  "gatewaySharedZoneTests": 40,
+  "backgroundExecutionTestsRequiredAndObserved": 7,
+  "nativePostgresTests": 216,
+  "docker": false,
+  "gateway": {
+    "path": "D:\\mir2-builds\\r16-hud-foundation-order-20261116\\release\\linux-package-r1\\mir2-gateway",
+    "bytes": 93576560,
+    "sha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+    "elf": "64-bit little-endian x86_64"
+  },
+  "productionInstalled": false,
+  "publicBrowserAcceptance": false
+}

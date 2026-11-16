@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "sourceGeneration": "Source68 generation03",
+  "kind": "actual original Node five-script regression",
+  "capturedAt": "2026-10-11T13:27:42.764Z",
+  "execution": {
+    "owner": "Root",
+    "builderPid": 55248,
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 21850
+  },
+  "originalCaller": {
+    "json": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source47-original-existing-builder-template-data01.json",
+      "bytes": 5007,
+      "sha256": "75dcd81559d98ceee80dc5b096b85a9f2917072f718668a71a15769cbe1b2f81"
+    },
+    "utf8Bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "configuration": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved03/node-tests03-config.json",
+    "bytes": 5411,
+    "sha256": "ff8cef94132bc1d6755544ef7bfc25d6b41ed6c18754bb30f7cf14523bb7b7bc"
+  },
+  "inputReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved03/source-review03.json",
+    "bytes": 6559,
+    "sha256": "91f46bdcee3f99f15e2ce124dca85219ea9be047904df3d4192f5d902945a81d"
+  },
+  "inputCount": 36369,
+  "logs": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/node-tests03/outer.json",
+      "bytes": 559,
+      "sha256": "4c86387149329c2767f5f01d2c01354b51130eff74422ee5b4f1ae73e976ee64"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/node-tests03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/node-tests03/stdout.log",
+      "bytes": 66193,
+      "sha256": "071f63733d3a56699f2466c6cd91f99b5ae4210bf4c617bc34d088a653c0cddb"
+    }
+  ],
+  "counts": {
+    "tests": 257,
+    "pass": 257,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "stage5": {
+    "actualCompletedGroups": 506,
+    "existingGroups": 501,
+    "newStorageGroups": 5,
+    "countedAsSeparateNodeTests": false
+  },
+  "validation": {
+    "nodeRegressionAccepted": true,
+    "originalCallerPreAndPostSourcePinsMatched": true,
+    "mainTsconfigUnchanged": true,
+    "strictControlsUnchanged": true
+  },
+  "historicalFailuresPreserved": [
+    "web-source68-node-failed01.json",
+    "web-source68-node-failed02.json"
+  ],
+  "scope": {
+    "nextExecuted": false,
+    "thinExecuted": false,
+    "runtimeUpdated": false,
+    "storageTooltipLiveAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  }
+}

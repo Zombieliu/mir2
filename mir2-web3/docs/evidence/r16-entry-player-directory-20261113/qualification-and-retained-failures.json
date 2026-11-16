@@ -1,0 +1,29 @@
+{
+  "initialDirectoryCandidate": "8e82f53fcd74-player-meta-b45173ae",
+  "supersededReason": "Standing/walking metadata could extend the existing window of missing running/attack geometry; replaced by complete per-gender directories before commit/publication. Initial UI passes do not qualify the final candidate.",
+  "initialFixtureFailures": [
+    {
+      "run": "game/quest-after-r1",
+      "reason": "Ready state was observed before the next rAF emitted firstPlayableFrame; fixture now waits for the actual existing marker, preserving the original age and readiness gates."
+    },
+    {
+      "run": "game/quest-after-r2",
+      "reason": "All cold/warm flows passed; final fixture required finishAt>releaseAt but synchronous release finished in the same millisecond. Corrected to>=; reruns remain separate."
+    }
+  ],
+  "baselineFailures": [
+    "Old map-routing source regex expects a retired worker loop spelling; both files unchanged from HEAD.",
+    "Fishing export range assertion expects0..175 but the unchanged frozen source metadata says0..351; test, export manifest and frame-table source unchanged."
+  ],
+  "finalSelectedTests": {
+    "passed": 70,
+    "failedUnchangedFileLevelBaseline": 1,
+    "skipped": 0
+  },
+  "publicProductionRevision": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "overallCandidate100": false,
+  "humanAccepted": false,
+  "newDeploymentAtCandidateQualification": false,
+  "recordedBeforePublication": true,
+  "subsequentPublicationRecord": "production/receipt.json"
+}

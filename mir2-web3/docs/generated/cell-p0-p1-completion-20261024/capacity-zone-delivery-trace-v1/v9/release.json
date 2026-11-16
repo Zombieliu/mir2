@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-26T14:25:54.366Z",
+  "sourceCommit": "74473d41ff989a36d9697f57ee4d9eb9c86b779a",
+  "backendSourceCommit": "74473d41ff989a36d9697f57ee4d9eb9c86b779a",
+  "executionSourceCommit": "74473d41ff989a36d9697f57ee4d9eb9c86b779a",
+  "driverSourceCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "navigationDependencyCommit": "4ecd237e25858a2080456a2e52d64b9ba0c167cd",
+  "backendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v1\\backend-source-v1.json",
+    "bytes": 48061,
+    "sha256": "ba082be9b981939e1cc64dd40d153b7d16e360611f695755700f9df6819eb04f"
+  },
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v1\\build-receipt-v1.json",
+    "bytes": 2253,
+    "sha256": "7c82a282c33ea62dd0d720540d454647c63c69f228ccac814c3ac3b9081badeb"
+  },
+  "rustValidation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\root-focused-receipt-v1.json",
+    "bytes": 32091,
+    "sha256": "beb1fd2156956c349517cee09f0b0d019d07148a24f451840710e56c37289d80"
+  },
+  "immutableRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87480832,
+    "sha256": "fa2e6bf971bfbc686a1575280e217c09947f035d1a0b9aca88e7fd59365af0b7"
+  },
+  "selectedRustTestsPassed": 55,
+  "allSelectedTestsPassed": true,
+  "diagnosticCandidateOnly": true,
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "freshOrdinaryLifecyclePerformed": false,
+  "realCapacityRunPerformed": false
+}

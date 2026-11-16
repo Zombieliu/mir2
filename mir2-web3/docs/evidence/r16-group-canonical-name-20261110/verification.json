@@ -1,0 +1,78 @@
+{
+  "schema": "mir2.r16.group-ascii-evidence.v1",
+  "testedSourceBase": "6c55c05aae4c215d709724ccea5bdcae3dc17702",
+  "browserReceiptSha256": "01ce1909dceaef9a63c10228b1830989e785f05c7e0a46949dcc0093faa83a96",
+  "testSourceSha256": "c8296a6328dbe501082f8e9be109335a01486a192e9e0389c26b37735729a3e6",
+  "webCommand": "node --test apps/web/scripts/test-group-operations.mjs apps/web/scripts/test-social-operation-budget-host.mjs apps/web/scripts/test-social-parity-actions.mjs",
+  "nativeCommand": "cargo +1.95.0 test --locked --offline -j 8 --manifest-path apps/game-client/client-bevy/Cargo.toml --lib social",
+  "tests": {
+    "webBaseline": {
+      "log": "web-baseline.log",
+      "sha256": "ab934ff541f0c3d3210a14d8dd936e73311b264326cfbf52b7eafb4ae4cbc57e",
+      "observed": "not ok 18 - group additions reconcile canonical ASCII case"
+    },
+    "webFinal": {
+      "log": "web-final.log",
+      "sha256": "891f7fb212a4eb403436b16c12f9d85dbfd7d1946e9966e7949b7a8ed7662984",
+      "observed": "# pass 53"
+    },
+    "nativeBaseline": {
+      "log": "rust-baseline-r2.log",
+      "sha256": "368e47c3e9140710e20577ae043f203c98edaec745c8fcd58fa9edd9556ac735",
+      "observed": "test result: FAILED. 0 passed; 1 failed"
+    },
+    "nativeFinal": {
+      "log": "rust-final-r2.log",
+      "sha256": "c0f4255a24d7e8ff4ea2f32f4a5334fac732a848f5146784ee76b95491f134d2",
+      "observed": "test result: ok. 91 passed; 0 failed"
+    }
+  },
+  "development": [
+    {
+      "round": "r3",
+      "receiptSha256": "7e2399b079e23f50929f7e0bde0321e259da26d647001418716291e8a880e8e6",
+      "lastPhase": "typed-mixed-case-invite",
+      "addMemberCommands": 0,
+      "diagnostics": [],
+      "stopped": {
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "round": "r4",
+      "receiptSha256": "7e2399b079e23f50929f7e0bde0321e259da26d647001418716291e8a880e8e6",
+      "lastPhase": "typed-mixed-case-invite",
+      "addMemberCommands": 0,
+      "diagnostics": [],
+      "stopped": {
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "round": "r5",
+      "receiptSha256": "610e1283bcdd84bd51429ea55d31a11e2cbe518246444e8d7fa9a918508552e5",
+      "lastPhase": "typed-mixed-case-invite",
+      "addMemberCommands": 0,
+      "diagnostics": [
+        {
+          "stage": "group-window-key-diagnostic",
+          "details": {
+            "screen": "login",
+            "focused": true,
+            "visibility": "visible",
+            "activeTag": "DIV",
+            "activeClass": "client-stage-frame ",
+            "shortcut": null,
+            "modalCount": 0
+          }
+        }
+      ],
+      "stopped": {
+        "next": true,
+        "gateway": true
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::config::SkillSnapshot;
-use crate::EquipmentSlot;
+use crate::{EquipmentSlot, ItemContainer};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
@@ -42,8 +42,8 @@ use super::crystal_compat::{
 };
 use super::equipment::equipment_slot_unique_id;
 use super::items::{
-    crystal_item_template_for_dynamic_key, current_player_required_stat_total,
-    merged_user_item_stats,
+    crystal_item_requirement_rejection_key, crystal_item_template_for_dynamic_key,
+    current_player_required_stat_total, item_unique_id, merged_user_item_stats, ItemState,
 };
 use super::map::{
     current_map_disallows_random_teleport, current_map_disallows_reincarnation, is_safe_zone_point,
@@ -105,6 +105,7 @@ impl SkillState {
             delay_ms: self.delay_ms,
             cast_time_ms: self.cast_time_ms,
             cooldown_remaining_ticks: self.cooldown_ends_at.saturating_sub(tick) as u32,
+            cooldown_remaining_ms: None,
         }
     }
 }
@@ -289,21 +290,21 @@ fn canonical_spell_name(spell: Option<Spell>) -> Option<&'static str> {
 fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
     match spell {
         Spell::Fencing
+        | Spell::Slaying
         | Spell::SpiritSword
         | Spell::Focus
+        | Spell::FatalSword
         | Spell::Meditation
         | Spell::MentalState
         | Spell::MPEater
         | Spell::Hemorrhage => SkillCastKind::Passive,
-        Spell::Slaying
-        | Spell::Thrusting
+        Spell::Thrusting
         | Spell::HalfMoon
         | Spell::CrossHalfMoon
         | Spell::DoubleSlash
+        | Spell::TwinDrakeBlade
         | Spell::CounterAttack
-        | Spell::FatalSword
-        | Spell::FlamingSword
-        | Spell::PoisonSword => SkillCastKind::Toggle,
+        | Spell::FlamingSword => SkillCastKind::Toggle,
         Spell::Fury
         | Spell::Haste
         | Spell::SwiftFeet
@@ -311,7 +312,6 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::Rage
         | Spell::LightBody
         | Spell::MoonLight
-        | Spell::DarkBody
         | Spell::Hiding
         | Spell::ImmortalSkin
         | Spell::MagicShield
@@ -341,9 +341,7 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::PoisonCloud
         | Spell::Plague
         | Spell::TrapHexagon
-        | Spell::Trap
         | Spell::ExplosiveTrap
-        | Spell::DelayedExplosion
         | Spell::Portal
         | Spell::Blink
         | Spell::Teleport
@@ -358,6 +356,7 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::Repulsion
         | Spell::EnergyRepulsor
         | Spell::FireBurst
+        | Spell::PoisonSword
         | Spell::BackStep
         | Spell::ShoulderDash
         | Spell::FlashDash
@@ -398,6 +397,8 @@ fn crystal_spell_is_offensive(spell: Spell) -> bool {
             | Spell::BackStep
             | Spell::FlashDash
             | Spell::StormEscape
+            // Crystal DarkBody accepts any live target, including self/allies.
+            | Spell::DarkBody
             // Cleanse cast on self/allies (Crystal Purification) 鈥?Target-kind
             // but not offensive, so it must not require a hostile target.
             | Spell::Purification
@@ -491,7 +492,8 @@ pub(super) fn normalize_crystal_skill_key(spell_name: &str) -> String {
 }
 
 pub(super) fn crystal_book_skill_state(template: &CrystalItemTemplate) -> Option<SkillState> {
-    crystal_skill_state(&template.name, 0)
+    let magic = mir2_game_data::crystal_magic_for_book(template)?;
+    crystal_skill_state(&magic.spell, 0)
 }
 
 pub(super) fn skill_definition(key: &str) -> Option<SkillTemplate> {
@@ -519,14 +521,16 @@ fn skill_mana_cost_from_authoritative_metadata(
     crystal_magic: Option<&CrystalMagicTemplate>,
     level: u8,
 ) -> Option<i32> {
-    let cost = definition
-        .map(|definition| definition.mana_cost)
-        .or_else(|| {
-            crystal_magic.map(|magic| {
-                i32::from(magic.base_cost)
-                    .saturating_add(i32::from(magic.level_cost).saturating_mul(i32::from(level)))
-            })
-        })?;
+    // Aliases such as minor-heal still resolve to Crystal Healing. Its wire
+    // ClientMagic and shared Zone already use the levelled Crystal cost; the
+    // same value must govern personal preflight, debit, and UI affordability.
+    // Retain generic costs only for skills without canonical magic metadata.
+    let cost = crystal_magic
+        .map(|magic| {
+            i32::from(magic.base_cost)
+                .saturating_add(i32::from(magic.level_cost).saturating_mul(i32::from(level)))
+        })
+        .or_else(|| definition.map(|definition| definition.mana_cost))?;
     (cost >= 0).then_some(cost)
 }
 
@@ -624,6 +628,9 @@ pub(super) fn skill_key_for_crystal_spell(spell: Spell) -> Option<String> {
 }
 
 pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key: u8) {
+    if !supports_magic_key_assignment(world, spell, key, old_key) {
+        return;
+    }
     if key > 16 || old_key > 16 {
         assign_hero_magic_key(world, spell, key);
         return;
@@ -641,6 +648,53 @@ pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key
         }
     }
 }
+
+pub(super) fn supports_magic_key_assignment(
+    world: &World,
+    spell: Spell,
+    key: u8,
+    old_key: u8,
+) -> bool {
+    if !super::resources::is_in_world(world) {
+        return false;
+    }
+    if key > 16 || old_key > 16 {
+        return world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .is_some_and(|hero| hero.spawned)
+            && hero_entity(world)
+                .and_then(|entity| world.entity(entity).get::<PlayerVitals>())
+                .is_some_and(|vitals| vitals.hp > 0)
+            && world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .hero_learned_magics
+                .iter()
+                .any(|learned| learned.spell == spell);
+    }
+    skill_key_for_crystal_spell(spell).is_some_and(|key| {
+        world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .any(|skill| skill.key == key)
+    })
+}
+
+#[cfg(test)]
+#[path = "magic_key_preflight_tests.rs"]
+mod magic_key_preflight_tests;
+
+#[cfg(test)]
+#[path = "slaying_passive_tests.rs"]
+mod slaying_passive_tests;
+
+#[cfg(test)]
+#[path = "five_class_skills_tests.rs"]
+mod five_class_skills_tests;
 
 fn assign_hero_magic_key(world: &mut World, spell: Spell, key: u8) {
     if !world
@@ -775,6 +829,16 @@ fn crystal_skill_context_preflight(
             if metadata.offensive && !crystal_magic_target_hostile(world, target_entity) {
                 return false;
             }
+            // HumanObject.Trap accepts a live hostile Monster below Level+2.
+            // Reject before spending MP or starting a cooldown, rather than
+            // acknowledging a ground cast which the real handler cannot use.
+            if spell == Some(Spell::Trap)
+                && (world.entity(target_entity).get::<Monster>().is_none()
+                    || monster_level(world, target_entity)
+                        >= crystal_player_level(world, player).saturating_add(2))
+            {
+                return false;
+            }
             if matches!(spell, Some(Spell::PetEnhancer | Spell::UltimateEnhancer))
                 && !crystal_support_target_friendly(world, player, target_entity, spell)
             {
@@ -881,7 +945,7 @@ fn crystal_spell_map_restrictions_allow(world: &World, spell: Spell) -> bool {
     }
 }
 
-fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
+pub(super) fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
     match spell {
         Spell::SoulFireBall
         | Spell::Hiding
@@ -893,19 +957,14 @@ fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
         | Spell::Curse
         | Spell::TrapHexagon
         | Spell::Plague
-        | Spell::BindingShot
         | Spell::SummonSkeleton => has_equipped_crystal_amulet(world, 0),
         Spell::SummonShinsu => equipped_crystal_amulet_component(world, 0, 5).is_some(),
         Spell::SummonHolyDeva => equipped_crystal_amulet_component(world, 0, 2).is_some(),
-        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
-            has_equipped_crystal_poison(world, None)
-        }
+        Spell::Poisoning => poisoning_supply(world).is_some(),
+        Spell::PoisonSword => has_equipped_crystal_poison(world, None),
         Spell::PoisonCloud => {
             equipped_crystal_amulet_component(world, 0, 5).is_some()
                 && equipped_crystal_poison_component(world, Some(1), 5).is_some()
-        }
-        Spell::Trap | Spell::DelayedExplosion | Spell::ExplosiveTrap => {
-            has_equipped_crystal_amulet(world, 0)
         }
         Spell::Reincarnation => has_equipped_crystal_amulet(world, 3),
         _ => true,
@@ -1064,6 +1123,7 @@ fn cast_skill_with_context_impl(
                 let (resolved_buff_name, resolved_buff_description) =
                     buff_metadata(buff_key, buff_name, buff_description);
                 let buff = BuffState {
+                    real_time_duration: None,
                     key: buff_key.clone(),
                     name: resolved_buff_name,
                     description: resolved_buff_description,
@@ -1450,6 +1510,7 @@ fn apply_manifest_spell_effect(
         "MagicBooster" => {
             let magic_bonus = 6 + i32::from(skill.level) * 6;
             let buff = BuffState {
+                real_time_duration: None,
                 key: "magic-booster".to_string(),
                 name: "Magic Booster".to_string(),
                 description: "Crystal magic booster buff is active.".to_string(),
@@ -1764,6 +1825,51 @@ fn append_failed_manifest_cast_packets(
     });
 }
 
+/// Crystal HumanObject.SpellToggle arms TwinDrakeBlade even for a disable
+/// request. Repeated requests while armed do not charge or restart the effect.
+pub(super) fn prepare_twin_drake_blade(world: &mut World) -> Vec<ServerPacket> {
+    if super::combat::skill_toggle_state(world, Spell::TwinDrakeBlade) {
+        return Vec::new();
+    }
+    let Some((magic, level)) = super::combat::crystal_skill_magic(world, "TwinDrakeBlade") else {
+        return Vec::new();
+    };
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
+    let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+    if entity_player_vitals(world, player)
+        .map(|v| v.mp)
+        .unwrap_or_default()
+        <= cost
+    {
+        return Vec::new();
+    }
+    world
+        .entity_mut(player)
+        .get_mut::<PlayerVitals>()
+        .expect("player vitals")
+        .mp -= cost;
+    super::combat::set_skill_toggle_state(world, Spell::TwinDrakeBlade, true);
+    let location = super::movement::current_location(world);
+    let mut packets = vec![ServerPacket::ObjectMagic {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        location: location.position.clone(),
+        direction: location.direction,
+        spell: Spell::TwinDrakeBlade,
+        target_id: 0,
+        target: Point { x: 0, y: 0 },
+        cast: false,
+        level,
+        self_broadcast: false,
+        secondary_target_ids: Vec::new(),
+    }];
+    if let Some(info) = super::packets::object_mana_info_for_entity(world, player) {
+        packets.push(ServerPacket::ObjectMana { info });
+    }
+    packets
+}
+
 fn apply_crystal_self_buff_spell(
     world: &mut World,
     skill: &SkillState,
@@ -1821,8 +1927,16 @@ fn apply_crystal_self_buff_spell(
             }],
         ),
         "MoonLight" | "DarkBody" => {
-            let defence = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_AC)
-                .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_AC));
+            // HumanObject uses GetAttackPower(MinAC, MaxAC), including Luck,
+            // rather than always granting the maximum defence duration.
+            let stats = super::stats::player_stats(world);
+            let defence = crystal_attack_power_roll(
+                world,
+                tick,
+                crystal_spell_salt(&magic.spell),
+                stats.min_ac(),
+                stats.max_ac(),
+            );
             let duration_ms = u64::try_from(
                 defence
                     .saturating_add((i32::from(skill.level) + 1).saturating_mul(5))
@@ -1927,7 +2041,12 @@ fn apply_crystal_self_buff_spell(
         _ => return None,
     };
 
+    // Source Assassin stealth can last an odd half-second. Keep its exact
+    // millisecond lifetime rather than extending it to a whole simulation tick.
+    let precise_stealth_duration = matches!(magic.spell.as_str(), "MoonLight" | "DarkBody");
     let buff = BuffState {
+        real_time_duration: precise_stealth_duration
+            .then(|| super::buffs::RealTimeBuffDuration::new(duration_ms)),
         key: key.to_string(),
         name: name.to_string(),
         description: description.to_string(),
@@ -1946,7 +2065,15 @@ fn apply_crystal_self_buff_spell(
     };
     apply_or_refresh_buff(world, buff.clone());
     let mut packets: Vec<ServerPacket> = hiding_amulet_packet.into_iter().collect();
-    packets.extend(client_buff_packet_for_state(world, &buff));
+    let mut buff_packet = client_buff_packet_for_state(world, &buff);
+    if precise_stealth_duration {
+        if let Some(ServerPacket::AddBuff { buff }) = &mut buff_packet {
+            // Envir.Time is fixed during the Source cast: the first packet
+            // carries the exact granted duration; later snapshots count down.
+            buff.expire_time = i64::try_from(duration_ms).unwrap_or(i64::MAX);
+        }
+    }
+    packets.extend(buff_packet);
     if matches!(key, "hiding" | "moon-light" | "dark-body") {
         if let Some(object_id) = current_player_object_id(world) {
             packets.push(ServerPacket::ObjectHidden {
@@ -1982,6 +2109,7 @@ fn apply_crystal_energy_shield_spell(
     let hp_gain = ((spirit_power as f32 / 4.0) * (level + 1) as f32).round() as i32;
     let duration_ms = (30_u64 + u64::from(skill.level).saturating_mul(50)).saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: "energy-shield".to_string(),
         name: "Energy Shield".to_string(),
         description: "Crystal Energy Shield buff is active.".to_string(),
@@ -2037,6 +2165,7 @@ fn apply_crystal_magic_shield_spell(
         .unwrap_or(1)
         .saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: "magic-shield".to_string(),
         name: "Magic Shield".to_string(),
         description: "Crystal magic shield buff is active.".to_string(),
@@ -2096,6 +2225,7 @@ fn apply_crystal_teleport_spell(
         super::components::Facing(direction),
     ));
     let buff = BuffState {
+        real_time_duration: None,
         key: "temporal-flux".to_string(),
         name: "Temporal Flux".to_string(),
         description: "Crystal temporal flux teleport penalty is active.".to_string(),
@@ -2174,6 +2304,7 @@ fn apply_crystal_blink_spell(
         super::components::Facing(context.direction),
     ));
     let buff = BuffState {
+        real_time_duration: None,
         key: "temporal-flux".to_string(),
         name: "Temporal Flux".to_string(),
         description: "Crystal temporal flux teleport penalty is active.".to_string(),
@@ -2455,6 +2586,7 @@ fn apply_crystal_taoist_support_spell(
                     .unwrap_or_default()
                     .saturating_mul(1_000);
             let buff = BuffState {
+                real_time_duration: None,
                 key: "ultimate-enhancer".to_string(),
                 name: "Ultimate Enhancer".to_string(),
                 description: "Crystal Ultimate Enhancer buff is active.".to_string(),
@@ -2484,6 +2616,7 @@ fn apply_crystal_concentration_spell(
     };
     let duration_ms = (45_u64 + u64::from(skill.level).saturating_mul(15)).saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: "concentration".to_string(),
         name: "Concentration".to_string(),
         description: "Crystal Concentration buff is active.".to_string(),
@@ -2589,6 +2722,7 @@ fn apply_crystal_elemental_barrier_spell(
         .saturating_add(orb_power)
         .max(1);
     let buff = BuffState {
+        real_time_duration: None,
         key: "elemental-barrier".to_string(),
         name: "Elemental Barrier".to_string(),
         description: "Crystal elemental barrier buff is active.".to_string(),
@@ -3313,6 +3447,7 @@ fn apply_crystal_storm_escape_spell(
         super::components::Facing(context.direction),
     ));
     let buff = BuffState {
+        real_time_duration: None,
         key: "temporal-flux".to_string(),
         name: "Temporal Flux".to_string(),
         description: "Crystal temporal flux teleport penalty is active.".to_string(),
@@ -4917,6 +5052,7 @@ fn apply_crystal_mass_hiding_action(
             .is_some_and(|position| action.locations.iter().any(|cell| cell == &position));
         if player_in_area {
             let buff = BuffState {
+                real_time_duration: None,
                 key: "hiding".to_string(),
                 name: "Mass Hiding".to_string(),
                 description: "Crystal mass hiding buff is active.".to_string(),
@@ -5009,6 +5145,7 @@ fn apply_crystal_taoist_area_support_action(
                 .saturating_div(7)
                 .saturating_add(4);
             let buff = BuffState {
+                real_time_duration: None,
                 key: key.to_string(),
                 name: name.to_string(),
                 description: format!("Crystal {name} buff is active."),
@@ -5283,8 +5420,7 @@ fn apply_crystal_poisoning_spell(
         return Vec::new();
     }
 
-    let Some((delete_packet, poison_shape)) = consume_equipped_crystal_poison(world, None, 1)
-    else {
+    let Some((delete_packet, poison_shape)) = consume_poisoning_supply(world) else {
         return Vec::new();
     };
 
@@ -5579,9 +5715,10 @@ fn apply_crystal_revelation_spell(
         return Vec::new();
     }
 
-    let duration = crystal_magic_damage(magic, skill.level)
-        .max(1)
-        .min(i32::from(u8::MAX)) as u8;
+    let duration_ms = u64::try_from(crystal_magic_damage(magic, skill.level).max(1))
+        .unwrap_or(1)
+        .saturating_mul(1_000);
+    let duration = crate::crystal_health::crystal_health_expire(duration_ms, 0);
     if let Some(info) = object_health_info_for_entity(world, target_entity, duration) {
         queue_due_packet(
             world,
@@ -6571,6 +6708,7 @@ fn apply_crystal_moon_mist_spell(
     .unwrap_or(1)
     .saturating_mul(500);
     let buff = BuffState {
+        real_time_duration: None,
         key: "moon-light".to_string(),
         name: "Moon Light".to_string(),
         description: "Crystal moon mist stealth is active.".to_string(),
@@ -7151,6 +7289,7 @@ fn apply_crystal_arrow_marker_buff(
 
     let duration_ms = (5_u64 + u64::from(skill.level).saturating_mul(5)).saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: buff_key.to_string(),
         name: name.to_string(),
         description: format!("Crystal {name} buff is active."),
@@ -7495,6 +7634,134 @@ fn equipped_crystal_poison_component(
         .map(|item| item.key.clone())
 }
 
+#[derive(Clone, Copy)]
+enum PoisoningSupplyLocation {
+    Equipment(usize),
+    Bag(usize),
+    Belt(usize),
+}
+
+struct PoisoningSupply {
+    location: PoisoningSupplyLocation,
+    item_key: String,
+    shape: u16,
+}
+
+fn carried_poisoning_shape(
+    world: &World,
+    inventory: &InventoryResource,
+    item: &ItemState,
+) -> Option<u16> {
+    if item.quantity == 0
+        || (item.durability_max.unwrap_or_default() > 0 && item.durability_current == Some(0))
+    {
+        return None;
+    }
+    let template = crystal_item_template_for_dynamic_key(&item.key)?;
+    (template.item_type == CRYSTAL_ITEM_TYPE_AMULET
+        && matches!(template.shape, 1 | 2)
+        && crystal_item_requirement_rejection_key(world, inventory, &template).is_none())
+    .then(|| u16::try_from(template.shape).unwrap_or_default())
+}
+
+/// Custom Poisoning rule: preserve equipped priority, then use the lowest bag
+/// slot, then the lowest belt slot. Admission, colour projection and debit all
+/// call this selector; the single-writer session keeps the selection stable.
+/// Other poison spells retain their original equipped-only rules.
+fn poisoning_supply(world: &World) -> Option<PoisoningSupply> {
+    let inventory = world.resource::<InventoryResource>();
+    if let Some((index, item)) = inventory
+        .equipment_items
+        .iter()
+        .enumerate()
+        .find(|(_, item)| {
+            !item.is_broken()
+                && item.quantity > 0
+                && matches!(item.shape, Some(1 | 2))
+                && crystal_item_template_for_dynamic_key(&item.key)
+                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+        })
+    {
+        return Some(PoisoningSupply {
+            location: PoisoningSupplyLocation::Equipment(index),
+            item_key: item.key.clone(),
+            shape: item.shape.unwrap_or_default(),
+        });
+    }
+    if let Some((index, item, shape)) = inventory
+        .inventory_items
+        .iter()
+        .enumerate()
+        .filter(|(_, item)| matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2))
+        .filter_map(|(index, item)| {
+            carried_poisoning_shape(world, inventory, item).map(|shape| (index, item, shape))
+        })
+        .min_by_key(|(index, item, _)| {
+            (
+                u8::from(item.container == ItemContainer::Bag2),
+                item.slot,
+                item_unique_id(item),
+                *index,
+            )
+        })
+    {
+        return Some(PoisoningSupply {
+            location: PoisoningSupplyLocation::Bag(index),
+            item_key: item.key.clone(),
+            shape,
+        });
+    }
+    inventory
+        .belt_items
+        .iter()
+        .enumerate()
+        .filter(|(_, item)| item.container == ItemContainer::Belt)
+        .filter_map(|(index, item)| {
+            carried_poisoning_shape(world, inventory, item).map(|shape| (index, item, shape))
+        })
+        .min_by_key(|(index, item, _)| (item.slot, item_unique_id(item), *index))
+        .map(|(index, item, shape)| PoisoningSupply {
+            location: PoisoningSupplyLocation::Belt(index),
+            item_key: item.key.clone(),
+            shape,
+        })
+}
+
+fn consume_poisoning_supply(world: &mut World) -> Option<(ServerPacket, u16)> {
+    let supply = poisoning_supply(world)?;
+    let mut inventory = world.resource_mut::<InventoryResource>();
+    let unique_id = match supply.location {
+        PoisoningSupplyLocation::Equipment(index) => {
+            let item = &mut inventory.equipment_items[index];
+            let unique_id = equipment_slot_unique_id(item.slot).unwrap_or(9);
+            item.quantity -= 1;
+            if item.quantity == 0 {
+                inventory.equipment_items.remove(index);
+            }
+            unique_id
+        }
+        PoisoningSupplyLocation::Bag(index) | PoisoningSupplyLocation::Belt(index) => {
+            let items = match supply.location {
+                PoisoningSupplyLocation::Bag(_) => &mut inventory.inventory_items,
+                _ => &mut inventory.belt_items,
+            };
+            let unique_id = item_unique_id(&items[index]);
+            items[index].quantity -= 1;
+            if items[index].quantity == 0 {
+                items.remove(index);
+            }
+            unique_id
+        }
+    };
+    Some((
+        ServerPacket::DeleteItem {
+            unique_id,
+            count: 1,
+        },
+        supply.shape,
+    ))
+}
+
 pub(super) fn zone_magic_inventory_components(
     world: &World,
     spell: Spell,
@@ -7512,20 +7779,15 @@ pub(super) fn zone_magic_inventory_components(
         | Spell::UltimateEnhancer
         | Spell::Hallucination
         | Spell::Curse
-        | Spell::TrapHexagon
-        | Spell::Trap
-        | Spell::DelayedExplosion
-        | Spell::ExplosiveTrap
-        | Spell::BindingShot => Some(vec![component(
+        | Spell::TrapHexagon => Some(vec![component(
             equipped_crystal_amulet_component(world, 0, 1)?,
             1,
         )]),
-        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
-            Some(vec![component(
-                equipped_crystal_poison_component(world, None, 1)?,
-                1,
-            )])
-        }
+        Spell::Poisoning => Some(vec![component(poisoning_supply(world)?.item_key, 1)]),
+        Spell::PoisonSword => Some(vec![component(
+            equipped_crystal_poison_component(world, None, 1)?,
+            1,
+        )]),
         Spell::PoisonCloud => Some(vec![
             component(equipped_crystal_amulet_component(world, 0, 5)?, 5),
             component(equipped_crystal_poison_component(world, Some(1), 5)?, 5),
@@ -7560,10 +7822,14 @@ pub(super) fn zone_magic_inventory_components(
     }
 }
 
-/// Preserve the Crystal poison colour selected by the equipped poison stack
+/// Preserve the poison colour selected by the actual poison stack
 /// while the gateway moves the cast into the shared Zone runtime. Shape 1 is
 /// green poison, shape 2 is red poison, and zero means no poison component.
 pub(super) fn zone_magic_inventory_item_param(world: &World, spell: Spell) -> u8 {
+    if spell == Spell::Poisoning {
+        return poisoning_supply(world)
+            .map_or(0, |supply| u8::try_from(supply.shape).unwrap_or_default());
+    }
     if !matches!(spell, Spell::Poisoning | Spell::Plague) {
         return 0;
     }
@@ -7626,11 +7892,7 @@ pub(super) fn consume_zone_magic_inventory_components(
         | Spell::UltimateEnhancer
         | Spell::Hallucination
         | Spell::Curse
-        | Spell::TrapHexagon
-        | Spell::Trap
-        | Spell::DelayedExplosion
-        | Spell::ExplosiveTrap
-        | Spell::BindingShot => {
+        | Spell::TrapHexagon => {
             let delete_packet = consume_equipped_crystal_amulet(world, 0, 1)?;
             Some(vec![delete_packet])
         }
@@ -7641,7 +7903,11 @@ pub(super) fn consume_zone_magic_inventory_components(
             equipped_crystal_amulet_component(world, 0, 1)?;
             Some(Vec::new())
         }
-        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+        Spell::Poisoning => {
+            let (delete_packet, _) = consume_poisoning_supply(world)?;
+            Some(vec![delete_packet])
+        }
+        Spell::PoisonSword => {
             let (delete_packet, _) = consume_equipped_crystal_poison(world, None, 1)?;
             Some(vec![delete_packet])
         }
@@ -8210,6 +8476,62 @@ impl SimulationSession {
         }
 
         cast_skill(self.app.world_mut(), key)
+    }
+}
+
+#[cfg(test)]
+mod crystal_mana_metadata_tests {
+    use super::*;
+
+    #[test]
+    fn canonical_metadata_precedes_legacy_alias_for_every_supported_level() {
+        for (key, spell) in [("minor-heal", "Healing"), ("battle-focus", "Fury")] {
+            let definition = skill_definition(key).expect("legacy alias fixture");
+            let magic = crystal_magic_by_spell(spell).expect("canonical spell fixture");
+            for level in 0..=3 {
+                let expected =
+                    i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+                assert_eq!(
+                    skill_mana_cost_from_authoritative_metadata(
+                        Some(&definition),
+                        Some(&magic),
+                        level,
+                    ),
+                    Some(expected),
+                    "{key} level {level}",
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn genuinely_non_crystal_skill_preserves_legacy_cost_including_zero() {
+        let mut definition = skill_definition("minor-heal").expect("generic definition fixture");
+        definition.crystal_spell = None;
+        for cost in [0, 6, 19] {
+            definition.mana_cost = cost;
+            for level in 0..=3 {
+                assert_eq!(
+                    skill_mana_cost_from_authoritative_metadata(Some(&definition), None, level),
+                    Some(cost),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn absent_or_negative_non_crystal_cost_fails_closed() {
+        let mut definition = skill_definition("minor-heal").expect("generic definition fixture");
+        definition.crystal_spell = None;
+        definition.mana_cost = -1;
+        assert_eq!(
+            skill_mana_cost_from_authoritative_metadata(Some(&definition), None, 0),
+            None,
+        );
+        assert_eq!(
+            skill_mana_cost_from_authoritative_metadata(None, None, 3),
+            None
+        );
     }
 }
 

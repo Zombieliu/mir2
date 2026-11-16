@@ -1,0 +1,21 @@
+{
+  "sourceSha256": {
+    "apps/gateway/src/zone_lease.rs": "8b4d64772b588b8647f90a0a3a9a204ddf35d4377c57182568fad1c874deaea9",
+    "apps/gateway/src/session.rs": "61513d66ef35f08245bb80927e47bfc6f6754e307b54c6aa07769d57eefc1980",
+    "apps/gateway/src/lib.rs": "bf18270408d3bee0135358006a8c18bc854f34d8f4b68bbf3ffa72acbf9ebd1f",
+    "apps/gateway/src/zone_owner_resolver.rs": "dbc24d3eb3be1dce95158d9617240f38990e5fc771b574ed2bf6179dae5b7058",
+    "apps/gateway/src/zone_rpc.rs": "5ac7ed75232643ec80eb9877063481f868dd9dfc682b6ce3abc8d191a56ed43f",
+    "apps/gateway/src/routing.rs": "2aaabd567dc42e92dc043c2313dd1501e29635a8ad2533e5289f26da8f297767",
+    "apps/gateway/src/web.rs": "69fd56efb08eb0e485ba14cf73f87cc68f7feedb4fc7e6d5805237aa5c46dbda",
+    "apps/gateway/src/zone_rpc/lease_failure_tests.rs": "b810bee32d6ea1e744a0ffa8d7a3526bca88a094eb26a8141c84f967b1f2a476",
+    "apps/gateway/src/tcp.rs": "7c41423461e57c784c1dc2b52f176225f7e6ffb2eb480ec2a8645015cf1f4850"
+  },
+  "explicitIsolatedPostgres": true,
+  "sourceUnchangedDuringRun": true,
+  "targetDirectory": "E:\\mir2-capacity-goal-20261030/target",
+  "exitCode": 0,
+  "filter": "zone_owner_resolver::tests::",
+  "startedAtUtc": "2026-10-30T06:01:07.6735841Z",
+  "database": "mir2_zone_lease_test_20261030_69f2a7f5",
+  "finishedAtUtc": "2026-10-30T06:01:47.2107097Z"
+}

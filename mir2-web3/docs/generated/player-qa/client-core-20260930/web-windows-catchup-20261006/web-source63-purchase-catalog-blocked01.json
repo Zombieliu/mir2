@@ -1,0 +1,49 @@
+{
+  "owner": "Root",
+  "kind": "Source63 ordinary purchase actual first rejection",
+  "route": "http://127.0.0.1:19205/",
+  "ordinaryActions": [
+    "login",
+    "StartGame existing level2 character",
+    "Scott normal interaction",
+    "View",
+    "select Candle",
+    "click Buy once"
+  ],
+  "quote": {
+    "item": "Candle",
+    "quantity": 1,
+    "totalGold": 10,
+    "goldBefore": 200,
+    "buyEnabled": true
+  },
+  "clickDiagnostic": "callbackInvoked",
+  "actionDiagnostic": {
+    "route": "durable",
+    "stage": "rejected",
+    "reason": "catalogSourceUnavailable"
+  },
+  "purchaseAccepted": false,
+  "saveRebuyVerified": false,
+  "limitedNetwork": {
+    "loginEvents": 2,
+    "loginTruncated": true,
+    "purchaseEvents": 0,
+    "purchaseTruncated": true,
+    "globalAbsenceClaimed": false
+  },
+  "screenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source63-purchase-catalog-blocked01.png",
+    "bytes": 65453,
+    "sha256": "93098fff939a6adbbcf6f75b12f8063470cf3be9cc7f5db4a048c5746a40cbc5"
+  },
+  "runtime": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source63-runtime-start-actual01.json",
+    "bytes": 1833,
+    "sha256": "a7281d3843e2457e46266c5cb3550ef9c1d8da332dc219a530596e1a975f37e8"
+  },
+  "noQaAdmin": true,
+  "noDirectGameOrWasmApi": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

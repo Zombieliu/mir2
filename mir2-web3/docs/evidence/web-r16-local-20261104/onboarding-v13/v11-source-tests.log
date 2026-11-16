@@ -1,0 +1,431 @@
+TAP version 13
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 1 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 1.5884
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 2 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.1583
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 3 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.3127
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 4 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.2201
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 5 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.1977
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 6 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 14.0529
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 7 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.1999
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 8 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 27.2636
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 9 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.396
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 10 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 1.1988
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 11 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 118.22
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 12 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 147.8164
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 13 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 3.2297
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 14 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 0.8514
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 15 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 0.2019
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 16 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.196
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 17 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 1.2852
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 18 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 0.7841
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 19 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.2693
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 20 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 2.6579
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 21 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.7848
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 22 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 116.1286
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 23 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 124.8545
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 24 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 30.753
+  type: 'test'
+  ...
+# newcomer v2 journey tests passed
+# Subtest: scripts\\test-newcomer-v2-journey.mjs
+ok 2 - scripts\\test-newcomer-v2-journey.mjs
+  ---
+  duration_ms: 485.1937
+  type: 'test'
+  ...
+# Subtest: CLI requires explicit absolute package inputs and a closed relative server entry
+ok 26 - CLI requires explicit absolute package inputs and a closed relative server entry
+  ---
+  duration_ms: 2.2072
+  type: 'test'
+  ...
+# Subtest: the real runtime closure contains Actor/model/supply/life modules and excludes local fixtures or administration CLIs
+ok 27 - the real runtime closure contains Actor/model/supply/life modules and excludes local fixtures or administration CLIs
+  ---
+  duration_ms: 179.2832
+  type: 'test'
+  ...
+# Subtest: computed imports and modules outside the runtime allowlist cannot enter a package
+ok 28 - computed imports and modules outside the runtime allowlist cannot enter a package
+  ---
+  duration_ms: 7.0343
+  type: 'test'
+  ...
+# Subtest: the import closure ignores literal Node preload flags and import-looking strings without weakening computed-load rejection
+ok 29 - the import closure ignores literal Node preload flags and import-looking strings without weakening computed-load rejection
+  ---
+  duration_ms: 4.6544
+  type: 'test'
+  ...
+# Subtest: an existing output containing old state is never changed
+ok 30 - an existing output containing old state is never changed
+  ---
+  duration_ms: 7.5767
+  type: 'test'
+  ...
+# Subtest: source/output overlap and escaped server locations fail before creating an artifact
+ok 31 - source/output overlap and escaped server locations fail before creating an artifact
+  ---
+  duration_ms: 7.4616
+  type: 'test'
+  ...
+# Subtest: private build inputs are refused rather than silently copied into the prepared Web tree
+ok 32 - private build inputs are refused rather than silently copied into the prepared Web tree
+  ---
+  duration_ms: 130.7372
+  type: 'test'
+  ...
+# Subtest: prepared Next links are refused without traversing their targets
+ok 33 - prepared Next links are refused without traversing their targets
+  ---
+  duration_ms: 99.5258
+  type: 'test'
+  ...
+# Subtest: a moved package imports the complete real runtime and reads navigation locally without starting any service
+ok 34 - a moved package imports the complete real runtime and reads navigation locally without starting any service
+  ---
+  duration_ms: 2769.7328
+  type: 'test'
+  ...
+# Subtest: hidden Windows argument quoting round-trips spaces, Unicode, empty values, quotes and trailing backslashes
+ok 35 - hidden Windows argument quoting round-trips spaces, Unicode, empty values, quotes and trailing backslashes
+  ---
+  duration_ms: 1214.2827
+  type: 'test'
+  ...
+# Subtest: launchers default to Alo/rules, hide the owned service, and stop only through existing authenticated control
+ok 36 - launchers default to Alo/rules, hide the owned service, and stop only through existing authenticated control
+  ---
+  duration_ms: 0.3176
+  type: 'test'
+  ...
+# Subtest: the deployment profile is explicit and defaults to Crystal
+ok 37 - the deployment profile is explicit and defaults to Crystal
+  ---
+  duration_ms: 0.5384
+  type: 'test'
+  ...
+# Subtest: wire endpoints preserve explicit zero and reject missing or malformed values
+ok 38 - wire endpoints preserve explicit zero and reject missing or malformed values
+  ---
+  duration_ms: 0.1053
+  type: 'test'
+  ...
+# Subtest: host projection passes endpoint, reward, stage, dialog and pending facts into shared Rust
+ok 39 - host projection passes endpoint, reward, stage, dialog and pending facts into shared Rust
+  ---
+  duration_ms: 0.3679
+  type: 'test'
+  ...
+# Subtest: absent metadata remains absent even with a matching NPC dialog link
+ok 40 - absent metadata remains absent even with a matching NPC dialog link
+  ---
+  duration_ms: 0.0925
+  type: 'test'
+  ...
+# Subtest: NPC offer requires an exact active link and positive numeric object id
+ok 41 - NPC offer requires an exact active link and positive numeric object id
+  ---
+  duration_ms: 0.1174
+  type: 'test'
+  ...
+# Subtest: malformed reward selection fails at the wire boundary instead of becoming no-choice
+ok 42 - malformed reward selection fails at the wire boundary instead of becoming no-choice
+  ---
+  duration_ms: 0.0971
+  type: 'test'
+  ...
+# Subtest: only the exact request and operation receipt releases pending transport state
+ok 43 - only the exact request and operation receipt releases pending transport state
+  ---
+  duration_ms: 0.1447
+  type: 'test'
+  ...
+# Subtest: changing the selected reward cannot submit another finish while the quest is pending
+ok 44 - changing the selected reward cannot submit another finish while the quest is pending
+  ---
+  duration_ms: 0.1646
+  type: 'test'
+  ...
+# Subtest: a synchronous shared runtime failure cannot escape the host adapter
+ok 45 - a synchronous shared runtime failure cannot escape the host adapter
+  ---
+  duration_ms: 0.2075
+  type: 'test'
+  ...
+# Subtest: one canonical public baseline projects byte-exact deterministic Node/Web data with an inert import-free frozen Node leaf
+ok 46 - one canonical public baseline projects byte-exact deterministic Node/Web data with an inert import-free frozen Node leaf
+  ---
+  duration_ms: 9.5778
+  type: 'test'
+  ...
+# Subtest: schema, identity, content, guidance, cadence, onboarding, extra fields and generated-byte drift are rejected explicitly
+ok 47 - schema, identity, content, guidance, cadence, onboarding, extra fields and generated-byte drift are rejected explicitly
+  ---
+  duration_ms: 1.136
+  type: 'test'
+  ...
+# Subtest: the existing Windows resource export retains its signed generation pin while taking every gameplay field from the shared leaf
+ok 48 - the existing Windows resource export retains its signed generation pin while taking every gameplay field from the shared leaf
+  ---
+  duration_ms: 0.1134
+  type: 'test'
+  ...
+# Subtest: the real local gateway spawn uses the R16 content and V2 cadence without inheriting foreign gameplay/auth/model settings
+ok 49 - the real local gateway spawn uses the R16 content and V2 cadence without inheriting foreign gameplay/auth/model settings
+  ---
+  duration_ms: 46.5715
+  type: 'test'
+  ...
+# Subtest: existing explicit fixture profiles remain explicit and never claim to be the R16 baseline
+ok 50 - existing explicit fixture profiles remain explicit and never claim to be the R16 baseline
+  ---
+  duration_ms: 32.7142
+  type: 'test'
+  ...
+# Subtest: the Web R16 onboarding projection is the exact canonical Native gameplay baseline
+ok 51 - the Web R16 onboarding projection is the exact canonical Native gameplay baseline
+  ---
+  duration_ms: 2.0211
+  type: 'test'
+  ...
+# Subtest: the Web profile and automatic tutorial policy come from the shared baseline helper
+ok 52 - the Web profile and automatic tutorial policy come from the shared baseline helper
+  ---
+  duration_ms: 32.7475
+  type: 'test'
+  ...
+# Subtest: all three Page Quest consumers use the same R16 profile helper without a deployment override
+ok 53 - all three Page Quest consumers use the same R16 profile helper without a deployment override
+  ---
+  duration_ms: 32.3963
+  type: 'test'
+  ...
+# Subtest: fresh keyboard, touch and controller entry cannot automatically start the legacy card tutorial
+ok 54 - fresh keyboard, touch and controller entry cannot automatically start the legacy card tutorial
+  ---
+  duration_ms: 39.4865
+  type: 'test'
+  ...
+# Subtest: Native Candidate default TOML and the package parameter resolve to the same canonical Quest profile
+ok 55 - Native Candidate default TOML and the package parameter resolve to the same canonical Quest profile
+  ---
+  duration_ms: 390.4484
+  type: 'test'
+  ...
+# Subtest: Native explicit historical profiles remain selectable and unknown profile values are rejected
+ok 56 - Native explicit historical profiles remain selectable and unknown profile values are rejected
+  ---
+  duration_ms: 387.6321
+  type: 'test'
+  ...
+# Subtest: the Native host uses the canonical fallback and retains explicit TOML profile precedence
+ok 57 - the Native host uses the canonical fallback and retains explicit TOML profile precedence
+  ---
+  duration_ms: 0.4675
+  type: 'test'
+  ...
+# Subtest: run arguments require explicit existing-location choices; controls cannot activate or retarget services
+ok 58 - run arguments require explicit existing-location choices; controls cannot activate or retarget services
+  ---
+  duration_ms: 1.7666
+  type: 'test'
+  ...
+# Subtest: generated credentials fit Crystal's 15-character alphanumeric boundary and each secret has independent entropy
+ok 59 - generated credentials fit Crystal's 15-character alphanumeric boundary and each secret has independent entropy
+  ---
+  duration_ms: 3.9568
+  type: 'test'
+  ...
+# Subtest: world, archive and recovery secrets stay unchanged across valid JSON reloads
+ok 60 - world, archive and recovery secrets stay unchanged across valid JSON reloads
+  ---
+  duration_ms: 0.9475
+  type: 'test'
+  ...
+# Subtest: Gateway alone receives File recovery/supply keys; only the dedicated wallet signer is shared with Next
+ok 61 - Gateway alone receives File recovery/supply keys; only the dedicated wallet signer is shared with Next
+  ---
+  duration_ms: 1.2859
+  type: 'test'
+  ...
+# Subtest: both R16 service environments consume one public gameplay baseline without migrating persistent state
+ok 62 - both R16 service environments consume one public gameplay baseline without migrating persistent state
+  ---
+  duration_ms: 0.2729
+  type: 'test'
+  ...
+# Subtest: wallet signing is persistent, world/domain separated and cannot be replaced by ambient public or dev settings
+ok 63 - wallet signing is persistent, world/domain separated and cannot be replaced by ambient public or dev settings
+  ---
+  duration_ms: 0.8385
+  type: 'test'
+  ...
+# Subtest: first preparation publishes one initializing identity before any account/bootstrap work
+ok 64 - first preparation publishes one initializing identity before any account/bootstrap work
+  ---
+  duration_ms: 12.074
+  type: 'test'
+  ...
+# Subtest: nonempty or corrupt state cannot produce replacement accounts, archives or keys
+ok 65 - nonempty or corrupt state cannot produce replacement accounts, archives or keys
+  ---
+  duration_ms: 5.5058
+  type: 'test'
+  ...
+# Subtest: complete ready state reloads without writing a byte or generating a new identity
+ok 66 - complete ready state reloads without writing a byte or generating a new identity
+  ---
+  duration_ms: 8.6991
+  type: 'test'
+  ...
+# Subtest: losing a supply key cannot recreate a spending ledger or reset its budget
+ok 67 - losing a supply key cannot recreate a spending ledger or reset its budget
+  ---
+  duration_ms: 6.069
+  type: 'test'
+  ...
+# Subtest: partially missing SQLite stores and state-publication remnants fail closed
+ok 68 - partially missing SQLite stores and state-publication remnants fail closed
+  ---
+  duration_ms: 12.4616
+  type: 'test'
+  ...
+# Subtest: private local control addresses are deterministic and scoped to the selected data directory
+ok 69 - private local control addresses are deterministic and scoped to the selected data directory
+  ---
+  duration_ms: 0.309
+  type: 'test'
+  ...
+# Subtest: launcher source keeps EOF detached from shutdown and model loading confined to its Actor worker
+ok 70 - launcher source keeps EOF detached from shutdown and model loading confined to its Actor worker
+  ---
+  duration_ms: 1.0271
+  type: 'test'
+  ...
+1..70
+# tests 70
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4809.4616

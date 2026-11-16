@@ -1,0 +1,140 @@
+{
+  "schema": "r16-city-v17-result/1",
+  "passed": false,
+  "quest5Completed": true,
+  "quest6Completed": false,
+  "blocker": "Confirmed ordinary durable purchase did not advance q6 server event objective",
+  "originalRun": {
+    "proof": "D:\\mir2-builds\\forest-quest-driver-20261106\\forest-city-v17-r1\\onboarding-forest-browser-proof.json",
+    "sha256": "f0ef61f13afe3c0d1dc23aa5aaa81dc328ae47d36a469638f9282bd3b1999969",
+    "passed": false,
+    "errors": [
+      {
+        "phase": "q6-real-town-potion-purchase",
+        "name": "QUEST_NOT_SERVER_READY"
+      }
+    ],
+    "movementSteps": 481,
+    "questOperations": [
+      {
+        "questId": 2110005,
+        "operation": "acceptQuest",
+        "matchingAck": true,
+        "success": true
+      },
+      {
+        "questId": 2110005,
+        "operation": "finishQuest",
+        "matchingAck": true,
+        "success": true
+      },
+      {
+        "questId": 2110006,
+        "operation": "acceptQuest",
+        "matchingAck": true,
+        "success": true
+      }
+    ],
+    "rewards": [
+      {
+        "questId": 2110005,
+        "goldDelta": 200,
+        "items": [
+          {
+            "name": "TownTeleport",
+            "count": 1
+          }
+        ],
+        "matchingAck": true
+      }
+    ],
+    "purchases": [
+      {
+        "itemName": "(HP)DrugSmall",
+        "bought": true,
+        "quantity": 4,
+        "chargedGold": 160,
+        "goldBefore": 180,
+        "goldAfter": 20,
+        "quantityBefore": 0,
+        "quantityAfter": 4,
+        "onePurchaseCommand": true,
+        "matchingDurableReceipt": true
+      },
+      {
+        "itemName": "(HP)DrugSmall",
+        "bought": true,
+        "quantity": 1,
+        "chargedGold": 40,
+        "goldBefore": 220,
+        "goldAfter": 180,
+        "quantityBefore": 4,
+        "quantityAfter": 5,
+        "onePurchaseCommand": true,
+        "matchingDurableReceipt": true
+      }
+    ],
+    "httpErrors": 0,
+    "failedRequests": 0,
+    "consoleErrors": 0
+  },
+  "freshOrdinaryUiReconciliation": {
+    "proof": "D:\\mir2-builds\\forest-quest-driver-20261106\\forest-city-v17-reconcile-r2\\onboarding-forest-browser-proof.json",
+    "sha256": "125d960759694db1dc7d713a25e6b567d3a76046b9b8c0e7b8a0f28e8d7745fa",
+    "scope": "read-only state confirmation, not city stage pass",
+    "passed": true,
+    "state": {
+      "q5Completed": true,
+      "q6Completed": false,
+      "q6": {
+        "questId": 2110006,
+        "stage": "inProgress",
+        "current": 0,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 0,
+            "required": 1,
+            "done": false
+          }
+        ]
+      },
+      "gold": 180,
+      "medicine": 5,
+      "hp": 78,
+      "maxHp": 78,
+      "mp": 42,
+      "maxMp": 42,
+      "dead": false,
+      "position": {
+        "x": 325,
+        "y": 290
+      },
+      "progression": {
+        "level": 9,
+        "experience": 378,
+        "maxExperience": 2500
+      },
+      "ordinaryEconomicActionsSent": 0
+    },
+    "ordinaryLogout": true,
+    "browserClosed": true,
+    "ordinaryEconomicActionsSent": 0
+  },
+  "screenshots": [
+    {
+      "path": "D:\\mir2-builds\\forest-quest-driver-20261106\\forest-city-v17-r1\\07-next-quest-2110005-completed.png",
+      "sha256": "b7b9e6cfe542408d31453cce74e5518a580ba27e413df2882b5ede7c027ac355"
+    },
+    {
+      "path": "D:\\mir2-builds\\forest-quest-driver-20261106\\forest-city-v17-reconcile-r2\\03-q6-read-only-reconcile-after-confirmed-purchase.png",
+      "sha256": "218ac216ee96d8be60c4dd093a98fb8ea576997c540c57caf9694a16f61c8ee0"
+    }
+  ],
+  "qaRoleReleased": true,
+  "productSourceModified": false,
+  "servicesStartedOrRestarted": false,
+  "retainedDriverFailure": "forest-city-v17-reconcile-r1: helper omitted normal npcPurchaseOwner begin bootstrap; archived failed, corrected only in external v2 helper",
+  "nextActionPendingRoot": "Review and fix authoritative durable-purchase quest-event path before continuing city/forest"
+}

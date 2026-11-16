@@ -1,0 +1,50 @@
+{
+  "source": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "base": "d269c56b33a4a1481622c022534d6b307277736b",
+  "baseline": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+  "previousProductionSource": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "runtime": "bevy-0c553a754308e5b8",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx",
+      "sha": "b43ef539c1d828b81e69d82c6585e7adc4304267"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "sha": "712aef3d3caa6ad3ffb72986bcaf0bea655b92ce"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+      "sha": "7371526457c072d3a99ce4071efb0226a96a384f"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/self-sprite-image.ts",
+      "sha": "a2d0267aa564a4553d7f117fc27a52ef724f53c0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/self-sprite-residency.ts",
+      "sha": "c437d6d563689bb47ba394928b5c56c841a58e76"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/package.json",
+      "sha": "dd1e6c4d9472e73d5b7afbe0e2c3f0a5e19578d1"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-self-sprite-residency.mjs",
+      "sha": "7e75a0326f39eedae6276d51c1a89a1f9cca00be"
+    }
+  ],
+  "workerBytes": 40071,
+  "workerSha256": "1725f95a0a238e2139a84a5aaad31f2d16f8476e28bf805c9a24b2557eb646e1",
+  "localCandidate": "d269c56b33a4-self-sprite-a5631224",
+  "localBuildReceiptSha256": "5d51498e4aa92cf80e2b62bdf52d074f650e9b46faa1c437fb9fb800b2c6dd97",
+  "noNewRuntimeOrAssetUpload": true
+}

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source70 actual original Thin build acceptance",
+  "builderPid": 82660,
+  "elapsedMs": 38038,
+  "exitCode": 0,
+  "exited": true,
+  "disposed": true,
+  "postSourceAndToolGuardPassed": true,
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\thin-source-review01.json",
+    "bytes": 21892,
+    "sha256": "c9322dd1ab91828a3e5e6443bf4e34c9295e4c7d8d4b4b5cae459ccb8e726225"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\thin01-config.json",
+    "bytes": 6591,
+    "sha256": "ce73a73d88fa17ad7f81c7516a4c7d84d592fa1674de54813eb9c40276666b50"
+  },
+  "packageManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\thin-package-manifest01.json",
+    "bytes": 908023,
+    "sha256": "b775e8c1c95b414418d370c4f5861e782f71b5adbc2da823eb0015a978977aeb"
+  },
+  "package": {
+    "files": 4182,
+    "directories": 517,
+    "bytes": 285112029,
+    "links": 0
+  },
+  "budgetBytes": 377487360,
+  "headroomBytes": 92375331,
+  "source70ActualNextOutput": true,
+  "clientPage": {
+    "bytes": 2592961,
+    "sha256": "0a9c33ae32e6affaa56f5532ef8124cf6d2a7e1d3372fb1936e4870218ecf6b5",
+    "actualNextBytes": 2592961,
+    "actualNextSha256": "0a9c33ae32e6affaa56f5532ef8124cf6d2a7e1d3372fb1936e4870218ecf6b5"
+  },
+  "localMap": {
+    "files": 116,
+    "bytes": 204399,
+    "sourceSha256": "891e6e66b283c7da142af1b1644e45b341245548cec625ec9bff9274011fb66f",
+    "allLeavesMatchFiniteAcceptedSource": true
+  },
+  "core": {
+    "leaves": 6,
+    "unchangedCompiledManifest": true,
+    "allLeavesMatch": true
+  },
+  "jsonCompaction": {
+    "files": 10,
+    "allSourceAndOutputHashesMatch": true,
+    "allParsedDataEqual": true
+  },
+  "warnings": {
+    "count": 59,
+    "normalizedMultisetExactAgainstSource69": true,
+    "normalization": "Only reviewed web root and compiled dist path names"
+  },
+  "stderrBytes": 0,
+  "report": {
+    "file": "web-source70-thin-size-report01.json",
+    "bytes": 81305,
+    "sha256": "1c869fa6d1a815545f6b56128941e5f9dceecbcf820358ce92750560b171be79"
+  },
+  "runtimeLaunched": false,
+  "uiOperated": false,
+  "candidateAccepted": false,
+  "humanAccepted": false,
+  "goalComplete": false
+}

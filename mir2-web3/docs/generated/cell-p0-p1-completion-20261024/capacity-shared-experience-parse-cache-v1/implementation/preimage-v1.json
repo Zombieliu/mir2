@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_experience_profile.rs",
+    "bytes": 76309,
+    "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+  },
+  "preimage": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-authority-parse-cache-v1\\shared_experience_profile.rs.before-cache-v1.txt",
+  "scope": "one Rust module; no tests or load executed here"
+}

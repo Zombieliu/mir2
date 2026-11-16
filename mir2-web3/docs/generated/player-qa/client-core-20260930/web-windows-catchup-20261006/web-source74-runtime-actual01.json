@@ -1,0 +1,73 @@
+{
+  "owner": "Root",
+  "kind": "Source74 actual original local Web runtime identity and independently accepted copy",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 2995,
+    "sha256": "9e5e05f5751cca0bf87c8d47ed126b3016877536d8b34722a7bb4b11e8ee19e5"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\web-start-source-review01.json",
+    "bytes": 2561,
+    "sha256": "166a9a753be0f6568753246e993d40a5448767250a40df4cdfe6c0d26c0cc1f9"
+  },
+  "actualThin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-thin-actual01.json",
+    "bytes": 10142,
+    "sha256": "97d55394c0a8221f8ae0e02f5368640881b8d031d6f450f4fd2950d18750f977"
+  },
+  "runtimeSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\runtime-preparation01\\runtime-snapshot01.json",
+    "bytes": 2413931,
+    "sha256": "6e0d5b18dc6151523801f5207379aa54b6b76b5ac9e089e0a8de0804a386af27"
+  },
+  "runtimeCopy": {
+    "files": 4433,
+    "directoriesIncludingRoot": 752,
+    "bytes": 315432103,
+    "hashDifferences": 0,
+    "membershipDifferences": 0,
+    "links": 0,
+    "special": 0
+  },
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "sessionId": 69084,
+    "open": true,
+    "preLaunchInputGuardCompleted": true,
+    "finalExitCode": null,
+    "postExitFullInputGuardPending": true
+  },
+  "actualProcess": {
+    "childPid": 84052,
+    "parentPid": 84152,
+    "publicServerArgumentMatched": true,
+    "originalCallerConfigMatched": true,
+    "localPort": 19205,
+    "source": "Source74",
+    "startupCallerOpen": true,
+    "finalExitPostguardPending": true
+  },
+  "oldRuntimeClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source73-runtime-final-closure01.json",
+    "bytes": 2735,
+    "sha256": "490b4d09764d2733a0a0910a7d1f946951840277e2bbe7dc9bf851f1e0ef9d0f"
+  },
+  "localUrl": "http://127.0.0.1:19205/",
+  "existingGateway": {
+    "source": "Source65",
+    "pid": 66300,
+    "ports": [
+      19100,
+      19110
+    ],
+    "unchanged": true
+  },
+  "activeProductLogsRead": false,
+  "noPrivateGatewayConfigurationRead": true,
+  "noCredentialFileRestored": true,
+  "noProductImportInDataRuntime": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

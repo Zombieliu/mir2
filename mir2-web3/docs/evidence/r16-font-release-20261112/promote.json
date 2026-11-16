@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "kind": "numeron-r16-release",
+  "passed": true,
+  "domainMovePending": true,
+  "customDomainChanged": false,
+  "oldGameProjectMutatedByHelper": false,
+  "writes": [
+    {
+      "operation": "promote",
+      "site": "game",
+      "deployment": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ"
+    }
+  ],
+  "rollbacks": [],
+  "credentialsRecorded": false,
+  "operation": "numeron-qr-promote",
+  "sourceSha": "df7aace1692ccbd28291a917b7e74eafe6942940",
+  "implementationSha": "7a7e428abed58a4a19f7adc5496238f094738043",
+  "projects": {
+    "original": {
+      "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "24.x"
+    },
+    "main": {
+      "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+      "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+      "rootDirectory": null,
+      "nodeVersion": "24.x"
+    },
+    "game": {
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "production": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "26.x"
+    }
+  },
+  "sourceClosure": {
+    "base": "99110428632b43e945c2341e8ca9058a8324937a",
+    "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "ref": "codex/windows-player-journey",
+    "changedFiles": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+        "sha": "026c4f90ca766e6ade536b1ef55e0e5bbefb8647"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+        "sha": "3285ec9deffbbb73ea3ecc189e7d222384089158"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "ab1a900c1b400345cd0df1f7dc1867d25be9f7cb"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "74b03eb8771c2dd7e2ac32a2a9c9ad6ff826bbc0"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "2e705f88cf4aeeb39acb097249b479f0501a9345"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "d1846fc9a0455fcdbf4c10397f58d9f1a4f09a38"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/README.md",
+        "sha": "65598c7679944a59c27bd6a9356e5ca0b568944a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/build-receipt.json",
+        "sha": "ce8f1459a4cb49ff93a4daecde23e1620316e91b"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/clean-candidate-green.log",
+        "sha": "184aa4e81752079e8dd8a5807d9c1ae13b4723b3"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/observe-network.mjs",
+        "sha": "bed08531773e3f1d6b0da38440499894939e19f3"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/order-red-r2.log",
+        "sha": "6f4afae45cae766449279ccf4402b270f00e1e63"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/production-build-r1.log",
+        "sha": "55e2165e1da7b875088bf2afad8a0bfc84a0f98c"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/receipt.json",
+        "sha": "1e96293acd98b04b70054e07696e4048b093a9ba"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/webgl2-quest.png",
+        "sha": "d94cab684faefb60934aa8e6d0947aa6e8eace4d"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/webgpu-quest.png",
+        "sha": "cce9619399f70aceebe1c44f712b3307b216c3fa"
+      }
+    ]
+  },
+  "assetPublication": {
+    "runId": "42494701555",
+    "artifactId": 13622863928,
+    "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+    "manifestBytes": 15716826
+  },
+  "candidates": {
+    "game": {
+      "id": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+      "url": "numeron-r16-5r36cxj9r-obelisk-labs.vercel.app"
+    }
+  },
+  "trafficBefore": {
+    "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+    "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+  },
+  "protectedEntryScene": {
+    "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+    "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+    "bytes": 458475
+  },
+  "protectedEntryFloor": {
+    "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+    "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+    "bytes": 439896
+  },
+  "protectedEntryPlayerMale": {
+    "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+    "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+    "bytes": 289851
+  },
+  "protectedEntryPlayerFemale": {
+    "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+    "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+    "bytes": 282415
+  },
+  "protectedEntryNpcs": {
+    "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+    "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+    "bytes": 313909
+  },
+  "protectedEntryObjects1": {
+    "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+    "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+    "bytes": 395412
+  },
+  "protectedEntryObjects2": {
+    "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+    "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+    "bytes": 395320
+  },
+  "protectedEntryObjects3": {
+    "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+    "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+    "bytes": 395216
+  },
+  "protectedEntryMonsterStanding": {
+    "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+    "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+    "bytes": 513566
+  },
+  "protectedEntryMonsterWalking": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "bytes": 764724
+  },
+  "protectedEntryGameplayLocale": {
+    "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+    "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+    "bytes": 3283113
+  },
+  "protectedQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "trafficAfter": {
+    "target": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+    "alias": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ"
+  },
+  "publicQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "publicEntryScene": {
+    "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+    "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+    "bytes": 458475
+  },
+  "publicEntryFloor": {
+    "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+    "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+    "bytes": 439896
+  },
+  "publicEntryPlayerMale": {
+    "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+    "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+    "bytes": 289851
+  },
+  "publicEntryPlayerFemale": {
+    "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+    "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+    "bytes": 282415
+  },
+  "publicEntryNpcs": {
+    "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+    "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+    "bytes": 313909
+  },
+  "publicEntryObjects1": {
+    "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+    "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+    "bytes": 395412
+  },
+  "publicEntryObjects2": {
+    "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+    "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+    "bytes": 395320
+  },
+  "publicEntryObjects3": {
+    "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+    "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+    "bytes": 395216
+  },
+  "publicEntryMonsterStanding": {
+    "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+    "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+    "bytes": 513566
+  },
+  "publicEntryMonsterWalking": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "bytes": 764724
+  },
+  "publicEntryGameplayLocale": {
+    "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+    "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+    "bytes": 3283113
+  }
+}

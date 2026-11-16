@@ -19,13 +19,12 @@ assert.match(
   "flushing must consume the pending action exactly once",
 );
 
-const staleSocketGuardCount = (
-  pageSource.match(/if \(socketRef\.current !== socket\) return;/g) ?? []
-).length;
-assert.ok(
-  staleSocketGuardCount >= 4,
-  `open, error, message, and close paths need stale-socket guards; found ${staleSocketGuardCount}`,
-);
+const connectGatewaySource = pageSource.split("function connectGateway(")[1].split("\n  useEffect(")[0];
+for (const event of ["open", "close", "error", "message"]) {
+  const listener = connectGatewaySource.split(`socket.addEventListener("${event}",`)[1];
+  assert.match(listener?.split("\n")[1] ?? "", /if \(socketRef\.current !== socket(?:\s*\|\|[^)]*)?\) return;/,
+    `the ${event} listener must check the current socket before taking action`);
+}
 assert.match(pageSource, /case "Connected":\s*setLoginErrorKey\(null\);\s*gatewayProtocolReadyRef\.current = true;\s*flushGatewayProtocolQueue\(\);/);
 assert.match(captureSource, /waitForGatewayProtocolReady/);
 assert.match(captureSource, /gatewayProtocolReady === true/);

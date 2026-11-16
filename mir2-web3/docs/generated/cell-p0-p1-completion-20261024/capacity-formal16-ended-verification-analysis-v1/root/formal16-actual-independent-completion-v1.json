@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T03:29:09.141Z",
+  "runId": "1792981760951-0079fde7",
+  "priorPendingFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-actual-independent-facts-v1.json",
+    "bytes": 10036,
+    "sha256": "ee42961cd87701cf7a0c79e9f84d483d74c8828508fd9235230499fa6894f240"
+  },
+  "actualEnded": {
+    "sourceSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2296,
+      "sha256": "4dee47066ba1bbb4ceb0024a6bf242dce721f0ad8d5665a8830223052cb4276d"
+    },
+    "executionReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 814,
+      "sha256": "281a9adf934598641240678c0d4c3d7d6eaf5e1d2d763c754e1e05a2e73a4851"
+    },
+    "verificationLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\actual-verification.log",
+      "bytes": 1808,
+      "sha256": "0e144b4c5d297d6f400a8d8a291f37cd176e549d3ec1a882dc8f9d78b04e0d5d"
+    },
+    "finalVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\final-verification.json",
+      "bytes": 572241,
+      "sha256": "070a748fc8791dec6d35dd31475c0e7f79a77bf8ec49537bad5ddecaa8d9aea6"
+    }
+  },
+  "checks": {
+    "actualExitCode": 0,
+    "actualSignal": null,
+    "checkedSourceInputs": 11,
+    "sourceBeforeAfterIdentical": true,
+    "reviewedSourceSealMappingExact": true,
+    "independentVerificationPassed": true,
+    "formalRunPassed": false,
+    "reportOk": false,
+    "phaseResults": [
+      {
+        "name": "stage-2",
+        "completeWindowCount": 5,
+        "strictGatesPassed": true
+      },
+      {
+        "name": "stage-10",
+        "completeWindowCount": 5,
+        "strictGatesPassed": true
+      },
+      {
+        "name": "stage-25",
+        "completeWindowCount": 5,
+        "strictGatesPassed": false
+      },
+      {
+        "name": "stage-50",
+        "completeWindowCount": 0,
+        "strictGatesPassed": false
+      },
+      {
+        "name": "stage-100",
+        "completeWindowCount": 0,
+        "strictGatesPassed": false
+      },
+      {
+        "name": "soak",
+        "completeWindowCount": 0,
+        "strictGatesPassed": false
+      },
+      {
+        "name": "post-resume-observation",
+        "completeWindowCount": 0,
+        "strictGatesPassed": false
+      }
+    ],
+    "continuousAssessments": 230,
+    "completeMinuteAssessments": 205,
+    "subMinuteAssessments": 25,
+    "continuousFailureCount": 0,
+    "scoutRows": 9,
+    "scoutReasonCounts": {
+      "no-active-other-waypoints": 7,
+      "reordered": 1,
+      "all-hints-unshared": 1
+    },
+    "scoutFiveFieldContractObserved": true,
+    "scoutDoesNotContributeToGameAcceptance": true,
+    "hpVerifiedEventsChecked": 0,
+    "hpSuccessProofChecked": false,
+    "hpNoVerifiedDoseObserved": true,
+    "preparedInputCount": 371,
+    "admittedInputCount": 376
+  },
+  "scope": "Small actual execution/result metadata closure check only; no raw/monitor replay, source execution or tests. The earlier pending facts remain historical. Independent consistencyPASS preserves the formal25 failure and does not grant capacity/P0/production acceptance or P2 permission. A waypoint shared/unshared diagnostic is not target exclusivity, proof of a better alternative or a unique cause. Per-request900ms packet replay and HP dose proof are not added.",
+  "verdict": {
+    "actualEndedExecutionAndMetadataConsistent": true,
+    "formalFailed": true,
+    "formalPassed": false,
+    "blockingFindingIds": []
+  },
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "productionAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

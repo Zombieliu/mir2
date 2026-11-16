@@ -1,0 +1,27 @@
+{
+  "workflow": {
+    "run": 43569019844,
+    "passed": true
+  },
+  "artifactSha256": "265cd1cbff5d07f241ba3bc5c2237d22f6447b06b7d04b0511330fd49a66a033",
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "operation": "numeron-qr-rollback",
+  "writes": [
+    {
+      "operation": "rollback",
+      "site": "game",
+      "deployment": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+    }
+  ],
+  "rollbacks": [],
+  "trafficAfter": {
+    "target": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+    "alias": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+  },
+  "failedCandidate": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu",
+  "target": {
+    "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+    "deployment": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+  },
+  "publicQrPending": null
+}

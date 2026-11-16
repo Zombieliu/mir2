@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -59,6 +60,12 @@ function installWindow() {
       return Promise.resolve();
     }
     pause() {}
+    removeAttribute(name) {
+      if (name === "src") this.src = null;
+    }
+    load() {
+      this.loads = (this.loads ?? 0) + 1;
+    }
     addEventListener() {}
   };
 }
@@ -143,6 +150,27 @@ function loadAudioModule() {
   assert.equal(invalid.musicVolume, 1, "NaN volume keeps the previous value");
 }
 
+// Cancel a pending media download and resume only when a new track is selected.
+{
+  storageBacking.clear();
+  playedAudios.length = 0;
+  const audio = loadAudioModule();
+  const track = "/original-ui/Sound/Login2.wav";
+  audio.setOriginalAudioSettings({ musicEnabled: true, musicVolume: 0.4 });
+  audio.setOriginalMusic(track);
+  const player = playedAudios[0];
+  assert.equal(player.src, track);
+  assert.equal(player.volume, 0.4);
+  audio.setOriginalMusic(null);
+  audio.unlockOriginalAudio();
+  assert.equal(player.src, null);
+  assert.equal(player.loads, 1);
+  audio.setOriginalMusic(track);
+  assert.equal(player.src, track);
+  assert.equal(player.loop, true);
+  assert.equal(player.volume, 0.4);
+}
+
 // --- 3. Playback fallback chain + missing-sound telemetry --------------------------------------
 {
   storageBacking.clear();
@@ -180,6 +208,42 @@ function loadAudioModule() {
   playedAudios.length = 0;
   assert.equal(audio.playOriginalSoundId(10100), false, "disabled effects suppress playback");
   assert.equal(playedAudios.length, 0);
+}
+
+// --- 4. Targeted spell phases against the committed Windows VIS-02 fixtures --------------------
+{
+  storageBacking.clear();
+  playedAudios.length = 0;
+  const audio = loadAudioModule();
+  audio.setOriginalAudioSettings({ effectsEnabled: true });
+  const { playTargetedSpellSound } = loadTypeScriptModule(new URL("../lib/original-sound-triggers.ts", import.meta.url), {
+    "./original-sound-events": soundEventsExports,
+    "./original-audio": audio,
+    "./crystal-magic-effects": loadTypeScriptModule(new URL("../lib/crystal-magic-effects.ts", import.meta.url)),
+  });
+  for (const [fixture, spellId] of [["great-fireball", 34], ["soul-fireball", 64]]) {
+    const { source } = readJson(new URL(
+      `../../game-client/platform-windows/tests/fixtures/vis02-bichon-${fixture}-v1.json`,
+      import.meta.url,
+    ));
+    for (const [offset, phase] of ["cast", "projectile", "impact"].entries()) {
+      const cue = source.audio.find(({ cue }) => cue === `${source.spell}.${phase}`);
+      assert.ok(cue, `Windows source has the ${source.spell} ${phase} cue`);
+      const soundId = 20000 + spellId * 10 + offset;
+      const path = `/original-ui/Sound/${cue.file}`;
+      assert.equal(soundIndexExports.crystalSoundPath(soundId), path);
+      assert.equal(playTargetedSpellSound(offset === 1 ? spellId : source.spell, phase), true);
+      assert.equal(playedAudios.at(-1)?.src, path);
+      const bytes = readFileSync(new URL(`../public${path}`, import.meta.url));
+      assert.equal(bytes.length, cue.sourceBytes);
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), cue.sha256);
+    }
+  }
+  assert.equal(playTargetedSpellSound("FireBall", "impact"), false);
+  assert.equal(playTargetedSpellSound(undefined, "cast"), false);
+  assert.equal(playTargetedSpellSound(34.5, "projectile"), false);
+  assert.equal(playTargetedSpellSound(34, "toString"), false);
+  assert.equal(playedAudios.length, 6, "only the six targeted cues were played");
 }
 
 console.log("audio system tests passed");

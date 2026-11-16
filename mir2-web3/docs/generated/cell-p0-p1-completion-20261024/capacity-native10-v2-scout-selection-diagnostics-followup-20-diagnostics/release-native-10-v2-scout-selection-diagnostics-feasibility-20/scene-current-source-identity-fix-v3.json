@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "repairedAt": "2026-10-26T01:46:11.360042+00:00",
+  "scope": "Only three current scene identity JSON leaves change J/J/226source to actual K/K/232source. scene-contract and all gate/geometry code, historical static source/commit/aggregate, spatial leaves, first10, resources and game thresholds remain byte-exact. No geometry/A* rerun or target-module import.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-binding.json.before-active-current-K-v3.txt",
+    "bytes": 6784,
+    "sha256": "eea4e2a2d7799dccec5177a6cb16bc14487c2124375e84ab2f971689b19d09c8"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-binding.json",
+    "bytes": 6784,
+    "sha256": "25a6543936cba85f0a97498d818c66e989e33e1bb3d939be8325f43c7f5812de"
+  },
+  "rules": [
+    {
+      "jsonPointer": "/activeDriverSourceCommit",
+      "beforeUtf8": "\"activeDriverSourceCommit\": \"4fb58ade4aa95b677bb795625d01da542a84a3f7\"",
+      "afterUtf8": "\"activeDriverSourceCommit\": \"b5374083d257d375437af3de42bead159cd2b917\"",
+      "occurrences": 1
+    },
+    {
+      "jsonPointer": "/activeExecutionSourceCommit",
+      "beforeUtf8": "\"activeExecutionSourceCommit\": \"4fb58ade4aa95b677bb795625d01da542a84a3f7\"",
+      "afterUtf8": "\"activeExecutionSourceCommit\": \"b5374083d257d375437af3de42bead159cd2b917\"",
+      "occurrences": 1
+    },
+    {
+      "jsonPointer": "/currentDriverSourceSha256",
+      "beforeUtf8": "\"currentDriverSourceSha256\": \"3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8\"",
+      "afterUtf8": "\"currentDriverSourceSha256\": \"d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1\"",
+      "occurrences": 1
+    }
+  ],
+  "inverseRawExact": true,
+  "actualChangedTopLevelFields": [
+    "activeDriverSourceCommit",
+    "activeExecutionSourceCommit",
+    "currentDriverSourceSha256"
+  ],
+  "unchangedOtherJSONValuesSemanticExact": true,
+  "matchesCurrentDriverBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\current-driver-binding.json",
+    "bytes": 2845,
+    "sha256": "9d63bebc0bb2b1bf1c9cf697a8b99944be7af2a429f2fe649b2d1b50826c1325"
+  },
+  "historicalStaticMetadataPreserved": true,
+  "sceneContractSourceUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-contract.mjs",
+    "bytes": 10796,
+    "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+  },
+  "canonicalGeometryProofUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2563,
+    "sha256": "1e03413bc5a3133e2b44f4a8ebb334cafa07600c48a964186567f59d1c7eaaee"
+  },
+  "priorActualRootSealFailure": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-preseal-failure-v1.json",
+    "bytes": 2419,
+    "sha256": "d412ca63843194a5e95efc037d6b0a97096aa626114ae0cd996b837b839d44ee"
+  },
+  "priorRevisionRootModuleImportedAndFailed": true,
+  "currentRevisionImportedByPreparer": false,
+  "newSyntaxChecksNotRequiredForJSONLeafOnlyChange": true,
+  "runtimeStateProducedByFailedSeal": false,
+  "capacityAccepted": false
+}

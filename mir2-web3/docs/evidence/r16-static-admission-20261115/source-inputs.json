@@ -1,0 +1,234 @@
+{
+  "parent": "9d06953d7bbb94d960686bed51048d0628996d7e",
+  "qualifiedBuildBase": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "sourceRoot": "F:/mir2-builds/r16-resource-recovery-20261115/source",
+  "copyResult": {
+    "code": 1,
+    "signal": null
+  },
+  "own": [
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha256": "81e82feaedb7a3eb73e74b01deda4a1ad2b9afc3124c0021230c049dc2bcb47e"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/asset-cache-progress.ts",
+      "sha256": "a7048ff227376798b4d0a9f610ee3dd6140220b2d86f64b7df625abf19cd6a35"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+      "sha256": "f3b2e0c3933f30fd3f6fd832e001d9db158804bc459ff276e35d1ea68d6dd0a0"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
+      "sha256": "d47fda772e19620eb518ce1ae91f218049e89235d9c6f9230eae04c7d4f234e9"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
+      "sha256": "e212c00ab7df4343c0db307773d0de644c21435cbde6542682b328fdfcbdcb9b"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
+      "sha256": "665154eeed48bbd5728134ed8285b5dd7de014e68495f258d402fbafc129a10a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+      "sha256": "6b247b99d61775b05765f82760835246a3fb28cd3a91abc3ac99f0f4c6f30568"
+    }
+  ],
+  "checkedFrontendBaseFiles": 2176,
+  "generatedOverride": 1,
+  "previousGeneratedInputs": {
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+    "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+    "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+    "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+    "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+    "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+    "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+    "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+    "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+    "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+    "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+    "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+    "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+    "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "lib/generated/client_core_runtime.json": "0130f025581b8d57f56b8b52670446ff57cf88d41954117b49a08f62089a5c14",
+    "public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web.js": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a",
+    "public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web_bg.wasm": "8015bae3dc34fc00810890d768ed63ce3bac01809d57cb2940aaf24df5b7386a",
+    "public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web.js": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d",
+    "public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web_bg.wasm": "9311520cd90bcb0990be8aa2c15c5f31c947e84075445de06844410d9276e914",
+    "public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web.js": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+    "public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web_bg.wasm": "9b9cf5f9f9cfbe04986f8f6619460f8a22c5f5c89f36ad2c15df12be9d2b1356",
+    "public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web.js": "5c47d5460070c0a0a044026742aee403295ae086ce4c126a3ea00341c71dae53",
+    "public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web_bg.wasm": "38e0353a03e5f038d259310bff13e8c576fbe73b1e3b551816b53a5a69ad5b93"
+  },
+  "cacheSchema": "sw8",
+  "runtimeUnchanged": true,
+  "assetVersionUnchanged": true,
+  "build": {
+    "parent": "9d06953d7bbb94d960686bed51048d0628996d7e",
+    "candidate": "20de-static-admission-ea797d99",
+    "sourceRoot": "F:/mir2-builds/r16-resource-recovery-20261115/source",
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "builtId": "FwyAa-YYQ828TTWsU61eC",
+    "dist": ".next-static-admission-r1",
+    "tsconfigPath": "tsconfig.static-admission-r1.json",
+    "version": "20261108-r16-08ec86d5105c",
+    "runtime": "bevy-0c553a754308e5b8",
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+        "sha256": "81e82feaedb7a3eb73e74b01deda4a1ad2b9afc3124c0021230c049dc2bcb47e"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/asset-cache-progress.ts",
+        "sha256": "a7048ff227376798b4d0a9f610ee3dd6140220b2d86f64b7df625abf19cd6a35"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+        "sha256": "f3b2e0c3933f30fd3f6fd832e001d9db158804bc459ff276e35d1ea68d6dd0a0"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
+        "sha256": "d47fda772e19620eb518ce1ae91f218049e89235d9c6f9230eae04c7d4f234e9"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
+        "sha256": "e212c00ab7df4343c0db307773d0de644c21435cbde6542682b328fdfcbdcb9b"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
+        "sha256": "665154eeed48bbd5728134ed8285b5dd7de014e68495f258d402fbafc129a10a"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+        "sha256": "6b247b99d61775b05765f82760835246a3fb28cd3a91abc3ac99f0f4c6f30568"
+      }
+    ],
+    "generatedInputs": {
+      "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+      "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+      "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+      "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+      "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+      "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+      "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+      "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+      "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+      "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+      "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+      "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+      "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+      "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+      "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+      "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+      "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+      "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "lib/generated/client_core_runtime.json": "0130f025581b8d57f56b8b52670446ff57cf88d41954117b49a08f62089a5c14",
+      "public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web.js": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a",
+      "public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web_bg.wasm": "8015bae3dc34fc00810890d768ed63ce3bac01809d57cb2940aaf24df5b7386a",
+      "public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web.js": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d",
+      "public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web_bg.wasm": "9311520cd90bcb0990be8aa2c15c5f31c947e84075445de06844410d9276e914",
+      "public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web.js": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+      "public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web_bg.wasm": "9b9cf5f9f9cfbe04986f8f6619460f8a22c5f5c89f36ad2c15df12be9d2b1356",
+      "public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web.js": "5c47d5460070c0a0a044026742aee403295ae086ce4c126a3ea00341c71dae53",
+      "public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web_bg.wasm": "38e0353a03e5f038d259310bff13e8c576fbe73b1e3b551816b53a5a69ad5b93"
+    },
+    "sourcePreparationSha256": "b5475f8ba5a0e0771874f633d74d13950d2eaf5ad9edacb5c13dc76e84209db8",
+    "durationMs": 45679,
+    "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+    "buildConfigSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+    "priorRuntimeQualifiedUnmodified": true
+  },
+  "fixture": {
+    "source": "Qualified 20de baseline plus bounded static image header admission and localized truthful prewarm progress",
+    "scripts": [
+      {
+        "name": "focused-driver.mjs",
+        "sha256": "d539beb1e590deb81cbb3adf8e9193a61742ad57d0294e87c91bf22969a6181d",
+        "previousSha256": "163b9e0faefdbe90554d06948961737d98509c29a9f4ebc5e2b3024b600ba77f"
+      },
+      {
+        "name": "profile.mjs",
+        "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159",
+        "previousSha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+      },
+      {
+        "name": "route-intent-gate.mjs",
+        "sha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728",
+        "previousSha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728"
+      },
+      {
+        "name": "route-plan-probe.mjs",
+        "sha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c",
+        "previousSha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c"
+      },
+      {
+        "name": "verify-original-fonts.mjs",
+        "sha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+        "previousSha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d"
+      },
+      {
+        "name": "verify-prewarm.mjs",
+        "sha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+        "previousSha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e"
+      },
+      {
+        "name": "prepare-store-visit.mjs",
+        "sha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11",
+        "previousSha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11"
+      },
+      {
+        "name": "hunt-navigation-game.mjs",
+        "sha256": "1bd82fde47a2aad2939467407a04451f14a008fb98c3053f9533dc91672d52d1",
+        "previousSha256": "1bd82fde47a2aad2939467407a04451f14a008fb98c3053f9533dc91672d52d1"
+      }
+    ],
+    "previousFixture": "r16-map-world-baseline/fixture-r6",
+    "newReadOnlyProbe": "actual running ServiceWorker declares wholeFontChain helpers; no request or world state mutation",
+    "retainedFailure": "fixture-r1/run-1; all owned processes terminal. Additional read-only Login packet/count observation and verification of the normal filled form. Original actions and deadlines unchanged.",
+    "additionalReadOnlyProbe": "Visibility and controlled input lengths before/after ordinary fill/click; no value, credential or auth response payload recorded.",
+    "additionalGateProbe": "Observe incoming/outgoing type, key names and lengths, never auth field values. Server packets explicitly forwarded unchanged. Original actions and deadlines retained.",
+    "webSocketInterceptionRemoved": true,
+    "reason": "No route-intent gate is armed or used in this cross-map lifecycle. It obscures normal page framesent observation (baseline reached real cross-map but reported zero baseline reads). Use the real unmodified browser WebSocket. Original collision-response hold, source checks, inputs, authority predicates and deadlines remain unchanged.",
+    "rootCause": "Prior candidates reloaded their document during pending password login after cache namespace cleanup; no-loginSubmit milestones survived because document changed. Real old baseline completed authentication. New source guards current state at scheduling and timer, and records actual cleanup plus no document navigation during login. No WebSocket interception or auth bypass.",
+    "cachePreconditionCorrection": "R7 now authenticates without reload but a fixture incorrectly assumes all old cached fonts survive real namespace cleanup. Record actual misses and let the game load normal sources; no cache injection. Original post-entry six-font hashes, 113/113, Native120, movement8s, source/lifecycle/save gates are unchanged.",
+    "baselineReadPreconditionCorrection": "The product explicitly avoids duplicate version reads if a matching full current baseline already arrives. R8 restored real map0 controls but an obsolete fixture asserted >=1 read. Require actual later WorldSnapshot matching map/player/active quest and a newer scene on the same connection/session; accept 0..3 reads. Original native/113/6fonts/movement/late-data/save gates unchanged. Unit tests still force the missing-baseline read branch.",
+    "observerCorrection": "The added read-only auth observer incorrectly matched String(undefined), then dereferenced missing payload. Its five exceptions obscured sent clientVersion/login frames and caused wireFailures=5 in R9 despite normal saved gameplay. Null-safe metadata observation verified with actual extracted function. Original wireFailures==0, complete authority and all other gates retained. Earlier zero observed read counts are not asserted to be actual network zeros.",
+    "scope": "Only private source/build/run-directory bindings changed. Existing real account, ordinary movement, cross-map state, whole-font/113/original Native deadline, late collision cancellation, reload and save/closure assertions unchanged."
+  }
+}

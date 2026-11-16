@@ -1,0 +1,116 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-final-targeted-receipt.json",
+    "bytes": 5848,
+    "sha256": "6aafdbc14d3d687d63dba0a116af0a11321fedf4a01916c7e71c2cbd41981f7a"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.final-targeted-receipt.v1",
+    "passed": true,
+    "draftOnly": false,
+    "candidate": "WN-CANDIDATE-20261029-unified-11",
+    "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "finalRoot": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-unified-11",
+    "originalStagingRoot": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-20261029-unified-11.staging-de076792a7ca4016a4e9259a2e25f932",
+    "originalReportRequireCurrentSource": false,
+    "originalReportCopy": {
+      "path": "C:\\mir2-build\\unified-20261029\\unified-package-verification.json",
+      "sha256": "7AF3E30AA468D17A9FFCFD8A93D860D9B5C555E1A95630028FC656B2F57C5114",
+      "byteIdentical": true
+    },
+    "control": {
+      "path": "C:/mir2-build/unified-20261029/unified-final-targeted-control-r6.json",
+      "sha256": "D1045B0B0ACDD98891BDEABFC62C9C9EFC4EE5327ADC157845EDF9DC568D25F6"
+    },
+    "producerSummary": {
+      "path": "F:\\mu\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261029-unified-11-package-summary.json",
+      "sha256": "9434B96E4DE9E324CC6CD977896FC146BDE63B592B19CCCA8256AA8D359E41B1"
+    },
+    "producerReturnProof": {
+      "kind": "pinned-sequential-wrapper-and-fresh-duplicate-log",
+      "samePowerShellProcess": true,
+      "producerReturnedSuccessfully": true,
+      "packageCommandGuardPassed": true,
+      "duplicateVerifierStoppedByRoot": true,
+      "wrapperPid": 76732,
+      "producerInvocationStartedUtc": "2026-10-29T15:44:21.9935960Z",
+      "wrapper": {
+        "path": "C:\\mir2-build\\unified-20261029\\run-unified-package.ps1",
+        "sha256": "0DDA29B019601FF245E0119B22263B13E6BB6A2339FDA642BC2D9E15444C5D88"
+      },
+      "producerLog": {
+        "path": "C:\\mir2-build\\unified-20261029\\unified-package.log",
+        "sha256": "C748FC528B9F9D03EE87F49B206B9D07C575E6E0360B3AC885AC10569EDA89C8"
+      },
+      "duplicateVerifierLog": {
+        "path": "C:\\mir2-build\\unified-20261029\\unified-package-verification.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      }
+    },
+    "checkerSha256": "24B82F2AC4AFD4FABAC8B40235931C646CCC1BC27DCBF5C9F9937B5EDBDFF68B",
+    "finalMetadataSha256": {
+      "PACKAGE-MANIFEST.json": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+      "VERSION.json": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+      "BUILD-ATTESTATION.json": "8AE470CDE3EE893BCFE726F86A0888197820002F6A61945D12F61712F8C27292",
+      "RELEASE-STATEMENT.json": "44A6B09F26450778F7ECBD66E5B381FCAFBE96A5CBFC7ACF94680047BEABF6C3",
+      "RELEASE-STATEMENT.p7s": "671BF2A43575EFD97124ED6DFA70D731E7317861CC1CEE1FBC91B0069FE9E29E"
+    },
+    "sourceProof": {
+      "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "clean": true,
+      "statusScope": "git-status-z+diff+all-untracked-content-v2",
+      "statusLineCount": 0,
+      "statusSha256": "7818A3870FF1F8D6CE856AB2C388E886FD3FB849ECA89BEFEFD3C6EE25D7D295"
+    },
+    "safety": {
+      "originalExactAst": true,
+      "realFiveClassSoundPolicy": true,
+      "reparse": true,
+      "nativeAds": true,
+      "providerAds": true,
+      "exactFileAndDirectoryAllowlist": true,
+      "independentCanonicalCms": true
+    },
+    "payload": {
+      "script": "C:\\mir2-build\\unified-20261029\\unified-final-targeted-payload\\prepare-installer-input.py",
+      "scriptSha256": "7F21F9B31180A39BCA68B0C393AF432B937D641B4EC408B5F956659EF07CC945",
+      "report": "C:\\mir2-build\\unified-20261029\\unified-final-targeted-payload\\installer-input-verification.json",
+      "reportSha256": "7DF75440E74C55D959C3BBCBAEE1A8D0A6DEC5DF83EDA46F1E51E44DD47537DA",
+      "literalInputs": "C:\\mir2-build\\unified-20261029\\unified-final-targeted-payload\\verified-payload-files.iss",
+      "literalInputsSha256": "7F80C75F094D22401C5FCCB7E16F4629573E61CCFC2BF1F61A2F7C9D8CC5C15B",
+      "files": 255079,
+      "bytes": 1270575381
+    },
+    "sourcePins": {
+      "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1": "700189B06951EB36D5BF57B4467B1CEB3130CB07202FE5235BCEA22A8297AF8E",
+      "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1": "F012D13B91268E29583A25A81C3F89B08445C22F50AA0D6CF390E20AC14BB516",
+      "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1": "C45B2CDF15CC4D1C2C54CE4BD6A9669BF5F70472B9780E097D1A6B3753B1B2A1",
+      "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1": "3A030F590E93D360CE159BD294AED46F11BE38F5827D6F5B2AC6CCC961025846",
+      "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1": "00AE6FA1E87BF7014E8806E519AB9C2BCAF0F555A5840A21FDFA4EA4B326B38F",
+      "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1": "05D7FDC54459DC3F7A2838D70465B4ACC2948C27B72CBFA4AEFFA4996840CDBE",
+      "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1": "3B641381BCDFB6ADEB0245DD541713515296875D85F39C780E7C59AF4CFEC479",
+      "apps/game-client/platform-windows/scripts/simplified-document-layout.ps1": "1CFB6396BE32E73612D02725DAF718F30B0134CDFB48A16F6814B43659942D24",
+      "apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py": "7F21F9B31180A39BCA68B0C393AF432B937D641B4EC408B5F956659EF07CC945",
+      "apps/web/scripts/asset-pipeline/five-class-skill-requirements.json": "B7AB10218D1992984E978AF7A1CEF951A4CA49E4A35A82B7B200279628272CAB",
+      "packages/game-data/data/content_profiles/platinum_fiveclass.json": "9FC2D6875C78691F7E34650EAE8E8DF868690A1EE6E5960BECC113CAE0E9D4AC"
+    },
+    "completedUtc": "2026-10-29T16:58:32.3023736+00:00",
+    "visualAccepted": false,
+    "noSourceEdits": true,
+    "noProcessChanges": true,
+    "noBuild": true,
+    "noSigning": true,
+    "requireImmutabilityUntilInstallerConsumptionCompletes": true
+  },
+  "phase": "Actual final-root safety/source/CMS/payload verification after successful producer return; original strict report retained byte-identical with false flag and staging GUID",
+  "outerDuplicateWrapperPassed": false,
+  "originalProducerReportArtifact": "original-producer-verification.json",
+  "rawRunLog": {
+    "filename": "unified-final-targeted-run.log",
+    "bytes": 5849,
+    "sha256": "f82b23146cb1104eb86f4b45d5dc89e0fb4261e03ab0f4d61306350ecc3a0453"
+  }
+}

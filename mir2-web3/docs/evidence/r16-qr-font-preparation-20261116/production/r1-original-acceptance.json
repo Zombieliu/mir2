@@ -1,0 +1,26 @@
+{
+  "kind": "r16-original-public-acceptance",
+  "accepted": true,
+  "checks": {
+    "exactSource": true,
+    "completeFunctionalRun": true,
+    "walletLoginOnly": true,
+    "movementOriginalEightSeconds": true,
+    "sixCompleteFonts": true,
+    "complete113": true,
+    "sharedNativeQuest": true,
+    "originalNative120": true,
+    "originalRuntimeBody120": true,
+    "workerRestart": true,
+    "normalLogout": true,
+    "bothBrowsersClosed": true
+  },
+  "source": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "deploymentId": "dpl_G8iq4UBFibrWSEaSbwahtboeAom3",
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "nativeAfterFirstFrameMs": 89688,
+  "runtimeBodyAfterFirstFrameMs": 21386,
+  "supplementary180ObservationChangesOriginalBudget": false,
+  "wholeParityAccepted": false
+}

@@ -1,0 +1,734 @@
+name: Mir2 Web Assets R2 Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Optional generated release id
+        required: false
+        type: string
+      asset_base_url:
+        description: Public R2/CDN base URL, may include {version}
+        required: false
+        type: string
+      object_prefix:
+        description: R2 object prefix, may include {version}
+        required: false
+        default: mir2/v/{version}
+        type: string
+      publish_r2:
+        description: Upload staged assets to Cloudflare R2
+        required: false
+        default: false
+        type: boolean
+      resume_existing_assets:
+        description: Verify an already uploaded immutable prefix and publish only release manifests
+        required: false
+        default: false
+        type: boolean
+      use_existing_release:
+        description: Use an existing R2 remote-asset-release.json instead of uploading a new release
+        required: false
+        default: false
+        type: boolean
+      remote_release_manifest_url:
+        description: Existing remote-asset-release.json URL; defaults to asset_base_url/remote-asset-release.json
+        required: false
+        type: string
+      upload_driver:
+        description: Upload driver for R2 publish (wrangler, api, worker, r2-s3)
+        required: false
+        default: worker
+        type: string
+      deploy_upload_worker:
+        description: Deploy the authenticated R2 upload Worker before publishing
+        required: false
+        default: false
+        type: boolean
+      require_full_crystal_pack:
+        description: Require an existing release to contain the verified full Crystal pack
+        required: false
+        default: false
+        type: boolean
+      deploy_worker:
+        description: Deploy mir2.obelisk.build Worker proxy after R2 verification
+        required: false
+        default: false
+        type: boolean
+      deploy_vercel:
+        description: Deploy Player Web to Vercel only after R2 verification
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  push-release-workflow-gate:
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm release workflow is manual-only
+        run: |
+          echo "R2 asset release is manual-only."
+          echo "Use workflow_dispatch with publish_r2/deploy_worker/deploy_vercel inputs to run the release chain."
+
+  build-web-assets:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+
+      - name: Install Rust 1.89
+        if: ${{ inputs.publish_r2 }}
+        run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Install wasm target
+        if: ${{ inputs.publish_r2 }}
+        run: rustup target add wasm32-unknown-unknown --toolchain 1.89.0
+
+      - name: Install wasm-bindgen CLI
+        if: ${{ inputs.publish_r2 }}
+        working-directory: mir2-web3/apps/game-client/runtime
+        run: |
+          set -euo pipefail
+          wasm_bindgen_version="$(
+            awk '
+              $0 == "name = \"wasm-bindgen\"" { found = 1; next }
+              found && $1 == "version" {
+                gsub(/"/, "", $3)
+                print $3
+                exit
+              }
+            ' Cargo.lock
+          )"
+          if [ -z "$wasm_bindgen_version" ]; then
+            echo "Unable to resolve wasm-bindgen version from Cargo.lock" >&2
+            exit 1
+          fi
+          cargo install wasm-bindgen-cli --version "$wasm_bindgen_version" --locked
+
+      - name: Install Web dependencies
+        working-directory: mir2-web3/apps/web
+        run: npm ci
+
+      - name: Verify quest item icon closure
+        working-directory: mir2-web3/apps/web
+        run: npm run test:quest-item-icons
+
+      - name: Resolve deterministic asset version
+        env:
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+          INPUT_ASSET_BASE_URL: ${{ inputs.asset_base_url }}
+          SECRET_ASSET_BASE_URL: ${{ secrets.MIR2_PUBLIC_R2_ASSET_BASE_URL }}
+          INPUT_OBJECT_PREFIX: ${{ inputs.object_prefix }}
+        run: |
+          set -euo pipefail
+          asset_version="$INPUT_RUN_ID"
+          if [ -z "$asset_version" ]; then
+            asset_version="${GITHUB_SHA::12}"
+          fi
+
+          asset_base_template="$INPUT_ASSET_BASE_URL"
+          if [ -z "$asset_base_template" ]; then
+            asset_base_template="${SECRET_ASSET_BASE_URL:-https://assets.mir2.obelisk.build/mir2/v/{version}}"
+          fi
+          if [[ "$asset_base_template" != *"{version}"* && "$asset_base_template" != *"$asset_version"* ]]; then
+            echo "asset_base_url must include {version} or the resolved asset version $asset_version" >&2
+            exit 1
+          fi
+
+          version_placeholder="{version}"
+          object_prefix_template="${INPUT_OBJECT_PREFIX:-mir2/v/$version_placeholder}"
+          asset_base="${asset_base_template//$version_placeholder/$asset_version}"
+          object_prefix="${object_prefix_template//$version_placeholder/$asset_version}"
+
+          {
+            echo "MIR2_ASSET_VERSION=$asset_version"
+            echo "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$asset_base"
+            echo "MIR2_ASSET_OBJECT_PREFIX=$object_prefix"
+            echo "MIR2_FALLBACK_OBJECT_PREFIX="
+            echo "MIR2_REMOTE_ASSET_RELEASE_MANIFEST=$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json"
+          } >> "$GITHUB_ENV"
+
+          echo "asset_version=$asset_version"
+          echo "asset_base=$asset_base"
+          echo "object_prefix=$object_prefix"
+
+      - name: Validate release intent ordering
+        run: |
+          set -euo pipefail
+          publish_r2="${{ inputs.publish_r2 }}"
+          use_existing_release="${{ inputs.use_existing_release }}"
+          require_full_crystal_pack="${{ inputs.require_full_crystal_pack }}"
+          deploy_worker="${{ inputs.deploy_worker }}"
+          deploy_vercel="${{ inputs.deploy_vercel }}"
+
+          if [ "$publish_r2" = "true" ] && [ "$use_existing_release" = "true" ]; then
+            echo "publish_r2 and use_existing_release are mutually exclusive." >&2
+            exit 1
+          fi
+          if [ "$require_full_crystal_pack" = "true" ] && [ "$publish_r2" = "true" ]; then
+            echo "The hosted workflow does not contain the ignored 10GB full pack. Publish it locally with the verified r2-s3 path, then rerun with use_existing_release=true." >&2
+            exit 1
+          fi
+          if [ "$require_full_crystal_pack" = "true" ] && [ "$use_existing_release" != "true" ]; then
+            echo "require_full_crystal_pack requires use_existing_release=true in this hosted workflow." >&2
+            exit 1
+          fi
+          if [ "$deploy_worker" = "true" ] && [ "$publish_r2" != "true" ] && [ "$use_existing_release" != "true" ]; then
+            echo "deploy_worker requires publish_r2 or use_existing_release first." >&2
+            exit 1
+          fi
+          if [ "$deploy_vercel" = "true" ] && [ "$publish_r2" != "true" ] && [ "$use_existing_release" != "true" ]; then
+            echo "deploy_vercel requires publish_r2 or use_existing_release first." >&2
+            exit 1
+          fi
+          if [ "$deploy_vercel" = "true" ] && [ "$deploy_worker" != "true" ]; then
+            echo "deploy_vercel will verify the currently deployed same-origin Worker before publishing Player Web."
+          fi
+
+      - name: Validate existing remote asset release
+        if: ${{ inputs.use_existing_release }}
+        env:
+          INPUT_REMOTE_RELEASE_MANIFEST_URL: ${{ inputs.remote_release_manifest_url }}
+          REQUIRE_FULL_CRYSTAL_PACK: ${{ inputs.require_full_crystal_pack }}
+          EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
+        run: |
+          set -euo pipefail
+          remote_release_url="${INPUT_REMOTE_RELEASE_MANIFEST_URL:-${NEXT_PUBLIC_MIR2_ASSET_BASE_URL%/}/remote-asset-release.json}"
+          export MIR2_ORIGINAL_ASSET_REMOTE_RELEASE="$remote_release_url"
+          echo "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE=$remote_release_url" >> "$GITHUB_ENV"
+          node - <<'NODE'
+          (async () => {
+            const remoteReleaseUrl = process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE;
+            const expectedObjectPrefix = String(process.env.MIR2_ASSET_OBJECT_PREFIX ?? "").replace(/^\/+|\/+$/g, "");
+            const expectedAssetBaseUrl = String(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? "").replace(/\/+$/g, "");
+            const response = await fetch(remoteReleaseUrl, { cache: "no-store" });
+            if (!response.ok) {
+              throw new Error(`remote asset release fetch failed: HTTP ${response.status} ${remoteReleaseUrl}`);
+            }
+            const release = await response.json();
+            const fs = await import("node:fs/promises");
+            const releaseObjectPrefix = String(release.objectPrefix ?? "").replace(/^\/+|\/+$/g, "");
+            const releaseAssetBaseUrl = String(release.assetBaseUrl ?? release.baseUrl ?? "").replace(/\/+$/g, "");
+            if (releaseObjectPrefix !== expectedObjectPrefix) {
+              throw new Error(`remote release objectPrefix mismatch: expected ${expectedObjectPrefix}, got ${releaseObjectPrefix}`);
+            }
+            if (releaseAssetBaseUrl !== expectedAssetBaseUrl) {
+              throw new Error(`remote release assetBaseUrl mismatch: expected ${expectedAssetBaseUrl}, got ${releaseAssetBaseUrl}`);
+            }
+            const fallbackObjectPrefix = String(release.fallbackObjectPrefix ?? "").replace(/^\/+|\/+$/g, "");
+            if (
+              fallbackObjectPrefix &&
+              (!fallbackObjectPrefix.startsWith("mir2/v/") || fallbackObjectPrefix === release.objectPrefix)
+            ) {
+              throw new Error(`invalid remote release fallbackObjectPrefix: ${fallbackObjectPrefix}`);
+            }
+            if (Number(release.stats?.missingCount ?? 0) !== 0) {
+              throw new Error(`remote release missingCount is not zero: ${release.stats?.missingCount}`);
+            }
+            const files = Array.isArray(release.files) ? release.files : [];
+            const hasPath = (needle) => files.some((file) => {
+              const value = String(file.p ?? file.relativePath ?? file.path ?? file.objectKey ?? "");
+              return value.replace(/^\/+/, "") === needle;
+            });
+            const required = [
+              "original-map/WemadeMir2/Objects/5240.png",
+              "original-map/WemadeMir2/Objects21/1504.png",
+              "original-map/WemadeMir2/Tiles/1000.png",
+              "original-ui/Sound/Login2.wav",
+              "generated/map-atlas/manifest.json",
+            ];
+            const mapAtlasPaths = files
+              .map((file) => String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""))
+              .filter((value) => value.startsWith("generated/map-atlas/"));
+            if (!mapAtlasPaths.some((value) => value.endsWith(".png"))) {
+              throw new Error("remote release has no map-atlas PNG page");
+            }
+            if (String(process.env.REQUIRE_FULL_CRYSTAL_PACK).toLowerCase() === "true") {
+              required.push("generated/crystal-packs/full/index.json");
+              if (release.fullCrystalPack?.enabled !== true || release.fullCrystalPack?.verified !== true) {
+                throw new Error("remote release does not declare a verified full Crystal pack");
+              }
+              const fullFiles = files.filter((file) =>
+                String(file.p ?? file.relativePath ?? file.path ?? "")
+                  .replace(/^\/+/, "")
+                  .startsWith("generated/crystal-packs/full/"),
+              );
+              const fullPaths = fullFiles.map((file) =>
+                String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""),
+              );
+              if (fullPaths.length !== Number(release.fullCrystalPack.fileCount ?? 0)) {
+                throw new Error(
+                  `remote release full-pack file count mismatch: declared ${release.fullCrystalPack.fileCount}, found ${fullPaths.length}`,
+                );
+              }
+              if (!fullPaths.some((value) => value.includes("/libraries/") && value.endsWith(".json"))) {
+                throw new Error("remote release has no full-pack library shard");
+              }
+              if (!fullPaths.some((value) => value.includes("/pages/") && value.endsWith(".png"))) {
+                throw new Error("remote release has no full-pack page");
+              }
+              const fullJsonFiles = fullFiles.filter((file) =>
+                String(file.p ?? file.relativePath ?? file.path ?? "").toLowerCase().endsWith(".json"),
+              );
+              const encodedJsonFiles = fullJsonFiles.filter((file) => {
+                const encoding = String(file.e ?? file.contentEncoding ?? "").toLowerCase();
+                const encodedSize = Number(file.es ?? file.encodedSize ?? 0);
+                const encodedSha256 = String(file.eh ?? file.encodedSha256 ?? "").toLowerCase();
+                return encoding === "gzip" && encodedSize > 0 && /^[a-f0-9]{64}$/.test(encodedSha256);
+              });
+              if (
+                release.fullCrystalPack.jsonContentEncoding !== "gzip" ||
+                encodedJsonFiles.length !== fullJsonFiles.length
+              ) {
+                throw new Error(
+                  `remote release full-pack JSON is not fully gzip encoded: ${encodedJsonFiles.length}/${fullJsonFiles.length}`,
+                );
+              }
+              const storageBytes = Number(release.stats?.storageBytes ?? 0);
+              if (!storageBytes || storageBytes >= 10_000_000_000) {
+                throw new Error(`remote release storageBytes must stay below 10GB: ${storageBytes}`);
+              }
+            }
+            const missing = required.filter((path) => !hasPath(path));
+            if (missing.length > 0) {
+              throw new Error(`remote release is missing required full-crystal paths: ${missing.join(", ")}`);
+            }
+            await fs.writeFile(
+              process.env.EXISTING_RELEASE_MANIFEST_PATH,
+              `${JSON.stringify(release)}\n`,
+              "utf8",
+            );
+            await fs.appendFile(
+              process.env.GITHUB_ENV,
+              `MIR2_FALLBACK_OBJECT_PREFIX=${fallbackObjectPrefix}\n`,
+              "utf8",
+            );
+            console.log(JSON.stringify({
+              ok: true,
+              version: release.version,
+              objectPrefix: releaseObjectPrefix,
+              fileCount: files.length,
+              missingCount: release.stats?.missingCount ?? null,
+              fallbackObjectPrefix: fallbackObjectPrefix || null,
+              remoteReleaseUrl,
+            }, null, 2));
+          })().catch((error) => {
+            console.error(error?.message || String(error));
+            process.exit(1);
+          });
+          NODE
+      - name: Build Web for asset manifest staging
+        if: ${{ inputs.publish_r2 }}
+        working-directory: mir2-web3/apps/web
+        env:
+          MIR2_USE_PREBUILT_BEVY_RUNTIME: "0"
+          # This is the bootstrap build for a brand-new immutable R2 prefix.
+          # The remote release manifest does not exist until the later upload
+          # step, so generating it from NEXT_PUBLIC_MIR2_ASSET_BASE_URL here
+          # would introduce a circular dependency and fail with HTTP 404.
+          MIR2_ORIGINAL_ASSET_MANIFEST_MODE: "filesystem"
+        run: npm run build
+
+      - name: Stage remote asset release
+        if: ${{ inputs.publish_r2 }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+
+          npm run start -- --hostname 127.0.0.1 --port 13020 > /tmp/mir2-web-assets-next.log 2>&1 &
+          server_pid="$!"
+          trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
+
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:13020/api/asset-manifest >/dev/null; then
+              break
+            fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/mir2-web-assets-next.log >&2
+              exit 1
+            fi
+            sleep 2
+          done
+
+          curl -fsS http://127.0.0.1:13020/api/asset-manifest >/dev/null
+          args=(
+            --baseUrl http://127.0.0.1:13020
+            --objectPrefix "$MIR2_ASSET_OBJECT_PREFIX"
+            --runId "$MIR2_ASSET_VERSION"
+          )
+          if [ -n "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL:-}" ]; then
+            args+=(--assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL")
+          fi
+          npm run assets:remote:build -- "${args[@]}"
+
+      - name: Dry run R2 upload plan
+        if: ${{ inputs.publish_r2 }}
+        working-directory: mir2-web3/apps/web
+        run: npm run assets:r2:dry-run
+
+      - name: Deploy authenticated R2 upload Worker
+        if: ${{ inputs.deploy_upload_worker && (inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel))) && (inputs.upload_driver == 'worker' || inputs.upload_driver == '') }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "R2 upload Worker deploy requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID." >&2
+            exit 1
+          fi
+          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-bulk-upload/wrangler.jsonc
+
+      - name: Publish Web assets to R2
+        if: ${{ inputs.publish_r2 }}
+        working-directory: mir2-web3/apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
+          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'worker' }}
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+          MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
+          MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
+          MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
+          MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
+          MIR2_R2_VERIFY_ORIGINAL_ASSETS: "1"
+          MIR2_R2_RESUME_EXISTING_ASSETS: ${{ inputs.resume_existing_assets }}
+        run: |
+          set -euo pipefail
+          bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
+          if [ -z "$bucket" ]; then
+            echo "R2 publish requested but MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET is missing." >&2
+            exit 1
+          fi
+          MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
+
+      - name: Prepare pinned Bevy runtime for an existing overlay release
+        if: ${{ inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel) }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+          runtime_base_url="$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+          if [ -n "${MIR2_FALLBACK_OBJECT_PREFIX:-}" ]; then
+            runtime_base_url="$(
+              node -e '
+                const current = new URL(process.argv[1]);
+                const fallbackPrefix = process.argv[2].replace(/^\/+|\/+$/g, "");
+                process.stdout.write(`${current.origin}/${fallbackPrefix}`);
+              ' "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL" "$MIR2_FALLBACK_OBJECT_PREFIX"
+            )"
+          fi
+          MIR2_BEVY_RUNTIME_BASE_URL="$runtime_base_url" npm run runtime:fetch:prebuilt
+
+      - name: Stage immutable Bevy runtime release
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+          runtime_manifest="$RUNNER_TEMP/mir2-bevy-runtime-r2-release.json"
+          npm run runtime:r2:build -- \
+            --assetVersion "$MIR2_ASSET_VERSION" \
+            --objectPrefix "$MIR2_ASSET_OBJECT_PREFIX" \
+            --assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL" \
+            --output "$runtime_manifest"
+          echo "MIR2_BEVY_RUNTIME_RELEASE_MANIFEST=$runtime_manifest" >> "$GITHUB_ENV"
+
+      - name: Dry run immutable Bevy runtime upload
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
+            npm run assets:r2:dry-run
+
+      - name: Publish immutable Bevy runtime to R2
+        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
+        working-directory: mir2-web3/apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
+          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'worker' }}
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+          MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
+          MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
+          MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
+          MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
+          MIR2_R2_VERIFY_ORIGINAL_ASSETS: "0"
+          MIR2_R2_UPLOAD_CONCURRENCY: "1"
+          MIR2_R2_UPLOAD_ATTEMPTS: "6"
+        run: |
+          set -euo pipefail
+          bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
+          if [ -z "$bucket" ]; then
+            echo "Bevy runtime publish requires MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET." >&2
+            exit 1
+          fi
+          MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
+            MIR2_R2_BUCKET="$bucket" \
+            npm run assets:r2:upload
+
+      - name: "Release doctor: manifest + R2 asset checks"
+        if: ${{ inputs.publish_r2 }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+          if [ -z "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL:-}" ]; then
+            echo "NEXT_PUBLIC_MIR2_ASSET_BASE_URL is required for R2 asset checks." >&2
+            exit 1
+          fi
+          npm run release:doctor -- \
+            --manifest "$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json" \
+            --checkManifest true \
+            --checkR2 true \
+            --checkWorker false \
+            --checkBevyRuntime false \
+            --requireFullCrystalPack "${{ inputs.require_full_crystal_pack }}" \
+            --assetBaseUrl "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL}"
+
+      - name: Deploy public asset CDN Worker
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const configPath = "infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc";
+          const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+          config.vars = {
+            ...(config.vars ?? {}),
+            MIR2_OVERLAY_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
+          };
+          if (process.env.MIR2_FALLBACK_OBJECT_PREFIX) {
+            config.vars.MIR2_FALLBACK_OBJECT_PREFIX = process.env.MIR2_FALLBACK_OBJECT_PREFIX;
+          } else {
+            delete config.vars.MIR2_FALLBACK_OBJECT_PREFIX;
+          }
+          fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc
+
+      - name: Deploy same-origin asset Worker proxy
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const { MIR2_ASSET_VERSION, MIR2_ASSET_OBJECT_PREFIX, NEXT_PUBLIC_MIR2_ASSET_BASE_URL } = process.env;
+          if (!MIR2_ASSET_VERSION || !MIR2_ASSET_OBJECT_PREFIX || !NEXT_PUBLIC_MIR2_ASSET_BASE_URL) {
+            console.error("deploy_worker requires MIR2_ASSET_VERSION, MIR2_ASSET_OBJECT_PREFIX, and NEXT_PUBLIC_MIR2_ASSET_BASE_URL");
+            process.exit(1);
+          }
+          const configPath = "infra/cloudflare/mir2-domain-proxy/wrangler.jsonc";
+          const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+          const runtime = JSON.parse(
+            fs.readFileSync("apps/web/lib/generated/bevy_runtime_version.json", "utf8"),
+          );
+          if (!/^bevy-[a-f0-9]{16}$/i.test(runtime.version ?? "")) {
+            console.error("deploy_worker could not resolve a valid Bevy runtime version");
+            process.exit(1);
+          }
+          config.vars = {
+            ...(config.vars ?? {}),
+            ASSET_ORIGIN_URL: process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL,
+            MIR2_ASSET_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
+            MIR2_ASSET_VERSION: process.env.MIR2_ASSET_VERSION,
+            MIR2_BEVY_RUNTIME_VERSION: runtime.version,
+          };
+          if (process.env.MIR2_FALLBACK_OBJECT_PREFIX) {
+            config.vars.MIR2_FALLBACK_OBJECT_PREFIX = process.env.MIR2_FALLBACK_OBJECT_PREFIX;
+          } else {
+            delete config.vars.MIR2_FALLBACK_OBJECT_PREFIX;
+          }
+          fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
+
+      - name: Smoke current same-origin original assets
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && (inputs.deploy_worker || inputs.deploy_vercel) }}
+        run: |
+          set -euo pipefail
+          npm run --prefix mir2-web3/apps/web smoke:production-original-assets -- \
+            --targets web \
+            --webBaseUrl "https://mir2.obelisk.build"
+
+      - name: Verify full-pack closure through same-origin Worker
+        if: ${{ inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel) && inputs.require_full_crystal_pack }}
+        working-directory: mir2-web3/apps/web
+        env:
+          EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
+        run: |
+          npm run release:doctor -- \
+            --manifest "$EXISTING_RELEASE_MANIFEST_PATH" \
+            --checkManifest true \
+            --checkR2 false \
+            --checkWorker true \
+            --checkBevyRuntime false \
+            --requireFullCrystalPack true \
+            --probeConcurrency 32 \
+            --webBaseUrl "https://mir2.obelisk.build"
+
+      - name: Deploy Player Web to Vercel
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
+        working-directory: mir2-web3/apps/web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_PUBLIC_MIR2_GATEWAY_WS_URL_SECRET: ${{ secrets.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL }}
+          MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ] || [ -z "${VERCEL_ORG_ID:-}" ] || [ -z "${VERCEL_PROJECT_ID:-}" ]; then
+            echo "Vercel deploy requested but VERCEL_TOKEN, VERCEL_ORG_ID, or VERCEL_PROJECT_ID is missing." >&2
+            exit 1
+          fi
+          export NEXT_PUBLIC_MIR2_GATEWAY_WS_URL="${NEXT_PUBLIC_MIR2_GATEWAY_WS_URL_SECRET:-wss://mir2.obelisk.build/ws}"
+          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
+            export MIR2_ORIGINAL_ASSET_MANIFEST_MODE="remote-release"
+            export MIR2_ORIGINAL_ASSET_REMOTE_RELEASE="${MIR2_ORIGINAL_ASSET_REMOTE_RELEASE:-${NEXT_PUBLIC_MIR2_ASSET_BASE_URL%/}/remote-asset-release.json}"
+          fi
+          npm run generate:original-asset-manifest
+          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
+            vercel_env_args=(
+              --build-env "MIR2_USE_PREBUILT_BEVY_RUNTIME=1"
+              --build-env "MIR2_ASSET_VERSION=$MIR2_ASSET_VERSION"
+              --build-env "MIR2_ASSET_OBJECT_PREFIX=$MIR2_ASSET_OBJECT_PREFIX"
+              --build-env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+              --build-env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
+              --build-env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE=$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
+              --build-env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE=$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
+              --build-env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST=1"
+              --env "MIR2_ASSET_VERSION=$MIR2_ASSET_VERSION"
+              --env "MIR2_ASSET_OBJECT_PREFIX=$MIR2_ASSET_OBJECT_PREFIX"
+              --env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+              --env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
+            )
+            (
+              cd "$GITHUB_WORKSPACE"
+              npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
+              sync_vercel_production_env() {
+                npx vercel@56.4.1 env add "$1" production \
+                  --force \
+                  --yes \
+                  --no-sensitive \
+                  --value "$2" \
+                  --token "$VERCEL_TOKEN"
+              }
+              # Vercel's remote builder resolves project-level production
+              # variables after accepting deploy-time --build-env values. Keep
+              # the project environment pinned to the release before starting
+              # the build so a successful deploy cannot silently reuse the
+              # previous asset version.
+              sync_vercel_production_env "MIR2_USE_PREBUILT_BEVY_RUNTIME" "1"
+              sync_vercel_production_env "MIR2_ASSET_VERSION" "$MIR2_ASSET_VERSION"
+              sync_vercel_production_env "MIR2_ASSET_OBJECT_PREFIX" "$MIR2_ASSET_OBJECT_PREFIX"
+              sync_vercel_production_env "MIR2_FALLBACK_OBJECT_PREFIX" "$MIR2_FALLBACK_OBJECT_PREFIX"
+              sync_vercel_production_env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL" "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+              sync_vercel_production_env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL" "$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
+              sync_vercel_production_env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE" "$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
+              sync_vercel_production_env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE" "$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
+              sync_vercel_production_env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST" "1"
+              # Refresh the local Vercel snapshot created by the first pull;
+              # otherwise the uploaded archive still contains the previous
+              # production values even though the project environment changed.
+              npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
+              npx vercel@56.4.1 deploy . --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
+            )
+            exit 0
+          fi
+          npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
+          npx vercel@56.4.1 build --prod --yes --token "$VERCEL_TOKEN"
+          npm run vercel:prune-output
+          npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes --token "$VERCEL_TOKEN"
+
+      - name: Smoke app manifest after deploy
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          set -euo pipefail
+          if [ -z "${MIR2_ASSET_VERSION:-}" ]; then
+            echo "MIR2_ASSET_VERSION is required for app manifest smoke." >&2
+            exit 1
+          fi
+          node - <<'NODE'
+          (async () => {
+            const manifestUrl = "https://mir2.obelisk.build/api/asset-manifest";
+            const response = await fetch(manifestUrl, { cache: "no-store" });
+            if (!response.ok) {
+              throw new Error(`asset manifest request failed: HTTP ${response.status}`);
+            }
+            const manifest = await response.json();
+            if (manifest.version !== process.env.MIR2_ASSET_VERSION) {
+              throw new Error(`asset manifest version mismatch: expected ${process.env.MIR2_ASSET_VERSION}, got ${manifest.version}`);
+            }
+            if (!Array.isArray(manifest.resourcePacks) || manifest.resourcePacks.length === 0) {
+              throw new Error("asset manifest missing resourcePacks");
+            }
+            console.log(`asset manifest smoke ok version=${manifest.version}`);
+          })().catch((error) => {
+            console.error(error?.message || String(error));
+            process.exit(1);
+          });
+          NODE
+
+      - name: Warm canonical first-playable scenes after deploy
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
+        working-directory: mir2-web3/apps/web
+        run: |
+          npm run warm:production-scenes -- \
+            --webBaseUrl "https://mir2.obelisk.build" \
+            --timeoutMs 180000
+
+      - name: Smoke browser Bevy runtime assets on immutable R2 origin
+        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
+        run: |
+          npm run --prefix mir2-web3/apps/web smoke:production-bevy-runtime -- \
+            --assetBaseUrl "https://assets.mir2.obelisk.build/mir2/v/$MIR2_ASSET_VERSION" \
+            --requireR2 true
+
+      - name: Upload remote asset release manifest
+        if: ${{ inputs.publish_r2 }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mir2-web-remote-assets
+          path: |
+            mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json
+            mir2-web3/docs/generated/remote-assets/**/remote-asset-release.json
+          if-no-files-found: error

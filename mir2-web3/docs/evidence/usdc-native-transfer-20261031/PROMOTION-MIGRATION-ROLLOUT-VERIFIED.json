@@ -1,0 +1,23 @@
+{
+  "schema": "mir2.promotion-migration.original-rollout-verification.v1",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "contractSha256": "d72572ec53ee4d7665447023ab01f8d2a6fb24c487de5bb6a8fa385a40c0e339",
+  "helperSha256": "f3898f638e93d217b572b374eb968ef8ecc42e811bb6efb1e943ee2dc932d841",
+  "originalResultSha256": "5af5b36b29ef114c69ee43a0660e258814c15de422bad9a1b45230260274416e",
+  "healthy": true,
+  "preservedServices": true,
+  "migrationCount": 28,
+  "oldMigrationRowsPreserved": 27,
+  "oldBusinessRowsPreserved": true,
+  "newTablesEmptyAtRollout": [
+    "promotion_attribution_migration_evidence",
+    "promotion_attribution_migration_confirmations",
+    "promotion_attribution_migration_payment_claims"
+  ],
+  "financialWritePerformed": false,
+  "operatorInvoked": false,
+  "migrationStagedAtVerification": false,
+  "memberConfirmationPerformed": false,
+  "docker": false,
+  "note": "Configuration parser reconstruction archived the original STATE and added protected backups; previously omitted environment files are not claimed to have historical prehash coverage."
+}

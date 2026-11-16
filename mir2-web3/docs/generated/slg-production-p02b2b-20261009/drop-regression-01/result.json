@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "drop-regression",
+  "startedUtc": "2026-10-08T18:48:56.4706333Z",
+  "finishedUtc": "2026-10-08T18:49:02.1787259Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::drops::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "1d5adaee29cebe6e9efaf12fd034db34e56f32333cb79153aaa1b65e8d152249",
+  "declaredInputs": 461,
+  "sourceDrift": [],
+  "cargoLogSha256": "0b4d3315449bae9d17d48fad8c4d8ff5e718050518c2149ec79c6b8902e100d0",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

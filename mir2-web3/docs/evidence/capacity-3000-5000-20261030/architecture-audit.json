@@ -1,0 +1,659 @@
+{
+  "schema": "mir2.capacity.architecture-audit.v1",
+  "generatedUtc": "2026-10-29T20:05:49.218711+00:00",
+  "repository": "<repository>/mir2-web3",
+  "head": "bb690060d599d6d224f0ca708af2e75a1d4b533c",
+  "sourceWorktreeClean": true,
+  "remoteDeployedRevisionReportedByParent": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "gatewayAndSimulationSourceIdenticalToReportedRemoteRevision": true,
+  "remoteEnvironmentInspected": false,
+  "sshUsed": false,
+  "repositoryModified": false,
+  "benchmarkRun": false,
+  "measuredCCU": null,
+  "claimedCapacityCCU": null,
+  "dynamicCellImplemented": false,
+  "fixedCellIndependentWritersImplemented": false,
+  "findings": [
+    {
+      "id": "A01",
+      "title": "Cell仍是whole-Zone兼容合同",
+      "state": "implemented_identity_only",
+      "detail": "64tile Cell坐标和TopologyRevision已实现，但所有Cell映射partition0；非零partition被拒绝。既无固定Cell独立writer，也无动态Cell拆分合并/跨Cell战斗权威交接。AOI格子只缩小可见性候选扫描。",
+      "evidence": [
+        {
+          "file": "apps/simulation/src/runtime/zone/partition.rs",
+          "line": 1,
+          "endLine": 6,
+          "sha256": "8560805a891983344d3049844d35b185fd178f7843e51306fabc83714cf4728f",
+          "excerpt": "1: //! Internal spatial identities for the whole-Zone compatibility topology.\n2: //!\n3: //! The directory is a deterministic projection of live `ZoneRuntime`s: every\n4: //! logical Zone owns partition zero and every spatial Cell resolves to it. It is\n5: //! not persisted topology, a scheduler, or an ownership/lease authority. The\n6: //! Gateway's existing owner lease remains the only source of placement fencing."
+        },
+        {
+          "file": "apps/simulation/src/runtime/zone/partition.rs",
+          "line": 18,
+          "endLine": 22,
+          "sha256": "8560805a891983344d3049844d35b185fd178f7843e51306fabc83714cf4728f",
+          "excerpt": "18: impl CellSize {\n19:     /// Frozen geometry of the initial whole-Zone topology. Changing this value\n20:     /// requires a new topology revision, even while all Cells share one writer.\n21:     pub const WHOLE_ZONE: Self = Self(64);\n22: "
+        },
+        {
+          "file": "apps/simulation/src/runtime/zone/partition.rs",
+          "line": 185,
+          "endLine": 202,
+          "sha256": "8560805a891983344d3049844d35b185fd178f7843e51306fabc83714cf4728f",
+          "excerpt": "185: impl ZonePartitionDescriptor {\n186:     pub(crate) fn whole_zone(zone: ZoneKey) -> Self {\n187:         Self {\n188:             partition: PartitionKey::whole_zone(zone.clone()),\n189:             topology_revision: TopologyRevision::WHOLE_ZONE,\n190:             cell_size: CellSize::WHOLE_ZONE,\n191:             effect_owner: MapEffectOwnerRef::for_zone(zone),\n192:         }\n193:     }\n194: \n195:     pub fn locate(&self, position: &Point) -> PartitionLocation {\n196:         PartitionLocation {\n197:             partition: self.partition.clone(),\n198:             cell: CellCoord::at(position, self.cell_size),\n199:             topology_revision: self.topology_revision,\n200:             effect_owner: self.effect_owner.clone(),\n201:         }\n202:     }"
+        },
+        {
+          "file": "apps/simulation/src/runtime/zone/manager.rs",
+          "line": 1151,
+          "endLine": 1163,
+          "sha256": "d93c223e85d5684fac8b9826b1f47707d7968e7b535ef3e36de530965ab4605c",
+          "excerpt": "1151:     pub fn handle_for_partition(\n1152:         &mut self,\n1153:         partition: PartitionKey,\n1154:         command: ZoneCommand,\n1155:     ) -> Result<Vec<ZoneOutbound>, String> {\n1156:         if partition.partition_id != PartitionId::WHOLE_ZONE {\n1157:             return Err(format!(\n1158:                 \"unsupported partition {} in whole-Zone topology\",\n1159:                 partition.partition_id.0\n1160:             ));\n1161:         }\n1162:         self.try_handle_single_partition(partition, command)\n1163:     }"
+        },
+        {
+          "file": "apps/simulation/src/runtime/zone/aoi_grid.rs",
+          "line": 4,
+          "endLine": 10,
+          "sha256": "51b9fe2149598f1dd92511b8b306454e6064b2355fd9289a1d19750815834aab",
+          "excerpt": "4: //! tick (`O(N)` per mover, `O(N^2)` per tick). For dense scenes — a capital city\n5: //! or a Sabuk-style siege — that quadratic cost is the dominant scaling wall.\n6: //!\n7: //! `AoiGrid` buckets members into coarse cells sized to the AOI range. Because a\n8: //! cell is at least as wide/tall as the AOI rectangle, any two mutually-visible\n9: //! points are guaranteed to fall in the same or an adjacent cell. Scanning the\n10: //! 3x3 neighborhood of a point therefore returns a **superset** of every member"
+        }
+      ]
+    },
+    {
+      "id": "A02",
+      "title": "单写与多核地图调度",
+      "state": "implemented",
+      "detail": "每个execution Zone有Arc<Mutex<State>>、64条movement入口和独立owner OS线程；同Zone写串行。ZoneManager含至少4张运行地图时ComputeTaskPool并行tick，按spawn顺序合并结果；不是把同一热点地图拆到多个core。单execution domain持锁期间的其他命令/dispatch仍等待。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 9085,
+          "endLine": 9086,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "9085: const SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY: usize = 64;\n9086: const SHARED_ZONE_MOVEMENT_REPLY_TIMEOUT: Duration = Duration::from_secs(5);"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 10178,
+          "endLine": 10184,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "10178: #[derive(Clone)]\n10179: struct SharedInProcessZoneResources {\n10180:     zone_state: Arc<Mutex<SharedInProcessZoneState>>,\n10181:     movement_sender: SyncSender<SharedZoneMovementRequest>,\n10182:     tick_count: Arc<AtomicU64>,\n10183:     autonomous_ticks_enabled: Arc<AtomicBool>,\n10184: }"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 10262,
+          "endLine": 10279,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "10262:     let (movement_sender, movement_receiver) = sync_channel(SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY);\n10263:     let zone_id = zone_id.clone();\n10264:     thread::Builder::new()\n10265:         .name(format!(\"mir2-zone-owner-{}\", zone_id.as_str()))\n10266:         .spawn(move || {\n10267:             shared_zone_owner_loop(\n10268:                 zone_id,\n10269:                 zone_state,\n10270:                 movement_receiver,\n10271:                 cadence,\n10272:                 tick_count,\n10273:                 mutation_capture,\n10274:                 autonomous_ticks_enabled,\n10275:             )\n10276:         })\n10277:         .expect(\"shared zone owner thread should start\");\n10278:     movement_sender\n10279: }"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 7699,
+          "endLine": 7727,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "7699: }\n7700: \n7701: /// FIFO gate shared by player commands and autonomous Zone ticks.\n7702: ///\n7703: /// `std::sync::Mutex` does not promise fair waiter selection. Under a sustained\n7704: /// multi-session journal load one RPC could therefore wait behind thousands of\n7705: /// later arrivals and eventually hit its socket timeout. Ticket ordering makes\n7706: /// the single-writer sequence explicit and bounded by the work already queued.\n7707: #[derive(Debug, Default)]\n7708: pub(crate) struct SharedZoneMutationGate {\n7709:     scope: RwLock<()>,\n7710:     state: Mutex<SharedZoneMutationGateState>,\n7711: }\n7712: \n7713: impl SharedZoneMutationGate {\n7714:     /// Stops every Zone lane for host-wide checkpoint install/export.\n7715:     pub(crate) fn lock(&self) -> Result<SharedZoneMutationGateGuard<'_>, String> {\n7716:         let scope = self\n7717:             .scope\n7718:             .write()\n7719:             .map_err(|_| \"shared Zone mutation scope was poisoned\".to_string())?;\n7720:         Ok(SharedZoneMutationGateGuard {\n7721:             gate: self,\n7722:             zone_id: None,\n7723:             _scope: SharedZoneMutationScopeGuard::Exclusive { _guard: scope },\n7724:         })\n7725:     }\n7726: \n7727:     /// Serializes one Zone while allowing unrelated maps to make progress."
+        },
+        {
+          "file": "apps/simulation/src/runtime/zone/manager.rs",
+          "line": 14,
+          "endLine": 14,
+          "sha256": "d93c223e85d5684fac8b9826b1f47707d7968e7b535ef3e36de530965ab4605c",
+          "excerpt": "14: const PARALLEL_TICK_MIN_ZONES: usize = 4;"
+        },
+        {
+          "file": "apps/simulation/src/runtime/zone/manager.rs",
+          "line": 1388,
+          "endLine": 1419,
+          "sha256": "d93c223e85d5684fac8b9826b1f47707d7968e7b535ef3e36de530965ab4605c",
+          "excerpt": "1388:     pub fn tick_all(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {\n1389:         let keys = self.zones.keys().cloned().collect::<Vec<_>>();\n1390:         if self.admit_timers(&keys, now_ms, false).is_err() {\n1391:             return Vec::new();\n1392:         }\n1393:         let mut pet_outbounds = self.refresh_online_pets_admitted(now_ms);\n1394:         let zone_count = self.zones.len();\n1395:         if zone_count < PARALLEL_TICK_MIN_ZONES {\n1396:             pet_outbounds.extend(self.tick_all_sequential_admitted(now_ms));\n1397:             return pet_outbounds;\n1398:         }\n1399: \n1400:         let pool = ComputeTaskPool::get_or_init(TaskPool::default);\n1401:         let workers = pool.thread_num().max(1);\n1402:         let chunk_size = zone_count.div_ceil(workers).max(1);\n1403:         let mut zones: Vec<&mut ZoneRuntime> = self.zones.values_mut().collect();\n1404: \n1405:         // Each task ticks a contiguous chunk of zones serially and returns their\n1406:         // concatenated outbounds. Chunks are spawned in order; `scope` preserves\n1407:         // spawn order, so flattening yields the same order as a sequential tick.\n1408:         let per_chunk: Vec<Vec<ZoneOutbound>> = pool.scope(|scope| {\n1409:             for chunk in zones.chunks_mut(chunk_size) {\n1410:                 scope.spawn(async move {\n1411:                     chunk\n1412:                         .iter_mut()\n1413:                         .flat_map(|zone| zone.tick(now_ms))\n1414:                         .collect::<Vec<ZoneOutbound>>()\n1415:                 });\n1416:             }\n1417:         });\n1418:         pet_outbounds.extend(per_chunk.into_iter().flatten());\n1419:         pet_outbounds"
+        }
+      ]
+    },
+    {
+      "id": "A03",
+      "title": "拓扑配置已接正常bootstrap",
+      "state": "implemented_default_single",
+      "detail": "main加载topology并创建共享factory与registry；默认single；per_map或JSON将地图/地图组分到独立execution Zones，各自tick cadence。不是当前远端已启用per_map的证据。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/main.rs",
+          "line": 121,
+          "endLine": 132,
+          "sha256": "dce20a93eb75858035cf1f5ef8889de1212744ecc949e67d410dfe62c40c24b8",
+          "excerpt": "121:     let topology = mir2_gateway::ZoneTopology::from_env()\n122:         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;\n123:     let factory = topology.runtime_factory();\n124:     let registry = Arc::new(\n125:         mir2_gateway::ZoneRegistry::with_router_and_owner_lease_authority(\n126:             topology.default_zone_id().clone(),\n127:             factory.clone(),\n128:             topology.router(),\n129:             mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),\n130:         ),\n131:     );\n132:     let _conquest_clock ="
+        },
+        {
+          "file": "apps/gateway/src/topology.rs",
+          "line": 55,
+          "endLine": 86,
+          "sha256": "1336ed74fe21547ef386204d53ce698af36f166e3a3e243e559d6b8ca6fc0ddb",
+          "excerpt": "55:     pub fn from_env() -> Result<Self, String> {\n56:         let file = env::var(\"MIR2_ZONE_TOPOLOGY_FILE\")\n57:             .ok()\n58:             .filter(|value| !value.trim().is_empty());\n59:         let inline = env::var(\"MIR2_ZONE_TOPOLOGY_JSON\")\n60:             .ok()\n61:             .filter(|value| !value.trim().is_empty());\n62:         if file.is_some() && inline.is_some() {\n63:             return Err(\n64:                 \"configure only one of MIR2_ZONE_TOPOLOGY_FILE or MIR2_ZONE_TOPOLOGY_JSON\"\n65:                     .to_string(),\n66:             );\n67:         }\n68:         if let Some(path) = file {\n69:             let bytes = fs::read(&path)\n70:                 .map_err(|error| format!(\"failed to read Zone topology {path}: {error}\"))?;\n71:             return Self::from_json(&bytes);\n72:         }\n73:         if let Some(json) = inline {\n74:             return Self::from_json(json.as_bytes());\n75:         }\n76:         match env::var(\"MIR2_ZONE_ROUTING_MODE\")\n77:             .unwrap_or_else(|_| \"single\".to_string())\n78:             .trim()\n79:         {\n80:             \"single\" | \"\" => Ok(Self::single()),\n81:             \"per_map\" => Ok(Self::per_map()),\n82:             mode => Err(format!(\n83:                 \"unsupported MIR2_ZONE_ROUTING_MODE {mode}; expected single or per_map\"\n84:             )),\n85:         }\n86:     }"
+        },
+        {
+          "file": "apps/gateway/src/topology.rs",
+          "line": 157,
+          "endLine": 169,
+          "sha256": "1336ed74fe21547ef386204d53ce698af36f166e3a3e243e559d6b8ca6fc0ddb",
+          "excerpt": "157: \n158:     pub fn route_map(&self, map_file_name: &str) -> ZoneId {\n159:         if self.mode == ZoneTopologyMode::Single {\n160:             return self.default_zone_id.clone();\n161:         }\n162:         if self.hot_map_policies.contains_key(map_file_name) {\n163:             return ZoneId::new(format!(\"map:{map_file_name}:line:1\"));\n164:         }\n165:         self.map_routes\n166:             .get(map_file_name)\n167:             .cloned()\n168:             .unwrap_or_else(|| ZoneId::new(format!(\"map:{map_file_name}\")))\n169:     }"
+        },
+        {
+          "file": "apps/gateway/src/topology.rs",
+          "line": 338,
+          "endLine": 359,
+          "sha256": "1336ed74fe21547ef386204d53ce698af36f166e3a3e243e559d6b8ca6fc0ddb",
+          "excerpt": "338: #[derive(Debug, Deserialize)]\n339: #[serde(rename_all = \"camelCase\")]\n340: struct ZoneTopologyDocument {\n341:     version: u32,\n342:     mode: ZoneTopologyMode,\n343:     #[serde(default = \"default_zone_id\")]\n344:     default_zone_id: String,\n345:     #[serde(default = \"default_tick_ms\")]\n346:     default_tick_ms: u64,\n347:     #[serde(default)]\n348:     zones: BTreeMap<String, ZoneGroupDocument>,\n349:     #[serde(default)]\n350:     hot_maps: BTreeMap<String, HotMapPolicy>,\n351: }\n352: \n353: #[derive(Debug, Deserialize)]\n354: #[serde(rename_all = \"camelCase\")]\n355: struct ZoneGroupDocument {\n356:     maps: Vec<String>,\n357:     #[serde(default = \"default_tick_ms\")]\n358:     tick_ms: u64,\n359: }"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 8370,
+          "endLine": 8400,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "8370:     fn resources_for_zone(&self, zone_id: &ZoneId) -> SharedInProcessZoneResources {\n8371:         let cadence = self\n8372:             .tick_cadences\n8373:             .get(zone_id)\n8374:             .copied()\n8375:             .unwrap_or(self.default_tick_cadence);\n8376:         // Keep replica observation and first resource insertion in the same\n8377:         // replicas -> Zones critical section as mark/promote/restore. Otherwise\n8378:         // a concurrent mark could install the marker between the two locks and\n8379:         // leave a standby resource with autonomous ticks enabled.\n8380:         let replica_zone_ids = self\n8381:             .replica_zone_ids\n8382:             .lock()\n8383:             .expect(\"shared Zone replica marker mutex should not be poisoned\");\n8384:         let autonomous_ticks_enabled =\n8385:             self.autonomous_ticks_by_default && !replica_zone_ids.contains(zone_id);\n8386:         let mut zones = self\n8387:             .zones\n8388:             .lock()\n8389:             .expect(\"shared zone factory mutex should not be poisoned\");\n8390:         zones\n8391:             .entry(zone_id.clone())\n8392:             .or_insert_with(|| {\n8393:                 SharedInProcessZoneResources::new(\n8394:                     zone_id,\n8395:                     cadence,\n8396:                     self.mutation_capture.clone(),\n8397:                     autonomous_ticks_enabled,\n8398:                 )\n8399:             })\n8400:             .clone()"
+        }
+      ]
+    },
+    {
+      "id": "A04",
+      "title": "独立zone_host和正常session RPC可复用",
+      "state": "implemented_requires_configuration_and_validation",
+      "detail": "GatewaySession优先Gate15 finalized transport，其次显式TCP endpoints，最后in-process。zone_host是真实可运行模拟进程，并读取同账号持久层/拓扑、安装owner fencing和journal observer。加Gateway须复用同一权威世界，不能各自默认in-process复制世界。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/session.rs",
+          "line": 1633,
+          "endLine": 1651,
+          "sha256": "53c1d8ae2f36364c929f14d70249170b72f1a57aed267cf11bc3f8cf6abec54d",
+          "excerpt": "1633: fn default_zone_owner_command_client(\n1634:     zone_id: &ZoneId,\n1635:     zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,\n1636: ) -> SharedZoneOwnerCommandClient {\n1637:     if let Some(transport) = crate::gate15::zone_owner_rpc_transport(zone_id.clone()) {\n1638:         return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(transport));\n1639:     }\n1640:     if let Some(transport) = crate::zone_rpc::TcpZoneOwnerRpcTransport::from_env(zone_id.clone()) {\n1641:         return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(std::sync::Arc::new(\n1642:             transport,\n1643:         )));\n1644:     }\n1645:     let client = if let Some(authority) = zone_owner_lease_authority {\n1646:         InProcessZoneOwnerCommandClient::with_owner_lease_authority(authority.clone())\n1647:     } else {\n1648:         InProcessZoneOwnerCommandClient::new()\n1649:     };\n1650:     std::sync::Arc::new(client)\n1651: }"
+        },
+        {
+          "file": "apps/gateway/src/bin/zone_host.rs",
+          "line": 25,
+          "endLine": 33,
+          "sha256": "d3345ce6350413094486f7e0e66388c288341ee4ef6e21a52272c4d5179988dc",
+          "excerpt": "25:     let address = env::var(\"MIR2_ZONE_HOST_ADDR\")\n26:         .unwrap_or_else(|_| DEFAULT_ZONE_HOST_ADDR.to_string())\n27:         .parse::<SocketAddr>()\n28:         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;\n29:     let auth_token = env::var(\"MIR2_ZONE_HOST_TOKEN\")\n30:         .ok()\n31:         .filter(|value| !value.trim().is_empty());\n32:     validate_zone_host_bind(address, auth_token.as_deref())?;\n33: "
+        },
+        {
+          "file": "apps/gateway/src/bin/zone_host.rs",
+          "line": 43,
+          "endLine": 76,
+          "sha256": "d3345ce6350413094486f7e0e66388c288341ee4ef6e21a52272c4d5179988dc",
+          "excerpt": "43:     let account_store_path = env::var(\"MIR2_ACCOUNT_STORE_PATH\")\n44:         .unwrap_or_else(|_| DEFAULT_ACCOUNT_STORE_PATH.to_string());\n45:     config = config\n46:         .with_account_store_environment(PathBuf::from(account_store_path))\n47:         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;\n48: \n49:     let listener = TcpListener::bind(address)?;\n50:     let bound_address = listener.local_addr()?;\n51:     let topology = ZoneTopology::from_env()\n52:         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;\n53:     let runtime_factory = match env::var(\"MIR2_ECONOMY_DATABASE_URL\")\n54:         .ok()\n55:         .filter(|value| !value.trim().is_empty())\n56:     {\n57:         Some(database_url) => {\n58:             let service = Arc::new(PostgresEconomyAccountInventoryService::new(database_url));\n59:             service\n60:                 .ensure_migrated()\n61:                 .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;\n62:             topology.runtime_factory_with_account_inventory_service(\n63:                 service as SharedAccountInventoryServiceHandle,\n64:             )\n65:         }\n66:         None => topology.runtime_factory(),\n67:     };\n68:     let server = Arc::new(ZoneHostServer::with_options_and_factory(\n69:         config,\n70:         default_zone_owner_lease_authority_from_env(),\n71:         auth_token,\n72:         ZoneRpcLimits::from_env(),\n73:         Arc::clone(&runtime_factory),\n74:     ));\n75:     server.configure_zone_map_catalog(topology.zone_map_catalog(), topology.all_maps_zone_ids());\n76:     start_zone_journal_compactor(Arc::clone(&server))?;"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 3043,
+          "endLine": 3064,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "3043:         let operation_gate = Arc::new(SharedZoneMutationGate::default());\n3044:         let journal = Arc::new(Mutex::new(ZoneHostJournal::default()));\n3045:         let tick_journal = Arc::clone(&journal);\n3046:         let tick_authority = Arc::clone(&owner_lease_authority);\n3047:         let tick_host_id = host_id.clone();\n3048:         let tick_owner_ids = owner_ids.clone();\n3049:         runtime_factory.configure_mutation_capture(\n3050:             Arc::clone(&operation_gate),\n3051:             Arc::new(move |zone_id| {\n3052:                 let lease = tick_authority.owner_lease(zone_id);\n3053:                 let legacy_in_process_owner =\n3054:                     lease.owner_id() == \"in-process\" || lease.owner_id().starts_with(\"in-process:\");\n3055:                 if !legacy_in_process_owner && !tick_owner_ids.contains(lease.owner_id()) {\n3056:                     return Err(format!(\n3057:                         \"Zone {zone_id} is fenced to {}, local host {} is not active\",\n3058:                         lease.owner_id(),\n3059:                         tick_host_id\n3060:                     ));\n3061:                 }\n3062:                 tick_authority.validate_owner_lease(&lease)\n3063:             }),\n3064:             Arc::new(move |zone_id, now_ms| {"
+        }
+      ]
+    },
+    {
+      "id": "A05",
+      "title": "多host是按Zone分配，非在线无损加机",
+      "state": "implemented_static_shards_optional_control_plane",
+      "detail": "ACTIVE_ADDRS实际按SHA256(zone)模active.len分配，line编号增加offset；改变N会重映射很多Zone。standby是故障候选而非额外同时writer。Gate15可按finalized generation改变placement；独立control_plane有place/drain/rebalance但普通main未实例化它。需运行匹配控制/复制/切换流程，不能仅改地址列表当在线自动扩容。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 1495,
+          "endLine": 1527,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "1495:     /// When `MIR2_ZONE_HOST_ACTIVE_ADDRS` is present, the Zone id is hashed to\n1496:     /// exactly one active shard and the configured standby endpoints follow it\n1497:     /// as failover candidates. The legacy `MIR2_ZONE_HOST_ADDRS` list keeps its\n1498:     /// original active/standby semantics when active sharding is not enabled.\n1499:     pub fn configured_endpoints_from_env(zone_id: &ZoneId) -> Option<(Vec<String>, usize)> {\n1500:         let active = comma_separated_env(\"MIR2_ZONE_HOST_ACTIVE_ADDRS\");\n1501:         if !active.is_empty() {\n1502:             let standby = comma_separated_env(\"MIR2_ZONE_HOST_STANDBY_ADDRS\");\n1503:             let colocated_standby = standby.is_empty()\n1504:                 && active.len() > 1\n1505:                 && enabled_env(\"MIR2_ZONE_HOST_COLOCATED_STANDBY\");\n1506:             let paired_standby =\n1507:                 !standby.is_empty() && enabled_env(\"MIR2_ZONE_HOST_PAIRED_STANDBY\");\n1508:             let active_shard_count = active.len();\n1509:             return Some((\n1510:                 select_zone_shard_endpoints(\n1511:                     zone_id,\n1512:                     &active,\n1513:                     &standby,\n1514:                     colocated_standby,\n1515:                     paired_standby,\n1516:                 ),\n1517:                 active_shard_count,\n1518:             ));\n1519:         }\n1520:         let addresses = comma_separated_env(\"MIR2_ZONE_HOST_ADDRS\");\n1521:         if !addresses.is_empty() {\n1522:             return Some((addresses, 1));\n1523:         }\n1524:         std::env::var(\"MIR2_ZONE_HOST_ADDR\")\n1525:             .ok()\n1526:             .filter(|value| !value.trim().is_empty())\n1527:             .map(|address| (vec![address.trim().to_string()], 1))"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 7754,
+          "endLine": 7782,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "7754:     debug_assert!(!active.is_empty());\n7755:     let (hash_key, line_offset) = zone_id\n7756:         .as_str()\n7757:         .rsplit_once(\":line:\")\n7758:         .and_then(|(map_zone, line)| {\n7759:             line.parse::<usize>()\n7760:                 .ok()\n7761:                 .filter(|line| *line > 0)\n7762:                 .map(|line| (map_zone, line - 1))\n7763:         })\n7764:         .unwrap_or((zone_id.as_str(), 0));\n7765:     let digest = Sha256::digest(hash_key.as_bytes());\n7766:     let mut prefix = [0u8; 8];\n7767:     prefix.copy_from_slice(&digest[..8]);\n7768:     let base_index =\n7769:         usize::try_from(u64::from_be_bytes(prefix) % active.len() as u64).unwrap_or_default();\n7770:     let active_index = base_index.wrapping_add(line_offset) % active.len();\n7771:     let mut endpoints = Vec::with_capacity(\n7772:         1 + if colocated_standby {\n7773:             active.len().saturating_sub(1)\n7774:         } else {\n7775:             standby.len()\n7776:         },\n7777:     );\n7778:     endpoints.push(active[active_index].clone());\n7779:     if colocated_standby {\n7780:         for offset in 1..active.len() {\n7781:             endpoints.push(active[(active_index + offset) % active.len()].clone());\n7782:         }"
+        },
+        {
+          "file": "apps/gateway/src/control_plane.rs",
+          "line": 148,
+          "endLine": 158,
+          "sha256": "c9070a6f21645ee31ad056b13f97006f5e4595432fb25bf722d855c3bdcdcd94",
+          "excerpt": "148: /// In-memory scheduler state machine used by a single control-plane leader.\n149: /// Its methods take an explicit clock so the placement and failover rules are\n150: /// deterministic and can later be driven by the Commonware replicated log.\n151: #[derive(Debug)]\n152: pub struct ZoneHostControlPlane {\n153:     state: Mutex<ZoneHostControlState>,\n154:     heartbeat_ttl_ms: u64,\n155:     placement_lease_ttl_ms: u64,\n156:     replica_count: usize,\n157: }\n158: "
+        },
+        {
+          "file": "apps/gateway/src/control_plane.rs",
+          "line": 314,
+          "endLine": 322,
+          "sha256": "c9070a6f21645ee31ad056b13f97006f5e4595432fb25bf722d855c3bdcdcd94",
+          "excerpt": "314:     pub fn rebalance(&self, now_ms: u64) -> Result<Vec<ZoneRebalanceMove>, String> {\n315:         let mut state = self.lock_state()?;\n316:         self.rebalance_locked(&mut state, now_ms)\n317:     }\n318: \n319:     pub fn placement(&self, zone_id: &ZoneId) -> Option<ZonePlacementLease> {\n320:         self.state\n321:             .lock()\n322:             .ok()"
+        },
+        {
+          "file": "apps/gateway/src/gate15.rs",
+          "line": 105,
+          "endLine": 112,
+          "sha256": "8cbce042324a4eea459cd5e8e091be119352be72eb1ea3274cf500d5fd925eb7",
+          "excerpt": "105: pub fn initialize_from_env() -> Result<bool, String> {\n106:     if GATE15_CONTROL_PLANE.get().is_some() {\n107:         return Ok(true);\n108:     }\n109:     let Some(validator_urls) = validator_urls_from_env()? else {\n110:         return Ok(false);\n111:     };\n112:     let gateway_id = env::var(\"MIR2_GATE15_GATEWAY_ID\")"
+        },
+        {
+          "file": "apps/gateway/src/gate15.rs",
+          "line": 717,
+          "endLine": 738,
+          "sha256": "8cbce042324a4eea459cd5e8e091be119352be72eb1ea3274cf500d5fd925eb7",
+          "excerpt": "717:         let placement = self.control.placement(&self.zone_id)?;\n718:         let endpoint_signature = placement.endpoints().join(\"\\0\");\n719:         let mut active = self\n720:             .active\n721:             .lock()\n722:             .map_err(|_| \"Gate 15 Zone RPC transport lock poisoned\".to_string())?;\n723:         let replace = active.as_ref().is_none_or(|current| {\n724:             current.generation != placement.generation\n725:                 || current.endpoint_signature != endpoint_signature\n726:         });\n727:         if replace {\n728:             let transport = TcpZoneOwnerRpcTransport::with_placement(\n729:                 &placement,\n730:                 self.rpc_session_id.clone(),\n731:                 self.auth_token.clone(),\n732:                 self.limits.clone(),\n733:             )?;\n734:             *active = Some(ActivePlacementTransport {\n735:                 generation: placement.generation,\n736:                 endpoint_signature,\n737:                 transport,\n738:             });"
+        },
+        {
+          "file": "apps/gateway/src/gate15.rs",
+          "line": 786,
+          "endLine": 802,
+          "sha256": "8cbce042324a4eea459cd5e8e091be119352be72eb1ea3274cf500d5fd925eb7",
+          "excerpt": "786: fn validator_urls_from_env() -> Result<Option<Vec<String>>, String> {\n787:     let Some(raw) = env::var(\"MIR2_GATE15_VALIDATOR_URLS\")\n788:         .ok()\n789:         .filter(|value| !value.trim().is_empty())\n790:     else {\n791:         return Ok(None);\n792:     };\n793:     let urls = raw\n794:         .split(',')\n795:         .map(str::trim)\n796:         .filter(|value| !value.is_empty())\n797:         .map(str::to_string)\n798:         .collect::<Vec<_>>();\n799:     if urls.len() != 4 {\n800:         return Err(\"MIR2_GATE15_VALIDATOR_URLS must contain four URLs\".to_string());\n801:     }\n802:     Ok(Some(urls))"
+        }
+      ]
+    },
+    {
+      "id": "A06",
+      "title": "owner lease防双写边界",
+      "state": "implemented_configuration_required",
+      "detail": "缺省lease是仅进程内；跨进程必须启用PG lease或Gate15 finalized placement，并保持唯一host/owner标识和一致拓扑。trusted-rpc是显式信任模式，不能冒称独立共识。PG validate在缓存安全TTL后必须查库失败即拒绝；owner_lease返回cached/bootstrap不能代替validate。NPC经济有FOR UPDATE持租约穿过提交。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/zone_lease.rs",
+          "line": 151,
+          "endLine": 167,
+          "sha256": "ff3291248288bc2051ee89f5aaba58b7daf79faccb541e582fbfacaeaa2db4ee",
+          "excerpt": "151:     pub fn from_env() -> Option<Self> {\n152:         let database_url = std::env::var(\"MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL\")\n153:             .ok()\n154:             .filter(|value| !value.trim().is_empty())?;\n155:         let owner_id = configured_owner_id(\n156:             std::env::var(\"MIR2_GATEWAY_ZONE_LEASE_OWNER_ID\").ok(),\n157:             std::env::var(\"MIR2_GATEWAY_INSTANCE_ID\").ok(),\n158:         );\n159:         let lease_ttl_ms = std::env::var(\"MIR2_GATEWAY_ZONE_LEASE_TTL_MS\")\n160:             .ok()\n161:             .and_then(|value| value.trim().parse::<u64>().ok())\n162:             .unwrap_or(DEFAULT_LEASE_TTL_MS);\n163:         Some(Self::new(\n164:             database_url.trim().to_string(),\n165:             owner_id,\n166:             lease_ttl_ms,\n167:         ))"
+        },
+        {
+          "file": "apps/gateway/src/zone_lease.rs",
+          "line": 495,
+          "endLine": 518,
+          "sha256": "ff3291248288bc2051ee89f5aaba58b7daf79faccb541e582fbfacaeaa2db4ee",
+          "excerpt": "495:     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {\n496:         let now = now_ms();\n497:         if let Some(cached) = self.cached_entry(zone_id) {\n498:             let live = cached.expires_at_ms > now;\n499:             let owned_by_peer = cached.lease.owner_id() != self.owner_id;\n500:             let safely_before_renewal =\n501:                 cached.expires_at_ms.saturating_sub(now) > self.lease_ttl_ms.saturating_div(2);\n502:             if live && (owned_by_peer || safely_before_renewal) {\n503:                 return cached.lease;\n504:             }\n505:         }\n506:         match self.acquire_at(zone_id, now) {\n507:             Ok(lease) => lease,\n508:             Err(error) => {\n509:                 // Transient DB unavailability must not relinquish ownership: return\n510:                 // the last known good lease, or a stable bootstrap lease for this\n511:                 // owner. Fencing is reconciled by renew/acquire once the DB heals.\n512:                 eprintln!(\n513:                     \"zone lease authority degraded for {}: {error}\",\n514:                     zone_id.as_str()\n515:                 );\n516:                 self.cached(zone_id).unwrap_or_else(|| {\n517:                     ZoneOwnerLease::new(zone_id.clone(), self.owner_id.clone(), 1)\n518:                 })"
+        },
+        {
+          "file": "apps/gateway/src/zone_lease.rs",
+          "line": 537,
+          "endLine": 569,
+          "sha256": "ff3291248288bc2051ee89f5aaba58b7daf79faccb541e582fbfacaeaa2db4ee",
+          "excerpt": "537:     }\n538: \n539:     fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {\n540:         let now = now_ms();\n541:         if let Some(cached) = self.cached_entry(lease.zone_id()) {\n542:             let safely_live = cached.expires_at_ms > now\n543:                 && (cached.lease.owner_id() != self.owner_id\n544:                     || cached.expires_at_ms.saturating_sub(now)\n545:                         > self.lease_ttl_ms.saturating_div(2));\n546:             if safely_live && cached.lease == *lease {\n547:                 return Ok(());\n548:             }\n549:         }\n550:         let current = self.acquire_at(lease.zone_id(), now).map_err(|error| {\n551:             format!(\n552:                 \"cannot validate zone owner lease for {} after cached TTL: {error}\",\n553:                 lease.zone_id()\n554:             )\n555:         })?;\n556:         if current == *lease {\n557:             Ok(())\n558:         } else {\n559:             Err(format!(\n560:                 \"stale zone owner lease for zone {}: current owner {} fencing token {}, got owner {} fencing token {}\",\n561:                 lease.zone_id(),\n562:                 current.owner_id(),\n563:                 current.fencing_token(),\n564:                 lease.owner_id(),\n565:                 lease.fencing_token()\n566:             ))\n567:         }\n568:     }\n569: "
+        },
+        {
+          "file": "apps/gateway/src/zone_lease.rs",
+          "line": 449,
+          "endLine": 487,
+          "sha256": "ff3291248288bc2051ee89f5aaba58b7daf79faccb541e582fbfacaeaa2db4ee",
+          "excerpt": "449: impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {\n450:     fn supports_durable_npc_purchase_lease(&self) -> bool {\n451:         true\n452:     }\n453: \n454:     fn with_durable_npc_purchase_lease(\n455:         &self,\n456:         lease: &ZoneOwnerLease,\n457:         operation: &mut (dyn FnMut() + Send),\n458:     ) -> Result<(), String> {\n459:         // A scoped worker keeps the real row lock through the account commit;\n460:         // no cached/bootstrap lease is accepted and no new schema is created.\n461:         std::thread::scope(|scope| {\n462:             scope.spawn(|| {\n463:                 let mut slot = self.client.lock().map_err(|_| \"zone lease client mutex poisoned\")?;\n464:                 if slot.is_none() {\n465:                     *slot = Some(Client::connect(&self.database_url, NoTls)\n466:                         .map_err(|error| format!(\"durable NPC lease connect failed: {error}\"))?);\n467:                 }\n468:                 let guarded_result = (|| {\n469:                 let client = slot.as_mut().expect(\"connected lease client\");\n470:                 let mut transaction = client.transaction()\n471:                     .map_err(|error| format!(\"durable NPC lease transaction failed: {error}\"))?;\n472:                 let row = transaction.query_opt(\n473:                     \"SELECT owner_id, fencing_token, expires_at_ms FROM zone_owner_leases WHERE zone_id=$1 FOR UPDATE\",\n474:                     &[&lease.zone_id().as_str()],\n475:                 ).map_err(|error| format!(\"durable NPC owner lease lock failed: {error}\"))?\n476:                     .ok_or(\"durable NPC owner lease is not registered\")?;\n477:                 let owner: String = row.get(\"owner_id\");\n478:                 let token: i64 = row.get(\"fencing_token\");\n479:                 let expires: i64 = row.get(\"expires_at_ms\");\n480:                 if owner != lease.owner_id() || token <= 0 || token as u64 != lease.fencing_token()\n481:                     || expires <= 0 || expires as u64 <= now_ms() {\n482:                     return Err(\"stale durable NPC purchase owner lease\".into());\n483:                 }\n484:                 crate::session::catch_gateway_panic(\"durable NPC lease callback\", || operation())?;\n485:                 // The row was only locked. Rollback releases the fencing guard;\n486:                 // any release error follows the already captured commit receipt.\n487:                 transaction.rollback().map_err(|error| format!(\"durable NPC lease guard release failed: {error}\"))"
+        },
+        {
+          "file": "apps/gateway/src/zone_lease.rs",
+          "line": 675,
+          "endLine": 709,
+          "sha256": "ff3291248288bc2051ee89f5aaba58b7daf79faccb541e582fbfacaeaa2db4ee",
+          "excerpt": "675: \n676: /// The owner-lease authority selected from the environment: a durable Postgres\n677: /// authority when `MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL` is set, otherwise the\n678: /// in-process authority (single-writer, no cross-process failover).\n679: pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuthority {\n680:     if let Some(authority) = crate::gate15::zone_owner_lease_authority() {\n681:         eprintln!(\"zone owner lease authority: Gate 15 Commonware finalized placement\");\n682:         return authority;\n683:     }\n684:     if std::env::var(\"MIR2_ZONE_OWNER_LEASE_BACKEND\")\n685:         .ok()\n686:         .is_some_and(|value| value.trim().eq_ignore_ascii_case(\"trusted-rpc\"))\n687:     {\n688:         let authority = TrustedRpcZoneOwnerLeaseAuthority::from_env()\n689:             .expect(\"invalid trusted-rpc Zone owner lease configuration\");\n690:         eprintln!(\n691:             \"zone owner lease authority: authenticated Home Agent RPC ({} trusted owners)\",\n692:             authority.trusted_owners.len()\n693:         );\n694:         return Arc::new(authority) as SharedZoneOwnerLeaseAuthority;\n695:     }\n696:     match PostgresZoneOwnerLeaseAuthority::from_env() {\n697:         Some(authority) => {\n698:             eprintln!(\n699:                 \"zone owner lease authority: postgres (instance {}, ttl {}ms)\",\n700:                 authority.owner_id(),\n701:                 authority.lease_ttl_ms()\n702:             );\n703:             Arc::new(authority) as SharedZoneOwnerLeaseAuthority\n704:         }\n705:         None => Arc::new(crate::routing::InMemoryZoneOwnerLeaseAuthority::new())\n706:             as SharedZoneOwnerLeaseAuthority,\n707:     }\n708: }\n709: "
+        }
+      ]
+    },
+    {
+      "id": "A07",
+      "title": "热图分线有代码，跨Gateway容量并非共享",
+      "state": "implemented_local_line_scheduler",
+      "detail": "HotMapLineScheduler按人数/affinity开line，回收仅空line且不迁移真人。每次router()创建本地Mutex scheduler，因此多Gateway的line计数/affinity不能当全局一致调度。分线改变互相可见世界，与同图同一战场动态Cell不同；行会战不能用分线替代同战场要求。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/topology.rs",
+          "line": 205,
+          "endLine": 216,
+          "sha256": "1336ed74fe21547ef386204d53ce698af36f166e3a3e243e559d6b8ca6fc0ddb",
+          "excerpt": "205:     pub fn router(&self) -> SharedSessionRouter {\n206:         let hot_map_scheduler = (!self.hot_map_policies.is_empty()).then(|| {\n207:             Arc::new(\n208:                 HotMapLineScheduler::new(self.hot_map_policies.clone())\n209:                     .expect(\"validated hot-map policies must construct\"),\n210:             )\n211:         });\n212:         Arc::new(ConfiguredZoneSessionRouter {\n213:             topology: self.clone(),\n214:             hot_map_scheduler,\n215:         }) as SharedSessionRouter\n216:     }"
+        },
+        {
+          "file": "apps/gateway/src/hotspot.rs",
+          "line": 64,
+          "endLine": 91,
+          "sha256": "2c02a2ba852c085c5e887a8ebb6bbe4903316036e0b4167cfd8950f5aac74481",
+          "excerpt": "64: #[derive(Debug, Default)]\n65: struct HotMapState {\n66:     assignments: BTreeMap<(String, String), u16>,\n67:     affinities: BTreeMap<(String, String), u16>,\n68:     session_affinities: BTreeMap<(String, String), String>,\n69:     lines: BTreeMap<String, BTreeMap<u16, BTreeSet<String>>>,\n70:     empty_since_ms: BTreeMap<(String, u16), u64>,\n71: }\n72: \n73: #[derive(Debug)]\n74: pub struct HotMapLineScheduler {\n75:     policies: BTreeMap<String, HotMapPolicy>,\n76:     state: Mutex<HotMapState>,\n77: }\n78: \n79: impl HotMapLineScheduler {\n80:     pub fn new(policies: BTreeMap<String, HotMapPolicy>) -> Result<Self, String> {\n81:         for (map, policy) in &policies {\n82:             if map.trim().is_empty() {\n83:                 return Err(\"hot-map policy map name must not be empty\".to_string());\n84:             }\n85:             policy\n86:                 .validate()\n87:                 .map_err(|error| format!(\"invalid hot-map policy for {map}: {error}\"))?;\n88:         }\n89:         Ok(Self {\n90:             policies,\n91:             state: Mutex::new(HotMapState::default()),"
+        },
+        {
+          "file": "apps/gateway/src/hotspot.rs",
+          "line": 137,
+          "endLine": 146,
+          "sha256": "2c02a2ba852c085c5e887a8ebb6bbe4903316036e0b4167cfd8950f5aac74481",
+          "excerpt": "137:         let players_on_line = state\n138:             .lines\n139:             .get(&request.map_file_name)\n140:             .and_then(|lines| lines.get(&line_id))\n141:             .map(BTreeSet::len)\n142:             .unwrap_or_default();\n143:         if players_on_line >= policy.maximum_players_per_line {\n144:             return Err(format!(\n145:                 \"line {line_id} reached its hard capacity {}\",\n146:                 policy.maximum_players_per_line"
+        },
+        {
+          "file": "apps/gateway/src/hotspot.rs",
+          "line": 215,
+          "endLine": 222,
+          "sha256": "2c02a2ba852c085c5e887a8ebb6bbe4903316036e0b4167cfd8950f5aac74481",
+          "excerpt": "215:     /// Remove only empty lines after a grace period. Live sessions are never\n216:     /// migrated implicitly, preserving party/guild-war visibility.\n217:     pub fn reconcile(&self, now_ms: u64) -> Result<usize, String> {\n218:         let mut state = self\n219:             .state\n220:             .lock()\n221:             .map_err(|_| \"hot-map scheduler mutex poisoned\".to_string())?;\n222:         let removable = state"
+        },
+        {
+          "file": "apps/gateway/src/hotspot.rs",
+          "line": 281,
+          "endLine": 305,
+          "sha256": "2c02a2ba852c085c5e887a8ebb6bbe4903316036e0b4167cfd8950f5aac74481",
+          "excerpt": "281: fn choose_line(state: &HotMapState, map: &str, policy: &HotMapPolicy) -> u16 {\n282:     let lines = state.lines.get(map);\n283:     let existing_count = lines.map(BTreeMap::len).unwrap_or_default();\n284:     if existing_count == 0 {\n285:         return 1;\n286:     }\n287:     if let Some((line, _)) = lines.and_then(|lines| {\n288:         lines\n289:             .iter()\n290:             .filter(|(_, sessions)| sessions.len() < policy.target_players_per_line)\n291:             .min_by_key(|(line, sessions)| (Reverse(sessions.len()), **line))\n292:     }) {\n293:         return *line;\n294:     }\n295:     if existing_count < usize::from(policy.maximum_lines) {\n296:         return (1..=policy.maximum_lines)\n297:             .find(|line| lines.is_none_or(|lines| !lines.contains_key(line)))\n298:             .unwrap_or(policy.maximum_lines);\n299:     }\n300:     lines\n301:         .and_then(|lines| {\n302:             lines\n303:                 .iter()\n304:                 .min_by_key(|(line, sessions)| (sessions.len(), **line))\n305:                 .map(|(line, _)| *line)"
+        }
+      ]
+    },
+    {
+      "id": "A08",
+      "title": "PostgreSQL可共享但AccountStore仍有全局串行段",
+      "state": "implemented_scaling_hotspot",
+      "detail": "纯PG source有scoped mutation、事务、账号/存档row lock+versionCAS，能避免跨进程静默覆盖。但单进程每次AccountStore transaction持persist mutex及完整store mutex，validate并clone完整AccountStore，直到PG提交后发布stagedStore。Pool默认8、可配1..64不会消除此锁；增加账号规模/保存/掉落经济会放大锁持有。需观测PersistWait/StoreWait/StoreHeld，再按账号/经济域分片事务快照，保留跨账号交易的确定锁序和CAS。",
+      "evidence": [
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 1367,
+          "endLine": 1381,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "1367: impl PostgresAccountStorePoolConfig {\n1368:     fn from_env() -> Self {\n1369:         Self {\n1370:             max_size: env_usize(\"MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE\")\n1371:                 .unwrap_or(8)\n1372:                 .clamp(1, 64),\n1373:             wait_timeout: env_millis(\"MIR2_ACCOUNT_STORE_PG_POOL_WAIT_TIMEOUT_MS\")\n1374:                 .unwrap_or(Duration::from_secs(2))\n1375:                 .max(Duration::from_millis(1)),\n1376:             connect_timeout: env_millis(\"MIR2_ACCOUNT_STORE_PG_CONNECT_TIMEOUT_MS\")\n1377:                 .unwrap_or(Duration::from_secs(3))\n1378:                 .max(Duration::from_millis(1)),\n1379:             test_on_checkout: env_flag_enabled(\"MIR2_ACCOUNT_STORE_PG_POOL_TEST_ON_CHECKOUT\"),\n1380:         }\n1381:     }"
+        },
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 5310,
+          "endLine": 5330,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "5310:         let diagnostics = DiagnosticRecord::new(DiagnosticOperation::Transaction);\n5311:         let persist_wait = diagnostics.span(DiagnosticStage::PersistWait);\n5312:         let _persist_guard = self\n5313:             .account_store_persist_lock\n5314:             .lock()\n5315:             .map_err(|_| \"account store persist mutex poisoned\".to_string())?;\n5316:         drop(persist_wait);\n5317:         self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;\n5318:         self.ensure_file_writer_binding()?;\n5319:         let store_wait = diagnostics.span(DiagnosticStage::StoreWait);\n5320:         let mut live_store = self\n5321:             .account_store\n5322:             .lock()\n5323:             .map_err(|_| \"account store mutex poisoned\".to_string())?;\n5324:         drop(store_wait);\n5325:         let _store_held = diagnostics.span(DiagnosticStage::StoreHeld);\n5326:         let original_store = &*live_store;\n5327:         crate::billing::validate_complete_store(&original_store)?;\n5328:         let mut staged_store = AccountStore::clone(original_store);\n5329:         let result = transaction(&mut staged_store)?;\n5330:         if matches!(scope, AccountStoreMutationScope::FullRestore) {"
+        },
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 5651,
+          "endLine": 5661,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "5651:             }\n5652:             (None, Some(database_url)) => {\n5653:                 postgres_versions = Some(\n5654:                     self.save_account_store_mutation_plan_to_repository(\n5655:                         database_url,\n5656:                         self.account_store_database_mode,\n5657:                         &mutation_plan,\n5658:                     )?\n5659:                     .into_source_versions(),\n5660:                 );\n5661:             }"
+        },
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 5679,
+          "endLine": 5693,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "5679:         if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth\n5680:             || !mutation_plan.conquests.is_empty()\n5681:         {\n5682:             if let Some(versions) = postgres_versions {\n5683:                 apply_account_store_mutation_source_versions(\n5684:                     &mut staged_store,\n5685:                     &mutation_plan,\n5686:                     versions,\n5687:                 );\n5688:             }\n5689:         }\n5690:         *live_store = staged_store;\n5691:         if xp_changed {\n5692:             self.guild_clock_updates\n5693:                 .fetch_add(1, std::sync::atomic::Ordering::AcqRel);"
+        },
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 6464,
+          "endLine": 6475,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "6464:         mode\n6465:     };\n6466:     let mut transaction = client\n6467:         .transaction()\n6468:         .map_err(|error| format!(\"postgres account-store transaction failed: {error}\"))?;\n6469:     let source_versions =\n6470:         write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;\n6471:     transaction\n6472:         .commit()\n6473:         .map_err(|error|if plan.carries_billing_source() && error.as_db_error().is_none(){format!(\"{}: postgres billing commit response unavailable: {error}\",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!(\"{}: postgres guild commit response unavailable: {error}\",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!(\"{}: stone commit response unavailable: {error}\",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!(\"{}: postgres Hero commit response unavailable: {error}\",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!(\"CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}\")}else{format!(\"postgres account-store commit failed: {error}\")})?;\n6474:     Ok(source_versions)\n6475: }"
+        },
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 6562,
+          "endLine": 6584,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "6562: ) -> Result<AccountStoreMutationOperationResult, String> {\n6563:     let current_account_version = transaction\n6564:         .query_opt(\n6565:             \"SELECT store_version FROM accounts WHERE account_id = $1 FOR UPDATE\",\n6566:             &[&account_id],\n6567:         )\n6568:         .map_err(|error| format!(\"postgres account lock failed for {account_id}: {error}\"))?\n6569:         .map(|row| row.get::<_, i64>(\"store_version\"));\n6570:     let current_save_versions = transaction\n6571:         .query(\n6572:             \"SELECT character_index, save_version FROM character_saves \\\n6573:              WHERE account_id = $1 ORDER BY character_index FOR UPDATE\",\n6574:             &[&account_id],\n6575:         )\n6576:         .map_err(|error| format!(\"postgres character-save locks failed for {account_id}: {error}\"))?\n6577:         .into_iter()\n6578:         .map(|row| {\n6579:             (\n6580:                 row.get::<_, i32>(\"character_index\"),\n6581:                 row.get::<_, i64>(\"save_version\"),\n6582:             )\n6583:         })\n6584:         .collect::<BTreeMap<_, _>>();"
+        },
+        {
+          "file": "apps/simulation/src/config.rs",
+          "line": 6696,
+          "endLine": 6725,
+          "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+          "excerpt": "6696: fn validate_account_store_account_mutation(\n6697:     account_id: &str,\n6698:     mutation: &AccountStoreAccountMutation,\n6699:     current_account_version: Option<i64>,\n6700:     current_save_versions: &BTreeMap<i32, i64>,\n6701:     mode: AccountStoreDatabaseMode,\n6702: ) -> Result<(), String> {\n6703:     validate_source_account_write(mode, mutation.expected_version, current_account_version)\n6704:         .map_err(|reason| {\n6705:             format!(\"stale postgres account-store write for {account_id}: {reason}\")\n6706:         })?;\n6707:     if mode != AccountStoreDatabaseMode::SourceOfTruth {\n6708:         return Ok(());\n6709:     }\n6710: \n6711:     let mut save_indices = BTreeSet::new();\n6712:     save_indices.extend(mutation.saves.keys().copied());\n6713:     save_indices.extend(current_save_versions.keys().copied());\n6714:     for character_index in save_indices {\n6715:         let expected_version = mutation\n6716:             .saves\n6717:             .get(&character_index)\n6718:             .and_then(|save| save.expected_version);\n6719:         let current_version = current_save_versions.get(&character_index).copied();\n6720:         validate_source_save_write(expected_version, current_version).map_err(|reason| {\n6721:             format!(\n6722:                 \"stale postgres character-save write for {account_id}/{character_index}: {reason}\"\n6723:             )\n6724:         })?;\n6725:     }"
+        }
+      ]
+    },
+    {
+      "id": "A09",
+      "title": "Redis路由缓存可共用，TCP开销与本地恢复须实测",
+      "state": "implemented_not_stateless_gateway",
+      "detail": "Redis已有原子route lease/token防重放及Sentinel发现；生产类要求Redis，不能回落内存。每次execute_redis_at新建同步TCP，无连接池；需量化频率/RTT/连接率。Web ReconnectSessionStore持真实GatewaySession于本地HashMap，Redis缓存不等于可跨Gateway还原整个运行会话；要做粘性路由/owner转接或接受重新登录，并验收故障恢复。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/cache.rs",
+          "line": 1493,
+          "endLine": 1522,
+          "sha256": "1c257d99144c51af24be254e85947a6eac2b18608ba0ba6ae904fa035f442614",
+          "excerpt": "1493: pub fn gateway_session_cache_requires_redis_from_env() -> bool {\n1494:     if env_flag_enabled(\"MIR2_GATEWAY_REQUIRE_REDIS_CACHE\") {\n1495:         return true;\n1496:     }\n1497:     mir2_simulation::account_store_requires_postgres_source_from_env()\n1498: }\n1499: \n1500: pub fn gateway_session_cache_runtime_backend_from_env(\n1501: ) -> Result<GatewaySessionCacheRuntimeBackend, String> {\n1502:     if env::var(\"MIR2_GATEWAY_REDIS_SENTINEL_ADDRS\")\n1503:         .ok()\n1504:         .is_some_and(|value| !value.trim().is_empty())\n1505:     {\n1506:         return Ok(GatewaySessionCacheRuntimeBackend::Redis);\n1507:     }\n1508:     match env::var(\"MIR2_GATEWAY_REDIS_CACHE_URL\") {\n1509:         Ok(redis_url) if !redis_url.trim().is_empty() => {\n1510:             Ok(GatewaySessionCacheRuntimeBackend::Redis)\n1511:         }\n1512:         _ if gateway_session_cache_requires_redis_from_env() => Err(\n1513:             \"prod-like Gateway requires MIR2_GATEWAY_REDIS_CACHE_URL for Redis session/routing cache\"\n1514:                 .to_string(),\n1515:         ),\n1516:         _ => Ok(GatewaySessionCacheRuntimeBackend::InMemory),\n1517:     }\n1518: }\n1519: \n1520: pub fn gateway_session_cache_from_env() -> Result<SharedGatewaySessionCache, String> {\n1521:     match gateway_session_cache_runtime_backend_from_env()? {\n1522:         GatewaySessionCacheRuntimeBackend::Redis => {"
+        },
+        {
+          "file": "apps/gateway/src/cache.rs",
+          "line": 1527,
+          "endLine": 1566,
+          "sha256": "1c257d99144c51af24be254e85947a6eac2b18608ba0ba6ae904fa035f442614",
+          "excerpt": "1527:             let cache = match env::var(\"MIR2_GATEWAY_REDIS_SENTINEL_ADDRS\")\n1528:                 .ok()\n1529:                 .filter(|value| !value.trim().is_empty())\n1530:             {\n1531:                 Some(sentinel_urls) => RedisGatewaySessionCache::with_sentinels(\n1532:                     &sentinel_urls,\n1533:                     env::var(\"MIR2_GATEWAY_REDIS_SENTINEL_MASTER\")\n1534:                         .unwrap_or_else(|_| \"mir2-primary\".to_string()),\n1535:                     \"mir2:gateway:session\",\n1536:                     ttl_seconds,\n1537:                 )?,\n1538:                 None => {\n1539:                     let redis_url = env::var(\"MIR2_GATEWAY_REDIS_CACHE_URL\").map_err(|_| {\n1540:                         \"MIR2_GATEWAY_REDIS_CACHE_URL or MIR2_GATEWAY_REDIS_SENTINEL_ADDRS is required for Redis session/routing cache\"\n1541:                             .to_string()\n1542:                     })?;\n1543:                     RedisGatewaySessionCache::new(&redis_url, \"mir2:gateway:session\", ttl_seconds)\n1544:                 }\n1545:             };\n1546:             if gateway_session_cache_requires_redis_from_env() {\n1547:                 cache.ping().map_err(|error| {\n1548:                     format!(\"required Redis session/routing cache is unavailable: {error}\")\n1549:                 })?;\n1550:             }\n1551:             Ok(Arc::new(cache))\n1552:         }\n1553:         GatewaySessionCacheRuntimeBackend::InMemory => {\n1554:             Ok(Arc::new(InMemoryGatewaySessionCache::default()))\n1555:         }\n1556:     }\n1557: }\n1558: \n1559: pub fn default_gateway_session_cache_from_env() -> SharedGatewaySessionCache {\n1560:     gateway_session_cache_from_env().unwrap_or_else(|error| panic!(\"{error}\"))\n1561: }\n1562: \n1563: fn env_flag_enabled(name: &str) -> bool {\n1564:     env::var(name)\n1565:         .map(|value| {\n1566:             matches!("
+        },
+        {
+          "file": "apps/gateway/src/cache.rs",
+          "line": 1588,
+          "endLine": 1600,
+          "sha256": "1c257d99144c51af24be254e85947a6eac2b18608ba0ba6ae904fa035f442614",
+          "excerpt": "1588:     timeout: Duration,\n1589: ) -> Result<RedisValue, String> {\n1590:     let mut stream = TcpStream::connect(address)\n1591:         .map_err(|error| format!(\"redis connect {address} failed: {error}\"))?;\n1592:     stream\n1593:         .set_read_timeout(Some(timeout))\n1594:         .map_err(|error| format!(\"redis read timeout setup failed: {error}\"))?;\n1595:     stream\n1596:         .set_write_timeout(Some(timeout))\n1597:         .map_err(|error| format!(\"redis write timeout setup failed: {error}\"))?;\n1598:     write_resp_command(&mut stream, args)?;\n1599:     read_resp_value(&mut stream)\n1600: }"
+        },
+        {
+          "file": "apps/gateway/src/web.rs",
+          "line": 937,
+          "endLine": 959,
+          "sha256": "d2532b9ac0a708752c057073958e5b20b94d37a35a9f1cc6dceb4f149fe40c8d",
+          "excerpt": "937: #[derive(Debug, Default)]\n938: struct ReconnectSessionStore {\n939:     state: Mutex<ReconnectSessionState>,\n940: }\n941: \n942: #[derive(Debug, Default)]\n943: struct ReconnectSessionState {\n944:     sessions: HashMap<GatewaySessionCacheKey, ReconnectSessionLease>,\n945:     credentials: ResumeCredentialRegistry,\n946:     account_auth_revisions: HashMap<String, u64>,\n947:     identity_session_auth_revisions: HashMap<String, u64>,\n948:     account_revocations_in_progress: HashMap<String, usize>,\n949:     identity_session_revocations_in_progress: HashMap<String, usize>,\n950: }\n951: \n952: #[derive(Debug)]\n953: struct ReconnectSessionLease {\n954:     session: GatewaySession,\n955:     active_session_permit: Option<GatewayCapacityPermit>,\n956:     _reconnect_lease_permit: GatewayCapacityPermit,\n957:     resume_family_id: Option<ResumeFamilyId>,\n958:     expires_at: Instant,\n959: }"
+        }
+      ]
+    },
+    {
+      "id": "A10",
+      "title": "当前RPC transport对5000存在每session OS线程成本",
+      "state": "implemented_scaling_hotspot",
+      "detail": "live outbound register为每个session启动OS polling线程，空闲poll20..100ms；Host每TCP连接spawn一个OS线程。RPC有共享连接池、MessagePack、reserved控制lanes，但共享池不消除每session poller。5000档先记录线程/RSS/ctxswitch/pollQPS，必要时改按host共享outbound多路复用/推送。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 2435,
+          "endLine": 2469,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "2435:     fn register_live_outbound(\n2436:         &self,\n2437:         sender: SharedZoneLiveOutboundSender,\n2438:     ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {\n2439:         let registration_id = NEXT_REMOTE_OUTBOUND_REGISTRATION_ID\n2440:             .fetch_add(1, Ordering::Relaxed)\n2441:             .max(1);\n2442:         let generation = self\n2443:             .outbound_generation\n2444:             .fetch_add(1, Ordering::AcqRel)\n2445:             .saturating_add(1);\n2446:         let stop = Arc::new(AtomicBool::new(false));\n2447:         let active = Arc::new(AtomicBool::new(false));\n2448:         let worker_stop = Arc::clone(&stop);\n2449:         let worker_active = Arc::clone(&active);\n2450:         let transport = self.clone();\n2451:         let acknowledged = Arc::clone(&self.outbound_acknowledged);\n2452:         let current_generation = Arc::clone(&self.outbound_generation);\n2453:         let highest_health_sent_sequence = Arc::new(Mutex::new(0));\n2454:         let transport_failed = Arc::new(AtomicBool::new(false));\n2455:         let handle = thread::spawn(move || {\n2456:             let minimum_idle_poll = Duration::from_millis(20);\n2457:             let maximum_idle_poll = Duration::from_millis(100);\n2458:             let mut idle_poll = minimum_idle_poll;\n2459:             while !worker_stop.load(Ordering::Acquire) && !worker_active.load(Ordering::Acquire) {\n2460:                 thread::sleep(Duration::from_millis(1));\n2461:             }\n2462:             while !worker_stop.load(Ordering::Acquire)\n2463:                 && current_generation.load(Ordering::Acquire) == generation\n2464:             {\n2465:                 let ack = acknowledged.load(Ordering::Acquire);\n2466:                 match transport.poll_outbounds(ack, transport.limits.outbound_poll_limit) {\n2467:                     Ok(batch) => {\n2468:                         if batch.items.is_empty() {\n2469:                             thread::sleep(idle_poll);"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 3943,
+          "endLine": 3969,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "3943:     fn spawn_connection(self: &Arc<Self>, stream: TcpStream) {\n3944:         if self.active_connections.fetch_add(1, Ordering::AcqRel) >= self.limits.max_connections {\n3945:             self.active_connections.fetch_sub(1, Ordering::AcqRel);\n3946:             return;\n3947:         }\n3948:         self.accepted_connections_total\n3949:             .fetch_add(1, Ordering::Relaxed);\n3950:         let server = Arc::clone(self);\n3951:         thread::spawn(move || {\n3952:             let _guard = ActiveConnectionGuard(&server.active_connections);\n3953:             if let Err(error) = server.handle_connection(stream) {\n3954:                 eprintln!(\"zone host connection error: {error}\");\n3955:             }\n3956:         });\n3957:     }\n3958: \n3959:     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {\n3960:         // `serve_until` uses a non-blocking listener so it can observe the stop\n3961:         // flag. Some platforms propagate that mode to accepted sockets; the\n3962:         // framed request handler is deliberately blocking with bounded timeouts.\n3963:         stream.set_nonblocking(false)?;\n3964:         stream.set_nodelay(true)?;\n3965:         stream.set_read_timeout(Some(self.limits.io_timeout))?;\n3966:         stream.set_write_timeout(Some(self.limits.io_timeout))?;\n3967:         loop {\n3968:             let bytes = match read_frame_allowing_idle(&mut stream, self.limits.max_frame_bytes) {\n3969:                 Ok(Some(bytes)) => bytes,"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 1400,
+          "endLine": 1447,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "1400:             .collect::<Vec<_>>();\n1401:         let shared_connections = positive_usize_env(\"MIR2_ZONE_RPC_SHARED_POOL_SIZE\")\n1402:             .map(|size| shared_rpc_pool(&addresses, size, limits.io_timeout));\n1403:         Ok(Self {\n1404:             addresses: Arc::new(addresses),\n1405:             active_endpoint: Arc::new(AtomicUsize::new(0)),\n1406:             zone_id,\n1407:             session_id: session_id.into(),\n1408:             auth_token,\n1409:             limits,\n1410:             codec: ZoneRpcCodec::from_env(),\n1411:             reuse_connections: false,\n1412:             connections: Arc::new(connections),\n1413:             shared_connections,\n1414:             outbound_acknowledged: Arc::new(AtomicU64::new(0)),\n1415:             outbound_generation: Arc::new(AtomicU64::new(0)),\n1416:             outbound_stream_id: Arc::new(Mutex::new(None)),\n1417:         })\n1418:     }\n1419: \n1420:     /// Reuse one framed TCP stream per configured endpoint.\n1421:     ///\n1422:     /// Calls on the same transport remain serialized so response ordering is\n1423:     /// unambiguous. Distinct player/session transports still execute in\n1424:     /// parallel over independent connections.\n1425:     pub fn with_connection_reuse(mut self) -> Self {\n1426:         self.reuse_connections = true;\n1427:         self\n1428:     }\n1429: \n1430:     /// Use the compact RPC codec. A magic prefix lets the same Zone Host\n1431:     /// listener continue serving JSON clients during rolling upgrades.\n1432:     pub fn with_binary_codec(mut self) -> Self {\n1433:         self.codec = ZoneRpcCodec::MessagePack;\n1434:         self\n1435:     }\n1436: \n1437:     /// Multiplex logical sessions over a bounded set of long-lived sockets.\n1438:     /// Control traffic uses reserved lanes so gameplay saturation cannot block\n1439:     /// health, replication, fencing, or promotion.\n1440:     pub fn with_shared_connection_pool(mut self, pool_size: usize) -> Self {\n1441:         self.shared_connections = Some(shared_rpc_pool(\n1442:             self.addresses.as_ref(),\n1443:             pool_size,\n1444:             self.limits.io_timeout,\n1445:         ));\n1446:         self.reuse_connections = true;\n1447:         self"
+        }
+      ]
+    },
+    {
+      "id": "A11",
+      "title": "准入默认值不是可承诺CCU",
+      "state": "configuration_gate",
+      "detail": "生产类Web默认WS2048、active512、reconnect512；Web/TCP persistence slot默认2048；Host sessions4096、连接64、每Zone4096，host maxZones128。须按压测授权单独设置并记录，不能只调大就宣布5000。Tokio线程可配1..64，不会使单热点Zone自动多writer。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/web.rs",
+          "line": 103,
+          "endLine": 112,
+          "sha256": "d2532b9ac0a708752c057073958e5b20b94d37a35a9f1cc6dceb4f149fe40c8d",
+          "excerpt": "103: const OWNER_LOCATION_OUTBOUND_CAPACITY: usize = 8;\n104: const SOCKET_INPUT_CAPACITY: usize = 256;\n105: const WEBSOCKET_MAX_FRAME_BYTES: usize = 64 * 1024;\n106: const WEBSOCKET_MAX_MESSAGE_BYTES: usize = WEBSOCKET_MAX_FRAME_BYTES;\n107: const SOCKET_INPUT_MAX_BUFFERED_BYTES: usize = WEBSOCKET_MAX_FRAME_BYTES * SOCKET_INPUT_CAPACITY;\n108: const DEFAULT_PRODUCTION_MAX_WS_CONNECTIONS: usize = 2_048;\n109: const DEFAULT_PRODUCTION_MAX_ACTIVE_SESSIONS: usize = 512;\n110: const DEFAULT_PRODUCTION_MAX_RECONNECT_LEASES: usize = 512;\n111: const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;\n112: static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::new();"
+        },
+        {
+          "file": "apps/gateway/src/web.rs",
+          "line": 715,
+          "endLine": 729,
+          "sha256": "d2532b9ac0a708752c057073958e5b20b94d37a35a9f1cc6dceb4f149fe40c8d",
+          "excerpt": "715:     fn from_env() -> Self {\n716:         let production_like = gateway_prod_like_env();\n717:         Self {\n718:             max_ws_connections: positive_usize_env(\"MIR2_GATEWAY_MAX_WS_CONNECTIONS\")\n719:                 .or_else(|| production_like.then_some(DEFAULT_PRODUCTION_MAX_WS_CONNECTIONS)),\n720:             max_active_sessions: positive_usize_env(\"MIR2_GATEWAY_MAX_ACTIVE_SESSIONS\")\n721:                 .or_else(|| production_like.then_some(DEFAULT_PRODUCTION_MAX_ACTIVE_SESSIONS)),\n722:             max_reconnect_leases: positive_usize_env(\"MIR2_GATEWAY_MAX_RECONNECT_LEASES\")\n723:                 .or_else(|| production_like.then_some(DEFAULT_PRODUCTION_MAX_RECONNECT_LEASES)),\n724:             max_login_in_flight: positive_usize_env(\"MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT\")\n725:                 .or_else(|| production_like.then_some(8)),\n726:             max_new_character_in_flight: positive_usize_env(\n727:                 \"MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT\",\n728:             )\n729:             .or_else(|| production_like.then_some(4)),"
+        },
+        {
+          "file": "apps/gateway/src/tcp.rs",
+          "line": 156,
+          "endLine": 162,
+          "sha256": "60d48c79bf213b4c88024575358792bd6368704f2e948ae53e4bd701b1f104fb",
+          "excerpt": "156: fn tcp_persistence_session_limit_from_env() -> usize {\n157:     std::env::var(\"MIR2_GATEWAY_MAX_PERSISTENCE_SESSIONS\")\n158:         .ok()\n159:         .and_then(|value| value.trim().parse::<usize>().ok())\n160:         .filter(|value| *value > 0)\n161:         .unwrap_or(DEFAULT_MAX_PERSISTENCE_SESSION_TASKS)\n162: }"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 61,
+          "endLine": 67,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "61: #[path = \"zone_rpc/native_attack_tests.rs\"]\n62: mod native_attack_tests;\n63: pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;\n64: pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;\n65: pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;\n66: pub const DEFAULT_ZONE_RPC_MAX_SESSIONS_PER_ZONE: usize = 4096;\n67: pub const DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES: usize = 1024;"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 186,
+          "endLine": 207,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "186:     pub fn from_env() -> Self {\n187:         let defaults = Self::default();\n188:         let max_sessions =\n189:             positive_usize_env(\"MIR2_ZONE_HOST_MAX_SESSIONS\").unwrap_or(defaults.max_sessions);\n190:         let max_sessions_per_zone = positive_usize_env(\"MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE\")\n191:             .unwrap_or(max_sessions)\n192:             .min(max_sessions);\n193:         Self {\n194:             max_frame_bytes: positive_usize_env(\"MIR2_ZONE_RPC_MAX_FRAME_BYTES\")\n195:                 .unwrap_or(defaults.max_frame_bytes),\n196:             max_connections: positive_usize_env(\"MIR2_ZONE_HOST_MAX_CONNECTIONS\")\n197:                 .unwrap_or(defaults.max_connections),\n198:             max_sessions,\n199:             max_sessions_per_zone,\n200:             max_outbound_messages: positive_usize_env(\"MIR2_ZONE_RPC_MAX_OUTBOUND_MESSAGES\")\n201:                 .unwrap_or(defaults.max_outbound_messages),\n202:             outbound_poll_limit: positive_usize_env(\"MIR2_ZONE_RPC_OUTBOUND_POLL_LIMIT\")\n203:                 .unwrap_or(defaults.outbound_poll_limit),\n204:             io_timeout: Duration::from_millis(\n205:                 positive_u64_env(\"MIR2_ZONE_RPC_TIMEOUT_MS\")\n206:                     .unwrap_or(defaults.io_timeout.as_millis() as u64),\n207:             ),"
+        },
+        {
+          "file": "apps/gateway/src/zone_rpc.rs",
+          "line": 3013,
+          "endLine": 3018,
+          "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+          "excerpt": "3013:         let host_id = std::env::var(\"MIR2_ZONE_HOST_ID\")\n3014:             .ok()\n3015:             .filter(|value| !value.trim().is_empty())\n3016:             .unwrap_or_else(|| format!(\"zone-host-{}\", std::process::id()));\n3017:         let zone_capacity = positive_usize_env(\"MIR2_ZONE_HOST_MAX_ZONES\").unwrap_or(128);\n3018:         Self::with_identity_and_factory("
+        },
+        {
+          "file": "apps/gateway/src/main.rs",
+          "line": 231,
+          "endLine": 243,
+          "sha256": "dce20a93eb75858035cf1f5ef8889de1212744ecc949e67d410dfe62c40c24b8",
+          "excerpt": "231: fn tokio_worker_threads_from_env() -> usize {\n232:     env::var(\"MIR2_GATEWAY_TOKIO_WORKER_THREADS\")\n233:         .ok()\n234:         .and_then(|value| value.trim().parse::<usize>().ok())\n235:         .filter(|value| *value > 0)\n236:         .unwrap_or_else(|| {\n237:             std::thread::available_parallelism()\n238:                 .map(usize::from)\n239:                 .unwrap_or(4)\n240:         })\n241:         .clamp(1, 64)\n242: }\n243: "
+        }
+      ]
+    },
+    {
+      "id": "A12",
+      "title": "跨Gateway消息/调度和容量观测仍须整体验证",
+      "state": "needs_distributed_acceptance",
+      "detail": "ChatBroadcastHub presence与广播、Registry GlobalZoneMessageBus均为进程内。不能仅PG/Redis在线就认为跨Gateway聊天/行会/世界消息完整。现有control plane负载score是zone数+session数+weight，不含CPU、内存、tick lag或网络热度。ZoneMetrics有请求耗时、zone work和两类deadline lag；分桶p99为上界，complete=false不能验收，非精确插值p99。",
+      "evidence": [
+        {
+          "file": "apps/gateway/src/chat_broadcast.rs",
+          "line": 117,
+          "endLine": 130,
+          "sha256": "8eb5ee898d0da97aabe4b0b2eca284d5a78c70ed5c4fb3fa6aa325a4ad714c05",
+          "excerpt": "117: #[derive(Debug)]\n118: struct ChatBroadcastInner {\n119:     presence: Mutex<PresenceState>,\n120:     sender: broadcast::Sender<ServerPacket>,\n121: }\n122: \n123: #[derive(Clone, Debug)]\n124: pub struct ChatBroadcastHub {\n125:     inner: Arc<ChatBroadcastInner>,\n126:     config: Arc<ChatBroadcastConfig>,\n127:     line_messages: Arc<Vec<String>>,\n128: }\n129: \n130: impl ChatBroadcastHub {"
+        },
+        {
+          "file": "apps/gateway/src/chat_broadcast.rs",
+          "line": 156,
+          "endLine": 165,
+          "sha256": "8eb5ee898d0da97aabe4b0b2eca284d5a78c70ed5c4fb3fa6aa325a4ad714c05",
+          "excerpt": "156:             line_messages: Arc::new(if line_messages.is_empty() {\n157:                 default_line_messages()\n158:             } else {\n159:                 line_messages\n160:             }),\n161:         }\n162:     }\n163: \n164:     #[cfg(test)]\n165:     pub(crate) fn for_tests() -> Self {"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 19082,
+          "endLine": 19095,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "19082: const GLOBAL_ZONE_MESSAGE_BACKLOG: usize = 256;\n19083: \n19084: #[derive(Debug, Default)]\n19085: pub(crate) struct GlobalZoneMessageBus {\n19086:     endpoints: Mutex<BTreeMap<String, GlobalZoneMessageEndpoint>>,\n19087:     next_registration_id: AtomicU64,\n19088: }\n19089: \n19090: #[derive(Debug)]\n19091: struct GlobalZoneMessageEndpoint {\n19092:     zone_id: ZoneId,\n19093:     active_identity: bool,\n19094:     pending: VecDeque<ServerPacket>,\n19095:     live: Option<GlobalZoneMessageLiveSender>,"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "line": 19385,
+          "endLine": 19395,
+          "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+          "excerpt": "19385:         runtime_factory: SharedZoneRuntimeFactory,\n19386:         session_router: SharedSessionRouter,\n19387:         owner_lease_authority: SharedZoneOwnerLeaseAuthority,\n19388:     ) -> Self {\n19389:         Self {\n19390:             default_zone_id,\n19391:             runtime_factory,\n19392:             session_router,\n19393:             owner_lease_authority,\n19394:             global_message_bus: Arc::new(GlobalZoneMessageBus::default()),\n19395:         }"
+        },
+        {
+          "file": "apps/gateway/src/control_plane.rs",
+          "line": 508,
+          "endLine": 526,
+          "sha256": "c9070a6f21645ee31ad056b13f97006f5e4595432fb25bf722d855c3bdcdcd94",
+          "excerpt": "508: fn host_rank(\n509:     state: &ZoneHostControlState,\n510:     host: &ZoneHostRecord,\n511:     zone_id: &ZoneId,\n512: ) -> (u128, std::cmp::Reverse<u64>, String) {\n513:     let assigned =\n514:         assigned_zone_count_excluding(state, &host.registration.host_id, zone_id) as u128;\n515:     let zone_load = assigned.saturating_mul(1_000_000) / host.registration.max_zones as u128;\n516:     let session_load = (host.heartbeat.session_count as u128).saturating_mul(1_000_000)\n517:         / host.registration.max_sessions as u128;\n518:     let load = zone_load.saturating_add(session_load).saturating_mul(1_000)\n519:         / host.registration.weight as u128;\n520:     (\n521:         load,\n522:         std::cmp::Reverse(rendezvous_hash(zone_id, &host.registration.host_id)),\n523:         host.registration.host_id.clone(),\n524:     )\n525: }\n526: "
+        },
+        {
+          "file": "apps/gateway/src/zone_metrics.rs",
+          "line": 45,
+          "endLine": 58,
+          "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8",
+          "excerpt": "45:     pub count: u64,\n46:     pub sum_us: u64,\n47:     pub max_us: u64,\n48:     pub over_budget_count: u64,\n49:     pub buckets: Vec<DurationBucketSnapshot>,\n50:     /// Nearest-rank quantile's bucket upper bound, not an interpolated value.\n51:     /// None means empty, overflow bucket, or incomplete saturated counters.\n52:     pub p50_upper_us: Option<u64>,\n53:     pub p95_upper_us: Option<u64>,\n54:     pub p99_upper_us: Option<u64>,\n55:     pub p999_upper_us: Option<u64>,\n56:     pub saturated: bool,\n57:     pub discarded_samples: u64,\n58: }"
+        },
+        {
+          "file": "apps/gateway/src/zone_metrics.rs",
+          "line": 70,
+          "endLine": 85,
+          "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8",
+          "excerpt": "70: #[serde(rename_all = \"camelCase\")]\n71: pub struct ZoneMetricsSnapshot {\n72:     pub version: u32,\n73:     pub scope: &'static str,\n74:     pub since_initialization_ms: u64,\n75:     pub budget_us: u64,\n76:     pub immediate_requests: RequestMetricsSnapshot,\n77:     pub lifecycle_requests: RequestMetricsSnapshot,\n78:     pub movement_admissions: RequestMetricsSnapshot,\n79:     pub zone_work: DurationHistogramSnapshot,\n80:     pub owner_tick_deadline_lag: DurationHistogramSnapshot,\n81:     pub pending_movement_deadline_lag: DurationHistogramSnapshot,\n82:     /// False after counter overflow, unrepresentable durations or mutex poison.\n83:     /// Such a snapshot cannot establish an acceptance percentile or fraction.\n84:     pub complete: bool,\n85: }"
+        }
+      ]
+    }
+  ],
+  "configuration": {
+    "topology": [
+      "MIR2_ZONE_ROUTING_MODE=single|per_map",
+      "MIR2_ZONE_TOPOLOGY_FILE or MIR2_ZONE_TOPOLOGY_JSON (exclusive); version=1/mode/defaultZoneId/defaultTickMs/zones{maps,tickMs}/hotMaps"
+    ],
+    "zone_host": [
+      "MIR2_ZONE_HOST_ADDR",
+      "MIR2_ZONE_HOST_TOKEN (non-loopback required)",
+      "MIR2_ZONE_HOST_ID",
+      "MIR2_ZONE_HOST_ACTIVE_ADDRS",
+      "MIR2_ZONE_HOST_STANDBY_ADDRS",
+      "MIR2_ZONE_HOST_COLOCATED_STANDBY",
+      "MIR2_ZONE_HOST_PAIRED_STANDBY"
+    ],
+    "ownership": [
+      "MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL",
+      "MIR2_GATEWAY_ZONE_LEASE_OWNER_ID",
+      "MIR2_GATEWAY_INSTANCE_ID",
+      "MIR2_GATEWAY_ZONE_LEASE_TTL_MS",
+      "or MIR2_GATE15_VALIDATOR_URLS (exactly four) + reviewed finalized placements"
+    ],
+    "storage": [
+      "MIR2_ACCOUNT_STORE_BACKEND=postgres",
+      "MIR2_ACCOUNT_STORE_DATABASE_URL",
+      "MIR2_GATEWAY_REQUIRE_REDIS_CACHE",
+      "MIR2_GATEWAY_REDIS_CACHE_URL or MIR2_GATEWAY_REDIS_SENTINEL_ADDRS",
+      "MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE",
+      "MIR2_ACCOUNT_STORE_PG_POOL_WAIT_TIMEOUT_MS",
+      "MIR2_ACCOUNT_STORE_PG_CONNECT_TIMEOUT_MS",
+      "optional MIR2_ECONOMY_DATABASE_URL (separate economy service, not replacement for account-store URL)"
+    ],
+    "limits": [
+      "MIR2_GATEWAY_MAX_WS_CONNECTIONS",
+      "MIR2_GATEWAY_MAX_ACTIVE_SESSIONS",
+      "MIR2_GATEWAY_MAX_RECONNECT_LEASES",
+      "MIR2_GATEWAY_MAX_PERSISTENCE_SESSIONS",
+      "MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT",
+      "MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT",
+      "MIR2_ZONE_HOST_MAX_SESSIONS",
+      "MIR2_ZONE_HOST_MAX_SESSIONS_PER_ZONE",
+      "MIR2_ZONE_HOST_MAX_CONNECTIONS",
+      "MIR2_ZONE_HOST_MAX_ZONES"
+    ],
+    "transport": [
+      "MIR2_ZONE_RPC_SHARED_POOL_SIZE",
+      "MIR2_ZONE_RPC_REUSE_CONNECTIONS",
+      "MIR2_ZONE_RPC_CODEC",
+      "MIR2_ZONE_RPC_TIMEOUT_MS",
+      "MIR2_ZONE_RPC_QUEUE_TIMEOUT_MS",
+      "MIR2_GATEWAY_TOKIO_WORKER_THREADS"
+    ]
+  },
+  "implementationOrder": [
+    {
+      "order": 1,
+      "name": "固定基线及隔离压测",
+      "action": "原e824远端clone或专用容量deployment+隔离PG/Redis/state/recovery；记录真实CPU型号/vCPU配额/内存/磁盘/网络/服务env白名单、版本和内容hash。真人协议bot分层测100/500/1000/2000/3000/5000；每档固定真实登录、跑图、AOI、持续战斗/掉落/拾取/保存比例；无管理员指令、不改经济、不动正常测试用户资产。",
+      "acceptance": "先以未越过请求/owner tick/pending movement预算、零丢物/重复奖励/存档错误为门；报告稳定时长、客户端数、峰值同时战斗、地图分布与热点人数。能力数字待实测，不预填通过。"
+    },
+    {
+      "order": 2,
+      "name": "可配置的多地图多核",
+      "action": "使用已有per_map/zone groups与cadence，保持游戏时间语义；比较single与per_map各地图分布，记录gate wait、zone work、CPU core利用率、RSS、吞吐及输出带宽。",
+      "acceptance": "异图能同时推进、切图无双人/幽灵/重复保存；单热点和分散图分别报告。"
+    },
+    {
+      "order": 3,
+      "name": "多Gateway+多zone_host",
+      "action": "先2 Gateway/2 active host+独立standby，以相同拓扑、真实owner fencing、PG source/Redis缓存启用现有RPC共享池。补全多Gateway分线/广播/重连策略；复制/故障测试后才能宣称可加机。",
+      "acceptance": "跨Gateway角色互见/战斗/交易/行会消息；跨map交接、owner失效、Gateway断线、Host故障、PG/Redis暂失；所有计数/资产守恒且原主不能再写。新增host只迁移计划内Zone，旧session能继续或按已明确的重连策略恢复。"
+    },
+    {
+      "order": 4,
+      "name": "按实测瓶颈改造共享串行段",
+      "action": "AccountStore按账号/领域scope避免全store clone/锁跨PG I/O；Redis连接池/异步限流；RPC按host多路复用outbound、限制线程和backlog；核验经济新连接率与replication/WAL磁盘成本。",
+      "acceptance": "原一致性测试和跨账号交易/CAS通过；PG锁等待、pool wait、保存延迟和重连风暴不拖住战斗；3000/5000稳定及峰值恢复均有证据。"
+    },
+    {
+      "order": 5,
+      "name": "同一热点战场确有需要才做Cell",
+      "action": "先固定Cell真正独立owner+ghost只读镜像、唯一效果队列、确定边界伤害与跨Cellhandoff/fencing/recovery；经过热点验收后再动态split/merge，不能把当前partition合同当已完成。",
+      "acceptance": "边界互见/移动/近远程攻击/延迟伤害/怪物宠物/掉落同实例唯一权威；重放确定、故障不双写，负载转移不改变战斗结果。"
+    }
+  ],
+  "limitations": [
+    "只读源码审计；没有SSH、实时env/硬件取证、构建或容量测试。",
+    "e824与HEAD的apps/gateway/src和apps/simulation/src diff --quiet exit0；这证明源码等同，不证明远端env或可承载人数。",
+    "该报告没有引用历史P0/P1/500CCU作为新鲜实测。"
+  ]
+}

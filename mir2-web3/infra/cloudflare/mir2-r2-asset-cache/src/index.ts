@@ -10,6 +10,7 @@ const DEFAULT_ALLOWED_PREFIX = "mir2/";
 const HOTLINK_SAFE_PREFIX = "hotlink-ok/";
 const DEFAULT_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const RELEASE_MANIFEST_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
+const FONT_RANGE_CACHE_READ_MS = 500;
 const CORS_EXPOSE_HEADERS =
   "accept-ranges, content-encoding, content-length, content-range, etag, " +
   "x-mir2-edge-cache, x-mir2-fallback-object-key, x-mir2-storage-content-encoding";
@@ -36,12 +37,19 @@ export default {
       return text("not_found", 404, "no-store");
     }
 
-    const rangeHeader = request.headers.get("range");
+    const rangeHeader = request.method === "GET" ? request.headers.get("range") : null;
     if (isStoredGzipPath(key)) {
       return serveFromR2(request, env, key, "BYPASS", rangeHeader ? parseRange(rangeHeader) : undefined);
     }
     if (rangeHeader) {
-      return serveFromR2(request, env, key, "BYPASS", parseRange(rangeHeader));
+      const range = parseRange(rangeHeader);
+      if (range && /\/original-ui\/fonts\/[^/]+\.(?:otf|ttf)$/i.test(key)) {
+        const cached = await matchFontRange(new Request(cacheUrl(url, key), {
+          headers: { range: rangeHeader.trim().toLowerCase() },
+        }), range);
+        if (cached) return withCacheHeader(cached, request.method, "HIT");
+      }
+      return serveFromR2(request, env, key, "BYPASS", range);
     }
 
     const cache = caches.default;
@@ -56,6 +64,48 @@ export default {
     return response;
   },
 };
+
+async function matchFontRange(request: Request, range: R2Range): Promise<Response | undefined> {
+  // Cache.match can slice a previously cached complete response without reading
+  // R2 or buffering the font here. Never store 206 responses in the Cache API.
+  let expired = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const lookup = Promise.resolve().then(() => caches.default.match(request)).then((response) => {
+    if (expired) {
+      discardCachedResponse(response);
+      return undefined;
+    }
+    return response;
+  }, () => undefined);
+  const cached = await Promise.race([
+    lookup,
+    new Promise<undefined>((resolve) => {
+      timer = setTimeout(() => { expired = true; resolve(undefined); }, FONT_RANGE_CACHE_READ_MS);
+    }),
+  ]);
+  if (timer !== undefined) clearTimeout(timer);
+  if (!cached) return undefined;
+
+  const contentRange = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(cached.headers.get("content-range") ?? "");
+  const contentLength = cached.headers.get("content-length") ?? "";
+  const returned = contentRange ? validatedByteRange(Number(contentRange[3]), {
+    offset: Number(contentRange[1]), length: Number(contentRange[2]) - Number(contentRange[1]) + 1,
+  }, range) : undefined;
+  const encoded = ["content-encoding", "x-mir2-storage-content-encoding"].some((header) => {
+    const value = cached.headers.get(header)?.trim().toLowerCase();
+    return Boolean(value && value !== "identity");
+  });
+  if (cached.status !== 206 || encoded || !returned ||
+    !/^\d+$/.test(contentLength) || Number(contentLength) !== returned.length) {
+    discardCachedResponse(cached);
+    return undefined;
+  }
+  return cached;
+}
+
+function discardCachedResponse(response: Response | undefined): void {
+  void response?.body?.cancel().catch(() => {});
+}
 
 async function serveFromR2(
   request: Request,
@@ -72,6 +122,7 @@ async function serveFromR2(
   // Byte ranges cannot be decoded independently, so fall back to the complete
   // representation for the rare range request against an encoded object.
   if (range && object.httpMetadata?.contentEncoding) {
+    await object.body.cancel().catch(() => {});
     object = await env.MIR2_ASSETS.get(resolved.objectKey);
     range = undefined;
     if (!object) return text("not_found", 404, "no-store", cacheState);
@@ -80,16 +131,27 @@ async function serveFromR2(
   const etag = object.httpEtag;
   if (!range && etag && request.headers.get("if-none-match") === etag) {
     const headers = responseHeaders(key, object, env, cacheState, resolved.fallbackObjectKey);
+    await object.body.cancel().catch(() => {});
     return new Response(null, { status: 304, headers });
   }
 
+  const returnedRange = range ? validatedByteRange(object.size, object.range, range) : undefined;
+  if (range && !returnedRange) {
+    await object.body.cancel().catch(() => {});
+    return text("invalid_range_response", 502, "no-store", cacheState);
+  }
   const headers = responseHeaders(key, object, env, cacheState, resolved.fallbackObjectKey);
-  const status = range ? 206 : 200;
-  if (range && object.range) {
-    headers.set("content-range", `bytes ${object.range.offset}-${object.range.end - 1}/${object.size}`);
+  const status = returnedRange ? 206 : 200;
+  if (returnedRange) {
+    const { offset, length } = returnedRange;
+    headers.set("content-range", `bytes ${offset}-${offset + length - 1}/${object.size}`);
+  }
+  if (!object.httpMetadata?.contentEncoding) {
+    headers.set("content-length", String(returnedRange?.length ?? object.size));
   }
 
   if (request.method === "HEAD") {
+    await object.body.cancel().catch(() => {});
     return new Response(null, { status, headers });
   }
 
@@ -97,6 +159,32 @@ async function serveFromR2(
     ? object.body.pipeThrough(new DecompressionStream("gzip"))
     : object.body;
   return new Response(body, { status, headers });
+}
+
+function validatedByteRange(
+  size: number,
+  actual: R2Range | undefined,
+  requested: R2Range,
+): { offset: number; length: number } | undefined {
+  // R2 reports the actual offset and length after clamping to the object size.
+  // Reject inconsistent metadata instead of emitting a misleading partial body.
+  if (
+    !Number.isSafeInteger(size) || size <= 0 ||
+    !actual || !("offset" in actual) || !("length" in actual) ||
+    typeof actual.offset !== "number" || typeof actual.length !== "number" ||
+    !Number.isSafeInteger(actual.offset) || !Number.isSafeInteger(actual.length) ||
+    actual.offset < 0 || actual.length <= 0 || actual.offset >= size ||
+    actual.length > size - actual.offset
+  ) return undefined;
+
+  const offset = "suffix" in requested
+    ? Math.max(0, size - requested.suffix)
+    : requested.offset ?? 0;
+  const length = "suffix" in requested
+    ? Math.min(requested.suffix, size)
+    : Math.min(requested.length ?? size - offset, size - offset);
+  if (actual.offset !== offset || actual.length !== length) return undefined;
+  return { offset: actual.offset, length: actual.length };
 }
 
 function responseHeaders(

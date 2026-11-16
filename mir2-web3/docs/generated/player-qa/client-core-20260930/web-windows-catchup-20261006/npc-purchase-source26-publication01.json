@@ -1,0 +1,104 @@
+{
+  "owner": "Root",
+  "kind": "Source26-actual-git-publication-after-commit",
+  "generatedAtUtc": "2026-10-07T08:45:33.613Z",
+  "commit": "4cbba7a193e5283b8f7d92ee2be8416262cd8d68",
+  "parentCommit": "7b1afe2706a4eec037f085d1f599d2ea987f031f",
+  "branch": "codex/windows-player-journey",
+  "scopeFiles": 22,
+  "reviewedPaths": [
+    "mir2-web3/apps/game-client/client-core/src/lib.rs",
+    "mir2-web3/apps/game-client/client-core/src/npc_purchase_receipt.rs",
+    "mir2-web3/apps/simulation/src/lib.rs",
+    "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+    "mir2-web3/apps/simulation/src/runtime/mod.rs",
+    "mir2-web3/apps/simulation/src/runtime/npc.rs",
+    "mir2-web3/apps/simulation/src/runtime/packets.rs",
+    "mir2-web3/apps/simulation/src/world_runtime.rs",
+    "mir2-web3/apps/simulation/src/runtime/npc_purchase_outcome.rs",
+    "mir2-web3/apps/simulation/src/runtime/npc_purchase_outcome_tests.rs",
+    "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+    "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+    "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+    "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+    "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+    "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+    "mir2-web3/docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+    "mir2-web3/docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-finite-result01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-publication01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-independent-review01.json"
+  ],
+  "actualCommitTool": {
+    "chunkId": "932eca",
+    "exitCode": 0,
+    "title": "fix: stage NPC resale and add shared purchase custody",
+    "files": 22
+  },
+  "actualPushTool": {
+    "initialChunkId": "64b7dd",
+    "sessionId": 39194,
+    "finalChunkId": "e5b957",
+    "exitCode": 0,
+    "output": "To https://github.com/Zombieliu/mir2.git\n   7b1afe2706..4cbba7a193  HEAD -> codex/windows-player-journey",
+    "temporaryHttpsRewrite": true
+  },
+  "actualRemoteVerification": {
+    "chunkId": "a6dc15",
+    "exitCode": 0,
+    "transport": "original configured SSH",
+    "head": "4cbba7a193e5283b8f7d92ee2be8416262cd8d68",
+    "ref": "refs/heads/codex/windows-player-journey"
+  },
+  "published": true,
+  "remoteVerified": true,
+  "gitOnlyNetworkExceptionUsed": true,
+  "forcePush": false,
+  "historyRewrite": false,
+  "maintenanceRun": false,
+  "credentialsUiOperated": false,
+  "unrelatedTrackedState": [
+    "M mir2-web3/apps/web/tsconfig.json"
+  ],
+  "finiteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-finite-result01.json",
+    "bytes": 57945,
+    "sha256": "41f3fbc7b95efb48a0680d5b79ce98b8b261764f7a22e24802e08c9102079958"
+  },
+  "independentFiniteReview": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-independent-review01.json",
+    "bytes": 6134,
+    "sha256": "73b6b2469c539c731ae6d42568f6c38f6b44a529fb7ca2abc2f66cb9697eaab2"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source26-rust04-snapshot.json",
+    "bytes": 275876,
+    "sha256": "f185703676e239d6d1e11dde301c94e39ebd2e5a100d98a629336c94c0f87f7a"
+  },
+  "latestBuiltPackage": {
+    "commit": "7b1afe2706a4eec037f085d1f599d2ea987f031f",
+    "publication": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-publication01.json",
+      "bytes": 9948,
+      "sha256": "5577d9778e660f5d0e4b9ad14b08f7cfe393b56c374f5a9d443d50c3427f7e34"
+    },
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-08",
+    "containsSource26": false
+  },
+  "outstanding": [
+    "Durable journal + complete character checkpoint + receipt/revision atomic transaction and cross-restart dedup.",
+    "Actual owner route/remote versioned result/query plus capability acceptance; unsupported no fallback.",
+    "Strict wire/ABI and Native-Web actual dispatcher/receiver/fullsnapshot integration.",
+    "Updated matching production bundle, asset runtime verification, actual login/combat/save/relogin/mobile/frontend acceptance."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkGameUsed": false,
+  "wasmApiUsed": false,
+  "playerAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "recordQualification": "Ordinary JSON written after commit and remote verification; it is not included in its own 22-file commit, to be carried into the next authorized code phase. No helper executable or receipt factory created."
+}

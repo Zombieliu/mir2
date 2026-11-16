@@ -1,0 +1,103 @@
+{
+  "schema": "mir2.promotion-realtime.release.v1",
+  "date": "2026-10-30",
+  "status": "deployed; protected candidate, ordinary public HTTP and anonymous browser verified",
+  "canonicalOrigin": "https://mir2.obelisk.build",
+  "sourceSha": "0a05d9e1fcd61a9427c40e18e5fcf177960a7bd5",
+  "releaseToolSha": "0a05d9e1fcd61a9427c40e18e5fcf177960a7bd5",
+  "deployment": "dpl_2yXeENZ4qrg69FhcThRW7o7H9KkB",
+  "productionVerifiedAtUtc": "2026-10-30T11:15:02Z",
+  "previousProduction": "dpl_9ZJvkBjUxwrXy7hiqt8aG1aNZpnT",
+  "marketingUnchanged": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97",
+  "workflowRuns": {
+    "stage": 41046105958,
+    "promote": 41046532226,
+    "earlier": {
+      "initialStage": 41043851585,
+      "firstAttemptRolledBack": 41044237193,
+      "readOnlyContext": 41045097385,
+      "firstSuccessfulPromote": 41045180454
+    }
+  },
+  "checks": {
+    "focusedAndAdjacentTests": {
+      "passed": 34,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "localFixtureBrowser": {
+      "passed": 10,
+      "failed": 0,
+      "realPollWaitMs": 10032,
+      "serverTimezone": "UTC",
+      "browserTimezone": "Asia/Shanghai",
+      "report": "UI-VERIFICATION.json"
+    },
+    "releaseGuardMocks": {
+      "passed": 13,
+      "failed": 0,
+      "report": "RELEASE-GUARDS.json"
+    },
+    "protectedCandidate": "passed",
+    "ordinaryPublicHttp": "passed",
+    "promotionAssetsLoaded": 13,
+    "versionMatchesSource": true,
+    "manifestStartUrl": "/game",
+    "manifestScope": "/",
+    "canonicalAliasAndWorkerOriginAlias": "both exact candidate; assignment job succeeded",
+    "publicAnonymousBrowser": {
+      "passed": true,
+      "report": "PUBLIC-BROWSER.json",
+      "verifiedAtUtc": "2026-10-30T11:16:33Z",
+      "browserTimezones": [
+        "UTC",
+        "Asia/Shanghai"
+      ],
+      "consoleAndPageErrors": 0,
+      "realObservationMs": 11383,
+      "realBusinessPosts": 0,
+      "fixtureResponses": 0
+    }
+  },
+  "aliasAssignmentEvidence": {
+    "pendingAtUtc": "2026-10-30T11:14:56Z",
+    "succeededAtUtc": "2026-10-30T11:15:00Z",
+    "productionPointerLedAliases": true
+  },
+  "campaign": {
+    "id": "numeron-playtest-20261029",
+    "environment": "test",
+    "commissionEnabled": true,
+    "payoutEnabled": false,
+    "existingDataPreserved": true
+  },
+  "existingRecords": {
+    "historicalCampaign": "numeron-chain-acceptance-20261029-fullchain",
+    "status": "locked",
+    "previouslyConfirmedPaidMicroUsdc": "5",
+    "newRechargeOrPayoutExecutedThisRound": false
+  },
+  "cloudflare": {
+    "readOnlyInspection": true,
+    "worker": "mir2-web3-domain-proxy",
+    "origin": "https://mir2-web3-web.vercel.app",
+    "configurationChanged": false
+  },
+  "limitations": [
+    "Authenticated accrued-income changes were tested with isolated local fixtures; no new live recharge, monthly-card purchase, settlement or blockchain payment was executed.",
+    "Existing historical income remains in its original closed campaign.",
+    "Promotion test realm is separate from the original Windows playtest realm.",
+    "Human visual acceptance of the new earnings display is still pending."
+  ],
+  "dockerStarted": false,
+  "windowsReleasePublished": false,
+  "databasesChanged": false,
+  "financialSwitchesChanged": false,
+  "hydrationFix": {
+    "cause": "Footer formatted server and browser timezone during first render",
+    "fix": "Render neutral timezone initially and set browser timezone after hydration",
+    "initialPublicFailure": "PUBLIC-BROWSER-INITIAL-HYDRATION.json",
+    "diagnosis": "HYDRATION-TIMEZONE-DIAGNOSIS.json",
+    "finalUtcAndShanghaiBrowser": "passed"
+  }
+}

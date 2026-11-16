@@ -1,0 +1,41 @@
+{
+  "status": "draft",
+  "environment": "test",
+  "timeZone": "Asia/Shanghai",
+  "draft": {
+    "campaignId": "numeron-windows-playtest-20261030",
+    "fundingMode": "revenue_share",
+    "termsVersion": "numeron-windows-playtest-20261030-v1",
+    "startsAtMs": 1793219738449,
+    "endsAtMs": 1793824538449,
+    "rules": {
+      "testWalletEnrollment": true,
+      "minimumLevel": 1,
+      "activeUtcDays": 1,
+      "candidateTtlMs": 604800000,
+      "confirmationWindowMs": 86400000,
+      "maximumCoverageMs": 604800000,
+      "reserveBps": 0,
+      "walletCooldownMs": 259200000
+    },
+    "budgetMicroUsd": 0,
+    "memberLimit": 0,
+    "leaderLimit": 0,
+    "perLeaderMemberLimit": 0,
+    "perMemberRevenueCapMicroUsd": 0
+  },
+  "intendedSwitches": {
+    "recruitmentEnabled": true,
+    "commissionEnabled": true,
+    "payoutEnabled": false
+  },
+  "disclosure": "Independent seven-day Windows test season on the original Windows test server. Verified wallet enrollment does not create a game character, grant a level, qualify gameplay, invent payment evidence, or grant money. Players create and play their own characters in the Windows client. Only authoritative game commits and verified Stripe sandbox or Sui Testnet USDC monthly-card sources count. Historical balances stay unknown; no old account, character or financial record is migrated from another realm. Commission accrues in real time pending season-end settlement. Payout remains disabled; test assets have no real value. No exclusive browser-game realm is enabled.",
+  "gameClient": "windows",
+  "paymentNetwork": "sui:testnet",
+  "paymentCurrency": "USDC",
+  "commissionTiersBps": [
+    1000,
+    2000,
+    3000
+  ]
+}

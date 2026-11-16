@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "state": "DRAFT_ONLY_NOT_AN_ENABLED_HELPER",
+  "oldFrozenHelper": "release-native-10-v2-personal-projection-feasibility-15/slow-stage-public.mjs",
+  "newScopedLabelsOnly": [
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush"
+  ],
+  "mechanicalChange": "A future new-name helper may add exactly these existing labels to ALLOWED_SCOPED_STAGES. They are already ALLOWED_STAGES. Keep all other arrays, queue-context schema, secret/field allowlist, byte/write caps and failure behavior unchanged.",
+  "rowContract": "Existing four-key {observedAtMs,stage,durationMs,connection} shape becomes legal only for these five additional labels. No arbitrary stage/extra field, no duration, connection or queue validation relaxation.",
+  "historicalHelperUnchanged": true,
+  "newHelperImplemented": false,
+  "newDiagnosticsOrGameGateIntroduced": false,
+  "originalP0FailurePreserved": true
+}

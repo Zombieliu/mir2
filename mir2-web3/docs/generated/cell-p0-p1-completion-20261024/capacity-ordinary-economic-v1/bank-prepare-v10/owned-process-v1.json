@@ -1,0 +1,18 @@
+{
+  "gateway": {
+    "pid": 72776,
+    "exe": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "creationTime": "2026-10-27T00:01:26.9991010Z"
+  },
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "driverSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "buildReused": true,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false
+}

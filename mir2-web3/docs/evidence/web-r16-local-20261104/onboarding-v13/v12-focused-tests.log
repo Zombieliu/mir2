@@ -1,0 +1,556 @@
+TAP version 13
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 1 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 1.7031
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 2 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.1824
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 3 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.3381
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 4 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.2425
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 5 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.21
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 6 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 3.6792
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 7 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.2211
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 8 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 28.8741
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 9 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.883
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 10 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 1.3718
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 11 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 119.5752
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 12 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 91.4045
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 13 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 0.6779
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 14 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 0.7593
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 15 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 0.1927
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 16 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.1845
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 17 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 3.2587
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 18 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 0.7683
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 19 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.2584
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 20 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 1.9658
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 21 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.729
+  type: 'test'
+  ...
+# Subtest: Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+ok 22 - Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+  ---
+  duration_ms: 0.3675
+  type: 'test'
+  ...
+# Subtest: questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+ok 23 - questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+  ---
+  duration_ms: 88.7032
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 24 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 84.0274
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 25 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 93.6252
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 26 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 32.0229
+  type: 'test'
+  ...
+# Subtest: actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+ok 27 - actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+  ---
+  duration_ms: 451.41
+  type: 'test'
+  ...
+# Subtest: actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+ok 28 - actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+  ---
+  duration_ms: 53.3846
+  type: 'test'
+  ...
+# Subtest: the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+ok 29 - the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+  ---
+  duration_ms: 6.1376
+  type: 'test'
+  ...
+# Subtest: the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+ok 30 - the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+  ---
+  duration_ms: 40.1017
+  type: 'test'
+  ...
+# Subtest: a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+ok 31 - a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+  ---
+  duration_ms: 17.3143
+  type: 'test'
+  ...
+# Subtest: actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+ok 32 - actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+  ---
+  duration_ms: 125.1628
+  type: 'test'
+  ...
+# Subtest: 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+ok 33 - 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+  ---
+  duration_ms: 260.8902
+  type: 'test'
+  ...
+# Subtest: actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+ok 34 - actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+  ---
+  duration_ms: 96.0981
+  type: 'test'
+  ...
+# Subtest: 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+ok 35 - 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+  ---
+  duration_ms: 181.8034
+  type: 'test'
+  ...
+# Subtest: the Web R16 onboarding projection is the exact canonical Native gameplay baseline
+ok 36 - the Web R16 onboarding projection is the exact canonical Native gameplay baseline
+  ---
+  duration_ms: 0.9745
+  type: 'test'
+  ...
+# Subtest: the Web profile and automatic tutorial policy come from the shared baseline helper
+ok 37 - the Web profile and automatic tutorial policy come from the shared baseline helper
+  ---
+  duration_ms: 28.2742
+  type: 'test'
+  ...
+# Subtest: all three Page Quest consumers use the same R16 profile helper without a deployment override
+ok 38 - all three Page Quest consumers use the same R16 profile helper without a deployment override
+  ---
+  duration_ms: 33.9638
+  type: 'test'
+  ...
+# Subtest: fresh keyboard, touch and controller entry cannot automatically start the legacy card tutorial
+ok 39 - fresh keyboard, touch and controller entry cannot automatically start the legacy card tutorial
+  ---
+  duration_ms: 45.0726
+  type: 'test'
+  ...
+# Subtest: Native Candidate default TOML and the package parameter resolve to the same canonical Quest profile
+ok 40 - Native Candidate default TOML and the package parameter resolve to the same canonical Quest profile
+  ---
+  duration_ms: 497.1974
+  type: 'test'
+  ...
+# Subtest: Native explicit historical profiles remain selectable and unknown profile values are rejected
+ok 41 - Native explicit historical profiles remain selectable and unknown profile values are rejected
+  ---
+  duration_ms: 395.28
+  type: 'test'
+  ...
+# Subtest: the Native host uses the canonical fallback and retains explicit TOML profile precedence
+ok 42 - the Native host uses the canonical fallback and retains explicit TOML profile precedence
+  ---
+  duration_ms: 9.6424
+  type: 'test'
+  ...
+# Subtest: real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+ok 43 - real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+  ---
+  duration_ms: 34.5488
+  type: 'test'
+  ...
+# Subtest: an unadmitted second pointer cannot replace the first retained world marker
+ok 44 - an unadmitted second pointer cannot replace the first retained world marker
+  ---
+  duration_ms: 18.255
+  type: 'test'
+  ...
+# Subtest: the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+ok 45 - the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+  ---
+  duration_ms: 13.21
+  type: 'test'
+  ...
+# Subtest: removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+ok 46 - removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+  ---
+  duration_ms: 24.9994
+  type: 'test'
+  ...
+# Subtest: NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+ok 47 - NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+  ---
+  duration_ms: 47.1841
+  type: 'test'
+  ...
+# Subtest: foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+ok 48 - foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+  ---
+  duration_ms: 39.6144
+  type: 'test'
+  ...
+# Subtest: foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+ok 49 - foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+  ---
+  duration_ms: 64.3625
+  type: 'test'
+  ...
+# Subtest: focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+ok 50 - focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+  ---
+  duration_ms: 23.4986
+  type: 'test'
+  ...
+# Subtest: renderer optimizer requires both explicit absolute executable and exact SHA256
+ok 51 - renderer optimizer requires both explicit absolute executable and exact SHA256
+  ---
+  duration_ms: 1.4737
+  type: 'test'
+  ...
+# Subtest: renderer tool hash refusal occurs before any injected command
+ok 52 - renderer tool hash refusal occurs before any injected command
+  ---
+  duration_ms: 4.935
+  type: 'test'
+  ...
+# Subtest: renderer optimizer accepts only actual Binaryen131 version output
+ok 53 - renderer optimizer accepts only actual Binaryen131 version output
+  ---
+  duration_ms: 16.8021
+  type: 'test'
+  ...
+# Subtest: renderer optimizer refuses version command status signal and error failures
+ok 54 - renderer optimizer refuses version command status signal and error failures
+  ---
+  duration_ms: 9.9349
+  type: 'test'
+  ...
+# Subtest: renderer optimization uses fixed size arguments and bounded hidden child options
+ok 55 - renderer optimization uses fixed size arguments and bounded hidden child options
+  ---
+  duration_ms: 7.0597
+  type: 'test'
+  ...
+# Subtest: renderer optimization lifecycle failure never renames staged input or published pointer
+ok 56 - renderer optimization lifecycle failure never renames staged input or published pointer
+  ---
+  duration_ms: 9.7892
+  type: 'test'
+  ...
+# Subtest: renderer second-stage failure leaves original bytes and cleans both owned outputs
+ok 57 - renderer second-stage failure leaves original bytes and cleans both owned outputs
+  ---
+  duration_ms: 4.0643
+  type: 'test'
+  ...
+# Subtest: renderer second stage must retain the original interface too
+ok 58 - renderer second stage must retain the original interface too
+  ---
+  duration_ms: 5.3069
+  type: 'test'
+  ...
+# Subtest: renderer pins first-stage bytes across the second command
+ok 59 - renderer pins first-stage bytes across the second command
+  ---
+  duration_ms: 4.7054
+  type: 'test'
+  ...
+# Subtest: renderer synchronous runner IO throws are propagated with staged input intact
+ok 60 - renderer synchronous runner IO throws are propagated with staged input intact
+  ---
+  duration_ms: 4.2786
+  type: 'test'
+  ...
+# Subtest: renderer missing or invalid optimized WASM cannot replace staged bytes
+ok 61 - renderer missing or invalid optimized WASM cannot replace staged bytes
+  ---
+  duration_ms: 8.8806
+  type: 'test'
+  ...
+# Subtest: renderer optimized name section is refused before staged rename
+ok 62 - renderer optimized name section is refused before staged rename
+  ---
+  duration_ms: 3.7385
+  type: 'test'
+  ...
+# Subtest: renderer import and export metadata changes are independently refused
+ok 63 - renderer import and export metadata changes are independently refused
+  ---
+  duration_ms: 7.0224
+  type: 'test'
+  ...
+# Subtest: renderer release numeric byte caps retain inclusive boundaries for all three limits
+ok 64 - renderer release numeric byte caps retain inclusive boundaries for all three limits
+  ---
+  duration_ms: 0.3837
+  type: 'test'
+  ...
+# Subtest: renderer budget measures full actual WASM gzip and JavaScript bytes
+ok 65 - renderer budget measures full actual WASM gzip and JavaScript bytes
+  ---
+  duration_ms: 66.914
+  type: 'test'
+  ...
+# Subtest: renderer optimized output over JavaScript cap does not rename the original WASM
+ok 66 - renderer optimized output over JavaScript cap does not rename the original WASM
+  ---
+  duration_ms: 5.8089
+  type: 'test'
+  ...
+# Subtest: renderer post-pins reject changed tool and prevent staged replacement
+ok 67 - renderer post-pins reject changed tool and prevent staged replacement
+  ---
+  duration_ms: 4.1106
+  type: 'test'
+  ...
+# Subtest: renderer post-pins detect input drift and never publish optimized output
+ok 68 - renderer post-pins detect input drift and never publish optimized output
+  ---
+  duration_ms: 3.941
+  type: 'test'
+  ...
+# Subtest: renderer output absence rejects existing ordinary and dangling linked leaves
+ok 69 - renderer output absence rejects existing ordinary and dangling linked leaves
+  ---
+  duration_ms: 2.6752
+  type: 'test'
+  ...
+# Subtest: renderer temp output symlink is refused without following its target
+ok 70 - renderer temp output symlink is refused without following its target
+  ---
+  duration_ms: 3.3818
+  type: 'test'
+  ...
+# Subtest: renderer linked tool or package directory cannot be followed
+ok 71 - renderer linked tool or package directory cannot be followed
+  ---
+  duration_ms: 2.3646
+  type: 'test'
+  ...
+# Subtest: renderer optimizer refuses inputs outside its explicitly owned staging root
+ok 72 - renderer optimizer refuses inputs outside its explicitly owned staging root
+  ---
+  duration_ms: 1.6415
+  type: 'test'
+  ...
+# Subtest: renderer post-pins detect JavaScript drift before replacing WASM
+ok 73 - renderer post-pins detect JavaScript drift before replacing WASM
+  ---
+  duration_ms: 3.1814
+  type: 'test'
+  ...
+# Subtest: renderer simultaneous runner and post-pin failures preserve both error causes
+ok 74 - renderer simultaneous runner and post-pin failures preserve both error causes
+  ---
+  duration_ms: 2.7213
+  type: 'test'
+  ...
+# Subtest: renderer version post-pins reject each drift before any optimization command
+ok 75 - renderer version post-pins reject each drift before any optimization command
+  ---
+  duration_ms: 8.9382
+  type: 'test'
+  ...
+# Subtest: renderer version throw still attempts all three post-pins and blocks optimization
+ok 76 - renderer version throw still attempts all three post-pins and blocks optimization
+  ---
+  duration_ms: 3.2613
+  type: 'test'
+  ...
+# Subtest: renderer cleanup refuses retargeted package ancestry and preserves outside same-name leaf
+ok 77 - renderer cleanup refuses retargeted package ancestry and preserves outside same-name leaf
+  ---
+  duration_ms: 5.4238
+  type: 'test'
+  ...
+# Subtest: renderer diagnostic formatter preserves nested tool failures without serializing environment values
+ok 78 - renderer diagnostic formatter preserves nested tool failures without serializing environment values
+  ---
+  duration_ms: 0.1814
+  type: 'test'
+  ...
+# Subtest: Core optimizer requires its own absolute tool and SHA config without renderer or PATH fallback
+ok 79 - Core optimizer requires its own absolute tool and SHA config without renderer or PATH fallback
+  ---
+  duration_ms: 0.2179
+  type: 'test'
+  ...
+# Subtest: Core release size gate is strictly below256KiB and retains inclusive200KiB JavaScript
+ok 80 - Core release size gate is strictly below256KiB and retains inclusive200KiB JavaScript
+  ---
+  duration_ms: 0.201
+  type: 'test'
+  ...
+# Subtest: Core budget measures whole actual pair and never applies the larger renderer budget
+ok 81 - Core budget measures whole actual pair and never applies the larger renderer budget
+  ---
+  duration_ms: 2.1563
+  type: 'test'
+  ...
+# Subtest: Core optimizer uses fixed131 Oz flatten rereloop Oz converge and bounded hidden single-core commands
+ok 82 - Core optimizer uses fixed131 Oz flatten rereloop Oz converge and bounded hidden single-core commands
+  ---
+  duration_ms: 3.8685
+  type: 'test'
+  ...
+# Subtest: Core refuses wrong tool hash and non131 version before any optimization
+ok 83 - Core refuses wrong tool hash and non131 version before any optimization
+  ---
+  duration_ms: 8.6153
+  type: 'test'
+  ...
+# Subtest: Core version and optimization failures never replace staged input or a published pointer
+ok 84 - Core version and optimization failures never replace staged input or a published pointer
+  ---
+  duration_ms: 17.5439
+  type: 'test'
+  ...
+# Subtest: Core command postpins detect version drift before optimization and optimization drift before rename
+ok 85 - Core command postpins detect version drift before optimization and optimization drift before rename
+  ---
+  duration_ms: 21.0625
+  type: 'test'
+  ...
+# Subtest: Core refuses metadata drift debugging names invalid output and fixed-cap overflow before rename
+ok 86 - Core refuses metadata drift debugging names invalid output and fixed-cap overflow before rename
+  ---
+  duration_ms: 24.0857
+  type: 'test'
+  ...
+# Subtest: Core and renderer wrappers cannot be broadened by caller profile or basename options
+ok 87 - Core and renderer wrappers cannot be broadened by caller profile or basename options
+  ---
+  duration_ms: 9.8379
+  type: 'test'
+  ...
+# Subtest: Core output symlink is refused without following its target
+ok 88 - Core output symlink is refused without following its target
+  ---
+  duration_ms: 3.5224
+  type: 'test'
+  ...
+# Subtest: Core recursive cleanup validates direct generated name and every ordinary ancestor
+ok 89 - Core recursive cleanup validates direct generated name and every ordinary ancestor
+  ---
+  duration_ms: 5.2797
+  type: 'test'
+  ...
+# Subtest: Core cleanup rejects a retargeted staging ancestor and retains tool postpin and cleanup causes
+ok 90 - Core cleanup rejects a retargeted staging ancestor and retains tool postpin and cleanup causes
+  ---
+  duration_ms: 13.0873
+  type: 'test'
+  ...
+# Subtest: actual Core sourceFingerprint includes optimizer and client-wire bytes and retains LF normalization sorted old recipe
+ok 91 - actual Core sourceFingerprint includes optimizer and client-wire bytes and retains LF normalization sorted old recipe
+  ---
+  duration_ms: 4.7983
+  type: 'test'
+  ...
+1..91
+# tests 91
+# suites 0
+# pass 91
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1674.9209

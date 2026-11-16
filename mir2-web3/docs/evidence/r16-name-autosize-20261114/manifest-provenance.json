@@ -1,0 +1,16 @@
+{
+  "rawExportSha256": "e325b15600f85b7ff7465cdd62346118fabeee01400ec12207d98aaaa8f04729",
+  "committedSource": "b19ca73072db16ac7f351857aa752ecc57953591",
+  "committedManifestSha256": "e77c5973ca98b709629c5cfd52ce7d26af009fe550bc9a9a1779598d10e9c1a1",
+  "JSONValuesIdentical": true,
+  "transformation": "The original Windows PowerShell JSON output used CRLF. The committed JSON obeys the existing LF attribute. Exporter b2dd6ac70b now emits that canonical LF directly; marker also has explicit LF attribute.",
+  "markerBeforeHex": "6372797374616c2d6764692d746578742d6f75747075742d76310d0a",
+  "markerRequiredHex": "6372797374616c2d6764692d746578742d6f75747075742d76310a",
+  "selfTest": {
+    "passed": true,
+    "assets": 11,
+    "independentExports": 2,
+    "invalidInputsRejected": 8
+  },
+  "fontVersionChange": "See asset-preservation.json: original and current font file SHA differ, while every original PNG remains byte-identical."
+}

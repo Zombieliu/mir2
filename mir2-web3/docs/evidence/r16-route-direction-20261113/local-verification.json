@@ -1,0 +1,2992 @@
+{
+  "passed": true,
+  "source": "ab02b84938eeb61ac844c6e0c894d04abf1c8bb0",
+  "build": {
+    "revision": "9ad10fb628eb-route-direction-1aa57470",
+    "buildReceiptSha256": "4e17c27597f121cb4daff4051da4fefe15046360a4ca916f20fb60c41464e53d",
+    "sourceArchiveSha256": "995458ccb096d9d682d3c0d67324e0a9962e0856f49647c17fa3875dbe52db00",
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/lib/quest-route-execution.ts",
+        "bytes": 2104,
+        "sha256": "cbeb0096433b828fe1ab85d000638bbd5e2b47040f6b099a629ec55306330f7e"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation.mjs",
+        "bytes": 15482,
+        "sha256": "4ea1d30ff9229be4294c36392b0093a50d939655ef5dbcdcbe25e40882b75959"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+        "bytes": 85341,
+        "sha256": "3a9a9f8c05fc55d30542e06633c2ce3cf75199f35a656cdc33f3b4d6f78ada48"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-route-authority-wait.mjs",
+        "bytes": 14589,
+        "sha256": "13bcdbbd31267a4235be56c16884a53fe6cf1f938f74dc39b9b913d15064ad28"
+      }
+    ],
+    "verifiedReusedInputCount": 27,
+    "id": "grYaCyvtWMqVNtWeuO6H2",
+    "assetRelease": "20261108-r16-08ec86d5105c",
+    "renderer": "bevy-0c553a754308e5b8"
+  },
+  "mode": "compatibility",
+  "className": "Warrior",
+  "ordinaryNewcomer": {
+    "map": "0",
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "level": 1,
+    "ordinaryLogout": true
+  },
+  "checks": {
+    "primary": 121,
+    "adjacentCorrection": 7,
+    "releaseGuards": 70,
+    "movementController": true
+  },
+  "cold": {
+    "nativeReadyWaitMs": 52721,
+    "prewarm": {
+      "passed": true,
+      "selection": "latest current-session hud-core; prior cancelled runs retained",
+      "waitMs": 2052,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": [],
+            "durationMs": 283.70000000298023,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done"
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "staleRequests": [],
+      "markerExpectation": "q1/q2 completed; active q3 is a diary hunting task with no current NPC marker"
+    },
+    "fontCache": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "rightButtons": {
+      "passed": true,
+      "scope": "Real Edge headless ordinary game inputs, authority and DOM cancellation; native browser overlay pixels remain unobserved.",
+      "startPosition": {
+        "x": 289,
+        "y": 616
+      },
+      "rows": [
+        {
+          "case": "ordinary-right-movement-and-release",
+          "started": 1794581829026,
+          "first": {
+            "x": 290,
+            "y": 616
+          },
+          "release": 1794581829296,
+          "settled": {
+            "x": 290,
+            "y": 616
+          },
+          "events": [
+            {
+              "phase": "cold-move",
+              "type": "pointerdown",
+              "at": 1794581829049,
+              "trusted": true,
+              "cancelable": true,
+              "button": 2,
+              "buttons": 2,
+              "pointerType": "mouse",
+              "target": {
+                "tag": "CANVAS",
+                "id": "mir2-quest-ui-canvas",
+                "classes": [
+                  "shared-quest-ui-visible"
+                ]
+              },
+              "inFrame": true,
+              "x": 680,
+              "y": 464,
+              "frame": {
+                "x": 128,
+                "y": 96,
+                "width": 1024,
+                "height": 768
+              },
+              "cancelled": true
+            },
+            {
+              "phase": "cold-move",
+              "type": "pointerup",
+              "at": 1794581829294,
+              "trusted": true,
+              "cancelable": true,
+              "button": 2,
+              "buttons": 0,
+              "pointerType": "mouse",
+              "target": {
+                "tag": "CANVAS",
+                "id": "mir2-quest-ui-canvas",
+                "classes": [
+                  "shared-quest-ui-visible"
+                ]
+              },
+              "inFrame": true,
+              "x": 680,
+              "y": 464,
+              "frame": {
+                "x": 128,
+                "y": 96,
+                "width": 1024,
+                "height": 768
+              },
+              "cancelled": true
+            },
+            {
+              "phase": "cold-move",
+              "type": "contextmenu",
+              "at": 1794581829296,
+              "trusted": true,
+              "cancelable": true,
+              "button": 2,
+              "buttons": 0,
+              "pointerType": "mouse",
+              "target": {
+                "tag": "CANVAS",
+                "id": "mir2-quest-ui-canvas",
+                "classes": [
+                  "shared-quest-ui-visible"
+                ]
+              },
+              "inFrame": true,
+              "x": 680,
+              "y": 464,
+              "frame": {
+                "x": 128,
+                "y": 96,
+                "width": 1024,
+                "height": 768
+              },
+              "cancelled": true
+            }
+          ],
+          "wire": [
+            {
+              "type": "walk",
+              "at": 1794581829235,
+              "direction": "Right"
+            }
+          ]
+        },
+        {
+          "case": "right-press-in-game-release-in-gutter",
+          "started": 1794581832946,
+          "gutterRelease": 1794581833097,
+          "geometry": {
+            "inside": {
+              "x": 680,
+              "y": 464
+            },
+            "gutter": {
+              "x": 116,
+              "y": 480
+            },
+            "frame": {
+              "x": 128,
+              "y": 96,
+              "width": 1024,
+              "height": 768
+            }
+          },
+          "events": [
+            {
+              "phase": "cold-gutter",
+              "type": "pointerdown",
+              "at": 1794581832968,
+              "trusted": true,
+              "cancelable": true,
+              "button": 2,
+              "buttons": 2,
+              "pointerType": "mouse",
+              "target": {
+                "tag": "CANVAS",
+                "id": "mir2-quest-ui-canvas",
+                "classes": [
+                  "shared-quest-ui-visible"
+                ]
+              },
+              "inFrame": true,
+              "x": 680,
+              "y": 464,
+              "frame": {
+                "x": 128,
+                "y": 96,
+                "width": 1024,
+                "height": 768
+              },
+              "cancelled": true
+            },
+            {
+              "phase": "cold-gutter",
+              "type": "pointerup",
+              "at": 1794581833052,
+              "trusted": true,
+              "cancelable": true,
+              "button": 2,
+              "buttons": 0,
+              "pointerType": "mouse",
+              "target": {
+                "tag": "CANVAS",
+                "id": "mir2-quest-ui-canvas",
+                "classes": [
+                  "shared-quest-ui-visible"
+                ]
+              },
+              "inFrame": true,
+              "x": 116,
+              "y": 480,
+              "frame": {
+                "x": 128,
+                "y": 96,
+                "width": 1024,
+                "height": 768
+              },
+              "cancelled": true
+            },
+            {
+              "phase": "cold-gutter",
+              "type": "contextmenu",
+              "at": 1794581833096,
+              "trusted": true,
+              "cancelable": true,
+              "button": 2,
+              "buttons": 0,
+              "pointerType": "mouse",
+              "target": {
+                "tag": "SECTION",
+                "id": "",
+                "classes": [
+                  "mir-stage"
+                ]
+              },
+              "inFrame": false,
+              "x": 116,
+              "y": 480,
+              "frame": {
+                "x": 128,
+                "y": 96,
+                "width": 1024,
+                "height": 768
+              },
+              "cancelled": true
+            }
+          ],
+          "settled": {
+            "x": 288,
+            "y": 617
+          }
+        }
+      ],
+      "returnSteps": [
+        {
+          "from": {
+            "x": 290,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "at": 1794581831256,
+          "arrived": {
+            "x": 289,
+            "y": 616
+          },
+          "authority": [
+            {
+              "at": 1794581831362,
+              "payload": {
+                "direction": "Left",
+                "x": 289,
+                "y": 616
+              }
+            }
+          ]
+        },
+        {
+          "from": {
+            "x": 288,
+            "y": 617
+          },
+          "key": "ArrowUp",
+          "at": 1794581835055,
+          "arrived": {
+            "x": 288,
+            "y": 616
+          },
+          "authority": [
+            {
+              "at": 1794581835124,
+              "payload": {
+                "direction": "Up",
+                "x": 288,
+                "y": 616
+              }
+            }
+          ]
+        },
+        {
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "at": 1794581835840,
+          "arrived": {
+            "x": 289,
+            "y": 616
+          },
+          "authority": [
+            {
+              "at": 1794581836011,
+              "payload": {
+                "direction": "Right",
+                "x": 289,
+                "y": 616
+              }
+            }
+          ]
+        }
+      ],
+      "finalTile": {
+        "x": 289,
+        "y": 616
+      }
+    }
+  },
+  "warm": {
+    "passed": true,
+    "browserRestart": {
+      "firstProcessCount": 7,
+      "allFirstProcessesExited": true,
+      "persistedProfileExists": true,
+      "secondProcessCount": 7
+    },
+    "saved": true,
+    "logout": {
+      "sentAt": 1794581912991,
+      "acknowledgedAt": 1794581916295,
+      "savedPosition": {
+        "x": 297,
+        "y": 595
+      },
+      "returnedToSelect": true,
+      "gutter": {
+        "x": 64,
+        "y": 480
+      }
+    },
+    "nativeReadyWaitMs": 1818
+  },
+  "targetSwitch": {
+    "quest": {
+      "current": 2,
+      "objective": "Defeat 2 Scarecrow.\nDefeat 2 RakingCat.",
+      "objectives": [
+        {
+          "current": 2,
+          "done": true,
+          "label": "Defeat 2 Scarecrow.",
+          "required": 2
+        },
+        {
+          "current": 0,
+          "done": false,
+          "label": "Defeat 2 RakingCat.",
+          "required": 2
+        }
+      ],
+      "progressLabel": "Progress 2/4",
+      "questId": 2110003,
+      "required": 4,
+      "rewardPreview": "EXP 2200, Gold 150, Fencing x1",
+      "stage": "inProgress",
+      "summary": "Newcomer V2 main node 3.",
+      "title": "Protect the village",
+      "tracker": "Defeat 2 Scarecrow."
+    },
+    "aliveCompletedScarecrows": [
+      {
+        "objectId": 206604,
+        "x": 275,
+        "y": 600
+      },
+      {
+        "objectId": 206626,
+        "x": 286,
+        "y": 628
+      },
+      {
+        "objectId": 206632,
+        "x": 286,
+        "y": 623
+      }
+    ],
+    "excluded": true,
+    "nativeNames": {
+      "version": 1,
+      "known": true,
+      "stamp": {
+        "generation": 2,
+        "revision": 10,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "objectIds": []
+    },
+    "start": {
+      "x": 288,
+      "y": 616
+    },
+    "catFinalTile": {
+      "x": 302,
+      "y": 600
+    },
+    "goal": {
+      "x": 340,
+      "y": 550,
+      "radius": 50
+    },
+    "routeCommands": [
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 22,
+        "at": 1794581881172
+      },
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 24,
+        "at": 1794581881781
+      },
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 26,
+        "at": 1794581882387
+      },
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 28,
+        "at": 1794581882991
+      },
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 30,
+        "at": 1794581883592
+      },
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 32,
+        "at": 1794581884214
+      },
+      {
+        "type": "run",
+        "direction": "Up",
+        "seq": 34,
+        "at": 1794581884815
+      },
+      {
+        "type": "run",
+        "direction": "UpRight",
+        "seq": 36,
+        "at": 1794581885431
+      },
+      {
+        "type": "walk",
+        "direction": "UpRight",
+        "seq": 38,
+        "at": 1794581886059
+      }
+    ],
+    "authority": [
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 289,
+          "y": 615
+        },
+        "type": "packet",
+        "seq": 23,
+        "at": 1794581881211
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 291,
+          "y": 613
+        },
+        "type": "packet",
+        "seq": 25,
+        "at": 1794581881784
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 293,
+          "y": 611
+        },
+        "type": "packet",
+        "seq": 27,
+        "at": 1794581882396
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 295,
+          "y": 609
+        },
+        "type": "packet",
+        "seq": 29,
+        "at": 1794581882997
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 297,
+          "y": 607
+        },
+        "type": "packet",
+        "seq": 31,
+        "at": 1794581883607
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 299,
+          "y": 605
+        },
+        "type": "packet",
+        "seq": 33,
+        "at": 1794581884318
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "Up",
+          "x": 299,
+          "y": 603
+        },
+        "type": "packet",
+        "seq": 35,
+        "at": 1794581884871
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 301,
+          "y": 601
+        },
+        "type": "packet",
+        "seq": 37,
+        "at": 1794581885464
+      },
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 302,
+          "y": 600
+        },
+        "type": "packet",
+        "seq": 39,
+        "at": 1794581886098
+      }
+    ]
+  },
+  "delayedAuthority": {
+    "passed": true,
+    "scope": "Loopback raw transport delays only: all payload bytes forwarded unchanged. Actual Native vendor route, one outstanding step, delayed authority resume, manual cancellation, hard timeout and late-ACK non-resurrection.",
+    "resume": {
+      "start": {
+        "x": 302,
+        "y": 600
+      },
+      "began": 1794581888436,
+      "first": {
+        "type": "run",
+        "direction": "UpLeft",
+        "seq": 40,
+        "at": 1794581888521
+      },
+      "duringHold": {
+        "at": 1794581892124,
+        "status": {
+          "keyboard": {
+            "lastKey": {
+              "direction": "right",
+              "at": 1794581875974,
+              "defaultPrevented": false,
+              "editable": false,
+              "modifiers": false,
+              "sceneInteractionReady": true,
+              "reason": "received"
+            },
+            "lastDispatch": {
+              "reason": "no-held-direction",
+              "source": "held",
+              "at": 1794581892108,
+              "sceneInteractionReady": true,
+              "bevyQuestUiCapturesPointer": false
+            },
+            "lastShortcut": {
+              "at": 1794581867986,
+              "actions": [
+                "quests"
+              ],
+              "stage": "dispatch",
+              "reason": "window-action",
+              "accepted": true,
+              "handled": true,
+              "repeat": false,
+              "focused": true,
+              "visible": true,
+              "editable": null,
+              "sceneInteractionReady": true,
+              "gameplayCallbackPresent": true,
+              "defaultPrevented": true,
+              "heroActive": false,
+              "heroTransitioning": false,
+              "heroWorldBlocked": false,
+              "heroLeaseHeld": false
+            }
+          },
+          "pointer": {
+            "at": 1794581888457,
+            "phase": "pointerdown",
+            "held": false,
+            "worldTarget": null,
+            "hudHeld": false,
+            "bagHeld": false,
+            "heroHeld": false,
+            "storageHeld": false,
+            "layers": [
+              {
+                "tag": "CANVAS",
+                "canvas": true,
+                "classes": [
+                  "shared-quest-ui-visible"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "BUTTON",
+                "canvas": false,
+                "classes": [
+                  "tile-hit"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "DIV",
+                "canvas": false,
+                "classes": [
+                  "game-world-composite"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "DIV",
+                "canvas": false,
+                "classes": [
+                  "client-stage-frame"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "SECTION",
+                "canvas": false,
+                "classes": [
+                  "mir-stage"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "MAIN",
+                "canvas": false,
+                "classes": [
+                  "mir-client-page"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "BODY",
+                "canvas": false,
+                "classes": [
+                  "notranslate"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "HTML",
+                "canvas": false,
+                "classes": [
+                  "notranslate"
+                ],
+                "objectId": null
+              }
+            ]
+          },
+          "host": {
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "suspended": null,
+            "sceneDeferred": false,
+            "lastIntent": {
+              "direction": "Right",
+              "at": 1794581875975,
+              "discrete": true
+            },
+            "lastAttempt": {
+              "reason": "route-awaiting-authority",
+              "at": 1794581892108
+            },
+            "lastPickup": null,
+            "self": {
+              "x": 302,
+              "y": 600,
+              "direction": "UpRight",
+              "dead": false
+            },
+            "queued": {
+              "kind": "target",
+              "ageMs": 3598,
+              "consumeAfterSend": false
+            },
+            "controller": {
+              "canSend": false,
+              "sendDelayMs": 0,
+              "blockedMs": 0,
+              "pending": {
+                "from": {
+                  "x": 302,
+                  "y": 600,
+                  "direction": "UpRight"
+                },
+                "to": {
+                  "x": 300,
+                  "y": 598,
+                  "direction": "UpLeft"
+                },
+                "ageMs": 3598
+              }
+            },
+            "target": {
+              "x": 303,
+              "y": 600
+            },
+            "targetMapBlocked": false,
+            "targetMapCell": {
+              "x": 303,
+              "y": 600,
+              "middle": "sprite-247"
+            },
+            "nearbyEntities": [
+              {
+                "objectId": "206610",
+                "kind": "monster",
+                "x": 301,
+                "y": 600,
+                "dead": false
+              },
+              {
+                "objectId": "206013",
+                "kind": "monster",
+                "x": 302,
+                "y": 598,
+                "dead": false
+              }
+            ]
+          }
+        },
+        "commands": [
+          {
+            "type": "run",
+            "direction": "UpLeft",
+            "seq": 40,
+            "at": 1794581888521
+          }
+        ],
+        "authority": []
+      },
+      "firstAck": {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpLeft",
+          "x": 301,
+          "y": 599
+        },
+        "type": "packet",
+        "seq": 41,
+        "at": 1794581895447
+      },
+      "resumed": [
+        {
+          "type": "run",
+          "direction": "UpLeft",
+          "seq": 40,
+          "at": 1794581888521
+        },
+        {
+          "type": "run",
+          "direction": "UpLeft",
+          "seq": 42,
+          "at": 1794581895448
+        },
+        {
+          "type": "run",
+          "direction": "UpLeft",
+          "seq": 44,
+          "at": 1794581896072
+        }
+      ],
+      "events": [
+        {
+          "type": "armed",
+          "atMs": 1794581888436,
+          "bytes": 0,
+          "armId": 1,
+          "delayMs": 6900,
+          "connectionIds": [
+            15
+          ]
+        },
+        {
+          "type": "clientTrigger",
+          "atMs": 1794581888520,
+          "bytes": 41,
+          "armId": 1,
+          "connectionId": 15,
+          "delayMs": 6900
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888522,
+          "bytes": 755,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 755
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888522,
+          "bytes": 92,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 847
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888522,
+          "bytes": 751,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 1598
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888522,
+          "bytes": 73,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 1671
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888522,
+          "bytes": 754,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 2425
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888522,
+          "bytes": 73,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 2498
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581888805,
+          "bytes": 294,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 2792
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581889187,
+          "bytes": 162,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 2954
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581889891,
+          "bytes": 85,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 3039
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581889891,
+          "bytes": 351,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 3390
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581889983,
+          "bytes": 156,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 3546
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581890586,
+          "bytes": 85,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 3631
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581890586,
+          "bytes": 351,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 3982
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581891888,
+          "bytes": 162,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 4144
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581892586,
+          "bytes": 85,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 4229
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581892586,
+          "bytes": 351,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 4580
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581892686,
+          "bytes": 156,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 4736
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581893394,
+          "bytes": 85,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 4821
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581893394,
+          "bytes": 351,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 5172
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581894580,
+          "bytes": 162,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 5334
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581895194,
+          "bytes": 85,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 5419
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581895194,
+          "bytes": 256,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 5675
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581895194,
+          "bytes": 95,
+          "armId": 1,
+          "connectionId": 15,
+          "bufferedBytes": 5770
+        },
+        {
+          "type": "flush",
+          "atMs": 1794581895423,
+          "bytes": 5770,
+          "armId": 1,
+          "connectionId": 15,
+          "delayMs": 6900,
+          "heldForMs": 6903
+        }
+      ],
+      "final": {
+        "x": 298,
+        "y": 596
+      },
+      "manualCancellation": {
+        "at": 1794581897484,
+        "position": {
+          "x": 298,
+          "y": 596
+        },
+        "status": {
+          "keyboard": {
+            "lastKey": {
+              "direction": "down",
+              "at": 1794581896149,
+              "defaultPrevented": false,
+              "editable": false,
+              "modifiers": false,
+              "sceneInteractionReady": true,
+              "reason": "received"
+            },
+            "lastDispatch": {
+              "reason": "no-held-direction",
+              "source": "held",
+              "at": 1794581899003,
+              "sceneInteractionReady": true,
+              "bevyQuestUiCapturesPointer": false
+            },
+            "lastShortcut": {
+              "at": 1794581867986,
+              "actions": [
+                "quests"
+              ],
+              "stage": "dispatch",
+              "reason": "window-action",
+              "accepted": true,
+              "handled": true,
+              "repeat": false,
+              "focused": true,
+              "visible": true,
+              "editable": null,
+              "sceneInteractionReady": true,
+              "gameplayCallbackPresent": true,
+              "defaultPrevented": true,
+              "heroActive": false,
+              "heroTransitioning": false,
+              "heroWorldBlocked": false,
+              "heroLeaseHeld": false
+            }
+          },
+          "pointer": {
+            "at": 1794581888457,
+            "phase": "pointerdown",
+            "held": false,
+            "worldTarget": null,
+            "hudHeld": false,
+            "bagHeld": false,
+            "heroHeld": false,
+            "storageHeld": false,
+            "layers": [
+              {
+                "tag": "CANVAS",
+                "canvas": true,
+                "classes": [
+                  "shared-quest-ui-visible"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "BUTTON",
+                "canvas": false,
+                "classes": [
+                  "tile-hit"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "DIV",
+                "canvas": false,
+                "classes": [
+                  "game-world-composite"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "DIV",
+                "canvas": false,
+                "classes": [
+                  "client-stage-frame"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "SECTION",
+                "canvas": false,
+                "classes": [
+                  "mir-stage"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "MAIN",
+                "canvas": false,
+                "classes": [
+                  "mir-client-page"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "BODY",
+                "canvas": false,
+                "classes": [
+                  "notranslate"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "HTML",
+                "canvas": false,
+                "classes": [
+                  "notranslate"
+                ],
+                "objectId": null
+              }
+            ]
+          },
+          "host": {
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "suspended": null,
+            "sceneDeferred": false,
+            "lastIntent": {
+              "direction": "Down",
+              "at": 1794581896150,
+              "discrete": true
+            },
+            "lastAttempt": {
+              "reason": "cadence",
+              "at": 1794581896157
+            },
+            "lastPickup": null,
+            "self": {
+              "x": 298,
+              "y": 596,
+              "direction": "UpLeft",
+              "dead": false
+            },
+            "queued": null,
+            "controller": {
+              "canSend": true,
+              "sendDelayMs": 0,
+              "blockedMs": 0,
+              "pending": null
+            },
+            "target": {
+              "x": 298,
+              "y": 597
+            },
+            "targetMapBlocked": false,
+            "targetMapCell": {
+              "x": 298,
+              "y": 597,
+              "middle": "sprite-179"
+            },
+            "nearbyEntities": [
+              {
+                "objectId": "206610",
+                "kind": "monster",
+                "x": 298,
+                "y": 597,
+                "dead": false
+              },
+              {
+                "objectId": "206013",
+                "kind": "monster",
+                "x": 299,
+                "y": 596,
+                "dead": false
+              }
+            ]
+          }
+        },
+        "stayedStopped": true
+      }
+    },
+    "timeout": {
+      "started": 1794581899428,
+      "start": {
+        "x": 298,
+        "y": 596
+      },
+      "first": {
+        "type": "run",
+        "direction": "UpLeft",
+        "seq": 46,
+        "at": 1794581899504
+      },
+      "messageAt": 1794581907607,
+      "atTimeout": {
+        "keyboard": {
+          "lastKey": {
+            "direction": "down",
+            "at": 1794581896149,
+            "defaultPrevented": false,
+            "editable": false,
+            "modifiers": false,
+            "sceneInteractionReady": true,
+            "reason": "received"
+          },
+          "lastDispatch": {
+            "reason": "no-held-direction",
+            "source": "held",
+            "at": 1794581907507,
+            "sceneInteractionReady": true,
+            "bevyQuestUiCapturesPointer": false
+          },
+          "lastShortcut": {
+            "at": 1794581867986,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "handled": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": null,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": true,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          }
+        },
+        "pointer": {
+          "at": 1794581899449,
+          "phase": "pointerdown",
+          "held": false,
+          "worldTarget": null,
+          "hudHeld": false,
+          "bagHeld": false,
+          "heroHeld": false,
+          "storageHeld": false,
+          "layers": [
+            {
+              "tag": "CANVAS",
+              "canvas": true,
+              "classes": [
+                "shared-quest-ui-visible"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "BUTTON",
+              "canvas": false,
+              "classes": [
+                "tile-hit"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "DIV",
+              "canvas": false,
+              "classes": [
+                "game-world-composite"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "DIV",
+              "canvas": false,
+              "classes": [
+                "client-stage-frame"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "SECTION",
+              "canvas": false,
+              "classes": [
+                "mir-stage"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "MAIN",
+              "canvas": false,
+              "classes": [
+                "mir-client-page"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "BODY",
+              "canvas": false,
+              "classes": [
+                "notranslate"
+              ],
+              "objectId": null
+            },
+            {
+              "tag": "HTML",
+              "canvas": false,
+              "classes": [
+                "notranslate"
+              ],
+              "objectId": null
+            }
+          ]
+        },
+        "host": {
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "suspended": null,
+          "sceneDeferred": false,
+          "lastIntent": {
+            "direction": "Down",
+            "at": 1794581896150,
+            "discrete": true
+          },
+          "lastAttempt": {
+            "reason": "route-awaiting-authority",
+            "at": 1794581907501
+          },
+          "lastPickup": null,
+          "self": {
+            "x": 298,
+            "y": 596,
+            "direction": "UpLeft",
+            "dead": false
+          },
+          "queued": null,
+          "controller": {
+            "canSend": false,
+            "sendDelayMs": 0,
+            "blockedMs": 300,
+            "pending": null
+          },
+          "target": {
+            "x": 298,
+            "y": 597
+          },
+          "targetMapBlocked": false,
+          "targetMapCell": {
+            "x": 298,
+            "y": 597,
+            "middle": "sprite-179"
+          },
+          "nearbyEntities": [
+            {
+              "objectId": "206610",
+              "kind": "monster",
+              "x": 298,
+              "y": 597,
+              "dead": false
+            },
+            {
+              "objectId": "206013",
+              "kind": "monster",
+              "x": 299,
+              "y": 596,
+              "dead": false
+            }
+          ]
+        }
+      },
+      "authority": [
+        {
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "UpLeft",
+            "x": 297,
+            "y": 595
+          },
+          "type": "packet",
+          "seq": 47,
+          "at": 1794581909538
+        }
+      ],
+      "events": [
+        {
+          "type": "armed",
+          "atMs": 1794581899428,
+          "bytes": 0,
+          "armId": 2,
+          "delayMs": 10000,
+          "connectionIds": [
+            15
+          ]
+        },
+        {
+          "type": "clientTrigger",
+          "atMs": 1794581899504,
+          "bytes": 41,
+          "armId": 2,
+          "connectionId": 15,
+          "delayMs": 10000
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581899505,
+          "bytes": 755,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 755
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581899505,
+          "bytes": 845,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 1600
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581899505,
+          "bytes": 146,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 1746
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581899531,
+          "bytes": 196,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 1942
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581899592,
+          "bytes": 110,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2052
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581899685,
+          "bytes": 110,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2162
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581900191,
+          "bytes": 108,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2270
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581900592,
+          "bytes": 108,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2378
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581901180,
+          "bytes": 106,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2484
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581901289,
+          "bytes": 110,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2594
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581901289,
+          "bytes": 180,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2774
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581901718,
+          "bytes": 156,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 2930
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902101,
+          "bytes": 158,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3088
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902388,
+          "bytes": 85,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3173
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902388,
+          "bytes": 143,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3316
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902388,
+          "bytes": 113,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3429
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902388,
+          "bytes": 95,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3524
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902680,
+          "bytes": 158,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3682
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902710,
+          "bytes": 73,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3755
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902789,
+          "bytes": 85,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 3840
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902789,
+          "bytes": 208,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4048
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581902789,
+          "bytes": 110,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4158
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581903389,
+          "bytes": 85,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4243
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581903389,
+          "bytes": 256,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4499
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581903389,
+          "bytes": 95,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4594
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581904284,
+          "bytes": 156,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4750
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581904392,
+          "bytes": 110,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4860
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581904990,
+          "bytes": 85,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 4945
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581904990,
+          "bytes": 143,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 5088
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581904990,
+          "bytes": 113,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 5201
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581904990,
+          "bytes": 95,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 5296
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905191,
+          "bytes": 158,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 5454
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905191,
+          "bytes": 158,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 5612
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905881,
+          "bytes": 84,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 5696
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905881,
+          "bytes": 351,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6047
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905882,
+          "bytes": 84,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6131
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905882,
+          "bytes": 113,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6244
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905882,
+          "bytes": 95,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6339
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581905990,
+          "bytes": 110,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6449
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581906893,
+          "bytes": 156,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6605
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581907588,
+          "bytes": 84,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 6689
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581907588,
+          "bytes": 460,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7149
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581907880,
+          "bytes": 158,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7307
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581907880,
+          "bytes": 158,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7465
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908493,
+          "bytes": 98,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7563
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908493,
+          "bytes": 84,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7647
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908494,
+          "bytes": 143,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7790
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908494,
+          "bytes": 113,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7903
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908494,
+          "bytes": 94,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 7997
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908494,
+          "bytes": 130,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 8127
+        },
+        {
+          "type": "hold",
+          "atMs": 1794581908600,
+          "bytes": 62,
+          "armId": 2,
+          "connectionId": 15,
+          "bufferedBytes": 8189
+        },
+        {
+          "type": "flush",
+          "atMs": 1794581909504,
+          "bytes": 8189,
+          "armId": 2,
+          "connectionId": 15,
+          "delayMs": 10000,
+          "heldForMs": 10000
+        }
+      ],
+      "final": {
+        "x": 297,
+        "y": 595
+      },
+      "chat": [
+        "你已到達 (340, 550) 附近的狩獵區域。請選擇任務目標怪物進行戰鬥。",
+        "正在規劃前往 (324, 291) 的路線…",
+        "正在規劃前往 (324, 291) 的路線…",
+        "移動確認逾時。自動尋路已停止，請等位置更新後重試。"
+      ],
+      "lateAckIsolation": {
+        "clientDeadAtTimeout": false,
+        "clientDeadAfterRelease": true,
+        "scope": "Actual browser timeout clears pending/queue before client sees death. The eventual release includes death, so independent live-client late-ACK behavior is proven by actual Page regression tests, not isolated by this browser case."
+      }
+    },
+    "final": {
+      "x": 297,
+      "y": 595
+    },
+    "lastCommands": [
+      {
+        "type": "run",
+        "direction": "UpLeft",
+        "seq": 46,
+        "at": 1794581899504
+      }
+    ],
+    "lastAuthority": [
+      {
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpLeft",
+          "x": 297,
+          "y": 595
+        },
+        "type": "packet",
+        "seq": 47,
+        "at": 1794581909538
+      }
+    ],
+    "input": {
+      "keyboard": {
+        "lastKey": {
+          "direction": "down",
+          "at": 1794581896149,
+          "defaultPrevented": false,
+          "editable": false,
+          "modifiers": false,
+          "sceneInteractionReady": true,
+          "reason": "received"
+        },
+        "lastDispatch": {
+          "reason": "no-held-direction",
+          "source": "held",
+          "at": 1794581912216,
+          "sceneInteractionReady": true,
+          "bevyQuestUiCapturesPointer": false
+        },
+        "lastShortcut": {
+          "at": 1794581867986,
+          "actions": [
+            "quests"
+          ],
+          "stage": "dispatch",
+          "reason": "window-action",
+          "accepted": true,
+          "handled": true,
+          "repeat": false,
+          "focused": true,
+          "visible": true,
+          "editable": null,
+          "sceneInteractionReady": true,
+          "gameplayCallbackPresent": true,
+          "defaultPrevented": true,
+          "heroActive": false,
+          "heroTransitioning": false,
+          "heroWorldBlocked": false,
+          "heroLeaseHeld": false
+        }
+      },
+      "pointer": {
+        "at": 1794581899449,
+        "phase": "pointerdown",
+        "held": false,
+        "worldTarget": null,
+        "hudHeld": false,
+        "bagHeld": false,
+        "heroHeld": false,
+        "storageHeld": false,
+        "layers": [
+          {
+            "tag": "CANVAS",
+            "canvas": true,
+            "classes": [
+              "shared-quest-ui-visible"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "BUTTON",
+            "canvas": false,
+            "classes": [
+              "tile-hit"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "DIV",
+            "canvas": false,
+            "classes": [
+              "game-world-composite"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "DIV",
+            "canvas": false,
+            "classes": [
+              "client-stage-frame"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "SECTION",
+            "canvas": false,
+            "classes": [
+              "mir-stage"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "MAIN",
+            "canvas": false,
+            "classes": [
+              "mir-client-page"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "BODY",
+            "canvas": false,
+            "classes": [
+              "notranslate"
+            ],
+            "objectId": null
+          },
+          {
+            "tag": "HTML",
+            "canvas": false,
+            "classes": [
+              "notranslate"
+            ],
+            "objectId": null
+          }
+        ]
+      },
+      "host": {
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "suspended": null,
+        "sceneDeferred": false,
+        "lastIntent": {
+          "direction": "Down",
+          "at": 1794581896150,
+          "discrete": true
+        },
+        "lastAttempt": {
+          "reason": "route-awaiting-authority",
+          "at": 1794581907501
+        },
+        "lastPickup": null,
+        "self": {
+          "x": 297,
+          "y": 595,
+          "direction": "UpLeft",
+          "dead": true
+        },
+        "queued": null,
+        "controller": {
+          "canSend": true,
+          "sendDelayMs": 0,
+          "blockedMs": 0,
+          "pending": null
+        },
+        "target": {
+          "x": 297,
+          "y": 596
+        },
+        "targetMapBlocked": false,
+        "targetMapCell": {
+          "x": 297,
+          "y": 596,
+          "middle": "sprite-179"
+        },
+        "nearbyEntities": [
+          {
+            "objectId": "206610",
+            "kind": "monster",
+            "x": 297,
+            "y": 596,
+            "dead": false
+          },
+          {
+            "objectId": "206013",
+            "kind": "monster",
+            "x": 298,
+            "y": 595,
+            "dead": false
+          },
+          {
+            "objectId": "206007",
+            "kind": "monster",
+            "x": 297,
+            "y": 594,
+            "dead": false
+          },
+          {
+            "objectId": "206628",
+            "kind": "monster",
+            "x": 299,
+            "y": 595,
+            "dead": false
+          }
+        ]
+      }
+    },
+    "chat": [
+      "你已到達 (340, 550) 附近的狩獵區域。請選擇任務目標怪物進行戰鬥。",
+      "正在規劃前往 (324, 291) 的路線…",
+      "正在規劃前往 (324, 291) 的路線…",
+      "移動確認逾時。自動尋路已停止，請等位置更新後重試。"
+    ],
+    "events": [
+      {
+        "type": "listening",
+        "atMs": 1794581640538,
+        "bytes": 0,
+        "port": 20630,
+        "upstreamPort": 20634
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640554,
+        "bytes": 0,
+        "connectionId": 1,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640596,
+        "bytes": 0,
+        "connectionId": 2,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640643,
+        "bytes": 0,
+        "connectionId": 3,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640688,
+        "bytes": 0,
+        "connectionId": 4,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640734,
+        "bytes": 0,
+        "connectionId": 5,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640780,
+        "bytes": 0,
+        "connectionId": 6,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640827,
+        "bytes": 0,
+        "connectionId": 7,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640873,
+        "bytes": 0,
+        "connectionId": 8,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "connectionError",
+        "atMs": 1794581640921,
+        "bytes": 0,
+        "connectionId": 9,
+        "side": "upstream",
+        "code": "ECONNREFUSED"
+      },
+      {
+        "type": "handshakeComplete",
+        "atMs": 1794581640975,
+        "bytes": 0,
+        "connectionId": 11
+      },
+      {
+        "type": "handshakeComplete",
+        "atMs": 1794581657126,
+        "bytes": 0,
+        "connectionId": 12
+      },
+      {
+        "type": "handshakeComplete",
+        "atMs": 1794581686746,
+        "bytes": 0,
+        "connectionId": 13
+      },
+      {
+        "type": "handshakeComplete",
+        "atMs": 1794581704677,
+        "bytes": 0,
+        "connectionId": 14
+      },
+      {
+        "type": "handshakeComplete",
+        "atMs": 1794581842683,
+        "bytes": 0,
+        "connectionId": 15
+      },
+      {
+        "type": "armed",
+        "atMs": 1794581888436,
+        "bytes": 0,
+        "armId": 1,
+        "delayMs": 6900,
+        "connectionIds": [
+          15
+        ]
+      },
+      {
+        "type": "clientTrigger",
+        "atMs": 1794581888520,
+        "bytes": 41,
+        "armId": 1,
+        "connectionId": 15,
+        "delayMs": 6900
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888522,
+        "bytes": 755,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 755
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888522,
+        "bytes": 92,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 847
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888522,
+        "bytes": 751,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 1598
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888522,
+        "bytes": 73,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 1671
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888522,
+        "bytes": 754,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 2425
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888522,
+        "bytes": 73,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 2498
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581888805,
+        "bytes": 294,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 2792
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581889187,
+        "bytes": 162,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 2954
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581889891,
+        "bytes": 85,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 3039
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581889891,
+        "bytes": 351,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 3390
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581889983,
+        "bytes": 156,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 3546
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581890586,
+        "bytes": 85,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 3631
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581890586,
+        "bytes": 351,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 3982
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581891888,
+        "bytes": 162,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 4144
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581892586,
+        "bytes": 85,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 4229
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581892586,
+        "bytes": 351,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 4580
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581892686,
+        "bytes": 156,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 4736
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581893394,
+        "bytes": 85,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 4821
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581893394,
+        "bytes": 351,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 5172
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581894580,
+        "bytes": 162,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 5334
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581895194,
+        "bytes": 85,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 5419
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581895194,
+        "bytes": 256,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 5675
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581895194,
+        "bytes": 95,
+        "armId": 1,
+        "connectionId": 15,
+        "bufferedBytes": 5770
+      },
+      {
+        "type": "flush",
+        "atMs": 1794581895423,
+        "bytes": 5770,
+        "armId": 1,
+        "connectionId": 15,
+        "delayMs": 6900,
+        "heldForMs": 6903
+      },
+      {
+        "type": "armed",
+        "atMs": 1794581899428,
+        "bytes": 0,
+        "armId": 2,
+        "delayMs": 10000,
+        "connectionIds": [
+          15
+        ]
+      },
+      {
+        "type": "clientTrigger",
+        "atMs": 1794581899504,
+        "bytes": 41,
+        "armId": 2,
+        "connectionId": 15,
+        "delayMs": 10000
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581899505,
+        "bytes": 755,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 755
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581899505,
+        "bytes": 845,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 1600
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581899505,
+        "bytes": 146,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 1746
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581899531,
+        "bytes": 196,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 1942
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581899592,
+        "bytes": 110,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2052
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581899685,
+        "bytes": 110,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2162
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581900191,
+        "bytes": 108,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2270
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581900592,
+        "bytes": 108,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2378
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581901180,
+        "bytes": 106,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2484
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581901289,
+        "bytes": 110,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2594
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581901289,
+        "bytes": 180,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2774
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581901718,
+        "bytes": 156,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 2930
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902101,
+        "bytes": 158,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3088
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902388,
+        "bytes": 85,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3173
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902388,
+        "bytes": 143,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3316
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902388,
+        "bytes": 113,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3429
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902388,
+        "bytes": 95,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3524
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902680,
+        "bytes": 158,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3682
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902710,
+        "bytes": 73,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3755
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902789,
+        "bytes": 85,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 3840
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902789,
+        "bytes": 208,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4048
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581902789,
+        "bytes": 110,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4158
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581903389,
+        "bytes": 85,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4243
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581903389,
+        "bytes": 256,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4499
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581903389,
+        "bytes": 95,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4594
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581904284,
+        "bytes": 156,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4750
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581904392,
+        "bytes": 110,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4860
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581904990,
+        "bytes": 85,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 4945
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581904990,
+        "bytes": 143,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 5088
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581904990,
+        "bytes": 113,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 5201
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581904990,
+        "bytes": 95,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 5296
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905191,
+        "bytes": 158,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 5454
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905191,
+        "bytes": 158,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 5612
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905881,
+        "bytes": 84,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 5696
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905881,
+        "bytes": 351,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6047
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905882,
+        "bytes": 84,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6131
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905882,
+        "bytes": 113,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6244
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905882,
+        "bytes": 95,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6339
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581905990,
+        "bytes": 110,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6449
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581906893,
+        "bytes": 156,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6605
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581907588,
+        "bytes": 84,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 6689
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581907588,
+        "bytes": 460,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7149
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581907880,
+        "bytes": 158,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7307
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581907880,
+        "bytes": 158,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7465
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908493,
+        "bytes": 98,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7563
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908493,
+        "bytes": 84,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7647
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908494,
+        "bytes": 143,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7790
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908494,
+        "bytes": 113,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7903
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908494,
+        "bytes": 94,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 7997
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908494,
+        "bytes": 130,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 8127
+      },
+      {
+        "type": "hold",
+        "atMs": 1794581908600,
+        "bytes": 62,
+        "armId": 2,
+        "connectionId": 15,
+        "bufferedBytes": 8189
+      },
+      {
+        "type": "flush",
+        "atMs": 1794581909504,
+        "bytes": 8189,
+        "armId": 2,
+        "connectionId": 15,
+        "delayMs": 10000,
+        "heldForMs": 10000
+      }
+    ]
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "scope": "Actual installed Edge default path, existing read-only diagnostics flags, cold then fully closed browser warm session. Real earned two Scarecrow kills, current shipped WASM target filtering, actual Native UI route and raw byte-transparent inbound delays. No administrative command/state injection.",
+  "transportClosed": true
+}

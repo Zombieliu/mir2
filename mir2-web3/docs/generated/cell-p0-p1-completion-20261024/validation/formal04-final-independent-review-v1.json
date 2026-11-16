@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-24T21:54:18.548Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Read-only static final formal04 launcher/collector/gate closure. Probe07 is live; no actual feasibility gate, product import, prepare, test, build, service, large raw or recording parse executed.",
+  "manifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal-native-v2-ladder-04/launcher-source-frozen-v1.json",
+    "bytes": 7101,
+    "sha256": "12dbc3f7c4f44ce9a9f0310e13cb268be28cd1fcb165d368cec546560a9e5d9d"
+  },
+  "sourceSha256": "be4a4476a6ea943fed8d7b060959928c67040bbac1415d699dbe97c9d08a8008",
+  "scriptSourceSha256": "11bf6b61aa90db76362519221577585ed3f3bed8634f8aafe8395cf8b0b5d89f",
+  "checkedPinnedFiles": 26,
+  "checkedScripts": 13,
+  "guardReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal-native-v2-ladder-04/source-guard-readonly-verification.json",
+    "bytes": 12960,
+    "sha256": "e6e0e202661cfd4a5c1fb6a539bbb60c682ae5781b3e60a8bc1fb38b4e54f9f8"
+  },
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "checkedCurrentDriverFiles": 9,
+  "formalCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "actualProbe07ProcessMetadata": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-patrol-feasibility-07/realm-process.json",
+    "bytes": 1345,
+    "sha256": "9f30bf34d574d2c885db584fc12192c42a11bcfd299c71270ef07018ab9bc4c1"
+  },
+  "probe07Caps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "scenarioAndResourceOriginal03ByteEqual": true,
+  "entirePolicyOriginal03Equal": true,
+  "formalRequirements": {
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "secondsPerStage": 300,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeObservationSeconds": 60,
+    "wallSeconds": 18000,
+    "combatActors": 10
+  },
+  "gateRequirements": {
+    "realSameDriverProbe07": true,
+    "phases": [
+      "stage-2",
+      "stage-10",
+      "soak"
+    ],
+    "seconds": [
+      300,
+      300,
+      360
+    ],
+    "passingCompleteWindows": [
+      5,
+      5,
+      6
+    ],
+    "exactBackend39AndDriver9": true,
+    "rawPhasesAndMonitorContinuity": true,
+    "normalSixCounterProcessPortCleanup": true,
+    "slowDiagnosticsComplete": true,
+    "probeRemainsCapacityIneligible": true
+  },
+  "blockingFindings": [],
+  "limitations": [
+    "Static approval does not authorize starting formal04 before the real07 complete success and normal cleanup gate passes.",
+    "Guard receipt and original backend binding were read and pinned; expensive backend rebuild/hash or suite was not repeated during the live CPU window.",
+    "Formal03 remains failed; no formal acceptance or rootcause resolution is inferred."
+  ],
+  "runtimeGateExecuted": false,
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

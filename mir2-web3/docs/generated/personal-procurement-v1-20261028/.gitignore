@@ -1,0 +1,3 @@
+# Keep this bounded evidence bundle's raw logs despite repository-wide *.log.
+!*.log
+!**/*.log

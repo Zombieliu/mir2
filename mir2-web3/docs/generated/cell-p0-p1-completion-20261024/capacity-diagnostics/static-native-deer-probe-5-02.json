@@ -1,0 +1,63 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 255,
+      "y": 637
+    },
+    {
+      "x": 262,
+      "y": 635
+    },
+    {
+      "x": 265,
+      "y": 636
+    },
+    {
+      "x": 256,
+      "y": 640
+    },
+    {
+      "x": 259,
+      "y": 641
+    }
+  ],
+  "monsterNames": [
+    "Deer"
+  ],
+  "generated": {
+    "staticOnly": true,
+    "spacing": 4,
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "center": {
+      "x": 260,
+      "y": 640
+    },
+    "actors": 5,
+    "patrolFootprint": "3x3 clear, non-overlapping cells excluding known stationary NPCs",
+    "stationaryNpcCount": 46,
+    "meanVisiblePeers": 4,
+    "minimumVisiblePeers": 4,
+    "maximumVisiblePeers": 4,
+    "limitation": "Static collision and doorway planning only; no login, movement, live occupancy, monster supply or performance acceptance",
+    "naturalMonsterSupplyTested": false,
+    "intendedUse": "Fresh old-dev 5-actor native scenario diagnostic at passive deer field; one fighter, four AOI witnesses"
+  },
+  "patrolSpan": 2,
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        2
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        3,
+        4
+      ]
+    }
+  ]
+}

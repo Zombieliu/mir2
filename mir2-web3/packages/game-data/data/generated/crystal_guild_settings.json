@@ -1,0 +1,70 @@
+{
+  "source": "Crystal/Build/Server/Debug/Configs/GuildSettings.ini",
+  "sourceSha256": "f044375e6eab8d1af811ce0a17a230dacdc169958379a5089da716c1e19e57d8",
+  "minimumLevel": 22,
+  "experienceRate": 0.01,
+  "pointsPerLevel": 1,
+  "warTime": 180,
+  "warCost": 30000,
+  "newbieGuildBuffEnabled": true,
+  "newbieGuildExpBuff": 5,
+  "totalBuffs": 16,
+  "creationCosts": [
+    {
+      "itemName": "",
+      "amount": 1000000
+    },
+    {
+      "itemName": "WoomaHorn",
+      "amount": 1
+    }
+  ],
+  "experienceLevels": [
+    45000,
+    700000,
+    950000,
+    1200000,
+    1450000,
+    1700000,
+    1950000,
+    2200000,
+    2450000,
+    2700000,
+    3200000,
+    4700000,
+    6200000,
+    7700000,
+    9200000,
+    12000000,
+    17000000,
+    22000000,
+    27000000,
+    32000000,
+    37000000,
+    999999999999999999
+  ],
+  "memberCaps": [
+    5,
+    5,
+    6,
+    7,
+    9,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    1000
+  ]
+}

@@ -1,0 +1,25 @@
+Full retained log: C:/mir2-build/crowded-gateway-cast-red-20261003.log
+SHA256: c358004b6af7c2ed53c6ad766acc73bbc02c1b686cba38c9ad30406a4ad3d09c
+
+running 4 tests
+test routing::tests::crowded_escape_tests::crowded_dazed_owner_cannot_bypass_physical_admission_with_normal_packet ... ok
+test routing::tests::crowded_escape_tests::crowded_status_owner_cannot_bypass_cast_lock_or_spend_with_normal_magic_packet ... FAILED
+test routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet ... ok
+test routing::tests::crowded_escape_tests::crowded_uncontrolled_owner_can_cast_normal_magic_packet ... ok
+---- routing::tests::crowded_escape_tests::crowded_status_owner_cannot_bypass_cast_lock_or_spend_with_normal_magic_packet stdout ----
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 894 filtered out; finished in 4.05s
+
+Failure details:
+---- routing::tests::crowded_escape_tests::crowded_status_owner_cannot_bypass_cast_lock_or_spend_with_normal_magic_packet stdout ----
+
+thread 'routing::tests::crowded_escape_tests::crowded_status_owner_cannot_bypass_cast_lock_or_spend_with_normal_magic_packet' (55756) panicked at apps\gateway\src\routing\tests\crowded_escape_tests.rs:137:9:
+crystal-stun must reject an ordinary cast: [ObjectMonster { info: MonsterInfo { object_id: 260909, name: "Deer", name_colour_argb: -1, location: Point { x: 331, y: 270 }, image: 4, direction: Down, effect: 0, ai: 2, light: 0, dead: false, skeleton: false, poison: 0, hidden: false, shock_time: 0, binding_shot_center: false, extra: false, extra_byte: 0, master_object_id: 0, rarity: 0, buffs: [] } }, UserLocation { location: UserLocation { position: Point { x: 330, y: 270 }, direction: Right } }, Magic { spell: FireBall, target_id: 260909, target: Point { x: 331, y: 270 }, cast: true, level: 0, secondary_target_ids: [] }, ObjectMagic { object_id: 1000, location: Point { x: 330, y: 270 }, direction: Right, spell: FireBall, target_id: 260909, target: Point { x: 331, y: 270 }, cast: true, level: 0, self_broadcast: false, secondary_target_ids: [] }, ObjectMana { info: ObjectManaInfo { object_id: 50000, percent: 97 } }, ObjectProjectile { spell: FireBall, source_id: 50000, destination_id: 260909 }, GuildStatus { guild_name: "", guild_rank_name: "", level: 0, experience: 0, max_experience: 0, gold: 0, spare_points: 0, member_count: 0, max_members: 0, voting: false, item_count: 0, buff_count: 0, my_options: 0, my_rank_id: -1 }, GuildMemberChange { name: "", rank_index: 0, status: 255, ranks: [] }, GuildBuffList { remove: 0, active_buffs: [], guild_buffs: [] }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    routing::tests::crowded_escape_tests::crowded_status_owner_cannot_bypass_cast_lock_or_spend_with_normal_magic_packet
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 894 filtered out; finished in 4.05s
+
+error: test failed, to rerun pass `-p mir2-gateway --lib`

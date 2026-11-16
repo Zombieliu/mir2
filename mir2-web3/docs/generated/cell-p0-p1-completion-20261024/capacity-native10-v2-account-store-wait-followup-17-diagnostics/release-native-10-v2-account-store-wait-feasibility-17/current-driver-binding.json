@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_NEW_ACCOUNT_STORE_BACKEND_AND_HISTORICAL_NODE9",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "driverFrozenFile": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+  "driverManifestBytes": 6759,
+  "driverManifestSha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b",
+  "backendBinarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "currentEvidence": [
+    {
+      "tests": 210,
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\frozen-full-driver-receipt-v1.json",
+        "bytes": 4758,
+        "sha256": "c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4"
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\frozen-full-driver-v1.log",
+        "bytes": 56491,
+        "sha256": "537f26b4a6037136470083a6a90acbf9ccc432f47f38cdeb82aace539b65dfb0"
+      }
+    }
+  ],
+  "staticGeometryCompatibilityProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 4074,
+    "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+  },
+  "historicalWrapperEvidence": {
+    "coreCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreFullTests": 187,
+    "wrapperTests": 28,
+    "adapterTests": 8,
+    "notCurrent210Coverage": true
+  },
+  "declarationBasis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-chase-preference-driver-frozen-v1.json",
+    "bytes": 19099,
+    "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+  },
+  "driverFreezeRole": "Unchanged historical d240 Node9/5ba and actual210 only; active new50 backend/Release/full16/execution is separate, not a new Node regression.",
+  "rootExecutionApproval": false,
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false
+}

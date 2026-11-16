@@ -1,0 +1,354 @@
+{
+  "schema": "mir2.r16.group-mixed-case.browser/1",
+  "base": "6c55c05aae4c215d709724ccea5bdcae3dc17702",
+  "localOnly": true,
+  "source": {
+    "apps/game-client/runtime/src/lib.rs": "30c4a6c4c5ba43167e0dd9da142d2e53aa23b4c213c8912e06986d698d9e3905",
+    "apps/game-client/client-bevy/src/social.rs": "cc2a0165b74e71949a64002e7b9acfaa92f21857b8aa5368f4122e3e2aa4c1e3",
+    "apps/web/lib/group-operations.ts": "8990da258e79e83048f210da420438e0c37e0f85c0ce8f594750a6d468aed160",
+    "apps/web/app/page.tsx": "23c30db0f6fe81268c0f6c256dd9f22bbc10791c54f3fb392ea771a6e2698f6a",
+    "apps/web/app/components/original-client-group-window.tsx": "95230d7ee5f10b82b1e829670a0b17fd51cfd349b5244ef2a35db5c4aed91cd7",
+    "apps/web/app/components/original-client-trade-window.tsx": "f6de8fab3eef174d64ab09bbb5a8226536ddc03d37beae6e70ec93c72f55d384"
+  },
+  "runtimeVersion": "bevy-81b7623f6e65d0ea",
+  "runtimeFiles": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "b30146482550703a7309d8471154d2200dc55a47aea2b9910b6895aea7d70069"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "b686360cd3a5f34577494cb16b9ce909e1cd5721b5ab83ecd2a1dc19a2818d1b"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "ce2d23207f4689b46109b11f06b758caa120d457f0a9bb8cd38e9a267889c3ca"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "35d1ad1206bba4693cef1d4f19ca2bc6e4cd173c4bbf1279daaf1eb745c1e66a"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "996874c0aa81b9dc4253935b7c27a4bc6bb73f833ecdc461d7c242ec468be4cc"
+    }
+  ],
+  "gatewaySha256": "72d53d80e3b2a664ae01bfc38b96b997a86c1b184f8dc7c148e40b76e4572d62",
+  "fixture": {
+    "ordinaryRegistrations": 2,
+    "ordinaryPositioningWalks": 1
+  },
+  "phases": [
+    "reserve-owned-loopback",
+    "ordinary-new-file-registration",
+    "fresh-frozen-web",
+    "next-production-build-webpack",
+    "next-production-start",
+    "owner-normal-browser-login",
+    "owner-group-panel-before-recipient",
+    "recipient-normal-browser-login",
+    "typed-mixed-case-invite",
+    "ordinary-canonical-removal",
+    "repeat-same-typed-spelling-and-same-connections",
+    "normal-browser-logouts"
+  ],
+  "checks": [
+    {
+      "stage": "first-authoritative-join",
+      "typedName": "bLaDe",
+      "ownerConnection": 1,
+      "peerConnection": 1,
+      "canonicalReceipt": "Blade",
+      "members": [
+        "CaseGuide",
+        "Blade"
+      ]
+    },
+    {
+      "stage": "second-authoritative-join",
+      "typedName": "bLaDe",
+      "ownerConnection": 1,
+      "peerConnection": 1,
+      "canonicalReceipt": "Blade",
+      "members": [
+        "CaseGuide",
+        "Blade"
+      ]
+    }
+  ],
+  "browserErrors": [],
+  "networkErrors": [],
+  "stopped": {
+    "next": true,
+    "gateway": true
+  },
+  "screenshots": [
+    {
+      "name": "typed-bLaDe",
+      "sha256": "92cb7b95de55827769908e0c20210ae54896f394eecec3e542ca151900f147b8"
+    },
+    {
+      "name": "first-authoritative-roster",
+      "sha256": "c7bad6f70f9e57422d1b37e6228539984347f390f5416a56cad66ecf072f7faa"
+    },
+    {
+      "name": "second-authoritative-roster",
+      "sha256": "c7bad6f70f9e57422d1b37e6228539984347f390f5416a56cad66ecf072f7faa"
+    }
+  ],
+  "participants": {
+    "owner": {
+      "socketCount": 1,
+      "commands": [
+        {
+          "connection": 1,
+          "type": "addMember",
+          "name": "bLaDe"
+        },
+        {
+          "connection": 1,
+          "type": "delMember",
+          "name": "Blade"
+        },
+        {
+          "connection": 1,
+          "type": "addMember",
+          "name": "bLaDe"
+        },
+        {
+          "connection": 1,
+          "type": "logOut"
+        }
+      ],
+      "packets": [
+        {
+          "connection": 1,
+          "packet": "StartGame",
+          "result": 4
+        },
+        {
+          "connection": 1,
+          "packet": "SwitchGroup",
+          "allowGroup": false
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "SwitchGroup",
+          "allowGroup": true
+        },
+        {
+          "connection": 1,
+          "packet": "SwitchGroup",
+          "allowGroup": true
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "CaseGuide"
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "Blade"
+        },
+        {
+          "connection": 1,
+          "packet": "GroupMemberInfo",
+          "members": [
+            "CaseGuide",
+            "Blade"
+          ]
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "SwitchGroup",
+          "allowGroup": true
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "CaseGuide"
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "Blade"
+        },
+        {
+          "connection": 1,
+          "packet": "GroupMemberInfo",
+          "members": [
+            "CaseGuide",
+            "Blade"
+          ]
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "LogOutSuccess"
+        }
+      ],
+      "runtimeRequests": [
+        {
+          "path": "/bevy-runtime/v/bevy-81b7623f6e65d0ea/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": 200
+        },
+        {
+          "path": "/bevy-runtime/v/bevy-81b7623f6e65d0ea/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200
+        }
+      ],
+      "navigations": [
+        {
+          "path": "/game",
+          "at": 1794263827827
+        },
+        {
+          "path": "/game",
+          "at": 1794263828095
+        }
+      ],
+      "closes": []
+    },
+    "recipient": {
+      "socketCount": 1,
+      "commands": [
+        {
+          "connection": 1,
+          "type": "groupInvite",
+          "acceptInvite": true
+        },
+        {
+          "connection": 1,
+          "type": "groupInvite",
+          "acceptInvite": true
+        },
+        {
+          "connection": 1,
+          "type": "logOut"
+        }
+      ],
+      "packets": [
+        {
+          "connection": 1,
+          "packet": "StartGame",
+          "result": 4
+        },
+        {
+          "connection": 1,
+          "packet": "SwitchGroup",
+          "allowGroup": false
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "SwitchGroup",
+          "allowGroup": true
+        },
+        {
+          "connection": 1,
+          "packet": "GroupInvite",
+          "name": "CaseGuide"
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "CaseGuide"
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "Blade"
+        },
+        {
+          "connection": 1,
+          "packet": "GroupMemberInfo",
+          "members": [
+            "CaseGuide",
+            "Blade"
+          ]
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "GroupInvite",
+          "name": "CaseGuide"
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "CaseGuide"
+        },
+        {
+          "connection": 1,
+          "packet": "AddMember",
+          "name": "Blade"
+        },
+        {
+          "connection": 1,
+          "packet": "GroupMemberInfo",
+          "members": [
+            "CaseGuide",
+            "Blade"
+          ]
+        },
+        {
+          "connection": 1,
+          "packet": "DeleteGroup"
+        },
+        {
+          "connection": 1,
+          "packet": "LogOutSuccess"
+        }
+      ],
+      "runtimeRequests": [
+        {
+          "path": "/bevy-runtime/v/bevy-81b7623f6e65d0ea/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": 200
+        },
+        {
+          "path": "/bevy-runtime/v/bevy-81b7623f6e65d0ea/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200
+        }
+      ],
+      "navigations": [
+        {
+          "path": "/game",
+          "at": 1794263844148
+        },
+        {
+          "path": "/game",
+          "at": 1794263844413
+        }
+      ],
+      "closes": []
+    }
+  },
+  "tradeWebOverlay": "97b660e526",
+  "result": "pass"
+}

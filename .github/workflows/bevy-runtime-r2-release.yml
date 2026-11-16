@@ -1,0 +1,92 @@
+name: Publish pinned Bevy runtime leaves to R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      runtime_version:
+        description: Exact verified Numeron renderer version
+        required: true
+        type: string
+      runtime_manifest_sha256:
+        description: Exact SHA256 of the verified Numeron renderer manifest
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mir2-bevy-runtime-r2-release
+  cancel-in-progress: false
+
+jobs:
+  publish-runtime-leaves:
+    if: >-
+      github.repository == 'Zombieliu/mir2' &&
+      github.ref == 'refs/heads/codex/windows-player-journey' &&
+      inputs.runtime_version == 'bevy-0c553a754308e5b8' &&
+      inputs.runtime_manifest_sha256 == '36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/web
+    env:
+      EXPECTED_RUNTIME_VERSION: bevy-0c553a754308e5b8
+      EXPECTED_RUNTIME_MANIFEST_SHA256: 36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Read the immutable renderer bundle
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: c52640554fde32200d1d0da802c5b1bad74a08cb
+          path: r16-renderer-artifact
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify local files and derive the six versioned object keys
+        run: |
+          bundle="$GITHUB_WORKSPACE/r16-renderer-artifact/r16-ui-asset-recovery-bevy.tar.gz"
+          printf '%s  %s\n' '9088d3ca71c77866d652f362524bd9e50cc3b27f8871e7cf7033ec0cb448ea92' "$bundle" | sha256sum --check
+          mkdir -p public/bevy-runtime-releases
+          tar --no-same-owner --no-same-permissions -xzf "$bundle" -C public/bevy-runtime-releases
+          cp lib/generated/bevy_runtime_version_numeron_r16.json lib/generated/bevy_runtime_version.json
+          node --test scripts/test-bevy-runtime-r2-upload.mjs
+          node scripts/build-bevy-runtime-r2-release.mjs \
+            --assetVersion 20261108-r16-08ec86d5105c \
+            --objectPrefix mir2/v/20261108-r16-08ec86d5105c \
+            --assetBaseUrl https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c \
+            --output "$RUNNER_TEMP/bevy-runtime-r2-release.json"
+          node scripts/verify-bevy-runtime-r2-upload.mjs --releaseManifest "$RUNNER_TEMP/bevy-runtime-r2-release.json"
+      - name: Check remote leaves and validate the missing subset without credentials
+        id: missing
+        run: |
+          npm ci --no-audit --no-fund
+          node scripts/verify-bevy-runtime-r2-upload.mjs \
+            --releaseManifest "$RUNNER_TEMP/bevy-runtime-r2-release.json" \
+            --prepareMissing "$RUNNER_TEMP/bevy-runtime-r2-missing.json"
+          node scripts/upload-r2-assets.mjs \
+            --manifest "$RUNNER_TEMP/bevy-runtime-r2-missing.json" \
+            --driver worker --bucket mir2-web3-assets \
+            --includeReleaseManifest false --ensureBucket false --dryRun true
+      - name: Publish only the missing versioned leaves through the existing uploader
+        if: steps.missing.outputs.missing_count != '0'
+        env:
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+        run: |
+          test -n "$MIR2_R2_UPLOAD_WORKER_URL"
+          test -n "$MIR2_R2_UPLOAD_SECRET"
+          node scripts/upload-r2-assets.mjs \
+            --manifest "$RUNNER_TEMP/bevy-runtime-r2-missing.json" \
+            --driver worker --bucket mir2-web3-assets \
+            --includeReleaseManifest false --ensureBucket false \
+            --concurrency 1 --maxAttempts 1 --progressEvery 1
+      - name: Read back every decoded leaf and verify its storage representation
+        run: |
+          node scripts/verify-bevy-runtime-r2-upload.mjs \
+            --releaseManifest "$RUNNER_TEMP/bevy-runtime-r2-release.json" --verifyRemote

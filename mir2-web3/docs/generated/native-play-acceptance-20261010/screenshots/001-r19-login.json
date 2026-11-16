@@ -1,0 +1,13 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/001-r19-login.jpg",
+  "sha256": "b7d239a1e493ceb06c65bc488d0e6a7847abaeb8067e184942b3475bb16717c4",
+  "bytes": 317178,
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 230887572,
+    "title": "numeron-legend of rebirth"
+  },
+  "description": "Observed installed R19 login, no credentials entered; updater R23 activation failed.",
+  "savedForAcceptanceEvidence": true
+}

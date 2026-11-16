@@ -1,0 +1,1506 @@
+TAP version 13
+# Subtest: browser dictionaries use the ten native languages in the native order
+not ok 1 - browser dictionaries use the ten native languages in the native order
+  ---
+  duration_ms: 1.5855
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:32:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    45 !== 49
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 49
+  actual: 45
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:35:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: zh-CN supplies every browser control without blank values
+not ok 2 - zh-CN supplies every browser control without blank values
+  ---
+  duration_ms: 0.6408
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: zh-TW supplies every browser control without blank values
+not ok 3 - zh-TW supplies every browser control without blank values
+  ---
+  duration_ms: 0.2406
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: en supplies every browser control without blank values
+not ok 4 - en supplies every browser control without blank values
+  ---
+  duration_ms: 0.1589
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: pt-BR supplies every browser control without blank values
+not ok 5 - pt-BR supplies every browser control without blank values
+  ---
+  duration_ms: 0.1852
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: ru supplies every browser control without blank values
+not ok 6 - ru supplies every browser control without blank values
+  ---
+  duration_ms: 0.246
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: hi supplies every browser control without blank values
+not ok 7 - hi supplies every browser control without blank values
+  ---
+  duration_ms: 0.1306
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: id supplies every browser control without blank values
+not ok 8 - id supplies every browser control without blank values
+  ---
+  duration_ms: 0.1809
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: vi supplies every browser control without blank values
+not ok 9 - vi supplies every browser control without blank values
+  ---
+  duration_ms: 0.3414
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: th supplies every browser control without blank values
+not ok 10 - th supplies every browser control without blank values
+  ---
+  duration_ms: 0.4782
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: ar supplies every browser control without blank values
+not ok 11 - ar supplies every browser control without blank values
+  ---
+  duration_ms: 0.2153
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-browser-localization.mjs:39:43'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'browser.accountInfo',
+        'browser.accountSecurity',
+        'browser.diagnostics',
+        'browser.settings',
+    ...
+        'ui.confirmReturnToCharacterSelect',
+    -   'ui.death.message',
+    -   'ui.death.revive',
+    -   'ui.death.reviving',
+    -   'ui.death.title',
+        'ui.effects',
+        'ui.effectsVolume',
+        'ui.fishingReel',
+        'ui.gameTextLoadUnavailable',
+        'ui.gameTextLoading',
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.death.message'
+    10: 'ui.death.revive'
+    11: 'ui.death.reviving'
+    12: 'ui.death.title'
+    13: 'ui.effects'
+    14: 'ui.effectsVolume'
+    15: 'ui.fishingReel'
+    16: 'ui.gameTextLoadUnavailable'
+    17: 'ui.gameTextLoading'
+    18: 'ui.languageSettings'
+    19: 'ui.masterVolume'
+    20: 'ui.music'
+    21: 'ui.musicVolume'
+    22: 'ui.muteAll'
+    23: 'ui.off'
+    24: 'ui.on'
+    25: 'ui.passkeyLogin'
+    26: 'ui.questActionPending'
+    27: 'ui.questActionRewardRequired'
+    28: 'ui.questActionStateChanged'
+    29: 'ui.questActionTalkToNpc'
+    30: 'ui.questClientLoading'
+    31: 'ui.questClientUnavailable'
+    32: 'ui.questRouteArrived'
+    33: 'ui.questRouteHuntArrived'
+    34: 'ui.questRouteLoadingTimeout'
+    35: 'ui.questRouteNpcArrived'
+    36: 'ui.questRoutePlanning'
+    37: 'ui.questRouteUnavailable'
+    38: 'ui.quickEnter'
+    39: 'ui.retry'
+    40: 'ui.routeConfirmationTimeout'
+    41: 'ui.sceneLoadUnavailable'
+    42: 'ui.unmuteAll'
+    43: 'ui.walletApproveOnDevice'
+    44: 'ui.walletLogin'
+    45: 'ui.walletMissing'
+    46: 'ui.walletQrAlt'
+    47: 'ui.walletQrFailed'
+    48: 'ui.walletQrRetryHint'
+  actual:
+    0: 'browser.accountInfo'
+    1: 'browser.accountSecurity'
+    2: 'browser.diagnostics'
+    3: 'browser.settings'
+    4: 'browser.settingsDetail'
+    5: 'browser.signIn'
+    6: 'ui.audio'
+    7: 'ui.characterCreateUnconfirmed'
+    8: 'ui.confirmReturnToCharacterSelect'
+    9: 'ui.effects'
+    10: 'ui.effectsVolume'
+    11: 'ui.fishingReel'
+    12: 'ui.gameTextLoadUnavailable'
+    13: 'ui.gameTextLoading'
+    14: 'ui.languageSettings'
+    15: 'ui.masterVolume'
+    16: 'ui.music'
+    17: 'ui.musicVolume'
+    18: 'ui.muteAll'
+    19: 'ui.off'
+    20: 'ui.on'
+    21: 'ui.passkeyLogin'
+    22: 'ui.questActionPending'
+    23: 'ui.questActionRewardRequired'
+    24: 'ui.questActionStateChanged'
+    25: 'ui.questActionTalkToNpc'
+    26: 'ui.questClientLoading'
+    27: 'ui.questClientUnavailable'
+    28: 'ui.questRouteArrived'
+    29: 'ui.questRouteHuntArrived'
+    30: 'ui.questRouteLoadingTimeout'
+    31: 'ui.questRouteNpcArrived'
+    32: 'ui.questRoutePlanning'
+    33: 'ui.questRouteUnavailable'
+    34: 'ui.quickEnter'
+    35: 'ui.retry'
+    36: 'ui.routeConfirmationTimeout'
+    37: 'ui.sceneLoadUnavailable'
+    38: 'ui.unmuteAll'
+    39: 'ui.walletApproveOnDevice'
+    40: 'ui.walletLogin'
+    41: 'ui.walletMissing'
+    42: 'ui.walletQrAlt'
+    43: 'ui.walletQrFailed'
+    44: 'ui.walletQrRetryHint'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: unknown languages and keys preserve the caller's fallback
+ok 12 - unknown languages and keys preserve the caller's fallback
+  ---
+  duration_ms: 0.2182
+  type: 'test'
+  ...
+# Subtest: native wallet captions are not redefined by the browser dictionary
+ok 13 - native wallet captions are not redefined by the browser dictionary
+  ---
+  duration_ms: 0.0706
+  type: 'test'
+  ...
+# Subtest: browser settings explain the extra volume/account/sign-in scope
+ok 14 - browser settings explain the extra volume/account/sign-in scope
+  ---
+  duration_ms: 0.1505
+  type: 'test'
+  ...
+# Subtest: type-only native compatibility does not pull a runtime dependency
+ok 15 - type-only native compatibility does not pull a runtime dependency
+  ---
+  duration_ms: 0.1434
+  type: 'test'
+  ...
+# Subtest: quest feedback covers every language without exposing implementation terms
+ok 16 - quest feedback covers every language without exposing implementation terms
+  ---
+  duration_ms: 0.586
+  type: 'test'
+  ...
+# Subtest: zh-CN route feedback preserves exact coordinate placeholders and local wording
+ok 17 - zh-CN route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.4427
+  type: 'test'
+  ...
+# Subtest: zh-TW route feedback preserves exact coordinate placeholders and local wording
+ok 18 - zh-TW route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1068
+  type: 'test'
+  ...
+# Subtest: en route feedback preserves exact coordinate placeholders and local wording
+ok 19 - en route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1372
+  type: 'test'
+  ...
+# Subtest: pt-BR route feedback preserves exact coordinate placeholders and local wording
+ok 20 - pt-BR route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0485
+  type: 'test'
+  ...
+# Subtest: ru route feedback preserves exact coordinate placeholders and local wording
+ok 21 - ru route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1103
+  type: 'test'
+  ...
+# Subtest: hi route feedback preserves exact coordinate placeholders and local wording
+ok 22 - hi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0477
+  type: 'test'
+  ...
+# Subtest: id route feedback preserves exact coordinate placeholders and local wording
+ok 23 - id route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0373
+  type: 'test'
+  ...
+# Subtest: vi route feedback preserves exact coordinate placeholders and local wording
+ok 24 - vi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0434
+  type: 'test'
+  ...
+# Subtest: th route feedback preserves exact coordinate placeholders and local wording
+ok 25 - th route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0343
+  type: 'test'
+  ...
+# Subtest: ar route feedback preserves exact coordinate placeholders and local wording
+ok 26 - ar route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0344
+  type: 'test'
+  ...
+# Subtest: route arrival describes a hunting area or NPC approach and leaves the next action to the player
+ok 27 - route arrival describes a hunting area or NPC approach and leaves the next action to the player
+  ---
+  duration_ms: 0.9271
+  type: 'test'
+  ...
+# Subtest: movement confirmation timeout is localized without placeholders, budgets or implementation terms
+ok 28 - movement confirmation timeout is localized without placeholders, budgets or implementation terms
+  ---
+  duration_ms: 0.5276
+  type: 'test'
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 17
+# fail 11
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 343.5983

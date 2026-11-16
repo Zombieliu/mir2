@@ -1,0 +1,360 @@
+{
+  "kind": "r16-walking-recovery-local-r9-partial",
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "passed": false,
+  "qualifiedFullFourSessions": false,
+  "scope": "Actual cold compiled Walking consumption passed; the same invocation failed during warm target selection. Not a production release or full local qualification.",
+  "evidence": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r7/game-full/quest-after-r9/entry-visual-receipt.json",
+      "sha256": "e66a8c977d304d8517a91fb23b99c531322194344b66a0f5df49d5c59cb77dcf",
+      "bytes": 1618098
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r7/game-full/quest-after-r9/walking-compiled-recovery.json",
+      "sha256": "5fba9f80035de137979cc032b3561b5f475bc2538365042e866279b4cad81bd4",
+      "bytes": 497167
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r7/game-full/quest-after-r9/warm/ordinary-deer-movement-trigger.json",
+      "sha256": "f6ec51676b8013a487a38e15907f25f7c6d34dc86d564154c8222e36396e9d13",
+      "bytes": 77341
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r7/game-full/quest-after-r9/early-player-diagnostics.json",
+      "sha256": "7ad6cc1db4cd22b785af549bad5e00ba4a9ab136eebee244e582b6702357d7be",
+      "bytes": 2226137
+    }
+  ],
+  "cold": {
+    "compiled": {
+      "passed": true,
+      "scriptBytes": 764839,
+      "scriptSha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+      "jsonBytes": 764724,
+      "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "images": 240,
+      "frames": 240,
+      "libraries": [
+        "Monster/000",
+        "Monster/003",
+        "Monster/004",
+        "Monster/005",
+        "Monster/139"
+      ]
+    },
+    "jsonAttempts": [
+      {
+        "attempt": 1,
+        "requestedAt": 1794599689588,
+        "bytes": 699188,
+        "expectedBytes": 764724,
+        "intentionalPartialBody": true,
+        "closedAt": 1794599697732
+      },
+      {
+        "attempt": 2,
+        "requestedAt": 1794599698179,
+        "bytes": 699188,
+        "expectedBytes": 764724,
+        "intentionalPartialBody": true,
+        "closedAt": 1794599706247
+      }
+    ],
+    "triggerPassed": true,
+    "attacks": 1,
+    "damage": {
+      "source": "ObjectHealth",
+      "percent": 96,
+      "at": 1794599743605,
+      "seq": 133
+    },
+    "retreat": {
+      "position": {
+        "x": 287,
+        "y": 605
+      },
+      "at": 1794599744365,
+      "seq": 140,
+      "source": "UserLocation"
+    },
+    "animation": {
+      "objectId": "206324",
+      "authority": [
+        {
+          "packet": "ObjectWalk",
+          "source": "server-movement-packet",
+          "at": 1794599744643,
+          "seq": 141,
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 206324,
+            "x": 288,
+            "y": 605
+          }
+        }
+      ],
+      "rows": [
+        {
+          "objectId": "206324",
+          "at": 1794599744851,
+          "path": "/original-ui/Monster/004/62.png",
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "pngSha256": "478adea96d81d8a16ce97095b6f4cc8c4e04420541b8faa2eb7f1b8f89d11731",
+          "exactPinnedPng": true,
+          "pixelSha256": "1124394501b7dc8deb51b628b85c463d40765033e4485d2b4ec4e83631770f48",
+          "rect": {
+            "x": 681,
+            "y": 394,
+            "width": 64,
+            "height": 64
+          },
+          "decodedBodyCaptureFile": "walking-decoded-body-01.png"
+        },
+        {
+          "objectId": "206324",
+          "at": 1794599744996,
+          "path": "/original-ui/Monster/004/63.png",
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "pngSha256": "faf987d42d5406a086dc2f44d3f6afa6e73cae8dda5fdd7a8aed60d2ae3afbe4",
+          "exactPinnedPng": true,
+          "pixelSha256": "072d3c6a7db357bccbca6fa1fa9486c2d045cce74a2422a4778bcf3244afe4ef",
+          "rect": {
+            "x": 665,
+            "y": 406,
+            "width": 64,
+            "height": 64
+          },
+          "decodedBodyCaptureFile": "walking-decoded-body-02.png"
+        },
+        {
+          "objectId": "206324",
+          "at": 1794599745095,
+          "path": "/original-ui/Monster/004/64.png",
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "pngSha256": "3a53bd6ab54b67afbe36e8755f4992c6ba2ab3f00e5a53002260b5127e7e5a68",
+          "exactPinnedPng": true,
+          "pixelSha256": "5e9d72967f783ccbe298c96c2cc3c18a1435efaaf7586b07456811cddbd794f8",
+          "rect": {
+            "x": 657,
+            "y": 410,
+            "width": 64,
+            "height": 64
+          },
+          "decodedBodyCaptureFile": "walking-decoded-body-03.png"
+        },
+        {
+          "objectId": "206324",
+          "at": 1794599745192,
+          "path": "/original-ui/Monster/004/65.png",
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "pngSha256": "6d9d65edf817580b1c01a92cdd911aa5ce8758686b6ce9997b0c772db79972bf",
+          "exactPinnedPng": true,
+          "pixelSha256": "46203a71eb05b8cbb4e090247260a46500420e834bced61ddba82dc923632fa2",
+          "rect": {
+            "x": 649,
+            "y": 416,
+            "width": 64,
+            "height": 64
+          },
+          "decodedBodyCaptureFile": "walking-decoded-body-04.png"
+        },
+        {
+          "objectId": "206324",
+          "at": 1794599745296,
+          "path": "/original-ui/Monster/004/66.png",
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "pngSha256": "b481e4a6046633f44e13abe0732b946ff6b4bc59f49f04afef64b52b8495a165",
+          "exactPinnedPng": true,
+          "pixelSha256": "aad0b4f39946acc977598d2246d8158e042629478591fdc9a998ebea39a2fd17",
+          "rect": {
+            "x": 649,
+            "y": 416,
+            "width": 64,
+            "height": 64
+          },
+          "decodedBodyCaptureFile": "walking-decoded-body-05.png"
+        },
+        {
+          "objectId": "206324",
+          "at": 1794599745386,
+          "path": "/original-ui/Monster/004/67.png",
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "pngSha256": "93caef8b4548337e5465dc56b6357733924bb08f5297e545fafec60624e2ee3e",
+          "exactPinnedPng": true,
+          "pixelSha256": "3a52fa91da51fcb3056b45fd07f586648c9e31c89ffe6239013125de0f087f7b",
+          "rect": {
+            "x": 649,
+            "y": 416,
+            "width": 64,
+            "height": 64
+          },
+          "decodedBodyCaptureFile": "walking-decoded-body-06.png"
+        }
+      ]
+    },
+    "normalTownReturn": {
+      "passed": true
+    },
+    "firstSave": {
+      "passed": true
+    },
+    "actualTownAuthority": {
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "at": 1794599752510,
+      "seq": 173,
+      "source": "UserLocation"
+    },
+    "fullBrowserRestartReached": true
+  },
+  "warm": {
+    "triggerPassed": false,
+    "error": {
+      "name": "AssertionError",
+      "message": "only the selected neutral Deer may be attacked\n\n'200339' !== '206711'\n"
+    },
+    "desiredTarget": {
+      "objectId": 206711,
+      "name": "Deer",
+      "kind": "monster",
+      "ai": 2,
+      "x": 276,
+      "y": 603,
+      "hp": 25
+    },
+    "actualAttack": {
+      "type": "attackV2",
+      "protocolVersion": 2,
+      "requestId": "1",
+      "objectId": 200339,
+      "seq": 85,
+      "at": 1794599807361
+    },
+    "attacks": 1,
+    "acceptedCancel": {
+      "position": {
+        "x": 277,
+        "y": 605
+      },
+      "at": 1794599808742,
+      "seq": 91,
+      "source": "UserLocation"
+    },
+    "note": "Object200339 is Royal_Guard in earlier preparation facts, not Scarecrow. Instantaneous competing pixels were not recorded; normal front-actor priority is compatible with the mismatch. No product priority change is justified."
+  },
+  "failure": {
+    "stage": "walking-compiled-transport-before-warm-stimulus",
+    "message": "one ordinary surviving Deer hit and manual cancel must succeed",
+    "readiness": {
+      "visible": true,
+      "pending": false,
+      "hasPlayer": true,
+      "hasRegion": true,
+      "ready": true,
+      "serviceWorkerControlled": true,
+      "marks": [
+        {
+          "name": "sceneAssetsReady",
+          "atMs": 359.2999999821186,
+          "epochMs": 1794599760235,
+          "sceneCache": null
+        },
+        {
+          "name": "gameplayLocaleStart",
+          "atMs": 5152.399999976158,
+          "epochMs": 1794599765028,
+          "sceneCache": null
+        },
+        {
+          "name": "gameplayLocaleReady",
+          "atMs": 5262.899999976158,
+          "epochMs": 1794599765138,
+          "sceneCache": null
+        },
+        {
+          "name": "startGamePacket",
+          "atMs": 19706.79999998212,
+          "epochMs": 1794599779582,
+          "sceneCache": null
+        },
+        {
+          "name": "userInformationReady",
+          "atMs": 19720.09999999404,
+          "epochMs": 1794599779595,
+          "sceneCache": null
+        },
+        {
+          "name": "sceneBlueprintStart",
+          "atMs": 20273.29999998212,
+          "epochMs": 1794599780149,
+          "sceneCache": null
+        },
+        {
+          "name": "sceneBlueprintReady",
+          "atMs": 20281.69999998808,
+          "epochMs": 1794599780157,
+          "sceneCache": "r16-entry-static"
+        },
+        {
+          "name": "sceneSpritesReady",
+          "atMs": 20413.5,
+          "epochMs": 1794599780289,
+          "sceneCache": null
+        },
+        {
+          "name": "firstPlayableFrame",
+          "atMs": 22178.09999999404,
+          "epochMs": 1794599782053,
+          "sceneCache": null
+        }
+      ],
+      "applied": {
+        "mapFileName": "0.map",
+        "cellCount": 5436,
+        "spriteCount": 871,
+        "doorCellCount": 57,
+        "closedDoorCellCount": 57,
+        "regionBounds": {
+          "minX": 228,
+          "maxX": 332,
+          "minY": 563,
+          "maxY": 664
+        },
+        "playBounds": {
+          "minX": 256,
+          "maxX": 304,
+          "minY": 585,
+          "maxY": 621
+        }
+      },
+      "first": {
+        "x": 289,
+        "y": 616,
+        "map": "0"
+      }
+    }
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "next": "A new private fixture must validate the final same physical hover/click point against normal full target priority and settled geometry; all original gates remain."
+}

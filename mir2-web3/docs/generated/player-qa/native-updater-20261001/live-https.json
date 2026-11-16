@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "candidate": "WN-CANDIDATE-20261001-invited-07",
+  "feed": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+  "firstUpdate": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261001-invited-07",
+    "changedGameFiles": 3,
+    "downloadedBytes": 112319925,
+    "downloadedFiles": 4,
+    "sequence": 3
+  },
+  "secondUpdate": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261001-invited-07",
+    "changedGameFiles": 0,
+    "downloadedBytes": 0,
+    "downloadedFiles": 0,
+    "sequence": 3
+  },
+  "personalFilesPreserved": true,
+  "realNativeLauncher": true,
+  "realNativeHttps": true,
+  "userInstallationTouched": false,
+  "gameplayStarted": false,
+  "firstLaunchAcceptance": "pending; check-only never starts or accepts the game",
+  "root": "C:\\mir2-updater-qa\\live-r6-r7-v1\\installation"
+}

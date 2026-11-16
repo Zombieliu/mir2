@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v2.mjs",
+    "bytes": 10118,
+    "sha256": "4b086dbbb4759dcf4084fc055765852928e2b4c2f9c3abce0b761cdf6502c117"
+  },
+  "output": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v3.mjs",
+    "bytes": 10118,
+    "sha256": "2bf0bc6d93a49450288348a69ed676eb2402558dd7b97bbac9f1635dfd67a993"
+  },
+  "from": "--bind-actual-ended15",
+  "to": "--bind-actual-ended16",
+  "occurrences": 1,
+  "inverseRawExact": true,
+  "scope": "Fix a mechanically inherited CLI identity; no evidence or threshold change.",
+  "capacityAccepted": false
+}

@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T15:28:55.9290242Z",
+  "scope": "Final bounded read-only review of formal11 actual Probe15 binding, 63 current input pins, complete ended-tool/execution prerequisites, consumer corrections and Root-only sealing/readonly control. No formal execution or capacity adjudication.",
+  "verdict": {
+    "presealContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "formalCapacityAccepted": false,
+    "P0Accepted": false,
+    "P2Authorized": false
+  },
+  "preseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\preseal-inputs-finalized-v1.json",
+    "bytes": 19516,
+    "sha256": "914a7c74eea80762790b52e38cfd2b9bbcf3d734a3173950e6da99e88cf07ad4"
+  },
+  "currentInputs": {
+    "count": 63,
+    "bytes": 457774,
+    "sourceSha256": "5a7377f33a168acd61cacf31b7bd5a8101c675c51fe02828b39c9989c393049d",
+    "everyCurrentRawPinMatched": true,
+    "uniqueRegularFilesUnderFormalRoot": true,
+    "syntaxScriptCount": 37,
+    "syntaxProvenance": "Actual Root binder ran node --check on every listed .mjs. Reviewer did not rerun syntax or product tests."
+  },
+  "actualBinding": {
+    "binding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\bound-formal11-binding-v1.json",
+      "bytes": 16340,
+      "sha256": "025b78b26a604d27803b172a0785243c5517c8784206d603eb19a4a0f5bbf9c0"
+    },
+    "state": "FINAL_FRESH_PROBE15_AND_NEW44_BOUND_NOT_EXECUTED",
+    "backendAndExecutionCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputCount": 44,
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "nodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "node9SourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "historicalWireCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "freshFull16ActualRun": "1792934546937-58ce6147",
+    "actual15Run": "1792937158876-b61ec943",
+    "sealed": false,
+    "provisioned": false,
+    "formalRunStarted": false
+  },
+  "actual15Evidence": {
+    "independentFinal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\final-verification.json",
+      "bytes": 448826,
+      "sha256": "2c9b79b7073eefac5094211fc78effee51f567dd21dbdf57223701860983878b"
+    },
+    "toolSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 1949,
+      "sha256": "7a90c16b13593dcc6c6e62d2b8abf98e4e4fcaeb312a308074f28968d0aec1aa"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 812,
+      "sha256": "1822d860e1d7d2fe7cba56d28ff4137d5530a2b9571f36ab9e912af88623ba96"
+    },
+    "toolSourceInputs": 9,
+    "everyToolSourceCurrentRawMatched": true,
+    "executorBeforeAfterAndFinalLogShaMatched": true,
+    "actualRootOsCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "eaf8ad2feede5ff55855097d9659a4ac9a22f08ce2a224dcfd75ff5c04a5dc00"
+    },
+    "actualSmallFactsReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-actual-terminal-independent-facts-v1.json",
+      "bytes": 6129,
+      "sha256": "b9a36163b9f80f7cac204715d939a7354037e4a215211a4a6c369a1c6de1b2d5"
+    },
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "capacityAccepted": false,
+    "realPhasesSeconds": [
+      300.221,
+      300.216,
+      360.255
+    ],
+    "completeMinuteWindows": [
+      5,
+      5,
+      6
+    ],
+    "minimumWindowSeconds": 60.005,
+    "continuousWindows": 132,
+    "continuousFailures": 0,
+    "zeroHpEventsDoNotProveDoseOrHealing": true
+  },
+  "prerequisites": {
+    "pin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\execution-prerequisites-v1.json",
+      "bytes": 6841,
+      "sha256": "759cefc92f2d056d4322df750783d9dfe5209961956872dc398190c9e2267ac4"
+    },
+    "sourceInputs": 9,
+    "evidencePins": 11,
+    "metadataPinsExactlyMatchActualEndedReceipt": true,
+    "currentSmallExecutorFinalAndLogHashesMatched": true,
+    "sourceManifestOrderAndMappedRelativePathsMatch": true,
+    "separatePinExplicitlyReadByRootHelper": true,
+    "rawAndMonitorReplayedByReviewer": false,
+    "rawAndMonitorDigestSource": "Already executed original ended-verifier, Root metadata binder and read-only functional fresh15 gate. This reviewer did not rescan them."
+  },
+  "sourceReview": {
+    "binder": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\bind-actual-ended15-v1.mjs",
+      "bytes": 10063,
+      "sha256": "c1db2445e026d376c90235fd518cae992f9e97f8f8a00b5b133fbb68626ce299"
+    },
+    "consumer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+      "bytes": 16213,
+      "sha256": "b9eebe3ea733b38ca828fcb7612065d73c9c18e5efb8d3fdfdae7d3047af251c"
+    },
+    "rootControl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\root-seal-and-guard-v1.mjs",
+      "bytes": 11466,
+      "sha256": "7983d9ea1b935dd9fcfd0755c21b95614c3de66852cd14d8e865f248f20ed745"
+    },
+    "controlDerivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\root-seal-and-guard-derivation-v1.json",
+      "bytes": 19324,
+      "sha256": "750496f153f2f2cd7c64b56a1ecb8b50be88437c96f1f997360bde95980e1f65"
+    },
+    "rootControlThreeRulesActualForwardAndInverseExact": true,
+    "rootControlOriginalSha256": "f41409bf89547f8d7500f9ac2eb34a85e8a2d075419361fe1d24e0b7fcd9e471",
+    "closedFindings": [
+      {
+        "id": "F1",
+        "issue": "Historical wire CORE name incorrectly used for current Node evidence in the pending template.",
+        "resolution": "Five imports explicitly separate wire historical6d from current Node b84d; prior pending review pins and inverses retained."
+      },
+      {
+        "id": "F2",
+        "issue": "Success-only source closure check called an undefined sha helper.",
+        "resolution": "Root added the single explicit crypto SHA definition; current16213B/b9eebe source removes exactly back to16139B/1d1c3cbfddd78af53cfdd5c27f05c6df832e31407f32a52782b123a3b6e41f6a. Actual Root functional fresh15 consumer now passes."
+      }
+    ],
+    "actualExecutorSealLogFinalAndCheckedInputLinkPresent": true,
+    "preparedSourceConfigUsedForActual15": true,
+    "completeNineSourceClosureConsumed": true,
+    "approvedFinalBoundSelectorUsed": true
+  },
+  "rootFunctionalCheck": {
+    "pin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-formal11-feasibility-functional-check-v1.json",
+      "bytes": 62282,
+      "sha256": "b8d9929795c2a55b958077b82c40766602a482c320b3f7f54223a57a88ec7a2d"
+    },
+    "readOnly": true,
+    "feasibilityPassed": true,
+    "collectedIndependentPassed": true,
+    "accountsPrepared": false,
+    "formalStarted": false,
+    "reviewerExecutedIt": false
+  },
+  "preservedFormalContract": {
+    "previousPendingReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-pending-independent-review-v1.json",
+      "bytes": 5179,
+      "sha256": "d988bcf9755a5cfb25146e606140d685205d37219145f6bf59361240b7d5f3ac"
+    },
+    "originalPolicyJsonExact": true,
+    "resourceProfileRawExactOriginalFormal10": true,
+    "scenario100RawExactOriginalFormal10": true,
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "postResumeObservationSeconds": 60,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "wallSeconds": 18000,
+    "expectedCompleteFormalMinuteWindows": 146,
+    "actualCaps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageMs": 50,
+    "cpuLogicalSoftGuard": 24,
+    "privateBytesSoftGuard": 34359738368,
+    "workingSetBytesSoftGuard": 42949672960,
+    "originalGameplayThresholdsUnchanged": true,
+    "hpZeroAndWireIncompleteNotNewGameCredit": true,
+    "formal146WindowsNotActuallyRun": true
+  },
+  "controlBoundaries": [
+    "Root must invoke explicit seal mode with the exact preseal/review SHA. Before any wx approval/freeze writes, the helper validates source/prerequisite pins and executes fresh15 admission using the already-sealed matching44 backend binding.",
+    "The separately invoked readonly-sourceguard validates the new formal freeze, current44 backend, unchanged Node9, scene and wrapper closure. It does not invoke account preparation or realm execution.",
+    "Seal/guard/final-approval/runtime paths were absent at this review. Original failed probe evidence and product sources were not modified.",
+    "A successful Probe15 permits only considering the separate original full formal profile. No100-person, two-hour, production, P0 or P2 acceptance is inferred."
+  ],
+  "reviewMethod": {
+    "reviewerImportedTargetModules": false,
+    "reviewerExecutedGateOrHelper": false,
+    "reviewerRanProductTests": false,
+    "reviewerQueriedOsProcesses": false,
+    "privateDataRead": false,
+    "rawMonitorRecordingScanned": false,
+    "trackedOrFrozenInputsModified": false,
+    "onlyNewExternalReviewWritten": true
+  }
+}

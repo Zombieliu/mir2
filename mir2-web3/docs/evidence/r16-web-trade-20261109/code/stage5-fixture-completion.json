@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "kind": "r16-trade-cancel-stage5-fixture-completion",
+  "createdAt": "2026-11-08T19:37:40.879Z",
+  "passed": true,
+  "writeSet": [
+    "apps/web/scripts/test-stage5-adapters.mjs"
+  ],
+  "sourcePin": {
+    "path": "apps/web/scripts/test-stage5-adapters.mjs",
+    "bytes": 760989,
+    "sha256": "d20911462677cbaba566387fb7fcae76c37e400fce9a815091b319eca813a980"
+  },
+  "result": {
+    "command": "node scripts/test-stage5-adapters.mjs",
+    "exitCode": 0,
+    "groupsPassed": 507,
+    "log": "stage5-adapters-full-r2.log"
+  },
+  "preservedFailures": [
+    "social-regression.log",
+    "stage5-adapters-green-1.log"
+  ],
+  "assertions": [
+    "exact TradeCancel condition",
+    "exact complete TradeCancel body before spend",
+    "no else branch",
+    "unchanged create/group/guild-rank ordering",
+    "TradeCancel immediately before socket try",
+    "same added guard in Bag/Fishing/Ranking sequence"
+  ],
+  "scope": {
+    "cancelWithTradeItemPending": true,
+    "cancelWithGuildItemPending": false,
+    "guildCustodyRetained": true,
+    "globalEightSocialBudgetComplete": false,
+    "completeTradeNativeParity": false,
+    "pageOrTypescriptRerun": false,
+    "noProductChangesInSupplement": true
+  },
+  "priorReceipt": "bounded-checks.json",
+  "evidence": [
+    {
+      "path": "stage5-adapters-full-r2.log",
+      "bytes": 41,
+      "sha256": "e447dcf27a53b65744575b2c7d2389e1ca79d171feac8cef7feb8257c1afcf00"
+    },
+    {
+      "path": "stage5-adapters-green-1.log",
+      "bytes": 716,
+      "sha256": "4365d2b8b693bc99cb1375a1a4cddf495bbe090edcc3e7fbfdaba77a2d23aac3"
+    },
+    {
+      "path": "stage5-fixture.patch",
+      "bytes": 7255,
+      "sha256": "8194b5ad903578ba3d1c40b15edd575051382c3ec88b16a8d6916b36fa80b37f"
+    }
+  ]
+}

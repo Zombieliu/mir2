@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T08:17:20.815Z",
+  "endedAt": "2026-10-25T08:17:20.871Z",
+  "exitCode": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "file": "verify-ended-formal10-v3.mjs",
+      "bytes": 27968,
+      "sha256": "3c689714ec1c9849b87e9730eb99ac192847f94250b7d805af890305373da6fc"
+    },
+    {
+      "file": "formal-contract-v1.mjs",
+      "bytes": 5570,
+      "sha256": "300441547632ecba0c132204352b02153edee96d1e0ce5e9e361d3c724a7363b"
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "file": "schema-selfcheck-v2.mjs",
+      "bytes": 6495,
+      "sha256": "11b65a9c6a4eeeb90207863f6df27cb636d8b58f1437e8097305fb2e6f244cb2"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "verify-ended-formal10-v3.mjs",
+      "bytes": 27968,
+      "sha256": "3c689714ec1c9849b87e9730eb99ac192847f94250b7d805af890305373da6fc"
+    },
+    {
+      "file": "formal-contract-v1.mjs",
+      "bytes": 5570,
+      "sha256": "300441547632ecba0c132204352b02153edee96d1e0ce5e9e361d3c724a7363b"
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "file": "schema-selfcheck-v2.mjs",
+      "bytes": 6495,
+      "sha256": "11b65a9c6a4eeeb90207863f6df27cb636d8b58f1437e8097305fb2e6f244cb2"
+    }
+  ],
+  "inputsUnchanged": true,
+  "passed": true,
+  "result": {
+    "schemaVersion": 1,
+    "passed": true,
+    "cases": 17,
+    "checks": [
+      {
+        "name": "formal exact146 >=60 windows and actual nominal fields",
+        "passed": true
+      },
+      {
+        "name": "one59.999second window rejected",
+        "passed": true
+      },
+      {
+        "name": "missing final soak window rejected",
+        "passed": true
+      },
+      {
+        "name": "post resume stage60 cannot be omitted",
+        "passed": true
+      },
+      {
+        "name": "noncontiguous actual clock rejected",
+        "passed": true
+      },
+      {
+        "name": "configured policy cannot lower attack rate",
+        "passed": true
+      },
+      {
+        "name": "all5 native resume and5saved states mandatory",
+        "passed": true
+      },
+      {
+        "name": "memory original1800 duration and32 slope boundary",
+        "passed": true
+      },
+      {
+        "name": "explicit ended identity required before verifier IO",
+        "passed": true
+      },
+      {
+        "name": "retained memory arithmetic uses actual timestamps",
+        "passed": true
+      },
+      {
+        "name": "histogram differences derive profile quantiles not lifetime maxima",
+        "passed": true
+      },
+      {
+        "name": "zero overflow and discarded histogram quantiles unknown",
+        "passed": true
+      },
+      {
+        "name": "histogram counter rollback rejected",
+        "passed": true
+      },
+      {
+        "name": "phase telemetry inside edges explicit and never server hardgate",
+        "passed": true
+      },
+      {
+        "name": "corrected movement remains failure at4of77 and V2 notLaunched not credit",
+        "passed": true
+      },
+      {
+        "name": "whole phase rate replay code uses measuredSeconds with no nominal fallback override",
+        "passed": true
+      },
+      {
+        "name": "permetricstatusdictionary rejects129th key andlongprototypevalues",
+        "passed": true
+      }
+    ],
+    "actualRunRead": false,
+    "productTestsExecuted": false,
+    "actualGameVerifierExecuted": false,
+    "capacityAccepted": false
+  },
+  "actualRunRead": false,
+  "actualGameVerifierExecuted": false,
+  "log": {
+    "file": "schema-selfcheck-v2.log",
+    "bytes": 1475,
+    "sha256": "2d56074d2902b21c2ff28aa304076059cb87b7c928ebc7a8d53a385378aedf32"
+  }
+}

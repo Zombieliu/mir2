@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793116390227-48ba2327",
+  "reportPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-probe-v2\\reports\\1793116390227-48ba2327.pvp-report.json",
+  "samplesPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-probe-v2\\reports\\1793116390227-48ba2327.pvp-samples.jsonl",
+  "startedAt": "2026-10-27T15:53:10.227Z",
+  "mode": "two-client-ordinary-pvp-functional-probe",
+  "durationSeconds": 30,
+  "durationIsMaximumBudget": true,
+  "indices": [
+    0,
+    1
+  ],
+  "attackResults": "legacy",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "cleanupErrors": [],
+  "checks": {
+    "session": {
+      "mutualVisibility": true,
+      "movementSteps": 2,
+      "exerciseElapsedMs": 5817,
+      "configuredMaximumExerciseSeconds": 30,
+      "fullDurationSustainedCombatPerformed": false,
+      "attackResults": "legacy",
+      "attackRequests": 2,
+      "launchedAttackCount": null,
+      "damage": {
+        "exactHpLoss": 1,
+        "dualClientHit": {
+          "targetIds": [
+            50001,
+            1000
+          ],
+          "attackerIds": [
+            1000,
+            50000
+          ],
+          "died": false,
+          "healthPercent": 95,
+          "receipts": [
+            {
+              "struck": 673,
+              "health": 683,
+              "damage": 682
+            },
+            {
+              "struck": 615,
+              "health": 626,
+              "damage": 625
+            }
+          ]
+        }
+      },
+      "healing": {
+        "doses": 1,
+        "uniqueId": 2,
+        "grid": "Inventory",
+        "quantityBefore": 1,
+        "quantityAfter": 0,
+        "exactHpIncrease": 1
+      },
+      "before": [
+        {
+          "sequence": 640,
+          "map": "0",
+          "x": 234,
+          "y": 590,
+          "hp": 24,
+          "maxHp": 24,
+          "hpStock": 12,
+          "inSafeZone": false
+        },
+        {
+          "sequence": 600,
+          "map": "0",
+          "x": 235,
+          "y": 590,
+          "hp": 24,
+          "maxHp": 24,
+          "hpStock": 12,
+          "inSafeZone": false
+        }
+      ],
+      "after": [
+        {
+          "sequence": 688,
+          "map": "0",
+          "x": 234,
+          "y": 590,
+          "hp": 24,
+          "maxHp": 24,
+          "hpStock": 12,
+          "inSafeZone": false
+        },
+        {
+          "sequence": 647,
+          "map": "0",
+          "x": 235,
+          "y": 590,
+          "hp": 24,
+          "maxHp": 24,
+          "hpStock": 11,
+          "inSafeZone": false
+        }
+      ]
+    },
+    "normalLogout": true,
+    "relogin": [
+      {
+        "actor": 1,
+        "positionAndHpStockPersisted": true,
+        "after": {
+          "sequence": 599,
+          "map": "0",
+          "x": 234,
+          "y": 590,
+          "hp": 24,
+          "maxHp": 24,
+          "hpStock": 12,
+          "inSafeZone": false
+        }
+      },
+      {
+        "actor": 2,
+        "positionAndHpStockPersisted": true,
+        "after": {
+          "sequence": 598,
+          "map": "0",
+          "x": 235,
+          "y": 590,
+          "hp": 24,
+          "maxHp": 24,
+          "hpStock": 11,
+          "inSafeZone": false
+        }
+      }
+    ]
+  },
+  "ok": true,
+  "finishedAt": "2026-10-27T15:53:26.462Z",
+  "exerciseElapsedMs": 5817,
+  "totalElapsedMs": 16235
+}

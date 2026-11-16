@@ -1,0 +1,13 @@
+{
+  "scope": "Passive bounded priority milestones only; no auth or player data",
+  "milestones": [
+    {
+      "name": "runtimeHeaderPriorityBackground",
+      "atMs": 74371.5,
+      "epochMs": 1794677373446,
+      "generation": 1,
+      "reason": "timeout",
+      "waitedMs": 8002
+    }
+  ]
+}

@@ -1,0 +1,351 @@
+{
+  "schema": "mir2.web-r16-public-evidence-mapping/1",
+  "sourceRoot": "F:/mir2-builds/web-r16-20261104",
+  "targetRoot": "docs/evidence/web-r16-local-20261104/shared-ui-v16",
+  "files": [
+    {
+      "source": "display-v14-staging-package-integrity-proof.json",
+      "target": "integrity/display-v14-staging-package-integrity-proof.json",
+      "role": "distribution-integrity-only",
+      "bytes": 17246,
+      "sha256": "55ec24d1219675218066329edb88c4949a75ef4659958bf8fbe36e38c4379b42",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v14-runtime-preservation-proof.json",
+      "target": "runtime-preservation/display-v14-runtime-preservation-proof.json",
+      "role": "cutover-runtime-preservation",
+      "bytes": 836,
+      "sha256": "ca9ea75e1ef6e5000619f936a3b517fa724de2672c4b57e619f7755f8212480f",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v15-staging-package-integrity-proof.json",
+      "target": "integrity/display-v15-staging-package-integrity-proof.json",
+      "role": "distribution-integrity-only",
+      "bytes": 13874,
+      "sha256": "36e502d9d418a22454bf3423f21725280548f9370ca83d1627a63da9f8015615",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v15-runtime-preservation-proof.json",
+      "target": "runtime-preservation/display-v15-runtime-preservation-proof.json",
+      "role": "cutover-runtime-preservation",
+      "bytes": 969,
+      "sha256": "66304e537c8929e2ce71755ef2d9315a0f2e65e91b97930ad40ce42468499495",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-staging-package-integrity-proof.json",
+      "target": "integrity/display-v16-staging-package-integrity-proof.json",
+      "role": "distribution-integrity-only",
+      "bytes": 13904,
+      "sha256": "9aa79ba6e3221c3352dce5224ecf5cd052077b9c067c7ab9532e32d97bf57c33",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-runtime-preservation-proof.json",
+      "target": "runtime-preservation/display-v16-runtime-preservation-proof.json",
+      "role": "cutover-runtime-preservation",
+      "bytes": 964,
+      "sha256": "07898ac40513d7149f7eea694066cae0a53476f0160dd64d9fbb444ec2b44726",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-original-preservation-proof.json",
+      "target": "runtime-preservation/display-v16-original-preservation-proof.json",
+      "role": "original-twelve-save-preservation-with-explicit-memory-count-deltas",
+      "bytes": 4331,
+      "sha256": "19c6f2542a0fe94bc34fd7af0f29172f0b3602666e2153dca955c30f605d94b8",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-final-pins.json",
+      "target": "pins/display-v16-final-pins.json",
+      "role": "v16-build-and-source-pins",
+      "bytes": 594,
+      "sha256": "aed3312e470b5422e9fc95e96e711921c8998fddcdc85d9c8f4a5c130fc13485",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v14-final-language-tests.log",
+      "target": "tests/display-v14-final-language-tests.log",
+      "role": "final-green-log",
+      "bytes": 10302,
+      "sha256": "8698ff06dc1820e30896469a94a0171de8f0d698637ceb5b6679a77f0d048774",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v14-renderer-gates.log",
+      "target": "tests/display-v14-renderer-gates.log",
+      "role": "final-green-log",
+      "bytes": 11069,
+      "sha256": "decdaf701acf05a4c94210800cd6e11939434c8afe98626ac7ffd7edc1587e10",
+      "type": "scanned-text"
+    },
+    {
+      "source": "shop-host-identity-focused-20261105.log",
+      "target": "tests/shop-host-identity-focused-20261105.log",
+      "role": "final-green-log",
+      "bytes": 63411,
+      "sha256": "cc0bd05806c9d96ab7942080d5e728867cd8f9598ca9c6052e77694cdbd4f984",
+      "type": "scanned-text"
+    },
+    {
+      "source": "package-gateway-preflight-tests-20261105.log",
+      "target": "tests/package-gateway-preflight-tests-20261105.log",
+      "role": "final-green-log",
+      "bytes": 3458,
+      "sha256": "a4795a5ef578ef7799e33404128c74148b82b0b0474d2ba94adaae6f8b4589f9",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-companion-window-tests.log",
+      "target": "tests/display-v16-companion-window-tests.log",
+      "role": "final-green-log",
+      "bytes": 3314,
+      "sha256": "a5354ae3b04fda216ccfc68f55ef6fde6bd8e77d2ed461124ee4646e3a0df352",
+      "type": "scanned-text"
+    },
+    {
+      "source": "shop-host-identity-red-20261105.log",
+      "target": "tests/shop-host-identity-red-20261105.log",
+      "role": "meaningful-pre-fix-red",
+      "bytes": 4062,
+      "sha256": "f5fd350d98509ee524a9101e4bcd2ec2e798903d4e4f9cc60e92694a36be0f65",
+      "type": "scanned-text"
+    },
+    {
+      "source": "portable-shared-font-and-quest-regression.log",
+      "target": "tests/portable-shared-font-and-quest-regression.log",
+      "role": "final-green-log",
+      "bytes": 25121,
+      "sha256": "07afa20312065caa1568610d2ed18a6ab9121277f8c1e2c527bf270932cebbe1",
+      "type": "scanned-text"
+    },
+    {
+      "source": "portable-skills-font-owner-tests.log",
+      "target": "tests/portable-skills-font-owner-tests.log",
+      "role": "final-green-log",
+      "bytes": 11115,
+      "sha256": "c5b91862d1ef7891ffae8e638aeed6a689939273393bbdea966b29522f84e35e",
+      "type": "scanned-text"
+    },
+    {
+      "source": "native-full-catalog-display-regression.log",
+      "target": "tests/native-full-catalog-display-regression.log",
+      "role": "final-green-log",
+      "bytes": 29808,
+      "sha256": "a1a8f3d5edaa7a0fbade0375d90855e8eb3e0ac1b415645bbba8a80687c647bf",
+      "type": "scanned-text"
+    },
+    {
+      "source": "quest_ui-display_tests-fixed-display-bridge-tests.log",
+      "target": "tests/quest_ui-display_tests-fixed-display-bridge-tests.log",
+      "role": "final-green-log",
+      "bytes": 11417,
+      "sha256": "08d9dd5b80e153db8b32ab3d09378c325bd408cab99e748fd5040ea96a2bc27c",
+      "type": "scanned-text"
+    },
+    {
+      "source": "native_i18n-portable-tests-fixed-display-bridge-tests.log",
+      "target": "tests/native_i18n-portable-tests-fixed-display-bridge-tests.log",
+      "role": "final-green-log",
+      "bytes": 11820,
+      "sha256": "d731aaa3ffa2d271a1e657f45d60752ca2b5144f967a1b503f10459884897941",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v15-browser-r6/display-v14-browser-proof.json",
+      "target": "language/display-v15-browser-r6/display-v14-browser-proof.json",
+      "role": "completed-sanitized-window-language-matrix",
+      "bytes": 111222,
+      "sha256": "47403ff8d6613f1074ae8ea14e52b49b17462ca2951812f5438270f7de35cf5a",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v15-browser-r6/01-quest-diary-zh-CN.png",
+      "target": "language/display-v15-browser-r6/01-quest-diary-zh-CN.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 105208,
+      "sha256": "89e89f2547b5e98f8ad348ed87ad34a8f28bd5f169826efd7312de5a5c6383d3",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/02-skills-body-zh-CN.png",
+      "target": "language/display-v15-browser-r6/02-skills-body-zh-CN.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/03-quest-diary-zh-TW.png",
+      "target": "language/display-v15-browser-r6/03-quest-diary-zh-TW.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 105197,
+      "sha256": "1365b787754488dfd4600ce82ca7efb952e5a8db6fd94cdb6c75239557f9901e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/04-skills-body-zh-TW.png",
+      "target": "language/display-v15-browser-r6/04-skills-body-zh-TW.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/05-quest-diary-en.png",
+      "target": "language/display-v15-browser-r6/05-quest-diary-en.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 105069,
+      "sha256": "b47978ce76df35ef063e7a208ead3f5add00b31b80635d5e12983e34ce0149ef",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/06-skills-body-en.png",
+      "target": "language/display-v15-browser-r6/06-skills-body-en.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/07-quest-diary-pt-BR.png",
+      "target": "language/display-v15-browser-r6/07-quest-diary-pt-BR.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 106164,
+      "sha256": "2442c4183356138aeefd3d5a6c950ae67e210a07647dbbfa7e756f64ab583893",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/08-skills-body-pt-BR.png",
+      "target": "language/display-v15-browser-r6/08-skills-body-pt-BR.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/09-quest-diary-ru.png",
+      "target": "language/display-v15-browser-r6/09-quest-diary-ru.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 106302,
+      "sha256": "1b7daddadf10652e7bfc8f23ad8838a0b579513df91d005440af92749476dd09",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/10-skills-body-ru.png",
+      "target": "language/display-v15-browser-r6/10-skills-body-ru.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/11-quest-diary-hi.png",
+      "target": "language/display-v15-browser-r6/11-quest-diary-hi.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 104598,
+      "sha256": "fa83ccc308de89474f50a2704d206a2f3f1e34ffe43630fcf24f131814b7d0ce",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/12-skills-body-hi.png",
+      "target": "language/display-v15-browser-r6/12-skills-body-hi.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/13-quest-diary-id.png",
+      "target": "language/display-v15-browser-r6/13-quest-diary-id.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 104943,
+      "sha256": "efae90e4d66e8cbb31d758f3a0338e6ba7cf33aa3c834ee6a38350ec8af72d3a",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/14-skills-body-id.png",
+      "target": "language/display-v15-browser-r6/14-skills-body-id.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/15-quest-diary-vi.png",
+      "target": "language/display-v15-browser-r6/15-quest-diary-vi.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 105539,
+      "sha256": "1e130f1dd32bd9f103566875925f06ad8867d7568936ccafef45245010b4d2ed",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/16-skills-body-vi.png",
+      "target": "language/display-v15-browser-r6/16-skills-body-vi.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/17-quest-diary-th.png",
+      "target": "language/display-v15-browser-r6/17-quest-diary-th.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 103641,
+      "sha256": "57508e1059415b832cb4f83ea066f27052de6edd0eddfc1ee8c77f6949db4b15",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/18-skills-body-th.png",
+      "target": "language/display-v15-browser-r6/18-skills-body-th.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/19-quest-diary-ar.png",
+      "target": "language/display-v15-browser-r6/19-quest-diary-ar.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 103813,
+      "sha256": "08635e25de1d8ad568a5f9bf618c8a059e3241ead89e89167564925afc439a96",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v15-browser-r6/20-skills-body-ar.png",
+      "target": "language/display-v15-browser-r6/20-skills-body-ar.png",
+      "role": "root-viewed-masked-crop",
+      "bytes": 65921,
+      "sha256": "808da315d07bfe657abeb5287184abc275379b3de2a1c9a6c3dfced24659010e",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v14-quest4-r1/quest4-login-boundary-receipt.json",
+      "target": "failures/v14/quest4-login-boundary-receipt.json",
+      "role": "failed-v14-ordinary-login-gateway-binding",
+      "bytes": 2783,
+      "sha256": "5c4b88f7243f8a13b5323fec0df48fd1c91c2787e1de54f08a63f5c2bd54b75b",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v15-quest4-r1/quest4-clothing-quote-partial-receipt.json",
+      "target": "partials/v15/quest4-clothing-quote-partial-receipt.json",
+      "role": "quote-received-no-purchase-before-host-identity-fix",
+      "bytes": 12176,
+      "sha256": "8777b13bbe600efd384adebd52a12e054aa76ba52d2df41aa002b03b4807ec73",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-quest4-r1/quest4-clothing-equipped-partial-receipt.json",
+      "target": "partials/v16/quest4-clothing-equipped-partial-receipt.json",
+      "role": "clothing-purchase-equipped-potion-step-incomplete",
+      "bytes": 12738,
+      "sha256": "048c8bc1342aeead167ae66dbf80b22b262c5ed9a002cf9cb10c017979324118",
+      "type": "scanned-text"
+    }
+  ]
+}

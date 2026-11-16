@@ -1,0 +1,39 @@
+{
+  "createdUtc": "2026-10-04T07:04:13.887152+00:00",
+  "results": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs"
+      ],
+      "exitCode": 0,
+      "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\guard-01.log",
+      "bytes": 2916,
+      "sha256": "6d394b68efb6842de0821fe2809debd4340c86d7bc379d3cace128097a48e351"
+    },
+    {
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-File",
+        "apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1"
+      ],
+      "exitCode": 1,
+      "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\guard-02.log",
+      "bytes": 610,
+      "sha256": "e1299baf51a9feae312ddcb33d0fe46df98f1b02f65fe62e0bb38f7f44619dd1"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/build-platinum-176-profile-bundle.mjs",
+        "--check"
+      ],
+      "exitCode": 0,
+      "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\guard-03.log",
+      "bytes": 355,
+      "sha256": "c8c56ff389642d6e3276dd8c9a2d0276f45c5646edea4d3815cbe471d10dc352"
+    }
+  ]
+}

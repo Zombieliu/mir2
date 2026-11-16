@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "id": "repair-source20-finite-result01",
+  "generatedAtUtc": "2026-10-06T19:29:38.629Z",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "parentCommit": "c400a19bf65c06dd84cf54a20f2d0c379b894e62",
+  "scope": "Original eleven finite scripts and strict code-only TSC on final actual Bag target/Hold repair source. Existing source extractors and explicit memory fixtures only; no product runtime or WASM API.",
+  "summary": {
+    "nodeTests": 218,
+    "nodePassed": 218,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "stage5InternalGroups": 290,
+    "stage5IncludedInOneGlobalTest": true,
+    "newStage5Groups": 8,
+    "strictNonincrementalTscPassed": true,
+    "currentSourceCategories": {
+      "shared": 103,
+      "legacy": 200,
+      "open": 6,
+      "common limitation": 8
+    },
+    "all317PlayerRows": "not-run",
+    "overallPercentage": null
+  },
+  "sourceEvidence": {
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03-snapshot.json",
+      "bytes": 9738734,
+      "sha256": "247b3a19fe20d52bd4635d9b7ef588505d2d4482d114cfb5784e5e618a8ffdc3"
+    },
+    "sourceReview": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-source-review03.json",
+      "bytes": 9321,
+      "sha256": "e3d85ce646c6baa16ed4e8dbfed66cb56b555025dc592b1dc445798166312473"
+    },
+    "productPins": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 936422,
+        "sha256": "41b077fc9b37d8348199f3a77cb3461303635588a57ec47c8f7cc692bb686f3b",
+        "relativePath": "apps/web/app/page.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 285332,
+        "sha256": "cab60110d16dc76b1cc4b7510e08d3f271cea27d710ecf091c6b2abbf1d987b7",
+        "relativePath": "apps/web/app/original-client-shell.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+        "bytes": 17742,
+        "sha256": "745ca93fe545d47826789d081608e081f1c9ec2c004a0132785e61afba736d17",
+        "relativePath": "apps/web/app/components/original-client-shell-types.ts"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+        "bytes": 34330,
+        "sha256": "7716e2078725c2b2a8aba5d2fa1adcb98ded8627ad80db90484cf2925002abd3",
+        "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-shop.tsx",
+        "bytes": 53357,
+        "sha256": "ec7ac1d1e941735529bf7196ef129309f46df8f0a4103a4d333b0856699d12c8",
+        "relativePath": "apps/web/app/components/original-client-game-shop.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-inventory-window.tsx",
+        "bytes": 51004,
+        "sha256": "5a22f9277163ad5fdf6b6e67d85aec2f49926db585d3284cf5c1c1bba9381dc8",
+        "relativePath": "apps/web/app/components/original-client-inventory-window.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\npc-repair-service.ts",
+        "bytes": 19743,
+        "sha256": "e9a26d62d47cd3704112cb7ba1a6f5c88a166ce5094ec47bb39dc9f40a4b34f0",
+        "relativePath": "apps/web/lib/npc-repair-service.ts"
+      }
+    ],
+    "selectedScriptPins": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs",
+        "bytes": 65656,
+        "sha256": "6dbde12357d12efa2fb663c74d0fd8ba32bb25ec404087c28acfe30b47ed24af",
+        "relativePath": "apps/web/scripts/test-bevy-combat-input.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-quest-ui.mjs",
+        "bytes": 69505,
+        "sha256": "c35558c3df2af7f9e4faf5f5f7623b9d4a28f35540c0a0c9b8783870f1e95f3b",
+        "relativePath": "apps/web/scripts/test-bevy-quest-ui.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-client-core-build.mjs",
+        "bytes": 7145,
+        "sha256": "53df09ad1b076c2d5732c05ed92982846b0e0fe30687bcf26277cb797a96ce2c",
+        "relativePath": "apps/web/scripts/test-client-core-build.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-client-core-release-files.mjs",
+        "bytes": 20235,
+        "sha256": "13b5c6cbd0f2aea1e344438cc223bd640f6ba0b7fb3c90f6db81986f9b148372",
+        "relativePath": "apps/web/scripts/test-client-core-release-files.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-crystal-chat-history.mjs",
+        "bytes": 24226,
+        "sha256": "3198bed2ece0e1c713ba72867bac828eb7c174fb48b905fb6441de43c689703c",
+        "relativePath": "apps/web/scripts/test-crystal-chat-history.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-minimap-transform.mjs",
+        "bytes": 12428,
+        "sha256": "59263fde37122528ecde9c1e567da18df79be64b5c33b23a929838d64d66751d",
+        "relativePath": "apps/web/scripts/test-minimap-transform.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-native-keyed-map-pack.mjs",
+        "bytes": 33307,
+        "sha256": "d3165a8801b6c5a01eaf8c99f4e42105f37d0c29906cca185e1627276e21749e",
+        "relativePath": "apps/web/scripts/test-native-keyed-map-pack.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 37692,
+        "sha256": "658af9bbc8f0ee8cfa708afeed011209457a6b7041e5faec285fd26cedf08c7e",
+        "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-renderer-wasm-opt.mjs",
+        "bytes": 38308,
+        "sha256": "0fd0063ae9db00b22d3679e3c81c0cde82fceb2f302ccce6bded538180b18622",
+        "relativePath": "apps/web/scripts/test-renderer-wasm-opt.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+        "bytes": 376366,
+        "sha256": "09f5e1815059200861a3ca05592bec7ad5e0f32a27fdd6eab43f240bcfd62235",
+        "relativePath": "apps/web/scripts/test-stage5-adapters.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs",
+        "bytes": 135118,
+        "sha256": "671a885befe0f2bd68b74ca788b192331764cf5869c09094ebebaf4750d0a9d8",
+        "relativePath": "apps/web/scripts/test-storage-page-gate.mjs"
+      }
+    ],
+    "postFiniteInputsRehashed": 27389,
+    "postFiniteDrift": 0,
+    "postNextMetadataQualification": "Node03 frozen original metadata preserved; only original Next generated two03includes and route import changed after Node03. The strict code-only project does not include generated distribution types."
+  },
+  "node03": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03.config.json",
+      "bytes": 4796,
+      "sha256": "6ad3bb782bdf485f319b3c1a00473ab2829ba663122c23307090972da1d58acb"
+    },
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03-snapshot.json",
+      "bytes": 9738734,
+      "sha256": "247b3a19fe20d52bd4635d9b7ef588505d2d4482d114cfb5784e5e618a8ffdc3"
+    },
+    "sourceReview": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-source-review03.json",
+      "bytes": 9321,
+      "sha256": "e3d85ce646c6baa16ed4e8dbfed66cb56b555025dc592b1dc445798166312473"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03.stdout.log",
+      "bytes": 23282,
+      "sha256": "32ef864df25d74a6aa6f02f2902d9f5b1a8d778b8097f80860c15379f16fdd6f"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03.outer.json",
+      "bytes": 553,
+      "sha256": "1b1a1709968f3644f46fcfbec89f487082716a2e312f071bc3188ee5ac4ac129"
+    },
+    "result": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 103620,
+      "kind": "Source20 final reachable repair UI and genuine Combat dependencies eleven original finite scripts",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 10983,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "tests": 218,
+    "passed": 218,
+    "failed": 0,
+    "skipped": 0,
+    "stage5InternalGroups": 290,
+    "internalGroupsAlreadyIncludedInOneGlobalFile": true
+  },
+  "tsc03": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-tsc03.config.json",
+      "bytes": 3914,
+      "sha256": "3dec44c1ff3a12a6fae1cd33570e20bd4e946afa6c11c82fd88f9762929838cb"
+    },
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-node03-snapshot.json",
+      "bytes": 9738734,
+      "sha256": "247b3a19fe20d52bd4635d9b7ef588505d2d4482d114cfb5784e5e618a8ffdc3"
+    },
+    "sourceReview": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-source-review03.json",
+      "bytes": 9321,
+      "sha256": "e3d85ce646c6baa16ed4e8dbfed66cb56b555025dc592b1dc445798166312473"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-tsc03.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-tsc03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-tsc03.outer.json",
+      "bytes": 528,
+      "sha256": "1a69607680b5f8d1d285db3e9a8313c02280fb3eaa592ab5dd951e6f52a119c0"
+    },
+    "result": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 95424,
+      "kind": "Source20 final strict nonincremental code-only TSC after actual type fixes",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 11753,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-tsc03.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "freshExecution": true
+  },
+  "history": {
+    "actualNode01": {
+      "exitCode": 1,
+      "tests": 218,
+      "passed": 203,
+      "failed": 15,
+      "skipped": 0,
+      "internalStage5GroupsPassed": 290,
+      "builderPid": 102256,
+      "elapsedMs": 10615,
+      "exited": true,
+      "disposed": true,
+      "reason": "14 original Combat fixture references missing real handleNpcRepairPointer; one memory document listener missing. Stage5 actual 290 internal groups passed; complete global suite failed.",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-node01.config.json",
+        "bytes": 4798,
+        "sha256": "97ada7c71c9404e70b8fddf7640fe0a9443c5a88c86fd4c6faf3334f2e2aa08a"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-node01-snapshot.json",
+        "bytes": 9740347,
+        "sha256": "cddc624b9c011523ded074787497ac2aeb4042fd00f779b3ee0483abfac93cef"
+      },
+      "review": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-source-review01.json",
+        "bytes": 5342,
+        "sha256": "ac51091e25de59039a169d0a0c0c7b123c47f3fecbd57324c89df47a2128e7cd"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-node01.stdout.log",
+        "bytes": 37283,
+        "sha256": "eae7d19896bc56fdeea6304c0e568d013810840f6921c1fb2fbb609a7f6ce325"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-node01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-node01.outer.json",
+        "bytes": 540,
+        "sha256": "b38b30ebcb6a9ae5295daf519c8311601410b67c12856204e4480c4fd38fa202"
+      }
+    },
+    "actualTsc01": {
+      "exitCode": 2,
+      "builderPid": 101688,
+      "elapsedMs": 11412,
+      "exited": true,
+      "disposed": true,
+      "errors": 9,
+      "reason": "Four unreachable repair/special comparisons after native repair panel early return and five SharedBag event timeStamp type errors; actual source type-only cleanup applied.",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-tsc01.config.json",
+        "bytes": 3930,
+        "sha256": "c59d349cd42b62185553f3acccf40f73806abbb6996fb5ccff70665e0ab9b896"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-tsc01.stdout.log",
+        "bytes": 2745,
+        "sha256": "73505b78f598024db4ad0484de4c2e20176a8b0e795e7a9cb5ca5fa24f9cfd24"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-tsc01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-tsc01.outer.json",
+        "bytes": 530,
+        "sha256": "1d41826ab3b4907e8ae5add34bcc95a7503529741658fac832ee24eee2f1adf5"
+      }
+    },
+    "prepared02NotExecuted": {
+      "node02Config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-node02.config.json",
+        "bytes": 4811,
+        "sha256": "6b92a132d34db7290bb87e3d20b9fe6f1ac9ceaa2157d3230815a19d3bd368ad"
+      },
+      "tsc02Config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source20-tsc02.config.json",
+        "bytes": 3948,
+        "sha256": "d3846c909a0cf02e4278ff7e91a15abcd17ea4d3b5ee7eed167bb3c96ff80e3f"
+      },
+      "reason": "Read-only reviewer detected obsolete unreachable shop-list source anchors before Root launched either prepared config; both remain immutable unexecuted history."
+    },
+    "previousSource19": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-finite-result01.json",
+      "bytes": 19667,
+      "sha256": "54aff998cd9718bf687acecb3f2d38e723564edee0ba0887ac590f7d8d208903"
+    }
+  },
+  "fixtureIntegrity": {
+    "stage5": {
+      "finalPin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+        "bytes": 376366,
+        "sha256": "09f5e1815059200861a3ca05592bec7ad5e0f32a27fdd6eab43f240bcfd62235",
+        "relativePath": "apps/web/scripts/test-stage5-adapters.mjs"
+      },
+      "oldNamedGroups": 282,
+      "addedGroups": [
+        "NPC repair opaque drag accepts actual UID zero and Bag2 physical slot and spends every terminal once",
+        "NPC repair known low gold remains selectable by row or drag while confirmation stays disabled",
+        "NPC repair drag live geometry page pointer DPR and source changes cannot revive a spent token",
+        "NPC repair Hold preserves normal authoritative updates but unknown owner source and close discard it",
+        "NPC repair fresh Hold drops keep entered UID barrier through cancel close and exact ACK without replay",
+        "NPC repair actual Page Hold drop sends once through final proof and live owner source barriers",
+        "NPC repair actual Shell captured drag terminal owns routing geometry and successor cleanup",
+        "NPC repair actual capture listeners quarantine second pointer through compatibility click while new gestures and keyboard remain usable"
+      ],
+      "totalInternalGroups": 290,
+      "qualification": "Original 282 group names and declaration order retained, plus eight new groups. Earlier inverse restored Source19 original 334501 bytes / 637e0a56a15ace2af9ecb2ac9fc424413be615e9d5c50a058974681c6d031621; final explicitly authorized three obsolete UI source anchors replaced with stronger actual reachable native repair AST assertions. Independent final inverse(new block to original three lines) exactly restores preceding 373371 bytes / 3ce2d499700a394d0751d9000d271ed50f4ef806e8b569af3fb0dbed709f97e5; every other byte and all 290 declarations unchanged. No claim all historical assertions remained byte-identical after final UI anchor update."
+    },
+    "combat": {
+      "finalPin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs",
+        "bytes": 65656,
+        "sha256": "6dbde12357d12efa2fb663c74d0fd8ba32bb25ec404087c28acfe30b47ed24af",
+        "relativePath": "apps/web/scripts/test-bevy-combat-input.mjs"
+      },
+      "originalTests": 23,
+      "allOriginalTestsAndAssertionsRetained": true,
+      "exactInverseOriginalBytes": 63126,
+      "exactInverseOriginalSha256": "8d967d2aa9eec2995f25b6a9d9ee09aed13e80d01c78f78b308fbe56787c8587",
+      "genuineShellDependencies": true,
+      "newGateTrueOrRouteFalseStub": false
+    }
+  },
+  "independentReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "sourceAccepted": true,
+    "node03Tsc03ReceiptAndPinnedSourceAccepted": true,
+    "confirmedP0P1Blockers": 0,
+    "fullDependencyRehashByReviewer": false,
+    "rootFullRehashAlreadyRecorded": true,
+    "qualification": "Read-only reviewer verified original config/receipt/log/snapshot/current seven products and modified tests; Stage5 290 groups remain inside one global test. Full27000dependency rehash by Root, not claimed again for reviewer."
+  },
+  "limits": [
+    "Memory DOM/quote/socket dependency fixtures and actual original source function extraction do not prove a committed React browser tree, native event dispatch, real Rust quote execution, WebSocket service or player operation.",
+    "UI, login, battle, save/relogin and mobile/human acceptance remain not-run.",
+    "317 stable source records are bounded audit bookkeeping, not a complete acceptance denominator or overall progress percentage."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

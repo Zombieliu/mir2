@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-08T11:05:32.472Z",
+  "sourcePins": {
+    "app/page.tsx": "2115a06fbd89f47ff76120c795fdcac598d795f87bfae2a3885fe15fa962abe4",
+    "app/original-client-shell.tsx": "dfc1d63852ab67dfb779095e6a1915e8f5d976a02775dfe9c55f697156cb3d6f",
+    "app/components/original-client-guild-window.tsx": "4a9491f68684d229a1108569bc9584442d9e8472fb842edceb514eb8f469f649",
+    "app/components/original-client-guild-controls.tsx": "7735810a7e829e4934fd5460573876cf8683486a969e4b01631ef935bc10eed0",
+    "app/components/original-client-extra-windows.tsx": "4c54b4b0b2b0d0fe5d10e32e49b36ee6fd907f9165d3f6aa42a3febcbc697378",
+    "lib/r16-guild-keyboard.ts": "5c49bd5a26c947b1bddfdd89707db3f0698545c40771f0c997dd94b57bffc735",
+    "lib/r16-guild-layout.ts": "1e732880c64dcc42cac4d32e1abaf9a195349ea3fa8101acae51f3158e01e3f0",
+    "lib/social-parity-actions.ts": "5acb357f9df207a9ad5ddf852799ab2f6f8e7aa7eff18d8bb733db00959c016d",
+    "lib/guild-rank-operations.ts": "172ba45b0f074657cb6f416d0a6337fe38baf2e7b93f87d902bf849edec304ee",
+    "lib/guild-rank-projection.ts": "a99fc44667181f75321fe12d4b2cde221613acf6aec4c90ba9abd9e83918c476",
+    "lib/generated/r16-native-localization.json": "944f1639e3ac7822ddba4c81a6b2bd5416aef3ded46be35a9e5f75a2f37271ea"
+  },
+  "renderer": "bevy-a46905128c316656",
+  "canonicalDrift": [],
+  "unit": {
+    "passed": 99,
+    "failed": 0,
+    "stage5Groups": 507,
+    "script": "apps/web/scripts/test-r16-guild-controls.mjs",
+    "scriptSha256": "99fb109c0243b8ecd90cba01e4236296c0290693714be62676cef1789a79b917",
+    "logSha256": "d37f52487a3b88db149f26cc81f2d3d4a92dc989b0e94c46f06c09d0df24e955"
+  },
+  "runs": [
+    {
+      "name": "webgl-r1",
+      "passed": false,
+      "checks": 0,
+      "phase": "owner-login-single-editor",
+      "type4": 0,
+      "realOwnStatus6": 0,
+      "normalLogoutChecks": 0,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [],
+      "screenshots": [],
+      "proofSha256": "b0f92bb03fe7ecb9b51c5dcbebebc6711df5dd164f954530b4cd7d512a43e7cf"
+    },
+    {
+      "name": "webgl-r2",
+      "passed": false,
+      "checks": 9,
+      "phase": "officer-numeric-hierarchy-and-peer-delta",
+      "type4": 1,
+      "realOwnStatus6": 1,
+      "normalLogoutChecks": 0,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [],
+      "screenshots": [
+        {
+          "name": "en-wide-initial",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        },
+        {
+          "name": "en-real-create-readback",
+          "sha256": "8ba59509d096eb1a8d1d6e84f5fb1c9648c5111bbc36318372bf82d99cfc6f1e"
+        },
+        {
+          "name": "officer-failure",
+          "sha256": "2931ff937782537235fbd467c5ec4fb6b36aaf33dcbeb4c24e65dcc2c55d2519"
+        }
+      ],
+      "proofSha256": "e6eedf1d0253b6600ae6d1312cb2b63ad8fef002bb1bb119b96e94ce8d27a33b"
+    },
+    {
+      "name": "focus-check-r1",
+      "passed": true,
+      "checks": 2,
+      "phase": "owner-returned-to-front",
+      "type4": 0,
+      "realOwnStatus6": 0,
+      "normalLogoutChecks": 2,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [],
+      "screenshots": [],
+      "proofSha256": "cb7f42506e83edd0f3c721cbf7e5646fe082a979189cd774f52a87a6fd12ea04"
+    },
+    {
+      "name": "webgl-r3",
+      "passed": false,
+      "checks": 14,
+      "phase": "three-language-narrow-and-drag",
+      "type4": 1,
+      "realOwnStatus6": 1,
+      "normalLogoutChecks": 2,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [],
+      "screenshots": [
+        {
+          "name": "en-wide-initial",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        },
+        {
+          "name": "en-real-create-readback",
+          "sha256": "8ba59509d096eb1a8d1d6e84f5fb1c9648c5111bbc36318372bf82d99cfc6f1e"
+        },
+        {
+          "name": "owner-failure",
+          "sha256": "7164f9d12f2e38f642724761f35a93c7936bbab88e4faf2942b4194ee338a290"
+        }
+      ],
+      "proofSha256": "7fdd609b73fc12670c7585e8d15dcfe2f38d846ed431ec5ae2a6dc23b02257d3"
+    },
+    {
+      "name": "webgl-visual-r1",
+      "passed": false,
+      "checks": 1,
+      "phase": "three-language-narrow-and-drag",
+      "type4": 0,
+      "realOwnStatus6": 0,
+      "normalLogoutChecks": 0,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [],
+      "screenshots": [
+        {
+          "name": "owner-failure",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        }
+      ],
+      "proofSha256": "61ede030ffdb182afb08d239f077a6707313ae5dc59c09a759caa68db3c9a27a"
+    },
+    {
+      "name": "webgl-visual-r2",
+      "passed": true,
+      "checks": 10,
+      "phase": "normal-reentry-and-no-world-input",
+      "type4": 0,
+      "realOwnStatus6": 0,
+      "normalLogoutChecks": 5,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [],
+      "screenshots": [
+        {
+          "name": "en-narrow-ranks",
+          "sha256": "f65ac9d81c0086e9190c54314e04328d16e57ca8acc1471a2098022ed85952e2"
+        },
+        {
+          "name": "zh-CN-narrow-ranks",
+          "sha256": "0e29c34d6965817f6090bcf81541e69b118b8ad84e51fed9f3d69623e226db46"
+        },
+        {
+          "name": "ar-narrow-ranks",
+          "sha256": "1794c60fafb1ac437bb87b87f43f6241bc3c9c7c4d847bdb785fb2e5a9d56efb"
+        },
+        {
+          "name": "en-final-persisted",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        }
+      ],
+      "proofSha256": "8bbb72974fcb0963e83aa1dafd1a75f46f2dff76735230e14bcf03ed4214885f"
+    },
+    {
+      "name": "webgpu-r1",
+      "passed": true,
+      "checks": 26,
+      "phase": "complete",
+      "type4": 1,
+      "realOwnStatus6": 1,
+      "normalLogoutChecks": 7,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [
+        "webgpu"
+      ],
+      "screenshots": [
+        {
+          "name": "en-wide-initial",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        },
+        {
+          "name": "en-real-create-readback",
+          "sha256": "8ba59509d096eb1a8d1d6e84f5fb1c9648c5111bbc36318372bf82d99cfc6f1e"
+        },
+        {
+          "name": "en-narrow-ranks",
+          "sha256": "2d97f9e5d01bae76761a02e982561f6d5fc5bd2a8bd3e6b3d6eb9bf854050c3d"
+        },
+        {
+          "name": "zh-CN-narrow-ranks",
+          "sha256": "1cc38e8efb8d8d24cddad96b0e5a2e409b903a4130c8ebaeee83d19e515af7ae"
+        },
+        {
+          "name": "ar-narrow-ranks",
+          "sha256": "c4d71ca1c73bfc5199fd5ee39cbe8a72535e7eb0449b27ef073f8ad55efbf641"
+        },
+        {
+          "name": "en-final-persisted",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        }
+      ],
+      "proofSha256": "621d3019d1cdcf77dc036e35be8756bf78395a10c8f08781a34b105f8934a039"
+    },
+    {
+      "name": "webgl-backend-readback-r1",
+      "passed": true,
+      "checks": 2,
+      "phase": "qualified-gl-readback",
+      "type4": 0,
+      "realOwnStatus6": 0,
+      "normalLogoutChecks": 1,
+      "worldCommands": 0,
+      "pageErrors": 0,
+      "httpErrors": 0,
+      "consoleErrors": 0,
+      "observedBackends": [
+        "webgl2"
+      ],
+      "screenshots": [
+        {
+          "name": "en-persisted-cross-backend",
+          "sha256": "ad842d7598cbf18cae6f0f2f28700d1ec8bc184b7383a33aaf7027e88ab61d36"
+        }
+      ],
+      "proofSha256": "fcbd6bdfe99a8a01b8b3a236eca17d7907e23e75a0707ab88cf0d616fb7862bb"
+    }
+  ],
+  "originalPrivateDataUnchanged": true,
+  "originalPrivateQaUnchanged": true,
+  "originalDataFiles": 7,
+  "originalPrivateDataDigest": "867a02c897b21bdd1ed62cf8dd0d3f98a98e262da93ad9d54ac8097920055fbb",
+  "originalPrivateQaDigest": "64032e2127eab375f3bdd8001cb4dd1da46c5970fd359ba955e999cb095cdbce",
+  "knownOpen": [
+    {
+      "code": "GUILD_STATS_LEVEL_NOT_PROJECTED",
+      "authoritativeGuildStatusLevel": 1,
+      "renderedLevel": 0,
+      "scope": "right stats panel; not claimed passed"
+    },
+    {
+      "code": "INITIAL_R2_EDITOR_DISAPPEARANCE_UNDETERMINED",
+      "evidence": "webgl-r2",
+      "alwaysBackgroundResetHypothesisFalsifiedBy": "focus-check-r1"
+    }
+  ],
+  "limits": [
+    "Guild rank controls and permission/scope input contract only; Members/storage/buff full-pixel parity not claimed",
+    "Browser IME negatives are untrusted DOM KeyboardEvent fixtures; unit executes actual isComposing/229 handlers",
+    "Language selected through actual normal Select menu before entering each narrow view",
+    "This does not create a guild through gameplay; guild existed in the copied isolated fixture",
+    "Old fixture credential material was accidentally emitted once by a failed single-line filter, separately reported to lead; new cloned service keys reissued, original files never changed"
+  ],
+  "productionModified": false,
+  "desktopControlled": false
+}

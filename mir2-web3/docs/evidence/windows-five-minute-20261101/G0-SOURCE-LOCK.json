@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.five-minute.g0-private-source-lock.v1",
+  "atUtc": "2026-11-01T15:38:12.6819229Z",
+  "privateSourceRevision": "262cf6f962eb72d2660fa81deb60639a402a7279",
+  "parentRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+  "canonicalHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+  "canonicalRefMoved": false,
+  "canonicalIndexPreserved": true,
+  "sourceTree": "04749b0ad9107d389f2769c168b3010f5c6f0c02",
+  "changedPaths": [
+    "mir2-web3/apps/game-client/platform-windows/src/capture.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/capture/resource_reads_tests.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/generation_launch_tests.rs",
+    "mir2-web3/apps/game-client/resource-pack/README.md",
+    "mir2-web3/apps/game-client/resource-pack/examples/repack.rs",
+    "mir2-web3/apps/game-client/resource-pack/src/lib.rs",
+    "mir2-web3/apps/game-client/resource-pack/src/read_profile.rs",
+    "mir2-web3/apps/game-client/resource-pack/src/repack.rs",
+    "mir2-web3/apps/game-client/resource-pack/tests/read_profile.rs",
+    "mir2-web3/apps/game-client/resource-pack/tests/repack.rs"
+  ],
+  "publicPushPerformed": false,
+  "codeSourceOnly": true,
+  "fiveMinuteAcceptance": false
+}

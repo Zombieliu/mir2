@@ -1,0 +1,506 @@
+{
+  "utc": "2026-10-11T09:02:53.506219+00:00",
+  "implementationBaseRevision": "8d96b3386c4d7558042c4b9117200f428eadf595",
+  "sourceReconstruction": {
+    "utc": "2026-10-11T08:56:07.506425+00:00",
+    "sourceBase": "8d96b3386c4d7558042c4b9117200f428eadf595",
+    "gatewayProductionAndOriginalAssertionsReconstructExactly": true,
+    "testLockCohort": 9,
+    "originalFullWorkflowAndCommandsReconstructExactly": true,
+    "gatewaySourceSha256": "850ea5c62cd5f456385f8930f0c5da0e632279214147cdd1a211b368c42e79e4",
+    "workflowSha256": "6fe70f5c1a39db1d99440942ea10fb7f8e1c16f4ab3d1852178e36e235b3634e",
+    "soundInputs": [
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_blackdragon.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_blackdragon.wav",
+        "bytes": 118060,
+        "sha256": "8253e843bc25c3f66e545dc994a83ace223f539ee0f473b73e3aaba5cf88594f"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_chick.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_chick.wav",
+        "bytes": 51954,
+        "sha256": "72b1998c1796a42ee5cd41dd8c315630cec98a36f5c636b6671242d32202c603"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_frog.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_frog.wav",
+        "bytes": 1187928,
+        "sha256": "887ce5b02a615550926ff1c331f9908e0c05752f3e2a4e7f07ee67a63fc47beb"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_kitty.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_kitty.wav",
+        "bytes": 79788,
+        "sha256": "c73bbf3e3b4fdf88904d4eeaef57b32ee9c14941c85c8695a673549719f15865"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_monkey.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_monkey.wav",
+        "bytes": 113616,
+        "sha256": "7f7c65e56f1cd5d570e8dbf176a6de76c1de4e1aff4256fe3c94cc88e2c73fc4"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_olympicmascot.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_olympicmascot.wav",
+        "bytes": 44156,
+        "sha256": "6440636cb32bb15ab68b3761009e2358bcd17732f418c96d249c0967679d1866"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_pickup.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_pickup.wav",
+        "bytes": 14030,
+        "sha256": "769f1e02c231fd1b31350dd79d83d6b9d7b103ffdd7b89ae941489959d49a777"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_pig.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_pig.wav",
+        "bytes": 62344,
+        "sha256": "34d22859920789e0ff33ea7df025d8985e79f294514caf40f9e452e2713b22c8"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_pigman.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_pigman.wav",
+        "bytes": 46480,
+        "sha256": "66a188857ec3d8754a8537a6a6dabe706568d0c4ffa8a7ecefecb424d2308cde"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_skeleton.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_skeleton.wav",
+        "bytes": 57572,
+        "sha256": "824d270bbd3db0781cde41176620da7b99c6814f9cd3b0c5225f1dc105023aed"
+      },
+      {
+        "source": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Sound\\pet_weman.wav",
+        "destination": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3\\apps\\web\\public\\original-ui\\Sound\\pet_weman.wav",
+        "bytes": 37346,
+        "sha256": "e0cb7ec6e3ea6b91d4c744d78a93423f81d49b77b1534fac22b82f77a1fbab22"
+      }
+    ]
+  },
+  "originalFailedWindowsArtifact": {
+    "utc": "2026-10-11T09:02:53.269426+00:00",
+    "runId": 38116708426,
+    "jobId": 114402931812,
+    "artifactId": 11695285895,
+    "source": "8d96b3386c4d7558042c4b9117200f428eadf595",
+    "ciJobConclusion": "success",
+    "actualOriginalNativeTests": {
+      "passed": 938,
+      "failed": 3,
+      "ignored": 7
+    },
+    "qualificationPassed": false,
+    "exeSha256": "FA9670B39C473443D93BF1497E64AE76D43F7C04A1ABB1D1053D1002F0211191",
+    "downloadedZipSha256": "13ac6c3ff18adb3db37996d47112bc6579e28c47cf516cad168ef6ab92890274",
+    "published": false,
+    "reusedAsFixedExe": false,
+    "originalRawLogSha256": "12540d40e227134424335a1072c1d57ecf3638d9ec4ba357070b5a3c932e5c16"
+  },
+  "actualChecks": {
+    "forcedInterleaveExpectedFailed": 2,
+    "focusedPassed": 13,
+    "fullNativePassed": 941,
+    "existingNativeIgnored": 7,
+    "fullNativeDefaultParallel": true,
+    "focusedIsSubsetOfFull": true,
+    "mapNodeTestsPassed": 25,
+    "workflowControlCasesPassed": 6,
+    "formatPassed": true
+  },
+  "memoryAndTimeSupervisor": {
+    "utcStarted": "2026-10-11T08:49:03.234562+00:00",
+    "utcFinished": "2026-10-11T08:49:14.380583+00:00",
+    "wrapperExitCode": 0,
+    "rootOwnedProcessId": 56140,
+    "observedOwnedTestProcesses": {
+      "61548": {
+        "name": "mir2_platform_windows-665b8ed76e7a05e5.exe",
+        "startedMonotonic": 57358.0973328,
+        "peakPrivateBytes": 240422912,
+        "peakWorkingSetBytes": 387170304
+      }
+    },
+    "peakTestPrivateBytes": 240422912,
+    "testMemoryBoundBytes": 2147483648,
+    "testTimeBoundSeconds": 600,
+    "boundFailure": null,
+    "unrelatedProcessesStopped": false,
+    "thisIsComponentVerification": true,
+    "nativeHumanAcceptance": false
+  },
+  "archive": {
+    "path": "original-evidence.zip",
+    "bytes": 388190,
+    "sha256": "20cf3f27e7ba0ea0f358fe03c646c7dfb7563531ebc98250d34ee32e68b661ca",
+    "files": [
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset-after.json",
+        "bytes": 5425,
+        "sha256": "b2640c7c5b70d1e93ca70f94574162fd324fa760ae622ac375305ed6e237daf8"
+      },
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset-before.json",
+        "bytes": 5426,
+        "sha256": "7818ace541f665d3c7ec27cadc26d802c839d92d22d7728789e2863a3cd503c2"
+      },
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset-result.json",
+        "bytes": 458,
+        "sha256": "2e233e8cdad7eced49b6eb3bf950bf3978a81328e2db9d93930435f1c500752d"
+      },
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset-supervisor.json",
+        "bytes": 657,
+        "sha256": "faf761d0e0fee1d7e837ca06345f06e3229177ec905bd3a129bf294f694474a3"
+      },
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset-supervisor.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset-supervisor.stdout.log",
+        "bytes": 2787,
+        "sha256": "8d3c6b3b01911106367dc8d8cb516f886f45c2d26b0c59c529caa6facc6428e4"
+      },
+      {
+        "path": "native-ci-fix-01/check-01-forced-cross-fixture-reset.log",
+        "bytes": 45064,
+        "sha256": "23ce80fbcb45c834e90384eb30ea818b8f947cec86bb8268607824db663fb034"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort-after.json",
+        "bytes": 5455,
+        "sha256": "8236ded92554bfdfd29fe805d99536f793d753b02a889d501c04339d1cb78abf"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort-before.json",
+        "bytes": 5456,
+        "sha256": "dec8697d3b03acda3a4c1e10e4c8576fe4d8e9132d5cee99822dfe9a571c0a4b"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort-result.json",
+        "bytes": 459,
+        "sha256": "22acc64ce5daf4077206032ac41c13d589fedf4b516ac29514e58e0f427ad7b3"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort-supervisor.json",
+        "bytes": 657,
+        "sha256": "e2e4701684dae347d65c7229f0374a1a731b34b5ac9062b02f406483df5e8e34"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort-supervisor.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort-supervisor.stdout.log",
+        "bytes": 3506,
+        "sha256": "bf3c6fb55d40a2e24405a7d724b67531bdc9f915436d65868a94e2b6692aa015"
+      },
+      {
+        "path": "native-ci-fix-01/check-02-fixed-native-queue-and-pet-cohort.log",
+        "bytes": 46390,
+        "sha256": "d9d71b3dac35887530aaf5ef9defc8953f6b49c648a057bf12d7206eead88db5"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel-after.json",
+        "bytes": 5192,
+        "sha256": "bbe4b21e1da532eea385fbb7c41f7574cb1d6fbcfab3e5fc5ec9bf69704f9a5d"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel-before.json",
+        "bytes": 5193,
+        "sha256": "92c560b994c8dd5a970fa5c490118245c3c2885497fe54e7e0464cb3233b6f6e"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel-result.json",
+        "bytes": 459,
+        "sha256": "84f378bb5ac0332f2b3206b8add87ed258c47bd9aa32e19d94de3c61c12fa9bf"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel-supervisor.json",
+        "bytes": 660,
+        "sha256": "bd54f8b23e96ed328bf983e03ac35dd9bb1d5c0e8d4fef2ba6ca8c62f8fc6be5"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel-supervisor.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel-supervisor.stdout.log",
+        "bytes": 4667,
+        "sha256": "e3fc572f5ac49d22ff16d05b62c66e523a65e845fb4c945295f0d6edd5269442"
+      },
+      {
+        "path": "native-ci-fix-01/check-03-fixed-full-native-default-parallel.log",
+        "bytes": 2038654,
+        "sha256": "53ad4594ceb73a113ee7db05d212764192a6e2d510fc79837985832ab15f1c89"
+      },
+      {
+        "path": "native-ci-fix-01/check-04-full-native-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/check-04-full-native-fmt.log.json",
+        "bytes": 176,
+        "sha256": "8d655dac2e3df65210b71a0ed5bb2e08bc140fd47e92a78accfdd4bb25692409"
+      },
+      {
+        "path": "native-ci-fix-01/DIAGNOSTIC-PREPARATION-01.json",
+        "bytes": 422,
+        "sha256": "eaeba51def90f76e5392469f71fd20a7692bcdbcb8102cb9fc018c13535f5253"
+      },
+      {
+        "path": "native-ci-fix-01/gateway-forced-interleave-diagnostic.rs",
+        "bytes": 533845,
+        "sha256": "7192cd09e47432fb0d75568b05f4c68dd7605a844d06ec19d9432b9955245547"
+      },
+      {
+        "path": "native-ci-fix-01/gateway-original-8d96.rs",
+        "bytes": 532450,
+        "sha256": "fd60570a4395143092e10a58d6473d135d3420a8751540d0593d81b697b64b7f"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-01/assets-map-atlas-build.log",
+        "bytes": 84,
+        "sha256": "d5852bb76112fa27cf30b9ea8dfd3240ca57a14749298d5ff127c09ee03384ec"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-01/RESULT.json",
+        "bytes": 320,
+        "sha256": "8458c1877577b93abbfa4dc8a10246748e0f93d48023a75ca8faab75fcbb3c24"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-02/ci.log",
+        "bytes": 1313,
+        "sha256": "25520b8fbdd5794e6339ce40095778aa3db363568cedf48c2761078f1bd8e406"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-02/RESULT.json",
+        "bytes": 272,
+        "sha256": "008bda1555a6e544fa226db7347d732366e7e5bbfe0f561e35ddf6f35551a76c"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-03/assets-map-atlas-build.log",
+        "bytes": 2332,
+        "sha256": "207deca9dc9afb3e75d0fcbdd713327c3bfe554d22f288c56d498854a4e4e0f7"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-03/assets-native-map-keyed-build.log",
+        "bytes": 916,
+        "sha256": "91fc395b13be2764caad9d63236e4bd39f20f4a9bdeb17c6750bba3b38892ae9"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-03/ci.log",
+        "bytes": 340,
+        "sha256": "99cbcc710b43ae3b7b61a54f6166578cf71795e0b5eccda31902a36dc193b781"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-03/INPUTS-VERIFIED.json",
+        "bytes": 1036,
+        "sha256": "d3cbc2633ba0bb4e2e3afc8322a99953c71e53f6c9490edf906c05eb2e0bce24"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-03/RESULT.json",
+        "bytes": 1351,
+        "sha256": "5d954b87914883bb47e97d6abcbd3a85da14b0e3a0301bb89537dd2c515a1294"
+      },
+      {
+        "path": "native-ci-fix-01/map-inputs-03/test-native-map-keyed.log",
+        "bytes": 4974,
+        "sha256": "bb6b4df1244d00a0ec538e4edd26c709a6d848d2cae53e09113fe801b89f9d87"
+      },
+      {
+        "path": "native-ci-fix-01/ORIGINAL-WINDOWS-ARTIFACT-QUARANTINED.json",
+        "bytes": 677,
+        "sha256": "6b02be756fd6ca3aeb49b760cfedc3c96af1d317eed2a61f4685d893462f2434"
+      },
+      {
+        "path": "native-ci-fix-01/SOUND-INPUTS-01.json",
+        "bytes": 4253,
+        "sha256": "da9c570ff5148784b172c9b2dcee9ec34f83b755b8a250f3017e08a3583fea64"
+      },
+      {
+        "path": "native-ci-fix-01/SOURCE-RECONSTRUCTION-01.json",
+        "bytes": 4550,
+        "sha256": "0d516e221a4228b4d0db842a97e0214abf76be7f560a0bc648da535fe13db7f7"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/cargo.cmd",
+        "bytes": 178,
+        "sha256": "0652628bf8b512618eb1ee2a49a84c5447e0a3b6124f63f359c39df8f2ac70e7"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-all-success.jsonl",
+        "bytes": 647,
+        "sha256": "1d35e20deb6705b89bb30619af02807a6a0676da4209ebeb23a359279d5b8138"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-all-success.ps1",
+        "bytes": 1167,
+        "sha256": "3d0661f87d5b44e10fbb5b544fba250b261a82092b6c48a71cb7dc8709f3c4d9"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-all-success.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-all-success.stdout.log",
+        "bytes": 19,
+        "sha256": "6764867a7104daad82691e4c348a76a0abaa68ea091e59b992d8301266676b29"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-build-failure.jsonl",
+        "bytes": 647,
+        "sha256": "1d35e20deb6705b89bb30619af02807a6a0676da4209ebeb23a359279d5b8138"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-build-failure.ps1",
+        "bytes": 1167,
+        "sha256": "3d0661f87d5b44e10fbb5b544fba250b261a82092b6c48a71cb7dc8709f3c4d9"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-build-failure.stderr.log",
+        "bytes": 343,
+        "sha256": "d1682aa63d9fc2a385a3257387ce7c709ea3807b581da0a080b51f2801897be3"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-build-failure.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-format-failure.jsonl",
+        "bytes": 335,
+        "sha256": "1bd6c449eafddb862cf4bffa809a59188cb028aaea76729ddd48e502f4bc94d0"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-format-failure.ps1",
+        "bytes": 1167,
+        "sha256": "3d0661f87d5b44e10fbb5b544fba250b261a82092b6c48a71cb7dc8709f3c4d9"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-format-failure.stderr.log",
+        "bytes": 342,
+        "sha256": "1f1891de3fb1973429c33b316cb264b5130f1eba537163ee2d7a0a847ebcf358"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-format-failure.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-self-test-failure.jsonl",
+        "bytes": 192,
+        "sha256": "77a11745db0737eb46975c5e5f9cd0d640ffe72a05de03b239f35d526a7b4500"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-self-test-failure.ps1",
+        "bytes": 1167,
+        "sha256": "3d0661f87d5b44e10fbb5b544fba250b261a82092b6c48a71cb7dc8709f3c4d9"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-self-test-failure.stderr.log",
+        "bytes": 348,
+        "sha256": "41d005a1bdebc11303e4203432b9bfb91a6d5f3b5fc169ac5e6dd19fdf4d68f7"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-self-test-failure.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-test-failure.jsonl",
+        "bytes": 472,
+        "sha256": "93c8b46a564da1a73b6c066d5284c3e2886095bc3b775a69900aa1ecab0c964a"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-test-failure.ps1",
+        "bytes": 1167,
+        "sha256": "3d0661f87d5b44e10fbb5b544fba250b261a82092b6c48a71cb7dc8709f3c4d9"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-test-failure.stderr.log",
+        "bytes": 339,
+        "sha256": "2dc0adefc0e05296cf9fee6b535438573147b983aa097363fa902b94654609b2"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/fixed-test-failure.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/native-command-stub.py",
+        "bytes": 417,
+        "sha256": "e14d1fb7b29ddbe3a052e4f0df44f45f659c3cf2199d10a1ca02d4a8e4afc9ff"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/original-test-failure.jsonl",
+        "bytes": 647,
+        "sha256": "1d35e20deb6705b89bb30619af02807a6a0676da4209ebeb23a359279d5b8138"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/original-test-failure.ps1",
+        "bytes": 645,
+        "sha256": "dbab9a93d4c06ceac161c3cef99afabb9ea448ff69bbc7e1b83e1609c799ac81"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/original-test-failure.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/original-test-failure.stdout.log",
+        "bytes": 19,
+        "sha256": "6764867a7104daad82691e4c348a76a0abaa68ea091e59b992d8301266676b29"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/powershell.cmd",
+        "bytes": 183,
+        "sha256": "c58dae363c9bb9fe8fd0b348517f64f11219dd6c4cfc7147e212b3d762e8f363"
+      },
+      {
+        "path": "native-ci-fix-01/workflow-exit-guards-02/RESULT.json",
+        "bytes": 1947,
+        "sha256": "466e1126bb4731a210eb747bec5038edf7e35bacaebd8a772d7402bb74be3783"
+      },
+      {
+        "path": "ci-02/windows-ci-01/artifact-01/ci-original-status.json",
+        "bytes": 18252,
+        "sha256": "d3a0a01b0564ef2185e13a141c9ab2732332fee38f7f90ef263ff798a0fe5bdd"
+      },
+      {
+        "path": "ci-02/windows-ci-01/artifact-01/ci-original-artifacts.json",
+        "bytes": 1486,
+        "sha256": "ae7f34cec97a92bc596a3e49c873f014647e1e8f7201b297b9ea3d49a42ff584"
+      },
+      {
+        "path": "ci-02/windows-ci-01/artifact-01/ci-original-windows-job.log",
+        "bytes": 698766,
+        "sha256": "12540d40e227134424335a1072c1d57ecf3638d9ec4ba357070b5a3c932e5c16"
+      },
+      {
+        "path": "ci-02/windows-ci-01/artifact-01/BUILD-ATTESTATION.json",
+        "bytes": 2416,
+        "sha256": "3b6a262446d335eeebdc7c18b0d1b80584aed15c3360cc914198733d5be632d4"
+      }
+    ]
+  },
+  "newCleanWholeCiBuildPending": true,
+  "windowsCandidatePublished": false,
+  "nativeDenseCombatPlay": false,
+  "humanAcceptance": false,
+  "fullClassicComplete": false,
+  "retainedPreparationFailures": [
+    "workflow block extractor skipped its first code line; corrected +4 to +3",
+    "explicit owned asset root had no generated maps; preflight stopped before Native tests",
+    "npm PowerShell shim misparsed call operator; npm.cmd replaced it",
+    "single PowerShell string splatted as c/i; explicit string[] fixed it"
+  ],
+  "privateConnectorTransportReferencesArchived": false
+}

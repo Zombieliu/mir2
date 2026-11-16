@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-14T04:43:01.185Z",
+  "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "origin": "https://numeron.obelisk.build",
+  "passed": true,
+  "scope": "Fresh ordinary public Chrome contexts; SC and TC real QR modules and pending state after verified rollback. No wallet approval, role or transaction.",
+  "rows": [
+    {
+      "language": "zh-CN",
+      "createAttempts": 1,
+      "createStatuses": [
+        200
+      ],
+      "pendingObserved": true,
+      "qrModulesMatch": true,
+      "pageErrors": 0,
+      "contextClosed": true,
+      "qrWidth": 240,
+      "qrHeight": 240,
+      "walletOrigin": "https://wallet.dubhe.obelisk.build",
+      "passed": true
+    },
+    {
+      "language": "zh-TW",
+      "createAttempts": 1,
+      "createStatuses": [
+        200
+      ],
+      "pendingObserved": true,
+      "qrModulesMatch": true,
+      "pageErrors": 0,
+      "contextClosed": true,
+      "qrWidth": 240,
+      "qrHeight": 240,
+      "walletOrigin": "https://wallet.dubhe.obelisk.build",
+      "passed": true
+    }
+  ],
+  "browserClosed": true
+}

@@ -1,0 +1,786 @@
+TAP version 13
+# Subtest: actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates
+ok 1 - actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates
+  ---
+  duration_ms: 19.5784
+  type: 'test'
+  ...
+# Subtest: actual hook ingests a late current baseline once, retains proof gates and never replays a select
+ok 2 - actual hook ingests a late current baseline once, retains proof gates and never replays a select
+  ---
+  duration_ms: 6.3936
+  type: 'test'
+  ...
+# Subtest: actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges
+ok 3 - actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges
+  ---
+  duration_ms: 193.69
+  type: 'test'
+  ...
+# Subtest: actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data
+ok 4 - actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data
+  ---
+  duration_ms: 1692.4573
+  type: 'test'
+  ...
+# Subtest: actual learned-skill packets retire the physical combat source while cast timing preserves it
+ok 5 - actual learned-skill packets retire the physical combat source while cast timing preserves it
+  ---
+  duration_ms: 586.93
+  type: 'test'
+  ...
+# Subtest: actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners
+ok 6 - actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners
+  ---
+  duration_ms: 119.2396
+  type: 'test'
+  ...
+# Subtest: cached combat diagnostics never poll, send, withdraw or consume a proof
+ok 7 - cached combat diagnostics never poll, send, withdraw or consume a proof
+  ---
+  duration_ms: 1.7634
+  type: 'test'
+  ...
+# Subtest: diagnostics record disabled facts and a real rejected snapshot without bypassing either gate
+ok 8 - diagnostics record disabled facts and a real rejected snapshot without bypassing either gate
+  ---
+  duration_ms: 0.4856
+  type: 'test'
+  ...
+# Subtest: persistent weapon state survives incomplete snapshots and retires at a fresh character session
+ok 9 - persistent weapon state survives incomplete snapshots and retires at a fresh character session
+  ---
+  duration_ms: 2.4705
+  type: 'test'
+  ...
+# Subtest: persistent weapon state cannot cross an ambiguous or replaced learned row
+ok 10 - persistent weapon state cannot cross an ambiguous or replaced learned row
+  ---
+  duration_ms: 1.9239
+  type: 'test'
+  ...
+# Subtest: persistent weapon wire dispatch shares the native 1000 ms interval and handles uncertain sends
+ok 11 - persistent weapon wire dispatch shares the native 1000 ms interval and handles uncertain sends
+  ---
+  duration_ms: 1.1383
+  type: 'test'
+  ...
+# Subtest: independent exact combat caps preserve old fallback and recognize compiled startup waiting
+ok 12 - independent exact combat caps preserve old fallback and recognize compiled startup waiting
+  ---
+  duration_ms: 0.2216
+  type: 'test'
+  ...
+# Subtest: combat capabilities explicitly distinguish forced-player input v2 from ordinary v1
+ok 13 - combat capabilities explicitly distinguish forced-player input v2 from ordinary v1
+  ---
+  duration_ms: 0.4551
+  type: 'test'
+  ...
+# Subtest: new host omits forced input for strict v1 runtimes and preserves monster dispatch
+ok 14 - new host omits forced input for strict v1 runtimes and preserves monster dispatch
+  ---
+  duration_ms: 0.4189
+  type: 'test'
+  ...
+# Subtest: v2 receives held and released forced input while downgrade removes the field
+ok 15 - v2 receives held and released forced input while downgrade removes the field
+  ---
+  duration_ms: 0.5681
+  type: 'test'
+  ...
+# Subtest: actual setter and event capture preserve raw null/zero and explicit slot16
+ok 16 - actual setter and event capture preserve raw null/zero and explicit slot16
+  ---
+  duration_ms: 0.3257
+  type: 'test'
+  ...
+# Subtest: pure repeated peek then one claim allows exactly one actual dispatch
+ok 17 - pure repeated peek then one claim allows exactly one actual dispatch
+  ---
+  duration_ms: 0.4297
+  type: 'test'
+  ...
+# Subtest: definitelyUnsent burns sequence without automatic replay
+ok 18 - definitelyUnsent burns sequence without automatic replay
+  ---
+  duration_ms: 0.4358
+  type: 'test'
+  ...
+# Subtest: outcomeUnknown burns sequence without automatic replay
+ok 19 - outcomeUnknown burns sequence without automatic replay
+  ---
+  duration_ms: 0.2628
+  type: 'test'
+  ...
+# Subtest: synchronous owner/runtime/skill/target/map mutations prevent final claim
+ok 20 - synchronous owner/runtime/skill/target/map mutations prevent final claim
+  ---
+  duration_ms: 1.0236
+  type: 'test'
+  ...
+# Subtest: nested synchronous same-proof listener cannot claim or resend twice
+ok 21 - nested synchronous same-proof listener cannot claim or resend twice
+  ---
+  duration_ms: 0.2172
+  type: 'test'
+  ...
+# Subtest: serialization binds plain exact command and rejects extra or malformed wire
+ok 22 - serialization binds plain exact command and rejects extra or malformed wire
+  ---
+  duration_ms: 0.3195
+  type: 'test'
+  ...
+# Subtest: raw exact local row/spell survives only actual unique current binding
+ok 23 - raw exact local row/spell survives only actual unique current binding
+  ---
+  duration_ms: 1.0084
+  type: 'test'
+  ...
+# Subtest: bad current nonarray stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+ok 24 - bad current nonarray stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+  ---
+  duration_ms: 0.3876
+  type: 'test'
+  ...
+# Subtest: bad current oversize stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+ok 25 - bad current oversize stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+  ---
+  duration_ms: 0.2338
+  type: 'test'
+  ...
+# Subtest: actual cast clock uses current connection observation and exact nonzero actor delay
+ok 26 - actual cast clock uses current connection observation and exact nonzero actor delay
+  ---
+  duration_ms: 0.434
+  type: 'test'
+  ...
+# Subtest: combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session
+ok 27 - combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session
+  ---
+  duration_ms: 0.4476
+  type: 'test'
+  ...
+# Subtest: delay before first cast is metadata; repeated delay never resets real start
+ok 28 - delay before first cast is metadata; repeated delay never resets real start
+  ---
+  duration_ms: 0.3511
+  type: 'test'
+  ...
+# Subtest: confirmed owner packet metadata survives before the first complete raw model
+ok 29 - confirmed owner packet metadata survives before the first complete raw model
+  ---
+  duration_ms: 0.2708
+  type: 'test'
+  ...
+# Subtest: same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover
+ok 30 - same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover
+  ---
+  duration_ms: 0.4136
+  type: 'test'
+  ...
+# Subtest: failed sink setup burns global namespace; clock rollback and throwing providers withdraw
+ok 31 - failed sink setup burns global namespace; clock rollback and throwing providers withdraw
+  ---
+  duration_ms: 0.4509
+  type: 'test'
+  ...
+# Subtest: clear and same owner reopen preserve edge highwater; frozen frame withdraws ready
+ok 32 - clear and same owner reopen preserve edge highwater; frozen frame withdraws ready
+  ---
+  duration_ms: 0.3469
+  type: 'test'
+  ...
+# Subtest: production integration captures raw before coalescing and final event proof claim is adjacent to socket send
+not ok 33 - production integration captures raw before coalescing and final event proof claim is adjacent to socket send
+  ---
+  duration_ms: 14.2552
+  type: 'test'
+  location: 'C:\\r16-skills-20261110\\warrior-candidate-r2\\next-source\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs:306:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+
+      [
+        'options?.mailProof',
+        'options?.mailQuoteProof',
+        'options?.mailLockProof',
+        "options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket))",
+    ...
+        'wireCommand.type === "requestGuildInfo"',
+    +   'options?.socialTradeProof && wireCommand.type === "tradeConfirm"',
+        'options?.socialTradeProof && wireCommand.type === "tradeCancel"',
+        'socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)',
+        'options?.socialTradeProof && wireCommand.type === "tradeCancel"'
+      ]
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'options?.mailProof'
+    1: 'options?.mailQuoteProof'
+    2: 'options?.mailLockProof'
+    3: "options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket))"
+    4: 'options?.ownerToken && "surface" in options.ownerToken && options.ownerToken.surface === "storage" && (!storageIntentMatchesCommand(options.ownerToken.intent, wireCommand) || storageUiIngressRef.current?.claim(options.ownerToken.intent) !== true)'
+    5: 'storageReservation'
+    6: 'wireCommand.type === "buyItem" && options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, wireCommand, true)'
+    7: 'wireCommand.type === "buyItem" && !options?.npcUi && npcShopUiIngressRef.current?.blocksInput()'
+    8: 'options?.npcUi && (!npcShopIntentMatchesCommand(options.npcUi.intent, wireCommand) || npcShopUiIngressRef.current?.claim(options.npcUi.intent) !== true)'
+    9: 'options?.npcBuyProof && !npcBuyDispatcher?.claim(options.npcBuyProof, wireCommand, serialized, socket, options.npcUi ? () => npcShopUiSendCurrent(options.npcUi!, socket) : () => !npcShopUiIngressRef.current?.blocksInput() && socketRef.current === socket && socket.readyState === WebSocket.OPEN)'
+    10: 'options?.socialReplyProof && (!socialReplyWindowOpen(options.socialReplyProof.request.kind) || !socialRepliesRef.current.claim(options.socialReplyProof, currentSocialReplyOwner(), wireCommand))'
+    11: 'options?.storageRentalProof && !storageRentalRef.current.claim(options.storageRentalProof, currentStorageRentalFacts(), wireCommand)'
+    12: 'wireCommand.type === "guildStorageItemChange" && wireCommand.changeType === 3'
+    13: '!socialItemMutationAllowed(wireCommand, options?.socialItemProof, options?.socialTradeProof)'
+    14: 'options?.socialItemProof && (!socialItemProofCurrent(options.socialItemProof) || !socialItemOperationsRef.current.claim(options.socialItemProof, currentSocialReplyOwner(), readSocialItemSurface(options.socialItemProof.surface)?.sourceKey ?? "", wireCommand))'
+    15: 'options?.socialTradeProof && !socialTradeProofCurrent(options.socialTradeProof, wireCommand)'
+    16: 'options?.socialTradeProof && wireCommand.type === "tradeReply"'
+    17: 'options?.socialRosterProof && !socialRosterProofCurrent(options.socialRosterProof, wireCommand)'
+    18: 'options?.rankingProof && !rankingQueriesRef.current.claim(options.rankingProof, currentSocialReplyOwner(), wireCommand)'
+    19: 'options?.rankingProof'
+    20: 'wireCommand.type === "startGame"'
+    21: 'options?.guildBuffProof'
+    22: 'options?.heroProof'
+    23: 'options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.claim(options.cashProof, currentCashGameShopSource(), wireCommand))'
+    24: 'options?.creatureProof'
+    25: 'options?.mailProof?.commandType === "collectParcel"'
+    26: 'options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)'
+    27: 'socketRef.current !== socket || socket.readyState !== WebSocket.OPEN'
+    28: ~
+    29: 'authKind'
+    30: 'options?.npcRepairProof'
+    31: 'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))'
+    32: 'options?.bagBeltProof'
+    33: 'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)'
+    34: 'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))'
+    35: 'wireCommand.type === "inspect" && (!options?.rankingInspectProof ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))'
+    36: 'wireCommand.type === "newCharacter"'
+    37: 'options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || options.groupProof.owner.socket !== socket || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))'
+    38: 'options?.socialRosterProof?.rankProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof, readGuildRankEditSource(), wireCommand, Math.floor(performance.now())))'
+    39: 'wireCommand.type === "requestGuildInfo"'
+    40: 'options?.socialTradeProof && wireCommand.type === "tradeCancel"'
+    41: 'socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)'
+    42: 'options?.socialTradeProof && wireCommand.type === "tradeCancel"'
+  actual:
+    0: 'options?.mailProof'
+    1: 'options?.mailQuoteProof'
+    2: 'options?.mailLockProof'
+    3: "options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket))"
+    4: 'options?.ownerToken && "surface" in options.ownerToken && options.ownerToken.surface === "storage" && (!storageIntentMatchesCommand(options.ownerToken.intent, wireCommand) || storageUiIngressRef.current?.claim(options.ownerToken.intent) !== true)'
+    5: 'storageReservation'
+    6: 'wireCommand.type === "buyItem" && options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, wireCommand, true)'
+    7: 'wireCommand.type === "buyItem" && !options?.npcUi && npcShopUiIngressRef.current?.blocksInput()'
+    8: 'options?.npcUi && (!npcShopIntentMatchesCommand(options.npcUi.intent, wireCommand) || npcShopUiIngressRef.current?.claim(options.npcUi.intent) !== true)'
+    9: 'options?.npcBuyProof && !npcBuyDispatcher?.claim(options.npcBuyProof, wireCommand, serialized, socket, options.npcUi ? () => npcShopUiSendCurrent(options.npcUi!, socket) : () => !npcShopUiIngressRef.current?.blocksInput() && socketRef.current === socket && socket.readyState === WebSocket.OPEN)'
+    10: 'options?.socialReplyProof && (!socialReplyWindowOpen(options.socialReplyProof.request.kind) || !socialRepliesRef.current.claim(options.socialReplyProof, currentSocialReplyOwner(), wireCommand))'
+    11: 'options?.storageRentalProof && !storageRentalRef.current.claim(options.storageRentalProof, currentStorageRentalFacts(), wireCommand)'
+    12: 'wireCommand.type === "guildStorageItemChange" && wireCommand.changeType === 3'
+    13: '!socialItemMutationAllowed(wireCommand, options?.socialItemProof, options?.socialTradeProof)'
+    14: 'options?.socialItemProof && (!socialItemProofCurrent(options.socialItemProof) || !socialItemOperationsRef.current.claim(options.socialItemProof, currentSocialReplyOwner(), readSocialItemSurface(options.socialItemProof.surface)?.sourceKey ?? "", wireCommand))'
+    15: 'options?.socialTradeProof && !socialTradeProofCurrent(options.socialTradeProof, wireCommand)'
+    16: 'options?.socialTradeProof && wireCommand.type === "tradeReply"'
+    17: 'options?.socialRosterProof && !socialRosterProofCurrent(options.socialRosterProof, wireCommand)'
+    18: 'options?.rankingProof && !rankingQueriesRef.current.claim(options.rankingProof, currentSocialReplyOwner(), wireCommand)'
+    19: 'options?.rankingProof'
+    20: 'wireCommand.type === "startGame"'
+    21: 'options?.guildBuffProof'
+    22: 'options?.heroProof'
+    23: 'options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.claim(options.cashProof, currentCashGameShopSource(), wireCommand))'
+    24: 'options?.creatureProof'
+    25: 'options?.mailProof?.commandType === "collectParcel"'
+    26: 'options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)'
+    27: 'socketRef.current !== socket || socket.readyState !== WebSocket.OPEN'
+    28: ~
+    29: 'authKind'
+    30: 'options?.npcRepairProof'
+    31: 'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))'
+    32: 'options?.bagBeltProof'
+    33: 'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)'
+    34: 'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))'
+    35: 'wireCommand.type === "inspect" && (!options?.rankingInspectProof ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))'
+    36: 'wireCommand.type === "newCharacter"'
+    37: 'options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || options.groupProof.owner.socket !== socket || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))'
+    38: 'options?.socialRosterProof?.rankProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof, readGuildRankEditSource(), wireCommand, Math.floor(performance.now())))'
+    39: 'wireCommand.type === "requestGuildInfo"'
+    40: 'options?.socialTradeProof && wireCommand.type === "tradeConfirm"'
+    41: 'options?.socialTradeProof && wireCommand.type === "tradeCancel"'
+    42: 'socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)'
+    43: 'options?.socialTradeProof && wireCommand.type === "tradeCancel"'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/r16-skills-20261110/warrior-candidate-r2/next-source/mir2-web3/apps/web/scripts/test-bevy-combat-input.mjs:331:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: synchronous cancel retires in-flight proof; replay fails and fresh tick output works
+ok 34 - synchronous cancel retires in-flight proof; replay fails and fresh tick output works
+  ---
+  duration_ms: 2.7542
+  type: 'test'
+  ...
+# Subtest: synchronous clear retires in-flight proof; replay fails and fresh tick output works
+ok 35 - synchronous clear retires in-flight proof; replay fails and fresh tick output works
+  ---
+  duration_ms: 0.6736
+  type: 'test'
+  ...
+# Subtest: enabled false synchronously withdraws proof and held work, with valid re-enable and no replay
+ok 36 - enabled false synchronously withdraws proof and held work, with valid re-enable and no replay
+  ---
+  duration_ms: 0.6623
+  type: 'test'
+  ...
+# Subtest: actual Page HP overlay callback and combat producer block immediately before React render
+ok 37 - actual Page HP overlay callback and combat producer block immediately before React render
+  ---
+  duration_ms: 156.0452
+  type: 'test'
+  ...
+# Subtest: UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently
+ok 38 - UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently
+  ---
+  duration_ms: 0.6781
+  type: 'test'
+  ...
+# Subtest: UI hold retired owner/runtime and stale release cannot unblock a new token
+ok 39 - UI hold retired owner/runtime and stale release cannot unblock a new token
+  ---
+  duration_ms: 0.335
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof
+ok 40 - actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof
+  ---
+  duration_ms: 351.2894
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints
+ok 41 - actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints
+  ---
+  duration_ms: 469.8863
+  type: 'test'
+  ...
+# Subtest: actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag
+ok 42 - actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag
+  ---
+  duration_ms: 497.3855
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture
+ok 43 - actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture
+  ---
+  duration_ms: 293.7103
+  type: 'test'
+  ...
+# Subtest: actual Shell bag UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 44 - actual Shell bag UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 276.5039
+  type: 'test'
+  ...
+# Subtest: actual Shell character UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 45 - actual Shell character UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 229.7025
+  type: 'test'
+  ...
+# Subtest: actual Shell hud UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 46 - actual Shell hud UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 263.1461
+  type: 'test'
+  ...
+# Subtest: actual Shell spells UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 47 - actual Shell spells UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 254.2316
+  type: 'test'
+  ...
+# Subtest: actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold
+ok 48 - actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold
+  ---
+  duration_ms: 228.3262
+  type: 'test'
+  ...
+# Subtest: actual bag rejected or throwing terminal releases captured hold after router lease cleared
+ok 49 - actual bag rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 324.2895
+  type: 'test'
+  ...
+# Subtest: actual character rejected or throwing terminal releases captured hold after router lease cleared
+ok 50 - actual character rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 332.521
+  type: 'test'
+  ...
+# Subtest: actual spells rejected or throwing terminal releases captured hold after router lease cleared
+ok 51 - actual spells rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 332.0157
+  type: 'test'
+  ...
+# Subtest: actual bag no-lease cleanup releases orphan captured token
+ok 52 - actual bag no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 72.9088
+  type: 'test'
+  ...
+# Subtest: actual character no-lease cleanup releases orphan captured token
+ok 53 - actual character no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 123.8985
+  type: 'test'
+  ...
+# Subtest: actual hud no-lease cleanup releases orphan captured token
+ok 54 - actual hud no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 75.9881
+  type: 'test'
+  ...
+# Subtest: actual spells no-lease cleanup releases orphan captured token
+ok 55 - actual spells no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 79.0244
+  type: 'test'
+  ...
+# Subtest: actual bag old rejected terminal cannot cancel synchronously new lease or token
+ok 56 - actual bag old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 61.7738
+  type: 'test'
+  ...
+# Subtest: actual character old rejected terminal cannot cancel synchronously new lease or token
+ok 57 - actual character old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 82.1435
+  type: 'test'
+  ...
+# Subtest: actual spells old rejected terminal cannot cancel synchronously new lease or token
+ok 58 - actual spells old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 86.1515
+  type: 'test'
+  ...
+# Subtest: actual Shell stale painted Quest button swallows one gesture before Bag/HUD world leases and compatibility mouse dispatch
+ok 59 - actual Shell stale painted Quest button swallows one gesture before Bag/HUD world leases and compatibility mouse dispatch
+  ---
+  duration_ms: 282.7348
+  type: 'test'
+  ...
+# Subtest: actual Shell painted Bag and Character own overlapping stale Quest paint while HUD foreground and modal swallow world gestures
+ok 60 - actual Shell painted Bag and Character own overlapping stale Quest paint while HUD foreground and modal swallow world gestures
+  ---
+  duration_ms: 653.3629
+  type: 'test'
+  ...
+# Subtest: actual Shell captured Quest terminal survives newly appearing NPC owner without cancelling that new owner
+ok 61 - actual Shell captured Quest terminal survives newly appearing NPC owner without cancelling that new owner
+  ---
+  duration_ms: 145.8808
+  type: 'test'
+  ...
+# Subtest: actual Shell window blur, resize and cleanup clear captured Quest gestures through the real effect
+ok 62 - actual Shell window blur, resize and cleanup clear captured Quest gestures through the real effect
+  ---
+  duration_ms: 232.1558
+  type: 'test'
+  ...
+# Subtest: actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile
+ok 63 - actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile
+  ---
+  duration_ms: 82.2241
+  type: 'test'
+  ...
+# Subtest: actual shared canvas routes drop labels to pickup and empty world to original tile action
+ok 64 - actual shared canvas routes drop labels to pickup and empty world to original tile action
+  ---
+  duration_ms: 38.9501
+  type: 'test'
+  ...
+# Subtest: actual surface router refuses world-target lookup under HUD, modal and foreground owners
+ok 65 - actual surface router refuses world-target lookup under HUD, modal and foreground owners
+  ---
+  duration_ms: 100.6912
+  type: 'test'
+  ...
+# Subtest: actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target
+ok 66 - actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target
+  ---
+  duration_ms: 29.0485
+  type: 'test'
+  ...
+# Subtest: independent exact capabilities and small touch stage preserve compatibility
+ok 67 - independent exact capabilities and small touch stage preserve compatibility
+  ---
+  duration_ms: 2.0178
+  type: 'test'
+  ...
+# Subtest: host captures raw null/zero/localized metadata and strict pointer DTO
+ok 68 - host captures raw null/zero/localized metadata and strict pointer DTO
+  ---
+  duration_ms: 1.5849
+  type: 'test'
+  ...
+# Subtest: request must belong to burned controller run and exact revision; no replay
+ok 69 - request must belong to burned controller run and exact revision; no replay
+  ---
+  duration_ms: 0.8843
+  type: 'test'
+  ...
+# Subtest: transport proof requires exact unique local row and explicit spell throughout reorder
+ok 70 - transport proof requires exact unique local row and explicit spell throughout reorder
+  ---
+  duration_ms: 0.9046
+  type: 'test'
+  ...
+# Subtest: same complete ACK snapshot is retained before a later ACK-less coalesced model
+ok 71 - same complete ACK snapshot is retained before a later ACK-less coalesced model
+  ---
+  duration_ms: 0.8658
+  type: 'test'
+  ...
+# Subtest: HMR same-runtime replacement and late old cleanup cannot claim new sink or old ACK
+ok 72 - HMR same-runtime replacement and late old cleanup cannot claim new sink or old ACK
+  ---
+  duration_ms: 0.5373
+  type: 'test'
+  ...
+# Subtest: crossing and wrong terminal pointer cannot save, owner drift revokes proof
+ok 73 - crossing and wrong terminal pointer cannot save, owner drift revokes proof
+  ---
+  duration_ms: 0.4865
+  type: 'test'
+  ...
+# Subtest: failed setup burns a fresh run and unsent/settled requests cannot replay
+ok 74 - failed setup burns a fresh run and unsent/settled requests cannot replay
+  ---
+  duration_ms: 1.1486
+  type: 'test'
+  ...
+# Subtest: actual cast observations use explicit spell, local owner and milliseconds, never snapshot serial
+ok 75 - actual cast observations use explicit spell, local owner and milliseconds, never snapshot serial
+  ---
+  duration_ms: 1.8943
+  type: 'test'
+  ...
+# Subtest: metadata validates actual sparse frames rather than count or names
+ok 76 - metadata validates actual sparse frames rather than count or names
+  ---
+  duration_ms: 2.6288
+  type: 'test'
+  ...
+# Subtest: current-owner nonarray learned capture withdraws through later timer ticks and valid capture recovers
+ok 77 - current-owner nonarray learned capture withdraws through later timer ticks and valid capture recovers
+  ---
+  duration_ms: 1.0989
+  type: 'test'
+  ...
+# Subtest: current-owner oversize learned capture withdraws through later timer ticks and valid capture recovers
+ok 78 - current-owner oversize learned capture withdraws through later timer ticks and valid capture recovers
+  ---
+  duration_ms: 0.7705
+  type: 'test'
+  ...
+# Subtest: bad current capture preserves pending send-time tuple and request highwater without replay
+ok 79 - bad current capture preserves pending send-time tuple and request highwater without replay
+  ---
+  duration_ms: 0.6882
+  type: 'test'
+  ...
+# Subtest: real host empty baseline with null metadata requires fresh exact runtime echo
+ok 80 - real host empty baseline with null metadata requires fresh exact runtime echo
+  ---
+  duration_ms: 1.2766
+  type: 'test'
+  ...
+# Subtest: real host empty baseline with empty metadata requires fresh exact runtime echo
+ok 81 - real host empty baseline with empty metadata requires fresh exact runtime echo
+  ---
+  duration_ms: 0.9617
+  type: 'test'
+  ...
+# Subtest: empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging
+ok 82 - empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging
+  ---
+  duration_ms: 0.3632
+  type: 'test'
+  ...
+# Subtest: finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing
+ok 83 - finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing
+  ---
+  duration_ms: 0.4579
+  type: 'test'
+  ...
+# Subtest: diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim
+ok 84 - diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim
+  ---
+  duration_ms: 0.4769
+  type: 'test'
+  ...
+# Subtest: status diagnostics expose only the first finite refusal and never raw status or error
+ok 85 - status diagnostics expose only the first finite refusal and never raw status or error
+  ---
+  duration_ms: 0.7721
+  type: 'test'
+  ...
+# Subtest: input and lifecycle diagnostics remain observational and sanitize auxiliary reasons
+ok 86 - input and lifecycle diagnostics remain observational and sanitize auxiliary reasons
+  ---
+  duration_ms: 0.5136
+  type: 'test'
+  ...
+# Subtest: early host refusals retain old short circuit runtime calls and withdrawal output
+ok 87 - early host refusals retain old short circuit runtime calls and withdrawal output
+  ---
+  duration_ms: 0.9859
+  type: 'test'
+  ...
+# Subtest: actual page supports HalfMoon enable, disable and re-enable without becoming passive
+ok 88 - actual page supports HalfMoon enable, disable and re-enable without becoming passive
+  ---
+  duration_ms: 1.9587
+  type: 'test'
+  ...
+# Subtest: actual page rejects foreign, malformed and unrelated toggle acknowledgements
+ok 89 - actual page rejects foreign, malformed and unrelated toggle acknowledgements
+  ---
+  duration_ms: 0.5575
+  type: 'test'
+  ...
+# Subtest: actual snapshot projection preserves the authoritative toggle state separately from skill kind
+ok 90 - actual snapshot projection preserves the authoritative toggle state separately from skill kind
+  ---
+  duration_ms: 0.348
+  type: 'test'
+  ...
+# Subtest: passive Slaying acknowledgements never turn the skill into an active toggle
+ok 91 - passive Slaying acknowledgements never turn the skill into an active toggle
+  ---
+  duration_ms: 0.2264
+  type: 'test'
+  ...
+# Subtest: actual modal captures before Character/Bag/HUD/world, outside clicks and second pointer cannot save
+ok 92 - actual modal captures before Character/Bag/HUD/world, outside clicks and second pointer cannot save
+  ---
+  duration_ms: 34.1869
+  type: 'test'
+  ...
+# Subtest: actual page yields foreground Bag, crossing or revision retires capture
+ok 93 - actual page yields foreground Bag, crossing or revision retires capture
+  ---
+  duration_ms: 32.2944
+  type: 'test'
+  ...
+# Subtest: fixed stage UI canvas is interactive for Spells in GPU and shared GL2 while world canvas stays in its composite
+ok 94 - fixed stage UI canvas is interactive for Spells in GPU and shared GL2 while world canvas stays in its composite
+  ---
+  duration_ms: 6.9988
+  type: 'test'
+  ...
+# Subtest: actual modal fences existing shortcuts and held keyboard movement before dispatch
+not ok 95 - actual modal fences existing shortcuts and held keyboard movement before dispatch
+  ---
+  duration_ms: 26.1376
+  type: 'test'
+  location: 'C:\\r16-skills-20261110\\warrior-candidate-r2\\next-source\\mir2-web3\\apps\\web\\scripts\\test-spells-page-gate.mjs:28:1'
+  failureType: 'testCodeFailure'
+  error: 'guildKeyboardOwnsEvent is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    Object.handleShortcutKey (eval at load (file:///C:/r16-skills-20261110/warrior-candidate-r2/next-source/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:9:199), <anonymous>:46:5)
+    TestContext.<anonymous> (file:///C:/r16-skills-20261110/warrior-candidate-r2/next-source/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:28:1344)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page empty-Spells eligibility preserves every refusal and its short-circuit HUD/focus reads
+ok 96 - actual Page empty-Spells eligibility preserves every refusal and its short-circuit HUD/focus reads
+  ---
+  duration_ms: 2072.5812
+  type: 'test'
+  ...
+# Subtest: public Spells diagnostic transports only the finite host report and never substitutes for readiness
+ok 97 - public Spells diagnostic transports only the finite host report and never substitutes for readiness
+  ---
+  duration_ms: 178.7483
+  type: 'test'
+  ...
+# Subtest: actual Page detaches complete raw snapshot after connection/session guard, before coalescing
+ok 98 - actual Page detaches complete raw snapshot after connection/session guard, before coalescing
+  ---
+  duration_ms: 186.322
+  type: 'test'
+  ...
+# Subtest: actual sendRaw checks proof after synchronous mir2:action and directly before socket send
+ok 99 - actual sendRaw checks proof after synchronous mir2:action and directly before socket send
+  ---
+  duration_ms: 317.5412
+  type: 'test'
+  ...
+# Subtest: actual Page bootstrap accepts authenticated empty learned after Bag owner initialization without retagging old cache or replaying ACK
+ok 100 - actual Page bootstrap accepts authenticated empty learned after Bag owner initialization without retagging old cache or replaying ACK
+  ---
+  duration_ms: 86.7881
+  type: 'test'
+  ...
+# Subtest: actual Spells bootstrap rejects stale socket/session/scene/version/self/map and suspended sources
+ok 101 - actual Spells bootstrap rejects stale socket/session/scene/version/self/map and suspended sources
+  ---
+  duration_ms: 1332.4216
+  type: 'test'
+  ...
+# Subtest: actual Spells bootstrap distinguishes genuine empty learned from missing null nonarray and overflow without normalizing raw fields
+ok 102 - actual Spells bootstrap distinguishes genuine empty learned from missing null nonarray and overflow without normalizing raw fields
+  ---
+  duration_ms: 308.0602
+  type: 'test'
+  ...
+# Subtest: hook captures runtime, complete pre-runtime baseline and aborts metadata on cleanup
+ok 103 - hook captures runtime, complete pre-runtime baseline and aborts metadata on cleanup
+  ---
+  duration_ms: 75.9651
+  type: 'test'
+  ...
+# Subtest: unrequested hook does not create controller or install a sink
+ok 104 - unrequested hook does not create controller or install a sink
+  ---
+  duration_ms: 12.7206
+  type: 'test'
+  ...
+# Subtest: hook diagnostic dedupes finite values on existing lifecycle and ignores retired callbacks
+ok 105 - hook diagnostic dedupes finite values on existing lifecycle and ignores retired callbacks
+  ---
+  duration_ms: 17.8926
+  type: 'test'
+  ...
+# Subtest: unrequested and absent runtime diagnostics require no host or runtime read
+ok 106 - unrequested and absent runtime diagnostics require no host or runtime read
+  ---
+  duration_ms: 22.2297
+  type: 'test'
+  ...
+# Subtest: hook diagnostic uses the existing callback lifecycle without new polling or runtime access
+ok 107 - hook diagnostic uses the existing callback lifecycle without new polling or runtime access
+  ---
+  duration_ms: 0.5165
+  type: 'test'
+  ...
+1..107
+# tests 107
+# suites 0
+# pass 105
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9849.4911

@@ -1,0 +1,679 @@
+{
+  "schema": "r16-v19-finite-map-route-asset-closure/1",
+  "baseManifest": "r16-playable-assets-v17.json",
+  "baseManifestSha256": "4c6837f63275261d78340213c51ebd6e9a03f3b020bdabd4108bb55e7953adb3",
+  "baseWitnesses": {
+    "rows": "3d3effa317bfcd09714a3b6b65012f7df9c2e4034d29921eedbd1fb8adf730a6",
+    "pins": "61c2fd299907ad9f63bb0b79acbd890abe5266fc26ae959bf19b5d35b3df74a4",
+    "required": "cf910777b260d9d6226d775cba20e341f910e1d45929d961245372d21503ce00"
+  },
+  "manifest": "r16-playable-assets-v19.json",
+  "manifestSha256": "454f30224cdec496b0a5f9d69e1e4a51d29e80a8897b00c5c158baad9ece370a",
+  "manifestBytes": 5136613,
+  "physicalSidecar": "r16-playable-assets-v19.json.public",
+  "profile": "platinum_fiveclass",
+  "activeByMap": {
+    "0": [
+      "000",
+      "003",
+      "004",
+      "005",
+      "006",
+      "007",
+      "009",
+      "010",
+      "011",
+      "012",
+      "013",
+      "014",
+      "139"
+    ],
+    "D001": [
+      "019",
+      "020",
+      "021",
+      "022",
+      "023"
+    ]
+  },
+  "sourceMapImages": {
+    "0": [
+      0,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      102,
+      139
+    ],
+    "D001": [
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  },
+  "allLibraries": [
+    {
+      "library": "Monster/000",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Royal_Guard",
+          "allowed": false
+        },
+        {
+          "map": "0",
+          "name": "Guard",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "b5deaa5413d2069c693f008ccf5c6e8fcda665315927a135eaf7c3f78da905d2",
+      "frameCount": 128,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 128,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 128,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "e566086c2ede14e28713fde237597b9642184798e6ad7ae8a416b4ecae90c9d5",
+      "embeddedRawPngPins": 128,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/003",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Hen",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "9aa040fec10fecafe9e864d969459d93a358c04bb44046291ee2dff0ac8188b7",
+      "frameCount": 232,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 232,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 232,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "51d9d6d5f5f8d57429eb42bae70d66fe29aed1c893c0f46925f002fdaa78e33d",
+      "embeddedRawPngPins": 232,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/004",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Deer",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "1fc5b2f759d4aa2b71fdae40b673aa1a28445a60b3079c83d6a5c3a7d8ca692c",
+      "frameCount": 232,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 232,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 232,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "6308a6979f6cdca712c5e63567fc6e0646492ef0275a45a5129f6ae3c65c78d6",
+      "embeddedRawPngPins": 232,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/005",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Scarecrow",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "e0d2af060e9043628fdff38a9adafa90b550cda2354508c6510287b3e45660ee",
+      "frameCount": 234,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 234,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 234,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "8f9326da8bfcee08f94bdf8a78b0905d778dacfd333dfd9283ced77bcc7c388f",
+      "embeddedRawPngPins": 234,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/006",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "HookingCat",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "5521a2375e68d742b1fbdcf07ad4eb44c01f71d6ee2bc9e7f405a91627081f79",
+      "frameCount": 224,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 224,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 224,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "5e033d4341d536f8d9d277ddb5d4ca688b67b2d9b0d2b2e6a5234116d1f355bd",
+      "embeddedRawPngPins": 224,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/007",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "RakingCat",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "5e6792d4ff065dadfee86c8b5b2dd73154f29c35461f327b9cc6fa13b4fbaee7",
+      "frameCount": 448,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 448,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 448,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "5b9c525446c288efc2606faa86273d4372b54bee93dd5659f3edb0d1b0c51881",
+      "embeddedRawPngPins": 448,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/008",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Yob",
+          "allowed": false
+        }
+      ],
+      "packShardSha256": "d2ccbbcaa957c7d719de1fc427320ac2430193dee189376e2bd0cffd002a906c",
+      "frameCount": 224,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 224,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "11efaf1a9f671f0aa8071024ebb2a97c479afd130afceb36ae9b3c434b093dc2",
+      "embeddedRawPngPins": 0,
+      "v17MissingRawPngs": 224,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 495028,
+      "exclusion": "Yob is outside the active profile and has no witnessed raw request"
+    },
+    {
+      "library": "Monster/009",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Oma",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "adc77146479307581f7ad5064b5f82375f8c946f74df1d472bf80cee800a7cc1",
+      "frameCount": 224,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 224,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 224,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "b4c87c811b0a84a2e521a29d09920a65a6bb0ea3f97b955d9fe875bfc76df11c",
+      "embeddedRawPngPins": 224,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/010",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "CannibalPlant",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "38ab703a7d2991d6b994f46d024fbf3e222ac428feaccfd519ccea6bf65414d8",
+      "frameCount": 164,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 164,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 164,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "16aea2cabc63f934e28f7486f138deddfd05cb920884e3f3bd7a03703a196152",
+      "embeddedRawPngPins": 164,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/011",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "ForestYeti",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "6ead554cb3705acd8c0e7d678746e9c17fb826ff9ecaf96b507c606b0d8f452c",
+      "frameCount": 176,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 176,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 176,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "b326762d814b8c1fd50e611a58dd62433df8301b2b106c9c7bcbe430ae9f2d35",
+      "embeddedRawPngPins": 176,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/012",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "SpittingSpider",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "52753e9d7b0f9c8da7482f69f5e3ea6ac230485565502493ce5c9437562add97",
+      "frameCount": 224,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 224,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 224,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "70b6c94e502bbe1a53d4f7a2f91bc9e31955338822a82e9c6e033aaddc6d6686",
+      "embeddedRawPngPins": 224,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/013",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "ChestnutTree",
+          "allowed": true
+        },
+        {
+          "map": "0",
+          "name": "ChestnutTree1",
+          "allowed": true
+        },
+        {
+          "map": "0",
+          "name": "ChestnutTree2",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "07c21fd8b377a931c08d35b94a816700ae3cb3caf0abd3aea34f70af94d38926",
+      "frameCount": 22,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 22,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 22,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "425c72e02858db35435b5f95596d1d6b9ac18695d1c082bcf0c55c31a97153d1",
+      "embeddedRawPngPins": 22,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/014",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "EbonyTree",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "7c50e45bb210ce551e7ea3ccc08adc55a9a108992ab0fcc39a04cf116d2f30fa",
+      "frameCount": 22,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 22,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 22,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "c7f49d12bc7b89c3b5c610446fab96401b73d1e8909bc1cbf04b12cea82dded9",
+      "embeddedRawPngPins": 22,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/015",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "LargeMushroom",
+          "allowed": false
+        }
+      ],
+      "packShardSha256": "01bd811c6a9be47926208d42ec3ecd68e46ad8f6f7456514509fecf1bd810446",
+      "frameCount": 22,
+      "masks": 0,
+      "append": true,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 22,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "50d668b14913e1538a9211523afa0456116cf4c8bc8819c5b7f7ab8467713bc4",
+      "embeddedRawPngPins": 0,
+      "v17MissingRawPngs": 22,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 87283
+    },
+    {
+      "library": "Monster/016",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "CherryTree",
+          "allowed": false
+        }
+      ],
+      "packShardSha256": "e7c5680a9c2e85aa394efca8af0d057642d012bef9932278648ec6b17ef26365",
+      "frameCount": 22,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 22,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 22,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "3744a0e09c49255a299ee0d61261155fa03522c9923118b098a8a112abe043ca",
+      "embeddedRawPngPins": 0,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    },
+    {
+      "library": "Monster/019",
+      "sourceActors": [
+        {
+          "map": "D001",
+          "name": "CaveBat",
+          "allowed": true
+        },
+        {
+          "map": "D001",
+          "name": "CaveBat0",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "e18dc4bd78e976792305bddb293381904a2a11c4d9cdd58af9f72fa6d6522c03",
+      "frameCount": 224,
+      "masks": 0,
+      "append": true,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 224,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "d6c3b8ff4a64856d8f917d0f52f7b052f6b15ea8da63a8bf4ee218f9731a39fc",
+      "embeddedRawPngPins": 224,
+      "v17MissingRawPngs": 224,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 364460
+    },
+    {
+      "library": "Monster/020",
+      "sourceActors": [
+        {
+          "map": "D001",
+          "name": "CaveMaggot",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "da7d5de471bd5edd3e6da7e8cb569ad9fcdb5d0e2d7b12e8be29fd6a6a0e057c",
+      "frameCount": 221,
+      "masks": 0,
+      "append": true,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 221,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "343d6fb19562deafcc0a3c89d1ed46d874bb96a700b45c7dfd92b58c114d9ada",
+      "embeddedRawPngPins": 221,
+      "v17MissingRawPngs": 221,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 388619
+    },
+    {
+      "library": "Monster/021",
+      "sourceActors": [
+        {
+          "map": "D001",
+          "name": "Scorpion",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "88ad6a221a696a4278d311c18e1bae8ae52b831309993acd9ccb7894c0ade20b",
+      "frameCount": 272,
+      "masks": 0,
+      "append": true,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 272,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "9411936e62740562bc7dda73cb51d4292ebe3928e6a00f189e144fb5c4ef6f63",
+      "embeddedRawPngPins": 272,
+      "v17MissingRawPngs": 272,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 1036436
+    },
+    {
+      "library": "Monster/022",
+      "sourceActors": [
+        {
+          "map": "D001",
+          "name": "Skeleton",
+          "allowed": true
+        },
+        {
+          "map": "D001",
+          "name": "Skeleton0",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "7ed1430228f895c552fe8ee16e2fdf376fcc970b388948ed03d72717886746de",
+      "frameCount": 244,
+      "masks": 0,
+      "append": true,
+      "installedV18RawPngs": 244,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 244,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "100454e29da824c50e32265aa0360fe4e446bee2ba0a02e2de2561b5e5bb910a",
+      "embeddedRawPngPins": 244,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 116167
+    },
+    {
+      "library": "Monster/023",
+      "sourceActors": [
+        {
+          "map": "D001",
+          "name": "BoneFighter",
+          "allowed": true
+        },
+        {
+          "map": "D001",
+          "name": "BoneFighter0",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "b7a9af05231c6466944868debef00533229848232ecfc1257396650bb95e4fd4",
+      "frameCount": 224,
+      "masks": 0,
+      "append": true,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": true,
+      "installedV18MetaCompacted": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 224,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "d620db8d3c88b30568a0d4053f8c340da4c0f46ee42e435efbd7efdb04d68085",
+      "embeddedRawPngPins": 224,
+      "v17MissingRawPngs": 224,
+      "v17MissingMeta": true,
+      "v17MissingBytes": 936728
+    },
+    {
+      "library": "Monster/102",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "FrostTiger",
+          "allowed": false
+        }
+      ],
+      "packShardSha256": "039a26d32fc7d37d813f89341fb3d31beb4e974b8e5dc530674c6b6dfe50b359",
+      "frameCount": 314,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 0,
+      "installedV18Meta": false,
+      "canonicalRawDirectory": false,
+      "canonicalRawPngs": 0,
+      "canonicalMeta": false,
+      "v17MissingRawPngs": 314,
+      "v17MissingMeta": true,
+      "exclusion": "FrostTiger is outside the active profile and has no witnessed raw request"
+    },
+    {
+      "library": "Monster/139",
+      "sourceActors": [
+        {
+          "map": "0",
+          "name": "Royal_Archer",
+          "allowed": false
+        },
+        {
+          "map": "0",
+          "name": "ArcherGuard",
+          "allowed": true
+        }
+      ],
+      "packShardSha256": "750920d5ab9479b20cb992290ed5a0f281fd5956272e233044cba7e55626d8f4",
+      "frameCount": 272,
+      "masks": 0,
+      "append": false,
+      "installedV18RawPngs": 272,
+      "installedV18Meta": true,
+      "canonicalRawDirectory": true,
+      "canonicalRawPngs": 272,
+      "canonicalMeta": true,
+      "canonicalMetaSha256": "73066c96bc03a05ea949a06ce0a6ffae38839bbadc81d83db3212a8d165b3d54",
+      "embeddedRawPngPins": 272,
+      "v17MissingRawPngs": 0,
+      "v17MissingMeta": false,
+      "v17MissingBytes": 0
+    }
+  ],
+  "witnessed015": [
+    "/original-ui/Monster/015/0.png",
+    "/original-ui/Monster/015/1.png",
+    "/original-ui/Monster/015/2.png",
+    "/original-ui/Monster/015/3.png",
+    "/original-ui/Monster/015/7.png"
+  ],
+  "allTransitionSamples": [
+    "debug/map-samples/smtile-0.png",
+    "debug/map-samples/smtile-104.png",
+    "debug/map-samples/smtile-32.png",
+    "debug/map-samples/smtile-52.png",
+    "debug/map-samples/smtile-72.png",
+    "debug/map-samples/smtile-80.png",
+    "debug/map-samples/tiles-0.png",
+    "debug/map-samples/tiles-1.png"
+  ],
+  "appendWitnesses": {
+    "mapRouteMonsters": {
+      "paths": "ecd9b391b1bac114f9639507e704c246af43543f35adc803278c5c4fe4bd7943",
+      "rows": "ed094b1d81d3cdb848c17f33ae7d7509846c70b8678dc58d2635a215536aad78",
+      "files": 969,
+      "bytes": 2929693
+    },
+    "transitionSamples": {
+      "paths": "20dce31d0402eec15768f22c6dd45d80aad107d1a2173526548a7a7f7437231d",
+      "rows": "5a07ba4be42434231d9065265596afed55b1a45363ecd07103e3d1b370115ce4",
+      "files": 7,
+      "bytes": 24327
+    }
+  },
+  "fileCount": 24262,
+  "totalBytes": 288862544,
+  "copiedAndReadBackFiles": 24262,
+  "keptOldFiles": 23286,
+  "keptOldSourcePins": 19,
+  "keptOldRequiredGroups": 9,
+  "noLinksOrExtraPaths": true,
+  "expectedSchema4FileLimit": 25000,
+  "unchangedAssetByteLimit": 377487360,
+  "unchangedManifestByteLimit": 8388608
+}

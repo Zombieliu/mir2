@@ -1,0 +1,13 @@
+{
+  "originalFixtureUnchanged": true,
+  "openingChangesOnlyTwoWallets": true,
+  "sourceFixtureSha256": "ea4a79a1867847544a9682f581c550b7a2416f2b0b9a7500643271a8b56a8ef0",
+  "seedFixtureSha256": "7a4c5596a4e3b8b62743ea2b6d6fa2559bd0e010743c088a72c8e194b0ca7a37",
+  "stoppedBrowserFileSha256": "46f94b8a5d9c6e3d582a50386a40e0517e10331ce2f653304c38c62f87681995",
+  "bothSavedBagAndWalletExactlyMatchCompletedExchange": true,
+  "preparedUnlockDidNotAlterCompletedExchange": true,
+  "gold": {
+    "primary": 922,
+    "peer": 778
+  }
+}

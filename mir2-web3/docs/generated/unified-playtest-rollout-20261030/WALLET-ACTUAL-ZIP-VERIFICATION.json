@@ -1,0 +1,48 @@
+{
+  "schema": "mir2.unified.wallet-actual-zip-verification.v1",
+  "passed": true,
+  "repository": "Zombieliu/mir2",
+  "runId": 40929164103,
+  "sourceRevision": "600444277cdee49055d9c2cb9df1b0a71246e1c9",
+  "artifactId": 12921911914,
+  "artifactName": "mir2-playtest-wallet-login-600444277cdee49055d9c2cb9df1b0a71246e1c9",
+  "apiDigest": "sha256:e8871be306ccdcfee930f48752b24a30959e5438e4e2bb8426de0c31036e4c4b",
+  "actualZipPath": "C:\\mir2-build\\unified-rollout-20261030\\ci-wallet-authenticated\\zip-12921911914\\12921911914.zip",
+  "actualZipSha256": "e8871be306ccdcfee930f48752b24a30959e5438e4e2bb8426de0c31036e4c4b",
+  "zipBytes": 58263089,
+  "actualZipDigestMatched": true,
+  "members": [
+    {
+      "path": "latest-wallet-login-release.json",
+      "bytes": 356,
+      "sha256": "da1a649899415cc2b871f22bdfda3dbf3b24071cc31158a5747fc224d9ccd1af"
+    },
+    {
+      "path": "mir2-wallet-login-600444277cdee49055d9c2cb9df1b0a71246e1c9.tar.gz",
+      "bytes": 14917220,
+      "sha256": "cafb762cdb67a570b245c35bb60f0b6684224156b284dd6432ecc9ab3e689595"
+    },
+    {
+      "path": "mir2-wallet-login-600444277cdee49055d9c2cb9df1b0a71246e1c9.tar.gz.sha256",
+      "bytes": 132,
+      "sha256": "8465ca3b26e3c4d0dce23e66ccb426471b3227d0a76d3d462a74b1d2dc5a5550"
+    },
+    {
+      "path": "node-runtime-600444277cdee49055d9c2cb9df1b0a71246e1c9.json",
+      "bytes": 615,
+      "sha256": "1242110f8804166b99f59ad8b933513f33108216fe16c0b4e1c4d870bf6868ed"
+    },
+    {
+      "path": "node-runtime-600444277cdee49055d9c2cb9df1b0a71246e1c9.tar.gz",
+      "bytes": 43662212,
+      "sha256": "1faa049fbcea64ebdab24bcbba3c7bfaad4b23baa244317e509acb8f0274b0d0"
+    },
+    {
+      "path": "node-runtime-600444277cdee49055d9c2cb9df1b0a71246e1c9.tar.gz.sha256",
+      "bytes": 127,
+      "sha256": "a37b3310751e23f546356d429760ff1652cf00674921ea076f657fda5775b358"
+    }
+  ],
+  "payloadReExtracted": false,
+  "remoteMutation": false
+}

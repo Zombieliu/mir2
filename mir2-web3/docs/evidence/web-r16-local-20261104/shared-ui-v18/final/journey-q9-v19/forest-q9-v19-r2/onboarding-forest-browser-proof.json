@@ -1,0 +1,1484 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-06T07:37:32.830Z",
+  "passed": true,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-or-Digit3-keydown-up-only",
+    "caveCompletionOnly": true
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "0c37a0082782be781376ccb452fda18ea6f4235a29fbbd678e7db066b81049ac",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "cave",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2110009,
+        "minLevel": 16,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 500,
+        "experience": 0,
+        "kills": [],
+        "flags": [
+          {
+            "number": 2210091,
+            "message": "Reach the Oma Cave entrance",
+            "kind": "serverEvent",
+            "conditions": [
+              "omaCaveEntryReached"
+            ]
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": true,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "q9-fresh-saved-d001-progress-and-ordinary-diary-turn-in",
+    "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "complete"
+  ],
+  "screenshots": [
+    "01-current-native-task-card-before-measured-readiness.png",
+    "02-fresh-v2-native-task-card.png",
+    "03-before-saved-q9-native-diary-turn-in.png",
+    "04-next-quest-2110009-completed.png",
+    "05-saved-progress-native-diary.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 24,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 25,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 4280,
+      "hp": 162,
+      "maxHp": 162,
+      "mp": 67,
+      "maxMp": 67,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 447,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2120015
+      ]
+    },
+    {
+      "sequence": 592,
+      "method": "ChangeQuest",
+      "phase": "q9-fresh-saved-d001-progress-and-ordinary-diary-turn-in",
+      "questId": 2110009,
+      "taken": false,
+      "completed": true
+    },
+    {
+      "sequence": 593,
+      "method": "CompleteQuest",
+      "phase": "q9-fresh-saved-d001-progress-and-ordinary-diary-turn-in",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2120015
+      ]
+    },
+    {
+      "sequence": 596,
+      "method": "UserLocation",
+      "phase": "q9-fresh-saved-d001-progress-and-ordinary-diary-turn-in",
+      "direction": "Down"
+    },
+    {
+      "sequence": 600,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 615,
+      "method": "LoginSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 619,
+      "method": "StartGame",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "result": 4
+    },
+    {
+      "sequence": 626,
+      "method": "MapInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 627,
+      "method": "UserInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "gold": 4780,
+      "hp": 162,
+      "maxHp": 162,
+      "mp": 67,
+      "maxMp": 67,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 1049,
+      "method": "CompleteQuest",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2120015
+      ]
+    },
+    {
+      "sequence": 1190,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    }
+  ],
+  "questOperations": [
+    {
+      "questId": 2110009,
+      "operation": "finishQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 591,
+      "ackSequence": 595,
+      "completeQuestObserved": true,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110004,
+          "stage": "completed",
+          "current": 3,
+          "required": 3,
+          "objectives": [
+            {
+              "label": "Defeat 2 Oma.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Complete your class practice",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110005,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Reach a Bichon safe area",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110006,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Buy a small HP or MP potion from a normal shop",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110007,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 4 ForestYeti.",
+              "current": 4,
+              "required": 4,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2120015,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": []
+        },
+        {
+          "questId": 2110008,
+          "stage": "completed",
+          "current": 3,
+          "required": 3,
+          "objectives": [
+            {
+              "label": "Defeat 2 Oma.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Complete your class practice",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110009,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Reach the Oma Cave entrance",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "movement": [],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 43,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 215,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 244,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 273,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 302,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    },
+    {
+      "name": "diary-2110009",
+      "ready": true,
+      "generation": 2,
+      "revision": 2,
+      "frame": 130,
+      "questLogOpen": true,
+      "capturesPointer": true,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 657,
+          "top": 496,
+          "width": 70,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 217,
+          "top": 193,
+          "width": 270,
+          "height": 33
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q9-fresh-saved-d001-progress-and-ordinary-diary-turn-in",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": true,
+      "closeCode": null,
+      "closeFrames": [],
+      "closedPhase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 10,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "ec2d7b0308d36bba08ee29fd991db13ae628a689da3d4262188132c9121cacd3"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "838219ed8bf876c898f3c0fcd095b1bf6852e7c3f6a966f59c2b19b5950b1aa0"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "b5dbb17b32e8c38af6b33ad3e993b12b122cc7d1dcc2ece937939880baede983"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "b5dbb17b32e8c38af6b33ad3e993b12b122cc7d1dcc2ece937939880baede983"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "b5dbb17b32e8c38af6b33ad3e993b12b122cc7d1dcc2ece937939880baede983"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "129f1988dfa73bd2bb1ca32cadb96ac3fff8597be9e1433704c8480302760801"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "838219ed8bf876c898f3c0fcd095b1bf6852e7c3f6a966f59c2b19b5950b1aa0"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "ec2d7b0308d36bba08ee29fd991db13ae628a689da3d4262188132c9121cacd3"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "npcPurchaseOwner": 2,
+    "keepAlive": 3,
+    "finishQuest": 1,
+    "logOut": 2
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793950656609,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 25,
+      "receivedAtMs": 1793950665992,
+      "method": "UserInformation",
+      "hp": 162,
+      "maxHp": 162,
+      "mp": 67,
+      "maxMp": 67,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 600,
+      "receivedAtMs": 1793950691175,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 627,
+      "receivedAtMs": 1793950703989,
+      "method": "UserInformation",
+      "hp": 162,
+      "maxHp": 162,
+      "mp": 67,
+      "maxMp": 67,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 40
+      }
+    },
+    {
+      "sequence": 1190,
+      "receivedAtMs": 1793950715397,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 584,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    },
+    {
+      "sequence": 1186,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 600000,
+    "maxSteps": 2300
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 244
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 244
+    },
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    }
+  ],
+  "resumeState": {
+    "hp": 162,
+    "maxHp": 162,
+    "mp": 67,
+    "maxMp": 67,
+    "dead": false,
+    "position": {
+      "x": 143,
+      "y": 40
+    },
+    "progression": {
+      "level": 16,
+      "experience": 906,
+      "maxExperience": 50000
+    },
+    "gold": 4280,
+    "smallHpMedicine": 3,
+    "equipment": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      },
+      {
+        "name": "SharpSword",
+        "slot": "weapon",
+        "durabilityCurrent": 18000,
+        "durabilityMax": 18000
+      }
+    ],
+    "playerLevel": 16,
+    "knownFencing": true,
+    "fencingBooks": 0,
+    "bagEquipment": [
+      {
+        "name": "WoodenSword",
+        "slot": 0,
+        "equipSlot": "weapon"
+      }
+    ],
+    "clothingInBag": [],
+    "clothingEquipped": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour"
+      }
+    ],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 0,
+        "quantity": 3,
+        "key": "Digit1"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2120015
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110009,
+        "stage": "readyToTurnIn",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach the Oma Cave entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 43,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "savedCaveTurnIn": {
+    "quest": {
+      "questId": 2110009,
+      "stage": "readyToTurnIn",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach the Oma Cave entrance",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    "normalFreshLogin": true,
+    "map": "0",
+    "position": {
+      "x": 143,
+      "y": 40
+    },
+    "openedFromActualDiary": true,
+    "priorEntryRepeated": false,
+    "priorAcceptanceRepeated": false,
+    "goldBefore": 4280,
+    "medicineBefore": 3,
+    "townTeleportBefore": 0,
+    "completed": true,
+    "goldAfter": 4780,
+    "medicineAfter": 13,
+    "townTeleportAfter": 1
+  },
+  "lastPhysicalNativeInput": {
+    "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "logical": {
+      "x": 493,
+      "y": 73.5
+    },
+    "css": {
+      "x": 621,
+      "y": 169.5
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": true,
+      "questLogOpen": true,
+      "frame": 76,
+      "generation": 2,
+      "revision": 2,
+      "openRevision": 2,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 2,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 906,
+          "maximum": 50000,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 18,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 18,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 16,
+          "maximum": 135,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 10,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 10,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 1188
+  },
+  "nextRewards": [
+    {
+      "questId": 2110009,
+      "goldDelta": 500,
+      "items": [
+        {
+          "name": "(HP)DrugSmall",
+          "count": 10
+        },
+        {
+          "name": "TownTeleport",
+          "count": 1
+        }
+      ],
+      "matchingAck": true,
+      "experienceConfigured": 0,
+      "experienceDelta": 0,
+      "experiencePackets": []
+    }
+  ],
+  "caveEntryQuestComplete": true,
+  "keyboardPanelChecks": [
+    {
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "persistence": {
+    "slayingBeforeLogout": true,
+    "slayingAfterRelogin": true,
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2120015,
+      2110009
+    ],
+    "progressionBeforeLogout": {
+      "level": 16,
+      "experience": 906,
+      "maxExperience": 50000
+    },
+    "progressionAfterRelogin": {
+      "level": 16,
+      "experience": 906,
+      "maxExperience": 50000
+    },
+    "exactExperienceRetained": true,
+    "learnedFencingBeforeLogout": true,
+    "learnedFencingAfterRelogin": true,
+    "map": "0",
+    "beforeLogoutPosition": {
+      "x": 143,
+      "y": 40
+    },
+    "reloginPosition": {
+      "x": 143,
+      "y": 40
+    },
+    "exactReturnPositionRetained": true,
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "gameplayPassed": true,
+  "networkClean": true,
+  "incompleteReason": null,
+  "finishedAt": "2026-11-06T07:38:35.483Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 4,
+          "required": 4,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120015,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110008,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110009,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach the Oma Cave entrance",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006,
+    2110007,
+    2110008,
+    2110009,
+    2120015
+  ],
+  "lastFullSnapshot": {
+    "sequence": 1191,
+    "receivedAtMs": 1793950715415,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "progression": {
+      "level": null,
+      "experience": 906,
+      "maxExperience": 50000
+    },
+    "gold": 4780,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 596,
+    "packet": "UserLocation",
+    "position": {
+      "x": 143,
+      "y": 40
+    },
+    "direction": "Down",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 0,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

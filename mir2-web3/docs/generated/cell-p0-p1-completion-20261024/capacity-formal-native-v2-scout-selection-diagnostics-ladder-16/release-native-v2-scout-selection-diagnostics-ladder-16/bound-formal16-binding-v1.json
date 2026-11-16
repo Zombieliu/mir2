@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_FRESH_PROBE20_AND_NEW50_BOUND_NOT_EXECUTED",
+  "finalized": true,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "backendInputCount": 50,
+  "capacityAccepted": false,
+  "sealed": false,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "probe20": {
+    "runId": "1792979329578-cf62e25d",
+    "report": {
+      "path": "release-native-10-v2-scout-selection-diagnostics-feasibility-20/reports/1792979329578-cf62e25d.report.json",
+      "bytes": 324552,
+      "sha256": "ce0e0d97ad44a8e35bf49d4f3a8229cea376e3d752640796df9232ccc99fd04d"
+    },
+    "raw": {
+      "path": "release-native-10-v2-scout-selection-diagnostics-feasibility-20/reports/1792979329578-cf62e25d.samples.jsonl",
+      "bytes": 30051600,
+      "sha256": "7d9a64c0646cb65323217f36c410bc1c9c595c2ee5be8baf323d9b2be1aa6a85"
+    },
+    "collectedEvidence": {
+      "publicChild": "capacity-native10-v2-scout-selection-diagnostics-followup-20-diagnostics",
+      "catalog": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-selection-diagnostics-followup-20-diagnostics\\collect-release-native-10-v2-scout-selection-diagnostics-feasibility-20-public-artifact-catalog.json",
+        "bytes": 77560,
+        "sha256": "cdd07995e8d82078e9e07948e9a054c1b23b6f5e87c0da467cc2300ed30ecb25"
+      },
+      "publicCopy": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-selection-diagnostics-followup-20-diagnostics\\public-copy-provenance.json",
+        "bytes": 85779,
+        "sha256": "1abe32a96155b067c5297805b5e93582d17da34e9f500124f4cfd96ce6f353ab"
+      },
+      "publicVerification": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-selection-diagnostics-followup-20-diagnostics\\public-verification.json",
+        "bytes": 7121,
+        "sha256": "ab1af09fc14db528f8d92f5238d0664864fb0ee1f933c0c9bfa7f7212a0a6fff"
+      },
+      "collectionVerification": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-selection-diagnostics-followup-20-diagnostics\\collection-verification.json",
+        "bytes": 332670,
+        "sha256": "9780ab2549b93df2542e64f5b0a66096cb39e40fd455ce58141897aed0795f9e"
+      },
+      "rawArtifactManifest": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-selection-diagnostics-followup-20-diagnostics\\raw-artifact-manifest.json",
+        "bytes": 780,
+        "sha256": "89fc80ef31ee9086b23197924ed8d2b4d0c9e6ba5da946881fcca4c3d681200e"
+      }
+    },
+    "independentVerification": {
+      "path": "probe20-independent-verification-v1/final-verification.json",
+      "bytes": 442311,
+      "sha256": "bd4897fb45dc67d1d65e2fe488021081bcf599e745febb9d66b83659cd4b5df0"
+    },
+    "independentVerifierSources": [
+      {
+        "path": "probe20-independent-verification-v1/verify-ended-probe20-v1.mjs",
+        "bytes": 44400,
+        "sha256": "335e2121bc24ad616061e829ed5e352f9658f431ef36571b1aae662eb61ad149"
+      },
+      {
+        "path": "probe20-independent-verification-v1/probe-contract-v1.mjs",
+        "bytes": 5860,
+        "sha256": "70da9fbc95c66e06dde5402ac159ccba4870c5695be9f556e8eb5c3396b0c455"
+      },
+      {
+        "path": "probe20-independent-verification-v1/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "path": "probe20-independent-verification-v1/expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      {
+        "path": "probe20-independent-verification-v1/run-ended-probe20-v1.mjs",
+        "bytes": 2257,
+        "sha256": "0665b467d2553f4355309b29b813620e6454942deee50f668ea2a7e566e7c4e9"
+      },
+      {
+        "path": "probe20-independent-verification-v1/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "path": "probe20-independent-verification-v1/derivation-v1.json",
+        "bytes": 20091,
+        "sha256": "e0b1c0558f39f7a581cba7c767e09fd2572d42fc082c65dc0c20466c0913ac38"
+      },
+      {
+        "path": "probe20-independent-verification-v1/root-actual-terminal-and-consumer-facts-v1.json",
+        "bytes": 10706,
+        "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b"
+      },
+      {
+        "path": "probe20-independent-verification-v1/syntax-check-v1.log",
+        "bytes": 673,
+        "sha256": "ce69536a9b7903892566bc52d06022b35137d40107ad452a08345b57c4a665ab"
+      },
+      {
+        "path": "probe20-independent-verification-v1/preparation-v1.json",
+        "bytes": 9766,
+        "sha256": "318e3852ee8259d63058f21c04efdf75b917f81c8dd8e2c926f9a13933f0ca4a"
+      },
+      {
+        "path": "probe20-independent-verification-v1/independent-review-v1.json",
+        "bytes": 6909,
+        "sha256": "844102d4cc3de34127d0c1feb0cb1762761e5f0cd2bc2c49c379cd321ebf67ce"
+      }
+    ],
+    "independentSourceClosureManifest": {
+      "path": "probe20-independent-verification-v1/tool-source-frozen-v1.json",
+      "bytes": 2290,
+      "sha256": "6f8f20969d6c5915edb60672b83556bd36a356e06c7249ddcb247890aec65a19"
+    },
+    "actualExecutionReceipt": {
+      "path": "probe20-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "1337e647fc24034d55670eae39d2946385cfefe8263ee48773c39484d070f68d"
+    },
+    "preparedSourceConfigSha256": "03658a95d3f1c3863daad3d1878185030580b31e99a92f38afef501a12a30db8",
+    "admittedSourceConfigSha256": "150116912a98b3040f8852fd6b965ab9f8da57fc7952ab105f8cd9b88b319e54",
+    "completePhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "capacityAccepted": false,
+    "independentVerifierRevision": 2,
+    "actualExecutionLog": {
+      "path": "probe20-independent-verification-v1/actual-verification.log",
+      "bytes": 878,
+      "sha256": "470d4519772fabad4c60e830caceedfbb6e86f0f28ddf02eda06e07e8afa055a"
+    },
+    "rootIndependentCleanup": {
+      "path": "probe20-root-independent-cleanup-v1.json",
+      "bytes": 450,
+      "sha256": "aa29be311ec8583e5c160de79f078e177d2683a52cde81f90e2171eda97cbd71"
+    },
+    "storeDiagnostics": {
+      "summary": {
+        "sourceValid": true,
+        "countsMatch": true,
+        "complete": true,
+        "reasons": [],
+        "rows": 20,
+        "bytes": 4371,
+        "sha256": "a5808e969c22ef3eb28abf64d7d49ccfa37c30f96d1b799a3822c416eff71aa9",
+        "sourceIdentity": {
+          "schemaVersion": 1,
+          "dataset": "account-store",
+          "storeOnly": true,
+          "manifest": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+            "bytes": 4628,
+            "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+          },
+          "review": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+            "bytes": 6459,
+            "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+          },
+          "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+          "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+          "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+          "separateFromBaseThreeFourSeven": true,
+          "contributesToGameAcceptance": false
+        },
+        "pins": {
+          "catalog": {
+            "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-artifact-catalog.json",
+            "bytes": 5249,
+            "sha256": "1a58cef255acf6c023bcecc41cf49799c66a4c6ac064946f8cd5088ad6e14963"
+          },
+          "publicVerification": {
+            "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-public-verification.json",
+            "bytes": 1423,
+            "sha256": "5eecc7a34eed4d7a4a50f39fe9263adb390a2d2b115d25eb19d162189fd6e832"
+          },
+          "status": {
+            "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-stage-public-status.json",
+            "bytes": 2604,
+            "sha256": "82d4b55a038abe76872156b6ab81a87a67814b3844ff55922bd01c5f4ac31a05"
+          },
+          "data": {
+            "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-stage-public.jsonl",
+            "bytes": 4371,
+            "sha256": "a5808e969c22ef3eb28abf64d7d49ccfa37c30f96d1b799a3822c416eff71aa9"
+          }
+        },
+        "diagnosticsDoNotChangeOriginalGameVerdict": true,
+        "contributesToGameAcceptance": false,
+        "completedOnlyCannotProveMissingHolder": true
+      },
+      "pins": {
+        "catalog": {
+          "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-artifact-catalog.json",
+          "bytes": 5249,
+          "sha256": "1a58cef255acf6c023bcecc41cf49799c66a4c6ac064946f8cd5088ad6e14963"
+        },
+        "publicVerification": {
+          "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-public-verification.json",
+          "bytes": 1423,
+          "sha256": "5eecc7a34eed4d7a4a50f39fe9263adb390a2d2b115d25eb19d162189fd6e832"
+        },
+        "status": {
+          "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-stage-public-status.json",
+          "bytes": 2604,
+          "sha256": "82d4b55a038abe76872156b6ab81a87a67814b3844ff55922bd01c5f4ac31a05"
+        },
+        "data": {
+          "path": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics/store-stage-public.jsonl",
+          "bytes": 4371,
+          "sha256": "a5808e969c22ef3eb28abf64d7d49ccfa37c30f96d1b799a3822c416eff71aa9"
+        }
+      }
+    },
+    "rootActualExecutionFacts": {
+      "path": "probe20-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b"
+    },
+    "historicalTerminalPrerequisite": {
+      "path": "probe20-full-prerequisite-v1/actual-prerequisite-v1.json",
+      "bytes": 14835,
+      "sha256": "a2236ff4d264f55052f19b1e606a7741ce64b1f2a0be57d270e8d3bf6908883d"
+    },
+    "historicalTerminalFacts": {
+      "path": "probe20-actual-independent-facts-v1.json",
+      "bytes": 15626,
+      "sha256": "4228cc8daa663319040ab6c315d5a8cd52bb4f51f312b321fd81db88c3e0e491"
+    },
+    "expectedOwnedPorts": [
+      17500,
+      17510
+    ],
+    "currentSourceDeclarationEvidence": {
+      "currentFreeze": {
+        "path": "capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+        "bytes": 12423,
+        "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+      },
+      "historicalDeclarationBasis": {
+        "path": "capacity-native-chase-preference-driver-frozen-v1.json",
+        "bytes": 19099,
+        "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+      },
+      "historicalPrior210Freeze": {
+        "path": "capacity-attack-deadline-driver-frozen-v1.json",
+        "bytes": 6759,
+        "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+      },
+      "actualFull232Regression": {
+        "path": "root-scout-selection-diagnostics-validation-v1/root-full-driver-receipt-v1.json",
+        "bytes": 5162,
+        "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+      },
+      "historicalPrior226Freeze": {
+        "path": "capacity-scout-anti-convergence-driver-frozen-v1.json",
+        "bytes": 9472,
+        "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+      },
+      "currentDiagnosticSourceEvidence": {
+        "sourcePreservation": {
+          "path": "scout-selection-decision-diagnostics-v1/source-preservation-and-focused-receipt-v1.json",
+          "bytes": 6798,
+          "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+        },
+        "productionMutation": {
+          "path": "scout-selection-decision-diagnostics-v1/production-mutation-v1.json",
+          "bytes": 3246,
+          "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e"
+        },
+        "sourceReview": {
+          "path": "scout-selection-decision-diagnostics-independent-review-v1.json",
+          "bytes": 4886,
+          "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0"
+        },
+        "fullRegressionReview": {
+          "path": "scout-selection-decision-diagnostics-independent-review-v1/full-regression-addendum-v1.json",
+          "bytes": 3712,
+          "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2"
+        }
+      },
+      "actualRegressionLog": {
+        "path": "root-scout-selection-diagnostics-validation-v1/root-full-driver-v1.stdout.log",
+        "bytes": 62597,
+        "sha256": "95277742a021f3c8a59eebda46e33022cb221011c2017bd5278c6dff63bf1444"
+      },
+      "actualRegressionStderr": {
+        "path": "root-scout-selection-diagnostics-validation-v1/root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "onlySixHistoricalDeclarationsReused": true,
+      "currentNineSourceIdentity": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1"
+    },
+    "scoutDiagnosticsAppendixNotGameGate": true,
+    "outsideMeasuredAttackCount": 7,
+    "outsideMeasuredAttackClassification": "Not independently classified"
+  },
+  "backendRebuilt": false,
+  "rootExecutionRequired": true,
+  "formalStarted": false,
+  "historicalRootFactsPendingResolvedByActualEndedReceipt": true
+}

@@ -1,0 +1,150 @@
+{
+  "owner": "Root",
+  "kind": "Source23 original Native static build; executable not launched",
+  "configuration": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.config.json",
+    "bytes": 3967,
+    "sha256": "4fb862bf95ae8d4ef8e53cdad862c51f42d26bf0245b3db8cb2b536e657bb465"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-snapshot.json",
+    "bytes": 148546,
+    "sha256": "37211548ac2b7a6b81d8e7462e660a60ecc7eeca3154ecf1d64d450432723753"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-review.json",
+    "bytes": 2948,
+    "sha256": "eb320ca5f0c239ee672e5ad4ed23f85772e0f8fcbc074e6aac9b46a999f3af66"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.policy.json",
+    "bytes": 2326,
+    "sha256": "79007d49b0dfb33cfc07770d10e66fdd2af004b3490b36c8a0afcfbf982b0d65"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "guardPid": 102264,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 458816,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-native-build05.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false,
+    "pin": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.outer.json",
+      "bytes": 449,
+      "sha256": "21f3f88dd676e33f961525d6736735f91771219e6fe8f37e94a43a6060c63ebf"
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.stderr.log",
+    "bytes": 53557,
+    "sha256": "2b50c843517f1c4203a1ec073b0883c565414a8b0230a26a9d35ad019718bc7a"
+  },
+  "guardReceipts": {
+    "before": {
+      "schemaVersion": 1,
+      "mode": "real-cargo",
+      "nonce": "3592315bc45c4cf0ab8ca907e8973aaa",
+      "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.policy.json",
+      "policySha": "79007d49b0dfb33cfc07770d10e66fdd2af004b3490b36c8a0afcfbf982b0d65",
+      "args": [
+        "+1.95.0",
+        "build",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1"
+      ],
+      "cwd": "E:\\mir2-player-journey\\mir2-web3",
+      "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "sample": {
+        "schemaVersion": "1",
+        "driveLetter": "C",
+        "sampleBeginUtc": "2026-10-07T01:28:43.1551921Z",
+        "sampleEndUtc": "2026-10-07T01:28:43.8241698Z",
+        "remainingBytes": "464112832512",
+        "requiredBytes": "53687091200"
+      },
+      "probePid": 112960,
+      "probeLaunchMs": 88.3476,
+      "probeEndMs": 944.0215000000001,
+      "decision": "FORWARD",
+      "thresholdBytes": "53687091200",
+      "sampleProof": "actualGetVolumeC",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05-cargo-receipts\\3592315bc45c4cf0ab8ca907e8973aaa\\before.json",
+        "bytes": 979,
+        "sha256": "12a035d531072d4ec681bde2fb61b002e06d609e7b7e36cc2a7422d0fc521198"
+      }
+    },
+    "after": {
+      "childPid": 112104,
+      "childStartedUtc": "/Date(1791336523887)/",
+      "childStartMs": 964.6740000000001,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791336981703)/",
+      "completionMs": 458773.5629,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05-cargo-receipts\\3592315bc45c4cf0ab8ca907e8973aaa\\after.json",
+        "bytes": 330,
+        "sha256": "e5e87b415472099ca3d6048804873cee0bbfed36d8c74fc2bc7447273dc42e49"
+      }
+    },
+    "probe": {
+      "probePid": 112960,
+      "probeKilled": false,
+      "probeCode": 0,
+      "probeLaunchUtc": "/Date(1791336523011)/",
+      "probeEndUtc": "/Date(1791336523866)/",
+      "probeLaunchMs": 88.3476,
+      "probeEndMs": 944.0215000000001,
+      "probeMode": "actual",
+      "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05-cargo-receipts\\3592315bc45c4cf0ab8ca907e8973aaa\\probe-process.json",
+        "bytes": 441,
+        "sha256": "786d5067ab631b62b754bd76cace7b20f17e39d372cb6e8b4ade905b44dc8fc9"
+      }
+    },
+    "freshnessUpperBoundMs": 63
+  },
+  "executable": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+    "bytes": 104656384,
+    "sha256": "2c473cae9153b8af53e4dddb5fb700d214f5cf1ece780cad32dd4eaa5a5563ee"
+  },
+  "conservativeDeclaredSourceCount": 432,
+  "finalSourcesMatched": 432,
+  "sourceDrift": [],
+  "staticBuildAccepted": true,
+  "productionBuildAccepted": false,
+  "executableLaunched": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

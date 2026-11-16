@@ -1,0 +1,210 @@
+{
+  "owner": "Root",
+  "stage": "Source23 repaired original11 fixture source-only review05",
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "reviewer": "/root/w2b_final_source_review",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node05-snapshot.json",
+    "bytes": 9776291,
+    "sha256": "996468bae73436afa857edc1265a4894a0e79104a028fb24e66492cc95641e0f"
+  },
+  "sourceCount": 27441,
+  "confirmedBlockers": [],
+  "sourceOnlyAcceptance": true,
+  "scope": "All27441 original Node04 members retained and freshly hashed. Only Combat/Quest/Storage original fixtures changed to assemble real newly added product dependencies and retain old actions/assertions. Node04 actual130pass/22fail/152reported retained; repaired original11 Node05/TSC05 not yet executed. Renderer/Core/PUI/Native static builds already passed; no player/UI/WASM API/network verification.",
+  "finiteRustChecksAccepted": false,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "stage5Declarations": 357,
+  "stage5NewDeclarations": 39,
+  "originalFixtureBeforeProof": {
+    "diff": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-stage5-full-context01.diff.txt",
+      "bytes": 542795,
+      "sha256": "66abe9d006d0edd3978a06efe61df0dc9cc8c1eb84e04bdd2c6ed1d2d23f53a8"
+    },
+    "reviewer": "/root/w2b_final_source_review",
+    "beforeBytes": 457519,
+    "beforeSha256": "89cea5607b19705f5ba056c739abbb017915911301ef8bc2a7aac49f3e214490",
+    "originalLabelsAndOrderPreserved": true,
+    "oldAssertLines": 1640,
+    "unchangedOldAssertLines": 1639,
+    "necessaryAssertChange": "Bag irreversible entry socket adjacency +1 to +2; unique Fishing middle entry +1 adjacent socket required"
+  },
+  "postFailureScope": "Original11 Node04 actually130pass22fail152reported, including Storage top-level early stop. Only original fixture dependency assembly/necessary structural adjacency expectations changed after read-only review; no old test names/order removed, no noop source replacement. Current original11 Node05/TSC05 not executed yet.",
+  "unknownRetirementReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "page": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 995759,
+      "sha256": "7836bf1a0c8bb4934efbaccb269eca4d75605ac5f205fb5abe77d34c13167307"
+    },
+    "script": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 545600,
+      "sha256": "fd7691baf7f2b153d12ab3c885ed313800e2e14af1964a28e71959d517561157"
+    },
+    "previous350LabelsAndOrderPreserved": true,
+    "previous1734AssertStartingLinesWithMultiplicityPreserved": true,
+    "extraGroups": 7,
+    "sourceOnly": true,
+    "execution": false
+  },
+  "currentCoreBuild": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-core-static05.json",
+    "bytes": 16573,
+    "sha256": "343e2ad6c01eab7d774e93408c9cc3ae234d87ed0c56dc877f5dfb4c26fb5d7c"
+  },
+  "currentRendererBuild": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-renderer-static05.json",
+    "bytes": 27976,
+    "sha256": "888a47403fa15459cadd316518b77d7af348060480fb28d22de068e77c402b2a"
+  },
+  "finalAffectedPui": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui-finite07.json",
+    "bytes": 7508,
+    "sha256": "3963424782707a9445bcd1591e7fc75a7ec705a6895d067ddfbbe9b3801ea919"
+  },
+  "fixtureReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "sourceOnly": true,
+    "execution": false,
+    "accepted": true,
+    "literalTestCallCounts": {
+      "combat": [
+        31,
+        31
+      ],
+      "quest": [
+        23,
+        23
+      ],
+      "storage": [
+        67,
+        67
+      ]
+    },
+    "audits": [
+      {
+        "name": "combat",
+        "rel": "apps/web/scripts/test-bevy-combat-input.mjs",
+        "beforePin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fixture-before-combat01.json",
+          "bytes": 68985,
+          "sha256": "14a3f4476a349c36994ff15c2a71ee9e37059332a5619cdd536456bfd4678096"
+        },
+        "currentPin": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs",
+          "bytes": 70365,
+          "sha256": "0e39a0d94a129ab6f7e6aef0bf1bbbf5151a3658178da3bbd53a9ea18ad1db56"
+        },
+        "beforeKeys": [
+          "path",
+          "sourceText",
+          "bytes",
+          "sha256"
+        ],
+        "sameTestNamesOrder": true,
+        "literalTestCalls": [
+          30,
+          30
+        ],
+        "changedLineRange": [
+          84,
+          336,
+          354
+        ],
+        "removedAssertStartingLines": [
+          " assert.equal(statements[authClaimIndex+4],socketTry,'no executable external callback between final proof gates and sole socket send');",
+          " assert.equal(socketIndex,authClaimIndex+4);",
+          " assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-3),["
+        ]
+      },
+      {
+        "name": "quest",
+        "rel": "apps/web/scripts/test-bevy-quest-ui.mjs",
+        "beforePin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fixture-before-quest01.json",
+          "bytes": 71892,
+          "sha256": "cfdbb6b3de25b4cb85d132ec42440f6f58b3ed259a8bd2b5aa4c8a45a0a3b0e1"
+        },
+        "currentPin": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-quest-ui.mjs",
+          "bytes": 69545,
+          "sha256": "b167db1673c6832b80f6319fdbb22a78b4cdc838d904f8d7c56a4d09d30a9758"
+        },
+        "beforeKeys": [
+          "path",
+          "sourceText",
+          "bytes",
+          "sha256"
+        ],
+        "sameTestNamesOrder": true,
+        "literalTestCalls": [
+          23,
+          23
+        ],
+        "changedLineRange": [
+          759,
+          758,
+          759
+        ],
+        "removedAssertStartingLines": []
+      },
+      {
+        "name": "storage",
+        "rel": "apps/web/scripts/test-storage-page-gate.mjs",
+        "beforePin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-fixture-before-storage01.json",
+          "bytes": 140364,
+          "sha256": "26fe1dd0e470143ba069345b06d62065f565629a0ed206f42db7eeaa80002bb7"
+        },
+        "currentPin": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs",
+          "bytes": 138133,
+          "sha256": "656cc86ebfb99c6891bd5800d7c50d4b1d09e49deb10205e63c9d3e23c94c54e"
+        },
+        "beforeKeys": [
+          "path",
+          "sourceText",
+          "bytes",
+          "sha256"
+        ],
+        "sameTestNamesOrder": true,
+        "literalTestCalls": [
+          66,
+          66
+        ],
+        "changedLineRange": [
+          8,
+          342,
+          370
+        ],
+        "removedAssertStartingLines": [
+          "    assert.equal(statements[index - 1].getText(pageAst), \"observeEquipmentSnapshot(snapshot, connectionGeneration);\");"
+        ]
+      }
+    ],
+    "necessaryChanges": [
+      "Combat original Auth/Repair/Bag proof retained; WorldFishing refusal exact, no else, return false, socket +4→+5, last IF suffix3→4",
+      "Storage Equipment snapshot (-1)→(-2) followed by explicit Fishing (-1), original Social retained",
+      "Quest old no-fishing fixture adds empty worldFishingQueuedRef only"
+    ]
+  },
+  "priorNodeFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node-failure04.json",
+    "bytes": 5007,
+    "sha256": "f0f191a0647284fb8d8508ed24fd7cc3849c0020a0f09d4cc24d6bd6a691d4d7"
+  },
+  "currentNativeBuild": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-static05.json",
+    "bytes": 6346,
+    "sha256": "593f0b19d5d3d7f0f0d6d7ce7934ed0f0fd9a1225c5e26a65e7fca548c317876"
+  }
+}

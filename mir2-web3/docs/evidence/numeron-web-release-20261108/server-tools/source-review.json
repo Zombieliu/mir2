@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "r16-test-cutover-r4-complete-systemd-environmentfiles-sequence",
+  "createdAt": "2026-11-08T16:47:43.319094+00:00",
+  "prepared": true,
+  "source": {
+    "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover_playtest_r16.py",
+    "bytes": 20063,
+    "sha256": "9edb8e9943c156b0259f15d42ec1267820327b54e53a69756f7d2b9339b192e3"
+  },
+  "tests": {
+    "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\test_cutover_playtest_r16.py",
+    "bytes": 35085,
+    "sha256": "3e40e990a95e1e9a12739236a9b4e7e2324c009f8cdf08b52b1434b4299dfb9f"
+  },
+  "sourceLines": 258,
+  "shared03Unchanged": {
+    "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\r16_candidate_install.py",
+    "bytes": 33930,
+    "sha256": "03c079ee51a6297dac1728df004c57df58bee1ddcdd65d74308b5cc4b6a5878b"
+  },
+  "previousSources": [
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover_playtest_r16.r1.py",
+      "bytes": 15357,
+      "sha256": "1ac2d72f0a17e275d8043acff3b97595b444103cfac3000fc1d55303aecf9769"
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover_playtest_r16.r2.py",
+      "bytes": 16210,
+      "sha256": "42922133d18761359e31b7464381c24eccd566e2c1448ee89e3295011819d031"
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover_playtest_r16.r3.py",
+      "bytes": 18556,
+      "sha256": "d5d70b18fcde93ce5ef6a710055f96bd841cc68430ba44d47d88b808c4901bab"
+    }
+  ],
+  "previousTests": [
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\test_cutover_playtest_r16.r1.py",
+      "bytes": 14679,
+      "sha256": "acf886951d18c132e00528d361c044c0f360a75195e7353ccb789f06d31f2fa4"
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\test_cutover_playtest_r16.r2.py",
+      "bytes": 19746,
+      "sha256": "ffa18b86349875d097aec21c3784f6d80725737c3e1052d62dddd9cb61e5876d"
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\test_cutover_playtest_r16.r3.py",
+      "bytes": 27673,
+      "sha256": "82926244b216ab43d62fd9eac09fc805727472de884de8754e8c2ef6d3ed5541"
+    }
+  ],
+  "previousProofs": [
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover-source-review.json",
+      "bytes": 4427,
+      "sha256": "41cdb1c9f5e0d203ad849c5cb7d66e400fe7c601fef66820a01f163352b5c3c9"
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover-r2-source-review.json",
+      "bytes": 4164,
+      "sha256": "d8d40eeb50f7efdf15d040f058c342f154094abf20e840732f31ad5daa7382c7"
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover-r3-source-review.json",
+      "bytes": 6458,
+      "sha256": "04278b11064cfdcee8a9c11368326b9dcdcd61d02c003053027a338805ff02eb"
+    }
+  ],
+  "coordinatorObservedR3Failure": {
+    "phase": "old-restart-requested",
+    "failureCode": "effective_command_changed",
+    "cause": "systemctl show emits EnvironmentFiles once per file. dict(line.split) discarded all but the last record. The old unit actually retained12 envfiles throughout; no EnvironmentFile reset occurred.",
+    "recordCorrection": "Earlier complete-effective-env-backup wording is incorrect for r1-r3. R3 backed up only the last effective envfile, not all12. Unit/dropin backups and completed dump/SQL/recovery pieces remain historical evidence; r4 does not reuse or combine them.",
+    "oldGatewayRestored": true,
+    "newGatewayStartRequested": false,
+    "r3BackupAndFailedFilesReadOrChangedHere": false
+  },
+  "r4Delta": {
+    "environmentFilesParser": "aggregate repeated EnvironmentFiles records in returned order; reject empty records, other duplicate properties, unknown or missing keys",
+    "oldExactOrderedEnvfileBaselineCount": 12,
+    "guardBefore": 12,
+    "guardAfter": 13,
+    "allEffectiveEnvfilesBackedUp": true,
+    "legacyReadAllowlist": "exact12 baseline paths only; per-component nofollow UID0/no group-or-other-write; final regular/nlink1/UID0/stableFD unchanged",
+    "newEnvironmentFile": "/etc/mir2-r16-release/r16-d53f9e3b2-20261108-r4.env",
+    "newDropinBasename": "zzzzzzzzzzzzzzzzzzzz-r16-d53f9e3b2-r4.conf",
+    "newBackupRoot": "/root/r16-playtest-cutover-d53f9e3b2-20261108-r4",
+    "oldEnvironmentFilesReset": false,
+    "onlyFourEnvOverridesPreserved": true,
+    "procEnvironmentPrivateFullCopy": true,
+    "r3FilesQuarantinedOrDeletedByR4": false,
+    "recoveryLimitsAndStopRollbackDeadlinesUnchanged": true
+  },
+  "validation": {
+    "syntaxPassed": true,
+    "windowsPassed": 30,
+    "actualLinuxRootFilesystemCasesSkippedHere": 11,
+    "totalCases": 41,
+    "log": {
+      "path": "D:\\mir2-builds\\r16-numeron-release-20261108\\server-tools\\cutover-fixtures-r4-final-windows.log",
+      "bytes": 7861,
+      "sha256": "b8a44f3cb6a5030e69afa78d41b13fdd397f4f3855712c209f4f19fdffc40778"
+    },
+    "newRegression": [
+      "real multiline systemctl shape12/13 preserved in order; naive dict reproduction loses11",
+      "other duplicated/scalar/missing/unknown/empty properties rejected",
+      "missing/reordered/repeated/foreign Envfiles cannot pass full baseline guard",
+      "actual preflight returns every configured effective envfile in backup mapping",
+      "all12 backup bytes written by actual execute before stop",
+      "only12 exact legacy paths choose relaxed directory GID reader",
+      "Linux actual12 files with nonzero readonly ancestor GID and0710service-group directory; final hardlink/symlink rejected"
+    ]
+  },
+  "limits": [
+    "No remote, systemctl, database or live secret reads performed here.",
+    "Root must run all41 tests on real Linux ROOT before fresh r4 plan/apply.",
+    "Use a fresh protected r4 tools directory with canonical script/test filenames and unchanged adjacent shared03.",
+    "Original failed roots, r1-r3 scripts/tests/logs/proofs remain; no old root is deleted, reused or re-quarantined.",
+    "Root separately compares complete MIR2 process environment before/after; only the four authorized override keys may differ, then verifies raw account/save preservation and health."
+  ],
+  "ownershipReleased": true
+}

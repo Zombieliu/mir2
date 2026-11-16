@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-24T17:23:40.640Z",
+  "realmStamp": "1792862312544-c2d8342e",
+  "runId": "1792862315921-325d69ed",
+  "inspectedPublicFiles": 18,
+  "privateValueCount": 6,
+  "credentialValuesAbsent": true,
+  "configuredValuesNeverPrinted": true,
+  "noPrivateStoreLedgerAccountsOrRecordingCopied": true,
+  "scope": "Exact-value absence scan of18 public run/audit/source artifacts against the two new ordinary registration passwords and four owned realm configured secrets. Source/profile artifacts only contain names/paths/hash pins; subsequent metadata contains counts/digests only."
+}

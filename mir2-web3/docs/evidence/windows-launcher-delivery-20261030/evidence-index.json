@@ -1,0 +1,142 @@
+{
+  "schema": "mir2.windows.launcher-delivery-evidence.v1",
+  "sourceRevision": "677e2ab56704660c4e93c14a1d29945f82b55f3e",
+  "publicUrl": "https://165.154.65.136.sslip.io/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/Mir2Setup.exe",
+  "files": [
+    {
+      "path": "bootstrap-installer-tests.log",
+      "bytes": 185,
+      "sha256": "7BFCBB27DCA32051C1F0161B9D3477D6199B2C6A63F1ACEF0D3880EC6DE724E1"
+    },
+    {
+      "path": "cms-native-contract.log",
+      "bytes": 420,
+      "sha256": "85569526336C1F96D039EAB452D97CC84DF6DFA2205B3219969233728F166AC3"
+    },
+    {
+      "path": "compiled-installers.json",
+      "bytes": 1095,
+      "sha256": "B58AD611AC5F8BE5C54344E3344F0D18C6C2F6D5FC2131A231B3E4762CB962A5"
+    },
+    {
+      "path": "game-candidate-verification.json",
+      "bytes": 3762,
+      "sha256": "0E725EEBC48C5241BB250F3DF7AE4143DD7F2D52C9B55F10F7DBFEE5C3BB2A4C"
+    },
+    {
+      "path": "installed-game-login.png",
+      "bytes": 317708,
+      "sha256": "70809C4E5DB3E1D62CCDDB4A6231F4E6887666D7F808D53140D32EF5FD560ABE"
+    },
+    {
+      "path": "installed-game-window.json",
+      "bytes": 170,
+      "sha256": "63C0F7EF1496ED67240FC8E7F0024382AA7EFA13437BD41DF7CC04ECA5DA893A"
+    },
+    {
+      "path": "installed-launcher-home.png",
+      "bytes": 148310,
+      "sha256": "D106F446DFE877F5CDBC8A77FF10ABB61C91A8AB1B900D302AD2848B5606F62E"
+    },
+    {
+      "path": "installed-launcher-home.txt",
+      "bytes": 920,
+      "sha256": "214C88C6BA4B7FE8B0B02AF8151B70A12820CF2D0D17C081AC26D6DEABE3DF46"
+    },
+    {
+      "path": "installed-launcher-smoke.json",
+      "bytes": 1446,
+      "sha256": "5B809162ED0283BD611826341D04DDE879E800AD5E888586A66B3CB2495F9B20"
+    },
+    {
+      "path": "installer-icon-resources.json",
+      "bytes": 567,
+      "sha256": "77390A60CF73B24BBF3DE5A34CDDD310F9C3BD39A1BF46887DBD3E783A98EC39"
+    },
+    {
+      "path": "installer-publication.json",
+      "bytes": 1160,
+      "sha256": "1B0ACE8F7035CB1EB9366E6F34DC568FDE6481C5B24CF0EFCF7D8ADC97ACBEB7"
+    },
+    {
+      "path": "installer-release-signature.json",
+      "bytes": 487,
+      "sha256": "AFEFF8F43728B2399667BEAA10E68640C98134B40E1736B64457830EE2B78A50"
+    },
+    {
+      "path": "packed-preparation-tests.log",
+      "bytes": 1928,
+      "sha256": "E892D8CAAD353E6209B1DCD17A0EA6D00D3280EE202622D21585265975BAF080"
+    },
+    {
+      "path": "public-download-verification.json",
+      "bytes": 2232,
+      "sha256": "04CFBA0F0ED0A45DE2FD334B30C88258BE6BFBD2D0D1B0E54C560B6EBFF1945D"
+    },
+    {
+      "path": "public-readback-cms.json",
+      "bytes": 241,
+      "sha256": "874EB00C67AE42969FF8885E44C6D355B512ECF5FA262075E9DBCC21A9DECF24"
+    },
+    {
+      "path": "publication-pins.json",
+      "bytes": 1103,
+      "sha256": "871ABE2F022BFCCBFBBF4C7B65C495236B9245A85CE0F22F90885D90A6AE571A"
+    },
+    {
+      "path": "README.zh-CN.txt",
+      "bytes": 945,
+      "sha256": "533EC2B0EDA19A15811E32E2C9CCCF23A9EB90204BC5829A88499B4C36A9AB37"
+    },
+    {
+      "path": "release-icon-resources.json",
+      "bytes": 478,
+      "sha256": "C811CB570B4B704B1F385436B7BD704E31946F680C7D7B0B66238BAEA8731557"
+    },
+    {
+      "path": "release.json",
+      "bytes": 2556,
+      "sha256": "1C83B417423710AAD71E1B50316B452E45A99B4C67EA11C31054F086333760EF"
+    },
+    {
+      "path": "release.p7s",
+      "bytes": 1614,
+      "sha256": "43265B21CCDE2F460DBB9E4DB79606913C6915663BAD0BF10ED8BA89037AAB3A"
+    },
+    {
+      "path": "SHA256SUMS.txt",
+      "bytes": 80,
+      "sha256": "A2780B9D3F6E426E3F56D2A28145997CAE91724897E48DEB937601086E08B3BA"
+    },
+    {
+      "path": "source-revision.json",
+      "bytes": 296,
+      "sha256": "638DA077E8857D4896C587DA9F4A23CAD6B7C9CCCF52BE3B05CCD1F33978A337"
+    },
+    {
+      "path": "unified-release-compatibility-tests.log",
+      "bytes": 106,
+      "sha256": "556CEC89258389BBFE9E5BD1AFBD412FEF1D1F34891AF78B9B55131988BDAF4C"
+    },
+    {
+      "path": "updater-bundle-verification.json",
+      "bytes": 592,
+      "sha256": "CD623510924CA6A352BE9D60C7C416A45F6E3870E94265698214016FD3684069"
+    },
+    {
+      "path": "updater-integrated-tests.log",
+      "bytes": 23804,
+      "sha256": "3B047F8480849E3FC73AAE4B0BBF7E0F706E59CFB0FE8C1283CE346B8E6529FE"
+    },
+    {
+      "path": "upgrade-qa-result.json",
+      "bytes": 2896,
+      "sha256": "67C03BCF2C971DDB9FD1F3A8022E7A7C6CA53EA48CBA90394F9C89BB6F0FE99C"
+    },
+    {
+      "path": "origin-download-speed.json",
+      "bytes": 696,
+      "sha256": "27068A9453E69BB2357C00868C151CCAE49F9E51D4C524BAA05085745A891E03"
+    }
+  ]
+}

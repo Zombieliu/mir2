@@ -1,0 +1,1302 @@
+{
+  "schema": "mir2.input-gate-trace100-tick-gate-forensic.v1",
+  "diagnosticOnly": true,
+  "capacityQualified": false,
+  "originalOverallPassed": false,
+  "controllerDriverServerActualExits": [
+    1,
+    1,
+    0
+  ],
+  "normalClosedNoKill": true,
+  "sourceRevision": "525e74364ab87ad49e84c26c8dd22db9fe9348d5",
+  "binarySha256": "4c6a18829d3bc50972d2dd84b2682a5f16347ba3dc77b396c9fdc9e2dc16fac5",
+  "inputFiles": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\input-gate-diagnostic-factory-bound-v7\\generated\\trace100\\selected-forensics.v2.json",
+      "bytes": 3160198,
+      "sha256": "b3479f9b06c11b87186f12786c0ea7619f3d34c23163b940113be678e5f89ee8"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-input-gate-dense100-v7\\runs\\dense100-v1\\game-stderr.log",
+      "bytes": 7994521,
+      "sha256": "f1d43bad0118e928f13d8841cda52cdd636ca7e6278341cc383452dff6540b2d"
+    }
+  ],
+  "exactCurrentEpochAssociations": [
+    {
+      "actorOrdinal": 53,
+      "zoneUid": 50053,
+      "sdkConnection": 54,
+      "nameSha256": "afc84f43eb1d930a2a8b9cab568f3199db22efb2a1e8068a91b0b30a252e7502",
+      "userInformation": {
+        "line": 66710,
+        "byteOffset": 19843663,
+        "lineSha256": "66e00cbc1ec3a4bff7fc16d7f784c6c2c03571791c391171842d94bc2a5584cd"
+      },
+      "ownedBootstrap": {
+        "line": 67366,
+        "byteOffset": 20075025,
+        "lineSha256": "854e41a64fd16124619869ec9a6c436e7619cce8e06a6732fc64eb23b1591bb0"
+      },
+      "otherPeerObjectPlayer": {
+        "line": 66595,
+        "byteOffset": 19767452,
+        "lineSha256": "493fddb51588fdb28ae2b77f0855e244d79b78b32907f3fb707afa4df9cab7d3"
+      },
+      "newEpochNamePeerUidProven": true,
+      "serverConnection": 54,
+      "registration": 54,
+      "status": "ExactNewEpochNamePeerUidServerBind",
+      "serverBind": {
+        "line": 170,
+        "byteOffset": 19109,
+        "lineSha256": "d77b8917b7f8464e19aaeeb27ad2422ab3d48bd7077788e7450d2bc1ac254725"
+      }
+    },
+    {
+      "actorOrdinal": 60,
+      "zoneUid": 50060,
+      "sdkConnection": 61,
+      "nameSha256": "37c8f3446f133acd65f743b40da33d720c68c1fb338bf45beea697b8dca9a185",
+      "userInformation": {
+        "line": 129053,
+        "byteOffset": 33469725,
+        "lineSha256": "6b2242b48dff5803300622938876215d942543f26c6900c4cdb9368460ab643f"
+      },
+      "ownedBootstrap": {
+        "line": 129646,
+        "byteOffset": 33684911,
+        "lineSha256": "3ca8e3d68dddd71b0efa43ef7ed744eb8600b048da46a2f2cbb6f05a4da19042"
+      },
+      "otherPeerObjectPlayer": {
+        "line": 128983,
+        "byteOffset": 33404968,
+        "lineSha256": "7cdaa9038a35b26c16a030fe6449a7b31ae99d05d2c22d9dc68e7e2b067e3b63"
+      },
+      "newEpochNamePeerUidProven": true,
+      "serverConnection": 61,
+      "registration": 61,
+      "status": "ExactNewEpochNamePeerUidServerBind",
+      "serverBind": {
+        "line": 346,
+        "byteOffset": 83124,
+        "lineSha256": "96ed8c9a67de7f7fa84d926cb98a459f3779f0eb9b25823e6372928c35f43edd"
+      }
+    }
+  ],
+  "mainSelectedTimeout": [
+    60,
+    8
+  ],
+  "additionalSelection": "up to3 other exact owner UserLocation actions, descending logged Enqueue\u2192writer-start, positive same-socket protected Tick span overlap",
+  "candidateActionsWithExactTickBarrierOverlap": 5,
+  "actions": [
+    {
+      "actorOrdinal": 60,
+      "ticketSequence": 8,
+      "sdkConnection": 61,
+      "serverConnection": 61,
+      "registration": 61,
+      "zoneUid": 50060,
+      "observedInputOrdinal": 498,
+      "originalPassed": false,
+      "originalTimedOut": true,
+      "originalAccepted": true,
+      "rawSent": {
+        "line": 371297,
+        "byteOffset": 103484931,
+        "lineSha256": "344e8011690793c8f8641634a66927ad9962a6ea8222949eb63d78bc8596a0b1"
+      },
+      "rawActionSent": {
+        "line": 371298,
+        "byteOffset": 103485097,
+        "lineSha256": "36c577387628c87e77705bcfac10e4ae85c9585b9196def1ffd23115377d0435"
+      },
+      "rawActionTerminal": {
+        "line": 382183,
+        "byteOffset": 106590363,
+        "lineSha256": "ea79b76ca654fc12456c15c89542ad04b32a7a172deaf7b562bb8f10761e47cc"
+      },
+      "ownerOriginalReceipt": {
+        "observerOrdinal": 60,
+        "connection": 61,
+        "receiveSeq": 2266,
+        "receiveAtUtc": "2026-11-14T11:43:38.268Z",
+        "atMs": 2783564.4913,
+        "packet": "UserLocation",
+        "objectId": null,
+        "location": {
+          "x": 47,
+          "y": 64
+        },
+        "textSha256": null
+      },
+      "ownerRawRef": {
+        "line": 378217,
+        "byteOffset": 105489357,
+        "lineSha256": "d1f5f90367c86dab57487e26e692257a2c531a6e2d29a7520bf772399d3729e2"
+      },
+      "ownerObservedTextIndex": 2266,
+      "sdkSentAttemptToOwnerReceiptMs": 1977.1070999996737,
+      "peerReceipts": [
+        {
+          "observerOrdinal": 61,
+          "sdkConnection": 62,
+          "sdkSentAttemptToReceiptMs": 2432.367499999702,
+          "packet": "ObjectWalk",
+          "rawRef": {
+            "line": 382123,
+            "byteOffset": 106574741,
+            "lineSha256": "9931b4de9b7df921ead042e7861391745fd3c4f028b164523ba2b6231fb75134"
+          },
+          "writerScope": "Unknown; unselected peer connection not attributed"
+        }
+      ],
+      "deliveryTraceID": 238,
+      "deliveryPoints": {
+        "enqueue": {
+          "stage": "enqueue",
+          "connection": 0,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616350,
+          "sourceEndUnixMs": 1794656616350,
+          "sourceStartMonoUs": 2781099881,
+          "sourceEndMonoUs": 2781099881,
+          "durationUs": 0,
+          "ref": {
+            "line": 4229,
+            "byteOffset": 1554317,
+            "lineSha256": "9a083cf13bf38c332d21a150911c56ffd584033e5b0e3f0d75e187cce711e627"
+          }
+        },
+        "dequeue": {
+          "stage": "dequeue",
+          "connection": 0,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618268,
+          "sourceEndUnixMs": 1794656618268,
+          "sourceStartMonoUs": 2783017946,
+          "sourceEndMonoUs": 2783017946,
+          "durationUs": 0,
+          "ref": {
+            "line": 4256,
+            "byteOffset": 1565181,
+            "lineSha256": "c01e52426bd13961bb3c6935b895dbab0e4e28d932db53f7eac5ffae9be9b550"
+          }
+        },
+        "gate": {
+          "stage": "gate",
+          "connection": 0,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618268,
+          "sourceEndUnixMs": 1794656618268,
+          "sourceStartMonoUs": 2783018040,
+          "sourceEndMonoUs": 2783018040,
+          "durationUs": 0,
+          "ref": {
+            "line": 4257,
+            "byteOffset": 1565592,
+            "lineSha256": "0eed42d5e4e2f74ebabe34afbbdf2ba908f099e4a03a11e610f0e87164304e19"
+          }
+        },
+        "send": {
+          "stage": "send",
+          "connection": 0,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618268,
+          "sourceEndUnixMs": 1794656618268,
+          "sourceStartMonoUs": 2783018136,
+          "sourceEndMonoUs": 2783018136,
+          "durationUs": 0,
+          "ref": {
+            "line": 4258,
+            "byteOffset": 1566000,
+            "lineSha256": "32b56da0fc8dab0eea1c2652d43d84c98fae3e9a04f0a1a0a612771135946ea9"
+          }
+        },
+        "sent": {
+          "stage": "sent",
+          "connection": 0,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618269,
+          "sourceEndUnixMs": 1794656618269,
+          "sourceStartMonoUs": 2783018538,
+          "sourceEndMonoUs": 2783018538,
+          "durationUs": 0,
+          "ref": {
+            "line": 4262,
+            "byteOffset": 1567609,
+            "lineSha256": "3cb289e462cea9249756129c3bce9b26fa59dbb0daba57969c21d12e107e0ac2"
+          }
+        }
+      },
+      "writerSpans": [
+        {
+          "stage": "writer_lock",
+          "connection": 61,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 2266,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656618268,
+          "sourceEndUnixMs": 1794656618268,
+          "sourceStartMonoUs": 2783018333,
+          "sourceEndMonoUs": 2783018333,
+          "durationUs": 0,
+          "ref": {
+            "line": 4260,
+            "byteOffset": 1566801,
+            "lineSha256": "ad37f6db385bf3d871b160d98aae0a30448de06c0638249c969efca16b77be09"
+          }
+        },
+        {
+          "stage": "writer_sink_send",
+          "connection": 61,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 238,
+          "frameFirst": 2266,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656618268,
+          "sourceEndUnixMs": 1794656618268,
+          "sourceStartMonoUs": 2783018423,
+          "sourceEndMonoUs": 2783018443,
+          "durationUs": 20,
+          "ref": {
+            "line": 4261,
+            "byteOffset": 1567202,
+            "lineSha256": "a6273bab71e33be6dab8b3a2c0b28ed889ee0848ee43c6a53077e1919038a0c6"
+          }
+        }
+      ],
+      "inputSpans": [
+        {
+          "stage": "reader_dispatch",
+          "connection": 61,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 498,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616292,
+          "sourceEndUnixMs": 1794656616292,
+          "sourceStartMonoUs": 2781042133,
+          "sourceEndMonoUs": 2781042133,
+          "durationUs": 0,
+          "ref": {
+            "line": 4222,
+            "byteOffset": 1551491,
+            "lineSha256": "50bd8ae4ac90fb79ffd51e643b8db4b4bbd7461eb03c2f5d8eadc5e9dbf5a491"
+          }
+        },
+        {
+          "stage": "reader_fast",
+          "connection": 61,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 498,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616292,
+          "sourceEndUnixMs": 1794656616350,
+          "sourceStartMonoUs": 2781042233,
+          "sourceEndMonoUs": 2781100223,
+          "durationUs": 57989,
+          "ref": {
+            "line": 4230,
+            "byteOffset": 1554722,
+            "lineSha256": "2347b552277ac076cb4932ec58274a10ee8061f6a99ba6c0552440ca054bfee0"
+          }
+        }
+      ],
+      "sameSocketTickWriteGateHeldSpans": [
+        {
+          "stage": "tick_execute",
+          "connection": 61,
+          "registration": 61,
+          "recipientZoneID": 50060,
+          "inputOrdinal": 0,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616351,
+          "sourceEndUnixMs": 1794656618267,
+          "sourceStartMonoUs": 2781100640,
+          "sourceEndMonoUs": 2783016622,
+          "durationUs": 1915982,
+          "ref": {
+            "line": 4246,
+            "byteOffset": 1561155,
+            "lineSha256": "35f949d7f289118e782ae70b9de506fcdd00175618ab7c2ce2591b9ecde06fb7"
+          }
+        }
+      ],
+      "sameSourceIntervalsUs": {
+        "loggedEnqueueToDequeue": 1918065,
+        "dequeueMinusEnqueueSignedProbeDelta": 1918065,
+        "ownDequeueToGate": 94,
+        "loggedEnqueueToWriterLockStart": 1918452,
+        "tickExecuteNoSendBarrierOverlapLowerBound": 1915982,
+        "ownDequeueToGateOverlappedByTickExecute": 0,
+        "enqueueToWriterOutsideCapturedTickExecute": 2470,
+        "lastTickEndToOwnerDequeue": 1324,
+        "tickBarrierFractionOfEnqueueToWriter": 0.9987125036227125
+      },
+      "established": "Message was already successfully queued by logged Enqueue. During captured same-socket tick_execute its required outbound read side could not coexist with the held write side.",
+      "notEstablished": [
+        "own read().await duration or batch-first identity from these point labels",
+        "Tick as sole cause of all queue residence",
+        "inner Tick/Store/Zone operation or CPU-vs-wait split",
+        "peer timeout/writer/gate cause",
+        "kernel/WAN delivery"
+      ],
+      "writerDurationIsNotSuccess": true,
+      "deadlineVerdictRecomputed": false
+    },
+    {
+      "actorOrdinal": 53,
+      "ticketSequence": 8,
+      "sdkConnection": 54,
+      "serverConnection": 54,
+      "registration": 54,
+      "zoneUid": 50053,
+      "observedInputOrdinal": 933,
+      "originalPassed": true,
+      "originalTimedOut": false,
+      "originalAccepted": true,
+      "rawSent": {
+        "line": 370795,
+        "byteOffset": 103342807,
+        "lineSha256": "62722db3b405dc0c65d84bad4ee0d826662400e0b679649267a683ced3b41688"
+      },
+      "rawActionSent": {
+        "line": 370796,
+        "byteOffset": 103342973,
+        "lineSha256": "e84c6cbdc9cc1851b49020976cf4ac014211e3b61fe5ec723ec8af75fe3c3929"
+      },
+      "rawActionTerminal": {
+        "line": 376998,
+        "byteOffset": 105144390,
+        "lineSha256": "066d5137b1092191dbc729d9bec3c9ca94b12a3d85f1dbd9c124d3ff0526aa60"
+      },
+      "ownerOriginalReceipt": {
+        "observerOrdinal": 53,
+        "connection": 54,
+        "receiveSeq": 2826,
+        "receiveAtUtc": "2026-11-14T11:43:38.105Z",
+        "atMs": 2783401.1503,
+        "packet": "UserLocation",
+        "objectId": null,
+        "location": {
+          "x": 53,
+          "y": 63
+        },
+        "textSha256": null
+      },
+      "ownerRawRef": {
+        "line": 376878,
+        "byteOffset": 105110989,
+        "lineSha256": "f72ad1e69e7f67fdbc4abf5d2c99738b589eea327481be508836ce6184df85c9"
+      },
+      "ownerObservedTextIndex": 2826,
+      "sdkSentAttemptToOwnerReceiptMs": 1962.3616999997757,
+      "peerReceipts": [
+        {
+          "observerOrdinal": 52,
+          "sdkConnection": 53,
+          "sdkSentAttemptToReceiptMs": 776.3336000000127,
+          "packet": "ObjectWalk",
+          "rawRef": {
+            "line": 372414,
+            "byteOffset": 103818544,
+            "lineSha256": "3e6ba9d6130b4552e2fd38516c88c168d6ca420f86581704f1d94e845e3134b4"
+          },
+          "writerScope": "Unknown; unselected peer connection not attributed"
+        }
+      ],
+      "deliveryTraceID": 232,
+      "deliveryPoints": {
+        "enqueue": {
+          "stage": "enqueue",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616206,
+          "sourceEndUnixMs": 1794656616206,
+          "sourceStartMonoUs": 2780955527,
+          "sourceEndMonoUs": 2780955527,
+          "durationUs": 0,
+          "ref": {
+            "line": 4219,
+            "byteOffset": 1550284,
+            "lineSha256": "eaf58375e49d51c4237b04456e8fbf72726d5984b655c3273e4fec9d78e05dc0"
+          }
+        },
+        "dequeue": {
+          "stage": "dequeue",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616206,
+          "sourceEndUnixMs": 1794656616206,
+          "sourceStartMonoUs": 2780955535,
+          "sourceEndMonoUs": 2780955535,
+          "durationUs": 0,
+          "ref": {
+            "line": 4220,
+            "byteOffset": 1550689,
+            "lineSha256": "2ca3a48197bf04be5111f60e57038fb854bccf596c673a6a0697d70ab546fb42"
+          }
+        },
+        "gate": {
+          "stage": "gate",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618105,
+          "sourceEndUnixMs": 1794656618105,
+          "sourceStartMonoUs": 2782854658,
+          "sourceEndMonoUs": 2782854658,
+          "durationUs": 0,
+          "ref": {
+            "line": 4237,
+            "byteOffset": 1557524,
+            "lineSha256": "f76745d4d8c573bc65ad5b650ddddb5b0be5665dedf00bd8d56e38c5ad66fc78"
+          }
+        },
+        "send": {
+          "stage": "send",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618105,
+          "sourceEndUnixMs": 1794656618105,
+          "sourceStartMonoUs": 2782854775,
+          "sourceEndMonoUs": 2782854775,
+          "durationUs": 0,
+          "ref": {
+            "line": 4238,
+            "byteOffset": 1557932,
+            "lineSha256": "aa051d8293e9e5c7ef0174188eea9729a862129ceff2aa268399280bfbb5e8ae"
+          }
+        },
+        "sent": {
+          "stage": "sent",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618105,
+          "sourceEndUnixMs": 1794656618105,
+          "sourceStartMonoUs": 2782855198,
+          "sourceEndMonoUs": 2782855198,
+          "durationUs": 0,
+          "ref": {
+            "line": 4242,
+            "byteOffset": 1559541,
+            "lineSha256": "e50cf7163844867a635bdfca22bd303396b4cd4a89b37d385215ea621d919917"
+          }
+        }
+      },
+      "writerSpans": [
+        {
+          "stage": "writer_lock",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 2826,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656618105,
+          "sourceEndUnixMs": 1794656618105,
+          "sourceStartMonoUs": 2782854976,
+          "sourceEndMonoUs": 2782854977,
+          "durationUs": 0,
+          "ref": {
+            "line": 4240,
+            "byteOffset": 1558733,
+            "lineSha256": "117fb9cf6c73aa2b877ccea3ed60d14a60463ada57cc539a57de52afa97636fb"
+          }
+        },
+        {
+          "stage": "writer_sink_send",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 232,
+          "frameFirst": 2826,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656618105,
+          "sourceEndUnixMs": 1794656618105,
+          "sourceStartMonoUs": 2782855074,
+          "sourceEndMonoUs": 2782855104,
+          "durationUs": 30,
+          "ref": {
+            "line": 4241,
+            "byteOffset": 1559134,
+            "lineSha256": "2006df8cb983f8de75cca49a3a320d251f6c2fafa24136ea3272a3afb5b7416d"
+          }
+        }
+      ],
+      "inputSpans": [
+        {
+          "stage": "reader_dispatch",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 933,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616146,
+          "sourceEndUnixMs": 1794656616146,
+          "sourceStartMonoUs": 2780896343,
+          "sourceEndMonoUs": 2780896343,
+          "durationUs": 0,
+          "ref": {
+            "line": 4218,
+            "byteOffset": 1549888,
+            "lineSha256": "518950d78146061a33cc7d30074951c52b599f025fab5e24e2eb48414b9f0594"
+          }
+        },
+        {
+          "stage": "reader_fast",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 933,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616146,
+          "sourceEndUnixMs": 1794656616207,
+          "sourceStartMonoUs": 2780896467,
+          "sourceEndMonoUs": 2780957040,
+          "durationUs": 60573,
+          "ref": {
+            "line": 4221,
+            "byteOffset": 1551095,
+            "lineSha256": "67acb3d8b83ac3eb685eef78009630c486c1e27a2d572e6cd78dd44f6c245850"
+          }
+        }
+      ],
+      "sameSocketTickWriteGateHeldSpans": [
+        {
+          "stage": "tick_execute",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656616207,
+          "sourceEndUnixMs": 1794656618104,
+          "sourceStartMonoUs": 2780957126,
+          "sourceEndMonoUs": 2782854118,
+          "durationUs": 1896992,
+          "ref": {
+            "line": 4233,
+            "byteOffset": 1555923,
+            "lineSha256": "b5d32c4fb0c7542a52c5d0314a07b4462c4403d37a7ff5ce647b59c8e3317002"
+          }
+        }
+      ],
+      "sameSourceIntervalsUs": {
+        "loggedEnqueueToDequeue": 8,
+        "dequeueMinusEnqueueSignedProbeDelta": 8,
+        "ownDequeueToGate": 1899123,
+        "loggedEnqueueToWriterLockStart": 1899449,
+        "tickExecuteNoSendBarrierOverlapLowerBound": 1896992,
+        "ownDequeueToGateOverlappedByTickExecute": 1896992,
+        "enqueueToWriterOutsideCapturedTickExecute": 2457,
+        "lastTickEndToOwnerDequeue": -1898583,
+        "tickBarrierFractionOfEnqueueToWriter": 0.9987064669806875
+      },
+      "established": "Message was already successfully queued by logged Enqueue. During captured same-socket tick_execute its required outbound read side could not coexist with the held write side.",
+      "notEstablished": [
+        "own read().await duration or batch-first identity from these point labels",
+        "Tick as sole cause of all queue residence",
+        "inner Tick/Store/Zone operation or CPU-vs-wait split",
+        "peer timeout/writer/gate cause",
+        "kernel/WAN delivery"
+      ],
+      "writerDurationIsNotSuccess": true,
+      "deadlineVerdictRecomputed": false
+    },
+    {
+      "actorOrdinal": 53,
+      "ticketSequence": 122,
+      "sdkConnection": 54,
+      "serverConnection": 54,
+      "registration": 54,
+      "zoneUid": 50053,
+      "observedInputOrdinal": 1143,
+      "originalPassed": true,
+      "originalTimedOut": false,
+      "originalAccepted": true,
+      "rawSent": {
+        "line": 1508165,
+        "byteOffset": 412646121,
+        "lineSha256": "a8ba38c5629ae36b0e0412cd43e02cb404baada8eaabdc934f03ee7eca551641"
+      },
+      "rawActionSent": {
+        "line": 1508166,
+        "byteOffset": 412646287,
+        "lineSha256": "961e5819c925bf89f58c972e913a13b2ae7d2328f895f7f2e2d3aac8034cfd6d"
+      },
+      "rawActionTerminal": {
+        "line": 1513006,
+        "byteOffset": 413933768,
+        "lineSha256": "ff97d6ee047b9548ad2f60e6990d37023c61e104a6f98348fb15a3f6f8da942c"
+      },
+      "ownerOriginalReceipt": {
+        "observerOrdinal": 53,
+        "connection": 54,
+        "receiveSeq": 13721,
+        "receiveAtUtc": "2026-11-14T11:47:08.730Z",
+        "atMs": 2994027.2175,
+        "packet": "UserLocation",
+        "objectId": null,
+        "location": {
+          "x": 53,
+          "y": 63
+        },
+        "textSha256": null
+      },
+      "ownerRawRef": {
+        "line": 1512786,
+        "byteOffset": 413870131,
+        "lineSha256": "eae443a3e74bd8f7a5514897710ed943b488a2db4b2256fecc31333b820113ff"
+      },
+      "ownerObservedTextIndex": 13721,
+      "sdkSentAttemptToOwnerReceiptMs": 592.1883999998681,
+      "peerReceipts": [
+        {
+          "observerOrdinal": 52,
+          "sdkConnection": 53,
+          "sdkSentAttemptToReceiptMs": 415.225700000301,
+          "packet": "ObjectWalk",
+          "rawRef": {
+            "line": 1511245,
+            "byteOffset": 413450833,
+            "lineSha256": "238180634cdc8130b8297b57252d633717fc92ba871f5419a40f5d2d6f887ec7"
+          },
+          "writerScope": "Unknown; unselected peer connection not attributed"
+        }
+      ],
+      "deliveryTraceID": 1458,
+      "deliveryPoints": {
+        "enqueue": {
+          "stage": "enqueue",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828444,
+          "sourceEndUnixMs": 1794656828444,
+          "sourceStartMonoUs": 2993193964,
+          "sourceEndMonoUs": 2993193964,
+          "durationUs": 0,
+          "ref": {
+            "line": 14858,
+            "byteOffset": 5840605,
+            "lineSha256": "f1b4e6d16aef4a1780fc8a3f9026fbaf23993d177b6f045441ed5af03827c8d6"
+          }
+        },
+        "dequeue": {
+          "stage": "dequeue",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828444,
+          "sourceEndUnixMs": 1794656828444,
+          "sourceStartMonoUs": 2993193915,
+          "sourceEndMonoUs": 2993193915,
+          "durationUs": 0,
+          "ref": {
+            "line": 14857,
+            "byteOffset": 5840198,
+            "lineSha256": "694234ed1a1ff46e363bd5b31a259b30f675ed7b2e8c68b81fa6abe1864fd664"
+          }
+        },
+        "gate": {
+          "stage": "gate",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828731,
+          "sourceEndUnixMs": 1794656828731,
+          "sourceStartMonoUs": 2993480641,
+          "sourceEndMonoUs": 2993480641,
+          "durationUs": 0,
+          "ref": {
+            "line": 14862,
+            "byteOffset": 5842209,
+            "lineSha256": "5af8155c1b724701ae820ed0bb5eeca43a7ea62518abc389acd0e98943e33fe5"
+          }
+        },
+        "send": {
+          "stage": "send",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828731,
+          "sourceEndUnixMs": 1794656828731,
+          "sourceStartMonoUs": 2993480743,
+          "sourceEndMonoUs": 2993480743,
+          "durationUs": 0,
+          "ref": {
+            "line": 14863,
+            "byteOffset": 5842617,
+            "lineSha256": "4eb825c93e0111ee5056b57962edbdec91b8cbe11c63dfb39417e3f32176517f"
+          }
+        },
+        "sent": {
+          "stage": "sent",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828731,
+          "sourceEndUnixMs": 1794656828731,
+          "sourceStartMonoUs": 2993481166,
+          "sourceEndMonoUs": 2993481166,
+          "durationUs": 0,
+          "ref": {
+            "line": 14867,
+            "byteOffset": 5844231,
+            "lineSha256": "af6a50c069d5d3e308c5c4ef4fee20ae241b7a4812d38a151184f0f7eab3ed3e"
+          }
+        }
+      },
+      "writerSpans": [
+        {
+          "stage": "writer_lock",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 13721,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656828731,
+          "sourceEndUnixMs": 1794656828731,
+          "sourceStartMonoUs": 2993480943,
+          "sourceEndMonoUs": 2993480944,
+          "durationUs": 0,
+          "ref": {
+            "line": 14865,
+            "byteOffset": 5843419,
+            "lineSha256": "cbb71600eb7d1cf6af7b4f7297a892ebcfaee2621d0ccbaaa615d1860c812c3b"
+          }
+        },
+        {
+          "stage": "writer_sink_send",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 1458,
+          "frameFirst": 13721,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656828731,
+          "sourceEndUnixMs": 1794656828731,
+          "sourceStartMonoUs": 2993481036,
+          "sourceEndMonoUs": 2993481069,
+          "durationUs": 33,
+          "ref": {
+            "line": 14866,
+            "byteOffset": 5843822,
+            "lineSha256": "bcfd8e9aefc6b493385f2e5c41ec5d1a6cf9206a88821e9b97d55179cdf8861a"
+          }
+        }
+      ],
+      "inputSpans": [
+        {
+          "stage": "reader_dispatch",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 1143,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828139,
+          "sourceEndUnixMs": 1794656828139,
+          "sourceStartMonoUs": 2992889122,
+          "sourceEndMonoUs": 2992889122,
+          "durationUs": 0,
+          "ref": {
+            "line": 14853,
+            "byteOffset": 5838614,
+            "lineSha256": "e27828a85ab9c706d6023c9217020c3e45e9b88788d673bff45496dd8a548bfa"
+          }
+        },
+        {
+          "stage": "reader_fast",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 1143,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828139,
+          "sourceEndUnixMs": 1794656828444,
+          "sourceStartMonoUs": 2992889243,
+          "sourceEndMonoUs": 2993194404,
+          "durationUs": 305160,
+          "ref": {
+            "line": 14859,
+            "byteOffset": 5841012,
+            "lineSha256": "ecf905ef60e333b934df152af05f0e010a77e4e4680b38f83eacbab6b1b5a87c"
+          }
+        }
+      ],
+      "sameSocketTickWriteGateHeldSpans": [
+        {
+          "stage": "tick_execute",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656828445,
+          "sourceEndUnixMs": 1794656828730,
+          "sourceStartMonoUs": 2993194631,
+          "sourceEndMonoUs": 2993480399,
+          "durationUs": 285768,
+          "ref": {
+            "line": 14861,
+            "byteOffset": 5841811,
+            "lineSha256": "506346b2d701fdb7447879bc6441cf335b609b682e2f563733c3ca0e18804c04"
+          }
+        }
+      ],
+      "sameSourceIntervalsUs": {
+        "loggedEnqueueToDequeue": null,
+        "dequeueMinusEnqueueSignedProbeDelta": -49,
+        "ownDequeueToGate": 286726,
+        "loggedEnqueueToWriterLockStart": 286979,
+        "tickExecuteNoSendBarrierOverlapLowerBound": 285768,
+        "ownDequeueToGateOverlappedByTickExecute": 285768,
+        "enqueueToWriterOutsideCapturedTickExecute": 1211,
+        "lastTickEndToOwnerDequeue": -286484,
+        "tickBarrierFractionOfEnqueueToWriter": 0.9957801790374905
+      },
+      "established": "Message was already successfully queued by logged Enqueue. During captured same-socket tick_execute its required outbound read side could not coexist with the held write side.",
+      "notEstablished": [
+        "own read().await duration or batch-first identity from these point labels",
+        "Tick as sole cause of all queue residence",
+        "inner Tick/Store/Zone operation or CPU-vs-wait split",
+        "peer timeout/writer/gate cause",
+        "kernel/WAN delivery"
+      ],
+      "writerDurationIsNotSuccess": true,
+      "deadlineVerdictRecomputed": false
+    },
+    {
+      "actorOrdinal": 53,
+      "ticketSequence": 10,
+      "sdkConnection": 54,
+      "serverConnection": 54,
+      "registration": 54,
+      "zoneUid": 50053,
+      "observedInputOrdinal": 935,
+      "originalPassed": true,
+      "originalTimedOut": false,
+      "originalAccepted": true,
+      "rawSent": {
+        "line": 377443,
+        "byteOffset": 105267187,
+        "lineSha256": "f776bca2a090e737dcc4c4e2fdecbc22d242575519ab2b56f062b7a3e5b47e49"
+      },
+      "rawActionSent": {
+        "line": 377444,
+        "byteOffset": 105267354,
+        "lineSha256": "483439dbf4d69daefbe3ebe3e22490824ad823252222963dd1621090a480ace8"
+      },
+      "rawActionTerminal": {
+        "line": 380775,
+        "byteOffset": 106205883,
+        "lineSha256": "6925da8d3bc1f0fc76c060f809d5ae154906ddfad1018d5930613026e76e4654"
+      },
+      "ownerOriginalReceipt": {
+        "observerOrdinal": 53,
+        "connection": 54,
+        "receiveSeq": 2915,
+        "receiveAtUtc": "2026-11-14T11:43:38.566Z",
+        "atMs": 2783862.0813,
+        "packet": "UserLocation",
+        "objectId": null,
+        "location": {
+          "x": 54,
+          "y": 63
+        },
+        "textSha256": null
+      },
+      "ownerRawRef": {
+        "line": 380531,
+        "byteOffset": 106140952,
+        "lineSha256": "866faa61d7d9d0d925835ceb16d40c6bf116903408813c937821d14fe7cb746a"
+      },
+      "ownerObservedTextIndex": 2915,
+      "sdkSentAttemptToOwnerReceiptMs": 425.4400000004098,
+      "peerReceipts": [
+        {
+          "observerOrdinal": 52,
+          "sdkConnection": 53,
+          "sdkSentAttemptToReceiptMs": 270.12570000020787,
+          "packet": "ObjectWalk",
+          "rawRef": {
+            "line": 379075,
+            "byteOffset": 105726050,
+            "lineSha256": "79b3c36be3472659d39a836a9a9d59ecbad66af4a204ebf274ce32714e7c55b4"
+          },
+          "writerScope": "Unknown; unselected peer connection not attributed"
+        }
+      ],
+      "deliveryTraceID": 242,
+      "deliveryPoints": {
+        "enqueue": {
+          "stage": "enqueue",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618391,
+          "sourceEndUnixMs": 1794656618391,
+          "sourceStartMonoUs": 2783141356,
+          "sourceEndMonoUs": 2783141356,
+          "durationUs": 0,
+          "ref": {
+            "line": 4312,
+            "byteOffset": 1587860,
+            "lineSha256": "fb6236022993b35b9efebac176d1cd6063c4b48f8f4fc6c8b99718b83c059fc3"
+          }
+        },
+        "dequeue": {
+          "stage": "dequeue",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618564,
+          "sourceEndUnixMs": 1794656618564,
+          "sourceStartMonoUs": 2783313798,
+          "sourceEndMonoUs": 2783313798,
+          "durationUs": 0,
+          "ref": {
+            "line": 4316,
+            "byteOffset": 1589461,
+            "lineSha256": "cea7e2d1c58be9fa27fbfb673fea7ac50384441ecf81ab5c0aab6d6c5cf37a94"
+          }
+        },
+        "gate": {
+          "stage": "gate",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618564,
+          "sourceEndUnixMs": 1794656618564,
+          "sourceStartMonoUs": 2783313901,
+          "sourceEndMonoUs": 2783313901,
+          "durationUs": 0,
+          "ref": {
+            "line": 4317,
+            "byteOffset": 1589871,
+            "lineSha256": "7e37884bd3ae4b87fe251721cad6817d99135177d94f93919a3cba7250fc91ac"
+          }
+        },
+        "send": {
+          "stage": "send",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618564,
+          "sourceEndUnixMs": 1794656618564,
+          "sourceStartMonoUs": 2783313998,
+          "sourceEndMonoUs": 2783313998,
+          "durationUs": 0,
+          "ref": {
+            "line": 4318,
+            "byteOffset": 1590278,
+            "lineSha256": "7cb705c213e5f699b93499604b6a7dd9e437dbaecbbc63b85ad82e514900e234"
+          }
+        },
+        "sent": {
+          "stage": "sent",
+          "connection": 0,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618564,
+          "sourceEndUnixMs": 1794656618564,
+          "sourceStartMonoUs": 2783314419,
+          "sourceEndMonoUs": 2783314419,
+          "durationUs": 0,
+          "ref": {
+            "line": 4322,
+            "byteOffset": 1591886,
+            "lineSha256": "23bbcc11a46f638d22d8f35f534a5f26f358de23abd9ab1b27ba3806b9e966bf"
+          }
+        }
+      },
+      "writerSpans": [
+        {
+          "stage": "writer_lock",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 2915,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656618564,
+          "sourceEndUnixMs": 1794656618564,
+          "sourceStartMonoUs": 2783314198,
+          "sourceEndMonoUs": 2783314198,
+          "durationUs": 0,
+          "ref": {
+            "line": 4320,
+            "byteOffset": 1591078,
+            "lineSha256": "5e5b2c0d380b556220f94b5ba05b6621d5f9d2dbae4dc8e1f776e92b4a26709d"
+          }
+        },
+        {
+          "stage": "writer_sink_send",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 242,
+          "frameFirst": 2915,
+          "frameCount": 1,
+          "sourceStartUnixMs": 1794656618564,
+          "sourceEndUnixMs": 1794656618564,
+          "sourceStartMonoUs": 2783314299,
+          "sourceEndMonoUs": 2783314316,
+          "durationUs": 16,
+          "ref": {
+            "line": 4321,
+            "byteOffset": 1591479,
+            "lineSha256": "eb76572f783f07e36a162d64fc34c313dbddabe138a6c326ff1ab15545ddf1d4"
+          }
+        }
+      ],
+      "inputSpans": [
+        {
+          "stage": "reader_dispatch",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 935,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618141,
+          "sourceEndUnixMs": 1794656618141,
+          "sourceStartMonoUs": 2782891034,
+          "sourceEndMonoUs": 2782891034,
+          "durationUs": 0,
+          "ref": {
+            "line": 4245,
+            "byteOffset": 1560759,
+            "lineSha256": "b37a0e55c052a3938797836c27cafac67f9822743aa1f2a6266d5f8329f02f7b"
+          }
+        },
+        {
+          "stage": "reader_fast",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 935,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618141,
+          "sourceEndUnixMs": 1794656618392,
+          "sourceStartMonoUs": 2782891143,
+          "sourceEndMonoUs": 2783141683,
+          "durationUs": 250539,
+          "ref": {
+            "line": 4313,
+            "byteOffset": 1588265,
+            "lineSha256": "c39633a7b49ab0f8bcbcee42d36be3de7bc5a19344cf9e48712477358800b15e"
+          }
+        }
+      ],
+      "sameSocketTickWriteGateHeldSpans": [
+        {
+          "stage": "tick_execute",
+          "connection": 54,
+          "registration": 54,
+          "recipientZoneID": 50053,
+          "inputOrdinal": 0,
+          "serverTraceID": 0,
+          "frameFirst": 0,
+          "frameCount": 0,
+          "sourceStartUnixMs": 1794656618392,
+          "sourceEndUnixMs": 1794656618562,
+          "sourceStartMonoUs": 2783141893,
+          "sourceEndMonoUs": 2783312100,
+          "durationUs": 170207,
+          "ref": {
+            "line": 4315,
+            "byteOffset": 1589063,
+            "lineSha256": "71ce3c4114b789e971561a71a97b643b623461f5200886d1d5ede6350bf348da"
+          }
+        }
+      ],
+      "sameSourceIntervalsUs": {
+        "loggedEnqueueToDequeue": 172442,
+        "dequeueMinusEnqueueSignedProbeDelta": 172442,
+        "ownDequeueToGate": 103,
+        "loggedEnqueueToWriterLockStart": 172842,
+        "tickExecuteNoSendBarrierOverlapLowerBound": 170207,
+        "ownDequeueToGateOverlappedByTickExecute": 0,
+        "enqueueToWriterOutsideCapturedTickExecute": 2635,
+        "lastTickEndToOwnerDequeue": 1698,
+        "tickBarrierFractionOfEnqueueToWriter": 0.9847548628226935
+      },
+      "established": "Message was already successfully queued by logged Enqueue. During captured same-socket tick_execute its required outbound read side could not coexist with the held write side.",
+      "notEstablished": [
+        "own read().await duration or batch-first identity from these point labels",
+        "Tick as sole cause of all queue residence",
+        "inner Tick/Store/Zone operation or CPU-vs-wait split",
+        "peer timeout/writer/gate cause",
+        "kernel/WAN delivery"
+      ],
+      "writerDurationIsNotSuccess": true,
+      "deadlineVerdictRecomputed": false
+    }
+  ],
+  "producerConsumerMarkerOrdering": {
+    "negativeDequeueMinusEnqueueProbeCount": 4,
+    "examples": [
+      {
+        "actorOrdinal": 53,
+        "ticketSequence": 18,
+        "dequeueMinusEnqueueMarkerUs": -4
+      },
+      {
+        "actorOrdinal": 53,
+        "ticketSequence": 122,
+        "dequeueMinusEnqueueMarkerUs": -49
+      },
+      {
+        "actorOrdinal": 53,
+        "ticketSequence": 135,
+        "dequeueMinusEnqueueMarkerUs": -13
+      },
+      {
+        "actorOrdinal": 53,
+        "ticketSequence": 157,
+        "dequeueMinusEnqueueMarkerUs": -12
+      }
+    ],
+    "meaning": "Enqueue is emitted after successful try_send; consumer may emit Dequeue first. Negative marker delta remains Unknown for queue duration, not zero."
+  },
+  "limits": {
+    "forensicBytesMax": 4194304,
+    "sourceLogBytesMax": 8388608,
+    "sourceTraceRows": 19449,
+    "sourceLogHashStable": true
+  },
+  "events530MBRead": false,
+  "report29MBRead": false,
+  "peerTimeoutCauseProven": false,
+  "innerStoreCauseProven": false,
+  "gameCargoSshAuthExecuted": false,
+  "physicalBinaryMalformedKernelCoverage": "Unknown"
+}

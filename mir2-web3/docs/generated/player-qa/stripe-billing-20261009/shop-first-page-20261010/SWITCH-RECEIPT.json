@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "switchedAtUtc": "2026-10-10T02:59:47.2301757Z",
+  "codeCommit": "0399bbdddb0c83bd922235260a80b56c47ef3dc8",
+  "humanNormalExitAuthorized": true,
+  "clientAbsentBeforeSwitch": true,
+  "launched": true,
+  "nativePid": 247236,
+  "nativeBinary": "mir2-platform-windows-monthly-shop.next.exe",
+  "nativeSha256": "36155e065c73075c31a0402514399dd822cfaf2c985b678f01c846da3e6f46ac",
+  "retainedFailedReplacement": {
+    "oldBinaryBackedUp": true,
+    "error": "Sharing violation32",
+    "oldBinaryUnchanged": true,
+    "lockingProcess": "DeltaForce",
+    "lockingPid": 237700
+  },
+  "delivery": "Verified separate executable name, same executable-adjacent config and existing isolated profile; no process termination",
+  "originalLauncherPreserved": true,
+  "originalConfigPreserved": true,
+  "configSha256": "c18d73c4960dbdb423d9c3824bb2700efbf14f2a4832328d4b6a20dbec7e7d18",
+  "originalLauncherSha256": "aeb3a1346b994d7d6754780503e0ea63231e7c68f7aeced546b18cb695eeb43c",
+  "newLauncherSha256": "b228401b93e5cadd5c2deb6f21baf1f0fb44096e49f2e7d7db93ae9f2ebeefb6",
+  "shortcutUpdated": true,
+  "shortcut": "启动充值测试.lnk",
+  "gatewayPidBefore": 223912,
+  "gatewayPidAfter": 223912,
+  "gatewayRestarted": false,
+  "publicChanged": false,
+  "humanLoginRequired": true,
+  "nativeVisualAcceptance": false,
+  "observedAtUtc": "2026-10-10T03:04:07.8445565Z",
+  "startupObserved": [
+    {
+      "processId": 247236,
+      "event": "timing",
+      "stage": "configuration",
+      "durationMs": 0.27090000000000003,
+      "sinceLaunchMs": 0.27999999999999997,
+      "unixMs": 1791601185978
+    },
+    {
+      "processId": 247236,
+      "event": "timing",
+      "stage": "asset_validation_and_map_decode",
+      "durationMs": 15.6822,
+      "sinceLaunchMs": 16.5114,
+      "unixMs": 1791601185995
+    },
+    {
+      "processId": 247236,
+      "event": "timing",
+      "stage": "build_runtime_app",
+      "durationMs": 738.3987,
+      "sinceLaunchMs": 755.4891,
+      "unixMs": 1791601186734
+    },
+    {
+      "processId": 247236,
+      "event": "timing",
+      "stage": "host_configured",
+      "durationMs": 1102.6928,
+      "sinceLaunchMs": 1102.6929,
+      "unixMs": 1791601187081
+    },
+    {
+      "processId": 247236,
+      "event": "timing",
+      "stage": "enter_event_loop",
+      "durationMs": 1104.7294000000002,
+      "sinceLaunchMs": 1104.7298,
+      "unixMs": 1791601187083
+    },
+    {
+      "processId": 247236,
+      "event": "timing",
+      "stage": "first_main_update",
+      "durationMs": 1713.6882,
+      "sinceLaunchMs": 1713.6884,
+      "unixMs": 1791601187692
+    }
+  ],
+  "processResponding": true,
+  "gatewayHealthy": true,
+  "observedConnections": 1,
+  "observedActiveSessions": 0
+}

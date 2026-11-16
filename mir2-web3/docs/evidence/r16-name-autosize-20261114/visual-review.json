@@ -1,0 +1,34 @@
+{
+  "reviewer": "root agent via view_image",
+  "humanAccepted": false,
+  "before": {
+    "path": "names-before.png",
+    "sha256": "e0705065444b06b3e0c4d61b8514e2490f4d61c0692135c6b2a9e8db478fe984"
+  },
+  "after": {
+    "path": "names-after.png",
+    "sha256": "1fe67e3b90f2e57ec5a891aa720bc70561db5c591bceb185233b7ba6444b56f2",
+    "exactQualifiedSource": true,
+    "bytesEqualPreviouslyViewedAfterImage": true
+  },
+  "observed": "The complete Assistant Jane bitmap, green Merchant and white Ruben at 12px stride, unwrapped fallback names, stable 48px NPC anchors, and four physical shared-canvas name picks outside anchor rectangles. Component only; full-game qualification recorded separately.",
+  "fullGameReviewed": [
+    {
+      "path": "default-en-npc-dialog.png",
+      "sha256": "f9aab16da772e2eee276f8f57a66406776bb4cbec7fede0c82d25bf9aa40041b"
+    },
+    {
+      "path": "shared-gl2-tw-npc-dialog.png",
+      "sha256": "91f40de0103b5577cc024bdb3227fdd0d967e0c06d9421a68d003fa174198c05"
+    },
+    {
+      "path": "default-en-route-arrival.png",
+      "sha256": "bb5ae1ed2a99e0e178fb9b1a944fcccc18a0d81966138ad74257835089a3995e"
+    },
+    {
+      "path": "shared-gl2-tw-route-arrival.png",
+      "sha256": "ad0e1a448f12f73f10050f29721121c370cf990cb29781f037c78115dad2f598"
+    }
+  ],
+  "fullGameObserved": "Both actual town NPC dialogues and final supplier locations reviewed. Full names are visible; English NPC line colours/spacing match the new per-line rendering. Actual GDI Merchant/Ruben assets consumed. Remaining mixed-language text is visible: English combat panel and some currency labels retain Chinese; Native NPC title keeps raw Teleport_Gilbert; Traditional Chinese display-name aliases may flatten underscore lines. These remain separate Windows-source/locale parity work, not passed by this name fix."
+}

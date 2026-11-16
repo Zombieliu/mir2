@@ -1,0 +1,96 @@
+{
+  "sourceRound": "Source65",
+  "observedAt": "2026-10-11T09:41:49.500Z",
+  "webRound": 64,
+  "gatewayRound": 65,
+  "normalUiOnly": true,
+  "qaAdminOrGameApiUsed": false,
+  "merchant": "Scott",
+  "item": "Candle",
+  "quantity": 1,
+  "price": 10,
+  "beforeGold": 190,
+  "afterGold": 180,
+  "ownerSnapshotGold": 180,
+  "inventoryItemCount": 5,
+  "inventoryNames": [
+    "Candle",
+    "CopperRing",
+    "GoldenPendant",
+    "Candle",
+    "Candle"
+  ],
+  "replayed": false,
+  "charged": 10,
+  "admittedCount": 1,
+  "passiveFrames": [
+    {
+      "seq": 727260,
+      "direction": "out",
+      "type": "npcPurchaseOwner",
+      "action": "quote",
+      "completePair": false
+    },
+    {
+      "seq": 727264,
+      "direction": "in",
+      "type": "npcPurchaseOwner",
+      "reply": "quote",
+      "snapshotGold": 190,
+      "inventoryCount": 4,
+      "completePair": true
+    },
+    {
+      "seq": 727265,
+      "direction": "out",
+      "type": "npcPurchaseOwner",
+      "action": "purchase",
+      "completePair": false
+    },
+    {
+      "seq": 727269,
+      "direction": "in",
+      "type": "packet",
+      "packet": "LoseGold",
+      "gold": 10
+    },
+    {
+      "seq": 727273,
+      "direction": "in",
+      "type": "packet",
+      "packet": "GainedItem"
+    },
+    {
+      "seq": 727274,
+      "direction": "in",
+      "type": "npcPurchaseOwner",
+      "reply": "purchase",
+      "snapshotGold": 180,
+      "inventoryCount": 5,
+      "committed": {
+        "charged": 10,
+        "admittedCount": 1,
+        "currency": "gold",
+        "source": "trade"
+      },
+      "completePair": true
+    },
+    {
+      "seq": 727644,
+      "direction": "in",
+      "type": "packet",
+      "packet": "KeepAlive"
+    }
+  ],
+  "traceTruncated": false,
+  "traceHasMore": false,
+  "ordinaryLoseGoldSequence": 727269,
+  "ordinaryGainedItemSequence": 727273,
+  "completeOwnerSequence": 727274,
+  "ordinaryPacketsBeforeOwner": true,
+  "reloginPending": true,
+  "reactShopCompatibilityVisible": true,
+  "sharedShopTakeoverAccepted": false,
+  "candidate100": false,
+  "goalComplete": false
+}

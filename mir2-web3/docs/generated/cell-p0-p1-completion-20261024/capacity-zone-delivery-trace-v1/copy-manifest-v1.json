@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v8\\episode-50\\reports\\1793022270692-c6a6acd4.report.json",
+      "archived": "v8-original-report.json",
+      "bytes": 50018,
+      "sha256": "c41553bbeef7ee05c9bf7f7704c55928c841cadc512900bb3edebf9570930a25"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v8\\episode-50\\realm-cleanup.json",
+      "archived": "v8-original-cleanup.json",
+      "bytes": 6529,
+      "sha256": "7f45742b4c317183d43447e403206025fc3f2f23ddc98ee91c7360388527873f"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\outbound-batch-v8-stage50-root-independent-cleanup-v1.json",
+      "archived": "v8-root-independent-cleanup.json",
+      "bytes": 835,
+      "sha256": "8c41b030be1324c5c1cf1b7e5761c9d4e63bf641cbf6722222b0d573d4e48bc9"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-outbound-batch-v8-aoi-analysis-v1\\findings-v1.json",
+      "archived": "v8-aoi-findings.json",
+      "bytes": 4599,
+      "sha256": "bd4fd78ab28f95ffd5361b54fb14003f53b925248f1d7978f62e610f6f52b2b1"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\root-focused-receipt-v1.json",
+      "archived": "root-focused-receipt-v1.json",
+      "bytes": 32091,
+      "sha256": "beb1fd2156956c349517cee09f0b0d019d07148a24f451840710e56c37289d80"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\format-stdout-v1.log",
+      "archived": "format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\format-stderr-v1.log",
+      "archived": "format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-live-overflow-stdout-v1.log",
+      "archived": "web-live-overflow-stdout-v1.log",
+      "bytes": 2687,
+      "sha256": "032edd2d1608d18d548fa26a79290dec37a56f900f300b7fe998500b3aaa45ab"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-live-overflow-stderr-v1.log",
+      "archived": "web-live-overflow-stderr-v1.log",
+      "bytes": 63604,
+      "sha256": "2dc4e6b5e80527c2f4c353a6e2a73460007808239c63e84e0428c27515751203"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-transport-close-stdout-v1.log",
+      "archived": "web-transport-close-stdout-v1.log",
+      "bytes": 531,
+      "sha256": "05b8c43a51da2fb7a6ad0ecf1c8697b0b1821278c365584ce12bcd46abf8dc72"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\web-transport-close-stderr-v1.log",
+      "archived": "web-transport-close-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "bcc9be1c088e27675c29460d7dcbc46776513d74b9bd58d083b15eb94886869d"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\experience-profile-stdout-v1.log",
+      "archived": "experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "b7d6980e617b6239a799bd46797ce7571cc92b3db0d15efb617ed0bbfc51b3e2"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\experience-profile-stderr-v1.log",
+      "archived": "experience-profile-stderr-v1.log",
+      "bytes": 43459,
+      "sha256": "89a7e8c60b8371237ada27ded7e90fc3053e49d1787d61c0044ada1e65ecf451"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\store-durability-stdout-v1.log",
+      "archived": "store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "f0e10ce96da1c8ddb7f4b76917ab433a05bf41578ad7946a5cc2520dd70c62d1"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\store-durability-stderr-v1.log",
+      "archived": "store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "7a2ca59942737ca0c12988b7184289dea241c1d9d34d94c2b5f4dde7026f722e"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-clock-store-stdout-v1.log",
+      "archived": "guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-clock-store-stderr-v1.log",
+      "archived": "guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "ddd693c5d735ae9137a9189ed8896643aea51396984fd7d78d6841d2a01cde7f"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\admission-lock-order-stdout-v1.log",
+      "archived": "admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "6d7171506cbe6074edc66a498904eaa3893d163fa88d9a2c262e072a3e73d4f4"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\admission-lock-order-stderr-v1.log",
+      "archived": "admission-lock-order-stderr-v1.log",
+      "bytes": 53576,
+      "sha256": "d97f7f9a12e858c79af0a2b1e6915d055994bd1946487de2d199bd6cedbb0868"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\kill-award-commit-stdout-v1.log",
+      "archived": "kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "4b17c46a1167048cb28431360d1addcf9d5816bbcbbba737adb87cfc95ed0a8a"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\kill-award-commit-stderr-v1.log",
+      "archived": "kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "b476576e0f956b68e9c23f3c6c44665c6aac01d7081827917037757ec6260b8d"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-kill-source-stdout-v1.log",
+      "archived": "guild-kill-source-stdout-v1.log",
+      "bytes": 394,
+      "sha256": "8d9b71c69e54632edec4542321412e9dd7aa5428170536dc38fbd24ab5c87cd5"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-zone-delivery-trace-validation-v1\\guild-kill-source-stderr-v1.log",
+      "archived": "guild-kill-source-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "c3e0f8a7958ec75bfe7e3423e1947e5bbab42c31d712541457c3d7b7158dd5d0"
+    }
+  ],
+  "privateGatewayLogPublished": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,160 @@
+{
+  "schema": "mir2.native-web-same-save-scoped-receipt/1",
+  "sealedAt": "2026-11-05T19:57:43.800Z",
+  "passedWithinScope": true,
+  "scope": "Existing ordinary Web QA character entered the same 19040 world through the installed Native client, moved and normally logged out; a fresh ordinary Web login then confirmed the saved state.",
+  "startup": {
+    "acceptedRunUsedTestOnlyExistingNativeAutoLogin": true,
+    "testCredentialInjectionWasExternalToPublicEntry": true,
+    "characterSelectionAndStartGameWereNormalUi": true,
+    "publicEntry": "Start-Shared-Web-World.ps1",
+    "publicEntryCredentialsPresent": false,
+    "publicConnectorDropsInheritedAutoLoginCredentialsVerified": true,
+    "manualCredentialEntryThroughPublicLauncherTested": false,
+    "manualLoginFormVisibleWasCoordinatorObserved": true,
+    "servicesStartedByAudit": 0
+  },
+  "installedNative": {
+    "executableBytes": 151773184,
+    "executableSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+    "buildManifestPinMatches": true,
+    "packageCreatedAt": "2026-11-03T20:04:17.434Z",
+    "sourceBaseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+    "uncommittedIntegration": true,
+    "newNativeSourceBuildPublished": false
+  },
+  "capturedNativeLog": {
+    "privateRawLogPublished": false,
+    "bytes": 4194304,
+    "limitBytes": 4194304,
+    "capped": true,
+    "gatewayConnected": true,
+    "configuredGateway19040Observed": true,
+    "transitions": [
+      {
+        "from": "Connecting",
+        "to": "Login"
+      },
+      {
+        "from": "Authenticating",
+        "to": "OpeningLogin"
+      },
+      {
+        "from": "StartingGame",
+        "to": "InGame"
+      }
+    ],
+    "inboundPacketCounts": {
+      "LoginSuccess": 1,
+      "StartGame": 1,
+      "MapInformation": 1,
+      "UserInformation": 1
+    },
+    "fixedErrorMarkerCounts": {
+      "bevyError": 0,
+      "bevyWarning": 0,
+      "panic": 0,
+      "queryConflict": 0,
+      "resourceConflict": 0,
+      "missingSystemResource": 0,
+      "assetLoadFailure": 0,
+      "connectionRefused": 0,
+      "handshakeFailure": 0,
+      "runtimeSnapshotDropped": 0,
+      "malformedServiceRate": 0,
+      "explicitCommandRejection": 0
+    },
+    "errorCountScope": "Captured prefix only; not an assertion about the unseen tail or all server rejections.",
+    "authoritativeUserLocationRecorded": false,
+    "logoutPacketRecorded": false
+  },
+  "coordinatorObservedNativeUi": {
+    "level": 8,
+    "gold": 180,
+    "experiencePercent": 22.24,
+    "mapFileName": "0",
+    "initialPosition": {
+      "x": 288,
+      "y": 615
+    },
+    "oneOrdinaryGroundClickFinalPosition": {
+      "x": 289,
+      "y": 616
+    },
+    "normalEscapeLogoutConfirmation": true,
+    "returnedToCharacterSelection": true,
+    "normalWindowClose": true
+  },
+  "nativeExit": {
+    "source": "Private child exit.json, projected fields only",
+    "exitCode": 0,
+    "signalAbsent": true
+  },
+  "webReadback": {
+    "file": "web-same-save-readback-r1/web-same-save-readback-receipt.json",
+    "bytes": 3439,
+    "sha256": "8caf4778e4fc15fda3edc436c37760aae8c021adf36ecef3e9de262b60a818fe",
+    "sourcePassed": true,
+    "ordinaryUiLogin": true,
+    "normalStartGame": true,
+    "authoritativeFullSnapshotSequence": 702,
+    "mapFileName": "0",
+    "position": {
+      "x": 289,
+      "y": 616
+    },
+    "progression": {
+      "level": 8,
+      "experience": 378,
+      "maxExperience": 1700
+    },
+    "gold": 180,
+    "completedQuestCount": 4,
+    "quests1Through4Complete": true,
+    "quest5Accepted": false,
+    "equipmentCount": 2,
+    "fencingKnown": true,
+    "hpMedicine": 0,
+    "normalLogoutAckCount": 1,
+    "ordinaryLogout": true,
+    "browserClosed": true,
+    "accountReleased": true,
+    "errors": 0
+  },
+  "evidence": {
+    "nativeScreenshot": {
+      "file": "native-same-save-world.png",
+      "bytes": 302997,
+      "sha256": "01c56a76bbadc4b86c2d38e81f181bfd259e2ccceb6195967d38af8e26a759ee",
+      "coordinatorViewed": true
+    }
+  },
+  "boundaries": {
+    "sameExistingWebQaSaveRoundTripVerified": true,
+    "originalStandaloneNativeWorldMigrated": false,
+    "originalStandaloneWorldStartedOrMerged": false,
+    "originalNativePrivateWorldReadByAudit": false,
+    "newNativeExeReleased": false,
+    "uiCacheBugReproduced": false,
+    "uiCachePatchApplied": false,
+    "publicManualCredentialEntryEndToEndAccepted": false,
+    "globalParityOrHumanAcceptanceClaimed": false
+  },
+  "limitations": [
+    "Native stderr reached its 4 MiB cap while InGame. Movement and normal logout/return-to-selection are coordinator UI observations; the captured log has no UserLocation or LogOut packet to claim.",
+    "Normal close is supported by private exit JSON (code 0, no signal), coordinator UI observation and the subsequent authoritative Web saved-position readback; no missing native packet is fabricated.",
+    "The accepted launch used external test-only existingNativeAutoLogin. The installed public client-only entry remains credential-free; typed manual authentication through that public entry was not the accepted login path.",
+    "This reused the unchanged installed old Native EXE; it does not release or validate every newer Native source change, and it does not migrate the older independent Native world."
+  ],
+  "audit": {
+    "privateLogReadOnlyInsideNode": true,
+    "rawLinesEmitted": false,
+    "credentialOrRealmOrObjectNameValuesEmitted": false,
+    "outputUsesFixedEnumsCountsAndApprovedGameplayFields": true,
+    "processesStartedOrStopped": 0,
+    "loginsPerformed": 0,
+    "gameCommandsSent": 0,
+    "modelCallsRequested": 0,
+    "applicationOrServiceChanges": 0
+  }
+}

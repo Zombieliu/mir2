@@ -1,0 +1,8 @@
+Candidate map coverage missing required journey/supply/entrance map: 0
+At C:\Users\Administrator\.codex\worktrees\maps\mir2-player-journey\mir2-web3\apps\game-client\platform-windows\scripts
+\candidate-release-profile.ps1:85 char:49
++ ... equired)) { throw "Candidate map coverage missing required journey/su ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Candidate map c...entrance map: 0:String) [], RuntimeException
+    + FullyQualifiedErrorId : Candidate map coverage missing required journey/supply/entrance map: 0
+ 

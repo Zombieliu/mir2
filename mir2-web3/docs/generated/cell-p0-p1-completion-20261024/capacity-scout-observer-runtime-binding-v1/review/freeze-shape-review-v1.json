@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:19:37.159Z",
+  "scope": "Bounded read-only actual driver-freeze pin/shape QA against the unchanged prepared runtime consumer. No target import, guard, Git capture, backend50 read or test execution.",
+  "freeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+    "bytes": 9465,
+    "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+  },
+  "consumer": {
+    "sourceLibrary": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 33531,
+      "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+    },
+    "readonlyEntry": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    }
+  },
+  "actualRoles": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52"
+  },
+  "checks": {
+    "actualFreezePinMatched": true,
+    "actualNineFilesMatch219SourceBeforeAndAfter": true,
+    "aggregateExact": true,
+    "gitBindingShapeNineAndRawRefsExact": true,
+    "otherSevenEqualHistoricalD240Freeze": true,
+    "prior243920ByteTestPrefixRefExact": true,
+    "regressionConsumerPassedFailedCountsAndPathReferencesMatch": true,
+    "receiptLogStderrRefsRehashed": true,
+    "runtimeLibraryAndReadonlyEntryUnchanged": true
+  },
+  "verdict": {
+    "actualFreezeSchemaCompatible": true,
+    "eligibleForRootFinalBinding": true,
+    "blockingFindingIds": [],
+    "guardExecuted": false,
+    "finalBindingReviewed": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  },
+  "limitations": [
+    "Current H clean checkout and raw/Git source equivalence were established by Root freeze execution and remain for the later actual readonly guard; this small QA does not independently rerun those operations.",
+    "The runtime current-execution binding remains a separate Root finalization step; no guard execution is authorized by a PENDING binding."
+  ]
+}

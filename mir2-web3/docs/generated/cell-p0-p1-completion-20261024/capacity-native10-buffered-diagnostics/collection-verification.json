@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:20:28.553Z",
+  "method": "File-only size/SHA/raw-byte-copy and frozen verifier stream/status/projection API; no tests/build/services/load.",
+  "runId": "1792861674728-9774b6b8",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "gatewaySha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+  "originalCopies": 20,
+  "originalCopyBytes": 151331,
+  "raw": {
+    "rows": 3219,
+    "bytes": 1926495,
+    "sha256": "1e456b7e2fc10eaae5ef2dab70eb0126bb9932193d679f9562142ec1556e3ec7",
+    "monitorSummary": {
+      "count": 53,
+      "validCount": 53,
+      "invalidCount": 0,
+      "stoppedCount": 0,
+      "complete": true,
+      "firstSampledAtMs": 1792861673110,
+      "lastSampledAtMs": 1792861782371,
+      "maxGapMs": 2199
+    }
+  },
+  "run": {
+    "runId": "1792861674728-9774b6b8",
+    "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+    "gatewaySha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+    "realGameplayAttempt": true,
+    "report": "release-native-10-feasibility-03/reports/1792861674728-9774b6b8.report.json",
+    "raw": "release-native-10-feasibility-03/reports/1792861674728-9774b6b8.samples.jsonl",
+    "peakControlledActors": 10,
+    "measurementSeconds": 30,
+    "soakSecondsMeasured": 0,
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "failedReason": "Observer4 original minimum native Run fraction:15/38=0.3947368421<0.5; other9 activity gates passed, combat16attacks16hits. No360s soak measured.",
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true
+  },
+  "spectator": {
+    "frames": 397,
+    "bytes": 22583696,
+    "recordingErrors": 0,
+    "filesMatchPersistedCounter": true
+  },
+  "capacityAccepted": 0,
+  "rootIndexUpdated": false
+}

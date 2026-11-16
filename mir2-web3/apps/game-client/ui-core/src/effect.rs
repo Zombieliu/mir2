@@ -152,6 +152,13 @@ pub enum GatewayCommand {
         quantity: u8,
         price_type: i32,
     },
+    GameShopGift {
+        request_id: String,
+        g_index: i32,
+        quantity: u8,
+        price_type: i32,
+        recipient_name: String,
+    },
     StoreItem {
         request_id: String,
         from: i32,

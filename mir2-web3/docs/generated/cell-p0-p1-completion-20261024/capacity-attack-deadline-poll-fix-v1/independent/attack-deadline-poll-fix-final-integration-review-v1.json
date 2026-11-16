@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:25:25.993Z",
+  "scope": "Fresh read-only final integration check of one actual complete four-file 210-test invocation. Reviewer did not rerun tests.",
+  "sourceReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-independent-review-v1.json",
+    "bytes": 7102,
+    "sha256": "33279fc5a562af27b791a15081bb90c3e4de03ee91a30cceae24a808c6512124"
+  },
+  "countCorrection": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-independent-review-count-addendum-v1.json",
+    "bytes": 2174,
+    "sha256": "66437d1a875f02cc6038e213c26ba0b7ebb937b97992d6577ac2b1c77f0f201f"
+  },
+  "actualFullRegression": {
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json",
+      "bytes": 4758,
+      "sha256": "c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4"
+    },
+    "before": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/frozen-full-driver-before-v1.json",
+      "bytes": 2263,
+      "sha256": "7803a67d751e1ce75821cbd3a16ad1eeafc46f2d326c189f4eb437fbda7a91f1"
+    },
+    "runner": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/run-frozen-full-driver-v1.mjs",
+      "bytes": 3318,
+      "sha256": "653d2fa1b8b0deb3d26ae7a5d63a23d2cf9d512562b5a2fa682f8d6829ada9bf"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\frozen-full-driver-v1.log",
+      "bytes": 56491,
+      "sha256": "537f26b4a6037136470083a6a90acbf9ccc432f47f38cdeb82aace539b65dfb0"
+    },
+    "exitCode": 0,
+    "signal": null,
+    "counts": {
+      "tests": 210,
+      "pass": 210,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "tapDurationMs": 310989.788,
+    "receiptElapsedMs": 311026.8763,
+    "sourceAggregate": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "actualBeforeAfterIdentical": true,
+    "explicitBeforeFileMatchesActualReceipt": true,
+    "currentNineInputsMatchAfter": true
+  },
+  "reviewedSourceFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "proof": {
+    "oldMain175RawPrefixBytes": 238892,
+    "oldMain175RawPrefixExact": true,
+    "otherSevenOriginalRawInputsUnchanged": true,
+    "mainFourRuleExactInverseRetained": true,
+    "actualFourFileCommandExact": true,
+    "preliminaryMain185AndAdjacent25PreservedAsSeparateRuns": true,
+    "missingPreliminaryBeforeManifestNotBackfilled": true
+  },
+  "evidenceBoundary": {
+    "fullRegression": "One same invocation, all four capacity test files: main185 plus other25 =210; exit0, no fail/cancel/skip/todo.",
+    "previousCounts": "Historical full200 was main175 plus other25. The earlier independent-review count wording is corrected by the preserved count addendum.",
+    "source": "Only the reviewed main/test differ from previous 9-input freeze. Actual capture before invocation and after exit agree and current raw pins still match. No raw source normalization occurred.",
+    "formalHistory": "Original Formal11 failure and both original timeout rows remain unchanged. These software regression checks do not establish new real capacity, a server limit or P0 acceptance.",
+    "release": "Changed web.rs diagnostic source is separate Rust validation and requires a new source-bound Release; old d879/full16 evidence cannot certify it."
+  },
+  "verdict": {
+    "sourceContractPassed": true,
+    "fullRegressionEvidencePassed": true,
+    "blockingFindingIds": [],
+    "eligibleForRootCheckpoint": true,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

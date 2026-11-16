@@ -1,0 +1,60 @@
+{
+  "schema": "mir2-alo-r16-windows-gui-acceptance/1",
+  "verifiedAt": "2026-11-02T22:52:35.589782+00:00",
+  "syntheticLocalTrial": true,
+  "realHumanTrial": false,
+  "nativeSha256": "a6f21a6d869027b332c7f3763076e856492ceca4df7697a4a7e2e04a2cba558e",
+  "gatewaySha256": "28ceae9f6f45392238f63cf2f539f8c23e64567d25a432a72c3a934e1cf6ead9",
+  "nativeProcessIds": [
+    62176,
+    62396
+  ],
+  "normalShutdownBetweenRuns": true,
+  "sameArchiveId": "00a545f0-9084-4c66-a54c-ec91acb4e223",
+  "policyVersionsObserved": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "allTaughtHabitsRetainedAfterRestart": true,
+  "revokedAndActiveTeachingHistoryRetained": true,
+  "normalOwnerPositionBeforeAndAfterRestart": {
+    "x": 288,
+    "y": 619
+  },
+  "ordinaryGroupInviteAccepted": true,
+  "ordinaryMouseMovementObserved": true,
+  "ownerRecallAndResumeAcknowledged": true,
+  "completeNativeExportVerified": "native-export-verification.json",
+  "modelCalls": 0,
+  "paidServiceConfigured": false,
+  "unknownHostingAndPaymentCostsShown": true,
+  "uiDeletionPerformed": false,
+  "screenshots": [
+    "windows-actions-chinese.png",
+    "windows-companion-before-teaching.png",
+    "windows-companion-retaught-v4.png",
+    "windows-companion-taught-v2.png",
+    "windows-complete-export.png",
+    "windows-memory-revoked-v3.png",
+    "windows-memory-teaching.png",
+    "windows-normal-movement.png",
+    "windows-owner-recall.png",
+    "windows-owner-resume.png",
+    "windows-party-follow.png",
+    "windows-restart-memory-history.png",
+    "windows-restart-retains-v4.png",
+    "windows-rules-service-costs.png"
+  ],
+  "limits": [
+    "rules-only local service",
+    "no GUI deletion or growth-clear performed",
+    "no real human retention, payment or public rollout",
+    "GUI checks are bounded, not full Crystal frontend acceptance"
+  ],
+  "priorFailureScreenshots": [
+    "windows-first-world.png",
+    "windows-control-unavailable-before-fix.png"
+  ]
+}

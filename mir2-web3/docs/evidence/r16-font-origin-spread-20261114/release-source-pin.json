@@ -1,0 +1,65 @@
+{
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "baseSource": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "changedFiles": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "a97ea7d52378b70dbcd80337ac41495cd04eec67"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "54a151f68c09844d6154d9a7f65bb6ec4dc5887f"
+    }
+  ],
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "a97ea7d52378b70dbcd80337ac41495cd04eec67"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "54a151f68c09844d6154d9a7f65bb6ec4dc5887f"
+    }
+  ],
+  "workerAsset": {
+    "path": "/mir2-asset-worker.js",
+    "bytes": 44059,
+    "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
+  },
+  "baseline": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "fixedAsset": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "localSessions": 4,
+  "localQualificationSha256": "b326036e63760c340ef4f95f116dea4cc24456dd85f54e800c5fa63058276c8d",
+  "nameAssets": [
+    {
+      "name": "NameAssistantJane",
+      "path": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+      "bytes": 366,
+      "sha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+    },
+    {
+      "name": "NameMerchant",
+      "path": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+      "bytes": 288,
+      "sha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+    },
+    {
+      "name": "NameRuben",
+      "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+      "bytes": 262,
+      "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+    }
+  ],
+  "workerBytes": 44059,
+  "workerSha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "localUiPending": false,
+  "publicUiPending": true,
+  "sourceQualificationSha256": "8e4f3707f5c57bc58d7536e218d64c7fc983c0f52504e4d4909335c257bf0c42"
+}

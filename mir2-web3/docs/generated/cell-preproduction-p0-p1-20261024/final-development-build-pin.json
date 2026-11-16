@@ -1,0 +1,7 @@
+{
+  "recordedAtUtc": "2026-10-24T12:52:03.6261437Z",
+  "purpose": "Final default development gateway rebuilt for integration persistence tests; distinct from live P0 executable pin",
+  "sha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+  "binaryRelativeToTarget": "debug/mir2-gateway.exe",
+  "releasePackage": false
+}

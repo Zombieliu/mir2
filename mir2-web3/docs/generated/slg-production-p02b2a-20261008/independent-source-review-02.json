@@ -1,0 +1,47 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T16:02:25.8503867Z",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\authored-source-02.json",
+  "authoredSourceSha256": "c4d3c7cce32f032d9c4b0b41cc2ef4e64109f62bd8835d0f67cea13dbc8d15ad",
+  "authoredFileCount": 9,
+  "shaAndLengthMismatches": 0,
+  "baselineCommit": "4644753b78c201cfa7dccc6cf6d694ce10021235",
+  "priorReviewPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\independent-source-review-01.json",
+  "priorReviewSha256": "ed2911914f36441fe5a376022c4372cf61f253ff297dfff389d9a51444b4a8b3",
+  "changedSourcePaths": [
+    "mir2-web3/apps/simulation/src/runtime/item_grants.rs"
+  ],
+  "inverseDeltaMatchesSource01Bytes": true,
+  "modulePathCorrections": 4,
+  "otherEightSourcesAndAllSixteenTestsUnchanged": true,
+  "newTestFunctions": 16,
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Accepted for original CargoGuard focused tests after the actual source01 compilation failure. Independently verified exactly four crate::ItemGrade to crate::config::ItemGrade prefix corrections in item_grants.rs; config.rs defines the actual ItemGrade enum. Reversing only these four prefixes restores the exact source01 SHA256 and length. All eight other authored paths and all sixteen tests are unchanged; all current nine source02 SHA256 and lengths match. Runner differs only by one independent review01 to review02 reference, verified by inverse byte hash. Source01 static acceptance did not catch this path error; its actual Guard compile exit101 and zero executed tests remain historical failures. No final test pass or rollout acceptance is asserted.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\run-check.ps1",
+    "sha256": "0f5c68c6735aeb36645a84a5a3a88280d29b819c802f4b5780d1083add69a0fc",
+    "priorRunnerPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\run-check-01.ps1",
+    "priorRunnerSha256": "336918685c95623a918e7c5dd627e0d15dd587c8f7cd89baa66b0417db12ca9c",
+    "inverseByteMatch": true,
+    "originalPolicyAndProbeUnchangedByDelta": true
+  },
+  "historicalCompile": {
+    "resultPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\grant-tests-01\\result.json",
+    "resultSha256": "8507de7da7a5dc6ad7b5cb521889ee15721d564d070f4339725473a88cc9d492",
+    "logPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\grant-tests-01\\cargo.log",
+    "logSha256": "605c55e2fc160438e8822d3a06dbf404bd77d8ddacbec9795f287d22b02c5aef",
+    "exitCode": 101,
+    "executedTests": 0,
+    "error": "Four E0433 ItemGrade root-path references"
+  },
+  "limits": [
+    "Acceptance permits tests only, with all original source01 functional and rollout limitations retained.",
+    "Controlled File opt-in grants only; not normal gateway, UI, PostgreSQL or durable atomic account publication.",
+    "Original guard logs/nonces/review/source01 preserved; no result counts accumulated."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}

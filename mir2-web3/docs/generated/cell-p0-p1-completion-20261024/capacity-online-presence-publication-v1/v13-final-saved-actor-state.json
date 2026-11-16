@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "Single explicitly authorised final ordinary test save. No account/name/auth/password or other inventory/runtime JSON is output.",
+  "raw": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\private\\accounts.json",
+    "bytes": 482806,
+    "sha256": "739cb740f4cef9a82ee74cc5c8f66f1c23c4a3f0cfd3d546ba04cccf06e2e291",
+    "physicalReadPasses": 1,
+    "lastModifiedUtc": "2026-10-26T17:28:10.838Z",
+    "stableDuringRead": true
+  },
+  "target": {
+    "matchCount": 1,
+    "savePointer": "/accounts/<redacted-account-key>/saves/30",
+    "accountKeyRedacted": true,
+    "fieldPointers": {
+      "hp": "/accounts/<redacted-account-key>/saves/30/hp",
+      "max_hp": "/accounts/<redacted-account-key>/saves/30/max_hp",
+      "mp": "/accounts/<redacted-account-key>/saves/30/mp",
+      "max_mp": "/accounts/<redacted-account-key>/saves/30/max_mp",
+      "gold": "/accounts/<redacted-account-key>/saves/30/gold",
+      "position": "/accounts/<redacted-account-key>/saves/30/position",
+      "character/level": "/accounts/<redacted-account-key>/saves/30/character/level",
+      "inventory_items_json": "/accounts/<redacted-account-key>/saves/30/inventory_items_json",
+      "belt_items_json": "/accounts/<redacted-account-key>/saves/30/belt_items_json"
+    }
+  },
+  "finalSavedState": {
+    "actor": "actor-1",
+    "hp": 0,
+    "max_hp": 18,
+    "mp": 14,
+    "max_mp": 14,
+    "gold": 0,
+    "revision": 6,
+    "level": 1,
+    "position": {
+      "x": 215,
+      "y": 588
+    },
+    "deadStored": null,
+    "exactHpNonpositive": true,
+    "hpTemplateStock": {
+      "658": {
+        "bag": 0,
+        "belt": 0,
+        "total": 0
+      },
+      "660": {
+        "bag": 0,
+        "belt": 0,
+        "total": 0
+      }
+    }
+  },
+  "stockValidation": {
+    "parsedItems": 0,
+    "itemParseErrors": 0,
+    "unresolvedTemplateItems": 0,
+    "identityConflicts": 0,
+    "invalidQuantityItems": 0,
+    "complete": true,
+    "identityRule": "Exact user_item_metadata.item_index; fallback only to source-defined crystal-item-N numeric template key. Only indexes658/660 and total quantities are exposed."
+  },
+  "limit": "Read after cleanup; final gold/stock does not prove price, shop reachability, initial funds, lethal source or fatal-instant HP. Schema has no stored dead scalar."
+}

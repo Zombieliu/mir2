@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'runtime::production::tests::production_double_session_cas_and_original_request_recovery' (55932) panicked at apps\simulation\src\runtime\production_tests.rs:589:52:
+called `Result::unwrap()` on an `Err` value: BeforeExecution("stale production checkpoint; reload before a new operation")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test runtime::production::tests::production_double_session_cas_and_original_request_recovery ... FAILED
+
+failures:
+
+failures:
+    runtime::production::tests::production_double_session_cas_and_original_request_recovery
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2930 filtered out; finished in 1.12s
+

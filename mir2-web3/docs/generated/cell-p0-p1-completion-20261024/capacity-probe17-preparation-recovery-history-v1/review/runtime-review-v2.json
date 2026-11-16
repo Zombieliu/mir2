@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T19:26:26.856Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v3.json",
+    "bytes": 31015,
+    "sha256": "3a80bedf5390884069be2f3bac42d42202fb1afc9280bd585545bcd8ed6f5c41"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-seal-and-guard-v1.mjs",
+    "bytes": 13790,
+    "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+  },
+  "scope": "Independent narrow metadata-only retry review after actual write-before-provision guard refusal. No target import, controller mode, gate, syntax/test repeat, source/executable/trace rescan, account or realm operation.",
+  "priorFullSourceReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-runtime-independent-review-v1\\review-v1.json",
+    "bytes": 5137,
+    "sha256": "319883ccb2acbfc0ef7bfb784f71b31ea0ee79246c25ea90e08b3c4d7cca8cf5"
+  },
+  "delta": {
+    "bindingBefore": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json.before-node-path-v1.txt",
+      "bytes": 342,
+      "sha256": "91f2f045e5b5610ad352683090eef6b54dbf24702b411b84f15093f8c8d7f86d"
+    },
+    "bindingAfter": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json",
+      "bytes": 346,
+      "sha256": "55a7e8475c2ce8b178c4ecd89274a0e29718c08deef44e00ee73729447808883"
+    },
+    "onlyLibraryPathStringChanged": true,
+    "nodePathResolveExact": true,
+    "semanticTargetUnchanged": true,
+    "preparedOnlyOneFilePinAndLocalAggregateChanged": true,
+    "remainingFiftyLocalAndTwelveExternalEntriesUnchanged": true,
+    "allJavaScriptControllerAndExistingSyntaxEvidenceUnchanged": true
+  },
+  "actualFailureHistory": {
+    "preservedOldSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-before-path-guard-failure-v1.json",
+      "bytes": 33193,
+      "sha256": "d6a54fba126d58c258462fe39bffc68a78b33cb7959b78591ef75e3ead5d72ad"
+    },
+    "oldSealBytesUnchanged": true,
+    "activeSealNowAbsent": true,
+    "repairRecord": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\metadata-path-guard-failure-and-repair-v1.json",
+      "bytes": 3356,
+      "sha256": "a72be9a2e051b1d823c1df1b97a14cb2ef3bf296f8802c3fdb976d4a7fe148a3"
+    },
+    "rawFailureStdoutOrStderrNotFabricated": true,
+    "readOnlyGuardStillAbsent": true,
+    "accountsAndRuntimeStillAbsent": true
+  },
+  "rootNextStep": "Old failed seal is preserved under its explicit history basename. Root can now reseal using this prepared-v3/review pin and run the independent read-only guard, before any account preparation or realm. No old fact is overwritten or retrospectively called successful.",
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "guardOrProvisioningExecutedByReviewer": false,
+    "probe17Executed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Started": false
+  }
+}

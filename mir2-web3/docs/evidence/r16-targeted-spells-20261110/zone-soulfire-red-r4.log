@@ -1,0 +1,25 @@
+2634 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 105 warnings (run `cargo fix --lib -p mir2-simulation --tests` to apply 9 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 56.67s
+     Running unittests src\lib.rs (C:/r16-targeted-spells-20261110/cargo\debug\deps\mir2_simulation-fbd46dff1eda8db6.exe)
+
+running 1 test
+test runtime::zone::runtime::player_magic_cooldown_tests::soulfire_reagent_preflight_uses_the_actual_wild_monster_target_rules ... FAILED
+
+failures:
+
+---- runtime::zone::runtime::player_magic_cooldown_tests::soulfire_reagent_preflight_uses_the_actual_wild_monster_target_rules stdout ----
+
+thread 'runtime::zone::runtime::player_magic_cooldown_tests::soulfire_reagent_preflight_uses_the_actual_wild_monster_target_rules' (211828) panicked at apps\simulation\src\runtime\zone\runtime\player_magic_cooldown_tests.rs:126:5:
+living wild neutral targets are legal
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    runtime::zone::runtime::player_magic_cooldown_tests::soulfire_reagent_preflight_uses_the_actual_wild_monster_target_rules
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3389 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `-p mir2-simulation --lib`

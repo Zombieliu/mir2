@@ -1,0 +1,26 @@
+{
+  "scripts": {
+    "entry-player-probe.mjs": "7440b8191578dda59a3f0e2a09027a4ef9a6c642284ed5f7033a8ac34b0a4b46",
+    "invoke.mjs": "e5ce4282fc55e21c3e22e5b7df148fa509a48ef100bff6dfc0cbf1338f43354f",
+    "profile.mjs": "3c40d2cb928b0799a4f59b7d621997f2e906572473591a45fe990a5f88b32930",
+    "run.mjs": "9809c10ed034cf8552ee0839f8c702884a1c7b3f0fdc2b7dfaedfb931bc2d434",
+    "standing-faces.mjs": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+    "ui-asset-fault.mjs": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "67a8fc372c7a24ff37e84f33eec0922cba67bbd46fceff63aafded79d2393a1c"
+  },
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "baseline": "210fa4716a24-standing-chunks-7f8bb015",
+  "candidate": "31e9b6a74661-entry-recovery-2bfdd3ba",
+  "scenario": "two NPC response-header20s stalls + Native source header8s and two body-idle15s stalls, followed by unchanged pinned bytes",
+  "noPublicResources": true,
+  "noUserStateInjection": true,
+  "noGateRelaxation": true,
+  "baselineStopsAfterFailedColdGate": true,
+  "candidateRequiresSameEntry": true,
+  "networkFixtureCorrection": "Playwright forbids HTTPS-to-HTTP route.continue. A fetch adapter redirects only the exact pinned WASM resource to the owned HTTP streaming mirror, preserving Request method,headers,signal,cache and all phase limits. Other fetches,client state,packets and images are unchanged. This is a controlled HTTP test, not public TLS acceptance.",
+  "originalPreparationRetained": true,
+  "observationCorrection": "Register the exact owned HTTP binary mirror path in the CDP byte/hash observer, and expose full-body byte length when Playwright supplies a complete body. Same bytes/SHA assertions,phase budgets,server fault sequence,input and product code. Before-r3 and after-r1 failures remain unchanged."
+}

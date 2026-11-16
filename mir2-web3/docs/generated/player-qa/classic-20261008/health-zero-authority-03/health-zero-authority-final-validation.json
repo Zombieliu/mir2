@@ -1,0 +1,117 @@
+{
+  "baseline": "724e64dcf50e1119bf0d142f99274d96b6f38cd3",
+  "toolchain": "1.95.0-x86_64-pc-windows-msvc",
+  "server_target": "C:/mir2-build/health-zero-authority-20261008/server",
+  "native_target": "C:/mir2-build/health-zero-authority-20261008/native",
+  "source_receipt": "C:/mir2-build/health-zero-authority-final-source-hashes.json",
+  "source_receipt_sha256": "141ee65a1682908192001c935bbfb2611f066bbb8d14fea39f0c8332aa20b63f",
+  "passed_runs": [
+    {
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib health_zero -- --test-threads=1",
+      "failed": 0,
+      "sha256": "f5f9236ab4ad1c833b5667678c21e8c011ab61dc0f1fb46d25a1d1f4d5375848",
+      "log": "C:/mir2-build/health-zero-authority-13-gateway-final.log",
+      "passed": 7
+    },
+    {
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml gameplay_bridge::tests -- --test-threads=1",
+      "failed": 0,
+      "sha256": "17c53958981c7b2adbf646cb35eb2e40625e2855a303113c6898e0df5f210d59",
+      "log": "C:/mir2-build/health-zero-authority-14-native-bridge-adjacent.log",
+      "passed": 102
+    },
+    {
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml health_zero -- --test-threads=1",
+      "failed": 0,
+      "sha256": "e25ac5646bb6df699832acc56db1a3d0bbdcb088948855c0ed7ac3f47256a397",
+      "log": "C:/mir2-build/health-zero-authority-16-native-focused-final.log",
+      "passed": 9
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-simulation --features test-support --test shared_zone retained_zone_object -- --test-threads=1",
+      "failed": 0,
+      "sha256": "c5d1116ff620f82ea4b66101d5eca732091ae53b32ae5159636f078ab98ea64a",
+      "log": "C:/mir2-build/health-zero-authority-18-retained-zone-adjacent.log",
+      "passed": 22
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-simulation --features test-support --test shared_zone zero_health -- --test-threads=1",
+      "failed": 0,
+      "sha256": "0668efd76124561c79478030a1864b21bd7b30adcba13334d440129d90d47299",
+      "log": "C:/mir2-build/health-zero-authority-19-zone-zero-health-public.log",
+      "passed": 2
+    },
+    {
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml entity_health:: -- --test-threads=1",
+      "failed": 0,
+      "sha256": "ad5cf71235f35d22d2865dfcca9c0487c9ae2d625cf7e128a2239ce7fd434b6d",
+      "log": "C:/mir2-build/health-zero-authority-21-native-display-final.log",
+      "passed": 7
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib shared_zone_state_ -- --test-threads=1",
+      "failed": 0,
+      "sha256": "f39be3f43a5fd597f6d78116d9d498926df8a95bca408aec86a6a8406b264cb1",
+      "log": "C:/mir2-build/health-zero-authority-23-gateway-cache-drop-adjacent.log",
+      "passed": 43
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib shared_owner_dead_entity_packet_filter -- --test-threads=1",
+      "failed": 0,
+      "sha256": "1e24b489fc5dcbbb0910bd5d0eea4bfa2f8e92c1dcd5950a241448bce032e1ff",
+      "log": "C:/mir2-build/health-zero-authority-25-gateway-owner-death-final.log",
+      "passed": 1
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib shared_player_kill_source_tests -- --test-threads=1",
+      "failed": 0,
+      "sha256": "30740879e94c58187808657da992eb9b213c5ac9a9161f83dd32a1d72ff14de0",
+      "log": "C:/mir2-build/health-zero-authority-26-gateway-real-pk-source.log",
+      "passed": 4
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib dead_experience_chain_tests -- --test-threads=1",
+      "failed": 0,
+      "sha256": "4ec328f104de15e761dd71f57843bffbfa06fead4b88e4da63d6143b487b54e7",
+      "log": "C:/mir2-build/health-zero-authority-27-gateway-real-hp0-death.log",
+      "passed": 12
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-gateway --lib live_owner_wire_ids_tests -- --test-threads=1",
+      "failed": 0,
+      "sha256": "ceff4a2820fa587c2171b824b4ff60e72ca598698f418574b49340bedad634cb",
+      "log": "C:/mir2-build/health-zero-authority-28-gateway-live-id-adjacent.log",
+      "passed": 5
+    },
+    {
+      "command": "cargo +1.95.0 test -p mir2-simulation --features test-support --lib health_zero -- --test-threads=1",
+      "failed": 0,
+      "sha256": "f4e1919ec50142f07884e0180f844054c7b7c802cb58375d80f19f10862b25e7",
+      "log": "C:/mir2-build/health-zero-authority-29-zone-cold-restore-final.log",
+      "passed": 6
+    }
+  ],
+  "known_baseline_failures": [
+    {
+      "test": "statue_checkpoint_preserves_sleep_and_wakes_strictly_after_fifteen_minutes",
+      "sha256": "b1320642fc593ef1649961e1ddb736edd93d5b62b2691358abbcdea6a21b45f7",
+      "only_difference": "Cold restore revokes experience_owner containing online epoch/namespace proof",
+      "log": "C:/mir2-build/health-zero-authority-20-sleep-ai-adjacent.log",
+      "baseline_reproduced": true
+    },
+    {
+      "test": "statue_checkpoint_preserves_sleep_and_wakes_strictly_after_fifteen_minutes",
+      "sha256": "85856ffbd5f9d29e4f640edef87f48559474248bdd3a94e5244c2254ad27ebed",
+      "only_difference": "Cold restore revokes experience_owner containing online epoch/namespace proof",
+      "log": "C:/mir2-build/health-zero-authority-22-sleep-baseline-724e.log",
+      "baseline_reproduced": true
+    }
+  ],
+  "limits": [
+    "Percentage math unchanged",
+    "No GroupHero/PetHealth recipient authority changes",
+    "Ordinary TCP/WS story covers live percent0 group health plus both accepted walks; real death/source fault tests use actual Gateway normal attacks and native poison paths",
+    "No R22/client/service/account changes or native app launch",
+    "No commit/push/docs changes by worker"
+  ]
+}

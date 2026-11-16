@@ -1,0 +1,1077 @@
+{
+  "recordedAt": "2026-11-11T17:46:00.195Z",
+  "source": "958f5aca2a38128fb39b245b30ec7b8a6d3b0925",
+  "candidate": "958f5aca2a38-r16-runtime-parallel-fdc43e97",
+  "buildReceiptSha256": "864400f30a626275a13f7015af2f7c532d55a45c9aa9ab925ce302ece47e0bc8",
+  "builtId": "9xBtRPE8um3r6N-FhC2V9",
+  "sourceFiles": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha256": "a70e3419c774372d91692017c8a38bbf2799dcd903aba218bb92a73892567baa",
+      "gitBlob": "ecbf1ec4d5804fecfc427fb5b1c28d1419b97da6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+      "sha256": "2cdec232b9e043879dfa11951f1e1f8899d75260ebb17af9d90a0fe7e3de82e1",
+      "gitBlob": "c104b9e005b39d6384ce31192a70d58c825befd6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+      "sha256": "f4a07e1bf403062896f564f466118c41cadebea8ac0f963690429ff4433de42b",
+      "gitBlob": "29a1ac6e3dc7f0792f7ce67e62a82a449bc35d6f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "be204ab94a9c156cd7313f44c9b79e788e256b2deb0cd22347344ff940d6538b",
+      "gitBlob": "5e6de817c931153b1d66a1751c350803876974ab"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "0843e36c91a545df88aa706cb96ddd2a2ebba86cc3f5f8e901f20f0e26a99a76",
+      "gitBlob": "067afe9410defe4412ddba7e52978cb93d535143"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha256": "e54bcf98196297a2116dfb52bc06429ce30c77f871cb382e60518c4677a71d3e",
+      "gitBlob": "c7f2d0f9217d45c5b73983b3178ce88311f838ad"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+      "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+      "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+      "sha256": "6eb91c281c98cf1ef9e120c4e2204b44eba805e83f2698c709976ae417c1ab18",
+      "gitBlob": "4d702deee9894bbc789d1a12faeeebd832d651c7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "2ef7f93a848eab806cb51ce7efd3198745445714cc5d1932f876a6f504412757",
+      "gitBlob": "84abf6349c210535ee66f87d7df85bbe802c447f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-bootstrap-race.ts",
+      "sha256": "95c0bbbbd6b02bf2992d3a3f5a45e9a95dfa55501a1b9b8092aca4583d65ae5e",
+      "gitBlob": "0c8914c74b60e0916d27d197a939bcd2eb4fb54f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha256": "9b943d42b22a28d74d6a094fc35877c4be01b61dd3c856c0b5e7fec6af6207b0",
+      "gitBlob": "cd3aa91671ef02712d058abc4d8f811953144247"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha256": "8b93f89611773ca46c7c321f94659bd9574da93b22d381bb19b61eda23d906d8",
+      "gitBlob": "9af2d78c0b8e60fe1c13c10bbc22d9dd95b7379a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs",
+      "sha256": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+      "gitBlob": "d3eb2215de8feb20cd61f7dbfdb3dc61cf44f377"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha256": "e0f7ec767b58a1792a4321c095ecac7fd41036f2967e8155e7328bf038262b48",
+      "gitBlob": "41877dda3628f42f230773960543dd81cc6c0825"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-newcomer-v2-journey.mjs",
+      "sha256": "26b4ffb843ac0dcf524542aca620fb7a1e37e0968495d7fb8ad098c9c97a5d95",
+      "gitBlob": "f25f94561799231bef7afae98b124a95ecc598b2"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-belt-shortcut-diagnostics.mjs",
+      "sha256": "e1ed3f52aa8b9e2c1674d3bb32e48e13937c68066b38726dccc07ff59ff1becb",
+      "gitBlob": "eb8e2d0c1bf161ae8f7b0e4b4cd24d70beb0aa65"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-group-hover.mjs",
+      "sha256": "b28529983e1195bde2c47f7406af4ee40e531e7453f1c78b70f2ba88a97776c2",
+      "gitBlob": "fa4f30eda5912770a582dbd6de77441d25228bee"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-language-parity.mjs",
+      "sha256": "51395153080a33985df3632fe286ffb85d36e821d95147043fa6717d169e8995",
+      "gitBlob": "b7f907871cb96a889588cae5da2320e711a213b7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+      "sha256": "ab05b17ad0763186079eabc97288b11080c1595db006e1ddf0926a85545bc7dc",
+      "gitBlob": "6abdf0aa794f891528aeacd3113cbf17ede85696"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha256": "c0f4d3966e4b66ce05dc2c1200a41e5b8a61fcf9138acd9f3286847311891a81",
+      "gitBlob": "ff7983341e0fcadd3aad4a95629ceae129107aca"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-bootstrap-race.mjs",
+      "sha256": "439cf1a6c90fd47b0d8bba09b9852799a939a2edfeef26c78ade1c0057fdcbd2",
+      "gitBlob": "4d34c16993eb07ef5f704de40e47f1261d0f76d6"
+    }
+  ],
+  "generatedInputCount": 27,
+  "assetVersion": "20261108-r16-08ec86d5105c",
+  "runtime": "bevy-84ef836460a84e03",
+  "checks": {
+    "fontAndAdjacent": 87,
+    "runtimeAndAdjacent": 24,
+    "total": 111,
+    "productionBuild": true,
+    "originalFontBytes": true,
+    "originalLanguagesRetained": true
+  },
+  "fontBrowser": {
+    "scope": "Ordinary Chrome; real worker and two HTTP origins; exact original SC font; no interception or proxy override. Controlled conditions, not public latency.",
+    "fontBytes": 16437364,
+    "fontSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "workers": {
+      "baseline": "982b83855eaa2cc6f4821ee5f37bc85d72ecaf0b515454aad2897fd61d2b6096",
+      "candidate": "9b943d42b22a28d74d6a094fc35877c4be01b61dd3c856c0b5e7fec6af6207b0"
+    },
+    "lanes": [
+      {
+        "mode": "baseline-stalled",
+        "timedOut": true,
+        "requests": [
+          {
+            "kind": "mirror",
+            "receivedChunks": 1
+          }
+        ]
+      },
+      {
+        "mode": "candidate-stalled",
+        "timedOut": false,
+        "cssMs": 15178.899999976158,
+        "native": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+          "finishedMs": 15086.100000023842,
+          "contentLength": "16437364",
+          "contentEncoding": null
+        },
+        "fontFace": "loaded",
+        "cache": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        "reloadUsedCache": true,
+        "requests": [
+          {
+            "kind": "mirror",
+            "receivedChunks": 1
+          },
+          {
+            "kind": "origin",
+            "receivedChunks": 1
+          }
+        ]
+      },
+      {
+        "mode": "candidate-progressive",
+        "timedOut": false,
+        "cssMs": 19331.600000023842,
+        "native": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+          "finishedMs": 19201.300000071526,
+          "contentLength": "16437364",
+          "contentEncoding": null
+        },
+        "fontFace": "loaded",
+        "cache": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        "reloadUsedCache": true,
+        "requests": [
+          {
+            "kind": "mirror",
+            "receivedChunks": 20
+          }
+        ]
+      },
+      {
+        "mode": "candidate-errored",
+        "timedOut": false,
+        "cssMs": 328.6999999284744,
+        "native": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+          "finishedMs": 541.2999999523163,
+          "contentLength": "16437364",
+          "contentEncoding": null
+        },
+        "fontFace": "loaded",
+        "cache": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        "reloadUsedCache": true,
+        "requests": [
+          {
+            "kind": "mirror",
+            "receivedChunks": 1
+          },
+          {
+            "kind": "origin",
+            "receivedChunks": 1
+          }
+        ]
+      },
+      {
+        "mode": "candidate-compressed",
+        "timedOut": false,
+        "cssMs": 222.80000007152557,
+        "native": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+          "finishedMs": 545.7000000476837,
+          "contentLength": "16437364",
+          "contentEncoding": null
+        },
+        "fontFace": "loaded",
+        "cache": {
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        "reloadUsedCache": true,
+        "requests": [
+          {
+            "kind": "mirror",
+            "receivedChunks": 1
+          }
+        ]
+      }
+    ],
+    "passed": true,
+    "closed": {
+      "browser": true,
+      "app": true,
+      "mirror": true
+    },
+    "requests": [
+      {
+        "lane": "baseline-stalled",
+        "kind": "mirror",
+        "requestedAt": 1794416324235,
+        "chunks": [
+          {
+            "at": 1794416324235,
+            "bytes": 1024
+          }
+        ],
+        "headersAt": 1794416324235,
+        "closedAt": 1794416342254
+      },
+      {
+        "lane": "candidate-stalled",
+        "kind": "mirror",
+        "requestedAt": 1794416342417,
+        "chunks": [
+          {
+            "at": 1794416342418,
+            "bytes": 1024
+          }
+        ],
+        "headersAt": 1794416342418,
+        "closedAt": 1794416357432
+      },
+      {
+        "lane": "candidate-stalled",
+        "kind": "origin",
+        "requestedAt": 1794416357429,
+        "chunks": [
+          {
+            "at": 1794416357429,
+            "bytes": 16437364
+          }
+        ],
+        "headersAt": 1794416357429,
+        "finishedAt": 1794416357431,
+        "closedAt": 1794416357431
+      },
+      {
+        "lane": "candidate-progressive",
+        "kind": "mirror",
+        "requestedAt": 1794416357856,
+        "chunks": [
+          {
+            "at": 1794416357856,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416358868,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416359873,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416360879,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416361882,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416362888,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416363895,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416364899,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416365904,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416366912,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416367919,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416368926,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416369934,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416370940,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416371946,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416372953,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416373958,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416374965,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416375972,
+            "bytes": 821869
+          },
+          {
+            "at": 1794416376979,
+            "bytes": 821853
+          }
+        ],
+        "headersAt": 1794416357856,
+        "finishedAt": 1794416376980,
+        "closedAt": 1794416376980
+      },
+      {
+        "lane": "candidate-errored",
+        "kind": "mirror",
+        "requestedAt": 1794416377469,
+        "chunks": [
+          {
+            "at": 1794416377469,
+            "bytes": 1024
+          }
+        ],
+        "headersAt": 1794416377469,
+        "closedAt": 1794416377630
+      },
+      {
+        "lane": "candidate-errored",
+        "kind": "origin",
+        "requestedAt": 1794416377631,
+        "chunks": [
+          {
+            "at": 1794416377631,
+            "bytes": 16437364
+          }
+        ],
+        "headersAt": 1794416377631,
+        "finishedAt": 1794416377635,
+        "closedAt": 1794416377635
+      },
+      {
+        "lane": "candidate-compressed",
+        "kind": "mirror",
+        "requestedAt": 1794416378257,
+        "chunks": [
+          {
+            "at": 1794416378257,
+            "bytes": 13652425
+          }
+        ],
+        "headersAt": 1794416378257,
+        "finishedAt": 1794416378260,
+        "closedAt": 1794416378260
+      }
+    ]
+  },
+  "fontPixels": {
+    "passed": true,
+    "scope": "Same original font and same sample, four controlled transport cases",
+    "rows": [
+      {
+        "name": "candidate-stalled",
+        "sha256": "0728c17a7a087d111a8a6403106327bc9a37227e1974a0641f86ec77a6ae4cbe"
+      },
+      {
+        "name": "candidate-progressive",
+        "sha256": "0728c17a7a087d111a8a6403106327bc9a37227e1974a0641f86ec77a6ae4cbe"
+      },
+      {
+        "name": "candidate-errored",
+        "sha256": "0728c17a7a087d111a8a6403106327bc9a37227e1974a0641f86ec77a6ae4cbe"
+      },
+      {
+        "name": "candidate-compressed",
+        "sha256": "0728c17a7a087d111a8a6403106327bc9a37227e1974a0641f86ec77a6ae4cbe"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "name": "game/quest-after-r1",
+      "passed": false,
+      "mode": "compatibility",
+      "gamePath": "/game",
+      "browserLanguage": "zh-TW",
+      "isolatedFile": true,
+      "publicAuth": false,
+      "buildRevision": "958f5aca2a38-r16-font-body-d37754c2",
+      "failure": {
+        "stage": "verify-hosted-font-policy-and-wait-native-hud",
+        "message": "The expression evaluated to a falsy value:\n\n  assert(fontTimings.some(row=>row.url.includes('/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf')))\n"
+      },
+      "native": {
+        "backend": "webgpu",
+        "hudReady": true,
+        "questReady": true
+      },
+      "nativeReadyWaitMs": null,
+      "interactionPassed": false,
+      "saved": false,
+      "wire": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794416460593,
+          "headersMs": 64501,
+          "elapsedMs": 64503,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 141747,
+          "requestedAt": 1794416478226,
+          "headersMs": 46878,
+          "elapsedMs": 46879,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 31441753,
+          "requestedAt": 1794416525106,
+          "headersMs": 133,
+          "elapsedMs": 51669,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 16437364,
+          "requestedAt": 1794416577244,
+          "headersMs": 17915,
+          "elapsedMs": 17986,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 621572,
+          "requestedAt": 1794416577244,
+          "headersMs": 6173,
+          "elapsedMs": 6179,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794416577245,
+          "headersMs": 31,
+          "elapsedMs": 248,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 243520,
+          "requestedAt": 1794416577245,
+          "headersMs": 4679,
+          "elapsedMs": 4684,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 37780,
+          "requestedAt": 1794416577245,
+          "headersMs": 388,
+          "elapsedMs": 423,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 234892,
+          "requestedAt": 1794416577245,
+          "headersMs": 1534,
+          "elapsedMs": 1543,
+          "failure": null
+        }
+      ],
+      "appFontReads": [],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "name": "game/quest-after-r2",
+      "passed": false,
+      "mode": "webgl2",
+      "gamePath": "/game?bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1",
+      "browserLanguage": "zh-TW",
+      "isolatedFile": true,
+      "publicAuth": false,
+      "buildRevision": "958f5aca2a38-r16-font-body-d37754c2",
+      "failure": {
+        "stage": "verify-hosted-font-policy-and-wait-native-hud",
+        "message": "page.waitForFunction: Timeout 120000ms exceeded."
+      },
+      "native": {
+        "backend": "webgl2",
+        "hudReady": false,
+        "questReady": false
+      },
+      "nativeReadyWaitMs": null,
+      "interactionPassed": false,
+      "saved": false,
+      "wire": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794416780408,
+          "headersMs": 71041,
+          "elapsedMs": 71042,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 139721,
+          "requestedAt": 1794416797980,
+          "headersMs": 30725,
+          "elapsedMs": 30725,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 32369572,
+          "requestedAt": 1794416828705,
+          "headersMs": 22665,
+          "elapsedMs": 78512,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794416907656,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794416907656,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794416907656,
+          "headersMs": 25,
+          "elapsedMs": 210,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794416907657,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 37780,
+          "requestedAt": 1794416907657,
+          "headersMs": 1202,
+          "elapsedMs": 1205,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794416907657,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        }
+      ],
+      "appFontReads": [],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "name": "game-overlap/quest-after-r1",
+      "passed": false,
+      "mode": "webgl2",
+      "gamePath": "/game?bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1",
+      "browserLanguage": "zh-TW",
+      "isolatedFile": true,
+      "publicAuth": false,
+      "buildRevision": "958f5aca2a38-r16-font-overlap-b8c461e4",
+      "failure": {
+        "stage": "verify-hosted-font-policy-and-wait-native-hud",
+        "message": "page.waitForFunction: Timeout 120000ms exceeded."
+      },
+      "native": {
+        "backend": null,
+        "hudReady": null,
+        "questReady": null
+      },
+      "nativeReadyWaitMs": null,
+      "interactionPassed": false,
+      "saved": false,
+      "wire": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794417709127,
+          "headersMs": 67820,
+          "elapsedMs": 67821,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 1024,
+          "requestedAt": 1794417726608,
+          "headersMs": 8004,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794417726609,
+          "headersMs": 50250,
+          "elapsedMs": 50296,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 139721,
+          "requestedAt": 1794417726763,
+          "headersMs": 71140,
+          "elapsedMs": 71140,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 621572,
+          "requestedAt": 1794417776905,
+          "headersMs": 8008,
+          "elapsedMs": 8024,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 243520,
+          "requestedAt": 1794417784930,
+          "headersMs": 8010,
+          "elapsedMs": 8015,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 37780,
+          "requestedAt": 1794417792945,
+          "headersMs": 8007,
+          "elapsedMs": 8008,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794417797904,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 234892,
+          "requestedAt": 1794417800953,
+          "headersMs": 8008,
+          "elapsedMs": 8012,
+          "failure": null
+        }
+      ],
+      "appFontReads": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "scope": "blocked-app-font",
+          "requestedAt": 1794417734611,
+          "controlledBodyDelayMs": 160000,
+          "closedAt": 1794417846700
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "scope": "app-font-read",
+          "requestedAt": 1794417784907,
+          "finishedAt": 1794417784927,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "scope": "app-font-read",
+          "requestedAt": 1794417792933,
+          "finishedAt": 1794417792943,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "scope": "app-font-read",
+          "requestedAt": 1794417800946,
+          "finishedAt": 1794417800951,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "scope": "app-font-read",
+          "requestedAt": 1794417808953,
+          "finishedAt": 1794417808964,
+          "status": 200
+        }
+      ],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "name": "game-parallel/quest-after-r1",
+      "passed": false,
+      "mode": "webgl2",
+      "gamePath": "/game?bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1",
+      "browserLanguage": "zh-TW",
+      "isolatedFile": true,
+      "publicAuth": false,
+      "buildRevision": "958f5aca2a38-r16-runtime-parallel-fdc43e97",
+      "failure": {
+        "stage": "verify-hosted-font-policy-and-wait-native-hud",
+        "message": "page.waitForFunction: Timeout 120000ms exceeded."
+      },
+      "native": {
+        "backend": "webgl2",
+        "hudReady": false,
+        "questReady": false
+      },
+      "nativeReadyWaitMs": null,
+      "interactionPassed": false,
+      "saved": false,
+      "wire": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794418545290,
+          "headersMs": 60810,
+          "elapsedMs": 60811,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 139721,
+          "requestedAt": 1794418562939,
+          "headersMs": 43214,
+          "elapsedMs": 43214,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "serviceWorker": false,
+          "decodedBytes": 32369572,
+          "requestedAt": 1794418562939,
+          "headersMs": 43214,
+          "elapsedMs": 90737,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794418654248,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 621572,
+          "requestedAt": 1794418654248,
+          "headersMs": 15489,
+          "elapsedMs": 15498,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794418654248,
+          "headersMs": 29,
+          "elapsedMs": 224,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 243520,
+          "requestedAt": 1794418654248,
+          "headersMs": 15497,
+          "elapsedMs": 15503,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 37780,
+          "requestedAt": 1794418654248,
+          "headersMs": 260,
+          "elapsedMs": 314,
+          "failure": null
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 234892,
+          "requestedAt": 1794418654248,
+          "headersMs": 17356,
+          "elapsedMs": 17361,
+          "failure": null
+        }
+      ],
+      "appFontReads": [],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "parallelDelivery": {
+        "requestGapMs": 0,
+        "binaryComplete": true,
+        "scriptComplete": true
+      }
+    },
+    {
+      "name": "game-parallel/quest-after-r2",
+      "passed": false,
+      "mode": "compatibility",
+      "gamePath": "/game",
+      "browserLanguage": "zh-TW",
+      "isolatedFile": true,
+      "publicAuth": false,
+      "buildRevision": "958f5aca2a38-r16-runtime-parallel-fdc43e97",
+      "failure": {
+        "stage": "verify-hosted-font-policy-and-wait-native-hud",
+        "message": "page.waitForFunction: Timeout 120000ms exceeded."
+      },
+      "native": {
+        "backend": null,
+        "hudReady": null,
+        "questReady": null
+      },
+      "nativeReadyWaitMs": null,
+      "interactionPassed": false,
+      "saved": false,
+      "wire": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "status": 200,
+          "serviceWorker": true,
+          "decodedBytes": 11941968,
+          "requestedAt": 1794418834508,
+          "headersMs": 117914,
+          "elapsedMs": 117918,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794418852138,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        },
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": null,
+          "serviceWorker": null,
+          "decodedBytes": 0,
+          "requestedAt": 1794418852138,
+          "headersMs": null,
+          "elapsedMs": null,
+          "failure": null
+        }
+      ],
+      "appFontReads": [
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "scope": "app-font-read",
+          "requestedAt": 1794418952036,
+          "finishedAt": 1794418952362,
+          "status": 200
+        }
+      ],
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "parallelDelivery": {
+        "requestGapMs": 0,
+        "binaryComplete": false,
+        "scriptComplete": false
+      }
+    }
+  ],
+  "production": {
+    "revision": "cd6410be749412d608a538e2db442b7e4d519de0",
+    "changedByThisRound": false,
+    "readAt": "2026-11-11T17:46:00.196Z"
+  },
+  "originalWorkInProgress": {
+    "files": 62,
+    "statusRows": 38,
+    "verifiedSeparately": true
+  },
+  "goalStatus": "active",
+  "globalCandidateClaim": false,
+  "physicalPhoneApprovalRetested": false,
+  "limitations": [
+    "Ordinary full-game readiness and shared UI must retain the 120-second gate.",
+    "Passing controlled font transport is not a public speedup or complete gameplay acceptance.",
+    "The parallel six-font prewarm prototype failed and was withdrawn; its exact source and failed receipts remain in the raw evidence directory.",
+    "The first body-only game reached HUD and Quest readiness but failed on unavailable Worker Resource Timing before Q or movement verification.",
+    "Public first-step latency, current three-class 1-30, remaining gameplay, Native window acceptance and other open goal items remain separate."
+  ]
+}

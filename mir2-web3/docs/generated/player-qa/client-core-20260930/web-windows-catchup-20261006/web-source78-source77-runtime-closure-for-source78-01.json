@@ -1,0 +1,55 @@
+{
+  "owner": "Root",
+  "kind": "Source77 ordinary logout then exact owned service stop for Source78 replacement",
+  "ordinaryLogout": {
+    "key": "Alt+x",
+    "sentOnce": true,
+    "loginPasswordLabelVisible": true,
+    "merchantMenuGone": true,
+    "credentialsEmitted": false,
+    "screenshotCaptured": false
+  },
+  "ownedService": {
+    "childPid": 99956,
+    "parentPid": 101196,
+    "localAddress": "127.0.0.1",
+    "localPort": 19205,
+    "executableAndExactServerPathAndListenerVerified": true,
+    "childAloneStopped": true,
+    "prohibitedPidsUntouched": true
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 99956,
+    "kind": "Root approved original Source77 independent Thin Web ordinary gameplay QA start",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4681106,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/web-start01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3487,
+    "sha256": "0783e526c0ac4feba8f46bcae9d42c039bc22413a4fe85ed93f46d562ef8a5d6"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/web-start01/stdout.txt",
+    "bytes": 117,
+    "sha256": "274297c61c29155ff784e9ab9cbe5cf1e002c600d7d2045746d64c76c1997de5"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/web-start01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "originalPostSourceAndToolGuardPassed": true,
+  "source65GatewayUnchanged": true,
+  "goalComplete": false
+}

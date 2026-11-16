@@ -1,0 +1,118 @@
+{
+  "index_url": "https://raw.githubusercontent.com/argosopentech/argospm-index/main/index.json",
+  "index_sha256": "a65ae909a97ddc89a01cbf0596932dc6415df9815a11d85fe8240b367926b7b0",
+  "license": "MIT / CC0 (Argos maintainer clarification, issue 533)",
+  "license_source": "https://github.com/argosopentech/argos-translate/issues/533",
+  "models": [
+    {
+      "language": "ar",
+      "url": "https://argos-net.com/v1/translate-en_ar-1_0.argosmodel",
+      "package": {
+        "package_version": "1.0",
+        "argos_version": "1.0",
+        "from_code": "en",
+        "from_name": "English",
+        "to_code": "ar",
+        "to_name": "Arabic",
+        "links": [
+          "https://argos-net.com/v1/translate-en_ar-1_0.argosmodel",
+          "ipfs://QmV5bmf8iqKpoGoyuTzEppaSWdceuW6zgiePaUr5ThPCpW"
+        ],
+        "code": "translate-en_ar"
+      },
+      "bytes": 88502631,
+      "sha256": "e2a6e84337f7ebbb55f9dc61dcba3a861c0d786ae5a46fa198fd8d6473f5c775"
+    },
+    {
+      "language": "hi",
+      "url": "https://argos-net.com/v1/translate-en_hi-1_1.argosmodel",
+      "package": {
+        "package_version": "1.1",
+        "argos_version": "1.1",
+        "from_code": "en",
+        "from_name": "English",
+        "to_code": "hi",
+        "to_name": "Hindi",
+        "links": [
+          "https://argos-net.com/v1/translate-en_hi-1_1.argosmodel",
+          "ipfs://QmUwZ5mSRLycPPw6CRqVVqXBMrtEN8Az9UiXH7eTuzMh8n"
+        ],
+        "code": "translate-en_hi"
+      },
+      "bytes": 106752178,
+      "sha256": "60470a003a9c7339db8c060ed8eafc7cf999ba90dfa5dceebd8d0a4f75f1d3f0"
+    },
+    {
+      "language": "id",
+      "url": "https://argos-net.com/v1/translate-en_id-1_9.argosmodel",
+      "package": {
+        "package_version": "1.9",
+        "argos_version": "1.9.0",
+        "from_code": "en",
+        "from_name": "English",
+        "to_code": "id",
+        "to_name": "Indonesian",
+        "links": [
+          "https://argos-net.com/v1/translate-en_id-1_9.argosmodel"
+        ],
+        "code": "translate-en_id"
+      },
+      "bytes": 68010209,
+      "sha256": "fe5773201222806cfc802a094c5758ada6c25e10dbdd306d0c46bf200aac25fd"
+    },
+    {
+      "language": "ru",
+      "url": "https://argos-net.com/v1/translate-en_ru-1_9.argosmodel",
+      "package": {
+        "package_version": "1.9",
+        "argos_version": "1.9",
+        "from_code": "en",
+        "from_name": "English",
+        "to_code": "ru",
+        "to_name": "Russian",
+        "links": [
+          "https://argos-net.com/v1/translate-en_ru-1_9.argosmodel"
+        ],
+        "code": "translate-en_ru"
+      },
+      "bytes": 195746693,
+      "sha256": "591d743ae103752b88ffc38785c50421320f4eff93c8967e0d3d2e14d4e27811"
+    },
+    {
+      "language": "th",
+      "url": "https://argos-net.com/v1/translate-en_th-1_9.argosmodel",
+      "package": {
+        "package_version": "1.9",
+        "argos_version": "1.9.0",
+        "from_code": "en",
+        "from_name": "English",
+        "to_code": "th",
+        "to_name": "Thai",
+        "links": [
+          "https://argos-net.com/v1/translate-en_th-1_9.argosmodel"
+        ],
+        "code": "translate-en_th"
+      },
+      "bytes": 66978916,
+      "sha256": "b0fd94eceb04b967b91c2c7d8d1f7b5493c25362e43027a52649242385d0b2a3"
+    },
+    {
+      "language": "vi",
+      "url": "https://argos-net.com/v1/translate-en_vi-1_9.argosmodel",
+      "package": {
+        "package_version": "1.9",
+        "argos_version": "1.9",
+        "from_code": "en",
+        "from_name": "English",
+        "to_code": "vi",
+        "to_name": "Vietnamese",
+        "links": [
+          "https://argos-net.com/v1/translate-en_vi-1_9.argosmodel"
+        ],
+        "code": "translate-en_vi"
+      },
+      "bytes": 67770159,
+      "sha256": "86957101aa4099aa9a1a7492e41987d938d3cf0fdaf4fb684c0797a9d567dd16"
+    }
+  ]
+}

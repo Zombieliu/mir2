@@ -1,0 +1,48 @@
+{
+  "name": "kill-award-commit",
+  "command": [
+    "C:/Users/Administrator/.cargo/bin/rustup.exe",
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "durationMs": 1750.0041999999958,
+  "totals": [
+    {
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 1252
+    }
+  ],
+  "passed": true,
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "e559fda2b305933bc676986bb03e0be0db1212cb9358b60f99f3278a165df2f1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "eb28d1255d0f081a66226232b4281a0f50f85c7733a0da56977c361a66eb580e"
+    }
+  ]
+}

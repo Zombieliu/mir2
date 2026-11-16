@@ -1,0 +1,48 @@
+{
+  "reviewer": "root agent via view_image",
+  "humanAccepted": false,
+  "reviewed": [
+    {
+      "path": "after/360-zh-CN-ready.png",
+      "sha256": "fa840994127503bf9d67de03c69c2220c7139c28a83d1f0a12095a81a5725b8c"
+    },
+    {
+      "path": "after/360-zh-TW-ready.png",
+      "sha256": "ac1237dd33cbe014ca1dcf0a9857368872dda7605c76ecc4840a1ee20eeaade4"
+    },
+    {
+      "path": "after/360-hi-busy.png",
+      "sha256": "a6b23b18df991633b287500d47703aaa893946fa231b54c5a0910eee76b4d338"
+    },
+    {
+      "path": "after/360-ar-ready.png",
+      "sha256": "b75f7830cd25586eeeb0ffb864851f8722deb27f50489f1613e863373da67cd1"
+    },
+    {
+      "path": "after/360-ru-busy.png",
+      "sha256": "2dc7be6b3d013946b2cf8200e5836e28b42a21c284a869fd3f4862e52ae98af0"
+    },
+    {
+      "path": "after/360-pt-BR-ready.png",
+      "sha256": "2850c34e538d11407a9a1ce41e2740c319ffeb7633d656ffdc5c654c015c44b2"
+    },
+    {
+      "path": "after/360-id-ready.png",
+      "sha256": "84a424ebbd243c7cefa990c0a41f2b7c0327df7cb8c7fc9eb3d9918ba0dbe05c"
+    },
+    {
+      "path": "after/360-vi-ready.png",
+      "sha256": "321081c61d6cbc56bf335f3d353092a5050e010c41a49a109256b7db0146863a"
+    },
+    {
+      "path": "after/360-th-ready.png",
+      "sha256": "2746b416d8d3fbe5da33cd60f22e17ad96b0a5b9c5ee505cb3f76e1191f7e4c2"
+    },
+    {
+      "path": "after/360-en-ready.png",
+      "sha256": "fd0bc5e77cb82247577a6cbd2bf89c8a626395f7db6745f81d429cc814039142"
+    }
+  ],
+  "observed": "Localized title/message/button, busy label and disabled button; no clipping in reviewed 360px views. Remaining views checked text and geometry automatically. Scope is the unchanged component, not gameplay/Windows appearance or native revival authority.",
+  "smokeSha256": "77add653a5e930aa3beff01981fcc82d392ba23a53da1bcf7d6ace2c9984528d"
+}

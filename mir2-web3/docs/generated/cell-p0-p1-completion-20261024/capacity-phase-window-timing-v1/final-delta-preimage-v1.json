@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Full151 source preserved before the separately authorized one-line nominal chat-trigger compatibility fix and additional test.",
+  "sourceSha256": "bcc53ee440624ef6831a591fb693226b7aade5a48ecbd6e502debec07d7f463b",
+  "fullReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1-receipt.json",
+    "bytes": 4502,
+    "sha256": "5cccefc8824e7bf064c3e09d912a0caf6d20bdba87e4b0156518d40125621b0f"
+  },
+  "files": [
+    {
+      "source": {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 132226,
+        "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.mjs.pre-final-full.mjs.txt",
+        "bytes": 132226,
+        "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+      }
+    },
+    {
+      "source": {
+        "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 195516,
+        "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.test.mjs.pre-final-full.mjs.txt",
+        "bytes": 195516,
+        "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+      }
+    }
+  ]
+}

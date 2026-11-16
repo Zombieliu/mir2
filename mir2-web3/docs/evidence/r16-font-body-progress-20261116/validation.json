@@ -1,0 +1,176 @@
+{
+  "checkedAt": "2026-11-16T02:45:26.096Z",
+  "parent": "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+  "candidate": "r16-font-body-7d3c6c83",
+  "worker": {
+    "bytes": 73875,
+    "sha256": "2333c5f6c64c05c2485c65bf4965df859e25d0bc446f72ac72ab716885f4aba2"
+  },
+  "tests": {
+    "focused": 152,
+    "adjacent": 63,
+    "total": 215,
+    "newTestsIncluded": 8,
+    "before": {
+      "tests": 5,
+      "expectedFailures": 4,
+      "cacheFixedBoundPassed": true
+    }
+  },
+  "chrome": [
+    {
+      "name": "chrome-sc-chunks",
+      "passed": true,
+      "expectedOldWorkerFailure": false,
+      "retainedRawObserverFailure": false,
+      "elapsedMs": 16118.100000023842,
+      "pieces": 63,
+      "allSixFontsCompleteAndDecoded": true,
+      "peakRawRequestLifetimes": 2,
+      "peakAdmittedBodies": null,
+      "allOwnedHandlesClosed": true
+    },
+    {
+      "name": "chrome-tc-chunks",
+      "passed": true,
+      "expectedOldWorkerFailure": false,
+      "retainedRawObserverFailure": false,
+      "elapsedMs": 16098.599999964237,
+      "pieces": 46,
+      "allSixFontsCompleteAndDecoded": true,
+      "peakRawRequestLifetimes": 2,
+      "peakAdmittedBodies": null,
+      "allOwnedHandlesClosed": true
+    },
+    {
+      "name": "chrome-baseline-chunks",
+      "passed": false,
+      "expectedOldWorkerFailure": true,
+      "retainedRawObserverFailure": false,
+      "elapsedMs": 24241.19999998808,
+      "pieces": 59,
+      "allSixFontsCompleteAndDecoded": false,
+      "peakRawRequestLifetimes": null,
+      "peakAdmittedBodies": null,
+      "allOwnedHandlesClosed": true
+    },
+    {
+      "name": "chrome-header-failover",
+      "passed": false,
+      "expectedOldWorkerFailure": false,
+      "retainedRawObserverFailure": true,
+      "elapsedMs": 16112.300000011921,
+      "pieces": 0,
+      "allSixFontsCompleteAndDecoded": true,
+      "peakRawRequestLifetimes": 3,
+      "peakAdmittedBodies": null,
+      "allOwnedHandlesClosed": true
+    },
+    {
+      "name": "chrome-header-failover-body-observer",
+      "passed": true,
+      "expectedOldWorkerFailure": false,
+      "retainedRawObserverFailure": false,
+      "elapsedMs": 16090.800000011921,
+      "pieces": 0,
+      "allSixFontsCompleteAndDecoded": true,
+      "peakRawRequestLifetimes": 4,
+      "peakAdmittedBodies": 1,
+      "allOwnedHandlesClosed": true
+    }
+  ],
+  "games": [
+    {
+      "name": "english",
+      "passed": true,
+      "mode": "compatibility",
+      "language": "en-US",
+      "source": "r16-font-body-7d3c6c83",
+      "allOwnedHandlesClosed": true,
+      "firstMoveMs": 123,
+      "firstNativeMs": 17792,
+      "sixFontsComplete": true,
+      "hud113": true,
+      "completeWalkingBodyAndNaturalFrame65": true,
+      "firstAndReenteredNativeQ": true,
+      "zeroQWorldMutations": true,
+      "ordinaryLogoutReentrySave": true,
+      "originalRosterAndSnapshotPreserved": true,
+      "obsoleteCache": null
+    },
+    {
+      "name": "original-tc",
+      "passed": false,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "source": "r16-font-body-7d3c6c83",
+      "allOwnedHandlesClosed": true,
+      "failure": "real cache cleanup must occur without discarding login",
+      "firstMoveMs": 122,
+      "firstNativeMs": 20676,
+      "sixFontsComplete": true,
+      "wholeFlowPassed": false
+    },
+    {
+      "name": "seeded-tc-supplement",
+      "passed": true,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "source": "r16-font-body-7d3c6c83",
+      "allOwnedHandlesClosed": true,
+      "firstMoveMs": 114,
+      "firstNativeMs": 24693,
+      "sixFontsComplete": true,
+      "hud113": true,
+      "completeWalkingBodyAndNaturalFrame65": true,
+      "firstAndReenteredNativeQ": true,
+      "zeroQWorldMutations": true,
+      "ordinaryLogoutReentrySave": true,
+      "originalRosterAndSnapshotPreserved": true,
+      "obsoleteCache": {
+        "name": "mir2-asset-cache-sw8-static-r16-font-body-obsolete-fixture",
+        "presentBeforeGame": true,
+        "absentAfterConfiguration": true
+      }
+    }
+  ],
+  "build": {
+    "passed": true,
+    "id": "NZunMJ6fCFPI4XoqB3fyG",
+    "durationMs": 43889,
+    "appLibChecked": 2181,
+    "lockedGeneratedInputs": 1,
+    "pinnedInputs": 35
+  },
+  "invariant": {
+    "networkBodyIdleMs": 15000,
+    "absoluteRangeCapMs": 48000,
+    "headerMs": 8000,
+    "cacheOperationMs": 750,
+    "cacheBodyFixedMs": 15000,
+    "fontReaders": 2,
+    "completeOriginalFonts": 6,
+    "requiredHudAssets": 113,
+    "scPins": 63,
+    "tcPins": 46,
+    "publicMoveMs": 8000,
+    "publicNaturalFrameMs": 65000,
+    "publicNativeMs": 120000,
+    "qrAttemptsMs": [
+      20000,
+      20000
+    ],
+    "noGlobalSourceBlacklist": true,
+    "wholeMirrorEligibleAfterAppFailure": true,
+    "configurationAndCancellationIsolationPreserved": true
+  },
+  "scope": "Owned CacheStorage reused; local ordinary shared-Zone test Gateway. TC supplementary run explicitly seeds an obsolete managed cache and uses the previously documented raw-CDP ancillary terrain capture. Product, original assertions and deadlines unchanged. Original cleanup assertion failure and no-space preflight failure retained; no public cold qualification.",
+  "privateOverlaysRestored": 15,
+  "originalRawWipPreserved": 29,
+  "productionDeploymentThisRound": false,
+  "productionSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "productionDeployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "goal": "active"
+}

@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "Auxiliary ordinary GatewayClient normal logout/password login/same character/StartGame/snapshot/final logout; no trade replay.",
+  "firstLogoutAcknowledged": true,
+  "sameCharacterIndex": true,
+  "ready": true,
+  "tradeActive": false,
+  "tradeUncertain": false,
+  "exactAssetsMatch": true,
+  "economy": {
+    "gold": 0,
+    "inventory": [
+      {
+        "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "slot": 0,
+        "count": 1,
+        "name": "WoodenSword"
+      },
+      {
+        "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "slot": 1,
+        "count": 1,
+        "name": "BaseDress(M)"
+      },
+      {
+        "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "slot": 2,
+        "count": 1,
+        "name": "(HP)DrugSmall"
+      },
+      {
+        "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+        "slot": 3,
+        "count": 1,
+        "name": "Candle"
+      }
+    ],
+    "belt": []
+  },
+  "finalLogoutAcknowledged": true,
+  "packets": [
+    {
+      "packet": "LogOutSuccess"
+    },
+    {
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "packet": "LogOutSuccess"
+    }
+  ]
+}

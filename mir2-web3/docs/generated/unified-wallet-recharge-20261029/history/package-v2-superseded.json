@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": false,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "package-v2-superseded.json",
+    "bytes": 251,
+    "sha256": "b00995ea031483c76762c5905e46bb9639a46e88ae0259134ec04ccfcd7a65a7"
+  },
+  "producerReport": {
+    "stoppedOwnedProcess": 86172,
+    "reason": "Source review found procurement bypasses Simplified Chinese locale; do not deliver e2c Game",
+    "signedCandidateCreated": false,
+    "sourceGameRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13"
+  },
+  "phase": "superseded before signed Candidate; partial resource results retained but not full package success"
+}

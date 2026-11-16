@@ -1,0 +1,202 @@
+{
+  "kind": "real-chrome-six-font-body-admission",
+  "passed": true,
+  "expectedOutcomeObserved": true,
+  "expected": "complete",
+  "publicNetworkUsed": false,
+  "gameAccountUsed": false,
+  "workerSha256": "5b45ec68a5efd1b2fe96aa78efcb917fbaa40e8a47a02ee3279a468e141fbbb3",
+  "story": "Renderer and CSS request six complete original font families together while the origin can serve two live bodies; images remain independent.",
+  "fontPins": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "bytes": 243520,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "bytes": 37780,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "bytes": 234892,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    }
+  ],
+  "requests": [
+    {
+      "path": "/",
+      "started": 1794689225591,
+      "status": 200,
+      "finished": 1794689225593
+    },
+    {
+      "path": "/mir2-asset-worker.js",
+      "started": 1794689225609,
+      "status": 200,
+      "finished": 1794689225610
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "started": 1794689225623,
+      "status": 200,
+      "finished": 1794689227639
+    },
+    {
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "started": 1794689225623,
+      "status": 200,
+      "finished": 1794689227641
+    },
+    {
+      "path": "/original-ui/Prguse/985.png",
+      "started": 1794689225624,
+      "fontsActiveAtImageRequest": 2,
+      "status": 200,
+      "finished": 1794689225624
+    },
+    {
+      "path": "/favicon.ico",
+      "started": 1794689225625,
+      "status": 404,
+      "finished": 1794689225626
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "started": 1794689227654,
+      "status": 200,
+      "finished": 1794689229656
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "started": 1794689227671,
+      "status": 200,
+      "finished": 1794689229672
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "started": 1794689229658,
+      "status": 200,
+      "finished": 1794689231662
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "started": 1794689229688,
+      "status": 200,
+      "finished": 1794689231693
+    }
+  ],
+  "browser": {
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "status": 200,
+        "bytes": 16437364,
+        "decoded": true,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "status": 200,
+        "bytes": 11941968,
+        "decoded": true,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "status": 200,
+        "bytes": 621572,
+        "decoded": true,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "status": 200,
+        "bytes": 243520,
+        "decoded": true,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "status": 200,
+        "bytes": 37780,
+        "decoded": true,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "status": 200,
+        "bytes": 234892,
+        "decoded": true,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "duplicate": {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "bytes": 11941968,
+      "decoded": true,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    "cache": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "elapsedMs": 6120.800000011921,
+    "imageMs": 6.200000017881393
+  },
+  "unexpectedNetworkOrigins": [],
+  "peakServerFontBodies": 2,
+  "browserClosed": true,
+  "serverClosed": true
+}

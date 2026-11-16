@@ -1,0 +1,169 @@
+{
+  "capturedUtc": "2026-10-09T14:57:24.5330061Z",
+  "sourceSha": "4a26a543110a4810296ba1992f60b811d6509424",
+  "run": {
+    "conclusion": "success",
+    "created_at": "2026-10-09T14:42:42Z",
+    "head_sha": "4a26a543110a4810296ba1992f60b811d6509424",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37946216332",
+    "id": 37946216332,
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-10-09T14:52:17Z"
+  },
+  "jobs": {
+    "conclusion": "success",
+    "id": 113873020758,
+    "status": "completed",
+    "steps": [
+      {
+        "conclusion": "success",
+        "name": "Set up job",
+        "number": 1,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Initialize containers",
+        "number": 2,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Checkout exact candidate",
+        "number": 3,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Install Rust",
+        "number": 4,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bind isolated evidence to source",
+        "number": 5,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Recharge, item custody and file restart",
+        "number": 6,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Real PostgreSQL competing writers and restart",
+        "number": 7,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Provider fixture HTTP, authenticated socket and private Source RPC",
+        "number": 8,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Expired shared owner and authoritative pools",
+        "number": 9,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Retain logs including failures",
+        "number": 10,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Post Checkout exact candidate",
+        "number": 19,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Stop containers",
+        "number": 20,
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "Complete job",
+        "number": 21,
+        "status": "completed"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "digest": "sha256:a94e51177ae828da7684b9cc15955a0b1dfb14dd4aff221bb093b8f8264b7bc6",
+      "expired": false,
+      "id": 11624502233,
+      "name": "stripe-billing-4a26a543110a4810296ba1992f60b811d6509424-37946216332-1",
+      "size_in_bytes": 28075,
+      "workflow_run": {
+        "head_branch": "codex/classic-npc-pet-source-semantics-20261008",
+        "head_repository_id": 1218375787,
+        "head_sha": "4a26a543110a4810296ba1992f60b811d6509424",
+        "id": 37946216332,
+        "repository_id": 1218375787
+      }
+    }
+  ],
+  "adjacentMonthly": {
+    "conclusion": "success",
+    "created_at": "2026-10-09T14:42:42Z",
+    "head_sha": "4a26a543110a4810296ba1992f60b811d6509424",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37946216237",
+    "id": 37946216237,
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-10-09T14:49:33Z"
+  },
+  "downloadedFiles": [
+    {
+      "path": "ci-37946216332/gateway.log",
+      "sha256": "edfaf6f06524d1e4db49766b7ca51e2f4c67177bea0157f68a72bc63947783d8",
+      "bytes": 46578,
+      "gitBlobId": "0f9e6ab3afd43f3c5f41d0f16b96044c1ba2ef6a"
+    },
+    {
+      "path": "ci-37946216332/postgres.log",
+      "sha256": "e276d4cb39e259f2aadc0246460ff59c8d5a7ca1dbeaa6d90c19085616479c0e",
+      "bytes": 31015,
+      "gitBlobId": "41741f41c5210ef43097ba503d847cda38993077"
+    },
+    {
+      "path": "ci-37946216332/shared-owner.log",
+      "sha256": "79a8413de26e784b638b98783f840236f99671207a9ba4f9c39dc13e9b13d8e3",
+      "bytes": 34645,
+      "gitBlobId": "7786935ddc41690270e5fe47cfa1990f8d848bff"
+    },
+    {
+      "path": "ci-37946216332/simulation.log",
+      "sha256": "ba875fc206682f6c4c996c0d81ed8ea9477faa151b63c40d45e404769d2d845a",
+      "bytes": 43756,
+      "gitBlobId": "446079d1fce444097a5e983bbbb83ff669ff4b0e"
+    },
+    {
+      "path": "ci-37946216332/source-sha.txt",
+      "sha256": "fe54c0a115e60421f95ef61279d5257563b852a3467a99826c6c76f4abdd52cd",
+      "bytes": 41,
+      "gitBlobId": "4502492c14e2c02acbdd2d7430c5b5ac9633c6e7"
+    }
+  ],
+  "archiveDigestVerification": "Artifact digest retained from authenticated GitHub API; gh downloaded/extracted files. Raw ZIP bytes not independently hashed.",
+  "limits": [
+    "Ephemeral isolated PostgreSQL only",
+    "No real Stripe charge or provider webhook registration",
+    "No deployment, installer, service, feed or production save changes"
+  ],
+  "adjacentRunLog": {
+    "path": "adjacent-monthly-ci-37946216237.log",
+    "sha256": "1fbe24fc2e8f75178ae1b0eb4e4b6b16f94803210637048676de02a92b89a252",
+    "gitBlobId": "150adea6a614ee4db3492e31d889e0ecf5d34abd",
+    "bytes": 422990
+  }
+}

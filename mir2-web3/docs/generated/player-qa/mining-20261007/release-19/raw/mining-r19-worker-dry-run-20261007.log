@@ -1,0 +1,9 @@
+
+ ⛅️ wrangler 4.147.0
+────────────────────
+Total Upload: 295.56 KiB / gzip: 73.53 KiB
+Your Worker has access to the following bindings:
+Binding                                 Resource       
+env.MIR2_ASSETS (mir2-web3-assets)      R2 Bucket      
+
+--dry-run: exiting now.

@@ -1,0 +1,41 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "backend-extra-test-results.json",
+    "bytes": 920,
+    "sha256": "1c985f4431b7e0d3f6c0724669c68e5c6ab076a0cd7a25cc5d457569fbdbe2c7"
+  },
+  "producerReport": [
+    {
+      "name": "web-usdc",
+      "exitCode": 0,
+      "elapsedSeconds": 0.5209068,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-web-usdc-v1.log",
+      "compileOnly": false,
+      "results": [
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1318 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "name": "web-procurement",
+      "exitCode": 0,
+      "elapsedSeconds": 0.4448772,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-web-procurement-v1.log",
+      "compileOnly": false,
+      "results": [
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1315 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "name": "activities-pg-compile-only",
+      "exitCode": 0,
+      "elapsedSeconds": 4.7625942,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-activities-pg-compile-only-v1.log",
+      "compileOnly": true,
+      "results": []
+    }
+  ],
+  "phase": "producer focused test rows; no counts added to aggregate twice"
+}

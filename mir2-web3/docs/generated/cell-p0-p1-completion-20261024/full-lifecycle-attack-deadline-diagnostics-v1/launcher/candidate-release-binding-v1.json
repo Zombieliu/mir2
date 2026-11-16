@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_ROOT_CONFIRMED_FRESH44_RELEASE",
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendInputCount": 44,
+  "backendSourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87371264,
+    "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+  },
+  "buildReceipt": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-v1-build-receipt.json",
+    "bytes": 2373,
+    "sha256": "c1c3259e50ac7eba1fe5cadbe77830a77549f700f98a8bc9deb15304f2c5b3f7"
+  },
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-attack-deadline-diagnostics-v1-release-build.log",
+    "bytes": 55560,
+    "sha256": "e11129d2b8e266549a504fb3ee11994aec834518c7808a6665319c2a45c6ee29"
+  },
+  "rootFunctionalValidation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-attack-deadline-functional-validation-v1.json",
+    "bytes": 7819,
+    "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea"
+  }
+}

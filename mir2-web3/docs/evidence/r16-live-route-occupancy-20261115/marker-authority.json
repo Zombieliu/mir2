@@ -1,0 +1,155 @@
+{
+  "passed": true,
+  "map": "0",
+  "questLog": [
+    {
+      "current": 1,
+      "objective": "Main-node reward claimed.",
+      "objectives": [
+        {
+          "current": 1,
+          "done": true,
+          "label": "Report to Assistant Jane",
+          "required": 1
+        }
+      ],
+      "progressLabel": "Completed.",
+      "questId": 2110001,
+      "required": 1,
+      "rewardPreview": "EXP 100, Gold 100, (HP)DrugSmall x10, WoodenSword x1",
+      "stage": "completed",
+      "summary": "Newcomer V2 main node 1.",
+      "title": "Your first patrol kit",
+      "tracker": "Your first patrol kit completed."
+    },
+    {
+      "current": 1,
+      "objective": "Main-node reward claimed.",
+      "objectives": [
+        {
+          "current": 1,
+          "done": true,
+          "label": "Equip a weapon you can use",
+          "required": 1
+        }
+      ],
+      "progressLabel": "Completed.",
+      "questId": 2110002,
+      "required": 1,
+      "rewardPreview": "EXP 200, Gold 100",
+      "stage": "completed",
+      "summary": "Newcomer V2 main node 2.",
+      "title": "Equip your weapon",
+      "tracker": "Equip your weapon completed."
+    },
+    {
+      "current": 0,
+      "objective": "Defeat 2 Scarecrow.\nDefeat 2 RakingCat.",
+      "objectives": [
+        {
+          "current": 0,
+          "done": false,
+          "label": "Defeat 2 Scarecrow.",
+          "required": 2
+        },
+        {
+          "current": 0,
+          "done": false,
+          "label": "Defeat 2 RakingCat.",
+          "required": 2
+        }
+      ],
+      "progressLabel": "Progress 0/4",
+      "questId": 2110003,
+      "required": 4,
+      "rewardPreview": "EXP 2200, Gold 150, Fencing x1",
+      "stage": "inProgress",
+      "summary": "Newcomer V2 main node 3.",
+      "title": "Protect the village",
+      "tracker": "Defeat 2 Scarecrow."
+    },
+    {
+      "current": 0,
+      "objective": "Emperors Problem",
+      "progressLabel": "Level 1+, class restricted",
+      "questId": 154,
+      "required": 1,
+      "rewardPreview": "Original Crystal quest reward.",
+      "stage": "available",
+      "summary": "Emperors Problem",
+      "title": "Emperors Problem",
+      "tracker": "Emperors Problem is available."
+    }
+  ],
+  "npcs": [
+    {
+      "id": 1,
+      "name": "Teleport_Gilbert",
+      "questIds": []
+    },
+    {
+      "id": 2,
+      "name": "BorderVillage_Board",
+      "questIds": []
+    },
+    {
+      "id": 3,
+      "name": "Assistant_Jane",
+      "questIds": [
+        1,
+        2,
+        3,
+        7,
+        10,
+        13,
+        16,
+        19,
+        2110001
+      ]
+    },
+    {
+      "id": 4,
+      "name": "CraftsLady_Jude",
+      "questIds": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Blacksmith_Smith",
+      "questIds": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Merchant_John",
+      "questIds": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Merchant_Ruben",
+      "questIds": [
+        48
+      ]
+    },
+    {
+      "id": 42,
+      "name": "Merchant_Scott",
+      "questIds": []
+    },
+    {
+      "id": 43,
+      "name": "MaterialDealer_Reece",
+      "questIds": []
+    }
+  ],
+  "sourceSnapshotKind": "ordinary non-compressed real Gateway response",
+  "ordinaryLogout": true,
+  "gatewayClosed": true
+}

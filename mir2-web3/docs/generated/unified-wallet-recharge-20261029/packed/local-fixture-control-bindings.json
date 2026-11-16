@@ -1,0 +1,64 @@
+{
+  "passed": true,
+  "controlReceipt": {
+    "filename": "packed-local-fixture-control.run1.json",
+    "bytes": 1219,
+    "sha256": "c6d7a36b9e34755a90e36daddd9076e640d5fdad3b6906341c6c48782a5aef66"
+  },
+  "rootReviewed": true,
+  "noRawControlOrEnvironmentPublished": true,
+  "preconditionsControlSha256Matched": true,
+  "sameAuthenticatedAttemptAndKernelPid": true,
+  "attemptValuesOmitted": true,
+  "preparationSourceAndLogChecks": [
+    {
+      "role": "externalAdapterSource",
+      "file": "Cargo.toml",
+      "bytes": 318,
+      "sha256": "8fd34be544ba82a9b3bdfce65d9b597f1c60bfd5bd638680f44a7730940d6e37"
+    },
+    {
+      "role": "externalAdapterSource",
+      "file": "Cargo.lock",
+      "bytes": 20249,
+      "sha256": "7b5a22b2ce57ea2d22a7b57fd6782ebaf0e9ddb74698f44c8699665f253e26e8"
+    },
+    {
+      "role": "externalAdapterSource",
+      "file": "main.rs",
+      "bytes": 22469,
+      "sha256": "637c34c98b865c03ad9a5a43edaf74db178b33eb14588f85184e42827c85f7e7"
+    },
+    {
+      "role": "adapterPreparationEvidence",
+      "file": "packed-fixture-driver-tests-v3.log",
+      "bytes": 664,
+      "sha256": "8082d1f7d9f7437bb7f0cc1ead0393b5308b843cb81cd43ce240fa46ff47f03b"
+    },
+    {
+      "role": "adapterPreparationEvidence",
+      "file": "packed-fixture-driver-describe-v3.json",
+      "bytes": 416,
+      "sha256": "e80626ee78514a8c83f626761cdf8404be515f206b5faf2f01ecf7f63d6d3f69"
+    },
+    {
+      "role": "adapterPreparationEvidence",
+      "file": "packed-fixture-driver-unreviewed-draft-v3.json",
+      "bytes": 345,
+      "sha256": "a50e12f7141fe6ed2fa1c09eb83fbe4e75d6b5f12a27a9a7aaca01cb3229f0d5"
+    },
+    {
+      "role": "adapterPreparationEvidence",
+      "file": "packed-fixture-driver-build-v3.log",
+      "bytes": 183,
+      "sha256": "3955edd1e82e61d66a89d304d82bf6aceadd95f78213ae1ea26113a395668067"
+    }
+  ],
+  "productionSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "realReadyHealthyExitSanitizedEvidence": [
+    "actual-real-game-ready.json",
+    "actual-real-game-healthy.json",
+    "actual-real-game-exit.json"
+  ],
+  "rawGameStdoutOrStderrIncluded": false
+}

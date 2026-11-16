@@ -1,0 +1,325 @@
+{
+  "formatVersion": 1,
+  "topic": "Persistent billing entry UI: fiat, onchain USDC, separate monthly card",
+  "dateAsiaShanghai": "2026-10-29",
+  "status": "ui-technical-candidate-complete-release-gates-open",
+  "scope": "UI layout, localization and navigation only; no new payments or monthly purchases",
+  "checks": [
+    {
+      "name": "native-billing-focused",
+      "status": "passed",
+      "path": "native-mock/focused-result.json",
+      "passed": 19,
+      "failed": 0,
+      "ignoredGpuSeparately": 1,
+      "phase": "Full simplified overlay before two scoped system caption additions; billing behavior unchanged."
+    },
+    {
+      "name": "native-billing-gpu",
+      "status": "passed",
+      "path": "native-mock/gpu/report.json",
+      "expectedLocalizedPages": [
+        "en-fiat",
+        "en-usdc",
+        "en-monthly",
+        "zh-TW-fiat",
+        "zh-TW-usdc",
+        "zh-TW-monthly",
+        "zh-CN-fiat",
+        "zh-CN-usdc",
+        "zh-CN-monthly"
+      ],
+      "livePaymentProof": false,
+      "passed": 1,
+      "failed": 0,
+      "screenshots": 39,
+      "locales": [
+        "en",
+        "zh-TW",
+        "zh-CN"
+      ],
+      "casesPerLocale": 13,
+      "missingGlyphs": 0,
+      "overflowingTextNodes": 0,
+      "outsideViewportNodes": 0,
+      "phase": "Three locales/13 states before two scoped system caption additions; billing code/text unchanged by those additions. Final gameplay and production fonts independently retested."
+    },
+    {
+      "name": "native-fonts",
+      "status": "passed",
+      "path": "native-mock/font-result.json",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 3,
+      "separatelyExecutedGpu": 1
+    },
+    {
+      "name": "windows-client-build",
+      "status": "passed",
+      "path": "native-mock/windows-build.json",
+      "binaryIncluded": false,
+      "binarySha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff"
+    },
+    {
+      "name": "actual-windows-three-tabs-and-monthly",
+      "status": "passed",
+      "path": "../native-zh-cn-20261029/windows-live/navigation-result.json"
+    },
+    {
+      "name": "unchanged-existing-economy",
+      "status": "passed",
+      "path": "../native-zh-cn-20261029/windows-live/economy-preservation.json"
+    }
+  ],
+  "windowsBaseline": {
+    "path": "windows-live/evidence/before-ui-change.json",
+    "credit": 100,
+    "gold": 10000,
+    "historicalUsdcOrders": 3,
+    "newPaymentClaim": false
+  },
+  "historicalPaymentEvidence": {
+    "path": "../sui-usdc-recharge-v1-20261029/README.md",
+    "retestedByThisBundle": false,
+    "oldUiScreenshotsSupersededByThisTopic": true,
+    "oldManifestRegenerated": false
+  },
+  "humanFrontendAccepted": false,
+  "excluded": [
+    "private keys",
+    "full account stores",
+    "APPDATA",
+    "raw user preferences",
+    "harnesses",
+    "binaries",
+    "large build logs",
+    "new chain transactions"
+  ],
+  "complete": true,
+  "sourceFiles": [
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_display.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/.gitattributes",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/BILLING-HAN-SOURCE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MIR2BillingHan-Regular.ttf",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "raw": true,
+      "expectedSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "raw": true,
+      "expectedSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansSC-BillingHan.txt",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/METADATA.pb",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/NotoSansSC-Text400.eot",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/generate-billing-han.py",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/verify-simplified-font.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ar.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.en.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.hi.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.id.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.pt-BR.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ru.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.th.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.vi.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-CN.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-TW.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/billing_browser.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_locale.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "raw": false
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "raw": false
+    }
+  ],
+  "startupFailure": {
+    "status": "fixed-and-actual-windows-startup-menu-navigation-restart-retested",
+    "path": "../native-zh-cn-20261029/windows-live/evidence/first-simplified-startup-failure.json",
+    "supersededBuildSha256": "5dc223de381b32cecc5b13f7e52e48c9ed12a4b1f6998a52709d691140ba58ce",
+    "fixedBuildSha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff"
+  },
+  "build": {
+    "sha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff",
+    "bytes": 149412864,
+    "binaryIncluded": false,
+    "actualDesktopRetestPending": false
+  },
+  "completionDefinition": "This round only: implemented UI technical goals, focused/static checks and actual Windows language/navigation/restart with preserved existing economic fields. Does not close release, production or human acceptance gates.",
+  "releaseGateLimitations": {
+    "fullPackageAndVerifySelfTests": {
+      "passed": false,
+      "reason": "Unchanged existing skillbar Title/meta.json identity mismatch blocks early, before the focused changed sections."
+    },
+    "trustedInnoCompilerAndCompleteTranslationClosure": {
+      "verified": false,
+      "reason": "Trusted Inno compiler is not installed; static recipe checks do not replace actual compiler validation."
+    },
+    "installerCompileInstallAndSigning": {
+      "verified": false
+    },
+    "productionDeploy": {
+      "performed": false
+    },
+    "fullManualLinguisticReview": {
+      "accepted": false,
+      "systemKeys": 9769,
+      "reason": "2362 reused shared Simplified entries plus 7407 offline-converted entries; not 9769 human-reviewed translations."
+    },
+    "humanFrontendAcceptance": {
+      "accepted": false
+    },
+    "gpuPhaseBoundary": "44 shell and 39 billing captures predate later two system captions and the display-label fix; final gameplay 3, focused display 7/counter 1 and actual native startup/restart 10 were separately run. No claim that every old suite was rerun on every final source."
+  },
+  "actualWindows": {
+    "screenshotsStoredInSibling": "../native-zh-cn-20261029/windows-live/screenshots/",
+    "reusedScreenshots": [
+      7,
+      8,
+      9
+    ],
+    "finalRestartScreenshot": 10,
+    "newPaymentAttempted": false,
+    "paymentChannelsDisabledDuringUiCheck": true
+  },
+  "packagingEvidence": "../native-zh-cn-20261029/packaging/static-focused-validation.json"
+}

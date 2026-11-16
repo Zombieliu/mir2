@@ -1,0 +1,24 @@
+{"stage": "signed-bundle-match", "index": 0, "sha256": "F7D89DE99E3BC3F565C58E4713870D78D9B446BFEE9651D30BA9D7C559A73CFE", "size": 60853297}
+{"stage": "bundle", "index": 0, "files": 1667, "bytes": 60853297}
+{"stage": "signed-bundle-match", "index": 1, "sha256": "112D1F77A20D0DA51F62BCBC488827530F5B854F91F7D423D101CAEDB0109ECC", "size": 58054864}
+{"stage": "bundle", "index": 1, "files": 3564, "bytes": 58054864}
+{"stage": "signed-bundle-match", "index": 2, "sha256": "567DFAE85CC7E726E99DFE74F7C9B6A3E1AB868F6C6727F5153A1D5ABEAC92C1", "size": 65945319}
+{"stage": "bundle", "index": 2, "files": 11380, "bytes": 65945319}
+{"stage": "signed-bundle-match", "index": 3, "sha256": "3FF41A0E69A58FAAEA5B1327AC5900079A043607D94999FFC18ED312BD7F6945", "size": 65515198}
+{"stage": "bundle", "index": 3, "files": 9780, "bytes": 65515198}
+{"stage": "signed-bundle-match", "index": 4, "sha256": "1E4052AA3F158A98B8D33306DDA36E788662EA58E625BB7C1F7A8E7CA3153B3E", "size": 58094559}
+{"stage": "bundle", "index": 4, "files": 23081, "bytes": 58094559}
+{"stage": "signed-bundle-match", "index": 5, "sha256": "AC4D15842886A496F093D585E02F9ADCC6C3CF3CC3C763A3021B0C56E01431E3", "size": 49934822}
+{"stage": "bundle", "index": 5, "files": 33996, "bytes": 49934822}
+{"stage": "signed-bundle-match", "index": 6, "sha256": "3E8B19DFD08F94AA7EAC46EF88001D199B6E6BE1BA3F9382BE2F9D39B5CF6BB3", "size": 63353851}
+{"stage": "bundle", "index": 6, "files": 6859, "bytes": 63353851}
+{"stage": "signed-bundle-match", "index": 7, "sha256": "0A685AD8D38E5BB86DB4AFF061A884408EA390A74170030E77CAD7059509D8B0", "size": 60629129}
+{"stage": "bundle", "index": 7, "files": 14111, "bytes": 60629129}
+{"stage": "signed-bundle-match", "index": 8, "sha256": "792DB75E22E4D9066F2529C3F117655C0EC794EB47B431B49FBA6C78760F052E", "size": 59469514}
+{"stage": "bundle", "index": 8, "files": 17248, "bytes": 59469514}
+{"stage": "signed-bundle-match", "index": 9, "sha256": "25FED6BDB5BBA24C651B90EBABE0805DCBD1429149D61241A4D7A0CA48BB8059", "size": 42095227}
+{"stage": "bundle", "index": 9, "files": 4278, "bytes": 42095227}
+{"stage": "signed-bundle-match", "index": 10, "sha256": "F176D5DBA713D8BD9BE0DE94B7A7FE1FEC48493049A0218C2BAA144D3312D0B5", "size": 36243793}
+{"stage": "bundle", "index": 10, "files": 1, "bytes": 36243793}
+{"stage": "delta", "baseSha256": "9930C82045DF5E6A25EB7201265090E690200698B18EA526CA5E66173E7C6869", "bytes": 25424169, "operationCount": 21, "copyBytes": 30818900, "literalBytes": 80194476}
+{"stage": "signed-regeneration-complete", "passed": true, "bundles": 11, "patches": 1, "elapsedSeconds": 311.795}

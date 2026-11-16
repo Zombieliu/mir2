@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "bounded-static-prepared-release-helper-review",
+  "reviewedAt": "2026-10-25T12:29:42.2092453Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\prepared-v3.json",
+    "bytes": 5882,
+    "sha256": "381ba589b9f2a8ead0c752ac39ca6dee0aed6e585a380dbf5b81263d4a06275c"
+  },
+  "checks": {
+    "newPreparedRawPins": 8,
+    "allNewPinsMatch": true,
+    "originalV1V2RawPins": 21,
+    "allOriginalPinsUnchanged": true,
+    "inverseSourceFiles": 4,
+    "inverseRules": 18,
+    "allInversesExact": true,
+    "expectedBackendInputs": 44,
+    "expectedRustInputs": 39,
+    "expectedCargoInputs": 5,
+    "allowedBackendDeltaCount": 5,
+    "otherOriginalInputsUnchanged": 39,
+    "preservedFourNoneFixtureInverse": true,
+    "ignoredInclusiveUntrackedGuard": true,
+    "trackedCleanNewCommittedHeadGuard": true,
+    "rawGitAttributesComparedWithoutRewrite": true,
+    "actualFunctionalReceiptRawPinAndSameFiveSourcePinsRequired": true,
+    "functionalChecksRequireExactTrue": [
+      "rustFocusedPassed",
+      "adjacentPassed",
+      "rustfmtPassed"
+    ],
+    "old855bAndA430ExecutableHashesRejected": true,
+    "releaseToolchain": "installed1.95.0; locked/offline Release; jobs4; active MSVC amd64",
+    "exclusiveImmutableBinaryAndUniqueArtifactOutputs": true,
+    "sourceAndBuildBeforeAfterBinding": true
+  },
+  "scope": {
+    "pendingStateVerified": "PENDING_FINAL_COMMITTED_BACKEND_SOURCE",
+    "actualFinalHeadStillPending": true,
+    "actualValidationReceiptStillPending": true,
+    "captureOrGuardExecuted": false,
+    "cargoOrRustupExecuted": false,
+    "productOrSchemaTestsExecuted": false,
+    "moduleOrGateImported": false,
+    "realmOrAccountCreated": false,
+    "productionInputsEdited": false
+  },
+  "limitations": [
+    "This verifies the prepared scripts and raw-byte derivations only. The root must provide the actual committed five-file source pins and real passing functional-summary JSON before source capture.",
+    "Build success is not full16 or capacity acceptance. The new Release must later receive its own ordinary functional and capacity evidence."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "blockingFindingIds": [],
+    "eligibleForActualBuildNow": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

@@ -1,0 +1,4290 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:03:18.932Z",
+  "parameters": {
+    "schemaVersion": 1,
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "bodySide": 3,
+    "haloSide": 5,
+    "bounds": {
+      "minX": 208,
+      "maxX": 376,
+      "minY": 512,
+      "maxY": 682
+    },
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "actors": 100,
+    "prefixes": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "fighterIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "maxExpanded": 4000,
+    "stableWitnessRange": 6,
+    "bodyExcludesCanonicalInitialMonsters": true,
+    "initialDangerHalfWidth": 8,
+    "initialDangerHalfHeight": 6,
+    "ordinaryProtocolOnly": true,
+    "freshWarrior": true,
+    "grants": false,
+    "newSpawnRules": false,
+    "productChanges": false,
+    "attacksPerFighterMinute": 18,
+    "positiveHitsPerFighterMinute": 12,
+    "minimumNativeCompletion": 0.95,
+    "minimumRunFraction": 0.5,
+    "minimumDistinctCells": 80,
+    "opportunityMs": 750,
+    "commandsPerSecond": 3,
+    "actualRuntimeLimitsUnchanged": {
+      "pathTargets": 4,
+      "adjacentGoals": 8,
+      "searchNodesPerPath": 4000,
+      "attackDeadlineMs": 900,
+      "chaseMoves": 40,
+      "chaseMs": 30000,
+      "visits": 3
+    },
+    "accepted": false,
+    "capacityAccepted": false,
+    "staticOnly": true
+  },
+  "geometrySelfChecks": {
+    "passed": true,
+    "boundaryChecks": 3,
+    "scope": "Pure integer geometry self-checks; no runtime or acceptance claim"
+  },
+  "legalCount": 6404,
+  "rejectedReasons": {
+    "body-initial-danger-8x6": 8512,
+    "halo-static-terrain-NPC-or-transfer": 16170,
+    "body-canonical-initial-monster": 2760
+  },
+  "canonicalWeakSlots": 510,
+  "targetsInsideBounds": [
+    {
+      "slot": 0,
+      "x": 292,
+      "y": 517,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206200,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 1,
+      "x": 325,
+      "y": 600,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206201,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 2,
+      "x": 310,
+      "y": 582,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206202,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 3,
+      "x": 290,
+      "y": 567,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206203,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 5,
+      "x": 290,
+      "y": 537,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206205,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 8,
+      "x": 322,
+      "y": 587,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206208,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 10,
+      "x": 331,
+      "y": 556,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206210,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 14,
+      "x": 343,
+      "y": 592,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206214,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 15,
+      "x": 347,
+      "y": 576,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206215,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 16,
+      "x": 311,
+      "y": 561,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206216,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 17,
+      "x": 329,
+      "y": 546,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206217,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 18,
+      "x": 335,
+      "y": 531,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206218,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 19,
+      "x": 318,
+      "y": 516,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206219,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 20,
+      "x": 326,
+      "y": 599,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206220,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 21,
+      "x": 331,
+      "y": 581,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206221,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 22,
+      "x": 310,
+      "y": 566,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206222,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 23,
+      "x": 305,
+      "y": 551,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206223,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 24,
+      "x": 316,
+      "y": 536,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206224,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 25,
+      "x": 308,
+      "y": 521,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206225,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 27,
+      "x": 340,
+      "y": 586,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206227,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 28,
+      "x": 311,
+      "y": 571,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206228,
+      "ruleIndex": 62,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 340,
+        "y": 550
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 0,
+      "x": 238,
+      "y": 557,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206300,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 1,
+      "x": 215,
+      "y": 584,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206301,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 2,
+      "x": 287,
+      "y": 611,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206302,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 3,
+      "x": 232,
+      "y": 538,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206303,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 4,
+      "x": 226,
+      "y": 565,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206304,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 5,
+      "x": 211,
+      "y": 592,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206305,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 6,
+      "x": 233,
+      "y": 519,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206306,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 7,
+      "x": 225,
+      "y": 546,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206307,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 8,
+      "x": 208,
+      "y": 573,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206308,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 9,
+      "x": 211,
+      "y": 600,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206309,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 10,
+      "x": 224,
+      "y": 527,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206310,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 11,
+      "x": 218,
+      "y": 554,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206311,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 13,
+      "x": 235,
+      "y": 608,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206313,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 14,
+      "x": 297,
+      "y": 534,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206314,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 16,
+      "x": 278,
+      "y": 588,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206316,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 17,
+      "x": 213,
+      "y": 516,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206317,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 18,
+      "x": 290,
+      "y": 542,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206318,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 19,
+      "x": 279,
+      "y": 569,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206319,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 20,
+      "x": 281,
+      "y": 596,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206320,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 22,
+      "x": 291,
+      "y": 550,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206322,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 23,
+      "x": 271,
+      "y": 577,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206323,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 24,
+      "x": 289,
+      "y": 604,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206324,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 25,
+      "x": 281,
+      "y": 531,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206325,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 26,
+      "x": 272,
+      "y": 558,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206326,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 27,
+      "x": 248,
+      "y": 585,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206327,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 28,
+      "x": 231,
+      "y": 613,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206328,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 29,
+      "x": 267,
+      "y": 539,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206329,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 30,
+      "x": 255,
+      "y": 566,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206330,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 31,
+      "x": 244,
+      "y": 593,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206331,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 32,
+      "x": 268,
+      "y": 520,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206332,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 33,
+      "x": 260,
+      "y": 547,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206333,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 34,
+      "x": 241,
+      "y": 574,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206334,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 35,
+      "x": 245,
+      "y": 601,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206335,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 36,
+      "x": 255,
+      "y": 528,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206336,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 37,
+      "x": 249,
+      "y": 555,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206337,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 38,
+      "x": 228,
+      "y": 582,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206338,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 39,
+      "x": 280,
+      "y": 609,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206339,
+      "ruleIndex": 63,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 247,
+        "y": 565
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 0,
+      "x": 338,
+      "y": 549,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206400,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 1,
+      "x": 295,
+      "y": 537,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206401,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 2,
+      "x": 311,
+      "y": 524,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206402,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 4,
+      "x": 338,
+      "y": 569,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206404,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 5,
+      "x": 312,
+      "y": 557,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206405,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 6,
+      "x": 343,
+      "y": 544,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206406,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 7,
+      "x": 292,
+      "y": 532,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206407,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 8,
+      "x": 336,
+      "y": 518,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206408,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 10,
+      "x": 346,
+      "y": 564,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206410,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 11,
+      "x": 312,
+      "y": 552,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206411,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 12,
+      "x": 340,
+      "y": 539,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206412,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 13,
+      "x": 291,
+      "y": 527,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206413,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 14,
+      "x": 295,
+      "y": 513,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206414,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 16,
+      "x": 348,
+      "y": 559,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206416,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 17,
+      "x": 317,
+      "y": 547,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206417,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 18,
+      "x": 332,
+      "y": 534,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206418,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 19,
+      "x": 330,
+      "y": 521,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206419,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 21,
+      "x": 316,
+      "y": 567,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206421,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 22,
+      "x": 350,
+      "y": 554,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206422,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 23,
+      "x": 320,
+      "y": 542,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206423,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 24,
+      "x": 330,
+      "y": 529,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206424,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 25,
+      "x": 299,
+      "y": 516,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206425,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 27,
+      "x": 323,
+      "y": 562,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206427,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 28,
+      "x": 350,
+      "y": 549,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206428,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 29,
+      "x": 307,
+      "y": 537,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206429,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 30,
+      "x": 323,
+      "y": 524,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206430,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 32,
+      "x": 350,
+      "y": 569,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206432,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 33,
+      "x": 324,
+      "y": 557,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206433,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 34,
+      "x": 292,
+      "y": 545,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206434,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 35,
+      "x": 304,
+      "y": 532,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206435,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 36,
+      "x": 291,
+      "y": 519,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206436,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 38,
+      "x": 295,
+      "y": 565,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206438,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 39,
+      "x": 324,
+      "y": 552,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206439,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 40,
+      "x": 291,
+      "y": 540,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206440,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 41,
+      "x": 303,
+      "y": 527,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206441,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 42,
+      "x": 307,
+      "y": 513,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206442,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 44,
+      "x": 298,
+      "y": 560,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206444,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 45,
+      "x": 329,
+      "y": 547,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206445,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 46,
+      "x": 344,
+      "y": 534,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206446,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 47,
+      "x": 344,
+      "y": 521,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206447,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 49,
+      "x": 328,
+      "y": 567,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206449,
+      "ruleIndex": 64,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 330,
+        "y": 530
+      },
+      "spawnSpread": 40
+    },
+    {
+      "slot": 0,
+      "x": 256,
+      "y": 621,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206500,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 1,
+      "x": 249,
+      "y": 670,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206501,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 2,
+      "x": 240,
+      "y": 586,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206502,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 3,
+      "x": 234,
+      "y": 619,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206503,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 4,
+      "x": 268,
+      "y": 668,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206504,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 5,
+      "x": 212,
+      "y": 585,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206505,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 6,
+      "x": 220,
+      "y": 617,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206506,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 7,
+      "x": 283,
+      "y": 666,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206507,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 8,
+      "x": 305,
+      "y": 583,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206508,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 9,
+      "x": 330,
+      "y": 614,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206509,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 10,
+      "x": 219,
+      "y": 665,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206510,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 11,
+      "x": 277,
+      "y": 582,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206511,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 12,
+      "x": 243,
+      "y": 613,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206512,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 13,
+      "x": 274,
+      "y": 662,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206513,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 14,
+      "x": 255,
+      "y": 581,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206514,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 15,
+      "x": 284,
+      "y": 611,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206515,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 16,
+      "x": 292,
+      "y": 660,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206516,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 17,
+      "x": 231,
+      "y": 580,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206517,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 18,
+      "x": 232,
+      "y": 610,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206518,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 19,
+      "x": 231,
+      "y": 659,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206519,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 20,
+      "x": 210,
+      "y": 579,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206520,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 21,
+      "x": 261,
+      "y": 608,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206521,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 22,
+      "x": 241,
+      "y": 657,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206522,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 23,
+      "x": 309,
+      "y": 577,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206523,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 24,
+      "x": 294,
+      "y": 606,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206524,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 25,
+      "x": 259,
+      "y": 655,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206525,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 26,
+      "x": 287,
+      "y": 576,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206526,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 27,
+      "x": 242,
+      "y": 605,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206527,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 28,
+      "x": 273,
+      "y": 653,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206528,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 29,
+      "x": 265,
+      "y": 575,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206529,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 30,
+      "x": 288,
+      "y": 603,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206530,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 31,
+      "x": 285,
+      "y": 651,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206531,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 32,
+      "x": 243,
+      "y": 574,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206532,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 33,
+      "x": 237,
+      "y": 602,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206533,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 34,
+      "x": 264,
+      "y": 649,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206534,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 35,
+      "x": 221,
+      "y": 573,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206535,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 36,
+      "x": 291,
+      "y": 600,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206536,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 37,
+      "x": 252,
+      "y": 647,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206537,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 38,
+      "x": 318,
+      "y": 571,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206538,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 39,
+      "x": 248,
+      "y": 599,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206539,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 40,
+      "x": 221,
+      "y": 645,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206540,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 41,
+      "x": 293,
+      "y": 570,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206541,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 42,
+      "x": 330,
+      "y": 597,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206542,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 43,
+      "x": 238,
+      "y": 642,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206543,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 44,
+      "x": 272,
+      "y": 569,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206544,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 45,
+      "x": 271,
+      "y": 596,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206545,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 46,
+      "x": 300,
+      "y": 639,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206546,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 47,
+      "x": 252,
+      "y": 568,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206547,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 48,
+      "x": 230,
+      "y": 595,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206548,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 49,
+      "x": 237,
+      "y": 637,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206549,
+      "ruleIndex": 65,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 0,
+      "x": 230,
+      "y": 574,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206600,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 1,
+      "x": 224,
+      "y": 602,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206601,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 2,
+      "x": 251,
+      "y": 649,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206602,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 3,
+      "x": 329,
+      "y": 572,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206603,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 4,
+      "x": 275,
+      "y": 600,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206604,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 5,
+      "x": 237,
+      "y": 647,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206605,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 6,
+      "x": 305,
+      "y": 571,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206606,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 7,
+      "x": 235,
+      "y": 599,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206607,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 8,
+      "x": 263,
+      "y": 644,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206608,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 9,
+      "x": 280,
+      "y": 570,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206609,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 10,
+      "x": 300,
+      "y": 597,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206610,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 11,
+      "x": 225,
+      "y": 642,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206611,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 12,
+      "x": 258,
+      "y": 569,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206612,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 13,
+      "x": 258,
+      "y": 596,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206613,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 14,
+      "x": 252,
+      "y": 639,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206614,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 15,
+      "x": 239,
+      "y": 568,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206615,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 16,
+      "x": 217,
+      "y": 595,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206616,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 17,
+      "x": 224,
+      "y": 637,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206617,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 18,
+      "x": 220,
+      "y": 567,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206618,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 19,
+      "x": 273,
+      "y": 593,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206619,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 20,
+      "x": 241,
+      "y": 634,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206620,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 21,
+      "x": 322,
+      "y": 565,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206621,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 22,
+      "x": 243,
+      "y": 592,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206622,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 23,
+      "x": 321,
+      "y": 631,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206623,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 24,
+      "x": 259,
+      "y": 682,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206624,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 25,
+      "x": 215,
+      "y": 591,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206625,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 26,
+      "x": 286,
+      "y": 628,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206626,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 27,
+      "x": 278,
+      "y": 677,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206627,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 28,
+      "x": 305,
+      "y": 589,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206628,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 29,
+      "x": 228,
+      "y": 626,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206629,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 30,
+      "x": 214,
+      "y": 674,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206630,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 31,
+      "x": 277,
+      "y": 588,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206631,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 32,
+      "x": 286,
+      "y": 623,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206632,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 33,
+      "x": 216,
+      "y": 672,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206633,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 34,
+      "x": 250,
+      "y": 587,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206634,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 35,
+      "x": 237,
+      "y": 621,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206635,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 36,
+      "x": 230,
+      "y": 670,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206636,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 37,
+      "x": 221,
+      "y": 586,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206637,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 38,
+      "x": 214,
+      "y": 619,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206638,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 39,
+      "x": 249,
+      "y": 668,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206639,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 40,
+      "x": 314,
+      "y": 584,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206640,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 41,
+      "x": 287,
+      "y": 616,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206641,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 42,
+      "x": 264,
+      "y": 666,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206642,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 43,
+      "x": 280,
+      "y": 583,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206643,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 44,
+      "x": 293,
+      "y": 614,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206644,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 45,
+      "x": 279,
+      "y": 664,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206645,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 46,
+      "x": 258,
+      "y": 582,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206646,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 47,
+      "x": 222,
+      "y": 613,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206647,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 48,
+      "x": 255,
+      "y": 662,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206648,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 49,
+      "x": 236,
+      "y": 581,
+      "name": "Scarecrow",
+      "ai": 0,
+      "objectId": 206649,
+      "ruleIndex": 66,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 270,
+        "y": 625
+      },
+      "spawnSpread": 60
+    },
+    {
+      "slot": 0,
+      "x": 270,
+      "y": 599,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206700,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 1,
+      "x": 261,
+      "y": 649,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206701,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 2,
+      "x": 313,
+      "y": 583,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206702,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 3,
+      "x": 342,
+      "y": 606,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206703,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 4,
+      "x": 282,
+      "y": 662,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206704,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 5,
+      "x": 314,
+      "y": 589,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206705,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 6,
+      "x": 261,
+      "y": 615,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206706,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 7,
+      "x": 282,
+      "y": 575,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206707,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 8,
+      "x": 259,
+      "y": 596,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206708,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 9,
+      "x": 250,
+      "y": 638,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206709,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 10,
+      "x": 249,
+      "y": 581,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206710,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 11,
+      "x": 276,
+      "y": 603,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206711,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 12,
+      "x": 261,
+      "y": 657,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206712,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 13,
+      "x": 343,
+      "y": 586,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206713,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 14,
+      "x": 275,
+      "y": 611,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206714,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 15,
+      "x": 285,
+      "y": 669,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206715,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 16,
+      "x": 342,
+      "y": 592,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206716,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 17,
+      "x": 288,
+      "y": 624,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206717,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 18,
+      "x": 288,
+      "y": 578,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206718,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    },
+    {
+      "slot": 19,
+      "x": 345,
+      "y": 599,
+      "name": "Deer",
+      "ai": 2,
+      "objectId": 206719,
+      "ruleIndex": 67,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "spawnCenter": {
+        "x": 295,
+        "y": 625
+      },
+      "spawnSpread": 50
+    }
+  ],
+  "topSpatiallySeparatedHomes": [
+    {
+      "home": {
+        "x": 271,
+        "y": 597
+      },
+      "targets": 5,
+      "scarecrows": 2,
+      "ids": [
+        206545,
+        206604,
+        206619,
+        206700,
+        206711
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 20,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 239,
+        "y": 596
+      },
+      "targets": 5,
+      "scarecrows": 2,
+      "ids": [
+        206331,
+        206335,
+        206533,
+        206607,
+        206622
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 52,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 215,
+        "y": 588
+      },
+      "targets": 5,
+      "scarecrows": 2,
+      "ids": [
+        206301,
+        206305,
+        206505,
+        206625,
+        206637
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 76,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 252,
+        "y": 585
+      },
+      "targets": 5,
+      "scarecrows": 2,
+      "ids": [
+        206327,
+        206514,
+        206634,
+        206646,
+        206710
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 39,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 255,
+        "y": 651
+      },
+      "targets": 5,
+      "scarecrows": 1,
+      "ids": [
+        206525,
+        206537,
+        206602,
+        206701,
+        206712
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 62,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 283,
+        "y": 573
+      },
+      "targets": 5,
+      "scarecrows": 1,
+      "ids": [
+        206319,
+        206526,
+        206609,
+        206707,
+        206718
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 287,
+        "y": 618
+      },
+      "targets": 4,
+      "scarecrows": 3,
+      "ids": [
+        206632,
+        206641,
+        206644,
+        206717
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 2,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 274,
+        "y": 587
+      },
+      "targets": 4,
+      "scarecrows": 3,
+      "ids": [
+        206316,
+        206619,
+        206631,
+        206643
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 30,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 232,
+        "y": 578
+      },
+      "targets": 4,
+      "scarecrows": 2,
+      "ids": [
+        206338,
+        206517,
+        206600,
+        206649
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 59,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 224,
+        "y": 569
+      },
+      "targets": 4,
+      "scarecrows": 2,
+      "ids": [
+        206304,
+        206535,
+        206600,
+        206618
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 67,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 277,
+        "y": 666
+      },
+      "targets": 4,
+      "scarecrows": 1,
+      "ids": [
+        206507,
+        206513,
+        206645,
+        206704
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 51,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 3
+      }
+    },
+    {
+      "home": {
+        "x": 281,
+        "y": 610
+      },
+      "targets": 4,
+      "scarecrows": 1,
+      "ids": [
+        206302,
+        206339,
+        206515,
+        206641
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 9,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 247,
+        "y": 596
+      },
+      "targets": 4,
+      "scarecrows": 1,
+      "ids": [
+        206331,
+        206335,
+        206539,
+        206622
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 242,
+        "y": 588
+      },
+      "targets": 4,
+      "scarecrows": 1,
+      "ids": [
+        206327,
+        206331,
+        206502,
+        206622
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 49,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 274,
+        "y": 573
+      },
+      "targets": 4,
+      "scarecrows": 1,
+      "ids": [
+        206319,
+        206323,
+        206544,
+        206609
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 44,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": {
+        "x": 263,
+        "y": 653
+      },
+      "targets": 4,
+      "scarecrows": 0,
+      "ids": [
+        206525,
+        206534,
+        206701,
+        206712
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 58,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    },
+    {
+      "home": {
+        "x": 236,
+        "y": 606
+      },
+      "targets": 4,
+      "scarecrows": 0,
+      "ids": [
+        206313,
+        206518,
+        206527,
+        206533
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 55,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 0
+      }
+    },
+    {
+      "home": {
+        "x": 213,
+        "y": 669
+      },
+      "targets": 3,
+      "scarecrows": 2,
+      "ids": [
+        206510,
+        206630,
+        206633
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 94,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 1
+      }
+    },
+    {
+      "home": {
+        "x": 251,
+        "y": 666
+      },
+      "targets": 3,
+      "scarecrows": 2,
+      "ids": [
+        206501,
+        206639,
+        206648
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 70,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 4
+      }
+    },
+    {
+      "home": {
+        "x": 259,
+        "y": 661
+      },
+      "targets": 3,
+      "scarecrows": 2,
+      "ids": [
+        206642,
+        206648,
+        206712
+      ],
+      "bootstrap": {
+        "found": true,
+        "steps": 62,
+        "noTransfer": true,
+        "noInitialDanger": true,
+        "initialMonsterCrossings": 2
+      }
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11361,
+      "sha256": "3f559db681d0c606dae4db5bdbdd4474a21ff7f8ded128ba684fcaca9bf40df6"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/inspect-candidates.mjs",
+      "bytes": 1832,
+      "sha256": "d17e2ed511dc98640151509a13762bf248c3f81e20302a431fc5b6e74be7b0f8"
+    }
+  ],
+  "accepted": false,
+  "capacityAccepted": false
+}

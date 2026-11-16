@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T18:08:48.578Z",
+  "runId": "1792951023370-34757a8d",
+  "scope": "Small independent facts check of actual sealed ended12 tool execution and original public report/cleanup only. No raw/monitor/recording/executable scan or OS query repeated.",
+  "independentVerification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\final-verification.json",
+    "bytes": 159743,
+    "sha256": "38452bccbf6020c4a38b6112591936b4801f4ca13f459b53b6c9c3f6cc4f1dc7"
+  },
+  "actualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 813,
+    "sha256": "87803d64b90b7bbce5564a79e8b08f7ea79607b0e6cb6ca4e7d9e3fd684a4a99"
+  },
+  "actualLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\actual-verification.log",
+    "bytes": 1811,
+    "sha256": "43c522260d7cdfc2de1670e288a13d833fff7a5c9c84c8e6455469d31a82df05"
+  },
+  "toolSourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 1965,
+    "sha256": "84515e3b03aba3aa5ae072f23ed3d622e648197ffcfcb71c1e38a73a9f850a27"
+  },
+  "toolInputsChecked": 9,
+  "toolInputsStillMatch": true,
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-independent-cleanup-v1.json",
+    "bytes": 324,
+    "sha256": "379c8d9dd3a7acf898a46aba230ec3c31f74ff448104ea7ba17001448e7b462a"
+  },
+  "boundedPublicPins": {
+    "report": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\release-native-v2-attack-deadline-ladder-12\\reports\\1792951023370-34757a8d.report.json",
+      "bytes": 26347,
+      "sha256": "36a21c5d838add035fbdf0d993868cb07744c34810246e603d0cf388573ab86e"
+    },
+    "realmCleanup": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\release-native-v2-attack-deadline-ladder-12\\realm-cleanup.json",
+      "bytes": 4835,
+      "sha256": "f9a5a0d5beefc0040454795203d3c1b9f9e7febd35c53984a2474f1bd08f3efe"
+    },
+    "reportProvenance": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\release-native-v2-attack-deadline-ladder-12\\report-provenance.json",
+      "bytes": 6604,
+      "sha256": "05c779c07d0ef895fed56664cbbfbfde6af091301b94d22181a196dd797f7b95"
+    },
+    "catalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\collect-formal-native-v2-attack-deadline-ladder-12-public-artifact-catalog.json",
+      "bytes": 66754,
+      "sha256": "008d1d52f4c47285555cec7b818a9b9069aefa0525a6ad0c585c76bf8ee74169"
+    },
+    "publicCopy": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\public-copy-provenance.json",
+      "bytes": 68222,
+      "sha256": "3cfd6c0a3f247aec4bb0bf05e74cb145b5e50a45f6fdfda90d4eceb086bc3003"
+    },
+    "publicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\public-verification.json",
+      "bytes": 7171,
+      "sha256": "f15e58dfa7fa1d7c957fa3610a2cd43e8d4919508395c89cde6f192d140ccacd"
+    },
+    "collectionVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-attack-deadline-ladder-12\\collection-verification.json",
+      "bytes": 136176,
+      "sha256": "dd814fdd6817c311c40ccc94bec92f3676bf7e9c1c0f8423bc8e4ef357eda3f2"
+    }
+  },
+  "identities": {
+    "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendInputs": 44,
+    "gatewaySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneSourceSha256": "e3eaf0604f0e99fde70fbbe90585f171e3a5068b6e89e1fffbaab13dafe92adf",
+    "sourceConfigSha256": "0e8cd1d740ac7705aae678ebb5edabc274e2957562754455fdb5182ba5c72336"
+  },
+  "formalResultKnown": true,
+  "formalRunPassed": false,
+  "formalFailed": true,
+  "originalReportOk": false,
+  "originalPlayableCapacityAccepted": false,
+  "completedStages": [],
+  "peakControlledActors": 2,
+  "firstFailure": {
+    "reason": "A participating actor received a real gameplay failure",
+    "evidence": {
+      "actor": "L6b35ac00",
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "rejected"
+    }
+  },
+  "phaseChecks": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 122.079,
+      "completed": false,
+      "completeWindowCount": 2,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-25",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-50",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-100",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 7200,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 120,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "post-resume-observation",
+      "configuredSeconds": 60,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 1,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    }
+  ],
+  "continuous": {
+    "assessedWindows": 6,
+    "failureCount": 3,
+    "source": "Actual original report and independently replayed ended-verifier summary; no new raw replay here."
+  },
+  "rawSummary": {
+    "rows": 1888,
+    "bytes": 2054564,
+    "sha256": "6e9a23aab7d71faee1b2e109aba076da722efcf3785f71a079137b0bbf9b1619",
+    "wholeRunCorrectedMovementActions": 0,
+    "correctedActionsTruncated": false,
+    "rawReadHere": false
+  },
+  "hp": {
+    "observedStatuses": {},
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "notContinuousHpCoverage": true
+  },
+  "wireDiagnostics": {
+    "present": true,
+    "sourceValid": true,
+    "countsMatch": true,
+    "uninstallSucceeded": true,
+    "complete": false,
+    "reasons": [
+      "producer-status-incomplete-connection-1",
+      "raw-truncation-present"
+    ],
+    "doesNotReclassifyGameFailure": true
+  },
+  "cleanup": {
+    "allSevenChecksTrue": true,
+    "gatewayExit0": true,
+    "monitorExit0": true,
+    "rootProofProcessesAbsent": true,
+    "rootProofPortsFree": true,
+    "gatewayPid": 68516,
+    "monitorPid": 64004,
+    "osQueriesRepeated": false
+  },
+  "publicCopiesVerifiedByOriginalTool": 196,
+  "independentVerificationPassed": true,
+  "actualVerifierExitCode": 0,
+  "originalGameVerdictPreserved": true,
+  "rootP0AcceptanceAdjudicated": false,
+  "p0Accepted": false,
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "productionAccepted": false,
+  "p2ImplementationStarted": false,
+  "causalDiagnosisPerformed": false,
+  "privateDataRead": false,
+  "sourceOrPreviousEvidenceChanged": false,
+  "limitations": [
+    "Passing consistency verification is not a passing game run.",
+    "Stage2 ended at122.079s with2 of5 required complete windows and no completed stage; later phases,100actors,7200soak/resume/save were not reached.",
+    "The first gameplay rejection is not an authoritative collision/root-cause diagnosis and is not a hardware capacity ceiling.",
+    "Earlier preparation/runtime unknown fields remain historical observations."
+  ]
+}

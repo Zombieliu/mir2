@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "native-check",
+  "startedUtc": "2026-10-09T15:29:09.6000852Z",
+  "finishedUtc": "2026-10-09T15:29:31.2096144Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "check",
+    "--manifest-path",
+    "apps/game-client/platform-windows/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1"
+  ],
+  "sourceSnapshotSha256": "521c30f2071c60fae5da0a8d36a0af524a9ed5564c2f46b06918cedbc21d009e",
+  "declaredInputs": 728,
+  "sourceDrift": [],
+  "cargoLogSha256": "f5412003b8e373535bcb1e735f2eb3a21cf69443f102179b9bc5b106a973a84e",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "headlessSidebarTests": false
+}

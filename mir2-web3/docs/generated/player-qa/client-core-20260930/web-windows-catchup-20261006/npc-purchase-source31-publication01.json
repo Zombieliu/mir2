@@ -1,0 +1,105 @@
+{
+  "owner": "Root",
+  "kind": "Source31 actual scoped commit/push and independent remote HEAD verification",
+  "generatedAtUtc": "2026-10-07T19:21:02.288Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "commit": "06da30011e4a98599bfee568e652f6d0839e894d",
+  "branch": "codex/windows-player-journey",
+  "committed": true,
+  "pushed": true,
+  "remoteVerified": true,
+  "actualSelectedFiles": 66,
+  "actualGit": {
+    "head": "06da30011e4a98599bfee568e652f6d0839e894d",
+    "branch": "codex/windows-player-journey",
+    "commit": {
+      "chunk_id": "c56323",
+      "wall_time_seconds": 1.0335878,
+      "exit_code": 0,
+      "original_token_count": 853,
+      "output": "[codex/windows-player-journey 06da30011e] Complete Native purchase application and lossless Web snapshots\n 66 files changed, 306307 insertions(+), 375 deletions(-)\n create mode 100644 mir2-web3/apps/game-client/platform-windows/src/npc_purchase_gateway.rs\n create mode 100644 mir2-web3/apps/game-client/platform-windows/src/npc_purchase_projection.rs\n create mode 100644 mir2-web3/apps/simulation/src/runtime/npc_purchase_snapshot.rs\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-independent-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-native-build-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-offline-cache-inventory01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-offline-file-recovery-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-offline-file-recovery-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-raw-evidence01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-rust-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-rust03-snapshot.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-rust04-snapshot.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-simulation-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-simulation05-snapshot.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-static-build-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-static-build01-snapshot.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-tsc-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-tsc02-snapshot.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-web-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-web07-snapshot.json\n create mode 100644 mir2-web3/packages/game-data/src/crystal_npc_goods.rs\n"
+    },
+    "pushAttempts": [
+      {
+        "result": {
+          "chunk_id": "4ce1bb",
+          "wall_time_seconds": 3.7274207,
+          "exit_code": 1,
+          "original_token_count": 39,
+          "output": "Connection to github.com closed by remote host.\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n"
+        },
+        "succeeded": false
+      },
+      {
+        "result": {
+          "chunk_id": "9502b2",
+          "wall_time_seconds": 5.1404279,
+          "exit_code": 1,
+          "original_token_count": 43,
+          "output": "Connection closed by 198.18.0.132 port 22\r\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n"
+        },
+        "succeeded": false
+      },
+      {
+        "result": {
+          "chunk_id": "a855f1",
+          "wall_time_seconds": 0.0000068,
+          "exit_code": 0,
+          "original_token_count": 25,
+          "output": "To github.com:Zombieliu/mir2.git\n   cb30715f53..06da30011e  HEAD -> codex/windows-player-journey\n"
+        },
+        "succeeded": true,
+        "perCallSsh": "BatchMode=yes,ConnectTimeout=15,ServerAliveInterval=15,ServerAliveCountMax=2; same configured origin; no trust/credentials/global-config changes"
+      }
+    ],
+    "remote": {
+      "chunk_id": "03a856",
+      "wall_time_seconds": 4.151269,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "06da30011e4a98599bfee568e652f6d0839e894d\trefs/heads/codex/windows-player-journey\n"
+    },
+    "postWorktree": {
+      "chunk_id": "a20183",
+      "wall_time_seconds": 0.2293403,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": " M apps/web/tsconfig.json\n"
+    },
+    "postIndex": {
+      "chunk_id": "d1d907",
+      "wall_time_seconds": 0.1686292,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  "normalizationVerification": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-index-verification01.json",
+    "bytes": 39680,
+    "sha256": "d1f68d94424e98b7c237179f6b87c67152bd16d85b9caafebb5a639bca9b443c"
+  },
+  "scopeManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-publication-prepare01.json",
+    "bytes": 33508,
+    "sha256": "102a3c1bead9a96bb9372c12b1a51dceec2bedab55b125ebdf7935ba394ba003"
+  },
+  "finiteResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-finite-result01.json",
+    "bytes": 5071,
+    "sha256": "2669ff3907451ec8933d35520b9b19c5ad7f91c767b05bdfa354a4c13def5f9f"
+  },
+  "unrelatedUserTsconfigPreserved": true,
+  "forcePush": false,
+  "gcAuto": false,
+  "maintenanceAuto": false,
+  "gitNetworkUsed": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "matchingFullProductionCombinationAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalActive": true,
+  "carryNote": "Post-publication receipt created after Source31 commit; this ordinary file is intentionally uncommitted until next source commit. It does not claim inclusion in the commit it records."
+}

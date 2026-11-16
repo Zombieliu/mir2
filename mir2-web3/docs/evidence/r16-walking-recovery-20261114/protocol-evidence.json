@@ -1,0 +1,647 @@
+{
+  "schemaVersion": 1,
+  "kind": "sanitized-private-ordinary-protocol-deer-movement-evidence",
+  "createdAtUtc": "2026-11-13T20:02:36.794155+00:00",
+  "scope": "Two isolated ordinary-protocol probes only. No Web UI, deployment, model, or full Crystal/AI parity acceptance.",
+  "summary": {
+    "r1": "Failed/inconclusive hit: Attack 46 ms after accepted Walk ACK; same-tile correction and no accepted swing/positive damage.",
+    "r2": "Passed protocol-only: one ordinary attack damaged Deer by 2; owner retreated outside safe zones; real changed ObjectWalk received for the selected Deer.",
+    "qualifiedSource": "received-authoritative-ObjectWalk",
+    "fullSnapshotPositionDeltaProved": false,
+    "webUiPassedByThisDigest": false,
+    "overallAiOrCrystalParityProved": false
+  },
+  "clockFacts": {
+    "normalServerWalkActionTimeMs": 600,
+    "r2WaitFromAcceptedWalkAckObservationMs": 650,
+    "r2ObservedWaitMs": 661,
+    "r2WireAckToAttackMs": 707,
+    "movementAckTimeoutMs": 8000,
+    "helperTimeoutMs": 60000,
+    "maxHelperSentCommands": 100,
+    "observationMaxMs": 12000,
+    "attackMaximum": 1,
+    "serverRulesOrDeadlinesChanged": false
+  },
+  "runs": [
+    {
+      "name": "probe-r1",
+      "passed": false,
+      "gatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6",
+      "fixtureSourceSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+      "goldenSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+      "freshNormalLevel1Role": {
+        "level": 1,
+        "x": 288,
+        "y": 616
+      },
+      "ordinaryQ1Q2Acknowledged": true,
+      "earnedWoodenSwordEquipped": true,
+      "localOwnerObjectId": 1000,
+      "localTargetObjectId": 206324,
+      "selected": {
+        "objectId": 206324,
+        "deer": {
+          "x": 289,
+          "y": 604
+        },
+        "attack": {
+          "x": 288,
+          "y": 605
+        },
+        "retreat": {
+          "x": 287,
+          "y": 605
+        },
+        "steps": 11
+      },
+      "acceptedApproachSteps": 11,
+      "attackCount": 1,
+      "walkSendToAttackMs": 47,
+      "acceptedWalkAckToAttackMs": 46,
+      "readinessWait": null,
+      "positiveHit": null,
+      "retreat": null,
+      "realMovementPackets": [],
+      "rawFullSnapshotPositionDeltas": [],
+      "helperSentCount": 18,
+      "helperDurationMs": 10786,
+      "error": {
+        "name": "Error",
+        "message": "Timeout waiting for one ordinary Deer hit"
+      },
+      "ordinaryLogout": true,
+      "allOwnedProcessesAndClientClosed": true,
+      "sourceAndGoldenUnchanged": true,
+      "timeline": [
+        {
+          "sequence": 849,
+          "atUtc": "2026-11-13T19:25:15.139Z",
+          "epochMs": 1794597915139,
+          "flow": "sent",
+          "event": "walk",
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 850,
+          "atUtc": "2026-11-13T19:25:15.140Z",
+          "epochMs": 1794597915140,
+          "flow": "received",
+          "event": "UserLocation",
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 852,
+          "atUtc": "2026-11-13T19:25:15.186Z",
+          "epochMs": 1794597915186,
+          "flow": "sent",
+          "event": "attack",
+          "objectId": 206324
+        },
+        {
+          "sequence": 860,
+          "atUtc": "2026-11-13T19:25:15.268Z",
+          "epochMs": 1794597915268,
+          "flow": "received",
+          "event": "UserLocation",
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 866,
+          "atUtc": "2026-11-13T19:25:19.209Z",
+          "epochMs": 1794597919209,
+          "flow": "sent",
+          "event": "logOut"
+        },
+        {
+          "sequence": 867,
+          "atUtc": "2026-11-13T19:25:21.529Z",
+          "epochMs": 1794597921529,
+          "flow": "received",
+          "event": "LogOutSuccess"
+        }
+      ],
+      "freeze": {
+        "manifestSha256": "b7f324694580d6bbbdbf5ceb3595be12f532ddda90c9ebf007ad68a439b2cd31",
+        "sourcePinsSha256": "c0d9bae41de0b4e0d0163610d325097ea3ec798e24ab8d880dd51008296f95e1",
+        "helperSha256": "a208867797493fa2fb16434da0d47e804afe3d0bf8b65b36f3effbb92ebcdc69",
+        "wrapperSha256": "f744729be162167d0cb9b3c184beca7535da38212f97d7a386b670934fe508a9"
+      }
+    },
+    {
+      "name": "probe-r2",
+      "passed": true,
+      "gatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6",
+      "fixtureSourceSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+      "goldenSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+      "freshNormalLevel1Role": {
+        "level": 1,
+        "x": 288,
+        "y": 616
+      },
+      "ordinaryQ1Q2Acknowledged": true,
+      "earnedWoodenSwordEquipped": true,
+      "localOwnerObjectId": 1000,
+      "localTargetObjectId": 206324,
+      "selected": {
+        "objectId": 206324,
+        "deer": {
+          "x": 289,
+          "y": 604
+        },
+        "attack": {
+          "x": 288,
+          "y": 605
+        },
+        "retreat": {
+          "x": 287,
+          "y": 605
+        },
+        "steps": 11
+      },
+      "acceptedApproachSteps": 11,
+      "attackCount": 1,
+      "walkSendToAttackMs": 708,
+      "acceptedWalkAckToAttackMs": 707,
+      "readinessWait": {
+        "lastAcceptedWalkAt": 1794598316987,
+        "normalWalkWaitMs": 650,
+        "readyAt": 1794598317637,
+        "startedAt": 1794598316987,
+        "endedAt": 1794598317648
+      },
+      "positiveHit": {
+        "source": "DamageIndicator",
+        "sequence": 865,
+        "at": "2026-11-13T19:31:57.752Z",
+        "damage": 2
+      },
+      "retreat": {
+        "from": {
+          "x": 288,
+          "y": 605
+        },
+        "to": {
+          "x": 287,
+          "y": 605
+        },
+        "outsideSafe": true,
+        "distanceFromDeer": 2
+      },
+      "realMovementPackets": [
+        {
+          "packet": "ObjectWalk",
+          "sequence": 884,
+          "at": "2026-11-13T19:31:59.036Z",
+          "objectId": 206324,
+          "x": 288,
+          "y": 605,
+          "direction": "DownLeft",
+          "from": {
+            "x": 289,
+            "y": 604
+          },
+          "changed": true
+        }
+      ],
+      "rawFullSnapshotPositionDeltas": [],
+      "helperSentCount": 19,
+      "helperDurationMs": 8907,
+      "error": null,
+      "ordinaryLogout": true,
+      "allOwnedProcessesAndClientClosed": true,
+      "sourceAndGoldenUnchanged": true,
+      "timeline": [
+        {
+          "sequence": 851,
+          "atUtc": "2026-11-13T19:31:56.941Z",
+          "epochMs": 1794598316941,
+          "flow": "sent",
+          "event": "walk",
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 853,
+          "atUtc": "2026-11-13T19:31:56.942Z",
+          "epochMs": 1794598316942,
+          "flow": "received",
+          "event": "UserLocation",
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 855,
+          "atUtc": "2026-11-13T19:31:57.649Z",
+          "epochMs": 1794598317649,
+          "flow": "sent",
+          "event": "attack",
+          "objectId": 206324
+        },
+        {
+          "sequence": 861,
+          "atUtc": "2026-11-13T19:31:57.752Z",
+          "epochMs": 1794598317752,
+          "flow": "received",
+          "event": "UserLocation",
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 863,
+          "atUtc": "2026-11-13T19:31:57.752Z",
+          "epochMs": 1794598317752,
+          "flow": "received",
+          "event": "ObjectAttack",
+          "objectId": 1000,
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 864,
+          "atUtc": "2026-11-13T19:31:57.752Z",
+          "epochMs": 1794598317752,
+          "flow": "received",
+          "event": "ObjectStruck",
+          "objectId": 206324,
+          "position": {
+            "x": 289,
+            "y": 604
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 865,
+          "atUtc": "2026-11-13T19:31:57.752Z",
+          "epochMs": 1794598317752,
+          "flow": "received",
+          "event": "DamageIndicator",
+          "objectId": 206324,
+          "damage": 2
+        },
+        {
+          "sequence": 866,
+          "atUtc": "2026-11-13T19:31:57.752Z",
+          "epochMs": 1794598317752,
+          "flow": "received",
+          "event": "ObjectHealth",
+          "objectId": 206324,
+          "healthPercent": 92
+        },
+        {
+          "sequence": 867,
+          "atUtc": "2026-11-13T19:31:57.752Z",
+          "epochMs": 1794598317752,
+          "flow": "received",
+          "event": "ObjectAttack",
+          "objectId": 206324,
+          "position": {
+            "x": 289,
+            "y": 604
+          },
+          "movementDirection": "DownLeft"
+        },
+        {
+          "sequence": 872,
+          "atUtc": "2026-11-13T19:31:58.433Z",
+          "epochMs": 1794598318433,
+          "flow": "received",
+          "event": "ObjectStruck",
+          "objectId": 1000,
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "UpRight"
+        },
+        {
+          "sequence": 873,
+          "atUtc": "2026-11-13T19:31:58.433Z",
+          "epochMs": 1794598318433,
+          "flow": "received",
+          "event": "DamageIndicator",
+          "objectId": 1000,
+          "damage": 3
+        },
+        {
+          "sequence": 875,
+          "atUtc": "2026-11-13T19:31:58.434Z",
+          "epochMs": 1794598318434,
+          "flow": "received",
+          "event": "ObjectHealth",
+          "objectId": 1000,
+          "healthPercent": 90
+        },
+        {
+          "sequence": 879,
+          "atUtc": "2026-11-13T19:31:58.439Z",
+          "epochMs": 1794598318439,
+          "flow": "sent",
+          "event": "walk",
+          "movementDirection": "Left"
+        },
+        {
+          "sequence": 882,
+          "atUtc": "2026-11-13T19:31:58.476Z",
+          "epochMs": 1794598318476,
+          "flow": "received",
+          "event": "UserLocation",
+          "position": {
+            "x": 287,
+            "y": 605
+          },
+          "movementDirection": "Left"
+        },
+        {
+          "sequence": 884,
+          "atUtc": "2026-11-13T19:31:59.036Z",
+          "epochMs": 1794598319036,
+          "flow": "received",
+          "event": "ObjectWalk",
+          "objectId": 206324,
+          "position": {
+            "x": 288,
+            "y": 605
+          },
+          "movementDirection": "DownLeft"
+        },
+        {
+          "sequence": 885,
+          "atUtc": "2026-11-13T19:31:59.144Z",
+          "epochMs": 1794598319144,
+          "flow": "sent",
+          "event": "logOut"
+        },
+        {
+          "sequence": 886,
+          "atUtc": "2026-11-13T19:32:02.000Z",
+          "epochMs": 1794598322000,
+          "flow": "received",
+          "event": "LogOutSuccess"
+        }
+      ],
+      "freeze": {
+        "manifestSha256": "44400157a21df149e50b0d52e6c2ff18744486a72d432ec9c02ed708980608a4",
+        "sourcePinsSha256": "2f6fe57d911632895ecf0976a1798b4255533de5090dd48512ef2eb1e2360a03",
+        "helperSha256": "4ab6b62127970c82e531f9e10beb67055a1819f92ac51f5f89ac52d5e1ee7a18",
+        "wrapperSha256": "f744729be162167d0cb9b3c184beca7535da38212f97d7a386b670934fe508a9"
+      }
+    }
+  ],
+  "sourceGapAndLimits": {
+    "rustSource": "Passive Deer eligibility excludes players with chat_profile.in_safe_zone true.",
+    "crystalCSharpSource": "PlayerObject.IsAttackTarget returns true for attacker.Master == null before its InSafeZone rejection.",
+    "safeZoneParityGapResolved": false,
+    "aiImplementationChanged": false,
+    "binaryBinding": "The exact Nov 10 Gateway binary SHA is proved for both probes. Its complete build-source closure is not established. Current/historical source timing corroborates the diagnosis; it is not binary-internal rejection telemetry.",
+    "r1CausalLimit": "No explicit rejection reason was emitted for legacy Attack; timing and same-tile correction are consistent with the source movement-readiness rule, which predates the Nov 10 build.",
+    "r2QualificationLimit": "Only this selected AI2 Deer/private map0 setup is demonstrated; object IDs are local to each isolated process, not persistent identities across runs.",
+    "uiBoundary": "Actual protocol movement is not proof of browser input, walking PNGs, GPU rendering, public cold transfer, or Web UI acceptance.",
+    "otherLimits": [
+      "No all-monster, all-map, timid/flee randomness, multiplayer-load, or full Crystal parity claim.",
+      "No credentials, account contents, or complete private protocol log are copied.",
+      "No rerun/server/network/build/test/repository edit/deployment was performed to prepare this digest."
+    ]
+  },
+  "sourceReferences": [
+    {
+      "repository": "E:\\mir2-player-journey",
+      "commit": "3588207432785fbac6a21aefbd30cbd49a70b476",
+      "repositoryRelativePath": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "gitShowBytes": 758686,
+      "gitShowSha256": "6ed947f8f9ff9ae2abae16f0f9e73efaef3d0a9f2fa841077d9dbbb1f2692fbd",
+      "relevantLines": [
+        {
+          "line": 3370,
+          "text": "!player.movement_actions.is_empty() && now_ms >= player.movement_ready_at_ms"
+        },
+        {
+          "line": 3598,
+          "text": "now_ms.saturating_add(zone_player_move_delay_ms(player, effective_running, now_ms));"
+        },
+        {
+          "line": 17802,
+          "text": "&& now_ms >= player.movement_ready_at_ms"
+        },
+        {
+          "line": 17830,
+          "text": "&& now_ms >= player.movement_ready_at_ms"
+        }
+      ]
+    },
+    {
+      "repository": "E:\\mir2-player-journey",
+      "commit": "3588207432785fbac6a21aefbd30cbd49a70b476",
+      "repositoryRelativePath": "mir2-web3/apps/simulation/src/runtime/zone/movement.rs",
+      "gitShowBytes": 934,
+      "gitShowSha256": "994d82a13b5a304ef85535d9755a6ae5c0e5eaf4336cd0111d59fee6aae9b393",
+      "relevantLines": [
+        {
+          "line": 3,
+          "text": "pub(crate) const ZONE_WALK_DELAY_MS: u64 = 600;"
+        }
+      ]
+    },
+    {
+      "repository": "E:\\mir2-player-journey",
+      "commit": "3588207432785fbac6a21aefbd30cbd49a70b476",
+      "repositoryRelativePath": "mir2-web3/apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "gitShowBytes": 7779,
+      "gitShowSha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145",
+      "relevantLines": [
+        {
+          "line": 99,
+          "text": "&& !p.chat_profile.in_safe_zone"
+        }
+      ]
+    },
+    {
+      "repository": "E:\\mir2-player-journey\\Crystal",
+      "commit": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+      "repositoryRelativePath": "Server/MirObjects/HumanObject.cs",
+      "gitShowBytes": 344484,
+      "gitShowSha256": "cd7115857377bd6cd96799a21bb2fe37b1c55fb7ff40a4252b757bf0d5986ffd",
+      "relevantLines": [
+        {
+          "line": 142,
+          "text": "return !Dead && Envir.Time >= ActionTime && Envir.Time >= AttackTime && !CurrentPoison.HasFlag(PoisonType.Paralysis) && !CurrentPoison.HasFlag(PoisonType.LRParalysis) && !CurrentPoison.HasFlag(PoisonType.Frozen) && !CurrentPoison.HasFlag(PoisonType.Dazed) && Mount.CanAttack;"
+        },
+        {
+          "line": 2494,
+          "text": "ActionTime = Envir.Time + GetDelayTime(MoveDelay);"
+        },
+        {
+          "line": 2616,
+          "text": "ActionTime = Envir.Time + GetDelayTime(MoveDelay);"
+        }
+      ]
+    },
+    {
+      "repository": "E:\\mir2-player-journey\\Crystal",
+      "commit": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+      "repositoryRelativePath": "Server/MirObjects/PlayerObject.cs",
+      "gitShowBytes": 571904,
+      "gitShowSha256": "3d06215d7efe11c6c5702119dd46b06687a060d4e0d54cf666268eff787f4f91",
+      "relevantLines": [
+        {
+          "line": 4714,
+          "text": "if (attacker.Master == null) return true;"
+        },
+        {
+          "line": 4715,
+          "text": "if (InSafeZone || attacker.InSafeZone || attacker.Master.InSafeZone) return false;"
+        }
+      ]
+    }
+  ],
+  "rawArtifactReferenceBase": "C:/r16-walking-recovery-20261114",
+  "rawArtifacts": [
+    {
+      "label": "probe-r1-raw-receipt",
+      "relativePath": "protocol-ai-diagnostic/probe-r1/receipt.json",
+      "bytes": 14595,
+      "sha256": "dcb3971a681c5faf5b56f3c8862445a58b40fbea91252e81c83e25faba86fd7a",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r1-private-protocol-trace-hash-only",
+      "relativePath": "protocol-ai-diagnostic/probe-r1/private/ordinary-protocol.jsonl",
+      "bytes": 1560109,
+      "sha256": "192f87ce0f95877fb75db3758e8a8f38881f7252d682f0ea59606aaa36ff1e4a",
+      "copied": false,
+      "privateTraceReferenceOnly": true
+    },
+    {
+      "label": "probe-r1-manifest.json",
+      "relativePath": "protocol-ai-diagnostic/manifest.json",
+      "bytes": 1592,
+      "sha256": "b7f324694580d6bbbdbf5ceb3595be12f532ddda90c9ebf007ad68a439b2cd31",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r1-freeze.json",
+      "relativePath": "protocol-ai-diagnostic/freeze.json",
+      "bytes": 360,
+      "sha256": "a18cf38c1330fd7173bf244814860cd16355646dc48b7356e860a9c3c3da37c3",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r1-source-pins.json",
+      "relativePath": "protocol-ai-diagnostic/source-pins.json",
+      "bytes": 4204,
+      "sha256": "c0d9bae41de0b4e0d0163610d325097ea3ec798e24ab8d880dd51008296f95e1",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r1-diagnose-outside-safe-deer.mjs",
+      "relativePath": "protocol-ai-diagnostic/diagnose-outside-safe-deer.mjs",
+      "bytes": 15656,
+      "sha256": "a208867797493fa2fb16434da0d47e804afe3d0bf8b65b36f3effbb92ebcdc69",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r1-run.mjs",
+      "relativePath": "protocol-ai-diagnostic/run.mjs",
+      "bytes": 12556,
+      "sha256": "f744729be162167d0cb9b3c184beca7535da38212f97d7a386b670934fe508a9",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r1-syntax-checks.json",
+      "relativePath": "protocol-ai-diagnostic/syntax-checks.json",
+      "bytes": 520,
+      "sha256": "3f2898954536fd806f3ab392b45051da6f51a16e7556c7249db98c6caaeaf941",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-raw-receipt",
+      "relativePath": "protocol-ai-diagnostic-r2/probe-r2/receipt.json",
+      "bytes": 16349,
+      "sha256": "17d6035850b979758943308e52691d8c38b7a2737ec6889731853838a33c7888",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-private-protocol-trace-hash-only",
+      "relativePath": "protocol-ai-diagnostic-r2/probe-r2/private/ordinary-protocol.jsonl",
+      "bytes": 1614133,
+      "sha256": "0a1b311ca5b573b20ca11bebe1085e4e38c7930361d154c43fe8fad87d93f707",
+      "copied": false,
+      "privateTraceReferenceOnly": true
+    },
+    {
+      "label": "probe-r2-manifest.json",
+      "relativePath": "protocol-ai-diagnostic-r2/manifest.json",
+      "bytes": 1915,
+      "sha256": "44400157a21df149e50b0d52e6c2ff18744486a72d432ec9c02ed708980608a4",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-freeze.json",
+      "relativePath": "protocol-ai-diagnostic-r2/freeze.json",
+      "bytes": 360,
+      "sha256": "f4ac4558e18a3b1190538c1c65eccd2528c7a0e01b8426382c86eb4783802da2",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-source-pins.json",
+      "relativePath": "protocol-ai-diagnostic-r2/source-pins.json",
+      "bytes": 4204,
+      "sha256": "2f6fe57d911632895ecf0976a1798b4255533de5090dd48512ef2eb1e2360a03",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-diagnose-outside-safe-deer.mjs",
+      "relativePath": "protocol-ai-diagnostic-r2/diagnose-outside-safe-deer.mjs",
+      "bytes": 16337,
+      "sha256": "4ab6b62127970c82e531f9e10beb67055a1819f92ac51f5f89ac52d5e1ee7a18",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-run.mjs",
+      "relativePath": "protocol-ai-diagnostic-r2/run.mjs",
+      "bytes": 12556,
+      "sha256": "f744729be162167d0cb9b3c184beca7535da38212f97d7a386b670934fe508a9",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    },
+    {
+      "label": "probe-r2-syntax-checks.json",
+      "relativePath": "protocol-ai-diagnostic-r2/syntax-checks.json",
+      "bytes": 520,
+      "sha256": "3f2898954536fd806f3ab392b45051da6f51a16e7556c7249db98c6caaeaf941",
+      "copied": false,
+      "privateTraceReferenceOnly": false
+    }
+  ],
+  "allR1RecordedFreezeReceiptAndPrivateTraceDigestsStillMatch": true
+}

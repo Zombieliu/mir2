@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "state": "TWO_NARROW_SOURCE_CORRECTIONS_NO_MODE",
+  "oldSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\driver-evidence-contract.mjs.before-path-comparison-and-separators-v2.txt",
+    "bytes": 7280,
+    "sha256": "5f8298d4c68c97f82c5481dddabd51b3717dc401f53dc227de8fdba4e29a3cb3"
+  },
+  "newSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\driver-evidence-contract.mjs",
+    "bytes": 7450,
+    "sha256": "b7c9cfabe12a4d56da0e1764cdc38d082b47ee1ba7f82cb82f0be6b7103430dd"
+  },
+  "rules": [
+    {
+      "at": 5162,
+      "before": "assert.deepEqual(normalize(actual.prior219Receipt),normalize(h.fullRegression.receipt));",
+      "after": "const actualPrior=normalize(actual.prior219Receipt),frozenPrior=normalize(h.fullRegression.receipt);assert.ok(samePath(actualPrior.file,frozenPrior.file));assert.equal(actualPrior.bytes,frozenPrior.bytes);assert.equal(actualPrior.sha256,frozenPrior.sha256);",
+      "label": "B1 same canonical path and exact bytes/SHA"
+    },
+    {
+      "at": 3101,
+      "before": "relative.split(/[\\/]/)",
+      "after": "relative.split(/[\\\\/]/)",
+      "label": "B2 restore prior18 Windows and slash separators"
+    }
+  ],
+  "rawInverseExact": true,
+  "previousPrepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\runtime-prepared-v1.json",
+    "bytes": 15933,
+    "sha256": "2bac2e6c8d2c9d53cf1e7d09787a01e44fcf0251bbcc955f73b0b0fd713f1b07"
+  },
+  "B1": {
+    "originalReceiptsChanged": false,
+    "scope": "Canonical path comparison plus bytes/SHA only; all other reference comparisons unchanged."
+  },
+  "B2": {
+    "prior18": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-observer-feasibility-18/driver-evidence-contract.mjs",
+      "bytes": 5863,
+      "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+    },
+    "v1SeparatorCharCodes": [
+      92,
+      47
+    ],
+    "restoredSeparatorCharCodes": [
+      92,
+      92,
+      47
+    ],
+    "prior18RegexRawExact": true,
+    "scope": "Restore original private/traversal split guard; no widening."
+  },
+  "syntax": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\driver-evidence-contract.mjs",
+      "bytes": 7450,
+      "sha256": "b7c9cfabe12a4d56da0e1764cdc38d082b47ee1ba7f82cb82f0be6b7103430dd"
+    },
+    "arguments": [
+      "--check",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\driver-evidence-contract.mjs"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\driver-evidence-path-and-separator-node-check-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "modulesImported": false
+  },
+  "geometryChanged": false,
+  "policyChanged": false,
+  "modesRun": false
+}

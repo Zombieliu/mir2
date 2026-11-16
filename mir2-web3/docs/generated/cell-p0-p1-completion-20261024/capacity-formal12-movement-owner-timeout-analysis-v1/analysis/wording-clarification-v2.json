@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "scope": "Clarification of one collective sentence only; all row/census data and original verdict remain unchanged.",
+  "summaryV1": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\summary-v1.json",
+    "bytes": 21871,
+    "sha256": "428d120c06c5b88d15c62b848db149b3d9211bb2b9f0c9c90cb00a638a941cc8"
+  },
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\selected-public-evidence-v1.json",
+    "bytes": 70065,
+    "sha256": "87172a39e9a2cdbf46f54305a26c840c492a56b6051c933ab24df7b30fee11e9"
+  },
+  "impreciseSentence": "Both clients had already recorded2s Run/Walk and RTT timeouts before the fatal error.",
+  "preciseSentence": "Both actors had Run and Walk authoritative-acknowledgement timeouts before the fatal owner error. Only actor01 (L6b35ac01) additionally had the RTT timeout at original raw line1847.",
+  "movementTimeouts": [
+    {
+      "line": 1839,
+      "actor": "L6b35ac01",
+      "kind": "run",
+      "status": "timeout"
+    },
+    {
+      "line": 1840,
+      "actor": "L6b35ac00",
+      "kind": "run",
+      "status": "timeout"
+    },
+    {
+      "line": 1849,
+      "actor": "L6b35ac01",
+      "kind": "walk",
+      "status": "timeout"
+    },
+    {
+      "line": 1852,
+      "actor": "L6b35ac00",
+      "kind": "walk",
+      "status": "timeout"
+    },
+    {
+      "line": 1867,
+      "actor": "L6b35ac01",
+      "kind": "walk",
+      "status": "timeout"
+    }
+  ],
+  "rttTimeouts": [
+    {
+      "line": 1847,
+      "actor": "L6b35ac01",
+      "kind": "rtt",
+      "status": "timeout"
+    }
+  ],
+  "originalRowsOrCensusChanged": false,
+  "rawReanalyzed": false,
+  "originalFailureChanged": false,
+  "capacityAccepted": false
+}

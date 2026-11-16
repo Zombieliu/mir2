@@ -1,0 +1,989 @@
+{
+  "kind": "isolated-real-worker-six-font-network-with-candidate-function-injection",
+  "startedAt": "2026-11-14T06:03:45.978Z",
+  "passed": true,
+  "measurementCompleted": true,
+  "origin": "https://numeron.obelisk.build",
+  "expectedRevision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "cacheMode": "reload",
+  "serviceWorkers": "allow",
+  "gameLogin": false,
+  "networkInterception": false,
+  "publicDeployment": false,
+  "candidateFunctionInjection": true,
+  "limits": {
+    "totalPerResourceMs": 120000,
+    "maxDecodedBytes": 33554432,
+    "observedOriginalHeaderMs": 7000,
+    "observedOriginalPositiveByteIdleMs": 15000
+  },
+  "pins": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "bytes": 243520,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "bytes": 37780,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "bytes": 234892,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    }
+  ],
+  "network": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 2,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 111065,
+          "decodedTotal": 65536,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 262144,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 524288,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 786432,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 1048576,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 1310720,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 1638400,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 1966080,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 2097152,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 4063232,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 4194304,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 4915200,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 6291456,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 7012352,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 8388608,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 9109504,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 10485760,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 11206656,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 12582912,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 13303808,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 14680064,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 15400960,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 111078,
+          "decodedTotal": 16437364,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 111056,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/otf",
+        "content-length": "16437364",
+        "cache-control": "public, max-age=31536000",
+        "etag": "W/\"6d30d01b9b25bd766898ecba71d5cd3d\""
+      },
+      "timing": {
+        "requestTime": 184617.399414,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.22,
+        "sendEnd": 0.22,
+        "receiveHeadersStart": 111053.511,
+        "receiveHeadersEnd": 111053.511
+      },
+      "decodedObserved": 16437364,
+      "encodedObserved": 0,
+      "finishedAtMs": 111119,
+      "completeEncodedBytes": 0
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 2,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 80862,
+          "decodedTotal": 65536,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 327680,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 655360,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 983040,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 1310720,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 1638400,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 1900544,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 2097152,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 3997696,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 4194304,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 5177344,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 6291456,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 7274496,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 8388608,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 9371648,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 10485760,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 11468800,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 80862,
+          "decodedTotal": 11941968,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 80845,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "11941968",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+        "age": "16722",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 184617.399526,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.335,
+        "sendEnd": 0.335,
+        "receiveHeadersStart": 80842.418,
+        "receiveHeadersEnd": 80842.418
+      },
+      "decodedObserved": 11941968,
+      "encodedObserved": 0,
+      "finishedAtMs": 80885,
+      "completeEncodedBytes": 0
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 2,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 83981,
+          "decodedTotal": 65536,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 83981,
+          "decodedTotal": 262144,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 83981,
+          "decodedTotal": 393216,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 83981,
+          "decodedTotal": 589824,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 83981,
+          "decodedTotal": 621572,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 83981,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "621572",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"f53b83ff53f1d2632bf4d26382469b44\"",
+        "age": "16753",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 184617.399573,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.327,
+        "sendEnd": 0.327,
+        "receiveHeadersStart": 83977.912,
+        "receiveHeadersEnd": 83977.912
+      },
+      "decodedObserved": 621572,
+      "encodedObserved": 0,
+      "finishedAtMs": 83982,
+      "completeEncodedBytes": 0
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 3,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 85613,
+          "decodedTotal": 243520,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 85613,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "243520",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"53ef84da2e0f1a7b49fffe7485395722\"",
+        "age": "16756",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 184617.399617,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.31,
+        "sendEnd": 0.31,
+        "receiveHeadersStart": 85610.664,
+        "receiveHeadersEnd": 85610.664
+      },
+      "decodedObserved": 243520,
+      "encodedObserved": 0,
+      "finishedAtMs": 85614,
+      "completeEncodedBytes": 0
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 3,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 85977,
+          "decodedTotal": 37780,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 85977,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "37780",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"62bf7ee514e48d83a95dcf1b3d8b0efd\"",
+        "age": "16758",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 184617.399654,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.295,
+        "sendEnd": 0.295,
+        "receiveHeadersStart": 85975.156,
+        "receiveHeadersEnd": 85975.156
+      },
+      "decodedObserved": 37780,
+      "encodedObserved": 0,
+      "finishedAtMs": 85978,
+      "completeEncodedBytes": 0
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 3,
+      "priority": "High",
+      "type": "Fetch",
+      "encodedProgress": [
+        {
+          "atMs": 89214,
+          "decodedTotal": 196608,
+          "encodedTotal": 0
+        },
+        {
+          "atMs": 89214,
+          "decodedTotal": 234892,
+          "encodedTotal": 0
+        }
+      ],
+      "headersAtMs": 89213,
+      "status": 200,
+      "protocol": "http/1.1",
+      "serviceWorker": true,
+      "diskCache": false,
+      "remoteIsLoopback": false,
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "234892",
+        "cache-control": "public, max-age=14400",
+        "etag": "W/\"22e156b807f3147bb7dcafadc52ab721\"",
+        "age": "16758",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "BYPASS"
+      },
+      "timing": {
+        "requestTime": 184617.399697,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.279,
+        "sendEnd": 0.279,
+        "receiveHeadersStart": 89210.7,
+        "receiveHeadersEnd": 89210.7
+      },
+      "decodedObserved": 234892,
+      "encodedObserved": 0,
+      "finishedAtMs": 89214,
+      "completeEncodedBytes": 0
+    }
+  ],
+  "browserClosed": true,
+  "chromeVersion": "157.0.8103.78",
+  "versionBefore": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "workerBody": {
+    "status": 200,
+    "bytes": 41492,
+    "sha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800"
+  },
+  "workerConfiguration": {
+    "type": "MIR2_ASSET_CACHE_CONFIGURED",
+    "deletedCaches": [],
+    "version": "isolated-font-read",
+    "assetVersion": "20261108-r16-08ec86d5105c",
+    "cacheNamespace": "isolated-font-read",
+    "remoteAssetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+    "remoteAssetBaseUrls": [
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+      "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c"
+    ],
+    "fontMirrorFirst": false,
+    "staticAssetTiers": {
+      "critical": 0,
+      "background": 0,
+      "runtime": 0
+    },
+    "configurationPersisted": true
+  },
+  "candidateWorker": {
+    "bytes": 44059,
+    "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
+  },
+  "candidateInjection": {
+    "concurrency": 2,
+    "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218",
+    "boundary": "only this fresh owned Worker fetchStaticAsset function; real network, normal published fetch handler/cache and no game"
+  },
+  "transfers": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 111064.19999998808,
+          "bytes": 65536
+        },
+        {
+          "atMs": 111073.69999998808,
+          "bytes": 262144
+        },
+        {
+          "atMs": 111073.79999998212,
+          "bytes": 524288
+        },
+        {
+          "atMs": 111073.89999997616,
+          "bytes": 786432
+        },
+        {
+          "atMs": 111074,
+          "bytes": 1048576
+        },
+        {
+          "atMs": 111074,
+          "bytes": 1310720
+        },
+        {
+          "atMs": 111074.09999999404,
+          "bytes": 1638400
+        },
+        {
+          "atMs": 111074.19999998808,
+          "bytes": 1966080
+        },
+        {
+          "atMs": 111074.19999998808,
+          "bytes": 2097152
+        },
+        {
+          "atMs": 111074.5,
+          "bytes": 4063232
+        },
+        {
+          "atMs": 111074.5,
+          "bytes": 4194304
+        },
+        {
+          "atMs": 111074.59999999404,
+          "bytes": 4915200
+        },
+        {
+          "atMs": 111075,
+          "bytes": 6291456
+        },
+        {
+          "atMs": 111075,
+          "bytes": 7012352
+        },
+        {
+          "atMs": 111075.29999998212,
+          "bytes": 8388608
+        },
+        {
+          "atMs": 111075.39999997616,
+          "bytes": 9109504
+        },
+        {
+          "atMs": 111075.79999998212,
+          "bytes": 10485760
+        },
+        {
+          "atMs": 111075.89999997616,
+          "bytes": 11206656
+        },
+        {
+          "atMs": 111076.09999999404,
+          "bytes": 12582912
+        },
+        {
+          "atMs": 111076.29999998212,
+          "bytes": 13303808
+        },
+        {
+          "atMs": 111076.5,
+          "bytes": 14680064
+        },
+        {
+          "atMs": 111076.69999998808,
+          "bytes": 15400960
+        },
+        {
+          "atMs": 111076.89999997616,
+          "bytes": 16437364
+        }
+      ],
+      "headersMs": 111054.39999997616,
+      "contentEncoding": null,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "bytes": 16437364,
+      "totalMs": 111115.19999998808,
+      "maxDecodedGapMs": 38.30000001192093
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 80857.40000000596,
+          "bytes": 65536
+        },
+        {
+          "atMs": 80857.60000002384,
+          "bytes": 327680
+        },
+        {
+          "atMs": 80857.70000001788,
+          "bytes": 655360
+        },
+        {
+          "atMs": 80857.70000001788,
+          "bytes": 983040
+        },
+        {
+          "atMs": 80857.80000001192,
+          "bytes": 1310720
+        },
+        {
+          "atMs": 80857.90000000596,
+          "bytes": 1638400
+        },
+        {
+          "atMs": 80857.90000000596,
+          "bytes": 1900544
+        },
+        {
+          "atMs": 80858,
+          "bytes": 2097152
+        },
+        {
+          "atMs": 80858.30000001192,
+          "bytes": 3997696
+        },
+        {
+          "atMs": 80858.30000001192,
+          "bytes": 4194304
+        },
+        {
+          "atMs": 80858.5,
+          "bytes": 5177344
+        },
+        {
+          "atMs": 80858.60000002384,
+          "bytes": 6291456
+        },
+        {
+          "atMs": 80858.80000001192,
+          "bytes": 7274496
+        },
+        {
+          "atMs": 80859,
+          "bytes": 8388608
+        },
+        {
+          "atMs": 80859.20000001788,
+          "bytes": 9371648
+        },
+        {
+          "atMs": 80859.40000000596,
+          "bytes": 10485760
+        },
+        {
+          "atMs": 80859.60000002384,
+          "bytes": 11468800
+        },
+        {
+          "atMs": 80859.70000001788,
+          "bytes": 11941968
+        }
+      ],
+      "headersMs": 80843,
+      "contentEncoding": null,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "bytes": 11941968,
+      "totalMs": 80882.90000000596,
+      "maxDecodedGapMs": 23.19999998807907
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 83979.39999997616,
+          "bytes": 65536
+        },
+        {
+          "atMs": 83979.39999997616,
+          "bytes": 262144
+        },
+        {
+          "atMs": 83979.5,
+          "bytes": 393216
+        },
+        {
+          "atMs": 83979.59999999404,
+          "bytes": 589824
+        },
+        {
+          "atMs": 83979.59999999404,
+          "bytes": 621572
+        }
+      ],
+      "headersMs": 83978.39999997616,
+      "contentEncoding": null,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+      "bytes": 621572,
+      "totalMs": 83980.69999998808,
+      "maxDecodedGapMs": 1.0999999940395355
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 85611.59999999404,
+          "bytes": 243520
+        }
+      ],
+      "headersMs": 85611.09999999404,
+      "contentEncoding": null,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313",
+      "bytes": 243520,
+      "totalMs": 85612.09999999404,
+      "maxDecodedGapMs": 0.5
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 85975.69999998808,
+          "bytes": 37780
+        }
+      ],
+      "headersMs": 85975.5,
+      "contentEncoding": null,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44",
+      "bytes": 37780,
+      "totalMs": 85975.80000001192,
+      "maxDecodedGapMs": 0.19999998807907104
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 200,
+      "complete": true,
+      "progress": [
+        {
+          "atMs": 89211.69999998808,
+          "bytes": 196608
+        },
+        {
+          "atMs": 89211.69999998808,
+          "bytes": 234892
+        }
+      ],
+      "headersMs": 89211.19999998808,
+      "contentEncoding": null,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48",
+      "bytes": 234892,
+      "totalMs": 89212.09999999404,
+      "maxDecodedGapMs": 0.5
+    }
+  ],
+  "versionAfter": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "allOriginalBudgetsMet": null,
+  "consumerTimingNote": "Worker intentionally returns full-font headers after body validation; consumer headers are not the upstream7s budget. Network-only observer is separate; it does not observe Worker decoded-reader idle directly.",
+  "workerNetwork": {
+    "kind": "r16-passive-worker-font-network-v1",
+    "workerUrl": "https://numeron.obelisk.build/mir2-asset-worker.js",
+    "contextScoped": true,
+    "source": "service-worker-upstream-cdp",
+    "setupMs": 5,
+    "finishMs": 34,
+    "workersAttached": 1,
+    "otherContextWorkersIgnored": 0,
+    "droppedRequests": 0,
+    "cleanupComplete": true,
+    "observerErrors": [],
+    "rows": [
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "requestAtMs": 10,
+        "observedAtMs": 4,
+        "encodedBodyBytes": 13614352,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 728,
+        "encodedBytes": 13614803,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 111037,
+        "durationMs": 111027
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 10,
+        "observedAtMs": 4,
+        "encodedBodyBytes": 7671600,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 289,
+        "encodedBytes": 7671861,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 80832,
+        "durationMs": 80822
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+        "requestAtMs": 80852,
+        "observedAtMs": 80844,
+        "encodedBodyBytes": 305337,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 81057,
+        "encodedBytes": 305577,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 83991,
+        "durationMs": 3139
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "requestAtMs": 83992,
+        "observedAtMs": 83980,
+        "encodedBodyBytes": 99338,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 84147,
+        "encodedBytes": 99635,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 85624,
+        "durationMs": 1632
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "requestAtMs": 85625,
+        "observedAtMs": 85613,
+        "encodedBodyBytes": 19796,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 85798,
+        "encodedBytes": 20018,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 85989,
+        "durationMs": 364
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "requestAtMs": 85990,
+        "observedAtMs": 85977,
+        "encodedBodyBytes": 97873,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 86197,
+        "encodedBytes": 98144,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 89225,
+        "durationMs": 3235
+      }
+    ],
+    "limits": [
+      "future-worker requests made before Network.enable may be unobserved; no target is paused",
+      "encodedBytes from loadingFinished includes protocol overhead; failed rows only expose observed encoded body counts",
+      "only exact Worker URL in the supplied browser context is observed; no headers or payloads are accessed"
+    ]
+  },
+  "workerObserverSha256": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+  "finishedAt": "2026-11-14T06:05:39.304Z",
+  "producerSha256": "8598265ac2f0c33fd4ee452e986b7f7c3679e3a5ee0ec3930b225b5d0132ad8a"
+}

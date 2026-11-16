@@ -1,0 +1,369 @@
+{
+  "schema": "mir2.mentor-parse-scale-resource-analysis.v1",
+  "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "codeIntegrationRevision": "33c75002cf6a78c1bd2005c9ace0476d34816c7a",
+  "binarySha256": "7d2a6c817b009d6a7e1d0a75cd6b7847fe8cbc5aa2cb57efa8c3d1032a784ff8",
+  "sdkManifestSha256": "3fbe7649ff36946c4e7979307ee8e1d0b7dd223987b287e3b1d4582a846a9e50",
+  "sdkEntrypointSha256": "4e481d4f7b61cd70865f9f14a9746066943807599581705377910b6607e1e865",
+  "casePinsSha256": "1f05f18940c86160650780aa21bc6a252e242da71ead531bfd8ea15334cd6ebb",
+  "cases": [
+    {
+      "population": 25,
+      "case": "modern-audit/fixture-mentor-parse-dense25-v1/runs/dense25-v1",
+      "outcome": "PASS",
+      "window": {
+        "startUtc": "2026-11-14T21:50:16.839Z",
+        "endUtc": "2026-11-14T21:55:16.839Z",
+        "durationMs": 300000
+      },
+      "totals": {
+        "offered": 4000,
+        "completedOnTime": 4000,
+        "timeouts": 0,
+        "notSent": 0,
+        "passedActorMinuteWindows": 125,
+        "totalActorMinuteWindows": 125
+      },
+      "resource": {
+        "server": {
+          "sampleRows": 1232,
+          "coverageMs": 300000.0,
+          "maxIntersectingSampleGapMs": 1036,
+          "meanCpuCores": 0.12891407520325204,
+          "durationWeightedCpuP95Cores": 0.3353658536585366,
+          "maximumOverlappingIntervalCpuCores": 0.6561279296875,
+          "fullRunJobPeakCommitBytes": 821981184,
+          "fullRunJobPeakCommitMiB": 783.90234375,
+          "allRowsResourceQualified": true,
+          "logicalCpuBudget": 4,
+          "commitBudgetBytes": 8589934592,
+          "affinityMaskHex": "0xf",
+          "peakCommitIsRAMorRSS": false
+        },
+        "injector": {
+          "sampleRows": 1230,
+          "coverageMs": 300000.0,
+          "maxIntersectingSampleGapMs": 1041,
+          "meanCpuCores": 0.02696110442518899,
+          "durationWeightedCpuP95Cores": 0.09137426900584796,
+          "maximumOverlappingIntervalCpuCores": 0.19817073170731708,
+          "fullRunJobPeakCommitBytes": 141770752,
+          "fullRunJobPeakCommitMiB": 135.203125,
+          "allRowsResourceQualified": true,
+          "logicalCpuBudget": 8,
+          "commitBudgetBytes": 4294967296,
+          "affinityMaskHex": "0xff0",
+          "peakCommitIsRAMorRSS": false
+        }
+      },
+      "applicationBytes": {
+        "scope": "JSON WebSocket payload bytes submitted/received; excludes WS framing/control/TCP/IP; no deflate",
+        "method": "per-frame epoch<=atMs<epoch+durationMs",
+        "durationMs": 300000,
+        "clientTxBytes": 297526,
+        "clientRxBytes": 12261548,
+        "clientTxMbps": 0.007934026666666667,
+        "clientRxMbps": 0.32697461333333333,
+        "allLifecycleConnections": 39,
+        "allLifecycleClientTxBytes": 782270,
+        "allLifecycleClientRxBytes": 49289804,
+        "socketOrNICBytes": false,
+        "jsonlSizeUsedAsTraffic": false,
+        "txCounterIsSubmittedJsonBeforeWsSend": true,
+        "rxCounterIsAcceptedJsonCallback": true
+      },
+      "existingStrictClosure": {
+        "filePassed": true,
+        "fileSampleCount": 25,
+        "enhancedPassed": true,
+        "actualExitCodes": [
+          0,
+          0,
+          0
+        ],
+        "normalJobsNoKill": true
+      },
+      "capacityQualified": false
+    },
+    {
+      "population": 50,
+      "case": "modern-audit/fixture-mentor-parse-dense50-v1/runs/dense50-v1",
+      "outcome": "PASS",
+      "window": {
+        "startUtc": "2026-11-14T22:28:34.857Z",
+        "endUtc": "2026-11-14T22:33:34.857Z",
+        "durationMs": 300000
+      },
+      "totals": {
+        "offered": 8000,
+        "completedOnTime": 8000,
+        "timeouts": 0,
+        "notSent": 0,
+        "passedActorMinuteWindows": 250,
+        "totalActorMinuteWindows": 250
+      },
+      "resource": {
+        "server": {
+          "sampleRows": 2120,
+          "coverageMs": 300000.0,
+          "maxIntersectingSampleGapMs": 1036,
+          "meanCpuCores": 0.32960914678675757,
+          "durationWeightedCpuP95Cores": 0.7317073170731708,
+          "maximumOverlappingIntervalCpuCores": 1.0213414634146343,
+          "fullRunJobPeakCommitBytes": 1418727424,
+          "fullRunJobPeakCommitMiB": 1353.00390625,
+          "allRowsResourceQualified": true,
+          "logicalCpuBudget": 4,
+          "commitBudgetBytes": 8589934592,
+          "affinityMaskHex": "0xf",
+          "peakCommitIsRAMorRSS": false
+        },
+        "injector": {
+          "sampleRows": 2118,
+          "coverageMs": 300000.0,
+          "maxIntersectingSampleGapMs": 1041,
+          "meanCpuCores": 0.07029605263157895,
+          "durationWeightedCpuP95Cores": 0.1827485380116959,
+          "maximumOverlappingIntervalCpuCores": 0.2899169921875,
+          "fullRunJobPeakCommitBytes": 201551872,
+          "fullRunJobPeakCommitMiB": 192.21484375,
+          "allRowsResourceQualified": true,
+          "logicalCpuBudget": 8,
+          "commitBudgetBytes": 4294967296,
+          "affinityMaskHex": "0xff0",
+          "peakCommitIsRAMorRSS": false
+        }
+      },
+      "applicationBytes": {
+        "scope": "JSON WebSocket payload bytes submitted/received; excludes WS framing/control/TCP/IP; no deflate",
+        "method": "per-frame epoch<=atMs<epoch+durationMs",
+        "durationMs": 300000,
+        "clientTxBytes": 595029,
+        "clientRxBytes": 48717495,
+        "clientTxMbps": 0.01586744,
+        "clientRxMbps": 1.2991332,
+        "allLifecycleConnections": 64,
+        "allLifecycleClientTxBytes": 1957383,
+        "allLifecycleClientRxBytes": 114322424,
+        "socketOrNICBytes": false,
+        "jsonlSizeUsedAsTraffic": false,
+        "txCounterIsSubmittedJsonBeforeWsSend": true,
+        "rxCounterIsAcceptedJsonCallback": true
+      },
+      "existingStrictClosure": {
+        "filePassed": true,
+        "fileSampleCount": 50,
+        "enhancedPassed": true,
+        "actualExitCodes": [
+          0,
+          0,
+          0
+        ],
+        "normalJobsNoKill": true
+      },
+      "capacityQualified": false
+    },
+    {
+      "population": 100,
+      "case": "modern-audit/fixture-projection-mentor-parse-dense100-v1/runs/dense100-v1",
+      "outcome": "FAIL",
+      "window": {
+        "startUtc": "2026-11-14T21:05:53.733Z",
+        "endUtc": "2026-11-14T21:10:53.733Z",
+        "durationMs": 300000
+      },
+      "totals": {
+        "offered": 16000,
+        "completedOnTime": 15366,
+        "timeouts": 81,
+        "notSent": 553,
+        "passedActorMinuteWindows": 167,
+        "totalActorMinuteWindows": 500
+      },
+      "resource": {
+        "server": {
+          "sampleRows": 3508,
+          "coverageMs": 300000.0,
+          "maxIntersectingSampleGapMs": 1053,
+          "meanCpuCores": 1.1680231176900586,
+          "durationWeightedCpuP95Cores": 2.5559883154819865,
+          "maximumOverlappingIntervalCpuCores": 3.936648832684825,
+          "fullRunJobPeakCommitBytes": 2647703552,
+          "fullRunJobPeakCommitMiB": 2525.046875,
+          "allRowsResourceQualified": true,
+          "logicalCpuBudget": 4,
+          "commitBudgetBytes": 8589934592,
+          "affinityMaskHex": "0xf",
+          "peakCommitIsRAMorRSS": false
+        },
+        "injector": {
+          "sampleRows": 3506,
+          "coverageMs": 300000.0,
+          "maxIntersectingSampleGapMs": 1065,
+          "meanCpuCores": 0.2210874231993486,
+          "durationWeightedCpuP95Cores": 0.39441747572815533,
+          "maximumOverlappingIntervalCpuCores": 0.5319795719844358,
+          "fullRunJobPeakCommitBytes": 314769408,
+          "fullRunJobPeakCommitMiB": 300.1875,
+          "allRowsResourceQualified": true,
+          "logicalCpuBudget": 8,
+          "commitBudgetBytes": 4294967296,
+          "affinityMaskHex": "0xff0",
+          "peakCommitIsRAMorRSS": false
+        }
+      },
+      "applicationBytes": {
+        "scope": "JSON WebSocket payload bytes submitted/received; excludes WS framing/control/TCP/IP; no deflate",
+        "method": "per-frame epoch<=atMs<epoch+durationMs",
+        "durationMs": 300000,
+        "clientTxBytes": 1166460,
+        "clientRxBytes": 186979603,
+        "clientTxMbps": 0.031105599999999997,
+        "clientRxMbps": 4.986122746666667,
+        "allLifecycleConnections": 114,
+        "allLifecycleClientTxBytes": 5265494,
+        "allLifecycleClientRxBytes": 319380241,
+        "socketOrNICBytes": false,
+        "jsonlSizeUsedAsTraffic": false,
+        "txCounterIsSubmittedJsonBeforeWsSend": true,
+        "rxCounterIsAcceptedJsonCallback": true
+      },
+      "existingStrictClosure": {
+        "filePassed": false,
+        "fileSampleCount": 0,
+        "enhancedPassed": false,
+        "actualExitCodes": [
+          1,
+          1,
+          0
+        ],
+        "normalJobsNoKill": true
+      },
+      "capacityQualified": false
+    }
+  ],
+  "baseline100Reproduced": true,
+  "cpuMethod": "Adjacent cumulative JobCPU delta divided by atUnixMs delta, linearly allocated to exact300s UTC overlap. P95 weighted by overlap duration; max is maximum sampled interval rate, not instantaneous CPU.",
+  "commitScope": "Full-run observed Job peak commit, includes startup/auth/gear/cleanup; not RSS or RAM.",
+  "limitations": [
+    "Application traffic is the SDK JSON scope only: TX submitted before ws.send, RX accepted successful JSON callback, excludes WS/control/TCP/IP/TLS/retransmissions.",
+    "UTC resources are not mixed with controller-relative or driver performance clock; boundary interpolation assumes a constant rate within each sampling interval. Maximum intersecting gaps are disclosed.",
+    "Different completion/timeout/unsent outcomes remain in every row. CPU averages/resource-qualified flags cannot prove hardware headroom, a causal bottleneck or a CCU upper bound.",
+    "This is bounded numerical analysis, not a new File/SLO/source/artifact/deployment qualification. No activeSLOW100/privateStore/rawevents are read."
+  ],
+  "rootNoConcurrentMeasurementAttested": true,
+  "inputs": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-release-v1\\DENSE25-CLOSED-PASS.json",
+      "bytes": 1698,
+      "sha256": "8d3a4f022ea05cbfe19697316927d10361ae652dfc9603531785f4438085af42"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense25-v1\\runs\\dense25-v1\\controller-result.json",
+      "bytes": 4151,
+      "sha256": "522c5e07c7fd07974fd5050a01e9f750683877bfbba6c90ad40ca96e26819376"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense25-v1\\runs\\dense25-v1\\service-result.json",
+      "bytes": 236,
+      "sha256": "5d63a33db48311a30692096a92aa67283de2b3aca30a58051d48a5abbabcfec4"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense25-v1\\runs\\dense25-v1\\runtime-receipt.json",
+      "bytes": 1433,
+      "sha256": "1edb8ada5b90e92cdd13b5aeaeb50a81a739e802f844299b4441f9682738561f"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense25-v1\\runs\\dense25-v1\\modern.report.json",
+      "bytes": 8481924,
+      "sha256": "60ef5d98187852c364402fba0a36a8852cd68674d5f43f0a4d11d11dc22e6154"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense25-v1\\runs\\dense25-v1\\resources.jsonl",
+      "bytes": 2777283,
+      "sha256": "578966c96cd6ca8fd128f518629398ac16fb31d7ed87f93401cd24a0f2d77fb0"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense25-v1\\runs\\dense25-v1\\injector-resources.jsonl",
+      "bytes": 1937066,
+      "sha256": "2bf538c07c65c0063a53a291fb88d47e6c203ec33f915f861d2a1f012ae86645"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-release-v1\\DENSE50-CLOSED-PASS.json",
+      "bytes": 1943,
+      "sha256": "ca2151f3d628c082d8d086aef8b1374b18ffefdcef81a40e1db2fa5674e87e57"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense50-v1\\runs\\dense50-v1\\controller-result.json",
+      "bytes": 4150,
+      "sha256": "f24be87662d4d5a2a8bad342aea3038f7589a3571377bfd45bcf11954a98e34c"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense50-v1\\runs\\dense50-v1\\service-result.json",
+      "bytes": 235,
+      "sha256": "42abf1f68345a93d73fe02ffd10ac31ef8842faace4317c573d2c8e8fd487bd3"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense50-v1\\runs\\dense50-v1\\runtime-receipt.json",
+      "bytes": 1433,
+      "sha256": "0932716815a4f3cece5d4035661915f1cb7133b153474b9aa7eb2ef162ec0b25"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense50-v1\\runs\\dense50-v1\\modern.report.json",
+      "bytes": 15535037,
+      "sha256": "2e37e2eb54483a1e1d53d7e8f6876755f08ab53537717af3f045f5319dbfd864"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense50-v1\\runs\\dense50-v1\\resources.jsonl",
+      "bytes": 4761982,
+      "sha256": "ea232a5821dc8c27f3ff9a3630caeeafa4b22e420b86f191f8f9334c553d7ae5"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-mentor-parse-dense50-v1\\runs\\dense50-v1\\injector-resources.jsonl",
+      "bytes": 3325636,
+      "sha256": "b61959ac84a4e6301f1f5823cf6ad391293b63ded12b7e7b7207a59bebe13bc0"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-release-v1\\DENSE100-CLOSED-FAIL.json",
+      "bytes": 2278,
+      "sha256": "a4afda3046997954259ed98c5e076831bb6d13dd2cb99581048fee3313f36a49"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-mentor-parse-dense100-v1\\runs\\dense100-v1\\controller-result.json",
+      "bytes": 4153,
+      "sha256": "18b0153ccdf55f2795b3138d8e8c993a3ae26a708ddc7c4270e444d69decde2c"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-mentor-parse-dense100-v1\\runs\\dense100-v1\\service-result.json",
+      "bytes": 235,
+      "sha256": "62c047348b4d99c5614c9ca904f1e8e15f53644c6213b7db5d4fa5217c2e5d29"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-mentor-parse-dense100-v1\\runs\\dense100-v1\\runtime-receipt.json",
+      "bytes": 1458,
+      "sha256": "b4107a52f0e636b49af0fabf9970fa1ac1bc4a7e9ce8737ccad3321cf5e742a5"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-mentor-parse-dense100-v1\\runs\\dense100-v1\\modern.report.json",
+      "bytes": 29511961,
+      "sha256": "2dafb6f0bec90ecce7004d7e2b155429e1347fb9c5a2c0d419c606b41bda0f2e"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-mentor-parse-dense100-v1\\runs\\dense100-v1\\resources.jsonl",
+      "bytes": 7911360,
+      "sha256": "bc937723749503f590b884fc353f65180a1043d5c75473cad05909758d8d186e"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-mentor-parse-dense100-v1\\runs\\dense100-v1\\injector-resources.jsonl",
+      "bytes": 5508959,
+      "sha256": "3f73e76412a0338772e544a02c0940b68b2839954517e94b3ff63c9a27d86c3f"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\mentor-parse-dense100-failure-audit-v1\\ANALYSIS.json",
+      "bytes": 11627,
+      "sha256": "44f9eadb82146cda8e29db4f1d11d17d6a3dcd3b8f8e34c9d49187f3172fd21b"
+    }
+  ],
+  "capacityQualified": false,
+  "newGameCargoNetworkAuthOrPrivateRead": false
+}

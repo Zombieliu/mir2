@@ -1,0 +1,40 @@
+{
+  "schema": "mir2.r16.group.browser.v1",
+  "passed": false,
+  "startedAt": "2026-11-07T14:13:27.155Z",
+  "phases": [
+    "ordinary-peer-registration"
+  ],
+  "commands": [],
+  "packets": [
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": false
+    },
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "DeleteGroup"
+    },
+    {
+      "source": "peer0",
+      "phase": "ordinary-peer-registration",
+      "packet": "SwitchGroup",
+      "allowGroup": true
+    }
+  ],
+  "checks": [],
+  "screenshots": [],
+  "pageErrors": [],
+  "networkErrors": [],
+  "errors": [
+    {
+      "phase": "ordinary-peer-registration",
+      "code": null,
+      "messageHash": "f4a8cee2309c47f1304ca4eaa2ec5a3d8d4a6aa9ee915a20819b1c303c2c4d49"
+    }
+  ],
+  "completedAt": "2026-11-07T14:13:47.526Z"
+}

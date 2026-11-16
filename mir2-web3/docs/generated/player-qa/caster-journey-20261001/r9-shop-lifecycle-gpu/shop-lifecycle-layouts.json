@@ -1,0 +1,1562 @@
+{
+  "captures": [
+    {
+      "class": "Warrior",
+      "file": "warrior-9-delayed-hide-buy.png",
+      "layout": {
+        "bagBounds": [
+          445.0,
+          0.0,
+          761.0,
+          236.0
+        ],
+        "controls": [
+          {
+            "action": "ShopQuantityInc",
+            "bounds": [
+              58.0,
+              528.0,
+              76.0,
+              550.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopShowSell",
+            "bounds": [
+              162.0,
+              528.0,
+              214.0,
+              550.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectInventoryPage(0)",
+            "bounds": [
+              451.0,
+              7.0,
+              523.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(1)",
+            "bounds": [
+              521.0,
+              7.0,
+              593.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(2)",
+            "bounds": [
+              591.0,
+              7.0,
+              663.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseWindows",
+            "bounds": [
+              734.0,
+              3.0,
+              758.0,
+              24.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "InventoryDeleteToggle",
+            "bounds": [
+              736.0,
+              212.0,
+              752.0,
+              227.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseShop",
+            "bounds": [
+              217.0,
+              227.0,
+              241.0,
+              248.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopBuy",
+            "bounds": [
+              77.0,
+              528.0,
+              157.0,
+              553.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "InspectBag(0)",
+            "bounds": [
+              454.0,
+              37.0,
+              490.0,
+              69.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopPageUp",
+            "bounds": [
+              219.0,
+              259.0,
+              231.0,
+              271.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopPageDown",
+            "bounds": [
+              219.0,
+              508.0,
+              231.0,
+              520.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectShopGood(701)",
+            "bounds": [
+              10.0,
+              258.0,
+              215.0,
+              290.0
+            ],
+            "surface": "shop"
+          }
+        ],
+        "shopBounds": [
+          0.0,
+          224.0,
+          440.0,
+          558.0
+        ]
+      },
+      "phase": "buy-after-text-hide",
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            65.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            11.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            20.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "−"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            607.0,
+            13.0,
+            40.0,
+            12.0
+          ],
+          "text": "任務物品"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            58.0,
+            11.0
+          ],
+          "text": "價格：40 金幣"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            179.0,
+            534.0,
+            18.0,
+            11.0
+          ],
+          "text": "出售"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            54.0,
+            11.0
+          ],
+          "text": "小型生命藥水"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包一"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            542.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包二"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            107.0,
+            535.0,
+            20.0,
+            12.0
+          ],
+          "text": "購買"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "金幣 700"
+        }
+      ]
+    },
+    {
+      "class": "Warrior",
+      "file": "warrior-9-delayed-hide-sell.png",
+      "layout": {
+        "bagBounds": [
+          445.0,
+          0.0,
+          761.0,
+          236.0
+        ],
+        "controls": [
+          {
+            "action": "ShopShowBuy",
+            "bounds": [
+              284.0,
+              336.0,
+              344.0,
+              358.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectInventoryPage(0)",
+            "bounds": [
+              451.0,
+              7.0,
+              523.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(1)",
+            "bounds": [
+              521.0,
+              7.0,
+              593.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(2)",
+            "bounds": [
+              591.0,
+              7.0,
+              663.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseWindows",
+            "bounds": [
+              734.0,
+              3.0,
+              758.0,
+              24.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "InventoryDeleteToggle",
+            "bounds": [
+              736.0,
+              212.0,
+              752.0,
+              227.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopToggleHold",
+            "bounds": [
+              378.0,
+              260.0,
+              426.0,
+              285.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "InspectBag(0)",
+            "bounds": [
+              454.0,
+              37.0,
+              490.0,
+              69.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopSell",
+            "bounds": [
+              378.0,
+              286.0,
+              426.0,
+              311.0
+            ],
+            "surface": "shop"
+          }
+        ],
+        "shopBounds": [
+          0.0,
+          224.0,
+          440.0,
+          558.0
+        ]
+      },
+      "phase": "sell-after-text-hide"
+    },
+    {
+      "class": "Wizard",
+      "file": "wizard-9-delayed-hide-buy.png",
+      "layout": {
+        "bagBounds": [
+          445.0,
+          0.0,
+          761.0,
+          236.0
+        ],
+        "controls": [
+          {
+            "action": "ShopQuantityInc",
+            "bounds": [
+              58.0,
+              528.0,
+              76.0,
+              550.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopShowSell",
+            "bounds": [
+              162.0,
+              528.0,
+              214.0,
+              550.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectInventoryPage(0)",
+            "bounds": [
+              451.0,
+              7.0,
+              523.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(1)",
+            "bounds": [
+              521.0,
+              7.0,
+              593.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(2)",
+            "bounds": [
+              591.0,
+              7.0,
+              663.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseWindows",
+            "bounds": [
+              734.0,
+              3.0,
+              758.0,
+              24.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "InventoryDeleteToggle",
+            "bounds": [
+              736.0,
+              212.0,
+              752.0,
+              227.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseShop",
+            "bounds": [
+              217.0,
+              227.0,
+              241.0,
+              248.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopBuy",
+            "bounds": [
+              77.0,
+              528.0,
+              157.0,
+              553.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "InspectBag(0)",
+            "bounds": [
+              454.0,
+              37.0,
+              490.0,
+              69.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopPageUp",
+            "bounds": [
+              219.0,
+              259.0,
+              231.0,
+              271.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopPageDown",
+            "bounds": [
+              219.0,
+              508.0,
+              231.0,
+              520.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectShopGood(701)",
+            "bounds": [
+              10.0,
+              258.0,
+              215.0,
+              290.0
+            ],
+            "surface": "shop"
+          }
+        ],
+        "shopBounds": [
+          0.0,
+          224.0,
+          440.0,
+          558.0
+        ]
+      },
+      "phase": "buy-after-text-hide",
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            65.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            11.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            20.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "−"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            607.0,
+            13.0,
+            40.0,
+            12.0
+          ],
+          "text": "任務物品"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            58.0,
+            11.0
+          ],
+          "text": "價格：40 金幣"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            179.0,
+            534.0,
+            18.0,
+            11.0
+          ],
+          "text": "出售"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            54.0,
+            11.0
+          ],
+          "text": "小型生命藥水"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包一"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            542.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包二"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            107.0,
+            535.0,
+            20.0,
+            12.0
+          ],
+          "text": "購買"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "金幣 700"
+        }
+      ]
+    },
+    {
+      "class": "Wizard",
+      "file": "wizard-9-delayed-hide-sell.png",
+      "layout": {
+        "bagBounds": [
+          445.0,
+          0.0,
+          761.0,
+          236.0
+        ],
+        "controls": [
+          {
+            "action": "ShopShowBuy",
+            "bounds": [
+              284.0,
+              336.0,
+              344.0,
+              358.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectInventoryPage(0)",
+            "bounds": [
+              451.0,
+              7.0,
+              523.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(1)",
+            "bounds": [
+              521.0,
+              7.0,
+              593.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(2)",
+            "bounds": [
+              591.0,
+              7.0,
+              663.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseWindows",
+            "bounds": [
+              734.0,
+              3.0,
+              758.0,
+              24.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "InventoryDeleteToggle",
+            "bounds": [
+              736.0,
+              212.0,
+              752.0,
+              227.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopToggleHold",
+            "bounds": [
+              378.0,
+              260.0,
+              426.0,
+              285.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "InspectBag(0)",
+            "bounds": [
+              454.0,
+              37.0,
+              490.0,
+              69.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopSell",
+            "bounds": [
+              378.0,
+              286.0,
+              426.0,
+              311.0
+            ],
+            "surface": "shop"
+          }
+        ],
+        "shopBounds": [
+          0.0,
+          224.0,
+          440.0,
+          558.0
+        ]
+      },
+      "phase": "sell-after-text-hide"
+    },
+    {
+      "class": "Taoist",
+      "file": "taoist-9-delayed-hide-buy.png",
+      "layout": {
+        "bagBounds": [
+          445.0,
+          0.0,
+          761.0,
+          236.0
+        ],
+        "controls": [
+          {
+            "action": "ShopQuantityInc",
+            "bounds": [
+              58.0,
+              528.0,
+              76.0,
+              550.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopShowSell",
+            "bounds": [
+              162.0,
+              528.0,
+              214.0,
+              550.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectInventoryPage(0)",
+            "bounds": [
+              451.0,
+              7.0,
+              523.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(1)",
+            "bounds": [
+              521.0,
+              7.0,
+              593.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(2)",
+            "bounds": [
+              591.0,
+              7.0,
+              663.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseWindows",
+            "bounds": [
+              734.0,
+              3.0,
+              758.0,
+              24.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "InventoryDeleteToggle",
+            "bounds": [
+              736.0,
+              212.0,
+              752.0,
+              227.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseShop",
+            "bounds": [
+              217.0,
+              227.0,
+              241.0,
+              248.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopBuy",
+            "bounds": [
+              77.0,
+              528.0,
+              157.0,
+              553.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "InspectBag(0)",
+            "bounds": [
+              454.0,
+              37.0,
+              490.0,
+              69.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopPageUp",
+            "bounds": [
+              219.0,
+              259.0,
+              231.0,
+              271.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "ShopPageDown",
+            "bounds": [
+              219.0,
+              508.0,
+              231.0,
+              520.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectShopGood(701)",
+            "bounds": [
+              10.0,
+              258.0,
+              215.0,
+              290.0
+            ],
+            "surface": "shop"
+          }
+        ],
+        "shopBounds": [
+          0.0,
+          224.0,
+          440.0,
+          558.0
+        ]
+      },
+      "phase": "buy-after-text-hide",
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            65.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            11.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            20.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "−"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            607.0,
+            13.0,
+            40.0,
+            12.0
+          ],
+          "text": "任務物品"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            58.0,
+            11.0
+          ],
+          "text": "價格：40 金幣"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            179.0,
+            534.0,
+            18.0,
+            11.0
+          ],
+          "text": "出售"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            54.0,
+            11.0
+          ],
+          "text": "小型生命藥水"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包一"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            542.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包二"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            107.0,
+            535.0,
+            20.0,
+            12.0
+          ],
+          "text": "購買"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "金幣 700"
+        }
+      ]
+    },
+    {
+      "class": "Taoist",
+      "file": "taoist-9-delayed-hide-sell.png",
+      "layout": {
+        "bagBounds": [
+          445.0,
+          0.0,
+          761.0,
+          236.0
+        ],
+        "controls": [
+          {
+            "action": "ShopShowBuy",
+            "bounds": [
+              284.0,
+              336.0,
+              344.0,
+              358.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "SelectInventoryPage(0)",
+            "bounds": [
+              451.0,
+              7.0,
+              523.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(1)",
+            "bounds": [
+              521.0,
+              7.0,
+              593.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "SelectInventoryPage(2)",
+            "bounds": [
+              591.0,
+              7.0,
+              663.0,
+              30.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "CloseWindows",
+            "bounds": [
+              734.0,
+              3.0,
+              758.0,
+              24.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "InventoryDeleteToggle",
+            "bounds": [
+              736.0,
+              212.0,
+              752.0,
+              227.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopToggleHold",
+            "bounds": [
+              378.0,
+              260.0,
+              426.0,
+              285.0
+            ],
+            "surface": "shop"
+          },
+          {
+            "action": "InspectBag(0)",
+            "bounds": [
+              454.0,
+              37.0,
+              490.0,
+              69.0
+            ],
+            "surface": "bag"
+          },
+          {
+            "action": "ShopSell",
+            "bounds": [
+              378.0,
+              286.0,
+              426.0,
+              311.0
+            ],
+            "surface": "shop"
+          }
+        ],
+        "shopBounds": [
+          0.0,
+          224.0,
+          440.0,
+          558.0
+        ]
+      },
+      "phase": "sell-after-text-hide"
+    }
+  ],
+  "kind": "production_widgets_delayed_npc_text_hide",
+  "liveAcceptance": false,
+  "locale": "zh-TW",
+  "passed": true,
+  "textHideAfterService": true,
+  "viewport": [
+    1024,
+    768
+  ],
+  "waitAfterHideMs": 560
+}

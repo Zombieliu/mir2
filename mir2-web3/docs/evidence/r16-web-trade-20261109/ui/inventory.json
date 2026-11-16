@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "path": "receipt-final.json",
+      "bytes": 8210,
+      "sha256": "98247b51d5488e82863ef552f6ffc619405e0b24bd298bc00b2c51d429440040"
+    },
+    {
+      "path": "cleanup-verified.json",
+      "bytes": 235,
+      "sha256": "e263cddafd789e9f7a5039b2500663064e8a862c9777c90048d7a0f76e2c377c"
+    },
+    {
+      "path": "shutdown.json",
+      "bytes": 108,
+      "sha256": "42ebaed5e577e2645d023e3cb45a8b357f75f34fb9531f75f39ca74206127ff8"
+    },
+    {
+      "path": "browser-r1/proof.json",
+      "bytes": 1159,
+      "sha256": "8db4382e90dd2a9373913085f972ae8aea7ff0823c480baf41cb4ac58c375c80"
+    },
+    {
+      "path": "browser-r2/proof.json",
+      "bytes": 7821,
+      "sha256": "27d90b79e5341e279baa59c252e072c63c99fc4d35f429a8e4b89a73d6e0a5e6"
+    },
+    {
+      "path": "browser-r3/proof.json",
+      "bytes": 12139,
+      "sha256": "6ae2a88c40d094ff574af78292c732666670958020bfcb46660b1d13fc948665"
+    },
+    {
+      "path": "browser-r4/proof.json",
+      "bytes": 6490,
+      "sha256": "4cbc7adab12b0b59096247dea28d26ea074be977641da7c33ec2668905e3dd61"
+    },
+    {
+      "path": "browser-r3/deposit-pending-cancel-enabled.png",
+      "bytes": 1217559,
+      "sha256": "1a2f8422d38a0a95a4f96f332bc7343c3cc612299c5526da4368bc1fa6bcf384"
+    },
+    {
+      "path": "browser-r3/deposit-cancelled-after-old-ack.png",
+      "bytes": 1330167,
+      "sha256": "95feddb5ca505d78abcd0894e7102cc56c34f1bb263451ad31f70b499e9eebaa"
+    },
+    {
+      "path": "browser-r4/retrieve-pending-cancel-enabled.png",
+      "bytes": 1207887,
+      "sha256": "e2f9cd9f9e463b06c4a05416f939977afe7a8d4bc08f53a996966f209b99d336"
+    },
+    {
+      "path": "browser-r4/retrieve-cancelled-after-old-ack.png",
+      "bytes": 1337514,
+      "sha256": "a41043183fc63d302b3d8cc5577a40cd22e7cbf1282b58b8fd497380364e3d33"
+    }
+  ]
+}

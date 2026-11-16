@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-11-13T10:04:48.389Z",
+  "id": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "state": "READY",
+  "target": "production",
+  "url": "numeron-r16-rgcu2lecc-obelisk-labs.vercel.app",
+  "source": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "aliasReadback": {
+    "checkedAt": "2026-11-13T09:58:34.417Z",
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  }
+}

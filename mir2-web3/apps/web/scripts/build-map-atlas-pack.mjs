@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { resolveProductionAssetConfigPath, assertNumeronFiniteProfile, NUMERON_PRODUCTION_ASSET_CONFIG } from "./lib/production-asset-config.mjs";
 
 // Packs each Mir2 MAP LIBRARY's exported per-frame PNGs (public/original-map/<Lib>/<frame>.png)
 // into texture-atlas PAGES, mirroring Crystal's one-indexed-.Lib-per-library model. Collapses
@@ -16,13 +17,7 @@ const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const PUBLIC_ROOT = path.join(WEB_ROOT, "public");
 const ORIGINAL_MAP_ROOT = path.join(PUBLIC_ROOT, "original-map");
 const DEFAULT_OUT_DIR = path.join(PUBLIC_ROOT, "generated", "map-atlas");
-const PRODUCTION_ASSET_CONFIG = path.resolve(
-  WEB_ROOT,
-  "..",
-  "..",
-  "config",
-  "production-web-assets.json",
-);
+const PRODUCTION_ASSET_CONFIG = resolveProductionAssetConfigPath(path.resolve(WEB_ROOT, "../.."));
 
 const ATLAS_PADDING = 1;
 const INITIAL_WIDTH = 1024;
@@ -39,12 +34,12 @@ const onlyLibraries = parseListArg(args.libraries, null);
 
 async function main() {
   if (isRemoteReleaseBuild()) {
-    const pinned = await readVerifiedRemoteMapAtlasRelease();
+    const pinned = await readRemoteMapAtlasBuildPlan();
     console.log(
       JSON.stringify({
         ok: true,
         skipped: true,
-        reason: "verified remote map-atlas release is pinned",
+        reason: pinned.enabled === false ? "selected finite profile disables map atlas; no atlas build or budget acceptance performed" : "verified remote map-atlas release is pinned",
         ...pinned,
       }),
     );
@@ -59,7 +54,7 @@ async function main() {
     if (await exists(existingManifest)) {
       try {
         const manifest = JSON.parse(await fs.readFile(existingManifest, "utf8"));
-        if (mapAtlasManifestFitsBudget(manifest)) {
+        if (mapAtlasManifestFitsBudget(manifest) && manifest.edgeExtrusion === ATLAS_PADDING) {
           console.log(JSON.stringify({ ok: true, skipped: true, reason: "compatible manifest already present", manifestPath: existingManifest }));
           return;
         }
@@ -98,7 +93,8 @@ async function main() {
   );
 
   await fs.mkdir(outDir, { recursive: true });
-  await removeStaleMapAtlasArtifacts(outDir);
+  // A running client may still hold the old content-addressed manifest.
+  if (!args.preserveExisting) await removeStaleMapAtlasArtifacts(outDir);
   const atlases = [];
   let totalSources = 0;
   let totalImageBytes = 0;
@@ -112,12 +108,7 @@ async function main() {
       const page = pages[pageIndex];
       const imageAbsDir = path.join(outDir, lib.dirParts.join("-"));
       await fs.mkdir(imageAbsDir, { recursive: true });
-      const imageBuffer = await sharp({
-        create: { width: page.width, height: page.height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
-      })
-        .composite(page.sources.map((s) => ({ input: s.filePath, left: s.x, top: s.y })))
-        .png({ compressionLevel: 9, adaptiveFiltering: true })
-        .toBuffer();
+      const imageBuffer = await renderMapAtlasPage(page);
       const imageHash = createHash("sha256").update(imageBuffer).digest("hex");
       const imageFileName = `p${pageIndex}.${imageHash.slice(0, 16)}.png`;
       const imageAbsPath = path.join(imageAbsDir, imageFileName);
@@ -147,6 +138,7 @@ async function main() {
   const manifest = {
     schemaVersion: 2,
     kind: "mir2-map-atlas-manifest",
+    edgeExtrusion: ATLAS_PADDING,
     pages: atlases.sort((a, b) => a.l.localeCompare(b.l) || a.p - b.p),
     stats: {
       libraryCount: new Set(atlases.map((a) => a.l)).size,
@@ -160,8 +152,9 @@ async function main() {
   const manifestJson = `${JSON.stringify(manifest)}\n`;
   const contentHash = createHash("sha256").update(manifestJson).digest("hex");
   const releaseManifestPath = path.join(outDir, `manifest.${contentHash}.json`);
-  await fs.writeFile(manifestPath, manifestJson, "utf8");
   await fs.writeFile(releaseManifestPath, manifestJson, "utf8");
+  await fs.writeFile(`${manifestPath}.tmp`, manifestJson, "utf8");
+  await fs.rename(`${manifestPath}.tmp`, manifestPath);
 
   console.log(
     JSON.stringify(
@@ -343,7 +336,7 @@ export function packIntoPages(sources, pagePixelBudget = DEFAULT_MAX_PAGE_PIXELS
     }
     if (current.cursorX + s.width + ATLAS_PADDING > width) {
       current.cursorX = ATLAS_PADDING;
-      current.cursorY += current.rowHeight + ATLAS_PADDING;
+      current.cursorY += current.rowHeight + ATLAS_PADDING * 2;
       current.rowHeight = 0;
     }
     // Would this row overflow the page? Roll to a new page.
@@ -353,11 +346,44 @@ export function packIntoPages(sources, pagePixelBudget = DEFAULT_MAX_PAGE_PIXELS
     }
     current.sources.push({ ...s, x: current.cursorX, y: current.cursorY });
     current.contentBottom = Math.max(current.contentBottom, current.cursorY + s.height);
-    current.cursorX += s.width + ATLAS_PADDING;
+    current.cursorX += s.width + ATLAS_PADDING * 2;
     current.rowHeight = Math.max(current.rowHeight, s.height);
   }
   flush();
   return pages;
+}
+
+// Nearest sampling still reaches outside a sprite's UV rectangle at fractional
+// camera edges with MSAA. Give each frame its own copied border, including
+// corners, without changing the original rect or its source RGBA pixels.
+export async function renderMapAtlasPage(page) {
+  const pixels = Buffer.alloc(page.width * page.height * 4);
+  for (const source of page.sources) {
+    if (source.x < ATLAS_PADDING || source.y < ATLAS_PADDING ||
+        source.x + source.width + ATLAS_PADDING > page.width ||
+        source.y + source.height + ATLAS_PADDING > page.height) {
+      throw new Error(`Map atlas frame has no owned gutter: ${source.filePath}`);
+    }
+    const { data, info } = await sharp(source.filePath).ensureAlpha().raw()
+      .toBuffer({ resolveWithObject: true });
+    if (info.width !== source.width || info.height !== source.height || info.channels !== 4) {
+      throw new Error(`Map atlas source dimensions changed: ${source.filePath}`);
+    }
+    const rowBytes = source.width * 4;
+    for (let y = -ATLAS_PADDING; y < source.height + ATLAS_PADDING; y += 1) {
+      const sourceY = Math.max(0, Math.min(source.height - 1, y));
+      const sourceStart = sourceY * rowBytes;
+      const destination = ((source.y + y) * page.width + source.x) * 4;
+      data.copy(pixels, destination, sourceStart, sourceStart + rowBytes);
+      for (let border = 1; border <= ATLAS_PADDING; border += 1) {
+        data.copy(pixels, destination - border * 4, sourceStart, sourceStart + 4);
+        data.copy(pixels, destination + rowBytes + (border - 1) * 4,
+          sourceStart + rowBytes - 4, sourceStart + rowBytes);
+      }
+    }
+  }
+  return sharp(pixels, { raw: { width: page.width, height: page.height, channels: 4 } })
+    .png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer();
 }
 
 export function mapAtlasManifestFitsBudget(manifest, maxSize = MAX_SIZE) {
@@ -386,6 +412,16 @@ export function mapAtlasLibrarySupportsRawUpload(libraryKey) {
 
 export function isRemoteReleaseBuild(environment = process.env) {
   return environment.MIR2_ORIGINAL_ASSET_MANIFEST_MODE === "remote-release";
+}
+
+export async function readRemoteMapAtlasBuildPlan(configPath = PRODUCTION_ASSET_CONFIG) {
+  if (path.basename(configPath) === NUMERON_PRODUCTION_ASSET_CONFIG) {
+    const release = JSON.parse(await fs.readFile(configPath, "utf8"));
+    assertNumeronFiniteProfile(release);
+    return { enabled: false, verified: false, atlasBudgetVerified: false, releaseVersion: release.version,
+      profile: "numeron-r16-finite" };
+  }
+  return { enabled: true, verified: true, atlasBudgetVerified: true, ...(await readVerifiedRemoteMapAtlasRelease(configPath)) };
 }
 
 export async function readVerifiedRemoteMapAtlasRelease(

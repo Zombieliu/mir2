@@ -1,0 +1,171 @@
+{
+  "owner": "Root",
+  "kind": "Source73 ordinary React storage deposit save relogin and takeback save relogin",
+  "url": "http://127.0.0.1:19205/",
+  "newWeb": {
+    "pid": 84876,
+    "parentPid": 55916,
+    "port": 19205,
+    "startConfig": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/web-start01-config.json",
+      "bytes": 3006,
+      "sha256": "3991ef8fae4161f3577962b07b6a28d84570f55e10fd4fa642da14eb1ba8f3df"
+    },
+    "originalSession": 55613,
+    "originalCallerOpen": true,
+    "finalExitAndPostguardPending": true
+  },
+  "gateway": {
+    "pid": 66300,
+    "ports": [
+      19100,
+      19110
+    ],
+    "unchanged": true
+  },
+  "normalActionsOnly": true,
+  "loginCredentialsRecorded": false,
+  "rawPacketOrQaAdminCommandsUsed": false,
+  "cacheCleared": false,
+  "productOrWasmGlobalsRead": false,
+  "privateGatewayConfigRead": false,
+  "activeProductLogsRead": false,
+  "checkpoints": [
+    {
+      "stage": "initial warehouse access",
+      "bag": 5,
+      "storage": 0,
+      "gold": 180
+    },
+    {
+      "stage": "ordinary Store Item Candle and empty storage slot",
+      "bag": 4,
+      "storage": 1,
+      "gold": 180
+    },
+    {
+      "stage": "ordinary Alt+x logout reload Login Start Game Anthony Access",
+      "bag": 4,
+      "storage": 1,
+      "gold": 180
+    },
+    {
+      "stage": "ordinary Take Back Candle and fresh empty inventory slot5",
+      "bag": 5,
+      "storage": 0,
+      "gold": 180
+    },
+    {
+      "stage": "final Alt+x logout reload Login Start Game Anthony Access",
+      "bag": 5,
+      "storage": 0,
+      "gold": 180
+    }
+  ],
+  "accountItemsAndGoldRestored": true,
+  "depositPersistedAcrossRelogin": true,
+  "takebackPersistedAcrossRelogin": true,
+  "observedStorageStatus": {
+    "owner": "react",
+    "phase": "prepare",
+    "reason": "rendererAssetsFailed"
+  },
+  "observedHudDom": {
+    "passiveCompat": true,
+    "mainHudShell": false
+  },
+  "canvas": {
+    "width": 644,
+    "height": 483
+  },
+  "sharedStorageOwnerAccepted": false,
+  "nativePointerHandoffAccepted": false,
+  "sharedCancelAccepted": false,
+  "unlockedBag2ActualTested": false,
+  "screenshots": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source73-restored-relogin01.png",
+      "bytes": 62477,
+      "sha256": "811a0f67ea149df5317af57b6bf6771fe344b58af8793303bd957c4ac5f3231b"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source73-react-store01.png",
+      "bytes": 64583,
+      "sha256": "7acee3d2767ba919d1bb050000514ace5a1b3653c57fa8655d5d8accc66cd1fd"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source73-react-takeback01.png",
+      "bytes": 63151,
+      "sha256": "f0bb2e3a1d1d7b513e9bc1d213c27792fc8b9eb1173ce74c40c391b37c176839"
+    }
+  ],
+  "finitePublicResponseObservation": {
+    "api": "passive Network.responseReceived only",
+    "whitelistDistinctPaths": 34,
+    "distinctPathsPositivelyObserved": 34,
+    "distinctPathsWith200": 32,
+    "distinctPathsWith404": 2,
+    "failedPaths": [
+      "/original-ui/UI_32bit/470.png",
+      "/original-ui/UI_32bit/471.png"
+    ],
+    "allSkinPathsObserved": 30,
+    "skinPathsWith200": 28,
+    "itemIconPathsWith200": [
+      "/original-ui/Items/130.png",
+      "/original-ui/Items/145.png",
+      "/original-ui/Items/222.png"
+    ],
+    "fontPathWith200": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+    "intervals": [
+      {
+        "stage": "reload-login",
+        "truncated": false,
+        "matched": 0
+      },
+      {
+        "stage": "after-login-observation",
+        "truncated": true,
+        "matched": 0
+      },
+      {
+        "stage": "start-game",
+        "truncated": false,
+        "matched": 0
+      },
+      {
+        "stage": "world-ready",
+        "truncated": true,
+        "matched": 4
+      },
+      {
+        "stage": "npc-dialog",
+        "truncated": false,
+        "matched": 1
+      },
+      {
+        "stage": "warehouse-access",
+        "truncated": false,
+        "matched": 37
+      },
+      {
+        "stage": "takeback-mode",
+        "truncated": false,
+        "matched": 2
+      },
+      {
+        "stage": "after-takeback",
+        "truncated": false,
+        "matched": 0
+      }
+    ],
+    "wholeObservationIntervalComplete": false,
+    "response200ProvesImageDecoded": false,
+    "requestIdsHeadersCredentialsOrRawFramesRecorded": false
+  },
+  "gapEvidence": "web-source73-required-skins-gap01.json",
+  "candidateAccepted": false,
+  "wholeParityPercentage": null,
+  "finalHumanAcceptance": false,
+  "goalComplete": false
+}

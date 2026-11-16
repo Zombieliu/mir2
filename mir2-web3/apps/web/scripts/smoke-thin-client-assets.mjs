@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
 import { access } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { readClientCoreRelease, verifyClientCoreManifest, assertCompiledClientCoreManifest,
+  CLIENT_CORE_BUILD_MANIFEST_ENV } from "./lib/client-core-release-files.mjs";
+import { resolveNextBuildDistDirectory } from "./lib/bevy-runtime-build-identity.mjs";
+import { readImmutableBevyRuntimeRelease } from "./lib/bevy-runtime-release-files.mjs";
 import path from "node:path";
 
 const args = parseArgs(process.argv.slice(2));
@@ -19,15 +24,27 @@ if (!assetBaseUrl) {
   );
 }
 
+const pinnedRuntime = readImmutableBevyRuntimeRelease({
+  webRoot: packageRoot, manifestPath: path.join(packageRoot, "public", "bevy-runtime", "runtime-manifest.json"),
+});
+const runtimeManifest = pinnedRuntime.normalized;
+const requiredServerFilesPath = path.join(resolveNextBuildDistDirectory(
+  { config: { distDir: args.nextDir ?? ".next" } }, packageRoot), "required-server-files.json");
+const requiredServerFiles = JSON.parse(readFileSync(requiredServerFilesPath, "utf8"));
+if (path.join(resolveNextBuildDistDirectory(requiredServerFiles, packageRoot), "required-server-files.json") !== requiredServerFilesPath) {
+  throw new Error("Package required-server-files location differs from compiled distDir");
+}
+const coreManifest = verifyClientCoreManifest(JSON.parse(
+  requiredServerFiles.config?.env?.[CLIENT_CORE_BUILD_MANIFEST_ENV] ?? "null"));
+assertCompiledClientCoreManifest(requiredServerFiles, coreManifest);
+const packagedCore = readClientCoreRelease({ webRoot: packageRoot, manifest: coreManifest, requireExactClosure: true });
 const localRequired = [
   "server.js",
+  ...packagedCore.files.map((entry) => `public/${entry.relativePath}`),
   "public/mir2-asset-worker.js",
   "public/generated/map-atlas/manifest.json",
   "public/bevy-entity-atlases/manifest.json",
-  "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
-  "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
-  "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
-  "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+  ...runtimeManifest.files.map((entry) => entry.path.replace(/^public\/bevy-runtime/, `public/bevy-runtime-releases/${runtimeManifest.version}`)),
   "public/original-ui/Prguse/2092.png",
   "public/original-ui/Prguse/2094.png",
   "public/original-ui/Prguse/2095.png",
@@ -118,6 +135,8 @@ const report = {
   local,
   remote,
   releaseManifest,
+  coreClosure: { version: coreManifest.version, abiVersion: coreManifest.abiVersion,
+    exactTwoLeafClosure: true, files: packagedCore.files.map(({ relativePath, bytes, sha256 }) => ({ relativePath, bytes, sha256 })) },
 };
 
 console.log(JSON.stringify(report, null, 2));

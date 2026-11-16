@@ -103,8 +103,13 @@ import type {
   SelectCharacterEntry,
 } from "./original-client-types";
 import {
+  CRYSTAL_FISHING_PHASES,
+  CRYSTAL_FISHING_ROD_FRAME_OFFSET,
+  CRYSTAL_PLAYER_ACTION_FRAMES,
+  crystalFishingRodLibrary,
   crystalMountedPlayerActionForPresentation,
   crystalPlayerAnimationMeta,
+  isCrystalFishingPhase,
   type CrystalPlayerActionKey,
 } from "./original-client-player-frames";
 import { crystalEntityAnimationMeta } from "./original-client-entity-frames";
@@ -200,11 +205,14 @@ export function buildViewportEntitySprite(
   }
 
   const bodyLibraryKey = normalizeSceneSpriteLibraryKey(sprite.bodyLibrary);
+  const bodyLibrary = libraries[bodyLibraryKey];
+  if (entity.kind === "monster" && bodyLibrary?.startupFramesOnly &&
+      animationState !== "standing" && animationState !== "walking") return null;
   const animation = spriteAnimationMetaForEntity(
     entity,
     sprite,
     animationState,
-    libraries[bodyLibraryKey],
+    bodyLibrary,
     animationPose?.action,
   );
   if (!animation) return null;
@@ -228,16 +236,22 @@ export function buildViewportEntitySprite(
   const hairLibraryKey = sprite.hairLibrary
     ? normalizeSceneSpriteLibraryKey(sprite.hairLibrary)
     : null;
-  const weaponLibraryKey = sprite.weaponLibrary
+  const normalWeaponLibraryKey = sprite.weaponLibrary
     ? normalizeSceneSpriteLibraryKey(sprite.weaponLibrary)
     : null;
-  const secondaryWeaponLibraryKey = sprite.weaponLibrarySecondary
+  const normalSecondaryWeaponLibraryKey = sprite.weaponLibrarySecondary
     ? normalizeSceneSpriteLibraryKey(sprite.weaponLibrarySecondary)
     : null;
+  const fishing = isCrystalFishingPhase(animationState);
+  const rodLibraryKey = sprite.mountLibrary ? null : crystalFishingRodLibrary(normalWeaponLibraryKey);
+  const weaponLibraryKey = fishing ? rodLibraryKey : normalWeaponLibraryKey;
+  const secondaryWeaponLibraryKey = fishing ? null : normalSecondaryWeaponLibraryKey;
   const fallbackFrameIndex =
     sprite.frameBaseOffset +
     directionIndex(presentationDirection) * Math.max(sprite.directionStride, 1);
-  const bodyFrame = frameMetaForIndexWithFallback(libraries[bodyLibraryKey], frameIndex, fallbackFrameIndex);
+  const bodyFrame = fishing
+    ? frameMetaForIndex(libraries[bodyLibraryKey], frameIndex)
+    : frameMetaForIndexWithFallback(libraries[bodyLibraryKey], frameIndex, fallbackFrameIndex);
   const effectCycle = animation.effect
     ? spriteFrameCycleForEntity(
         entity,
@@ -259,7 +273,9 @@ export function buildViewportEntitySprite(
     ? null
     : frameMetaForIndexWithFallback(libraries[bodyLibraryKey], effectFrameIndex, null);
   const hairFrame = hairLibraryKey
-    ? frameMetaForIndexWithFallback(libraries[hairLibraryKey], frameIndex, fallbackFrameIndex)
+    ? fishing
+      ? frameMetaForIndex(libraries[hairLibraryKey], frameIndex)
+      : frameMetaForIndexWithFallback(libraries[hairLibraryKey], frameIndex, fallbackFrameIndex)
     : null;
   const weaponFrameIndex =
     animation.weaponFrameOffset === null
@@ -271,7 +287,9 @@ export function buildViewportEntitySprite(
       : sprite.weaponFrameOffset + directionIndex(presentationDirection) * Math.max(sprite.directionStride, 1);
   const primaryWeaponFrame =
     weaponLibraryKey && weaponFrameIndex !== null
-      ? frameMetaForIndexWithFallback(libraries[weaponLibraryKey], weaponFrameIndex, fallbackWeaponFrameIndex)
+      ? fishing
+        ? frameMetaForIndex(libraries[weaponLibraryKey], weaponFrameIndex)
+        : frameMetaForIndexWithFallback(libraries[weaponLibraryKey], weaponFrameIndex, fallbackWeaponFrameIndex)
       : null;
   const secondaryWeaponFrame =
     secondaryWeaponLibraryKey && weaponFrameIndex !== null
@@ -317,7 +335,7 @@ export function buildViewportEntitySprite(
     entity,
     sprite,
     animationState,
-    animation,
+    fishing ? null : animation,
     libraries[bodyLibraryKey],
   );
   const preloadFrames = animationPreloadFramesForEntity({
@@ -326,13 +344,29 @@ export function buildViewportEntitySprite(
     directions: atlasPreloadDirectionsForEntity(entity),
     bodyLibraryKey,
     hairLibraryKey,
-    weaponLibraryKey,
-    secondaryWeaponLibraryKey,
+    weaponLibraryKey: normalWeaponLibraryKey,
+    secondaryWeaponLibraryKey: normalSecondaryWeaponLibraryKey,
     mountLibraryKey,
     fallbackFrameIndex,
     fallbackWeaponFrameIndex,
     fallbackMountFrameIndex,
   });
+  if (rodLibraryKey) {
+    // Keep the same atlas key while a standing rod carrier casts, waits and reels.
+    const phaseFrames = CRYSTAL_FISHING_PHASES.reduce((count, phase) =>
+      count + CRYSTAL_PLAYER_ACTION_FRAMES[phase].count * 8, 0);
+    const actorStart = sprite.frameBaseOffset + CRYSTAL_PLAYER_ACTION_FRAMES.fishingCast.start;
+    for (let index = 0; index < phaseFrames; index += 1) {
+      const body = viewportSpriteLayer(frameMetaForIndex(libraries[bodyLibraryKey], actorStart + index));
+      const hair = hairLibraryKey
+        ? viewportSpriteLayer(frameMetaForIndex(libraries[hairLibraryKey], actorStart + index))
+        : null;
+      const rod = viewportSpriteLayer(frameMetaForIndex(libraries[rodLibraryKey], index));
+      if (body) preloadFrames.push(body);
+      if (hair) preloadFrames.push(hair);
+      if (rod) preloadFrames.push(rod);
+    }
+  }
   const resolvedPreloadFrames = preloadFrames.map((frame) => ({
     ...frame,
     path: originalAssetPath(frame.path),
@@ -567,8 +601,9 @@ function frameMetaForIndexWithFallback(
   frameIndex: number,
   fallbackFrameIndex: number | null,
 ) {
+  const exact = frameMetaForIndex(library, frameIndex);
+  if (exact || library?.startupFramesOnly) return exact;
   return (
-    frameMetaForIndex(library, frameIndex) ??
     (fallbackFrameIndex === null ? null : frameMetaForIndex(library, fallbackFrameIndex)) ??
     library?.frames[0] ??
     null
@@ -664,7 +699,7 @@ function atlasPreloadAnimationsForEntity(
   entity: DisplayEntity,
   sprite: EntitySprite,
   animationState: EntitySpriteAnimationState,
-  currentAnimation: ViewportSpriteAnimationMeta,
+  currentAnimation: ViewportSpriteAnimationMeta | null,
   bodyLibrary: OriginalSceneSpriteLibraryMeta | null | undefined,
 ) {
   // Keep the atlas source set stable across short-lived actions. Building only
@@ -963,6 +998,10 @@ function spriteAnimationMetaForEntity(
       crystalMountedPlayerActionForPresentation(animationState),
       false,
     );
+  }
+
+  if (isCrystalFishingPhase(animationState)) {
+    return crystalPlayerAnimationMeta(animationState, sprite.frameBaseOffset, CRYSTAL_FISHING_ROD_FRAME_OFFSET);
   }
 
   const archerAlt =

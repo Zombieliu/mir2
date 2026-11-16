@@ -21,7 +21,6 @@ const PUBLIC_ORIGINAL_UI_DIR = process.env.MIR2_ORIGINAL_UI_OUTPUT_DIR
   ? path.resolve(process.env.MIR2_ORIGINAL_UI_OUTPUT_DIR)
   : path.resolve(WORKSPACE_ROOT, ORIGINAL_UI_OUTPUT_RELATIVE);
 const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
-const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const MAX_ON_DEMAND_LIBRARY_FRAMES = Number(process.env.MIR2_MAX_ON_DEMAND_LIBRARY_FRAMES ?? 15000);
 
@@ -243,9 +242,7 @@ function validateOriginalUiLibraryKey(normalizedKey: string): SourceLibraryEntry
 function crystalDataDir() {
   const root = process.env.CRYSTAL_CLIENT_ROOT
     ? path.resolve(process.env.CRYSTAL_CLIENT_ROOT)
-    : existsSync(LOCAL_CRYSTAL_CLIENT_ROOT)
-      ? LOCAL_CRYSTAL_CLIENT_ROOT
-      : DEFAULT_CRYSTAL_CLIENT_ROOT;
+    : LOCAL_CRYSTAL_CLIENT_ROOT;
   return path.basename(root).toLowerCase() === "data" ? root : path.join(root, "Data");
 }
 

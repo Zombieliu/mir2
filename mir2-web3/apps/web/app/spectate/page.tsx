@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export default function SpectateEntryPage() {
   useEffect(() => {
-    const target = new URL("/", window.location.origin);
+    const target = new URL("/game", window.location.origin);
     for (const [key, value] of new URLSearchParams(window.location.search)) {
       target.searchParams.set(key, value);
     }

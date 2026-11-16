@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
+import { CREATURE_FILTER_KEYS, creaturePlayerCommand, creaturePlayerSourceCurrent, creaturePlayerSourceKey,
+  type CreatureItemFilter, type CreaturePlayerIntent, type CreaturePlayerSource } from "../../lib/creature-player-ui";
 
 type TranslateFn = (
   key: string,
@@ -91,9 +93,13 @@ export type HeroPetWindowProps = {
   onRecallHero?: () => void;
   /** Change the hero's AI behaviour (Crystal SetHeroBehaviour). */
   onSetHeroBehaviour?: (behaviour: HeroBehaviourKey) => void;
+  onOpenHeroManagement?: (page: "inventory" | "equipment" | "skills") => void;
   onSummonCreature?: (creatureId: string) => void;
   onReleaseCreature?: (creatureId: string) => void;
   onCyclePickupMode?: (creatureId: string) => void;
+  creatureSource?: CreaturePlayerSource | null;
+  petActionPending?: boolean;
+  onPetAction?: (intent: CreaturePlayerIntent, renderSource: CreaturePlayerSource) => void;
   onClose: () => void;
 };
 
@@ -111,21 +117,52 @@ export function HeroPetWindow({
   onDismissHero,
   onRecallHero,
   onSetHeroBehaviour,
-  onSummonCreature,
-  onReleaseCreature,
-  onCyclePickupMode,
+  onOpenHeroManagement,
+  creatureSource = null,
+  petActionPending = false,
+  onPetAction,
   onClose,
 }: HeroPetWindowProps) {
   const [tab, setTab] = useState<HeroPetTab>(hero ? "hero" : "creatures");
   const [selectedCreatureId, setSelectedCreatureId] = useState<string | null>(creatures[0]?.id ?? null);
+  const visibleCreatures = useMemo<CreatureSummary[]>(() => creatureSource ? creatureSource.records.map(pet => ({
+    id: `pet-${pet.petType}`, name: pet.customName, icon: pet.icon >= 0 ? pet.icon : undefined,
+    summoned: creatureSource.summonedPetType === pet.petType, typeLabel: `Pet ${pet.petType}`,
+    pickupMode: pet.petMode === 0 ? "Auto" : "Semi-auto",
+  })) : creatures, [creatures, creatureSource]);
+  const [petEditor, setPetEditor] = useState<{
+    kind: "rename" | "release" | "options"; source: CreaturePlayerSource; petType: number;
+    text: string; filter: CreatureItemFilter; grade: number;
+  } | null>(null);
+  const submittedPetAction = useRef<string | null>(null);
 
   const selectedCreature = useMemo(() => {
     if (selectedCreatureId) {
-      const match = creatures.find((creature) => creature.id === selectedCreatureId);
+      const match = visibleCreatures.find((creature) => creature.id === selectedCreatureId);
       if (match) return match;
     }
-    return creatures[0] ?? null;
-  }, [creatures, selectedCreatureId]);
+    return visibleCreatures[0] ?? null;
+  }, [visibleCreatures, selectedCreatureId]);
+  const selectedPet = creatureSource?.records.find(pet => `pet-${pet.petType}` === selectedCreature?.id) ?? null;
+  const petEditorCurrent = petEditor !== null && creaturePlayerSourceCurrent(petEditor.source, creatureSource);
+  const canPetAction = (intent: CreaturePlayerIntent) => !!creatureSource && !!onPetAction && !petActionPending
+    && petEditor === null && creaturePlayerCommand(intent, creatureSource) !== null;
+  const submitPetAction = (intent: CreaturePlayerIntent, captured: CreaturePlayerSource | null = creatureSource) => {
+    if (!captured || !onPetAction || petActionPending || !creaturePlayerSourceCurrent(captured, creatureSource)
+      || !creaturePlayerCommand(intent, captured)) return;
+    const key = JSON.stringify([captured.owner.connectionGeneration, captured.owner.sessionGeneration,
+      captured.owner.sceneRevision, captured.owner.playerObjectId, captured.owner.mapFileName, creaturePlayerSourceKey(captured), intent]);
+    if (submittedPetAction.current === key) return;
+    submittedPetAction.current = key;
+    onPetAction(intent, captured);
+  };
+  const openPetEditor = (kind: "rename" | "release" | "options") => {
+    if (!selectedPet || !creatureSource || !onPetAction || petActionPending) return;
+    if (kind === "rename" && !creatureSource.renameEnabled
+      || kind === "release" && creatureSource.summonedPetType === selectedPet.petType) return;
+    setPetEditor({ kind, source: creatureSource, petType: selectedPet.petType,
+      text: kind === "rename" ? selectedPet.customName : "", filter: selectedPet.filter, grade: selectedPet.pickupGrade });
+  };
 
   useEffect(() => {
     if (!hero && tab === "hero") {
@@ -173,7 +210,7 @@ export function HeroPetWindow({
           style={{ ...style.tab, ...(tab === "creatures" ? style.tabActive : null) }}
         >
           {t("ui.creatures", [], "Creatures")}
-          <span style={style.tabCount}>{creatures.length}</span>
+          <span style={style.tabCount}>{visibleCreatures.length}</span>
         </button>
       </div>
 
@@ -283,6 +320,14 @@ export function HeroPetWindow({
                   />
                 ) : null}
               </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
+                <ActionButton label={t("ui.heroBag", [], "Hero bag")} disabled={!onOpenHeroManagement}
+                  onClick={() => onOpenHeroManagement?.("inventory")} />
+                <ActionButton label={t("ui.heroEquipment", [], "Equipment")} disabled={!onOpenHeroManagement}
+                  onClick={() => onOpenHeroManagement?.("equipment")} />
+                <ActionButton label={t("ui.heroSkills", [], "Skills")} disabled={!onOpenHeroManagement}
+                  onClick={() => onOpenHeroManagement?.("skills")} />
+              </div>
             </>
           ) : (
             <div style={style.empty}>{t("ui.heroNone", [], "No hero recruited yet.")}</div>
@@ -291,10 +336,10 @@ export function HeroPetWindow({
       ) : (
         <div style={style.body}>
           <div style={style.creatureList} aria-label={t("ui.creatures", [], "Creatures")}>
-            {creatures.length === 0 ? (
+            {visibleCreatures.length === 0 ? (
               <div style={style.empty}>{t("ui.creatureNone", [], "No creatures tamed.")}</div>
             ) : (
-              creatures.map((creature) => {
+               visibleCreatures.map((creature) => {
                 const isSelected = selectedCreature?.id === creature.id;
                 return (
                   <button
@@ -302,8 +347,8 @@ export function HeroPetWindow({
                     type="button"
                     data-creature-id={creature.id}
                     aria-pressed={isSelected}
-                    onClick={() => setSelectedCreatureId(creature.id)}
-                    style={{ ...style.creatureRow, ...(isSelected ? style.creatureRowSelected : null) }}
+                    onClick={() => { setSelectedCreatureId(creature.id); setPetEditor(null); }}
+                    style={{ ...style.creatureRow, minHeight: 44, flexShrink: 0, ...(isSelected ? style.creatureRowSelected : null) }}
                   >
                     {typeof creature.icon === "number" ? (
                       <img style={style.creatureIcon} src={creatureIconPath(creature.icon)} alt="" draggable={false} />
@@ -318,7 +363,7 @@ export function HeroPetWindow({
             )}
           </div>
 
-          <div style={style.creatureDetail} data-creature-detail={selectedCreature?.id ?? ""}>
+          <div style={{ ...style.creatureDetail, flex: "0 0 auto", overflow: "visible" }} data-creature-detail={selectedCreature?.id ?? ""}>
             {selectedCreature ? (
               <>
                 <div style={style.creatureDetailName}>{selectedCreature.name}</div>
@@ -346,25 +391,47 @@ export function HeroPetWindow({
                   <span style={style.creaturePickupLabel}>{t("ui.creaturePickup", [], "Pickup")}</span>
                   <button
                     type="button"
-                    disabled={!onCyclePickupMode}
-                    onClick={() => onCyclePickupMode?.(selectedCreature.id)}
-                    style={{ ...style.creaturePickupButton, ...(!onCyclePickupMode ? style.actionButtonDisabled : null) }}
+                    disabled={!selectedPet || !canPetAction({ kind: "mode", petType: selectedPet.petType, mode: selectedPet.petMode === 0 ? 1 : 0 })}
+                    onClick={() => { if (selectedPet) submitPetAction({ kind: "mode", petType: selectedPet.petType,
+                      mode: selectedPet.petMode === 0 ? 1 : 0 }); }}
+                    style={{ ...style.creaturePickupButton, minHeight: 44 }}
                   >
                     {selectedCreature.pickupMode ?? t("ui.creaturePickupOff", [], "Off")}
                   </button>
                 </div>
-                <div style={style.actions}>
+                <div style={{ ...style.actions, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
                   <ActionButton
                     label={t("ui.creatureSummon", [], "Summon")}
-                    disabled={!onSummonCreature || Boolean(selectedCreature.summoned)}
-                    onClick={() => onSummonCreature?.(selectedCreature.id)}
+                    disabled={!selectedPet || !canPetAction({ kind: "summon", petType: selectedPet.petType })}
+                    onClick={() => { if (selectedPet) submitPetAction({ kind: "summon", petType: selectedPet.petType }); }}
                   />
+                  <ActionButton label={t("ui.creatureDismiss", [], "Dismiss")}
+                    disabled={!selectedPet || !canPetAction({ kind: "dismiss", petType: selectedPet.petType })}
+                    onClick={() => { if (selectedPet) submitPetAction({ kind: "dismiss", petType: selectedPet.petType }); }} />
                   <ActionButton
                     label={t("ui.creatureRelease", [], "Release")}
-                    disabled={!onReleaseCreature}
-                    onClick={() => onReleaseCreature?.(selectedCreature.id)}
+                    disabled={!selectedPet || !onPetAction || petActionPending || petEditor !== null
+                      || creatureSource?.summonedPetType === selectedPet.petType}
+                    onClick={() => openPetEditor("release")}
                   />
+                  <ActionButton label={t("ui.creatureRename", [], "Rename")}
+                    disabled={!selectedPet || !onPetAction || petActionPending || petEditor !== null || !creatureSource?.renameEnabled}
+                    onClick={() => openPetEditor("rename")} />
+                  <ActionButton label={t("ui.creatureOptions", [], "Options")}
+                    disabled={!selectedPet || !onPetAction || petActionPending || petEditor !== null}
+                    onClick={() => openPetEditor("options")} />
                 </div>
+                {selectedPet ? <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                  {t("ui.creatureSlot", [], "Slot")}
+                  <select aria-label={t("ui.creatureSlot", [], "Slot")} value={selectedPet.slotIndex}
+                    style={{ minHeight: 44 }} disabled={!onPetAction || petActionPending || petEditor !== null}
+                    onChange={event => { if (selectedPet) submitPetAction({ kind: "slot", petType: selectedPet.petType, slotIndex: Number(event.currentTarget.value) }); }}>
+                    {Array.from({ length: 10 }, (_, slot) => <option key={slot} value={slot}
+                      disabled={creatureSource?.records.some(pet => pet.petType !== selectedPet.petType && pet.slotIndex === slot)}>{slot}</option>)}
+                  </select>
+                </label> : null}
+                {!creatureSource ? <p role="status">{t("ui.creatureSourceUnknown", [], "Waiting for the complete current creature record.")}</p> : null}
+                {petActionPending ? <p role="status">{t("ui.creaturePending", [], "Waiting for authoritative creature state.")}</p> : null}
               </>
             ) : (
               <div style={style.empty}>{t("ui.creatureSelectHint", [], "Select a creature.")}</div>
@@ -372,6 +439,58 @@ export function HeroPetWindow({
           </div>
         </div>
       )}
+      {petEditor ? <div role="dialog" aria-modal="true"
+        aria-label={petEditor.kind === "options" ? t("ui.creatureOptions", [], "Creature options") : t("ui.confirm", [], "Confirm")}
+        style={{ position: "absolute", inset: 16, zIndex: 1000, background: "#21190f", border: "1px solid #987443",
+          padding: 16, color: "#eadbb4", overflow: "auto" }} onKeyDown={event => {
+          if (event.key === "Escape") { event.stopPropagation(); setPetEditor(null); }
+        }}>
+        {petEditor.kind === "options" ? <>
+          <p>{t("ui.creatureOptions", [], "Creature options")}</p>
+          {CREATURE_FILTER_KEYS.map(key => <label key={key} style={{ display: "flex", minHeight: 44, alignItems: "center", gap: 10 }}>
+            <input type="checkbox" checked={petEditor.filter[key]} disabled={!petEditorCurrent || petActionPending}
+              onChange={event => { const checked = event.currentTarget.checked; setPetEditor(current => current ? {
+                ...current, filter: { ...current.filter, [key]: checked } } : null); }} />
+            {t(`ui.${key}`, [], key.replace(/^petPickup/, "Pickup "))}
+          </label>)}
+          <label style={{ display: "flex", minHeight: 44, alignItems: "center", gap: 10 }}>
+            {t("ui.creaturePickupGrade", [], "Pickup grade")}
+            <select value={petEditor.grade} style={{ minHeight: 44 }} disabled={!petEditorCurrent || petActionPending}
+              onChange={event => { const grade = Number(event.currentTarget.value); setPetEditor(current => current ? { ...current, grade } : null); }}>
+              {[0, 1, 2, 3, 4, 5].map(grade => <option key={grade} value={grade}>{grade}</option>)}
+            </select>
+          </label>
+        </> : <>
+          <p>{petEditor.kind === "release"
+            ? t("ui.creatureReleaseVerify", [petEditor.source.records.find(pet => pet.petType === petEditor.petType)?.customName ?? ""],
+              `Type the current creature name: ${petEditor.source.records.find(pet => pet.petType === petEditor.petType)?.customName ?? ""}`)
+            : t("ui.creatureRenameRule", [], "Use 3–15 ASCII letters or digits.")}</p>
+          <input aria-label={petEditor.kind === "release" ? t("ui.creatureName", [], "Current creature name") : t("ui.creatureNewName", [], "New creature name")}
+            value={petEditor.text} maxLength={petEditor.kind === "rename" ? 15 : 256} style={{ minHeight: 44, width: "100%" }}
+            disabled={!petEditorCurrent || petActionPending} onChange={event => {
+              const text = event.currentTarget.value; setPetEditor(current => current ? { ...current, text } : null);
+            }} />
+        </>}
+        {!petEditorCurrent ? <p role="status">{t("ui.creatureChanged", [], "Creature state changed. Close this draft and review it again.")}</p> : null}
+        <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
+          <button type="button" autoFocus style={{ minHeight: 44, minWidth: 88 }} onClick={() => setPetEditor(null)}>{t("ui.cancel", [], "Cancel")}</button>
+          <button type="button" style={{ minHeight: 44, minWidth: 88 }} disabled={!petEditorCurrent || petActionPending || !onPetAction
+            || !creaturePlayerCommand(petEditor.kind === "options"
+              ? { kind: "options", petType: petEditor.petType, filter: petEditor.filter, pickupGrade: petEditor.grade }
+              : petEditor.kind === "rename" ? { kind: "rename", petType: petEditor.petType, text: petEditor.text }
+                : { kind: "release", petType: petEditor.petType, confirmationName: petEditor.text }, petEditor.source)}
+            onClick={() => {
+              const captured = petEditor;
+              if (!captured || !creaturePlayerSourceCurrent(captured.source, creatureSource)) return;
+              const intent: CreaturePlayerIntent = captured.kind === "options"
+                ? { kind: "options", petType: captured.petType, filter: captured.filter, pickupGrade: captured.grade }
+                : captured.kind === "rename" ? { kind: "rename", petType: captured.petType, text: captured.text }
+                  : { kind: "release", petType: captured.petType, confirmationName: captured.text };
+              if (!creaturePlayerCommand(intent, captured.source) || petActionPending || !onPetAction) return;
+              submitPetAction(intent, captured.source); setPetEditor(null);
+            }}>{petEditor.kind === "options" ? t("ui.save", [], "Save") : t("ui.confirm", [], "Confirm")}</button>
+        </div>
+      </div> : null}
     </section>
   );
 }
@@ -406,7 +525,7 @@ function ActionButton({ label, disabled, onClick }: { label: string; disabled?: 
       type="button"
       disabled={disabled}
       onClick={onClick}
-      style={{ ...style.actionButton, ...(disabled ? style.actionButtonDisabled : null) }}
+      style={{ ...style.actionButton, minHeight: 44, ...(disabled ? style.actionButtonDisabled : null) }}
     >
       {label}
     </button>
@@ -558,7 +677,7 @@ const style: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: 2,
-    overflow: "hidden",
+    overflowY: "auto",
     border: "1px solid rgba(190, 157, 99, 0.28)",
     background: "rgba(11, 8, 5, 0.45)",
     padding: 3,

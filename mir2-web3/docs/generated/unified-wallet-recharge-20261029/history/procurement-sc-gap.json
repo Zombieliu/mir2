@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "procurement-locale-render-path-review.json",
+    "bytes": 1851,
+    "sha256": "ef96612291a965cf4486add5ea710542477823dbb8ac6b65935f61fb476a5187"
+  },
+  "producerReport": {
+    "reviewedAtUtc": "2026-10-29T15:12:08.382386+00:00",
+    "scope": "read-only exact final text path; no source changes or new GPU run",
+    "conclusion": "Procurement direct Text nodes retain Traditional Chinese strings even when active locale is SimplifiedChinese; locale only changes their font.",
+    "renderPath": [
+      "native_procurement.rs:711-727 directly spawns Text::new(value.into()) without LocalizedText marker or translation call.",
+      "button():729-752 uses that same text() helper.",
+      "native_i18n.rs:953-970 updates only Query nodes containing LocalizedText. Procurement nodes are excluded.",
+      "native_i18n.rs:933-950 refreshes TextFont only, not Text content."
+    ],
+    "actualLabelsInCapturedLayout": [
+      "個人智慧求購 · Dubhe / Sui",
+      "公開求購",
+      "服務與明細"
+    ],
+    "gpuEvidence": {
+      "count": 7,
+      "locale": "zh-TW",
+      "localeProof": "native_procurement.rs:1358 fixture explicitly activates TraditionalChinese",
+      "hasSimplifiedChineseCapture": false,
+      "layoutReport": "C:\\mir2-build\\unified-20261029\\native-gpu-procurement\\procurement-native-gpu.json",
+      "layoutReportSha256": "73fbeda6bb39beec09bee1c7b2f90285aa5343ed04b22de091d9ed2194aff0ae",
+      "examplePng": "C:\\mir2-build\\unified-20261029\\native-gpu-procurement\\procurement-delivery-confirm-1024x768.png"
+    },
+    "freshSimplifiedProcurementGpuVerified": false,
+    "humanAccepted": false,
+    "sourceSha256": {
+      "apps/game-client/client-bevy/src/native_procurement.rs": "da7f74d62ba2076f4de4dd89d8ec6246972ea664b65b90a6d4b713af7456e63c",
+      "apps/game-client/client-bevy/src/native_i18n.rs": "3bdce43ce650fb8a31021dc7236ba7a68a39230ce2982a7441c3b5997ef617cb",
+      "packages/game-data/data/native-i18n/extra/zh-CN.json": "4e81d7fa6c190ca4540a7cb466f8178eb2b6aff744a206a9950ddb8b8d8f53bf"
+    }
+  },
+  "phase": "confirmed source/render coverage gap; original7 procurement GPU images are Traditional Chinese",
+  "freshSimplifiedProcurementAcceptance": false
+}

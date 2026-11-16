@@ -1,0 +1,2318 @@
+{
+  "schema": "mir2.dense-fixture-original-world-inputs.v1",
+  "sourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "sourceFiles": [
+    {
+      "relativePath": "apps/web/lib/generated/crystal_respawn_manifest.json",
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "relativePath": "packages/game-data/data/content_profiles/platinum_176.json",
+      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd"
+    }
+  ],
+  "maps": [
+    {
+      "map": "0",
+      "title": "BichonProvince",
+      "index": 1,
+      "safeZones": [
+        {
+          "location": {
+            "x": 288,
+            "y": 616
+          },
+          "size": 10,
+          "start_point": true
+        },
+        {
+          "location": {
+            "x": 650,
+            "y": 629
+          },
+          "size": 10,
+          "start_point": false
+        },
+        {
+          "location": {
+            "x": 328,
+            "y": 264
+          },
+          "size": 10,
+          "start_point": false
+        },
+        {
+          "location": {
+            "x": 304,
+            "y": 256
+          },
+          "size": 10,
+          "start_point": false
+        },
+        {
+          "location": {
+            "x": 267,
+            "y": 256
+          },
+          "size": 10,
+          "start_point": false
+        },
+        {
+          "location": {
+            "x": 331,
+            "y": 330
+          },
+          "size": 10,
+          "start_point": false
+        }
+      ],
+      "fire": false,
+      "lightning": false,
+      "transfers": [
+        {
+          "map_index": 2,
+          "source": {
+            "x": 347,
+            "y": 188
+          },
+          "destination": {
+            "x": 13,
+            "y": 40
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0122"
+        },
+        {
+          "map_index": 3,
+          "source": {
+            "x": 308,
+            "y": 264
+          },
+          "destination": {
+            "x": 3,
+            "y": 7
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0102"
+        },
+        {
+          "map_index": 4,
+          "source": {
+            "x": 326,
+            "y": 288
+          },
+          "destination": {
+            "x": 8,
+            "y": 12
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0108"
+        },
+        {
+          "map_index": 6,
+          "source": {
+            "x": 322,
+            "y": 247
+          },
+          "destination": {
+            "x": 4,
+            "y": 10
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0104"
+        },
+        {
+          "map_index": 7,
+          "source": {
+            "x": 354,
+            "y": 319
+          },
+          "destination": {
+            "x": 9,
+            "y": 13
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0107"
+        },
+        {
+          "map_index": 8,
+          "source": {
+            "x": 295,
+            "y": 251
+          },
+          "destination": {
+            "x": 8,
+            "y": 16
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0125"
+        },
+        {
+          "map_index": 8,
+          "source": {
+            "x": 295,
+            "y": 250
+          },
+          "destination": {
+            "x": 8,
+            "y": 16
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0125"
+        },
+        {
+          "map_index": 10,
+          "source": {
+            "x": 335,
+            "y": 299
+          },
+          "destination": {
+            "x": 5,
+            "y": 12
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0103"
+        },
+        {
+          "map_index": 10,
+          "source": {
+            "x": 335,
+            "y": 300
+          },
+          "destination": {
+            "x": 6,
+            "y": 12
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0103"
+        },
+        {
+          "map_index": 10,
+          "source": {
+            "x": 344,
+            "y": 308
+          },
+          "destination": {
+            "x": 17,
+            "y": 24
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0103"
+        },
+        {
+          "map_index": 10,
+          "source": {
+            "x": 345,
+            "y": 308
+          },
+          "destination": {
+            "x": 18,
+            "y": 24
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0103"
+        },
+        {
+          "map_index": 11,
+          "source": {
+            "x": 295,
+            "y": 284
+          },
+          "destination": {
+            "x": 8,
+            "y": 23
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0105"
+        },
+        {
+          "map_index": 11,
+          "source": {
+            "x": 295,
+            "y": 285
+          },
+          "destination": {
+            "x": 8,
+            "y": 23
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0105"
+        },
+        {
+          "map_index": 11,
+          "source": {
+            "x": 305,
+            "y": 276
+          },
+          "destination": {
+            "x": 20,
+            "y": 11
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0105"
+        },
+        {
+          "map_index": 12,
+          "source": {
+            "x": 307,
+            "y": 311
+          },
+          "destination": {
+            "x": 8,
+            "y": 24
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0106"
+        },
+        {
+          "map_index": 12,
+          "source": {
+            "x": 307,
+            "y": 310
+          },
+          "destination": {
+            "x": 9,
+            "y": 23
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0106"
+        },
+        {
+          "map_index": 12,
+          "source": {
+            "x": 317,
+            "y": 302
+          },
+          "destination": {
+            "x": 21,
+            "y": 11
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0106"
+        },
+        {
+          "map_index": 12,
+          "source": {
+            "x": 317,
+            "y": 301
+          },
+          "destination": {
+            "x": 20,
+            "y": 12
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0106"
+        },
+        {
+          "map_index": 13,
+          "source": {
+            "x": 289,
+            "y": 292
+          },
+          "destination": {
+            "x": 9,
+            "y": 22
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0101"
+        },
+        {
+          "map_index": 13,
+          "source": {
+            "x": 286,
+            "y": 296
+          },
+          "destination": {
+            "x": 17,
+            "y": 13
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0101"
+        },
+        {
+          "map_index": 15,
+          "source": {
+            "x": 278,
+            "y": 239
+          },
+          "destination": {
+            "x": 5,
+            "y": 8
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0128"
+        },
+        {
+          "map_index": 16,
+          "source": {
+            "x": 284,
+            "y": 236
+          },
+          "destination": {
+            "x": 2,
+            "y": 7
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0129"
+        },
+        {
+          "map_index": 17,
+          "source": {
+            "x": 271,
+            "y": 256
+          },
+          "destination": {
+            "x": 13,
+            "y": 17
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0123"
+        },
+        {
+          "map_index": 18,
+          "source": {
+            "x": 283,
+            "y": 268
+          },
+          "destination": {
+            "x": 7,
+            "y": 12
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0124"
+        },
+        {
+          "map_index": 19,
+          "source": {
+            "x": 396,
+            "y": 230
+          },
+          "destination": {
+            "x": 11,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0110"
+        },
+        {
+          "map_index": 19,
+          "source": {
+            "x": 396,
+            "y": 229
+          },
+          "destination": {
+            "x": 11,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0110"
+        },
+        {
+          "map_index": 20,
+          "source": {
+            "x": 400,
+            "y": 225
+          },
+          "destination": {
+            "x": 11,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0111"
+        },
+        {
+          "map_index": 20,
+          "source": {
+            "x": 399,
+            "y": 225
+          },
+          "destination": {
+            "x": 10,
+            "y": 16
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0111"
+        },
+        {
+          "map_index": 21,
+          "source": {
+            "x": 404,
+            "y": 221
+          },
+          "destination": {
+            "x": 11,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0112"
+        },
+        {
+          "map_index": 21,
+          "source": {
+            "x": 403,
+            "y": 221
+          },
+          "destination": {
+            "x": 10,
+            "y": 16
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0112"
+        },
+        {
+          "map_index": 22,
+          "source": {
+            "x": 414,
+            "y": 243
+          },
+          "destination": {
+            "x": 19,
+            "y": 20
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0137"
+        },
+        {
+          "map_index": 22,
+          "source": {
+            "x": 415,
+            "y": 241
+          },
+          "destination": {
+            "x": 18,
+            "y": 21
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0137"
+        },
+        {
+          "map_index": 22,
+          "source": {
+            "x": 416,
+            "y": 241
+          },
+          "destination": {
+            "x": 17,
+            "y": 22
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0137"
+        },
+        {
+          "map_index": 24,
+          "source": {
+            "x": 315,
+            "y": 613
+          },
+          "destination": {
+            "x": 3,
+            "y": 16
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0121"
+        },
+        {
+          "map_index": 26,
+          "source": {
+            "x": 266,
+            "y": 630
+          },
+          "destination": {
+            "x": 7,
+            "y": 11
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0130"
+        },
+        {
+          "map_index": 27,
+          "source": {
+            "x": 271,
+            "y": 621
+          },
+          "destination": {
+            "x": 5,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0131"
+        },
+        {
+          "map_index": 28,
+          "source": {
+            "x": 295,
+            "y": 649
+          },
+          "destination": {
+            "x": 3,
+            "y": 19
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0136"
+        },
+        {
+          "map_index": 29,
+          "source": {
+            "x": 283,
+            "y": 636
+          },
+          "destination": {
+            "x": 13,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0132"
+        },
+        {
+          "map_index": 29,
+          "source": {
+            "x": 282,
+            "y": 636
+          },
+          "destination": {
+            "x": 14,
+            "y": 15
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0132"
+        },
+        {
+          "map_index": 29,
+          "source": {
+            "x": 282,
+            "y": 635
+          },
+          "destination": {
+            "x": 15,
+            "y": 14
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0132"
+        },
+        {
+          "map_index": 30,
+          "source": {
+            "x": 274,
+            "y": 636
+          },
+          "destination": {
+            "x": 5,
+            "y": 10
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0138"
+        },
+        {
+          "map_index": 31,
+          "source": {
+            "x": 302,
+            "y": 622
+          },
+          "destination": {
+            "x": 2,
+            "y": 11
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0141"
+        },
+        {
+          "map_index": 31,
+          "source": {
+            "x": 311,
+            "y": 631
+          },
+          "destination": {
+            "x": 17,
+            "y": 26
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0141"
+        },
+        {
+          "map_index": 32,
+          "source": {
+            "x": 307,
+            "y": 627
+          },
+          "destination": {
+            "x": 2,
+            "y": 10
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0140"
+        },
+        {
+          "map_index": 33,
+          "source": {
+            "x": 314,
+            "y": 474
+          },
+          "destination": {
+            "x": 17,
+            "y": 21
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0115"
+        },
+        {
+          "map_index": 34,
+          "source": {
+            "x": 43,
+            "y": 111
+          },
+          "destination": {
+            "x": 154,
+            "y": 368
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 33,
+          "targetMap": "D011"
+        },
+        {
+          "map_index": 47,
+          "source": {
+            "x": 664,
+            "y": 215
+          },
+          "destination": {
+            "x": 25,
+            "y": 181
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 33,
+          "targetMap": "D401"
+        },
+        {
+          "map_index": 47,
+          "source": {
+            "x": 663,
+            "y": 215
+          },
+          "destination": {
+            "x": 24,
+            "y": 181
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "D401"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 324,
+            "y": 41
+          },
+          "destination": {
+            "x": 562,
+            "y": 557
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 325,
+            "y": 42
+          },
+          "destination": {
+            "x": 563,
+            "y": 558
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 326,
+            "y": 43
+          },
+          "destination": {
+            "x": 562,
+            "y": 558
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 326,
+            "y": 42
+          },
+          "destination": {
+            "x": 561,
+            "y": 557
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 325,
+            "y": 41
+          },
+          "destination": {
+            "x": 563,
+            "y": 558
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 325,
+            "y": 40
+          },
+          "destination": {
+            "x": 562,
+            "y": 558
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 326,
+            "y": 40
+          },
+          "destination": {
+            "x": 561,
+            "y": 557
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 144,
+          "source": {
+            "x": 666,
+            "y": 86
+          },
+          "destination": {
+            "x": 411,
+            "y": 566
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "2"
+        },
+        {
+          "map_index": 144,
+          "source": {
+            "x": 667,
+            "y": 87
+          },
+          "destination": {
+            "x": 411,
+            "y": 566
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "2"
+        },
+        {
+          "map_index": 144,
+          "source": {
+            "x": 667,
+            "y": 88
+          },
+          "destination": {
+            "x": 412,
+            "y": 567
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "2"
+        },
+        {
+          "map_index": 334,
+          "source": {
+            "x": 316,
+            "y": 649
+          },
+          "destination": {
+            "x": 61,
+            "y": 82
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "HELL00"
+        },
+        {
+          "map_index": 334,
+          "source": {
+            "x": 315,
+            "y": 650
+          },
+          "destination": {
+            "x": 61,
+            "y": 82
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "HELL00"
+        },
+        {
+          "map_index": 334,
+          "source": {
+            "x": 316,
+            "y": 650
+          },
+          "destination": {
+            "x": 61,
+            "y": 82
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "HELL00"
+        },
+        {
+          "map_index": 334,
+          "source": {
+            "x": 315,
+            "y": 649
+          },
+          "destination": {
+            "x": 62,
+            "y": 81
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "HELL00"
+        },
+        {
+          "map_index": 334,
+          "source": {
+            "x": 315,
+            "y": 648
+          },
+          "destination": {
+            "x": 62,
+            "y": 81
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "HELL00"
+        },
+        {
+          "map_index": 334,
+          "source": {
+            "x": 314,
+            "y": 649
+          },
+          "destination": {
+            "x": 62,
+            "y": 81
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "HELL00"
+        },
+        {
+          "map_index": 25,
+          "source": {
+            "x": 310,
+            "y": 600
+          },
+          "destination": {
+            "x": 14,
+            "y": 16
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0127"
+        },
+        {
+          "map_index": 13,
+          "source": {
+            "x": 286,
+            "y": 296
+          },
+          "destination": {
+            "x": 9,
+            "y": 22
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0101"
+        },
+        {
+          "map_index": 2,
+          "source": {
+            "x": 347,
+            "y": 189
+          },
+          "destination": {
+            "x": 13,
+            "y": 40
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0122"
+        },
+        {
+          "map_index": 387,
+          "source": {
+            "x": 322,
+            "y": 473
+          },
+          "destination": {
+            "x": 0,
+            "y": 0
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "01041"
+        },
+        {
+          "map_index": 387,
+          "source": {
+            "x": 323,
+            "y": 474
+          },
+          "destination": {
+            "x": 0,
+            "y": 0
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "01041"
+        },
+        {
+          "map_index": 39,
+          "source": {
+            "x": 147,
+            "y": 33
+          },
+          "destination": {
+            "x": 151,
+            "y": 362
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 33,
+          "targetMap": "D001"
+        },
+        {
+          "map_index": 39,
+          "source": {
+            "x": 148,
+            "y": 34
+          },
+          "destination": {
+            "x": 151,
+            "y": 362
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "D001"
+        },
+        {
+          "map_index": 22,
+          "source": {
+            "x": 414,
+            "y": 243
+          },
+          "destination": {
+            "x": 0,
+            "y": 0
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0137"
+        }
+      ],
+      "respawns": []
+    },
+    {
+      "map": "0132",
+      "title": "Library",
+      "index": 29,
+      "safeZones": [],
+      "fire": false,
+      "lightning": false,
+      "transfers": [
+        {
+          "map_index": 1,
+          "source": {
+            "x": 14,
+            "y": 16
+          },
+          "destination": {
+            "x": 283,
+            "y": 638
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 1,
+          "source": {
+            "x": 15,
+            "y": 15
+          },
+          "destination": {
+            "x": 283,
+            "y": 638
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 1,
+          "source": {
+            "x": 16,
+            "y": 14
+          },
+          "destination": {
+            "x": 284,
+            "y": 638
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        }
+      ],
+      "respawns": []
+    },
+    {
+      "map": "1",
+      "title": "WoomyonWoods(S)",
+      "index": 64,
+      "safeZones": [
+        {
+          "location": {
+            "x": 315,
+            "y": 82
+          },
+          "size": 15,
+          "start_point": false
+        }
+      ],
+      "fire": false,
+      "lightning": false,
+      "transfers": [
+        {
+          "map_index": 1,
+          "source": {
+            "x": 559,
+            "y": 559
+          },
+          "destination": {
+            "x": 324,
+            "y": 43
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 1,
+          "source": {
+            "x": 560,
+            "y": 560
+          },
+          "destination": {
+            "x": 324,
+            "y": 43
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 1,
+          "source": {
+            "x": 561,
+            "y": 560
+          },
+          "destination": {
+            "x": 324,
+            "y": 43
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 1,
+          "source": {
+            "x": 560,
+            "y": 559
+          },
+          "destination": {
+            "x": 324,
+            "y": 43
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 1,
+          "source": {
+            "x": 561,
+            "y": 560
+          },
+          "destination": {
+            "x": 324,
+            "y": 43
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "0"
+        },
+        {
+          "map_index": 65,
+          "source": {
+            "x": 205,
+            "y": 518
+          },
+          "destination": {
+            "x": 68,
+            "y": 284
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 33,
+          "targetMap": "D2041"
+        },
+        {
+          "map_index": 65,
+          "source": {
+            "x": 206,
+            "y": 518
+          },
+          "destination": {
+            "x": 68,
+            "y": 285
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "D2041"
+        },
+        {
+          "map_index": 69,
+          "source": {
+            "x": 84,
+            "y": 277
+          },
+          "destination": {
+            "x": 76,
+            "y": 74
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 33,
+          "targetMap": "D021"
+        },
+        {
+          "map_index": 69,
+          "source": {
+            "x": 84,
+            "y": 278
+          },
+          "destination": {
+            "x": 76,
+            "y": 75
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "D021"
+        },
+        {
+          "map_index": 77,
+          "source": {
+            "x": 46,
+            "y": 170
+          },
+          "destination": {
+            "x": 443,
+            "y": 189
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "4"
+        },
+        {
+          "map_index": 77,
+          "source": {
+            "x": 47,
+            "y": 169
+          },
+          "destination": {
+            "x": 443,
+            "y": 189
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "4"
+        },
+        {
+          "map_index": 77,
+          "source": {
+            "x": 48,
+            "y": 168
+          },
+          "destination": {
+            "x": 443,
+            "y": 189
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "4"
+        },
+        {
+          "map_index": 77,
+          "source": {
+            "x": 49,
+            "y": 167
+          },
+          "destination": {
+            "x": 443,
+            "y": 189
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "4"
+        },
+        {
+          "map_index": 77,
+          "source": {
+            "x": 50,
+            "y": 166
+          },
+          "destination": {
+            "x": 443,
+            "y": 189
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "4"
+        },
+        {
+          "map_index": 77,
+          "source": {
+            "x": 51,
+            "y": 165
+          },
+          "destination": {
+            "x": 443,
+            "y": 189
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "4"
+        },
+        {
+          "map_index": 103,
+          "source": {
+            "x": 155,
+            "y": 401
+          },
+          "destination": {
+            "x": 457,
+            "y": 203
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "UMM"
+        },
+        {
+          "map_index": 103,
+          "source": {
+            "x": 156,
+            "y": 402
+          },
+          "destination": {
+            "x": 457,
+            "y": 203
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "UMM"
+        },
+        {
+          "map_index": 103,
+          "source": {
+            "x": 157,
+            "y": 403
+          },
+          "destination": {
+            "x": 457,
+            "y": 203
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "UMM"
+        },
+        {
+          "map_index": 103,
+          "source": {
+            "x": 157,
+            "y": 404
+          },
+          "destination": {
+            "x": 457,
+            "y": 203
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "UMM"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 43,
+            "y": 34
+          },
+          "destination": {
+            "x": 46,
+            "y": 481
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 44,
+            "y": 33
+          },
+          "destination": {
+            "x": 47,
+            "y": 480
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 45,
+            "y": 32
+          },
+          "destination": {
+            "x": 48,
+            "y": 479
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 46,
+            "y": 31
+          },
+          "destination": {
+            "x": 49,
+            "y": 478
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 47,
+            "y": 30
+          },
+          "destination": {
+            "x": 50,
+            "y": 477
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 43,
+            "y": 34
+          },
+          "destination": {
+            "x": 46,
+            "y": 481
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 44,
+            "y": 33
+          },
+          "destination": {
+            "x": 47,
+            "y": 480
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 45,
+            "y": 32
+          },
+          "destination": {
+            "x": 48,
+            "y": 479
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 46,
+            "y": 31
+          },
+          "destination": {
+            "x": 49,
+            "y": 478
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        },
+        {
+          "map_index": 108,
+          "source": {
+            "x": 47,
+            "y": 30
+          },
+          "destination": {
+            "x": 50,
+            "y": 477
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "11"
+        }
+      ],
+      "respawns": []
+    },
+    {
+      "map": "D021",
+      "title": "WoomaTempleEntrance",
+      "index": 69,
+      "safeZones": [],
+      "fire": false,
+      "lightning": false,
+      "transfers": [
+        {
+          "map_index": 64,
+          "source": {
+            "x": 77,
+            "y": 75
+          },
+          "destination": {
+            "x": 85,
+            "y": 278
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 31,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 64,
+          "source": {
+            "x": 77,
+            "y": 76
+          },
+          "destination": {
+            "x": 85,
+            "y": 279
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "1"
+        },
+        {
+          "map_index": 70,
+          "source": {
+            "x": 26,
+            "y": 27
+          },
+          "destination": {
+            "x": 338,
+            "y": 356
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": true,
+          "icon": 34,
+          "targetMap": "D022"
+        },
+        {
+          "map_index": 70,
+          "source": {
+            "x": 26,
+            "y": 26
+          },
+          "destination": {
+            "x": 339,
+            "y": 355
+          },
+          "need_hole": false,
+          "need_move": false,
+          "conquest_index": 0,
+          "show_on_big_map": false,
+          "icon": 0,
+          "targetMap": "D022"
+        }
+      ],
+      "respawns": [
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 40,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 928,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 929,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 930,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 931,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 932,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 933,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 934,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 935,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 81,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 10,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 936,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        },
+        {
+          "monster_index": 83,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 30,
+          "spread": 60,
+          "delay_minutes": 20,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 937,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveMaggot",
+          "monster_image": 20,
+          "monster_ai": 7,
+          "monster_view_range": 7,
+          "monster_hp": 80,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1000,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 12,
+          "route": []
+        },
+        {
+          "monster_index": 82,
+          "location": {
+            "x": 50,
+            "y": 44
+          },
+          "count": 1,
+          "spread": 60,
+          "delay_minutes": 60,
+          "direction": "Up",
+          "route_path": null,
+          "random_delay_minutes": 0,
+          "respawn_index": 938,
+          "save_respawn_time": false,
+          "respawn_ticks": 0,
+          "monster_name": "CaveBat0",
+          "monster_image": 19,
+          "monster_ai": 0,
+          "monster_view_range": 7,
+          "monster_hp": 25,
+          "monster_attack_speed": 2500,
+          "monster_move_speed": 1200,
+          "monster_can_push": true,
+          "monster_can_tame": true,
+          "monster_auto_rev": true,
+          "monster_undead": false,
+          "monster_agility": 25,
+          "route": []
+        }
+      ]
+    }
+  ],
+  "legalDenseRoute": [
+    "0",
+    "1",
+    "D021"
+  ],
+  "legalBookRoute": [
+    "0",
+    "0132",
+    "0"
+  ],
+  "npcs": [
+    {
+      "map": "0",
+      "name": "Merchant_Ruben",
+      "x": 288,
+      "y": 608
+    },
+    {
+      "map": "0132",
+      "name": "Librarian_Brian",
+      "x": 5,
+      "y": 18
+    }
+  ],
+  "acceptedHostileFamily": {
+    "name": "CaveBat",
+    "ai": 0,
+    "level": 20,
+    "hp": 25,
+    "minDC": 4,
+    "maxDC": 6,
+    "moveMs": 1200,
+    "attackMs": 2500,
+    "viewRange": 7,
+    "AC": 2,
+    "MAC": 0,
+    "accuracy": 11
+  },
+  "canPinMonsterRing": false,
+  "unsafeQaRequired": false
+}

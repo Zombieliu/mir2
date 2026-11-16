@@ -1,0 +1,98 @@
+{
+  "schema": "mir2.r16.postcast-lightweight-runtime.v1",
+  "manifestSha256": "7db42b475aa372719ef4b74addc9153f27ab797e760dc6af10f36eaa71a3c6a6",
+  "sourceSha256": "da13922a1d56c48793abb312357b20d9ad5a6fd51992214f9509443852587c24",
+  "sourceFiles": {
+    "apps/game-client/platform-web/src/entity_animation_state.rs": "60e2e218410bfab182ca37bec1e3146626fe55c9eca5757fe9c212f308914c3f",
+    "apps/web/app/components/original-client-entity-animation-runtime.ts": "a96246d9c51e811af32419687739e35dad4dc0926ab9512c00b8769e4e62f3bc",
+    "apps/web/app/original-client-shell.tsx": "50ee4a0285749806cb8a9467a539c04debaeb44f86e0b12c77bd8896af08e7b5",
+    "apps/web/scripts/lib/renderer-wasm-opt.mjs": "7f61351a0b965e1e10744dc001e99f3649a75898309252e93a6a429fc83afe53",
+    "apps/web/scripts/test-renderer-wasm-opt.mjs": "2de3924f13ca778f46c6eed8092c6dec5abf37fe4445b6ea8de7b4a87951932c"
+  },
+  "bundles": [
+    {
+      "name": "core",
+      "version": "f5ef7ac2517b54f5b757abaf5f0b60d67e778dac728a3034f0a27bc59d89ff10",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 247359,
+          "sha256": "f05926c9eaf2bbd99c083f5087b61b6d6c290e238b693f6539a0096e2e96fb98"
+        }
+      }
+    },
+    {
+      "name": "presentation",
+      "version": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24721,
+          "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 261876,
+          "sha256": "0836ec2d40bb41a7b554557edd2a021cabbd06838c186372f974b85705fb107e"
+        }
+      }
+    },
+    {
+      "name": "npcPurchase",
+      "version": "4fc17fc598d3461ab0cbd31580c9dffce3cf05ba6313ef19fc6628e55d61a9f1",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 8332,
+          "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 164095,
+          "sha256": "a85623cef01a803cae3a35226b4ae3c4f517cd8ef2f5c42331cd4b0e0c02298a"
+        }
+      }
+    }
+  ],
+  "optimizerRuns": [
+    {
+      "label": "core",
+      "bytes": 247359,
+      "jsBytes": 24393,
+      "metadataMatched": true,
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    {
+      "label": "presentation",
+      "bytes": 261876,
+      "jsBytes": 24721,
+      "metadataMatched": true,
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    {
+      "label": "npc-purchase",
+      "bytes": 164095,
+      "jsBytes": 8332,
+      "metadataMatched": true,
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    }
+  ],
+  "rejectedFirstPresentation": {
+    "actualBytes": 262518,
+    "limitExclusive": 262144,
+    "logSha256": "4febc1a47803469407266e8e3500df5173aad818e6b20801b2ff585191f53d1b"
+  },
+  "regression": {
+    "rustBaseline": "9072687a92fbe0ecebeac2ecc27e4ba0884ebf6000f499731cdcdaa1517d0933",
+    "rustEdgeBaseline": "899b5569fe52ca18f04261bb27283c00cc3dbaf8a26df53d0ef1dff55ff5d48f",
+    "platformWeb99": "c7124a469bfb22f08ee3c1227ae5ed3dfcbce05c55586507de0d3cf9514fd949",
+    "sharedAnimation28": "e6e2ad1c13d88c5847240b3f04c7815b77a95139a6694cdc4ec8753b67f7c3bb",
+    "web95": "3f63e77dbe7a32344e4e854797f5953e0ee7b2157962a180ab1c77c7a96868da",
+    "optimizer41": "1267ca5993ba1419075d5ea9f7c5300cecf6505a8cafbad3fc417d0f13d2b1d9",
+    "clientCore216": "69aedd75e437223b86261648c5f1f83b193a4c67a905d6894404ca4608cdf8f6",
+    "stage5Adapters511": "e664632fd86f5ba77fe47b30b02d351a5ae811eea33a5aaad6aa390e0e127c75",
+    "bevyBudgets": "1e8af1a61a5f899b283867f417e71fc44e3cce7a929e74d49d29533bb0b0fa04",
+    "sceneMotion": "7950bd508a0230c524b64834015fd44ec2bbbeece32676b1e1200bca1aec785d",
+    "targetCombat": "86be5ae8116c2b8e8c93f9d6a37aac4be1a18b3532448a44ccfebbea6c07d472",
+    "strictTypeScript": true
+  }
+}

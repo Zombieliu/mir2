@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "scope": "v20 existing ordinary save readback and real large-map pointer ownership",
+  "passed": true,
+  "liveNextBuild": "cxoBD81Hi-E6yr5pTeyYD",
+  "renderer": "bevy-a46905128c316656",
+  "browserProof": {
+    "path": "v20-save-and-big-map-browser-r1/onboarding-forest-browser-proof.json",
+    "sha256": "df9efdc9d04eb06fcc0e531f39cacccfed170d0ee80c9186d2d28dde17177ff9"
+  },
+  "saveReadback": {
+    "map": "0",
+    "hp": 162,
+    "maxHp": 162,
+    "mp": 67,
+    "maxMp": 67,
+    "dead": false,
+    "position": {
+      "x": 143,
+      "y": 40
+    },
+    "progression": {
+      "level": 16,
+      "experience": 906,
+      "maxExperience": 50000
+    },
+    "gold": 4780,
+    "medicine": 13,
+    "townTeleport": 1,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2120015
+    ],
+    "equipment": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      },
+      {
+        "name": "SharpSword",
+        "slot": "weapon",
+        "durabilityCurrent": 18000,
+        "durabilityMax": 18000
+      }
+    ],
+    "fencingKnown": true,
+    "slayingKnown": true
+  },
+  "pointer": {
+    "topIsVisibleRaster": true,
+    "pointerEvents": "auto",
+    "sharedCanvasBelow": true,
+    "physicalClick": true,
+    "worldTargetPresent": false,
+    "worldClickCommands": 0,
+    "ordinaryPanelClose": true
+  },
+  "coordinateReconciliation": {
+    "requestedTile": {
+      "x": 141,
+      "y": 42
+    },
+    "attemptedPhysicalCssPoint": {
+      "x": 388.81714285714287,
+      "y": 305.07142857142856
+    },
+    "actualBrowserMouseEventPointInMatchingOfflineGeometry": {
+      "x": 388,
+      "y": 305,
+      "trusted": true
+    },
+    "integerPointForRequestedTileInMatchingOfflineGeometry": {
+      "x": 389,
+      "y": 305,
+      "trusted": true
+    },
+    "effectiveClickedTile": {
+      "x": 140.0,
+      "y": 42.0
+    },
+    "originalSampledArrivalWasIntermediate": true,
+    "finalOwnerLocation": {
+      "sequence": 588,
+      "map": "0",
+      "position": {
+        "x": 140,
+        "y": 42
+      }
+    },
+    "observedOwnerPositions": [
+      {
+        "position": {
+          "x": 142,
+          "y": 41
+        },
+        "direction": "DownLeft",
+        "sequence": 584
+      },
+      {
+        "position": {
+          "x": 141,
+          "y": 42
+        },
+        "direction": "DownLeft",
+        "sequence": 586
+      },
+      {
+        "sequence": 588,
+        "position": {
+          "x": 140,
+          "y": 42
+        },
+        "direction": "Left"
+      }
+    ],
+    "walk": 3,
+    "run": 0
+  },
+  "logout": {
+    "ordinaryAckSequence": 592,
+    "browserClosed": true
+  },
+  "screenshots": [
+    {
+      "path": "v20-save-and-big-map-browser-r1/01-v20-current-big-map-viewport.png",
+      "sha256": "faf5d39540b52988277e6e9c01d5f3a6d14c7edb282cf02b540c1773b775f15f"
+    }
+  ],
+  "network": {
+    "httpErrors": 0,
+    "failed": 0,
+    "consoleErrors": 0
+  }
+}

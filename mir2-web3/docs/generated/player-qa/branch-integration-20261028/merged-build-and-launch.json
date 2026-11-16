@@ -1,0 +1,30 @@
+{
+  "recordedAt": "2026-10-28T11:19:09.8493233Z",
+  "checkpoint": "5ad6b04014a87ee8661496801137b6c664e58700",
+  "mergedTarget": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "builtBeforeMergeCommit": true,
+  "native": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\target\\halfmoon-client\\debug\\mir2-platform-windows.exe",
+    "sha256": "6d391015e52529ec5c75aa86b1b4fa440b23c2a7c8333a381d81b66dcd618684",
+    "length": 131923456,
+    "log": "native-build-final.log",
+    "windows": [
+      {
+        "pid": 83600,
+        "responding": true,
+        "title": "numeron-legend of rebirth",
+        "windowHandle": 6619366
+      }
+    ]
+  },
+  "gateway": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\target\\debug\\mir2-gateway.exe",
+    "sha256": "e903a7b9d815e143325f19d7ca5b031cb4ac5d3c947f533dcf2dad59012c92a9",
+    "length": 94165504,
+    "pid": 72076,
+    "log": "gateway-build-final.log"
+  },
+  "dockerStartedForThisRestart": false,
+  "oldTestRunRetained": true,
+  "testRunDirectory": ".mir2-data/dubhe-wallet-local-test/20261028-191752-29f138c3e9aa4c728ce704aad859e174"
+}

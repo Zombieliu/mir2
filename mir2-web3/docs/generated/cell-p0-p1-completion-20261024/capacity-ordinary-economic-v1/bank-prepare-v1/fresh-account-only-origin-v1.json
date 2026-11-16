@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "seeder": {
+    "file": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/debug/seed_capacity_accounts.exe",
+    "bytes": 67982336,
+    "sha256": "b261ed037a2055e6a10964554a0da8a98719b95b5017317b11e623e0ff622094"
+  },
+  "provisioning": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\provisioning-v1.json",
+    "bytes": 332,
+    "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+  },
+  "accountOnlyStore": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\private\\accounts.json",
+    "bytes": 57432,
+    "sha256": "8f289f2bb1af76c339c52e279597c220d4c8450c617352e1ed54c86930ca5af7"
+  },
+  "pool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\private\\capacity-pool.json",
+    "bytes": 20567,
+    "sha256": "04a5fc36188e13860804353cdc07ac643062d8520134ef2d06143302d1074530"
+  },
+  "ordinaryAccounts": 100,
+  "charactersCreated": 0,
+  "gameplayGrants": 0,
+  "existingLedgerOverwritten": false
+}

@@ -1,0 +1,11 @@
+
+running 6 tests
+test authoritative_cell_crossing_preserves_actor_and_map_effect_owner_until_leave ... ok
+test cell_geometry_validates_deserialization_and_uses_euclidean_boundaries ... ok
+test directory_is_derived_after_v4_restore_without_duplicate_checkpoint_topology ... ok
+test effect_owner_and_topology_versions_reject_unsupported_internal_data ... ok
+test partition_identity_preserves_all_logical_zone_namespaces ... ok
+test unknown_partition_is_rejected_before_zone_or_session_mutation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

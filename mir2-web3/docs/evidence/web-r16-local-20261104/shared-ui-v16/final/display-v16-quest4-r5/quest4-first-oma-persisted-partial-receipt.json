@@ -1,0 +1,887 @@
+{
+  "schema": "r16-v16-quest4-first-oma-persisted-partial/1",
+  "passed": false,
+  "sourceProof": "onboarding-v11-browser-proof.json",
+  "sourceProofSha256": "44378fb6462f91f7bb9e35f996efe980b0e0cf4385db013846b69e8efcaf4bef",
+  "firstOmaDeath": [
+    {
+      "objectId": 205637,
+      "name": "Oma",
+      "ownHitSequence": 916,
+      "deathSequence": 919,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110004,
+          "stage": "inProgress",
+          "current": 2,
+          "required": 3,
+          "objectives": [
+            {
+              "current": 1,
+              "required": 2,
+              "done": false
+            },
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meleeBattles": [
+    {
+      "targetId": 205637,
+      "startedSequence": 873,
+      "budgetMs": 180000,
+      "clicks": [
+        {
+          "at": 1793895398619,
+          "css": {
+            "x": 680,
+            "y": 404
+          },
+          "actualGapMs": null,
+          "hpBefore": 53,
+          "hpAfter": 51,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 877
+            }
+          ],
+          "legacyLaunchSequences": [
+            886
+          ],
+          "ownHitSequences": [
+            887
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895400299,
+          "css": {
+            "x": 680,
+            "y": 404
+          },
+          "actualGapMs": 1680,
+          "hpBefore": 51,
+          "hpAfter": 51,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 894
+            }
+          ],
+          "legacyLaunchSequences": [
+            899
+          ],
+          "ownHitSequences": [
+            900
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895402124,
+          "css": {
+            "x": 680,
+            "y": 404
+          },
+          "actualGapMs": 1825,
+          "hpBefore": 51,
+          "hpAfter": 48,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 910
+            }
+          ],
+          "legacyLaunchSequences": [
+            915
+          ],
+          "ownHitSequences": [
+            916
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        }
+      ],
+      "initial": {
+        "hp": 53,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 279,
+          "y": 591
+        }
+      },
+      "outcome": "target-died",
+      "final": {
+        "hp": 48,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 279,
+          "y": 591
+        }
+      },
+      "deathSequence": 919,
+      "ownHitSequence": 916,
+      "allTargetAttackRequests": [
+        {
+          "sequence": 877,
+          "type": "attack"
+        },
+        {
+          "sequence": 894,
+          "type": "attack"
+        },
+        {
+          "sequence": 910,
+          "type": "attack"
+        }
+      ],
+      "allOwnHitSequences": [
+        887,
+        900,
+        916
+      ]
+    },
+    {
+      "targetId": 205626,
+      "startedSequence": 1642,
+      "budgetMs": 161515,
+      "clicks": [
+        {
+          "at": 1793895548182,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": null,
+          "hpBefore": 60,
+          "hpAfter": 55,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1652
+            }
+          ],
+          "legacyLaunchSequences": [
+            1657
+          ],
+          "ownHitSequences": [
+            1658
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895549820,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1638,
+          "hpBefore": 55,
+          "hpAfter": 53,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1664
+            }
+          ],
+          "legacyLaunchSequences": [
+            1672
+          ],
+          "ownHitSequences": [
+            1673
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895551738,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1918,
+          "hpBefore": 53,
+          "hpAfter": 53,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [
+            1688
+          ],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895553419,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1681,
+          "hpBefore": 53,
+          "hpAfter": 46,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1702
+            }
+          ],
+          "legacyLaunchSequences": [
+            1707
+          ],
+          "ownHitSequences": [
+            1708
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895555107,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1688,
+          "hpBefore": 46,
+          "hpAfter": 42,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [
+            1722
+          ],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895556890,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1783,
+          "hpBefore": 42,
+          "hpAfter": 42,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1731
+            }
+          ],
+          "legacyLaunchSequences": [
+            1738
+          ],
+          "ownHitSequences": [
+            1739
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895558654,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1764,
+          "hpBefore": 42,
+          "hpAfter": 38,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895560222,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1568,
+          "hpBefore": 38,
+          "hpAfter": 38,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [
+            1764
+          ],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895561810,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1588,
+          "hpBefore": 38,
+          "hpAfter": 32,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1772
+            }
+          ],
+          "legacyLaunchSequences": [
+            1777
+          ],
+          "ownHitSequences": [
+            1778
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895563485,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1675,
+          "hpBefore": 32,
+          "hpAfter": 26,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1787
+            }
+          ],
+          "legacyLaunchSequences": [
+            1792
+          ],
+          "ownHitSequences": [
+            1793
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895565145,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1660,
+          "hpBefore": 26,
+          "hpAfter": 26,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [
+            1808
+          ],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895566796,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1651,
+          "hpBefore": 26,
+          "hpAfter": 24,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [
+            1825
+          ],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895568431,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1635,
+          "hpBefore": 24,
+          "hpAfter": 21,
+          "targetDistance": 1,
+          "requests": [],
+          "legacyLaunchSequences": [
+            1840
+          ],
+          "ownHitSequences": [],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895570058,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1627,
+          "hpBefore": 21,
+          "hpAfter": 21,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1852
+            }
+          ],
+          "legacyLaunchSequences": [
+            1856
+          ],
+          "ownHitSequences": [
+            1857
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895571754,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1696,
+          "hpBefore": 21,
+          "hpAfter": 18,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1867
+            }
+          ],
+          "legacyLaunchSequences": [
+            1878
+          ],
+          "ownHitSequences": [
+            1879
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895573468,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1714,
+          "hpBefore": 18,
+          "hpAfter": 18,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1884
+            }
+          ],
+          "legacyLaunchSequences": [
+            1890
+          ],
+          "ownHitSequences": [
+            1891
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        },
+        {
+          "at": 1793895575078,
+          "css": {
+            "x": 680,
+            "y": 436
+          },
+          "actualGapMs": 1610,
+          "hpBefore": 18,
+          "hpAfter": 13,
+          "targetDistance": 1,
+          "requests": [
+            {
+              "type": "attack",
+              "sequence": 1902
+            }
+          ],
+          "legacyLaunchSequences": [
+            1907
+          ],
+          "ownHitSequences": [
+            1908
+          ],
+          "typedReceipts": [],
+          "correlation": "same-connection-character-target-and-click-window; legacy-launch-has-no-request-id"
+        }
+      ],
+      "initial": {
+        "hp": 60,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 268,
+          "y": 524
+        }
+      },
+      "outcome": "low-hp-normal-retreat",
+      "final": {
+        "hp": 13,
+        "maxHp": 60,
+        "mp": 35,
+        "maxMp": 35,
+        "dead": false,
+        "position": {
+          "x": 268,
+          "y": 524
+        }
+      },
+      "deathSequence": null,
+      "ownHitSequence": 1908,
+      "allTargetAttackRequests": [
+        {
+          "sequence": 1652,
+          "type": "attack"
+        },
+        {
+          "sequence": 1664,
+          "type": "attack"
+        },
+        {
+          "sequence": 1702,
+          "type": "attack"
+        },
+        {
+          "sequence": 1731,
+          "type": "attack"
+        },
+        {
+          "sequence": 1772,
+          "type": "attack"
+        },
+        {
+          "sequence": 1787,
+          "type": "attack"
+        },
+        {
+          "sequence": 1852,
+          "type": "attack"
+        },
+        {
+          "sequence": 1867,
+          "type": "attack"
+        },
+        {
+          "sequence": 1884,
+          "type": "attack"
+        },
+        {
+          "sequence": 1902,
+          "type": "attack"
+        }
+      ],
+      "allOwnHitSequences": [
+        1658,
+        1673,
+        1708,
+        1739,
+        1778,
+        1793,
+        1857,
+        1879,
+        1891,
+        1908
+      ]
+    }
+  ],
+  "secondTargetLastHealth": {
+    "sequence": 1910,
+    "method": "ObjectHealth",
+    "phase": "fourth-quest-natural-two-oma-hunt",
+    "percent": 3,
+    "objectId": 205626
+  },
+  "quest4": {
+    "questId": 2110004,
+    "stage": "inProgress",
+    "current": 2,
+    "required": 3,
+    "objectives": [
+      {
+        "label": "Defeat 2 Oma.",
+        "current": 1,
+        "required": 2,
+        "done": false
+      },
+      {
+        "label": "Complete your class practice",
+        "current": 1,
+        "required": 1,
+        "done": true
+      }
+    ]
+  },
+  "normalRevive": {
+    "normalUi": true,
+    "oneCommand": true,
+    "matchingRevivedObserved": true,
+    "before": {
+      "hp": 0,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": true,
+      "position": {
+        "x": 273,
+        "y": 526
+      }
+    },
+    "after": {
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    "goldBefore": 30,
+    "goldAfter": 30,
+    "smallHpMedicineBefore": 0,
+    "smallHpMedicineAfter": 0,
+    "retainedQuestLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "inProgress",
+        "current": 2,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 1,
+            "required": 2,
+            "done": false
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003
+    ],
+    "learnedFencingBeforeLogout": true,
+    "learnedFencingAfterRelogin": true,
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-keydown-up-only",
+    "stageFourOnly": true
+  },
+  "network": {
+    "failed": 0,
+    "httpErrors": 0,
+    "consoleErrors": 0
+  },
+  "secretScan": {
+    "ownQaAndRealmMatches": 0
+  },
+  "evidence": [
+    {
+      "name": "onboarding-v11-browser-proof.json",
+      "bytes": 199983,
+      "sha256": "44378fb6462f91f7bb9e35f996efe980b0e0cf4385db013846b69e8efcaf4bef"
+    },
+    {
+      "name": "01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1210688,
+      "sha256": "00b507f252d669bf84ad6c37d22353f7835b69d03512fbfb37ab7a12880eb326"
+    },
+    {
+      "name": "02-fresh-village-native-task-card.png",
+      "bytes": 1209452,
+      "sha256": "92bd1f664154f41fe34cbf370275a6ebabc8149670e0722aa8d8db751080f238"
+    },
+    {
+      "name": "03-fourth-quest-natural-progress-incomplete.png",
+      "bytes": 1180169,
+      "sha256": "72e75c4a004590190c816bebb11b78482bea2aaeb4aff8c7c1a9fc39529d8864"
+    },
+    {
+      "name": "04-saved-death-before-normal-town-revive.png",
+      "bytes": 943758,
+      "sha256": "9e2ae740f241a37ca17b64f676afdf4e89713c8c5fc3048bbf5607812ccab72b"
+    },
+    {
+      "name": "05-saved-progress-native-diary.png",
+      "bytes": 1147842,
+      "sha256": "802e10fc13ace3e5efdbf64a722ebafed68688ea266c08b6842224e9008beceb"
+    }
+  ],
+  "runner": {
+    "name": "runner.executed.mjs",
+    "sha256": "396f1ca0af37c96321678d509ebfcac6d6388dfddde786c31432b8766183a3d5"
+  }
+}

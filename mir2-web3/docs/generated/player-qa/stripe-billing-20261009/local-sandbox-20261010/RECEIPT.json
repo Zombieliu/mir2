@@ -1,0 +1,65 @@
+{
+  "observedUtc": "2026-10-09T17:44:17.1154587Z",
+  "baseCommit": "fd660003db5b40d78308b118f8d58e37c1280ab1",
+  "source": {
+    "path": "apps/gateway/src/stripe_billing.rs",
+    "gitBlob": "4e1cbf3dea3ad4081d278c00086ff8065ad9a78b",
+    "windowsSha256": "f45cbd973691e56af3befedb6d981301662e4db2d431a79bd8307fb8ce88ec90"
+  },
+  "tests": {
+    "command": "cargo +1.95.0 test -p mir2-gateway --lib billing --locked --offline -j2 -- --test-threads=1",
+    "passed": 38,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 997,
+    "durationSeconds": 1.0,
+    "log": "gateway38.log",
+    "sha256": "2a659844da0b339015e579ca59a9b945888b69593d35a4b9bc35c11ec6274c21"
+  },
+  "gateway": {
+    "buildSucceeded": true,
+    "buildDurationSeconds": 114,
+    "log": "gateway-build.log",
+    "logSha256": "839d7602756e63d2ce71165a033ab15d98000bf6e6955686f77ad71044e91263",
+    "binarySha256": "70c10f6db2dea19a18d3a43ff67f998243378704e07bc77400f3f4b586b4b224",
+    "launched": false
+  },
+  "native": {
+    "sourceCommit": "fd660003db5b40d78308b118f8d58e37c1280ab1",
+    "sha256": "828d34de89510aa7d013b7d3f37d4fd46b5524db6ac08ae063216b8eda1b2726",
+    "launched": false
+  },
+  "baselineCi": {
+    "id": 37957284779,
+    "headSha": "fd660003db5b40d78308b118f8d58e37c1280ab1",
+    "conclusion": "success",
+    "coversNewLoopbackGuard": false
+  },
+  "safety": {
+    "loopbackOptInDefault": false,
+    "onlyTestKeysMayUseHttpLoopback": true,
+    "liveKeysRequireHttps": true,
+    "generalPublicTunnelStarted": false,
+    "officialStripeListenerStarted": false,
+    "localKeyPresent": false,
+    "privateKeyLastWriteLocal": "2026-10-10T00:34:43+08:00",
+    "privateKeyLastObservedBytes": 293,
+    "providerPaymentCreated": false,
+    "realChargeCreated": false,
+    "walletCredited": false,
+    "monthlyItemActivated": false
+  },
+  "publicBaseline": {
+    "game": "R22",
+    "gateway": "a41",
+    "signedFeed": 17,
+    "changed": false
+  },
+  "limitations": [
+    "Actual paid sandbox Checkout and provider callback remain blocked by the currently empty private server-key entry.",
+    "Cloudflare Quick Tunnel launch was rejected by automatic approval review; the rejected action was not retried or routed through another tool.",
+    "Official Stripe CLI and isolated loopback settings are prepared; no callback or service is yet running.",
+    "Native binary startup, account login, billing UI, payment, monthly activation and human acceptance are not claimed.",
+    "This is a commercial extension Candidate; it does not complete P1-P7 or change existing public installs, services or saves."
+  ]
+}

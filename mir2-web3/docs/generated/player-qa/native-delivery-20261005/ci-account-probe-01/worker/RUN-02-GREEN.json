@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:/Python313/python.exe",
+    "-B",
+    "C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\test_cloudflare_read_authority_probe.py"
+  ],
+  "cwd": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01",
+  "exitCode": 0,
+  "inputSha256": {
+    "cloudflare_read_authority_probe.py": "a1294fd9a4c6a7978ab9ad8fd2874f7f393697eb1a8746f5d3d4cb8185ec9faa",
+    "test_cloudflare_read_authority_probe.py": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d"
+  },
+  "log": "local-tests-02-green.log",
+  "logSha256": "9646b6b1f959706af7639450d49567d4a057046e257a5ad297e198b09858758e",
+  "network": "fake transport only; no actual authorization request"
+}

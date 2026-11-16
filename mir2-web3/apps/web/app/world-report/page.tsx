@@ -30,7 +30,7 @@ export default async function WorldReportPage() {
           <p>OBELISK · MIR2 WORLD INTELLIGENCE</p>
           <h1>玛法世界日报</h1>
         </div>
-        <Link href="/">返回游戏</Link>
+        <Link href="/game">返回游戏</Link>
       </header>
       {result.ok ? (
         <>
@@ -76,7 +76,7 @@ export default async function WorldReportPage() {
           <span>WORLD FEED OFFLINE</span>
           <h2>今天的世界报尚未发布</h2>
           <p>{result.error}</p>
-          <Link href="/">进入玛法世界</Link>
+          <Link href="/game">进入玛法世界</Link>
         </section>
       )}
     </main>

@@ -1,0 +1,9 @@
+{
+  "label": "Isolated QA Wallet (real Testnet)",
+  "network": "testnet",
+  "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+  "payer": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+  "messageSha256": "015fb5273fad991536369fb0aaeffedc3a754c7c74e01ca6ec46c646a28cd143",
+  "signedAt": "2026-10-28T20:08:53.217Z",
+  "transfersFunds": false
+}

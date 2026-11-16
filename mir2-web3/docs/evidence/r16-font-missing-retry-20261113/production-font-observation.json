@@ -1,0 +1,942 @@
+{
+  "kind": "r16-read-only-font-source-chain-audit",
+  "createdAt": "2026-11-12T17:56:47.983Z",
+  "codeSource": "f6acaad6b0046553bcc5d2fb15784b29877f5eb9",
+  "workerSourceSha256": "a0b5b907f3eaad2540aa50c6297e2c52b74103adeefc697d9cbe129198eb7f5e",
+  "raw": [
+    {
+      "path": "C:/r16-worker-restart-release-20261113/signed-public/desktop-first-party-worker-restart-release/startup-probe.json",
+      "sha256": "0d9babd752587ca0f2617bbcb77c2f13f2e38df15c2b6e9a8226454aa3c74e80"
+    },
+    {
+      "path": "C:/r16-worker-restart-release-20261113/signed-public/desktop-first-party-worker-restart-release/worker-pre-restart-resource-timings.json",
+      "sha256": "0af4d02e2b188b2d92d4b88389fb788e03f11cdacf42396980759f2bc25cc621"
+    },
+    {
+      "path": "C:/r16-worker-restart-release-20261113/signed-public/desktop-first-party-worker-restart-release/receipt.json",
+      "sha256": "0f495d01054fd0e4f7268ff173c14bb29fb19d2d503adf4c74166fbe263bb3c7"
+    }
+  ],
+  "counts": {
+    "pageFontRequests": 25,
+    "page404": 25,
+    "fast404Within12ms": 12,
+    "distinctFontPaths": 6,
+    "upstreamResourceRows": 81
+  },
+  "pageFontRequests": [
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 92771,
+      "status": 404,
+      "headersAtMs": 150746,
+      "finishedAtMs": null,
+      "failedAtMs": 150746,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 208174,
+      "status": 404,
+      "headersAtMs": 260459,
+      "finishedAtMs": null,
+      "failedAtMs": 260459,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 208174,
+      "status": 404,
+      "headersAtMs": 262171,
+      "finishedAtMs": null,
+      "failedAtMs": 262171,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 260611,
+      "status": 404,
+      "headersAtMs": 260612,
+      "finishedAtMs": null,
+      "failedAtMs": 260612,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 260913,
+      "status": 404,
+      "headersAtMs": 260914,
+      "finishedAtMs": null,
+      "failedAtMs": 260914,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 260914,
+      "status": 404,
+      "headersAtMs": 313815,
+      "finishedAtMs": null,
+      "failedAtMs": 313818,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 262324,
+      "status": 404,
+      "headersAtMs": 262324,
+      "finishedAtMs": null,
+      "failedAtMs": 262324,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 262626,
+      "status": 404,
+      "headersAtMs": 262627,
+      "finishedAtMs": null,
+      "failedAtMs": 262627,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 262627,
+      "status": 404,
+      "headersAtMs": 315148,
+      "finishedAtMs": null,
+      "failedAtMs": 315148,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 300106,
+      "status": 404,
+      "headersAtMs": 351781,
+      "finishedAtMs": 351837,
+      "failedAtMs": null,
+      "failure": null,
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 300106,
+      "status": 404,
+      "headersAtMs": 313815,
+      "finishedAtMs": 313865,
+      "failedAtMs": null,
+      "failure": null,
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 300106,
+      "status": 404,
+      "headersAtMs": 351957,
+      "finishedAtMs": 352018,
+      "failedAtMs": null,
+      "failure": null,
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 300106,
+      "status": 404,
+      "headersAtMs": 315148,
+      "finishedAtMs": 315200,
+      "failedAtMs": null,
+      "failure": null,
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 300106,
+      "status": 404,
+      "headersAtMs": 352014,
+      "finishedAtMs": 352065,
+      "failedAtMs": null,
+      "failure": null,
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 300106,
+      "status": 404,
+      "headersAtMs": 352240,
+      "finishedAtMs": 352291,
+      "failedAtMs": null,
+      "failure": null,
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 313966,
+      "status": 404,
+      "headersAtMs": 313967,
+      "finishedAtMs": null,
+      "failedAtMs": 313967,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 314272,
+      "status": 404,
+      "headersAtMs": 314278,
+      "finishedAtMs": null,
+      "failedAtMs": 314280,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 314278,
+      "status": 404,
+      "headersAtMs": 352014,
+      "finishedAtMs": null,
+      "failedAtMs": 352018,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 315300,
+      "status": 404,
+      "headersAtMs": 315311,
+      "finishedAtMs": null,
+      "failedAtMs": 315316,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 315620,
+      "status": 404,
+      "headersAtMs": 315622,
+      "finishedAtMs": null,
+      "failedAtMs": 315624,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 315622,
+      "status": 404,
+      "headersAtMs": 352240,
+      "finishedAtMs": null,
+      "failedAtMs": 352246,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 352166,
+      "status": 404,
+      "headersAtMs": 352169,
+      "finishedAtMs": null,
+      "failedAtMs": 352171,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 352394,
+      "status": 404,
+      "headersAtMs": 352394,
+      "finishedAtMs": null,
+      "failedAtMs": 352394,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 352472,
+      "status": 404,
+      "headersAtMs": 352476,
+      "finishedAtMs": null,
+      "failedAtMs": 352481,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 352695,
+      "status": 404,
+      "headersAtMs": 352695,
+      "finishedAtMs": null,
+      "failedAtMs": 352695,
+      "failure": "net::ERR_ABORTED",
+      "fromServiceWorker": true
+    }
+  ],
+  "upstreamResourceRows": [
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 92759,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 100760,
+      "durationMs": 8000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 108760,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 115761,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 122761,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 129762,
+      "durationMs": 7006,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 136768,
+      "durationMs": 5336,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 142046,
+      "durationMs": 1716,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 143745,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 208174,
+      "durationMs": 8000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 208174,
+      "durationMs": 8000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 216174,
+      "durationMs": 8002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 216174,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 224175,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 224175,
+      "durationMs": 7000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 231175,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 231175,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 238176,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 238176,
+      "durationMs": 7000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 245176,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 245177,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 252178,
+      "durationMs": 1579,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 252178,
+      "durationMs": 5007,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 253257,
+      "durationMs": 219,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 253458,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 254616,
+      "durationMs": 1463,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 255171,
+      "durationMs": 7000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 260915,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 262628,
+      "durationMs": 8002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 268917,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 270629,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 276917,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 278630,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 283918,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 285631,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 290918,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 292633,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 297920,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 299635,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 300088,
+      "durationMs": 8002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 300088,
+      "durationMs": 8002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 300088,
+      "durationMs": 8002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 300088,
+      "durationMs": 8002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 304921,
+      "durationMs": 5783,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 305449,
+      "durationMs": 1653,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 306635,
+      "durationMs": 2558,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+      "startAtMs": 306805,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 307342,
+      "durationMs": 1178,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 308090,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 308090,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 308090,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 308090,
+      "durationMs": 8001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "startAtMs": 308146,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 316090,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 316090,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 316090,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 316091,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 323091,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 323091,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 323091,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 323091,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 330092,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 330092,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 330092,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 330092,
+      "durationMs": 7002,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 337094,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 337094,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 337094,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 337094,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 344094,
+      "durationMs": 266,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 344095,
+      "durationMs": 317,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 344095,
+      "durationMs": 494,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 344095,
+      "durationMs": 535,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 344307,
+      "durationMs": 488,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 344352,
+      "durationMs": 622,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 344570,
+      "durationMs": 456,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 344611,
+      "durationMs": 640,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "startAtMs": 344778,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "startAtMs": 344956,
+      "durationMs": 7000,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "startAtMs": 345009,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "startAtMs": 345233,
+      "durationMs": 7001,
+      "responseStart": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    }
+  ],
+  "confirmed": [
+    "All six requested font URLs ended in HTTP404 at the page; this alone is sufficient to fail multilingual font readiness",
+    "SC and TC initial long source chains were followed by near-immediate404 retries inside the10second negative-cache TTL",
+    "fetchStaticAsset can classify a logical asset as missing based on one fallback404 even when earlier candidates timed out or failed",
+    "Current-release font mirrors are attempted before the app and some are repeated in ordinary fallbacks"
+  ],
+  "limitations": [
+    "Worker resource timing entries do not include HTTP status and cross-origin detailed timings can be hidden without Timing-Allow-Origin; zero fields are not proof of zero network bytes",
+    "The exact upstream404/CORS/timeout status per source still needs Worker CDP Network events",
+    "The quest error combines font/skin readiness; font404 is established but additional skin failures are not excluded",
+    "No new login, account, deployment or live mutation was performed"
+  ],
+  "nextExperiment": "Isolated Worker VM: preferred exact-release mirror rejects/aborts, app404, inherited404; first logical response must be transient504 and a subsequent healthy current-source request must reach network and return complete200, with no negative404 short circuit; also test all explicit404/410 retains genuine missing and Range206 remains valid"
+}

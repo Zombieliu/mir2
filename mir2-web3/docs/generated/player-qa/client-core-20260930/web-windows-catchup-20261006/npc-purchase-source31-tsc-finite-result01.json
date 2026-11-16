@@ -1,0 +1,139 @@
+{
+  "owner": "Root",
+  "kind": "Source31 actual full strict non-incremental TSC02 conditional effective-input carry",
+  "generatedAtUtc": "2026-10-07T18:30:08.896Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "args": [
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--incremental",
+    "false",
+    "--pretty",
+    "false"
+  ],
+  "actualProcess": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 159204,
+    "kind": "Source31 strict full project no-emit corrected TSC02 locked5.9.3",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 11304,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02.config.json",
+    "bytes": 4908,
+    "sha256": "2e8d1b72446bced7a7f4ce5c2336d4da388c099975c9276d5cd483ef44c376e9"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02-snapshot.json",
+    "bytes": 5909288,
+    "sha256": "eef644df4345633327c666bbdf96234a873cde60460c202286976182ed02217d"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02-review.json",
+    "bytes": 2668,
+    "sha256": "5948896958e7ddc3d29b80b4ec428e62e5a25a5f89044cdb3fba9685e660ba0a"
+  },
+  "declaredInputSupersetCount": 16827,
+  "currentSupersetDrift": [
+    {
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+        "bytes": 30249,
+        "sha256": "60475895c0c272d285fa5c4852dffa747551e8162f1e3691c5bd93e4c1406338",
+        "relativePath": "apps/web/scripts/test-bevy-storage-ui.mjs"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+        "bytes": 30428,
+        "sha256": "79d9e6e52cf68aaeb05ef9bfa295cc49e9b36b7335e0b11bc43a538fe0ed5f45"
+      }
+    },
+    {
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs",
+        "bytes": 41567,
+        "sha256": "fa03934b90f752b7fd2f932c2b9957d3b43694985336823d7422171b62e148bf",
+        "relativePath": "apps/web/scripts/test-storage-surface-integration.mjs"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs",
+        "bytes": 45373,
+        "sha256": "6a09d5d940343f970818c84dfbfc8df9c8d0a218733a6ecd15a330f086bdad91"
+      }
+    }
+  ],
+  "effectiveInputConclusion": "Only2 declared MJS test scripts changed after TSC02; tsconfig actual effective TS/TSX/type declarations/relative JSON and locked dependencies unchanged. Carry actual exit0 for effective compile input only; do not claim current16827 zero-drift or repeated TSC.",
+  "diagnostics": 0,
+  "rawPins": {
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc02.outer.json",
+      "bytes": 528,
+      "sha256": "480f1eb4d528da17d64a176b13f8dcda700702981cbe35fc03e14fdabbbc1855"
+    }
+  },
+  "history": {
+    "id": "TSC01",
+    "actualExitCode": 2,
+    "diagnostics": 4,
+    "excludedFromAcceptance": true,
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc01.config.json",
+      "bytes": 4897,
+      "sha256": "844eb1fa3eb0beae99dc967593682fb44ecd5c487aab42c9b8c8c2e75de071c5"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc01.stdout.log",
+      "bytes": 2247,
+      "sha256": "4c9a3ee6bcb4f1111011e666e500fcadb71d22b8dd51a2b9b92ce2aa1c0fa48b"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc01.outer.json",
+      "bytes": 517,
+      "sha256": "bfe3defa32c0578bd41e1f152bf741f1cf542539509b4449a1312bc695d960dc"
+    }
+  },
+  "toolchain": "Complete lock-matching official TypeScript5.9.3 recovered from exact public npm cache SHA512; no installer/lifecycle/network.",
+  "recovery": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-result01.json",
+    "bytes": 160048,
+    "sha256": "d3a2911a819ac2e4b8de453f1163feda812b59a9e720178c747184752a6e929d"
+  },
+  "excludedKnownAssetLinks": [
+    {
+      "relativePath": "public/generated/crystal-packs/full",
+      "target": "F:\\mir2-r2-fullcrystal\\20260730-fullcrystal-f71b89aa-gzip1\\generated\\crystal-packs\\full"
+    }
+  ],
+  "userTsconfigPreserved": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

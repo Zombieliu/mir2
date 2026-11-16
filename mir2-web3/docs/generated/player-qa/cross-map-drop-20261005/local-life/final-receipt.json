@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.p3a.local-at-impact-life.follow-up.v1",
+  "createdAt": "2026-10-04T18:13:22.554861+00:00",
+  "status": "frozen-for-parent-review",
+  "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\p3\\mir2-player-journey\\mir2-web3",
+  "relativeTo": "exact original frozen P3a 14-file delivery",
+  "files": 2,
+  "productionFiles": [
+    "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs"
+  ],
+  "newTests": [
+    "apps/simulation/tests/shared_experience_owner_tick_life.rs"
+  ],
+  "patch": "p3-local-life-follow-up.patch",
+  "patchSha256": "0639884c3952a5df5e51efa68d679a883893fb16bff1e4c089a935035799a888",
+  "finalSourceManifestSha256": "e4c03fe2f0575fbd814d301a87b4cb067cc2ca04fd030a0777b87c4b76805e84",
+  "trueRedBeforeProductionEdit": true,
+  "redPassed": 2,
+  "redFailed": 1,
+  "greenPassed": 43,
+  "greenFailed": 0,
+  "prior13SourceFilesUnchanged": true,
+  "prior14FrozenCopiesAndPhaseUnchanged": true,
+  "prior100FrozenArtifactsUnchanged": true,
+  "nineCrystalSourcesUnchanged": true,
+  "exactPhysicalForwardApply": true,
+  "networkAcceptance": false,
+  "crossZoneSameBatchLife": "OPEN",
+  "objectIdCollision": "separate read-only finding and proposed next write set; not fixed or run",
+  "noChangesTo": [
+    "runtime.rs",
+    "manager.rs",
+    "routing.rs",
+    "types.rs",
+    "cold custody",
+    "TTL/protection clocks",
+    "global docs",
+    "services",
+    "saves",
+    "resources",
+    "Git commits",
+    "release/publication"
+  ]
+}

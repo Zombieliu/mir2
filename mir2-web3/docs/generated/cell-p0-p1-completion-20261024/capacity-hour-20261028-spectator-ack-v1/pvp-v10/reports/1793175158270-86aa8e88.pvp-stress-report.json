@@ -1,0 +1,2286 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793175158270-86aa8e88",
+  "reportPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\reports\\1793175158270-86aa8e88.pvp-stress-report.json",
+  "samplesPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\reports\\1793175158270-86aa8e88.pvp-stress-samples.jsonl",
+  "startedAt": "2026-10-28T08:12:38.271Z",
+  "scope": "server-only-preconfigured-all-fighter-pvp",
+  "preseeded": true,
+  "ordinaryEvidence": false,
+  "ordinaryP0Qualification": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "attackResults": "v2",
+  "legacyFallback": false,
+  "diagnosticContinuation": true,
+  "anyFailedStage": false,
+  "count": 500,
+  "stagesRequested": [
+    25,
+    50,
+    100,
+    250,
+    500
+  ],
+  "stageSeconds": 300,
+  "soakSeconds": 0,
+  "finiteWallSeconds": 3600,
+  "loginConcurrency": 1,
+  "startGameConcurrency": 2,
+  "authAndPoolWritesSerialized": true,
+  "stationaryGroups": true,
+  "movingPvpTested": false,
+  "hotspotTested": false,
+  "clientAuthBudget": 600,
+  "serverAuthProfileVerification": "Root owned wrapper responsibility; fixture declaration alone is not runtime proof",
+  "stages": [],
+  "cleanupErrors": [],
+  "healthBefore": {
+    "capacity": {
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "loadTestLogin": {
+      "testOnly": true,
+      "loginPeerLimit": 600,
+      "loginDeviceLimit": 600,
+      "windowSeconds": 900
+    }
+  },
+  "admissions": [
+    {
+      "target": 25,
+      "newActors": 25,
+      "elapsedMs": 74731
+    }
+  ],
+  "ok": false,
+  "error": "Underlying PvP transport, monitor or operation failed",
+  "totals": [
+    {
+      "actorIndex": 0,
+      "activeElapsedMs": 221938,
+      "role": "fighter",
+      "seconds": 221.938,
+      "requests": 162,
+      "launched": 160,
+      "notLaunched": 1,
+      "positive": 96,
+      "positiveDamage": 605,
+      "launchedPerMinute": 43.25532355883175,
+      "positivePerMinute": 25.95319413529905,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 161,
+        "p50Ms": 514,
+        "p95Ms": 981,
+        "p99Ms": 1204,
+        "maxMs": 1340.5843999999925
+      },
+      "positiveHitLatency": {
+        "count": 96,
+        "p50Ms": 534,
+        "p95Ms": 1058,
+        "p99Ms": 1175,
+        "maxMs": 1174.2146000000066
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 1,
+      "activeElapsedMs": 221938,
+      "role": "fighter",
+      "seconds": 221.938,
+      "requests": 164,
+      "launched": 163,
+      "notLaunched": 0,
+      "positive": 100,
+      "positiveDamage": 655,
+      "launchedPerMinute": 44.066360875559845,
+      "positivePerMinute": 27.034577224269842,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 163,
+        "p50Ms": 521,
+        "p95Ms": 1028,
+        "p99Ms": 1371,
+        "maxMs": 1850.1210000000137
+      },
+      "positiveHitLatency": {
+        "count": 100,
+        "p50Ms": 526,
+        "p95Ms": 1045,
+        "p99Ms": 1166,
+        "maxMs": 1375.1735000000044
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 2,
+      "activeElapsedMs": 216884,
+      "role": "fighter",
+      "seconds": 216.884,
+      "requests": 161,
+      "launched": 160,
+      "notLaunched": 0,
+      "positive": 98,
+      "positiveDamage": 632,
+      "launchedPerMinute": 44.263292820125045,
+      "positivePerMinute": 27.11126685232659,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 160,
+        "p50Ms": 522,
+        "p95Ms": 1031,
+        "p99Ms": 1281,
+        "maxMs": 1490.5850999999966
+      },
+      "positiveHitLatency": {
+        "count": 98,
+        "p50Ms": 537,
+        "p95Ms": 1062,
+        "p99Ms": 1282,
+        "maxMs": 1281.1767999999865
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 3,
+      "activeElapsedMs": 216884,
+      "role": "fighter",
+      "seconds": 216.884,
+      "requests": 162,
+      "launched": 161,
+      "notLaunched": 0,
+      "positive": 101,
+      "positiveDamage": 667,
+      "launchedPerMinute": 44.539938400250826,
+      "positivePerMinute": 27.941203592703935,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 161,
+        "p50Ms": 520,
+        "p95Ms": 943,
+        "p99Ms": 1150,
+        "maxMs": 1396.4104999999981
+      },
+      "positiveHitLatency": {
+        "count": 101,
+        "p50Ms": 528,
+        "p95Ms": 1059,
+        "p99Ms": 1151,
+        "maxMs": 1160.1859000000113
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 4,
+      "activeElapsedMs": 211828,
+      "role": "fighter",
+      "seconds": 211.828,
+      "requests": 162,
+      "launched": 161,
+      "notLaunched": 0,
+      "positive": 108,
+      "positiveDamage": 716,
+      "launchedPerMinute": 45.60303642577941,
+      "positivePerMinute": 30.590856732820967,
+      "heals": 3,
+      "heldUnitsConsumed": 3,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 161,
+        "p50Ms": 533,
+        "p95Ms": 1090,
+        "p99Ms": 1262,
+        "maxMs": 1343.5974999999744
+      },
+      "positiveHitLatency": {
+        "count": 108,
+        "p50Ms": 534,
+        "p95Ms": 1136,
+        "p99Ms": 1283,
+        "maxMs": 1422.6348999999755
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 5,
+      "activeElapsedMs": 211828,
+      "role": "fighter",
+      "seconds": 211.828,
+      "requests": 165,
+      "launched": 164,
+      "notLaunched": 0,
+      "positive": 115,
+      "positiveDamage": 719,
+      "launchedPerMinute": 46.452782446135544,
+      "positivePerMinute": 32.57359744698529,
+      "heals": 3,
+      "heldUnitsConsumed": 3,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 164,
+        "p50Ms": 515,
+        "p95Ms": 1014,
+        "p99Ms": 1328,
+        "maxMs": 1337.3042999999889
+      },
+      "positiveHitLatency": {
+        "count": 115,
+        "p50Ms": 565,
+        "p95Ms": 1235,
+        "p99Ms": 1338,
+        "maxMs": 1379.7030999999988
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 6,
+      "activeElapsedMs": 206347,
+      "role": "fighter",
+      "seconds": 206.347,
+      "requests": 161,
+      "launched": 159,
+      "notLaunched": 1,
+      "positive": 109,
+      "positiveDamage": 712,
+      "launchedPerMinute": 46.23280202765245,
+      "positivePerMinute": 31.694185037824635,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 160,
+        "p50Ms": 539,
+        "p95Ms": 973,
+        "p99Ms": 1157,
+        "maxMs": 1170.9165000000212
+      },
+      "positiveHitLatency": {
+        "count": 109,
+        "p50Ms": 582,
+        "p95Ms": 1078,
+        "p99Ms": 1158,
+        "maxMs": 1404.5777999999991
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 7,
+      "activeElapsedMs": 206348,
+      "role": "fighter",
+      "seconds": 206.348,
+      "requests": 156,
+      "launched": 155,
+      "notLaunched": 0,
+      "positive": 101,
+      "positiveDamage": 633,
+      "launchedPerMinute": 45.06949425242794,
+      "positivePerMinute": 29.367863996743363,
+      "heals": 3,
+      "heldUnitsConsumed": 3,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 155,
+        "p50Ms": 523,
+        "p95Ms": 1003,
+        "p99Ms": 1148,
+        "maxMs": 1964.9390999999887
+      },
+      "positiveHitLatency": {
+        "count": 101,
+        "p50Ms": 581,
+        "p95Ms": 1065,
+        "p99Ms": 1177,
+        "maxMs": 1965.3076
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 8,
+      "activeElapsedMs": 201040,
+      "role": "fighter",
+      "seconds": 201.04,
+      "requests": 146,
+      "launched": 145,
+      "notLaunched": 0,
+      "positive": 88,
+      "positiveDamage": 592,
+      "launchedPerMinute": 43.274970155192996,
+      "positivePerMinute": 26.26343016315161,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 145,
+        "p50Ms": 551,
+        "p95Ms": 1026,
+        "p99Ms": 1186,
+        "maxMs": 1266.4639000000025
+      },
+      "positiveHitLatency": {
+        "count": 88,
+        "p50Ms": 545,
+        "p95Ms": 1145,
+        "p99Ms": 1386,
+        "maxMs": 1385.3213999999862
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 9,
+      "activeElapsedMs": 201040,
+      "role": "fighter",
+      "seconds": 201.04,
+      "requests": 153,
+      "launched": 152,
+      "notLaunched": 0,
+      "positive": 100,
+      "positiveDamage": 642,
+      "launchedPerMinute": 45.3641066454437,
+      "positivePerMinute": 29.844807003581376,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 152,
+        "p50Ms": 541,
+        "p95Ms": 1118,
+        "p99Ms": 1172,
+        "maxMs": 1573.9725000000035
+      },
+      "positiveHitLatency": {
+        "count": 100,
+        "p50Ms": 568,
+        "p95Ms": 1144,
+        "p99Ms": 1365,
+        "maxMs": 1574.5607000000018
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 10,
+      "activeElapsedMs": 195706,
+      "role": "fighter",
+      "seconds": 195.706,
+      "requests": 145,
+      "launched": 143,
+      "notLaunched": 1,
+      "positive": 89,
+      "positiveDamage": 560,
+      "launchedPerMinute": 43.84127211225001,
+      "positivePerMinute": 27.285826699232523,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 144,
+        "p50Ms": 542,
+        "p95Ms": 982,
+        "p99Ms": 1321,
+        "maxMs": 1754.7381999999925
+      },
+      "positiveHitLatency": {
+        "count": 89,
+        "p50Ms": 604,
+        "p95Ms": 1098,
+        "p99Ms": 1371,
+        "maxMs": 1370.9220999999961
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 11,
+      "activeElapsedMs": 195706,
+      "role": "fighter",
+      "seconds": 195.706,
+      "requests": 139,
+      "launched": 138,
+      "notLaunched": 0,
+      "positive": 78,
+      "positiveDamage": 514,
+      "launchedPerMinute": 42.30836049993358,
+      "positivePerMinute": 23.91342115213637,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 138,
+        "p50Ms": 557,
+        "p95Ms": 1044,
+        "p99Ms": 1245,
+        "maxMs": 1516.2782000000007
+      },
+      "positiveHitLatency": {
+        "count": 78,
+        "p50Ms": 610,
+        "p95Ms": 1146,
+        "p99Ms": 1246,
+        "maxMs": 1245.569199999998
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 12,
+      "activeElapsedMs": 188763,
+      "role": "fighter",
+      "seconds": 188.763,
+      "requests": 152,
+      "launched": 150,
+      "notLaunched": 1,
+      "positive": 109,
+      "positiveDamage": 646,
+      "launchedPerMinute": 47.67883536498148,
+      "positivePerMinute": 34.64662036521988,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 151,
+        "p50Ms": 525,
+        "p95Ms": 991,
+        "p99Ms": 1244,
+        "maxMs": 1652.3167000000249
+      },
+      "positiveHitLatency": {
+        "count": 109,
+        "p50Ms": 574,
+        "p95Ms": 1143,
+        "p99Ms": 1815,
+        "maxMs": 1836.5555000000168
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 13,
+      "activeElapsedMs": 188763,
+      "role": "fighter",
+      "seconds": 188.763,
+      "requests": 139,
+      "launched": 138,
+      "notLaunched": 0,
+      "positive": 90,
+      "positiveDamage": 537,
+      "launchedPerMinute": 43.864528535782966,
+      "positivePerMinute": 28.60730121898889,
+      "heals": 4,
+      "heldUnitsConsumed": 4,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 138,
+        "p50Ms": 553,
+        "p95Ms": 1013,
+        "p99Ms": 1297,
+        "maxMs": 1893.4365999999864
+      },
+      "positiveHitLatency": {
+        "count": 90,
+        "p50Ms": 592,
+        "p95Ms": 1329,
+        "p99Ms": 1894,
+        "maxMs": 1893.624199999991
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 14,
+      "activeElapsedMs": 184519,
+      "role": "fighter",
+      "seconds": 184.519,
+      "requests": 138,
+      "launched": 138,
+      "notLaunched": 0,
+      "positive": 89,
+      "positiveDamage": 511,
+      "launchedPerMinute": 44.87342766869536,
+      "positivePerMinute": 28.94010914865136,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 138,
+        "p50Ms": 551,
+        "p95Ms": 1051,
+        "p99Ms": 1197,
+        "maxMs": 1640.3586999999825
+      },
+      "positiveHitLatency": {
+        "count": 89,
+        "p50Ms": 572,
+        "p95Ms": 1311,
+        "p99Ms": 1891,
+        "maxMs": 1890.1775999999954
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 15,
+      "activeElapsedMs": 184519,
+      "role": "fighter",
+      "seconds": 184.519,
+      "requests": 135,
+      "launched": 134,
+      "notLaunched": 0,
+      "positive": 83,
+      "positiveDamage": 533,
+      "launchedPerMinute": 43.572748605834626,
+      "positivePerMinute": 26.989090554360256,
+      "heals": 3,
+      "heldUnitsConsumed": 3,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 134,
+        "p50Ms": 584,
+        "p95Ms": 1081,
+        "p99Ms": 1187,
+        "maxMs": 1306.9353999999876
+      },
+      "positiveHitLatency": {
+        "count": 83,
+        "p50Ms": 640,
+        "p95Ms": 1056,
+        "p99Ms": 1309,
+        "maxMs": 1308.9511999999813
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 16,
+      "activeElapsedMs": 178100,
+      "role": "fighter",
+      "seconds": 178.1,
+      "requests": 130,
+      "launched": 129,
+      "notLaunched": 0,
+      "positive": 78,
+      "positiveDamage": 519,
+      "launchedPerMinute": 43.45873104997193,
+      "positivePerMinute": 26.277372262773724,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 129,
+        "p50Ms": 583,
+        "p95Ms": 1048,
+        "p99Ms": 1196,
+        "maxMs": 1965.6273999999976
+      },
+      "positiveHitLatency": {
+        "count": 78,
+        "p50Ms": 647,
+        "p95Ms": 1107,
+        "p99Ms": 1198,
+        "maxMs": 1197.1291999999958
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 17,
+      "activeElapsedMs": 178100,
+      "role": "fighter",
+      "seconds": 178.1,
+      "requests": 135,
+      "launched": 132,
+      "notLaunched": 2,
+      "positive": 83,
+      "positiveDamage": 544,
+      "launchedPerMinute": 44.46939921392476,
+      "positivePerMinute": 27.961819202695114,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 134,
+        "p50Ms": 598,
+        "p95Ms": 1019,
+        "p99Ms": 1229,
+        "maxMs": 1495.8329999999842
+      },
+      "positiveHitLatency": {
+        "count": 83,
+        "p50Ms": 608,
+        "p95Ms": 1020,
+        "p99Ms": 1230,
+        "maxMs": 1229.8169000000053
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 18,
+      "activeElapsedMs": 171586,
+      "role": "fighter",
+      "seconds": 171.586,
+      "requests": 126,
+      "launched": 125,
+      "notLaunched": 0,
+      "positive": 76,
+      "positiveDamage": 496,
+      "launchedPerMinute": 43.709859778769825,
+      "positivePerMinute": 26.575594745492054,
+      "heals": 0,
+      "heldUnitsConsumed": 0,
+      "timeouts": 1,
+      "timeoutRatio": 0.007936507936507936,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 125,
+        "p50Ms": 575,
+        "p95Ms": 1095,
+        "p99Ms": 1277,
+        "maxMs": 1338.8985000000102
+      },
+      "positiveHitLatency": {
+        "count": 76,
+        "p50Ms": 605,
+        "p95Ms": 1078,
+        "p99Ms": 1340,
+        "maxMs": 1339.5409999999974
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 19,
+      "activeElapsedMs": 171586,
+      "role": "fighter",
+      "seconds": 171.586,
+      "requests": 117,
+      "launched": 115,
+      "notLaunched": 1,
+      "positive": 59,
+      "positiveDamage": 346,
+      "launchedPerMinute": 40.21307099646824,
+      "positivePerMinute": 20.631053815579357,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 116,
+        "p50Ms": 581,
+        "p95Ms": 1137,
+        "p99Ms": 1343,
+        "maxMs": 1754.9904999999853
+      },
+      "positiveHitLatency": {
+        "count": 59,
+        "p50Ms": 633,
+        "p95Ms": 1343,
+        "p99Ms": 1391,
+        "maxMs": 1390.387000000017
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 20,
+      "activeElapsedMs": 164004,
+      "role": "fighter",
+      "seconds": 164.004,
+      "requests": 124,
+      "launched": 122,
+      "notLaunched": 1,
+      "positive": 79,
+      "positiveDamage": 542,
+      "launchedPerMinute": 44.633057730299264,
+      "positivePerMinute": 28.901734104046245,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 123,
+        "p50Ms": 587,
+        "p95Ms": 1063,
+        "p99Ms": 1177,
+        "maxMs": 1295.5415999999968
+      },
+      "positiveHitLatency": {
+        "count": 79,
+        "p50Ms": 653,
+        "p95Ms": 1051,
+        "p99Ms": 1342,
+        "maxMs": 1341.3889999999956
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 21,
+      "activeElapsedMs": 164004,
+      "role": "fighter",
+      "seconds": 164.004,
+      "requests": 124,
+      "launched": 123,
+      "notLaunched": 0,
+      "positive": 82,
+      "positiveDamage": 535,
+      "launchedPerMinute": 44.99890246579352,
+      "positivePerMinute": 29.999268310529015,
+      "heals": 3,
+      "heldUnitsConsumed": 3,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 123,
+        "p50Ms": 582,
+        "p95Ms": 1115,
+        "p99Ms": 1238,
+        "maxMs": 1593.7578999999969
+      },
+      "positiveHitLatency": {
+        "count": 82,
+        "p50Ms": 618,
+        "p95Ms": 1036,
+        "p99Ms": 1594,
+        "maxMs": 1593.9268000000156
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 22,
+      "activeElapsedMs": 153020,
+      "role": "fighter",
+      "seconds": 153.02,
+      "requests": 113,
+      "launched": 112,
+      "notLaunched": 0,
+      "positive": 70,
+      "positiveDamage": 449,
+      "launchedPerMinute": 43.91582799634035,
+      "positivePerMinute": 27.447392497712716,
+      "heals": 2,
+      "heldUnitsConsumed": 2,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 112,
+        "p50Ms": 607,
+        "p95Ms": 1110,
+        "p99Ms": 1346,
+        "maxMs": 1966.2206000000006
+      },
+      "positiveHitLatency": {
+        "count": 70,
+        "p50Ms": 611,
+        "p95Ms": 1221,
+        "p99Ms": 1967,
+        "maxMs": 1966.4118999999773
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 23,
+      "activeElapsedMs": 153020,
+      "role": "fighter",
+      "seconds": 153.02,
+      "requests": 113,
+      "launched": 112,
+      "notLaunched": 0,
+      "positive": 70,
+      "positiveDamage": 459,
+      "launchedPerMinute": 43.91582799634035,
+      "positivePerMinute": 27.447392497712716,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 112,
+        "p50Ms": 581,
+        "p95Ms": 1088,
+        "p99Ms": 1220,
+        "maxMs": 1261.1699999999837
+      },
+      "positiveHitLatency": {
+        "count": 70,
+        "p50Ms": 616,
+        "p95Ms": 1173,
+        "p99Ms": 1974,
+        "maxMs": 1973.830099999992
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    },
+    {
+      "actorIndex": 24,
+      "activeElapsedMs": 153020,
+      "role": "fighter",
+      "seconds": 153.02,
+      "requests": 112,
+      "launched": 111,
+      "notLaunched": 0,
+      "positive": 68,
+      "positiveDamage": 424,
+      "launchedPerMinute": 43.523722389230166,
+      "positivePerMinute": 26.663181283492353,
+      "heals": 1,
+      "heldUnitsConsumed": 1,
+      "timeouts": 0,
+      "timeoutRatio": 0,
+      "witnessFailures": 0,
+      "attackAckLatency": {
+        "count": 111,
+        "p50Ms": 609,
+        "p95Ms": 997,
+        "p99Ms": 1352,
+        "maxMs": 1968.393000000011
+      },
+      "positiveHitLatency": {
+        "count": 68,
+        "p50Ms": 621,
+        "p95Ms": 1026,
+        "p99Ms": 1972,
+        "maxMs": 1971.6638000000094
+      },
+      "hpMinimum": null,
+      "hpMaximum": null,
+      "latestRaw": null,
+      "passed": false
+    }
+  ],
+  "groupPlacements": [
+    {
+      "groupIndex": 0,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 0,
+          "original": {
+            "x": 104,
+            "y": 32
+          },
+          "actual": {
+            "x": 104,
+            "y": 32
+          },
+          "rawSequence": 572
+        },
+        {
+          "actorIndex": 1,
+          "original": {
+            "x": 105,
+            "y": 32
+          },
+          "actual": {
+            "x": 105,
+            "y": 32
+          },
+          "rawSequence": 568
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 0,
+          "sequence": 561,
+          "at": 1793175160924,
+          "map": "0",
+          "x": 104,
+          "y": 32,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 1,
+          "sequence": 559,
+          "at": 1793175163309,
+          "map": "0",
+          "x": 105,
+          "y": 32,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 788,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 1,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 2,
+          "original": {
+            "x": 296,
+            "y": 32
+          },
+          "actual": {
+            "x": 296,
+            "y": 32
+          },
+          "rawSequence": 588
+        },
+        {
+          "actorIndex": 3,
+          "original": {
+            "x": 297,
+            "y": 32
+          },
+          "actual": {
+            "x": 297,
+            "y": 32
+          },
+          "rawSequence": 576
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 2,
+          "sequence": 561,
+          "at": 1793175165974,
+          "map": "0",
+          "x": 296,
+          "y": 32,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 3,
+          "sequence": 559,
+          "at": 1793175168359,
+          "map": "0",
+          "x": 297,
+          "y": 32,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 794,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 2,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 4,
+          "original": {
+            "x": 104,
+            "y": 56
+          },
+          "actual": {
+            "x": 104,
+            "y": 56
+          },
+          "rawSequence": 640
+        },
+        {
+          "actorIndex": 5,
+          "original": {
+            "x": 105,
+            "y": 56
+          },
+          "actual": {
+            "x": 105,
+            "y": 56
+          },
+          "rawSequence": 592
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 4,
+          "sequence": 587,
+          "at": 1793175170932,
+          "map": "0",
+          "x": 104,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 5,
+          "sequence": 579,
+          "at": 1793175173406,
+          "map": "0",
+          "x": 105,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 775,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 3,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 6,
+          "original": {
+            "x": 272,
+            "y": 56
+          },
+          "actual": {
+            "x": 272,
+            "y": 56
+          },
+          "rawSequence": 640
+        },
+        {
+          "actorIndex": 7,
+          "original": {
+            "x": 273,
+            "y": 56
+          },
+          "actual": {
+            "x": 273,
+            "y": 56
+          },
+          "rawSequence": 594
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 6,
+          "sequence": 573,
+          "at": 1793175176360,
+          "map": "0",
+          "x": 272,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 7,
+          "sequence": 576,
+          "at": 1793175179092,
+          "map": "0",
+          "x": 273,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 684,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 4,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 8,
+          "original": {
+            "x": 320,
+            "y": 56
+          },
+          "actual": {
+            "x": 320,
+            "y": 56
+          },
+          "rawSequence": 691
+        },
+        {
+          "actorIndex": 9,
+          "original": {
+            "x": 321,
+            "y": 56
+          },
+          "actual": {
+            "x": 321,
+            "y": 56
+          },
+          "rawSequence": 623
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 8,
+          "sequence": 602,
+          "at": 1793175181727,
+          "map": "0",
+          "x": 320,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 9,
+          "sequence": 585,
+          "at": 1793175184263,
+          "map": "0",
+          "x": 321,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 713,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 5,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 10,
+          "original": {
+            "x": 392,
+            "y": 56
+          },
+          "actual": {
+            "x": 392,
+            "y": 56
+          },
+          "rawSequence": 665
+        },
+        {
+          "actorIndex": 11,
+          "original": {
+            "x": 393,
+            "y": 56
+          },
+          "actual": {
+            "x": 393,
+            "y": 56
+          },
+          "rawSequence": 605
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 10,
+          "sequence": 578,
+          "at": 1793175187097,
+          "map": "0",
+          "x": 392,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 11,
+          "sequence": 572,
+          "at": 1793175189585,
+          "map": "0",
+          "x": 393,
+          "y": 56,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 684,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 6,
+      "translation": {
+        "x": -1,
+        "y": -1
+      },
+      "assignments": [
+        {
+          "actorIndex": 12,
+          "original": {
+            "x": 104,
+            "y": 80
+          },
+          "actual": {
+            "x": 103,
+            "y": 79
+          },
+          "rawSequence": 830
+        },
+        {
+          "actorIndex": 13,
+          "original": {
+            "x": 105,
+            "y": 80
+          },
+          "actual": {
+            "x": 104,
+            "y": 79
+          },
+          "rawSequence": 699
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 12,
+          "sequence": 605,
+          "at": 1793175192426,
+          "map": "0",
+          "x": 104,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 13,
+          "sequence": 588,
+          "at": 1793175195017,
+          "map": "0",
+          "x": 104,
+          "y": 79,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 6,
+      "elapsedMs": 2238,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": true
+    },
+    {
+      "groupIndex": 7,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 14,
+          "original": {
+            "x": 152,
+            "y": 80
+          },
+          "actual": {
+            "x": 152,
+            "y": 80
+          },
+          "rawSequence": 759
+        },
+        {
+          "actorIndex": 15,
+          "original": {
+            "x": 153,
+            "y": 80
+          },
+          "actual": {
+            "x": 153,
+            "y": 80
+          },
+          "rawSequence": 623
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 14,
+          "sequence": 610,
+          "at": 1793175198063,
+          "map": "0",
+          "x": 152,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 15,
+          "sequence": 585,
+          "at": 1793175200659,
+          "map": "0",
+          "x": 153,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 770,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 8,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 16,
+          "original": {
+            "x": 200,
+            "y": 80
+          },
+          "actual": {
+            "x": 200,
+            "y": 80
+          },
+          "rawSequence": 816
+        },
+        {
+          "actorIndex": 17,
+          "original": {
+            "x": 201,
+            "y": 80
+          },
+          "actual": {
+            "x": 201,
+            "y": 80
+          },
+          "rawSequence": 634
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 16,
+          "sequence": 601,
+          "at": 1793175204061,
+          "map": "0",
+          "x": 200,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 17,
+          "sequence": 585,
+          "at": 1793175207215,
+          "map": "0",
+          "x": 201,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 513,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 9,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 18,
+          "original": {
+            "x": 248,
+            "y": 80
+          },
+          "actual": {
+            "x": 248,
+            "y": 80
+          },
+          "rawSequence": 825
+        },
+        {
+          "actorIndex": 19,
+          "original": {
+            "x": 249,
+            "y": 80
+          },
+          "actual": {
+            "x": 249,
+            "y": 80
+          },
+          "rawSequence": 646
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 18,
+          "sequence": 601,
+          "at": 1793175210684,
+          "map": "0",
+          "x": 248,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 19,
+          "sequence": 592,
+          "at": 1793175213830,
+          "map": "0",
+          "x": 249,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 468,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 10,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 20,
+          "original": {
+            "x": 296,
+            "y": 80
+          },
+          "actual": {
+            "x": 296,
+            "y": 80
+          },
+          "rawSequence": 895
+        },
+        {
+          "actorIndex": 21,
+          "original": {
+            "x": 297,
+            "y": 80
+          },
+          "actual": {
+            "x": 297,
+            "y": 80
+          },
+          "rawSequence": 679
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 20,
+          "sequence": 628,
+          "at": 1793175217788,
+          "map": "0",
+          "x": 296,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 21,
+          "sequence": 602,
+          "at": 1793175221196,
+          "map": "0",
+          "x": 297,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 693,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    },
+    {
+      "groupIndex": 11,
+      "translation": {
+        "x": 0,
+        "y": 0
+      },
+      "assignments": [
+        {
+          "actorIndex": 22,
+          "original": {
+            "x": 344,
+            "y": 80
+          },
+          "actual": {
+            "x": 344,
+            "y": 80
+          },
+          "rawSequence": 1196
+        },
+        {
+          "actorIndex": 23,
+          "original": {
+            "x": 345,
+            "y": 80
+          },
+          "actual": {
+            "x": 345,
+            "y": 80
+          },
+          "rawSequence": 932
+        },
+        {
+          "actorIndex": 24,
+          "original": {
+            "x": 344,
+            "y": 81
+          },
+          "actual": {
+            "x": 344,
+            "y": 81
+          },
+          "rawSequence": 685
+        }
+      ],
+      "before": [
+        {
+          "actorIndex": 22,
+          "sequence": 664,
+          "at": 1793175225274,
+          "map": "0",
+          "x": 344,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 23,
+          "sequence": 645,
+          "at": 1793175229049,
+          "map": "0",
+          "x": 345,
+          "y": 80,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        },
+        {
+          "actorIndex": 24,
+          "sequence": 620,
+          "at": 1793175232173,
+          "map": "0",
+          "x": 344,
+          "y": 81,
+          "hp": 674,
+          "maxHp": 674,
+          "hpStock": 194
+        }
+      ],
+      "physicalSteps": 0,
+      "elapsedMs": 603,
+      "sourceFixtureRewritten": false,
+      "densityGeometryChanged": false
+    }
+  ],
+  "extraSnapshotQueries": [
+    {
+      "actorIndex": 0,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 1,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 2,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 3,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 4,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 5,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 6,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 7,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 8,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 9,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 10,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 11,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 12,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 13,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 14,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 15,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 16,
+      "byReason": {
+        "preparation": 3,
+        "heal-percent-cue": 1,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 17,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 18,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 19,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 20,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 21,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 22,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 23,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    },
+    {
+      "actorIndex": 24,
+      "byReason": {
+        "preparation": 3,
+        "drain": 1
+      },
+      "staleWatchdogs": 0
+    }
+  ],
+  "normalDrains": [
+    {
+      "actorIndex": 3,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15803,
+        "at": 1793175386590,
+        "map": "0",
+        "x": 297,
+        "y": 32,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 4,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15932,
+        "at": 1793175386878,
+        "map": "0",
+        "x": 104,
+        "y": 56,
+        "hp": 586,
+        "maxHp": 674,
+        "hpStock": 191
+      }
+    },
+    {
+      "actorIndex": 5,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15888,
+        "at": 1793175386880,
+        "map": "0",
+        "x": 105,
+        "y": 56,
+        "hp": 662,
+        "maxHp": 674,
+        "hpStock": 191
+      }
+    },
+    {
+      "actorIndex": 0,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15819,
+        "at": 1793175386593,
+        "map": "0",
+        "x": 104,
+        "y": 32,
+        "hp": 661,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 6,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15675,
+        "at": 1793175387451,
+        "map": "0",
+        "x": 272,
+        "y": 56,
+        "hp": 664,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 1,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15901,
+        "at": 1793175388057,
+        "map": "0",
+        "x": 105,
+        "y": 32,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 7,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15680,
+        "at": 1793175388154,
+        "map": "0",
+        "x": 273,
+        "y": 56,
+        "hp": 667,
+        "maxHp": 674,
+        "hpStock": 191
+      }
+    },
+    {
+      "actorIndex": 8,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15600,
+        "at": 1793175388068,
+        "map": "0",
+        "x": 320,
+        "y": 56,
+        "hp": 631,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 2,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15869,
+        "at": 1793175388155,
+        "map": "0",
+        "x": 296,
+        "y": 32,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 10,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15364,
+        "at": 1793175388334,
+        "map": "0",
+        "x": 392,
+        "y": 56,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 9,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15527,
+        "at": 1793175388333,
+        "map": "0",
+        "x": 321,
+        "y": 56,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 11,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15237,
+        "at": 1793175388568,
+        "map": "0",
+        "x": 393,
+        "y": 56,
+        "hp": 618,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 12,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15492,
+        "at": 1793175388664,
+        "map": "0",
+        "x": 103,
+        "y": 79,
+        "hp": 637,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 13,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15391,
+        "at": 1793175388920,
+        "map": "0",
+        "x": 104,
+        "y": 79,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 190
+      }
+    },
+    {
+      "actorIndex": 15,
+      "normalLogout": true,
+      "final": {
+        "sequence": 14934,
+        "at": 1793175388987,
+        "map": "0",
+        "x": 153,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 191
+      }
+    },
+    {
+      "actorIndex": 14,
+      "normalLogout": true,
+      "final": {
+        "sequence": 15042,
+        "at": 1793175388972,
+        "map": "0",
+        "x": 152,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 16,
+      "normalLogout": true,
+      "final": {
+        "sequence": 14625,
+        "at": 1793175389047,
+        "map": "0",
+        "x": 200,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 17,
+      "normalLogout": true,
+      "final": {
+        "sequence": 14437,
+        "at": 1793175389129,
+        "map": "0",
+        "x": 201,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 18,
+      "normalLogout": true,
+      "final": {
+        "sequence": 14224,
+        "at": 1793175389244,
+        "map": "0",
+        "x": 248,
+        "y": 80,
+        "hp": 667,
+        "maxHp": 674,
+        "hpStock": 194
+      }
+    },
+    {
+      "actorIndex": 19,
+      "normalLogout": true,
+      "final": {
+        "sequence": 14056,
+        "at": 1793175389417,
+        "map": "0",
+        "x": 249,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 20,
+      "normalLogout": true,
+      "final": {
+        "sequence": 13857,
+        "at": 1793175389477,
+        "map": "0",
+        "x": 296,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 21,
+      "normalLogout": true,
+      "final": {
+        "sequence": 13661,
+        "at": 1793175389547,
+        "map": "0",
+        "x": 297,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 191
+      }
+    },
+    {
+      "actorIndex": 22,
+      "normalLogout": true,
+      "final": {
+        "sequence": 13378,
+        "at": 1793175389697,
+        "map": "0",
+        "x": 344,
+        "y": 80,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 192
+      }
+    },
+    {
+      "actorIndex": 24,
+      "normalLogout": true,
+      "final": {
+        "sequence": 12815,
+        "at": 1793175389761,
+        "map": "0",
+        "x": 344,
+        "y": 81,
+        "hp": 674,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    },
+    {
+      "actorIndex": 23,
+      "normalLogout": true,
+      "final": {
+        "sequence": 13076,
+        "at": 1793175389762,
+        "map": "0",
+        "x": 345,
+        "y": 80,
+        "hp": 669,
+        "maxHp": 674,
+        "hpStock": 193
+      }
+    }
+  ],
+  "privateFirstFailureRecorded": true,
+  "privateFirstFailureWriteFailed": false,
+  "finishedAt": "2026-10-28T08:16:30.270Z",
+  "totalElapsedMs": 231999,
+  "finiteWallExceeded": false,
+  "cleanupComplete": true,
+  "resourceMonitorStopped": true,
+  "resourceStopReason": "PvP correlated outcome timeout; unknown execution is terminal",
+  "serverOnlyMeasuredProfilePassed": false
+}

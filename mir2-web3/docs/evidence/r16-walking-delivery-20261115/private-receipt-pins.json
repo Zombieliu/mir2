@@ -1,0 +1,65 @@
+{
+  "scope": "Private accounts, stores, profiles and auth traces remain local.",
+  "pins": [
+    {
+      "run": 1,
+      "name": "receipt.json",
+      "bytes": 28955,
+      "sha256": "551ba63803e6095edf538c2c2153369cbe239fa54d2f2e0c0e77242952e0b0bf"
+    },
+    {
+      "run": 1,
+      "name": "town-walking.json",
+      "bytes": 1808,
+      "sha256": "f7bda8ebecca88109677baf2ad778bc5b0b4806a39df72aaa4a3b9fea6f0e457"
+    },
+    {
+      "run": 1,
+      "name": "town-diagnostic.json",
+      "bytes": 14607,
+      "sha256": "9f9903b2f2d4d53e7c53225f2e7439d48ec7d640644f0458a5ee7df13ffc5d8a"
+    },
+    {
+      "run": 1,
+      "name": "town-pack-network.json",
+      "bytes": 2501,
+      "sha256": "382bc1ca04d1ef479c7348cf8b2befb940655441448036b96df25dea247ec3d9"
+    },
+    {
+      "run": 1,
+      "name": "original-fonts.json",
+      "bytes": 2377,
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "run": 2,
+      "name": "receipt.json",
+      "bytes": 29350,
+      "sha256": "a4b13ffdee66a3b8107d2dce9265f51cf0f54c8f163cb64682ac6c0d983b7a57"
+    },
+    {
+      "run": 2,
+      "name": "town-walking.json",
+      "bytes": 1808,
+      "sha256": "1dbd1aa69ca325b2d714e068f0b39e331ea93d8b74883916fae7f735d8938faa"
+    },
+    {
+      "run": 2,
+      "name": "town-diagnostic.json",
+      "bytes": 14609,
+      "sha256": "c4642b6a63b38d30e998926a1e77e602ead4d6f0ae03d63ddb9dea58b6bc1176"
+    },
+    {
+      "run": 2,
+      "name": "town-pack-network.json",
+      "bytes": 2501,
+      "sha256": "667aeb211c20ab367a8028b0e14a43ed8500a76e2adf2cfcb4f084abd5a1835e"
+    },
+    {
+      "run": 2,
+      "name": "original-fonts.json",
+      "bytes": 2377,
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    }
+  ]
+}

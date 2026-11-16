@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source71 original caller local runtime startup observed",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01/web-start01-config.json",
+    "bytes": 3104,
+    "sha256": "a98ad1e21ece3a8c8cd89b08bc14dd2012780d58f6835ff108bd93d798b300dd"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01/runtime-source-review01.json",
+    "bytes": 6891,
+    "sha256": "6fd449bc9c072d608656a51ab980fc71f583720b0c838698254c66f44d9c4981"
+  },
+  "actualThinProof": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-thin-actual01.json",
+    "bytes": 3081,
+    "sha256": "7c961348ca74c38c92ab28f7fab80377a0a71e2b7f081e3b0e52e465a40c484a"
+  },
+  "actual": {
+    "originalCallerSession": 19618,
+    "webPid": 74932,
+    "parentPid": 86616,
+    "ownListener19205": true,
+    "originalParentConfigMatched": true,
+    "callerStillOpen": true,
+    "callerClosed": false,
+    "exitCode": null,
+    "postExitGuardPending": true,
+    "activeLogsRead": false
+  },
+  "unchangedGateway": {
+    "pid": 66300,
+    "ports": [
+      19100,
+      19110
+    ],
+    "privateConfigRead": false,
+    "privateConfigRestored": false
+  },
+  "previousSource70": {
+    "normalAltXSaveLogoutObserved": true,
+    "ownedWebPid": 74724,
+    "parentPid": 81980,
+    "originalCallerSession": 50385,
+    "callerClosed": true,
+    "exitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "postExitGuardObserved": true
+  },
+  "uiOperated": true,
+  "sharedStorageHandoffAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

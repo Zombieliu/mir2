@@ -1,0 +1,244 @@
+{
+  "schema": "r16-onboarding-v12-r6-public-receipt/1",
+  "overallPassed": false,
+  "scope": "same-ordinary-qa-role-continuation; separate earlier q1/q2 receipts are retained",
+  "runnerSha256": "cdf35af66be2ca791af1f8c1c23d73834cc5a8b6c2e153e5a0f45db6f693e682",
+  "priorEvidence": {
+    "q1": "../onboarding-v12-browser-r3/onboarding-v11-browser-proof.json",
+    "q2": "../onboarding-v12-browser-r5/onboarding-v11-browser-proof.json"
+  },
+  "checks": [
+    {
+      "name": "saved-death-recovered-through-visible-town-revive-with-real-losses-retained",
+      "passed": true
+    },
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110001-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110002-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+      "passed": true
+    }
+  ],
+  "normalResume": {
+    "hp": 0,
+    "maxHp": 30,
+    "mp": 21,
+    "maxMp": 21,
+    "dead": true,
+    "position": {
+      "x": 295,
+      "y": 592
+    },
+    "gold": 200,
+    "smallHpMedicine": 10,
+    "completedQuestIds": [
+      2110001,
+      2110002
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "current": 2,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 0,
+            "required": 2,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "normalRevive": {
+    "normalUi": true,
+    "oneCommand": true,
+    "matchingRevivedObserved": true,
+    "before": {
+      "hp": 0,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": true,
+      "position": {
+        "x": 295,
+        "y": 592
+      }
+    },
+    "after": {
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    "goldBefore": 200,
+    "goldAfter": 200,
+    "smallHpMedicineBefore": 10,
+    "smallHpMedicineAfter": 10,
+    "retainedQuestLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "current": 2,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 0,
+            "required": 2,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "thirdQuest": {
+    "completed": false,
+    "scarecrow": 2,
+    "rakingCat": 0,
+    "required": 4,
+    "blocker": "REAL_QUEST_TARGET_NOT_DEFEATED_WITHIN_BOUNDED_FIGHT"
+  },
+  "medicineUses": 8,
+  "inventoryNativeXSuccessfulCloses": 8,
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002
+    ],
+    "completedNpcRewardNotOffered": true,
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "lastInGameVital": {
+    "sequence": 2527,
+    "receivedAtMs": 1793812531303,
+    "method": "HealthChanged",
+    "hp": 30,
+    "maxHp": 30,
+    "mp": 21,
+    "maxMp": 21,
+    "dead": false,
+    "position": {
+      "x": 285,
+      "y": 607
+    }
+  },
+  "normalLogout": true,
+  "browserClosed": true,
+  "newAccounts": 0,
+  "newCharacters": 0,
+  "questEconomicRequests": 0,
+  "network": {
+    "failed": 0,
+    "httpErrorEvents": 16,
+    "uniqueMissingPublicResources": 4,
+    "details": "resource-misses-public.json"
+  },
+  "consoleErrors": 16,
+  "publicSecretScan": {
+    "ownQaIdentityAndCredentialsMatches": 0
+  },
+  "clothingEvidence": {
+    "inventoryOwnershipConclusion": "not-established-by-this-helper",
+    "reason": "The helper used BaseDress while the actual starter template is BaseDress(M). No dress action occurred; a visible ground item is not attributed to this role."
+  },
+  "screenshots": [
+    "01-saved-death-before-normal-town-revive.png",
+    "02-village-native-task-card-before-measured-readiness.png",
+    "03-fresh-village-native-task-card.png",
+    "04-bounded-natural-hunt-incomplete.png",
+    "05-saved-progress-native-diary.png",
+    "06-failure-safe-masked.png"
+  ]
+}

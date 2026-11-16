@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "name": "validation.json",
+      "bytes": 894,
+      "sha256": "d3599d9df8e80e700324d8560285defe5faf225b9337b2a8a9873aec8b338916"
+    },
+    {
+      "name": "isolated-build.json",
+      "bytes": 10692,
+      "sha256": "c08eda77fb62217ab987c09cfcda2d339130832261d556ab99c0f0949ddafec8"
+    },
+    {
+      "name": "source-ownership.json",
+      "bytes": 604,
+      "sha256": "819f21902a7aaa4c206f6f143ccc1d3858c0edcb2bf71e24ee5a4b705a4e961d"
+    },
+    {
+      "name": "restoration.json",
+      "bytes": 1226,
+      "sha256": "84ba1b064f38a4d9e0c850c58d9768111ef6bddb0f6a7ca346de79c8ac569d8c"
+    },
+    {
+      "name": "webgpu-tc.json",
+      "bytes": 30107,
+      "sha256": "00a74d81cf98a091491596fda21cc6152d43cce51a9fd8200045197397671850"
+    },
+    {
+      "name": "webgpu-tc-objects-recovered.png",
+      "bytes": 1417250,
+      "sha256": "06ae3759bf4ac6873a712d98267dcbbf13f1dd51f5336515d210bc049aa3146c"
+    },
+    {
+      "name": "webgl2-tc.json",
+      "bytes": 21783,
+      "sha256": "fce4efef424ac625e037b493185dbdc98b54974e18f23d51d80e0469b3e91fa1"
+    },
+    {
+      "name": "webgl2-tc-objects-recovered.png",
+      "bytes": 1417094,
+      "sha256": "44992edde95c354830da1fbd24fe27309ac612cfddb4b78bbd3f0de77b88ad50"
+    },
+    {
+      "name": "webgl2-original-Q-observations.json",
+      "bytes": 5233,
+      "sha256": "6c0abbf01e0377b151b00d949818de2e9070470ae50d0e9c87123e73d5f010f9"
+    },
+    {
+      "name": "next-Q-investigation.json",
+      "bytes": 1169,
+      "sha256": "434497e2ad77fb01132e64cb5c0bf7f7b9fc10b1b7dce4392ad9cab323d644d7"
+    },
+    {
+      "name": "public-readback.json",
+      "bytes": 513,
+      "sha256": "573b95d132933a246908d9b8a83db00cf4f377eea742a9b7af23a80894cb5132"
+    },
+    {
+      "name": "alias-readback.json",
+      "bytes": 239,
+      "sha256": "23db098e12f680d6e8ecd88dc6891ad15d6f44a6f795c5cc5fa1aba2f20eda5c"
+    },
+    {
+      "name": "status.json",
+      "bytes": 1395,
+      "sha256": "5599d3d3be7db5e51ffcd666b0d61a6e9aa1d1f3c1e20340ca7db09fd0b2fa89"
+    }
+  ],
+  "scope": "Sanitized bounded object-recovery evidence; original local R2 remains failed, full public cold release not qualified. Complete original scripts and logs retained privately."
+}

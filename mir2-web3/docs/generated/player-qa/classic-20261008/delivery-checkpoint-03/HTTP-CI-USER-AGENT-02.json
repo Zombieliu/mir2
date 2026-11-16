@@ -1,0 +1,22 @@
+{
+  "schema": "mir2.r22.http-ci-user-agent.v1",
+  "passed": true,
+  "createdUnix": 1791441218,
+  "status": 401,
+  "bytes": 171,
+  "sha256": "84d34640f4fc658f97e3f8d65b1f061e13ec602cd4e55105f9d81389bdec2892",
+  "cacheControl": "no-store",
+  "userAgent": "Mir2NativeR17Delivery/1",
+  "priorProbeRetained": true,
+  "readOnly": true,
+  "securitySettingsChanged": false,
+  "payload": {
+    "ok": false,
+    "error": "unauthorized",
+    "pointerAttempted": false,
+    "pointerChanged": false,
+    "pointerOutcomeUnknown": false,
+    "objectWriteAttempted": false,
+    "objectOutcomeUnknown": false
+  }
+}

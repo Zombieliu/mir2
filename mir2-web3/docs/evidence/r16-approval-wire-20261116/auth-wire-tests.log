@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: interleaved poll and approval use their own wire clock and expose no capabilities
+ok 1 - interleaved poll and approval use their own wire clock and expose no capabilities
+  ---
+  duration_ms: 1.8611
+  type: 'test'
+  ...
+# Subtest: headers without body and a partially read body are distinguished at cancellation
+ok 2 - headers without body and a partially read body are distinguished at cancellation
+  ---
+  duration_ms: 0.6687
+  type: 'test'
+  ...
+# Subtest: an unresolved request is retained without inventing a failure or successful body
+ok 3 - an unresolved request is retained without inventing a failure or successful body
+  ---
+  duration_ms: 0.2766
+  type: 'test'
+  ...
+# Subtest: cache metadata rejects arbitrary secret-shaped values and unknown endpoints
+ok 4 - cache metadata rejects arbitrary secret-shaped values and unknown endpoints
+  ---
+  duration_ms: 0.5017
+  type: 'test'
+  ...
+# Subtest: bounded capture and marker allowlists do not let unrelated values persist
+ok 5 - bounded capture and marker allowlists do not let unrelated values persist
+  ---
+  duration_ms: 0.2176
+  type: 'test'
+  ...
+# Subtest: finish detaches all listeners and is idempotent
+ok 6 - finish detaches all listeners and is idempotent
+  ---
+  duration_ms: 0.1049
+  type: 'test'
+  ...
+# Subtest: redirecting outside auth closes the old hop and cannot attribute the destination body to it
+ok 7 - redirecting outside auth closes the old hop and cannot attribute the destination body to it
+  ---
+  duration_ms: 0.1555
+  type: 'test'
+  ...
+# Subtest: missing monotonic request time uses the observer clock and invalid status values are discarded
+ok 8 - missing monotonic request time uses the observer clock and invalid status values are discarded
+  ---
+  duration_ms: 0.1273
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 56.4873

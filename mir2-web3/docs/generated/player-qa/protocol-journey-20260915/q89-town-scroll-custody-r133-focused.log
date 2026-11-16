@@ -1,0 +1,268 @@
+TAP version 13
+# Subtest: reports preferred weapon funding for an unarmed or under-geared Warrior
+ok 1 - reports preferred weapon funding for an unarmed or under-geared Warrior
+  ---
+  duration_ms: 1.1138
+  type: 'test'
+  ...
+# Subtest: reports and buys the live class weapon when a caster lost every weapon
+ok 2 - reports and buys the live class weapon when a caster lost every weapon
+  ---
+  duration_ms: 2.035
+  type: 'test'
+  ...
+# Subtest: under-geared Warrior upgrades Dagger to the preferred BronzeAxe without a lower-tier fallback
+ok 3 - under-geared Warrior upgrades Dagger to the preferred BronzeAxe without a lower-tier fallback
+  ---
+  duration_ms: 0.6098
+  type: 'test'
+  ...
+# Subtest: unarmed Warrior buys the best affordable live Blacksmith weapon with exact proof
+ok 4 - unarmed Warrior buys the best affordable live Blacksmith weapon with exact proof
+  ---
+  duration_ms: 0.8432
+  type: 'test'
+  ...
+# Subtest: unarmed Warrior falls back to the strongest affordable exact catalog row
+ok 5 - unarmed Warrior falls back to the strongest affordable exact catalog row
+  ---
+  duration_ms: 0.4274
+  type: 'test'
+  ...
+# Subtest: weapon purchase proves the live Blacksmith rate-adjusted price
+ok 6 - weapon purchase proves the live Blacksmith rate-adjusted price
+  ---
+  duration_ms: 0.7282
+  type: 'test'
+  ...
+# Subtest: recomputes caster stock after service travel consumes the departure-floor MP bottle
+ok 7 - recomputes caster stock after service travel consumes the departure-floor MP bottle
+  ---
+  duration_ms: 1.0348
+  type: 'test'
+  ...
+# Subtest: does nothing outside map 0 or when relevant stock is sufficient
+ok 8 - does nothing outside map 0 or when relevant stock is sufficient
+  ---
+  duration_ms: 0.2117
+  type: 'test'
+  ...
+# Subtest: ordinary restock does not buy RandomTeleport unless explicitly requested
+ok 9 - ordinary restock does not buy RandomTeleport unless explicitly requested
+  ---
+  duration_ms: 0.2832
+  type: 'test'
+  ...
+# Subtest: Wizard-only HP Medium opt-in buys the live Ruben row to target six
+ok 10 - Wizard-only HP Medium opt-in buys the live Ruben row to target six
+  ---
+  duration_ms: 0.511
+  type: 'test'
+  ...
+# Subtest: HP Medium opt-in skips safely when the fresh Ruben row is missing or unaffordable
+ok 11 - HP Medium opt-in skips safely when the fresh Ruben row is missing or unaffordable
+  ---
+  duration_ms: 0.3859
+  type: 'test'
+  ...
+# Subtest: ordinary restock does not buy TownTeleport unless explicitly requested
+ok 12 - ordinary restock does not buy TownTeleport unless explicitly requested
+  ---
+  duration_ms: 0.1374
+  type: 'test'
+  ...
+# Subtest: opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport
+ok 13 - opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport
+  ---
+  duration_ms: 0.9529
+  type: 'test'
+  ...
+# Subtest: TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott
+ok 14 - TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott
+  ---
+  duration_ms: 0.6578
+  type: 'test'
+  ...
+# Subtest: explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas
+ok 15 - explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas
+  ---
+  duration_ms: 0.3321
+  type: 'test'
+  ...
+# Subtest: emergency reserve liquidates Venison until all requested RandomTeleport scrolls are affordable
+ok 16 - emergency reserve liquidates Venison until all requested RandomTeleport scrolls are affordable
+  ---
+  duration_ms: 0.6956
+  type: 'test'
+  ...
+# Subtest: emergency reserve is a target and does not repurchase an existing full stock
+ok 17 - emergency reserve is a target and does not repurchase an existing full stock
+  ---
+  duration_ms: 0.1193
+  type: 'test'
+  ...
+# Subtest: RandomTeleport use requires an ack, a fresh quantity decrease, and changed position
+ok 18 - RandomTeleport use requires an ack, a fresh quantity decrease, and changed position
+  ---
+  duration_ms: 0.4238
+  type: 'test'
+  ...
+# Subtest: RandomTeleport use fails closed on a rejected ack
+ok 19 - RandomTeleport use fails closed on a rejected ack
+  ---
+  duration_ms: 0.3466
+  type: 'test'
+  ...
+# Subtest: TownTeleport use proves consumption and accepts a map change with unchanged coordinates
+ok 20 - TownTeleport use proves consumption and accepts a map change with unchanged coordinates
+  ---
+  duration_ms: 0.3298
+  type: 'test'
+  ...
+# Subtest: TownTeleport UseItem rejection leaves the authoritative item unconsumed
+ok 21 - TownTeleport UseItem rejection leaves the authoritative item unconsumed
+  ---
+  duration_ms: 0.1282
+  type: 'test'
+  ...
+# Subtest: TownTeleport false ack cannot be treated as consumption
+ok 22 - TownTeleport false ack cannot be treated as consumption
+  ---
+  duration_ms: 0.1727
+  type: 'test'
+  ...
+# Subtest: shared emergency escape cooldown conserves scrolls across independent loops
+ok 23 - shared emergency escape cooldown conserves scrolls across independent loops
+  ---
+  duration_ms: 0.2612
+  type: 'test'
+  ...
+# Subtest: insufficient funds preserves the 100 gold reserve and sends no command
+ok 24 - insufficient funds preserves the 100 gold reserve and sends no command
+  ---
+  duration_ms: 0.1764
+  type: 'test'
+  ...
+# Subtest: journey mode sells only provably superseded quest gear before buying survival stock
+ok 25 - journey mode sells only provably superseded quest gear before buying survival stock
+  ---
+  duration_ms: 0.6615
+  type: 'test'
+  ...
+# Subtest: journey liquidation accepts Crystal Blacksmith combined BuySell service
+ok 26 - journey liquidation accepts Crystal Blacksmith combined BuySell service
+  ---
+  duration_ms: 0.5083
+  type: 'test'
+  ...
+# Subtest: journey recovery sells obsolete materials but preserves an active quest item
+ok 27 - journey recovery sells obsolete materials but preserves an active quest item
+  ---
+  duration_ms: 0.6418
+  type: 'test'
+  ...
+# Subtest: journey recovery sells harvested Venison to Butcher John before buying potions
+ok 28 - journey recovery sells harvested Venison to Butcher John before buying potions
+  ---
+  duration_ms: 0.4195
+  type: 'test'
+  ...
+# Subtest: Warrior buys HP only through the fresh Ruben row id and proves exact snapshot deltas
+ok 29 - Warrior buys HP only through the fresh Ruben row id and proves exact snapshot deltas
+  ---
+  duration_ms: 0.3065
+  type: 'test'
+  ...
+# Subtest: restock clears an adjacent hostile that seals the supply service approach
+ok 30 - restock clears an adjacent hostile that seals the supply service approach
+  ---
+  duration_ms: 0.4039
+  type: 'test'
+  ...
+# Subtest: restock clears a distant hostile that seals every final service approach
+ok 31 - restock clears a distant hostile that seals every final service approach
+  ---
+  duration_ms: 0.6868
+  type: 'test'
+  ...
+# Subtest: a distant village service receives a route budget derived from authoritative distance
+ok 32 - a distant village service receives a route budget derived from authoritative distance
+  ---
+  duration_ms: 0.2436
+  type: 'test'
+  ...
+# Subtest: large restock fills the partial potion stack before buying the overflow chunk
+ok 33 - large restock fills the partial potion stack before buying the overflow chunk
+  ---
+  duration_ms: 0.229
+  type: 'test'
+  ...
+# Subtest: Taoist does not detour for Amulets before level 18 or without learned SoulFireBall
+ok 34 - Taoist does not detour for Amulets before level 18 or without learned SoulFireBall
+  ---
+  duration_ms: 0.1998
+  type: 'test'
+  ...
+# Subtest: caster stocks both HP and MP while preserving the fixed gold reserve
+ok 35 - caster stocks both HP and MP while preserving the fixed gold reserve
+  ---
+  duration_ms: 0.5048
+  type: 'test'
+  ...
+# Subtest: equips an eligible held Amulet into slot 9 even when total stock is already sufficient
+ok 36 - equips an eligible held Amulet into slot 9 even when total stock is already sufficient
+  ---
+  duration_ms: 0.2121
+  type: 'test'
+  ...
+# Subtest: moves a milestone Amulet stack from its authoritative belt slot before equipping slot 9
+ok 37 - moves a milestone Amulet stack from its authoritative belt slot before equipping slot 9
+  ---
+  duration_ms: 0.383
+  type: 'test'
+  ...
+# Subtest: belt Amulet movement remains fail closed for level, space, rejection, and stale snapshots
+ok 38 - belt Amulet movement remains fail closed for level, space, rejection, and stale snapshots
+  ---
+  duration_ms: 0.4346
+  type: 'test'
+  ...
+# Subtest: a tight caster budget buys a bounded HP partial and never spends the reserve
+ok 39 - a tight caster budget buys a bounded HP partial and never spends the reserve
+  ---
+  duration_ms: 0.1942
+  type: 'test'
+  ...
+# Subtest: Wizard with 600 gold reaches both six-potion targets and preserves the reserve
+ok 40 - Wizard with 600 gold reaches both six-potion targets and preserves the reserve
+  ---
+  duration_ms: 0.222
+  type: 'test'
+  ...
+# Subtest: requires a live exact Ruben and an enabled exact BuySell link
+ok 41 - requires a live exact Ruben and an enabled exact BuySell link
+  ---
+  duration_ms: 0.3633
+  type: 'test'
+  ...
+# Subtest: rejects stale, missing, or malformed goods instead of guessing a shop row
+ok 42 - rejects stale, missing, or malformed goods instead of guessing a shop row
+  ---
+  duration_ms: 0.5169
+  type: 'test'
+  ...
+# Subtest: silent rejection and incorrect authoritative deltas cannot prove purchase
+ok 43 - silent rejection and incorrect authoritative deltas cannot prove purchase
+  ---
+  duration_ms: 0.6235
+  type: 'test'
+  ...
+1..43
+# tests 43
+# suites 0
+# pass 43
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 93.9529

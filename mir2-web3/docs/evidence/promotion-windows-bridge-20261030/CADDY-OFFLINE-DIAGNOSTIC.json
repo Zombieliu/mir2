@@ -1,0 +1,110 @@
+{
+  "schema": "mir2.caddy-offline-additive-diagnostic.v1",
+  "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+  "publicationSourceSha256": "f0206683b8f9fb998c0fc18474220ed37d57ce17417a6792c102d2922ea1a4bc",
+  "extractedSourceSha256": "94a0a733b7330be3a1aa70775ee287be7711ef8fbdbe1c2234c9be9769979695",
+  "observedAtUtc": "2026-10-30T14:20:31.826915+00:00",
+  "liveServiceReloaded": false,
+  "mainConfigWritten": false,
+  "ownedCandidateCreated": true,
+  "ownedCandidateDeleted": true,
+  "calls": [
+    {
+      "operation": "adapt",
+      "configLabel": "main",
+      "exitCode": 0,
+      "stderrSha256": "5694a1a26c1d924de3d539497099d7c420c7c13195c721e4e9f5eea58822ff20",
+      "stderrCategories": [],
+      "stderrLocations": [],
+      "stdoutBytes": 13116
+    },
+    {
+      "operation": "adapt",
+      "configLabel": "ownedCandidate",
+      "exitCode": 0,
+      "stderrSha256": "b4d69d6d0fcd08dcec315e6925a50f3180c2d36c7f2cb36fe8acd80b2e6c6e47",
+      "stderrCategories": [],
+      "stderrLocations": [],
+      "stdoutBytes": 15062
+    }
+  ],
+  "passed": true,
+  "protectedRollbackConfirmed": true,
+  "mainBeforeSha256": "aa5c0eb8d5fafa9d0353729ab642c3cc3a5263cad1416d882809c29e3bd7c7b1",
+  "caddyIdentity": {
+    "pid": 2107428,
+    "binary": "/usr/bin/caddy",
+    "binarySha256": "9681d054b6e5137d53f6d027188b349e0603fd12ea6334bd0d49da6755432f1b"
+  },
+  "publicationStateSha256": "8f23515c26e0592d051faba6fcb78a26ab3d56e090c9c7b4b4d5f1858a599d2a",
+  "ownedCandidateSha256": "1ef45fc9201f991c197eee721d6476df3ba0f756a6de0ad9aa63b8a895813529",
+  "canonicalBeforeSha256": "ab86824ea9a61dfe90d5dad79ad77a83258e2bf18e53af3758ee41a62cba354c",
+  "canonicalAfterNewRouteRemovedSha256": "9d32ec22445785c8fc45759712c9c4e6198b67496bcf7bc7538739be59405b54",
+  "newRoutesRemoved": 1,
+  "differenceCount": 8,
+  "differences": [
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/1/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/2/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/3/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/1/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/2/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/3/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/1/handle/0/routes/0/handle/0/routes/0/handle/0/routes/0/handle/0/routes/4/handle/0/routes/0/handle/4/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    },
+    {
+      "path": "/apps/http/servers/srv0/routes/3/handle/0/routes/2/handle/0/routes/1/handle/2/<key:1f5bb9791a31>/0",
+      "beforeType": "str",
+      "afterType": "str",
+      "beforeSha256": "a2be24fe7eb0b5292558346c1a6393cc0cb283e4f2852fbc24f542aff05c75ac",
+      "afterSha256": "af7f7023a703fc5572c548348083e29cf8c44ac2deeb278e6a77697f59928bcf"
+    }
+  ],
+  "guardPassed": false,
+  "mainConfigUnchanged": true,
+  "publicationStateUnchanged": true,
+  "newIncludeAbsent": true,
+  "candidateAbsent": true,
+  "caddyIdentityUnchanged": true,
+  "completedAtUtc": "2026-10-30T14:20:34.323021+00:00"
+}

@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "state": "explicit-public-ended-originals",
+  "base": "C:/mir2-build/p01-completion-20261024",
+  "topic": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024",
+  "child": "capacity-formal13-native-supply-failure-analysis-v1",
+  "runId": "1792959622496-365f0175",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-actual-terminal-independent-facts-v1.json",
+        "bytes": 10026,
+        "sha256": "0db4c38c85153d170de995989451495ea853d491b3e7c11125a3909b465751f0"
+      },
+      "target": "facts/formal13-actual-terminal-independent-facts-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-root-independent-cleanup-v1.json",
+        "bytes": 409,
+        "sha256": "1daaa6cb91e6554da86bed13a977bc2f75f59fb27f2e70b41ca4be80cff3d1e1"
+      },
+      "target": "facts/formal13-root-independent-cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-report-failure-analysis-v1\\analysis-v1.json",
+        "bytes": 42280,
+        "sha256": "a71c159e87ed0fd1b88c94d69d768addd233aa589ef236369815d7e48fa8af1e"
+      },
+      "target": "report-analysis/analysis-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-wait-analysis-v1\\analysis-v1.json",
+        "bytes": 24819,
+        "sha256": "8d7ff05c9f0ace2a05a00b0871fa50beeacb811c275005caebda6bfed565eaf5"
+      },
+      "target": "store-analysis/analysis-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public.mjs",
+        "bytes": 43271,
+        "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+      },
+      "target": "post-collector/collect-public.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2.mjs",
+        "bytes": 43374,
+        "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+      },
+      "target": "post-collector/collect-public-current50-v2.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2-derivation-v1.json",
+        "bytes": 2392,
+        "sha256": "a08201cea196ca8434195201a11f5f05bfc42fb277aae7f42cc5be9a6c56418f"
+      },
+      "target": "post-collector/collect-public-current50-v2-derivation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-post-collector-independent-review-v1\\review-v2.json",
+        "bytes": 1994,
+        "sha256": "b9973e5f2065b19a646407e326528958631f4a77b283099ff43942249b7decc1"
+      },
+      "target": "post-collector/review-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-post-collector-independent-review-v1\\review-v1.json",
+        "bytes": 6,
+        "sha256": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789"
+      },
+      "target": "post-collector/review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-execution-v1.json",
+        "bytes": 813,
+        "sha256": "1455f843604b6a826f2e461667e1ebf6b82afdc44e6c19d19e5cde0fd3d14813"
+      },
+      "target": "execution/formal13-base-collection-execution-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-stdout-v1.log",
+        "bytes": 132826,
+        "sha256": "221b99478b2fd446966a3f29fff4c90f42f39be7dd215897120f9a1734dac985"
+      },
+      "target": "execution/formal13-base-collection-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "target": "execution/formal13-base-collection-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-verification-stdout-v1.log",
+        "bytes": 5017,
+        "sha256": "ea47fbbe35c0de602731cabfa393e0ad6b6a3ef6388b17d45cd973b457cb8cfc"
+      },
+      "target": "execution/formal13-base-verification-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "target": "execution/formal13-base-verification-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-collection-stdout-v1.log",
+        "bytes": 393,
+        "sha256": "77a89f6c51729ddd5684ce2be25c1426c372bb3e4c0c3c601729b606f0f95a78"
+      },
+      "target": "execution/formal13-store-collection-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "target": "execution/formal13-store-collection-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "cd7acecf0ded42bbdda38c20b29b991db8df106bb579eac55a5bc62d3ced6eef"
+      },
+      "target": "execution/formal13-store-verification-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "target": "execution/formal13-store-verification-stderr-v1.log"
+    }
+  ],
+  "readmes": [
+    {
+      "file": "capacity-formal13-native-supply-failure-analysis-v1/README.md",
+      "content": "# Formal13：原生战斗供给失败分析\n\n本轮 1792959622496-365f0175 已结束，原始report、raw verifier和capacity均为false。2/10人分别实测300.259/300.261s通过；25人测满300.254s，五窗中W3/W4未通过。25人阶段218条攻击action全为successful，0timeout、0not-launched；失败是逐fighter攻击发起供给，actor05的正伤害率也低于按真实时长计算的门槛。见[终态事实](facts/formal13-actual-terminal-independent-facts-v1.json)与[失败分析](report-analysis/analysis-v1.json)。\n\n50/100人、7200s soak、resume/save/post均未执行。原阈值未放宽，P0/capacity仍false，P2未启动。7项正常清理为true，另有[Root OS实查](facts/formal13-root-independent-cleanup-v1.json)。\n\nRoot基础collect/verify与独立Store collect/verify四项均exit0，只确认归档一致性，保留游戏失败。Store共106条、23083B，诊断complete；[Store分析](store-analysis/analysis-v1.json)只讨论已完成且超过50ms的记录，嵌套阶段不可相加，不能据此确定Store/IO实际holder、目标竞争、碰撞或容量上限，未确立旧5s停顿根因。successful action并非独立逐请求900ms typed+双端正包重放。\n\n事后采集器只修正catalog.scope轮次并加入self/proof白名单，原100冻结输入保持。可核[原采集器](post-collector/collect-public.mjs)、[派生v2](post-collector/collect-public-current50-v2.mjs)、[精确逆变换与syntax](post-collector/collect-public-current50-v2-derivation-v1.json)、[有效v2独审](post-collector/review-v2.json)及[实际采集执行](execution/formal13-base-collection-execution-v1.json)。[v1审查原件](post-collector/review-v1.json)是PowerShell记录构造错误留下的null JSON，作为历史保留，不视为有效审查；有效v2在实际采集前完成。\n\n大raw/monitor/录像/EXE/private不复制。原始报告和185份基础copy见[基础目录](../capacity-formal-native-v2-account-store-wait-ladder-13/README.md)，Store独立数据见[Store目录](../capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics/README.md)。新说明、白名单、复制收据和核验不改原catalog/verification。\n"
+    },
+    {
+      "file": "capacity-formal-native-v2-account-store-wait-ladder-13/README.md",
+      "content": "# Formal13 基础公开证据\n\nRun 1792959622496-365f0175：2/10人阶段通过，25人测满300.254s但W3/W4战斗供给未达标；25人218条attack action均successful、0timeout，不能据此改为通过。50/100人、7200s soak及resume/save/post未执行；report/raw verifier/capacity/P0均false，P2未启动。\n\nRoot posthoc v2 collect与原verify均exit0，正常清理7项true；原[报告](release-native-v2-account-store-wait-ladder-13/reports/1792959622496-365f0175.report.json)、[catalog](collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json)、[copy provenance](public-copy-provenance.json)、[collection verification](collection-verification.json)、[public verification](public-verification.json)、[raw SHA manifest](raw-artifact-manifest.json)保持原字节。原copy计数185、验证前目录189files均为新增本README之前的真实快照。\n\n50578926B/82186行raw仍在外部，只保原SHA绑定。无新的逐包900ms独立重放或服务器根因判定。见[失败分析及执行历史](../capacity-formal13-native-supply-failure-analysis-v1/README.md)和[独立Store companion](../capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics/README.md)。\n"
+    },
+    {
+      "file": "capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics/README.md",
+      "content": "# Formal13 独立 Store 诊断\n\n本数据集与基础3/4/7日志分开，不参与或改写游戏验收。Run 1792959622496-365f0175已结束；Root Store collect/verify均exit0，106条/23083B，SHA 927baeb695360376d15ade2f3fa8a7dd5d873fcc33ca329e456d807268ee56d8，diagnosticComplete=true。\n\n原[Store catalog](store-artifact-catalog.json)、[copy provenance](store-copy-provenance.json)、[public verification](store-public-verification.json)、[status](store-stage-public-status.json)、[公开Store行](store-stage-public.jsonl)不改。complete只指有界已完成记录的投影一致性；未完成、低于阈值或未instrument的等待不可被排除。duration为同stage最大单次值，samples/total为聚合，嵌套值不可相加。\n\n[基础游戏结果](../capacity-formal-native-v2-account-store-wait-ladder-13/README.md)仍是25人供给失败，P0/capacityfalse、P2未启动；未认定Store/IO holder、死锁、碰撞或CPU容量上限。见[Store分析与终态事实](../capacity-formal13-native-supply-failure-analysis-v1/README.md)。\n"
+    }
+  ],
+  "referencedExistingPublicPins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json",
+      "bytes": 65388,
+      "sha256": "f96df32acb661959bd36c402710b4f7cac2ea91bfb6f634be977cd5cad6fbe44"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\public-verification.json",
+      "bytes": 7105,
+      "sha256": "392c37e6d3035bb35717fd1668f581e0cb6c68447a59e1a7d351109da8445389"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-public-verification.json",
+      "bytes": 1426,
+      "sha256": "e4a7c66ff54fe439b230036389843705c8cc753260aee44c40fa0400b94cf081"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-artifact-catalog.json",
+      "bytes": 5157,
+      "sha256": "98037f21748c1d866764a94ba6574d1d2ee240eb936abd8e1a389075e1a2315e"
+    }
+  ],
+  "constraints": {
+    "maximumOriginalBytes": 1048576,
+    "maximumTotalOriginalBytes": 2097152,
+    "copyOnlyListedOriginals": true,
+    "noRawMonitorRecordingExecutablePrivate": true,
+    "noSourceOrExistingEvidenceMutation": true
+  },
+  "originalGameVerdict": {
+    "reportOk": false,
+    "rawVerifierAccepted": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p1EngineeringContractsPassed": true,
+    "p2Started": false,
+    "peakControlledActors": 25,
+    "highestPassedStage": 10,
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "measuredSeconds": 300.259,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792959653921,
+        "endedAtMs": 1792959954180,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "measuredSeconds": 300.261,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792960009375,
+        "endedAtMs": 1792960309636,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-25",
+        "controlledActors": 25,
+        "seconds": 300,
+        "measuredSeconds": 300.254,
+        "completed": true,
+        "passed": false,
+        "startedAtMs": 1792960394310,
+        "endedAtMs": 1792960694564,
+        "minuteWindows": 5
+      }
+    ],
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-25": {
+        "complete": 5,
+        "passed": 3
+      }
+    },
+    "unexecuted": [
+      "stage-50",
+      "stage-100",
+      "7200-second soak",
+      "save",
+      "resume",
+      "post-resume measurement"
+    ],
+    "reason": "Stage25 W3/W4 per-fighter combat launch supply; actor05 positive-hit rate also below actual-duration threshold. Stage25 218 observed attack actions all classified successful, no timeout/not-launched. All original gates remain."
+  }
+}

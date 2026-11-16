@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "offlineOnly": true,
+  "productionSourceModified": false,
+  "commandsSent": 0,
+  "runtimeLoadPerformed": false,
+  "testsRun": false,
+  "budgetChanged": false,
+  "actualOriginalFailurePreserved": true,
+  "scriptAuthoringCorrection": "Initial analyze invocation exited1 before output because protocolMapCellIsWalkable expects a point object. Script corrected; final syntax/analysis exited0. No production source change.",
+  "syntaxAndOfflineExecutions": [
+    {
+      "script": "analyze-v1.mjs",
+      "syntaxExit": 0,
+      "offlineExit": 0
+    },
+    {
+      "script": "static-connectivity-v1.mjs",
+      "syntaxExit": 0,
+      "offlineExit": 0
+    }
+  ],
+  "pins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-funding-aoi-feasibility-v1\\analyze-v1.mjs",
+      "bytes": 14524,
+      "sha256": "323486f7691cb988e6dcac4bdba577ae9f30a746862cbfe7822431ea57e9a49d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-funding-aoi-feasibility-v1\\geometry-result-v1.json",
+      "bytes": 206696,
+      "sha256": "76788189f25be3227e5ee09f9136736dfbcb3444782d07d4e45419801fd3eea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-funding-aoi-feasibility-v1\\static-connectivity-v1.mjs",
+      "bytes": 4482,
+      "sha256": "09104e1960bcd8f6a47af313c43184397dcd74a70caccb686c9b60372c71b8ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-funding-aoi-feasibility-v1\\static-route-proof-v1.json",
+      "bytes": 17617,
+      "sha256": "a8a3b3dec48e072f14a0e8192a902749fd02c9093bf84cd3c12358d58862b59f"
+    }
+  ],
+  "findings": {
+    "fourMissingAreNotUnknownHpFailures": true,
+    "allFourStaticRoutesRequireLeavingTargetAoi16": true,
+    "minimumRequiredStaticRadii": [
+      {
+        "objectId": 206500,
+        "minimumStaticRouteRadius": 23,
+        "staticGlobalSteps": 57
+      },
+      {
+        "objectId": 206521,
+        "minimumStaticRouteRadius": 18,
+        "staticGlobalSteps": 27
+      },
+      {
+        "objectId": 206708,
+        "minimumStaticRouteRadius": 20,
+        "staticGlobalSteps": 26
+      },
+      {
+        "objectId": 206706,
+        "minimumStaticRouteRadius": 24,
+        "staticGlobalSteps": 36
+      }
+    ],
+    "lastExactNoPath": {
+      "objectId": 206320,
+      "from": {
+        "x": 293,
+        "y": 612
+      },
+      "target": {
+        "x": 281,
+        "y": 596
+      },
+      "range": 1,
+      "sharedPoints": 7,
+      "exactOccupancy": 27,
+      "explicitCellsReconstructed": 604,
+      "publishedExplicitPrefixCellsChecked": 128,
+      "authoredTransfers": 69,
+      "actualDynamicArrayTotal": 700,
+      "allNineGoalCellsBlockedBy": [
+        206604
+      ],
+      "historyRemainingMs": 16138,
+      "globalQuarantine": 0
+    }
+  },
+  "coverageBoundary": {
+    "earlierFour": "Static map proof is exact for its declared pinned closed-door collision+transfer model. Earlier dynamic views are not retained; sampled projections are not exact client replay.",
+    "lastNoPath": "Complete seven shared points and qualification/27occupancy retained. Deterministic helper reconstruction matches604 explicit total and128 published prefix.69transfer cells are source-sampled static authored data, not invented client receipt history.",
+    "sampledThreatUnion": "20s union is only conservative over enumerated spectator samples, not a certified superset of every unsampled client position/identity receipt."
+  },
+  "minimumDesignRecommendation": [
+    "Do not apply an AOI16 ring alone: all four actual selected targets have no static route inside it, so this only fails sooner.",
+    "For ordinary strict candidate query only, require local static reachability within the exact selected target AOI16 using the same map collision+transfer policy before selection/NAV-stop eligibility; this may reject only and cannot confer safety/HP/readiness.",
+    "Additionally reject a candidate when every legal range1 goal is already covered by still-valid helper certified blockers under the existing cell model. Read current trail expiry/identity; no TTL renewal, memory clearing, unknown exemption or radius reduction.",
+    "Keep original selected races charged/excluded, max8/600s/2048/3cmd/2s/3replans and current consecutive-empty/cue limits. Rejected unselected candidates use only the original bounded search, not new retry budgets.",
+    "Before implementation decide how the existing collision map is supplied/cached in the ordinary helper. Current helper does not expose a collision-map input; production changes need new explicit assignment."
+  ],
+  "noLiveSuccessClaim": true
+}

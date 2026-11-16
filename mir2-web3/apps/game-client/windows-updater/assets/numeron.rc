@@ -1,0 +1,26 @@
+#include <windows.h>
+
+// Resource ID 1 is also used by the native updater window.
+1 ICON "../platform-windows/resources/numeron.ico"
+
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "Numeron - Legend of Rebirth launcher and updater\0"
+            VALUE "ProductName", "Numeron - Legend of Rebirth\0"
+            VALUE "FileVersion", "1.0.0\0"
+            VALUE "ProductVersion", "1.0.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

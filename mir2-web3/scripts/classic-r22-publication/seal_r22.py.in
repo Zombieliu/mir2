@@ -1,0 +1,129 @@
+# Literal frozen inputs below are emitted only after actual proof/plan validation.
+import hashlib, json, os, pathlib, stat, sys
+
+
+def need(condition, label):
+    if not condition:
+        raise RuntimeError(label)
+
+
+def ident(info):
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def root_parents(path):
+    for parent in [*reversed(path.parent.parents), path.parent]:
+        i = parent.lstat()
+        need(stat.S_ISDIR(i.st_mode) and i.st_uid == 0 and not i.st_mode & 0o022, 'unsafe-root-parent')
+
+
+def source_info(row):
+    need(row['kind'] in ('public', 'user'), 'fixed-source-kind')
+    path = pathlib.Path(row['source'])
+    if row['kind'] == 'public':
+        need(path.is_relative_to(PUBLIC) and '..' not in path.parts, 'reuse-source-boundary')
+        root_parents(path)
+    else:
+        need(path.parent == USER and path.name == row['name'], 'upload-source-boundary')
+        need(ident(USER.lstat()) == user_identity, 'user-directory-changed')
+    info = (os.stat(row['name'], dir_fd=userfd, follow_symlinks=False)
+            if row['kind'] == 'user' else path.lstat())
+    need(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_uid == (0 if row['kind'] == 'public' else 1000)
+         and not info.st_mode & 0o022 and info.st_size == row['size'], 'unsafe-source-file')
+    if row['kind'] == 'user':
+        need(stat.S_IMODE(info.st_mode) == 0o600, 'private-upload-mode-required')
+    else:
+        need(stat.S_IMODE(info.st_mode) == 0o444, 'immutable-public-reuse-source-required')
+    return path, info
+
+
+def transfer(row, rootfd=None):
+    path, info = source_info(row)
+    flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
+    fd = (os.open(row['name'], flags, dir_fd=userfd)
+          if row['kind'] == 'user' else os.open(path, flags))
+    with os.fdopen(fd, 'rb') as reader:
+        need(ident(os.fstat(reader.fileno())) == ident(info), 'source-open-race')
+        writer = None
+        if rootfd is not None:
+            dest = os.open(row['name'], os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC,
+                           0o600, dir_fd=rootfd)
+            writer = os.fdopen(dest, 'wb')
+        try:
+            count, h = 0, hashlib.sha256()
+            while chunk := reader.read(1024 * 1024):
+                count += len(chunk)
+                need(count <= row['size'], 'source-overrun')
+                h.update(chunk)
+                if writer is not None:
+                    writer.write(chunk)
+            need(count == row['size'] and h.hexdigest() == row['sha256'], 'source-pin:' + row['name'])
+            current_info = (os.stat(row['name'], dir_fd=userfd, follow_symlinks=False)
+                            if row['kind'] == 'user' else path.lstat())
+            need(ident(os.fstat(reader.fileno())) == ident(info) and ident(current_info) == ident(info), 'source-read-race')
+            if writer is not None:
+                writer.flush()
+                os.fsync(writer.fileno())
+                sealed = os.fstat(writer.fileno())
+                need(stat.S_ISREG(sealed.st_mode) and sealed.st_uid == 0 and sealed.st_nlink == 1 and
+                     stat.S_IMODE(sealed.st_mode) == 0o600 and sealed.st_size == row['size'], 'sealed-file-metadata')
+                need(ident(os.stat(row['name'], dir_fd=rootfd, follow_symlinks=False)) == ident(sealed), 'sealed-file-race')
+        finally:
+            if writer is not None:
+                writer.close()
+
+
+need(sys.platform.startswith('linux') and os.geteuid() == 0, 'linux-root-required')
+need(str(USER) == '/tmp/mir2-origin-r22-s17-20261008-01' and str(ROOT) == '/srv/.mir2-origin-r22-s17-20261008-01'
+     and str(PUBLIC) == '/srv/mir2-client-updates', 'fixed-boundaries')
+tmp = USER.parent.lstat()
+need(stat.S_ISDIR(tmp.st_mode) and tmp.st_uid == 0, 'unsafe-tmp-parent')
+root_parents(PUBLIC)
+public_before = PUBLIC.lstat()
+need(stat.S_ISDIR(public_before.st_mode) and public_before.st_uid == 0 and not public_before.st_mode & 0o022,
+     'unsafe-public-root')
+user_before = USER.lstat()
+need(stat.S_ISDIR(user_before.st_mode) and user_before.st_uid == 1000 and stat.S_IMODE(user_before.st_mode) == 0o700,
+     'private-user-directory-required')
+user_identity = ident(user_before)
+userfd = os.open(USER, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+try:
+    need(ident(os.fstat(userfd)) == user_identity, 'user-directory-open-race')
+    need(set(os.listdir(userfd)) == {r['name'] for r in ROWS if r['kind'] == 'user'}, 'closed-upload-input-set')
+    need(len(ROWS) == len({r['name'] for r in ROWS}), 'duplicate-seal-name')
+    for row in ROWS:
+        need(pathlib.Path(row['name']).name == row['name'] and row['name'] not in ('.', '..'), 'unsafe-seal-name')
+        transfer(row)  # All inputs are verified before creating the root stage.
+    root_parents(ROOT)
+    need(not ROOT.exists() and not ROOT.is_symlink(), 'fresh-root-stage-required')
+    ROOT.mkdir(mode=0o700)
+    root_before = ROOT.lstat()
+    need(stat.S_ISDIR(root_before.st_mode) and root_before.st_uid == 0 and stat.S_IMODE(root_before.st_mode) == 0o700,
+         'private-root-directory-required')
+    rootfd = os.open(ROOT, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        need(ident(os.fstat(rootfd)) == ident(root_before), 'root-directory-open-race')
+        current_public = PUBLIC.lstat()
+        need(stat.S_ISDIR(current_public.st_mode) and current_public.st_uid == 0 and not current_public.st_mode & 0o022
+             and current_public.st_dev == public_before.st_dev and current_public.st_ino == public_before.st_ino,
+             'public-root-changed')
+        need(root_before.st_dev == current_public.st_dev, 'stage-filesystem-mismatch')
+        for row in ROWS:
+            transfer(row, rootfd)  # Copies bytes; never links or renames public sources.
+        need(set(os.listdir(rootfd)) == {r['name'] for r in ROWS}, 'closed-root-input-set')
+        need(set(os.listdir(userfd)) == {r['name'] for r in ROWS if r['kind'] == 'user'}, 'closed-upload-input-set-changed')
+        need(ident(USER.lstat()) == user_identity and ident(os.fstat(userfd)) == user_identity, 'user-stage-changed')
+        os.fsync(rootfd)
+        parentfd = os.open(ROOT.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        try:
+            os.fsync(parentfd)
+        finally:
+            os.close(parentfd)
+    finally:
+        os.close(rootfd)
+finally:
+    os.close(userfd)
+print(json.dumps({'schema': 'mir2.origin.r22.fixed-inputs-sealed.v1', 'passed': True, 'files': len(ROWS),
+                  'reusedPublicFiles': sum(r['kind'] == 'public' for r in ROWS),
+                  'reusedPublicBytes': sum(r['size'] for r in ROWS if r['kind'] == 'public'),
+                  'hardlinksCreated': False, 'publicMutations': False, 'gatewayRestarted': False}))

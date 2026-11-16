@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T23:06:09.806Z",
+  "scope": "Template-v2 only: the original ordinary full16 workload on the new socket-diagnostics41-input Release, with only the existing slow-stage threshold explicitly enabled at50ms. The originalv1 template remains unchanged. No finalization, account preparation, process or gameplay has run.",
+  "releaseRecord": "C:\\mir2-build\\p01-completion-20261024\\release-socket-diagnostics-v1.json",
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json",
+  "dynamicBackendInputCount": true,
+  "driverPins": [
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "toolPins": [
+    {
+      "file": "run-owned-full.mjs",
+      "bytes": 14364,
+      "sha256": "080e61086a45d7022f125e50e334da5962c432dc28a022fa00abff12e85d2d78"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "bytes": 9030,
+      "sha256": "1815198d61651a9537aa342371d3af821fa10ee21e241b639be98adce8a79dd0"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "bytes": 6233,
+      "sha256": "e79671426406ebd334c9e30255aec3cf7a655f5e03b72d2af6289ca0bec62d41"
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "bytes": 2010,
+      "sha256": "20f4e15fa90bd3de8ea726f328c548ab68fc517158e352347f902601e037a182"
+    },
+    {
+      "file": "socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    }
+  ],
+  "endpoint": "ws://127.0.0.1:17610/ws",
+  "tcpBind": "127.0.0.1:17600",
+  "webBind": "127.0.0.1:17610",
+  "profile": "full-lifecycle",
+  "durationSeconds": 900,
+  "ordinaryRegistrationCount": 2,
+  "nativeAttackV2DriverUsed": false,
+  "nativeAttackV2ServerReleaseExpected": true,
+  "normalPlayerGates": true,
+  "qaAdminEnabled": false,
+  "contentProfile": "platinum_176",
+  "routing": "single",
+  "accountBackend": "file",
+  "tokioWorkers": 4,
+  "capacityAccepted": false,
+  "humanFrontendAccepted": false,
+  "repository": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "expectedBackendInputCount": 41,
+  "outputRoot": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\public",
+  "socketDiagnosticsReleaseExpected": true,
+  "socketDiagnosticsEnabled": true,
+  "templateOnly": true,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "slowStageThresholdMs": 50,
+  "intendedBackendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "intendedSourceManifestSha256": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "intendedSourceManifestFileSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058"
+}

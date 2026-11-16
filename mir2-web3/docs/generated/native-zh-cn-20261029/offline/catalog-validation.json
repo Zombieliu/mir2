@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "totalKeys": 9769,
+  "sourceCounts": {
+    "common": 2445,
+    "content": 3913,
+    "shell": 167,
+    "quest": 404,
+    "game": 282,
+    "help": 124,
+    "npc-menus": 607,
+    "npc-prose": 1479,
+    "periodic": 210,
+    "conquest": 50,
+    "embeddedVocabulary": 88,
+    "totalKeys": 9769
+  },
+  "methods": {
+    "OpenCC-1.4.2-tw2sp": 7407,
+    "existing-shared-zh-CN": 2362
+  },
+  "overlaySha256": "6c64f1791f8743831f13b3d89aea298c629f0ae0b18722fc4b80f274a9506310",
+  "converter": {
+    "project": "official OpenCC",
+    "version": "1.4.2",
+    "configuration": "tw2sp",
+    "runtimeDependency": false,
+    "wheelSha256": "4338dc5c7c6c7b42a847f3a8ecbbdfb2543e39d63bebcbe25f10e3c81b1c76fb"
+  },
+  "preservationChecks": [
+    "unique/exact complete native key set",
+    "nonempty values",
+    "placeholder tokens",
+    "numbers",
+    "displayed @commands"
+  ],
+  "manualLinguisticReviewOfAllKeys": false,
+  "sourceProvenance": "../../../packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+  "argumentPolicy": "Only system-owned catalog templates are converted offline; player/name/chat fields and inserted arguments stay opaque."
+}

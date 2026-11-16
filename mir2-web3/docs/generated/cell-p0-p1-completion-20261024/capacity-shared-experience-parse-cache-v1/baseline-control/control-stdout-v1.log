@@ -1,0 +1,13 @@
+
+running 2 tests
+test routing::tests::guild_kill_source_tests::guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt ... FAILED
+test routing::tests::guild_kill_source_tests::guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_success_packets ... FAILED
+
+failures:
+
+failures:
+    routing::tests::guild_kill_source_tests::guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt
+    routing::tests::guild_kill_source_tests::guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_success_packets
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 1251 filtered out; finished in 2.11s
+

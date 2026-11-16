@@ -28,7 +28,76 @@ assert.deepEqual(
 const loaded = { exports: {} };
 new Function("exports", "module", compiled.outputText)(loaded.exports, loaded);
 
-const { animationEventForEntity } = loaded.exports;
+const { animationEventForEntity, resolveCrystalEntityAnimationPoses } = loaded.exports;
+
+test("sends unrendered FishingUpdate edges once and waits for the matching owner projection", () => {
+  const entity = { objectId: "7", kind: "selfPlayer", x: 31, y: 44, direction: "Right", fishing: false };
+  const original = { active: false }, cast = { active: true };
+  const recorded = [];
+  const runtime = { resolveMir2EntityAnimationPoses(raw) {
+    const { worldKey, nowMs, entities } = JSON.parse(raw);
+    recorded.push(entities[0]);
+    return JSON.stringify({ worldKey, nowMs, poses: [] });
+  } };
+  function deliver(fishing, actor) {
+    resolveCrystalEntityAnimationPoses({ runtime, worldKey: "0:7", worldSeed: 7, now: 1000 + recorded.length,
+      selfAuthority: { owner: { playerObjectId: 7 }, fishing }, entities: [{ entity: actor, state: "standing" }] });
+    return recorded.at(-1);
+  }
+  assert.equal(deliver(true, entity).fishing, undefined);
+  const first = { ...entity, fishing: true, fishingEdges: [original, cast] };
+  assert.equal(deliver(true, first).fishingEdges, 1, "first accepted transition includes its known standing baseline");
+  assert.equal(deliver(false, first).fishing, undefined);
+  const recast = { ...first, fishingEdges: [...first.fishingEdges, { active: false }, { active: true }] };
+  const next = deliver(true, recast);
+  assert.deepEqual([next.fishingEdges, next.fishing], [1, true]);
+  assert.equal(deliver(true, recast).fishingEdges, undefined, "duplicate UI commit cannot replay the same cast");
+  assert.equal(deliver(true, { ...recast, dead: true }).fishing, undefined);
+});
+
+test("sends a live player movement hint only for the selected moving event", () => {
+  const player = { objectId: "7", kind: "selfPlayer", x: 31, y: 44, direction: "Right" };
+  const segment = { fromX: 30, fromY: 44, toX: 31, toY: 44,
+    animationState: "walking", startedAt: 1000, expiresAt: 1600 };
+  function input(entity, state, motionSnapshot, selfAuthority) {
+    let delivered;
+    const runtime = { resolveMir2EntityAnimationPoses(raw) {
+      const { worldKey, nowMs, entities } = JSON.parse(raw);
+      delivered = entities[0];
+      return JSON.stringify({ worldKey, nowMs, poses: [] });
+    } };
+    resolveCrystalEntityAnimationPoses({ runtime, worldKey: "0:7", worldSeed: 7, now: 1100, selfAuthority,
+      entities: [{ entity, state, motionSnapshot }] });
+    return delivered;
+  }
+  const packet = { ...player, movementAnimation: "walking", movementStartedAt: 1000, movementUntil: 1600 };
+  assert.equal(input(packet, "walking").movementActive, true);
+  assert.equal(input({ ...packet, kind: "player" }, "walking", segment).movementActive, true);
+  const source = { owner: { playerObjectId: 7 }, sourceKey: "0:7", revision: 1,
+    self: player, bootstrapKnown: false, animationKnown: false };
+  const ownerMotion = input(player, "walking", segment, source);
+  assert.equal(ownerMotion.movementActive, true);
+  assert.equal(ownerMotion.actionKnown, false);
+  const sourcedMotion = input(packet, "walking", segment, { ...source, animationKnown: true,
+    actionEvidence: { family: "walking", token: "action:1", receivedAtMs: 1000 } });
+  assert.equal(sourcedMotion.actionToken, "action:1:move:1000:walking");
+  assert.equal(sourcedMotion.movementActive, true);
+  assert.equal(input(player, "walking", { ...segment, fromX: 30.5 }).movementActive, true);
+  for (const entry of [
+    input({ ...player, kind: "player" }, "walking", segment),
+    input(player, "walking", { ...segment, expiresAt: 1100 }),
+    input(player, "walking", { ...segment, startedAt: 1101 }),
+    input(player, "walking", { ...segment, toX: 32 }),
+    input(player, "walking", { ...segment, fromX: 31 }),
+    input(player, "walking", { ...segment, fromX: 26 }),
+    input(player, "walking", { ...segment, fromX: Infinity }),
+    input({ ...packet, movementStartedAt: 1101 }, "walking", segment),
+    input({ ...packet, movementUntil: 1100 }, "walking"),
+    input({ ...packet, movementAnimation: "running" }, "walking", segment),
+    input({ ...packet, kind: "monster" }, "walking", segment),
+    input({ ...packet, attackAnimation: "spell", attackStartedAt: 1100 }, "attackRange", segment),
+  ]) assert.notEqual(entry.movementActive, true);
+});
 
 test("maps the death window to Die and the corpse state to Dead", () => {
   const monster = {

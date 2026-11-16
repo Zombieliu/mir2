@@ -1,0 +1,517 @@
+{
+  "schema": "mir2.r16.reconnect.verification.v1",
+  "createdAt": "2026-11-07T18:11:57.674Z",
+  "branch": "codex/windows-player-journey",
+  "baseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "sourcePins": {
+    "Cargo.lock": "4569349e470d448c645eeecef8fc6219d9e3e525d8c7d355a784ee694398291f",
+    "apps/gateway/Cargo.toml": "6fc8840d0ae4682d4ed5c9e949511bf20d882be63384793219045700c83f2b0f",
+    "apps/gateway/src/web.rs": "39efad29cedd60c372ea42f1f84c8084b315945db267d67e28b4028ead2a45d2",
+    "apps/gateway/src/session.rs": "c4f7a6dc2aca6297ca0fbbfec18401eda47c865d18dd9633a180eb3efc059baf",
+    "apps/gateway/src/web_transport.rs": "dc8c7ac981d937e252b9d9f9b0ab3f4563215deb652a4c15444bf96df536d496",
+    "apps/gateway/src/web_reconnect_handoff.rs": "860cd0ee203454c5ee80310d32fe00d2195288ea816473d398ccb50d6ba515cf",
+    "apps/gateway/src/web_reconnect_handoff_tests.rs": "943fbba9398149a4d678992b1078c96e8034c768b8ce3fd1fdc4bace6852fd4f",
+    "apps/gateway/src/web_reconnect_handoff_store_tests.rs": "3c2a07d076d74f1540a9d70bcf59b7feaad78a97d7f3e0430d7bfcf5ccf4bc61",
+    "apps/gateway/src/web_reconnect_persistence_wait_tests.rs": "44958acf058303cd190a0de77e7c9972801725358809cc103805b70621523ba1",
+    "apps/web/app/page.tsx": "2e9a1cf1e10b911d587483e11e01cfdcffdb3452dfec4b76171fc7998df119f2",
+    "apps/web/app/original-client-shell.tsx": "33e3e82f00bd9f2960ed70b89dc93e1ad4f9761b21b62dd6ce209b67b07cf521",
+    "apps/web/app/components/original-client-group-window.tsx": "95230d7ee5f10b82b1e829670a0b17fd51cfd349b5244ef2a35db5c4aed91cd7",
+    "apps/web/lib/group-operations.ts": "08fce78a67fef84c380bb4084aa052bfb86f7e9957f2104fbe1b9440ecc2c8ea",
+    "apps/web/lib/stage5-window-adapters.ts": "b1a2ad8270db7e6e9f5f206a754e12f6ca577eb48934851a09abb73c299318a5",
+    "apps/web/lib/use-window-keydown.ts": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce"
+  },
+  "previousGoalTurn": "progress: group hover and ordinary flows completed; legal close exposed persistence-before-retain race",
+  "scope": "Same Gateway process, WebSocket, authenticated ordinary Login/StartGame. No desktop control or wire/persistent schema change.",
+  "behavior": {
+    "serverOwnedLiveBindingBeforeTeardown": true,
+    "onlyEndedTransportCanBeWaitedOn": true,
+    "expectedRouteOwnerAndUniqueBindingToken": true,
+    "noGateHeldAcrossHandoffWait": true,
+    "readyOnlyAfterSavedThawedAndStored": true,
+    "tokenAndIdentityRevisionComparedUnderStoreCommitLock": true,
+    "sharedIdentityRecheckedAfterCapacityWait": true,
+    "failedCancelledExpiredOrCompetingRestoreDoesNotColdStart": true,
+    "newSocketBindingPublishedBeforePostRestoreAwait": true,
+    "originalRouteLeaseAdmissionRemains": true,
+    "originalJournalAndFencePolicyRemains": true,
+    "normalNativeResumeRegressionRemains": true
+  },
+  "tests": {
+    "newHandoff": 33,
+    "adjacentUnique": 71,
+    "combinedUnique": 103,
+    "failed": 0,
+    "ignored": 0,
+    "newTestGroups": [
+      "notification14",
+      "store-and-identity15",
+      "actual-persistence-and-route4"
+    ],
+    "fullLibraryExecuted": false,
+    "normalNativeResumeTests": 22,
+    "productionCandidateBuild": true,
+    "buildProfile": "dev/debug",
+    "productionReleaseBuild": false
+  },
+  "candidate": {
+    "file": "D:\\mir2-builds\\r16-reconnect-integration-20261107/mir2-gateway-r16-reconnect.exe",
+    "sha256": "e519dc7a6d0eb3f399fcb20c1145bb260418ec0c13e3d7ad44327610fc987c55",
+    "bytes": 144653824,
+    "changedSourcePinnedBeforeAndAfter": true,
+    "fullReleaseSourceClosurePinned": false
+  },
+  "liveBrowser": {
+    "backends": 2,
+    "checksPerBackend": 6,
+    "closeCode": 3001,
+    "realGatewayAndExistingOrdinaryRoles": true,
+    "modelCalls": 0,
+    "unsafeOrAdminCommands": false,
+    "perBackend": {
+      "startGameCommands": 3,
+      "automaticResumeStartGameCommands": 1,
+      "addMemberCommands": 3,
+      "delMemberCommands": 1,
+      "normalLogouts": 2,
+      "movementCombatAndItems": 0,
+      "pageErrors": 0,
+      "networkErrors": 0
+    },
+    "checkpointSaveMs": [
+      7412,
+      7728
+    ],
+    "handoffWaitMs": [
+      861,
+      1009
+    ],
+    "restoredSessions": 2,
+    "routeLeaseRejections": 0
+  },
+  "preservation": {
+    "schema": "mir2.r16.reconnect.preservation.v1",
+    "createdAt": "2026-11-07T18:02:03.244Z",
+    "sourceSnapshotSha256": "11b43ee45d8da81560f37e6bddb564688a15ebad93ff4dd36ea7b5d7c6dd29ef",
+    "sourceSnapshotImmutable": true,
+    "baselineAccounts": 4,
+    "afterAccounts": 4,
+    "noNewAccounts": true,
+    "accounts": [
+      {
+        "account": 1,
+        "metadataEqual": true
+      },
+      {
+        "account": 2,
+        "metadataEqual": true
+      },
+      {
+        "account": 3,
+        "metadataEqual": true
+      },
+      {
+        "account": 4,
+        "metadataEqual": true
+      }
+    ],
+    "roles": [
+      {
+        "role": "baseline-account-1-role-0",
+        "level": 7,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "differingFields": []
+      },
+      {
+        "role": "baseline-account-2-role-3",
+        "level": 1,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "differingFields": [
+          "default_npc_events",
+          "revision"
+        ]
+      },
+      {
+        "role": "original-level30",
+        "level": 30,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "differingFields": []
+      },
+      {
+        "role": "owner-level1",
+        "level": 1,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "differingFields": [
+          "default_npc_events",
+          "revision"
+        ]
+      },
+      {
+        "role": "baseline-account-4-role-4",
+        "level": 1,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "differingFields": [
+          "default_npc_events",
+          "revision"
+        ]
+      }
+    ],
+    "protectedComparisons": 130,
+    "originalLiveSourceFilesUsedReadOnly": true,
+    "originalLiveFileByteEqualityClaimed": false
+  },
+  "cleanup": {
+    "schema": "mir2.r16.reconnect.cleanup.v1",
+    "timeUtc": "2026-11-07T18:04:59.9215200Z",
+    "ownedPortsClosed": [
+      19252,
+      19282,
+      19352
+    ],
+    "originalListeners": [
+      {
+        "LocalPort": 19235,
+        "OwningProcess": 129280
+      },
+      {
+        "LocalPort": 19232,
+        "OwningProcess": 128444
+      },
+      {
+        "LocalPort": 19231,
+        "OwningProcess": 126788
+      }
+    ],
+    "originalWindowsExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+    "oldGatewayCandidateSha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+    "originalCopiesPreserved": true,
+    "desktopControlUsed": false,
+    "publicDeploy": false,
+    "ownServicesGracefullyStopped": true
+  },
+  "failedPreparations": [
+    {
+      "artifact": "reconnect-check-initial-failed.log",
+      "scope": "compile",
+      "reason": "TransportSignal was moved into the reader; new binding uses its exact clone"
+    },
+    {
+      "artifact": "reconnect-tests-initial-failed.log",
+      "scope": "test fixture",
+      "reason": "Fixed repeated-byte test MAC did not meet existing minimum diversity; normal protection retained"
+    },
+    {
+      "artifact": "reconnect-tests-length-failed.log",
+      "scope": "test fixture compile",
+      "reason": "The generated fixed test key needed an explicit array length"
+    },
+    {
+      "artifact": "reconnect-tests-capacity-fixture-failed.log",
+      "scope": "test fixture compile",
+      "reason": "Capacity API receiver requires Arc; fixture corrected"
+    },
+    {
+      "scope": "test launcher",
+      "reason": "Windows backslashes inserted into generated JS caused ENOENT before Gateway startup; path generated as a quoted forward-slash JS literal, no product or private data changed"
+    }
+  ],
+  "openWork": [
+    "Actual Native window/cross-client and Native credential-first recovery during pending persistence are not qualified by ordinary Login/StartGame browser cases",
+    "Cross-Gateway/TCP resume is not implemented by this process-local WebSocket handoff store",
+    "Group shared failure ACK/global social budget, trade, Alo, cold-cache/size/release gates and human acceptance remain"
+  ],
+  "candidate100": false,
+  "humanAccepted": false,
+  "publicDeploy": false,
+  "unrelatedWorkingTreeAndOriginalCopiesPreserved": true,
+  "artifactPins": {
+    "reconnect-browser-webgl.json": {
+      "sha256": "533aa98df58955ce686cfa17f2e63851e96532765160224c338381f6363c3c32",
+      "bytes": 255619
+    },
+    "reconnect-webgl-party.png": {
+      "sha256": "f7faee6183b10978665b8ab95917ee97058b903e11fad703ba13b18e1c080866",
+      "bytes": 1386959
+    },
+    "reconnect-webgl-bag.png": {
+      "sha256": "c1e7d25f49ccb0ad9ce36e101fa76eeaefacef285324da224e960cf73e7d4d19",
+      "bytes": 1334122
+    },
+    "reconnect-browser-webgpu.json": {
+      "sha256": "b9410631781dfa4a21ad26d4bde05af588fc21ca041a3e984b47c9e9427ec1e2",
+      "bytes": 255545
+    },
+    "reconnect-webgpu-party.png": {
+      "sha256": "cf6a38bf98f88d5fd173df5de1e970780312386fe5ca645a29c9ba47264ab0c2",
+      "bytes": 1384876
+    },
+    "reconnect-webgpu-bag.png": {
+      "sha256": "185710948c9225a94397f171573961d8476af43588c4e98f8a34fad6d59123a3",
+      "bytes": 1335692
+    },
+    "reconnect-candidate-build.json": {
+      "sha256": "1bdb0d2f43da7db84b3c777ad08110b20b26d548f3cb60f96a10278683cf2b55",
+      "bytes": 1625
+    },
+    "reconnect-candidate-build.log": {
+      "sha256": "b847b998c53d60f5cd0f7489b54b53c5b0390b20b96fe69d746cc8be58d711dd",
+      "bytes": 60903
+    },
+    "reconnect-candidate-build.d": {
+      "sha256": "e39c3b06fa138dd1eb091ad6aa9bf051358f733524a2b1bebcc2c49983adc64d",
+      "bytes": 43165
+    },
+    "reconnect-source-before.json": {
+      "sha256": "0ecfd5ee15f97e67affbde500fa46f0277beeedfe554edd29cac91bcd7feb271",
+      "bytes": 1107
+    },
+    "reconnect-test-summary.json": {
+      "sha256": "df78e4917d73950c1743d71f2cb64278cc9c09fcb77f75dbd6a36feb9276f457",
+      "bytes": 10684
+    },
+    "reconnect-handoff-qualified.log": {
+      "sha256": "781d9dfe757bc29b8b79add50db1c68134f3d8fe98301b465c01518c270f7dad",
+      "bytes": 62484
+    },
+    "reconnect-regression-result.json": {
+      "sha256": "d8cdc501b7aaaf971052ea46d4e44a17a8983d8d79614e47aafc6cf6e11d3ccb",
+      "bytes": 7988
+    },
+    "reconnect-preservation.json": {
+      "sha256": "8a94e4c37a0ee42a39a4e68d7322de3b47ae2666d3c1e411669072ec048a0a29",
+      "bytes": 6546
+    },
+    "reconnect-lifecycle.json": {
+      "sha256": "1a3e500efc101b4c1967ed0ac48ae4bb902531e21c70dc720ea43f840647c102",
+      "bytes": 3315
+    },
+    "reconnect-cleanup.json": {
+      "sha256": "bbe7ff38a337f1ce4ea4b7e107135c373bc3db597521b6b0248dd5520b67925d",
+      "bytes": 747
+    },
+    "reconnect-check-initial-failed.log": {
+      "sha256": "a0eec74372cf96ca73d7f6e9f5f20b80de089192676fafd9d52f5fe972ae82a0",
+      "bytes": 66850
+    },
+    "reconnect-tests-initial-failed.log": {
+      "sha256": "e8c62b578984990c8e5780b1977383b89201965d8be4c65de47d0bd3acef6a81",
+      "bytes": 73299
+    },
+    "reconnect-tests-length-failed.log": {
+      "sha256": "8ee8e45b9c5a0655401a1701f7641aeac8e608db9364c0feeb835bf03309cc98",
+      "bytes": 57680
+    },
+    "reconnect-tests-capacity-fixture-failed.log": {
+      "sha256": "89fcfa0e8bd9ccd3f134c9ae670ead62bdf758bc718352fc7af1d3013f11caf4",
+      "bytes": 57763
+    },
+    "reconnect-regression-native_resume.log": {
+      "sha256": "ef4bc0365d65aabbf86f388c91c990b5f1bf947621009c573d4ab2ba0317cbcd",
+      "bytes": 2227
+    },
+    "reconnect-regression-web_transport_close_tests.log": {
+      "sha256": "72a72f7a7de32fe1d14bf4516ad20c08066e5a59c27084c27959cd1218c0ba51",
+      "bytes": 531
+    },
+    "reconnect-regression-web_explicit_leave_route_tests.log": {
+      "sha256": "72959298d38787ddfe964d1ad55303e278f215964577ec72385b2d43ec993587",
+      "bytes": 856
+    },
+    "reconnect-regression-abnormal_teardown_persistence_tests.log": {
+      "sha256": "2364a328c49be4274a43f4675c0f72da31d6f73538e077099940de3a9ea31e8a",
+      "bytes": 785
+    },
+    "reconnect-regression-web_auth_peer_bucket_tests.log": {
+      "sha256": "2bfdaa8ad29bd57be9680c1f9134fef141c864face1e9254eb311b45043062c8",
+      "bytes": 586
+    },
+    "reconnect-regression-reconnect_session_store.log": {
+      "sha256": "37a389fb9b4b5557f87a1d0021d0b4588522c7f3b95a17276283760882d65af2",
+      "bytes": 373
+    },
+    "reconnect-regression-capacity.log": {
+      "sha256": "3343782d41fd31ebfb83571cf4edce94132a89a64924c26bf1dd62d23455a627",
+      "bytes": 2901
+    },
+    "reconnect-browser-source.json": {
+      "sha256": "e0a3d7c940884db657f988edfaad47c9886da1b9cfdfe841d52ee8ac07c10260",
+      "bytes": 1072
+    },
+    "reconnect-tools/build-candidate.mjs": {
+      "sha256": "ce7b2716a237d89f405709335fc82324130742b9b0e1ecad62afbcbb0cea89dd",
+      "bytes": 2539
+    },
+    "reconnect-tools/regression.mjs": {
+      "sha256": "6757233ccecd6afc899be2d958572aec3adcb51147a580ca0f3b362800ef8732",
+      "bytes": 1631
+    },
+    "reconnect-tools/prepare-browser.mjs": {
+      "sha256": "789c5b797743b1ab6093308607b8e0440fd82d8596eac9bb440a3de0ee37b95a",
+      "bytes": 4995
+    },
+    "reconnect-tools/inspect-result.mjs": {
+      "sha256": "68dd26bcbe9ec14a9ca68fc3292d8c7336553141eb7bab84a918ad5af0c7afb0",
+      "bytes": 5190
+    },
+    "reconnect-tools/fix-launch-path.mjs": {
+      "sha256": "e3030018b703ec5ae670e8904cf99d571bbfbdadc88a1eaf831fcb95efa667db",
+      "bytes": 696
+    },
+    "reconnect-tools/launch-realm.mjs": {
+      "sha256": "549909eff0d9ab066d9c1854c7ccf26a51c639cde7718b972380e12b390c5f72",
+      "bytes": 2608
+    },
+    "reconnect-tools/launch-web.mjs": {
+      "sha256": "7729e905e063ec7b519e2153992bcc05166b13618b4e54b2564f32f0d05f5f4f",
+      "bytes": 1419
+    },
+    "reconnect-tools/browser.mjs": {
+      "sha256": "e42da383c99649eb127d21c071ec41b65ed3514d819743bfcf0a3cd12d6c5efb",
+      "bytes": 17770
+    }
+  }
+}

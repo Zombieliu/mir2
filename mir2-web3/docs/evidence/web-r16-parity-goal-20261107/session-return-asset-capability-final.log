@@ -1,0 +1,155 @@
+TAP version 13
+# Subtest: an index retained by a finite package does not advertise absent full-pack shards
+ok 1 - an index retained by a finite package does not advertise absent full-pack shards
+  ---
+  duration_ms: 0.9768
+  type: 'test'
+  ...
+# Subtest: local index presence cannot override a disabled or unverified release
+ok 2 - local index presence cannot override a disabled or unverified release
+  ---
+  duration_ms: 0.6757
+  type: 'test'
+  ...
+# Subtest: a publisher-verified pinned release remains available without local payloads
+ok 3 - a publisher-verified pinned release remains available without local payloads
+  ---
+  duration_ms: 0.8338
+  type: 'test'
+  ...
+# Subtest: a local index cannot supply missing or malformed publisher verification pins
+ok 4 - a local index cannot supply missing or malformed publisher verification pins
+  ---
+  duration_ms: 0.4052
+  type: 'test'
+  ...
+# Subtest: map-atlas verification remains independent of a retained full-pack index
+ok 5 - map-atlas verification remains independent of a retained full-pack index
+  ---
+  duration_ms: 0.2784
+  type: 'test'
+  ...
+# Subtest: a full pack is enabled only by a verified content-addressed release capability
+ok 6 - a full pack is enabled only by a verified content-addressed release capability
+  ---
+  duration_ms: 0.9291
+  type: 'test'
+  ...
+# Subtest: a map atlas is enabled only when its verified manifest path matches its content hash
+ok 7 - a map atlas is enabled only when its verified manifest path matches its content hash
+  ---
+  duration_ms: 0.2475
+  type: 'test'
+  ...
+# Subtest: Bevy runtime URLs use an immutable version path instead of a cache-busting query
+ok 8 - Bevy runtime URLs use an immutable version path instead of a cache-busting query
+  ---
+  duration_ms: 0.2611
+  type: 'test'
+  ...
+# Subtest: R2 upload Worker paths cannot escape the configured origin
+ok 9 - R2 upload Worker paths cannot escape the configured origin
+  ---
+  duration_ms: 0.3691
+  type: 'test'
+  ...
+# Subtest: R2 upload Worker persists the private gzip representation header
+ok 10 - R2 upload Worker persists the private gzip representation header
+  ---
+  duration_ms: 11.7793
+  type: 'test'
+  ...
+# Subtest: immutable overlay releases fall back only to a pinned Mir2 release prefix
+ok 11 - immutable overlay releases fall back only to a pinned Mir2 release prefix
+  ---
+  duration_ms: 0.2679
+  type: 'test'
+  ...
+# Subtest: public asset CDN reads an overlay object first and then its pinned base
+ok 12 - public asset CDN reads an overlay object first and then its pinned base
+  ---
+  duration_ms: 2.4722
+  type: 'test'
+  ...
+# Subtest: production release and Next routing expose the pinned capability and immutable runtime
+ok 13 - production release and Next routing expose the pinned capability and immutable runtime
+  ---
+  duration_ms: 55.7498
+  type: 'test'
+  ...
+# Subtest: maps exported asset URLs back to Crystal library/frame identities
+ok 14 - maps exported asset URLs back to Crystal library/frame identities
+  ---
+  duration_ms: 0.7515
+  type: 'test'
+  ...
+# Subtest: builds a lazy multi-page Bevy snapshot with stable CAS page keys
+ok 15 - builds a lazy multi-page Bevy snapshot with stable CAS page keys
+  ---
+  duration_ms: 0.6389
+  type: 'test'
+  ...
+# Subtest: returns null instead of a partial atlas for dimension or frame misses
+ok 16 - returns null instead of a partial atlas for dimension or frame misses
+  ---
+  duration_ms: 0.2217
+  type: 'test'
+  ...
+# crystal full-pack capability tests passed
+# Subtest: scripts\\test-crystal-full-pack-capability.mjs
+ok 4 - scripts\\test-crystal-full-pack-capability.mjs
+  ---
+  duration_ms: 375.1552
+  type: 'test'
+  ...
+# Subtest: normalizes a library key and resolves a drawable image page plus rect
+ok 18 - normalizes a library key and resolves a drawable image page plus rect
+  ---
+  duration_ms: 2.7662
+  type: 'test'
+  ...
+# Subtest: preserves explicit noDraw frame slots without resolving a texture
+ok 19 - preserves explicit noDraw frame slots without resolving a texture
+  ---
+  duration_ms: 0.6043
+  type: 'test'
+  ...
+# Subtest: resolves an image and mask from independent pages
+ok 20 - resolves an image and mask from independent pages
+  ---
+  duration_ms: 0.6279
+  type: 'test'
+  ...
+# Subtest: rejects root and shard count corruption
+ok 21 - rejects root and shard count corruption
+  ---
+  duration_ms: 0.6293
+  type: 'test'
+  ...
+# Subtest: rejects source hash and shard URL mismatches against the root record
+ok 22 - rejects source hash and shard URL mismatches against the root record
+  ---
+  duration_ms: 1.3477
+  type: 'test'
+  ...
+# Subtest: rejects missing cross-references and duplicate rect definitions
+ok 23 - rejects missing cross-references and duplicate rect definitions
+  ---
+  duration_ms: 0.8032
+  type: 'test'
+  ...
+# Subtest: caches root and shard fetch promises and reset starts a clean generation
+ok 24 - caches root and shard fetch promises and reset starts a clean generation
+  ---
+  duration_ms: 1.1376
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 749.7299

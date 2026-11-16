@@ -1,0 +1,3834 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792873511986-56c2dbe6",
+  "actor": "Lc7785700",
+  "home": {
+    "x": 252,
+    "y": 671
+  },
+  "window": {
+    "previousWindowEmittedAtMs": 1792873816777,
+    "estimatedActiveStartAtMs": 1792873816778.032,
+    "failureEmittedAtMs": 1792873877264,
+    "rule": "Use prior same-actor window emission as a diagnostic wall boundary; true continuous accumulation uses monotonic time. Full actions/ACKs retained for independent reconciliation."
+  },
+  "counts": {
+    "moves": 77,
+    "walk": 39,
+    "run": 38,
+    "walkInsideHome": 19,
+    "walkOutsideHome": 20,
+    "walkWithRecentMovePriming": 36,
+    "originalBlocked": 0
+  },
+  "byPhase": [
+    {
+      "phase": "stage-2",
+      "moves": 42,
+      "walk": 24,
+      "run": 18,
+      "walkInsideHome": 12,
+      "walkOutsideHome": 12,
+      "walkWithRecentMovePriming": 22,
+      "originalBlocked": 0
+    },
+    {
+      "phase": "ramp",
+      "moves": 35,
+      "walk": 15,
+      "run": 20,
+      "walkInsideHome": 7,
+      "walkOutsideHome": 8,
+      "walkWithRecentMovePriming": 14,
+      "originalBlocked": 0
+    }
+  ],
+  "precedingMovements": [
+    {
+      "type": "action",
+      "at": 1792873813643,
+      "phase": "stage-2",
+      "actor": "Lc7785700",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 315405.2522,
+      "sentAtMs": 315411.691,
+      "plannedTarget": {
+        "x": 254,
+        "y": 673
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "direction": "Left",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.40270000003511086,
+      "plannedLatencyMs": 6.84150000003865,
+      "line": 2767
+    },
+    {
+      "type": "action",
+      "at": 1792873814390,
+      "phase": "stage-2",
+      "actor": "Lc7785700",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 316155.2522,
+      "sentAtMs": 316157.4248,
+      "plannedTarget": {
+        "x": 252,
+        "y": 673
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.44479999999748543,
+      "plannedLatencyMs": 2.6173999999882653,
+      "line": 2774
+    },
+    {
+      "type": "action",
+      "at": 1792873815162,
+      "phase": "stage-2",
+      "actor": "Lc7785700",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 316905.2522,
+      "sentAtMs": 316929.9725,
+      "plannedTarget": {
+        "x": 252,
+        "y": 671
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.4459000000497326,
+      "plannedLatencyMs": 25.166200000036042,
+      "line": 2783
+    },
+    {
+      "type": "action",
+      "at": 1792873815906,
+      "phase": "stage-2",
+      "actor": "Lc7785700",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 317655.2522,
+      "sentAtMs": 317673.8355,
+      "plannedTarget": {
+        "x": 252,
+        "y": 673
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "direction": "Down",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5082999999867752,
+      "plannedLatencyMs": 19.091599999985192,
+      "line": 2790
+    },
+    {
+      "type": "action",
+      "at": 1792873816652,
+      "phase": "stage-2",
+      "actor": "Lc7785700",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 318405.2522,
+      "sentAtMs": 318419.4803,
+      "plannedTarget": {
+        "x": 252,
+        "y": 671
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5090000000200234,
+      "plannedLatencyMs": 14.737100000027567,
+      "line": 2796
+    }
+  ],
+  "auxiliary": [
+    {
+      "kind": "turn",
+      "at": 1792873818143,
+      "sentAtMs": 319910.0627
+    },
+    {
+      "kind": "chat",
+      "at": 1792873824159,
+      "sentAtMs": 325926.2349
+    },
+    {
+      "kind": "chat",
+      "at": 1792873854166,
+      "sentAtMs": 355933.7648
+    }
+  ],
+  "observedPlayerOverlap": [],
+  "peer01OwnerBounds": {
+    "minX": 256,
+    "maxX": 258,
+    "minY": 671,
+    "maxY": 673
+  },
+  "movements": [
+    {
+      "at": 1792873817398,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 319166.2854,
+      "scheduledAtMs": 319155.2522,
+      "latencyMs": 0.4340000000083819,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3316,
+      "receiptMonoMs": 319166.7194,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.8050999999978,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873816778,
+        "monotonicMs": 318576.3822,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873818890,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 320657.8127,
+      "scheduledAtMs": 320655.2522,
+      "latencyMs": 0.499599999981001,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 253,
+        "y": 670
+      },
+      "actual": {
+        "x": 253,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3324,
+      "receiptMonoMs": 320658.3123,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 1491.527300000016,
+      "theoreticalPrimedByLastMovement": false,
+      "interveningAuxiliary": [
+        {
+          "kind": "turn",
+          "at": 1792873818143,
+          "sentAtMs": 319910.0627
+        }
+      ],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873818267,
+        "monotonicMs": 320065.8243,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873819663,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 321431.6871,
+      "scheduledAtMs": 321405.2522,
+      "latencyMs": 0.4649000000208616,
+      "origin": {
+        "x": 253,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3328,
+      "receiptMonoMs": 321432.152,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 773.8743999999715,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873819014,
+        "monotonicMs": 320812.7475,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873820407,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 322174.8743,
+      "scheduledAtMs": 322155.2522,
+      "latencyMs": 0.4473999999463558,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3334,
+      "receiptMonoMs": 322175.3217,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 743.187200000044,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873819790,
+        "monotonicMs": 321588.5759,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873821151,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 322918.6279,
+      "scheduledAtMs": 322905.2522,
+      "latencyMs": 0.4646000000066124,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3337,
+      "receiptMonoMs": 322919.0925,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.7535999999964,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873820532,
+        "monotonicMs": 322330.2774,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873821895,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 323663.883,
+      "scheduledAtMs": 323655.2522,
+      "latencyMs": 0.4232000000192784,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3345,
+      "receiptMonoMs": 323664.3062,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.2550999999512,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873820532,
+        "monotonicMs": 322330.2774,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873822640,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 324408.6048,
+      "scheduledAtMs": 324405.2522,
+      "latencyMs": 0.6684000000241213,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3352,
+      "receiptMonoMs": 324409.2732,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.7217999999993,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873822021,
+        "monotonicMs": 323819.0876,
+        "position": {
+          "x": 258,
+          "y": 672
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873823416,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 325184.1618,
+      "scheduledAtMs": 325155.2522,
+      "latencyMs": 0.5041000000201166,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3358,
+      "receiptMonoMs": 325184.6659,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 775.5570000000298,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873822766,
+        "monotonicMs": 324564.4029,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873824901,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 326669.5799,
+      "scheduledAtMs": 326655.2522,
+      "latencyMs": 0.43449999997392297,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 672
+      },
+      "actual": {
+        "x": 252,
+        "y": 672
+      },
+      "movedCells": 1,
+      "receiptSequence": 3376,
+      "receiptMonoMs": 326670.0144,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 1485.4181000000099,
+      "theoreticalPrimedByLastMovement": false,
+      "interveningAuxiliary": [
+        {
+          "kind": "chat",
+          "at": 1792873824159,
+          "sentAtMs": 325926.2349
+        }
+      ],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873824283,
+        "monotonicMs": 326081.031,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873825647,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 327415.1444,
+      "scheduledAtMs": 327405.2522,
+      "latencyMs": 0.4728999999933876,
+      "origin": {
+        "x": 252,
+        "y": 672
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3379,
+      "receiptMonoMs": 327415.6173,
+      "originInsideHome": true,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 745.5644999999786,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873825026,
+        "monotonicMs": 326824.5803,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873826390,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 328158.5315,
+      "scheduledAtMs": 328155.2522,
+      "latencyMs": 0.4113000000361353,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3387,
+      "receiptMonoMs": 328158.9428,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.3870999999926,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873825771,
+        "monotonicMs": 327569.7423,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873827164,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 328932.8778,
+      "scheduledAtMs": 328905.2522,
+      "latencyMs": 0.4519999999902211,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 2,
+      "receiptSequence": 3391,
+      "receiptMonoMs": 328933.3298,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 774.3463000000338,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873826515,
+        "monotonicMs": 328313.2891,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873827911,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 329679.4652,
+      "scheduledAtMs": 329655.2522,
+      "latencyMs": 0.5344000000040978,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3397,
+      "receiptMonoMs": 329679.9996,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 746.5873999999603,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873827258,
+        "monotonicMs": 329056.6007,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873828656,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 330422.5573,
+      "scheduledAtMs": 330405.2522,
+      "latencyMs": 0.520699999993667,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3401,
+      "receiptMonoMs": 330423.078,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.0921000000089,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873828036,
+        "monotonicMs": 329834.8928,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873829399,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 331167.475,
+      "scheduledAtMs": 331155.2522,
+      "latencyMs": 0.4680999999982305,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3408,
+      "receiptMonoMs": 331167.9431,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.9176999999909,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873828036,
+        "monotonicMs": 329834.8928,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873830143,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 331911.2859,
+      "scheduledAtMs": 331905.2522,
+      "latencyMs": 0.5155999999842606,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3416,
+      "receiptMonoMs": 331911.8015,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 743.8109000000404,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873829525,
+        "monotonicMs": 331323.0391,
+        "position": {
+          "x": 258,
+          "y": 672
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873830888,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 332656.8509,
+      "scheduledAtMs": 332655.2522,
+      "latencyMs": 0.49640000000363216,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3422,
+      "receiptMonoMs": 332657.3473,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 745.5650000000023,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873830269,
+        "monotonicMs": 332067.3709,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873831665,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 333431.6708,
+      "scheduledAtMs": 333405.2522,
+      "latencyMs": 0.47920000000158325,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3432,
+      "receiptMonoMs": 333432.15,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 774.8199000000022,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873831013,
+        "monotonicMs": 332811.4035,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873832410,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 334178.1538,
+      "scheduledAtMs": 334155.2522,
+      "latencyMs": 0.46170000004349276,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3440,
+      "receiptMonoMs": 334178.6155,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.4829999999492,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873831758,
+        "monotonicMs": 333556.954,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873833155,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 334922.5685,
+      "scheduledAtMs": 334905.2522,
+      "latencyMs": 0.5770999999949709,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 2,
+      "receiptSequence": 3444,
+      "receiptMonoMs": 334923.1456,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.414700000023,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873832535,
+        "monotonicMs": 334333.4164,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873833899,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 335666.7601,
+      "scheduledAtMs": 335655.2522,
+      "latencyMs": 0.5166999999783002,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3449,
+      "receiptMonoMs": 335667.2768,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.1916000000201,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873833280,
+        "monotonicMs": 335077.9895,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873834646,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 336413.037,
+      "scheduledAtMs": 336405.2522,
+      "latencyMs": 0.42619999998714775,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3455,
+      "receiptMonoMs": 336413.4632,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.2768999999971,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873834024,
+        "monotonicMs": 335822.2935,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873835391,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 337159.3161,
+      "scheduledAtMs": 337155.2522,
+      "latencyMs": 0.44239999999990687,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3464,
+      "receiptMonoMs": 337159.7585,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.2790999999852,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873834771,
+        "monotonicMs": 336569.8116,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873836163,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 337931.8819,
+      "scheduledAtMs": 337905.2522,
+      "latencyMs": 0.5945000000065193,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3472,
+      "receiptMonoMs": 337932.4764,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 772.5657999999821,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873835515,
+        "monotonicMs": 337313.0035,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873836907,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 338675.1992,
+      "scheduledAtMs": 338655.2522,
+      "latencyMs": 0.5354000000515953,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3478,
+      "receiptMonoMs": 338675.7346,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 743.3172999999952,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873836257,
+        "monotonicMs": 338055.4693,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873837652,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 339419.3465,
+      "scheduledAtMs": 339405.2522,
+      "latencyMs": 0.44880000001285225,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3488,
+      "receiptMonoMs": 339419.7953,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.1473000000115,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873837032,
+        "monotonicMs": 338830.4319,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873838396,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 340165.3992,
+      "scheduledAtMs": 340155.2522,
+      "latencyMs": 0.44839999999385327,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3496,
+      "receiptMonoMs": 340165.8476,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.0527000000002,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873837776,
+        "monotonicMs": 339574.7309,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873839142,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 340910.2304,
+      "scheduledAtMs": 340905.2522,
+      "latencyMs": 0.5445000000181608,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 2,
+      "receiptSequence": 3501,
+      "receiptMonoMs": 340910.7749,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.8312000000151,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873838522,
+        "monotonicMs": 340320.0041,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873839889,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 341657.731,
+      "scheduledAtMs": 341655.2522,
+      "latencyMs": 0.4785999999730848,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3506,
+      "receiptMonoMs": 341658.2096,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 747.5006000000285,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873839267,
+        "monotonicMs": 341065.5607,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873840665,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 342432.1539,
+      "scheduledAtMs": 342405.2522,
+      "latencyMs": 0.5561000000452623,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3510,
+      "receiptMonoMs": 342432.71,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 774.4228999999468,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873840014,
+        "monotonicMs": 341812.2734,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873841412,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 343180.5292,
+      "scheduledAtMs": 343155.2522,
+      "latencyMs": 0.49469999998109415,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3517,
+      "receiptMonoMs": 343181.0239,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 748.3753000000142,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873840759,
+        "monotonicMs": 342557.893,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873842158,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 343926.5353,
+      "scheduledAtMs": 343905.2522,
+      "latencyMs": 0.498699999996461,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3525,
+      "receiptMonoMs": 343927.034,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 746.0060999999987,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873841537,
+        "monotonicMs": 343335.1855,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873842899,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 344667.5838,
+      "scheduledAtMs": 344655.2522,
+      "latencyMs": 0.4405999999726191,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3531,
+      "receiptMonoMs": 344668.0244,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 741.0485000000335,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873842281,
+        "monotonicMs": 344079.9483,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873843642,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 345409.3495,
+      "scheduledAtMs": 345405.2522,
+      "latencyMs": 0.4100999999791384,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3541,
+      "receiptMonoMs": 345409.7596,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 741.765699999989,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873843023,
+        "monotonicMs": 344821.3267,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873844419,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 346187.4847,
+      "scheduledAtMs": 346155.2522,
+      "latencyMs": 0.40290000004461035,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3550,
+      "receiptMonoMs": 346187.8876,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 778.1351999999606,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873843768,
+        "monotonicMs": 345565.9932,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873845162,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 346930.1667,
+      "scheduledAtMs": 346905.2522,
+      "latencyMs": 0.4790999999968335,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 2,
+      "receiptSequence": 3556,
+      "receiptMonoMs": 346930.6458,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 742.6820000000298,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873844512,
+        "monotonicMs": 346310.7108,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873845905,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 347674.4619,
+      "scheduledAtMs": 347655.2522,
+      "latencyMs": 0.4746000000159256,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3562,
+      "receiptMonoMs": 347674.9365,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.2951999999932,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873845287,
+        "monotonicMs": 347085.0639,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873846652,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 348419.2947,
+      "scheduledAtMs": 348405.2522,
+      "latencyMs": 0.5010999999940395,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3566,
+      "receiptMonoMs": 348419.7958,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.8328000000329,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873846029,
+        "monotonicMs": 347827.8405,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873847395,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 349163.2571,
+      "scheduledAtMs": 349155.2522,
+      "latencyMs": 0.41690000001108274,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3573,
+      "receiptMonoMs": 349163.674,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.9623999999603,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873846777,
+        "monotonicMs": 348575.0858,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873848140,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 349908.228,
+      "scheduledAtMs": 349905.2522,
+      "latencyMs": 0.48599999997531995,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3581,
+      "receiptMonoMs": 349908.714,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.9709000000148,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873847523,
+        "monotonicMs": 349321.4074,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873848916,
+      "phase": "stage-2",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 350684.6677,
+      "scheduledAtMs": 350655.2522,
+      "latencyMs": 0.4944000000250526,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3587,
+      "receiptMonoMs": 350685.1621,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 776.4396999999881,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873848264,
+        "monotonicMs": 350062.5425,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873849663,
+      "phase": "stage-2",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 351430.3144,
+      "scheduledAtMs": 351405.2522,
+      "latencyMs": 0.4576000000233762,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3597,
+      "receiptMonoMs": 351430.772,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.646699999983,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873849010,
+        "monotonicMs": 350808.9234,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873850407,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 352176.3156,
+      "scheduledAtMs": 352155.2522,
+      "latencyMs": 0.38150000001769513,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3605,
+      "receiptMonoMs": 352176.6971,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.0011999999988,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873849757,
+        "monotonicMs": 351555.1045,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873851138,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 352915.9938,
+      "scheduledAtMs": 352905.2522,
+      "latencyMs": 0.612299999978859,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 2,
+      "receiptSequence": 3609,
+      "receiptMonoMs": 352916.6061,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 739.6782000000239,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873850532,
+        "monotonicMs": 352330.4561,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873851900,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 353668.7605,
+      "scheduledAtMs": 353655.2522,
+      "latencyMs": 0.49620000005234033,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3614,
+      "receiptMonoMs": 353669.2567,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 752.7666999999783,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873851278,
+        "monotonicMs": 353076.4953,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873852645,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 354412.9657,
+      "scheduledAtMs": 354405.2522,
+      "latencyMs": 0.5830999999889173,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3619,
+      "receiptMonoMs": 354413.5488,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.2052000000258,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873852025,
+        "monotonicMs": 353823.3579,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873853390,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 355158.7348,
+      "scheduledAtMs": 355155.2522,
+      "latencyMs": 0.5260000000125729,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3626,
+      "receiptMonoMs": 355159.2608,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.7690999999759,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873852770,
+        "monotonicMs": 354568.637,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873854912,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 356680.7381,
+      "scheduledAtMs": 356655.2522,
+      "latencyMs": 0.6297999999951571,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 253,
+        "y": 674
+      },
+      "actual": {
+        "x": 253,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3642,
+      "receiptMonoMs": 356681.3679,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 1522.0033000000403,
+      "theoreticalPrimedByLastMovement": false,
+      "interveningAuxiliary": [
+        {
+          "kind": "chat",
+          "at": 1792873854166,
+          "sentAtMs": 355933.7648
+        }
+      ],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873854261,
+        "monotonicMs": 356058.9907,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873855655,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 357423.1783,
+      "scheduledAtMs": 357405.2522,
+      "latencyMs": 0.5084999999962747,
+      "origin": {
+        "x": 253,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3646,
+      "receiptMonoMs": 357423.6868,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 742.4402000000118,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873855036,
+        "monotonicMs": 356834.7667,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873856402,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 358170.5327,
+      "scheduledAtMs": 358155.2522,
+      "latencyMs": 0.4648000000161119,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3651,
+      "receiptMonoMs": 358170.9975,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 747.3543999999529,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873855781,
+        "monotonicMs": 357579.2108,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873857147,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 358914.3137,
+      "scheduledAtMs": 358905.2522,
+      "latencyMs": 0.4822000000276603,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3661,
+      "receiptMonoMs": 358914.7959,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.7810000000172,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873856526,
+        "monotonicMs": 358324.7691,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873857893,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 359660.6016,
+      "scheduledAtMs": 359655.2522,
+      "latencyMs": 0.4743000000016764,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3669,
+      "receiptMonoMs": 359661.0759,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.2878999999957,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873857275,
+        "monotonicMs": 359073.6848,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873858638,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 360405.688,
+      "scheduledAtMs": 360405.2522,
+      "latencyMs": 0.4554999999818392,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3673,
+      "receiptMonoMs": 360406.1435,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.0864000000292,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873858018,
+        "monotonicMs": 359816.8112,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873859415,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 361181.6572,
+      "scheduledAtMs": 361155.2522,
+      "latencyMs": 0.601299999980256,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3680,
+      "receiptMonoMs": 361182.2585,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 775.9691999999923,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873858762,
+        "monotonicMs": 360560.9549,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873860159,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 361926.6054,
+      "scheduledAtMs": 361905.2522,
+      "latencyMs": 0.5141999999759719,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3687,
+      "receiptMonoMs": 361927.1196,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.9481999999844,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873858762,
+        "monotonicMs": 360560.9549,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873860904,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 362672.1324,
+      "scheduledAtMs": 362655.2522,
+      "latencyMs": 0.779500000004191,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3694,
+      "receiptMonoMs": 362672.9119,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.5270000000019,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873860284,
+        "monotonicMs": 362082.8845,
+        "position": {
+          "x": 258,
+          "y": 672
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873861666,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 363432.8844,
+      "scheduledAtMs": 363405.2522,
+      "latencyMs": 0.4972000000416301,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3702,
+      "receiptMonoMs": 363433.3816,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 760.7519999999786,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873861043,
+        "monotonicMs": 362840.6837,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873862411,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 364178.3155,
+      "scheduledAtMs": 364155.2522,
+      "latencyMs": 0.5211999999592081,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3707,
+      "receiptMonoMs": 364178.8367,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.4311000000453,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873861760,
+        "monotonicMs": 363557.9568,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873863157,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 364924.2289,
+      "scheduledAtMs": 364905.2522,
+      "latencyMs": 0.47279999998863786,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3712,
+      "receiptMonoMs": 364924.7017,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.9133999999613,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873862535,
+        "monotonicMs": 364333.554,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873863900,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 365667.6813,
+      "scheduledAtMs": 365655.2522,
+      "latencyMs": 0.646999999997206,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3717,
+      "receiptMonoMs": 365668.3283,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.4524000000092,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873863281,
+        "monotonicMs": 365079.3297,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873864645,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 366412.7665,
+      "scheduledAtMs": 366405.2522,
+      "latencyMs": 0.5393999999505468,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3724,
+      "receiptMonoMs": 366413.3059,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 745.0852000000305,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873864024,
+        "monotonicMs": 365822.456,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873865391,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 367159.4405,
+      "scheduledAtMs": 367155.2522,
+      "latencyMs": 0.6124999999883585,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 670
+      },
+      "actual": {
+        "x": 252,
+        "y": 670
+      },
+      "movedCells": 1,
+      "receiptSequence": 3735,
+      "receiptMonoMs": 367160.053,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 746.6739999999991,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873864770,
+        "monotonicMs": 366568.2256,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873866169,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 367946.2402,
+      "scheduledAtMs": 367905.2522,
+      "latencyMs": 2.935799999977462,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 670
+      },
+      "actual": {
+        "x": 254,
+        "y": 670
+      },
+      "movedCells": 2,
+      "receiptSequence": 3739,
+      "receiptMonoMs": 367949.176,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 786.7996999999741,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873865516,
+        "monotonicMs": 367313.6519,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873866898,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 368666.208,
+      "scheduledAtMs": 368655.2522,
+      "latencyMs": 0.4884000000311062,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3744,
+      "receiptMonoMs": 368666.6964,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 719.967799999984,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873866280,
+        "monotonicMs": 368077.9717,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873867643,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 369410.2122,
+      "scheduledAtMs": 369405.2522,
+      "latencyMs": 0.5065000000176951,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3748,
+      "receiptMonoMs": 369410.7187,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.0042000000249,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873867023,
+        "monotonicMs": 368821.6228,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873868389,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 370157.3491,
+      "scheduledAtMs": 370155.2522,
+      "latencyMs": 0.480600000009872,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3755,
+      "receiptMonoMs": 370157.8297,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 747.1368999999831,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873867769,
+        "monotonicMs": 369566.8529,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873869165,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 370933.2132,
+      "scheduledAtMs": 370905.2522,
+      "latencyMs": 0.584099999978207,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3763,
+      "receiptMonoMs": 370933.7973,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 775.8641000000061,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873868514,
+        "monotonicMs": 370311.9393,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873869910,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 371678.6507,
+      "scheduledAtMs": 371655.2522,
+      "latencyMs": 0.4591999999829568,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 673
+      },
+      "actual": {
+        "x": 252,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3769,
+      "receiptMonoMs": 371679.1099,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 745.4375,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873869259,
+        "monotonicMs": 371056.9514,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873870655,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 372423.1976,
+      "scheduledAtMs": 372405.2522,
+      "latencyMs": 0.5184000000008382,
+      "origin": {
+        "x": 252,
+        "y": 673
+      },
+      "target": {
+        "x": 251,
+        "y": 673
+      },
+      "actual": {
+        "x": 251,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3779,
+      "receiptMonoMs": 372423.716,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 744.5469000000157,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873870035,
+        "monotonicMs": 371832.8349,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873871400,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 373167.549,
+      "scheduledAtMs": 373155.2522,
+      "latencyMs": 0.5056999999796972,
+      "origin": {
+        "x": 251,
+        "y": 673
+      },
+      "target": {
+        "x": 251,
+        "y": 671
+      },
+      "actual": {
+        "x": 251,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3786,
+      "receiptMonoMs": 373168.0547,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.351399999985,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873870778,
+        "monotonicMs": 372575.698,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873872146,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 373913.8778,
+      "scheduledAtMs": 373905.2522,
+      "latencyMs": 0.5050000000046566,
+      "origin": {
+        "x": 251,
+        "y": 671
+      },
+      "target": {
+        "x": 252,
+        "y": 671
+      },
+      "actual": {
+        "x": 252,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3792,
+      "receiptMonoMs": 373914.3828,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 746.3288000000175,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873871524,
+        "monotonicMs": 373322.4127,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873872890,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 374656.8858,
+      "scheduledAtMs": 374655.2522,
+      "latencyMs": 0.5474000000394881,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "target": {
+        "x": 254,
+        "y": 671
+      },
+      "actual": {
+        "x": 254,
+        "y": 671
+      },
+      "movedCells": 2,
+      "receiptSequence": 3801,
+      "receiptMonoMs": 374657.4332,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 743.0079999999725,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873872270,
+        "monotonicMs": 374067.8061,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873873666,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 375434.3001,
+      "scheduledAtMs": 375405.2522,
+      "latencyMs": 0.5595000000321306,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "target": {
+        "x": 255,
+        "y": 671
+      },
+      "actual": {
+        "x": 255,
+        "y": 671
+      },
+      "movedCells": 1,
+      "receiptSequence": 3806,
+      "receiptMonoMs": 375434.8596,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 777.414300000004,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873873014,
+        "monotonicMs": 374812.2867,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873874412,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 376179.5559,
+      "scheduledAtMs": 376155.2522,
+      "latencyMs": 0.46450000000186265,
+      "origin": {
+        "x": 255,
+        "y": 671
+      },
+      "target": {
+        "x": 255,
+        "y": 673
+      },
+      "actual": {
+        "x": 255,
+        "y": 673
+      },
+      "movedCells": 2,
+      "receiptSequence": 3811,
+      "receiptMonoMs": 376180.0204,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 745.2557999999844,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873873759,
+        "monotonicMs": 375557.35,
+        "position": {
+          "x": 256,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873875157,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 376924.9999,
+      "scheduledAtMs": 376905.2522,
+      "latencyMs": 0.4830000000074506,
+      "origin": {
+        "x": 255,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 673
+      },
+      "actual": {
+        "x": 254,
+        "y": 673
+      },
+      "movedCells": 1,
+      "receiptSequence": 3825,
+      "receiptMonoMs": 376925.4829,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 745.4440000000177,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873874536,
+        "monotonicMs": 376334.5473,
+        "position": {
+          "x": 256,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873875914,
+      "phase": "ramp",
+      "kind": "walk",
+      "status": "success",
+      "sentAtMs": 377682.5046,
+      "scheduledAtMs": 377655.2522,
+      "latencyMs": 0.4838999999919906,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "target": {
+        "x": 254,
+        "y": 674
+      },
+      "actual": {
+        "x": 254,
+        "y": 674
+      },
+      "movedCells": 1,
+      "receiptSequence": 3829,
+      "receiptMonoMs": 377682.9885,
+      "originInsideHome": true,
+      "originIsCorner": true,
+      "lastSuccessfulMovementSentGapMs": 757.5046999999904,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873875282,
+        "monotonicMs": 377080.3795,
+        "position": {
+          "x": 258,
+          "y": 671
+        },
+        "source": "UserLocation"
+      }
+    },
+    {
+      "at": 1792873876659,
+      "phase": "ramp",
+      "kind": "run",
+      "status": "success",
+      "sentAtMs": 378427.3889,
+      "scheduledAtMs": 378405.2522,
+      "latencyMs": 0.7048000000067987,
+      "origin": {
+        "x": 254,
+        "y": 674
+      },
+      "target": {
+        "x": 252,
+        "y": 674
+      },
+      "actual": {
+        "x": 252,
+        "y": 674
+      },
+      "movedCells": 2,
+      "receiptSequence": 3837,
+      "receiptMonoMs": 378428.0937,
+      "originInsideHome": false,
+      "originIsCorner": false,
+      "lastSuccessfulMovementSentGapMs": 744.8843000000343,
+      "theoreticalPrimedByLastMovement": true,
+      "interveningAuxiliary": [],
+      "ownAoiPlayersLastReceipt": null,
+      "peer01TrueOwnerLastReceipt": {
+        "at": 1792873876007,
+        "monotonicMs": 377805.5686,
+        "position": {
+          "x": 258,
+          "y": 673
+        },
+        "source": "UserLocation"
+      }
+    }
+  ],
+  "slowStageCensus": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.jsonl",
+    "bytes": 5137,
+    "sha256": "c6f37cf51f1b12361f993e0ba198550a303ae87673deb6252e467f0e60e5038b",
+    "rows": 59,
+    "timestampScope": "observedAtMs is launcher receive time, not exact source span endpoint. Receiver-phase labels are diagnostic; only>=50ms whitelist records are present, not all runtime calls. Absence of a named spectator span cannot exclude spectator work.",
+    "groups": [
+      {
+        "key": "bootstrap-2|shared_session.inner_execute",
+        "count": 2,
+        "minMs": 1031,
+        "maxMs": 1106,
+        "atLeast500": 2
+      },
+      {
+        "key": "bootstrap-2|shared_session.tail",
+        "count": 1,
+        "minMs": 54,
+        "maxMs": 54,
+        "atLeast500": 0
+      },
+      {
+        "key": "bootstrap-2|zone_owner.in_process.execute_request",
+        "count": 2,
+        "minMs": 1086,
+        "maxMs": 1116,
+        "atLeast500": 2
+      },
+      {
+        "key": "bootstrap-2|session_action.execute",
+        "count": 3,
+        "minMs": 50,
+        "maxMs": 1117,
+        "atLeast500": 2
+      },
+      {
+        "key": "bootstrap-2|runtime_tick.save_checkpoint",
+        "count": 1,
+        "minMs": 100,
+        "maxMs": 100,
+        "atLeast500": 0
+      },
+      {
+        "key": "bootstrap-2|zone_cadence.total",
+        "count": 1,
+        "minMs": 55,
+        "maxMs": 55,
+        "atLeast500": 0
+      },
+      {
+        "key": "bootstrap-10|session_action.execute",
+        "count": 12,
+        "minMs": 51,
+        "maxMs": 1055,
+        "atLeast500": 6
+      },
+      {
+        "key": "bootstrap-10|shared_session.inner_execute",
+        "count": 6,
+        "minMs": 1033,
+        "maxMs": 1044,
+        "atLeast500": 6
+      },
+      {
+        "key": "bootstrap-10|zone_owner.in_process.execute_request",
+        "count": 6,
+        "minMs": 1042,
+        "maxMs": 1053,
+        "atLeast500": 6
+      },
+      {
+        "key": "drain-after-bootstrap|shared_session.inner_execute",
+        "count": 8,
+        "minMs": 293,
+        "maxMs": 306,
+        "atLeast500": 0
+      },
+      {
+        "key": "drain-after-bootstrap|zone_owner.in_process.execute_request",
+        "count": 8,
+        "minMs": 303,
+        "maxMs": 327,
+        "atLeast500": 0
+      },
+      {
+        "key": "drain-after-bootstrap|session_action.execute",
+        "count": 8,
+        "minMs": 303,
+        "maxMs": 327,
+        "atLeast500": 0
+      },
+      {
+        "key": "drain-after-bootstrap|serial_gate.zone_outbound_wait",
+        "count": 1,
+        "minMs": 180,
+        "maxMs": 180,
+        "atLeast500": 0
+      }
+    ],
+    "records": [
+      {
+        "line": 1,
+        "observedAtMs": 1792873514411,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1031,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873513380
+      },
+      {
+        "line": 2,
+        "observedAtMs": 1792873514466,
+        "stage": "shared_session.tail",
+        "durationMs": 54,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873514412
+      },
+      {
+        "line": 3,
+        "observedAtMs": 1792873514466,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1086,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873513380
+      },
+      {
+        "line": 4,
+        "observedAtMs": 1792873514468,
+        "stage": "session_action.execute",
+        "durationMs": 1088,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873513380
+      },
+      {
+        "line": 5,
+        "observedAtMs": 1792873517064,
+        "stage": "session_action.execute",
+        "durationMs": 50,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873517014
+      },
+      {
+        "line": 6,
+        "observedAtMs": 1792873519095,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1106,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873517989
+      },
+      {
+        "line": 7,
+        "observedAtMs": 1792873519104,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1116,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873517988
+      },
+      {
+        "line": 8,
+        "observedAtMs": 1792873519106,
+        "stage": "session_action.execute",
+        "durationMs": 1117,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873517989
+      },
+      {
+        "line": 9,
+        "observedAtMs": 1792873529702,
+        "stage": "runtime_tick.save_checkpoint",
+        "durationMs": 100,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873529602
+      },
+      {
+        "line": 10,
+        "observedAtMs": 1792873529702,
+        "stage": "zone_cadence.total",
+        "durationMs": 55,
+        "receiverObservedPhase": "bootstrap-2",
+        "estimatedSpanStartIfImmediateLogMs": 1792873529647
+      },
+      {
+        "line": 11,
+        "observedAtMs": 1792873850459,
+        "stage": "session_action.execute",
+        "durationMs": 51,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873850408
+      },
+      {
+        "line": 12,
+        "observedAtMs": 1792873852428,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1040,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873851388
+      },
+      {
+        "line": 13,
+        "observedAtMs": 1792873852437,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1049,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873851388
+      },
+      {
+        "line": 14,
+        "observedAtMs": 1792873852438,
+        "stage": "session_action.execute",
+        "durationMs": 1051,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873851387
+      },
+      {
+        "line": 15,
+        "observedAtMs": 1792873854468,
+        "stage": "session_action.execute",
+        "durationMs": 52,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873854416
+      },
+      {
+        "line": 16,
+        "observedAtMs": 1792873856426,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1033,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873855393
+      },
+      {
+        "line": 17,
+        "observedAtMs": 1792873856434,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1042,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873855392
+      },
+      {
+        "line": 18,
+        "observedAtMs": 1792873856436,
+        "stage": "session_action.execute",
+        "durationMs": 1044,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873855392
+      },
+      {
+        "line": 19,
+        "observedAtMs": 1792873859082,
+        "stage": "session_action.execute",
+        "durationMs": 55,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873859027
+      },
+      {
+        "line": 20,
+        "observedAtMs": 1792873861038,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1033,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873860005
+      },
+      {
+        "line": 21,
+        "observedAtMs": 1792873861048,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1043,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873860005
+      },
+      {
+        "line": 22,
+        "observedAtMs": 1792873861050,
+        "stage": "session_action.execute",
+        "durationMs": 1045,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873860005
+      },
+      {
+        "line": 23,
+        "observedAtMs": 1792873864154,
+        "stage": "session_action.execute",
+        "durationMs": 52,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873864102
+      },
+      {
+        "line": 24,
+        "observedAtMs": 1792873866118,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1038,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873865080
+      },
+      {
+        "line": 25,
+        "observedAtMs": 1792873866128,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1047,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873865081
+      },
+      {
+        "line": 26,
+        "observedAtMs": 1792873866130,
+        "stage": "session_action.execute",
+        "durationMs": 1049,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873865081
+      },
+      {
+        "line": 27,
+        "observedAtMs": 1792873868798,
+        "stage": "session_action.execute",
+        "durationMs": 52,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873868746
+      },
+      {
+        "line": 28,
+        "observedAtMs": 1792873870768,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1044,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873869724
+      },
+      {
+        "line": 29,
+        "observedAtMs": 1792873870777,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1053,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873869724
+      },
+      {
+        "line": 30,
+        "observedAtMs": 1792873870779,
+        "stage": "session_action.execute",
+        "durationMs": 1055,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873869724
+      },
+      {
+        "line": 31,
+        "observedAtMs": 1792873873330,
+        "stage": "session_action.execute",
+        "durationMs": 51,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873873279
+      },
+      {
+        "line": 32,
+        "observedAtMs": 1792873875297,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 1040,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873874257
+      },
+      {
+        "line": 33,
+        "observedAtMs": 1792873875306,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 1049,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873874257
+      },
+      {
+        "line": 34,
+        "observedAtMs": 1792873875308,
+        "stage": "session_action.execute",
+        "durationMs": 1051,
+        "receiverObservedPhase": "bootstrap-10",
+        "estimatedSpanStartIfImmediateLogMs": 1792873874257
+      },
+      {
+        "line": 35,
+        "observedAtMs": 1792873877702,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 303,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877399
+      },
+      {
+        "line": 36,
+        "observedAtMs": 1792873877703,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 306,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877397
+      },
+      {
+        "line": 37,
+        "observedAtMs": 1792873877703,
+        "stage": "session_action.execute",
+        "durationMs": 306,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877397
+      },
+      {
+        "line": 38,
+        "observedAtMs": 1792873877704,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 305,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877399
+      },
+      {
+        "line": 39,
+        "observedAtMs": 1792873877704,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 308,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877396
+      },
+      {
+        "line": 40,
+        "observedAtMs": 1792873877704,
+        "stage": "session_action.execute",
+        "durationMs": 308,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877396
+      },
+      {
+        "line": 41,
+        "observedAtMs": 1792873877712,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 293,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877419
+      },
+      {
+        "line": 42,
+        "observedAtMs": 1792873877712,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 315,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877397
+      },
+      {
+        "line": 43,
+        "observedAtMs": 1792873877712,
+        "stage": "session_action.execute",
+        "durationMs": 315,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877397
+      },
+      {
+        "line": 44,
+        "observedAtMs": 1792873877724,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 294,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877430
+      },
+      {
+        "line": 45,
+        "observedAtMs": 1792873877724,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 304,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877420
+      },
+      {
+        "line": 46,
+        "observedAtMs": 1792873877724,
+        "stage": "session_action.execute",
+        "durationMs": 304,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877420
+      },
+      {
+        "line": 47,
+        "observedAtMs": 1792873877726,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 180,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877546
+      },
+      {
+        "line": 48,
+        "observedAtMs": 1792873878111,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 301,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877810
+      },
+      {
+        "line": 49,
+        "observedAtMs": 1792873878112,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 303,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877809
+      },
+      {
+        "line": 50,
+        "observedAtMs": 1792873878112,
+        "stage": "session_action.execute",
+        "durationMs": 303,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877809
+      },
+      {
+        "line": 51,
+        "observedAtMs": 1792873878122,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 301,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877821
+      },
+      {
+        "line": 52,
+        "observedAtMs": 1792873878122,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 313,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877809
+      },
+      {
+        "line": 53,
+        "observedAtMs": 1792873878122,
+        "stage": "session_action.execute",
+        "durationMs": 313,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877809
+      },
+      {
+        "line": 54,
+        "observedAtMs": 1792873878129,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 300,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877829
+      },
+      {
+        "line": 55,
+        "observedAtMs": 1792873878129,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 321,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877808
+      },
+      {
+        "line": 56,
+        "observedAtMs": 1792873878129,
+        "stage": "session_action.execute",
+        "durationMs": 321,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877808
+      },
+      {
+        "line": 57,
+        "observedAtMs": 1792873878135,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 306,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877829
+      },
+      {
+        "line": 58,
+        "observedAtMs": 1792873878135,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 327,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877808
+      },
+      {
+        "line": 59,
+        "observedAtMs": 1792873878135,
+        "stage": "session_action.execute",
+        "durationMs": 327,
+        "receiverObservedPhase": "drain-after-bootstrap",
+        "estimatedSpanStartIfImmediateLogMs": 1792873877808
+      }
+    ]
+  },
+  "limitations": [
+    "Owner AOI player projection covers players, not per-decision monsters/terrain/rejected-cells/full obstacle union.",
+    "Theoretical priming is calculated from prior successful action send+1200ms and does not substitute for an actual recorded planner branch.",
+    "No public recording payload was read by this extraction."
+  ]
+}

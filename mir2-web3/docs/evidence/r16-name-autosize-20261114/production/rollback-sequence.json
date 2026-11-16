@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "workflowRun": 43552001521,
+  "operation": "numeron-qr-rollback",
+  "passed": true,
+  "implementation": "e4f085e0d44f32babee35cd6a2cfa75d2b21a9d2",
+  "writes": [
+    {
+      "operation": "rollback",
+      "site": "game",
+      "deployment": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+    }
+  ],
+  "trafficBefore": "dpl_GAmrbFTE548Y6C3xSuMAX1qdfe6B",
+  "trafficAfter": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "credentialsRecorded": false,
+  "artifact": {
+    "bytes": 4526,
+    "sha256": "5b1a4b64c06c09ba4be677bcd09aa7af8013ef15cacbfd8adb6d575a0e4aa3c2"
+  },
+  "publicQrAfterRollback": "separate ordinary browser recheck"
+}

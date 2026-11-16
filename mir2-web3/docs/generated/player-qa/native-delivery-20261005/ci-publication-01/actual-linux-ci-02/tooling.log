@@ -1,0 +1,343 @@
+native-download-tooling-check	Set up job	﻿2026-10-05T01:27:20.3498065Z Current runner version: '2.337.0'
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3531650Z ##[group]Runner Image Provisioner
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3533301Z Hosted Compute Agent
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3534263Z Version: 20260901.588
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3535295Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3536574Z Build Date: 2026-09-01T19:56:44Z
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3537759Z Worker ID: {e14f6dc8-6839-41dd-86ca-580c98bb93bc}
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3539069Z Azure Region: eastus
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3539971Z ##[endgroup]
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3542604Z ##[group]Operating System
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3543658Z Ubuntu
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3544580Z 24.04.5
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3545511Z LTS
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3546313Z ##[endgroup]
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3547156Z ##[group]Runner Image
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3548248Z Image: ubuntu-24.04
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3549215Z Version: 20260927.320.1
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3551182Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3554407Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3556117Z ##[endgroup]
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3558133Z ##[group]GITHUB_TOKEN Permissions
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3560722Z Contents: read
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3562599Z Metadata: read
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3563555Z ##[endgroup]
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3567065Z Secret source: Actions
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3568570Z Cache mode: write
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.3570068Z Prepare workflow directory
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.4033918Z Prepare all required actions
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.4104347Z Getting action download info
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.6393607Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.7412998Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+native-download-tooling-check	Set up job	2026-10-05T01:27:20.8169254Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+native-download-tooling-check	Set up job	2026-10-05T01:27:21.0324851Z Complete job name: native-download-tooling-check
+native-download-tooling-check	Checkout native tooling without persisted credentials	﻿2026-10-05T01:27:21.1086895Z ##[group]Run actions/checkout@v4
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1087793Z with:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1088262Z   persist-credentials: false
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1088794Z   repository: Zombieliu/mir2
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1092801Z   token: ***
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1093245Z   ssh-strict: true
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1093684Z   ssh-user: git
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1094112Z   clean: true
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1094562Z   sparse-checkout-cone-mode: true
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1095089Z   fetch-depth: 1
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1095520Z   fetch-tags: false
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1095972Z   show-progress: true
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1096417Z   lfs: false
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1096840Z   submodules: false
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1097292Z   set-safe-directory: true
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1097795Z   allow-unsafe-pr-checkout: false
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.1098563Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2122349Z Syncing repository: Zombieliu/mir2
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2125659Z ##[group]Getting Git version info
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2127070Z Working directory is '/home/runner/work/mir2/mir2'
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2128928Z [command]/usr/bin/git version
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2232422Z git version 2.55.0
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2255204Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2270691Z Temporarily overriding HOME='/home/runner/work/_temp/71330005-cf8d-4791-a8d6-d826aedfac75' before making global git config changes
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2273235Z Adding repository directory to the temporary git global config as a safe directory
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2276888Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/mir2/mir2
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2326567Z Deleting the contents of '/home/runner/work/mir2/mir2'
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2331578Z ##[group]Initializing the repository
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2335538Z [command]/usr/bin/git init /home/runner/work/mir2/mir2
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2441746Z hint: Using 'master' as the name for the initial branch. This default branch name
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2443862Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2445868Z hint: to use in all of your new repositories, which will suppress this warning,
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2447237Z hint: call:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2448204Z hint:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2449037Z hint: 	git config --global init.defaultBranch <name>
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2449880Z hint:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2450937Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2452466Z hint: 'development'. The just-created branch can be renamed via this command:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2453313Z hint:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2453745Z hint: 	git branch -m <name>
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2454230Z hint:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2454861Z hint: Disable this message with "git config set advice.defaultBranchName false"
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2455828Z Initialized empty Git repository in /home/runner/work/mir2/mir2/.git/
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2458259Z [command]/usr/bin/git remote add origin https://github.com/Zombieliu/mir2
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2508210Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2509041Z ##[group]Disabling automatic garbage collection
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2512805Z [command]/usr/bin/git config --local gc.auto 0
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2544532Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2545335Z ##[group]Setting up auth
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2553172Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2585867Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.2969174Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3010485Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3255880Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3295305Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3547948Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3591045Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3593268Z ##[group]Fetching the repository
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:21.3604439Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +bb4679272cb6ae6a677f18a0e636d31dd3d139f3:refs/remotes/origin/codex/crowded-combat-control-20261003
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9903297Z From https://github.com/Zombieliu/mir2
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9906134Z  * [new ref]             bb4679272cb6ae6a677f18a0e636d31dd3d139f3 -> origin/codex/crowded-combat-control-20261003
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9918310Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9924123Z ##[group]Determining the checkout info
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9925740Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9926878Z [command]/usr/bin/git sparse-checkout disable
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:37.9972772Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:38.0008381Z ##[group]Checking out the ref
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:38.0014850Z [command]/usr/bin/git checkout --progress --force -B codex/crowded-combat-control-20261003 refs/remotes/origin/codex/crowded-combat-control-20261003
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.0781014Z Updating files:   6% (8649/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.1578471Z Updating files:   7% (8743/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.2259000Z Updating files:   8% (9992/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.2927679Z Updating files:   9% (11241/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.3541096Z Updating files:  10% (12490/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.4208597Z Updating files:  11% (13739/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.4898513Z Updating files:  12% (14988/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.5549436Z Updating files:  13% (16237/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.6154397Z Updating files:  14% (17486/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.6791524Z Updating files:  15% (18734/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.7504417Z Updating files:  16% (19983/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.8126287Z Updating files:  17% (21232/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.8771760Z Updating files:  18% (22481/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.9375011Z Updating files:  19% (23730/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:39.9941920Z Updating files:  20% (24979/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.0561420Z Updating files:  21% (26228/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.0721328Z Updating files:  22% (27477/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.1124591Z Updating files:  22% (27832/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.1669643Z Updating files:  23% (28726/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.2222868Z Updating files:  24% (29975/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.2805870Z Updating files:  25% (31224/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.3413096Z Updating files:  26% (32473/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.3982911Z Updating files:  27% (33722/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.4563959Z Updating files:  28% (34971/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.5116807Z Updating files:  29% (36219/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.5725532Z Updating files:  30% (37468/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.6334720Z Updating files:  31% (38717/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.6907113Z Updating files:  32% (39966/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.7501701Z Updating files:  33% (41215/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.8075183Z Updating files:  34% (42464/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.8646561Z Updating files:  35% (43713/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.9223584Z Updating files:  36% (44962/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:40.9803657Z Updating files:  37% (46211/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.0385823Z Updating files:  38% (47460/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.0721340Z Updating files:  39% (48709/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.0965191Z Updating files:  39% (49437/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.1540931Z Updating files:  40% (49958/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.2131935Z Updating files:  41% (51207/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.2719460Z Updating files:  42% (52456/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.3308610Z Updating files:  43% (53704/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.3860104Z Updating files:  44% (54953/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.4409150Z Updating files:  45% (56202/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.4975566Z Updating files:  46% (57451/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.5523177Z Updating files:  47% (58700/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.6087381Z Updating files:  48% (59949/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.6687675Z Updating files:  49% (61198/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.7248316Z Updating files:  50% (62447/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.7804550Z Updating files:  51% (63696/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.8364473Z Updating files:  52% (64945/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.8920844Z Updating files:  53% (66194/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:41.9530556Z Updating files:  54% (67443/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.0134046Z Updating files:  55% (68692/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.0688319Z Updating files:  56% (69941/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.0721233Z Updating files:  57% (71190/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.1319842Z Updating files:  57% (71236/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.1916304Z Updating files:  58% (72438/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.2470514Z Updating files:  59% (73687/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.3032095Z Updating files:  60% (74936/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.3580021Z Updating files:  61% (76185/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.4145091Z Updating files:  62% (77434/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.5160287Z Updating files:  63% (78683/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.5744533Z Updating files:  64% (79932/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.6309686Z Updating files:  65% (81181/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.6905443Z Updating files:  66% (82430/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.7656002Z Updating files:  67% (83679/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.8428721Z Updating files:  68% (84928/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.8926155Z Updating files:  69% (86177/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:42.9462073Z Updating files:  70% (87426/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.0094469Z Updating files:  71% (88675/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.0621129Z Updating files:  72% (89923/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.0721646Z Updating files:  73% (91172/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.1168238Z Updating files:  73% (91409/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.1736724Z Updating files:  74% (92421/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.2264153Z Updating files:  75% (93670/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.2786307Z Updating files:  76% (94919/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.3342880Z Updating files:  77% (96168/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.4006568Z Updating files:  78% (97417/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.4591479Z Updating files:  79% (98666/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.5127749Z Updating files:  80% (99915/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.5705455Z Updating files:  81% (101164/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.6209266Z Updating files:  82% (102413/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.6733858Z Updating files:  83% (103662/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.7267679Z Updating files:  84% (104911/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.7821103Z Updating files:  85% (106160/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.8331709Z Updating files:  86% (107408/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.8878996Z Updating files:  87% (108657/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:43.9458394Z Updating files:  88% (109906/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.0014500Z Updating files:  89% (111155/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.0721823Z Updating files:  90% (112404/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.0833387Z Updating files:  90% (113498/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.1349309Z Updating files:  91% (113653/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.1887299Z Updating files:  92% (114902/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.2397725Z Updating files:  93% (116151/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.2912539Z Updating files:  94% (117400/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.3554452Z Updating files:  95% (118649/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.5382784Z Updating files:  96% (119898/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:44.7524880Z Updating files:  97% (121147/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.0797720Z Updating files:  98% (122396/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.1795358Z Updating files:  98% (123466/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.5035003Z Updating files:  99% (123645/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.5035782Z Updating files: 100% (124893/124893)
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.5036246Z Updating files: 100% (124893/124893), done.
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6019490Z Switched to a new branch 'codex/crowded-combat-control-20261003'
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6021036Z branch 'codex/crowded-combat-control-20261003' set up to track 'origin/codex/crowded-combat-control-20261003'.
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6148527Z ##[endgroup]
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6203774Z [command]/usr/bin/git log -1 --format=%H
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6234046Z bb4679272cb6ae6a677f18a0e636d31dd3d139f3
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6244974Z ##[group]Removing auth
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6248671Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6281329Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6580228Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6610508Z http.https://github.com/.extraheader
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6619294Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6656936Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.6968976Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.7007539Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+native-download-tooling-check	Checkout native tooling without persisted credentials	2026-10-05T01:27:45.7301718Z ##[endgroup]
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	﻿2026-10-05T01:27:45.7559330Z ##[group]Run actions/setup-python@v5
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7559667Z with:
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7559888Z   python-version: 3.13
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7560201Z   check-latest: false
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7563423Z   token: ***
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7563661Z   update-environment: true
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7563917Z   allow-prereleases: false
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7564165Z   freethreaded: false
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.7564390Z ##[endgroup]
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.8857097Z ##[group]Installed versions
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.8948368Z (node:2396) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.8949705Z (Use `node --trace-deprecation ...` to show where the warning was created)
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.8950499Z Successfully set up CPython (3.13.15)
+native-download-tooling-check	Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:45.8951321Z ##[endgroup]
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	﻿2026-10-05T01:27:45.9108788Z ##[group]Run python3 -B scripts/test_native_r17_r2_delivery.py
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9109331Z ^[[36;1mpython3 -B scripts/test_native_r17_r2_delivery.py^[[0m
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9437423Z shell: /usr/bin/bash -e {0}
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9437827Z env:
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9438224Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9438884Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.15/x64/lib/pkgconfig
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9439537Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9440104Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9440688Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9441256Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.15/x64/lib
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:45.9441736Z ##[endgroup]
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.4982602Z test_111mb_synthetic_stream_is_bounded_and_fails_real_exe_checksum (__main__.DeliveryTests.test_111mb_synthetic_stream_is_bounded_and_fails_real_exe_checksum) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.5240754Z test_absolute_deadline_cancels_stalled_headers_not_throughput_proof (__main__.DeliveryTests.test_absolute_deadline_cancels_stalled_headers_not_throughput_proof) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.5250335Z test_actual_private_post_bearer_body_only_fixed_verified_origin (__main__.DeliveryTests.test_actual_private_post_bearer_body_only_fixed_verified_origin) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.5928876Z test_alias_wrong_headers_or_bytes_never_overall_pass (__main__.DeliveryTests.test_alias_wrong_headers_or_bytes_never_overall_pass) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.5950299Z test_cancel_and_exception_body_never_printed_partial_retained (__main__.DeliveryTests.test_cancel_and_exception_body_never_printed_partial_retained) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.7209300Z test_cancelled_connect_never_sends_auth_after_deadline (__main__.DeliveryTests.test_cancelled_connect_never_sends_auth_after_deadline) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.7211946Z test_changed_plan_or_attestation_is_rejected_before_http (__main__.DeliveryTests.test_changed_plan_or_attestation_is_rejected_before_http) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.7240930Z test_cli_no_plan_url_key_override_or_duplicate_arguments (__main__.DeliveryTests.test_cli_no_plan_url_key_override_or_duplicate_arguments) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.7593007Z test_cli_stage_success_fresh_receipt_exit_zero_and_exact_summary (__main__.DeliveryTests.test_cli_stage_success_fresh_receipt_exit_zero_and_exact_summary) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.7600905Z test_connection_close_error_cannot_be_success_and_is_redacted (__main__.DeliveryTests.test_connection_close_error_cannot_be_success_and_is_redacted) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.7619530Z test_control_json_declared_length_duplicate_headers_and_corrupt_type (__main__.DeliveryTests.test_control_json_declared_length_duplicate_headers_and_corrupt_type) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8331681Z test_each_actual_transport_request_gets_its_own_deadline (__main__.DeliveryTests.test_each_actual_transport_request_gets_its_own_deadline) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8450635Z test_exact_already_promoted_candidate_does_not_claim_new_pointer_change (__main__.DeliveryTests.test_exact_already_promoted_candidate_does_not_claim_new_pointer_change) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8453757Z test_fixed_transport_no_host_query_key_secret_or_method_override (__main__.DeliveryTests.test_fixed_transport_no_host_query_key_secret_or_method_override) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8637908Z test_forged_incomplete_or_changed_stage_never_promotes (__main__.DeliveryTests.test_forged_incomplete_or_changed_stage_never_promotes) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8665153Z test_import_forged_or_malformed_reply_not_accepted (__main__.DeliveryTests.test_import_forged_or_malformed_reply_not_accepted) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8668000Z test_literal_plan_and_two_real_tiny_objects_bound (__main__.DeliveryTests.test_literal_plan_and_two_real_tiny_objects_bound) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8834834Z test_missing_invalid_secret_and_poisoned_environment_never_changes_paths (__main__.DeliveryTests.test_missing_invalid_secret_and_poisoned_environment_never_changes_paths) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.8926408Z test_output_hardlink_added_during_stage_cannot_pass_cli (__main__.DeliveryTests.test_output_hardlink_added_during_stage_cannot_pass_cli) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9011700Z test_pointer_exact_candidate_permits_stage_but_other_pointer_refuses (__main__.DeliveryTests.test_pointer_exact_candidate_permits_stage_but_other_pointer_refuses) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9037700Z test_poisoned_sslkeylogfile_is_not_created_or_written (__main__.DeliveryTests.test_poisoned_sslkeylogfile_is_not_created_or_written) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9042683Z test_private_plan_header_change_stops_before_any_write (__main__.DeliveryTests.test_private_plan_header_change_stops_before_any_write) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9154839Z test_private_pointer_readback_failure_after_ack_retains_unknown (__main__.DeliveryTests.test_private_pointer_readback_failure_after_ack_retains_unknown) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9187268Z test_private_resume_metadata_corruption_stops_before_post (__main__.DeliveryTests.test_private_resume_metadata_corruption_stops_before_post) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9617026Z test_promote_401_malformed_ack_and_oversized_ack_stop_no_retry (__main__.DeliveryTests.test_promote_401_malformed_ack_and_oversized_ack_stop_no_retry) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9730335Z test_promote_direct_envelope_then_private_and_full_alias_gets (__main__.DeliveryTests.test_promote_direct_envelope_then_private_and_full_alias_gets) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:46.9837118Z test_promote_response_loss_after_commit_keeps_unknown_no_retry (__main__.DeliveryTests.test_promote_response_loss_after_commit_keeps_unknown_no_retry) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0124918Z test_promote_retained_stage_hash_and_regular_file_gate_before_http (__main__.DeliveryTests.test_promote_retained_stage_hash_and_regular_file_gate_before_http) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0351716Z test_promote_worker_unknown_and_cas_denial_retained (__main__.DeliveryTests.test_promote_worker_unknown_and_cas_denial_retained) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0383240Z test_public_206_and_redirect_refuse_without_following (__main__.DeliveryTests.test_public_206_and_redirect_refuse_without_following) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0432476Z test_public_headers_reject_partial_encoding_cache_and_length (__main__.DeliveryTests.test_public_headers_reject_partial_encoding_cache_and_length) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0440093Z test_read_regular_rejects_new_hardlink_during_read (__main__.DeliveryTests.test_read_regular_rejects_new_hardlink_during_read) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0446654Z test_real_https_transport_fixed_tls_no_proxy_and_public_no_auth (__main__.DeliveryTests.test_real_https_transport_fixed_tls_no_proxy_and_public_no_auth) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0495865Z test_receipt_existing_symlink_hardlink_parent_link_refuse_before_http (__main__.DeliveryTests.test_receipt_existing_symlink_hardlink_parent_link_refuse_before_http) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0595922Z test_receipt_write_failure_exit2_even_if_fake_core_passed (__main__.DeliveryTests.test_receipt_write_failure_exit2_even_if_fake_core_passed) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0680878Z test_reflected_secret_in_permitted_etag_is_never_persisted (__main__.DeliveryTests.test_reflected_secret_in_permitted_etag_is_never_persisted) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0702769Z test_source_feed_exact_expiration_boundary_refuses_stage (__main__.DeliveryTests.test_source_feed_exact_expiration_boundary_refuses_stage) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0713752Z test_stage_401_and_412_stop_without_retry_or_pointer_write (__main__.DeliveryTests.test_stage_401_and_412_stop_without_retry_or_pointer_write) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0795187Z test_stage_consumes_full_public_every_object_before_envelope (__main__.DeliveryTests.test_stage_consumes_full_public_every_object_before_envelope) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0802527Z test_stage_corrupt_public_bytes_cannot_template_pass (__main__.DeliveryTests.test_stage_corrupt_public_bytes_cannot_template_pass) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.0976500Z test_stage_envelope_numeric_boolean_and_call_index_bool_refuse (__main__.DeliveryTests.test_stage_envelope_numeric_boolean_and_call_index_bool_refuse) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1129093Z test_stage_fabricated_receipt_calls_or_wrong_byte_hash_refuse (__main__.DeliveryTests.test_stage_fabricated_receipt_calls_or_wrong_byte_hash_refuse) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1140608Z test_stage_partial_length_failure_retains_actual_bytes_and_no_envelope (__main__.DeliveryTests.test_stage_partial_length_failure_retains_actual_bytes_and_no_envelope) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1225638Z test_stage_resume_still_checks_private_and_full_public (__main__.DeliveryTests.test_stage_resume_still_checks_private_and_full_public) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1262424Z test_strict_json_utf8_duplicate_depth_tokens_and_float (__main__.DeliveryTests.test_strict_json_utf8_duplicate_depth_tokens_and_float) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1272048Z test_tls_unverified_context_rejects_before_connection (__main__.DeliveryTests.test_tls_unverified_context_rejects_before_connection) ... ok
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1273314Z 
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1273560Z ----------------------------------------------------------------------
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1274068Z Ran 46 tests in 0.709s
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1274275Z 
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1274385Z OK
+native-download-tooling-check	Check fixed routes, stream bounds, receipts and POSIX permissions	2026-10-05T01:27:47.1278063Z RAW_RECEIPT=/home/runner/work/mir2/mir2/mir2-web3/evidence/TEST-RECEIPT-1791163667127387463.json
+native-download-tooling-check	Retain raw offline checks	﻿2026-10-05T01:27:47.1540576Z ##[group]Run actions/upload-artifact@v4
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1540902Z with:
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1541124Z   name: native-r17-tooling-37251484195
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1541410Z   path: mir2-web3/evidence/
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1541679Z   if-no-files-found: error
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1541923Z   retention-days: 7
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1542474Z   compression-level: 6
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1542705Z   overwrite: false
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1542936Z   include-hidden-files: false
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1543180Z env:
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1543455Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1543928Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.15/x64/lib/pkgconfig
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1544375Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1544776Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1545175Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1545579Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.15/x64/lib
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.1545972Z ##[endgroup]
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.3177010Z (node:2417) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.3178185Z (Use `node --trace-deprecation ...` to show where the warning was created)
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.3388665Z With the provided path, there will be 31 files uploaded
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.3395981Z Artifact name is valid!
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.3396487Z Root directory input is valid!
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.5285606Z Beginning upload of artifact content to blob storage
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.5804522Z (node:2417) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.6043561Z Uploaded bytes 49224
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.6177474Z Finished uploading artifact content to blob storage!
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.6178835Z SHA256 digest of uploaded artifact zip is 1a215e087eadbf86b30b2a2a88db7baf8548b8a351ae6c0dec8422b77fc997a4
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.6179866Z Finalizing artifact upload
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.8201824Z Artifact native-r17-tooling-37251484195.zip successfully finalized. Artifact ID 11321185826
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.8203999Z Artifact native-r17-tooling-37251484195 has been successfully uploaded! Final size is 49224 bytes. Artifact ID is 11321185826
+native-download-tooling-check	Retain raw offline checks	2026-10-05T01:27:47.8209495Z Artifact download URL: https://github.com/Zombieliu/mir2/actions/runs/37251484195/artifacts/11321185826
+native-download-tooling-check	Post Use Python 3.13 for the bounded offline checks	﻿2026-10-05T01:27:47.8414386Z Post job cleanup.
+native-download-tooling-check	Post Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:47.9581102Z (node:2429) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+native-download-tooling-check	Post Use Python 3.13 for the bounded offline checks	2026-10-05T01:27:47.9582546Z (Use `node --trace-deprecation ...` to show where the warning was created)
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	﻿2026-10-05T01:27:47.9811116Z Post job cleanup.
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0698599Z [command]/usr/bin/git version
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0744646Z git version 2.55.0
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0790057Z Temporarily overriding HOME='/home/runner/work/_temp/9840c31b-36dd-42f5-8c7a-84ee308147cd' before making global git config changes
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0791056Z Adding repository directory to the temporary git global config as a safe directory
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0797811Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/mir2/mir2
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0835859Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.0871405Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.1198271Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.1237486Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.1625745Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+native-download-tooling-check	Post Checkout native tooling without persisted credentials	2026-10-05T01:27:48.1665383Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+native-download-tooling-check	Complete job	﻿2026-10-05T01:27:48.2146237Z Cleaning up orphan processes
+native-download-tooling-check	Complete job	2026-10-05T01:27:48.2449196Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

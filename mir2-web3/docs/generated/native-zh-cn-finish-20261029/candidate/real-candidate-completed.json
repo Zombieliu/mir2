@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "originalCandidate": "F:\\m9\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-invited-09",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "clean": true,
+  "files": 255027,
+  "detachedCmsValid": true,
+  "currentSourceValidated": true,
+  "requireCurrentSourceSwitch": false,
+  "frozenSnapshotMetadataMatchesFinal": true,
+  "parentPackagingExit": 0,
+  "report": "real-original-candidate-verification.json"
+}

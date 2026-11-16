@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/011-r23-locale-hi.jpg",
+  "purpose": "Hindi basic label glyphs visible without apparent tofu or clipping; translation semantics and game text remain pending.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 317889,
+  "sha256": "55fde48c2dfaba3b6fe2ec4cc497984ec60e5cf045929b6b1a711477651aa833",
+  "recordedUtc": "2026-10-09T18:42:18.049Z"
+}

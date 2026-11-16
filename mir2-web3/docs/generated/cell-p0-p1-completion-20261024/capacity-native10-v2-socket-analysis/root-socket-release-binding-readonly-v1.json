@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T00:20:14.799Z",
+  "binding": {
+    "manifest": "backend-source-socket-diagnostics-v1.json",
+    "build": "release-socket-diagnostics-v1.json"
+  },
+  "passed": true,
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "sourceManifestSha256": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "binarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "scope": "Read-only integration verification of the exact new Release against its committed Git blobs; this does not certify capacity or alter the tracked release registry."
+}

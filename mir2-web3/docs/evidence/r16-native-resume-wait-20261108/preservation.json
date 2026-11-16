@@ -1,0 +1,38 @@
+{
+  "schema": "mir2.r16.native-resume.preservation.v1",
+  "timeUtc": "2026-11-07T20:03:11.3286233Z",
+  "originalListeners": [
+    {
+      "LocalPort": 19235,
+      "OwningProcess": 129280
+    },
+    {
+      "LocalPort": 19232,
+      "OwningProcess": 128444
+    },
+    {
+      "LocalPort": 19231,
+      "OwningProcess": 126788
+    }
+  ],
+  "originalGatewayProcesses": [
+    {
+      "ProcessId": 129280,
+      "ExecutablePath": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+    },
+    {
+      "ProcessId": 128444,
+      "ExecutablePath": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+    },
+    {
+      "ProcessId": 126788,
+      "ExecutablePath": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+    }
+  ],
+  "originalWindowsExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "previousOrdinaryReconnectCandidateSha256": "e519dc7a6d0eb3f399fcb20c1145bb260418ec0c13e3d7ad44327610fc987c55",
+  "desktopControlUsed": false,
+  "publicDeploy": false,
+  "onlyIsolatedFixtureAccountsUsed": true,
+  "productionOriginalSaveByteComparisonClaimed": false
+}

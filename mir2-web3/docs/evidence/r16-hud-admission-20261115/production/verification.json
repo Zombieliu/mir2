@@ -1,0 +1,633 @@
+{
+  "schema": 1,
+  "kind": "r16-required-hud-priority-public-failure-and-verified-rollback",
+  "recordedAt": "2026-11-15T16:25:05.032096+00:00",
+  "goalActive": true,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "candidateRetainedInProduction": false,
+  "productSource": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+  "releaseController": "b299be39fbace1d57fcb2d29efcffad23e4d0f57",
+  "sourceClosure": {
+    "base": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "commits": 54,
+    "files": 296,
+    "gitAndIndependentGithubVerified": true
+  },
+  "releaseChecks": 80,
+  "linux": {
+    "source": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+    "workflowRun": 43726382939,
+    "artifact": 14168150599,
+    "downloadCompleted": true,
+    "artifactZipBytes": 95700108,
+    "artifactZipSha256LocallyComputed": "e6e840e4e68925e5dc02caaa7cf2e162384b9e4fba73ee481934503a1ccbcfbc",
+    "allPackageFilesShaVerified": 1841,
+    "sharedZoneTests": 310,
+    "gatewaySharedZoneTests": 40,
+    "backgroundExecutionTestsRequiredAndObserved": 7,
+    "nativePostgresTests": 216,
+    "docker": false,
+    "gateway": {
+      "path": "D:\\mir2-builds\\r16-hud-admission-20261115\\linux-package-r1\\mir2-gateway",
+      "bytes": 93576560,
+      "sha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+      "elf": "64-bit little-endian x86_64"
+    },
+    "productionInstalled": false,
+    "publicBrowserAcceptance": false
+  },
+  "artifactTransfer": {
+    "id": 14168150599,
+    "bytes": 95700108,
+    "sha256": "e6e840e4e68925e5dc02caaa7cf2e162384b9e4fba73ee481934503a1ccbcfbc",
+    "workflowRun": 43726382939,
+    "source": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+    "attempt": 2,
+    "workflowSuccessVerified": true,
+    "githubDigestMatched": true,
+    "firstAttemptTimeoutSeconds": 240,
+    "firstAttemptPartialBytes": 82526208,
+    "rangeIgnoredByServer": false,
+    "resumedBytes": 13173900,
+    "wholeShaRequiredBeforeUse": true
+  },
+  "contentCacheReuse": {
+    "cacheReusable": true,
+    "copied": true,
+    "bytes": 21083535,
+    "compressedSha256": "81cc528018b0effbd487c026e56712d958757e50e9493e30875116a5c9645970",
+    "remotePath": "/var/tmp/mir2-r16-hud-20e79131a2-20261115/mir2-gateway.gz",
+    "cachedFromSource": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+    "newlyBuiltAndLocallyVerifiedSource": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+    "newArtifactSha256": "e6e840e4e68925e5dc02caaa7cf2e162384b9e4fba73ee481934503a1ccbcfbc",
+    "identicalExecutableContentOnly": true,
+    "productionInstalled": false
+  },
+  "canary": {
+    "passed": true,
+    "source": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+    "debugCommandsSent": 0,
+    "normalLogouts": 2,
+    "sameRoleReentry": true,
+    "neutralMonsterWalkCount": 1,
+    "productionProcessUnchanged": true
+  },
+  "web": {
+    "stage": 43726716442,
+    "check": 43727535327,
+    "promote": 43731004730,
+    "rollback": 43732258169,
+    "candidate": "dpl_BhnpPu3yzJmL6quhBbdWcwoKHsK2",
+    "readyIndependentlyVerified": true,
+    "protectedAndPublicEntryAssets": 15,
+    "worker": {
+      "bytes": 64313,
+      "sha256": "17d387d77329dda4b769d89cb7733a20f5642e145c0f4a0e797ebe0661430d6f"
+    }
+  },
+  "publicR1": {
+    "executed": true,
+    "functionalPassed": false,
+    "originalClassifier": {
+      "kind": "r16-original-public-acceptance",
+      "accepted": false,
+      "checks": {
+        "exactSource": true,
+        "completeFunctionalRun": false,
+        "walletLoginOnly": true,
+        "movementOriginalEightSeconds": true,
+        "sixCompleteFonts": true,
+        "complete113": true,
+        "sharedNativeQuest": true,
+        "originalNative120": false,
+        "originalRuntimeBody120": true,
+        "workerRestart": true,
+        "normalLogout": true,
+        "bothBrowsersClosed": true
+      },
+      "source": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+      "deploymentId": "dpl_BhnpPu3yzJmL6quhBbdWcwoKHsK2",
+      "originalMoveBudgetMs": 8000,
+      "originalNativeBudgetMs": 120000,
+      "nativeAfterFirstFrameMs": 133427,
+      "runtimeBodyAfterFirstFrameMs": 72529,
+      "supplementary180ObservationChangesOriginalBudget": false,
+      "wholeParityAccepted": false
+    },
+    "startToFirstFrameMs": 7402,
+    "firstFrameMs": 98419,
+    "moveWithinEightSeconds": true,
+    "sixCompleteFonts": true,
+    "hud": {
+      "summary": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "durationMs": 116804.5,
+      "recovery": {
+        "initialOk": 104,
+        "initialFailedUrls": [
+          "/original-ui/Prguse/1.png",
+          "/original-ui/Prguse/4.png",
+          "/original-ui/Prguse/6.png",
+          "/original-ui/Prguse/12.png",
+          "/original-ui/Prguse/13.png",
+          "/original-ui/Prguse/8.png",
+          "/original-ui/Prguse/76.png",
+          "/original-ui/UI_32bit/473.png",
+          "/original-ui/UI_32bit/472.png"
+        ],
+        "requested": 9,
+        "recoveredUrls": [
+          "/original-ui/Prguse/1.png",
+          "/original-ui/Prguse/4.png",
+          "/original-ui/Prguse/6.png",
+          "/original-ui/Prguse/12.png",
+          "/original-ui/Prguse/13.png",
+          "/original-ui/Prguse/8.png",
+          "/original-ui/Prguse/76.png",
+          "/original-ui/UI_32bit/473.png",
+          "/original-ui/UI_32bit/472.png"
+        ],
+        "failedUrls": [],
+        "unattemptedUrls": [],
+        "status": "done"
+      }
+    },
+    "walking": {
+      "passed": false,
+      "originalJsonBodyObserved": false,
+      "originalJsonAttempts": [
+        {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "kind": "entry-monster-walking",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 98415,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 0,
+          "redirected": false,
+          "failAfterMs": 20001,
+          "failed": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "corsError": null
+        },
+        {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "kind": "entry-monster-walking",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 118616,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 0,
+          "redirected": false,
+          "failAfterMs": 20003,
+          "failed": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "corsError": null
+        }
+      ],
+      "compiledPartsObserved": [
+        {
+          "libraryKey": "Monster/000",
+          "payloadBytes": 210658,
+          "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+          "imageCount": 48,
+          "requestedAfterFirstFrameMs": 40200,
+          "verifiedAfterFirstFrameMs": 72861
+        },
+        {
+          "libraryKey": "Monster/003",
+          "payloadBytes": 60788,
+          "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+          "imageCount": 48,
+          "requestedAfterFirstFrameMs": 40200,
+          "verifiedAfterFirstFrameMs": 72810
+        }
+      ],
+      "completeFivePartPublicationObserved": false,
+      "partialOrMixedObserverCoverageRemainsOpen": true
+    },
+    "sharedQuest": true,
+    "workerRestart": true,
+    "normalLogout": true,
+    "desktopClosed": true,
+    "mobileClosed": true,
+    "officialPhoneViewportWallet": {
+      "passed": true,
+      "loginApprovalClicks": 1,
+      "forbiddenOperations": 0,
+      "physicalPhoneCameraTested": false
+    }
+  },
+  "publicR2": {
+    "prepared": true,
+    "executed": false,
+    "reason": "first original cohort failed"
+  },
+  "passiveObservations": {
+    "firstPrguse1": {
+      "pageRequestBeforeFirstFrameMs": -3040,
+      "firstUpstreamAfterFirstFrameMs": 91986,
+      "pageToUpstreamMs": 95026,
+      "firstCompleteAfterFirstFrameMs": 106910
+    },
+    "beforePrguse1Admission": {
+      "scope": "Observed upstream attempts between first HUD page request and first Prguse/1 upstream admission; requested source paths classified against unchanged real manifest packs. Not an early Worker priority-state snapshot.",
+      "counts": {
+        "character-select": 3,
+        "unlisted": 5,
+        "hud-core": 95
+      },
+      "samples": [
+        {
+          "path": "/original-ui/Title/360.png",
+          "bucket": "character-select",
+          "requestAtMs": 98338,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/ChrSel/22.png",
+          "bucket": "unlisted",
+          "requestAtMs": 98787,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/ChrSel/23.png",
+          "bucket": "unlisted",
+          "requestAtMs": 98887,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Prguse/2090.png",
+          "bucket": "hud-core",
+          "requestAtMs": 98933,
+          "status": null
+        },
+        {
+          "path": "/original-ui/ChrSel/24.png",
+          "bucket": "unlisted",
+          "requestAtMs": 98937,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Title/362.png",
+          "bucket": "character-select",
+          "requestAtMs": 98979,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Title/361.png",
+          "bucket": "character-select",
+          "requestAtMs": 99110,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Prguse/2099.png",
+          "bucket": "hud-core",
+          "requestAtMs": 101245,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2096.png",
+          "bucket": "hud-core",
+          "requestAtMs": 102620,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2102.png",
+          "bucket": "hud-core",
+          "requestAtMs": 104043,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2093.png",
+          "bucket": "hud-core",
+          "requestAtMs": 105542,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2113.png",
+          "bucket": "hud-core",
+          "requestAtMs": 105654,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2090.png",
+          "bucket": "hud-core",
+          "requestAtMs": 105941,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Prguse/1933.png",
+          "bucket": "hud-core",
+          "requestAtMs": 106130,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2099.png",
+          "bucket": "hud-core",
+          "requestAtMs": 108246,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2096.png",
+          "bucket": "hud-core",
+          "requestAtMs": 109621,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2102.png",
+          "bucket": "hud-core",
+          "requestAtMs": 111043,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2093.png",
+          "bucket": "hud-core",
+          "requestAtMs": 112543,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2113.png",
+          "bucket": "hud-core",
+          "requestAtMs": 112654,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/1933.png",
+          "bucket": "hud-core",
+          "requestAtMs": 113139,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2099.png",
+          "bucket": "hud-core",
+          "requestAtMs": 115247,
+          "status": null
+        },
+        {
+          "path": "/original-ui/Prguse/2096.png",
+          "bucket": "hud-core",
+          "requestAtMs": 116621,
+          "status": null
+        }
+      ]
+    },
+    "observedImageBodyPeak": 3,
+    "earlyPrioritySetQueueAndCacheStageSnapshotsAvailable": false,
+    "fontObserver": {
+      "contextScoped": true,
+      "cleanupComplete": true,
+      "droppedRequests": 0,
+      "errors": [
+        {
+          "code": "WORKER_FONT_CDP_COMMAND_TIMEOUT",
+          "method": "Network.enable"
+        }
+      ],
+      "completeNetworkCensusClaimed": false
+    },
+    "fontRows": [
+      {
+        "font": "NotoSansTC.ttf",
+        "host": "numeron.obelisk.build",
+        "range": null,
+        "status": 200,
+        "requestAfterFirstFrameMs": -8273,
+        "finishedAfterFirstFrameMs": 69767,
+        "encodedBodyBytes": 7671645,
+        "encodedBytesComplete": true
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": "bytes=0-1048575",
+        "status": 206,
+        "requestAfterFirstFrameMs": 8007,
+        "finishedAfterFirstFrameMs": 23158,
+        "encodedBodyBytes": 262351,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": "bytes=0-1048575",
+        "status": null,
+        "requestAfterFirstFrameMs": 23157,
+        "finishedAfterFirstFrameMs": 31170,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": "bytes=1048576-2097151",
+        "status": null,
+        "requestAfterFirstFrameMs": 31170,
+        "finishedAfterFirstFrameMs": 39171,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": "bytes=1048576-2097151",
+        "status": null,
+        "requestAfterFirstFrameMs": 39171,
+        "finishedAfterFirstFrameMs": 47172,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": "bytes=0-262143",
+        "status": null,
+        "requestAfterFirstFrameMs": 47171,
+        "finishedAfterFirstFrameMs": 55171,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": "bytes=0-262143",
+        "status": null,
+        "requestAfterFirstFrameMs": 55171,
+        "finishedAfterFirstFrameMs": 63179,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": null,
+        "status": null,
+        "requestAfterFirstFrameMs": 63179,
+        "finishedAfterFirstFrameMs": 71189,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "assets.mir2.obelisk.build",
+        "range": null,
+        "status": null,
+        "requestAfterFirstFrameMs": 71189,
+        "finishedAfterFirstFrameMs": 79190,
+        "encodedBodyBytes": 0,
+        "encodedBytesComplete": false
+      },
+      {
+        "font": "NotoSans-Regular.ttf",
+        "host": "numeron.obelisk.build",
+        "range": null,
+        "status": 200,
+        "requestAfterFirstFrameMs": 72852,
+        "finishedAfterFirstFrameMs": 73448,
+        "encodedBodyBytes": 305310,
+        "encodedBytesComplete": true
+      },
+      {
+        "font": "NotoSansDevanagari-Regular.ttf",
+        "host": "numeron.obelisk.build",
+        "range": null,
+        "status": 200,
+        "requestAfterFirstFrameMs": 73449,
+        "finishedAfterFirstFrameMs": 74557,
+        "encodedBodyBytes": 99338,
+        "encodedBytesComplete": true
+      },
+      {
+        "font": "NotoSansThai-Regular.ttf",
+        "host": "numeron.obelisk.build",
+        "range": null,
+        "status": 200,
+        "requestAfterFirstFrameMs": 74559,
+        "finishedAfterFirstFrameMs": 75030,
+        "encodedBodyBytes": 19796,
+        "encodedBytesComplete": true
+      },
+      {
+        "font": "NotoSansArabic-Regular.ttf",
+        "host": "numeron.obelisk.build",
+        "range": null,
+        "status": 200,
+        "requestAfterFirstFrameMs": 75031,
+        "finishedAfterFirstFrameMs": 75573,
+        "encodedBodyBytes": 97900,
+        "encodedBytesComplete": true
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "host": "numeron.obelisk.build",
+        "range": null,
+        "status": 200,
+        "requestAfterFirstFrameMs": 79189,
+        "finishedAfterFirstFrameMs": 105365,
+        "encodedBodyBytes": 14167254,
+        "encodedBytesComplete": true
+      }
+    ]
+  },
+  "recovery": {
+    "web": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "gateway": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "independentAlias": {
+      "checkedAt": "2026-11-15T16:00:41.659Z",
+      "alias": "numeron.obelisk.build",
+      "deploymentId": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+    },
+    "publicReadback": {
+      "checkedAt": "2026-11-15T16:01:23.307Z",
+      "passed": true,
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+          "passed": true
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "passed": true
+        }
+      ]
+    },
+    "oldRows": {
+      "accounts": {
+        "preexistingRows": 310,
+        "currentRows": 311,
+        "preexistingCanonicalBytes": 2302626,
+        "preexistingSha256": "3779797fa49c82ba1af7ba0ea2fdc4a90ea36a87d0a28c2b580f88907d74ea3a",
+        "preexistingRowsUnchanged": true
+      },
+      "characters": {
+        "preexistingRows": 222,
+        "currentRows": 223,
+        "preexistingCanonicalBytes": 74956,
+        "preexistingSha256": "7dd732c23b2ab695ff2acb8e16280039239ec8d147169583dd2654578b4edd63",
+        "preexistingRowsUnchanged": true
+      },
+      "character_saves": {
+        "preexistingRows": 222,
+        "currentRows": 223,
+        "preexistingCanonicalBytes": 2593769,
+        "preexistingSha256": "f16a33dbf81c63efb7d375cb4ba06dff4fbc121f6d34acedceea41a143a3352c",
+        "preexistingRowsUnchanged": true
+      }
+    },
+    "originalConfigurationFilesUnchanged": 22,
+    "databaseRestored": false,
+    "qr": [
+      {
+        "locale": "zh-CN",
+        "passed": true,
+        "pollsAfterCancel": 0,
+        "createAttempts": 1,
+        "browserClosed": true
+      },
+      {
+        "locale": "zh-TW",
+        "passed": true,
+        "pollsAfterCancel": 0,
+        "createAttempts": 1,
+        "browserClosed": true
+      }
+    ],
+    "sshClosed": true,
+    "canaryServicesStopped": true,
+    "finalReadbackAfterRecording": {
+      "checkedAt": "2026-11-15T16:28:16.021Z",
+      "passed": true,
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+          "passed": true
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "preservedWip": {
+    "count": 29,
+    "rawSha256Unchanged": true
+  },
+  "privateRoot": "D:\\mir2-builds\\r16-hud-admission-20261115"
+}

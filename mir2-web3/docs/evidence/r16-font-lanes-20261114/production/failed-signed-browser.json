@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "revision": "6ae96fa6017d511255ac46216c034594b6fe500f",
+  "deploymentId": "dpl_2fPb8TAKHFC5phjUkKZS4oRv7CWm",
+  "publicOrigin": "https://numeron.obelisk.build",
+  "passed": false,
+  "failure": {
+    "phase": "verify-six-original-font-cache-bodies",
+    "code": "AUTOMATION_FAILED"
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "returnedToSelect": true
+  },
+  "timing": {
+    "clockEpochMs": 1794630557521,
+    "authoritativeLoginSuccessMs": 76810,
+    "startIntentMs": 107535,
+    "startAckMs": 112408,
+    "authoritativeStarterMapMs": 112416,
+    "authoritativeSelfMs": 112416,
+    "firstPlayableObservedMs": 126092,
+    "terrainPaintVerifiedMs": 194249,
+    "logoutIntentMs": 381496,
+    "logoutAckMs": 382566,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 76812,
+    "starterRegionWireHeadersMs": 78007.109,
+    "starterRegionResponseEventMs": 78008,
+    "starterRegionBodyMs": 78147,
+    "starterRegionCommitMs": 112546,
+    "sceneSpritesReadyMs": 112575,
+    "localeRequestMs": 76813,
+    "localeBodyMs": 79025,
+    "localeReadyMs": 79051,
+    "firstPlayableFrameMs": 125949,
+    "rendererBodyMs": 259392
+  },
+  "movement": {
+    "passed": true,
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "physicalInput": "trusted-playwright-keyboard-pulse",
+    "wireAtMs": 126204,
+    "authorityAtMs": 126389,
+    "authorityLatencyMs": 185,
+    "renderAtMs": 126515,
+    "originalEightSecondBudgetPassed": true
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": true,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "questUi": true,
+  "prewarm": {
+    "passed": true,
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "initialFailures": [
+      "/original-ui/Prguse/1.png",
+      "/original-ui/Prguse/4.png",
+      "/original-ui/Prguse/6.png",
+      "/original-ui/Prguse/12.png",
+      "/original-ui/Prguse/76.png",
+      "/original-ui/Prguse/827.png",
+      "/original-ui/Prguse/828.png"
+    ]
+  },
+  "sixFontsPassed": false,
+  "original120SecondNativeQualification": false,
+  "workerRestart": {
+    "attempted": false,
+    "passed": false
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "errors": {
+    "console": 59,
+    "page": 0,
+    "assetHttp": 58,
+    "failedRequests": {
+      "net::ERR_ABORTED": 268
+    }
+  },
+  "walletScope": {
+    "officialWalletOrigin": "https://wallet.dubhe.obelisk.build",
+    "phoneSizedBrowser": true,
+    "physicalPhoneCamera": false,
+    "network": "Testnet",
+    "loginOnly": true,
+    "approvalCount": 1,
+    "forbiddenOperations": 0,
+    "defaultNetworkUnmodified": true
+  },
+  "ownedDesktopBrowserClosed": true,
+  "ownedWalletBrowserClosed": true,
+  "staticAuditorsAfterSignedReplay": {
+    "attempted": false,
+    "reason": "required signed browser gate failed; preparation not run"
+  },
+  "sourceReceipts": [
+    {
+      "name": "signed-public/desktop-font-body-lanes-r1/receipt.json",
+      "bytes": 76909,
+      "sha256": "4dce6201e20334fe044e30b9088588cf6fb3024066cfeae12fdbe0ebf5e1ab28",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/first-party-signed-summary.json",
+      "bytes": 53585,
+      "sha256": "76e8cee287e713d11a8c5ce9af6b3be838b3332f9b8cb44343c3ea4ba6468bfa",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/browser-closed.json",
+      "bytes": 60,
+      "sha256": "1e861a6891a1b37d77f3bfb0da983c3d4a49098db9a95f8fe9e6806dc91d99e6",
+      "privateOriginalPreserved": true
+    },
+    {
+      "name": "signed-public/preparation.json",
+      "bytes": 10511,
+      "sha256": "151668278cae54f74334565d1413543b01fc122082ddcc4bd25ae8748ed5156d",
+      "privateOriginalPreserved": true
+    }
+  ]
+}

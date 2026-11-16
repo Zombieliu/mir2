@@ -1,0 +1,89 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+error[E0433]: cannot find type `EntityTargetPurpose` in this scope
+   --> apps\simulation\src\runtime\zone\runtime\snake_totem_ai.rs:140:25
+    |
+140 |                         EntityTargetPurpose::Search,
+    |                         ^^^^^^^^^^^^^^^^^^^ use of undeclared type `EntityTargetPurpose`
+    |
+help: consider importing this enum
+    |
+  2 + use crate::runtime::zone::runtime::entity_combat::EntityTargetPurpose;
+    |
+
+error[E0433]: cannot find type `ZoneCombatEntityRef` in this scope
+   --> apps\simulation\src\runtime\zone\runtime\stage_summons.rs:129:48
+    |
+129 |                 || !matches!(target.reference, ZoneCombatEntityRef::Player { .. })
+    |                                                ^^^^^^^^^^^^^^^^^^^ use of undeclared type `ZoneCombatEntityRef`
+    |
+help: consider importing this enum
+    |
+  4 + use crate::runtime::zone::runtime::entity_combat::ZoneCombatEntityRef;
+    |
+
+error[E0433]: cannot find type `EntityTargetPurpose` in this scope
+   --> apps\simulation\src\runtime\zone\runtime\stage_summons.rs:211:64
+    |
+211 |             self.native_entity_targets(id, &boss.position, 16, EntityTargetPurpose::Search, now_ms)
+    |                                                                ^^^^^^^^^^^^^^^^^^^ use of undeclared type `EntityTargetPurpose`
+    |
+help: consider importing this enum
+    |
+  4 + use crate::runtime::zone::runtime::entity_combat::EntityTargetPurpose;
+    |
+
+warning: unused import: `statue_centipede_ai::*`
+  --> apps\simulation\src\runtime\zone\runtime.rs:82:5
+   |
+82 | use statue_centipede_ai::*;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> apps\simulation\src\runtime\zone\runtime\snake_totem_ai.rs:138:25
+    |
+137 |                     self.native_entity_can_attack(
+    |                          ------------------------ arguments to this method are incorrect
+138 |                         enemy_id,
+    |                         ^^^^^^^^ expected `&ZoneCombatEntityRef`, found `u32`
+    |
+note: method defined here
+   --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:697:19
+    |
+697 |     pub(super) fn native_entity_can_attack(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+698 |         &self,
+699 |         source: &ZoneCombatEntityRef,
+    |         ----------------------------
+
+Some errors have detailed explanations: E0308, E0433.
+For more information about an error, try `rustc --explain E0308`.
+warning: `mir2-simulation` (lib) generated 5 warnings
+error: could not compile `mir2-simulation` (lib) due to 4 previous errors; 5 warnings emitted

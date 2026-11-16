@@ -1,0 +1,21 @@
+{
+  "parent": "1f08bfe4be38cb25ef8f3656048863a187cef8da",
+  "candidate": "r16-qr-font-8515912b",
+  "builtId": "lj7I4rCtgpbaostdWbw5n",
+  "dist": ".next-qr-font-r1",
+  "durationMs": 43262,
+  "version": "20261108-r16-08ec86d5105c",
+  "runtime": "bevy-0c553a754308e5b8",
+  "status": {
+    "code": 0,
+    "signal": null
+  },
+  "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+  "buildConfigSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+  "priorRuntimeQualifiedUnmodified": true,
+  "checkedExistingAppLibFiles": 2180,
+  "newAppLibFiles": 1,
+  "generatedOverride": 1,
+  "pinnedInputFiles": 34,
+  "privateOverlaysRestored": 8
+}

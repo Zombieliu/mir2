@@ -40,11 +40,16 @@ type Props = {
   accountId: string;
   language: string;
   onCurrentSessionRevoked: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 };
 
-export function IdentitySecurityPanel({ token, accountId, language, onCurrentSessionRevoked }: Props) {
+export function IdentitySecurityPanel({ token, accountId, language, onCurrentSessionRevoked, open: controlledOpen, onOpenChange, hideTrigger = false }: Props) {
   const zh = language.toLowerCase().startsWith("zh");
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = controlledOpen ?? localOpen;
+  const setOpen = useCallback((next: boolean) => { setLocalOpen(next); onOpenChange?.(next); }, [onOpenChange]);
   const [overview, setOverview] = useState<Overview | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +82,7 @@ export function IdentitySecurityPanel({ token, accountId, language, onCurrentSes
       throw new Error(typeof payload?.error === "string" ? payload.error : `HTTP ${response.status}`);
     }
     return payload;
-  }, [token]);
+  }, [token, setOpen]);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -162,9 +167,9 @@ export function IdentitySecurityPanel({ token, accountId, language, onCurrentSes
 
   return (
     <>
-      <button type="button" className="identity-security-trigger" onClick={() => setOpen(true)}>
+      {!hideTrigger ? <button type="button" className="identity-security-trigger" onClick={() => setOpen(true)}>
         {token ? (zh ? "账号安全" : "Account security") : (zh ? "恢复账号" : "Recover account")}
-      </button>
+      </button> : null}
       {open ? (
         <div className="identity-security-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
           <section className="identity-security-dialog" role="dialog" aria-modal="true" aria-label={zh ? "账号安全中心" : "Account security center"}>

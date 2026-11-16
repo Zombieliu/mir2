@@ -265,6 +265,10 @@ fn platinum_176_levels_8_to_21_have_a_complete_natural_product_loop() {
         .iter()
         .map(String::as_str)
         .collect::<BTreeSet<_>>();
+    assert!(
+        whitelisted_scripts.contains("BichonProvince/BorderVillage/Pedlar"),
+        "the visible Border Village merchant must support ordinary supply purchases"
+    );
     let placed_scripts = npc_info
         .npcs
         .iter()

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "scope": "Unique ordinary ten-player natural workload feasibility probe only; not formal capacity acceptance",
+  "sourceExecutable": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/release/mir2-gateway.exe",
+  "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-feasibility-04\\bin\\mir2-gateway.exe",
+  "sha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+  "bytes": 87128576,
+  "copiedAtUtc": "2026-10-24T17:22:02.9859403+00:00",
+  "capacityAccepted": false,
+  "formalRunStarted": false
+}

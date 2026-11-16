@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "personal-monster-projection-v1-owned-cargo-build",
+  "startedAtMs": 1792934038915,
+  "finishedAtMs": 1792934244609,
+  "durationMs": 205694,
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+  "sourceManifestFileSha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52",
+  "sourceManifestSha256": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+  "backendInputCount": 44,
+  "command": "cargo",
+  "arguments": [
+    "+1.95.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "targetDirectory": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target",
+  "toolchain": {
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)"
+  },
+  "visualStudio": {
+    "targetArch": "x64",
+    "linkExecutable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe"
+  },
+  "buildJobs": 4,
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "error": null,
+  "postSourceFailure": null,
+  "sourceUnchangedBeforeAfter": true,
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-personal-monster-projection-v1-release-build.log",
+    "bytes": 55865,
+    "sha256": "065a9fa0ad55a19fa38f846fb152b06c4a2053b819f2192ac930529fbb782eaa"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\release\\mir2-gateway.exe",
+    "bytes": 87363072,
+    "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+  },
+  "immutableBinary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87363072,
+    "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+  },
+  "success": true,
+  "scope": "Complete merged stdout/stderr log and actual Cargo exit tied to exact before/after committed44-input source and fresh immutable executable; no lifecycle/capacity acceptance."
+}

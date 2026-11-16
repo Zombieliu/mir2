@@ -1,0 +1,709 @@
+{
+  "passed": true,
+  "waitMs": 6919,
+  "snapshot": {
+    "runs": [
+      {
+        "name": "hud-core",
+        "label": "Core HUD",
+        "requested": 113,
+        "ok": 113,
+        "failed": 0,
+        "failedUrls": [],
+        "durationMs": 253476.40000000596,
+        "sceneCacheHits": 0,
+        "sceneCacheMisses": 0,
+        "status": "done",
+        "requestFailures": [
+          {
+            "url": "/original-ui/Prguse/1.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10003,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/4.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10002,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/6.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10002,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1.png",
+            "attempt": 2,
+            "phase": "http",
+            "status": 504,
+            "bytes": 0,
+            "durationMs": 7902
+          },
+          {
+            "url": "/original-ui/Prguse/6.png",
+            "attempt": 2,
+            "phase": "http",
+            "status": 504,
+            "bytes": 0,
+            "durationMs": 7904
+          },
+          {
+            "url": "/original-ui/Prguse/4.png",
+            "attempt": 2,
+            "phase": "http",
+            "status": 504,
+            "bytes": 0,
+            "durationMs": 7904
+          },
+          {
+            "url": "/original-ui/Prguse/1.png",
+            "attempt": 3,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/6.png",
+            "attempt": 3,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/4.png",
+            "attempt": 3,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/12.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/13.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/8.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/12.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/13.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/8.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/76.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/UI_32bit/473.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/UI_32bit/472.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/76.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/UI_32bit/473.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/UI_32bit/472.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/2034.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/826.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/827.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/2034.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/826.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10003,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/827.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/828.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1960.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1961.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/828.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1960.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10004,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1961.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10002,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1962.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1900.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1901.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1962.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1900.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1901.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1902.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10002,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1903.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1904.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1902.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10002,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1903.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1904.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1905.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1906.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1907.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1905.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10005,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1906.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10004,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1907.png",
+            "attempt": 2,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10004,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1905.png",
+            "attempt": 3,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1906.png",
+            "attempt": 3,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1907.png",
+            "attempt": 3,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1908.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1911.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10000,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1912.png",
+            "attempt": 1,
+            "phase": "headers",
+            "bytes": 0,
+            "durationMs": 10001,
+            "errorName": "TimeoutError"
+          },
+          {
+            "url": "/original-ui/Prguse/1908.png",
+            "attempt": 2,
+            "phase": "http",
+            "status": 504,
+            "bytes": 0,
+            "durationMs": 7540
+          },
+          {
+            "url": "/original-ui/Prguse/1911.png",
+            "attempt": 2,
+            "phase": "http",
+            "status": 504,
+            "bytes": 0,
+            "durationMs": 7537
+          },
+          {
+            "url": "/original-ui/Prguse/1912.png",
+            "attempt": 2,
+            "phase": "http",
+            "status": 504,
+            "bytes": 0,
+            "durationMs": 7537
+          }
+        ],
+        "recovery": {
+          "initialOk": 107,
+          "initialFailedUrls": [
+            "/original-ui/Prguse/1.png",
+            "/original-ui/Prguse/6.png",
+            "/original-ui/Prguse/4.png",
+            "/original-ui/Prguse/1905.png",
+            "/original-ui/Prguse/1906.png",
+            "/original-ui/Prguse/1907.png"
+          ],
+          "requested": 6,
+          "recoveredUrls": [
+            "/original-ui/Prguse/1.png",
+            "/original-ui/Prguse/6.png",
+            "/original-ui/Prguse/4.png",
+            "/original-ui/Prguse/1905.png",
+            "/original-ui/Prguse/1906.png",
+            "/original-ui/Prguse/1907.png"
+          ],
+          "failedUrls": [],
+          "unattemptedUrls": [],
+          "status": "done",
+          "requestFailures": []
+        }
+      }
+    ],
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "orchestrator": {
+      "backgroundMode": "afterPlayable",
+      "firstPlayable": true,
+      "requestedStage": "game",
+      "pendingBackgroundStage": null,
+      "activeBackgroundStage": null,
+      "completed": [
+        "game:background"
+      ],
+      "disposed": false
+    }
+  },
+  "originalMarkerPins": [
+    {
+      "frame": 985,
+      "bytes": 469,
+      "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+    },
+    {
+      "frame": 986,
+      "bytes": 486,
+      "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+    }
+  ],
+  "cached": [
+    {
+      "frame": 985,
+      "bytes": 469,
+      "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+    },
+    {
+      "frame": 986,
+      "bytes": 486,
+      "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+    }
+  ],
+  "samples": [
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "complete": true,
+        "width": 28,
+        "height": 29,
+        "failed": null,
+        "hidden": false
+      }
+    ]
+  ],
+  "staleRequests": []
+}

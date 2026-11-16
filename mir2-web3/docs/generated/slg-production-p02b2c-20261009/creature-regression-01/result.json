@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "creature-regression",
+  "startedUtc": "2026-10-08T23:44:21.8874741Z",
+  "finishedUtc": "2026-10-08T23:44:45.6075698Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "creature",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "80c857e4ba8314570862d317f1315a56cdcc2dc2047b9fda3c4d865505acb76c",
+  "declaredInputs": 462,
+  "sourceDrift": [],
+  "cargoLogSha256": "60857d3a0bbc899a4a9308c66e188d5627cc90584e452c4541da901ecf0f9ff6",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

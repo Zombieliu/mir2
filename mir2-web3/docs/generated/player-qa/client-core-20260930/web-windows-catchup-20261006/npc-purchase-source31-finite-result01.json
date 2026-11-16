@@ -1,0 +1,98 @@
+{
+  "owner": "Root",
+  "kind": "Source31 final selected finite checks and partial matching static builds",
+  "generatedAtUtc": "2026-10-07T18:42:51.496Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "actualSelectedPassingExecutions": 292,
+  "rustSelected": 91,
+  "nodeSelected": 201,
+  "uniqueFinalNames": 289,
+  "duplicateNodeNameExecutions": 3,
+  "newDistinctDeclaredTestsComparedSource30": 76,
+  "newDistinctBreakdown": {
+    "rust": 47,
+    "npc": 27,
+    "storage": 2
+  },
+  "actualRust": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust-finite-result01.json",
+    "bytes": 62705,
+    "sha256": "d189eea801df820c5d6428ff2a759565b93b32cbe83f22d19ee57251bc204cf1"
+  },
+  "actualSimulation": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation-finite-result02.json",
+    "bytes": 15604,
+    "sha256": "3067cc1cdc2435687929a90e47074aad0b934bb0b9cfa38d23062767f2af953b"
+  },
+  "actualWeb": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web-finite-result01.json",
+    "bytes": 39492,
+    "sha256": "75a57e523e83cb253891457d1ed09e34c9ac0c8261ead92c2903ea48cc2cf2c2"
+  },
+  "actualStrictTsc": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-tsc-finite-result01.json",
+    "bytes": 6128,
+    "sha256": "a210a9b07d1ee2fee87b915b25ae04d483498ca87b0bed9ba15df7606956a8c3"
+  },
+  "actualOfflineDependencyRecovery": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-result01.json",
+    "bytes": 160048,
+    "sha256": "d3a2911a819ac2e4b8de453f1163feda812b59a9e720178c747184752a6e929d"
+  },
+  "actualStaticBuilds": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-static-build-result01.json",
+    "bytes": 13013,
+    "sha256": "d3e53b1938870ad1f1cf3c308eec976b360d94e2ed9b3a029c74a9b2451e7218"
+  },
+  "carrySource30Publication": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-publication01.json",
+    "bytes": 22833,
+    "sha256": "35d239a75d3c3e213b60c5d7105ce8617835f42b85d5dcd9b29329abedf846b5"
+  },
+  "matrix": {
+    "currentMatrix": "feature-matrix11.json",
+    "boundedImplementedRecords": 309,
+    "boundedTotalRecords": 317,
+    "boundedPercentage": 97.47634069400631,
+    "shared": 103,
+    "legacy": 206,
+    "rawOpen": 0,
+    "common": 8,
+    "unchanged": true,
+    "overallPercentage": null,
+    "candidate100": false
+  },
+  "artifacts": {
+    "windowsNative": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+      "bytes": 106137600,
+      "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+    },
+    "gateway": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-gateway.exe",
+      "bytes": 108321280,
+      "sha256": "a536ddc827aa0945ab759e12fd65c956585961d334f7434eb4efcca249a523da"
+    },
+    "web": "Source25 Next08/Thin08 at7b1afe2706a4eec037f085d1f599d2ea987f031f; does not contain Source26–31",
+    "matchingCombinationAccepted": false
+  },
+  "verificationBoundaries": [
+    "91 Rust: Native03 36 carries only cfg(test)-exclusive fixture change, Runtime04 39 +Hero3+Core2+Bevy1+Simulation8+GameData2 actual final selections.881 and367 are declared snapshots; not all workspace/toolchain inputs.",
+    "Web07 original3 scripts actual201 executions/198 names, pre/post15504 declared superset zero drift; no live DOM mount.",
+    "Strict TSC02 actual exit0/zero diagnostics; only2 MJS superset scripts changed since. Effective TS/JSON/dependency inputs unchanged, not a fresh TSC run.",
+    "Original immutable CargoGuard/probe actual GetVolume C>=50GiB, freshness2000ms and PolicyB; compile source886 now explicitly includes2 production JSON plus .cargo/config and2 workspace manifests.",
+    "Lossless UID sidecar does not authorize unsafe numeric ABI actions; SkillModel row count is not full row-content validation; poll_flush has no deadline.",
+    "Controlled Sink/bare World/model/source-declaration checks do not prove authenticated transport, browser/Native UI, shared stock atomic ownership, performance or whole parity.",
+    "Mandatory original Core/renderer optimizer uses WebAssembly.Module API; current no-WASM-API restriction prevents invoking original builder. No helper replacement or metadata/budget bypass."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "matchingFullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalActive": true,
+  "playableDate": null
+}

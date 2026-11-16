@@ -1,0 +1,16 @@
+
+running 11 tests
+test routing::tests::zone_journey_event_bridge_tests::public_shared_magic_cooldown_survives_private_tick_acceleration ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_taoist_healing_commits_n4_flag_through_the_zone_journey_bridge ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_pending_safe_zone_snapshot_follows_zone_before_private_tick ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_walk_survives_autosave_before_tick ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival ... ok
+test routing::tests::zone_journey_event_bridge_tests::zone_journey_event_is_owner_bound_deduplicated_and_checkpointed ... ok
+test routing::tests::zone_journey_event_bridge_tests::zone_journey_event_not_needed_discards_pending_and_replay_fence ... ok
+test routing::tests::zone_journey_event_bridge_tests::zone_journey_event_presence_cleanup_discards_pending_and_replay_fence ... ok
+test routing::tests::zone_journey_event_bridge_tests::zone_journey_event_rejects_wrong_owner_stale_life_and_post_fence_receipts ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 787 filtered out; finished in 155.87s
+

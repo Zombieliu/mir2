@@ -1,0 +1,169 @@
+{
+  "schema": "mir2.r16.public-qr-network-readback.v1",
+  "entry": "https://numeron.obelisk.build/game",
+  "source": {
+    "live": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "canonical": "7dd452d45a2647b7eb2fc3ff59d016d1db51a550",
+    "canonicalCommitsAhead": 44
+  },
+  "summarySha256": "83d467619809498944645c5b2433160e6bacbdfc69ebed4d1705ef844f02aac1",
+  "signedCheckpointSha256": "702009a212b8b51f0d04b29e4847a946529ba41f61ddf5a619e567375692eeff",
+  "network": {
+    "controlledDirectPassed": true,
+    "controlledExplicitProxyAborted": true,
+    "browserTimeoutMs": 12000,
+    "directDnsUnmodified": true,
+    "hostProtocolOrTlsOverrides": false
+  },
+  "publicBrowserAttempts": [
+    {
+      "name": "direct-browser",
+      "sha256": "5a758c791b1c81e9501c994c1efcdb301cd13f5a8bd922b466e2f504ad571d30",
+      "checkedAt": "2026-11-10T00:18:59.895Z",
+      "pageStatus": 200,
+      "network": "direct",
+      "peer": {
+        "ipAddress": "104.18.16.68",
+        "port": 443
+      },
+      "tls": "TLS 1.3",
+      "create": {
+        "status": 200,
+        "finishMs": 1307,
+        "abortedMs": null,
+        "code": null,
+        "ttlSeconds": 119
+      },
+      "renderedQr": {
+        "size": [
+          240,
+          240
+        ],
+        "exactPixels": true,
+        "modules": 2809,
+        "all": 2809
+      },
+      "pending": true,
+      "mobile": {
+        "pageStatus": 200,
+        "pagePeer": {
+          "ipAddress": "172.66.44.129",
+          "port": 443
+        },
+        "pageTls": "TLS 1.3",
+        "origin": "https://wallet.dubhe.obelisk.build",
+        "routeKind": "wallet-approval",
+        "visibleUi": {
+          "walletBrand": true,
+          "numeronBrand": false,
+          "testnetMention": false,
+          "confirmationCopy": true,
+          "connectOrUnlockCopy": true,
+          "invalidOrExpiredCopy": false,
+          "visibleControls": 2
+        },
+        "emulatedViewport": {
+          "width": 390,
+          "height": 664
+        },
+        "currentApprovalSigned": false,
+        "gameEntered": false,
+        "pairedLinkMatchesMint": true
+      },
+      "loginRestored": true,
+      "failedStage": null,
+      "failedOperation": null,
+      "completed": true
+    },
+    {
+      "name": "explicit-proxy-browser",
+      "sha256": "5e19ba7de571645116952088a92cb570527084c951432511e332ed27466c6476",
+      "checkedAt": "2026-11-10T00:19:19.227Z",
+      "pageStatus": 200,
+      "network": "explicit-loopback-proxy",
+      "peer": {
+        "ipAddress": "127.0.0.1",
+        "port": 7897
+      },
+      "tls": "TLS 1.3",
+      "create": {
+        "finishMs": null,
+        "abortedMs": 11994,
+        "code": "unavailable",
+        "ttlSeconds": null
+      },
+      "pending": false,
+      "mobile": {},
+      "loginRestored": false,
+      "failedStage": "ordinary-ui-request-and-render",
+      "failedOperation": "page.waitForResponse",
+      "completed": false
+    }
+  ],
+  "freshOfficialPwaAttempt": {
+    "fullFreshEndToEnd": false,
+    "desktopPublicGameAndVersion": [
+      200,
+      200
+    ],
+    "desktopQrCreate": [
+      200
+    ],
+    "desktopVisibleQr": true,
+    "desktopPolls": {
+      "count": 16,
+      "httpErrors": 0,
+      "states": [
+        "pending"
+      ]
+    },
+    "walletPwaOnboardingHttp": 200,
+    "disposableTestnetWalletCreated": true,
+    "newGameAccountOrRole": false,
+    "mobileApproval": {
+      "phase": "load-exact-relay-session",
+      "name": "TimeoutError",
+      "messageHash": "5f473d9a3e5040afa0c697484274dd574ca42ef09dffda2b89fa1cf968ff1d44"
+    },
+    "mobileRelayNetwork": [
+      {
+        "operation": "session",
+        "method": "GET",
+        "failureCode": "net::ERR_CONNECTION_TIMED_OUT",
+        "ms": 22106
+      }
+    ],
+    "mobileLoginConsentReached": false,
+    "loginSignaturesRequested": 0,
+    "fundingOrTransactionsExecuted": false,
+    "enteredGame": false,
+    "browserContextsClosed": true,
+    "persistedTokensSignaturesOrQrImages": false
+  },
+  "relayUnauthenticatedHealth": {
+    "origin": "https://dubhe-connect-relay.zombiesliu.workers.dev",
+    "path": "/health",
+    "direct": {
+      "curlExit": 35,
+      "receivedHttp": false,
+      "connectedSeconds": 0.25708,
+      "totalSeconds": 0.270354,
+      "error": "Recv failure: Connection was reset"
+    },
+    "explicitlyProxied": {
+      "curlExit": 0,
+      "status": 200,
+      "totalSeconds": 0.457523
+    }
+  },
+  "historical": {
+    "sha256": "054292815b1af025542f38dd46b813a1e7d4524aad9b32d1acc12c341f31cc2b",
+    "sameWebRevision": true,
+    "actualApproval": true,
+    "physicalPhoneCamera": false,
+    "virtualPasskey": true,
+    "visibleGameStage": true,
+    "sceneInteractionReady": true,
+    "returnedToSelect": true
+  }
+}

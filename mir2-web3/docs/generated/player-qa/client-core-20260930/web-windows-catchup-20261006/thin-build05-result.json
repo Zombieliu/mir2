@@ -1,0 +1,84 @@
+{
+  "kind": "actual-existing-thin05-next03-spouse-build-static-audit",
+  "actualToolChunk": "475690",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05.config.json",
+    "bytes": 3721,
+    "sha256": "4146bd44bc63a3e8eefe1c3e45b3c22e6de9046e1d93b79c688906cdf7b4dc99"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05-source-snapshot.json",
+    "bytes": 25685897,
+    "sha256": "aaa62f82ce915702754316e7b757d31a16979e5b793041a49f7147cd931b4dd6"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05.outer.json",
+    "bytes": 499,
+    "sha256": "fb7d5d1280e38e060f77ad035df38aa6e856710aa5981e5cbe870540f510fa8c",
+    "value": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 69196,
+      "kind": "existing-production-thin-client-package-build05-spouse",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 19683,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-thin-build05.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05.stdout.log",
+    "bytes": 20315,
+    "sha256": "f120b097f0de7ce54dc7b5771c01ae01c4b3bce5e20721177a01d2f51fd1075e"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "report": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05-size-report.json",
+    "bytes": 20315,
+    "sha256": "f120b097f0de7ce54dc7b5771c01ae01c4b3bce5e20721177a01d2f51fd1075e"
+  },
+  "outputHashes": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05-output-hashes.json",
+    "bytes": 2921634,
+    "sha256": "7b23554735b101b6e86aac5f54158481d7ca8ee6144c45edeae5c8de38acf8c2"
+  },
+  "staticClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build05-static-closure.json",
+    "bytes": 1121684,
+    "sha256": "5e4e3fe9aaf2dafd442e8496d4bc25aa83f105a75bf9ad987cb7f8d45f4af081"
+  },
+  "package": {
+    "exists": true,
+    "bytes": 372478397,
+    "files": 7299,
+    "directories": 775,
+    "links": 0
+  },
+  "budgetBytes": 377487360,
+  "remainingBytes": 5008963,
+  "warningCount": 44,
+  "compiledSpouseControls": [
+    {
+      "relativePath": "mir2-web3/apps/web/.next-web-windows-catchup-20261006-03/static/chunks/app/page-5af213901b5bfd35.js",
+      "bytes": 2306481,
+      "sha256": "3dca72f14a95bca635aa5ea6000bb55b48f9f6bc976be7642d101441d00f2882",
+      "scope": "Compiled labels/control attributes present; handlers/UI not executed."
+    }
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

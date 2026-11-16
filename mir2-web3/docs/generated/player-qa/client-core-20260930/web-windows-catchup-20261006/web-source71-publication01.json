@@ -1,0 +1,21 @@
+{
+  "owner": "Root",
+  "kind": "Source71 scoped commit and normal push actual verification",
+  "implementationCommit": "625a3d5f43788095fe2b65144d501b452e148d8c",
+  "branch": "codex/windows-player-journey",
+  "previousRemoteCommit": "2167ffdeffabf4205e61454f81e731e48cc4f2d2",
+  "normalPush": true,
+  "forcePush": false,
+  "firstAttemptConnectionClosed": true,
+  "retryPushExitCode": 0,
+  "independentLsRemoteExitCode": 0,
+  "independentRemoteHead": "625a3d5f43788095fe2b65144d501b452e148d8c",
+  "scopedPaths": 21,
+  "ownedCodeFiles": 5,
+  "ownedDocumentPrefixes": 7,
+  "finiteQaFiles": 9,
+  "source72PendingCodeExcluded": true,
+  "indexEmptyAfterCommit": true,
+  "goalComplete": false,
+  "candidateAccepted": false
+}

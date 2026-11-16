@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "phase": "natural-assets-ready-check-create-account-no-submit",
+  "elapsedMs": 139835,
+  "staticReady": true,
+  "state": {
+    "elapsedMs": 139835,
+    "language": "zh-CN",
+    "screen": "login",
+    "fontStatus": "loaded",
+    "selectedFont": "\"Noto Sans CJK SC\",sans-serif",
+    "fontFaces": [
+      {
+        "family": "Noto Sans",
+        "status": "loaded",
+        "weight": "400"
+      },
+      {
+        "family": "Noto Sans",
+        "status": "unloaded",
+        "weight": "700"
+      },
+      {
+        "family": "Noto Sans TC",
+        "status": "unloaded",
+        "weight": "400"
+      },
+      {
+        "family": "Noto Sans CJK SC",
+        "status": "loaded",
+        "weight": "400"
+      },
+      {
+        "family": "Noto Sans Devanagari",
+        "status": "unloaded",
+        "weight": "400"
+      },
+      {
+        "family": "Noto Sans Devanagari",
+        "status": "unloaded",
+        "weight": "700"
+      },
+      {
+        "family": "Noto Sans Thai",
+        "status": "unloaded",
+        "weight": "400"
+      },
+      {
+        "family": "Noto Sans Thai",
+        "status": "unloaded",
+        "weight": "700"
+      },
+      {
+        "family": "Noto Sans Arabic",
+        "status": "unloaded",
+        "weight": "400"
+      },
+      {
+        "family": "Noto Sans Arabic",
+        "status": "unloaded",
+        "weight": "700"
+      }
+    ],
+    "cjkFontLoaded": true,
+    "loginVisible": true,
+    "brokenLoginImages": 0,
+    "registrationVisible": false,
+    "registrationReady": false,
+    "allInputValuesEmpty": true,
+    "bevyRuntimePresent": false,
+    "cache": {
+      "status": "registered",
+      "prewarm": "done",
+      "fallbackBases": 5
+    },
+    "cacheMetrics": {
+      "milestones": [
+        {
+          "name": "cacheMetricsReady",
+          "atMs": 0
+        },
+        {
+          "name": "assetManifestStart",
+          "atMs": 0.5
+        },
+        {
+          "name": "htmlReady",
+          "atMs": 87.79999995231628
+        },
+        {
+          "name": "bevyRuntimeDeferred",
+          "atMs": 88.89999997615814
+        },
+        {
+          "name": "assetManifestReady",
+          "atMs": 3481.5
+        },
+        {
+          "name": "serviceWorkerSetupQueued",
+          "atMs": 3481.5
+        },
+        {
+          "name": "serviceWorkerRegisterStart",
+          "atMs": 3481.5999999046326
+        },
+        {
+          "name": "prewarmStart:login:critical",
+          "atMs": 3482.5
+        },
+        {
+          "name": "storagePersistRequest",
+          "atMs": 3501.5999999046326
+        },
+        {
+          "name": "serviceWorkerRegistered",
+          "atMs": 3677.899999976158
+        },
+        {
+          "name": "serviceWorkerConfigDispatched",
+          "atMs": 3678.1999999284744
+        },
+        {
+          "name": "serviceWorkerReady",
+          "atMs": 3678.2999999523163
+        },
+        {
+          "name": "serviceWorkerUpdateStart",
+          "atMs": 3678.2999999523163
+        },
+        {
+          "name": "serviceWorkerConfigured",
+          "atMs": 3681.899999976158
+        },
+        {
+          "name": "prewarmDone:login:critical",
+          "atMs": 4313.5
+        },
+        {
+          "name": "sceneAssetsReady",
+          "atMs": 5280.099999904633
+        },
+        {
+          "name": "serviceWorkerUpdateDone",
+          "atMs": 5922
+        }
+      ]
+    },
+    "coreArtifacts": [
+      {
+        "path": "/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web.js",
+        "completedAndPinned": true
+      },
+      {
+        "path": "/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web_bg.wasm",
+        "completedAndPinned": true
+      },
+      {
+        "path": "/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web.js",
+        "completedAndPinned": true
+      },
+      {
+        "path": "/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web_bg.wasm",
+        "completedAndPinned": true
+      },
+      {
+        "path": "/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web.js",
+        "completedAndPinned": true
+      },
+      {
+        "path": "/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web_bg.wasm",
+        "completedAndPinned": true
+      }
+    ],
+    "loginAssets": {
+      "expected": 19,
+      "completed": 19,
+      "pendingPaths": []
+    },
+    "requestCounts": {
+      "seen": 60,
+      "pending": 1,
+      "httpErrors": 0
+    }
+  }
+}

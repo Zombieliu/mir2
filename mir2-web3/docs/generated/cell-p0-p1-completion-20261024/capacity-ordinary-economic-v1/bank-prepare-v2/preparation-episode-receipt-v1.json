@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v2",
+  "mode": "continued-partial-ordinary-capacity-bank-preparation-only",
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\source-bank-plan-pending-v1.json",
+    "bytes": 7769,
+    "sha256": "c1ed7d1d33b369c95457688ee5d258c0a3ada2e287f14eef4b67e4b8d63d165e"
+  },
+  "sourceBankCopyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\source-bank-copy-receipt-v1.json",
+    "bytes": 8341,
+    "sha256": "d42a98cd5c537c19e96991996a8051375a0123a49882b11b245d8dcd20dbbf54"
+  },
+  "sourceOriginalFailedVerdictRetained": true,
+  "sourcePreparedEligibilityInherited": false,
+  "sourceFirst3InventoryReuse": true,
+  "seederInvoked": false,
+  "loginNotBeforeOverridden": false,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "maxPrepared": 100,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\frozen-source-v1.json",
+    "bytes": 82940,
+    "sha256": "b5163917ef7ff8c4e670afca4fe8daf891b6bb11a70e7ad20d95e33f7cb86f85"
+  },
+  "driverSourceCommit": "2444c9ba01978dcc3674a04859f5594ffaebac62",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\reports\\1793047839765-82a5e52b.preparation-report.json",
+    "bytes": 12866,
+    "sha256": "07e47a4aa30335776e9f35a6e11f3249a64c2a30ceb6572e24230dea1ab8238f"
+  },
+  "rawOriginalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\reports\\1793047839765-82a5e52b.preparation.jsonl",
+    "bytes": 1385678,
+    "sha256": "535bab6c44ae77d09f5669fb11823f5b491c6c8399d8cca77c0b9dfdafd8b143"
+  },
+  "rawOriginalVerdict": {
+    "attackResults": "v2",
+    "ok": false,
+    "error": "ordinary supplies: owner/map/health changed",
+    "preparedCount": 4,
+    "testExecution": false,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "preparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\prepared-index-v1.json",
+    "bytes": 1604,
+    "sha256": "4380401719949823ab0967932fcfbbeebd6cb6190e61ae26e92c618ebaa668a0"
+  },
+  "preparedIndexValid": false,
+  "progressCheckpoints": [],
+  "progressIsColdCheckpoint": false,
+  "productionPreparationEvidence": false,
+  "preparationComplete": false,
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\cleanup-v1.json",
+    "bytes": 1036,
+    "sha256": "6e1e1ff89b5cd2e26a51671f964929260dc3b9b70b263227358dc41477f6a552"
+  },
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "gameplayEngineActivated": false,
+  "nativeResumeExercisePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

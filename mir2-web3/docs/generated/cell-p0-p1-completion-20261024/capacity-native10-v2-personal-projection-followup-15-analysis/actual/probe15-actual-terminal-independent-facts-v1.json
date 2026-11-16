@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T14:41:11.5533292Z",
+  "scope": "Independent read-only cross-check of already-ended Probe15 small terminal facts and sealed-tool execution records; no second raw replay or OS query.",
+  "verdict": {
+    "terminalEvidenceConsistent": true,
+    "actualProbePassed": true,
+    "independentProducerPassed": true,
+    "capacityAccepted": false,
+    "formalRunAccepted": false,
+    "formal11TemplateNotYetAdjudicated": true,
+    "P2Authorized": false,
+    "blockingFindingIds": []
+  },
+  "runId": "1792937158876-b61ec943",
+  "evidence": {
+    "actualFinal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\final-verification.json",
+      "bytes": 448826,
+      "sha256": "2c9b79b7073eefac5094211fc78effee51f567dd21dbdf57223701860983878b"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 812,
+      "sha256": "1822d860e1d7d2fe7cba56d28ff4137d5530a2b9571f36ab9e912af88623ba96"
+    },
+    "executionLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\actual-verification.log",
+      "bytes": 878,
+      "sha256": "24914cae556e9042f848f3a08ff2fa1264ada6698feaf6c3e58b91203d334505"
+    },
+    "toolSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 1949,
+      "sha256": "7a90c16b13593dcc6c6e62d2b8abf98e4e4fcaeb312a308074f28968d0aec1aa"
+    },
+    "originalReport": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.report.json",
+      "bytes": 324947,
+      "sha256": "14dc94b768c52135c506f1df0621ca1ea358320d8d1140d245d0aec143ec860e"
+    },
+    "rootCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "eaf8ad2feede5ff55855097d9659a4ac9a22f08ce2a224dcfd75ff5c04a5dc00"
+    }
+  },
+  "sourceCheck": {
+    "currentSealedInputsRawMatched": 9,
+    "actualRunnerCheckedInputs": 9,
+    "actualRunnerBeforeAfterIdentical": true,
+    "executionExitCode": 0,
+    "executionLogAndFinalPinsMatched": true,
+    "staticReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-ended-tool-independent-review-v1.json",
+      "bytes": 7436,
+      "sha256": "b7f466113755240130abb2fc2cc357fce114882951b66fb689504790de515151"
+    }
+  },
+  "identities": {
+    "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputs": 44,
+    "gatewaySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneSourceSha256": "2ecf0c1b01920809daa4004db7fe926092005a974c322e78bbd2a156a6326889",
+    "sourceConfigSha256": "7bb9aeaaf29fbf0aa0f051b70a3388fa06877cf65ed3b2f64957a77a1e595022"
+  },
+  "measurement": {
+    "phases": [
+      {
+        "name": "stage-2",
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.221,
+        "windowCount": 5,
+        "completed": true,
+        "passed": true
+      },
+      {
+        "name": "stage-10",
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.216,
+        "windowCount": 5,
+        "completed": true,
+        "passed": true
+      },
+      {
+        "name": "soak",
+        "configuredSeconds": 360,
+        "measuredSeconds": 360.255,
+        "windowCount": 6,
+        "completed": true,
+        "passed": true
+      }
+    ],
+    "completeRealMinuteWindows": 16,
+    "minimumWindowSeconds": 60.005,
+    "reportedContinuousWindows": 132,
+    "reportedContinuousFailures": 0,
+    "originalReportOk": true,
+    "nativeResumeCount": 0,
+    "savedVerificationCount": 0
+  },
+  "diagnosticSemantics": {
+    "hpTotalRows": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "wireRows": 5716,
+    "wireSourceValid": true,
+    "wireCountsMatch": true,
+    "wireUninstallSucceeded": true,
+    "wireComplete": true,
+    "wireSequence": {
+      "1": {
+        "rows": 3523,
+        "first": 1,
+        "last": 3523,
+        "gaps": [],
+        "gapCount": 0
+      },
+      "2": {
+        "rows": 2193,
+        "first": 1,
+        "last": 2193,
+        "gaps": [],
+        "gapCount": 0
+      }
+    }
+  },
+  "rootOsProof": {
+    "gatewayPid": 63108,
+    "monitorPid": 58736,
+    "processesAbsent": true,
+    "portsFree": true,
+    "readOnlyIndependentCheck": true,
+    "capacityAccepted": false,
+    "reviewerPerformedNewOsQuery": false
+  },
+  "producerRawReplaySummary": {
+    "rawRows": 41301,
+    "rawBytes": 29881742,
+    "rawSha256": "ee1c2288dcff01bce9a36e1ebaa44f4ce7efeecdb05a84ee3e631a79c859b300",
+    "publicCopiesVerified": 168,
+    "reviewerRepeatedRawMonitorOrRecordingScan": false
+  },
+  "limitations": [
+    "The 41301-row raw replay, 132 continuous counters and 168 public-copy verification are actual ended-verifier results, not a second replay performed by this reviewer.",
+    "This review directly checked the small original report clocks, current nine sealed source hashes, execution/log/final bindings and original Root OS-proof bytes.",
+    "Passing a 2/10-person 300/300/360 probe is only a prerequisite for a separate full formal run; P0, 100-person capacity, two-hour soak and P2 are not accepted here."
+  ],
+  "trackedOrFrozenInputsChanged": false,
+  "privateDataRead": false,
+  "servicesOrTestsStarted": false
+}

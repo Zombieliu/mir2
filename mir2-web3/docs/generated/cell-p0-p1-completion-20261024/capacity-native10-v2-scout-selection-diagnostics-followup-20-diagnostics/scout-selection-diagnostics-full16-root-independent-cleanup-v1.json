@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-26T01:28:36.8823959Z",
+  "realmStamp": "1792977848891-7c9f3b5a",
+  "runId": "1792977859487-2ff0ea0f",
+  "ownedGatewayPid": 59644,
+  "ownedGatewayProcessPresent": false,
+  "checkedPorts": [
+    17600,
+    17610
+  ],
+  "remainingOwnedPortListeners": []
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.native-r17-importer-root-integration.v1",
+  "files": [
+    {
+      "externalPath": "src/index.ts",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts",
+      "size": 3291,
+      "sha256": "7aa43b7c6cffe6ff271fcd7199ed8be95bd30783dc5b72809d57688fadcd1f40"
+    },
+    {
+      "externalPath": "src/native-r17-publication.mjs",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+      "size": 23298,
+      "sha256": "55a158a819feba4cb991682ef2dcc2c6aa7b4b1b6a22315e2d197cdcf1d9d400"
+    },
+    {
+      "externalPath": "src/native-r17-publication-plan.json",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+      "size": 42463,
+      "sha256": "4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc"
+    },
+    {
+      "externalPath": "test/native-r17-publication.test.mjs",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs",
+      "size": 32904,
+      "sha256": "cb0053d02cdf18b09bec3150678d46f41169cda8157e12016ce7691fc26a5a3d"
+    }
+  ],
+  "allLegacySourceExceptReviewedIndexHunksPreserved": true,
+  "remoteR2OrServicesChanged": false,
+  "actualAuthDeniedAndPublicationPending": true
+}

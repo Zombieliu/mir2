@@ -1,0 +1,79 @@
+{
+  "schema": "mir2.background-default-closed-case.v1",
+  "case": "dense2",
+  "sourceRevision": "32eb62774dc8ac1a49876808f6118948f137d5b6",
+  "codeIntegrationRevision": "362ea11c2498ffb7dda28d38299ed4aa6ca6c425",
+  "binarySha256": "a930e11764211d50230fdc61e79f2bc781b8abf2766838261a8e405efe0a3222",
+  "actualExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "normalBothOwnedJobsClosedNoKill": true,
+  "strictPassed": true,
+  "promotableAsNew100Predecessor": true,
+  "rootReviewStillRequiredBeforeNextCase": true,
+  "approvedNextCaseClaimCreated": false,
+  "capacityQualified": false,
+  "controllerSha256": "528cc784e9d5be20f02625f7613ca40ffe593bd9ac88ef8e6fe0ae11db847eb0",
+  "inheritanceReceiptSha256": "10ed52e24bdfc3a51aa7dcb44cb73d60ce8edbdea7adb1ef26a1d6572997b1ba",
+  "reportSha256": "264ea98ae96c96e683b37b859d9388431230eb375fa9be0562622d64a7f43340",
+  "publicReportScalars": {
+    "runCompleted": true,
+    "ok": true,
+    "evidenceValid": true,
+    "measurementSloPassed": true,
+    "offered": 64,
+    "completedOnTime": 64,
+    "timeouts": 0,
+    "notSent": 0,
+    "passedActorMinuteWindows": 2,
+    "totalActorMinuteWindows": 2,
+    "gearActorRecords": 2,
+    "gearActorRecordsPassed": 2,
+    "cleanupRecords": 2,
+    "normalLogoutCount": 2,
+    "transportCloseCount": 2,
+    "freshRecords": 2,
+    "freshPassedCount": 2,
+    "freshNormalLogoutCount": 2,
+    "freshTransportCloseCount": 2,
+    "measurementStartedAtUtc": "2026-11-15T08:53:53.449Z",
+    "measurementPlannedEndAtUtc": "2026-11-15T08:54:53.449Z",
+    "measurementEndedAtUtc": "2026-11-15T08:54:54.455Z"
+  },
+  "runtimeBudgetObservation": {
+    "status": "observed",
+    "qualified": true,
+    "proofSha256": "7145b00e60b19581ea956f7cf2bb2ae33ae741087c5e4166eb72d77816fecc2a",
+    "observedRuntimeBudgetSlots": 4,
+    "matchingStartupLinesCount": 1,
+    "gamePid": 90484,
+    "serviceStartedSha256": "eda2c963b89f44ece20e579fe0fb29605b964fd14d36ea603f0cf4fd8bbfcdda",
+    "gameStderr": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-functional2-v1\\runs\\calibration-2-v1\\game-stderr.log",
+      "bytes": 16810,
+      "sha256": "52263a66f8437679f5c6ce55240b0d482442a5e4a293ef93914436637943ee7e"
+    }
+  },
+  "publicErrors": [],
+  "previousCase": {
+    "case": "dense2",
+    "controllerSha256": "528cc784e9d5be20f02625f7613ca40ffe593bd9ac88ef8e6fe0ae11db847eb0",
+    "inheritanceReceiptSha256": "10ed52e24bdfc3a51aa7dcb44cb73d60ce8edbdea7adb1ef26a1d6572997b1ba",
+    "authLedgerSha256": "1ae424492f2fb01a345c1b1efcd4dd57fb5d1c6fd98867a11674722755e0376a",
+    "fileReadbackSha256": "bfba4d9fbb3ed613cc5a6860b7198a0308aa7b69e8ca2a7aa0bfff06f3328ea3",
+    "enhancedSha256": "35e8ef37eb837334e8d0d5dcb6e6c536d2cccfef97e602ae727d75a70d977dd9"
+  },
+  "history": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v43.json",
+    "sha256": "20d10b911e60f3055b77f205b461207f750a30db324366f1f3b9c696ce682d01",
+    "attemptCount": 2284,
+    "previousPrefixCount": 2272,
+    "newAttempts": 12,
+    "completeV42PrefixRetained": true,
+    "expectedTotalCaseReservations": 12,
+    "expectedCaseAttemptCountObserved": true,
+    "expectedCountIsNotSubstituteForActualLedger": true
+  }
+}

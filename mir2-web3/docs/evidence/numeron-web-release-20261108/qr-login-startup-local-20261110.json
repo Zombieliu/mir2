@@ -1,0 +1,68 @@
+{
+  "candidate": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+  "productionWebpackBuild": true,
+  "localFixtureRelay": true,
+  "interception": false,
+  "checks": [
+    {
+      "locale": "zh-CN",
+      "face": "Numeron Login SC",
+      "codeMs": 341,
+      "verifiedPending": true,
+      "musicAfterCancelAndNormalGesture": true,
+      "heavyBeforeQr": 0,
+      "optionalTitleFetchBeforeQr": 0,
+      "fontRequestCount": 1
+    },
+    {
+      "locale": "zh-TW",
+      "face": "Numeron Login TC",
+      "codeMs": 235,
+      "verifiedPending": true,
+      "musicAfterCancelAndNormalGesture": true,
+      "heavyBeforeQr": 0,
+      "optionalTitleFetchBeforeQr": 0,
+      "fontRequestCount": 1
+    }
+  ],
+  "passed": true,
+  "keyboard": {
+    "candidate": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "productionWebpackBuild": true,
+    "localFixtureRelay": true,
+    "interception": false,
+    "ordinaryInput": "F8",
+    "checks": [
+      {
+        "locale": "zh-CN",
+        "face": "Numeron Login SC",
+        "codeMs": 219,
+        "verifiedPending": true,
+        "musicAfterCancelAndNormalGesture": true,
+        "heavyBeforeQr": 0,
+        "optionalTitleFetchBeforeQr": 0,
+        "fontRequestCount": 1
+      },
+      {
+        "locale": "zh-TW",
+        "face": "Numeron Login TC",
+        "codeMs": 221,
+        "verifiedPending": true,
+        "musicAfterCancelAndNormalGesture": true,
+        "heavyBeforeQr": 0,
+        "optionalTitleFetchBeforeQr": 0,
+        "fontRequestCount": 1
+      }
+    ],
+    "passed": true,
+    "sha256": "3fb274a2256d1b7db5caeb4da64f1afd8fa100b76c577409ea505f3b8a42afde"
+  },
+  "r16PostIntegration": {
+    "typescript": true,
+    "walletTests": 24,
+    "stage5Groups": 517,
+    "audio": true,
+    "coreManifest": true,
+    "guardTests": 44
+  }
+}

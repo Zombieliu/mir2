@@ -1,0 +1,181 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:03:58.610351+00:00",
+  "producerReceipt": {
+    "filename": "unified-installer-build-summary.json",
+    "bytes": 7143,
+    "sha256": "014c5e12e3069bfa92ba86ad4ce01632b4871c8f2c544cae946b34f182b9d257"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.installer-build-summary.v1",
+    "recordedAtUtc": "2026-10-29T17:02:46.9078751Z",
+    "passed": true,
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "candidate": "WN-CANDIDATE-20261029-unified-11",
+    "installerVersion": "2026.10.29.11",
+    "sequence": 2026102911,
+    "finalRecheckPending": false,
+    "producerPackagePending": false,
+    "originalPendingReceiptsUnchanged": true,
+    "sourceRecipeRawBytesIdentical": true,
+    "sourceCopyFilesChecked": 23,
+    "gameInput": {
+      "files": 255079,
+      "bytes": 1270575381,
+      "extraFiles": [],
+      "exeSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+      "metadataSha256": {
+        "PACKAGE-MANIFEST.json": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+        "RELEASE-STATEMENT.json": "44A6B09F26450778F7ECBD66E5B381FCAFBE96A5CBFC7ACF94680047BEABF6C3",
+        "RELEASE-STATEMENT.p7s": "671BF2A43575EFD97124ED6DFA70D731E7317861CC1CEE1FBC91B0069FE9E29E",
+        "VERSION.json": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A"
+      }
+    },
+    "updaterInputFiles": 9,
+    "normalAndValidationUseIdenticalPayloadUpdaterAndRecipe": true,
+    "recipeSha256": "CE9FFFE7F203DD7DB97F95AE6D37D27D386B365014DA7F3C1D0E01EC3B5BAE91",
+    "payloadIncludeSha256": "7F80C75F094D22401C5FCCB7E16F4629573E61CCFC2BF1F61A2F7C9D8CC5C15B",
+    "updaterIncludeSha256": "F36DCADD53B4A7EBB81551A7B74C2449889A46171BB99DAA3843CB10CF82EAAD",
+    "normal": {
+      "passed": true,
+      "kind": "normal",
+      "exe": "F:\\mir2-build\\unified-20261029\\installer-normal-output-r11\\Numeron-Legend-of-Rebirth-20261029-unified-r11-Setup.exe",
+      "bytes": 1024372943,
+      "sha256": "387FD7140A1457C3977032C4577AD1914DE2F70C8402FF4312FAF1A0BC4F647F",
+      "fileVersion": "2026.10.29.11       ",
+      "elapsedSeconds": 58.5145485,
+      "pinnedCompilerEngine": "7.1.1",
+      "compilerSha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+      "recipeSha256": "CE9FFFE7F203DD7DB97F95AE6D37D27D386B365014DA7F3C1D0E01EC3B5BAE91",
+      "payloadIncludeSha256": "7F80C75F094D22401C5FCCB7E16F4629573E61CCFC2BF1F61A2F7C9D8CC5C15B",
+      "updaterIncludeSha256": "F36DCADD53B4A7EBB81551A7B74C2449889A46171BB99DAA3843CB10CF82EAAD",
+      "arguments": [
+        "/Qp",
+        "/OF:/mir2-build/unified-20261029/installer-normal-output-r11",
+        "F:\\mir2-build\\unified-20261029\\installer-r11\\Mir2-Invite.iss"
+      ],
+      "publicRelease": false,
+      "authenticodeStatus": "NotSigned",
+      "installation": "not performed by this helper"
+    },
+    "validation": {
+      "passed": true,
+      "kind": "validation",
+      "exe": "F:\\mir2-build\\unified-20261029\\installer-validation-output-r11\\Numeron-Legend-of-Rebirth-20261029-unified-r11-LocalValidation-Setup.exe",
+      "bytes": 1024372706,
+      "sha256": "61526737863975826E721704BAD2C03AE6FAB5485DD745EF072E74D6922BD1D3",
+      "fileVersion": "2026.10.29.11       ",
+      "elapsedSeconds": 59.6232242,
+      "pinnedCompilerEngine": "7.1.1",
+      "compilerSha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+      "recipeSha256": "CE9FFFE7F203DD7DB97F95AE6D37D27D386B365014DA7F3C1D0E01EC3B5BAE91",
+      "payloadIncludeSha256": "7F80C75F094D22401C5FCCB7E16F4629573E61CCFC2BF1F61A2F7C9D8CC5C15B",
+      "updaterIncludeSha256": "F36DCADD53B4A7EBB81551A7B74C2449889A46171BB99DAA3843CB10CF82EAAD",
+      "arguments": [
+        "/Qp",
+        "/OF:/mir2-build/unified-20261029/installer-validation-output-r11",
+        "/DMir2ValidationInstall=1",
+        "F:\\mir2-build\\unified-20261029\\installer-r11\\Mir2-Invite.iss"
+      ],
+      "publicRelease": false,
+      "authenticodeStatus": "NotSigned",
+      "installation": "not performed by this helper"
+    },
+    "independentFinalBytesAndVersionRechecked": true,
+    "producerProof": {
+      "actualProducerCompleted": true,
+      "originalReportPassed": true,
+      "originalReportRequireCurrentSource": false,
+      "originalReportCopyByteIdentical": true,
+      "postmoveTargetedReceiptPassed": true,
+      "fullGameByteChecks": 255079,
+      "outerDuplicateWrapperReportedExit0": false
+    },
+    "localCompileOnly": true,
+    "actualInstallationPerformedByThisAgent": false,
+    "guiPerformedByThisAgent": false,
+    "remoteDeployment": false,
+    "publicRelease": false,
+    "publicAuthenticode": "NotSigned",
+    "humanAccepted": false,
+    "handoff": {
+      "validationAppId": "57CF8E63-1E57-49E9-882B-EC858C59C0F9",
+      "validationGroup": "Numeron - Legend of Rebirth - Local Validation",
+      "rootPlannedValidationInstall": "F:/mir2-build/unified-20261029/installed-validation",
+      "normalAppId": "DC4E7701-25AD-4E48-9970-5C1983CBC77F",
+      "normalMustNotRunForIsolatedQa": true
+    },
+    "evidence": [
+      {
+        "path": "unified-installer-final-gate-admission.json",
+        "bytes": 986,
+        "sha256": "78390A628BEC0C7CBA12122B884594DF21A1784FF25B0DE233D07B08D747A392"
+      },
+      {
+        "path": "unified-final-targeted-receipt.json",
+        "bytes": 5848,
+        "sha256": "6AAFDBC14D3D687D63DBA0A116AF0A11321FEDF4A01916C7E71C2CBD41981F7A"
+      },
+      {
+        "path": "unified-package-verification.json",
+        "bytes": 5574,
+        "sha256": "7AF3E30AA468D17A9FFCFD8A93D860D9B5C555E1A95630028FC656B2F57C5114"
+      },
+      {
+        "path": "unified-installer-source-copy-verification.json",
+        "bytes": 7418,
+        "sha256": "0E6C19B280F43DED545A57ED0ED3BA90559B9A9A4057BCFD2F74DC3DEEAC2CB6"
+      },
+      {
+        "path": "unified-installer-prepare-run.log",
+        "bytes": 319,
+        "sha256": "4BA4E1C7A94A33886DD3A8F803208EFB82C0717E8866E888CDA2B9D61939348E"
+      },
+      {
+        "path": "unified-installer-recipe-verification.json",
+        "bytes": 3728,
+        "sha256": "EDA40C1DBDB5329A5C1319CF921A6347B0F189B490FECD28E01E6F59C59C65C4"
+      },
+      {
+        "path": "unified-installer-payload-prepare.log",
+        "bytes": 1167,
+        "sha256": "2FD553E19E2856407983CFB6480565202F6D72136CBEC55D24BA90831B9BBA6B"
+      },
+      {
+        "path": "unified-installer-updater-prepare.log",
+        "bytes": 72,
+        "sha256": "42F9065DEECBF4A4DCE4C0F2417E90214302EFD5F917ABAF7FA659B4F6DF9262"
+      },
+      {
+        "path": "unified-installer-normal-compile.json",
+        "bytes": 1053,
+        "sha256": "F8805A13912B2D71395D3845CDBDFB0EE2F5214778266B47C96785AF876E7B8C"
+      },
+      {
+        "path": "unified-installer-normal-compile.log",
+        "bytes": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "path": "unified-installer-validation-compile.json",
+        "bytes": 1115,
+        "sha256": "7F6C91C14F29000209C462442ED0725B90A028F161DAB1EF0F3C0C3D817E0A6A"
+      },
+      {
+        "path": "unified-installer-validation-compile.log",
+        "bytes": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "path": "unified-updater-execution-summary.json",
+        "bytes": 4206,
+        "sha256": "52153C34B96B6FC16DC55A2BAF2493502EF5D3DC36A1184B1FC03F365C27C3DD"
+      }
+    ]
+  },
+  "phase": "Actual normal/isolated full Inno compile admitted after final Candidate proof; original historical pending receipts preserved",
+  "installationByThisPhase": false,
+  "guiByThisPhase": false
+}

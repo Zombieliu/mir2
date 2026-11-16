@@ -1,0 +1,87 @@
+{
+  "passed": false,
+  "pin": {
+    "path": "/original-ui/Prguse/1.png",
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "beforeStatus": {
+    "version": "20261108-r16-08ec86d5105c-a60d8c73f6f7",
+    "fontMirrorFirst": true,
+    "staticAssetTiers": {
+      "critical": 19,
+      "background": 161,
+      "runtime": 0
+    },
+    "cacheCount": 5,
+    "entryCount": 224
+  },
+  "beforeCache": {
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "versions": [
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "running"
+    },
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "stopping"
+    },
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "stopped"
+    },
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "starting"
+    },
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "starting"
+    },
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "starting"
+    },
+    {
+      "versionId": "0",
+      "status": "activated",
+      "runningStatus": "running"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "fromServiceWorker": true
+    }
+  ],
+  "after": {
+    "status": 200,
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "afterStatus": {
+    "version": "20261108-r16-08ec86d5105c-a60d8c73f6f7",
+    "fontMirrorFirst": true,
+    "staticAssetTiers": {
+      "critical": 19,
+      "background": 161,
+      "runtime": 0
+    },
+    "cacheCount": 5,
+    "entryCount": 224
+  },
+  "afterCache": {
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "nativeReady": false
+}

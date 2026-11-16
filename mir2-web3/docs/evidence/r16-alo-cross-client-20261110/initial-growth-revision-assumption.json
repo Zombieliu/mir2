@@ -1,0 +1,130 @@
+{
+  "schema": "mir2-r16-alo-cross-client/1",
+  "localOnly": true,
+  "modelProvider": "rules",
+  "baseCommit": "870fdd4baa5ad205a91e39481d43f9a9416ecf32",
+  "gatewayBuild": "trade-reopen candidate gateway from df34e3b9b4, published by 870fdd4baa",
+  "gatewaySha256": "b39dad51be46d1fee7c89c6002fe79dc15621df2f75666a512559c74bded2b46",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "source": {
+    "apps/web/lib/r16-companion-client.ts": "108ae5fa740d7f22b1e0fed1194ad2c3bf9c8a07c11c9d63842d31c11cd45ec5",
+    "apps/web/app/components/r16-companion-window.tsx": "6d8f0322c406e563110ecab03ab3853876af10f3ed9280195bfeff9aee710246",
+    "apps/web/app/page.tsx": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba"
+  },
+  "phases": [
+    "reserve-own-loopback",
+    "prepare-independent-next-source",
+    "ordinary-new-file-store-provisioning",
+    "actual-headless-web-start",
+    "owner-browser-login-select-enter",
+    "teach-real-web-button-and-check-memory",
+    "first-browser-logs-out-and-actor-persists-v2",
+    "restart-owned-actor-on-same-sqlite",
+    "native-transport-reads-same-archive-revokes-and-logs-out"
+  ],
+  "events": [
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "teach",
+      "status": "ok"
+    }
+  ],
+  "pageErrors": [],
+  "startGameAcks": [
+    4
+  ],
+  "logoutAcks": 1,
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "baseline": {
+    "version": 1,
+    "partyHabits": [
+      false,
+      false,
+      false
+    ],
+    "feedback": 0
+  },
+  "taught": {
+    "version": 2,
+    "partyHabits": [
+      true,
+      true,
+      true
+    ],
+    "activeFeedback": 1,
+    "modelCalls": 0
+  },
+  "sqliteAfterWeb": {
+    "readOnly": true,
+    "sameArchiveAndActor": true,
+    "policyVersion": 2,
+    "sameFeedback": true,
+    "status": "active",
+    "operations": [
+      "teach"
+    ]
+  },
+  "restart": {
+    "actorRestarted": true,
+    "sameSqlitePath": true,
+    "actorSaveConfirmed": true,
+    "firstActorPid": 226772,
+    "secondActorPid": 216240
+  },
+  "native": {
+    "sha256": "db9a45cae222c689bf59e5dc25ffb43a0718f8c4d494c26c5847293206770301",
+    "exitCode": 0,
+    "learned": {
+      "growthRevision": 5,
+      "party": [
+        true,
+        true,
+        true
+      ],
+      "policyVersion": 2,
+      "status": "active"
+    },
+    "loginRoster": true,
+    "logoutRoster": true,
+    "passed": true,
+    "privateProjectionCleared": true,
+    "revoked": {
+      "growthRevision": 6,
+      "party": [
+        false,
+        false,
+        false
+      ],
+      "policyVersion": 3,
+      "status": "revoked"
+    },
+    "sameArchiveRealmAndActor": true,
+    "sameEnrollment": true,
+    "sameFeedback": true,
+    "scope": "real Windows gateway transport and NativeCompanionHostPlugin; no window/render or UI input",
+    "transportShutdown": true,
+    "wire": [
+      "LoginSuccess",
+      "StartGame(4)",
+      "PlayerBootstrapped",
+      "CompanionResult(list)",
+      "CompanionResult(view)",
+      "CompanionResult(revokeFeedback)",
+      "LogOutSuccess"
+    ]
+  },
+  "result": "failed",
+  "error": {
+    "name": "AssertionError",
+    "code": "ERR_ASSERTION",
+    "messageSha256": "0335992615627910ca8c4cd8f56e96164b0caa321d14fd31a3164be4f0331f99",
+    "line": "269"
+  }
+}

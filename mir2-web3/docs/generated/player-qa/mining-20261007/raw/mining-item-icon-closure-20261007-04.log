@@ -1,0 +1,22 @@
+(node:97852) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///C%3A/mir2-build/mining-sharp-loader-20261007.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "ok": true,
+  "itemCount": 1628,
+  "catalogueImageCount": 913,
+  "stackImageCount": 11,
+  "uniqueImageCount": 924,
+  "sourceLibrary": {
+    "path": "Items.Lib",
+    "sha256": "5d5f6e0251d2e5f7d87cb18352be2c2999ea311a7aa988de63dcf2fa78f9fb5a",
+    "bytes": 4035433
+  },
+  "itemCatalogue": {
+    "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+    "itemCount": 1628,
+    "catalogueImageCount": 913,
+    "stackImageCount": 11,
+    "uniqueImageCount": 924
+  }
+}

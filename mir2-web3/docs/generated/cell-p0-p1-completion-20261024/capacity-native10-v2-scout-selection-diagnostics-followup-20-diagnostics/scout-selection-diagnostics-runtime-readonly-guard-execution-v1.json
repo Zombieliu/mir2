@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T01:19:47.5620716Z",
+  "endedAt": "2026-10-26T01:19:55.3031496Z",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\readonly-source-guard-v1.mjs",
+    "--readonly-sourceguard",
+    "--repository",
+    "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+    "--expected-head",
+    "b5374083d257d375437af3de42bead159cd2b917"
+  ],
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "review": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-independent-review-v1\\final-binding-review-v2.json",
+    "bytes": 4774,
+    "sha256": "bb8fa1794aae6a06ad7a6b8b24b62ea54a830d9a0a2e732298d943bbef8e4117"
+  },
+  "sourceBefore": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 57227,
+      "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+      "bytes": 1429,
+      "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 57227,
+      "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+      "bytes": 1429,
+      "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+    }
+  ],
+  "sourcePinsUnchanged": true,
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d124d042a9c6385f29d649fa0d5d4c60a95a4ba731e89858effebc86e0fddd75"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-stderr-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "capacityRunPerformed": false,
+  "capacityAccepted": false
+}

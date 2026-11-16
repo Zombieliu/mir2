@@ -1,0 +1,13 @@
+{
+  "source": "715078944ac7a84a61b6d64901b80568a8e8d63b",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T16:25:01.481855+00:00",
+  "pid": 123456,
+  "complete": true,
+  "success": false,
+  "testsStarted": false,
+  "publicPublished": false,
+  "phase": "stopped-before-test",
+  "error": "Release pipeline failed: output must be a strict child of dist: C:\\mir2-playtest-releases\\20261001-native-r9\\candidate",
+  "finishedUtc": "2026-10-01T16:27:01.488946+00:00"
+}

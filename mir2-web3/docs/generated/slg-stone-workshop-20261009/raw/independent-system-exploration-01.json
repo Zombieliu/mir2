@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/production_review",
+  "kind": "bounded read-only architecture exploration",
+  "phase": "slg-stonecutting-20261009",
+  "createdUtc": "2026-10-09",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductDocsIndexWrites": true,
+  "isSourceOrResultAcceptance": false,
+  "objective": "Smallest usable authenticated stone generation, appraisal and cutting loop with three grades, immutable generation-time outcome, exact custody and atomic fees/results/replay recovery.",
+  "recommendation": {
+    "choice": "New independent ItemState.stone_ref containing an opaque server-generated 128/256-bit serial and public grade/table digest, plus a private AccountStore.shared_stones registry containing immutable frozen outcome/appraisal evidence and irreversible cut tombstones. Use actual workshop NPC and a typed player route; generation, appraisal and cut each commit the affected account(s), registry CAS, wallet, exact carrier and receipt together.",
+    "why": "The serial remains unchanged across whole-item storage/trade, so result does not reroll when a physical UID is normalized or an owner changes. Existing shared trade serializes full ItemState. Keeping hidden outcome outside ItemState avoids existing nested JSON client snapshot leaks. A serial is additional logical identity, not a substitute or second authority for UserItem UID.",
+    "usableFirstSlice": [
+      "Register three distinct non-stackable quantity-one rough-stone templates with explicit normal icon/item-info/i18n bindings.",
+      "Authenticate a real workshop NPC Buy/Appraise/Cut page in the current map/range and derive account/character/actor from the active session. Implement matching typed frontend actions and result receipts.",
+      "NPC Buy creates stone ItemState, random serial, frozen selected output and table digest plus the generation receipt in one durable transaction. Preview quotes never draw a result or allocate identities.",
+      "Appraise charges once and records a frozen coarse hint; Cut consumes exactly one owned original carrier and releases all frozen outputs only after an atomic successful transaction. An already-cut serial is a permanent tombstone.",
+      "Preserve serial through actual full ItemState storage and shared trade, validate global duplicate carrier identities, and use strict affected account revision + registry revision CAS for trade-versus-cut races.",
+      "Only bind tested existing real gem/material outputs. Building consumption is a later real consumer; normal ore and weapon-upgrade behavior stay intact."
+    ],
+    "notEnough": [
+      "Pure recipe/rules module without NPC/client routes.",
+      "Generic FreshItemGrant publish alone: current mining publication is in-memory and cannot atomically create and persist a sealed stone.",
+      "A per-character outcome ledger alone for tradeable stones.",
+      "Secrets in UserItem metadata, slots, stats, dura, description or sealed_info.",
+      "A random serial or a global spent set alone as an excuse to enable the existing incomplete public UID migration."
+    ]
+  },
+  "rootSpecificAnswers": {
+    "newItemStatePrivateRecord": "Full ItemState storage and shared trade can retain a serde-default private field, but a hidden seed/outcome in that field is not safely private with today's client snapshot implementation. Use a public opaque reference in ItemState and keep the frozen outcome/salt entirely in a server-only global record. If root chooses full private ItemState records, it must recursively redact all embedded JSON-string carriers and adapt every UserItem-only custody route first; this is larger than the reference+registry choice.",
+    "pgAllocator": "There is NO registered production PostgreSQL UserItemUidAllocator in the current code. UserItemUidAllocator exposes initialize_file/open_file, and trusted with_item_uid_allocator explicitly rejects any configured account_store_database_url. item_identity_reservation/item_identity_postgres/config_item_identity modules are cfg(test) unregistered candidates; their CAS reservation SQL is not a runtime binding and must not be claimed as production.",
+    "globalRegistryHeroPattern": "Tractable, but explicit. Copy the Hero domain's structural validator, fixed authorized record scope, no-deletion tombstones, source-version receipt validation, load/restore protection, mutation-plan projection and same-transaction PG CAS integration into separate stone domain files. Add new AccountStore fields/clone/normalization/schema gating and every relevant match/permit deliberately. AccountsWithGlobal only authorizes existing global shop stock; it is not a generic permission for new fields. A File-only first transaction can persist full AccountStore JSON but must still implement domain scope validation and block PG/Mirror activation until the registry's transaction projection is complete.",
+    "publicActivation": "The new serial separates immutable roll identity from physical UID but does not close the incomplete all-issuers authority/census boundary. Controlled File opt-in testing can exercise real authenticated routes, but public gateway activation remains blocked until a single deployed UID authority and every required issuer/custody/census backend are covered. Do not add a second independent high-water service."
+  },
+  "evidence": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "line": 194,
+      "observation": "authenticated enforces durable File/SourceOfTruth, writable source, active mutating account, in-world/incarnation and full save validation."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "line": 570,
+      "observation": "run_personal_production supplies existing recipe/job analogue: replay first, actual facility range, strict account+ledger CAS, UID mint under locked complete source, one save publication and later live projection."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "line": 634,
+      "observation": "Strict revision/ledger compare before staged gold, materials, outputs and receipt commit; unknown/post-commit errors are distinct and must not refund or remint."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "line": 422,
+      "observation": "commit_active_character_save_transaction reusable for per-account durable mutation, but stone global registry requires an explicitly authorized combined transaction scope."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "line": 405,
+      "observation": "begin_npc_purchase_producer is the durable non-reusable actor provisioning precedent; actual_intent at204 checks current NPC/catalog; PreparedCheckpointMerge at133 prevalidates live projection."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "line": 7,
+      "observation": "OsRng/RngCore already available, suitable server entropy primitive. No secret was read."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "line": 71,
+      "observation": "ItemState is serde-owned complete carrier; new reference must be default-compatible, bounded, validated and initialized in all Rust struct literals. UserItem metadata at104 is a wire identity sidecar, not a private result store."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "line": 1061,
+      "observation": "try_item_state_from_user_item reconstructs from a supplied ItemState/template and raw UserItem; a reference absent from UserItem is not recoverable from raw wire alone."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "line": 1578,
+      "observation": "Existing full carrier/committed validators must remain strict; add stone reference domain validation without relaxing the original carrier limits."
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/types.rs",
+      "line": 1168,
+      "observation": "UserItem is the emitted client item projection; no seed/hidden outcome in any protocol fields."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "line": 143,
+      "observation": "SharedTradeOfferItem carries full item_state_json; build_shared_trade_offer at1766 serializes ItemState after original UID reference validation."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "line": 1848,
+      "observation": "Actual shared delivery deserializes the exact ItemState, validates identity, changes container/slot and passes original normalization; the new serial can survive. This does not itself prove a new stone-registry transaction is correct."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "line": 276,
+      "observation": "Inventory and storage ItemState JSON are captured in ordinary saves (storage at287), so serde reference survives exact save/reload."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 7007,
+      "observation": "Stage5MailMessage.item_states_json retains raw ItemState JSON in snapshots."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 7335,
+      "observation": "Stage5AuctionListing.item_state_json is another embedded raw ItemState carrier; refine oven/material fields at7354/7361 add more."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 7684,
+      "observation": "WorldSnapshotClientView currently serializes the complete snapshot then selectively removes ground exactItem and a few Stage5 fields; it does NOT recursively redact ItemState JSON strings in mail/auction/refine. Private ItemState outcome would risk leaking here."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 6464,
+      "observation": "GroundDropItemPayload only carries UserItem. A new server-only ItemState reference needs full custody payload/lookup adaptation, or an explicit first-slice rejection of stone dropping; silently losing the reference is unacceptable."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 213,
+      "observation": "AccountStore has global shop/guild/Hero domains and source versions, but no stone registry."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 464,
+      "observation": "Mutation scope enum is closed; a new fixed stone scope and guild-XP combination need explicit handling. Scope validation at516 and mutation plan fields at593 must include new domain."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_scope.rs",
+      "line": 6,
+      "observation": "Hero fixed-domain validator rejects out-of-scope changes, deletions/revival and requires exact revision increment; build_mutations at66 supplies domain CAS records."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_postgres.rs",
+      "line": 59,
+      "observation": "write_hero_mutations does not independently commit: source account inventory and domain records publish in the same outer PG transaction, with record CAS and no deletes. Use as integration precedent."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 5482,
+      "observation": "Outer PG mutation-plan transaction calls domain writes before one commit and classifies missing commit response. New stone records cannot be omitted by existing PG plan or falsely acknowledged."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "line": 145,
+      "observation": "Trusted binding is one existing service handle; File-only and configured PG refusal at154. Incomplete issuer migration/default public off explicitly documented."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "line": 252,
+      "observation": "Concrete runtime allocator constructors initialize_file/open_file only; same-handle shares_authority_with at272, monotonic durable floor at286."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 179,
+      "observation": "item_identity_reservation, item_identity_postgres and config_item_identity are cfg(test), so no production PG mint path is registered."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "line": 417,
+      "observation": "Current real mine reward publishes FreshItemGrant into live inventory only. Durable sealed outcome generation needs a real account+registry transaction hook."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "line": 378,
+      "observation": "Exact Crystal name lookup can return none. Configured RubyOre is not the shipped actual Ruby template name/index830; do not claim existing RubyOre payout works."
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "line": 2776,
+      "observation": "Normal name/index lookup uses registered exact manifest templates; new stone keys/indices need deliberate game-data/item-info/icon integration."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "line": 130,
+      "observation": "Production player validation has explicit auth-sensitive variants and a default allowed case; new Stone command must explicitly reject unauthenticated actions."
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "line": 1578,
+      "observation": "BrowserCommand typed action/request precedent exists. NativeGameShop seam at9102 derives actual active identity and requires a typed committed outcome, closing on unknown."
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "line": 34,
+      "observation": "NativeOutboundCommand can carry matching typed JSON; use exact decimal/U64 identity, not JavaScript numeric UID."
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "line": 288,
+      "observation": "Existing independent Hero UI host tracks accepted pending intents and processed receipts. Add separate Stone host/model/render and sidebar entry, do not modify conflicting Hero implementation wholesale."
+    }
+  ],
+  "immutableSealContract": {
+    "generation": "Preflight actual fee, exact full capacity and complete carrier shape before mint. Generate serial/private salt once on accepted generation, choose and store frozen complete outputs under one immutable table SHA, record minted carrier+registry+fee+receipt in the same durable account commit.",
+    "randomness": "Do not derive hidden outcome from public UID or time. Frozen sampled outcome plus random private salt is sufficient for deterministic later reveal; if a public commitment is emitted, hash a canonically encoded serial+grade+table digest+private random salt+frozen output, not a low-entropy unsalted outcome that can be brute-forced.",
+    "noReroll": "Changing owner, physical slot/UID, login, table/key rotation or repeating appraisal never reseeds. Preserve original table-specific decision and original receipt; a cut cannot be undone or tombstone evicted.",
+    "ownership": "Accept only exact current authenticated durable bag carrier with the registry's serial/template/grade/version. Registry is not keyed to initial purchaser for ownership. Strict revisions serialize trade-versus-cut; reject foreign query or old owner without leaking private record existence.",
+    "duplication": "Each live serial must have at most one authoritative custody location across complete declared held/personal/shared source domains. A Cut tombstone stops repeated output but alone does not stop duplicate tradable stones from defrauding another buyer; protect carrier uniqueness too.",
+    "appraisal": "Emit only explicitly whitelisted coarse hint, public grade/cost and spent/available status to current owner. Never generic-serialize the registry, seed, selected output or private salt into UserItem/world snapshot/action error/log.",
+    "cut": "Stage source removal, full fee and the entire frozen output batch; use existing actual capacity/weight/carrier checks and the same trusted UID service. No partial delivery or fee/source mutation on a known failure. UID prefix burned during a later failure remains retired rather than reused.",
+    "receipts": "Idempotency identity includes durable actor+request+operation/serial/expected source version and quoted price/catalog digest. Exact replay returns original terminal receipt; conflicting reuse rejects. Query original receipt from confirmed durable source after reopen, not a live cache.",
+    "unknown": "Known precommit failure leaves source/wallet/ledger unchanged. Unknown publication freezes source writes across reopen/restart; exact original receipt reconciliation only. PostCommit live projection failure must not mint/refund again.",
+    "bounds": "Bound records, request grammar, output batch, checkpoint JSON and reserve space for future terminal receipts. No pruning unresolved operation records or cut tombstones without a separately safe durable archive.",
+    "custody": "Stack size1/count1; reject split/merge/equip/refine or unsupported fresh rehydration for rough stones. Adapt full original custody returns, never substitute a new serial or fresh mint."
+  },
+  "realOutputs": [
+    {
+      "itemIndex": 824,
+      "name": "CopperOre",
+      "binding": "Ordinary material; existing ore behavior retains purity/durability."
+    },
+    {
+      "itemIndex": 826,
+      "name": "SilverOre",
+      "binding": "Ordinary material."
+    },
+    {
+      "itemIndex": 827,
+      "name": "GoldOre",
+      "binding": "Protected weapon-upgrade material; do not redirect normal mining or rewrite as rough stone."
+    },
+    {
+      "itemIndex": 828,
+      "name": "BlackIronOre",
+      "binding": "Protected refinement material; do not redirect."
+    },
+    {
+      "itemIndex": 830,
+      "name": "Ruby",
+      "binding": "Shipped exact name, not RubyOre."
+    },
+    {
+      "itemIndex": 904,
+      "name": "JadeCrystal",
+      "binding": "Real material carrier; no inspected implemented building consumer, so do not label construction flow complete."
+    },
+    {
+      "itemIndex": 734,
+      "name": "BraveryGem",
+      "binding": "Type18 shape3, real existing gem upgrade/CombineItem consumer."
+    },
+    {
+      "itemIndex": 735,
+      "name": "MagicGem",
+      "binding": "Type18 shape3, real gem consumer."
+    },
+    {
+      "itemIndex": 736,
+      "name": "SoulGem",
+      "binding": "Type18 shape3, real gem consumer."
+    },
+    {
+      "itemIndex": 646,
+      "name": "DCStone",
+      "binding": "Type11, real orb/crafting resource."
+    },
+    {
+      "itemIndex": 651,
+      "name": "MCStone",
+      "binding": "Type11."
+    },
+    {
+      "itemIndex": 656,
+      "name": "SCStone",
+      "binding": "Type11."
+    }
+  ],
+  "implementationBoundary": {
+    "newFiles": [
+      "packages/stonecutting for pure bounded catalog/seal/quote/operation/state/DTOs",
+      "apps/simulation/src/config_stone_registry.rs + config_stone_scope.rs (+ PG map/domain adapter only if actually supported)",
+      "apps/simulation/src/runtime/stonecutting.rs with typed checked account transaction and actual NPC hook",
+      "separate stonecutting transaction/auth/custody/leakage tests",
+      "separate client stone dialog model/host/renderer and narrow sidebar/UI intent hooks"
+    ],
+    "necessaryExistingHooks": [
+      "AccountStore/transaction scopes/schema/copy/load/save/restore/PG mutation plan/unknown receipt handling; serialize source-only records safely",
+      "ItemState new default-compatible bounded reference, actual full item validators and functional identity/split gates",
+      "game-data registered templates/index and client info/icon translations",
+      "WorldCommand/session/gateway typed action/capability/owned result routes and actual facility validation",
+      "native/browser transport and separate UI pending receipt/reconnect/layout gates",
+      "mining durable payout integration if mining acquisition is included in this delivery"
+    ],
+    "coordination": "config.rs and runtime session/inventory/packets are high conflict and Hero is concurrently changing them. Root/frontier must own narrow integration; do not duplicate/rewrite Hero domain or unrelated state.",
+    "notImplementedNow": [
+      "No product code was written by this exploration.",
+      "No original Crystal stone gambling feature was inferred; this is a new explicit extension.",
+      "Building/territory resource consumption still needs actual construction implementation.",
+      "Current File UID is not a PG/global-all-issuer production solution.",
+      "No GUI/public gateway/installer acceptance has occurred."
+    ]
+  },
+  "requiredFocusedTests": [
+    "Three grade weighted-selection boundaries; one sealed selection per successful mint; canonical table digest and frozen output survive table/key rotation.",
+    "Actual durable authenticated NPC generation: exact fee+one registered carrier+private record+original receipt commit together; preview causes no mint/random mutation.",
+    "Actual typed Appraise: one charge/frozen coarse hint across repeats/new IDs/relogin; conflicting request reuse and foreign UID/serial query fail closed.",
+    "Actual Cut: exact source removed, all original frozen outputs and UIDs recorded in one account+registry commit, irreversible tombstone and replay no remint/recharge.",
+    "Two sessions simultaneously cut/appraise the same source: one terminal change; stale account/registry CAS preserves loser state.",
+    "Actual multi-account durable trade then new-owner Cut gives the original outcome; old-owner replay/new request cannot spend; reject duplicate serial custody.",
+    "Storage save/reload and supported whole-item return preserve serial; UserItem-only ground/mail/auction/refine routes either preserve it formally or reject without source loss.",
+    "Full bag/overweight/multioutput mismatch leaves wallet/source/registry identical; missing template/corrupt or exhausted authority never local-falls-back.",
+    "Known File rollback; commit-response loss/reopen/restart retains freeze and original receipt; failed live projection reconciles confirmed durable outcome.",
+    "Normal save/full restore cannot erase/revive cut records or change frozen result; fixed domain permits reject unrelated registry mutations.",
+    "Inspect all actual client DTO/UserItem/world snapshot including embedded JSON held/mail/auction strings and logs for hidden outcome/salt leakage.",
+    "Bounded future receipt/checkpoint capacity, invalid grade/template/serial/table bytes and input carrier budgets.",
+    "Typed native/browser IDs roundtrip above2^53; unauth/out-of-range/wrong NPC/dead/lease-lost/disabled service and incompatible old clients are rejected.",
+    "Native sidebar actual select/buy/appraise/cut pending/reconnect/recovery/fullbag result, multilingual fonts and shop/bag layering/wheel/movement input; actual UI evidence before claiming frontend acceptance."
+  ],
+  "limitations": [
+    "This note is architecture exploration, not a source/test result permit.",
+    "Some ordinary shared trade normalization can reassign physical UIDs on collision; serial preserves roll identity but does not authorize that custody behavior or close UID migration.",
+    "Existing mining output publication is not durable account atomic, and the shipped RubyOre name mismatch is separate existing behavior.",
+    "A server-only ItemState private result is not currently globally redacted at client boundaries.",
+    "No schema/security implementation or PG migrations were executed; root/frontier must independently review actual patch."
+  ],
+  "observedSourcePins": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "sha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a",
+      "length": 32768
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "length": 166139
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "b6651bd7cb9a094a2c1dc526b24f7dcb763c47108fe292e4dca058466e261eae",
+      "length": 90281
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "342fdc12cba69a42236bde6b8fdaf168e17a41d075526e0876c6ef7a47abfb45",
+      "length": 165805
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "sha256": "b8ad73bd55654b8626b9c7c20a2808845f04386f001aaf46aed08efc4d314308",
+      "length": 15146
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "sha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4",
+      "length": 8418
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "f9f7ca7fbb54d01f0edb29f9e1cb02ae3de4219448660c3ffed0c5853477e894",
+      "length": 300129
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_scope.rs",
+      "sha256": "b82af653acb3414f4cfda1fef375d791c07683e24474b33581a8281f7917a969",
+      "length": 5897
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_postgres.rs",
+      "sha256": "cc61e027e7ed449179d58a145e9984ace44b30878c70e52957b35b8872f45726",
+      "length": 7954
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+      "length": 43402
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_item_identity.rs",
+      "sha256": "33bf6ac2d1806aea75e97598e608e3a3faed9b03c90776f8dbe90ef2081a244c",
+      "length": 11014
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_registry.rs",
+      "sha256": "cd9afcebb5ed61beb4d1f69cff6ce61cd53503ad18644bb326885a6d36d0203b",
+      "length": 13380
+    }
+  ]
+}

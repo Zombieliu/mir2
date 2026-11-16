@@ -1,0 +1,5 @@
+N=6 syntax, LF identity, owned artifact paths: PASS (no CMS/publication admission)
+N=44 syntax, LF identity, owned artifact paths: PASS (no CMS/publication admission)
+N=100 syntax, LF identity, owned artifact paths: PASS (no CMS/publication admission)
+three pinned LF template hashes and current Windows hashes are explicit: PASS
+true14 default admission proof retained and old files unchanged: PASS

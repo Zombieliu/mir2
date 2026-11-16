@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T09:57:59.362Z",
+  "state": "final-functional-source-frozen-post-code-commit",
+  "scope": "Client-only, nonexclusive native chase preference within the original first4 candidate window. Functional200 tests and original thresholds are preserved; no new real game capacity claim.",
+  "repositoryBaselineCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "actualCodeCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "rustBackendModified": false,
+  "freezeBuilder": {
+    "revision": 2,
+    "script": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\freeze-driver-v2.mjs",
+      "bytes": 10309,
+      "sha256": "89e2c2973debdaa38e66644d467e06796155258baec65e1253af00497009d0da"
+    },
+    "mutationProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\freeze-driver-v2-mutation-proof-v1.json",
+      "bytes": 3551,
+      "sha256": "912d2fe27e9b149fcdd6d13cf80746439b6566064d1b19b1d0d6457d575ba59c"
+    },
+    "originalBuilderUnchanged": true
+  },
+  "sourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "changedFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+    }
+  ],
+  "otherSevenInputsUnchanged": true,
+  "otherSevenInputs": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "gitSourceBindings": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "rawBytes": 37930,
+      "rawSha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "gitAttributeFilteredObject": "e74f78a20cd51a66460ee03a8ba23903fecbab4c",
+      "committedGitObject": "e74f78a20cd51a66460ee03a8ba23903fecbab4c",
+      "committedBlobBytes": 37930,
+      "committedBlobSha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "rawBytes": 148409,
+      "rawSha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f",
+      "gitAttributeFilteredObject": "7600ad16cccca0a8a4a54cca6e737136ca922604",
+      "committedGitObject": "7600ad16cccca0a8a4a54cca6e737136ca922604",
+      "committedBlobBytes": 148409,
+      "committedBlobSha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "rawBytes": 238892,
+      "rawSha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db",
+      "gitAttributeFilteredObject": "b90e3edcb63a7e34fddd77d5be96c89c19ca1861",
+      "committedGitObject": "b90e3edcb63a7e34fddd77d5be96c89c19ca1861",
+      "committedBlobBytes": 238892,
+      "committedBlobSha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "rawBytes": 4447,
+      "rawSha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "gitAttributeFilteredObject": "f9ac9210e43da18e85ce75f70f92bf5bafae42db",
+      "committedGitObject": "f9ac9210e43da18e85ce75f70f92bf5bafae42db",
+      "committedBlobBytes": 4447,
+      "committedBlobSha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "rawBytes": 5228,
+      "rawSha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "gitAttributeFilteredObject": "217fd903024bc89a860ecd2e1c4c80b20753537b",
+      "committedGitObject": "217fd903024bc89a860ecd2e1c4c80b20753537b",
+      "committedBlobBytes": 5228,
+      "committedBlobSha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "rawBytes": 21246,
+      "rawSha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "gitAttributeFilteredObject": "a65227bec58442cd2865455730899c220d67964b",
+      "committedGitObject": "a65227bec58442cd2865455730899c220d67964b",
+      "committedBlobBytes": 21246,
+      "committedBlobSha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "rawBytes": 10882,
+      "rawSha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "gitAttributeFilteredObject": "85f3c977ead3a05a175d523b6556446de7d426c8",
+      "committedGitObject": "85f3c977ead3a05a175d523b6556446de7d426c8",
+      "committedBlobBytes": 10882,
+      "committedBlobSha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "rawBytes": 6548,
+      "rawSha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "gitAttributeFilteredObject": "01b929db555e7442044386689dc05bcd3d4b20e0",
+      "committedGitObject": "01b929db555e7442044386689dc05bcd3d4b20e0",
+      "committedBlobBytes": 6548,
+      "committedBlobSha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "rawWorktreeRewritten": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "rawBytes": 6277,
+      "rawSha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "gitAttributeFilteredObject": "7174c2d58d947ed8f9bbf78f42c2c1526e7b94f0",
+      "committedGitObject": "7174c2d58d947ed8f9bbf78f42c2c1526e7b94f0",
+      "committedBlobBytes": 6277,
+      "committedBlobSha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "rawWorktreeRewritten": false
+    }
+  ],
+  "gitBindingRule": "git hash-object --path=<repository path> --stdin applies the actual Git attributes to the tested raw bytes. Raw evidence and committed canonical objects are separately recorded; no worktree byte is normalized or rewritten.",
+  "original187": {
+    "bytes": 224817,
+    "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+    "byteIdentical": true
+  },
+  "newFocusedTests": 13,
+  "functionalVerificationOnly": true,
+  "focused": {
+    "passed": 13,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "exactSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\current-green-v1.log",
+      "bytes": 3691,
+      "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+      "bytes": 5650,
+      "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+    }
+  },
+  "redGreen": {
+    "originalMain": {
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    "originalPassed": 4,
+    "originalFailed": 9,
+    "currentPassed": 13,
+    "finallyRestored": true,
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+      "bytes": 5650,
+      "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+    }
+  },
+  "fullRegression": {
+    "passed": 200,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "durationMs": 311114,
+    "exactSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+      "bytes": 4682,
+      "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-v1.log",
+      "bytes": 53991,
+      "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+      "bytes": 4682,
+      "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+    },
+    "finalSourceFullRegressionPerformed": true,
+    "sourcePinsUnchangedAfterRun": true
+  },
+  "navigationCoordination": {
+    "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+    "maximumHintCellsPerConnection": 7,
+    "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+  },
+  "nativePatrolPlanning": {
+    "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+    "maximumFallbackCornerTargets": 4,
+    "pathExpansionLimit": 4000,
+    "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+    "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+  },
+  "measurementClock": {
+    "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+    "minimumCompleteWindowMs": 60000,
+    "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+    "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+    "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+  },
+  "nativeHpMaintenance": {
+    "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+    "hpThreshold": 0.6,
+    "reuseDelayMs": 6000,
+    "evidenceDeadlineMs": 2000,
+    "commandBudgetPerSecond": 3,
+    "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+    "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+  },
+  "nativeAttackWitness": {
+    "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+    "maximumOwnerAndTargetDistance": 6,
+    "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+    "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+    "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+  },
+  "nativeChasePreference": {
+    "freshReceiptMs": 3000,
+    "scope": "Client-side preference within the original first4 candidates, not an exclusive claim or a capacity result.",
+    "evidenceRule": "Only fresh matching nonzero chase UserLocation receipts establish monotonic first/last ACK priority; active living same-map fighters and live targets only.",
+    "selectionRule": "Keep adjacent witnessed attacks first, then prefer targets without an earlier recent pursuer; retain every original first4 candidate and path fallback.",
+    "budgetRule": "Original4-target/8-goal/4000-node searches, cadence, offered/completed accounting and finite chase budgets are unchanged.",
+    "restoreRule": "Resume clears receipt preference only; original chase elapsed time, ACK count and visited positions remain."
+  },
+  "evidenceArtifacts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-main-mutation-v1.json",
+      "bytes": 6417,
+      "sha256": "6c0d95fbcdb5f9a035da54bff5920cc47f8834daa8bb3eb0e8a8bafc05942291"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-tests-v1\\append-receipt-v2.json",
+      "bytes": 2943,
+      "sha256": "b16a417a9d5cf3a758e4ae41e66240b80896948c414f66d92bc6194666bea3af"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\source-review-v1.json",
+      "bytes": 7006,
+      "sha256": "62bade1cc1a842453274f19371adf7b7ca6cb197405560cabedb66253c8f67bd"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\test-review-v1.json",
+      "bytes": 6437,
+      "sha256": "95682bf8c45ae2784405f0ca423b0bf309402d79a4145e3784347f4ab271dcfd"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\test-review-v2.json",
+      "bytes": 7722,
+      "sha256": "e405722272174429c6794acff574d8efe120dd3dbe411fd66c4fd4f76f68d6d3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\final-integration-review-v1.json",
+      "bytes": 6013,
+      "sha256": "c92ea8583a1faea74ebd0b1890d9f878d59341e11eb481dc2829760d5d453555"
+    }
+  ],
+  "validationArchive": {
+    "topicChild": "capacity-native-chase-preference-validation-v1",
+    "committedIn": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "whitelist": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\archive-whitelist-final-v1.json",
+      "bytes": 14285,
+      "sha256": "972331b5b4a6cfe1d2ca4aae1cb0aeb1c84770b8c7270d6b4f3588bff6911994"
+    },
+    "copyReceipt": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native-chase-preference-validation-v1\\public-copy-receipt-v1.json",
+      "bytes": 10816,
+      "sha256": "66481671b9dfa02792bbbd789c4fe661ff99c0a1a11c4fe6420de6961e89ad7d"
+    }
+  },
+  "originalPolicyUnchanged": {
+    "nativeAttacksPerMinute": 18,
+    "nativePositiveHitsPerMinute": 12,
+    "minimumRunRatio": 0.5,
+    "movementIntervalMs": 750,
+    "movementP95Ms": 750,
+    "originalSearchBudget": "4 targets ×8 goals ×4000 nodes"
+  },
+  "capacityAccepted": false,
+  "realCapacityRunPerformedByThisFreeze": false,
+  "p2ImplementationPermitted": false,
+  "limitations": [
+    "A planning preference is not an exclusive reservation: two fighters may choose the same target before either receives a qualifying ACK.",
+    "TTL is optional client planning evidence; original authoritative routing, combat outcomes and all offered/completed accounting remain.",
+    "The external wire wrapper28 and adapter8 retain separate original evidence; these200 core tests do not claim to cover either.",
+    "No original failed probe/formal report is changed or promoted."
+  ]
+}

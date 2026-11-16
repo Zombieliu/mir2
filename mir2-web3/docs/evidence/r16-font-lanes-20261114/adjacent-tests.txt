@@ -1,0 +1,172 @@
+TAP version 13
+# Subtest: retiring a redundant pack preserves the published cache-namespace inventory input
+ok 1 - retiring a redundant pack preserves the published cache-namespace inventory input
+  ---
+  duration_ms: 0.7833
+  type: 'test'
+  ...
+# Subtest: low tier bounds scene prewarm and disables background packs by default
+ok 2 - low tier bounds scene prewarm and disables background packs by default
+  ---
+  duration_ms: 0.1373
+  type: 'test'
+  ...
+# Subtest: medium and high tiers preserve progressively more eager prewarming
+ok 3 - medium and high tiers preserve progressively more eager prewarming
+  ---
+  duration_ms: 0.0675
+  type: 'test'
+  ...
+# Subtest: an explicit background mode remains available for deterministic QA
+ok 4 - an explicit background mode remains available for deterministic QA
+  ---
+  duration_ms: 0.058
+  type: 'test'
+  ...
+# Subtest: initial critical prewarm contains only the lightweight login shell
+ok 5 - initial critical prewarm contains only the lightweight login shell
+  ---
+  duration_ms: 0.2046
+  type: 'test'
+  ...
+# Subtest: deferred scene stages expose deterministic follow-up pack selections
+ok 6 - deferred scene stages expose deterministic follow-up pack selections
+  ---
+  duration_ms: 0.2347
+  type: 'test'
+  ...
+# Subtest: the UI lifecycle requests each deferred prewarm stage
+ok 7 - the UI lifecycle requests each deferred prewarm stage
+  ---
+  duration_ms: 4.5881
+  type: 'test'
+  ...
+# Subtest: only the low tier prewarms raw map frames for the DOM compatibility path
+ok 8 - only the low tier prewarms raw map frames for the DOM compatibility path
+  ---
+  duration_ms: 0.086
+  type: 'test'
+  ...
+# Subtest: heavy map and effect metadata loaders stay behind the game screen boundary
+ok 9 - heavy map and effect metadata loaders stay behind the game screen boundary
+  ---
+  duration_ms: 2.0175
+  type: 'test'
+  ...
+# Subtest: playable cache acceptance waits for lifecycle background work to settle
+ok 10 - playable cache acceptance waits for lifecycle background work to settle
+  ---
+  duration_ms: 0.7012
+  type: 'test'
+  ...
+# Subtest: HUD recovery reads only failed URLs after worker configuration and keeps first failures
+ok 11 - HUD recovery reads only failed URLs after worker configuration and keeps first failures
+  ---
+  duration_ms: 521.738
+  type: 'test'
+  ...
+# Subtest: recovery does not erase a failure before its replacement body reaches EOF
+ok 12 - recovery does not erase a failure before its replacement body reaches EOF
+  ---
+  duration_ms: 498.5379
+  type: 'test'
+  ...
+# Subtest: persistent HUD failures get at most one bounded recovery sweep
+ok 13 - persistent HUD failures get at most one bounded recovery sweep
+  ---
+  duration_ms: 2365.6942
+  type: 'test'
+  ...
+# Subtest: owner cancellation during the configuration refresh prevents every recovery request
+ok 14 - owner cancellation during the configuration refresh prevents every recovery request
+  ---
+  duration_ms: 488.1882
+  type: 'test'
+  ...
+# Subtest: healthy HUD and non-HUD packs do not configure or retry
+ok 15 - healthy HUD and non-HUD packs do not configure or retry
+  ---
+  duration_ms: 498.4022
+  type: 'test'
+  ...
+# Subtest: a failed configuration refresh cannot manufacture success or retain the stage forever
+ok 16 - a failed configuration refresh cannot manufacture success or retain the stage forever
+  ---
+  duration_ms: 928.309
+  type: 'test'
+  ...
+# Subtest: canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+ok 17 - canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+  ---
+  duration_ms: 490.3132
+  type: 'test'
+  ...
+# Subtest: public prewarm progress waits for the complete response body
+ok 18 - public prewarm progress waits for the complete response body
+  ---
+  duration_ms: 12.9334
+  type: 'test'
+  ...
+# Subtest: a disconnected body is retried and only the final complete bytes are returned
+ok 19 - a disconnected body is retried and only the final complete bytes are returned
+  ---
+  duration_ms: 158.7321
+  type: 'test'
+  ...
+# Subtest: three broken bodies produce one failed prewarm metric and its URL
+ok 20 - three broken bodies produce one failed prewarm metric and its URL
+  ---
+  duration_ms: 488.8498
+  type: 'test'
+  ...
+# Subtest: body inactivity cancels the incomplete stream before retrying
+ok 21 - body inactivity cancels the incomplete stream before retrying
+  ---
+  duration_ms: 186.1738
+  type: 'test'
+  ...
+# Subtest: continuing chunks renew the idle deadline instead of imposing a total body deadline
+ok 22 - continuing chunks renew the idle deadline instead of imposing a total body deadline
+  ---
+  duration_ms: 375.6997
+  type: 'test'
+  ...
+# Subtest: an owner cancellation cannot turn a cancelled body prefix into success
+ok 23 - an owner cancellation cannot turn a cancelled body prefix into success
+  ---
+  duration_ms: 0.6493
+  type: 'test'
+  ...
+# Subtest: an owner cancellation during backoff prevents another request
+ok 24 - an owner cancellation during backoff prevents another request
+  ---
+  duration_ms: 31.2287
+  type: 'test'
+  ...
+# Subtest: a header timeout retires and retries the request
+ok 25 - a header timeout retires and retries the request
+  ---
+  duration_ms: 191.4409
+  type: 'test'
+  ...
+# Subtest: non-success responses are cancelled, bounded and never counted as warmed
+ok 26 - non-success responses are cancelled, bounded and never counted as warmed
+  ---
+  duration_ms: 472.7065
+  type: 'test'
+  ...
+# Subtest: oversized bodies are cancelled once without retaining or retrying their prefix
+ok 27 - oversized bodies are cancelled once without retaining or retrying their prefix
+  ---
+  duration_ms: 0.3649
+  type: 'test'
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8026.661

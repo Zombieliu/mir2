@@ -1,0 +1,491 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-10",
+  "production": {
+    "url": "https://numeron.obelisk.build/game",
+    "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "qr": [
+      {
+        "locale": "cold-public-zh-cn",
+        "checks": {
+          "realCodeVisible": true,
+          "firstPartyLink": true,
+          "ordinaryPending": true,
+          "ordinaryCanceled": true
+        },
+        "signed": false,
+        "starts": 1
+      },
+      {
+        "locale": "cold-public-zh-tw",
+        "checks": {
+          "realCodeVisible": true,
+          "firstPartyLink": true,
+          "ordinaryPending": true,
+          "ordinaryCanceled": true
+        },
+        "signed": false,
+        "starts": 1
+      }
+    ],
+    "releaseProtectionReadback": {
+      "requiredEnvironmentReviewer": false,
+      "protectedReleaseBranchPolicy": false
+    }
+  },
+  "build": {
+    "sourceBase": "8b80d3de359916d01fb53fee8f5884b4feaed046",
+    "id": "IM7s51ehvfS-YrNHWSpYJ",
+    "sourceFiles": {
+      "app/globals.css": "e6becfc82ef9f2fcf097c093cb0a54032f743ff3fe6c1420692c5f045585e3ac",
+      "app/page.tsx": "f09e7e59122e455acb973812801581e5d4f79108bb52840e0b9314385d6cb660",
+      "app/original-client-shell.tsx": "7b2402945cb243df8e209aeebad460f977a381ae28123bd39e85010833b3fc1a",
+      "app/components/original-client-shell-types.ts": "64efb686eab86d652d5bc6a9beb7709f6bc7c4048fffeb22aec32d593330cd9d",
+      "app/components/original-client-scene-overlays.tsx": "b2f0afb892b290f9a51ed0bce2c8a273f2683fdcbb42418e525124f4092a3a92",
+      "lib/localization.ts": "7e6c67b37a03af6d30a9745be2a6149d47011b06da89ef073aa96c07624ac692",
+      "lib/client-login-runtime.ts": "5ee80b7181a667aded6ca56d4feb7f53c3761b2ca800bbe49294f64df3f7f106",
+      "lib/r16-native-localization.ts": "f7f63d835ae99948c466c285d84f0d6b93b24be51760bc250544c73344bcd9f1",
+      "lib/r16-browser-localization.ts": "a8602ce87b5c758a941724acbaae913659f0dc73bebf85e77a1ab64e29deb707",
+      "lib/generated/r16-native-localization-startup.json": "d7168313773babd5382bda2d436a7d5825e9e6b75458cc889c34d7244255b8aa",
+      "lib/generated/r16-native-localization-gameplay.json": "287ba8aff6fe8b2c08bee5981928d7f3e8e1018d65d72c966bc47162f5ffa8ba"
+    },
+    "renderer": "bevy-84ef836460a84e03",
+    "rendererSource": {
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs": "1c58b37dc8615a48aefd86a0410fc3486f695ed1c6d56fa5bfc172b822320bed",
+      "mir2-web3/apps/game-client/client-bevy/src/portable_hp_orb_ui.rs": "b9db3c33937fe182125070ec8bf2e4db7823356ca88c791db885881365354733"
+    },
+    "runtimeArtifacts": [
+      [
+        "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+        "a40b7e86e2cb98bb55beee4f742004695602aa0b8fc6bea6b3f8117799d0e7e9"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+        "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "6c0bc68bd87d78602a60aff7567daa4e2067d1ecf7670f683172da503a19047f"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "326d3e502d06fbffc31f84d3a5c7fb7404cc843cf689040980790828341eccdf"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490"
+      ]
+    ]
+  },
+  "gutter": {
+    "baselineDirectGameNoRedirect": true,
+    "candidate": [
+      {
+        "width": 1440,
+        "height": 900,
+        "passed": true,
+        "cancelAndEscape": 3,
+        "pageErrors": 0,
+        "noReauthOnReentry": true,
+        "ordinaryLogoutAckAndReadback": true
+      },
+      {
+        "width": 1600,
+        "height": 900,
+        "passed": true,
+        "cancelAndEscape": 3,
+        "pageErrors": 0,
+        "noReauthOnReentry": true,
+        "ordinaryLogoutAckAndReadback": true
+      }
+    ],
+    "attribution": "The original reported site navigation was not reproduced from ordinary /game in the two isolated baseline viewports."
+  },
+  "health": {
+    "candidate": [
+      {
+        "renderer": "candidate-r6-webgpu",
+        "fullOrbs": [
+          {
+            "viewport": "native-size",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "w": 1024,
+              "h": 768
+            },
+            "pixels": {
+              "hp": [
+                120,
+                0,
+                0
+              ],
+              "mp": [
+                0,
+                60,
+                96
+              ],
+              "hpLow": [
+                136,
+                8,
+                8
+              ],
+              "mpLow": [
+                0,
+                64,
+                80
+              ]
+            },
+            "screenshot": "C:\\r16-hud-health-qa-20261110\\candidate-r6-webgpu\\native-size-orb.png",
+            "sha256": "39f0dd98f1db75523eeaff1df7fb6d65a673f914557794fffbe3439ce32cb816"
+          },
+          {
+            "viewport": "letterbox",
+            "layout": {
+              "x": 171,
+              "y": 0,
+              "w": 1024,
+              "h": 768
+            },
+            "pixels": {
+              "hp": [
+                120,
+                0,
+                0
+              ],
+              "mp": [
+                0,
+                60,
+                96
+              ],
+              "hpLow": [
+                136,
+                8,
+                8
+              ],
+              "mpLow": [
+                0,
+                64,
+                80
+              ]
+            },
+            "screenshot": "C:\\r16-hud-health-qa-20261110\\candidate-r6-webgpu\\letterbox-orb.png",
+            "sha256": "8156f9692e28c50272e200bac2ade9ec133a3c3eaaa57d83f15c194208d1d7a1"
+          }
+        ],
+        "targetBar": {
+          "target": true,
+          "id": "200203",
+          "rect": {
+            "x": 683,
+            "y": 432,
+            "w": 32,
+            "h": 4
+          },
+          "class": "scene-overlay-health monster is-target",
+          "fill": {
+            "style": "32px",
+            "color": "rgb(0, 192, 0)"
+          }
+        },
+        "removedFixedLeftPanel": true,
+        "authoritativeHit": {
+          "seq": 660,
+          "at": 35289.913,
+          "packet": "ObjectStruck",
+          "objectId": "200203",
+          "attackerId": "1000",
+          "targetId": null,
+          "x": 297,
+          "y": 274,
+          "direction": "DownRight"
+        },
+        "receiptSha256": "9139a40c80322f0abdf99e57f62d1f0aee90cb0f97a71a96405c93cd56072dcc"
+      },
+      {
+        "renderer": "candidate-r6-shared",
+        "fullOrbs": [
+          {
+            "viewport": "native-size",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "w": 1024,
+              "h": 768
+            },
+            "pixels": {
+              "hp": [
+                120,
+                0,
+                0
+              ],
+              "mp": [
+                0,
+                60,
+                96
+              ],
+              "hpLow": [
+                136,
+                8,
+                8
+              ],
+              "mpLow": [
+                0,
+                64,
+                80
+              ]
+            },
+            "screenshot": "C:\\r16-hud-health-qa-20261110\\candidate-r6-shared\\native-size-orb.png",
+            "sha256": "873a954478a704152a2a8de95e06f703002fcd0297fae41d04a64e49b7e56b86"
+          },
+          {
+            "viewport": "letterbox",
+            "layout": {
+              "x": 171,
+              "y": 0,
+              "w": 1024,
+              "h": 768
+            },
+            "pixels": {
+              "hp": [
+                120,
+                0,
+                0
+              ],
+              "mp": [
+                0,
+                60,
+                96
+              ],
+              "hpLow": [
+                136,
+                8,
+                8
+              ],
+              "mpLow": [
+                0,
+                64,
+                80
+              ]
+            },
+            "screenshot": "C:\\r16-hud-health-qa-20261110\\candidate-r6-shared\\letterbox-orb.png",
+            "sha256": "38fd20c6279209621bc61993ca0fd3191256e043567f5a4e43b1773cfdebe769"
+          }
+        ],
+        "targetBar": {
+          "target": true,
+          "id": "200203",
+          "rect": {
+            "x": 691,
+            "y": 438,
+            "w": 32,
+            "h": 4
+          },
+          "class": "scene-overlay-health monster is-target",
+          "fill": {
+            "style": "32px",
+            "color": "rgb(0, 192, 0)"
+          }
+        },
+        "removedFixedLeftPanel": true,
+        "authoritativeHit": {
+          "seq": 660,
+          "at": 35289.932,
+          "packet": "ObjectStruck",
+          "objectId": "200203",
+          "attackerId": "1000",
+          "targetId": null,
+          "x": 297,
+          "y": 274,
+          "direction": "DownRight"
+        },
+        "receiptSha256": "19b2a5ec0f4d2b895c000af09639897909e3d5e1a0dddc8a78c334a793de5b2d"
+      }
+    ],
+    "colorBands": {
+      "aboveHalf": "green",
+      "aboveQuarter": "orange",
+      "quarterOrLess": "red"
+    },
+    "colorScope": "All bands were exercised by rendered component fixtures; real browser used a full-health monster and a lethal hit."
+  },
+  "movement": [
+    {
+      "renderer": "webgpu",
+      "initial": {
+        "x": 298,
+        "y": 269
+      },
+      "firstAccepted": {
+        "x": 297,
+        "y": 269
+      },
+      "peerEntered": {
+        "x": 296,
+        "y": 269
+      },
+      "correction": {
+        "x": 297,
+        "y": 269
+      },
+      "correctionToNextMs": 442.22,
+      "detour": [
+        {
+          "x": 296,
+          "y": 270
+        },
+        {
+          "x": 294,
+          "y": 268
+        },
+        {
+          "x": 293,
+          "y": 269
+        }
+      ],
+      "savedBrowser": {
+        "x": 293,
+        "y": 269
+      },
+      "savedPeer": {
+        "x": 296,
+        "y": 269
+      },
+      "receiptSha256": "c14422dbd8417c12239302aea094bc645b8983374825157e7219486c8adca501"
+    },
+    {
+      "renderer": "webgl2-shared",
+      "initial": {
+        "x": 298,
+        "y": 269
+      },
+      "firstAccepted": {
+        "x": 297,
+        "y": 269
+      },
+      "peerEntered": {
+        "x": 296,
+        "y": 269
+      },
+      "correction": {
+        "x": 297,
+        "y": 269
+      },
+      "correctionToNextMs": 492.96,
+      "detour": [
+        {
+          "x": 296,
+          "y": 270
+        },
+        {
+          "x": 294,
+          "y": 268
+        },
+        {
+          "x": 293,
+          "y": 269
+        }
+      ],
+      "savedBrowser": {
+        "x": 293,
+        "y": 269
+      },
+      "savedPeer": {
+        "x": 296,
+        "y": 269
+      },
+      "receiptSha256": "1031f94c867c91f4f1bec7228c37c2e4f5bf08c92c65d8fb2f78a1d20dd2683f"
+    }
+  ],
+  "locale": {
+    "testedBuild": {
+      "base": "8b80d3de359916d01fb53fee8f5884b4feaed046",
+      "id": "Vi4fPe_vuL1g7X-8g3w4W",
+      "receiptSha256": "3fdc9b104a3c23b927f4dea86276efd243936b177a96025a046cd400ae92e1c1"
+    },
+    "locales": 10,
+    "initialLargestDecodedBytesBefore": 7476158,
+    "initialLargestDecodedBytesR6": 2847446,
+    "contentPack": [
+      {
+        "url": "/_next/static/chunks/r16-gameplay-locales.4ca10922dadccacd.js",
+        "sha256": "93126da9b89d8e1af8234634b2418b7a71bb0b5bfb1c5726ff67adf01e9a2260",
+        "decodedBytes": 4628024,
+        "gameplayKeyCount": 5
+      }
+    ],
+    "nativeEntries": 9907
+  },
+  "tests": {
+    "selectedNodePassed": 164,
+    "stage5GroupsPassed": 520,
+    "sameStorageFixtureFailures": [
+      "actual Page cross-item gates lock reserved source and empty destination but allow unrelated items",
+      "actual confirmed session retirement releases storage cells and retains monotonic request IDs",
+      "Pearl actual Storage Page service retirement preserves wallet and session retirement clears it",
+      "Group confirmed session retirement clears pending operations and group-only hidden target history",
+      "Group a successful new StartGame retires old pending after physical reconnect while a rejected StartGame does not",
+      "Page scene and closed-window retirement retain entered budget but successful new StartGame uses the real new session"
+    ]
+  },
+  "sources": {
+    "exactProductionBuild": {
+      "path": "C:/r16-locale-split-20261110/production-r6/build-receipt.json",
+      "sha256": "b931503446abdcc2f1523cfee45c203e022d9ebc9233083cacd62d78c644d3a9"
+    },
+    "gutterR6": {
+      "path": "C:/r16-gutter-exit-qa-20261110/candidate-wide-final-r3/gutter-receipt.json",
+      "sha256": "8eaaa24558276c5ff3a1a3e3f1725c60431da1fb761cdb1a4613cf3126cad433"
+    },
+    "gutterBaseline": {
+      "path": "C:/r16-gutter-exit-qa-20261110/baseline-wide-r1/gutter-receipt.json",
+      "sha256": "ed2e69112102462659137877654e270f0ebbdc75773150cd1a8329cb003cbdcf"
+    },
+    "gutterInitialEscapeFailure": {
+      "path": "C:/r16-gutter-exit-qa-20261110/candidate-wide-r2/gutter-receipt.json",
+      "sha256": "cfd4fa9ef41f1863b20413772b65873e74e43113973439272a4395e75f514e75"
+    },
+    "hudR6PixelComparison": {
+      "path": "C:/r16-hud-health-qa-20261110/final-r6-pixel-comparison.json",
+      "sha256": "9e53a321a6b4205ece9949cde43d4e93fb248c92867f5159f68dcfe12e457b6a"
+    },
+    "routeR6ActualWorldCollision": {
+      "path": "F:/r16-durable-route-browser-20261110/r6-durable-route-browser-seal.json",
+      "sha256": "bc133ad84afbfc61796b7b9a2d6dba99a2a3e8f1d3a9dd998dafd74b9d7861f4"
+    },
+    "localeR2TenLanguageMatrix": {
+      "path": "C:/r16-locale-qr-qa-20261110/locale-split-final-verification.json",
+      "sha256": "8aa7088aca645a7ca1834e35cb7bc8aebfca7c1c046220939109c7b16a25a2a4"
+    },
+    "publicOrdinaryQr-zh-cn": {
+      "path": "C:/r16-locale-split-20261110/cold-public-zh-cn.json",
+      "sha256": "08e58de3045c9128ecfad98d80f488a0031ee00df185048bc0faff328278c8bf"
+    },
+    "publicOrdinaryQr-zh-tw": {
+      "path": "C:/r16-locale-split-20261110/cold-public-zh-tw.json",
+      "sha256": "363dbebb30733a0f67741768ddaaf079b6079b654120b561d109dee56b03020a"
+    }
+  },
+  "images": [
+    {
+      "name": "gutter-confirm.png",
+      "sha256": "8a889bdc8fbbbf063f42f64e5d66a91f699f12ec8d4e121f5e2a45b3d1402355",
+      "bytes": 1206415
+    },
+    {
+      "name": "red-blue-orbs.png",
+      "sha256": "8156f9692e28c50272e200bac2ade9ec133a3c3eaaa57d83f15c194208d1d7a1",
+      "bytes": 1525247
+    }
+  ],
+  "attackMotionPrototype": {
+    "path": "F:/r16-action-motion-typed-20261110/r16-attack-motion-typed-seal.json",
+    "sha256": "a89e9d5fc14d3349478103243c6dba3173742de6c86244aa51cc1b751046eeb3",
+    "integrated": false,
+    "requires": "ordinary browser and supported target Gateway topology; preserve legacy recovery when typed execution is unavailable"
+  }
+}

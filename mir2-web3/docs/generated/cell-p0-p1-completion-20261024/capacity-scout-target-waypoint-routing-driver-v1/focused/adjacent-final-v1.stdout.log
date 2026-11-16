@@ -1,0 +1,360 @@
+TAP version 13
+# Subtest: native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+ok 1 - native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+  ---
+  duration_ms: 5.9726
+  type: 'test'
+  ...
+# Subtest: native attack witness uses nearest eligible peer with original order on equal separation
+ok 2 - native attack witness uses nearest eligible peer with original order on equal separation
+  ---
+  duration_ms: 0.4905
+  type: 'test'
+  ...
+# Subtest: native attack witness is reselected with its current namespace and cursor immediately before the real send
+ok 3 - native attack witness is reselected with its current namespace and cursor immediately before the real send
+  ---
+  duration_ms: 2.503
+  type: 'test'
+  ...
+# Subtest: native attack witness loss before send retains the original incomplete opportunity without a fake attack
+ok 4 - native attack witness loss before send retains the original incomplete opportunity without a fake attack
+  ---
+  duration_ms: 25.8197
+  type: 'test'
+  ...
+# Subtest: native initial no-witness selection can use another genuinely witnessed adjacent target
+ok 5 - native initial no-witness selection can use another genuinely witnessed adjacent target
+  ---
+  duration_ms: 0.4284
+  type: 'test'
+  ...
+# Subtest: native initial no-witness target with no approach route retains the original bounded scout fallback
+ok 6 - native initial no-witness target with no approach route retains the original bounded scout fallback
+  ---
+  duration_ms: 0.9383
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+ok 7 - native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+  ---
+  duration_ms: 1.3911
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+ok 8 - native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+  ---
+  duration_ms: 1.0478
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+ok 9 - native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+  ---
+  duration_ms: 1.2864
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+ok 10 - native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+  ---
+  duration_ms: 1.2
+  type: 'test'
+  ...
+# Subtest: native witnessed approach skips cheap ineligible targets before the original four path-target limit
+ok 11 - native witnessed approach skips cheap ineligible targets before the original four path-target limit
+  ---
+  duration_ms: 0.4848
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a not-ready observer without replacing real membership with distance
+ok 12 - native witnessed approach rejects a not-ready observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1867
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a dead observer without replacing real membership with distance
+ok 13 - native witnessed approach rejects a dead observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1182
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+ok 14 - native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1922
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+ok 15 - native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1311
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-target observer without replacing real membership with distance
+ok 16 - native witnessed approach rejects a missing-target observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1797
+  type: 'test'
+  ...
+# Subtest: native witnessed approach retains the original four path targets and eight adjacent destinations
+ok 17 - native witnessed approach retains the original four path targets and eight adjacent destinations
+  ---
+  duration_ms: 102.3209
+  type: 'test'
+  ...
+# (node:55740) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+ok 18 - native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+  ---
+  duration_ms: 8.0953
+  type: 'test'
+  ...
+# Subtest: scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+ok 19 - scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+  ---
+  duration_ms: 0.962
+  type: 'test'
+  ...
+# Subtest: temporary observer coverage loss and restore do not wash a live pursuit movement budget
+ok 20 - temporary observer coverage loss and restore do not wash a live pursuit movement budget
+  ---
+  duration_ms: 0.74
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 21 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 0.3507
+  type: 'test'
+  ...
+# Subtest: native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+ok 22 - native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+  ---
+  duration_ms: 0.464
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 23 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 4.1388
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 24 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.4282
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 25 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.4923
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 26 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.3451
+  type: 'test'
+  ...
+# Subtest: native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+ok 27 - native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+  ---
+  duration_ms: 0.136
+  type: 'test'
+  ...
+# Subtest: native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+ok 28 - native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+  ---
+  duration_ms: 0.2465
+  type: 'test'
+  ...
+# Subtest: native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+ok 29 - native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+  ---
+  duration_ms: 1
+  type: 'test'
+  ...
+# Subtest: native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+ok 30 - native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+  ---
+  duration_ms: 1.1241
+  type: 'test'
+  ...
+# Subtest: native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence
+ok 31 - native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence
+  ---
+  duration_ms: 6.9536
+  type: 'test'
+  ...
+# Subtest: observer scout preference keeps the original cyclic no-hint plan and emits no selection credit
+ok 32 - observer scout preference keeps the original cyclic no-hint plan and emits no selection credit
+  ---
+  duration_ms: 0.2338
+  type: 'test'
+  ...
+# Subtest: observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility
+ok 33 - observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility
+  ---
+  duration_ms: 0.6543
+  type: 'test'
+  ...
+# Subtest: observer scout preference preserves the exact cyclic fallback when its hint fails within the four-search budget
+ok 34 - observer scout preference preserves the exact cyclic fallback when its hint fails within the four-search budget
+  ---
+  duration_ms: 0.9174
+  type: 'test'
+  ...
+# Subtest: observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback
+ok 35 - observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback
+  ---
+  duration_ms: 3.4435
+  type: 'test'
+  ...
+# Subtest: observer scout preference allows expired exclusions and own claims using wall-clock eligibility
+ok 36 - observer scout preference allows expired exclusions and own claims using wall-clock eligibility
+  ---
+  duration_ms: 0.7164
+  type: 'test'
+  ...
+# Subtest: observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets
+ok 37 - observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets
+  ---
+  duration_ms: 0.3742
+  type: 'test'
+  ...
+# Subtest: observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts
+ok 38 - observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts
+  ---
+  duration_ms: 0.3803
+  type: 'test'
+  ...
+# Subtest: observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit
+ok 39 - observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit
+  ---
+  duration_ms: 12.939
+  type: 'test'
+  ...
+# Subtest: observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup
+ok 40 - observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup
+  ---
+  duration_ms: 1.2849
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting
+ok 41 - scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting
+  ---
+  duration_ms: 1.5897
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries
+ok 42 - scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries
+  ---
+  duration_ms: 7.2641
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence compares declared coordinates across clusters rather than local home indices
+ok 43 - scout anti-convergence compares declared coordinates across clusters rather than local home indices
+  ---
+  duration_ms: 1.2777
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence retains original hint order when all hints are shared or only one remains
+ok 44 - scout anti-convergence retains original hint order when all hints are shared or only one remains
+  ---
+  duration_ms: 2.1648
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit
+ok 45 - scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit
+  ---
+  duration_ms: 0.7018
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence failed preferred paths keep the exact cyclic fallback within four total searches
+ok 46 - scout anti-convergence failed preferred paths keep the exact cyclic fallback within four total searches
+  ---
+  duration_ms: 1.9086
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence does not introduce distance sorting when no other scout shares a hint
+ok 47 - scout anti-convergence does not introduce distance sorting when no other scout shares a hint
+  ---
+  duration_ms: 0.33
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+ok 48 - scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+  ---
+  duration_ms: 0.671
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+ok 49 - scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+  ---
+  duration_ms: 0.2906
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics count mixed alternatives and report the existing stable reordering
+ok 50 - scout selection diagnostics count mixed alternatives and report the existing stable reordering
+  ---
+  duration_ms: 0.4196
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+ok 51 - scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+  ---
+  duration_ms: 0.301
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+ok 52 - scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+  ---
+  duration_ms: 0.5406
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+ok 53 - scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+  ---
+  duration_ms: 5.1198
+  type: 'test'
+  ...
+# Subtest: scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+ok 54 - scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+  ---
+  duration_ms: 0.858
+  type: 'test'
+  ...
+# Subtest: scout target waypoint invalidation safely falls back without rebuilding the finite scout
+ok 55 - scout target waypoint invalidation safely falls back without rebuilding the finite scout
+  ---
+  duration_ms: 5.0065
+  type: 'test'
+  ...
+# Subtest: scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+ok 56 - scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+  ---
+  duration_ms: 0.8175
+  type: 'test'
+  ...
+# Subtest: scout target waypoint does not redirect an ordinary established scout or reset its saved state
+ok 57 - scout target waypoint does not redirect an ordinary established scout or reset its saved state
+  ---
+  duration_ms: 0.2247
+  type: 'test'
+  ...
+# Subtest: scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+ok 58 - scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+  ---
+  duration_ms: 0.7854
+  type: 'test'
+  ...
+1..58
+# tests 58
+# suites 0
+# pass 58
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 302.0773

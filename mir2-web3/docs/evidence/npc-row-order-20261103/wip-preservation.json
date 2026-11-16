@@ -1,0 +1,12 @@
+{
+  "checked": 299,
+  "unchanged": 295,
+  "intentionallyChanged": [
+    "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+    "mir2-web3/apps/game-client/runtime/src/lib.rs",
+    "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md"
+  ],
+  "unexpectedChanges": [],
+  "originalIndexUntouched": true
+}

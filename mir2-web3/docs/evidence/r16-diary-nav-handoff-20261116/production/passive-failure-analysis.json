@@ -1,0 +1,38 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "originalAccepted": false,
+  "failure": {
+    "phase": "in-memory-qr-ready",
+    "code": "APPROVED_WALLET_LOGIN_NOT_OBSERVED"
+  },
+  "walletApprovalPassed": true,
+  "exactAppAndSessionMatched": true,
+  "gameLoginExchangeRequests": 0,
+  "gameWebSockets": 0,
+  "observedPollResponseStatuses": [
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "observedStates": [
+    "pending"
+  ],
+  "perPollTimestampsAvailable": false,
+  "interpretation": "The game did not progress from wallet approval into its game login exchange. The response counts alone cannot establish whether a pending response occurred after approval. This evidence does not identify caching, HTTP body stalling, expiry, or a unique product root cause.",
+  "visualAndMovementGates": "not reached",
+  "unchangedCandidateRetryAuthorizedByThisEvidence": false,
+  "next": "Correlate a separate controlled run with passive request, response and body timing around the single real approval; retain the original failed run and deadlines."
+}

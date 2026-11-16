@@ -1,0 +1,9 @@
+
+running 4 tests
+test shared_gateway_billing_rejects_another_owned_character_while_active ... ok
+test shared_gateway_expired_owner_can_refresh_buy_activate_and_replay ... ok
+test shared_gateway_old_consumed_uid_cannot_consume_the_next_card ... ok
+test shared_gateway_refresh_purchase_and_activation_save_current_zone_pools ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.48s
+

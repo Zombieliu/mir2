@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\frozen-source-v1.json",
+    "bytes": 97582,
+    "sha256": "5fe236e45809386af26d91cfe2cec57591870f1d8289cddd35a2e185e3fe90c3"
+  },
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "maxPrepared": 100,
+    "finiteWallSeconds": 18000,
+    "targetHp": 12,
+    "attackResults": "v2",
+    "poolFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\capacity-pool.json",
+    "monitor": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\monitor-current.json",
+    "output": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\reports",
+    "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+    "routeFile": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "mapRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack"
+  },
+  "scope": "New owned Gateway strictly reuses the actual V6 ee06 backend and continues the complete cold W8 game Store, pool, four secrets, active control-only recovery files and latest W8 client traffic ledger by exclusive byte copying. The W8 final-navigation NoPath failure remains false. All100 start with zero newly prepared evidence; first4 need fresh stock/no-economic-command proof. Only current production ordinary recovery/preparation may act. No seed, account state/stock/position edits, loginNotBefore override or inherited prepared acceptance.",
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "preparationSupplyDurationClaim": false
+}

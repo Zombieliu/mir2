@@ -1,0 +1,86 @@
+{
+  "schema": "mir2.native.portable.root-review.v1",
+  "baseRootArchiveSha256": "2f769c870eaae3690687b3b32d91a5618e4a765ecacf07bacb043316d2ae306a",
+  "originalRootArchiveUnchanged": true,
+  "archive": {
+    "members": 17,
+    "bytes": 74546,
+    "sha256": "99ffa6aafe3f113a5df79495e9ee4983bdedf057d2bd8d1ef3b3d07e935d20cb"
+  },
+  "indexProof": [
+    {
+      "path": "mir2-web3/scripts/native_r17_r2_delivery.py",
+      "sha256": "63b6a8c601551747a927f5bdbaced793ef2904ad36598ecb974cac944899014c",
+      "indexEqualsWorking": true
+    },
+    {
+      "path": "mir2-web3/scripts/test_native_r17_r2_delivery.py",
+      "sha256": "22d80025bbdf5092ce0a3a45365163c9fbfc4127e51d70e1496f7578144e9e58",
+      "indexEqualsWorking": true
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+      "sha256": "6c389da7832a6dbf027eaaa0fac7dbe584dfe7ec9bcdd29de9786f043e9702c3",
+      "indexEqualsWorking": true
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+      "sha256": "9fd816a5fdf26a937d3d94a5b031c9e992fbb104f49832ba31a703587a0385f8",
+      "indexEqualsWorking": true
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs",
+      "sha256": "c08d5a918c4163917b922bb5da5232ef9edc43a340a50c76082753bb6d3f5af0",
+      "indexEqualsWorking": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/prepared-snapshot-01/scripts/native_r17_r2_delivery.py",
+      "sha256": "51c8b8f8e6c2dcac9e3cd2ead7e65428f5755253a0e8b677ca37d9a0606a022b",
+      "fixtureByteExact": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/prepared-snapshot-01/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+      "sha256": "73620830ecca19a5acdbef44dad5cd21b3a8f17e0bf5bf5c66ac1593abb813e5",
+      "fixtureByteExact": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/prepared-snapshot-01/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+      "sha256": "4c5132fd509a5c8e6f1d07f04fb5b3db4ef3cd209849a7bc4197c49495acad5d",
+      "fixtureByteExact": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/preview/artifacts/feed/latest.json",
+      "sha256": "5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16",
+      "fixtureByteExact": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/preview/artifacts/feed/latest.p7s",
+      "sha256": "1227f6b40f103cbd4d29cdf989ddb1cb70f4d972b79c681ba7d0a2746493b003",
+      "fixtureByteExact": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/predecessor12/latest.json",
+      "sha256": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88",
+      "fixtureByteExact": true
+    },
+    {
+      "path": "mir2-web3/scripts/fixtures/native-r17-13/predecessor12/latest.p7s",
+      "sha256": "7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916",
+      "fixtureByteExact": true
+    }
+  ],
+  "rootNode": 138,
+  "rootPython": 64,
+  "skipped": 0,
+  "assertionsChanged": false,
+  "productionGuardsChangedByPathAddendum": false,
+  "firstForcedGitAddFailed": "Windows managed path too long; no QA files indexed by that failed command.",
+  "firstFixtureMoveFailed": "PowerShell Split-Path LiteralPath/Parent parameter set, no move occurred; fixed using System.IO.Path.GetDirectoryName.",
+  "nativePlanRawBytes": 64106,
+  "nativePlanRawSha256": "9fd816a5fdf26a937d3d94a5b031c9e992fbb104f49832ba31a703587a0385f8",
+  "sourceWhitespaceCheckPassed": true,
+  "frozenEvidenceWhitespaceNotRewritten": true,
+  "linuxAcceptance": false,
+  "publicSpeedAcceptance": false,
+  "remotePublication": false
+}

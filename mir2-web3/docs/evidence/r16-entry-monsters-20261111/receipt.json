@@ -1,0 +1,398 @@
+{
+  "product": "d740f13823ce7cadf892d0d3e5c4dc205dcfc7c5",
+  "deploymentId": "dpl_BLoL9Vb2AHfaUZpQKu3E1CDvsg9q",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "renderer": "bevy-84ef836460a84e03",
+  "production": {
+    "stageRunId": "42908220115",
+    "promotionRunId": "42909553498",
+    "protectedAndPublicAssets": [
+      {
+        "name": "Scene",
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "bytes": 458475
+      },
+      {
+        "name": "Floor",
+        "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+        "bytes": 439896
+      },
+      {
+        "name": "Objects",
+        "path": "/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json",
+        "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe",
+        "bytes": 1185944
+      },
+      {
+        "name": "Actors",
+        "path": "/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json",
+        "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895",
+        "bytes": 885989
+      },
+      {
+        "name": "MonsterStanding",
+        "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+        "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+        "bytes": 513566
+      },
+      {
+        "name": "MonsterWalking",
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "bytes": 764724
+      }
+    ],
+    "publicQrPending": true,
+    "alias": "dpl_BLoL9Vb2AHfaUZpQKu3E1CDvsg9q",
+    "sourceBranch": "codex/windows-player-journey",
+    "browsers": [
+      {
+        "locale": "zh-CN",
+        "passed": true,
+        "checks": {
+          "exactRevision": true,
+          "nativeBrowserLocale": true,
+          "noSplitLocaleRequestsBeforeAuth": true,
+          "localizedTitle": true,
+          "firstPartyLink": true,
+          "renderedQr": true,
+          "sameIntentPending": true,
+          "localizedPending": true,
+          "normalCancel": true,
+          "pollingStopped": true,
+          "remainedLogin": true
+        },
+        "createAttempts": 1,
+        "pollsAfterCancel": 0,
+        "phases": [
+          {
+            "phase": "verify-revision",
+            "atMs": 298
+          },
+          {
+            "phase": "plain-game",
+            "atMs": 832
+          },
+          {
+            "phase": "one-qr-click",
+            "atMs": 3207
+          },
+          {
+            "phase": "same-intent-pending",
+            "atMs": 4113
+          },
+          {
+            "phase": "normal-cancel",
+            "atMs": 4115
+          },
+          {
+            "phase": "passed",
+            "atMs": 7448
+          }
+        ],
+        "browserClosed": true
+      },
+      {
+        "locale": "zh-TW",
+        "passed": true,
+        "checks": {
+          "exactRevision": true,
+          "nativeBrowserLocale": true,
+          "noSplitLocaleRequestsBeforeAuth": true,
+          "localizedTitle": true,
+          "firstPartyLink": true,
+          "renderedQr": true,
+          "sameIntentPending": true,
+          "localizedPending": true,
+          "normalCancel": true,
+          "pollingStopped": true,
+          "remainedLogin": true
+        },
+        "createAttempts": 1,
+        "pollsAfterCancel": 0,
+        "phases": [
+          {
+            "phase": "verify-revision",
+            "atMs": 252
+          },
+          {
+            "phase": "plain-game",
+            "atMs": 1058
+          },
+          {
+            "phase": "one-qr-click",
+            "atMs": 6103
+          },
+          {
+            "phase": "same-intent-pending",
+            "atMs": 10066
+          },
+          {
+            "phase": "normal-cancel",
+            "atMs": 10068
+          },
+          {
+            "phase": "passed",
+            "atMs": 13401
+          }
+        ],
+        "browserClosed": true
+      }
+    ],
+    "signedPlay": {
+      "testnetWallet": true,
+      "loginOnlySignatures": 1,
+      "forbiddenWalletOperations": 0,
+      "newDisposableRole": true,
+      "wire": {
+        "gameSockets": 1,
+        "passkeyLogin": 1,
+        "loginSuccess": 1,
+        "newCharacter": 1,
+        "newCharacterSuccess": 1,
+        "startGame": 1,
+        "startGameResult": 4,
+        "walk": 1,
+        "logOut": 1,
+        "logOutSuccess": 1,
+        "unexpectedMutation": 0
+      },
+      "startAckToPlayableMs": 17703,
+      "localeBodyDurationMs": 51548,
+      "movement": {
+        "attempted": true,
+        "passed": true,
+        "status": "one-authoritative-walk",
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 289,
+          "y": 616,
+          "direction": "Right"
+        },
+        "geometry": {
+          "source": "sha256-pinned-local-release-reference",
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "physical": {
+          "input": "trusted-playwright-keyboard-pulse",
+          "key": "ArrowRight",
+          "atMs": 74215
+        },
+        "wire": {
+          "type": "walk",
+          "direction": "Right",
+          "atMs": 74218
+        },
+        "ack": {
+          "x": 289,
+          "y": 616,
+          "packet": "UserLocation",
+          "atMs": 74422
+        },
+        "rendered": {
+          "x": 289,
+          "y": 616,
+          "atMs": 74531
+        }
+      },
+      "logout": {
+        "attempted": true,
+        "passed": true,
+        "returnedToSelect": true,
+        "sent": 1,
+        "acknowledged": 1
+      },
+      "optionalHud": "not-observed",
+      "naturalMonsterWalkVerified": false,
+      "samples": [
+        {
+          "label": "first-playable",
+          "msAfterStartAck": 17706,
+          "msAfterFirstPlayable": 3,
+          "floor": 221,
+          "objects": 39,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 0,
+          "compositorComplexRegions": 24
+        },
+        {
+          "label": "after-walk",
+          "msAfterStartAck": 18254,
+          "msAfterFirstPlayable": 551,
+          "floor": 243,
+          "objects": 40,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 0,
+          "compositorComplexRegions": 24
+        },
+        {
+          "label": "first-painted-candidate",
+          "msAfterStartAck": 21722,
+          "msAfterFirstPlayable": 4019,
+          "floor": 243,
+          "objects": 40,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 9,
+          "compositorComplexRegions": 24
+        },
+        {
+          "label": "post-move-6000",
+          "msAfterStartAck": 24516,
+          "msAfterFirstPlayable": 6813,
+          "floor": 243,
+          "objects": 40,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 9,
+          "compositorComplexRegions": 24
+        },
+        {
+          "label": "runtime-body-delivered",
+          "msAfterStartAck": 33797,
+          "msAfterFirstPlayable": 16094,
+          "floor": 243,
+          "objects": 40,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 9,
+          "compositorComplexRegions": 24
+        },
+        {
+          "label": "post-move-22000",
+          "msAfterStartAck": 40750,
+          "msAfterFirstPlayable": 23047,
+          "floor": 243,
+          "objects": 40,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 9,
+          "compositorComplexRegions": 24
+        },
+        {
+          "label": "terrain-window-end",
+          "msAfterStartAck": 41541,
+          "msAfterFirstPlayable": 23838,
+          "floor": 243,
+          "objects": 40,
+          "self": 1,
+          "npcs": 8,
+          "monsters": 9,
+          "compositorComplexRegions": 24
+        }
+      ],
+      "verifiedMonsterResponses": [
+        {
+          "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+          "kind": "entry-monster-standing",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 73978,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 513566,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/json",
+          "headersAfterMs": 606,
+          "fromServiceWorker": false,
+          "fromDiskCache": false,
+          "protocol": "h2",
+          "cache": "DYNAMIC",
+          "vercelCache": "MISS",
+          "cors": "wildcard",
+          "lastDataAfterMs": 3385,
+          "finishAfterMs": 3383,
+          "wireBytes": 355276
+        },
+        {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "kind": "entry-monster-walking",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 77364,
+          "initiator": "script",
+          "priority": "Low",
+          "bytes": 764724,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/json",
+          "headersAfterMs": 15431,
+          "fromServiceWorker": false,
+          "fromDiskCache": false,
+          "protocol": "h2",
+          "cache": "DYNAMIC",
+          "vercelCache": "MISS",
+          "cors": "wildcard",
+          "lastDataAfterMs": 20303,
+          "finishAfterMs": 20299,
+          "wireBytes": 529674
+        }
+      ],
+      "screenshotSha256": "59600b70398cb4269166043ce2fea98df145a76d698b4cb79e4d2cd20f80cbf2"
+    }
+  },
+  "isolatedBrowser": {
+    "buildId": "wqidlmrVP5EjRujgOfAqp",
+    "buildRevision": "d10b9983e01f-r16-entry-monsters-e421101d",
+    "buildReceiptSha256": "da7418bcaa9f76a11d9b431b0c987a96e90e3b2f880aa84a545a06cc6b2cd433",
+    "firstObservation": {
+      "passed": false,
+      "timeout": "naturally moving monster uses an original decoded walking frame",
+      "walkingResponseCompleted": true
+    },
+    "verified": {
+      "packedStandingBodies": 13,
+      "packedWalkingBodies": 1,
+      "standingSources": [
+        "/original-ui/Monster/003/7.png",
+        "/original-ui/Monster/005/23.png",
+        "/original-ui/Monster/003/0.png",
+        "/original-ui/Monster/000/3.png",
+        "/original-ui/Monster/005/24.png",
+        "/original-ui/Monster/004/30.png",
+        "/original-ui/Monster/004/18.png",
+        "/original-ui/Monster/005/9.png",
+        "/original-ui/Monster/139/12.png",
+        "/original-ui/Monster/004/2.png",
+        "/original-ui/Monster/004/25.png",
+        "/original-ui/Monster/004/30.png",
+        "/original-ui/Monster/005/2.png"
+      ],
+      "walkingSources": [
+        "/original-ui/Monster/003/44.png"
+      ],
+      "walkingProofKind": "isolated-protocol-replay",
+      "standingObservedBeforeWalkingBodyReleased": true,
+      "coveredIndividualMediaSuccessful": 0,
+      "movementSaved": {
+        "x": 289,
+        "y": 616
+      },
+      "unchangedFixture": true
+    },
+    "existingRole": {
+      "loginToStartAckMs": 12441,
+      "selectReadyToStartClickMs": 28,
+      "startAckToFirstPlayableMs": 3294,
+      "standingPackPendingAtPlayerMove": true,
+      "packedMonstersAfterRelease": 21,
+      "initiallyLoaded": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": {
+        "x": 290,
+        "y": 616
+      },
+      "unchangedFixture": true
+    }
+  }
+}

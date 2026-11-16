@@ -1,0 +1,48 @@
+{
+  "readOnly": true,
+  "passed": true,
+  "observedAtUtc": "2026-11-16T01:55:09.382401+00:00",
+  "pid": 1729017,
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "ok": true,
+  "originalConfigurationFilesUnchanged": 24,
+  "oldRows": {
+    "accounts": {
+      "preexistingRows": 318,
+      "currentRows": 320,
+      "preexistingCanonicalBytes": 2367071,
+      "preexistingSha256": "e8b1b8291ee1df9aebf5ad86b50076983039dc0e450000f8d6436566d66b3c52",
+      "preexistingRowsUnchanged": true
+    },
+    "characters": {
+      "preexistingRows": 230,
+      "currentRows": 232,
+      "preexistingCanonicalBytes": 77707,
+      "preexistingSha256": "72c9d5ae3e5b077f68e5e6459256aab4842a1bf6df3032d9636dfc43b50474fb",
+      "preexistingRowsUnchanged": true
+    },
+    "character_saves": {
+      "preexistingRows": 230,
+      "currentRows": 232,
+      "preexistingCanonicalBytes": 2672150,
+      "preexistingSha256": "45f1aa97af81a30e123165d517f199d3526a17128a0127e4d2455f53ddd41fd8",
+      "preexistingRowsUnchanged": true
+    }
+  },
+  "capacity": {
+    "maxWsConnections": 66,
+    "maxActiveSessions": 51,
+    "maxReconnectLeases": 51,
+    "maxLoginInFlight": 2,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "databaseRestored": false,
+  "credentialsRecorded": false
+}

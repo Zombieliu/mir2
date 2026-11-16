@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T20:24:28.050Z",
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "feasibilityDriverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "exactSameFrozenDriverInputs": true,
+  "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+  "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+  "releaseSha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "runId": "1792870589933-af9ef086",
+  "navigationCoordination": {
+    "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+    "maximumHintCellsPerConnection": 7,
+    "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+  },
+  "feasibilityPassed": true,
+  "capacityAccepted": false,
+  "profile": "probe",
+  "native10SoakSeconds": 360,
+  "actualPassedSoakWindows": 6,
+  "rawRows": 16032,
+  "rawMonitor": {
+    "count": 214,
+    "complete": true,
+    "maxGapMs": 7796
+  },
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\realm-cleanup.json",
+      "bytes": 2039,
+      "sha256": "60ff54cd7e9d195cec7ab1c64572fa158d5fb177c502f6606456c9755ce4e79b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\gateway-build-pin.json",
+      "bytes": 1317,
+      "sha256": "cdceae9cec4b0a0383642da9f8db6328891d7c227886689558e54bdd7b911041"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.report.json",
+      "bytes": 172239,
+      "sha256": "3cff9154f0ed9ea1c7b80089b144074f8b1fd86849620675d30f8c9eadb27da4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\source-pins-admitted-v2.json",
+      "bytes": 17608,
+      "sha256": "39005965dc2e8a6b5d605df780b0e9ea82198175b77a2106d2d8a94e9aa457e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\source-pins.json",
+      "bytes": 17185,
+      "sha256": "ce3302c7ad11fbb2c17c40105b89402dab30a087090d7f7556435e6f1a635840"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\report-provenance.json",
+      "bytes": 991,
+      "sha256": "5df3c47309911ed61e7d54e5ef3672830344c66dca7455b8b80d91cf66e7788e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\launcher-source-frozen-v1.json",
+      "bytes": 2396,
+      "sha256": "32303d637205386052b093ac692503231f7e236530179b12afe035a20a2ab61c"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+      "bytes": 46895,
+      "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.samples.jsonl",
+      "bytes": 9395564,
+      "sha256": "6ede64425f5fe435ba343ddfc74fbb824e38db280f2ca1161cb90ea8b6a0b473"
+    }
+  ]
+}

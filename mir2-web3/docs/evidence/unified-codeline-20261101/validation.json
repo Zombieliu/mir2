@@ -1,0 +1,171 @@
+{
+  "schema": "mir2.unified.integration-validation.v1",
+  "createdAtUtc": "2026-10-31T21:43:02.079754+00:00",
+  "verifiedSourceCommit": "6c8341ed7a8306bda0b09a69b7a4b047f9f817a3",
+  "canonicalBranch": "codex/windows-player-journey",
+  "requiredAncestors": {
+    "windowsUiAndLauncher": "21c744ea1dd8dad51cd2b19b586b5080e5af32ec",
+    "capacityAuthority": "48abee4711930715f81447314d328b1c4cf8b8bc",
+    "walletUsdcPromotionBackend": "964825606dbbdc2ed1b0de599bc4f0ca6c297c67",
+    "websiteAndPromotionUi": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+    "originalUncommittedWorkCheckpoint": "e4fab71b44e1da5045b75eb5cabce96cbc68c358"
+  },
+  "allRequiredAncestorsPresent": true,
+  "clientTreeEqualToUi21": true,
+  "originalWork": {
+    "checkpoint": "e4fab71b44e1da5045b75eb5cabce96cbc68c358",
+    "sourceAndEvidenceFiles": 226,
+    "rawBytesBackedUp": 13085279,
+    "generatedUntrackedFilesRetainedOnDisk": 1004935
+  },
+  "results": {
+    "native": {
+      "passedExecutions": 478,
+      "failed": 0,
+      "explicitlyUnexecuted": 12,
+      "sourceWitnessCurrent": true,
+      "compiler": "1.95.0"
+    },
+    "web": {
+      "passedExecutions": 233,
+      "failed": 0,
+      "skipped": 0,
+      "nextTypegen": true,
+      "typeScript": true,
+      "sourceWitnessFiles": 27
+    },
+    "backendMemory": {
+      "groups": [
+        {
+          "filter": "billing_provenance",
+          "exitCode": 0,
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.553,
+          "logSha256": "eb301e1b7d831d9a5301285afa56f0a46aa688d2c54bf2621c45d63fe55c6186"
+        },
+        {
+          "filter": "game_shop",
+          "exitCode": 0,
+          "passed": 46,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 15.082,
+          "logSha256": "4327958f8cea7d3d9081afd0a666d043603b9df23f4a4ceb5ebd4b06a902ae5d"
+        },
+        {
+          "filter": "migration_union",
+          "exitCode": 0,
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.021,
+          "logSha256": "5305e338845be044b6dcb2ae53c6702528b378a141d162caab04c22fdb97030d"
+        }
+      ],
+      "note": "63 executions, with one shared billing/shop case; migration compatibility also covered in database combination."
+    },
+    "postgresCombination": {
+      "passedExecutions": 125,
+      "failed": 0,
+      "ignored": 0,
+      "groups": [
+        {
+          "name": "billing-and-native-pg",
+          "passed": 37
+        },
+        {
+          "name": "wallet-native-pg",
+          "passed": 1
+        },
+        {
+          "name": "simulation-zone-save-pg",
+          "passed": 37
+        },
+        {
+          "name": "gateway-zone-save-pg",
+          "passed": 28
+        },
+        {
+          "name": "mail-transfer-pg",
+          "passed": 4
+        },
+        {
+          "name": "shared-uid-pg",
+          "passed": 11
+        },
+        {
+          "name": "prepared-kill-pg",
+          "passed": 7
+        }
+      ],
+      "compiler": "1.89.0",
+      "note": "Combination includes database-backed functions and adjacent pure assertions; not every counted function opens PG."
+    },
+    "sharedZoneSecurity": {
+      "passedExecutions": 230,
+      "failed": 0,
+      "compiler": "1.89.0"
+    },
+    "workspace": {
+      "schema": "mir2.unified.workspace-check.v1",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "check",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--all-targets"
+      ],
+      "sourceRevision": "6c8341ed7a8306bda0b09a69b7a4b047f9f817a3",
+      "workingChange": "Root rust-toolchain.toml 1.89.0 -> 1.95.0; no dependencies changed",
+      "compiler": "Rust 1.95.0",
+      "target": "C:/m2u-target/backend-195",
+      "exitCode": 0,
+      "seconds": 62.973,
+      "passed": true,
+      "logSha256": "5c565af5da5e4aec2d1309719b2a840239acebf2f297048e5215ab8a6b816a09"
+    },
+    "releaseGuards": {
+      "passed": 54,
+      "failed": 0,
+      "mockOnly": true
+    },
+    "cloudflareInstallerTool": {
+      "passed": 33,
+      "failed": 0,
+      "offlineOnly": true
+    },
+    "websiteI18n": {
+      "locales": 16,
+      "passed": true
+    },
+    "gitConnectivity": {
+      "passed": true,
+      "fullObjectRehashClaimed": false
+    },
+    "isolatedPostgresStopped": true
+  },
+  "failuresResolved": [
+    "Windows PowerShell 5 treated normal cargo stderr as a terminating harness error; successful runs use PowerShell 7",
+    "Wallet generated DB name shorter than fixture guard; created a compliant dedicated DB without weakening guard",
+    "Scoped test fixtures replayed unrecorded promotion trigger SQL; use real migration ledger and exercise double initialization",
+    "Old kill fixtures assumed Mirror PG publication; exercise fenced SourceOfTruth, enforce Mirror refusal and preserve ordinary File play",
+    "Added File proof initially used hardcoded character index; use actual identity and assert login/start packets",
+    "Root 1.89 toolchain incompatible with current UI Bevy dependency; align root with existing 1.95 platform pins"
+  ],
+  "boundaries": {
+    "dockerStarted": false,
+    "oldOrRemoteDatabaseUsed": false,
+    "liveChainTransaction": false,
+    "newInstallerBuilt": false,
+    "remoteBackendDeployed": false,
+    "publicChannelPublished": false,
+    "humanFrontendAcceptanceClaimed": false,
+    "ccuQualified": false,
+    "backendPgRepeatedAfterToolchainChange": false
+  },
+  "artifact": "checks.zip"
+}

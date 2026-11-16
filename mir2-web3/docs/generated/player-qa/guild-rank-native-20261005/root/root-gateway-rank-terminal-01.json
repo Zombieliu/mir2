@@ -1,0 +1,26 @@
+{
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "-p",
+    "mir2-gateway",
+    "--test",
+    "shared_guild_rank_terminal"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3",
+  "target": "C:/mir2-build/gateway-tests-r49",
+  "jobs": 2,
+  "startedUtc": "2026-10-04T19:10:13.968273+00:00",
+  "elapsedSeconds": 218.7351222000143,
+  "exitCode": 0,
+  "logSha256": "8c526ce22c76ee8ed87be245525dcbc8bb740dd1e022b9849f3f1f626385d87d",
+  "isolatedFaultReceiptDir": "C:\\mir2-playtest-releases\\20261004-native-r18\\guild-rank-native-root-review-01",
+  "privateFixtureContentsExported": false,
+  "networkOrNativeAcceptance": false,
+  "overlapsWorkerChecks": true
+}

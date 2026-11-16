@@ -1,0 +1,94 @@
+[
+  {
+    "phase": "candidate-before-rollback",
+    "revision": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+    "locale": "zh-CN",
+    "passed": true,
+    "browserClosed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "forbiddenEdges": 0,
+    "normalSystemNetwork": true,
+    "noInterception": true
+  },
+  {
+    "phase": "candidate-before-rollback",
+    "revision": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+    "locale": "zh-TW",
+    "passed": true,
+    "browserClosed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "forbiddenEdges": 0,
+    "normalSystemNetwork": true,
+    "noInterception": true
+  },
+  {
+    "phase": "restored-stable",
+    "revision": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "locale": "zh-CN",
+    "passed": true,
+    "browserClosed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "forbiddenEdges": 0,
+    "normalSystemNetwork": true,
+    "noInterception": true
+  },
+  {
+    "phase": "restored-stable",
+    "revision": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "locale": "zh-TW",
+    "passed": true,
+    "browserClosed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "forbiddenEdges": 0,
+    "normalSystemNetwork": true,
+    "noInterception": true
+  }
+]

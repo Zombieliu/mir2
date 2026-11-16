@@ -1,0 +1,19 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "pid": 1787421,
+  "freshInventory": true,
+  "activeSessionsAtInventory": 0,
+  "databaseFingerprintCounts": {
+    "accounts": 322,
+    "characters": 234,
+    "character_saves": 234
+  },
+  "configurationFilesUnchanged": 24,
+  "sameExportedSnapshot": true,
+  "privateBackupComplete": true,
+  "backupBytes": 1253018,
+  "productionServiceRestarted": false,
+  "publicMappingChanged": false,
+  "observedAt": "2026-11-16T09:55:52.066669+00:00",
+  "recordedAt": "2026-11-16T09:57:00.585Z"
+}

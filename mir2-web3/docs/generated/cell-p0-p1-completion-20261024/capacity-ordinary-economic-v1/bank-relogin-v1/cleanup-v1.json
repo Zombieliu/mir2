@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "checks": {
+    "sixCountersZero": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorSamplerAbsent": true,
+    "normalOwnedShutdown": true,
+    "gatewayProcessAbsent": true,
+    "driverProcessAbsent": true,
+    "monitorProcessAbsent": true,
+    "portsFree": true,
+    "postSourceUnchanged": true
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "driverExit": {
+    "exitCode": 1,
+    "signal": null,
+    "error": null
+  },
+  "monitorExit": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "monitorTerminal": {
+    "sampledAt": 1793043459391,
+    "stop": true,
+    "reason": "Operator requested load drain"
+  },
+  "remainingMonitorChildren": [],
+  "gatewayExit": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "remainingListeners": [],
+  "logErrors": [],
+  "finishedAt": "2026-10-26T19:37:50.698Z"
+}

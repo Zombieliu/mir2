@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.native-r17-external-prepare.v1",
+  "baseRevision": "d1f7dcec0213815b6f3bdcd33eff4d9d1c2774dc",
+  "baseRepositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts",
+  "base": {
+    "path": "index.ts",
+    "size": 2968,
+    "sha256": "353a1d7420659f4c12a3a7dc654351382ec8f7dd7a1c795237777e9372a05dfe"
+  },
+  "originalPlanSha256": "04bdb9d5f891bba38752e4ba4029db2d638dc7f4674d494ce0c6b5ab354f3b87",
+  "originalRootReceiptSha256": "6b36134597180ad2b423c2015c05b3c48447fbd766e858c2fb0ce6f45e2565b9",
+  "definition": {
+    "path": "native-r17-publication-plan.json",
+    "size": 42461,
+    "sha256": "3d994ede8b6d1f09fc05488cc271b9dbad1ae2b12503f991931d3c2f409ba94b"
+  },
+  "definitionCanonicalSha256": "f67176ce08d9114fb5916421937169be26ca83f8deab2f87a4d04d68913db183",
+  "objectCount": 36,
+  "objectsSha256": "f38a692a4ba200177f4358c9f3d1566f97fadb32cf408c072cb1f8b8bb03d4f0",
+  "totalObjectBytes": 817657896,
+  "fixtureShaVerified": [
+    "latest.json",
+    "latest.p7s"
+  ],
+  "credentialValuesRead": false,
+  "sourceModified": false,
+  "networkCalls": false,
+  "payloadAllShaRechecked": false
+}

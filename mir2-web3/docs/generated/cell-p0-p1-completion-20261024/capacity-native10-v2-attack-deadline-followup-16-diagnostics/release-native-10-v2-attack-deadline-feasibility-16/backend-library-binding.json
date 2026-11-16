@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "library": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\source-lib-v1.mjs",
+    "bytes": 16541,
+    "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+  },
+  "adapter": "projection-build-source-lib.mjs",
+  "expectedBackendInputCount": 44
+}

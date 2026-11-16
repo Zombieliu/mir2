@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "scope": "One explicitly authorized overflow test expectation maintenance: old viewport health is transient, XP is durable. Not only setup maintenance.",
+  "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+  "before": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\live_aoi_order_tests.rs.before-overflow-v2.txt",
+    "bytes": 27740,
+    "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af"
+  },
+  "after": {
+    "bytes": 28187,
+    "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+  },
+  "rules": [
+    {
+      "purpose": "Classify unchanged injected health separately from durable personal XP",
+      "from": "    let personal = vec![\n        ServerPacket::GainExperience { amount: 17 },\n        ServerPacket::ObjectHealth {\n            info: ObjectHealthInfo {\n                object_id: 1000,\n                percent: 87,\n                expire: 5,\n            },\n        },\n    ];",
+      "to": "    let personal = vec![ServerPacket::GainExperience { amount: 17 }];\n    let transient_health = ServerPacket::ObjectHealth {\n        info: ObjectHealthInfo {\n            object_id: 1000,\n            percent: 87,\n            expire: 5,\n        },\n    };\n    let mut injected_before_overflow = personal.clone();\n    injected_before_overflow.push(transient_health.clone());"
+    },
+    {
+      "purpose": "Keep original XP then health injection in one queue call",
+      "from": "        state.queue_zone_packets(pair.keys[0].clone(), personal.clone());",
+      "to": "        state.queue_zone_packets(pair.keys[0].clone(), injected_before_overflow);"
+    },
+    {
+      "purpose": "Assert old epoch health does not leak into durable pending",
+      "from": "        assert_eq!(state.pending_zone_packets[&pair.keys[0]], personal);",
+      "to": "        assert_eq!(state.pending_zone_packets[&pair.keys[0]], personal);\n        assert!(!state.pending_zone_packets[&pair.keys[0]].contains(&transient_health));"
+    },
+    {
+      "purpose": "Describe current transient health and durable teardown contract",
+      "from": "    // The authoritative personal receipt is still available for ordinary\n    // teardown, while fresh projection waits for a rebuilt registration.",
+      "to": "    // Only durable personal receipts survive ordinary teardown. Health belongs\n    // to the old viewport epoch and must not enter the replacement registration."
+    },
+    {
+      "purpose": "Assert teardown has no old epoch health",
+      "from": "    assert_eq!(receipts, personal);\n    assert_ne!(new_id, registration);",
+      "to": "    assert_eq!(receipts, personal);\n    assert!(!receipts.contains(&transient_health));\n    assert_ne!(new_id, registration);"
+    },
+    {
+      "purpose": "Assert replacement channel never receives old health while preserving registration checks",
+      "from": "    assert_eq!(fresh.registration_id(), new_id);\n    assert_eq!(\n        *observed.borrow(),",
+      "to": "    assert_eq!(fresh.registration_id(), new_id);\n    let mut replacement_packets = vec![fresh.into_packet()];\n    replacement_packets.extend(drain_live(&mut replacement));\n    assert!(!replacement_packets.contains(&transient_health));\n    assert_eq!(\n        *observed.borrow(),"
+    }
+  ],
+  "exactRawInverse": true,
+  "productionSourceChanged": false,
+  "cargoExecuted": false,
+  "originalInjectedPacketsAndOrderPreserved": true,
+  "originalOverloadSignalPoisoningGlobalFenceAndReplacementAssertionsPreserved": true
+}

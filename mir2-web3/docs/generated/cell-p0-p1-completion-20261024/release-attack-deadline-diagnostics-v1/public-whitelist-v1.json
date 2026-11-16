@@ -1,0 +1,456 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public diagnostic Release/build/source evidence and fresh ordinary full16 originals only.",
+  "actualCodeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "entries": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/backend-source-attack-deadline-diagnostics-v1.json",
+      "target": "backend-source-attack-deadline-diagnostics-v1.json",
+      "category": "root-manifest",
+      "bytes": 35581,
+      "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/release-attack-deadline-diagnostics-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1.json",
+      "category": "root-release",
+      "bytes": 3146,
+      "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/build-release-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/tools/build-release-v1.mjs",
+      "category": "release-tool",
+      "bytes": 4904,
+      "sha256": "864ab65942cebd22edab689bab3eb46222fb38e42e0ec5124d4c22d3c3cbdbf1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/capture-release-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/tools/capture-release-v1.mjs",
+      "category": "release-tool",
+      "bytes": 3492,
+      "sha256": "7e6f40d82f785a397ef24022cccb53f92e30eac1ddc18f1d5296afbb598e545f"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/entrypoint-derivation-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/entrypoint-derivation-v1.json",
+      "category": "release-tool",
+      "bytes": 5817,
+      "sha256": "28b68650ab94aa627651e7d7c0ff7451df77aac7ef492fb12c7b4d0d4cd5c582"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/final-source-binding-pending-original-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/final-source-binding-pending-original-v1.json",
+      "category": "release-tool",
+      "bytes": 192,
+      "sha256": "678463e39a418a376ffa786c44733ce0096ebfe2e4e503470907e3e2007ba7db"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/final-source-binding-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/final-source-binding-v1.json",
+      "category": "release-tool",
+      "bytes": 804,
+      "sha256": "9399a96c74f345eeaa0fa4cefb8ced88712a79dd7be6d8bb8bae24abe4d66555"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/pin-build-source-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/tools/pin-build-source-v1.mjs",
+      "category": "release-tool",
+      "bytes": 906,
+      "sha256": "9c2bb5502f3f9d6eadd7146daf670c5a2d88372da6518e198a82e8abaac385cc"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/prepare-entrypoints-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/tools/prepare-entrypoints-v1.mjs",
+      "category": "release-tool",
+      "bytes": 4717,
+      "sha256": "2939c504f293248e8320e0acca7bc403e2cd4dcc52e91d3499b5b93003aa6243"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/prepare-metadata-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/tools/prepare-metadata-v1.mjs",
+      "category": "release-tool",
+      "bytes": 4935,
+      "sha256": "5dcb9281abf053937b699fdaaa497168430e8b2c67e16ebe37f65a2026700646"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/prepared-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/prepared-v1.json",
+      "category": "release-tool",
+      "bytes": 7234,
+      "sha256": "002b6ee01de9fc5f60b4d21d95883ca9904b2365bc370cd5fd5481257786c4ee"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/README.md",
+      "target": "release-attack-deadline-diagnostics-v1/tools/README.md",
+      "category": "release-tool",
+      "bytes": 3186,
+      "sha256": "ccee84531a2c4a639844e317d08766757ea237df21f1afd0d7df4b76385c5029"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/root-reviewed-tool-source-seal-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/root-reviewed-tool-source-seal-v1.json",
+      "category": "release-tool",
+      "bytes": 3206,
+      "sha256": "7fdf1b9782bfd47b0d3b673ccac47fee306b93c4f2c9e729da711495ae2948a5"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/slow-stage-scoped-draft-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/slow-stage-scoped-draft-v1.json",
+      "category": "release-tool",
+      "bytes": 1000,
+      "sha256": "bd518cf5ed1328bc9511a97fc5b19c08031cfb6bea4f4774f40f71743358850e"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/source-and-parameter-schema-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/tools/source-and-parameter-schema-v1.json",
+      "category": "release-tool",
+      "bytes": 3002,
+      "sha256": "2a773f037d4db999454f8564171a3f6acebb77ab38a0977af5cdb905558e774f"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/source-lib-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/tools/source-lib-v1.mjs",
+      "category": "release-tool",
+      "bytes": 16541,
+      "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/capacity-attack-deadline-driver-frozen-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/driver/capacity-attack-deadline-driver-frozen-v1.json",
+      "category": "release-evidence",
+      "bytes": 6759,
+      "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/freeze-committed-driver-v1.mjs",
+      "target": "release-attack-deadline-diagnostics-v1/driver/freeze-committed-driver-v1.mjs",
+      "category": "release-evidence",
+      "bytes": 5319,
+      "sha256": "da92d1c931bb833e934d35e07fb13120b862ec52a6d0af1a3390e1762f155b99"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-v1-build-receipt.json",
+      "target": "release-attack-deadline-diagnostics-v1/build/attack-deadline-diagnostics-v1-build-receipt.json",
+      "category": "release-evidence",
+      "bytes": 2373,
+      "sha256": "c1c3259e50ac7eba1fe5cadbe77830a77549f700f98a8bc9deb15304f2c5b3f7"
+    },
+    {
+      "source": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-attack-deadline-diagnostics-v1-release-build.log",
+      "target": "release-attack-deadline-diagnostics-v1/build/p0-attack-deadline-diagnostics-v1-release-build.log",
+      "category": "release-evidence",
+      "bytes": 55560,
+      "sha256": "e11129d2b8e266549a504fb3ee11994aec834518c7808a6665319c2a45c6ee29"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-independent-review-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/review/attack-deadline-diagnostics-release-independent-review-v1.json",
+      "category": "release-evidence",
+      "bytes": 5278,
+      "sha256": "bc3a99cdc61021a4de94e20939081328c1f0f9c8c0e3c24428b5a32accd64be1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-actual-source-binding-independent-review-v1.json",
+      "target": "release-attack-deadline-diagnostics-v1/review/attack-deadline-actual-source-binding-independent-review-v1.json",
+      "category": "release-evidence",
+      "bytes": 6360,
+      "sha256": "b2ee13b28948671c07d0020e501ee7a2e0816dcef836bd9457cd64b87f249090"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-actual-source-release-independent-review-v2.json",
+      "target": "release-attack-deadline-diagnostics-v1/review/attack-deadline-actual-source-release-independent-review-v2.json",
+      "category": "release-evidence",
+      "bytes": 2495,
+      "sha256": "e68d230c46e560826633ddd0df10459f4a46fdefd22ed49eb531e59915c8d810"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.audit-source.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.audit-source.mjs",
+      "category": "full16-public",
+      "bytes": 9066,
+      "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.backend-source.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.backend-source.json",
+      "category": "full16-public",
+      "bytes": 35581,
+      "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.independent-audit.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.independent-audit.json",
+      "category": "full16-public",
+      "bytes": 1746,
+      "sha256": "e32baec4d1b4484afe63dfe3890aa88cfc822008ad48faa46cecdc7c751b42ad"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.prepared-profile.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.prepared-profile.json",
+      "category": "full16-public",
+      "bytes": 4333,
+      "sha256": "a099b0fca2123cb75c5f781a49746c007db8803e7662b3dc12ae8a18b7356398"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.realm-evidence.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.realm-evidence.json",
+      "category": "full16-public",
+      "bytes": 34980,
+      "sha256": "6fe76458e84cdac23e283e24ba388913d1872349f7f55a969f64cc26c1f2f316"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.release-input.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.release-input.json",
+      "category": "full16-public",
+      "bytes": 3146,
+      "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.runner-source.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.runner-source.mjs",
+      "category": "full16-public",
+      "bytes": 14389,
+      "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.source-manifest-verification.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.source-manifest-verification.json",
+      "category": "full16-public",
+      "bytes": 572,
+      "sha256": "b569c318c3a80134f757781b87415ec51a524f2a6fb6708169a3a9b5bb4976a4"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.zone-metrics.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946591077-812d0b0d.zone-metrics.json",
+      "category": "full16-public",
+      "bytes": 23601,
+      "sha256": "de19178f7f88d39fad653057405b79d12ec918bf88473b636f6703eee4f4735a"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-a.trace.jsonl",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9-a.trace.jsonl",
+      "category": "full16-public",
+      "bytes": 980261,
+      "sha256": "9b84c0deb676ad52c820d98d8d156e722cd942c22303a26da08cd90dbbcc1d5f"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-b.trace.jsonl",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9-b.trace.jsonl",
+      "category": "full16-public",
+      "bytes": 904691,
+      "sha256": "401c85bb6e09799fab4f73d47d8106d8134cb20fb5136d58df6778d8b1e51d0b"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-guard-newCharacter.trace.jsonl",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9-guard-newCharacter.trace.jsonl",
+      "category": "full16-public",
+      "bytes": 3478,
+      "sha256": "c10ebf8eba6069f273ccfea0946ea204691bfec12d4c4fb162d329ec828b024b"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-guard-startGame.trace.jsonl",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9-guard-startGame.trace.jsonl",
+      "category": "full16-public",
+      "bytes": 3439,
+      "sha256": "67f7d62fb74dff46667894b22b5700266d8b6842375ece88bc396a5e68df2e53"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-relogin-0.trace.jsonl",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9-relogin-0.trace.jsonl",
+      "category": "full16-public",
+      "bytes": 684268,
+      "sha256": "ecf3474989d3d885a12e3fbe30d563f98b8d500d258b8dad3fa09030b1556eab"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-relogin-1.trace.jsonl",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9-relogin-1.trace.jsonl",
+      "category": "full16-public",
+      "bytes": 681075,
+      "sha256": "c94599e5af708956184e016f17f834d4956e4126dd23c98041e2bd8a0e9b8f49"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9.report.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/1792946599345-0034c2b9.report.json",
+      "category": "full16-public",
+      "bytes": 110777,
+      "sha256": "543e19e82e251161e4fae4c5344fd78a204287836819f0c3734b2b252ac02137"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/audit-owned-full.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/audit-owned-full.mjs",
+      "category": "full16-launcher",
+      "bytes": 9066,
+      "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/candidate-release-binding-pending-original-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/candidate-release-binding-pending-original-v1.json",
+      "category": "full16-launcher",
+      "bytes": 552,
+      "sha256": "4cda885695452fe3a8e86fcc50c507b90b881d4bd1405c7868e43eae0a9d8471"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/candidate-release-binding-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/candidate-release-binding-v1.json",
+      "category": "full16-launcher",
+      "bytes": 1589,
+      "sha256": "a061b31ef81c5335db5fc966806d353e77f3c030dc62dda6e8a0571438a53855"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/derivation-proof-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/derivation-proof-v1.json",
+      "category": "full16-launcher",
+      "bytes": 9447,
+      "sha256": "d9647020eda5d334dc0f6e57a1f311806e0405091d439b1dd8878ea3da0a078e"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/finalize-launcher-inputs.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/finalize-launcher-inputs.mjs",
+      "category": "full16-launcher",
+      "bytes": 2038,
+      "sha256": "df13d2a46fff49f21d147c24e4db366777ccf125338c374f1b780c7710bdc0d0"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/frozen-audit-support.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/frozen-audit-support.mjs",
+      "category": "full16-launcher",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/full-lifecycle-profile-pending-original-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/full-lifecycle-profile-pending-original-v1.json",
+      "category": "full16-launcher",
+      "bytes": 4150,
+      "sha256": "f62d0655626e037be41fbf15a71b7fe64209b18feadfcc4db8aa6605248c71ba"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/full-lifecycle-profile.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/full-lifecycle-profile.json",
+      "category": "full16-launcher",
+      "bytes": 4333,
+      "sha256": "a099b0fca2123cb75c5f781a49746c007db8803e7662b3dc12ae8a18b7356398"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/initialize-fresh-private.ps1",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/initialize-fresh-private.ps1",
+      "category": "full16-launcher",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/launcher-final-binding-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher-final-binding-v1.json",
+      "category": "full16-launcher",
+      "bytes": 1681,
+      "sha256": "61f9c10227a8b83e7a6392173235afb2ac586db046a8485a1da89a39fc70fbef"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/prepare-template-v1.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/prepare-template-v1.mjs",
+      "category": "full16-launcher",
+      "bytes": 12179,
+      "sha256": "4e2188bee53580a745bbac3f812ed58623d31cb525a128f47e914291185d5976"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/projection-build-source-lib.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/projection-build-source-lib.mjs",
+      "category": "full16-launcher",
+      "bytes": 239,
+      "sha256": "a0cdb317c114f41ec51ba13e6682aaf77397399cfd314413d5af5b6ad304e309"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/README.md",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/README.md",
+      "category": "full16-launcher",
+      "bytes": 2026,
+      "sha256": "9e807ad6c55f01d870227a3446690765051f9a816d944e51d757e4eb0352f651"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/root-actual-candidate-binding-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/root-actual-candidate-binding-v1.json",
+      "category": "full16-launcher",
+      "bytes": 3875,
+      "sha256": "4e89713b0c9a57f1d8ecfec778622ff64d96fe5e17ea6e1372bcd16cf1850952"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/run-owned-full.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/run-owned-full.mjs",
+      "category": "full16-launcher",
+      "bytes": 14389,
+      "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/slow-scoped-allowlist-proof-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/slow-scoped-allowlist-proof-v1.json",
+      "category": "full16-launcher",
+      "bytes": 2302,
+      "sha256": "fcc174582a8a4dd33909e07121bc97b2d807c84edb68994a729f224a72885e6d"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/slow-stage-public.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/slow-stage-public.mjs",
+      "category": "full16-launcher",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/slow-stage-row-contract.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/slow-stage-row-contract.mjs",
+      "category": "full16-launcher",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/template-prepared-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/template-prepared-v1.json",
+      "category": "full16-launcher",
+      "bytes": 6167,
+      "sha256": "0717ff370a38fabedff82e67b4f92e51a34f04a0655b3c5b95e6713071e151c8"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/verify-inputs.mjs",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/launcher/verify-inputs.mjs",
+      "category": "full16-launcher",
+      "bytes": 9392,
+      "sha256": "b715c67e7e0b3e764df11a885aff386b909d9f5dc81828eff89f51898660d395"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-full16-root-independent-cleanup-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/attack-deadline-full16-root-independent-cleanup-v1.json",
+      "category": "full16-evidence",
+      "bytes": 305,
+      "sha256": "b87b81759e8ffedab6999d6bf59eb2789793e16fc3a69aaf0f55c6e97ecedacb"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-prepared-independent-review-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/review/full-lifecycle-attack-deadline-diagnostics-prepared-independent-review-v1.json",
+      "category": "full16-evidence",
+      "bytes": 3459,
+      "sha256": "a6490407b60493792d771d96705491f94ff4093f529c7c95794aa0f6132bc6c1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+      "target": "full-lifecycle-attack-deadline-diagnostics-v1/review/attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+      "category": "full16-evidence",
+      "bytes": 10820,
+      "sha256": "4fd5867e421360dca4bb5cf0ec9f5bcd9b21a364f46f0bbb3bf97d53c571f1fa"
+    }
+  ],
+  "sourceCount": 62,
+  "excluded": [
+    "executables and bin directories",
+    "private stores/credentials/stdout/stderr",
+    "recording payload",
+    "duplicate Rootfunctional or full Rust/Node regression logs"
+  ],
+  "additionalReleaseBindingNeeded": {
+    "manifest": "backend-source-attack-deadline-diagnostics-v1.json",
+    "build": "release-attack-deadline-diagnostics-v1.json",
+    "action": "Root may append this fifth entry after review; this archive does not modify additional-release-bindings.json."
+  },
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2ImplementationPermitted": false
+}

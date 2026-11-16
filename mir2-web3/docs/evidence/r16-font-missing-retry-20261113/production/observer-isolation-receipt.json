@@ -1,0 +1,139 @@
+{
+  "kind": "r16-real-chrome-passive-worker-network-fixture",
+  "passed": true,
+  "publicNetworkUsed": false,
+  "ordinaryLoginUsed": false,
+  "requestInterceptionUsed": false,
+  "workerPauseUsed": false,
+  "hashes": {
+    "module": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+    "workerFixture": "dd77db52c1c6990e94f5942d74a52ad58d262bc4dab9cc1494a60a2ac3dec7d3",
+    "testFixture": "4491f4940cee8c670bc0ec21cea2823275ca6326e890a3380bebb468dfe73627",
+    "payload": "37fe21c902499b01809c9581086c1b8aabf49edd079694e32c1aea4972c4f625"
+  },
+  "browserVersion": "157.0.8103.78",
+  "fixtureResults": [
+    {
+      "path": "/original-ui/fonts/success.ttf",
+      "status": 200,
+      "bytes": 34
+    },
+    {
+      "path": "/original-ui/fonts/missing.woff2",
+      "status": 404,
+      "bytes": 7
+    },
+    {
+      "path": "/original-ui/fonts/network-error.otf",
+      "networkError": true
+    }
+  ],
+  "observation": {
+    "kind": "r16-passive-worker-font-network-v1",
+    "workerUrl": "http://127.0.0.1:57018/mir2-asset-worker.js",
+    "contextScoped": true,
+    "source": "service-worker-upstream-cdp",
+    "setupMs": 5,
+    "finishMs": 32,
+    "workersAttached": 1,
+    "otherContextWorkersIgnored": 1,
+    "droppedRequests": 0,
+    "cleanupComplete": true,
+    "observerErrors": [],
+    "rows": [
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "http://127.0.0.1:57018/original-ui/fonts/success.ttf",
+        "requestAtMs": 200,
+        "observedAtMs": 200,
+        "encodedBodyBytes": 34,
+        "status": 200,
+        "protocol": "http/1.1",
+        "headersAtMs": 201,
+        "encodedBytes": 206,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 201,
+        "durationMs": 1
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "http://127.0.0.1:57018/original-ui/fonts/missing.woff2",
+        "requestAtMs": 201,
+        "observedAtMs": 200,
+        "encodedBodyBytes": 17,
+        "status": 404,
+        "protocol": "http/1.1",
+        "headersAtMs": 202,
+        "encodedBytes": 206,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 202,
+        "durationMs": 1
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "http://127.0.0.1:57018/original-ui/fonts/network-error.otf",
+        "requestAtMs": 202,
+        "observedAtMs": 201,
+        "encodedBodyBytes": 0,
+        "netError": "net::ERR_EMPTY_RESPONSE",
+        "encodedBytes": 0,
+        "encodedBytesComplete": false,
+        "finishedAtMs": 203,
+        "durationMs": 1
+      }
+    ],
+    "limits": [
+      "future-worker requests made before Network.enable may be unobserved; no target is paused",
+      "encodedBytes from loadingFinished includes protocol overhead; failed rows only expose observed encoded body counts",
+      "only exact Worker URL in the supplied browser context is observed; no headers or payloads are accessed"
+    ]
+  },
+  "pageOnlyExcluded": true,
+  "otherContextWorkerExcluded": true,
+  "noNonLoopbackRequests": true,
+  "serverCalls": [
+    {
+      "path": "/"
+    },
+    {
+      "path": "/favicon.ico"
+    },
+    {
+      "path": "/mir2-asset-worker.js"
+    },
+    {
+      "path": "/original-ui/fonts/page-only.ttf"
+    },
+    {
+      "path": "/"
+    },
+    {
+      "path": "/favicon.ico"
+    },
+    {
+      "path": "/mir2-asset-worker.js"
+    },
+    {
+      "path": "/original-ui/fonts/decoy.ttf"
+    },
+    {
+      "path": "/original-ui/fonts/success.ttf"
+    },
+    {
+      "path": "/original-ui/fonts/missing.woff2"
+    },
+    {
+      "path": "/original-ui/fonts/network-error.otf"
+    },
+    {
+      "path": "/original-ui/fonts/network-error.otf"
+    }
+  ],
+  "closed": {
+    "browser": true,
+    "server": true
+  }
+}

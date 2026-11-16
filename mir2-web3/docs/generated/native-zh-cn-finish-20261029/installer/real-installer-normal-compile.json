@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "kind": "normal",
+  "actualFullPayload": true,
+  "compilerExitCode": 0,
+  "compilerEngineVersion": "7.1.1",
+  "exe": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-normal-output\\Numeron-Legend-of-Rebirth-20261029-r9-Setup.exe",
+  "bytes": 1017970518,
+  "sha256": "B29F0638CEFE77F95D1CED256A02E6260AA6E269B212F53548E39736A1272C20",
+  "rawFileVersion": "2026.10.29.9        ",
+  "normalizedFileVersion": "2026.10.29.9",
+  "receiptRecovery": "Compiler exit0; original wrapper rejected trailing spaces in PE version resource. Independently verified actual existing output; no recompilation.",
+  "authenticodeStatus": "NotSigned",
+  "publicRelease": false,
+  "recipeSha256": "49F087BEF9C21BA5BE66B72C03221D5B5503B6AC340AC04BF286DDE55F747F31",
+  "payloadIncludeSha256": "C4E273FCA76D39C15CE7CB203FF260BB49BD6DF41855C9F2F3740A09AA97ABF8",
+  "updaterIncludeSha256": "DBA84B24B7973EC419BF3EF4AD0A7438EF4E84A36169996B871BE9BAE70D09F8"
+}

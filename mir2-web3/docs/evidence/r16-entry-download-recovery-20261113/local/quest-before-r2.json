@@ -1,0 +1,7 @@
+{
+  "run": "quest-before-r2",
+  "passed": false,
+  "receiptWritten": false,
+  "classification": "Harness setup failed: Playwright forbids HTTPS-to-HTTP route.continue; no product outcome. Owned Chrome/listening ports subsequently checked closed.",
+  "rawLogSha256": "b55a52a552f89ef105dd8cd2352ae74b82457083214f5a2552e21686b8752b52"
+}

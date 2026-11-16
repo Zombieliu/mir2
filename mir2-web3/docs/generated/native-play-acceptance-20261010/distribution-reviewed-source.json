@@ -1,0 +1,7 @@
+{
+  "operatorSha256": "14d961f35b2d6673e7f77b3442230d59bf3dc7a08ff35b2fe722c9edebb9d3d7",
+  "size": 8113,
+  "reviewer": "/root/production_review",
+  "entry": "/usr/bin/python3 -I -c",
+  "scope": "only append four pinned missing R23 assets"
+}

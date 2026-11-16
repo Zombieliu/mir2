@@ -1,0 +1,60 @@
+{
+  "accepted": false,
+  "nativeUi": {
+    "passed": 613,
+    "failed": 0
+  },
+  "simulationDestinations": {
+    "passed": 8,
+    "failed": 0
+  },
+  "windowsSerial": {
+    "passed": 560,
+    "testThreads": 1,
+    "failed": 0
+  },
+  "date": "2026-09-09",
+  "simulationTradeRegression": {
+    "passed": 18,
+    "failed": 0
+  },
+  "visualAccepted": false,
+  "sourceHashes": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "22ff09ca2eaa40d7c6d199168aee769fca117b2a3eeaade4d895631c117b33f6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "sha256": "f7e7ba466868cb6f42479c64887c27104a90af3f86b5acb51644bcfa7cba1515"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "sha256": "ccc1b524a233ea6be1dee212a9a17a7c7160e419460c76b439f4ad60d3dba0f9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "sha256": "fbbdf3d0251507bb4b085cedf912fe009627a78ec90413ba8c282bdfa62eb35d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "sha256": "2b2f190bb5511c02b789ff2275608296e06e06bf5fa71876b7353f37497f94d4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "sha256": "697e8906b60cffc1e9c7c5b4e974dfe6e72f997589f9abc48012cfedaed1c318"
+    },
+    {
+      "path": "apps/simulation/tests/trade_item_destinations.rs",
+      "sha256": "c82d4c3e8cdd420c5b5c2a77993e0f6c7490c86bee402338fce40266ef68782d"
+    }
+  ],
+  "windowsParallel": {
+    "passed": 557,
+    "status": "open shared global queue test isolation",
+    "failed": 3
+  },
+  "packaged": false,
+  "baseCommit": "d1007a349",
+  "globalParityPercent": null
+}

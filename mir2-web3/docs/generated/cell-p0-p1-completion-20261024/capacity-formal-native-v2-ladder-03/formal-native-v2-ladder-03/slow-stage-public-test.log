@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: frozen public labels equal every current static Rust GatewaySlowStage label
+ok 1 - frozen public labels equal every current static Rust GatewaySlowStage label
+  ---
+  duration_ms: 8.5698
+  type: 'test'
+  ...
+# Subtest: split chunks and CRLF emit only the three declared metadata fields at receive time
+ok 2 - split chunks and CRLF emit only the three declared metadata fields at receive time
+  ---
+  duration_ms: 1.7461
+  type: 'test'
+  ...
+# Subtest: private account/token lines, non-ASCII, prefix/suffix injections and unknown labels never reach public output
+ok 3 - private account/token lines, non-ASCII, prefix/suffix injections and unknown labels never reach public output
+  ---
+  duration_ms: 0.5066
+  type: 'test'
+  ...
+# Subtest: an unterminated matching EOF is not published and is explicitly incomplete
+ok 4 - an unterminated matching EOF is not published and is explicitly incomplete
+  ---
+  duration_ms: 0.4658
+  type: 'test'
+  ...
+# Subtest: canonical integer validation rejects leading zero and unsafe digits without publishing them
+ok 5 - canonical integer validation rejects leading zero and unsafe digits without publishing them
+  ---
+  duration_ms: 1.2242
+  type: 'test'
+  ...
+# Subtest: overlong input is bounded at8KiB and asks for safe stop exactly once
+ok 6 - overlong input is bounded at8KiB and asks for safe stop exactly once
+  ---
+  duration_ms: 0.6914
+  type: 'test'
+  ...
+# Subtest: the32MiB ceiling is fixed and lower synthetic byte limits stop without buffering a large string
+ok 7 - the32MiB ceiling is fixed and lower synthetic byte limits stop without buffering a large string
+  ---
+  duration_ms: 0.7187
+  type: 'test'
+  ...
+# Subtest: writer backpressure marks incomplete and flushes its one bounded queued record before finish returns
+ok 8 - writer backpressure marks incomplete and flushes its one bounded queued record before finish returns
+  ---
+  duration_ms: 18.6175
+  type: 'test'
+  ...
+# Subtest: finish waits for the actual metadata writer final callback and is idempotent
+ok 9 - finish waits for the actual metadata writer final callback and is idempotent
+  ---
+  duration_ms: 0.7714
+  type: 'test'
+  ...
+# Subtest: writer final error stays incomplete and cannot disclose its private error text
+ok 10 - writer final error stays incomplete and cannot disclose its private error text
+  ---
+  duration_ms: 0.8201
+  type: 'test'
+  ...
+# Subtest: a stalled writer finish has a bounded deadline and never claims a complete stream
+ok 11 - a stalled writer finish has a bounded deadline and never claims a complete stream
+  ---
+  duration_ms: 13.4252
+  type: 'test'
+  ...
+# Subtest: empty complete stderr is a valid empty projection and says nothing about uncaptured server stages
+ok 12 - empty complete stderr is a valid empty projection and says nothing about uncaptured server stages
+  ---
+  duration_ms: 0.336
+  type: 'test'
+  ...
+# Subtest: closed stderr or an unexited Gateway cannot be called complete
+ok 13 - closed stderr or an unexited Gateway cannot be called complete
+  ---
+  duration_ms: 0.5552
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 98.195

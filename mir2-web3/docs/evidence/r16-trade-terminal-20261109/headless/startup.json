@@ -1,0 +1,20 @@
+{
+  "ready": true,
+  "origin": "http://127.0.0.1:19582",
+  "gatewayUrl": "ws://127.0.0.1:19581/ws",
+  "realmId": "ai-web-0d21c453-2f49-426b-9232-5841e92ca1dc",
+  "gatewayPid": 161160,
+  "webPid": 176772,
+  "pageSha256": "5fc2fe55f2c5131de3dc6e9956c1ca4a404afeeed31023dba377053d14f4720b",
+  "hostSha256": "0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "gatewaySha256": "60dbb6b2ad9df5165dc1472dc64c7c0281e6094a1c1208c161dfccf35f5ea974",
+  "gatewayBuildBase": "8cd766e53eede54e8c79c93fbb2ec860fb7fab90",
+  "gatewaySourceCommit": "ac6817dbf95ab1e5d1e98f78a9dd88b6885a8731",
+  "currentGatewaySourceExact": true,
+  "reusedOwnFileStore": false,
+  "clonedOwnFileStore": true,
+  "accountStoreBeforeSha256": "ea4a79a1867847544a9682f581c550b7a2416f2b0b9a7500643271a8b56a8ef0",
+  "actorStarted": false,
+  "unsafeLocalCommands": false
+}

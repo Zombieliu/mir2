@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T23:09:16.612Z",
+  "state": "ACTUAL_FULL226_REGRESSION_EVIDENCE_VERIFIED",
+  "scope": "Read-only addendum after Root actual four-entry/nine-input regression. No test rerun, target import, realm, guard, build, source or documentation edit performed here.",
+  "priorSourceAndFocusedReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-independent-review-v1\\review-v1.json",
+    "bytes": 6236,
+    "sha256": "5e81a1aac4757a406fda264b2099faaf641df2a7b9f4100c488f2b0e3f27f9d7"
+  },
+  "preservationProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\source-preservation-and-focused-receipt-v1.json",
+    "bytes": 8316,
+    "sha256": "892f65a3de4d255451e686aff53384bba5a1a998a153537c2b89f314543926f3"
+  },
+  "actualFullRegressionReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5113,
+    "sha256": "e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a"
+  },
+  "actualStdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-v1.stdout.log",
+    "bytes": 60940,
+    "sha256": "a1537754ffa171d088ece189a7d4f6ba741d203e08a62b947c9ecc63ca8d5592"
+  },
+  "actualStderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-v1.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "prior219Receipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+    "bytes": 5378,
+    "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+  },
+  "sourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "checks": {
+    "actualExitCode": 0,
+    "signal": null,
+    "counts": {
+      "tests": 226,
+      "passed": 226,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "sourceBeforeAndAfterRawExact": true,
+    "nineCurrentSourcesRawExact": true,
+    "ninePinsAndAggregateEqualPriorReviewedCandidate": true,
+    "all226TapCasesOk": true,
+    "allFooterCountsExact": true,
+    "original219Test258200BytePrefixStillRawExact": true,
+    "sevenNewFocusedTestsIncludedIn226": true,
+    "focusedTestNames": [
+      "scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting",
+      "scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries",
+      "scout anti-convergence compares declared coordinates across clusters rather than local home indices",
+      "scout anti-convergence retains original hint order when all hints are shared or only one remains",
+      "scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit",
+      "scout anti-convergence failed preferred paths keep the exact cyclic fallback and four total searches",
+      "scout anti-convergence does not introduce distance sorting when no other scout shares a hint"
+    ],
+    "oldSourceAndMetadataProofUnchanged": true,
+    "actualTAPDurationMs": 311050.8607,
+    "actualReceiptElapsedMs": 311091.0996,
+    "noSkipCancelTodo": true
+  },
+  "limits": [
+    "The7 focused tests are a subset of226, not additional independent tests counted on top.",
+    "The source/focused review remains its original earlier state; this later addendum binds the completed full regression without rewriting it.",
+    "Current unexpired zero-ACK scout plans and plans retained during pursuit are only nonexclusive waypoint preferences, not proof of arrival, real execution or target ownership.",
+    "This validates functional regression evidence only. No online capacity rerun, causal25-player improvement, new commit/freeze, fresh full16/probe/formal acceptance or P0/P2 acceptance is established."
+  ],
+  "verdict": {
+    "actualFullRegressionEvidencePassed": true,
+    "sourceReviewStillApplicable": true,
+    "blockingFindingIds": [],
+    "capacityAccepted": false,
+    "p2ImplementationPermitted": false
+  }
+}

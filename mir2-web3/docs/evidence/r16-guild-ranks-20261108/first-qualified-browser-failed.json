@@ -1,0 +1,813 @@
+{
+  "schema": "mir2.r16.guild-ranks.browser.v1",
+  "passed": false,
+  "backend": "webgl2-shared",
+  "startedAt": "2026-11-07T21:50:21.376Z",
+  "phases": [
+    "ordinary-owner-login",
+    "single-rename-and-real-rank-deltas",
+    "members-refresh-and-normal-reentry",
+    "independent-officer-hierarchy"
+  ],
+  "commands": [
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "clientCapabilities"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "clientCapabilities"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "setLanguage"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "clientVersion"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "login"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "startGame"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "keepAlive"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "npcPurchaseOwner"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "type": "requestGuildInfo",
+      "infoType": 1
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "type": "keepAlive"
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "type": "editGuildMember",
+      "changeType": 3,
+      "rankIndex": 2,
+      "name": "",
+      "rankName": "TrailGL"
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "type": "editGuildMember",
+      "changeType": 5,
+      "rankIndex": 2,
+      "name": "true",
+      "rankName": "3"
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "type": "editGuildMember",
+      "changeType": 5,
+      "rankIndex": 2,
+      "name": "true",
+      "rankName": "1"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "type": "requestGuildInfo",
+      "infoType": 1
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "type": "logOut"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "type": "startGame"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "type": "keepAlive"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "type": "npcPurchaseOwner"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "type": "requestGuildInfo",
+      "infoType": 1
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "clientCapabilities"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "clientCapabilities"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "setLanguage"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "clientVersion"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "login"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "startGame"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "keepAlive"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "npcPurchaseOwner"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "requestGuildInfo",
+      "infoType": 1
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "editGuildMember",
+      "changeType": 3,
+      "rankIndex": 1,
+      "name": "",
+      "rankName": "OfficerGL"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "editGuildMember",
+      "changeType": 5,
+      "rankIndex": 2,
+      "name": "true",
+      "rankName": "4"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "keepAlive"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "type": "keepAlive"
+    }
+  ],
+  "packets": [
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "Member",
+          "options": 0,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "ordinary-owner-login",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "Member",
+          "options": 0,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildMemberChange",
+      "status": 7,
+      "rankIndex": 0,
+      "actorIsSelf": true,
+      "ranks": [
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 0,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 0,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildMemberChange",
+      "status": 7,
+      "rankIndex": 0,
+      "actorIsSelf": true,
+      "ranks": [
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 8,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 8,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildMemberChange",
+      "status": 7,
+      "rankIndex": 0,
+      "actorIsSelf": true,
+      "ranks": [
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "single-rename-and-real-rank-deltas",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 0,
+      "myOptions": 255,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "owner",
+      "phase": "members-refresh-and-normal-reentry",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 1,
+      "myOptions": 1,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 1,
+      "myOptions": 1,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "Officer",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildMemberChange",
+      "status": 7,
+      "rankIndex": 0,
+      "actorIsSelf": true,
+      "ranks": [
+        {
+          "index": 1,
+          "name": "OfficerGL",
+          "options": 1,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 1,
+      "myOptions": 1,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "OfficerGL",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 10,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildMemberChange",
+      "status": 7,
+      "rankIndex": 0,
+      "actorIsSelf": true,
+      "ranks": [
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 26,
+          "members": 1
+        }
+      ]
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildStatus",
+      "actorIsSelf": false,
+      "myRankId": 1,
+      "myOptions": 1,
+      "guildName": "RankQA"
+    },
+    {
+      "actor": "officer",
+      "phase": "independent-officer-hierarchy",
+      "packet": "GuildMemberChange",
+      "status": 255,
+      "rankIndex": 0,
+      "actorIsSelf": false,
+      "ranks": [
+        {
+          "index": 0,
+          "name": "Leader",
+          "options": 255,
+          "members": 1
+        },
+        {
+          "index": 1,
+          "name": "OfficerGL",
+          "options": 1,
+          "members": 1
+        },
+        {
+          "index": 2,
+          "name": "TrailGL",
+          "options": 26,
+          "members": 1
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "singleRenameKeepsOtherRanks",
+      "actor": "owner",
+      "rankIndex": 2,
+      "passed": true,
+      "topLevelRankIndex": 0,
+      "nestedRankIndex": 2
+    },
+    {
+      "name": "singleAuthoritativePermission",
+      "actor": "owner",
+      "permission": "CanStoreItem",
+      "enabled": true,
+      "passed": true,
+      "rankIndex": 2
+    },
+    {
+      "name": "singleAuthoritativePermissionPreservesDraft",
+      "actor": "owner",
+      "permission": "CanRecruit",
+      "enabled": true,
+      "passed": true,
+      "rankIndex": 2
+    },
+    {
+      "name": "NativeShortNameRejectedByOrdinaryUI",
+      "passed": true
+    },
+    {
+      "name": "NormalLogoutReentryKeepsActualRenamedRank",
+      "passed": true
+    },
+    {
+      "name": "OrdinaryOfficerCannotEditHigherRankCanEditOwnAndLower",
+      "passed": true
+    },
+    {
+      "name": "singleRenameKeepsOtherRanks",
+      "actor": "officer",
+      "rankIndex": 1,
+      "passed": true,
+      "topLevelRankIndex": 0,
+      "nestedRankIndex": 1
+    },
+    {
+      "name": "singleAuthoritativePermission",
+      "actor": "officer",
+      "permission": "CanRetrieveItem",
+      "enabled": true,
+      "passed": true,
+      "rankIndex": 2
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "owner-initial-ranks",
+      "sha256": "d0c163a0e1c8ad5ba05e7eeac9554b1576804ca808b41495522a0bbbe8386879"
+    },
+    {
+      "name": "owner-permissions-draft-retained",
+      "sha256": "dd58ec4f502120cff06943ceadbc0915500b21c035a916876943d10025df373c"
+    },
+    {
+      "name": "owner-members-after-deltas",
+      "sha256": "dad7a2798a7af4afafa8e4098d0da7336136d81e6f912d5ed02cf443b923e1a1"
+    },
+    {
+      "name": "owner-failure",
+      "sha256": "ff090914977464a2371cb705c31d62560c46137cf27efdcfb8198e51cf72ded6"
+    },
+    {
+      "name": "officer-failure",
+      "sha256": "37b5db51e0a863e5eeba4927643dde58635dc886a8e40daea475a6075999918e"
+    }
+  ],
+  "pageErrors": [],
+  "networkErrors": [],
+  "errors": [
+    {
+      "phase": "independent-officer-hierarchy",
+      "code": null,
+      "messageHash": "1ade3cb3e6b0b1290b75209928d9543c096ebdc040daf6d9a9eafd16329c840c"
+    }
+  ],
+  "fixtureGuildCreatedBeforeStartup": true,
+  "guildCreationViaGameplayClaimed": false,
+  "browser": "156.0.8078.80",
+  "completedAt": "2026-11-07T21:52:13.945Z"
+}

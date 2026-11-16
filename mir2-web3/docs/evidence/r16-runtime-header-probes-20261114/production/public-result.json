@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "source": "5b011e5d2fcce78883b517e5992ef23245052f84",
+  "deploymentId": "dpl_CGUG4eNnpBEreSxFPi7rsoZcNVhV",
+  "accepted": false,
+  "rawFunctionalPassed": true,
+  "failure": null,
+  "timing": {
+    "clockEpochMs": 1794669933578,
+    "authoritativeLoginSuccessMs": 56676,
+    "startIntentMs": 87478,
+    "startAckMs": 91723,
+    "authoritativeStarterMapMs": 91732,
+    "authoritativeSelfMs": 91732,
+    "firstPlayableObservedMs": 94920,
+    "terrainPaintVerifiedMs": 166834,
+    "sharedHudObservedMs": 342544,
+    "logoutIntentMs": 350863,
+    "logoutAckMs": 351822,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 56681,
+    "starterRegionWireHeadersMs": 63472.991,
+    "starterRegionResponseEventMs": 63477,
+    "starterRegionBodyMs": 63772,
+    "starterRegionCommitMs": 91854,
+    "sceneSpritesReadyMs": 91893,
+    "localeRequestMs": 56682,
+    "localeBodyMs": 63461,
+    "localeReadyMs": 63493,
+    "firstPlayableFrameMs": 94902,
+    "rendererBodyMs": 249396
+  },
+  "movement": {
+    "passed": true,
+    "ackWithinEightSeconds": true,
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 98918
+    },
+    "wireAtMs": 95108,
+    "ackLatencyMs": 3810
+  },
+  "prewarm": {
+    "passed": true,
+    "requested": 113,
+    "ok": 113,
+    "failed": 0,
+    "durationMs": 253076
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": true,
+    "status": "observed",
+    "gateReady": true,
+    "runtimeDelivered": true,
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-shared-zh-TW.png"
+    }
+  },
+  "questPassed": true,
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "browsersClosed": true,
+  "wallet": {
+    "passed": true,
+    "officialPwa": true,
+    "mobileBrowserEmulation": true,
+    "virtualPasskey": true,
+    "approveUiClicks": 1,
+    "fundingGuardClear": true,
+    "physicalPhoneCameraTested": false
+  },
+  "static": {
+    "rows": 1371,
+    "workerRows": 537,
+    "pending": 7,
+    "dropped": 0,
+    "doorFrameRows": 2,
+    "doorFrames": [
+      {
+        "ordinal": 29,
+        "url": "https://numeron.obelisk.build/original-ui/ChrSel/0.png",
+        "category": "ui",
+        "source": "page",
+        "resourceType": "image",
+        "requestAtMs": 56683,
+        "outcome": "finished",
+        "status": 200,
+        "headersAtMs": 57610,
+        "fromServiceWorker": true,
+        "finishedAtMs": 77561,
+        "observedDurationMs": 20878,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 0.063,
+          "responseStart": 924.5,
+          "responseEnd": 20875.732
+        },
+        "requestToHeadersMs": 924.437,
+        "headersToEndMs": 19951.232,
+        "browserReportedResponseBodyBytes": null,
+        "browserReportedResponseHeadersBytes": 716
+      },
+      {
+        "ordinal": 35,
+        "url": "https://numeron.obelisk.build/original-ui/ChrSel/1.png",
+        "category": "ui",
+        "source": "page",
+        "resourceType": "image",
+        "requestAtMs": 77562,
+        "outcome": "finished",
+        "status": 200,
+        "headersAtMs": 78118,
+        "fromServiceWorker": true,
+        "finishedAtMs": 98604,
+        "observedDurationMs": 21042,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 2.09,
+          "responseStart": 555.537,
+          "responseEnd": 21041.4
+        },
+        "requestToHeadersMs": 553.447,
+        "headersToEndMs": 20485.863,
+        "browserReportedResponseBodyBytes": null,
+        "browserReportedResponseHeadersBytes": 716
+      }
+    ],
+    "runtime": [
+      {
+        "ordinal": 280,
+        "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page",
+        "resourceType": "fetch",
+        "requestAtMs": 95003,
+        "outcome": "failed",
+        "finishedAtMs": 103004,
+        "observedDurationMs": 8001,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": -1,
+          "responseStart": -1,
+          "responseEnd": -1
+        },
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "ordinal": 306,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page",
+        "resourceType": "fetch",
+        "requestAtMs": 103004,
+        "outcome": "failed",
+        "finishedAtMs": 111006,
+        "observedDurationMs": 8002,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": -1,
+          "responseStart": -1,
+          "responseEnd": -1
+        },
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "ordinal": 326,
+        "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page",
+        "resourceType": "fetch",
+        "requestAtMs": 111006,
+        "outcome": "finished",
+        "status": 200,
+        "headersAtMs": 206217,
+        "fromServiceWorker": false,
+        "finishedAtMs": 249619,
+        "observedDurationMs": 138613,
+        "timingMs": {
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 0.039,
+          "responseStart": 95204.025,
+          "responseEnd": 138389.735
+        },
+        "requestToHeadersMs": 95203.98599999999,
+        "headersToEndMs": 43185.70999999999,
+        "browserReportedResponseBodyBytes": 6026778,
+        "browserReportedResponseHeadersBytes": 0
+      }
+    ]
+  },
+  "wholeParityAccepted": false
+}

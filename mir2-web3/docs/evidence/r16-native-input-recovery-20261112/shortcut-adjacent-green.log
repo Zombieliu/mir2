@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: actual Belt1 routing records handled separately from one accepted use for empty and Fencing lists
+ok 1 - actual Belt1 routing records handled separately from one accepted use for empty and Fencing lists
+  ---
+  duration_ms: 187.9215
+  type: 'test'
+  ...
+# Subtest: actual repeat remains handled without attempting an item, Core request or fallback
+ok 2 - actual repeat remains handled without attempting an item, Core request or fallback
+  ---
+  duration_ms: 56.995
+  type: 'test'
+  ...
+# Subtest: actual Shell records focus editable and existing UI refusals before Page without using an item
+ok 3 - actual Shell records focus editable and existing UI refusals before Page without using an item
+  ---
+  duration_ms: 313.678
+  type: 'test'
+  ...
+# Subtest: actual Page preserves Belt handled even when its item is missing invalid or locally refused
+ok 4 - actual Page preserves Belt handled even when its item is missing invalid or locally refused
+  ---
+  duration_ms: 116.9839
+  type: 'test'
+  ...
+# Subtest: actual Page diagnostics preserve existing scene owner and window gates and do not add scene-ready authority
+ok 5 - actual Page diagnostics preserve existing scene owner and window gates and do not add scene-ready authority
+  ---
+  duration_ms: 267.6549
+  type: 'test'
+  ...
+# Subtest: ordinary NPC dialogue claims both physical forms of Belt1
+ok 6 - ordinary NPC dialogue claims both physical forms of Belt1
+  ---
+  duration_ms: 154.6042
+  type: 'test'
+  ...
+# Subtest: actual public Belt getter is inert finite and excludes identities names arbitrary refusal text or private fields
+ok 7 - actual public Belt getter is inert finite and excludes identities names arbitrary refusal text or private fields
+  ---
+  duration_ms: 71.8926
+  type: 'test'
+  ...
+# Subtest: current shared diary closes through its configured key and the Native-only navigation dispatcher
+ok 8 - current shared diary closes through its configured key and the Native-only navigation dispatcher
+  ---
+  duration_ms: 52.9087
+  type: 'test'
+  ...
+# Subtest: remapped Native binding works and its former key stays blocked by the modal
+ok 9 - remapped Native binding works and its former key stays blocked by the modal
+  ---
+  duration_ms: 0.7469
+  type: 'test'
+  ...
+# Subtest: repeats and declined navigation cannot toggle or fall through to the world
+ok 10 - repeats and declined navigation cannot toggle or fall through to the world
+  ---
+  duration_ms: 0.3229
+  type: 'test'
+  ...
+# Subtest: typing, another modal, stale HUD authority and non-quest keys retain their input owner
+ok 11 - typing, another modal, stale HUD authority and non-quest keys retain their input owner
+  ---
+  duration_ms: 1.4914
+  type: 'test'
+  ...
+# Subtest: withdrawing current HUD before dispatch blocks a captured old modal handler
+ok 12 - withdrawing current HUD before dispatch blocks a captured old modal handler
+  ---
+  duration_ms: 0.2725
+  type: 'test'
+  ...
+# Subtest: the actual hook exposes only committed handlers across pending and abandoned renders
+ok 13 - the actual hook exposes only committed handlers across pending and abandoned renders
+  ---
+  duration_ms: 2.2819
+  type: 'test'
+  ...
+# Subtest: initial null, entry and leaving keep one capture subscription and null dispatches nothing
+ok 14 - initial null, entry and leaving keep one capture subscription and null dispatches nothing
+  ---
+  duration_ms: 0.5545
+  type: 'test'
+  ...
+# Subtest: unmount removes the exact capture listener and clears an abandoned next handler
+ok 15 - unmount removes the exact capture listener and clears an abandoned next handler
+  ---
+  duration_ms: 0.2896
+  type: 'test'
+  ...
+# Subtest: negative control: rebinding an effect during an earlier listener loses that same dispatch
+ok 16 - negative control: rebinding an effect during an earlier listener loses that same dispatch
+  ---
+  duration_ms: 0.4061
+  type: 'test'
+  ...
+# Subtest: the actual stable listener forwards once after a preceding same-target listener commits a new handler
+ok 17 - the actual stable listener forwards once after a preceding same-target listener commits a new handler
+  ---
+  duration_ms: 0.2997
+  type: 'test'
+  ...
+# Subtest: the actual hook forwards the original key and modifiers without consuming or filtering it
+ok 18 - the actual hook forwards the original key and modifiers without consuming or filtering it
+  ---
+  duration_ms: 0.2724
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1722.3401

@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "scope": "Frozen buffered-spectator Release187775 / source827d4c8 and original native driver plus narrowly authorized probe cap10 boundary; unique independent ten ordinary fresh account/character natural-supply feasibility run. No grants, teleports, Butcher or server content changes. Original18/12 and six60s windows unchanged. Not formal capacity acceptance. Observer4 home relocation is the sole ordinary workload geometry change; same target classes, patrol span, cluster, strict thresholds and resource guards.",
+  "sourceConfigSha256": "73cb69e576e7c38f11f2e4483d4a77b250f5c2b808b6bbc07add6f50fe5a5041",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 108464,
+      "sha256": "c76c4d756a4316c0e7c1d847c03f2dc621d957f03f108192ea78397bf0d1b530"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 36588,
+      "sha256": "1e067f87fd9cbb2a2c370823ccca1d3c6046b23e45e7c5e6108d5d883f347bcc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "apps/web/scripts/playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "a5d3a45d780a27abc2bd97528e4002c616dc8fc29d15ca5ff30085196102c9a5"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/backend-source-spectator-buffer-827d4c8.json",
+      "bytes": 10050,
+      "sha256": "c6cd3a1cfa0a02bb1a709d937b85457be72def4a61c5fa50a3a7768a2b2ebc1f"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/gateway-build-pin.json",
+      "bytes": 588,
+      "sha256": "f72ddbd486e16c472a99f6ac8e410ed97d615e48043a18009e2575b959932e37"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-native10-actor4-home-candidate-v1.json",
+      "bytes": 1176,
+      "sha256": "2e58c3413fc6603183eca3e752bb480c3d985c7e0c2fd17ca0a433bc380b5cee"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-native10-actor4-home-review-v1.json",
+      "bytes": 4304,
+      "sha256": "fc3b8797aa0710dbbaa3ae49ef8dd99bcebdd736316f5ecc31e2ea2bb8481fe5"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/gateway-build-pin-source-v2.json",
+      "bytes": 1121,
+      "sha256": "fb919f22f142cf4b3061a069ad965207d85b918487ebe60d9dd80a11c6230c1e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/run-options-admitted-v2.json",
+      "bytes": 1278,
+      "sha256": "0cfec12543113d4d57c22f78074013a2c3dd2c95837fe0b2010d9300299347b4"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/realm-process.json",
+      "bytes": 1044,
+      "sha256": "914a50b2496e40e86722c0c92e0bb8b29230e6ac4f021aed3500dc1538e6ed90"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/spectator-health-before.json",
+      "bytes": 739,
+      "sha256": "7bac03d95cf077af864c64bfb0d81f02d88b63c62c9663166b0a940d9325be9d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/start-release-native-10-feasibility-04.ps1",
+      "bytes": 4158,
+      "sha256": "32416c518e4019dbfe1920ca81488d99fe0b389c94c22075a7f273acaf108378"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-spectator-buffer-827d4c8.json",
+      "bytes": 962,
+      "sha256": "1e4f76b7282885defa6ee1ba7c66b867a27561174281f3a64140150efa08b502"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-probe10-source-frozen.json",
+      "bytes": 2516,
+      "sha256": "2635ee67e0bcfb82b829a538b864691e10dc5249ef6080d9a175cf0454e9852e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capture-native10-04-spectator-health.mjs",
+      "bytes": 1733,
+      "sha256": "93607ff250e3775ac3850829a0ed2869bd5e21a8b240827c3b5f8d10842951d4"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/summarize-native10-04-spectator-recordings.mjs",
+      "bytes": 3417,
+      "sha256": "c9941dcbc39657bc7485b8e6ea238eee1e96325aa99b752559d9255862c9634f"
+    }
+  ],
+  "repositoryCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "backendSourceHistoryCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "backendSourceManifest": "C:/mir2-build/p01-completion-20261024/backend-source-spectator-buffer-827d4c8.json",
+  "primaryBuildPin": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/gateway-build-pin-source-v2.json",
+  "preparedAt": "2026-10-24T17:22:51.894Z",
+  "focusedDriverPassed": 2,
+  "adjacentDriverPassed": 111,
+  "bufferedRecorderFocusedPassed": 16
+}

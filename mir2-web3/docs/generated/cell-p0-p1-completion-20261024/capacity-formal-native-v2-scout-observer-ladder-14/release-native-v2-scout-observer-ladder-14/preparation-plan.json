@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_UNSEALED_NOT_EXECUTED",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendInputCount": 50,
+  "sourceOnly": true,
+  "freshProbe18Bound": true,
+  "rootExecutionRequired": true,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "formalScope": {
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "wallSeconds": 18000,
+    "completeMinuteWindows": 146
+  },
+  "staticRiskBoundary": [
+    "100 representative scout tour886 unitsteps is historical static evidence only",
+    "Original24ACK/20s online waypoint advance budget unchanged",
+    "Conditional static120 positive hits does not prove180 launched attacks or2h supply",
+    "Historical25 failure is not retroactively passed by new source tests"
+  ],
+  "futureOrder": [
+    "Actual ended18 full PASS/raw/base+Store/independent source seal+execution/OS binding",
+    "Final consumer schema/source integration and independent QA",
+    "Root seal/readonlyguard/prepare100ordinary/explicit formal run",
+    "Ended formal game and independent Store collection/verification"
+  ],
+  "proposedEnded18SchemaNotYetValidated": false,
+  "finalExternalSourceClosureAssemblyPending": false,
+  "actualProbe18RunId": "1792965008290-fc5e2eed",
+  "actualProbe18Independent": {
+    "path": "probe18-independent-verification-v1/final-verification.json",
+    "bytes": 437094,
+    "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+  },
+  "independentSourceClosure": {
+    "path": "probe18-independent-verification-v1/tool-source-frozen-v1.json",
+    "bytes": 2111,
+    "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+  }
+}

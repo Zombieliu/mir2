@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "phase": "r10-first",
+  "gamePid": 71048,
+  "gameExe": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+  "gameSha256": "6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D",
+  "updaterPid": 81784,
+  "updaterExe": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\.update\\engine-10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC.exe",
+  "updaterSha256": "10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC",
+  "fullLauncherChain": true,
+  "directGameLaunch": false,
+  "localePreference": {
+    "schema": 1,
+    "locale": "zh-CN"
+  },
+  "observedAtUtc": "2026-10-29T11:32:14.6093162Z",
+  "paymentsAttempted": false
+}

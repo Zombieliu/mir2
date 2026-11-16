@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.production-serial-slot-wait.v1",
+  "recordedUtc": "2026-10-08T16:10:18.7479146Z",
+  "requestedRun": "grant-tests-02",
+  "maximumWaitSeconds": 45,
+  "result": "Serial Cargo slot busy; no check started.",
+  "cargoStarted": false,
+  "testsExecuted": 0,
+  "guardNonces": 0
+}

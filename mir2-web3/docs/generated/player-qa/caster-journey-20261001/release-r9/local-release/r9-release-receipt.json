@@ -1,0 +1,147 @@
+{
+  "schema": "mir2.windows.local-invited-release-receipt.v1",
+  "passed": true,
+  "createdUtc": "2026-10-01T18:23:38.398293+00:00",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "sourceClean": true,
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "updaterSequence": 5,
+  "cmsSignerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+  "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+  "packageFileCount": 123035,
+  "payloadFileCount": 123031,
+  "packageBytes": 764613204,
+  "manifestAggregateSha256": "1ACE314B6D2D45A7570B88F907ECD3F945CC234CEF37E147195AE728CE176C8A",
+  "cmsVerificationPassed": true,
+  "nonvisualVerificationPassed": true,
+  "packageVerifierSourceRepoCheck": "checked",
+  "sourceCleanCheck": "Exact source and clean status checked here and by the canonical packager/verifier against the adjacent short source checkout.",
+  "publisherAuthenticode": {
+    "required": false,
+    "status": "internal-candidate-only",
+    "thumbprint": null,
+    "timestampRequired": false
+  },
+  "updaterPublicAuthenticode": "NotSigned",
+  "publicPublished": false,
+  "humanVisualAccepted": false,
+  "scope": "Local internal Candidate packaging only; rollout and gameplay acceptance remain with root.",
+  "retainedPackageAttempts": [
+    "build-package-process-attempt1.json",
+    "build-package-process-attempt2.json",
+    "build-package-process-attempt3.json",
+    "build-package-process-attempt4.json"
+  ],
+  "artifacts": {
+    "nativeExe": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9\\mir2-platform-windows.exe",
+      "sizeBytes": 110583296,
+      "sha256": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488"
+    },
+    "buildAttestation": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9\\BUILD-ATTESTATION.json",
+      "sizeBytes": 1493,
+      "sha256": "1FD9D1D881054D7BAFAA1B71A9E80816C8F54FD5BC62E77F06433CF24A92BA10"
+    },
+    "packageManifest": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9\\PACKAGE-MANIFEST.json",
+      "sizeBytes": 23621064,
+      "sha256": "E9797953F1F6A14CE7EE83EAD71CE94C5E22AEC75200624DCD97AA110E95201B"
+    },
+    "candidateVersion": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9\\VERSION.json",
+      "sizeBytes": 1221,
+      "sha256": "533069F3BF09CE831F7D5D59F44F4E9BB84DC8651EB20AE5DF76B80DD555A02A"
+    },
+    "releaseStatement": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9\\RELEASE-STATEMENT.json",
+      "sizeBytes": 707,
+      "sha256": "DB4861E04B58F6CFE20C0A2938C77920FCD9435636CBBED590611D0E7CE026B6"
+    },
+    "releaseSignature": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9\\RELEASE-STATEMENT.p7s",
+      "sizeBytes": 1614,
+      "sha256": "5859A1EEA8BBE0E56C46E13BBDA1EF52CF22840F6C03D62F969CB099ECD11249"
+    },
+    "launcherExe": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\bundle\\Mir2Launcher.exe",
+      "sizeBytes": 388096,
+      "sha256": "57D9298D61A43F6DD412906DB88F54AC9C328DDCA361864EED3ED4878BC5BCDD"
+    },
+    "updaterExe": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\bundle\\updater\\engines\\00A898666E57DC0457968BEB667902C8CD3A4FCEFA74EB9BA2336A28BE21B902\\Mir2Updater.exe",
+      "sizeBytes": 1725440,
+      "sha256": "00A898666E57DC0457968BEB667902C8CD3A4FCEFA74EB9BA2336A28BE21B902"
+    },
+    "updaterBuildReceipt": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\BUILD-UPDATER.json",
+      "sizeBytes": 616,
+      "sha256": "47A5DBAE3869AD84BEEF933602024C0AE2171EC613FFC497C81CA91DD7B3F6A6"
+    },
+    "updaterBundleStatement": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\bundle\\UPDATER-BUNDLE.json",
+      "sizeBytes": 1286,
+      "sha256": "047DEB57427F0E8651649365676F0AF04E97BE0F5874BCD0EDE5A758F1620C27"
+    },
+    "updaterBundleSignature": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\bundle\\UPDATER-BUNDLE.p7s",
+      "sizeBytes": 1614,
+      "sha256": "D5B53ECEBB08100B2BA64A1A31C94BCBFC86ABA158398F364007810CFFAE165D"
+    },
+    "updaterVerification": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater-bundle-verification.json",
+      "sizeBytes": 592,
+      "sha256": "E7C8B0640893EE60996DD469BA5425C8A2A3FF9CCF612EFDF3E92B6486111794"
+    },
+    "feed": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\feed\\latest.json",
+      "sizeBytes": 1157,
+      "sha256": "BEBFB5193DE19DD4107C1E5CC4BAC89C092B83094D86FE49F4A10DD3A291E487"
+    },
+    "feedSignature": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\feed\\latest.p7s",
+      "sizeBytes": 1614,
+      "sha256": "58507D93FDB2E2D903D01DB8072CBB6C4221FE5C6691B6DBD4388B5129E2E919"
+    },
+    "installer": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\Numeron-Legend-of-Rebirth-20261001-r9-Setup.exe",
+      "sizeBytes": 603527723,
+      "sha256": "951EF073484C2FAF281679BADB389BFEA1A4985FEEA04955532B4ABB8B927FB8"
+    },
+    "releaseArchive": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\releases-r9.tar.gz",
+      "sizeBytes": 624855845,
+      "sha256": "FB5697A89B2A652E793A790FA6DCCE0A88B4C1D057DD86DEADBB07CF6127AF52"
+    },
+    "installerInputVerification": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\installer-build\\installer-input-verification.json",
+      "sizeBytes": 910,
+      "sha256": "4FFC1F465505551B9A5A62C421E0C8F536E6757DB8648D9192076C2FA8EC64B0"
+    },
+    "installerTemplates": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\installer-template-copy.json",
+      "sizeBytes": 8186,
+      "sha256": "F5950C95CC909B684A73F66EE1CBD12B1239940CFCEEF283E20771A2CD1D6850"
+    },
+    "candidateVerification": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261001-invited-09-verification.json",
+      "sizeBytes": 1866,
+      "sha256": "4A8D968402ED8B7A8133538A38AE3286E95335FA4AA7AB787AC8A313840B53F6"
+    },
+    "candidateVerificationReuse": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\candidate-verification-reuse.json",
+      "sizeBytes": 2717,
+      "sha256": "5C44839707428E2E874118D447A0CAC99852C2B1AFD039EC99CCE46D69D26E3A"
+    },
+    "packageProcess": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\build-package-process.json",
+      "sizeBytes": 849,
+      "sha256": "23BFC1834950382B7A9A5CD341864218225504DE1B924654D6E4F22E6AFB1107"
+    },
+    "releaseProcess": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\release-process.json",
+      "sizeBytes": 376,
+      "sha256": "8D1CBAF2372AD8274AE3D12A46EE46DB5403FF996868AD3ED6826D7AFBFCBF4E"
+    }
+  }
+}

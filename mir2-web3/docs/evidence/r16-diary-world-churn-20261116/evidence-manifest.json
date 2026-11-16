@@ -1,0 +1,80 @@
+{
+  "files": [
+    {
+      "name": "red-regression.json",
+      "bytes": 649,
+      "sha256": "24811fad97af3bc9afc32988056ee021412d12941608c22dfd74d0e89a10e9e9"
+    },
+    {
+      "name": "validation.json",
+      "bytes": 1689,
+      "sha256": "7d49b7e8406ec215c5e0ab01af893193951efbe2ae4f173e6534afce5f9ead54"
+    },
+    {
+      "name": "isolated-build.json",
+      "bytes": 9889,
+      "sha256": "7b046cf77205f249f1dbddca1a185e135bf34ef2ae7692ee85a14a9f734659cd"
+    },
+    {
+      "name": "restoration.json",
+      "bytes": 1060,
+      "sha256": "4cb2a21a7014f4b4a52ad1f8377697c508d5874c404eb1fb99bcdea00b4f5ab0"
+    },
+    {
+      "name": "r1-original-capture-failure.json",
+      "bytes": 433,
+      "sha256": "cacbbcb034cd579ae1d8caa4fb6c36d5c8248bf516e36d9d49558c499d6c053d"
+    },
+    {
+      "name": "webgpu-tc.json",
+      "bytes": 21389,
+      "sha256": "391d0ccadb3fa6afafc3fd2a9dae92b0ce2f5785c4f6a1530c833b78396d77b7"
+    },
+    {
+      "name": "webgpu-tc-diary-open.png",
+      "bytes": 1357347,
+      "sha256": "67f161abc052ff276e507cf94a9458ad8ba1123a9f476918fb2de3e775bdce57"
+    },
+    {
+      "name": "webgpu-tc-diary-closed.png",
+      "bytes": 1415591,
+      "sha256": "b100041675966149e914ebc87c387c2bf39c7a8a503a6ac5c5f188d1d57e6ba9"
+    },
+    {
+      "name": "webgl2-tc.json",
+      "bytes": 21425,
+      "sha256": "b2504b6dfc579b873f6c3e5992afd9b6505654ba37c053ae5d5887e3a4356dcc"
+    },
+    {
+      "name": "webgl2-tc-diary-open.png",
+      "bytes": 1353165,
+      "sha256": "70b9f576235ce121b9a9f14f81844f991c3f227a4ddc6b7597025aecfee84e9d"
+    },
+    {
+      "name": "webgl2-tc-diary-closed.png",
+      "bytes": 1409780,
+      "sha256": "d909ce0387e540820a922b62e81626442aa5e3bccff265c61e8ec96c3a4dc57b"
+    },
+    {
+      "name": "public-readback.json",
+      "bytes": 513,
+      "sha256": "3c241f507b50a3bd8a3f32a293be80a5f3b25a2f2a02fd7fd186e7846ae67503"
+    },
+    {
+      "name": "alias-readback.json",
+      "bytes": 239,
+      "sha256": "6bf6efd1cdd64c2194e48986c3df2586739da13bef90209427bf80a25290c0ba"
+    },
+    {
+      "name": "status.json",
+      "bytes": 1555,
+      "sha256": "76f5a86e9fe3e31006b97225982e84d87076bacab2f61ef49b0138bf39fa4ced"
+    },
+    {
+      "name": "prior-coverage-correction.json",
+      "bytes": 666,
+      "sha256": "b6ff0774b3f29341e9824453f3ebe2685347048fc5fdfd29dce7a42a09830ce1"
+    }
+  ],
+  "scope": "Selected sanitized bounded diary-close fix evidence. All original failures and complete traces remain in private topic."
+}

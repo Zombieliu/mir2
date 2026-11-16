@@ -1,0 +1,139 @@
+{
+  "kind": "preserved-unrelated-tracked-wip",
+  "count": 33,
+  "unchanged": true,
+  "files": [
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "sha256": "e80072eff58555cdfaa8963eaf21ce5556da247507ae49b564222484138a2437"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+      "sha256": "cfc9755f516ec7a16bc2bfcd202e240ffa7b0be8246b93d0cb2b030475a712df"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "sha256": "556acc585807ca76d8e0fa0c0374ca5066f6d5b22f1aad44329b98d21fadc967"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_layout.rs",
+      "sha256": "89e767b5f26e6db984e29eb71f23e8f96ba34c64aa79d7b6aa95cb2175c94da0"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_reference.rs",
+      "sha256": "f3ad121ea8cb02cdb7b109553b5ae31c9bd2867f5684fd120a74a657a9dde803"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "sha256": "94bcc11c7ebd58ca099da00c6006f6dbae6f83c10973729b8b43963115ffa7f4"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "sha256": "2085337d2c1fa164f9e98796a40d307d82c585cb2e5e367adaa9e9f234192321"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "sha256": "e5cc1662c8e3fa2c072bbcbe6e6700524ac8a284219d435a76c1b3894c5df6b8"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/pc_login.rs",
+      "sha256": "1e033f4ca776f9225d98aadcf020f7d35323e7d659b4ab98053dd3ea9ab9b353"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "sha256": "d04466e3bafb3a201e399ff9dbc3ffecaf6a13c31ca1f3044c95fa3f8f3ab9ef"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "b47681702030a30f1d99673a79e2b5d350aee4b1541d7173c2c15cd2f48ade69"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "sha256": "f99a8d5f2922036aa807f01f10a706a1935290f8eb7fae633d3770f4dd93b3e5"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "sha256": "d7f9f0574a43394facb4da476397e6a367c1ba5852312e46e2ee66caaa7e5014"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "sha256": "15676c18c1812c4293087b98768a97be9a909fcab7de22aa2d390b227ffaea85"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+      "sha256": "930028511aee30592d94dda85e8175d76149cc38d3400d9c333fc94d6d4bdf21"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "sha256": "adc33b2398789a77a6608a978911d32c2d7667d55010ab53e842b7818c7cc176"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "sha256": "b3e0623cdebbcb2194635c75f9fff9f7c90b8a7519eef683b3a5656a23ac72b3"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/hud_layout_pointer_input_tests.rs",
+      "sha256": "6bf7506b8a8f559c847b53560105de9b703e12b8e9f9c1a471ee26d160bf7455"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "sha256": "e316672a3b346272b5b621ce9a84af7c8a98aca678acd5c7e65fea427ba35a05"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "sha256": "f71773dcd52bc8e16b2a772e0ab3bf19547c839088e751e82ab2e05c6532a397"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/pc_hud.rs",
+      "sha256": "9c8ce9950bd113bf2e454bd448a67c6de96ff939f5a09ce6e7cd5a60f25f63e8"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/pc_hud_visual_tests.rs",
+      "sha256": "51de89e50c1bba193a8e6b7d18b9d3a209e166ed476b45a8310c80167fba2839"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "sha256": "729b843d671a2dbe70407168b0a528591bb99ca28a92c6d77df0016525633713"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "5a0c186b891228f99fc35642408249391f58d243021851c574b14c38c0241c35"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "dbfb577db9395086576fc1d9da0f7c458f1836eb69356a12cdca4b384e69fbce"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "91bc5aa6f8cde16ca4ff4f9b2f5c7bf965162b8049316683a262855c48a37fd9"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/manifest.json",
+      "sha256": "e77c5973ca98b709629c5cfd52ce7d26af009fe550bc9a9a1779598d10e9c1a1"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+      "sha256": "32ec79ce9b7a10c13c3a638ed4c8258137945ca7af4f594b76701dfce59bfa7d"
+    },
+    {
+      "filename": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "sha256": "024cd7215baa87027f5ae3e9d9d116593a9d088c1957cb844cb29f690dae1068"
+    },
+    {
+      "filename": "mir2-web3/docs/PC-UI-INTEGRATION-20261109.zh-CN.md",
+      "sha256": "a7fd33032c54a32fc36282f032dc6bbfa059885deed798752cf264ad470379e2"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-walking-recovery-20261114/protocol-evidence.json",
+      "sha256": "ab8764ab3a3b3845acc2c166b8eb3ed384a8d8f5519c4c1cb6762c8dc6b3592b"
+    },
+    {
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/.crystal-gdi-text-output",
+      "sha256": "fb7191bce7cab2d26d1547c8135bdb9b3da4a1ba9210315fc1fb5a3075aea910"
+    },
+    {
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/manifest.json",
+      "sha256": "e77c5973ca98b709629c5cfd52ce7d26af009fe550bc9a9a1779598d10e9c1a1"
+    }
+  ]
+}

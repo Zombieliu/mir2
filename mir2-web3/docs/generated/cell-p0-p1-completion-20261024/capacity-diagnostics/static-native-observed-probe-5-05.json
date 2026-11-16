@@ -1,0 +1,161 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 265,
+      "y": 636
+    },
+    {
+      "x": 252,
+      "y": 625
+    },
+    {
+      "x": 266,
+      "y": 621
+    },
+    {
+      "x": 283,
+      "y": 620
+    },
+    {
+      "x": 269,
+      "y": 606
+    }
+  ],
+  "patrolSpan": 2,
+  "monsterNames": [
+    "Deer",
+    "Scarecrow"
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        2
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        3,
+        4
+      ]
+    }
+  ],
+  "generated": {
+    "staticOnly": true,
+    "staticProof": {
+      "homes": [
+        {
+          "x": 265,
+          "y": 636
+        },
+        {
+          "x": 252,
+          "y": 625
+        },
+        {
+          "x": 266,
+          "y": 621
+        },
+        {
+          "x": 283,
+          "y": 620
+        },
+        {
+          "x": 269,
+          "y": 606
+        }
+      ],
+      "visitedCells": 3777,
+      "mapCells": 490000,
+      "footprintCells": 45
+    },
+    "observedNaturalTargets": [
+      {
+        "kind": "monster",
+        "objectId": 206339,
+        "name": "Deer",
+        "x": 284,
+        "y": 613,
+        "hp": 25,
+        "dead": false,
+        "disposition": "neutral",
+        "ownerName": null,
+        "covered": true
+      },
+      {
+        "kind": "monster",
+        "objectId": 206500,
+        "name": "Deer",
+        "x": 256,
+        "y": 621,
+        "hp": 25,
+        "dead": false,
+        "disposition": "neutral",
+        "ownerName": null,
+        "covered": true
+      },
+      {
+        "kind": "monster",
+        "objectId": 206515,
+        "name": "Deer",
+        "x": 284,
+        "y": 611,
+        "hp": 25,
+        "dead": false,
+        "disposition": "neutral",
+        "ownerName": null,
+        "covered": true
+      },
+      {
+        "kind": "monster",
+        "objectId": 206521,
+        "name": "Deer",
+        "x": 261,
+        "y": 608,
+        "hp": 25,
+        "dead": false,
+        "disposition": "neutral",
+        "ownerName": null,
+        "covered": true
+      },
+      {
+        "kind": "monster",
+        "objectId": 206604,
+        "name": "Scarecrow",
+        "x": 272,
+        "y": 610,
+        "hp": 20,
+        "dead": false,
+        "disposition": "hostile",
+        "ownerName": null,
+        "covered": true
+      },
+      {
+        "kind": "monster",
+        "objectId": 206706,
+        "name": "Deer",
+        "x": 261,
+        "y": 615,
+        "hp": 25,
+        "dead": false,
+        "disposition": "neutral",
+        "ownerName": null,
+        "covered": true
+      },
+      {
+        "kind": "monster",
+        "objectId": 206714,
+        "name": "Deer",
+        "x": 275,
+        "y": 611,
+        "hp": 25,
+        "dead": false,
+        "disposition": "neutral",
+        "ownerName": null,
+        "covered": true
+      }
+    ],
+    "sustainableSupplyAccepted": false,
+    "purpose": "Final ACK/A* driver fix, four witnesses expand ordinary natural supply; all strict thresholds unchanged"
+  }
+}

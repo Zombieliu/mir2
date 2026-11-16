@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.full-monthly.original-guarded-attempts.v1",
+  "firstPreviewRejectedBeforePolicyApply": true,
+  "firstPreviewReason": "static row hashes advanced during read-only preview",
+  "v1ApplyStatus": "verification_inconclusive",
+  "v1PolicyAttempted": false,
+  "v1Failure": "business rows changed since reviewed preview; no policy attempt",
+  "sameSourceWorkerRestored": true,
+  "v1RawReceiptSha256": "6e0281f144eae17912a98533b98917e91128e8f8309b88ee632dd0845719e8d8",
+  "failureBatchesRetained": true,
+  "sameBatchNotReplayed": true,
+  "diagnosticOnlyChangedHoldField": "updated_at_ms",
+  "diagnosticReceipt": "SOURCE-HOLD-TIMESTAMP-READONLY.json",
+  "finalVerifiedNewBatch": "057767e793634984",
+  "noOriginalPolicyReplay": true
+}

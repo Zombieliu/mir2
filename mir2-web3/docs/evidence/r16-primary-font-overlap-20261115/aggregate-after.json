@@ -1,0 +1,196 @@
+{
+  "name": "aggregate-after",
+  "passed": true,
+  "schedule": "aggregate",
+  "variant": "after",
+  "sourceHashes": {
+    "effect": "47be9509391f0dadc15534486cba9e9d3038e3631a057d4d2fafa233d8f41100",
+    "library": "c991721f49c2966441cded6b2c8ff34836507d7b3e3422d79f49a8aed34943dc",
+    "worker": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51"
+  },
+  "pageErrors": [],
+  "networkFailures": [],
+  "unexpectedOrigins": [],
+  "browser": {
+    "events": [
+      {
+        "name": "bevyRuntimeStart",
+        "detail": {
+          "runtimeVersion": "fixture",
+          "runtimeAssetBaseUrl": ""
+        },
+        "at": 1
+      },
+      {
+        "name": "bevyRuntimeForegroundWarmSettled",
+        "detail": {
+          "stage": "game"
+        },
+        "at": 1
+      },
+      {
+        "name": "fixtureRuntimeHeaders",
+        "at": 3
+      },
+      {
+        "name": "bevyRuntimePrimaryFontPrewarmStart",
+        "at": 3
+      },
+      {
+        "name": "bevyRuntimeFontPrewarmStart",
+        "at": 3053
+      },
+      {
+        "name": "bevyRuntimeModuleReady",
+        "detail": {
+          "backend": "webgl2",
+          "compiledBackend": "webgl2",
+          "fallbackFrom": null
+        },
+        "at": 3053
+      },
+      {
+        "name": "fixtureAppBoot",
+        "at": 3053
+      },
+      {
+        "name": "bevyRuntimeReady",
+        "detail": {
+          "reused": false,
+          "backend": "webgl2",
+          "compiledBackend": "webgl2",
+          "fallbackFrom": null,
+          "packageId": "webgl2"
+        },
+        "at": 3053
+      },
+      {
+        "name": "bevyRuntimePrimaryFontPrewarmComplete",
+        "detail": {
+          "requested": 1,
+          "ok": 1,
+          "failed": 0,
+          "aborted": false,
+          "bytes": 16437364
+        },
+        "at": 4635
+      },
+      {
+        "name": "bevyRuntimeFontPrewarmComplete",
+        "detail": {
+          "requested": 6,
+          "ok": 6,
+          "failed": 0,
+          "aborted": false,
+          "bytes": 29517096
+        },
+        "at": 4655
+      }
+    ],
+    "runtime": {
+      "bytes": 8388621,
+      "sha256": "c3b3ab227e32156bd0f972221224df485f2c928e3256c482a8ceba0f014c66d8",
+      "at": 3053
+    },
+    "tc": {
+      "at": 3966,
+      "loaded": true
+    },
+    "cacheBodies": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "interactionCount": "Interaction 3",
+    "cleaned": true
+  },
+  "requests": [
+    {
+      "path": "/fixture.wasm",
+      "started": 1794704631290,
+      "headers": 1794704631290,
+      "finished": 1794704634313,
+      "bytes": 8388621,
+      "complete": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "started": 1794704631292,
+      "headers": 1794704631292,
+      "finished": 1794704635197,
+      "bytes": 11941968,
+      "complete": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "started": 1794704631293,
+      "headers": 1794704631293,
+      "finished": 1794704635873,
+      "bytes": 16437364,
+      "complete": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "started": 1794704635224,
+      "headers": 1794704635224,
+      "finished": 1794704635356,
+      "bytes": 621572,
+      "complete": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "started": 1794704635359,
+      "headers": 1794704635359,
+      "finished": 1794704635417,
+      "bytes": 243520,
+      "complete": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "started": 1794704635422,
+      "headers": 1794704635422,
+      "finished": 1794704635449,
+      "bytes": 37780,
+      "complete": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "started": 1794704635451,
+      "headers": 1794704635451,
+      "finished": 1794704635512,
+      "bytes": 234892,
+      "complete": true
+    }
+  ],
+  "peakCompleteFontBodies": 2,
+  "runtimeMs": 3053,
+  "allFontsMs": 4655,
+  "browserClosed": true
+}

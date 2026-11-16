@@ -1,0 +1,18 @@
+{
+  "passed": false,
+  "gameLogin": false,
+  "workerScriptSubstitutionOnly": true,
+  "publicDeployment": false,
+  "sourceSha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218",
+  "intercepted": 0,
+  "browserClosed": true,
+  "worker": {
+    "pin": null,
+    "concurrency": null
+  },
+  "failure": {
+    "name": "AssertionError",
+    "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ null\n- '94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218'\n"
+  },
+  "producerSha256": "c2749a9a9dcc6ad27b0fe55d4347483297c60e26e4d41a6488d8b116eab3222b"
+}

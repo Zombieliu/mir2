@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "source": "df7aace1692ccbd28291a917b7e74eafe6942940",
+  "candidate": "99110428632b-font-critical-29aef945",
+  "buildReceiptSha256": "6bdf88a5e38c0471a00337660d2bf92d3def0d20736809f4aab509db9c5487e9",
+  "matchingGitBlobs": 53,
+  "originalFilesUnchanged": 65
+}

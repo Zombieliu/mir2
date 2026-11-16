@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "id": "repair-source20-action-chain-review01",
+  "generatedAtUtc": "2026-10-06T19:29:38.629Z",
+  "parentCommit": "c400a19bf65c06dd84cf54a20f2d0c379b894e62",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "finiteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-finite-result01.json",
+    "bytes": 20389,
+    "sha256": "b576c1d9da49afe10bfb07907663e4262f5a40805427aca6e6d2c9b5725aee91"
+  },
+  "products": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 936422,
+      "sha256": "41b077fc9b37d8348199f3a77cb3461303635588a57ec47c8f7cc692bb686f3b",
+      "relativePath": "apps/web/app/page.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 285332,
+      "sha256": "cab60110d16dc76b1cc4b7510e08d3f271cea27d710ecf091c6b2abbf1d987b7",
+      "relativePath": "apps/web/app/original-client-shell.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 17742,
+      "sha256": "745ca93fe545d47826789d081608e081f1c9ec2c004a0132785e61afba736d17",
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+      "bytes": 34330,
+      "sha256": "7716e2078725c2b2a8aba5d2fa1adcb98ded8627ad80db90484cf2925002abd3",
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-shop.tsx",
+      "bytes": 53357,
+      "sha256": "ec7ac1d1e941735529bf7196ef129309f46df8f0a4103a4d333b0856699d12c8",
+      "relativePath": "apps/web/app/components/original-client-game-shop.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-inventory-window.tsx",
+      "bytes": 51004,
+      "sha256": "5a22f9277163ad5fdf6b6e67d85aec2f49926db585d3284cf5c1c1bba9381dc8",
+      "relativePath": "apps/web/app/components/original-client-inventory-window.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\npc-repair-service.ts",
+      "bytes": 19743,
+      "sha256": "e9a26d62d47cd3704112cb7ba1a6f5c88a166ce5094ec47bb39dc9f40a4b34f0",
+      "relativePath": "apps/web/lib/npc-repair-service.ts"
+    }
+  ],
+  "reviewer": "w2b_final_source_review",
+  "readOnly": true,
+  "executionsByReviewer": 0,
+  "conclusion": "All three original composite repair source actions are closed in final source and passed original finite checks; actual Bag target drag, mode-scoped Hold and genuine shared quote use current owner/source and one-use final socket proof. Current Web DOM remains legacy presentation; UI/player not-run. This is source candidate closure only.",
+  "originalRecords": [
+    {
+      "id": "F09.NPC.REPAIR_BAG",
+      "status": "legacy",
+      "sourceCandidate": "closed",
+      "completedFacets": [
+        "actual raw Bag UID/container/physical slot source",
+        "primary mouse/touch gesture captured on actual Bag DOM button",
+        "drop on actual current ordinary repair target using fresh opaque single-use token",
+        "owner/source/stamp/geometry/page/DPR and socket UID barrier/final proof/exact ItemRepaired ACK"
+      ],
+      "remainingSourceFacets": [],
+      "player": "not-run"
+    },
+    {
+      "id": "F09.NPC.SREPAIR_BAG",
+      "status": "legacy",
+      "sourceCandidate": "closed",
+      "completedFacets": [
+        "same actual Bag physical identity and fresh capture",
+        "drop on actual current special repair target",
+        "mode owner and source quote fence with same physical socket UID entry barrier"
+      ],
+      "remainingSourceFacets": [],
+      "player": "not-run"
+    },
+    {
+      "id": "F09.NPC.REPAIR_QUOTE",
+      "status": "legacy",
+      "sourceCandidate": "closed",
+      "completedFacets": [
+        "shared genuine Rust rate/float/rental/zero/affordability quote",
+        "known low gold selectable with confirmation disabled; unknown/locked/busy denied",
+        "Hold toggle sends zero commands; each fresh accepted drop can confirm once",
+        "normal ACK/dura/gold refresh retains Hold; unknown/owner/mode/close clears it",
+        "same exact key after transient unknown cannot revive an old stamp/proof"
+      ],
+      "remainingSourceFacets": [],
+      "player": "not-run"
+    }
+  ],
+  "nativeEvidence": {
+    "overlays": {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "fixedGitBlobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+      "actualCurrent": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\overlays.rs",
+        "bytes": 895205,
+        "sha256": "e858e5c466977df354d2793e1e86c02ac3a8f03eabbe3d9cebbeb7399174f232"
+      },
+      "currentLfNormalizedBlobEqualsFixedBaseline": true,
+      "anchors": [
+        {
+          "line": 5995,
+          "role": "Bag drag to real npc_item_service through6014"
+        },
+        {
+          "line": 10130,
+          "role": "Hold reducer through10137"
+        },
+        {
+          "line": 10245,
+          "role": "Hold auto-submit selected Bag source through10254"
+        }
+      ]
+    },
+    "currentNpcItemService": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\npc_item_service.rs",
+      "bytes": 41905,
+      "sha256": "ad062fb91777e2449c03d5d3b99fd5d829712c46648576bbca2a9b36eabc3038",
+      "anchors": [
+        {
+          "line": 28,
+          "role": "real repair drop target rectangle through43"
+        },
+        {
+          "line": 49,
+          "role": "captured actual BagUID source and Hold auto-submit through89"
+        },
+        {
+          "line": 358,
+          "role": "real Hold button, Title293/294/295 fallback through378"
+        }
+      ],
+      "qualification": "Source18 shared quote implementation current source; historical baseline action anchors remain preserved separately."
+    }
+  },
+  "webEvidence": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "line": 8834,
+      "role": "Mode-scoped Hold with actual current owner and source; toggle sends nothing."
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "line": 8838,
+      "role": "Actual raw Bag UID/container/physical slot capture, including UID0 and Bag2+40."
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "line": 8850,
+      "role": "Fresh terminal selects/drop and optional Hold confirm through final proof."
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "line": 3721,
+      "role": "Actual committed terminal routing, geometry/source validation and retire-before-callback."
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "line": 3772,
+      "role": "Control/pointer tombstone and second-pointer compatible click quarantine."
+    },
+    {
+      "path": "apps/web/app/components/original-client-inventory-window.tsx",
+      "line": 106,
+      "role": "Actual Bag button mousedown custody survives repair close."
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-shop.tsx",
+      "line": 786,
+      "role": "Actual176x147 Native repair frame,75x75 target,Hold andConfirm physical controls."
+    },
+    {
+      "path": "apps/web/lib/npc-repair-service.ts",
+      "line": 195,
+      "role": "Opaque token service enforces live stamp/source/owner/geometry and one-use final entry."
+    }
+  ],
+  "matrixQualification": "317 stable ordered IDs; originalAudit and native anchors unchanged. Source20 repair3 open→legacy only:103shared/200legacy/6open/8common. All317playernot-run; no complete acceptance denominator or overall percentage.",
+  "nextWork": "Lightweight shared tooltip including Bag/Belt/equipment, Bag-to-Belt, fishing click, Pearl and Ranking Inspect.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false,
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source20-source-review03.json",
+    "bytes": 9321,
+    "sha256": "e3d85ce646c6baa16ed4e8dbfed66cb56b555025dc592b1dc445798166312473"
+  },
+  "finiteFixtureGroups": [
+    "NPC repair opaque drag accepts actual UID zero and Bag2 physical slot and spends every terminal once",
+    "NPC repair known low gold remains selectable by row or drag while confirmation stays disabled",
+    "NPC repair drag live geometry page pointer DPR and source changes cannot revive a spent token",
+    "NPC repair Hold preserves normal authoritative updates but unknown owner source and close discard it",
+    "NPC repair fresh Hold drops keep entered UID barrier through cancel close and exact ACK without replay",
+    "NPC repair actual Page Hold drop sends once through final proof and live owner source barriers",
+    "NPC repair actual Shell captured drag terminal owns routing geometry and successor cleanup",
+    "NPC repair actual capture listeners quarantine second pointer through compatibility click while new gestures and keyboard remain usable"
+  ],
+  "limitations": "Memory fixture observations and actual source AST assertions do not establish committed browser UI, actual native event flow, services or player acceptance."
+}

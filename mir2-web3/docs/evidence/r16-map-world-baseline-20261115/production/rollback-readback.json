@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-11-14T20:36:37.219Z",
+  "independentAlias": {
+    "kind": "r16-independent-rollback-alias",
+    "checkedAt": "2026-11-14T20:32:31.117Z",
+    "deploymentId": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "readyState": "READY",
+    "url": "numeron-r16-oj83afw7s-obelisk-labs.vercel.app"
+  },
+  "publicVersion": {
+    "status": 200,
+    "revision": "b9acf175fad0bb582f20fd76282580f179c4b0d2"
+  },
+  "gateway": {
+    "status": 200,
+    "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "ok": true
+  },
+  "rollbackWorkflow": 43637256256,
+  "rolledBack": true
+}

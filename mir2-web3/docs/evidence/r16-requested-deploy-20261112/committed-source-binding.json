@@ -1,0 +1,67 @@
+{
+  "source": "888dd59046fa625989c8d9df903f5fff0a89035d",
+  "scope": "Read-only binding to the previous matching build/evidence, no current local publication WIP included",
+  "files": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-entity-animation-runtime.ts",
+      "sha256": "f0f7086f95c6aaf5bcd75a0bf5dda35e1180c175070d42a7e055ed409119a15e",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "7badba45d19a388a394a930462f375508af6e4966b9828d85b634b71f2ff86ec",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "sha256": "55825f02e7b999bdc3e97c1ab991b059f605b0289cfda05242a65ad0fa6df51b",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/client-presentation-runtime.ts",
+      "sha256": "cbe8bfe8ec4fcb8427dfae5a19ccad150f8013f536c9da09f9b5f0361a711951",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+      "sha256": "4facb5c9be60665619d9d8f0806469381145344b91d3f4d15b0ef5d2255d08ff",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/native-attack-movement.ts",
+      "sha256": "ccc6d8e6e59d24043c8a2c21badb30f98f29987915c4081bbdc727714403f55d",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+      "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+      "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+      "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+      "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+      "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d",
+      "previousBuildOverlayVerified": true
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+      "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96",
+      "previousBuildOverlayVerified": true
+    }
+  ],
+  "previousEvidenceKind": "r16-current-action-and-attack-cadence-candidate"
+}

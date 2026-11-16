@@ -1,0 +1,31 @@
+{
+  "atUtc": "2026-10-30T07:50:50.8332074Z",
+  "algorithm": "SHA-256",
+  "artifacts": {
+    "g2-handoff-adjacent.log": "af5da365ad4fee1fcd12e13353b5680661db37c80b280f9c2aa53a966229108c",
+    "g2-lease-adjacent.log": "7be8182fd507eda18078d0f90b910ef2924afe7faa84a9cf17d4d4d41e921107",
+    "g2-binding-accepted-result.json": "3c67d0ccd579de4e95d742671e454eeab080130022f7c9e510a03bb9b4f53b42",
+    "g2-attack-adjacent.log": "14d2376c9afda14729350592a87cad42d34b11cbf1ddf11b81a23283bb9e5a0e",
+    "g2-verification.json": "c2f99b5c3ca092ccbd7d2322d9ef105b4ca6afa2d43d6481940ccc511aae7a48",
+    "g2-resolver-adjacent-result.json": "0a4f8ad3a05f38f86f502670a3b4f5457066509b68a4412de50d1ff3a0278614",
+    "g2-simulation-accepted.log": "6fc77cd619c8dce31f0d962bfd495e70642eb1684280e49a6cb5df493a7a9878",
+    "g2-handoff-adjacent-result.json": "5e8d358100e7b0801009e2813020100aa9a56b2867cdc961fb79eb64025df1e2",
+    "g2-attack-adjacent-result.json": "cc58b5133a8d35cb25ed6ec9544006b50ba8526432d4e422eb5dfb07ef7e0c4f",
+    "g2-fixture-stop.json": "6f7735f1ce2401e5f38d895cb4ab9eeb6950ff1f814d261420ca39c5250843d3",
+    "g2-session-adjacent-result.json": "18f6da5b8799e45e26aa0e3e24b74a0a092568d3399ac1c4e069aa7ad7e30c2f",
+    "g2-save-adjacent.log": "8796bf9bdba4eeb81d98a96eeb5cc7845ee5288af0105f96e49145619f34c9b5",
+    "g2-npc-adjacent-result.json": "955c2c8cf09937c2bfd778dfbc19e9e8a2d441d927a30213700f3507af2e39be",
+    "g2-bins-accepted-result.json": "a7578c7ccf9c00e3144ec068b426353c12a996168b1a37db37a227ac8cd3f28e",
+    "g2-resolver-adjacent.log": "59f2e32818ecb1e58ca0142fa4dac3a74ae253787c66388e54bfcb6dd3825fcd",
+    "g2-simulation-accepted-result.json": "4d0e007272b255183933e33c5f8bc11243d49fd54131f47fe4d1734ce56103eb",
+    "g2-save-adjacent-result.json": "f35d7c3b7a9c3494fecee84474380a147cda266eb5d155452d563c473c792fe7",
+    "g2-bins-accepted.log": "6a194e06a28641af47c31e8e8748fff97ddbee90030ea12ec11a19efb18fa9b7",
+    "g2-teardown-adjacent-result.json": "f2c546b3240297bff5cd2dbf461ee3306b800e98df4b688d480cf5db7adbe4df",
+    "g2-session-adjacent.log": "550106f93e3b9cbd5e5b067a76020f73e8233e8da3eae8d182f94e9a92b31362",
+    "g2-binding-accepted.log": "9c9d37c163471cd4bfa849b3e23ee97e91145fc64cbaf904f75fa8afb271522b",
+    "g2-npc-adjacent.log": "a5f2842bc48ea92df9da25ca41ac19061e756261ac924e9470a2e2fe297bd9fc",
+    "g2-teardown-adjacent.log": "50d5130d5b16470e77e5579e732b1ebf594e4158058e6005d6208918f40a9e38",
+    "g2-lease-adjacent-result.json": "69eddc87fa8f495c7167ff2f02f7ba0b0aed3497f6cf48f1e24985acd8b520ee",
+    "g2-postgres-final.json": "a98825ddbb7fdac69e6ffa1a898c8b754536ed4009fdf3ccff19822f962b02d2"
+  }
+}

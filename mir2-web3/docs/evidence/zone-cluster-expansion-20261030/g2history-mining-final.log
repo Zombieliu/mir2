@@ -1,0 +1,22 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 16 tests
+test runtime::mining::uid_tests::contradictory_pickaxe_metadata_rejects_before_wear_payout_or_uid_issuance ... ok
+test runtime::mining::uid_tests::failed_mine_issuance_keeps_stones_pickaxe_and_inventory ... ok
+test runtime::mining::uid_tests::guaranteed_mine_uses_shared_uid_and_keeps_ore_purity_and_original_swing_cost ... ok
+test runtime::mining::uid_tests::legacy_pickaxe_without_exact_uid_keeps_equipment_slot_wear_reference ... ok
+test runtime::mining_player::uid_tests::shared_mining_uid_failure_preserves_tool_inventory_file_and_uncommitted_wall ... ok
+test runtime::mining_player::uid_tests::shared_mining_uid_save_failure_burns_ore_identity_but_restores_tool_and_assets ... ok
+test runtime::mining_player::uid_tests::shared_mining_uid_success_persists_ore_and_exact_wear_before_wall_commit ... ok
+test runtime::session::tests::crystal_attack_into_mine_spot_triggers_mining ... ok
+test runtime::session::tests::crystal_mining_depleted_spot_regenerates_timer ... ok
+test runtime::session::tests::crystal_mining_guaranteed_set_yields_ore_and_damages_pickaxe ... ok
+test runtime::session::tests::crystal_mining_swing_broadcasts_mine_node_state ... ok
+test runtime::session::tests::crystal_mining_swing_emits_mine_effect_and_depletes_stone ... ok
+test runtime::session::tests::crystal_mining_without_pickaxe_does_nothing ... ok
+test runtime::session::tests::stage5_conquest_event_hero_mining_and_crafting_flow ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v6_retains_authenticated_custody_and_discards_unbound_mining ... ok
+test runtime::zone::runtime::checkpoint::tests::mining_schema_seven_round_trip_and_integrity ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 3240 filtered out; finished in 4.12s

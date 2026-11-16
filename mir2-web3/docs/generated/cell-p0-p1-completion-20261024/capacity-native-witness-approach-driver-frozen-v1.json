@@ -1,0 +1,838 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T04:15:26.424Z",
+  "state": "final-functional-source-frozen-independent-review-complete",
+  "scope": "Native stable-witness approach planning only. This freezes exact final nine inputs and functional regression evidence; it is not a real capacity run or P0 acceptance.",
+  "repositoryBaselineCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "rustBackendModified": false,
+  "sourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "changedFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    }
+  ],
+  "otherSevenInputsUnchanged": true,
+  "otherSevenInputs": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "functionalVerificationOnly": true,
+  "focused": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exactSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "durationMs": 230,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2.log",
+      "bytes": 3217,
+      "sha256": "0eab26e49bc9624776ac537f67f976bf5c2494c5e979ebff1f0648d057de7075"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-receipt.json",
+      "bytes": 1475,
+      "sha256": "ae7d50544f66135d538df9d207e66da9d9ea7b7cbf8a8baf1e70509994539e14"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-pins.json",
+      "bytes": 1796,
+      "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+    },
+    "finalSourceFullRegressionPerformed": false,
+    "sourcePinsUnchangedAfterRun": true
+  },
+  "adjacentFocused": {
+    "passed": 88,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exactSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "durationMs": 573,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3.log",
+      "bytes": 23797,
+      "sha256": "8a83faad887188361e5ef3b889e24f37150ef46fbdf05882a881c75462d55d45"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-receipt.json",
+      "bytes": 1920,
+      "sha256": "2d3cf259782d37045dd825f942c7b7f9427dc7cd2ef4a1b9719eb1785ccb3a32"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-pins.json",
+      "bytes": 1796,
+      "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+    },
+    "finalSourceFullRegressionPerformed": false,
+    "sourcePinsUnchangedAfterRun": true
+  },
+  "fullRegression": {
+    "passed": 187,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exactSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "durationMs": 310605,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1.log",
+      "bytes": 50385,
+      "sha256": "0b583d1989be3aaa1d8336dc97c9387fe0542b3eea751a87ef7706254a4976f7"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-receipt.json",
+      "bytes": 1606,
+      "sha256": "19cd53188c41fafe6520bb5bf7eea6ba9a9a808bae2b2c3811e1007bc6c83e75"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-pins.json",
+      "bytes": 1796,
+      "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+    },
+    "finalSourceFullRegressionPerformed": true,
+    "sourcePinsUnchangedAfterRun": true
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-independent-review-v1.json",
+    "bytes": 11055,
+    "sha256": "ef831525c544e6b79084d5f478b458eaec126ce5b126478488be5a5a91823453"
+  },
+  "preimageManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\preimage-manifest-v1.json",
+    "bytes": 9814,
+    "sha256": "6420f382b4690dc2207ffe46e97d05c9da972a1f65ac77f357ddb981ccd83600"
+  },
+  "finalSourcePreservation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preservation-v1.json",
+    "bytes": 2130,
+    "sha256": "114187e79fa2c834074f3eb1183d313d0fc585f3445c5fc8ed1d5671e43c6b96"
+  },
+  "finalFixturePreservation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\fixture-preservation-v1.json",
+    "bytes": 4106,
+    "sha256": "1c14334b07c402a000674d336a96c8a845508d10a384d19ff0742d08b4617702"
+  },
+  "priorDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-survival-pursuit-witness-driver-frozen-v1.json",
+    "bytes": 28714,
+    "sha256": "4bac2cca1a8cb6eca3432ebc22add873456ce38a7f33b81f39998d88befe3063"
+  },
+  "priorFull175Evidence": {
+    "role": "Historical preceding c792 source; not new-source validation.",
+    "passed": 175,
+    "failed": 0,
+    "sourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\full175-v2.log",
+      "bytes": 47276,
+      "sha256": "c0335bb31c428a1dd7233eab77397db345a6647b3153c6ff7d8c24c0c715cab6"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\full175-v2-receipt.json",
+      "bytes": 1419,
+      "sha256": "fb7b9f3600453b2f131d3eaca2fac839077622ddcd300156229de485824a4a24"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\full175-v2-source-pins.json",
+      "bytes": 2042,
+      "sha256": "7fb9311df8f33895bda027ce5b8eaec532659ed28492f5f2a9b357830b92e7b9"
+    }
+  },
+  "historicalRuns": {
+    "focused-v1": {
+      "role": "Historical source/fixture attempt retained without promotion to final validation.",
+      "counts": {
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exitCode": 0,
+      "sourceSha256": "cb1cb0ee94cb6f077a96433dbb9e3e6a65dc7c5bc6e6ed681eebc922822e25f7",
+      "sourcePinsUnchangedAfterRun": true,
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1.log",
+        "bytes": 3217,
+        "sha256": "80ec7b3981dfd9f8b4a59b50469beb6972e027af29a04013ade151bda8c33c16"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-receipt.json",
+        "bytes": 1475,
+        "sha256": "5db9db93e5fce22851863b2d9cfe6830653a2a1729f3b6099c9f7c1fa0f36bf6"
+      },
+      "exactSourceManifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-pins.json",
+        "bytes": 1796,
+        "sha256": "d8a4c7a1acd7ac0d3f2df149d20527e857471fdc009d5f294b0c06e959870769"
+      }
+    },
+    "adjacent-v1": {
+      "role": "Historical source/fixture attempt retained without promotion to final validation.",
+      "counts": {
+        "tests": 88,
+        "pass": 78,
+        "fail": 10,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exitCode": 1,
+      "sourceSha256": "cb1cb0ee94cb6f077a96433dbb9e3e6a65dc7c5bc6e6ed681eebc922822e25f7",
+      "sourcePinsUnchangedAfterRun": true,
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1.log",
+        "bytes": 36328,
+        "sha256": "4a2a98ca817a4fde0c6df668630145cf89a0df6c8df8dbe4b42cb2cf405f1f91"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-receipt.json",
+        "bytes": 1921,
+        "sha256": "dc7d2cc69d1b8bd894fcfe7c5e7d5365fb4897f82dcde2c6f7ec161d66865c1a"
+      },
+      "exactSourceManifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-pins.json",
+        "bytes": 1796,
+        "sha256": "d8a4c7a1acd7ac0d3f2df149d20527e857471fdc009d5f294b0c06e959870769"
+      }
+    },
+    "adjacent-v2": {
+      "role": "Historical source/fixture attempt retained without promotion to final validation.",
+      "counts": {
+        "tests": 88,
+        "pass": 82,
+        "fail": 6,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exitCode": 1,
+      "sourceSha256": "6fc1c92d23bb3f71afdbe1769682e5666a33d77f5cc997d72e927b68f30251f4",
+      "sourcePinsUnchangedAfterRun": true,
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2.log",
+        "bytes": 28635,
+        "sha256": "724f824dbf9aa3d5f20cd76e1c53a5eac37540a4276cff46dc02e6ba49ed5147"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-receipt.json",
+        "bytes": 1920,
+        "sha256": "f207ef430158689151748b7eaed6215f18e728e4e584b7436824d1c24156b0a4"
+      },
+      "exactSourceManifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-pins.json",
+        "bytes": 1796,
+        "sha256": "f027922162b76442a9929f26656c2a68d45bff0d4ae316d1a848f4227f4aa998"
+      }
+    }
+  },
+  "oldTestBodiesCompletelyUnmodified": false,
+  "originalAssertionsAndControlFlowPreservedAfterExplicitFixtureInverse": true,
+  "originalFullTestCount": 175,
+  "newFocusedTestCount": 12,
+  "finalFullTestCount": 187,
+  "navigationCoordination": {
+    "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+    "maximumHintCellsPerConnection": 7,
+    "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+  },
+  "nativePatrolPlanning": {
+    "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+    "maximumFallbackCornerTargets": 4,
+    "pathExpansionLimit": 4000,
+    "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+    "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+  },
+  "measurementClock": {
+    "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+    "minimumCompleteWindowMs": 60000,
+    "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+    "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+    "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+  },
+  "nativeHpMaintenance": {
+    "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+    "hpThreshold": 0.6,
+    "reuseDelayMs": 6000,
+    "evidenceDeadlineMs": 2000,
+    "commandBudgetPerSecond": 3,
+    "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+    "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+  },
+  "nativeAttackWitness": {
+    "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+    "maximumOwnerAndTargetDistance": 6,
+    "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+    "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+    "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+  },
+  "reusedOrdinaryHpHelper": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+    "bytes": 33042,
+    "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2",
+    "export": "startEmergencyHpRecovery",
+    "sourceModified": false,
+    "alreadyInExistingTransitiveImportClosure": true
+  },
+  "recordCombatPursuitMovementUnchanged": true,
+  "originalGuardThresholds": {
+    "maximumMoves": 40,
+    "maximumMs": 30000,
+    "thirdVisitDefers": true,
+    "minimumAttacksPerMinute": 18,
+    "minimumHitsPerMinute": 12,
+    "nativeCompletionRatio": 0.95,
+    "attackEvidenceDeadlineMs": 900,
+    "pathExpansionLimit": 4000,
+    "maximumPathTargets": 4,
+    "maximumAdjacentTiles": 8
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "newProbeStarted": false,
+  "ownedRealmStarted": false,
+  "scenarioModified": false,
+  "resourceProfileModified": false,
+  "gameplayOrAuthorityModified": false,
+  "evidenceArtifacts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-receipt.json",
+      "bytes": 1921,
+      "sha256": "dc7d2cc69d1b8bd894fcfe7c5e7d5365fb4897f82dcde2c6f7ec161d66865c1a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-pins.json",
+      "bytes": 1796,
+      "sha256": "d8a4c7a1acd7ac0d3f2df149d20527e857471fdc009d5f294b0c06e959870769"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 223789,
+      "sha256": "e0630422b9a97233988697f0fdb6b8e0243d08d291f7982342fe91d95e29b7b0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1.log",
+      "bytes": 36328,
+      "sha256": "4a2a98ca817a4fde0c6df668630145cf89a0df6c8df8dbe4b42cb2cf405f1f91"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-receipt.json",
+      "bytes": 1920,
+      "sha256": "f207ef430158689151748b7eaed6215f18e728e4e584b7436824d1c24156b0a4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-pins.json",
+      "bytes": 1796,
+      "sha256": "f027922162b76442a9929f26656c2a68d45bff0d4ae316d1a848f4227f4aa998"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 225337,
+      "sha256": "03822f575233c7e7e848a25125506550835965044a86369dc93c3857d8b33e9f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2-source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v2.log",
+      "bytes": 28635,
+      "sha256": "724f824dbf9aa3d5f20cd76e1c53a5eac37540a4276cff46dc02e6ba49ed5147"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-receipt.json",
+      "bytes": 1920,
+      "sha256": "2d3cf259782d37045dd825f942c7b7f9427dc7cd2ef4a1b9719eb1785ccb3a32"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-pins.json",
+      "bytes": 1796,
+      "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3-source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3.log",
+      "bytes": 23797,
+      "sha256": "8a83faad887188361e5ef3b889e24f37150ef46fbdf05882a881c75462d55d45"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\fixture-preservation-v1.json",
+      "bytes": 4106,
+      "sha256": "1c14334b07c402a000674d336a96c8a845508d10a384d19ff0742d08b4617702"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-receipt.json",
+      "bytes": 1475,
+      "sha256": "5db9db93e5fce22851863b2d9cfe6830653a2a1729f3b6099c9f7c1fa0f36bf6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-pins.json",
+      "bytes": 1796,
+      "sha256": "d8a4c7a1acd7ac0d3f2df149d20527e857471fdc009d5f294b0c06e959870769"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 223789,
+      "sha256": "e0630422b9a97233988697f0fdb6b8e0243d08d291f7982342fe91d95e29b7b0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1.log",
+      "bytes": 3217,
+      "sha256": "80ec7b3981dfd9f8b4a59b50469beb6972e027af29a04013ade151bda8c33c16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-receipt.json",
+      "bytes": 1475,
+      "sha256": "ae7d50544f66135d538df9d207e66da9d9ea7b7cbf8a8baf1e70509994539e14"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-pins.json",
+      "bytes": 1796,
+      "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2-source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2.log",
+      "bytes": 3217,
+      "sha256": "0eab26e49bc9624776ac537f67f976bf5c2494c5e979ebff1f0648d057de7075"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-receipt.json",
+      "bytes": 1606,
+      "sha256": "19cd53188c41fafe6520bb5bf7eea6ba9a9a808bae2b2c3811e1007bc6c83e75"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-pins.json",
+      "bytes": 1796,
+      "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1.log",
+      "bytes": 50385,
+      "sha256": "0b583d1989be3aaa1d8336dc97c9387fe0542b3eea751a87ef7706254a4976f7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\preimage-manifest-v1.json",
+      "bytes": 9814,
+      "sha256": "6420f382b4690dc2207ffe46e97d05c9da972a1f65ac77f357ddb981ccd83600"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\final-driver-frozen-v1.json",
+      "bytes": 28714,
+      "sha256": "4bac2cca1a8cb6eca3432ebc22add873456ce38a7f33b81f39998d88befe3063"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\full175-v2-receipt.json",
+      "bytes": 1419,
+      "sha256": "fb7b9f3600453b2f131d3eaca2fac839077622ddcd300156229de485824a4a24"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\full175-v2-source-pins.json",
+      "bytes": 2042,
+      "sha256": "7fb9311df8f33895bda027ce5b8eaec532659ed28492f5f2a9b357830b92e7b9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\prior-regression\\full175-v2.log",
+      "bytes": 47276,
+      "sha256": "c0335bb31c428a1dd7233eab77397db345a6647b3153c6ff7d8c24c0c715cab6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\run-check.mjs",
+      "bytes": 4280,
+      "sha256": "b75b10ca4cc345f8dd9e8bd4eb46b7724a1b3d7d790ccd05e114402d8a788a70"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-monitor.mjs.txt",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-monitor.test.mjs.txt",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-observability.mjs.txt",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-observability.test.mjs.txt",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-soak.mjs.txt",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 216899,
+      "sha256": "4280e97d90981f75d37ed15c5d395d3d0129f3d5d213310ad7fc134429e25097"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-telemetry.mjs.txt",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-telemetry.test.mjs.txt",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preservation-v1.json",
+      "bytes": 2130,
+      "sha256": "114187e79fa2c834074f3eb1183d313d0fc585f3445c5fc8ed1d5671e43c6b96"
+    }
+  ],
+  "limitations": [
+    "No new gameplay realm or real capacity profile was started for this change. Fresh probe/formal acceptance remains pending.",
+    "The four historical gap-coordinate fixtures use an open collision map to isolate geometry and do not replay the original complete map/AOI trace.",
+    "Current observer snapshots and prospective attack-tile eligibility are used only for planning; actual attacks still require fresh real witness membership and geometry at send.",
+    "Witness filtering repeats bounded pure CPU membership/geometry work across candidates and eight tiles. No100-player CPU benchmark or stall attribution is claimed.",
+    "Ordinary held-potion supply, natural target density and long-duration survival remain finite and require fresh live evidence.",
+    "The original failed probe10/shortfall and both failed adjacent fixture attempts remain unchanged historical evidence."
+  ]
+}

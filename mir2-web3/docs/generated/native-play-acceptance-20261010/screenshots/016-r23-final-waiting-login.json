@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/016-r23-final-waiting-login.jpg",
+  "purpose": "All nine basic locale screens observed and original Traditional Chinese/automatic resolution restored. Login remains empty; no gameplay acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 316777,
+  "sha256": "fd207612be40ea0384bca33e80dcc7a634ce6415d9aa0d4a4f7afd4ab610bb31",
+  "recordedUtc": "2026-10-09T19:06:30.790Z"
+}

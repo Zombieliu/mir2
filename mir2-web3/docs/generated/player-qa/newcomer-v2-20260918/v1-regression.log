@@ -1,0 +1,16 @@
+
+running 11 tests
+test runtime::quests::newcomer_progression_tests::bonus_counts_two_distinct_current_period_claims_and_regresses_across_reset ... ok
+test runtime::quests::newcomer_progression_tests::bonus_requires_distinct_options_and_accepts_each_two_of_three_combination ... ok
+test runtime::quests::newcomer_progression_tests::daily_assignments_use_standard_accept_kill_finish_and_enforce_two_choices ... ok
+test runtime::quests::newcomer_progression_tests::daily_objective_snapshot_keeps_counts_out_of_the_label ... ok
+test runtime::quests::newcomer_progression_tests::disabled_profile_hides_and_freezes_saved_newcomer_rows ... ok
+test runtime::quests::newcomer_progression_tests::later_milestones_keep_their_existing_gold_only_contract ... ok
+test runtime::quests::newcomer_progression_tests::milestone_finish_rechecks_level_and_keeps_the_gold_reward_permanent ... ok
+test runtime::quests::newcomer_progression_tests::milestone_reward_finish_is_atomic_when_the_bag_is_full ... ok
+test runtime::quests::newcomer_progression_tests::milestone_rewards_are_server_resolved_for_every_class_and_gender_and_pay_once ... ok
+test runtime::quests::newcomer_progression_tests::newcomer_catalog_is_profile_gated_and_bound_to_the_real_board_object ... ok
+test runtime::quests::newcomer_progression_tests::two_daily_finishes_unlock_and_pay_bonus_once_then_next_day_reopens_it ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1843 filtered out; finished in 8.28s
+

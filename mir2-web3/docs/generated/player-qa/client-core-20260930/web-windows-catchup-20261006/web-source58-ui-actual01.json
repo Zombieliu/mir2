@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source58 actual normal-browser sustained combat and keyboard QA",
+  "observedAtUtc": "2026-10-11T03:50:02.077Z",
+  "url": "http://127.0.0.1:19205/",
+  "renderer": "bevy-cbaf32383ce0ff77",
+  "buildInputs": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/next-build01/config.json",
+    "bytes": 4384,
+    "sha256": "a9f57379614dbd119af43f974ea3c74b9150673ae4264b37da95bf2727e9e7e2"
+  },
+  "package": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/thin-build01-config02.json",
+    "bytes": 5723,
+    "sha256": "c06f2161029e57e3ec21979d08d05754bcc94e5dd2be49b610c627522880a7fa"
+  },
+  "scope": "Authorized existing disposable local gateway and normal browser UI",
+  "actual": {
+    "normalLogin": true,
+    "normalStartGame": true,
+    "persistedPositionBeforeCombat": {
+      "x": 284,
+      "y": 607
+    },
+    "persistedGoldBeforeCombat": 200,
+    "sustainedCombat": {
+      "objectId": "206644",
+      "acceptedSelectionClicks": 1,
+      "observedHp": [
+        20,
+        14,
+        0
+      ],
+      "observedInitialDistance": 8,
+      "observedAttackDistance": 1,
+      "observedFinalPosition": {
+        "x": 292,
+        "y": 614
+      },
+      "fallen": true,
+      "normalDrop": "SunPotion x1",
+      "normalPickupMessage": "You gained an item."
+    },
+    "shortcuts": {
+      "mainCanvasIopensBag": true,
+      "sharedCanvasIclosesBag": true,
+      "sharedCanvasQopensAndClosesQuest": true,
+      "sharedCanvasAltXnormalLogout": true
+    },
+    "normalQuestCompletedReadback": 2,
+    "bagCloseX": false,
+    "normalReloginReadback": {
+      "passed": true,
+      "position": {
+        "x": 292,
+        "y": 614
+      },
+      "gold": 200,
+      "experienceBarPercent": 85,
+      "bagOwner": "bevy",
+      "bagRevision": 5,
+      "rewardItems": [
+        "GoldenPendant",
+        "CopperRing"
+      ],
+      "goldenPendantTooltipVisible": true,
+      "sunPotionBeltCount": 2
+    }
+  },
+  "knownFailure": {
+    "bagCloseX": "Normal screenshot-grounded X click leaves shared bag open; exact TS wire payload includes local beltDropGeometry, rejected by existing strict Rust schema; bounded fix in progress"
+  },
+  "debugCommandsUsed": false,
+  "directGameOrWasmCallsUsed": false,
+  "mobileDeviceTested": false,
+  "nativeUiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "screenshots": [
+    "web-source58-sustained-kill01.png",
+    "web-source58-relogin-reward01.png"
+  ],
+  "reloadedAtUtc": "2026-10-11T03:43:41.081Z",
+  "errorsSinceReload": 0
+}

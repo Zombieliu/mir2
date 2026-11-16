@@ -1,0 +1,344 @@
+{
+  "schema": "mir2-promotion-windows-bridge-local-tests-v1",
+  "recorded_at_utc": "2026-10-30T12:49:13.889469Z",
+  "status": "LOCAL_VERIFICATION_PASSED_REMOTE_ACCEPTANCE_PENDING",
+  "source": {
+    "backend_commit": "f25e823cf1ce1437bce632b886b7a0bdafdc5031",
+    "native_patch_commit": "5022a2423ddb0aaf9bb3b5370c68c1862ce31853",
+    "frontend_commit_reported_by_root": "806e8be6d7da536184413856573965d0113e97ab",
+    "local_tests_ran_on_frozen_working_tree_before_commit": true,
+    "frozen_source_hashes_rechecked_after_commit": {
+      "apps/gateway/src/web_promotions.rs": "eba7c9e0b10f186e1916925c3bcef2a75fa7936e62456332e8aee2c28d35bf0f",
+      "apps/simulation/examples/promotion_windows_playtest.rs": "d861decc30689ef7f0185ee7752666d7833a24cfb8e2e608b7a7ef081642bbfe",
+      "apps/simulation/examples/promotion_windows_acceptance.rs": "287048e53c96b8605fa606e04da9c4f77d88968e1ea30134265817152a2be463",
+      "config/promotion-windows-playtest-20261030.test.json": "ce3f08958fa23588ff7739715f9d05b75beaef0d11e04627c5c7dc364079c948"
+    }
+  },
+  "limits": {
+    "docker_started": false,
+    "remote_services_changed_by_this_writer": false,
+    "production_or_test_server_deployed_by_this_writer": false,
+    "real_stripe_payment_tested": false,
+    "real_phone_wallet_signature_tested": false,
+    "onchain_rebate_transfer_tested": false,
+    "raw_account_json_in_receipt": false,
+    "connection_urls_or_passwords_in_receipt": false,
+    "test_group_counts_not_a_deduplicated_total": true
+  },
+  "local_runtime": {
+    "rust_toolchain": "1.89.0-x86_64-pc-windows-msvc",
+    "postgres_major": 17,
+    "postgres_distribution": "17.11-3",
+    "postgres_server_started_for_this_test_only": true,
+    "postgres_server_stopped_after_tests": true,
+    "listen_host": "127.0.0.1",
+    "listen_port": 55483,
+    "independent_test_databases": [
+      "mir2_promotion_bridge_test",
+      "mir2_promotion_windows_acceptance_123456789abc"
+    ],
+    "each_pg_test_uses_random_schema": true,
+    "environment": {
+      "MIR2_RUN_PROMOTION_PG_TESTS": "1",
+      "MIR2_PROMOTION_TEST_DATABASE_URL": "supplied privately; omitted",
+      "MIR2_PROMOTION_WINDOWS_TEST_DATABASE_URL": "supplied privately; omitted",
+      "RUST_TEST_THREADS": "1",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_TEST_DEBUG": "0",
+      "CARGO_INCREMENTAL": "0"
+    }
+  },
+  "native_postgres": {
+    "unique_test_functions_executed": 12,
+    "passed": 12,
+    "skipped": 0,
+    "tests": [
+      {
+        "scope": "promotion_backend_compat",
+        "test": "native_postgres_original_migrations_upgrade_and_typed_roundtrip_preserve_every_old_field",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_live_revenue",
+        "test": "native_credit_fifo_import_refund_hold_and_environment_are_durable",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_postgres",
+        "test": "isolated_native_postgres_promotion_invariants",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_revenue_share",
+        "test": "native_revenue_share_has_no_budget_reservations_and_holds_keep_qualification_time",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_wallet_enrollment",
+        "test": "native_wallet_enrollment_is_explicit_test_only_and_does_not_create_game_or_money_facts",
+        "result": "passed"
+      },
+      {
+        "scope": "sui_usdc_provenance",
+        "test": "native_sui_receipt_fences_fifo_and_monthly_import_are_replay_safe",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_launch_postgres",
+        "test": "isolated_production_launch_approval_and_exact_coin_gate",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_micro_payouts",
+        "test": "native_postgres_micro_draft_journal_refund_cooldown_and_public_receipt",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion_payout_postgres",
+        "test": "isolated_native_postgres_durable_payout_journal",
+        "result": "passed"
+      },
+      {
+        "scope": "promotion::game_events",
+        "test": "isolated_postgres_game_sources_commit_rollback_replay_and_preserve_utc_day",
+        "result": "passed"
+      },
+      {
+        "scope": "example:promotion_windows_acceptance",
+        "test": "native_pg_clone_audit_reads_real_account_character_and_save_without_mutating_rows",
+        "result": "passed"
+      },
+      {
+        "scope": "example:promotion_windows_playtest",
+        "test": "native_pg_setup_is_idempotent_creates_only_two_locked_system_actors_and_preserves_old_rows",
+        "result": "passed"
+      }
+    ],
+    "note": "Real local PostgreSQL SQL/transactions were exercised. Provider receipts, gameplay actors, finance approvals and signatures remain explicit fixtures; no real chain or production approval is implied."
+  },
+  "groups": [
+    {
+      "scope": "integration:billing_recharge",
+      "passed": 24,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_backend_compat",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_live_revenue",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_postgres",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_revenue_share",
+      "passed": 2,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_wallet_enrollment",
+      "passed": 2,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:sui_usdc_provenance",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_launch_postgres",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_micro_payouts",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "scope": "integration:promotion_payout_postgres",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "scope": "simulation:billing_provenance::",
+      "passed": 15,
+      "ignored": 0
+    },
+    {
+      "scope": "simulation:promotion::game_events",
+      "passed": 11,
+      "ignored": 0,
+      "native_pg_tests": 1
+    },
+    {
+      "scope": "simulation:promotion::tests",
+      "passed": 19,
+      "ignored": 0
+    },
+    {
+      "scope": "simulation:promotion_source_producer_tests",
+      "passed": 1,
+      "ignored": 0
+    },
+    {
+      "scope": "simulation:sui_usdc_billing::tests",
+      "passed": 21,
+      "ignored": 0
+    },
+    {
+      "scope": "simulation:procurement::tests",
+      "passed": 43,
+      "ignored": 0
+    },
+    {
+      "scope": "simulation:config::config_schema_compat_tests",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "scope": "gateway:promotion_",
+      "passed": 8,
+      "ignored": 0,
+      "note": "Includes original routing/native-attack promotion regressions and one offline HTTP test also reported below."
+    },
+    {
+      "scope": "gateway:identity::tests",
+      "passed": 9,
+      "ignored": 2,
+      "note": "Two existing ignored tests were not executed; they are not counted as passed."
+    },
+    {
+      "scope": "gateway:stripe_billing::tests",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "scope": "gateway:stripe_billing::provider_tests",
+      "passed": 6,
+      "ignored": 0
+    },
+    {
+      "scope": "gateway:web::billing::tests::offline_http",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "scope": "gateway:sui_usdc_billing::tests",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "scope": "example:promotion_windows_playtest",
+      "passed": 3,
+      "ignored": 0,
+      "native_pg_tests": 1
+    },
+    {
+      "scope": "example:promotion_windows_acceptance",
+      "passed": 3,
+      "ignored": 0,
+      "native_pg_tests": 1
+    },
+    {
+      "scope": "node:usdc-recharge/test/driver.test.mjs",
+      "passed": 23,
+      "ignored": 0
+    }
+  ],
+  "executed_commands": [
+    "cargo +1.89.0 check --locked --manifest-path mir2-web3/Cargo.toml -p mir2-simulation -p mir2-gateway --lib --examples --offline --target-dir E:/mir2-bridge-check-target",
+    "cargo +1.89.0 test --manifest-path mir2-web3/Cargo.toml -p mir2-simulation --test promotion_backend_compat --test billing_recharge --test sui_usdc_provenance --test promotion_postgres --test promotion_live_revenue --test promotion_wallet_enrollment --test promotion_revenue_share --offline --target-dir E:/mir2-bridge-check-target",
+    "cargo +1.89.0 test --manifest-path mir2-web3/Cargo.toml -p mir2-simulation --test promotion_launch_postgres --test promotion_payout_postgres --test promotion_micro_payouts --offline --target-dir E:/mir2-bridge-check-target",
+    "cargo +1.89.0 test --locked --manifest-path mir2-web3/Cargo.toml -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance --test promotion_backend_compat --offline --target-dir E:/mir2-bridge-check-target",
+    "cargo +1.89.0 test --locked --manifest-path mir2-web3/Cargo.toml -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance --offline --target-dir E:/mir2-bridge-check-target",
+    "cargo +1.89.0 test --locked --manifest-path mir2-web3/Cargo.toml -p mir2-simulation --lib billing_provenance:: --offline --target-dir E:/mir2-bridge-check-target",
+    "cargo +1.89.0 test --locked --manifest-path mir2-web3/Cargo.toml -p mir2-gateway --lib promotion_ --offline --target-dir E:/mir2-bridge-check-target",
+    "npm ci --ignore-scripts --offline --prefix mir2-web3/onchain/usdc-recharge",
+    "node --test mir2-web3/onchain/usdc-recharge/test/driver.test.mjs",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_simulation-bf869c08515da9c3.exe promotion::game_events --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_simulation-bf869c08515da9c3.exe promotion::tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_simulation-bf869c08515da9c3.exe promotion_source_producer_tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_simulation-bf869c08515da9c3.exe sui_usdc_billing::tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_simulation-bf869c08515da9c3.exe procurement::tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_simulation-bf869c08515da9c3.exe config::config_schema_compat_tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_gateway-2a9a3f29c94c0482.exe identity::tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_gateway-2a9a3f29c94c0482.exe stripe_billing::tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_gateway-2a9a3f29c94c0482.exe stripe_billing::provider_tests --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_gateway-2a9a3f29c94c0482.exe web::billing::tests::offline_http --test-threads=1",
+    "E:/mir2-bridge-check-target/debug/deps/mir2_gateway-2a9a3f29c94c0482.exe sui_usdc_billing::tests --test-threads=1"
+  ],
+  "preservation_evidence": [
+    "Original 19 migrations retained in order; exactly 7 promotion migrations appended; no 0024_sui_usdc_billing_authority repeat/backfill.",
+    "OriginalAccountReader reproduces all original AccountRecord fields, including procurement, Stripe orders, Sui orders, monthly-card receipts, account/storage/ban metadata and saves; JSON roundtrip comparison passes.",
+    "Native PG test creates original 19 migrations, inserts historical fixture, runs all 26 twice and verifies identical raw_json plus MD5 before/after; original procurement and Sui deletion triggers still reject destructive updates.",
+    "Historical funded-order records do not create verified payment revenue; observed old balance becomes Unknown lots without changing old financial fields.",
+    "Old strict BillingLedger reader rejects nonempty new provenance rather than silently dropping it; all typed readers require compatible binaries before new writes.",
+    "Windows activation test creates exactly two empty random-PHC system actors, zero wallet credentials and zero characters; repeat adds zero and preserves existing raw account SHA256.",
+    "Windows clone audit reads real account, character and save rows, verifies nonempty persisted fields survive typed conversion, applies migrations twice, and checks complete row snapshots/SHA256 unchanged.",
+    "Gateway wallet-context regression uses separate fixture proof keys for native/web contexts, rejects cross-key/passkey/expired proof, reuses original bound credential/account and leaves game account JSON/channel count unchanged."
+  ],
+  "local_log_references_only_not_copied": [
+    {
+      "name": "mir2-bridge-focused.log",
+      "sha256": "4c04dfab31feb6bd6e0cdfa6d6afc1d94764969b565cfdfea07cc4bac2962a16",
+      "bytes": 57008,
+      "modified_utc": "2026-10-30T12:32:15.681177Z"
+    },
+    {
+      "name": "mir2-bridge-payout-tests.log",
+      "sha256": "1db08f71001028d4cb4a90539be66d34969aa1a03cd061dd07eb1a31c9fdae9e",
+      "bytes": 53479,
+      "modified_utc": "2026-10-30T12:34:17.704524Z"
+    },
+    {
+      "name": "mir2-bridge-windows-cli-tests.log",
+      "sha256": "fd3bc6b8f61590f5860d96c9126a98f3b16260dc439ea1a308a79fb80b0872ff",
+      "bytes": 53387,
+      "modified_utc": "2026-10-30T12:42:01.810018Z"
+    },
+    {
+      "name": "mir2-bridge-provenance-unit.log",
+      "sha256": "3d33022f4ebff1a3f6a195bf9b4baac02e83dd52259065848d877ac8e6b96d09",
+      "bytes": 46148,
+      "modified_utc": "2026-10-30T12:43:12.022999Z"
+    },
+    {
+      "name": "mir2-bridge-gateway-tests.log",
+      "sha256": "c59184bb025914388d583d570d520eb0bf7a4194f50368a063d33df8097cb4f8",
+      "bytes": 57358,
+      "modified_utc": "2026-10-30T12:36:25.486970Z"
+    },
+    {
+      "name": "mir2-bridge-usdc-tests.log",
+      "sha256": "65598fa80856c2f3dde45c86fcb108bd8c22592e3f07dde5a1da9a97357be022",
+      "bytes": 5401,
+      "modified_utc": "2026-10-30T12:35:21.984743Z"
+    },
+    {
+      "name": "mir2-bridge-final-check.log",
+      "sha256": "232e115d98d6a9944c7a84280edb962b49d38f8b5e75995fc073eff6ddf8c66a",
+      "bytes": 67537,
+      "modified_utc": "2026-10-30T12:44:57.905043Z"
+    }
+  ],
+  "pending_root_owned": {
+    "backend_ci_run": 41057817826,
+    "backend_ci_ref": "f25e823cf1ce1437bce632b886b7a0bdafdc5031",
+    "ci_result": "pending confirmation",
+    "remote_clone_audit": "pending",
+    "remote_wallet_proof_http_mapping": "pending",
+    "remote_original_rows_preservation": "pending",
+    "service_rollout": "pending",
+    "frontend_release": "pending",
+    "human_phone_scan_login": "pending",
+    "actual_recharge_and_testnet_rebate_acceptance": "pending"
+  }
+}

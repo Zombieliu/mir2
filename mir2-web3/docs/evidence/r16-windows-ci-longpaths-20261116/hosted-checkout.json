@@ -1,0 +1,105 @@
+{
+  "checkedAt": "2026-11-15T20:35:19.729728+00:00",
+  "runs": [
+    {
+      "run": 43757023567,
+      "name": "Developer Handoff Smoke",
+      "source": "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+      "status": "in_progress",
+      "conclusion": null,
+      "windowsJobs": [
+        {
+          "name": "clean-checkout-and-build",
+          "id": 132943228906,
+          "status": "in_progress",
+          "conclusion": null,
+          "windowsConfiguration": "success",
+          "checkout": [
+            {
+              "name": "Checkout with Crystal",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ],
+          "failedSteps": []
+        }
+      ]
+    },
+    {
+      "run": 43757023553,
+      "name": "Mir2 Candidate Gate",
+      "source": "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+      "status": "in_progress",
+      "conclusion": null,
+      "windowsJobs": [
+        {
+          "name": "Windows functional vertical slice",
+          "id": 132943228836,
+          "status": "in_progress",
+          "conclusion": null,
+          "windowsConfiguration": "success",
+          "checkout": [
+            {
+              "name": "Checkout",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ],
+          "failedSteps": []
+        }
+      ]
+    },
+    {
+      "run": 43757023605,
+      "name": "Cross-platform client",
+      "source": "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "windowsJobs": [
+        {
+          "name": "Windows native host and assets",
+          "id": 132943229355,
+          "status": "completed",
+          "conclusion": "failure",
+          "windowsConfiguration": "success",
+          "checkout": [
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ],
+          "failedSteps": [
+            "Test and build Windows host"
+          ]
+        }
+      ]
+    },
+    {
+      "run": 43757023612,
+      "name": "Home Agent",
+      "source": "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+      "status": "in_progress",
+      "conclusion": null,
+      "windowsJobs": [
+        {
+          "name": "test (windows-2025, x86_64-pc-windows-msvc)",
+          "id": 132943229278,
+          "status": "in_progress",
+          "conclusion": null,
+          "windowsConfiguration": "success",
+          "checkout": [
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ],
+          "failedSteps": []
+        }
+      ]
+    }
+  ],
+  "wholeCandidatePassed": false,
+  "productionChanged": false
+}

@@ -1,0 +1,55 @@
+{
+  "restored": true,
+  "at": "2026-11-16T09:28:37.419Z",
+  "overlays": 27,
+  "rawWipUnchanged": 28,
+  "foreignShellInverseByteProof": true,
+  "rapidEdges": 48,
+  "results": [
+    {
+      "folder": "game-r1",
+      "passed": true,
+      "backend": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "ackMs": 99,
+      "nativeMs": 30773,
+      "rapidEdges": 24,
+      "maxRapidMs": 91,
+      "opensThroughStaleCapturedFlag": 0,
+      "distinctDeclinedHudRows": 0,
+      "normalLogoutAndReentry": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "folder": "game-r2",
+      "passed": true,
+      "backend": {
+        "selectedBackend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "ackMs": 105,
+      "nativeMs": 29704,
+      "rapidEdges": 24,
+      "maxRapidMs": 67,
+      "opensThroughStaleCapturedFlag": 3,
+      "distinctDeclinedHudRows": 4,
+      "normalLogoutAndReentry": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "allOwnedHandlesClosed": true,
+  "productionChanged": false,
+  "buildNotServableWithoutGuardedReapply": true
+}

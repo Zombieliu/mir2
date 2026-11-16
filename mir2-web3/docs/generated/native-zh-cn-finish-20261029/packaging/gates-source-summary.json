@@ -1,0 +1,283 @@
+{
+  "schema": "mir2.windows.packaging-gates-summary.v1",
+  "capturedAtUtc": "2026-10-29T07:40:18.193Z",
+  "baseRevision": "758cd76b07bb4a5feace9b9cc01a80c808542b2d",
+  "state": "full-selftests-passed; actual attested release/package/installer pending coordinator",
+  "freshValidatedSourcePins": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "bytes": 123657,
+      "rawSha256": "29d656330c372f4c45d48c94e6a71376fb959e4c63f32a5d8b1fa8dd31cf7aed",
+      "normalizedLfSha256": "d28da79b7e94cab6b447a033e47f4d12238018666baa953fe753310a88943020",
+      "lastWriteUtc": "2026-10-29T07:35:04.698Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "bytes": 175626,
+      "rawSha256": "66fef5c4bff848106de05ec4e915b22a4f7450d022480338dceae0b6006c0c6b",
+      "normalizedLfSha256": "a599a46c099052da0512603bc3d9872e35cf6d1d4dc269b520acf430a47c08e2",
+      "lastWriteUtc": "2026-10-29T06:09:51.020Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+      "bytes": 21778,
+      "rawSha256": "3b641381bcdfb6adeb0245dd541713515296875d85f39c780e7c59af4cfec479",
+      "normalizedLfSha256": "944a69ad6b1c3210672e9c33cb11e3c7a863664ff67d9cb38c93adc40f849b5c",
+      "lastWriteUtc": "2026-10-29T07:14:33.298Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "bytes": 36192,
+      "rawSha256": "2311297dd58f81609f194991f5135b4e5ec6a25a337d1badada8f545f5db3f98",
+      "normalizedLfSha256": "711bb1b6274b657e827417cbfab04d1ed2d0b04038b4bda04dca16f2a3bdaf34",
+      "lastWriteUtc": "2026-10-24T11:52:03.006Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+      "bytes": 5210,
+      "rawSha256": "c45b2cdf15cc4d1c2c54ce4bd6a9669bf5f70472b9780e097d1a6b3753b1b2a1",
+      "normalizedLfSha256": "7949ac14cae0767c7fd3ded084ff16bd848cd1ce28dcdaa0157a4ee1e067a865",
+      "lastWriteUtc": "2026-10-24T11:52:03.006Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1",
+      "bytes": 5198,
+      "rawSha256": "3a030f590e93d360ce159bd294aed46f11be38f5827d6f5b2ac6ccc961025846",
+      "normalizedLfSha256": "b3c50be80b7f63b4cb9a9f0a027aad8770c62d47774e39c4a230eee3af6725da",
+      "lastWriteUtc": "2026-10-24T11:52:03.019Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1",
+      "bytes": 1307,
+      "rawSha256": "05d7fdc54459dc3f7a2838d70465b4acc2948c27b72cbfa4aeffa4996840cdbe",
+      "normalizedLfSha256": "95491d643e2b3a1846499ce421a6061b7e2d942906390d0af3d7e35dda3aa04e",
+      "lastWriteUtc": "2026-10-24T11:52:03.007Z"
+    }
+  ],
+  "testedFontAndMetadataPins": [
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "bytes": 11941968,
+      "rawSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "lastWriteUtc": "2026-10-24T11:52:02.999Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Regular.ttf",
+      "bytes": 621572,
+      "rawSha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+      "lastWriteUtc": "2026-10-24T11:52:02.933Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Bold.ttf",
+      "bytes": 631484,
+      "rawSha256": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913",
+      "lastWriteUtc": "2026-10-24T11:52:02.929Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Regular.ttf",
+      "bytes": 234892,
+      "rawSha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48",
+      "lastWriteUtc": "2026-10-24T11:52:02.937Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Bold.ttf",
+      "bytes": 261460,
+      "rawSha256": "4e5462d2e8be880317b9f49b5b2da109ddb6a3563d91cc604b67f3535832a555",
+      "lastWriteUtc": "2026-10-24T11:52:02.935Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Regular.ttf",
+      "bytes": 243520,
+      "rawSha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313",
+      "lastWriteUtc": "2026-10-24T11:52:02.939Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Bold.ttf",
+      "bytes": 250176,
+      "rawSha256": "6a09c8d797cfc803d32cdc731e809424d74cbaff59f503de34ade421a08e5bc2",
+      "lastWriteUtc": "2026-10-24T11:52:02.938Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Regular.ttf",
+      "bytes": 37780,
+      "rawSha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44",
+      "lastWriteUtc": "2026-10-24T11:52:03.001Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Bold.ttf",
+      "bytes": 37824,
+      "rawSha256": "2ac6c6e8a478e23b15f76e4894af1fa2210f8f350e4e6e54aad530bec03efbfb",
+      "lastWriteUtc": "2026-10-24T11:52:03.001Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MIR2BillingHan-Regular.ttf",
+      "bytes": 2532,
+      "rawSha256": "7cc4d33730ae409a198cae325f57db54730f94b193f5d604375701890bb762ce",
+      "lastWriteUtc": "2026-10-29T03:54:16.787Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "bytes": 16437364,
+      "rawSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "lastWriteUtc": "2026-10-29T04:56:16.100Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "bytes": 1302,
+      "rawSha256": "75f59b710e9f647d21819302aa3a29cf93fdabe39a3e1a4eda269d74643978de",
+      "normalizedLfSha256": "d7598658e0d667902ca56ce5f3c2eeaffd23a8db356be60f02f9a391ccd620e5",
+      "lastWriteUtc": "2026-10-29T04:59:19.596Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MULTILINGUAL-SOURCES.json",
+      "bytes": 8618,
+      "rawSha256": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11",
+      "normalizedLfSha256": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11",
+      "lastWriteUtc": "2026-10-24T11:52:02.926Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/BILLING-HAN-SOURCE.json",
+      "bytes": 3786,
+      "rawSha256": "d3cd4b2451d73890d465009e0ea7b27940e7c5f285355bdfd48da131de6dec7d",
+      "normalizedLfSha256": "5a3a08443be4f8a3483cb692feaddac87b54e1da84e317c8696c47af8e62cac5",
+      "lastWriteUtc": "2026-10-29T03:54:16.791Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "bytes": 1568,
+      "rawSha256": "60f3d56e71d21aabc9a6a7c9453c752e89d3de9d30d96b900ee9e9e4d9c8d250",
+      "normalizedLfSha256": "22264165aa5bb1cbb42075e6d57aab9beaea484528249d82e9a3f1fd28b36afa",
+      "lastWriteUtc": "2026-10-29T05:20:08.774Z"
+    }
+  ],
+  "tests": [
+    {
+      "name": "package-windows-candidate FULL selftest",
+      "command": "pwsh -NoProfile -File apps/game-client/platform-windows/scripts/package-windows-candidate.ps1 -SelfTest",
+      "log": "package-selftest-v3.log",
+      "exitCode": 0,
+      "passed": true,
+      "sourcePaths": [
+        "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+        "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+        "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+        "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1",
+        "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1"
+      ],
+      "scope": [
+        "209-map profile routing and configuration",
+        "strict resource allowlist and actual tracked resource paths",
+        "2 deterministic development-cache path fixtures + 8 rejected near-misses",
+        "6224 pet/guild PNG, 22 metadata, 15 frame sets, 11 sounds and mutation rejection",
+        "ADS, reparse and actor closure guards"
+      ],
+      "productionMapGenerationExecuted": false,
+      "logPin": {
+        "path": "C:/mir2-build/native-zh-cn-finish-20261029/package-selftest-v3.log",
+        "bytes": 654,
+        "rawSha256": "e5921e09b1e5bf9fc1fb8950085eb89c366e9f6db422e2f709fe43b37d5b5823",
+        "lastWriteUtc": "2026-10-29T07:35:59.502Z"
+      }
+    },
+    {
+      "name": "verify-windows-candidate FULL selftest",
+      "command": "pwsh -NoProfile -File apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1 -SelfTest",
+      "log": "verify-selftest-v1.log",
+      "exitCode": 0,
+      "passed": true,
+      "sourcePaths": [
+        "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+        "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+        "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+        "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1"
+      ],
+      "scope": [
+        "strict 11 whole-font identities, exact SFNT ranges and adjacent/unmasked path leak checks",
+        "font mutation/truncation and ASCII/UTF8/UTF16 path boundaries",
+        "package and metadata/schema validation, crypto tamper/signer rejection",
+        "ephemeral in-memory CMS selftest certificates only; no persisted key or trust-store writes"
+      ],
+      "logPin": {
+        "path": "C:/mir2-build/native-zh-cn-finish-20261029/verify-selftest-v1.log",
+        "bytes": 997,
+        "rawSha256": "f67b0e3e0c839cef69061d6de4c62180de424634c3cdf0ffa38a9386da195eaf",
+        "lastWriteUtc": "2026-10-29T07:21:03.184Z"
+      }
+    }
+  ],
+  "repairs": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+      "cause": "Complete raw Title/Prguse2 metadata hashes were pinned to older commits, not a line-ending mismatch. Current working metadata equals committed HEAD.",
+      "unchanged": "Prior 349 Title and 382 Prguse2 frame metadata entries, sourceLib identities/counts and frame-set validation remain strict; no source metadata or image changed.",
+      "updates": [
+        {
+          "library": "Title",
+          "historicalAddCommit": "dabe442ff1cd98f607190013540738cc97910315",
+          "addedFrames": [
+            743,
+            744,
+            745,
+            746
+          ],
+          "currentMetadataSha256": "6513b3f04f3ccc67a201c1722339f76f6083973ba77ebfb940fd9a17773e5a69"
+        },
+        {
+          "library": "Prguse2",
+          "historicalAddCommit": "2a1c54c29",
+          "addedFrames": [
+            424
+          ],
+          "currentMetadataSha256": "52ff33c696a8b04d576bddcc7b8f14d94aa5b3b35cd8e0d31f379295e9a635cd"
+        }
+      ]
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "cause": "Full selftest incorrectly required local generated development caches. Production package already generates a new atlas and keyed set, but two preflight references still checked the stale development atlas.",
+      "fix": "Selftest uses deterministic known-PNG path fixtures and rejects near-misses, additionally scanning actual caches when present. Production required manifest and tree now reference the same newly generated temporary atlas that staging copies.",
+      "preserved": "Fresh real production generators, profile scope, complete floor atlas, missing drawable resource rejection, hashes, ADS, reparse and staging closure checks are unchanged."
+    }
+  ],
+  "productionPrerequisites": {
+    "fullCrystalPack": {
+      "indexRawSha256": "77a9050818df502f65a7b151976ee7d66bd01e94d87680cf0760b925dd10dbee",
+      "contentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+      "matchesProductionConfig": true,
+      "declaredLibraryManifests": 1440,
+      "missingLibraryManifests": 0,
+      "declaredPages": 4446,
+      "pageContentHashesNotIndependentlyRerun": true
+    },
+    "profile": "platinum_176",
+    "expectedMaps": 209,
+    "missingPackagedMapGzipInputs": 0,
+    "nodeDependencies": {
+      "sharp": "resolved locally",
+      "typescript": "resolved locally"
+    },
+    "existingCmsTestCertificate": {
+      "thumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+      "codeSigningEku": true,
+      "hasPrivateKey": true,
+      "expiresUtc": "2026-12-27T16:29:43Z"
+    },
+    "releaseBuildMustUseCleanCheckout": true,
+    "actualPackageGeneratesAndValidatesRealMaps": true
+  },
+  "boundaries": {
+    "installerRecipeR9OrCompilerNotCoveredByTheseTests": true,
+    "noActualReleaseExeBuildByThisWorker": true,
+    "noActualCandidatePackageOrInstallerBuildByThisWorker": true,
+    "noProductionSigningKeyCreated": true,
+    "noTrustStoreChange": true,
+    "noChainOperations": true
+  },
+  "supersedes": [
+    "package-selftest-v1.log: failed development-cache prerequisite",
+    "package-selftest-v2.log: passed before final two production atlas reference repairs; latest is v3"
+  ],
+  "externalLogsPreserved": true
+}

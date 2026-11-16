@@ -1,0 +1,197 @@
+{
+  "passed": true,
+  "kind": "r10-first-real-installed-launcher-updater-game-and-windows-ui",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "updaterSourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "updaterSequence": 2026102910,
+  "producerCompleteInstalledIdentityVerificationPassed": true,
+  "gameFilesVerified": 255027,
+  "updaterFilesVerified": 9,
+  "curatorDidNotRepeatLargeInstalledScan": true,
+  "noArgumentLauncherChain": true,
+  "actualRecordedGamePid": 71048,
+  "actualRecordedUpdaterPid": 81784,
+  "directGameLaunch": false,
+  "gameExeSha256": "6b657f869afc2baa8a086baf9bd39ce77b5011247d8b12a8f92eaeebe3cf2e9d",
+  "updaterExeSha256": "10b94f60286afeaae43db0117a9c73b2dccecae1ddd79d562379ac316b40c6bc",
+  "screenshots": [
+    {
+      "image": "r10-first-startup.png",
+      "sidecar": "r10-first-startup.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-startup.png",
+        "bytes": 209286,
+        "sha256": "47737b91a9522cdd6882535a18ce46f9a43f3eba7325429daafa8903c7cadd7b"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-startup.png.json",
+        "bytes": 606,
+        "sha256": "7ee758028a29b64f1ade352a0b7db3b17a69663f361d38d9b55bb1498dc03b87"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-options-zh-cn.png",
+      "sidecar": "r10-first-options-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-options-zh-cn.png",
+        "bytes": 215455,
+        "sha256": "d129c91fd0747370dd763cf8979120aaff029de32263fd657cbf146ed6c05012"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-options-zh-cn.png.json",
+        "bytes": 559,
+        "sha256": "4d38e4cc960f049e95ae74369e6b2de2bf414c4649608060b44ee37380805a05"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-ten-language-menu.png",
+      "sidecar": "r10-first-ten-language-menu.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-ten-language-menu.png",
+        "bytes": 214097,
+        "sha256": "e2db2b382d7740a96c96c9adfe67afd32091d5d365ea140b14d99682e549f37e"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-ten-language-menu.png.json",
+        "bytes": 573,
+        "sha256": "763a23701b0ac158f0d02f7eddadf6cdff6231d5f24b7370634269ea55a3dc3f"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-options-english.png",
+      "sidecar": "r10-first-options-english.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-options-english.png",
+        "bytes": 213748,
+        "sha256": "d3fa2d44b52b3cff01c9cb1489abec66cc98c4482dc74e620ec4bffea00645b4"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-options-english.png.json",
+        "bytes": 606,
+        "sha256": "1a45407aca03ec4b2690f214bcd7057b4537a23993d82576cc6ba41e374671a2"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-options-restored-zh-cn.png",
+      "sidecar": "r10-first-options-restored-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-options-restored-zh-cn.png",
+        "bytes": 207547,
+        "sha256": "b0b46712c1d577f734bf10ed2fa1090fb6e67a4e05047ce7dcf2db2d22279a74"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-options-restored-zh-cn.png.json",
+        "bytes": 583,
+        "sha256": "3a3f5702e19cb7361e31f63ccea07a371aac1187a7983b7c3876b79a7aeac314"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-fiat-zh-cn.png",
+      "sidecar": "r10-first-fiat-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-fiat-zh-cn.png",
+        "bytes": 85092,
+        "sha256": "fc05aa82d3dbee207a64df913e7e9edbb277e16e11ecc864aa8e3cd8ee44af63"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-fiat-zh-cn.png.json",
+        "bytes": 607,
+        "sha256": "56bc25bef8da4334d2ee4bfee56d6b4f2a61f413e20de70593235473971177cc"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-usdc-zh-cn.png",
+      "sidecar": "r10-first-usdc-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-usdc-zh-cn.png",
+        "bytes": 98019,
+        "sha256": "759263d167b9dafcc801048e13275d365a7b85ea9a51a6471f78e1f59930476f"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-usdc-zh-cn.png.json",
+        "bytes": 614,
+        "sha256": "5a2268acfbddfff0e166cb37c5f16300b07902d208bc9b269217fc41f8e30474"
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-first-monthly-zh-cn.png",
+      "sidecar": "r10-first-monthly-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-first-monthly-zh-cn.png",
+        "bytes": 86225,
+        "sha256": "e8e01fb7e4cdde2e26476c722973361d2cfd2c7fc4b2aee2937b4c5163fcf4c6"
+      },
+      "sidecarReceipt": {
+        "filename": "r10-first-monthly-zh-cn.png.json",
+        "bytes": 615,
+        "sha256": "b8e12d7a040956a798dc151c6bcb648b9a8427744095426cd60d222cc7ad8d69"
+      },
+      "curatorViewedActualPng": true
+    }
+  ],
+  "actualPngCount": 8,
+  "updaterProgressWindowScreenshot": {
+    "created": false,
+    "claimed": false,
+    "reason": "Window closed before capture; successful process chain is separately recorded."
+  },
+  "observedUi": [
+    "Simplified Chinese startup",
+    "Simplified Chinese settings",
+    "ten-language menu",
+    "English settings after selection",
+    "Simplified Chinese settings restored",
+    "Fiat page",
+    "USDC page with three existing orders",
+    "independent monthly-card page"
+  ],
+  "curatorVisualReview": {
+    "missingGlyphObserved": false,
+    "blockingTextOverlapObserved": false,
+    "humanFrontendAccepted": false
+  },
+  "economyUnchanged": {
+    "credit": 100,
+    "gold": 10000,
+    "usdcOrders": 3,
+    "stableEconomyHash": "62075679239d8dd5370fc02c307c81f74d379548844ef2f061c66f10789b8a27"
+  },
+  "paymentsOrMonthlyCardPurchasesAttempted": false,
+  "ownedProcessesBeforeUninstall": 0,
+  "savedLocale": "zh-CN",
+  "normalRegistrationGameAndPersonalPreferencesUnchanged": true,
+  "sourceReceipts": {
+    "installed-identity-verification.json": {
+      "filename": "installer-r10-first.json",
+      "bytes": 1066,
+      "sha256": "0875b1f717026f3f9b02c04610f0d28dbffd2b5068705385bc93d94f7f1fda0d"
+    },
+    "launcher-updater-game-chain.json": {
+      "filename": "launch-chain-r10-first.json",
+      "bytes": 772,
+      "sha256": "3de32121b4ff872934667c9526c504729a20bd9e4da15261f45cf177141d6383"
+    },
+    "profile-before-uninstall.json": {
+      "filename": "profile-before-r10-uninstall.json",
+      "bytes": 558,
+      "sha256": "81f75913c099ea5cb7a4bb56579625ca93283b25515a2d0996916392f19db474"
+    },
+    "economy-after-ui.json": {
+      "filename": "after-r10-first-ui.json",
+      "bytes": 1337,
+      "sha256": "1d58459e30486670122c1beea13927e23711929f0e3c7c4da53814a57fbff341"
+    }
+  },
+  "r9FailureRetainedSeparately": true,
+  "lastRunInterpretation": "Old r9 errors remain historical; rejecting an older remote sequence is expected fallback. This phase success is based on actual updater/game process identities, not deleting old log entries.",
+  "uninstallReinstallAndPreferencePersistenceVerifiedByThisPhase": false,
+  "normalSetupActuallyInstalledByThisPhase": false,
+  "productionDeployed": false
+}

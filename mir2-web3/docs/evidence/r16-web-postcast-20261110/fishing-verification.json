@@ -1,0 +1,675 @@
+{
+  "schema": "mir2.r16.postcast-fishing-browser.v1",
+  "receiptSha256": "3fd10ca30d7e9efd42b226361030893624dfdda3ad886d2e487cf58639907260",
+  "provisionReceiptSha256": "5538079276adbc87f038ae28c03b47ba5ddcb6b4981f391b96329f0302340528",
+  "scope": {
+    "ordinaryPhysicalBrowserUi": true,
+    "fixturePreparedByOrdinaryNativeCompatibleWire": true,
+    "isolatedFile": true,
+    "nativeExeRenderer": false,
+    "fixtureProfile": "crystal_full",
+    "browserProfile": "platinum_fiveclass",
+    "productionService": false
+  },
+  "renderer": "webgpu",
+  "build": {
+    "rendererVersion": "bevy-535f8e7a3b0707cb",
+    "inputs": {
+      "app/components/original-client-entity-animation-runtime.ts": "ad216d47262dd5ca12b4badae604f2acb53dbca2dcbdad3c6a4dbbeb30a47898",
+      "app/original-client-shell.tsx": "50ee4a0285749806cb8a9467a539c04debaeb44f86e0b12c77bd8896af08e7b5",
+      "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+      "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+      "lib/generated/bevy_runtime_version.json": "bee8e9c2a1891189ddaae46920759cc70156535b5e0a58759a80782612d9d65b",
+      "lib/generated/client_core_runtime.json": "7db42b475aa372719ef4b74addc9153f27ab797e760dc6af10f36eaa71a3c6a6"
+    },
+    "observer": {
+      "scope": "immutable read-only observer on output from one real production animation bridge call; no input, runtime setter, pose advancement or state changes",
+      "productFileSha": "a96246d9c51e811af32419687739e35dad4dc0926ab9512c00b8769e4e62f3bc",
+      "tapSha": "58aac324527dbf5960b5b931ea5ddae4b4d4a488355c5966cd15e9708c9d4633",
+      "sourceHashes": {
+        "app/components/original-client-entity-animation-runtime.ts": "ad216d47262dd5ca12b4badae604f2acb53dbca2dcbdad3c6a4dbbeb30a47898",
+        "app/original-client-shell.tsx": "50ee4a0285749806cb8a9467a539c04debaeb44f86e0b12c77bd8896af08e7b5"
+      }
+    }
+  },
+  "assets": [
+    {
+      "path": "/bevy-runtime/v/bevy-535f8e7a3b0707cb/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200
+    },
+    {
+      "path": "/bevy-runtime/v/bevy-535f8e7a3b0707cb/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    }
+  ],
+  "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+  "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6",
+  "setup": {
+    "profile": "crystal_full",
+    "weapon": {
+      "key": "crystal-item-793",
+      "uid": 51970049,
+      "durability": 10000,
+      "slots": [
+        {
+          "slot": 0,
+          "key": "crystal-item-795",
+          "qty": 1,
+          "dura": 8000
+        },
+        {
+          "slot": 2,
+          "key": "crystal-item-798",
+          "qty": 3,
+          "dura": null
+        },
+        {
+          "slot": 4,
+          "key": "crystal-item-802",
+          "qty": 1,
+          "dura": 6000
+        }
+      ]
+    },
+    "purchases": [
+      {
+        "name": "BlueFishingRod",
+        "itemIndex": 793,
+        "qty": 1,
+        "unitPrice": 10000,
+        "before": 53295,
+        "after": 43295,
+        "id": 51970049,
+        "sequence": 851
+      },
+      {
+        "name": "FishingHook",
+        "itemIndex": 795,
+        "qty": 1,
+        "unitPrice": 6000,
+        "before": 43295,
+        "after": 37295,
+        "id": 52101122,
+        "sequence": 857
+      },
+      {
+        "name": "FishBait",
+        "itemIndex": 798,
+        "qty": 3,
+        "unitPrice": 80,
+        "before": 37295,
+        "after": 37055,
+        "id": 52297734,
+        "sequence": 861
+      },
+      {
+        "name": "FishingReel",
+        "itemIndex": 802,
+        "qty": 1,
+        "unitPrice": 12000,
+        "before": 37055,
+        "after": 25055,
+        "id": 52559877,
+        "sequence": 865
+      }
+    ],
+    "slots": [
+      {
+        "itemIndex": 795,
+        "slot": 0,
+        "id": 52101122,
+        "ack": 874
+      },
+      {
+        "itemIndex": 798,
+        "slot": 2,
+        "id": 52297734,
+        "ack": 879
+      },
+      {
+        "itemIndex": 802,
+        "slot": 4,
+        "id": 52559877,
+        "ack": 883
+      }
+    ],
+    "logout": {
+      "packet": "LogOutSuccess",
+      "seq": 888
+    }
+  },
+  "spell": {
+    "sent": {
+      "type": "magic",
+      "seq": 732,
+      "at": 1794268872930,
+      "direction": "downleft",
+      "spell": "SoulFireBall",
+      "targetId": 200203,
+      "x": 297,
+      "y": 274
+    },
+    "ack": {
+      "packet": "ObjectMagic",
+      "seq": 738,
+      "at": 1794268873300,
+      "objectId": 1000,
+      "targetId": 200203,
+      "spell": "SoulFireBall",
+      "cast": true
+    },
+    "target": "ordinary SoulFireBall on naturally spawned map monster"
+  },
+  "observedSpell": [
+    {
+      "nowMs": 1794268873337,
+      "legacyState": "attackRange",
+      "entity": {
+        "objectId": "1000",
+        "x": 300,
+        "y": 267,
+        "direction": "DownLeft",
+        "attackAnimation": "spell",
+        "attackStartedAt": 1794268873298,
+        "attackUntil": 1794268873898
+      },
+      "motion": {
+        "animationState": "walking",
+        "fromX": 300,
+        "fromY": 266,
+        "toX": 300,
+        "toY": 267,
+        "startedAt": 1794268870299,
+        "expiresAt": 1794268870899
+      },
+      "in": {
+        "action": "spell",
+        "token": "world-fishing-source:1:action:1:attack:1794268873298:spell",
+        "actionKnown": true,
+        "revision": 38,
+        "bootstrapKnown": false,
+        "direction": "DownLeft"
+      },
+      "source": {
+        "revision": 38,
+        "animationKnown": true,
+        "family": "spell",
+        "fishing": false,
+        "transformType": -1,
+        "self": {
+          "x": 300,
+          "y": 267,
+          "direction": "DownLeft",
+          "dead": false
+        },
+        "receivedAtMs": 1794268873298,
+        "evidenceRevision": 1
+      },
+      "out": {
+        "objectId": "1000",
+        "incarnation": 1,
+        "animationState": "attackRange",
+        "action": "spell",
+        "direction": "DownLeft",
+        "logicalFrameIndex": 0,
+        "queueDepth": 0
+      },
+      "authorityPose": {
+        "action": "spell",
+        "direction": "DownLeft",
+        "sourceRevision": 38,
+        "continuityRevision": 19,
+        "bridgeEpoch": 1,
+        "lastNowMs": 1794268873337,
+        "incarnation": 1
+      },
+      "errorCount": null
+    },
+    {
+      "nowMs": 1794268873478,
+      "legacyState": "attackRange",
+      "entity": {
+        "objectId": "1000",
+        "x": 300,
+        "y": 267,
+        "direction": "DownLeft",
+        "attackAnimation": "spell",
+        "attackStartedAt": 1794268873298,
+        "attackUntil": 1794268873898
+      },
+      "motion": {
+        "animationState": "walking",
+        "fromX": 300,
+        "fromY": 266,
+        "toX": 300,
+        "toY": 267,
+        "startedAt": 1794268870299,
+        "expiresAt": 1794268870899
+      },
+      "in": {
+        "action": "spell",
+        "token": "world-fishing-source:1:action:1:attack:1794268873298:spell",
+        "actionKnown": true,
+        "revision": 38,
+        "bootstrapKnown": false,
+        "direction": "DownLeft"
+      },
+      "source": {
+        "revision": 38,
+        "animationKnown": true,
+        "family": "spell",
+        "fishing": false,
+        "transformType": -1,
+        "self": {
+          "x": 300,
+          "y": 267,
+          "direction": "DownLeft",
+          "dead": false
+        },
+        "receivedAtMs": 1794268873298,
+        "evidenceRevision": 1
+      },
+      "out": {
+        "objectId": "1000",
+        "incarnation": 1,
+        "animationState": "attackRange",
+        "action": "spell",
+        "direction": "DownLeft",
+        "logicalFrameIndex": 1,
+        "queueDepth": 0
+      },
+      "authorityPose": {
+        "action": "spell",
+        "direction": "DownLeft",
+        "sourceRevision": 38,
+        "continuityRevision": 19,
+        "bridgeEpoch": 1,
+        "lastNowMs": 1794268873478,
+        "incarnation": 1
+      },
+      "errorCount": null
+    },
+    {
+      "nowMs": 1794268873510,
+      "legacyState": "attackRange",
+      "entity": {
+        "objectId": "1000",
+        "x": 300,
+        "y": 267,
+        "direction": "DownLeft",
+        "attackAnimation": "spell",
+        "attackStartedAt": 1794268873298,
+        "attackUntil": 1794268873898
+      },
+      "motion": {
+        "animationState": "walking",
+        "fromX": 300,
+        "fromY": 266,
+        "toX": 300,
+        "toY": 267,
+        "startedAt": 1794268870299,
+        "expiresAt": 1794268870899
+      },
+      "in": {
+        "action": "spell",
+        "token": "world-fishing-source:1:action:1:attack:1794268873298:spell",
+        "actionKnown": true,
+        "revision": 38,
+        "bootstrapKnown": false,
+        "direction": "DownLeft"
+      },
+      "source": {
+        "revision": 38,
+        "animationKnown": true,
+        "family": "spell",
+        "fishing": false,
+        "transformType": -1,
+        "self": {
+          "x": 300,
+          "y": 267,
+          "direction": "DownLeft",
+          "dead": false
+        },
+        "receivedAtMs": 1794268873298,
+        "evidenceRevision": 1
+      },
+      "out": {
+        "objectId": "1000",
+        "incarnation": 1,
+        "animationState": "attackRange",
+        "action": "spell",
+        "direction": "DownLeft",
+        "logicalFrameIndex": 1,
+        "queueDepth": 0
+      },
+      "authorityPose": {
+        "action": "spell",
+        "direction": "DownLeft",
+        "sourceRevision": 38,
+        "continuityRevision": 19,
+        "bridgeEpoch": 1,
+        "lastNowMs": 1794268873510,
+        "incarnation": 1
+      },
+      "errorCount": null
+    },
+    {
+      "nowMs": 1794268873590,
+      "legacyState": "attackRange",
+      "entity": {
+        "objectId": "1000",
+        "x": 300,
+        "y": 267,
+        "direction": "DownLeft",
+        "attackAnimation": "spell",
+        "attackStartedAt": 1794268873298,
+        "attackUntil": 1794268873898
+      },
+      "motion": {
+        "animationState": "walking",
+        "fromX": 300,
+        "fromY": 266,
+        "toX": 300,
+        "toY": 267,
+        "startedAt": 1794268870299,
+        "expiresAt": 1794268870899
+      },
+      "in": {
+        "action": "spell",
+        "token": "world-fishing-source:1:action:1:attack:1794268873298:spell",
+        "actionKnown": true,
+        "revision": 38,
+        "bootstrapKnown": false,
+        "direction": "DownLeft"
+      },
+      "source": {
+        "revision": 38,
+        "animationKnown": true,
+        "family": "spell",
+        "fishing": false,
+        "transformType": -1,
+        "self": {
+          "x": 300,
+          "y": 267,
+          "direction": "DownLeft",
+          "dead": false
+        },
+        "receivedAtMs": 1794268873298,
+        "evidenceRevision": 1
+      },
+      "out": {
+        "objectId": "1000",
+        "incarnation": 1,
+        "animationState": "attackRange",
+        "action": "spell",
+        "direction": "DownLeft",
+        "logicalFrameIndex": 2,
+        "queueDepth": 0
+      },
+      "authorityPose": {
+        "action": "spell",
+        "direction": "DownLeft",
+        "sourceRevision": 38,
+        "continuityRevision": 19,
+        "bridgeEpoch": 1,
+        "lastNowMs": 1794268873590,
+        "incarnation": 1
+      },
+      "errorCount": null
+    }
+  ],
+  "finalWalk": {
+    "sent": {
+      "type": "walk",
+      "seq": 860,
+      "at": 1794268896608,
+      "direction": "DownLeft"
+    },
+    "ack": {
+      "packet": "UserLocation",
+      "seq": 861,
+      "at": 1794268896627,
+      "x": 342,
+      "y": 244,
+      "direction": "DownLeft"
+    }
+  },
+  "authorityBeforeClick": {
+    "action": "standing",
+    "direction": "DownLeft",
+    "sourceRevision": 72,
+    "continuityRevision": 19,
+    "bridgeEpoch": 1,
+    "lastNowMs": 1794268897297,
+    "incarnation": 1
+  },
+  "sourceBeforeClick": {
+    "revision": 72,
+    "animationKnown": true,
+    "family": "spell",
+    "fishing": false,
+    "transformType": -1,
+    "self": {
+      "x": 342,
+      "y": 244,
+      "direction": "DownLeft",
+      "dead": false
+    },
+    "receivedAtMs": 1794268873298,
+    "evidenceRevision": 1
+  },
+  "physicalActions": [
+    {
+      "label": "post-spell DownLeft shore walk",
+      "from": {
+        "x": 343,
+        "y": 243
+      },
+      "target": {
+        "x": 342,
+        "y": 244
+      },
+      "physical": [
+        584,
+        496
+      ],
+      "sent": {
+        "type": "walk",
+        "seq": 860,
+        "at": 1794268896608,
+        "direction": "DownLeft"
+      },
+      "ack": {
+        "packet": "UserLocation",
+        "seq": 861,
+        "at": 1794268896627,
+        "x": 342,
+        "y": 244,
+        "direction": "DownLeft"
+      }
+    },
+    {
+      "label": "plain-left real cast",
+      "from": {
+        "x": 342,
+        "y": 244
+      },
+      "water": {
+        "x": 339,
+        "y": 247
+      },
+      "physical": [
+        488,
+        560
+      ],
+      "before": 862,
+      "under": [
+        {
+          "tag": "CANVAS",
+          "id": "mir2-quest-ui-canvas",
+          "cls": "shared-quest-ui-visible",
+          "owner": "true",
+          "entity": null
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "game-world-composite ",
+          "owner": null,
+          "entity": null
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "client-stage-frame ",
+          "owner": null,
+          "entity": null
+        },
+        {
+          "tag": "SECTION",
+          "id": "",
+          "cls": "mir-stage",
+          "owner": null,
+          "entity": null
+        },
+        {
+          "tag": "MAIN",
+          "id": "",
+          "cls": "mir-client-page ",
+          "owner": null,
+          "entity": null
+        }
+      ]
+    }
+  ],
+  "water": {
+    "status": 200,
+    "map": "0.map",
+    "bounds": {
+      "minX": 300,
+      "maxX": 388,
+      "minY": 210,
+      "maxY": 303
+    },
+    "water": {
+      "x": 339,
+      "y": 247,
+      "blocked": true,
+      "light": 100
+    },
+    "blockers": [
+      {
+        "x": 341,
+        "y": 245,
+        "blocked": true
+      },
+      {
+        "x": 341,
+        "y": 244,
+        "blocked": true
+      },
+      {
+        "x": 342,
+        "y": 245,
+        "blocked": true
+      }
+    ],
+    "error": null
+  },
+  "cast": {
+    "sent": {
+      "type": "fishingCast",
+      "seq": 863,
+      "at": 1794268897898,
+      "castOut": true
+    },
+    "ack": {
+      "packet": "FishingUpdate",
+      "seq": 867,
+      "at": 1794268898032,
+      "objectId": 1000,
+      "fishing": true,
+      "progressPercent": 0,
+      "foundFish": false,
+      "fishingPoint": {
+        "x": 339,
+        "y": 247
+      }
+    },
+    "baitDebit": {
+      "packet": "DeleteItem",
+      "seq": 865,
+      "at": 1794268898026,
+      "uniqueId": 52297734,
+      "count": 1
+    },
+    "rodDura": {
+      "packet": "DuraChanged",
+      "seq": 866,
+      "at": 1794268898029,
+      "uniqueId": 51970049,
+      "currentDura": 9999
+    },
+    "hookDura": {
+      "packet": "DuraChanged",
+      "seq": 864,
+      "at": 1794268898015,
+      "uniqueId": 52101122,
+      "currentDura": 7999
+    }
+  },
+  "logout": {
+    "sent": {
+      "type": "logOut",
+      "seq": 869,
+      "at": 1794268898278
+    },
+    "ack": {
+      "packet": "LogOutSuccess",
+      "seq": 871,
+      "at": 1794268900191
+    },
+    "file": {
+      "map": "0",
+      "position": {
+        "x": 342,
+        "y": 244
+      },
+      "direction": "DownLeft",
+      "bait": 2,
+      "rodDura": 9999
+    }
+  },
+  "closed": {
+    "browser": true,
+    "next": true,
+    "gateway": true
+  },
+  "baseline": [
+    {
+      "run": "browser-baseline-shared-r2",
+      "receiptSha256": "fb35f2d9d38838ba01da0ecfbb6b834be7eb024bb8226beac26b6c1420387824",
+      "stage": "physical-plain-left-shore-cast",
+      "reason": "wire-send-fishingCast",
+      "passed": false
+    },
+    {
+      "run": "browser-baseline-webgpu-r1",
+      "receiptSha256": "16af0af8f5f501a386c1c7baf9a79c202766fd86661ed228bc3e255b27fd71cb",
+      "stage": "physical-plain-left-shore-cast",
+      "reason": "wire-send-fishingCast",
+      "passed": false
+    }
+  ],
+  "earlyFieldFailure": {
+    "run": "browser-exact-final-webgpu-field-r1",
+    "receiptSha256": "5ae2f6236573848a49a3ae358d60fa24d15bf6acf1da156f55c0b357f164937b",
+    "stage": "ordinary-to-natural-field-target",
+    "reason": "ordinary-route-walk-ack-field-{\"x\":337,\"y\":256}",
+    "passed": false
+  },
+  "screenshot": {
+    "file": "fishing-shore.png",
+    "sha256": "7c18af5b89efcb501b2296f3fa93299b1116134ce4298a26cd0308d0dafe8015"
+  }
+}

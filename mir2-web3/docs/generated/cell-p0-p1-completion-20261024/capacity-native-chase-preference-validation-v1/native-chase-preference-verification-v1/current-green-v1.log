@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: native chase preference avoids the formal25 duplicated approach after a real peer ACK without sharing owner1000 identity
+ok 1 - native chase preference avoids the formal25 duplicated approach after a real peer ACK without sharing owner1000 identity
+  ---
+  duration_ms: 13.7443
+  type: 'test'
+  ...
+# Subtest: native chase preference keeps first4 claimed fallback when three preferred alternatives have no path
+ok 2 - native chase preference keeps first4 claimed fallback when three preferred alternatives have no path
+  ---
+  duration_ms: 81.7389
+  type: 'test'
+  ...
+# Subtest: native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence
+ok 3 - native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence
+  ---
+  duration_ms: 6.7086
+  type: 'test'
+  ...
+# Subtest: native chase preference uses a symmetric first-receipt label tiebreak regardless of client iteration order
+ok 4 - native chase preference uses a symmetric first-receipt label tiebreak regardless of client iteration order
+  ---
+  duration_ms: 17.7226
+  type: 'test'
+  ...
+# Subtest: native chase preference honors an earlier actual receipt before lexical actor order
+ok 5 - native chase preference honors an earlier actual receipt before lexical actor order
+  ---
+  duration_ms: 9.2069
+  type: 'test'
+  ...
+# Subtest: native chase preference expires at the original receipt age and reacquires only from a new real ACK
+ok 6 - native chase preference expires at the original receipt age and reacquires only from a new real ACK
+  ---
+  duration_ms: 9.235
+  type: 'test'
+  ...
+# Subtest: native chase preference records the fractional actual receipt clock and ignores duplicate ACK processing
+ok 7 - native chase preference records the fractional actual receipt clock and ignores duplicate ACK processing
+  ---
+  duration_ms: 5.6651
+  type: 'test'
+  ...
+# Subtest: native chase preference rejects invalid, zero, corrected and unmatched movement evidence
+ok 8 - native chase preference rejects invalid, zero, corrected and unmatched movement evidence
+  ---
+  duration_ms: 38.4666
+  type: 'test'
+  ...
+# Subtest: native chase preference clears a stale or malformed new receipt clock without inventing coordination progress
+ok 9 - native chase preference clears a stale or malformed new receipt clock without inventing coordination progress
+  ---
+  duration_ms: 33.5903
+  type: 'test'
+  ...
+# Subtest: native chase preference does not arise from pure plans or a throwing ordinary movement send
+ok 10 - native chase preference does not arise from pure plans or a throwing ordinary movement send
+  ---
+  duration_ms: 64.3147
+  type: 'test'
+  ...
+# Subtest: native chase preference ignores inactive, wrong-map, noncombat, invalid-target and already-attacking peers
+ok 11 - native chase preference ignores inactive, wrong-map, noncombat, invalid-target and already-attacking peers
+  ---
+  duration_ms: 77.4465
+  type: 'test'
+  ...
+# Subtest: native chase preference resume drops socket receipt preference while retaining spent chase and quarantine budgets
+ok 12 - native chase preference resume drops socket receipt preference while retaining spent chase and quarantine budgets
+  ---
+  duration_ms: 3.3462
+  type: 'test'
+  ...
+# Subtest: native chase preference leaves baseline candidate choice and every declared gameplay gate unchanged
+ok 13 - native chase preference leaves baseline candidate choice and every declared gameplay gate unchanged
+  ---
+  duration_ms: 3.7347
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 449.6675

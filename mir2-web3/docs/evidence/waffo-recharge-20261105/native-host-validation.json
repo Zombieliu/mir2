@@ -1,0 +1,50 @@
+{
+  "schema": "mir2.waffo.native-host-check.v1",
+  "originalLockSha256": "16a4204573038f56ee1e036c7392f3ff3ea43319ccbeb6d3c5aed393f1a3b9d9",
+  "lockBackup": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-waffo-platform-lock-6577ec162c6246d783ea27455b721584.backup",
+  "temporaryLockRestored": true,
+  "stages": [
+    {
+      "name": "resolve-offline",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "update",
+        "--workspace",
+        "--offline",
+        "--manifest-path",
+        "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml"
+      ],
+      "exitCode": 0,
+      "log": "native-host-resolve-offline.log"
+    },
+    {
+      "name": "check-offline",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "check",
+        "--locked",
+        "--manifest-path",
+        "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml",
+        "--tests",
+        "--target-dir",
+        "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-waffo-native-target",
+        "--config",
+        "profile.dev.package.\"*\".opt-level=0",
+        "--offline"
+      ],
+      "exitCode": 0,
+      "log": "native-host-check-offline.log"
+    }
+  ],
+  "generatedLockSha256": "a023ff19beacfc6102f0d1a9e0ff9b2269dd4396ae48cecb8d8bb6e2f854bfbd",
+  "hostCompilePassed": true,
+  "onlineResolutionOrFetchUsed": false,
+  "protectedFilesUnchanged": {
+    "apps\\game-client\\platform-windows\\Cargo.toml": true,
+    "apps\\game-client\\runtime\\Cargo.lock": true,
+    "apps\\game-client\\runtime\\Cargo.toml": true
+  },
+  "finalLockSha256": "16a4204573038f56ee1e036c7392f3ff3ea43319ccbeb6d3c5aed393f1a3b9d9"
+}

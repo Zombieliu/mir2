@@ -1,0 +1,822 @@
+{
+  "passed": true,
+  "source": "f6603c89a34e27813d7495fceab3292cc293c47b",
+  "deployment": "dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh",
+  "productionMapping": {
+    "deploymentId": "dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh",
+    "publicAlias": "numeron.obelisk.build",
+    "checkedAt": "2026-11-13T16:56:07.662Z",
+    "sha256": "54e0414b8ed287533263a2ade2316d4e841802e5dd4cfc18a9ce2b5f2de75997"
+  },
+  "staticReadback": {
+    "passed": true,
+    "checkedAt": "2026-11-13T17:02:17.163Z",
+    "source": "f6603c89a34e27813d7495fceab3292cc293c47b",
+    "origin": "https://numeron.obelisk.build",
+    "workerMatchesCandidate": true,
+    "networkAttempts": [
+      {
+        "round": 1,
+        "failures": []
+      }
+    ],
+    "routes": [
+      {
+        "path": "/version",
+        "status": 200,
+        "bytes": 55,
+        "sha256": "1066e15e67eac4d2f1905b0a92ba5f7f9ea7d976bd281db093601ef76a2af292"
+      },
+      {
+        "path": "/game",
+        "status": 200,
+        "bytes": 11168,
+        "sha256": "3a12dceaf4b3738c54e2c39fd1c951faf265376d45ca2725672c6bd741224111"
+      },
+      {
+        "path": "/mir2-asset-worker.js",
+        "status": 200,
+        "bytes": 41492,
+        "sha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800"
+      },
+      {
+        "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 26425,
+        "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
+      },
+      {
+        "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 252454,
+        "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+      },
+      {
+        "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 22689,
+        "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
+      },
+      {
+        "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 259326,
+        "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+      },
+      {
+        "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 8332,
+        "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+      },
+      {
+        "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 164087,
+        "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+      },
+      {
+        "path": "/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 6063,
+        "sha256": "3aef998b810fe329edf69a017308f3918151a320e733ff8ab9ff819b5efaf116"
+      },
+      {
+        "path": "/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 190701,
+        "sha256": "ea6be941a0d7467b63fccb7522e6f9f18691a2f4f99057c9157cac2ce44bed22"
+      }
+    ]
+  },
+  "standing": {
+    "passed": true,
+    "source": "f6603c89a34e27813d7495fceab3292cc293c47b",
+    "origin": "https://numeron.obelisk.build",
+    "checkedAt": "2026-11-13T17:02:17.210Z",
+    "chunks": [
+      {
+        "path": "/_next/static/chunks/1800.19c71628f8e82dd4.js",
+        "gender": "male",
+        "direction": 0,
+        "status": 200,
+        "bytes": 15162,
+        "sha256": "581a70514c3d4736a0bc75e6b1d0da117e06938a1e1737b75e0f97701860554a",
+        "sourcePayloadSha256": "25fa0d5ce010c43bc86dc382fbd2e1764e084db5124c477134d134244b45edce",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/2215.6ace83641d2454a7.js",
+        "gender": "female",
+        "direction": 2,
+        "status": 200,
+        "bytes": 12045,
+        "sha256": "ba09091f1378b906fa95fa522fbfcdd94f7a27c9f8fe10220babb096d8a3d189",
+        "sourcePayloadSha256": "2d2e2a4f15932a144c9ef6f75622f38594de7a723a64a834c268a1da4279751a",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/2220.0b4a1634da395aaf.js",
+        "gender": "female",
+        "direction": 7,
+        "status": 200,
+        "bytes": 13881,
+        "sha256": "32af02c4d93b2158eeadbf7348f63630fb69d3264c00afedf2541735a9ff7016",
+        "sourcePayloadSha256": "7e14dabb760a34a8ddb9c97d5625216c108fdc5a00bcebdc0fa79ed6a96f3f2c",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/3017.1d408f617d14e947.js",
+        "gender": "male",
+        "direction": 7,
+        "status": 200,
+        "bytes": 14682,
+        "sha256": "b9a1e9b96fe5a37539110747f31334bc64ece2d75e95493f1895f9f5936b60a0",
+        "sourcePayloadSha256": "d9773e077b405cf5f8e74350bbd997ad8cdf4fc802e785826707f9ec0908f3f1",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/3328.9dae2e402d18aee5.js",
+        "gender": "female",
+        "direction": 3,
+        "status": 200,
+        "bytes": 14189,
+        "sha256": "af9d282c3e08ec47328e6d37ef99451dd735e564d0bdf672dd14ff52855a5b9b",
+        "sourcePayloadSha256": "ba26b4a6769b994a831ea24872abeaff00151aaa06170415ce9a4a9ce77149dc",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/4894.9137a019630d6459.js",
+        "gender": "male",
+        "direction": 2,
+        "status": 200,
+        "bytes": 11615,
+        "sha256": "4da1ba6cb06ac7217f0280d7d64cf91c709d464d88afb8c76e40da66d1f5a6c0",
+        "sourcePayloadSha256": "3e3dec8e85c5241f8c32d43ce103e98de67085e8957541598ffcdc8be555e0e0",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/4947.e3fadecc4d490769.js",
+        "gender": "female",
+        "direction": 6,
+        "status": 200,
+        "bytes": 11797,
+        "sha256": "4c46c608c5547ac59e80bd85646fd3f3d3df891342b7ee08e61d9c0fcebb7b4e",
+        "sourcePayloadSha256": "c8bbe761ee26060ae7e3bac2de3b39bb67f646d69a2f3095c7433e303ad1ad76",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/5809.b25b9fe6a961911d.js",
+        "gender": "female",
+        "direction": 4,
+        "status": 200,
+        "bytes": 14605,
+        "sha256": "68f229d791507964c7960a91264e1bffde043ac48caa50632c8767bf239d1d4a",
+        "sourcePayloadSha256": "9281486cab6026c90532d9ba5e18085393fbfc4242a36a11add160087edc691e",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/6322.2aa571f0b44a6c4e.js",
+        "gender": "female",
+        "direction": 5,
+        "status": 200,
+        "bytes": 13805,
+        "sha256": "9363a6f02cd1fce776a7296ff478b439ae89cc20b39ca7ba63ba8d6ad3769776",
+        "sourcePayloadSha256": "3eceedc550f203def4baf10f0e4b52978231ac947011607d5e513677771f5c79",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/7014.fc532adcf7c10925.js",
+        "gender": "female",
+        "direction": 1,
+        "status": 200,
+        "bytes": 14172,
+        "sha256": "7b61741ed4bb01e1d9c90c0df1dde608ccb506d79b39c90d1b28511e579908ae",
+        "sourcePayloadSha256": "9f66d5c60bfbda2ce6cfc31f4a71fb08d297c6955705b3604422b96b54ca4e59",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/8251.f5df49eacdde2902.js",
+        "gender": "male",
+        "direction": 5,
+        "status": 200,
+        "bytes": 14199,
+        "sha256": "f8f22c2ccb6eb026de55bafc3ba441a843b91f86a6d99f309a59fae73baaa66a",
+        "sourcePayloadSha256": "7f843b54f30904499f6451e65f2ede8acafa10aeb606a4ff65f790613e36ed79",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/8276.6135a4ed55d62c7d.js",
+        "gender": "male",
+        "direction": 4,
+        "status": 200,
+        "bytes": 15100,
+        "sha256": "818eac72d768bfc8964b1670e29579c8ceec2813113d2dbbc1fc18e159074dfc",
+        "sourcePayloadSha256": "6867daf96438abc759c1acb4f9abe035f0f7ce695af45debcbfbb980035b7f20",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/8725.d54c9910c41e773f.js",
+        "gender": "female",
+        "direction": 0,
+        "status": 200,
+        "bytes": 14957,
+        "sha256": "be3720cc7b6412da7867c97d1af7af159a2eb90ce6d6413264668360e3bbf960",
+        "sourcePayloadSha256": "bdf2abb992e520416aebdab66643e491cd56ee47763c2e6710326d5426e3209e",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/9322.2e27199a5218d8c2.js",
+        "gender": "male",
+        "direction": 6,
+        "status": 200,
+        "bytes": 11815,
+        "sha256": "c7c92711b3e4a70458642b514d1f0acd950a3665178106bce3aa4aafeb3c09a9",
+        "sourcePayloadSha256": "9769b05cf18e4a04d66aba2aeafa9c62ba9801e3efc5ffbd3423c5141eaa313b",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/9517.afd74d727e2d0ea6.js",
+        "gender": "male",
+        "direction": 3,
+        "status": 200,
+        "bytes": 15007,
+        "sha256": "1aa0f9bfaefaaf439351d394eea8f9d507d549c697d202adec8d619dbb82c56c",
+        "sourcePayloadSha256": "510a9bf7ad4b3c5a3cec54ea6a61970efe469488c7d4cca8dfc7805e7b8b68ff",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      },
+      {
+        "path": "/_next/static/chunks/9839.86b119db0960837e.js",
+        "gender": "male",
+        "direction": 1,
+        "status": 200,
+        "bytes": 14167,
+        "sha256": "1fc8f6c53a9fdbc194ff0f346ed505fd00f724bf6c504dabd343755f98462698",
+        "sourcePayloadSha256": "6a702484ae02172e23b2b9eefd6ec21f2000775a1200c0a2b21f9e98409d644d",
+        "pngs": 8,
+        "sameJavaScriptBytesAsLocal": true
+      }
+    ],
+    "scope": "Actual deployment JS names resolved from its webpack loader; only static AST/JSON parsed, no remote JavaScript execution. All 16 full structured payloads and 128 PNGs exactly match the qualified source. Bundler wrappers/hash names may differ from local build.",
+    "allSixteenPayloadsMatchCandidate": true,
+    "noEagerHtmlPreload": true,
+    "performedAfterSignedColdBrowser": true,
+    "attemptRounds": 1
+  },
+  "bootstrap": {
+    "passed": true,
+    "source": "f6603c89a34e27813d7495fceab3292cc293c47b",
+    "versionBeforeAndAfterMatched": true,
+    "checkedAt": "2026-11-13T17:02:28.621Z",
+    "origin": "https://numeron.obelisk.build",
+    "rows": [
+      {
+        "kind": "scene",
+        "path": "/_next/static/chunks/r16-entry-scene-fallback.2de96a71b81f435a.js",
+        "passed": true,
+        "scriptBytes": 458590,
+        "scriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+        "jsonBytes": 458475,
+        "payloadSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "counts": {
+          "cells": 6819,
+          "sprites": 957
+        },
+        "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+        "attempts": [
+          {
+            "round": 1,
+            "status": 200,
+            "exit": 0,
+            "bytes": 458590
+          }
+        ]
+      },
+      {
+        "kind": "floor",
+        "path": "/_next/static/chunks/r16-entry-floor-fallback.c9903a19ce2f9700.js",
+        "passed": true,
+        "scriptBytes": 439514,
+        "scriptSha256": "77b660b7ed9a23ce3877ba30ca15f1c1469647a3c6aee72ccb3455804489e4cf",
+        "jsonBytes": 439896,
+        "payloadSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+        "counts": {
+          "pngs": 124
+        },
+        "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+        "attempts": [
+          {
+            "round": 1,
+            "status": 200,
+            "exit": 0,
+            "bytes": 439514
+          }
+        ]
+      },
+      {
+        "kind": "locale",
+        "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+        "passed": true,
+        "scriptBytes": 3336037,
+        "scriptSha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+        "jsonBytes": 3283113,
+        "payloadSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+        "counts": {
+          "entries": 5164,
+          "fullTenVectors": true
+        },
+        "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+        "attempts": [
+          {
+            "round": 1,
+            "status": 200,
+            "exit": 0,
+            "bytes": 3336037
+          }
+        ]
+      }
+    ],
+    "performedAfterSignedColdBrowser": true,
+    "scope": "Actual deployed names resolved statically from production webpack; full response bytes parsed as static AST/JSON, exact original payload bytes and SHA. No remote code execution; performed after the ordinary cold-browser replay."
+  },
+  "signed": {
+    "passed": true,
+    "realQrPixels": {
+      "valid": true,
+      "width": 240,
+      "height": 240,
+      "matched": 2401,
+      "total": 2401
+    },
+    "gameProtocol": {
+      "gameSockets": 1,
+      "passkeyLogin": 1,
+      "loginSuccess": 1,
+      "newCharacter": 1,
+      "newCharacterSuccess": 1,
+      "startGame": 1,
+      "startGameResult": 4,
+      "walk": 1,
+      "logOut": 1,
+      "logOutSuccess": 1,
+      "unexpectedMutation": 0
+    },
+    "walletNetworkGuard": {
+      "schema": 1,
+      "requestInterception": false,
+      "operations": {
+        "http-read": 158,
+        "testnet-grpc-read": 2,
+        "testnet-graphql-query": 2,
+        "exact-login-session-read": 1,
+        "signed-login-approval": 1
+      },
+      "forbiddenCount": 0,
+      "forbidden": [],
+      "browserClosed": true
+    }
+  },
+  "desktop": {
+    "passed": true,
+    "checks": {
+      "exactRevision": true,
+      "publicEdgeAndTlsVerified": true,
+      "normalLoginVisible": true,
+      "quietLoginResources": true,
+      "realQrImage": true,
+      "emptyQaRoster": true,
+      "createOnApprovedSocket": true,
+      "oneDedicatedQaRoleCreated": true,
+      "startMatchesCreatedRole": true,
+      "visibleReadyGameStage": true,
+      "exactVersionedStarterRegion": true,
+      "renderedStarterCity": true,
+      "expectedRuntimeDelivered": true,
+      "returnedToSelect": true
+    },
+    "sharedHud": {
+      "optional": true,
+      "passed": true,
+      "status": "observed",
+      "gateReady": true,
+      "runtimeDelivered": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-shared-zh-TW.png"
+      }
+    },
+    "quest": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-react-fallback",
+      "questId": 2110001,
+      "stage": "available",
+      "objective": "向助理簡報告",
+      "counter": "0/1",
+      "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+      "journey": "當前主線 0/26",
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "prewarm": [
+      {
+        "name": "hud-core",
+        "status": "done",
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      }
+    ],
+    "fonts": {
+      "passed": true,
+      "expected": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "cacheReadsOnly": true,
+      "rows": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "present": true,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "present": true,
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "present": true,
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "present": true,
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ]
+    },
+    "workerRestart": {
+      "passed": true,
+      "pin": {
+        "path": "/original-ui/Prguse/1.png",
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "beforeStatus": {
+        "version": "20261108-r16-08ec86d5105c-e8970ebeea64",
+        "fontMirrorFirst": false,
+        "staticAssetTiers": {
+          "critical": 19,
+          "background": 161,
+          "runtime": 0
+        },
+        "cacheCount": 5,
+        "entryCount": 358
+      },
+      "beforeCache": {
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "versions": [
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "running"
+        },
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "stopping"
+        },
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "stopped"
+        },
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "starting"
+        },
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "starting"
+        },
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "starting"
+        },
+        {
+          "versionId": "0",
+          "status": "activated",
+          "runningStatus": "running"
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "fromServiceWorker": true
+        }
+      ],
+      "after": {
+        "status": 200,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "afterStatus": {
+        "version": "20261108-r16-08ec86d5105c-e8970ebeea64",
+        "fontMirrorFirst": false,
+        "staticAssetTiers": {
+          "critical": 19,
+          "background": 161,
+          "runtime": 0
+        },
+        "cacheCount": 5,
+        "entryCount": 358
+      },
+      "afterCache": {
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+      },
+      "nativeReady": true,
+      "noConfigurationMessageSentByTest": true
+    },
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    }
+  },
+  "timing": {
+    "clockEpochMs": 1794588974980,
+    "authoritativeLoginSuccessMs": 17025,
+    "startIntentMs": 47690,
+    "startAckMs": 75146,
+    "authoritativeStarterMapMs": 75155,
+    "authoritativeSelfMs": 75156,
+    "firstPlayableObservedMs": 78378,
+    "terrainPaintVerifiedMs": 146721,
+    "sharedHudObservedMs": 282677,
+    "logoutIntentMs": 286997,
+    "logoutAckMs": 288040,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 17029,
+    "starterRegionWireHeadersMs": 17973.501,
+    "starterRegionResponseEventMs": 17974,
+    "starterRegionBodyMs": 18145,
+    "starterRegionCommitMs": 75301,
+    "sceneSpritesReadyMs": 75349,
+    "localeRequestMs": 17029,
+    "localeBodyMs": 20073,
+    "localeReadyMs": 20105,
+    "firstPlayableFrameMs": 78357,
+    "rendererBodyMs": 185910,
+    "startIntentToFirstFrameMs": 30667,
+    "firstWalkTransport": {
+      "websocketFrameMs": 127,
+      "keepAlives": [
+        {
+          "sentRelativeToWalkMs": -47652,
+          "rttMs": 127
+        },
+        {
+          "sentRelativeToWalkMs": -32655,
+          "rttMs": 128
+        },
+        {
+          "sentRelativeToWalkMs": -17653,
+          "rttMs": 15378
+        },
+        {
+          "sentRelativeToWalkMs": -2640,
+          "rttMs": 624
+        },
+        {
+          "sentRelativeToWalkMs": 12346,
+          "rttMs": 128
+        },
+        {
+          "sentRelativeToWalkMs": 27348,
+          "rttMs": 127
+        },
+        {
+          "sentRelativeToWalkMs": 42345,
+          "rttMs": 126
+        },
+        {
+          "sentRelativeToWalkMs": 57347,
+          "rttMs": 130
+        },
+        {
+          "sentRelativeToWalkMs": 72348,
+          "rttMs": 127
+        },
+        {
+          "sentRelativeToWalkMs": 87346,
+          "rttMs": 128
+        },
+        {
+          "sentRelativeToWalkMs": 102346,
+          "rttMs": 132
+        },
+        {
+          "sentRelativeToWalkMs": 117348,
+          "rttMs": 134
+        },
+        {
+          "sentRelativeToWalkMs": 132348,
+          "rttMs": 134
+        },
+        {
+          "sentRelativeToWalkMs": 147349,
+          "rttMs": 135
+        },
+        {
+          "sentRelativeToWalkMs": 162350,
+          "rttMs": 133
+        },
+        {
+          "sentRelativeToWalkMs": 177347,
+          "rttMs": 135
+        },
+        {
+          "sentRelativeToWalkMs": 192350,
+          "rttMs": 135
+        },
+        {
+          "sentRelativeToWalkMs": 207359,
+          "rttMs": 138
+        }
+      ],
+      "gatewayHealthBefore": {
+        "status": null,
+        "startedAt": 47672,
+        "finishedAt": 51680
+      },
+      "gatewayHealthAfter": {
+        "status": 200,
+        "startedAt": 78739,
+        "finishedAt": 78815,
+        "revision": "82efff2c8c0eef72a950501d84acad3c6c3de958",
+        "complete": true,
+        "sinceInitializationMs": 62155418,
+        "successes": 1151,
+        "failures": 0,
+        "count": 1151,
+        "sumUs": 3095258
+      },
+      "admissionCounterDelta": null
+    },
+    "runtimeBodyAfterFirstFrameMs": 107553,
+    "sharedHudObservedAfterFirstFrameMs": 204320,
+    "nativeColdBudgetMs": 120000,
+    "nativeColdQualified": false,
+    "meaning": "Original120s cold qualification evaluated separately from functional flow success. SharedHUD is a sampled observation upper bound on same clock, not an exact boot event. No deadline or browser condition changed."
+  },
+  "runtimeDeliveries": [
+    {
+      "scope": "expectedBevyRuntime",
+      "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestOrdinal": 4,
+      "requestedMs": 78461,
+      "decodedBytes": 0,
+      "encodedBytes": 0,
+      "failure": "net::ERR_ABORTED",
+      "failureMs": 86462
+    },
+    {
+      "scope": "expectedBevyRuntime",
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestOrdinal": 5,
+      "requestedMs": 86461,
+      "decodedBytes": 31452436,
+      "encodedBytes": 6441574,
+      "status": 200,
+      "ttfbMs": 84988,
+      "headersMs": 171449,
+      "responseEventMs": 171449,
+      "responseTiming": {
+        "scope": "browser-network-response",
+        "connectionReused": true,
+        "requestTimeFromRequestEventMs": 0.499,
+        "offsetsMs": {
+          "proxyStart": null,
+          "proxyEnd": null,
+          "dnsStart": null,
+          "dnsEnd": null,
+          "connectStart": null,
+          "connectEnd": null,
+          "sslStart": null,
+          "sslEnd": null,
+          "workerStart": null,
+          "workerReady": null,
+          "workerFetchStart": null,
+          "workerRespondWithSettled": null,
+          "sendStart": 0.086,
+          "sendEnd": 0.141,
+          "receiveHeadersStart": 84986.818,
+          "receiveHeadersEnd": 84986.897
+        },
+        "firstHeadersAfterRequestMs": 84987.317,
+        "completeHeadersAfterRequestMs": 84987.396,
+        "beforeSendAfterRequestMs": 0.585,
+        "sendToHeadersMs": 84986.677,
+        "firstHeadersMs": 171448.317,
+        "completeHeadersMs": 171448.396
+      },
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "gzip",
+      "edgeCache": "HIT",
+      "firstDataMs": 178376,
+      "lastDataMs": 185911,
+      "transferMs": 99449,
+      "bodyCompleteMs": 185910,
+      "totalEncodedBytes": 6441695
+    }
+  ],
+  "scope": "Second fresh standard public Chrome cohort after rollback and independent complete walkingJSON readiness; this is not an unprimed edge-cache benchmark. official phone-sized Testnet wallet, login-only confirmation, at most one ordinaryQArole; no hardwarecamera acceptance or network/TLS/DNS/interception overrides. Local controlled transfers are separate."
+}

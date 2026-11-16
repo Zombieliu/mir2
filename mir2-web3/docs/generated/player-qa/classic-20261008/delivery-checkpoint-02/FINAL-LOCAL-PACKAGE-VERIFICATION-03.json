@@ -1,0 +1,179 @@
+{
+  "schema": "mir2.windows.final-local-package-evidence.v1",
+  "utc": "2026-10-08T04:48:55.8097400Z",
+  "candidate": "WN-CANDIDATE-20261008-invited-22",
+  "packageRoot": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22",
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "sourceClean": true,
+  "originalAuthenticatedMetadataReused": true,
+  "newGitHubReadClaimed": false,
+  "runtime": {
+    "version": "7.6.5",
+    "exe": {
+      "path": "C:\\Users\\Administrator\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+      "bytes": 301368,
+      "sha256": "362A356CE7F0940EC74F73A8FC2C990A2CC24A38A11C90BBD8ECA947110AD139"
+    }
+  },
+  "recipeSource": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\recipes-01\\RECIPE-SOURCE.json",
+    "bytes": 11367,
+    "sha256": "296CAD75FC8473659D121B7A62754FCC2E33310307520A4AA521D3E5F0C840A5"
+  },
+  "originalValidationFunctionsUnchanged": 13,
+  "originalArtifact": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\ci-input-01\\artifact-11523774584.zip",
+    "bytes": 263037676,
+    "sha256": "E619172FDC25E8448611203E3D170516719D49D0676D3AD6044D3F40592A8D43"
+  },
+  "manifest": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\PACKAGE-MANIFEST.json",
+    "bytes": 31538315,
+    "sha256": "00967A994D9586C574CA89D5EA4046B25F0A79C346D63FE76F261C0C23735916"
+  },
+  "manifestFileCount": 154579,
+  "manifestAggregateSha256": "C8BCDD771B753264507EACF392B465635C3A56E336D1964824062DF60AD76F84",
+  "payloadBytes": 986493911,
+  "metadataSerialization": {
+    "previousPowerShell51ManifestBytes": 43750295,
+    "newPowerShell765ManifestBytes": 31538315,
+    "unchangedUpdaterLimitBytes": 33554432,
+    "newManifestWithinLimit": true,
+    "oldSignedManifestNotRewritten": true
+  },
+  "payloadSubjectChecks": [
+    {
+      "relativePath": "mir2-platform-windows.exe",
+      "bytes": 111275520,
+      "sha256": "8EBB7E8E32FBF2A577B90E2341767CC34B467A021E23406003D55597B077BC22",
+      "manifestCovered": true
+    },
+    {
+      "relativePath": "BUILD-ATTESTATION.json",
+      "bytes": 2416,
+      "sha256": "4900E283FCAE1112CEC678CAC98E0ACCA0BDC348229966ACE28F69717F6FBF64",
+      "manifestCovered": true
+    },
+    {
+      "relativePath": "mir2-assets/original-ui/Prguse/1002.png",
+      "bytes": 15671,
+      "sha256": "72F73B42BC7B95A91144FE0F135EDE2AD343FBFED488C75095F98ED427CAF497",
+      "manifestCovered": true
+    },
+    {
+      "relativePath": "mir2-assets/original-ui/Title/18.png",
+      "bytes": 697,
+      "sha256": "3B8A6097B20B32FC1BB8D371EFDEFFFE564AF7BF1C75BC098BFD10BE097C02AD",
+      "manifestCovered": true
+    },
+    {
+      "relativePath": "mir2-assets/generated/native-map-keyed/resource-input-provenance.json",
+      "bytes": 18104,
+      "sha256": "719BD17FF82CFC42EBD7B870ECB1334DB1C9B916A4F11DDC1888B2977B0F38FF",
+      "manifestCovered": true
+    }
+  ],
+  "privateOriginalReceipt": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\recipes-01\\history-attempt-02\\RESOURCE-INPUT-PROVENANCE.json",
+    "bytes": 17804,
+    "sha256": "A8406D213E4E31B9720DAC73BC99169E0D9818AB7A9C43F4F1DA6912DF2FE4E1"
+  },
+  "publicReceiptManifestCovered": true,
+  "originalPrivacyExpressionPassed": true,
+  "version": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\VERSION.json",
+    "bytes": 1221,
+    "sha256": "33DE36E552668C358ADC1EE5F7FEA2ED8BD9D79AA387F4F231C5AA4EE7BA2935"
+  },
+  "releaseStatement": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\RELEASE-STATEMENT.json",
+    "bytes": 707,
+    "sha256": "EC87DBED90B51D11705BCE7002363C5B32BE5792B70D21DCA1FB069FC609B5E5"
+  },
+  "detachedSignature": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\RELEASE-STATEMENT.p7s",
+    "bytes": 1614,
+    "sha256": "EF2D6A84C22A683C5215F0BEE815F60959ED3C273A7FED7B6682A095CF3913A6"
+  },
+  "cmsSha256Valid": true,
+  "cmsSignerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+  "originalVerification": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\evidence-03\\WN-CANDIDATE-20261008-invited-22-verification.json",
+    "bytes": 1836,
+    "sha256": "C490C0D13000B8629C24A419485211F3587017B1AA838A1B5BE3FA532D73D6A4"
+  },
+  "originalPackageSummary": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\evidence-03\\WN-CANDIDATE-20261008-invited-22-package-summary.json",
+    "bytes": 815,
+    "sha256": "0F6DFE1D797251CF60A58DA33ABD2508DCD03A47B3AE15E14B5191EBD704DCBC"
+  },
+  "nonvisualPassed": true,
+  "additionalExactFrozenSourceVerification": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\evidence-03\\FROZEN-SOURCE-ATTESTATION-03.json",
+    "bytes": 2463,
+    "sha256": "0B75452A002A4A74C39AB49F0969822091FB6F501F222032AAA496F5C5D2966B"
+  },
+  "originalVerifierSourceRepoCheck": "unavailable",
+  "originalVerifierExternalScopePreserved": true,
+  "sourceRepoCheck": "checked-by-additive-original-functions",
+  "failedAttemptsRetained": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\logs-01\\20-verified-ci-pickup-package.log",
+      "bytes": 4149,
+      "sha256": "270DCBC3AC449E202FB68EC53D1417C781900E2BCD434310F2D3B13DECE80EE7"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\logs-01\\22-verified-ci-pickup-package-atlas-02.log",
+      "bytes": 82,
+      "sha256": "7B656AFF0BE43AC37B5095CE5777AABE9A9AB45C783335FFC1AC4916A3BE3817"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\logs-01\\23-verified-ci-pickup-package-atlas-02.log",
+      "bytes": 82,
+      "sha256": "7B656AFF0BE43AC37B5095CE5777AABE9A9AB45C783335FFC1AC4916A3BE3817"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\logs-01\\24-verified-ci-pickup-package-atlas-02-http1.log",
+      "bytes": 104,
+      "sha256": "8F32BAD31C355A30425E70AF0A23C9CF48B0A4A860EB9811307CA98DAF876EC7"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\logs-01\\26-local-verified-subject-package-atlas-02.log",
+      "bytes": 45449,
+      "sha256": "064CB88A1D3F2FE8C0CDFF964E03F4178D54149A32BBE9109C34A987432FC7BA"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\logs-01\\29-public-provenance-projection-03.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    }
+  ],
+  "failedSignedAttempt02MetadataPreserved": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-02\\.WN-CANDIDATE-20261008-invited-22.staging-a35238b3563e41bdaa123023439fb83c\\PACKAGE-MANIFEST.json",
+      "bytes": 43750295,
+      "sha256": "AB348E4ED2D79C8429AF09CB33D134CBFAFEF00F753C249E4C4436B50925A4A7"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-02\\.WN-CANDIDATE-20261008-invited-22.staging-a35238b3563e41bdaa123023439fb83c\\VERSION.json",
+      "bytes": 1287,
+      "sha256": "A70D5031FC006AC4F952C53FB0279995036F04A7B52B8BD0C1FDD00C540431D0"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-02\\.WN-CANDIDATE-20261008-invited-22.staging-a35238b3563e41bdaa123023439fb83c\\RELEASE-STATEMENT.p7s",
+      "bytes": 1620,
+      "sha256": "3355ADA022C9836147E46E04E172596C1DD1F93317AA676CCADEA24F409249C5"
+    }
+  ],
+  "auditScript": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\recipes-01\\record-final-local-package-03.ps1",
+    "bytes": 12183,
+    "sha256": "FF99AB7472CEFEF3B712DE5F57E62FBE2207996AC1E192D98E2D65F04245E807"
+  },
+  "sessionId": 95032,
+  "publicRelease": false,
+  "authenticodeClaimed": false,
+  "clientLaunched": false,
+  "frontendAccepted": false,
+  "allPassed": true
+}

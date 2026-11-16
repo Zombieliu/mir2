@@ -1,0 +1,1090 @@
+TAP version 13
+# Subtest: Source30 durable receiver and retained facade pass strict no-emit type checking
+ok 1 - Source30 durable receiver and retained facade pass strict no-emit type checking
+  ---
+  duration_ms: 532.5991
+  type: 'test'
+  ...
+# Subtest: preview diagnostics identify existing admission gates and repeated reads have no Core or planner effects
+ok 2 - preview diagnostics identify existing admission gates and repeated reads have no Core or planner effects
+  ---
+  duration_ms: 8.6881
+  type: 'test'
+  ...
+# Subtest: preview diagnostics classify actual live and post-quote failures while preserving original short circuit calls
+ok 3 - preview diagnostics classify actual live and post-quote failures while preserving original short circuit calls
+  ---
+  duration_ms: 6.0653
+  type: 'test'
+  ...
+# Subtest: preview diagnostics clear on original success and denial quotes but never release retained economic flights
+ok 4 - preview diagnostics clear on original success and denial quotes but never release retained economic flights
+  ---
+  duration_ms: 7.9954
+  type: 'test'
+  ...
+# Subtest: preview diagnostics preserve inactive and synchronous busy rejection without changing the outer successful quote
+ok 5 - preview diagnostics preserve inactive and synchronous busy rejection without changing the outer successful quote
+  ---
+  duration_ms: 1.2043
+  type: 'test'
+  ...
+# Subtest: quote calls the actual runtime hook with exact full request and preserves Rust values
+ok 6 - quote calls the actual runtime hook with exact full request and preserves Rust values
+  ---
+  duration_ms: 0.5947
+  type: 'test'
+  ...
+# Subtest: blocked Rust quotes retain computed amounts and never create a sending proof
+ok 7 - blocked Rust quotes retain computed amounts and never create a sending proof
+  ---
+  duration_ms: 2.8236
+  type: 'test'
+  ...
+# Subtest: response and wire shapes fail closed without rounding or transport extension
+ok 8 - response and wire shapes fail closed without rounding or transport extension
+  ---
+  duration_ms: 13.5223
+  type: 'test'
+  ...
+# Subtest: caller capture must match the live snapshot before the first Rust call
+ok 9 - caller capture must match the live snapshot before the first Rust call
+  ---
+  duration_ms: 1.0595
+  type: 'test'
+  ...
+# Subtest: returned DTO and opaque token reject mutation, forgery and a foreign dispatcher
+ok 10 - returned DTO and opaque token reject mutation, forgery and a foreign dispatcher
+  ---
+  duration_ms: 3.5617
+  type: 'test'
+  ...
+# Subtest: final listener changes to every bound owner, model, raw item, wallet or layout reject the send
+ok 11 - final listener changes to every bound owner, model, raw item, wallet or layout reject the send
+  ---
+  duration_ms: 23.3371
+  type: 'test'
+  ...
+# Subtest: altered or extended mutable wire is rejected and consumes its token
+ok 12 - altered or extended mutable wire is rejected and consumes its token
+  ---
+  duration_ms: 8.1764
+  type: 'test'
+  ...
+# Subtest: runtime refusal, throw, replacement and unavailable source fail at the final claim
+ok 13 - runtime refusal, throw, replacement and unavailable source fail at the final claim
+  ---
+  duration_ms: 7.403
+  type: 'test'
+  ...
+# Subtest: runtime mutation during preparation or final revalidation cannot authorize a stale command
+ok 14 - runtime mutation during preparation or final revalidation cannot authorize a stale command
+  ---
+  duration_ms: 2.82
+  type: 'test'
+  ...
+# Subtest: read and Rust synchronous reentry cannot claim or prepare a second command
+ok 15 - read and Rust synchronous reentry cannot claim or prepare a second command
+  ---
+  duration_ms: 3.6233
+  type: 'test'
+  ...
+# Subtest: a recursive final listener cannot reserve a second proof before the first Core flight enters
+ok 16 - a recursive final listener cannot reserve a second proof before the first Core flight enters
+  ---
+  duration_ms: 3.9365
+  type: 'test'
+  ...
+# Subtest: spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal
+ok 17 - spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal
+  ---
+  duration_ms: 5.645
+  type: 'test'
+  ...
+# Subtest: same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA
+ok 18 - same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA
+  ---
+  duration_ms: 103.4433
+  type: 'test'
+  ...
+# Subtest: an unclaimed old proof cannot revive after an observed model ABA
+ok 19 - an unclaimed old proof cannot revive after an observed model ABA
+  ---
+  duration_ms: 5.4729
+  type: 'test'
+  ...
+# Subtest: socket throw after claim retains the Core pending barrier without replaying a command
+ok 20 - socket throw after claim retains the Core pending barrier without replaying a command
+  ---
+  duration_ms: 5.1247
+  type: 'test'
+  ...
+# Subtest: non-JSON transport values are refused rather than silently coerced or invoking user callbacks
+ok 21 - non-JSON transport values are refused rather than silently coerced or invoking user callbacks
+  ---
+  duration_ms: 1.0988
+  type: 'test'
+  ...
+# Subtest: missing raw purchase rate stays null and delegates invalidRate to Rust
+ok 22 - missing raw purchase rate stays null and delegates invalidRate to Rust
+  ---
+  duration_ms: 1.0437
+  type: 'test'
+  ...
+# Subtest: actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust
+ok 23 - actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust
+  ---
+  duration_ms: 48.8749
+  type: 'test'
+  ...
+# Subtest: actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener
+ok 24 - actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener
+  ---
+  duration_ms: 10.6606
+  type: 'test'
+  ...
+# Subtest: actual Page final listener catalogue replacement rejects even a same-template selected UID
+ok 25 - actual Page final listener catalogue replacement rejects even a same-template selected UID
+  ---
+  duration_ms: 13.6882
+  type: 'test'
+  ...
+# Subtest: actual Page NPC service retirement during action withdraws current source before final claim
+ok 26 - actual Page NPC service retirement during action withdraws current source before final claim
+  ---
+  duration_ms: 4.0958
+  type: 'test'
+  ...
+# Subtest: actual Page synchronous action reentry is refused by the existing reserved Core flight
+ok 27 - actual Page synchronous action reentry is refused by the existing reserved Core flight
+  ---
+  duration_ms: 6.0048
+  type: 'test'
+  ...
+# Subtest: actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade
+ok 28 - actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade
+  ---
+  duration_ms: 4.539
+  type: 'test'
+  ...
+# Subtest: actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound
+ok 29 - actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound
+  ---
+  duration_ms: 0.9591
+  type: 'test'
+  ...
+# Subtest: actual Page unmarked legacy final listener cannot send through changed catalogue service or owner
+ok 30 - actual Page unmarked legacy final listener cannot send through changed catalogue service or owner
+  ---
+  duration_ms: 2.6821
+  type: 'test'
+  ...
+# Subtest: actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket
+ok 31 - actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket
+  ---
+  duration_ms: 0.7779
+  type: 'test'
+  ...
+# Subtest: actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence
+ok 32 - actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence
+  ---
+  duration_ms: 28.516
+  type: 'test'
+  ...
+# Subtest: actual Core facade forwards all nine exact operations and retains u64 decimal precision
+ok 33 - actual Core facade forwards all nine exact operations and retains u64 decimal precision
+  ---
+  duration_ms: 0.4047
+  type: 'test'
+  ...
+# Subtest: actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry
+ok 34 - actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry
+  ---
+  duration_ms: 15.766
+  type: 'test'
+  ...
+# Subtest: actual Core result validator rejects noncanonical malformed contradictory or imprecise responses
+ok 35 - actual Core result validator rejects noncanonical malformed contradictory or imprecise responses
+  ---
+  duration_ms: 0.5838
+  type: 'test'
+  ...
+# Subtest: persistent document version facade survives module reevaluation without a second Core bridge
+ok 36 - persistent document version facade survives module reevaluation without a second Core bridge
+  ---
+  duration_ms: 0.5612
+  type: 'test'
+  ...
+# Subtest: missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable
+ok 37 - missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable
+  ---
+  duration_ms: 2.416
+  type: 'test'
+  ...
+# Subtest: producer handoff prevents stale cleanup commands while forwarding only exact old receipts
+ok 38 - producer handoff prevents stale cleanup commands while forwarding only exact old receipts
+  ---
+  duration_ms: 0.2511
+  type: 'test'
+  ...
+# Subtest: actual facade transport identities bind current open object and retain decimal socket tickets
+ok 39 - actual facade transport identities bind current open object and retain decimal socket tickets
+  ---
+  duration_ms: 1.1785
+  type: 'test'
+  ...
+# Subtest: dispatcher requires exact body and exact socket at entry and never exposes a token on the wire
+ok 40 - dispatcher requires exact body and exact socket at entry and never exposes a token on the wire
+  ---
+  duration_ms: 4.3607
+  type: 'test'
+  ...
+# Subtest: failed bind retires only the exact unpublished token and a later manual attempt gets a new token
+ok 41 - failed bind retires only the exact unpublished token and a later manual attempt gets a new token
+  ---
+  duration_ms: 2.8851
+  type: 'test'
+  ...
+# Subtest: ownerRevision invalidates a gesture proof but cannot change the entered Core authority
+ok 42 - ownerRevision invalidates a gesture proof but cannot change the entered Core authority
+  ---
+  duration_ms: 6.8892
+  type: 'test'
+  ...
+# Subtest: player object identity is required and authority changes bind the actual selected player
+ok 43 - player object identity is required and authority changes bind the actual selected player
+  ---
+  duration_ms: 3.2178
+  type: 'test'
+  ...
+# Subtest: two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer
+ok 44 - two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer
+  ---
+  duration_ms: 8.0816
+  type: 'test'
+  ...
+# Subtest: actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token
+ok 45 - actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token
+  ---
+  duration_ms: 6.2563
+  type: 'test'
+  ...
+# Subtest: actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup
+ok 46 - actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup
+  ---
+  duration_ms: 10.5196
+  type: 'test'
+  ...
+# Subtest: actual Page enter is directly before socket send and all terminal receipts keep exact token ticket
+ok 47 - actual Page enter is directly before socket send and all terminal receipts keep exact token ticket
+  ---
+  duration_ms: 5.2227
+  type: 'test'
+  ...
+# Subtest: actual Page malformed receipt result poisons the slot without replaying an already sent purchase
+ok 48 - actual Page malformed receipt result poisons the slot without replaying an already sent purchase
+  ---
+  duration_ms: 3.9696
+  type: 'test'
+  ...
+# Subtest: actual NPCResponse clause synchronously retires old preentry proof before any later rendered service
+ok 49 - actual NPCResponse clause synchronously retires old preentry proof before any later rendered service
+  ---
+  duration_ms: 6.8068
+  type: 'test'
+  ...
+# Subtest: actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings
+ok 50 - actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings
+  ---
+  duration_ms: 7.8567
+  type: 'test'
+  ...
+# Subtest: temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof
+ok 51 - temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof
+  ---
+  duration_ms: 11.0855
+  type: 'test'
+  ...
+# Subtest: shared UI status reads only an already attached producer and cannot discover or observe a Core
+ok 52 - shared UI status reads only an already attached producer and cannot discover or observe a Core
+  ---
+  duration_ms: 0.7427
+  type: 'test'
+  ...
+# Subtest: shared UI status preserves canonical full-u64 data and does not manufacture receipt history
+ok 53 - shared UI status preserves canonical full-u64 data and does not manufacture receipt history
+  ---
+  duration_ms: 0.589
+  type: 'test'
+  ...
+# Subtest: shared UI exact revision withdrawal rejects malformed and stale strings before availability
+ok 54 - shared UI exact revision withdrawal rejects malformed and stale strings before availability
+  ---
+  duration_ms: 0.7078
+  type: 'test'
+  ...
+# Subtest: shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK
+ok 55 - shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK
+  ---
+  duration_ms: 10.0645
+  type: 'test'
+  ...
+# Subtest: shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease
+ok 56 - shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease
+  ---
+  duration_ms: 2.0576
+  type: 'test'
+  ...
+# Subtest: shared UI availability refusal throw and mismatched post-status cannot certify withdrawal
+ok 57 - shared UI availability refusal throw and mismatched post-status cannot certify withdrawal
+  ---
+  duration_ms: 2.5122
+  type: 'test'
+  ...
+# Subtest: final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter
+ok 58 - final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter
+  ---
+  duration_ms: 3.9346
+  type: 'test'
+  ...
+# Subtest: last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof
+ok 59 - last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof
+  ---
+  duration_ms: 2.8744
+  type: 'test'
+  ...
+# Subtest: capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged
+ok 60 - capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged
+  ---
+  duration_ms: 1.6285
+  type: 'test'
+  ...
+# Subtest: evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response
+ok 61 - evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response
+  ---
+  duration_ms: 5.9885
+  type: 'test'
+  ...
+# Subtest: inventory readiness retires stale projection stages and owner replacements synchronously
+ok 62 - inventory readiness retires stale projection stages and owner replacements synchronously
+  ---
+  duration_ms: 0.1444
+  type: 'test'
+  ...
+# Subtest: canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority
+ok 63 - canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority
+  ---
+  duration_ms: 5.1008
+  type: 'test'
+  ...
+# Subtest: old unsafe expiry uses actual source while no-source null is retained through the NPC transport
+ok 64 - old unsafe expiry uses actual source while no-source null is retained through the NPC transport
+  ---
+  duration_ms: 15.5501
+  type: 'test'
+  ...
+# Subtest: expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority
+ok 65 - expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority
+  ---
+  duration_ms: 3.2267
+  type: 'test'
+  ...
+# Subtest: trusted socket connection is observed before complete authority availability and reserve
+ok 66 - trusted socket connection is observed before complete authority availability and reserve
+  ---
+  duration_ms: 1.2881
+  type: 'test'
+  ...
+# Subtest: public connection forgery and malformed trusted epoch fields never reach the Core bridge
+ok 67 - public connection forgery and malformed trusted epoch fields never reach the Core bridge
+  ---
+  duration_ms: 0.2758
+  type: 'test'
+  ...
+# Subtest: only entered flushed and unknown results may retain a canonical old authority revision
+ok 68 - only entered flushed and unknown results may retain a canonical old authority revision
+  ---
+  duration_ms: 0.2518
+  type: 'test'
+  ...
+# Subtest: connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve
+ok 69 - connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve
+  ---
+  duration_ms: 0.6008
+  type: 'test'
+  ...
+# Subtest: preparation read and planner socket changes cannot publish a stale or replacement-socket proof
+ok 70 - preparation read and planner socket changes cannot publish a stale or replacement-socket proof
+  ---
+  duration_ms: 3.243
+  type: 'test'
+  ...
+# Subtest: postproof planner Core allows and final callback socket changes produce zero entry
+ok 71 - postproof planner Core allows and final callback socket changes produce zero entry
+  ---
+  duration_ms: 5.2625
+  type: 'test'
+  ...
+# Subtest: same socket close reopen HMR and dual producers retain every unresolved phase
+ok 72 - same socket close reopen HMR and dual producers retain every unresolved phase
+  ---
+  duration_ms: 20.3238
+  type: 'test'
+  ...
+# Subtest: new actual socket requires fresh complete observation and a new explicit manual token
+ok 73 - new actual socket requires fresh complete observation and a new explicit manual token
+  ---
+  duration_ms: 4.036
+  type: 'test'
+  ...
+# Subtest: returning to a known older socket refuses without any Core operation on the new flight
+ok 74 - returning to a known older socket refuses without any Core operation on the new flight
+  ---
+  duration_ms: 2.0848
+  type: 'test'
+  ...
+# Subtest: connection and Core model callbacks cannot admit an old full model on the current socket
+ok 75 - connection and Core model callbacks cannot admit an old full model on the current socket
+  ---
+  duration_ms: 1.6382
+  type: 'test'
+  ...
+# Subtest: final beforeEntry sees same-socket last-read source changes before any Core entry
+ok 76 - final beforeEntry sees same-socket last-read source changes before any Core entry
+  ---
+  duration_ms: 5.3936
+  type: 'test'
+  ...
+# Subtest: same-content old72 holder is poisoned and rejected without returning its pre-connection facade
+ok 77 - same-content old72 holder is poisoned and rejected without returning its pre-connection facade
+  ---
+  duration_ms: 0.9606
+  type: 'test'
+  ...
+# Subtest: matching connection facade contract reuses the immutable holder and socket epoch across HMR
+ok 78 - matching connection facade contract reuses the immutable holder and socket epoch across HMR
+  ---
+  duration_ms: 0.2446
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price
+ok 79 - Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price
+  ---
+  duration_ms: 13.9026
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page final claim enters the existing Core immediately before exact four-key send
+ok 80 - Pearl actual Page final claim enters the existing Core immediately before exact four-key send
+  ---
+  duration_ms: 24.0922
+  type: 'test'
+  ...
+# Subtest: Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods
+ok 81 - Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods
+  ---
+  duration_ms: 23.8202
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID
+ok 82 - Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID
+  ---
+  duration_ms: 80.766
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page missing or invalid wallet never admits a free host quote
+ok 83 - Pearl actual Page missing or invalid wallet never admits a free host quote
+  ---
+  duration_ms: 32.7625
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page wallet catalog and service ABA invalidate exact captured source
+ok 84 - Pearl actual Page wallet catalog and service ABA invalidate exact captured source
+  ---
+  duration_ms: 71.5252
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration
+ok 85 - Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration
+  ---
+  duration_ms: 149.5796
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade
+ok 86 - Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade
+  ---
+  duration_ms: 74.5103
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page action and final Core entry reentrancy cannot publish a second flight
+ok 87 - Pearl actual Page action and final Core entry reentrancy cannot publish a second flight
+  ---
+  duration_ms: 51.5732
+  type: 'test'
+  ...
+# Subtest: Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement
+ok 88 - Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement
+  ---
+  duration_ms: 138.0054
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page own parcel hero and storage reservations reject before Core entry
+ok 89 - Pearl actual Page own parcel hero and storage reservations reject before Core entry
+  ---
+  duration_ms: 63.5862
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page retires catalog while retaining personal wallet on service close
+ok 90 - Pearl actual Page retires catalog while retaining personal wallet on service close
+  ---
+  duration_ms: 1.2529
+  type: 'test'
+  ...
+# Subtest: Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount
+ok 91 - Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount
+  ---
+  duration_ms: 7.718
+  type: 'test'
+  ...
+# Subtest: Pearl full snapshot wallet observation remains inside completed owner inventory projection
+ok 92 - Pearl full snapshot wallet observation remains inside completed owner inventory projection
+  ---
+  duration_ms: 17.4206
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry
+ok 93 - Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry
+  ---
+  duration_ms: 335.9464
+  type: 'test'
+  ...
+# Subtest: Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0
+ok 94 - Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0
+  ---
+  duration_ms: 5.5461
+  type: 'test'
+  ...
+# Subtest: Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows
+ok 95 - Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows
+  ---
+  duration_ms: 11.4721
+  type: 'test'
+  ...
+# Subtest: Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row
+ok 96 - Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row
+  ---
+  duration_ms: 1.7213
+  type: 'test'
+  ...
+# Subtest: Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read
+ok 97 - Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read
+  ---
+  duration_ms: 186.3688
+  type: 'test'
+  ...
+# Subtest: Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof
+ok 98 - Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof
+  ---
+  duration_ms: 42.1196
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation
+ok 99 - Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation
+  ---
+  duration_ms: 111.7682
+  type: 'test'
+  ...
+# Subtest: receipt_facade_document_remount_retains_one_host_and_original_operation
+ok 100 - receipt_facade_document_remount_retains_one_host_and_original_operation
+  ---
+  duration_ms: 1.3811
+  type: 'test'
+  ...
+# Subtest: receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host
+ok 101 - receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host
+  ---
+  duration_ms: 0.2512
+  type: 'test'
+  ...
+# Subtest: receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket
+ok 102 - receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket
+  ---
+  duration_ms: 0.285
+  type: 'test'
+  ...
+# Subtest: receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket
+ok 103 - receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket
+  ---
+  duration_ms: 0.1667
+  type: 'test'
+  ...
+# Subtest: receipt_facade_operation_accessor_is_rejected_without_invocation
+ok 104 - receipt_facade_operation_accessor_is_rejected_without_invocation
+  ---
+  duration_ms: 0.1595
+  type: 'test'
+  ...
+# Subtest: receipt_facade_nested_nondata_and_lossy_values_never_enter_abi
+ok 105 - receipt_facade_nested_nondata_and_lossy_values_never_enter_abi
+  ---
+  duration_ms: 0.285
+  type: 'test'
+  ...
+# Subtest: receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition
+ok 106 - receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition
+  ---
+  duration_ms: 0.2019
+  type: 'test'
+  ...
+# Subtest: receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection
+ok 107 - receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection
+  ---
+  duration_ms: 0.2191
+  type: 'test'
+  ...
+# Subtest: receipt_facade_bound_bridge_method_survives_old_instance_method_replacement
+ok 108 - receipt_facade_bound_bridge_method_survives_old_instance_method_replacement
+  ---
+  duration_ms: 0.1139
+  type: 'test'
+  ...
+# Subtest: receipt_facade_invalid_output_poison_keeps_original_host_unavailable
+ok 109 - receipt_facade_invalid_output_poison_keeps_original_host_unavailable
+  ---
+  duration_ms: 0.1558
+  type: 'test'
+  ...
+# Subtest: receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer
+ok 110 - receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer
+  ---
+  duration_ms: 0.0802
+  type: 'test'
+  ...
+# Subtest: receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector
+ok 111 - receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector
+  ---
+  duration_ms: 0.1565
+  type: 'test'
+  ...
+# Subtest: Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings
+ok 112 - Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings
+  ---
+  duration_ms: 0.2003
+  type: 'test'
+  ...
+# Subtest: Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow
+ok 113 - Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow
+  ---
+  duration_ms: 0.2272
+  type: 'test'
+  ...
+# Subtest: Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields
+ok 114 - Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields
+  ---
+  duration_ms: 4.1626
+  type: 'test'
+  ...
+# Subtest: Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view
+ok 115 - Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view
+  ---
+  duration_ms: 1.2762
+  type: 'test'
+  ...
+# Subtest: Source30 paired Begin applies frozen full source before exact complete witness
+ok 116 - Source30 paired Begin applies frozen full source before exact complete witness
+  ---
+  duration_ms: 8.126
+  type: 'test'
+  ...
+# Subtest: Source30 partial application unsafe original integer and omitted bundle never issue complete witness
+ok 117 - Source30 partial application unsafe original integer and omitted bundle never issue complete witness
+  ---
+  duration_ms: 3.1472
+  type: 'test'
+  ...
+# Subtest: Source30 actual gold trade explicit gesture Quote Reserve Enter sends once
+ok 118 - Source30 actual gold trade explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.7989
+  type: 'test'
+  ...
+# Subtest: Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once
+ok 119 - Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.528
+  type: 'test'
+  ...
+# Subtest: Source30 actual gold used explicit gesture Quote Reserve Enter sends once
+ok 120 - Source30 actual gold used explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.5697
+  type: 'test'
+  ...
+# Subtest: Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once
+ok 121 - Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.5282
+  type: 'test'
+  ...
+# Subtest: Source30 quote rejects changed source currency request and stale physical owner before reserve
+ok 122 - Source30 quote rejects changed source currency request and stale physical owner before reserve
+  ---
+  duration_ms: 6.1858
+  type: 'test'
+  ...
+# Subtest: Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only
+ok 123 - Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only
+  ---
+  duration_ms: 2.4242
+  type: 'test'
+  ...
+# Subtest: Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry
+ok 124 - Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry
+  ---
+  duration_ms: 15.3417
+  type: 'test'
+  ...
+# Subtest: Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody
+ok 125 - Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody
+  ---
+  duration_ms: 8.4832
+  type: 'test'
+  ...
+# Subtest: Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody
+ok 126 - Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody
+  ---
+  duration_ms: 2.9364
+  type: 'test'
+  ...
+# Subtest: Source30 dispatcher malformed extra fields or accessor decisions cannot send
+ok 127 - Source30 dispatcher malformed extra fields or accessor decisions cannot send
+  ---
+  duration_ms: 0.2659
+  type: 'test'
+  ...
+# Subtest: Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays
+ok 128 - Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays
+  ---
+  duration_ms: 23.6345
+  type: 'test'
+  ...
+# Subtest: Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors
+ok 129 - Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors
+  ---
+  duration_ms: 2.521
+  type: 'test'
+  ...
+# Subtest: Source30 terminal frame applies its entire same revision economic source before complete witness
+ok 130 - Source30 terminal frame applies its entire same revision economic source before complete witness
+  ---
+  duration_ms: 2.5911
+  type: 'test'
+  ...
+# Subtest: Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase
+ok 131 - Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase
+  ---
+  duration_ms: 1.492
+  type: 'test'
+  ...
+# Subtest: Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance
+ok 132 - Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance
+  ---
+  duration_ms: 4.6759
+  type: 'test'
+  ...
+# Subtest: Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves
+ok 133 - Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves
+  ---
+  duration_ms: 0.4259
+  type: 'test'
+  ...
+# Subtest: Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes
+ok 134 - Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes
+  ---
+  duration_ms: 0.477
+  type: 'test'
+  ...
+# Subtest: Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict
+ok 135 - Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict
+  ---
+  duration_ms: 0.6924
+  type: 'test'
+  ...
+# Subtest: Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness
+ok 136 - Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness
+  ---
+  duration_ms: 16.6158
+  type: 'test'
+  ...
+# Subtest: Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry
+ok 137 - Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry
+  ---
+  duration_ms: 9.7895
+  type: 'test'
+  ...
+# Subtest: Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority
+ok 138 - Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority
+  ---
+  duration_ms: 1.4548
+  type: 'test'
+  ...
+# Subtest: Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments
+ok 139 - Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments
+  ---
+  duration_ms: 1.008
+  type: 'test'
+  ...
+# Subtest: Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values
+ok 140 - Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values
+  ---
+  duration_ms: 1.783
+  type: 'test'
+  ...
+# Subtest: Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model
+ok 141 - Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model
+  ---
+  duration_ms: 0.9399
+  type: 'test'
+  ...
+# Subtest: Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves
+ok 142 - Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves
+  ---
+  duration_ms: 3.1174
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads
+ok 143 - Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads
+  ---
+  duration_ms: 6.9664
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable
+ok 144 - Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable
+  ---
+  duration_ms: 13.8956
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase
+ok 145 - Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase
+  ---
+  duration_ms: 160.5192
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source
+ok 146 - Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source
+  ---
+  duration_ms: 67.4394
+  type: 'test'
+  ...
+# Subtest: Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter
+ok 147 - Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter
+  ---
+  duration_ms: 4.4217
+  type: 'test'
+  ...
+# Subtest: Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops
+ok 148 - Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops
+  ---
+  duration_ms: 19.8637
+  type: 'test'
+  ...
+# Subtest: Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown
+ok 149 - Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown
+  ---
+  duration_ms: 23.7718
+  type: 'test'
+  ...
+# Subtest: Source31 packet refresh final fences reject reentrant connection change or service withdrawal
+ok 150 - Source31 packet refresh final fences reject reentrant connection change or service withdrawal
+  ---
+  duration_ms: 12.8102
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application
+ok 151 - Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application
+  ---
+  duration_ms: 11.0081
+  type: 'test'
+  ...
+# Subtest: Source32 actual Page positive HP MP and unrelated monster damage retain the original complete economic witness
+ok 152 - Source32 actual Page positive HP MP and unrelated monster damage retain the original complete economic witness
+  ---
+  duration_ms: 13.0852
+  type: 'test'
+  ...
+# Subtest: Source32 actual Page durable eligibility fences economic role death and real NPC source changes before quote
+ok 153 - Source32 actual Page durable eligibility fences economic role death and real NPC source changes before quote
+  ---
+  duration_ms: 155.4439
+  type: 'test'
+  ...
+# Subtest: Source32 actual Native stale HP gesture cancels and a fresh painted click sends exactly one durable quote
+ok 154 - Source32 actual Native stale HP gesture cancels and a fresh painted click sends exactly one durable quote
+  ---
+  duration_ms: 89.5493
+  type: 'test'
+  ...
+# Subtest: Source32 actual Native records the first changed-source refusal without quote or raw source diagnostics
+ok 155 - Source32 actual Native records the first changed-source refusal without quote or raw source diagnostics
+  ---
+  duration_ms: 129.3837
+  type: 'test'
+  ...
+# Subtest: Source32 actual durable quote continuation still refuses changed position economy role and death before reserve
+ok 156 - Source32 actual durable quote continuation still refuses changed position economy role and death before reserve
+  ---
+  duration_ms: 53.5411
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native quote continuation survives render wrappers of the same Host only
+ok 157 - Source33 actual Native quote continuation survives render wrappers of the same Host only
+  ---
+  duration_ms: 59.6899
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native quote continuation rejects a replaced or cleaned up Host with a finite reason
+ok 158 - Source33 actual Native quote continuation rejects a replaced or cleaned up Host with a finite reason
+  ---
+  duration_ms: 113.3022
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native quote continuation records every existing UI status and proof refusal
+ok 159 - Source33 actual Native quote continuation records every existing UI status and proof refusal
+  ---
+  duration_ms: 985.3379
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native same Host wrappers cannot preserve a changed socket session full witness or selection
+ok 160 - Source33 actual Native same Host wrappers cannot preserve a changed socket session full witness or selection
+  ---
+  duration_ms: 326.1974
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody
+ok 161 - Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody
+  ---
+  duration_ms: 245.5759
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter
+ok 162 - Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter
+  ---
+  duration_ms: 46.2173
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws
+ok 163 - Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws
+  ---
+  duration_ms: 16.3888
+  type: 'test'
+  ...
+# Subtest: Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder
+ok 164 - Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder
+  ---
+  duration_ms: 45.3639
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement
+ok 165 - Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement
+  ---
+  duration_ms: 33.4108
+  type: 'test'
+  ...
+# Subtest: Source31 exact integer consumers pass bounded strict no-emit type checking
+ok 166 - Source31 exact integer consumers pass bounded strict no-emit type checking
+  ---
+  duration_ms: 550.4132
+  type: 'test'
+  ...
+# Subtest: Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding
+ok 167 - Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding
+  ---
+  duration_ms: 8.2447
+  type: 'test'
+  ...
+# Subtest: Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates
+ok 168 - Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates
+  ---
+  duration_ms: 2.8998
+  type: 'test'
+  ...
+# Subtest: ordinary Page purchase diagnostics retain first refusal and exact transport stage
+ok 169 - ordinary Page purchase diagnostics retain first refusal and exact transport stage
+  ---
+  duration_ms: 8.9926
+  type: 'test'
+  ...
+# Subtest: ordinary durable Page purchase reports missing adapter and catalog before quote or fallback
+ok 170 - ordinary durable Page purchase reports missing adapter and catalog before quote or fallback
+  ---
+  duration_ms: 1.6349
+  type: 'test'
+  ...
+# Subtest: actual durable client passive getter classifies first synchronous refusal without host reads
+ok 171 - actual durable client passive getter classifies first synchronous refusal without host reads
+  ---
+  duration_ms: 11.6606
+  type: 'test'
+  ...
+# Subtest: Source64 actual capability consumers preserve both declarations with Core early or late
+ok 172 - Source64 actual capability consumers preserve both declarations with Core early or late
+  ---
+  duration_ms: 20.863
+  type: 'test'
+  ...
+# Subtest: Source64 same socket append keeps the other capability and replacement socket inherits neither
+ok 173 - Source64 same socket append keeps the other capability and replacement socket inherits neither
+  ---
+  duration_ms: 10.0483
+  type: 'test'
+  ...
+# Subtest: Source64 actual consumers mark capabilities only after successful sends
+ok 174 - Source64 actual consumers mark capabilities only after successful sends
+  ---
+  duration_ms: 18.949
+  type: 'test'
+  ...
+# Subtest: Source64 actual socket and observer blockers preserve capability send gates
+ok 175 - Source64 actual socket and observer blockers preserve capability send gates
+  ---
+  duration_ms: 29.3811
+  type: 'test'
+  ...
+# Subtest: Source66 actual NPC activation sends once across distance two without the blocked approach
+ok 176 - Source66 actual NPC activation sends once across distance two without the blocked approach
+  ---
+  duration_ms: 0.3647
+  type: 'test'
+  ...
+# Subtest: Source66 actual NPC repeat and same-dialog guards retain their original boundaries
+ok 177 - Source66 actual NPC repeat and same-dialog guards retain their original boundaries
+  ---
+  duration_ms: 0.1933
+  type: 'test'
+  ...
+# Subtest: Source66 actual invalid and dead entity branches stop before interaction or attack
+ok 178 - Source66 actual invalid and dead entity branches stop before interaction or attack
+  ---
+  duration_ms: 0.1444
+  type: 'test'
+  ...
+# Subtest: Source66 actual monster activation keeps the existing attack path and non-NPC selection
+ok 179 - Source66 actual monster activation keeps the existing attack path and non-NPC selection
+  ---
+  duration_ms: 0.0976
+  type: 'test'
+  ...
+# Subtest: Source66 direct NPC activation retires old arrival intent without cancelling unrelated movement
+ok 180 - Source66 direct NPC activation retires old arrival intent without cancelling unrelated movement
+  ---
+  duration_ms: 0.1415
+  type: 'test'
+  ...
+1..180
+# tests 180
+# suites 0
+# pass 180
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6874.0446

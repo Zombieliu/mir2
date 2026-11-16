@@ -1,0 +1,936 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fresh selected Rust/source qualification for bounded Zone outbound batch plus legal guild source fixtures; not a whole workspace or capacity pass",
+  "startedAt": "2026-10-26T13:28:22.673Z",
+  "endedAt": "2026-10-26T13:29:49.945Z",
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+      "bytes": 20499,
+      "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11322,
+      "sha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "bytes": 25213,
+      "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+      "bytes": 11932,
+      "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+      "bytes": 6217,
+      "sha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "bytes": 28187,
+      "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+      "bytes": 41476,
+      "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+      "bytes": 17228,
+      "sha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 859676,
+      "sha256": "24795c64195741c90a27052d4756351c340d9a18c3474e3ad87b1fe2f30d67bf"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 45887,
+      "sha256": "b8cf1098431a50dcf3533656f6537ff2f64771e0f40e75750b138fccfd8539b1"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5814,
+      "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "bytes": 367763,
+      "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+      "bytes": 18382,
+      "sha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 94359,
+      "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+      "bytes": 20853,
+      "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 63790,
+      "sha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+      "bytes": 14691,
+      "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 2486,
+      "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 95833,
+      "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+      "bytes": 3229,
+      "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+      "bytes": 4781,
+      "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+      "bytes": 3307,
+      "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 26376,
+      "sha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+      "bytes": 12551,
+      "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "bytes": 207260,
+      "sha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+      "bytes": 80522,
+      "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+      "bytes": 8041,
+      "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "bytes": 81407,
+      "sha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+      "bytes": 19135,
+      "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "bytes": 14196,
+      "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+      "bytes": 11438,
+      "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+      "bytes": 20499,
+      "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11322,
+      "sha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "bytes": 25213,
+      "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+      "bytes": 11932,
+      "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+      "bytes": 6217,
+      "sha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "bytes": 28187,
+      "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+      "bytes": 41476,
+      "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+      "bytes": 17228,
+      "sha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 859676,
+      "sha256": "24795c64195741c90a27052d4756351c340d9a18c3474e3ad87b1fe2f30d67bf"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 45887,
+      "sha256": "b8cf1098431a50dcf3533656f6537ff2f64771e0f40e75750b138fccfd8539b1"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5814,
+      "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "bytes": 367763,
+      "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+      "bytes": 18382,
+      "sha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 94359,
+      "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+      "bytes": 20853,
+      "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 63790,
+      "sha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+      "bytes": 14691,
+      "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 2486,
+      "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 95833,
+      "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+      "bytes": 3229,
+      "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+      "bytes": 4781,
+      "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+      "bytes": 3307,
+      "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 26376,
+      "sha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+      "bytes": 12551,
+      "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "bytes": 207260,
+      "sha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+      "bytes": 80522,
+      "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+      "bytes": 8041,
+      "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "bytes": 81407,
+      "sha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+      "bytes": 19135,
+      "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "bytes": 14196,
+      "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+      "bytes": 11438,
+      "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24"
+    }
+  ],
+  "sourceUnchanged": true,
+  "sourceInputCount": 51,
+  "checks": [
+    {
+      "name": "format",
+      "startedAt": "2026-10-26T13:28:22.674Z",
+      "endedAt": "2026-10-26T13:28:22.725Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "C:\\mir2-build\\p01-completion-20261024\\zone-outbound-bounded-batch-v2\\root-format-v2\\sender-fragment.rs",
+        "C:\\mir2-build\\p01-completion-20261024\\zone-outbound-bounded-batch-v2\\root-format-v2\\tests-tail.rs",
+        "apps/gateway/src/routing/tests/guild_kill_source_tests.rs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\format-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\format-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "totals": [],
+      "passed": true
+    },
+    {
+      "name": "web-live-overflow",
+      "startedAt": "2026-10-26T13:28:22.727Z",
+      "endedAt": "2026-10-26T13:29:37.344Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "web_live_overflow_tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-live-overflow-stdout-v1.log",
+        "bytes": 2162,
+        "sha256": "3f1f908bbdf87b64c3cac2eea2005f1b3a369f1b2d89b01f64281ac354a2327a"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-live-overflow-stderr-v1.log",
+        "bytes": 57767,
+        "sha256": "1acaf8de59afedbd55756da3ed217169a7a40a890b5d0e504dda1a37881edb45"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1244
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "web-transport-close",
+      "startedAt": "2026-10-26T13:29:37.345Z",
+      "endedAt": "2026-10-26T13:29:37.785Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "web_transport_close_tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-transport-close-stdout-v1.log",
+        "bytes": 531,
+        "sha256": "83882021c57553faba5e212fe8dff24fdedfae086f301c799fd337f8631a1344"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-transport-close-stderr-v1.log",
+        "bytes": 53409,
+        "sha256": "4eead63c8d0d385ea920b2e4c2ef3a704ddacbd988f9e3a3f9cd229082faca3c"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1258
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "experience-profile",
+      "startedAt": "2026-10-26T13:29:37.786Z",
+      "endedAt": "2026-10-26T13:29:42.683Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "runtime::shared_experience_profile::tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\experience-profile-stdout-v1.log",
+        "bytes": 2798,
+        "sha256": "8512e5025624e4432fa8318eea198b3d880766492166b52448a2bf2b6f9b0fd9"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\experience-profile-stderr-v1.log",
+        "bytes": 43459,
+        "sha256": "cd1ba22c2f4af9d18eb6cc5f6b70f74f5c4a03bbee7ceee2a4dd5e50b01549df"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2925
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "store-durability",
+      "startedAt": "2026-10-26T13:29:42.683Z",
+      "endedAt": "2026-10-26T13:29:43.132Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "config::config_account_store_durability_tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\store-durability-stdout-v1.log",
+        "bytes": 368,
+        "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\store-durability-stderr-v1.log",
+        "bytes": 43101,
+        "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2944
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "guild-clock-store",
+      "startedAt": "2026-10-26T13:29:43.132Z",
+      "endedAt": "2026-10-26T13:29:43.523Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-clock-store-stdout-v1.log",
+        "bytes": 218,
+        "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-clock-store-stderr-v1.log",
+        "bytes": 43101,
+        "sha256": "ddd693c5d735ae9137a9189ed8896643aea51396984fd7d78d6841d2a01cde7f"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2945
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "admission-lock-order",
+      "startedAt": "2026-10-26T13:29:43.524Z",
+      "endedAt": "2026-10-26T13:29:45.569Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\admission-lock-order-stdout-v1.log",
+        "bytes": 253,
+        "sha256": "0090b2b81abd8b261c7c4233026ecd081fc203922d99a9c95b6899cab8972127"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\admission-lock-order-stderr-v1.log",
+        "bytes": 53576,
+        "sha256": "61b95cc34e9c07045bce0b1061aabaea2a65107d089cd18aa487e563b350855c"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1261
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "kill-award-commit",
+      "startedAt": "2026-10-26T13:29:45.570Z",
+      "endedAt": "2026-10-26T13:29:47.255Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\kill-award-commit-stdout-v1.log",
+        "bytes": 215,
+        "sha256": "65a8951aa883a801179115f0794146bf4e11345db02de30ee30e3fe3de5190e3"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\kill-award-commit-stderr-v1.log",
+        "bytes": 53409,
+        "sha256": "cfaf906ece7e8dd7b4be815dd194a9649cf446cc9c4cfa47809eb9240ba7e642"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1261
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "guild-kill-source",
+      "startedAt": "2026-10-26T13:29:47.255Z",
+      "endedAt": "2026-10-26T13:29:49.940Z",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "guild_kill_source_",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-kill-source-stdout-v1.log",
+        "bytes": 394,
+        "sha256": "55f2fbb4981db09e9459fd732d9fb94b077ab560322a38963776d6a41eba2581"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-kill-source-stderr-v1.log",
+        "bytes": 53409,
+        "sha256": "cfaf906ece7e8dd7b4be815dd194a9649cf446cc9c4cfa47809eb9240ba7e642"
+      },
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1260
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "allSelectedTestsPassed": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

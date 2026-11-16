@@ -1,0 +1,425 @@
+{
+  "kind": "selected original r2 ordinary combat movement and readiness receipts",
+  "sourceTrace": "wizard/Wizard.2026-10-01T09-49-41-731Z.trace.jsonl",
+  "rawTraceSha256": "2e389e91e4b360a4d62b6a7ad3c5a3394b99ae3f54d5fdb01c2bc06be9ae16d0",
+  "sanitized": true,
+  "notNativeVisualAcceptance": true,
+  "events": [
+    {
+      "at": "2026-10-01T10:01:10.004Z",
+      "sequence": 5118,
+      "direction": "received",
+      "type": "worldSnapshot",
+      "payload": {
+        "mapFileName": "D401",
+        "playerObjectId": 1000,
+        "playerHp": 81,
+        "playerMaxHp": 81,
+        "playerMp": 299,
+        "playerMaxMp": 299,
+        "playerPoison": null,
+        "entities": [
+          {
+            "objectId": 1000,
+            "kind": "selfPlayer",
+            "name": "JW2032fe72",
+            "class": "Wizard",
+            "x": 24,
+            "y": 181,
+            "hp": 81,
+            "maxHp": 81,
+            "dead": false,
+            "poison": null,
+            "ai": null
+          },
+          {
+            "objectId": 248838,
+            "kind": "monster",
+            "name": "Zombie3",
+            "class": null,
+            "x": 35,
+            "y": 175,
+            "hp": 155,
+            "maxHp": 155,
+            "dead": false,
+            "poison": null,
+            "ai": 25
+          }
+        ],
+        "knownSkills": [
+          {
+            "spell": "FireBall",
+            "level": 0,
+            "mpCost": 3,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "GreatFireBall",
+            "level": 0,
+            "mpCost": 5,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:10.707Z",
+      "sequence": 5123,
+      "direction": "sent",
+      "type": "walk",
+      "command": {
+        "type": "walk",
+        "movementDirection": "Right"
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:10.762Z",
+      "sequence": 5124,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Right",
+        "x": 26,
+        "y": 181
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:10.800Z",
+      "sequence": 5125,
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "type": "magic",
+        "objectId": 1000,
+        "spell": "GreatFireBall",
+        "targetId": 248838,
+        "x": 35,
+        "y": 175,
+        "spellTargetLock": true,
+        "movementDirection": "UpRight"
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:10.943Z",
+      "sequence": 5127,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Right",
+        "x": 26,
+        "y": 181
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:15.846Z",
+      "sequence": 5135,
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "type": "magic",
+        "objectId": 1000,
+        "spell": "GreatFireBall",
+        "targetId": 248838,
+        "x": 35,
+        "y": 175,
+        "spellTargetLock": true,
+        "movementDirection": "UpRight"
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:15.972Z",
+      "sequence": 5136,
+      "direction": "received",
+      "type": "packet",
+      "packet": "Magic",
+      "payload": {
+        "cast": true,
+        "level": 0,
+        "secondaryTargetIds": [],
+        "spell": "GreatFireBall",
+        "target": {
+          "x": 35,
+          "y": 175
+        },
+        "targetId": 248838
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:15.972Z",
+      "sequence": 5137,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectMagic",
+      "payload": {
+        "cast": true,
+        "direction": "UpRight",
+        "level": 0,
+        "location": {
+          "x": 26,
+          "y": 181
+        },
+        "objectId": 1000,
+        "secondaryTargetIds": [],
+        "selfBroadcast": false,
+        "spell": "GreatFireBall",
+        "target": {
+          "x": 35,
+          "y": 175
+        },
+        "targetId": 248838
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:16.187Z",
+      "sequence": 5142,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectStruck",
+      "payload": {
+        "attackerId": 1000,
+        "direction": "Left",
+        "location": {
+          "x": 35,
+          "y": 175
+        },
+        "objectId": 248838
+      }
+    },
+    {
+      "at": "2026-10-01T10:01:16.187Z",
+      "sequence": 5143,
+      "direction": "received",
+      "type": "packet",
+      "packet": "DamageIndicator",
+      "payload": {
+        "damage": 16,
+        "damageType": 0,
+        "objectId": 248838,
+        "typed": true
+      }
+    },
+    {
+      "at": "2026-10-01T10:03:51.529Z",
+      "sequence": 6528,
+      "direction": "received",
+      "type": "worldSnapshot",
+      "payload": {
+        "mapFileName": "D401",
+        "playerObjectId": 1000,
+        "playerHp": 81,
+        "playerMaxHp": 81,
+        "playerMp": 174,
+        "playerMaxMp": 299,
+        "playerPoison": null,
+        "entities": [
+          {
+            "objectId": 1000,
+            "kind": "selfPlayer",
+            "name": "JW2032fe72",
+            "class": "Wizard",
+            "x": 49,
+            "y": 148,
+            "hp": 81,
+            "maxHp": 81,
+            "dead": false,
+            "poison": null,
+            "ai": null
+          },
+          {
+            "objectId": 248742,
+            "kind": "monster",
+            "name": "Zombie2",
+            "class": null,
+            "x": 51,
+            "y": 157,
+            "hp": 69,
+            "maxHp": 155,
+            "dead": false,
+            "poison": null,
+            "ai": 24
+          }
+        ],
+        "knownSkills": [
+          {
+            "spell": "FireBall",
+            "level": 0,
+            "mpCost": 3,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "GreatFireBall",
+            "level": 0,
+            "mpCost": 5,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T10:03:52.206Z",
+      "sequence": 6532,
+      "direction": "sent",
+      "type": "run",
+      "command": {
+        "type": "run",
+        "movementDirection": "DownLeft"
+      }
+    },
+    {
+      "at": "2026-10-01T10:03:52.207Z",
+      "sequence": 6533,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "DownLeft",
+        "x": 46,
+        "y": 150
+      }
+    },
+    {
+      "at": "2026-10-01T10:03:52.253Z",
+      "sequence": 6535,
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "type": "magic",
+        "objectId": 1000,
+        "spell": "GreatFireBall",
+        "targetId": 248742,
+        "x": 51,
+        "y": 157,
+        "spellTargetLock": true,
+        "movementDirection": "DownRight"
+      }
+    },
+    {
+      "at": "2026-10-01T10:03:52.467Z",
+      "sequence": 6538,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "DownLeft",
+        "x": 46,
+        "y": 150
+      }
+    },
+    {
+      "at": "2026-10-01T10:08:14.376Z",
+      "sequence": 10527,
+      "direction": "received",
+      "type": "worldSnapshot",
+      "payload": {
+        "mapFileName": "D401",
+        "playerObjectId": 1000,
+        "playerHp": 73,
+        "playerMaxHp": 81,
+        "playerMp": 114,
+        "playerMaxMp": 299,
+        "playerPoison": null,
+        "entities": [
+          {
+            "objectId": 1000,
+            "kind": "selfPlayer",
+            "name": "JW2032fe72",
+            "class": "Wizard",
+            "x": 135,
+            "y": 118,
+            "hp": 73,
+            "maxHp": 81,
+            "dead": false,
+            "poison": null,
+            "ai": null
+          },
+          {
+            "objectId": 248729,
+            "kind": "monster",
+            "name": "Zombie2",
+            "class": null,
+            "x": 131,
+            "y": 123,
+            "hp": 138,
+            "maxHp": 155,
+            "dead": false,
+            "poison": null,
+            "ai": 24
+          }
+        ],
+        "knownSkills": [
+          {
+            "spell": "FireBall",
+            "level": 0,
+            "mpCost": 3,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "GreatFireBall",
+            "level": 0,
+            "mpCost": 5,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T10:08:16.394Z",
+      "sequence": 10546,
+      "direction": "sent",
+      "type": "walk",
+      "command": {
+        "type": "walk",
+        "movementDirection": "DownLeft"
+      }
+    },
+    {
+      "at": "2026-10-01T10:08:16.395Z",
+      "sequence": 10547,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "DownLeft",
+        "x": 133,
+        "y": 120
+      }
+    },
+    {
+      "at": "2026-10-01T10:08:16.440Z",
+      "sequence": 10549,
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "type": "magic",
+        "objectId": 1000,
+        "spell": "GreatFireBall",
+        "targetId": 248729,
+        "x": 132,
+        "y": 122,
+        "spellTargetLock": true,
+        "movementDirection": "DownLeft"
+      }
+    },
+    {
+      "at": "2026-10-01T10:08:16.590Z",
+      "sequence": 10552,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "DownLeft",
+        "x": 133,
+        "y": 120
+      }
+    }
+  ],
+  "limits": "No server rules or budgets changed. Normal combat helper missed fresh readiness after Walk/Run; practice helper was already corrected. These are before-correction original receipts, not a completed fresh route."
+}

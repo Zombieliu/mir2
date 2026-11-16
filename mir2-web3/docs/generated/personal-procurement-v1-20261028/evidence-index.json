@@ -1,0 +1,158 @@
+{
+  "formatVersion": 1,
+  "collectedAtUtc": "2026-10-28T15:15:18.898Z",
+  "evidenceKindsKeptSeparate": [
+    "Rust local/mock state-machine tests",
+    "embedded PostgreSQL WASM SQL/PLpgSQL tests",
+    "Gateway worker mocks and compilation",
+    "offline native client production renderer",
+    "standalone real Sui testnet custody fixtures linked outside this bundle",
+    "Real Windows -> File game authority -> Sui testnet -> all deliveries and refunds claimed"
+  ],
+  "rust": {
+    "finalLog": "rust/procurement-tests-v17-stable-wire-states.log",
+    "passed": 54,
+    "failed": 0,
+    "schemaLog": "rust/procurement-schema-regression-v3.log",
+    "schemaPassed": 3,
+    "realTestnet": false,
+    "nativePostgres": false,
+    "previousFeeSourceLog": "rust/procurement-tests-v16-machine-fee-source.log",
+    "scope": "Local/mock state-machine tests including stable wire state projection, actual owner request public-open and refund claim; not real chain or native PostgreSQL"
+  },
+  "sql": {
+    "result": "sql/results.json",
+    "passed": 44,
+    "failed": 0,
+    "engine": "PostgreSQL 18.6 WASM / official @electric-sql/pglite 0.5.13",
+    "temporaryInMemory": true,
+    "nativePostgresLibpqIntegration": false,
+    "dockerTouched": false,
+    "migrationSha256": "53b63e26318a345c9fc7dc571e6f6a50c9b4534829130a2ea4519446a7f03ac4"
+  },
+  "gateway": {
+    "v4": {
+      "log": "gateway/gateway-tests-v4.log",
+      "passed": 14,
+      "failed": 0,
+      "snapshot": "historical before later worker fixes; includes slow fair-rotation test"
+    },
+    "v5": {
+      "log": "gateway/gateway-tests-v5-final.log",
+      "passed": 13,
+      "failed": 0,
+      "snapshot": "worker fixes checked; predates final runtime machine-readable fee-source fix",
+      "skippedPreviouslyPassedSlowFairnessCase": true
+    },
+    "buildV2": {
+      "log": "gateway/gateway-build-v2-final.log",
+      "succeeded": true,
+      "binarySha256": "8e3cf97f4963df33fecc9cb701b748220d38c36e10cc665f66decb1043f187d9",
+      "snapshot": "before final runtime fee-source fix; final live build must be separately recorded"
+    },
+    "buildV3": {
+      "log": "gateway/gateway-build-v3-fee-source.log",
+      "succeeded": true,
+      "binarySha256": "c7ddc929a6290070221f1808f5dfaafb3f7fdfdf2792d128e4e0a934271806b4",
+      "snapshot": "After fee-source fix, before final stable wire-state fix; actual final build/live execution separately recorded"
+    },
+    "buildV4": {
+      "log": "gateway/gateway-build-v4-wire-state.log",
+      "succeeded": true,
+      "binarySha256": null,
+      "snapshot": "Stable wire-state fix included; predates final procurement-response world snapshot fix; raw log retained, final executed binary hash to be recorded with v5 live evidence"
+    },
+    "buildV5": {
+      "log": "gateway/gateway-build-v5-asset-projection.log",
+      "succeeded": true,
+      "binarySha256": "4b5bc8a10793583e0631ab9145862d86ad209c8a58f1481f1875f6892569060c",
+      "snapshot": "Final running candidate including authoritative world snapshot after successful procurement response; real live evidence separately recorded"
+    },
+    "testsV6": {
+      "log": "gateway/gateway-tests-v6-asset-projection.log",
+      "passed": 13,
+      "failed": 0,
+      "skippedPreviouslyPassedSlowFairnessCase": true,
+      "snapshot": "Final asset-projection integration; historical test counts are not additive"
+    },
+    "finalBuild": "buildV5",
+    "finalFocusedTests": "testsV6"
+  },
+  "client": {
+    "initialManifest": "client/initial-fixture/manifest.json",
+    "initialSourcePinsAreHistorical": true,
+    "finalFocusedLog": "client/final-fixture/native-focused.log",
+    "finalFocusedPassed": 11,
+    "finalFocusedFailed": 0,
+    "finalFocusedGpuIgnored": 1,
+    "finalGpu": "client/final-fixture/gpu-short-expiry/procurement-native-gpu.json",
+    "finalGpuPassed": 1,
+    "finalBuild": "client/final-fixture/windows-build-exit.json",
+    "binarySha256": "76178f1c6b82ac6628d95de8bed5bda82ef2afc8689dee8e00559e342b201226",
+    "fixtureServerConnected": false,
+    "fixtureTestnetTransactions": 0,
+    "fixtureHumanAccepted": false,
+    "v3": {
+      "focusedLog": "client/v3-fixture/native-focused.log",
+      "focusedExit": "client/v3-fixture/native-focused-exit.json",
+      "focusedPassed": 13,
+      "focusedFailed": 0,
+      "focusedGpuIgnored": 1,
+      "buildLog": "client/v3-fixture/windows-build.log",
+      "buildExit": "client/v3-fixture/windows-build-exit.json",
+      "binarySha256": "1a8c941bac3ae9be03bf64652dc64b555d8699a6a65bd65c9ca532da6b0bc144",
+      "snapshot": "Final fee-rule validation and dynamic fee units; earlier GPU captures remain earlier fixtures; actual live execution separately recorded"
+    }
+  },
+  "chainEvidence": "../../../onchain/procurement/validation/20261028/README.md",
+  "windowsLive": {
+    "status": "passed all three scenarios and both actors final post-settlement real Windows relogin",
+    "path": "windows-live/README.md",
+    "audit": "windows-live/evidence/live-three-scenarios-independent-audit.json",
+    "snapshotCount": 18,
+    "actualOrderTransactions": 9,
+    "netMist": "102301767",
+    "allDeliveriesClaimed": true,
+    "realAuthority": "File",
+    "custodyFixtureOnly": false,
+    "privateStoresCopied": false,
+    "wholeAccountStoresCopied": false,
+    "credentialsCopied": false,
+    "screenshots": {
+      "count": 27,
+      "format": "JPEG",
+      "captureKind": "computer-use target window",
+      "sidecarsPreserved": true,
+      "associations": "windows-live/screenshots/snapshot-associations.json"
+    },
+    "gatewaySha256": "4b5bc8a10793583e0631ab9145862d86ad209c8a58f1481f1875f6892569060c",
+    "windowsSha256": "1a8c941bac3ae9be03bf64652dc64b555d8699a6a65bd65c9ca532da6b0bc144",
+    "humanAccepted": false,
+    "nativePostgresVerified": false,
+    "productionChargingEnabled": false,
+    "totalSavedStageSnapshots": 18,
+    "finalRelogin": {
+      "passed": true,
+      "snapshot": "windows-live/evidence/final-after-both-relogin.json",
+      "snapshotAtUtc": "2026-10-28T17:11:29.443Z",
+      "snapshotRawSha256": "13f8f86f4cdd7d74a3e9e172b5f79ba6a361c08323147d9059ca1a8e2ae57f8f",
+      "buyerGold": 1500000,
+      "sellerGold": 510000,
+      "totalGold": 2011280,
+      "escrowGold": 0,
+      "pendingGold": 0,
+      "uniqueItemUid": 1028024501,
+      "effectiveOwner": "buyer inventory only",
+      "allThreeOrdersTerminal": true,
+      "allDeliveriesClaimed": true,
+      "testQuotaConsumed": 3,
+      "testQuotaReserved": 0,
+      "buyerPid": 68868,
+      "sellerPid": 84368
+    },
+    "independentAuditIncludesFinalRelogin": true
+  },
+  "productionChargingEnabled": false,
+  "copiedArtifactSourcePolicy": "Exact explicit allowlist only; no recursive external directory copying; raw byte source/output hashes checked; initial client file pins checked against its original manifest",
+  "updatedAtUtc": "2026-10-28T17:16:05.548Z"
+}

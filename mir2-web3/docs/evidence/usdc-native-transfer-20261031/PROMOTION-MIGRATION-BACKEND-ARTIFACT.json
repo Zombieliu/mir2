@@ -1,0 +1,37 @@
+{
+  "schema": "mir2.promotion-migration.backend-artifact.v1",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "workflowRunId": "41121641837",
+  "workflowUrl": "https://github.com/Zombieliu/mir2/actions/runs/41121641837",
+  "artifactId": "13010452302",
+  "artifactName": "promotion-backend-173332a004c01312802a67042ff7800a04893134",
+  "originalZipBytes": 91264572,
+  "originalZipSha256": "95ce96e59781c05a793522543091ac141ec936058a139a6256242605bb5c8ee8",
+  "githubDigestMatchesOriginalZip": true,
+  "normalizedTarBytes": 87604247,
+  "normalizedTarSha256": "c6c63f56d4b007c43faabecaa113b8b45eb40adfdf4064bc4f7f798cb6182d75",
+  "fullManifestSha256": "e6987f31b6f67ae64f99b7d124ec1a1c9596019ddf3f20639b187640765bc308",
+  "regularFiles": 1829,
+  "authenticatedMetadataSha256": "2a58488216bbe69378fd86d0e7765da87f71ccb1c3d6e088452827176b01fd05",
+  "ci": {
+    "passed": true,
+    "testsExecuted": 74,
+    "skipped": 0,
+    "docker": false,
+    "logs": {
+      "NATIVE-PG-TESTS.log": { "testsExecuted": 55, "sha256": "1578aadddee5278e05e0698a3079abf7125a57c20acd920a7625d34988d0ebcc" },
+      "CLONE-CLI-TESTS.log": { "testsExecuted": 11, "sha256": "7733136573699bbb28bf2c768cc4e696d7ab7da0dee5ce4b8d5d699a5f527374" },
+      "WALLET-IDENTITY-TESTS.log": { "testsExecuted": 8, "sha256": "7ba65cb14dba4fd00dbad0c50c201cd8e3f5d13f44e8644d3ce52958dc1bf36d" }
+    }
+  },
+  "binarySha256": {
+    "mir2-gateway": "e6c57c5ba17c2c17e076aeec035a6f6a4c285234bff6679bbd48c494eb52a87b",
+    "promotion_worker": "dc33ce75ae0eaaf419d8c901fde4eecb9eb1edafde445570a1b9715f9aa80393",
+    "promotion_attribution_migration": "e20c85e2ec26f8379811b77e55fc9d5308bdac51c21db3a4144cec35c45794f7",
+    "promotion_windows_acceptance": "790b9dc25d6632e3f8d211c1d479ba83ddc04f8a9cad1e350631ca3f275f5d14"
+  },
+  "coordinatorIndependentlyRehashedZipTarManifestAndSelectedRuntime": true,
+  "thisReceiptProvesDeployment": false,
+  "thisReceiptProvesOriginalMigrationStageOrMemberConfirmation": false,
+  "financialOperationsPerformed": false
+}

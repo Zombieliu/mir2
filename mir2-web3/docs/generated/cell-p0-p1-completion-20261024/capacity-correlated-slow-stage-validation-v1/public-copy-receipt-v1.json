@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T16:26:41.377Z",
+  "child": "capacity-correlated-slow-stage-validation-v1",
+  "manifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/correlated-slow-stage-public-whitelist-v1.json",
+    "bytes": 2931,
+    "sha256": "c463570da1fd822d7201df0706fd654bc633cd20586b3bb3a6ebd87cc19ae12e"
+  },
+  "files": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/web-before-v1.rs.txt",
+      "target": "capacity-correlated-slow-stage-validation-v1/source/web-before-v1.rs.txt",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+      "target": "capacity-correlated-slow-stage-validation-v1/source/web-after-v1.rs.txt",
+      "bytes": 857503,
+      "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/mutation-v1.json",
+      "target": "capacity-correlated-slow-stage-validation-v1/validation/mutation-v1.json",
+      "bytes": 3929,
+      "sha256": "d7d30e40bd93bb683b9c9cb9988796e346d5f9f259c93e3c983ed11127b53ddb"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/focused-v1.log",
+      "target": "capacity-correlated-slow-stage-validation-v1/validation/focused-v1.log",
+      "bytes": 64266,
+      "sha256": "43ab5289f35aeea4e9ad34e89321409695662c450441fec06259e86127c0e2a6"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/focused-execution-v1.json",
+      "target": "capacity-correlated-slow-stage-validation-v1/validation/focused-execution-v1.json",
+      "bytes": 1744,
+      "sha256": "1874a8243344494a7a65ceef06a263a3cf1b7eacd898010636caae510cda91c6"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/validation-receipt-v1.json",
+      "target": "capacity-correlated-slow-stage-validation-v1/validation/validation-receipt-v1.json",
+      "bytes": 2727,
+      "sha256": "34db4d83270771906b3860f1af476ad13a775c25041234b81c692f2e982537f1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-independent-review-v1.json",
+      "target": "capacity-correlated-slow-stage-validation-v1/review/independent-review-v1.json",
+      "bytes": 2799,
+      "sha256": "e10e660b755819e68daebea33d75b18df8e2c269be0697402c16d2560f03595b"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/rustfmt-command-record-v1.json",
+      "target": "capacity-correlated-slow-stage-validation-v1/validation/rustfmt-command-record-v1.json",
+      "bytes": 1409,
+      "sha256": "d2f091427f1ffaaa2b0e0c232f963df5404ab0fbc7a08ecb06c4f1912f2e4648"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/archive-correlated-slow-stage-validation-v1.mjs",
+      "target": "capacity-correlated-slow-stage-validation-v1/archive-tools/archive-correlated-slow-stage-validation-v1.mjs",
+      "bytes": 5480,
+      "sha256": "c886e8e7cc5be1ed929565723ab810587f2a07a404b7d042dd85a520c39d237a"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/correlated-slow-stage-public-whitelist-v1.json",
+      "target": "capacity-correlated-slow-stage-validation-v1/archive-tools/public-whitelist-v1.json",
+      "bytes": 2931,
+      "sha256": "c463570da1fd822d7201df0706fd654bc633cd20586b3bb3a6ebd87cc19ae12e"
+    }
+  ],
+  "copiedFiles": 10,
+  "copiedBytes": 1798475,
+  "everyDestinationRawBytesMatched": true,
+  "scope": "Explicit public source/format/test evidence only; no binaries, private/store, large raw or recording payload.",
+  "newReleaseBuilt": false,
+  "newLoadPerformed": false,
+  "capacityAccepted": false,
+  "sourceChangedByArchive": false,
+  "rootReadmeChanged": false
+}

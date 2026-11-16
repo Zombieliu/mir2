@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "use-item-regression",
+  "startedUtc": "2026-10-09T00:32:26.4938051Z",
+  "finishedUtc": "2026-10-09T00:32:50.9345788Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "use_item",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "13d477118f394d310882db8447992ce83dfa66d72bd3c17f8c5e833d94c84fd6",
+  "declaredInputs": 462,
+  "sourceDrift": [],
+  "cargoLogSha256": "b18e02c9d6f3174386ac7d05680d4f2a11db093219700542ccd1e997b9b546f9",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

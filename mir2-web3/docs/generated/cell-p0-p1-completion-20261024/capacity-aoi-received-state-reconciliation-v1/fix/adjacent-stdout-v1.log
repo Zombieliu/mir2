@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: movement diagnostic retains collision failures but never continues transport, AOI or idle-load failures
+ok 1 - movement diagnostic retains collision failures but never continues transport, AOI or idle-load failures
+  ---
+  duration_ms: 2.1501
+  type: 'test'
+  ...
+# Subtest: native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+ok 2 - native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+  ---
+  duration_ms: 4.0208
+  type: 'test'
+  ...
+# Subtest: native attack witness uses nearest eligible peer with original order on equal separation
+ok 3 - native attack witness uses nearest eligible peer with original order on equal separation
+  ---
+  duration_ms: 0.4382
+  type: 'test'
+  ...
+# Subtest: native attack witness is reselected with its current namespace and cursor immediately before the real send
+ok 4 - native attack witness is reselected with its current namespace and cursor immediately before the real send
+  ---
+  duration_ms: 2.5148
+  type: 'test'
+  ...
+# Subtest: native attack witness loss before send retains the original incomplete opportunity without a fake attack
+ok 5 - native attack witness loss before send retains the original incomplete opportunity without a fake attack
+  ---
+  duration_ms: 28.0144
+  type: 'test'
+  ...
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 6 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 1.3298
+  type: 'test'
+  ...
+# Subtest: AOI denominator includes a player whose ObjectPlayer was never delivered, using actual 16-cell geometry
+ok 7 - AOI denominator includes a player whose ObjectPlayer was never delivered, using actual 16-cell geometry
+  ---
+  duration_ms: 0.6882
+  type: 'test'
+  ...
+# Subtest: native-resume AOI grace restarts for planned absence but duplicates and later ghosts stay failed
+ok 8 - native-resume AOI grace restarts for planned absence but duplicates and later ghosts stay failed
+  ---
+  duration_ms: 0.2271
+  type: 'test'
+  ...
+# Subtest: fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+ok 9 - fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+  ---
+  duration_ms: 0.2169
+  type: 'test'
+  ...
+# Subtest: real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+ok 10 - real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+  ---
+  duration_ms: 0.2825
+  type: 'test'
+  ...
+# Subtest: shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+ok 11 - shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+  ---
+  duration_ms: 0.2371
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics preserve remove and reentry wire order with projection before and after
+ok 12 - player lifecycle diagnostics preserve remove and reentry wire order with projection before and after
+  ---
+  duration_ms: 1.2957
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics retain same-membership owner coordinate replacements but omit ordinary peer movement
+ok 13 - player lifecycle diagnostics retain same-membership owner coordinate replacements but omit ordinary peer movement
+  ---
+  duration_ms: 14.9542
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics keep a bounded remembered identity and projection footprint
+ok 14 - player lifecycle diagnostics keep a bounded remembered identity and projection footprint
+  ---
+  duration_ms: 13.6412
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics persist real socket receive order through the existing bounded writer without secrets
+ok 15 - player lifecycle diagnostics persist real socket receive order through the existing bounded writer without secrets
+  ---
+  duration_ms: 170.4443
+  type: 'test'
+  ...
+# Subtest: AOI received state clears a ghost clock during the actual in-range interval between polls
+ok 16 - AOI received state clears a ghost clock during the actual in-range interval between polls
+  ---
+  duration_ms: 0.3612
+  type: 'test'
+  ...
+# Subtest: AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications
+ok 17 - AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications
+  ---
+  duration_ms: 0.1102
+  type: 'test'
+  ...
+# Subtest: AOI received state clears missing only for exactly one entry or no longer required visibility
+ok 18 - AOI received state clears missing only for exactly one entry or no longer required visibility
+  ---
+  duration_ms: 0.2327
+  type: 'test'
+  ...
+# Subtest: AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair
+ok 19 - AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair
+  ---
+  duration_ms: 0.37
+  type: 'test'
+  ...
+# Subtest: AOI received state hook follows real decoded owner peer Join Leave snapshot and map state
+ok 20 - AOI received state hook follows real decoded owner peer Join Leave snapshot and map state
+  ---
+  duration_ms: 0.7916
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 326.5605

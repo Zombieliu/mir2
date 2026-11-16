@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\root-seal-and-guard-v1.mjs",
+    "bytes": 17593,
+    "sha256": "06229ef67a7053c2e3f0a6d597a9952999a63255be3ea72987eacf98f284d455"
+  },
+  "destination": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-seal-and-guard-v1.mjs",
+    "bytes": 17598,
+    "sha256": "06429d705d71cdf3af1062070648b146f95f6a2b4d4dd6f7171a2d96d3e6e12b"
+  },
+  "lineHunks": [
+    {
+      "oldLine": 8,
+      "newLine": 8,
+      "before": "const HEAD='4fb58ade4aa95b677bb795625d01da542a84a3f7',CORE=HEAD,BUILD='c743122af05faca43d9535d8c6c2a4bfb01b924f',DRIVER='3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8';\nconst FULL16=path.join(BASE,'full-lifecycle-scout-anti-convergence-v1');\n",
+      "after": "const HEAD='b5374083d257d375437af3de42bead159cd2b917',CORE=HEAD,BUILD='c743122af05faca43d9535d8c6c2a4bfb01b924f',DRIVER='d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1';\nconst FULL16=path.join(BASE,'full-lifecycle-scout-selection-diagnostics-v1');\n"
+    },
+    {
+      "oldLine": 99,
+      "newLine": 99,
+      "before": " const metadata={schemaVersion:1,state:'final-source-bound-not-executed',frozenAt:new Date().toISOString(),root:ROOT,backendSourceCommit:BUILD,backendBuildCommit:BUILD,executionSourceCommit:HEAD,backendInputCount:50,backendRebuilt:false,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,binarySha256:binding.release.binary.sha256,backendSourceAggregate:binding.manifest.sourceManifestSha256,sceneProfile:scene.profile,sceneSourceSha256:scene.sourceSha256,patrolSpan:2,storeDiagnostics:storeIdentity,ordinaryAccountPoolSize:100,maximumControlledActors:10,wireDiagnostics:wireIdentity,wireSourceFiles:wireSource.files,coreFunctionalEvidenceCoversWrapper:false,nodeCodeFullTests:226,wrapperUnitTests:28,adapterUnitTests:8,actualAdmissionCaps:[24,10,10,4,1,2],tokioWorkers:4,slowStageThresholdMs:50,full16RunId:binding.full16Gate.runId,preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,rootControllerPreparation:pre.controllerPrepPin,reviewedRuntimeLocalFiles:pre.value.files.length,reviewedExternalStableInputs:pre.value.externalStableInputs.length,driverClosurePins:drivers.pins.length,syntax:{log:syntaxLog,checks:syntax.checks,targetModulesImported:false,behaviouralTestsExecuted:false},preparationReferencePins:references,sourceConfigNotYet:true,accountsProvisioned:false,realmStarted:false,capacityAccepted:false,files,sourceSha256:sha(JSON.stringify(files)),scripts:files.filter(entry=>/\\.(mjs|ps1)$/.test(entry.file))};\n",
+      "after": " const metadata={schemaVersion:1,state:'final-source-bound-not-executed',frozenAt:new Date().toISOString(),root:ROOT,backendSourceCommit:BUILD,backendBuildCommit:BUILD,executionSourceCommit:HEAD,backendInputCount:50,backendRebuilt:false,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,binarySha256:binding.release.binary.sha256,backendSourceAggregate:binding.manifest.sourceManifestSha256,sceneProfile:scene.profile,sceneSourceSha256:scene.sourceSha256,patrolSpan:2,storeDiagnostics:storeIdentity,ordinaryAccountPoolSize:100,maximumControlledActors:10,wireDiagnostics:wireIdentity,wireSourceFiles:wireSource.files,coreFunctionalEvidenceCoversWrapper:false,nodeCodeFullTests:232,wrapperUnitTests:28,adapterUnitTests:8,actualAdmissionCaps:[24,10,10,4,1,2],tokioWorkers:4,slowStageThresholdMs:50,full16RunId:binding.full16Gate.runId,preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,rootControllerPreparation:pre.controllerPrepPin,reviewedRuntimeLocalFiles:pre.value.files.length,reviewedExternalStableInputs:pre.value.externalStableInputs.length,driverClosurePins:drivers.pins.length,syntax:{log:syntaxLog,checks:syntax.checks,targetModulesImported:false,behaviouralTestsExecuted:false},preparationReferencePins:references,sourceConfigNotYet:true,accountsProvisioned:false,realmStarted:false,capacityAccepted:false,files,sourceSha256:sha(JSON.stringify(files)),scripts:files.filter(entry=>/\\.(mjs|ps1)$/.test(entry.file))};\n"
+    }
+  ],
+  "forwardRawExact": true,
+  "inverseRawExact": true,
+  "scope": "Only actual K execution/source aggregate, new fresh-full16 directory and current232 metadata. Original reviewed dynamic prepared+review schema/128source cap/syntax-before-seal/read-only contract preflight remain exact. No mode executed.",
+  "moduleImported": false,
+  "modeExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

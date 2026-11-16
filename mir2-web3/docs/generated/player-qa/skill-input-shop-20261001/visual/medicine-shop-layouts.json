@@ -1,0 +1,2281 @@
+{
+  "class": "Warrior",
+  "gold": 700,
+  "hpPotions": 11,
+  "kind": "offline_production_npc_service_open",
+  "layoutFailures": [],
+  "level": 9,
+  "liveAcceptance": false,
+  "passed": true,
+  "screenshots": [
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "zh-TW-medicine-shop.png",
+      "locale": "zh-TW",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            65.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            11.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            20.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "−"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            607.0,
+            13.0,
+            40.0,
+            12.0
+          ],
+          "text": "任務物品"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            58.0,
+            11.0
+          ],
+          "text": "價格：40 金幣"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            54.0,
+            11.0
+          ],
+          "text": "小型生命藥水"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包一"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            542.0,
+            13.0,
+            30.0,
+            12.0
+          ],
+          "text": "背包二"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            107.0,
+            535.0,
+            20.0,
+            12.0
+          ],
+          "text": "購買"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "金幣 700"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "en-medicine-shop.png",
+      "locale": "en",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            65.0,
+            11.0
+          ],
+          "text": "(HP)Drug Small"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            474.0,
+            13.0,
+            27.0,
+            12.0
+          ],
+          "text": "Bag 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            544.0,
+            13.0,
+            27.0,
+            12.0
+          ],
+          "text": "Bag 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            108.0,
+            535.0,
+            18.0,
+            12.0
+          ],
+          "text": "Buy"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            42.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "Gold 700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            58.0,
+            11.0
+          ],
+          "text": "Price: 40 gold"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            598.0,
+            13.0,
+            58.0,
+            12.0
+          ],
+          "text": "Quest Items"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "pt-BR-medicine-shop.png",
+      "locale": "pt-BR",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            42.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            96.0,
+            535.0,
+            42.0,
+            12.0
+          ],
+          "text": "Comprar"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            24.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            594.0,
+            7.0,
+            66.0,
+            24.0
+          ],
+          "text": "Itens de missão"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            46.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            464.0,
+            13.0,
+            46.0,
+            12.0
+          ],
+          "text": "Mochila 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            46.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            534.0,
+            13.0,
+            46.0,
+            12.0
+          ],
+          "text": "Mochila 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "Ouro 700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            99.0,
+            11.0
+          ],
+          "text": "Poção de vida pequena"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            75.0,
+            11.0
+          ],
+          "text": "Preço: 40 de ouro"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "ru-medicine-shop.png",
+      "locale": "ru",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            68.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            68.0,
+            11.0
+          ],
+          "text": "(HP) Наркотики"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "Золото: 700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            100.0,
+            535.0,
+            34.0,
+            12.0
+          ],
+          "text": "Купить"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            24.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            594.0,
+            7.0,
+            66.0,
+            24.0
+          ],
+          "text": "Предметы заданий"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            468.0,
+            13.0,
+            39.0,
+            12.0
+          ],
+          "text": "Сумка 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            538.0,
+            13.0,
+            39.0,
+            12.0
+          ],
+          "text": "Сумка 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            70.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            70.0,
+            11.0
+          ],
+          "text": "Цена: 40 золота"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "hi-medicine-shop.png",
+      "locale": "hi",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            49.0,
+            11.0
+          ],
+          "text": "(HP)ड्रग स्मॉल"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            65.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            11.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            601.0,
+            13.0,
+            53.0,
+            12.0
+          ],
+          "text": "कार्य की वस्तुएँ"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            53.0,
+            11.0
+          ],
+          "text": "कीमत: 40 सोना"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            107.0,
+            535.0,
+            21.0,
+            12.0
+          ],
+          "text": "खरीदें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            477.0,
+            13.0,
+            20.0,
+            12.0
+          ],
+          "text": "बैग 1"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            547.0,
+            13.0,
+            20.0,
+            12.0
+          ],
+          "text": "बैग 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "सोना 700"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            20.0,
+            534.0,
+            5.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "id-medicine-shop.png",
+      "locale": "id",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            63.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            63.0,
+            11.0
+          ],
+          "text": "(HP) Obat Kecil"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            56.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            599.0,
+            13.0,
+            56.0,
+            12.0
+          ],
+          "text": "Barang misi"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            108.0,
+            535.0,
+            18.0,
+            12.0
+          ],
+          "text": "Beli"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            46.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "Emas 700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            67.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            67.0,
+            11.0
+          ],
+          "text": "Harga: 40 emas"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            475.0,
+            13.0,
+            24.0,
+            12.0
+          ],
+          "text": "Tas 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            545.0,
+            13.0,
+            24.0,
+            12.0
+          ],
+          "text": "Tas 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "vi-medicine-shop.png",
+      "locale": "vi",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            65.0,
+            11.0
+          ],
+          "text": "(HP) Thuốc nhỏ"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            53.0,
+            11.0
+          ],
+          "text": "Giá: 40 vàng"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            107.0,
+            535.0,
+            21.0,
+            12.0
+          ],
+          "text": "Mua"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            476.0,
+            13.0,
+            23.0,
+            12.0
+          ],
+          "text": "Túi 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            546.0,
+            13.0,
+            23.0,
+            12.0
+          ],
+          "text": "Túi 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "Vàng 700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            24.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            594.0,
+            7.0,
+            66.0,
+            24.0
+          ],
+          "text": "Vật phẩm nhiệm vụ"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "th-medicine-shop.png",
+      "locale": "th",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            73.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            73.0,
+            11.0
+          ],
+          "text": "HP) ขนาดเล็ก (พ.ศ."
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            469.0,
+            13.0,
+            36.0,
+            12.0
+          ],
+          "text": "กระเป๋า 1"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            539.0,
+            13.0,
+            36.0,
+            12.0
+          ],
+          "text": "กระเป๋า 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            111.0,
+            535.0,
+            12.0,
+            12.0
+          ],
+          "text": "ซื้อ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "ทอง 700"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            50.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            50.0,
+            11.0
+          ],
+          "text": "ราคา: 40 ทอง"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            51.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            602.0,
+            13.0,
+            51.0,
+            12.0
+          ],
+          "text": "ไอเทมภารกิจ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    },
+    {
+      "bagBounds": [
+        445.0,
+        0.0,
+        761.0,
+        236.0
+      ],
+      "file": "ar-medicine-shop.png",
+      "locale": "ar",
+      "shopBounds": [
+        0.0,
+        224.0,
+        440.0,
+        558.0
+      ],
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            67.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            258.0,
+            67.0,
+            11.0
+          ],
+          "text": "(HP) Drug Small"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            64.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "+"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            478.0,
+            57.0,
+            12.0,
+            12.0
+          ],
+          "text": "11"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            713.0,
+            212.0,
+            26.0,
+            14.0
+          ],
+          "text": "45"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            485.0,
+            212.0,
+            111.0,
+            14.0
+          ],
+          "text": "700"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            12.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            34.0,
+            530.0,
+            36.0,
+            18.0
+          ],
+          "text": "x1"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            601.0,
+            13.0,
+            53.0,
+            12.0
+          ],
+          "text": "أغراض المهام"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            47.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            10.0,
+            232.0,
+            150.0,
+            16.0
+          ],
+          "text": "الذهب 700"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            54.0,
+            272.0,
+            58.0,
+            11.0
+          ],
+          "text": "السعر: 40 ذهب"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            471.0,
+            13.0,
+            32.0,
+            12.0
+          ],
+          "text": "حقيبة 1"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            541.0,
+            13.0,
+            32.0,
+            12.0
+          ],
+          "text": "حقيبة 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            19.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            108.0,
+            535.0,
+            19.0,
+            12.0
+          ],
+          "text": "شراء"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            534.0,
+            6.0,
+            11.0
+          ],
+          "text": "−"
+        }
+      ]
+    }
+  ],
+  "systemFonts": false
+}

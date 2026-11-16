@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "reviewedAt": "2026-10-25T07:00:23.269Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "state": "independent-readonly-review-no-blocking-found-v2",
+  "scope": "Final v2 source, exact raw closure, in-memory inverse and log/receipt inspection. Reviewer did not import wrapper/product modules or execute tests, templates, prepare/accounts or realm.",
+  "sourceFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+    "bytes": 10830,
+    "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+  },
+  "previousReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v1.json",
+    "bytes": 10774,
+    "sha256": "46f1e40b899ae5973750bdc4ec1a18e53cbbd62f5bef092e9d46462af325fc23"
+  },
+  "closure": {
+    "files": 9,
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "all9RawPinsMatched": true,
+    "oldV1Manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\source-frozen-v1.json",
+      "bytes": 11470,
+      "sha256": "9b6fe294b6941ee8c751d9c4491809c41e9296b04c8a084d294ffc28bf09e06c"
+    },
+    "allOriginalV1_17FilesByteUnchanged": true,
+    "currentCore9RawPinsMatched": true,
+    "actualFoldInspection4PinsMatched": true,
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendRebuilt": false
+  },
+  "sourceDelta": {
+    "productChangedLines": [
+      8,
+      77
+    ],
+    "changes": [
+      "Add actual settle to fixed PHASES enum.",
+      "Replace unconditional pending catch-all with pending-limited owner control context; ordinary nonplayer packets still require regional/current/remembered interest."
+    ],
+    "inverseToV1RawBytesExact": true,
+    "inverseSha256": "c062c325f657c5cc753342749131b0897859ad73cb1f7202b28ffd59d0957112",
+    "old25TestBodiesExact": true,
+    "fakeClassOnlyHook": "Optional onOriginalSend invocation supports new synchronous reentry fixture; no old test assertion was edited."
+  },
+  "blockingFindingDisposition": {
+    "id": "B1-region-scope-pending-bypass",
+    "status": "closed",
+    "actualSourceLine": 77,
+    "earlierReceiptLineNumberCorrection": "The v1 receipt and initial message said76; raw-file line comparison establishes77. The identified expression and exact raw source were correct.",
+    "proof": "Nonplayer sources now require entityRelevant regardless of pending. Only worldSnapshot/MapChanged/MapInformation and UserLocation/Pushed/UserDash/UserDashFail may use pending fallback. A far never-regional spawn/motion/Remove is neither emitted nor remembered; a remembered regional ID still emits later out-of-region motion/removal."
+  },
+  "newFixtureReview": [
+    {
+      "name": "pending cannot emit or remember never-regional far spawn, unknown motion or unknown Remove",
+      "finding": "Checks pending open, negative farObjectMonster90001/unknownWalk90002/Remove90002, preserved original fold and six calls, no leaked IDs; then verifies remembered206613 movement and Remove outside region still emit."
+    },
+    {
+      "name": "synchronous fake inbound reentry is causally before post-send window creation and stays incomplete without ACK credit",
+      "finding": "Checks one saved send+observe under synchronous fake reentry, ordinary sequence2, observe row before send row, pendingOpen=true/complete=false, no ackSuccess/completed fields. It documents the causal limitation rather than inventing correlation."
+    },
+    {
+      "name": "the actual settle phase has a fixed explicit enum instead of being collapsed to other",
+      "finding": "Checks actual settle enum recorded and one original call."
+    }
+  ],
+  "syntheticEvidence": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    "tests": 28,
+    "passed": 28,
+    "failed": 0,
+    "exitCode": 0,
+    "sourceBeforeAfterRawExact": true,
+    "footerMatched": true,
+    "executionAttribution": "Author-run fake-class suite only; reviewer verified actual receipt/log bytes and source closure without rerunning. The core historical187 regression does not constitute wrapper coverage."
+  },
+  "retainedChecks": {
+    "savedOriginalObserveAndSendExactOnce": true,
+    "sameThisAndArguments": true,
+    "identicalOriginalReturnOrThrowObject": true,
+    "originalErrorPriority": true,
+    "noClientSnapshotEventsCommandHintPlanMetricsOrAcceptanceMutation": true,
+    "postOriginalFoldAndRecordSequence": true,
+    "publicFixedEnumsAndNumericFieldsOnly": true,
+    "existingWriterOnlyCallbackContext": true,
+    "connectionsAtMostTwo": true,
+    "rememberedIds64PerConnection": true,
+    "entityProjection32TotalPerRow": true,
+    "receivedEvents64PerPendingIncludingTruncationMarker": true,
+    "singleSendRowAdditional": true,
+    "rowLimit12000PerConnectionIncludingTerminalMarker": true,
+    "truncationOrOpenWindowNotSuccess": true,
+    "unknownMotionNeverSynthesizesEntity": true,
+    "normalUserLocationHasNoObjectIdAndCanClosePending": true
+  },
+  "limitations": [
+    "This is a subset of owner packet/membership/position observations; ObjectRevived is the real object spelling, selfRevived/Hide/Show are not complete lifecycle/visibility coverage.",
+    "Synchronous original-send reentry predates pending creation and leaves diagnostic incomplete; actual Node WS receive is asynchronous, but no zero-risk/zero-impact claim is made.",
+    "Before/after AOI scans, allocation and synchronous writer callback have real overhead and may trigger unchanged lag/cadence/resource/safety gates. Sink/projection exceptions propagate after original call and can stop the driver.",
+    "Diagnostic status is observability completeness only and cannot turn failed12 or historicalformal09 into a passed or capacityAccepted result."
+  ],
+  "verdict": {
+    "blockingFindings": [],
+    "noBlockingFound": true,
+    "B1Closed": true,
+    "suitableForRootToConsiderSeparatelyAuthorizedDiagnosticTemplate": true,
+    "authorizesNew13TemplateOrRun": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "notPerformed": {
+    "testRerun": true,
+    "moduleImport": true,
+    "trackedOrFrozenFileEdit": true,
+    "newTemplate": true,
+    "accountProvisioning": true,
+    "realmOrLoad": true
+  }
+}

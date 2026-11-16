@@ -17,6 +17,130 @@ use super::{
 use super::{stable_file_identity, validate_windows_file_id};
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(1);
+
+#[cfg(windows)]
+mod windows_path_regressions {
+    use super::super::{durable_rename, windows_extended_path};
+    use std::ffi::OsString;
+    use std::fs;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn drive_and_unc_slashes_are_normalized_before_verbatim_prefix() {
+        for (input, expected) in [
+            (
+                "C:/new-parent/missing.json",
+                r"\\?\C:\new-parent\missing.json",
+            ),
+            (
+                r"C:/new-parent\child/missing.json",
+                r"\\?\C:\new-parent\child\missing.json",
+            ),
+            (
+                r"\\server\share\missing.json",
+                r"\\?\UNC\server\share\missing.json",
+            ),
+            (
+                "//server/share/missing.json",
+                r"\\?\UNC\server\share\missing.json",
+            ),
+            (
+                r"\\server/share\child/missing.json",
+                r"\\?\UNC\server\share\child\missing.json",
+            ),
+        ] {
+            let mut expected = expected.encode_utf16().collect::<Vec<_>>();
+            expected.push(0);
+            assert_eq!(
+                windows_extended_path(Path::new(input)).unwrap(),
+                expected,
+                "{input}"
+            );
+        }
+    }
+
+    #[test]
+    fn existing_extended_paths_and_utf16_are_preserved_exactly() {
+        for input in [
+            r"\\?\C:\a\..\missing.json",
+            r"\\?\UNC\server\share\missing.json",
+        ] {
+            let mut expected = input.encode_utf16().collect::<Vec<_>>();
+            expected.push(0);
+            assert_eq!(windows_extended_path(Path::new(input)).unwrap(), expected);
+        }
+        let mut units = r"\\?\C:\unpaired-".encode_utf16().collect::<Vec<_>>();
+        units.push(0xd800);
+        let path = PathBuf::from(OsString::from_wide(&units));
+        units.push(0);
+        assert_eq!(windows_extended_path(&path).unwrap(), units);
+    }
+
+    #[test]
+    fn relative_paths_and_dot_components_do_not_need_existing_targets() {
+        let input = Path::new("not-created/../new-name.json");
+        let absolute = std::env::current_dir().unwrap().join("new-name.json");
+        assert_eq!(
+            windows_extended_path(input).unwrap(),
+            windows_extended_path(&absolute).unwrap()
+        );
+        assert_eq!(
+            windows_extended_path(Path::new("C:/not-created/../new-name.json")).unwrap(),
+            windows_extended_path(Path::new(r"C:\new-name.json")).unwrap()
+        );
+    }
+
+    #[test]
+    fn embedded_nul_is_rejected_without_native_path_truncation() {
+        let path = PathBuf::from(OsString::from_wide(&[
+            b'C' as u16,
+            b':' as u16,
+            b'\\' as u16,
+            0,
+            b'x' as u16,
+        ]));
+        assert_eq!(
+            windows_extended_path(&path).unwrap_err().kind(),
+            std::io::ErrorKind::InvalidInput
+        );
+    }
+
+    #[test]
+    fn durable_rename_accepts_forward_slash_and_mixed_nonexistent_destination() {
+        let root = std::env::temp_dir().join(format!(
+            "mir2-extended-path-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir(&root).unwrap();
+        let from = root.join("before.json");
+        let to = root.join("after.json");
+        fs::write(&from, b"durable-path").unwrap();
+        let slash = |path: &Path| {
+            let units = path
+                .as_os_str()
+                .encode_wide()
+                .map(|u| if u == b'\\' as u16 { b'/' as u16 } else { u })
+                .collect::<Vec<_>>();
+            PathBuf::from(OsString::from_wide(&units))
+        };
+        assert!(!to.exists());
+        durable_rename(&slash(&from), &slash(&to), false).unwrap();
+        assert!(!from.exists());
+        assert_eq!(fs::read(&to).unwrap(), b"durable-path");
+        // Appending through PathBuf supplies a backslash after a slash root.
+        let mixed = slash(&root).join("third.json");
+        durable_rename(&to, &mixed, false).unwrap();
+        assert_eq!(fs::read(&mixed).unwrap(), b"durable-path");
+        fs::remove_file(mixed).unwrap();
+        fs::remove_dir(root).unwrap();
+    }
+}
+
 const TEST_RECOVERY_MAC_KEY: [u8; 32] = [
     0x10, 0x21, 0x32, 0x43, 0x54, 0x65, 0x76, 0x87, 0x98, 0xa9, 0xba, 0xcb, 0xdc, 0xed, 0xfe, 0x0f,
     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xf1, 0x02,
@@ -202,6 +326,152 @@ fn newer_durable_state_is_quarantined_instead_of_overwritten() {
     assert_eq!(summary.quarantined, 1);
     assert_eq!(state.persisted_checkpoint().gold, 3_000);
     assert!(replay_account(&state.config, "demo").is_err());
+}
+
+#[test]
+fn transport_recovery_lost_save_ack_keeps_dead_character_and_learned_skill_exactly_once() {
+    let state = TestState::new("transport-lost-save-ack");
+    let mut original = SimulationSession::new(state.config.clone());
+    original.select_account_for_recovery("demo").unwrap();
+    original.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut checkpoint = original.active_character_checkpoint().unwrap();
+    checkpoint.hp = 0;
+    checkpoint.gold += 777;
+    checkpoint.skill_states_json = vec![serde_json::json!({
+        "key":"FireBall", "name":"FireBall", "description":"Learned recovery skill",
+        "level":2, "experience":321, "hotkey":4, "cooldown_ticks":2,
+        "delay_ms":1800, "cooldown_ends_at":123, "cast_time_ms":2000,
+    })
+    .to_string()];
+    original
+        .restore_active_character_checkpoint(&checkpoint)
+        .unwrap();
+    // Journaling captures the actual runtime snapshot, never a hand-written
+    // JSON string with a different field order than the SkillState encoder.
+    checkpoint = original.active_character_checkpoint().unwrap();
+    let learned: serde_json::Value =
+        serde_json::from_str(&checkpoint.skill_states_json[0]).unwrap();
+    assert_eq!(learned["experience"], 321);
+    assert_eq!(learned["hotkey"], 4);
+    assert_eq!(learned["cooldown_ends_at"], 123);
+    assert_eq!(checkpoint.hp, 0);
+    // Keep the checkpoint from before this CAS, as a lost publication receipt
+    // would. Durable skill metadata must not make this a different character.
+    original.save_active_character_for_logout().unwrap();
+    let durable = state.persisted_checkpoint();
+    assert_eq!(durable.revision, checkpoint.revision + 1);
+    let skill: serde_json::Value = serde_json::from_str(&durable.skill_states_json[0]).unwrap();
+    assert!(skill.get("_runtimeCooldownClock").is_some());
+    journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
+    let before_bytes = serde_json::to_vec(&durable).unwrap();
+
+    let summary = replay_startup(&state.config).unwrap();
+    assert_eq!(summary.replayed, 0);
+    assert_eq!(summary.already_committed, 1);
+    assert_eq!(summary.quarantined, 0);
+    let after = state.persisted_checkpoint();
+    assert_eq!(serde_json::to_vec(&after).unwrap(), before_bytes);
+    assert_eq!(after.hp, 0);
+    assert_eq!(after.map_file_name, checkpoint.map_file_name);
+    assert_eq!(after.position, checkpoint.position);
+    assert_eq!(after.default_npc_events, checkpoint.default_npc_events);
+    assert!(journal_files(&state).is_empty());
+    let again = replay_startup(&state.config).unwrap();
+    assert_eq!(again.replayed, 0);
+    assert_eq!(again.already_committed, 0);
+    assert_eq!(state.persisted_checkpoint().revision, durable.revision);
+}
+
+#[test]
+fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_save_and_replay() {
+    for primary_save in [false, true] {
+        let state = TestState::new(if primary_save {
+            "timer-primary-save"
+        } else {
+            "timer-replay"
+        });
+        let mut original = SimulationSession::new(state.config.clone());
+        original.select_account_for_recovery("demo").unwrap();
+        original.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let mut checkpoint = original.active_character_checkpoint().unwrap();
+        // Isolated but valid held-weapon fixture: preserve the real carrier and
+        // UID, removing it from the bag before assigning sole oven custody.
+        let mut weapon: serde_json::Value = checkpoint
+            .inventory_items_json
+            .iter()
+            .map(|encoded| serde_json::from_str::<serde_json::Value>(encoded).unwrap())
+            .find(|item| item["key"] == "dagger")
+            .unwrap();
+        let uid = weapon["unique_id"].as_u64().unwrap();
+        weapon["user_item_metadata"] = serde_json::json!({
+            "item_index": mir2_game_data::crystal_item_by_name("Dagger").unwrap().item_index,
+            "refine_added": 1, "refined_value": 1, "refine_success_chance": 50,
+        });
+        checkpoint.inventory_items_json.retain(|encoded| {
+            serde_json::from_str::<serde_json::Value>(encoded).unwrap()["unique_id"] != uid
+        });
+        let mut systems: mir2_simulation::Stage5SystemsState =
+            serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
+        systems.refine = mir2_simulation::Stage5RefineState {
+            oven_item_state_json: Some(weapon.to_string()),
+            current_item: Some("dagger".into()),
+            refining: true,
+            ready: false,
+            remaining_ms: 60_000,
+            ..Default::default()
+        };
+        checkpoint.stage5_systems_json = Some(serde_json::to_string(&systems).unwrap());
+        checkpoint.buff_states_json = vec![serde_json::json!({
+            "key":"exp", "name":"Timed experience buff", "description":"Recovery fixture",
+            "expires_at_tick":60, "real_time_duration":60_000,
+            "attack_bonus":0, "defence_bonus":0, "stats":[],
+        })
+        .to_string()];
+        original
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        checkpoint = original.active_character_teardown_checkpoint().unwrap();
+        let frozen_systems: mir2_simulation::Stage5SystemsState =
+            serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(frozen_systems.refine.clock_epoch.is_some());
+        assert!(frozen_systems.refine.remaining_ms > 0);
+        assert!(frozen_systems.refine.remaining_ms <= 60_000);
+        journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
+        if primary_save {
+            original
+                .save_frozen_character_checkpoint_for_logout(&checkpoint)
+                .unwrap();
+        }
+        // Let the actual monotonic oven/buff clocks advance. Verification must
+        // compare the frozen source bytes, not a newly generated World snapshot.
+        std::thread::sleep(std::time::Duration::from_millis(25));
+        let summary = replay_startup(&state.config).unwrap();
+        assert_eq!(summary.replayed, usize::from(!primary_save));
+        assert_eq!(summary.already_committed, usize::from(primary_save));
+        assert_eq!(summary.quarantined, 0);
+        let durable = state.persisted_checkpoint();
+        assert_eq!(durable.revision, checkpoint.revision + 1);
+        assert_eq!(durable.buff_states_json, checkpoint.buff_states_json);
+        assert_eq!(durable.stage5_systems_json, checkpoint.stage5_systems_json);
+        assert_eq!(
+            durable.inventory_items_json,
+            checkpoint.inventory_items_json
+        );
+        assert!(journal_files(&state).is_empty());
+        // Reproduce a lost commit/cleanup ACK: same authenticated pre-CAS
+        // journal, now with a committed source, must not save a second time.
+        journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(25));
+        let again = replay_startup(&state.config).unwrap();
+        assert_eq!(again.replayed, 0);
+        assert_eq!(again.already_committed, 1);
+        assert_eq!(again.quarantined, 0);
+        assert_eq!(
+            serde_json::to_vec(&state.persisted_checkpoint()).unwrap(),
+            serde_json::to_vec(&durable).unwrap()
+        );
+        assert!(journal_files(&state).is_empty());
+    }
 }
 
 #[test]
@@ -507,8 +777,25 @@ fn recovery_directory_cannot_overlap_account_store_parent() {
 
     let error = replay_startup(&config).unwrap_err();
 
-    assert!(error.contains("must be dedicated"));
+    assert!(error.contains("must be dedicated"), "{error}");
     assert!(!state.root.join(DIRECTORY_OWNER_SENTINEL).exists());
+}
+
+#[test]
+fn recovery_path_comparison_resolves_missing_descendants_without_creating_them() {
+    let state = TestState::new("missing-descendants");
+    let missing = state.root.join("not-created").join("accounts.json");
+    let canonical = fs::canonicalize(&state.root).unwrap();
+    assert_eq!(
+        super::absolute_without_parent_components(&missing).unwrap(),
+        canonical.join("not-created").join("accounts.json")
+    );
+    assert!(!state.root.join("not-created").exists());
+    assert!(
+        super::absolute_without_parent_components(&state.root.join(".."))
+            .unwrap_err()
+            .contains("parent-directory")
+    );
 }
 
 #[test]

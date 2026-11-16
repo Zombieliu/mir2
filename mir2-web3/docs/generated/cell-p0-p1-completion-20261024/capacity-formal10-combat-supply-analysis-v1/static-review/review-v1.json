@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:35:56.1200628Z",
+  "scope": "Bounded source/static-model review after formal25 supply failure; no new simulation, path search, scenario, verifier execution or live/raw scan",
+  "sourceState": {
+    "currentHead": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "driverAggregate": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "productModified": false
+  },
+  "actualRunBoundary": {
+    "runId": "1792915219265-d3bcff63",
+    "source": "Root reported ended formal result; this static review did not independently scan formal raw",
+    "passedActorStages": [
+      2,
+      10
+    ],
+    "failedActorStage": 25,
+    "failedStageMeasuredSeconds": 300.326,
+    "failedCombatWindowOrdinals": [
+      3,
+      4
+    ],
+    "unmeasured": [
+      "50",
+      "100",
+      "7200-second soak"
+    ],
+    "capacityAccepted": false
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "conclusion": "The current scene has one shared cluster, not ten independent target pools",
+      "proof": "candidate-100-repaired-v4.json combatClusters contains one entry with all 10 combat indices and all 90 movement indices",
+      "implication": "Prefix25 doubles fighters from1 to2 while canonical stable targets rise28 to33. Actual contention/depletion needs per-fighter raw evidence; aggregate counts cannot be assigned to each fighter independently."
+    },
+    {
+      "id": "S2",
+      "conclusion": "The proposed blanket8x6 exclusion explanation is contradicted by the generator",
+      "proof": "static-lib.mjs69-70: danger requires non-neutral AI and template max_dc>2. Deer AI2 is neutral; Scarecrow AI0 has max_dc2. Neither enters dangerMask. Lines84-85 separately reject canonical initial occupancy in the9-cell body; the25-cell halo only needs static terrain/NPC/transfer clearance.",
+      "implication": "Retain initial occupied-body rejection. Loosening the8x6 rule for these two species cannot recover anchors because they were already excluded from that mask. This is collision-safe initial placement, not proof against later roaming monsters."
+    },
+    {
+      "id": "S3",
+      "conclusion": "Scarecrow is mobile hostile AI0, not an immobile harmless dummy",
+      "proof": "monsters.rs1031-1039 classifies AI0 Hostile/targets_players; zone/runtime.rs13398-13409 dispatches AI2 passive behavior first, then generic hostile targeting/movement/attacks. Scarecrow template has view7, move1500ms, DC1..2.",
+      "implication": "Intact ordinary BaseDress AC2 can conditionally mitigate its ordinary physical DC1..2, but actual equipment/durability/status and other attackers must be observed. It may still move and occupy a patrol cell."
+    },
+    {
+      "id": "S4",
+      "conclusion": "Respawn and increasing ordinary damage reduce sustainable per-slot attack stock",
+      "proof": "Current target rules have Deer3/4-minute and Scarecrow5-minute delays. Death sets due_at at death; harvest-AI corpse expires after180s and may gate refresh until removal. The delay is not death+policy+another3minutes. Starter DC rises with floor(level/5), subject to real skills/equipment.",
+      "implication": "The existing model gives conditional expected positive-hit stock, not valid launched-attempt throughput, per-fighter allocation or any60-second guarantee."
+    },
+    {
+      "id": "S5",
+      "conclusion": "Static route existence does not prove bounded online scout completion",
+      "proof": "Existing representative originalfirst4/4000 paths pass, but circuit lengths grow97/172/372/886 unit steps. Some50/100 legs have53..65 steps against the unchanged24 confirmed movement/20-second waypoint budget.",
+      "implication": "Measure time actually spent scouting, route progress and genuine eligible target inventory before adopting a denser or shorter layout."
+    },
+    {
+      "id": "S6",
+      "conclusion": "No direct durable harmless replacement exists inside this exact ordinary map0 two-name contract",
+      "proof": "TrainingMob template has HP9999/AI56 but AI56 is Neutral and not in harvest AI1/2/4/5/7/9/28/35/153. Zone melee eligibility (runtime.rs250/types.rs1381) therefore does not admit it as an ordinary hostile/livestock target. It is not in the five-name capacity whitelist or current explicit Deer+Scarecrow scene; prior narrow manifest search found no map0 TrainingMob respawn.",
+      "implication": "Do not spawn, relocate, change disposition, change melee eligibility or extend the named target set to manufacture this acceptance. Hen HP5 is less durable; HookingCat/RakingCat HP30/32 and DC2..4 are not zero-risk substitutes and are outside the exact two-name scenario."
+    }
+  ],
+  "nativeTemplateFacts": [
+    {
+      "name": "TrainingMob",
+      "index": 8,
+      "ai": 56,
+      "level": 99,
+      "hp": 9999,
+      "dc": [
+        1,
+        1
+      ],
+      "ac": [
+        0,
+        0
+      ],
+      "attackMs": 2500,
+      "moveMs": 1200,
+      "view": 7,
+      "experience": 0
+    },
+    {
+      "name": "Hen",
+      "index": 29,
+      "ai": 1,
+      "level": 2,
+      "hp": 5,
+      "dc": [
+        1,
+        1
+      ],
+      "ac": [
+        0,
+        0
+      ],
+      "attackMs": 3000,
+      "moveMs": 1400,
+      "view": 7,
+      "experience": 9
+    },
+    {
+      "name": "Deer",
+      "index": 30,
+      "ai": 2,
+      "level": 12,
+      "hp": 25,
+      "dc": [
+        2,
+        4
+      ],
+      "ac": [
+        0,
+        0
+      ],
+      "attackMs": 3000,
+      "moveMs": 1400,
+      "view": 7,
+      "experience": 18
+    },
+    {
+      "name": "Scarecrow",
+      "index": 39,
+      "ai": 0,
+      "level": 10,
+      "hp": 20,
+      "dc": [
+        1,
+        2
+      ],
+      "ac": [
+        0,
+        0
+      ],
+      "attackMs": 2500,
+      "moveMs": 1500,
+      "view": 7,
+      "experience": 15
+    },
+    {
+      "name": "HookingCat",
+      "index": 42,
+      "ai": 0,
+      "level": 13,
+      "hp": 30,
+      "dc": [
+        2,
+        4
+      ],
+      "ac": [
+        0,
+        0
+      ],
+      "attackMs": 2500,
+      "moveMs": 1500,
+      "view": 7,
+      "experience": 23
+    },
+    {
+      "name": "RakingCat",
+      "index": 44,
+      "ai": 0,
+      "level": 13,
+      "hp": 32,
+      "dc": [
+        2,
+        4
+      ],
+      "ac": [
+        0,
+        0
+      ],
+      "attackMs": 2500,
+      "moveMs": 1500,
+      "view": 7,
+      "experience": 27
+    }
+  ],
+  "conditionalPrefixTable": [
+    {
+      "actors": 10,
+      "fighters": 1,
+      "canonicalStableTargets": 28,
+      "targetCounts": {
+        "Deer": 21,
+        "Scarecrow": 7
+      },
+      "requiredLaunchedPerMinute": 18,
+      "requiredPositiveHitsPerMinute": 12,
+      "conditionalExpectedPositiveHitsPerMinute": [
+        {
+          "level": 1,
+          "rate": 57.722063220564486
+        },
+        {
+          "level": 5,
+          "rate": 44.09352232891327
+        },
+        {
+          "level": 10,
+          "rate": 35.816186556927306
+        },
+        {
+          "level": 15,
+          "rate": 30.787654320987638
+        }
+      ],
+      "fixedOrderSecondCircuitUnitSteps": 97,
+      "maxLegUnitSteps": 22
+    },
+    {
+      "actors": 25,
+      "fighters": 2,
+      "canonicalStableTargets": 33,
+      "targetCounts": {
+        "Deer": 24,
+        "Scarecrow": 9
+      },
+      "requiredLaunchedPerMinute": 36,
+      "requiredPositiveHitsPerMinute": 24,
+      "conditionalExpectedPositiveHitsPerMinute": [
+        {
+          "level": 1,
+          "rate": 67.06458101651927
+        },
+        {
+          "level": 5,
+          "rate": 51.23376009754608
+        },
+        {
+          "level": 10,
+          "rate": 41.61659807956105
+        },
+        {
+          "level": 15,
+          "rate": 35.791358024691334
+        }
+      ],
+      "fixedOrderSecondCircuitUnitSteps": 172,
+      "maxLegUnitSteps": 27
+    },
+    {
+      "actors": 50,
+      "fighters": 5,
+      "canonicalStableTargets": 62,
+      "targetCounts": {
+        "Deer": 40,
+        "Scarecrow": 22
+      },
+      "requiredLaunchedPerMinute": 90,
+      "requiredPositiveHitsPerMinute": 60,
+      "conditionalExpectedPositiveHitsPerMinute": [
+        {
+          "level": 1,
+          "rate": 122.35110953050285
+        },
+        {
+          "level": 5,
+          "rate": 93.49254686785541
+        },
+        {
+          "level": 10,
+          "rate": 75.94650205761319
+        },
+        {
+          "level": 15,
+          "rate": 65.42962962962966
+        }
+      ],
+      "fixedOrderSecondCircuitUnitSteps": 372,
+      "maxLegUnitSteps": 55
+    },
+    {
+      "actors": 100,
+      "fighters": 10,
+      "canonicalStableTargets": 123,
+      "targetCounts": {
+        "Deer": 80,
+        "Scarecrow": 43
+      },
+      "requiredLaunchedPerMinute": 180,
+      "requiredPositiveHitsPerMinute": 120,
+      "conditionalExpectedPositiveHitsPerMinute": [
+        {
+          "level": 1,
+          "rate": 244.02017408015809
+        },
+        {
+          "level": 5,
+          "rate": 186.46033125031784
+        },
+        {
+          "level": 10,
+          "rate": 151.46616369455873
+        },
+        {
+          "level": 15,
+          "rate": 130.4736625514403
+        }
+      ],
+      "fixedOrderSecondCircuitUnitSteps": 886,
+      "maxLegUnitSteps": 65
+    }
+  ],
+  "modelAssumptions": [
+    "Existing DP reused, not recomputed: uniform integer DC, AC0, intact ordinary WoodenSword, no added skills/buffs/critical/gear upgrades. Real Slaying, ordinary progression and durability can change the result.",
+    "Stable target counts use the conservative same observer/all9 patrol positions/same prospective attack tile within6 geometry and original accepted paths; they do not establish live owner AOI, current target life, slot availability or actual send-time witness.",
+    "Positive hits and launched attacks remain separate:100 needs180 launched AND120 positive per minute. Expected130.474 positive at level15 is not proof of180 launches. No synthetic misses, retries or denominator changes.",
+    "The closed-pool XP model is deliberately overgenerous and excludes external targets/quests. Its five-hour309270XP<level20 cumulative456900 does not prove a fresh two-hour run must fail."
+  ],
+  "nextDecision": {
+    "first": "Use partition forensic evidence for the failed25 windows: actor levels/equipped condition, actual launch/hit counts, live eligible ordinary targets, closest real witness, scout/chase time, target lifetimes and shared claims. A confirmed planner/claim bug takes priority over a replacement scene.",
+    "ifDepletionOrTravelIsConfirmed": "An explicitly new ordinary layout with shorter tours and independently accounted local target/witness pools is an engineering option. Validate actual same-map stable6 visibility, prefix2/10/25/50/100 geometry, original4x8x4000 routes and bounded24ACK/20s scout progression before a new run. More static density alone is not an acceptance result.",
+    "notAuthorizedOrProven": [
+      "No new scene/realm/launcher generated",
+      "No product or rule change",
+      "No relaxation of18launched/12positive,95percent completion, Run50percent,80cells,750ms cadence,900ms dual-end damage proof, stable6 or safety constraints",
+      "No conclusion that server capacity,25 failure root cause,100 workload or two-hour soak has passed"
+    ],
+    "capacityAccepted": false,
+    "p2ImplementationPermitted": false
+  },
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/stats.rs",
+      "bytes": 31065,
+      "sha256": "4e075d9af585560c0db0fadb29a75610e217858bcbc766e6e2ef4f1d04335ece"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "bytes": 7779,
+      "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    }
+  ],
+  "reviewCompleted": true,
+  "accepted": false,
+  "capacityAccepted": false
+}

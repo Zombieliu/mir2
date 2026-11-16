@@ -1,0 +1,26 @@
+{
+  "recordedAtUtc": "2026-10-30T11:08:43.1714592Z",
+  "schema": "mir2.promotion-hydration-timezone-diagnosis.v1",
+  "realBusinessPosts": 0,
+  "sourceRevision": "d10e5a98647f88aca6b7dc9f4fada3c247dbf0b5",
+  "url": "https://mir2.obelisk.build/promotions?lang=zh-CN#earnings",
+  "method": "Two separate anonymous Playwright browser contexts, same public URL; no fixture responses or POST",
+  "cases": [
+    {
+      "browserTimezone": "UTC",
+      "pageErrorCount": 0,
+      "documentHttp": 200,
+      "footerTimezone": "UTC"
+    },
+    {
+      "browserTimezone": "Asia/Shanghai",
+      "pageErrorCount": 1,
+      "documentHttp": 200,
+      "footerTimezone": "Asia/Shanghai",
+      "reactError": "418 hydration text mismatch"
+    }
+  ],
+  "initialReport": "PUBLIC-BROWSER-INITIAL-HYDRATION.json",
+  "userCookiesRead": false,
+  "conclusion": "Synchronous footer timezone differed between UTC SSR and Asia/Shanghai first client render"
+}

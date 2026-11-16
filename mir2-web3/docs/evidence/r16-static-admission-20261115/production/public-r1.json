@@ -1,0 +1,212 @@
+{
+  "cohort": "r1",
+  "source": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+  "accepted": true,
+  "functionalPassed": true,
+  "summaryPassed": true,
+  "normalSystemNetwork": true,
+  "timing": {
+    "clockEpochMs": 1794700027282,
+    "authoritativeLoginSuccessMs": 72695,
+    "startIntentMs": 103168,
+    "startAckMs": 106760,
+    "authoritativeStarterMapMs": 106769,
+    "authoritativeSelfMs": 106769,
+    "firstPlayableObservedMs": 110105,
+    "terrainPaintVerifiedMs": 123678,
+    "sharedHudObservedMs": 168145,
+    "logoutIntentMs": 179847,
+    "logoutAckMs": 180877,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 72698,
+    "starterRegionWireHeadersMs": 73959.356,
+    "starterRegionResponseEventMs": 73982,
+    "starterRegionBodyMs": 74317,
+    "starterRegionCommitMs": 106918,
+    "sceneSpritesReadyMs": 107011,
+    "localeRequestMs": 72699,
+    "localeBodyMs": 73960,
+    "localeReadyMs": 73995,
+    "firstPlayableFrameMs": 110022,
+    "rendererBodyMs": 122805
+  },
+  "moveAckMs": 207,
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 20,
+      "packet": "UserInformation",
+      "atMs": 110231
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "41454c147c8391ded6fc3a3bba6c89090b96ebc872f8af68d90b180c96695d27"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 110231
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 110234
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 110438
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 110552
+    }
+  },
+  "approval": {
+    "passed": true,
+    "approveUiClicks": 1,
+    "forbiddenCount": 0,
+    "onlySignedLogin": true
+  },
+  "internalQaWallets": 1,
+  "internalQaRoles": 1,
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "prewarm": {
+    "passed": true,
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    }
+  },
+  "sharedHud": {
+    "passed": true,
+    "questPassed": true
+  },
+  "workerRestartPassed": true,
+  "normalLogout": true,
+  "returnedToSelect": true,
+  "ui": {
+    "engine": "chrome",
+    "headlessDesktopViewport": true,
+    "networkMock": false,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "browserClosed": true
+  },
+  "mobileClosed": true,
+  "resourceErrors": [],
+  "captures": {
+    "waterfallRows": 1062,
+    "waterfallDropped": 0,
+    "waterfallTruncated": false,
+    "transportRows": 697,
+    "transportDropped": 0,
+    "transportTruncated": false,
+    "configuredSourceBases": [
+      "https://numeron.obelisk.build",
+      "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
+    ]
+  },
+  "auxiliaryCacheAudit": {
+    "valid": false,
+    "reason": "Observer assumed wrong cache-name prefix; selected zero real caches. Raw92 missing rows are invalid for asset presence. Production classifier unaffected.",
+    "rawSha256": "ea7f793829f420bec92bffa47448a5931e13e816e0ce7f04eb7a5c50bb39d054"
+  }
+}

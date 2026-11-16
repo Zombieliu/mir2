@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "release": "v21-r3",
+  "comparedTo": "v21-r2",
+  "runtimeComponentsIdentical": true,
+  "preservedOldEntries": 51085,
+  "files": 51319,
+  "bytes": 975944888,
+  "manifestSha256": "67f481be5d4a0ad82e911c394fc96bb77d71d5b445b7661ccfefd36e849edfdf",
+  "gatewaySha256": "c70aef2d2733635964a44c5973ad48cdb87919e4758a6336058106af3a51c063",
+  "assetPin": "05cd8adb07bedbf15bf95f26c08dd7232a987d80ce7b1543d92d52b1dc159490",
+  "finiteFiles": 42724,
+  "changed": 236,
+  "newFiles": 234,
+  "removed": 0,
+  "privateDataPackaged": false,
+  "thinGate": {
+    "bytes": 737960507,
+    "limit": 377487360,
+    "passed": false
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.shared-zone-linux-release.v1",
+  "sourceSha": "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+  "workflowRunId": "43677385790",
+  "passed": true,
+  "logs": {
+    "SHARED-ZONE-INTEGRATION.log": {
+      "passed": 246,
+      "bytes": 72455,
+      "sha256": "16fb86a7de647dae6add82a5d6e6696cd576aaa97063ff2e6ebd1fd2e55b6201"
+    },
+    "SHARED-ZONE-UNIT.log": {
+      "passed": 24,
+      "bytes": 89762,
+      "sha256": "dce8c90ed893bbe20910d58d25ec34880cc4708c32910e701db5d53c3c633c99"
+    },
+    "SHARED-ZONE-GATEWAY.log": {
+      "passed": 33,
+      "bytes": 63447,
+      "sha256": "f70752ce63b0d73eb741bf711f5ed274971c2261cc5ecf1916ea58c12edaaa86"
+    }
+  },
+  "testsExecuted": 303,
+  "publicBrowserAcceptance": false,
+  "productionChanged": false
+}

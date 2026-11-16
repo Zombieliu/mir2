@@ -1,0 +1,80 @@
+{
+  "schema": "numeron.website.production-release.v2",
+  "status": "published-and-verified",
+  "sourceSha": "aecf01a81d1a3552bb15283e06859e5a9f59d169",
+  "contentCommit": "cf1d1514df315595802e5992d46eced60325aa06",
+  "branch": "codex/windows-player-journey",
+  "teamId": "team_pXY7oaLtibSTlKSmKXMXzrQR",
+  "projectId": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+  "deploymentId": "dpl_C56xb5m5UAS5WYZ4H8mCYojr3HCq",
+  "deploymentUrl": "https://numeron-legend-of-rebirth-77ztq975u-obelisk-labs.vercel.app",
+  "publicOrigin": "https://numeron.obelisk.build",
+  "baselineDeploymentId": "dpl_4dXyLJo6QFudTXzKNS6kbuEMFJd4",
+  "firstDeploymentId": "dpl_J6GgqbvBAomNrVXpNxr5RUjGWKfm",
+  "firstDeploymentSource": "cf1d1514df315595802e5992d46eced60325aa06",
+  "fix": "Public redirect check found an empty wildcard adds a trailing slash on Vercel. Added explicit /game and /promotions root redirects, then built, checked and promoted the exact new commit.",
+  "finalCandidateChecks": [
+    {
+      "path": "/game?lang=zh-CN",
+      "status": 307,
+      "location": "https://mir2.obelisk.build/game?lang=zh-CN",
+      "passed": true
+    },
+    {
+      "path": "/promotions?lang=zh-CN",
+      "status": 307,
+      "location": "https://mir2.obelisk.build/promotions?lang=zh-CN",
+      "passed": true
+    },
+    {
+      "path": "/promotions/invite/release-probe?campaignId=release-probe",
+      "status": 307,
+      "location": "https://mir2.obelisk.build/promotions/invite/release-probe?campaignId=release-probe",
+      "passed": true
+    },
+    {
+      "path": "/zh-CN/guide",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "path": "/zh-CN/download",
+      "status": 200,
+      "passed": true
+    }
+  ],
+  "finalAlias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_C56xb5m5UAS5WYZ4H8mCYojr3HCq",
+    "projectId": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA"
+  },
+  "gameBefore": {
+    "revision": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3"
+  },
+  "gameAfter": {
+    "revision": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3"
+  },
+  "buildRequest": {
+    "name": "numeron-legend-of-rebirth",
+    "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+    "target": "production",
+    "gitSource": {
+      "type": "github",
+      "repoId": 1218375787,
+      "ref": "aecf01a81d1a3552bb15283e06859e5a9f59d169"
+    },
+    "projectSettings": {
+      "rootDirectory": "mir2-web3/apps/website",
+      "framework": "nextjs",
+      "nodeVersion": "22.x",
+      "installCommand": "npm ci --no-audit --no-fund",
+      "buildCommand": "NEXT_PUBLIC_SITE_URL=https://numeron.obelisk.build NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL=https://assets.mir2.obelisk.build/client-updates/installers/4e56e9d6f30ff02ffb07acbd78c5f29450387313747ad60d9d3937d452c7d1be/Mir2Setup.exe npm run build"
+    },
+    "meta": {
+      "releaseScope": "numeron-website-docs-organized",
+      "sourceSha": "aecf01a81d1a3552bb15283e06859e5a9f59d169"
+    }
+  },
+  "scope": "Website only. No Docker, game backend, Windows release, credentials, wallet transactions or database changes.",
+  "browserVerification": "Production screenshot visually verified. DOM interaction tooling timed out; no fresh production search-interaction claim. Matching source had prior local desktop/mobile interaction evidence."
+}

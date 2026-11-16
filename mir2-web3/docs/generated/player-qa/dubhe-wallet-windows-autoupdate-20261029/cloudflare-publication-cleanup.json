@@ -1,0 +1,131 @@
+{
+  "schema": "mir2.wallet.cloudflare-publication-cleanup.v1",
+  "startedAt": "2026-10-28T21:28:12.583Z",
+  "finishedAt": "2026-10-28T21:29:00.385Z",
+  "passed": true,
+  "steps": [
+    {
+      "kind": "temporary-bic-rule",
+      "path": "/zones/99ce48eea9b3d1ae966cd998df110fd7/rulesets/84a6b4784c4149d3a54fbec09d01dc8d/rules/af22e7f8abd44da0a2de6c8a2a3e64b0",
+      "status": 200,
+      "success": true,
+      "errors": []
+    },
+    {
+      "kind": "temporary-route",
+      "path": "/zones/99ce48eea9b3d1ae966cd998df110fd7/workers/routes/ffd9b6d20f0b4eeba85fa60c7f1ec4ce",
+      "status": 200,
+      "success": true,
+      "errors": []
+    },
+    {
+      "kind": "temporary-worker",
+      "path": "/accounts/85bf64d86ea9221e172d26feba9fd47e/workers/scripts/mir2-wallet-native-publisher-20261029",
+      "status": 200,
+      "success": true,
+      "errors": []
+    }
+  ],
+  "before": {
+    "mainRule": {
+      "action": "set_config",
+      "action_parameters": {
+        "bic": false
+      },
+      "description": "Mir2 public native downloads: desktop HTTP clients",
+      "enabled": true,
+      "expression": "(http.host eq \"assets.mir2.obelisk.build\" and http.request.method in {\"GET\" \"HEAD\"} and (http.request.uri.path in {\"/client-updates/latest.json\" \"/client-updates/latest.p7s\" \"/client-updates/five-class/latest.json\" \"/client-updates/five-class/latest.p7s\"} or starts_with(http.request.uri.path, \"/client-updates/releases/\") or starts_with(http.request.uri.path, \"/client-updates/feeds/\") or starts_with(http.request.uri.path, \"/client-updates/installers/\") or starts_with(http.request.uri.path, \"/client-updates/five-class/releases/\") or starts_with(http.request.uri.path, \"/client-updates/five-class/feeds/\") or starts_with(http.request.uri.path, \"/client-updates/five-class/installers/\")))",
+      "id": "21672a0ba48849df876afac9369b1f9f",
+      "last_updated": "2026-10-28T16:59:35.450764Z",
+      "ref": "mir2_public_native_downloads_bic",
+      "version": "2"
+    },
+    "temporaryRule": {
+      "action": "set_config",
+      "action_parameters": {
+        "bic": false
+      },
+      "description": "Temporary fixed signed Mir2 native publication transport 20261029",
+      "enabled": true,
+      "expression": "(http.host eq \"assets.mir2.obelisk.build\" and http.request.method in {\"GET\" \"HEAD\" \"PUT\"} and starts_with(http.request.uri.path, \"/__mir2-native-publisher-20261029/\"))",
+      "id": "af22e7f8abd44da0a2de6c8a2a3e64b0",
+      "last_updated": "2026-10-28T18:51:09.112758Z",
+      "ref": "mir2_native_publisher_temporary_20261029",
+      "version": "1"
+    },
+    "mainRoute": {
+      "id": "4b15131031c44d1db952cb90bfd50f4a",
+      "pattern": "assets.mir2.obelisk.build/client-updates/*",
+      "script": "mir2-native-downloads",
+      "request_limit_fail_open": false
+    },
+    "temporaryRoute": {
+      "id": "ffd9b6d20f0b4eeba85fa60c7f1ec4ce",
+      "pattern": "assets.mir2.obelisk.build/__mir2-native-publisher-20261029/*",
+      "script": "mir2-wallet-native-publisher-20261029",
+      "request_limit_fail_open": false
+    },
+    "reader": {
+      "compatibility_date": "2026-10-02",
+      "bindings": [
+        {
+          "bucket_name": "mir2-web3-assets",
+          "name": "MIR2_ASSETS",
+          "type": "r2_bucket"
+        }
+      ]
+    },
+    "temporarySubdomain": {
+      "enabled": false,
+      "previews_enabled": false
+    }
+  },
+  "after": {
+    "schema": "mir2.wallet.cloudflare-cleanup-readback.v1",
+    "passed": true,
+    "checkedUtc": "2026-10-28T21:29:00.385Z",
+    "temporaryRuleAbsent": true,
+    "temporaryRouteAbsent": true,
+    "temporaryWorkerAbsent": true,
+    "temporaryWorkerGetStatus": 404,
+    "deletedWorkerLookup": {
+      "status": 404,
+      "code": 10007,
+      "absent": true,
+      "expected404ReportedAsConnectorException": true
+    },
+    "mainRuleUnchanged": true,
+    "mainRouteUnchanged": true,
+    "readerUnchanged": true,
+    "mainRule": {
+      "action": "set_config",
+      "action_parameters": {
+        "bic": false
+      },
+      "description": "Mir2 public native downloads: desktop HTTP clients",
+      "enabled": true,
+      "expression": "(http.host eq \"assets.mir2.obelisk.build\" and http.request.method in {\"GET\" \"HEAD\"} and (http.request.uri.path in {\"/client-updates/latest.json\" \"/client-updates/latest.p7s\" \"/client-updates/five-class/latest.json\" \"/client-updates/five-class/latest.p7s\"} or starts_with(http.request.uri.path, \"/client-updates/releases/\") or starts_with(http.request.uri.path, \"/client-updates/feeds/\") or starts_with(http.request.uri.path, \"/client-updates/installers/\") or starts_with(http.request.uri.path, \"/client-updates/five-class/releases/\") or starts_with(http.request.uri.path, \"/client-updates/five-class/feeds/\") or starts_with(http.request.uri.path, \"/client-updates/five-class/installers/\")))",
+      "id": "21672a0ba48849df876afac9369b1f9f",
+      "last_updated": "2026-10-28T16:59:35.450764Z",
+      "ref": "mir2_public_native_downloads_bic",
+      "version": "2"
+    },
+    "mainRoute": {
+      "id": "4b15131031c44d1db952cb90bfd50f4a",
+      "pattern": "assets.mir2.obelisk.build/client-updates/*",
+      "script": "mir2-native-downloads",
+      "request_limit_fail_open": false
+    },
+    "reader": {
+      "compatibility_date": "2026-10-02",
+      "bindings": [
+        {
+          "bucket_name": "mir2-web3-assets",
+          "name": "MIR2_ASSETS",
+          "type": "r2_bucket"
+        }
+      ]
+    }
+  },
+  "readbackReconciledAfterExpected404": true
+}

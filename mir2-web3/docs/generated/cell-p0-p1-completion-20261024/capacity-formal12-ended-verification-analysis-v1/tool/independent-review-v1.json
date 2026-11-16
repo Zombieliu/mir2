@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:06:01.062Z",
+  "scope": "Independent bounded static source review of ended Formal12 tool only. No target import, product test, verifier execution, raw/monitor/executable scan or game verdict adjudication.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\preparation-v1.json",
+    "bytes": 8492,
+    "sha256": "8fde87b96887f5dc11402753a05e0435bc2c78dbba31496c0774ee63fa0615bc"
+  },
+  "sourceFiles": [
+    {
+      "path": "verify-ended-formal12-v1.mjs",
+      "bytes": 31367,
+      "sha256": "1fd990313efba763df9ceb233071adc8e5f65b4172e7981c822a42220d098ef0"
+    },
+    {
+      "path": "formal-contract-v1.mjs",
+      "bytes": 6103,
+      "sha256": "10be94d3fc062f442caa9b46f00f4d5eebaeafd0200f39273a2a1881a19e3361"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "path": "run-ended-formal12-v1.mjs",
+      "bytes": 2259,
+      "sha256": "9412fe9f12c8433677b81494a984333f8a1248860c7844e6222b8dce6e3ee728"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-proof-v1.json",
+      "bytes": 35567,
+      "sha256": "2e32a5fc6c8345597bf5064e005dcb925f2aee16dcfd31a10e06340ae4657635"
+    }
+  ],
+  "sourceAggregate": "ac544bdecf744eff7850dc093f4ca00300d62cedc155d659d9ec0b60de774223",
+  "totalSourceBytes": 83989,
+  "allSevenCurrentRawPinsMatched": true,
+  "derivationChecks": [
+    {
+      "file": "verify-ended-formal12-v1.mjs",
+      "hunks": 8,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "formal-contract-v1.mjs",
+      "hunks": 2,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "hunks": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "expected-formal-policy-v1.json",
+      "hunks": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "run-ended-formal12-v1.mjs",
+      "hunks": 1,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "seal-tool-source-v1.mjs",
+      "hunks": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "unchangedRawHelpers": [
+    "hp-proof-contract-v2.mjs",
+    "expected-formal-policy-v1.json",
+    "seal-tool-source-v1.mjs"
+  ],
+  "currentFreezeAdaptation": {
+    "probe16Source": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe16-independent-verification-v1/verify-ended-probe16-v1.mjs",
+      "bytes": 30334,
+      "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+    },
+    "commonSourceBlockBytes": 2909,
+    "current6759AndHistorical19099AndActual210BlockExact": true,
+    "probeOnlyForcedCapacityFalseAssertionsNotAppliedToFormal": true,
+    "reason": "Formal acceptance uses original raw verifier and full formal shape; it must not inherit a probe-only always-false acceptance assertion."
+  },
+  "checks": {
+    "actualFormal12CatalogLiteralMatchesFrozenCollector": true,
+    "actualRunIdAndPidsAndSourceConfigAnd108SealExplicit": true,
+    "backendD24044Binary1980AndNode5ba210DistinctFromHistoricalWire6d": true,
+    "currentFreezePriorRefAndRegressionBeforeAfterExactRequired": true,
+    "sixDeclarationsReadFromHistoricalBasisAndComparedToReportSidecarCatalog": true,
+    "allOriginalSevenPhases146ActualMinuteWindowsAnd7200Resume5Save5Post60Retained": true,
+    "completeShapeSuccessOnly": true,
+    "emptyStagesAndFailurePartialAllowedWithoutPromotion": true,
+    "actualMeasuredSecondsWholePhaseAndReal60SecondWindowChecksPreserved": true,
+    "hpZeroHasNoDoseProof": true,
+    "wireIncompletenessSeparatedFromGameVerdict": true,
+    "monitorMemoryAndTelemetryBoundsUnchanged": true,
+    "explicitRootSealerAndEndedRunnerWithWxAndPrePostRawPinChecks": true,
+    "originalVerifierFailureExitPreserved": true,
+    "noAccountPrivateOrRealmOperations": true
+  },
+  "observedSyntaxEvidence": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\preparation-v1.json",
+      "bytes": 8492,
+      "sha256": "8fde87b96887f5dc11402753a05e0435bc2c78dbba31496c0774ee63fa0615bc"
+    },
+    "recordedNodeChecks": 5,
+    "allRecordedExit0": true,
+    "repeatedByReviewer": false
+  },
+  "limitations": [
+    "Source contract approval only; actual ended consistency requires Root cleanup, closed original report/raw, collection and explicit verifier execution.",
+    "No report or raw from the current run was read by this review. No game PASS, capacity, P0 or P2 conclusion is made.",
+    "Trusted producer readline full-line allocation precedes the inherited64MiB line bound; no unrelated framework change introduced.",
+    "Original memory suffix arithmetic and missing exact warmup-cutoff limitation are retained."
+  ],
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": []
+  },
+  "targetImportsExecuted": false,
+  "testsExecuted": false,
+  "actualVerifierExecuted": false,
+  "rawOrMonitorRead": false,
+  "executableRehashed": false,
+  "privateDataRead": false,
+  "sourceModified": false,
+  "rootP0AcceptanceAdjudicated": false,
+  "p2ImplementationPermitted": false
+}

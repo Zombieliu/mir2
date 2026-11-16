@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "jsonDocuments": 12,
+  "checkedDocumentationLinks": 636,
+  "privateInputDigestsMatched": 5,
+  "producerHashesMatched": true,
+  "publicUrlQueryOrCredentialsExported": false,
+  "testCount": 16,
+  "failed": 0,
+  "productionChanged": false,
+  "goalComplete": false,
+  "scope": "Evidence schema/links/hash/privacy checks; no additional gameplay or network pass inferred"
+}

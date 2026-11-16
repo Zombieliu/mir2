@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.wallet.s24-tool-verification.v1",
+  "checkedUtc": "2026-10-28T20:48:59.2438420Z",
+  "nodeWorkerTestsPassed": 23,
+  "nativeWorkerdTestsPassed": 4,
+  "publicVerifierOfflineTestsPassed": 6,
+  "privateConfigAclAppliedBeforeSecret": true,
+  "syntheticTestsDoNotAssertRealCms": true,
+  "localWorkerdCompatibility": "2026-07-30",
+  "deploymentCompatibility": "2026-10-28",
+  "sha256": {
+    "test-worker-s24.mjs": "EAFAB29735B285F02710FCDE591A9ECB87CFAF4BA5585565C61CCB5C67FDCF42",
+    "test_verify_public_release_s24.py": "8DEAEC725B1CFF894AE53024C7389E06431E3B0349B57C3EC7D556EC23C0DFD7",
+    "generate_publisher_s24.py": "9C38752F990A5A85F9C1B68833102775D281250AFB9C5F0127EE23738AD2A78E",
+    "initialize-private-s24.ps1": "FF3A3B6E43F43E12AC9ABC0854B3BE26DB97175B640FCA99681FE8939B7BF186",
+    "test-workerd-s24.mjs": "BA2326702A89E623813F39628B97FDE924DF741B45E42E398AFF645FC815B2FC",
+    "verify_public_release_s24.py": "2CE2361333AADBDC0EF138E8318ADD9964114524694579F09D449714DEB777F3"
+  }
+}

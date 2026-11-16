@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "fishing-regression",
+  "startedUtc": "2026-10-08T16:38:46.1029737Z",
+  "finishedUtc": "2026-10-08T16:38:56.2551252Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "fishing",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "b979bb2a61402878d077edf1450cbca31d640ddfb233c3a40ad78b587b0d983d",
+  "declaredInputs": 460,
+  "sourceDrift": [],
+  "cargoLogSha256": "bdd780423e57748b2d0fb7282980774f93bd1c9061f1c30b033e8f204789e116",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

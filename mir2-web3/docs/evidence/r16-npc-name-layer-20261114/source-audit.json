@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "kind": "npc-name-source-only-audit",
+  "preparedAtUtc": "2026-11-13T22:10:27.368618+00:00",
+  "status": "SOURCE_ONLY_NOT_IMPLEMENTED_NO_NEW_UI_OR_TEST_RUN",
+  "scope": "Read the root-provided qualified Web source and existing local screenshot. This file is the sole write; no repository/qualified-source edits, network, build, runtime/UI control or new test execution.",
+  "qualifiedWebRoot": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web",
+  "screenshot": {
+    "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r1/native-hud-after-worker-restart.png",
+    "bytes": 1391219,
+    "sha256": "b8a6a3b7a6ec78945949b4866c8f30ae733fa0c7bb0297169537c92aa2637155"
+  },
+  "sources": {
+    "css": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/globals.css",
+      "bytes": 137606,
+      "sha256": "e6becfc82ef9f2fcf097c093cb0a54032f743ff3fe6c1420692c5f045585e3ac",
+      "relevantLines": [
+        386,
+        390,
+        391,
+        536,
+        542,
+        546,
+        549,
+        739,
+        740,
+        892,
+        894,
+        915,
+        917,
+        924,
+        5675,
+        5679,
+        5686,
+        5690,
+        5706
+      ]
+    },
+    "visualLayers": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "bytes": 62331,
+      "sha256": "8365cdd41569c95329ad509b581e6bb64b2af757afeffcd9d1c6cfe766b4dbab",
+      "relevantLines": [
+        101,
+        435,
+        840,
+        847,
+        870,
+        1007,
+        1075,
+        1126,
+        1173,
+        1288,
+        1297,
+        1301,
+        1343,
+        1371,
+        1373,
+        1374,
+        1398,
+        1440
+      ]
+    },
+    "depth": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/lib/crystal-world-depth.ts",
+      "bytes": 3072,
+      "sha256": "1b2436b59d268838c2738d267c7028a2ebfd72ecae559b9a3b2c082d8c5cc5ee",
+      "relevantLines": [
+        7,
+        8,
+        9,
+        10,
+        33,
+        41,
+        46,
+        59,
+        67
+      ]
+    },
+    "effectDepth": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/lib/scene-effect-runtime.ts",
+      "bytes": 9979,
+      "sha256": "f4d96acd45883a6b210ca01437d5f112cc844129ee25571eac4ee6e0f7ca4ee8",
+      "relevantLines": [
+        20,
+        21,
+        40,
+        44,
+        47
+      ]
+    },
+    "viewportDepthAdapter": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/original-client-scene-layout.ts",
+      "bytes": 6452,
+      "sha256": "87ee98bc4e654973099490a070b6011e33975d5f9ac4b386ae246f99f21e5cfa",
+      "relevantLines": [
+        15,
+        16,
+        152,
+        159
+      ]
+    },
+    "gdiComponent": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/crystal-gdi-text.tsx",
+      "bytes": 3533,
+      "sha256": "c925a922c86a9eeeca0a9504d8f6689f84a74a3c477bf3315855d6377e4835b4",
+      "relevantLines": [
+        42,
+        61,
+        67,
+        77,
+        91,
+        99,
+        105
+      ]
+    },
+    "gdiManifest": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/public/original-ui/gdi-text/manifest.json",
+      "bytes": 32512,
+      "sha256": "96a25dc099622f5ab382d67bf1ed66814a826d28316476b374db62d2d73e5460",
+      "relevantLines": [
+        50,
+        54,
+        76,
+        84,
+        88
+      ]
+    },
+    "assistantJanePng": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-assistant-jane.png",
+      "bytes": 297,
+      "sha256": "d7c45ab85fe05802c14ef8602cd804bbe4efe1e87ab065bbaa998a78746d6da6"
+    },
+    "crystalNpc": {
+      "path": "E:/mir2-player-journey/Crystal/Client/MirObjects/NPCObject.cs",
+      "bytes": 15293,
+      "sha256": "16bb35aaf79ea1df41b957c66d07215d3cd7315d0a630e4b2f28bbb2cd86956a",
+      "relevantLines": [
+        328,
+        341,
+        346,
+        361
+      ]
+    },
+    "crystalMapObject": {
+      "path": "E:/mir2-player-journey/Crystal/Client/MirObjects/MapObject.cs",
+      "bytes": 25196,
+      "sha256": "d895a709bce2bf5119ac50b08408d6175bc130b0f1dba75f672610fba53f265c",
+      "relevantLines": [
+        412,
+        425,
+        432
+      ]
+    },
+    "crystalPlayer": {
+      "path": "E:/mir2-player-journey/Crystal/Client/MirObjects/PlayerObject.cs",
+      "bytes": 295354,
+      "sha256": "e4eacf5249d41aaf35c4cd6a905cae9ab1ef0edb68379a5dee2fcfe4b1f9c20a",
+      "relevantLines": [
+        5195,
+        5206,
+        5208,
+        5255,
+        5269
+      ]
+    },
+    "crystalMirLabel": {
+      "path": "E:/mir2-player-journey/Crystal/Client/MirControls/MirLabel.cs",
+      "bytes": 8797,
+      "sha256": "4a3932f085e671c872fdfbfc8324a6c71e2355fd5313ed56605098ac950e003c",
+      "relevantLines": [
+        129,
+        131,
+        138,
+        142
+      ]
+    },
+    "crystalDrawOrder": {
+      "path": "E:/mir2-player-journey/Crystal/Client/MirScenes/GameScene.cs",
+      "bytes": 529111,
+      "sha256": "935d1ca35ddf4800bccdac4cd1675fcb59a269560a57bf98c2b952a459ffb504",
+      "relevantLines": [
+        10991,
+        10995,
+        10996
+      ]
+    },
+    "existingDepthTests": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/scripts/test-crystal-world-depth.mjs",
+      "bytes": 12670,
+      "sha256": "a8c22cb505ef2eb922a5c4ec18f817a36a880c9685e3e3505b9dde926586ee3a",
+      "relevantLines": [
+        205
+      ]
+    },
+    "existingNameGeometryTests": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/scripts/test-player-frames.mjs",
+      "bytes": 12137,
+      "sha256": "136124c8a828f9fb5fe297b91d01102b1ed217b4810a85a7648897d90c99b5f8",
+      "relevantLines": [
+        254,
+        259
+      ]
+    },
+    "existingGdiTests": {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/scripts/test-crystal-gdi-text-assets.mjs",
+      "bytes": 2751,
+      "sha256": "b0ebd20cb00adc5cab4243124473c796441209a9d26803ddc3c5635ab8601e07",
+      "relevantLines": [
+        14,
+        32,
+        35,
+        37
+      ]
+    }
+  },
+  "finding1_domPaintOrder": {
+    "confirmedSourceDefect": true,
+    "observation": "The existing screenshot shows surviving fragments of NPC labels. World sprite overpainting can produce these fragments without damaged glyphs.",
+    "exactScreenshotDomStyleAndAssetCaptured": false,
+    "sourceMechanism": "Positioned viewport-entity-overlay has z-index 32761 and forms one stacking context. Positioned viewport-sprite-overlay has z-index auto; its positioned map/object/actor descendants participate in the surrounding isolated world context with raw depth values in the millions. Body/building pixels can therefore paint above the whole name overlay. Raising a child name/icon z-index cannot escape its parent stacking context.",
+    "namesOverlayZ": 32761,
+    "dropOverlayZ": 4000000,
+    "worldContext": {
+      "selector": ".game-world-composite",
+      "position": "absolute",
+      "zIndex": 1,
+      "overflow": "hidden",
+      "isolation": "isolate",
+      "scopeNote": "World-local ordering; not a reason to move names above separate game UI or change input handlers."
+    },
+    "spriteOverlay": {
+      "selector": ".viewport-sprite-overlay",
+      "position": "absolute",
+      "zIndex": "auto"
+    },
+    "depthFormula": {
+      "relativeCoordinate": "clamp(trunc(value)-trunc(center), -128, +128)",
+      "rowColumn": "(relativeY+128)*12000 + (relativeX+128)*20",
+      "objectSortZ": "rowColumn + 6000",
+      "domEntityStackZ": "objectSortZ + 5",
+      "sameCellObjectSortZ": 1544560,
+      "sameCellDomEntityStackZ": 1544565,
+      "boundedMaximumObjectSortZ": 3083120,
+      "boundedMaximumDomEntityBodyStackZ": 3083125,
+      "rawEntityRoleOffsets": {
+        "ground": 1,
+        "mount": 2,
+        "rearWeapon": 4,
+        "body": 5,
+        "hair": 6,
+        "frontWeapon": 7
+      },
+      "boundedMaximumRawFrontWeaponDepth": 3083127,
+      "domStackNote": "DOM actor layers paint inside the stack whose root z-index is objectSortZ+5; their internal order does not escape that context."
+    },
+    "effectBounds": {
+      "groundOffset": 3,
+      "groundMaskOffset": 4,
+      "transientOffset": 10,
+      "transientMaskOffset": 11,
+      "boundedMaximumOrdinaryEffectOrMaskZ": 3083131,
+      "fallbackVfxOffset": 10,
+      "ordinaryProjectileOffset": 9,
+      "questIconChildOffset": 12,
+      "boundedMaximumQuestIconChildZ": 3083132,
+      "explicitTargetedEffectZ": 3100000,
+      "fishingWaterZ": 3100000,
+      "fishingBiteZ": 3100001,
+      "maximumReviewedWorldEffectZ": 3100001,
+      "qualification": "Current reviewed producers only, including explicit targeted/fishing branches; not merely ordinary row-column effects."
+    },
+    "minimalCandidate": {
+      "implemented": false,
+      "selector": ".viewport-entity-overlay",
+      "proposedZIndex": 3500000,
+      "inequality": "3100001 < 3500000 < 4000000",
+      "preserve": [
+        "48px NPC/monster and 50px player anchor boxes",
+        "existing absolute positions and motion transforms",
+        "pointer-events policies and click handlers",
+        "separate world/game-UI stacking contexts",
+        "ground-drop overlay above names"
+      ],
+      "applicability": [
+        "DOM name/quest overlay in the reviewed isolated world context",
+        "Known bounded body, map, ordinary-effect, targeted-effect and fishing-effect producers"
+      ],
+      "limits": [
+        "Not proof that every screenshot fragment uses this particular DOM node/asset; no new live computed-style or pixel probe was run.",
+        "Future depth constants or new world producers must keep the inequality verified.",
+        "Does not change glyph measurement, text wrapping or the separate pre-clipped GDI image.",
+        "GPU world-to-DOM composition and UI handoff still need their own screenshot regression."
+      ]
+    }
+  },
+  "finding2_fixedGdiBitmap": {
+    "confirmedAssetClipping": true,
+    "assetKey": "entity-assistant-jane",
+    "text": "Assistant Jane",
+    "sizeMode": "fixed",
+    "measured": {
+      "width": 79,
+      "height": 14
+    },
+    "output": {
+      "width": 50,
+      "height": 15
+    },
+    "pngSha256": "d7c45ab85fe05802c14ef8602cd804bbe4efe1e87ab065bbaa998a78746d6da6",
+    "evidence": "Existing 50x15 PNG was viewed read-only and is already horizontally cut. CSS overflow visible/max-width none cannot restore pixels absent from that file.",
+    "lookup": "visual-layers requests fixed width 50 and height 15 for a one-line name; 54x32 for multiline. findCrystalGdiTextAsset requires exact fixed dimensions when width/height are supplied.",
+    "multilineComparison": {
+      "key": "entity-merchant-ruben-multiline",
+      "measured": {
+        "width": 52,
+        "height": 28
+      },
+      "output": {
+        "width": 54,
+        "height": 32
+      }
+    },
+    "cssDetails": {
+      "nameAnchorWidthPlayer": 50,
+      "nameAnchorWidthNpcMonster": 48,
+      "gdiSpan": "inline-block; explicit asset output dimensions; overflow:visible",
+      "gdiImg": "absolute; max-width:none",
+      "nameGdiAlignment": "justify-self:center",
+      "fallbackStrong": "11px font, 12px line height; no explicit horizontal clipping rule in the nameplate selector"
+    },
+    "crystalEvidence": {
+      "npcLabel": "CreateNPCLabel sets AutoSize=true (NPCObject.cs:361).",
+      "genericAndPlayerLabel": "MapObject/PlayerObject create AutoSize labels.",
+      "measurement": "MirLabel.GetSize returns TextRenderer.MeasureText and adds 2px per dimension for outline.",
+      "placement": "DrawName centers the measured label at DisplayRectangle.X+(48 or 50-label.Size.Width)/2; 48/50 is the centering anchor, not the text bitmap maximum.",
+      "latePass": "GameScene draws NameView labels after world objects/effects in its name/effect pass."
+    },
+    "candidateNotImplemented": "Generate genuinely AutoSize NPC name assets and select/center their intrinsic measured width inside the existing anchor, then compare with the Crystal oracle. Do not globally widen the world hit box just to repair the bitmap.",
+    "scopeLimit": "This fixed English asset can explain only matching GDI names. Localized or unmatched names render strong text; it is not a universal explanation for every NPC in the screenshot."
+  },
+  "recommendedVerificationNotRun": [
+    {
+      "kind": "bounded-depth-regression",
+      "proposal": "Extend actual depth/CSS assertions to include regular and explicit targeted/fishing producers and require worldMax < nameOverlay < dropOverlay. Existing depth tests assert entity depth, not this parent overlay order."
+    },
+    {
+      "kind": "pixel-regression",
+      "proposal": "Render actual CSS with an opaque overlapping DOM actor/building and a complete known label; compare visible label pixels, including multilingual and multiline labels. TextContent and pointer hit tests alone cannot prove unoccluded painting."
+    },
+    {
+      "kind": "gdi-oracle-regression",
+      "proposal": "Compare AutoSize name output to the original Crystal MirLabel full-string/per-line bitmap. Existing GDI tests preserve old PNG SHA, so they can bless a pre-clipped fixture."
+    },
+    {
+      "kind": "input-and-handoff",
+      "proposal": "After any future patch, verify names/quest markers, ground drops, UI windows and both DOM/GPU handoff paths retain their intended click/paint ownership."
+    }
+  ],
+  "workPerformed": {
+    "sourceReadOnly": true,
+    "existingScreenshotViewed": true,
+    "existingGdiPngViewed": true,
+    "newUiRun": false,
+    "newTestsRun": false,
+    "implementation": false,
+    "repositoryEdited": false,
+    "qualifiedSourceEdited": false,
+    "networkRequests": false,
+    "onlyWrittenFile": "C:/r16-walking-recovery-20261114/npc-name-source-audit.json"
+  }
+}

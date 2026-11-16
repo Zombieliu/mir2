@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T09:34:00.922Z",
+  "scope": "Pending-template pre-review wiring corrections only; original13 untouched. No sourceguard, preparation, account, binary or realm execution.",
+  "changes": [
+    {
+      "name": "prepare-inputs.mjs",
+      "preimage": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/template-preimages-v1/prepare-inputs.mjs.txt",
+        "bytes": 11482,
+        "sha256": "0c0648d5e3e938b9ddd8f8ad1117b3e957280d4f0ad8d10e7a25595dabd2b0f9"
+      },
+      "current": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/prepare-inputs.mjs",
+        "bytes": 11505,
+        "sha256": "34435610714b44c9d7d73cd6734a15473622600c35a6b858c9788dd9b076fd54"
+      },
+      "edits": [
+        {
+          "before": "nativeAttackWitness: EXPECTED_NATIVE_ATTACK_WITNESS, EXPECTED_NATIVE_CHASE_PREFERENCE });",
+          "after": "nativeAttackWitness: EXPECTED_NATIVE_ATTACK_WITNESS, nativeChasePreference: EXPECTED_NATIVE_CHASE_PREFERENCE });",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true,
+      "syntaxPassed": true
+    },
+    {
+      "name": "run-owned.mjs",
+      "preimage": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/template-preimages-v1/run-owned.mjs.txt",
+        "bytes": 19670,
+        "sha256": "7de36be609c4e2bb1120e733ac3484277b789729564b662ebdcf3778e6c9ece2"
+      },
+      "current": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/run-owned.mjs",
+        "bytes": 19727,
+        "sha256": "6fd4eaf8be4a99dc2095cd2a137cdfba85ad3638b8703e631ece4fc01f9be547"
+      },
+      "edits": [
+        {
+          "before": "nativeAttackWitness: report.nativeAttackWitness, full16RunId:",
+          "after": "nativeAttackWitness: report.nativeAttackWitness, nativeChasePreference: report.nativeChasePreference, full16RunId:",
+          "count": 1
+        },
+        {
+          "before": "owned-native-compact-halo-probe13-ready",
+          "after": "owned-native-chase-preference-probe14-ready",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true,
+      "syntaxPassed": true
+    },
+    {
+      "name": "collect-public.mjs",
+      "preimage": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/template-preimages-v1/collect-public.mjs.txt",
+        "bytes": 42507,
+        "sha256": "9a10a4fac0a04c3d2c07f84ca6995368e9db87f7e5a51235e757a9b3f5e2fa86"
+      },
+      "current": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/collect-public.mjs",
+        "bytes": 42507,
+        "sha256": "f827cccd83ec7e867b999c5b2b7f63ab0e153dcfb37655ca7e26a6773d03e983"
+      },
+      "edits": [
+        {
+          "before": "Probe13",
+          "after": "Probe14",
+          "count": 3
+        },
+        {
+          "before": "Passing09",
+          "after": "Passing14",
+          "count": 3
+        }
+      ],
+      "inverseRawExact": true,
+      "syntaxPassed": true
+    }
+  ],
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false
+}

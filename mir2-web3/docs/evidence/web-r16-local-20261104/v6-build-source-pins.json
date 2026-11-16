@@ -1,0 +1,69 @@
+{
+  "schema": "mir2.r16.build-source-pins.v1",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "r16Ancestor": "e9117b6691e3f7ec238ff1c1eb77b699b0646c2f",
+  "buildId": "kH3yQjxYAuzF2nvUWQtzS",
+  "files": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1098859,
+      "sha256": "167158528db15a0da5cc059376bf2d9b3881d7732bbb06a1e6db6cf2ac469dd0"
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "bytes": 341571,
+      "sha256": "6db1017c493f31dee03675de56053c9257d691175f2a551cdbc544bfcd4c0c6a"
+    },
+    {
+      "path": "apps/web/app/globals.css",
+      "bytes": 134688,
+      "sha256": "e6cea4b402f1c00e6644548bbdb2650428a70a7cfde655a072b59263982175a2"
+    },
+    {
+      "path": "apps/web/lib/crystal-world-depth.ts",
+      "bytes": 3072,
+      "sha256": "1b2436b59d268838c2738d267c7028a2ebfd72ecae559b9a3b2c082d8c5cc5ee"
+    },
+    {
+      "path": "apps/web/lib/bevy-bag-ui.ts",
+      "bytes": 27129,
+      "sha256": "3462c48b006906dc6c4636ba570f4ab23a6887061fa4771eec12385b9e14618c"
+    },
+    {
+      "path": "apps/web/lib/use-bevy-bag-ui.ts",
+      "bytes": 3108,
+      "sha256": "aeafbe059c7b6d692ff133b74c4c66662359cb0ac008199794f09ed34cdda6cd"
+    },
+    {
+      "path": "apps/web/lib/use-bevy-hud-ui.ts",
+      "bytes": 12546,
+      "sha256": "cb2be2852dde7bb1d2ea897d709b9406b97b630cb0284663067c786238b9d33c"
+    },
+    {
+      "path": "apps/web/lib/r16-companion-client.ts",
+      "bytes": 36225,
+      "sha256": "30fda1686d57b4b08c5131debefa631a637bc813ff904c64adbee39a817a95be"
+    },
+    {
+      "path": "apps/web/lib/r16-companion-private-frame.ts",
+      "bytes": 1486,
+      "sha256": "0b792871bd41db42dd8adfc9caa7bb35c16be2139e3a30ce531386042e61a657"
+    },
+    {
+      "path": "apps/web/app/components/r16-companion-window.tsx",
+      "bytes": 30448,
+      "sha256": "f93f3684c98eb04adb2eda3d31a4d0c6681a7855fb48800c979d8d7255429462"
+    },
+    {
+      "path": "apps/web/lib/generated/bevy_runtime_version.json",
+      "bytes": 1711,
+      "sha256": "386f0445ebee8002994a86b8500d491c6f0f89cc92e980846a5025508a6ed165"
+    },
+    {
+      "path": "apps/web/lib/generated/client_core_runtime.json",
+      "bytes": 1580,
+      "sha256": "7e71968e1ba93c332d12312bb764b8595457ce8d6a49b35e18fcaabff627b386"
+    }
+  ]
+}

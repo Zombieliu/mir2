@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only defer two exact prior-basis path references until exported verification functions execute; no target import/mode,policy/pins/219/declaration semantics changed.",
+  "preimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-contract.mjs.before-lazy-refs-v4.txt",
+    "bytes": 5843,
+    "sha256": "7629d35c1ff788c6db282ec834f8d471659b90526020332fe9f51b95876f900d"
+  },
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-contract.mjs",
+    "bytes": 5843,
+    "sha256": "7629d35c1ff788c6db282ec834f8d471659b90526020332fe9f51b95876f900d"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-contract.mjs",
+    "bytes": 5863,
+    "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+  },
+  "hunks": [
+    {
+      "line": 4,
+      "before": "const prior219={file:path.join(base,'capacity-attack-deadline-driver-frozen-v1.json'),bytes:6759,sha256:'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b'};",
+      "after": "const prior219=()=>({file:path.join(base,'capacity-attack-deadline-driver-frozen-v1.json'),bytes:6759,sha256:'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b'});"
+    },
+    {
+      "line": 5,
+      "before": "const metadataBasis={file:path.join(base,'capacity-native-chase-preference-driver-frozen-v1.json'),bytes:19099,sha256:'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef'};",
+      "after": "const metadataBasis=()=>({file:path.join(base,'capacity-native-chase-preference-driver-frozen-v1.json'),bytes:19099,sha256:'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef'});"
+    },
+    {
+      "line": 8,
+      "before": " const prior=await exact(frozen.priorFreeze,prior219);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');",
+      "after": " const prior=await exact(frozen.priorFreeze,prior219());assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');"
+    },
+    {
+      "line": 9,
+      "before": " const basis=await exact(prior.priorFreeze,metadataBasis);assert.equal(basis.actualCodeCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');",
+      "after": " const basis=await exact(prior.priorFreeze,metadataBasis());assert.equal(basis.actualCodeCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');"
+    },
+    {
+      "line": 26,
+      "before": " await add(prior219);await add(metadataBasis);await getDriverDeclarationBasis(frozen);",
+      "after": " await add(prior219());await add(metadataBasis());await getDriverDeclarationBasis(frozen);"
+    }
+  ],
+  "inverseRawExact": true,
+  "oldSha256": "7629d35c1ff788c6db282ec834f8d471659b90526020332fe9f51b95876f900d",
+  "newSha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056",
+  "unchangedReferenceValues": true,
+  "staticCycleReview": {
+    "cycle": "input-lib -> driver-report-contract -> driver-evidence-contract -> input-lib",
+    "onlyEvidenceTopLevelImportedBindingReadsRemoved": [
+      "prior219 path.join(base)",
+      "metadataBasis path.join(base)"
+    ],
+    "normalizeDoesNotReadImports": true,
+    "remainingImportedValuesUsedOnlyInsideFunctions": true,
+    "driverBindingOwnJSONHasNoInputLibDependency": true,
+    "driverReportInputLibImportsUsedOnlyInsideFunctions": true
+  },
+  "targetImported": false,
+  "modeExecuted": false,
+  "capacityAccepted": false
+}

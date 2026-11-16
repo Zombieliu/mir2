@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_REVIEWED_ENDED_ONLY_NOT_EXECUTED",
+  "sealedAt": "2026-10-25T16:04:04.868Z",
+  "files": [
+    {
+      "path": "verify-ended-formal11-v1.mjs",
+      "bytes": 29070,
+      "sha256": "cb7b98b25e01d61708b79f7c0df1197e161e78ee27a33109f73c4087f5cf0010"
+    },
+    {
+      "path": "formal-contract-v1.mjs",
+      "bytes": 6103,
+      "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "path": "run-ended-formal11-v1.mjs",
+      "bytes": 2259,
+      "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-proof-v1.json",
+      "bytes": 5566,
+      "sha256": "5deeeb599e483cf135c7618877b1b827b4c9a0b5e1462e578d6319231d0a5a3c"
+    },
+    {
+      "path": "preparation-v1.json",
+      "bytes": 7760,
+      "sha256": "d6211e8f3bd521b1df94a97a81baea0506c9b9657a589efa972b03e9a6edabbd"
+    },
+    {
+      "path": "independent-review-v1.json",
+      "bytes": 5988,
+      "sha256": "233b880a8dd21a53085f9e77fd1d2f303f772abd3b1e1953f5bfbed5b856c82e"
+    }
+  ],
+  "sourceSha256": "f239af66eea4ab609587e822e8151cdec8ff987248854a7685ad5de75068a540",
+  "sourceReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal11-ended-tool-independent-review-v2.json",
+    "bytes": 5988,
+    "sha256": "233b880a8dd21a53085f9e77fd1d2f303f772abd3b1e1953f5bfbed5b856c82e"
+  },
+  "actualVerificationExecuted": false,
+  "capacityAccepted": false
+}

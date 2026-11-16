@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-14T14:28:39.424Z",
+  "rows": [
+    {
+      "kind": "version",
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "revision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+      "buildVersion": null
+    },
+    {
+      "kind": "gateway",
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+      "buildVersion": null
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+[
+  {
+    "runId": 43653655905,
+    "operation": "stage",
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "jobs": [
+      {
+        "name": "numeron-website / source",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / website",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / backend",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ],
+    "source": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+    "implementation": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "candidate": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+    "trafficBefore": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "trafficAfter": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "writes": [
+      {
+        "operation": "stage",
+        "site": "game"
+      }
+    ],
+    "rollbacks": [],
+    "protectedEntryChecks": 0,
+    "publicEntryChecks": 0
+  },
+  {
+    "runId": 43654213483,
+    "operation": "check",
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "jobs": [
+      {
+        "name": "numeron-website / source",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / website",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / backend",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ],
+    "source": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+    "implementation": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "candidate": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+    "trafficBefore": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "trafficAfter": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "writes": [],
+    "rollbacks": [],
+    "protectedEntryChecks": 15,
+    "publicEntryChecks": 0
+  },
+  {
+    "runId": 43654581118,
+    "operation": "promote",
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "jobs": [
+      {
+        "name": "numeron-website / source",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / website",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / backend",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ],
+    "source": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+    "implementation": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "candidate": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+    "trafficBefore": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "trafficAfter": {
+      "target": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+      "alias": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF"
+    },
+    "writes": [
+      {
+        "operation": "promote",
+        "site": "game",
+        "deployment": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF"
+      }
+    ],
+    "rollbacks": [],
+    "protectedEntryChecks": 15,
+    "publicEntryChecks": 15
+  },
+  {
+    "runId": 43656160859,
+    "operation": "rollback",
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "jobs": [
+      {
+        "name": "numeron-website / source",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / website",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "numeron-website / backend",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ],
+    "source": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+    "implementation": "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+    "candidate": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+    "trafficBefore": {
+      "target": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF",
+      "alias": "dpl_HSPVqhc6HiBGTWgDBgRohEYrFTkF"
+    },
+    "trafficAfter": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "writes": [
+      {
+        "operation": "rollback",
+        "site": "game",
+        "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+      }
+    ],
+    "rollbacks": [],
+    "protectedEntryChecks": 0,
+    "publicEntryChecks": 0
+  }
+]

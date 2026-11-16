@@ -1,0 +1,2 @@
+   Compiling mir2-windows-updater v1.0.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\windows-updater)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.10s

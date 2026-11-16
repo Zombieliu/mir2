@@ -1,0 +1,99 @@
+{
+  "owner": "Root",
+  "kind": "Source47 actual original full strict TypeScript CLI result for optional build tsconfig selector",
+  "generatedAtUtc": "2026-10-08T16:26:47.263Z",
+  "parentCommit": "22d814ad2ae5e45cf177f3505e0ed0f993b47195",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source47-tsc01.config01.json",
+    "bytes": 5289,
+    "sha256": "45abef8f4c0ea6b75f637478b376fdca569270f9157ac0f18b61940f88a5be5a"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source47-web01-snapshot.json",
+    "bytes": 5969090,
+    "sha256": "e4aaa2a882515c6b32509257cbceacd7e0d6948d4bb128b9f9e083ec721c8026"
+  },
+  "independentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-bevy-next-tsconfig-independent-review01.json",
+    "bytes": 19739,
+    "sha256": "1496b36891bf1eb1f533aeb52c09685c6f970f6a73aade369c1bd90269cedfc5"
+  },
+  "originalTemplateData": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-original-existing-builder-template-data01.json",
+    "bytes": 5007,
+    "sha256": "75dcd81559d98ceee80dc5b096b85a9f2917072f718668a71a15769cbe1b2f81"
+  },
+  "args": [
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--incremental",
+    "false",
+    "--pretty",
+    "false"
+  ],
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 199988,
+    "kind": "Source47 original full strict TSC verification of next build tsconfig selector; one owned TypeScript change",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 12188,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source47-tsc01.config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "rawPins": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source47-tsc01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source47-tsc01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source47-tsc01.outer.json",
+      "bytes": 566,
+      "sha256": "9bc0fd7343a4e3bfbe28ef1fc8d352bb3da4d3ff26f01cbeed823529fc1e48fa"
+    }
+  ],
+  "strictTypeScriptRunCount": 1,
+  "zeroDiagnostics": true,
+  "actualExitCode": 0,
+  "actualCompletedExitedDisposed": true,
+  "launcherPreAndPostAll17136Passed": true,
+  "tsTsxDeclarationCount": 5413,
+  "newTaps": 0,
+  "newCargoRuns": 0,
+  "newRustTests": 0,
+  "uiOperated": false,
+  "wasmApiUsed": false,
+  "nextConfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\next.config.ts",
+    "bytes": 13454,
+    "sha256": "9df1068e2257c21a2bc2063e160e61121ab4cb662b95ba21484c68b0d783846c"
+  },
+  "userTsconfigPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "ownMutableFutureBuildCopy": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.source47-build01.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "fullOriginalRendererAndSmallBuildersRun": false,
+  "fullNextThinRun": false,
+  "playableAccepted": false,
+  "candidate100": false,
+  "goalComplete": false,
+  "qualification": "Original strict no-emit/nonincremental CLI actually completed0 in12188ms; full caller source/tool pre/post checks passed. TSC parses/types next.config but does not execute its optional filesystem validator or full Next config/gates. Own future JSON copy exists and matches original user config at creation; Next may modify only that copy. No new test counts or WASM/API/player acceptance inferred."
+}

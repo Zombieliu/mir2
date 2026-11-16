@@ -1,0 +1,40 @@
+{
+  "schema": "mir2.engine-only-origin-tool-verification.v1",
+  "passed": true,
+  "checkedUtc": "2026-10-28T20:23:16.796590+00:00",
+  "syntheticFocusedTestsPassed": 23,
+  "pythonAstPassed": true,
+  "remoteActionsPerformed": false,
+  "realCmsVerifiedByTheseTests": false,
+  "linuxRootExecutionTested": false,
+  "fullGamePayloadRehashed": false,
+  "rollbackCovers": [
+    "target-serving-failure",
+    "legacy-serving-failure",
+    "health-after-both",
+    "caddy-before-legacy",
+    "caddy-after-both",
+    "second-exchange-failure",
+    "fsync-after-exchange",
+    "one-rollback-failure-still-attempts-earlier",
+    "success-receipt-write",
+    "success-receipt-file-fsync",
+    "success-receipt-directory-fsync"
+  ],
+  "files": [
+    {
+      "file": "prepare_engine_only_origin.py",
+      "size": 30958,
+      "sha256": "032a13e454d8690d807440b4235453e716a3af5c8a95060a3e67b6d46abea14b"
+    },
+    {
+      "file": "test_prepare_engine_only_origin.py",
+      "size": 22377,
+      "sha256": "348db73d5907142d7cf670cb4c6075bcf7354a7f97739d65c85ce910f3e6b210"
+    }
+  ],
+  "logSha256": "d891243e3ab9fe6b4b0661b9fdac502963db9bd4c7867d69504516553a10bde5",
+  "directoryFsyncBeforeAliasExchange": true,
+  "durableReceiptInsideRollbackScope": true,
+  "stdoutFailureRequiresReadback": true
+}

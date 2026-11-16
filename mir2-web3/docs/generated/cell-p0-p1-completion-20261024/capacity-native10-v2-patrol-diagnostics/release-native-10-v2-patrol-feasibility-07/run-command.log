@@ -1,0 +1,14 @@
+{"phase":"owned-native-patrol-probe07-ready","pid":59292,"monitorPid":62896,"sha256":"855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f","sourceCommit":"461f1d85eed6309a55a88bd79a0022f7b97febe4","backendSourceCommit":"461f1d85eed6309a55a88bd79a0022f7b97febe4","driverSourceCommit":"0998105c30f35502b8b569b82fb7942a5d356c89","explicitAttackResults":"v2","endpoint":"ws://127.0.0.1:17510/ws"}
+{"stage":"admitted","controlledActors":1,"target":2}
+{"stage":"admitted","controlledActors":2,"target":2}
+{"stage":"stage-2","passed":true}
+{"stage":"admitted","controlledActors":3,"target":10}
+{"stage":"admitted","controlledActors":4,"target":10}
+{"stage":"admitted","controlledActors":5,"target":10}
+{"stage":"admitted","controlledActors":6,"target":10}
+{"stage":"admitted","controlledActors":7,"target":10}
+{"stage":"admitted","controlledActors":8,"target":10}
+{"stage":"admitted","controlledActors":9,"target":10}
+{"stage":"admitted","controlledActors":10,"target":10}
+{"stage":"stage-10","passed":true}
+{"phase":"finished","root":"C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\","report":{"reportPath":"C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\reports\\1792878747018-da931241.report.json","runId":"1792878747018-da931241","backendSourceCommit":"461f1d85eed6309a55a88bd79a0022f7b97febe4","driverSourceCommit":"0998105c30f35502b8b569b82fb7942a5d356c89","ok":false,"playableCapacityAccepted":false,"error":"Soak failed fixed rolling activity or delivery gates"},"cleanupComplete":true,"checks":{"sixCountersZero":true,"monitorTerminalPreserved":true,"monitorStoppedBeforeGateway":true,"monitorExitZero":true,"normalOwnedShutdown":true,"processAbsent":true,"portsFree":true},"capacityAccepted":false,"capacityAcceptanceAdjudicated":false,"formalStarted":false}

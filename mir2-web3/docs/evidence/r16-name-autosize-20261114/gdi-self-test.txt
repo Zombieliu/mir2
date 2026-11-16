@@ -1,0 +1,1 @@
+Crystal GDI text self-test passed: 11 assets, two identical exports, 8 rejected invalid inputs.

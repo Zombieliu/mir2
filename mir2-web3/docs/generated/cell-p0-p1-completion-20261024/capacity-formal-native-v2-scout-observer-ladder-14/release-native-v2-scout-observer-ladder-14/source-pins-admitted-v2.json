@@ -1,0 +1,3139 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "socketDiagnosticsReleaseUsed": true,
+  "coreCodeEvidenceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "wireDiagnostics": {
+    "version": "v2",
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "wrapperTests": 28,
+    "core187CoversWrapper": false,
+    "terminalFile": "compact-navigation-wire-terminal.json",
+    "terminalOutsideRaw": true,
+    "existingWriter": {
+      "defaultMaxBufferedBytes": 4194304,
+      "addMayRecordFailureAndReturn": true,
+      "durableRowsRequireRawCrosscheck": true
+    }
+  },
+  "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+  "driverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "feasibilityGate": {
+    "schemaVersion": 1,
+    "verifiedAt": "2026-10-25T22:25:45.109Z",
+    "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "feasibilityDriverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "exactSameFrozenDriverInputs": true,
+    "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+    "driverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+    "releaseSha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "runId": "1792965008290-fc5e2eed",
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "nativePatrolPlanning": {
+      "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+      "maximumFallbackCornerTargets": 4,
+      "pathExpansionLimit": 4000,
+      "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+      "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+    },
+    "measurementClock": {
+      "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+      "minimumCompleteWindowMs": 60000,
+      "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+      "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+      "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+    },
+    "nativeHpMaintenance": {
+      "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+      "hpThreshold": 0.6,
+      "reuseDelayMs": 6000,
+      "evidenceDeadlineMs": 2000,
+      "commandBudgetPerSecond": 3,
+      "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+      "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+    },
+    "nativeAttackWitness": {
+      "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+      "maximumOwnerAndTargetDistance": 6,
+      "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+      "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+      "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+    },
+    "diagnosticsComplete": true,
+    "feasibilityPassed": true,
+    "collectedEvidence": {
+      "schemaVersion": 1,
+      "runId": "1792965008290-fc5e2eed",
+      "publicCollectionVerified": true,
+      "storeDiagnostics": {
+        "sourceValid": true,
+        "countsMatch": true,
+        "complete": true,
+        "reasons": [],
+        "rows": 21,
+        "bytes": 4571,
+        "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377",
+        "sourceIdentity": {
+          "schemaVersion": 1,
+          "dataset": "account-store",
+          "storeOnly": true,
+          "manifest": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+            "bytes": 4628,
+            "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+          },
+          "review": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+            "bytes": 6459,
+            "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+          },
+          "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+          "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+          "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+          "separateFromBaseThreeFourSeven": true,
+          "contributesToGameAcceptance": false
+        },
+        "pins": {
+          "catalog": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-artifact-catalog.json",
+            "bytes": 5158,
+            "sha256": "172ced353393f1204823c7892a8aab3244157e30abf215ec912e669538ad0315"
+          },
+          "publicVerification": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-public-verification.json",
+            "bytes": 1423,
+            "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+          },
+          "status": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-stage-public-status.json",
+            "bytes": 2590,
+            "sha256": "d3c5259beaba9632fc21cdb2173c986cdb064f1cb452848d519b55c93a57ae3e"
+          },
+          "data": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-stage-public.jsonl",
+            "bytes": 4571,
+            "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+          }
+        },
+        "diagnosticsDoNotChangeOriginalGameVerdict": true,
+        "contributesToGameAcceptance": false,
+        "completedOnlyCannotProveMissingHolder": true
+      },
+      "wireDiagnostics": {
+        "present": true,
+        "sourceValid": true,
+        "countsMatch": true,
+        "uninstallSucceeded": true,
+        "complete": true,
+        "independentComplete": true,
+        "reasons": [],
+        "terminal": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\compact-navigation-wire-terminal.json",
+          "bytes": 5089,
+          "sha256": "61a3086c8158bcdad39107e6df6f5f42e4ef95a7dc692920a4fd2ed00c9f72fd"
+        },
+        "sourceIdentity": {
+          "manifest": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+            "bytes": 10830,
+            "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+          },
+          "review": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+            "bytes": 6809,
+            "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+          },
+          "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49"
+        },
+        "rawCounts": {
+          "rows": 5503,
+          "rowsByConnection": {
+            "1": 3423,
+            "2": 2080
+          },
+          "truncationRowsByConnection": {
+            "1": 0,
+            "2": 0
+          },
+          "events": {
+            "send": 1299,
+            "observe": 4204
+          }
+        },
+        "boundedTruncationIsNotGameplayFailure": true
+      },
+      "independentVerificationPassed": true,
+      "independentVerifierRevision": 2,
+      "independentVerifierSources": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+          "bytes": 36368,
+          "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+          "bytes": 5695,
+          "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+          "bytes": 4644,
+          "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+          "bytes": 1008,
+          "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+          "bytes": 2257,
+          "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+          "bytes": 3011,
+          "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derivation-v1.json",
+          "bytes": 15779,
+          "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derive-verifier-v1.mjs",
+          "bytes": 9843,
+          "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\preparation-v1.json",
+          "bytes": 4186,
+          "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\independent-review-v1.json",
+          "bytes": 8417,
+          "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+        }
+      ],
+      "probePassed": true,
+      "capacityAccepted": false,
+      "rawVerifierAccepted": false,
+      "formalPreconditionOnly": true,
+      "files": [
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.report.json",
+          "bytes": 324303,
+          "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\report-provenance.json",
+          "bytes": 7705,
+          "sha256": "3d21bb4b0b7dbea10db3737309e59fb25f0694a91807735ad89814f94f6c7d8d"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+          "bytes": 72158,
+          "sha256": "80a5baa03493b2f8d137303a28ae1f348109053881130e5de9ab6a04dcfb1cbf"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-copy-provenance.json",
+          "bytes": 74700,
+          "sha256": "3d94fb3db21cf1a82a8fd9dfdeede001104b7fe895b57ea03ceb0e20a5f373e2"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-verification.json",
+          "bytes": 7108,
+          "sha256": "cf38707c66c491d0ac1db30f3176d5412f480e3d20587699b6e8e1381730cb73"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collection-verification.json",
+          "bytes": 332549,
+          "sha256": "f9916c1808b9108297fd395d7265a88fcda8cbed797f481bef54dc8c8b94ff26"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.raw-projection.json",
+          "bytes": 337456,
+          "sha256": "f7a35387cd9dd3c1657fecf27b9a62a404a0704c9969412a92a5e0175effcd47"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\compact-navigation-wire-terminal.json",
+          "bytes": 5089,
+          "sha256": "61a3086c8158bcdad39107e6df6f5f42e4ef95a7dc692920a4fd2ed00c9f72fd"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\raw-artifact-manifest.json",
+          "bytes": 715,
+          "sha256": "218546fc957043b6b77cd5daf1c81bb153d3db44824c736c71122fe02a3dc176"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+          "bytes": 437094,
+          "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\monitor-history.jsonl",
+          "bytes": 4811825,
+          "sha256": "a03201ad192a67fbbd5429c79452543bbe95c34ce02539c438ccd69292575f0f"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+          "bytes": 371,
+          "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+          "bytes": 10830,
+          "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+          "bytes": 6809,
+          "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+          "bytes": 7876,
+          "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+          "bytes": 5182,
+          "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+          "bytes": 6062,
+          "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+          "bytes": 1982,
+          "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+          "bytes": 1711,
+          "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+          "bytes": 7111,
+          "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+          "bytes": 2021,
+          "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+          "bytes": 14598,
+          "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+          "bytes": 21656,
+          "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\tool-source-frozen-v1.json",
+          "bytes": 2111,
+          "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+          "bytes": 813,
+          "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification.log",
+          "bytes": 877,
+          "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+          "bytes": 36368,
+          "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+          "bytes": 5695,
+          "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+          "bytes": 4644,
+          "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+          "bytes": 1008,
+          "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+          "bytes": 2257,
+          "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+          "bytes": 3011,
+          "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derivation-v1.json",
+          "bytes": 15779,
+          "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derive-verifier-v1.mjs",
+          "bytes": 9843,
+          "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\preparation-v1.json",
+          "bytes": 4186,
+          "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\independent-review-v1.json",
+          "bytes": 8417,
+          "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-artifact-catalog.json",
+          "bytes": 5158,
+          "sha256": "172ced353393f1204823c7892a8aab3244157e30abf215ec912e669538ad0315"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-public-verification.json",
+          "bytes": 1423,
+          "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public-status.json",
+          "bytes": 2590,
+          "sha256": "d3c5259beaba9632fc21cdb2173c986cdb064f1cb452848d519b55c93a57ae3e"
+        },
+        {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public.jsonl",
+          "bytes": 4571,
+          "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+        }
+      ]
+    },
+    "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+    "sceneSourceSha256": "3e34b754d55e7ba0aa38b7600fb5746b80ef3cb272a2216ba88904e1a12c785d",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "capacityAccepted": false,
+    "profile": "probe",
+    "measuredCohorts": [
+      2,
+      10
+    ],
+    "configuredSeconds": [
+      300,
+      300
+    ],
+    "measuredSeconds": [
+      300.258,
+      300.32
+    ],
+    "measuredPassingWindows": [
+      5,
+      5
+    ],
+    "native10SoakSeconds": 360,
+    "native10SoakMeasuredSeconds": 360.252,
+    "actualPassedSoakWindows": 6,
+    "rawRows": 41154,
+    "rawMonitor": {
+      "count": 534,
+      "complete": true,
+      "maxGapMs": 7577
+    },
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\realm-cleanup.json",
+        "bytes": 6484,
+        "sha256": "08b62b4792fccc121d54c7888e801406d80fadd5fb7fca547e08c2d415c26a60"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\gateway-build-pin.json",
+        "bytes": 1454,
+        "sha256": "8f1ee8dc9b24201c567b1ad7ca69ca701a69c11cf19f47800c63c4dbfc8d67ab"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\realm-process.json",
+        "bytes": 4359,
+        "sha256": "17384e7214981375698147bfee7706104b89aa5aefa315f865aaf470a1864ff4"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.report.json",
+        "bytes": 324303,
+        "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\source-pins-admitted-v2.json",
+        "bytes": 52954,
+        "sha256": "99bce08a1a0656ccac1ff58a7b1fdadb103399026626aee9dab658c9f18674d7"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\source-pins.json",
+        "bytes": 53781,
+        "sha256": "264781007d455c92183fc8e58cbe915a3b6b81b919681ad09b5998ddda0de5c8"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\report-provenance.json",
+        "bytes": 7705,
+        "sha256": "3d21bb4b0b7dbea10db3737309e59fb25f0694a91807735ad89814f94f6c7d8d"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\launcher-source-frozen-v1.json",
+        "bytes": 66405,
+        "sha256": "75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-public-status.json",
+        "bytes": 1022,
+        "sha256": "e7bdd7a899ed24fdabadd5d5f9bf21fc9d20d6eea4071200d71b3dc90eb03d5e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scenario.json",
+        "bytes": 804,
+        "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-report-contract.mjs",
+        "bytes": 9785,
+        "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+        "bytes": 46895,
+        "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.samples.jsonl",
+        "bytes": 29612729,
+        "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-public.jsonl",
+        "bytes": 13308,
+        "sha256": "701fd80e9cb8119e16d71d5bd3f935b3cebd744a31e168a36807c9dab5a55004"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+        "bytes": 7084,
+        "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\actor-92-candidate-list-v1.json",
+        "bytes": 11865,
+        "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\attempt-count-correction-v1.json",
+        "bytes": 987,
+        "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\build-validation-adapters.mjs",
+        "bytes": 3222,
+        "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+        "bytes": 804,
+        "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.json",
+        "bytes": 48359,
+        "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.mjs",
+        "bytes": 8728,
+        "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-validation-v4.log",
+        "bytes": 4757,
+        "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v1.mjs.txt",
+        "bytes": 4731,
+        "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v2.mjs.txt",
+        "bytes": 4709,
+        "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure.mjs",
+        "bytes": 4795,
+        "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v2.log",
+        "bytes": 817,
+        "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v3.log",
+        "bytes": 1620,
+        "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnostic-adapter-setup-failure-v1.json",
+        "bytes": 344,
+        "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\final-independent-review-binding-v4.json",
+        "bytes": 2272,
+        "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v4.log",
+        "bytes": 821,
+        "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v5.log",
+        "bytes": 1377,
+        "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+        "bytes": 11639,
+        "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+        "bytes": 13583,
+        "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-failure-diagnosis-v1.json",
+        "bytes": 20418,
+        "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-prefix-contracts-v4.json",
+        "bytes": 19490,
+        "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.json",
+        "bytes": 80434,
+        "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.mjs",
+        "bytes": 2887,
+        "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-validation-v4.log",
+        "bytes": 1308,
+        "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\protocol-navigation-counted.mjs",
+        "bytes": 18581,
+        "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prove-repaired-leg-v4.mjs",
+        "bytes": 3000,
+        "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-layout.mjs",
+        "bytes": 8094,
+        "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-result-v1.json",
+        "bytes": 82947,
+        "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-run-v1.log",
+        "bytes": 1776,
+        "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repaired-leg-proof-v4.json",
+        "bytes": 19105,
+        "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+        "bytes": 20628,
+        "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\seal-review-summary-v4.mjs",
+        "bytes": 9199,
+        "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\syntax-verification-v4.json",
+        "bytes": 3328,
+        "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-01-v1.json",
+        "bytes": 19398,
+        "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-02-v1.json",
+        "bytes": 37886,
+        "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-prefix-contracts-v4.mjs",
+        "bytes": 2240,
+        "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-repaired.mjs",
+        "bytes": 11508,
+        "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-adapter-provenance-v2.json",
+        "bytes": 5649,
+        "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+        "bytes": 7220826,
+        "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+        "bytes": 3473,
+        "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+        "bytes": 18249,
+        "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+        "bytes": 2535,
+        "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+        "bytes": 144416,
+        "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 153586,
+        "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+        "bytes": 4074,
+        "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/capacity-scout-observer-preference-driver-frozen-v1.json",
+        "bytes": 9465,
+        "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+        "bytes": 6799671,
+        "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+        "bytes": 397117,
+        "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+        "bytes": 313945,
+        "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+        "bytes": 512762,
+        "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+        "bytes": 107777,
+        "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session.rs",
+        "bytes": 99414,
+        "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib.mjs",
+        "bytes": 11368,
+        "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-binding.json",
+        "bytes": 6784,
+        "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+        "bytes": 7084,
+        "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\actor-92-candidate-list-v1.json",
+        "bytes": 11865,
+        "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\attempt-count-correction-v1.json",
+        "bytes": 987,
+        "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\build-validation-adapters.mjs",
+        "bytes": 3222,
+        "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+        "bytes": 804,
+        "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.json",
+        "bytes": 48359,
+        "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.mjs",
+        "bytes": 8728,
+        "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-validation-v4.log",
+        "bytes": 4757,
+        "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v1.mjs.txt",
+        "bytes": 4731,
+        "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v2.mjs.txt",
+        "bytes": 4709,
+        "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure.mjs",
+        "bytes": 4795,
+        "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v2.log",
+        "bytes": 817,
+        "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v3.log",
+        "bytes": 1620,
+        "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnostic-adapter-setup-failure-v1.json",
+        "bytes": 344,
+        "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\final-independent-review-binding-v4.json",
+        "bytes": 2272,
+        "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v4.log",
+        "bytes": 821,
+        "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v5.log",
+        "bytes": 1377,
+        "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+        "bytes": 11639,
+        "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+        "bytes": 13583,
+        "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-failure-diagnosis-v1.json",
+        "bytes": 20418,
+        "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-prefix-contracts-v4.json",
+        "bytes": 19490,
+        "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.json",
+        "bytes": 80434,
+        "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.mjs",
+        "bytes": 2887,
+        "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-validation-v4.log",
+        "bytes": 1308,
+        "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\protocol-navigation-counted.mjs",
+        "bytes": 18581,
+        "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prove-repaired-leg-v4.mjs",
+        "bytes": 3000,
+        "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-layout.mjs",
+        "bytes": 8094,
+        "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-result-v1.json",
+        "bytes": 82947,
+        "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-run-v1.log",
+        "bytes": 1776,
+        "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repaired-leg-proof-v4.json",
+        "bytes": 19105,
+        "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+        "bytes": 20628,
+        "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\seal-review-summary-v4.mjs",
+        "bytes": 9199,
+        "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\syntax-verification-v4.json",
+        "bytes": 3328,
+        "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-01-v1.json",
+        "bytes": 19398,
+        "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-02-v1.json",
+        "bytes": 37886,
+        "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-prefix-contracts-v4.mjs",
+        "bytes": 2240,
+        "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-repaired.mjs",
+        "bytes": 11508,
+        "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-adapter-provenance-v2.json",
+        "bytes": 5649,
+        "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+        "bytes": 7220826,
+        "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+        "bytes": 3473,
+        "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+        "bytes": 18249,
+        "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+        "bytes": 2535,
+        "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+        "bytes": 144416,
+        "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 153586,
+        "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+        "bytes": 4074,
+        "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+      },
+      {
+        "file": "C:/mir2-build/p01-completion-20261024/capacity-scout-observer-preference-driver-frozen-v1.json",
+        "bytes": 9465,
+        "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+        "bytes": 6799671,
+        "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+        "bytes": 397117,
+        "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+        "bytes": 313945,
+        "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+        "bytes": 512762,
+        "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+        "bytes": 107777,
+        "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session.rs",
+        "bytes": 99414,
+        "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib.mjs",
+        "bytes": 11368,
+        "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-binding.json",
+        "bytes": 6784,
+        "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.report.json",
+        "bytes": 324303,
+        "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\report-provenance.json",
+        "bytes": 7705,
+        "sha256": "3d21bb4b0b7dbea10db3737309e59fb25f0694a91807735ad89814f94f6c7d8d"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+        "bytes": 72158,
+        "sha256": "80a5baa03493b2f8d137303a28ae1f348109053881130e5de9ab6a04dcfb1cbf"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-copy-provenance.json",
+        "bytes": 74700,
+        "sha256": "3d94fb3db21cf1a82a8fd9dfdeede001104b7fe895b57ea03ceb0e20a5f373e2"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-verification.json",
+        "bytes": 7108,
+        "sha256": "cf38707c66c491d0ac1db30f3176d5412f480e3d20587699b6e8e1381730cb73"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collection-verification.json",
+        "bytes": 332549,
+        "sha256": "f9916c1808b9108297fd395d7265a88fcda8cbed797f481bef54dc8c8b94ff26"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.raw-projection.json",
+        "bytes": 337456,
+        "sha256": "f7a35387cd9dd3c1657fecf27b9a62a404a0704c9969412a92a5e0175effcd47"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\compact-navigation-wire-terminal.json",
+        "bytes": 5089,
+        "sha256": "61a3086c8158bcdad39107e6df6f5f42e4ef95a7dc692920a4fd2ed00c9f72fd"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\raw-artifact-manifest.json",
+        "bytes": 715,
+        "sha256": "218546fc957043b6b77cd5daf1c81bb153d3db44824c736c71122fe02a3dc176"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+        "bytes": 437094,
+        "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\monitor-history.jsonl",
+        "bytes": 4811825,
+        "sha256": "a03201ad192a67fbbd5429c79452543bbe95c34ce02539c438ccd69292575f0f"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+        "bytes": 371,
+        "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+        "bytes": 10830,
+        "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+        "bytes": 6809,
+        "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+        "bytes": 7876,
+        "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+        "bytes": 5182,
+        "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+        "bytes": 6062,
+        "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+        "bytes": 1982,
+        "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+        "bytes": 1711,
+        "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+        "bytes": 7111,
+        "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+        "bytes": 2021,
+        "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+        "bytes": 14598,
+        "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+        "bytes": 21656,
+        "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\tool-source-frozen-v1.json",
+        "bytes": 2111,
+        "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+        "bytes": 813,
+        "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification.log",
+        "bytes": 877,
+        "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derivation-v1.json",
+        "bytes": 15779,
+        "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derive-verifier-v1.mjs",
+        "bytes": 9843,
+        "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\preparation-v1.json",
+        "bytes": 4186,
+        "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\independent-review-v1.json",
+        "bytes": 8417,
+        "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-artifact-catalog.json",
+        "bytes": 5158,
+        "sha256": "172ced353393f1204823c7892a8aab3244157e30abf215ec912e669538ad0315"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-public-verification.json",
+        "bytes": 1423,
+        "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public-status.json",
+        "bytes": 2590,
+        "sha256": "d3c5259beaba9632fc21cdb2173c986cdb064f1cb452848d519b55c93a57ae3e"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public.jsonl",
+        "bytes": 4571,
+        "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+      }
+    ]
+  },
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+  "primaryBuildPin": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\gateway-build-pin.json",
+  "preparedAt": "2026-10-25T22:25:47.587Z",
+  "sourceConfigSha256": "9407bdc12da5bad14e55deca4f05939f02132e0c3b33ce4780071cc60bf8de9a",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.audit-source.mjs",
+      "bytes": 9481,
+      "sha256": "da2636cb33f6ce11454f45e0f684c79e98173f591c7e62bfdc0c9324794723ce"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.backend-source.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.independent-audit.json",
+      "bytes": 1907,
+      "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.prepared-profile.json",
+      "bytes": 4571,
+      "sha256": "8736f7c2f3c002a8a57b972cb9d5ba6be09d83a224ffcd444b277dd49f9ade98"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.realm-evidence.json",
+      "bytes": 35109,
+      "sha256": "f41f368182319ad881c960fcd59ba3150381751de6679683d8bed6fef59df0e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.release-input.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.runner-source.mjs",
+      "bytes": 14494,
+      "sha256": "b1bf77146f5f6cdddc93198b2bf0d21ebc0ef0522ed47ec34a4a2755e2e65802"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.source-manifest-verification.json",
+      "bytes": 717,
+      "sha256": "4c580c3b6e29e8a4bc0440698c3f007c75b7db827ae0439f51c8ccd97a79ba3d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.zone-metrics.json",
+      "bytes": 23593,
+      "sha256": "d2cbe34bdf3405f4d44c480549ffbbef5e02739475e646b027f57ed719081ede"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-a.trace.jsonl",
+      "bytes": 982984,
+      "sha256": "bff94267486f19494628a7a106f45c656f90d0f0044d0d724397848afe0afe89"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-b.trace.jsonl",
+      "bytes": 908448,
+      "sha256": "9ec1ab4fb027908a5b524c8ac9095e76784d8e335bd5040f7f5519b761857a18"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-guard-newCharacter.trace.jsonl",
+      "bytes": 3486,
+      "sha256": "d2349f826580d669c54c3cf1d9c801a80cf5ef84776a9de3d34dcc853403bc0d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-guard-startGame.trace.jsonl",
+      "bytes": 3450,
+      "sha256": "c8fdf014325402531e4ec75be4725e50e151a0c6c84db15931da9297f74cdc7c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-relogin-0.trace.jsonl",
+      "bytes": 685108,
+      "sha256": "b4ab57e86cb079273484a0a8d44299731bc82d22e6c5535e049a7737630b7e9f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-relogin-1.trace.jsonl",
+      "bytes": 680202,
+      "sha256": "35bf1edfa2085531587106509dff6e48c8095e4af06891217af8f07904ddf8a4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694.report.json",
+      "bytes": 109384,
+      "sha256": "8e635a13d012553e140ddb0633771c4f1e2cb4596026a60153f0bfe5198460c7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\LICENSE",
+      "bytes": 1083,
+      "sha256": "dcd0a622a3a2c94fe3aa6238b76363f87df442afe788cbad966afe943ed62281"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\index.js",
+      "bytes": 45840,
+      "sha256": "af354cb13a11abe910cdbcb70943cb450b01b24f322026ae3f88d428d148395d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\package.json",
+      "bytes": 114,
+      "sha256": "40f71b1fd703434f93cf2d4f34a68ccdd884de8b70b5ab05b2ee197726e19b26"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\package.json",
+      "bytes": 3188,
+      "sha256": "546222266ef4402af870e96f03964570038e8498f4a4f7cb6dcf591f08cb07ec"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\package.json",
+      "bytes": 22280,
+      "sha256": "9149ab59b87c138f5aec42d4abfdb1f95006aeaf1ed70fdf736a43ab2fb6dcc9"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 258200,
+      "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\newcomer-v2-supply-policy.mjs",
+      "bytes": 10901,
+      "sha256": "eb0c50969844ce6f5622a7d83336cfe7f4d86dbbe2ac05a83c0daf6e1321e398"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\policy.mjs",
+      "bytes": 87501,
+      "sha256": "b36a72ddbfcaa2cf19d6656ab53387f4161b2be0b4904342abf0ca1a87450506"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-client.mjs",
+      "bytes": 8454,
+      "sha256": "cc1efb06b93984d203a388bb9f20f042240594434572339ba1ef435fc27dad8e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-loadout.mjs",
+      "bytes": 33042,
+      "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-refresh.mjs",
+      "bytes": 844,
+      "sha256": "ea93b5657ff08d2415015b29cb2f6cc1d4c368bdca6b2c62f889d077b490c58f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-status.mjs",
+      "bytes": 451,
+      "sha256": "240c070810f5386926db49c35fe9caa5b8c684724a684b9452439bb08bbc5dce"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-supplies.mjs",
+      "bytes": 79734,
+      "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-survival.mjs",
+      "bytes": 52409,
+      "sha256": "5fd6b537c7625e00131b62e48734102b363ca2bf813c367e30c1f694191488dd"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-supplies.json",
+      "bytes": 1152,
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+      "bytes": 5378,
+      "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-v1.log",
+      "bytes": 59078,
+      "sha256": "4b2d8af950ce74bd775bdb01a14aef9531ac3b6ef1ae9968573b1f7d4af95727"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+      "bytes": 6759,
+      "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\source-preservation-and-focused-receipt-v1.json",
+      "bytes": 21049,
+      "sha256": "5177c156deabecce26c37cc4104e36ff7b22352ebf26c6b77478a4bb23fa5684"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-independent-review-v1\\review-v1.json",
+      "bytes": 7980,
+      "sha256": "2ff103a69374fa6860616d566d3a22b488c3e5ebe77b000cd019b8cff9afbfbc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-independent-review-v1\\full-regression-addendum-v1.json",
+      "bytes": 3152,
+      "sha256": "281d5faacadc10c0df2f476b9c5ed2b9ce50ddfaf4dc5e37979c4624dc08af6a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2535,
+      "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+      "bytes": 4074,
+      "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/account-store-public-validator.mjs",
+      "bytes": 5407,
+      "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/protocol-contract-v1.json",
+      "bytes": 5971,
+      "sha256": "02852a5ab77ec2c8f5944bdbd2d907fdb39be3b5fb22722db0d47cf1f9cfc800"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\launcher-source-frozen-v1.json",
+      "bytes": 50321,
+      "sha256": "346c201ef7cf205a23b3521aed6d781386b7e1ae94327d590ed2f69bb4ea7480"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\launcher-source-prepared-v1.json",
+      "bytes": 23879,
+      "sha256": "7e251c5a59ce2ac86eeaeb5f240df9a5d532bd3ea3dc55d2a38c2d3473700707"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\preparation-plan.json",
+      "bytes": 2104,
+      "sha256": "879244c21d8e19afdb81ff86f1b605124ef83fdbdcfc18ba2a63629981b37e85"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\final-inputs-approved.json",
+      "bytes": 1090,
+      "sha256": "9f99c66db456956cdadb4a4394dd3e10278bae1bb431102fd7e4bca8ecac577a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-diagnostics-config.json",
+      "bytes": 4445,
+      "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\static-preparation-verification.json",
+      "bytes": 1122,
+      "sha256": "21dc48b1ec8db0f5f30b7c2a4a8886c6510477b82f0b31ec022b7aa640d61fd1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\source-guard-readonly-verification.json",
+      "bytes": 2350,
+      "sha256": "5a6cf222c5cbe892be7e79c2a961d1db2a842f48223868a6f22ba00c99606f61"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\synthetic-tests-v1.log",
+      "bytes": 7579,
+      "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-helper-freeze-v1.json",
+      "bytes": 2314,
+      "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\candidate-release-binding.json",
+      "bytes": 7448,
+      "sha256": "8362712a2cd1f81148dc8485caa4e168fc7c9958e6149008f666e5fccc08a75d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\backend-library-binding.json",
+      "bytes": 1047,
+      "sha256": "0a4ae571314cd97de54d2410f2b24bdf4e88b36134f7324702555df78d3a6044"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 33531,
+      "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\launcher-syntax-check.log",
+      "bytes": 8506,
+      "sha256": "5da15841904dfd4af86d96088aead02c0aed22170b4d9236a8a884729d78e074"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-v1-build-receipt.json",
+      "bytes": 2453,
+      "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-v2-driver-frozen-v1.json",
+      "bytes": 6123,
+      "sha256": "6c8bc4eef07b455a7a7cf76cea98874a010811d720834de8897279d403ec403b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\backend-driver-source-guard.mjs",
+      "bytes": 2675,
+      "sha256": "1d6cb996f88de6a47be1b0bedae3e1f57dd82c3aaa66eeb82dc18196061d8db5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public.mjs",
+      "bytes": 43126,
+      "sha256": "c4c1ede0b5e96c7191ff4fdd2e7cd5ab0478c89d2e601e60e5c4e2baef43c619"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-store-public.mjs",
+      "bytes": 4915,
+      "sha256": "ac763933fbfd0e9f8619caa101013b463fa1a6915bcf2da07a43f0edf8342664"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-binding-contract.mjs",
+      "bytes": 1623,
+      "sha256": "b54e5ffd89da0f048632f8d3ee7257880f00d73b44a8cc4a7b36a21fce833f72"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-evidence-contract.mjs",
+      "bytes": 5863,
+      "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\formal-template-contract.mjs",
+      "bytes": 1496,
+      "sha256": "74463f0fe4ad40d1f5c6809cbb36bed785797ee5d800196eb0c2aa25a4421c65"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\initialize-private.ps1",
+      "bytes": 2677,
+      "sha256": "5f04ec6b8379b941cac75ef66b31b94039500483f29c587224730b8e9f23418a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\input-lib.mjs",
+      "bytes": 17164,
+      "sha256": "60342898fe76d6116f71661aba2cafac815b8aa617230200747df41c714382ef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\monitor-owned.mjs",
+      "bytes": 1283,
+      "sha256": "813676ce7833dc483676e0f66a0c28b81587b52b846e6f1e7c1b7c6570750387"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\prepare-inputs.mjs",
+      "bytes": 14302,
+      "sha256": "c5979823e19172d1c2df7d28086036580c7d3337168750b64abea15265a2fbee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\projection-build-source-lib.mjs",
+      "bytes": 172,
+      "sha256": "2ef575db3c6c67eb01bf743ccb178cf648d3968ed90592fa70073efbb572769a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\recover-drained-owned.ps1",
+      "bytes": 3646,
+      "sha256": "6b92d828d6bccb733d19420f10056672dbe4f185fa3d1514b2b3f5fe73e50aa7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\request-stop.mjs",
+      "bytes": 1016,
+      "sha256": "45609865bb52e7777634d2259154c64d2327a4e59ecd925ab9902624a32c73f6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+      "bytes": 16503,
+      "sha256": "b4440acd5a721719f064499cc67d2b135a49283b02ee965100a885f8f8e5115b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-owned.mjs",
+      "bytes": 21597,
+      "sha256": "97eb3ada45e6615c4702a8b9a608bc7c78286b6f5824db048eb0d20279a685dc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-feasibility-gate.mjs",
+      "bytes": 19741,
+      "sha256": "7582c7ea7e6a3e7502c8cb4406fc3208d4bbb1af63c9dec8c2fc032406f4f40e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-full16-gate.mjs",
+      "bytes": 5649,
+      "sha256": "cad6f1112466b41e65b4415d7c28bbf679f1f838be86af135e5a7c2fb6ae9c4d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-probe18-collected-evidence.mjs",
+      "bytes": 17320,
+      "sha256": "cb83a51d5fcd901d3b56458fd8463cbaaee6cdfc5a8f5c77a6cee9604599bc5d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-public.mjs",
+      "bytes": 19038,
+      "sha256": "4a7ddd53afc9194b50e6aaac52b9b832c6f16e1496330d1e49768e36bec5979a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-store-public.mjs",
+      "bytes": 4737,
+      "sha256": "0a462f723703c9daf43e86388558cf9b8765554bbc451f1bb6d83f7b562274b7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\copied-baseline-inputs.json",
+      "bytes": 331,
+      "sha256": "d24f0cc83a5238e490a8e94890134fe70b85e87c2da739ca4eeba7da0ba48b40"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-options.json",
+      "bytes": 2887,
+      "sha256": "953c0fba5b00e2a2c2ffc01fd24beccf7c452eb91259bf8033c0361c3d5f9421"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\gateway-build-pin.json",
+      "bytes": 1446,
+      "sha256": "0237138b3f88297a7c2fee6685a97f3ed02f6b6098d6fb775513e78ee309cbfd"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\full16-gate.json",
+      "bytes": 4883,
+      "sha256": "4df42b0a28ee0a2b50db42c430928c09e529eac8f2c2ded64048f178253af1fb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\feasibility-gate.json",
+      "bytes": 66457,
+      "sha256": "81054b54d004876a452d1c55feb1f30a06cb913979651c8f985861fe3ff2c3f4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-baseline-100\\resource-profile-local-host.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\realm-cleanup.json",
+      "bytes": 6484,
+      "sha256": "08b62b4792fccc121d54c7888e801406d80fadd5fb7fca547e08c2d415c26a60"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\gateway-build-pin.json",
+      "bytes": 1454,
+      "sha256": "8f1ee8dc9b24201c567b1ad7ca69ca701a69c11cf19f47800c63c4dbfc8d67ab"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\realm-process.json",
+      "bytes": 4359,
+      "sha256": "17384e7214981375698147bfee7706104b89aa5aefa315f865aaf470a1864ff4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.report.json",
+      "bytes": 324303,
+      "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\source-pins-admitted-v2.json",
+      "bytes": 52954,
+      "sha256": "99bce08a1a0656ccac1ff58a7b1fdadb103399026626aee9dab658c9f18674d7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\source-pins.json",
+      "bytes": 53781,
+      "sha256": "264781007d455c92183fc8e58cbe915a3b6b81b919681ad09b5998ddda0de5c8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\report-provenance.json",
+      "bytes": 7705,
+      "sha256": "3d21bb4b0b7dbea10db3737309e59fb25f0694a91807735ad89814f94f6c7d8d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\launcher-source-frozen-v1.json",
+      "bytes": 66405,
+      "sha256": "75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-public-status.json",
+      "bytes": 1022,
+      "sha256": "e7bdd7a899ed24fdabadd5d5f9bf21fc9d20d6eea4071200d71b3dc90eb03d5e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scenario.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+      "bytes": 46895,
+      "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.samples.jsonl",
+      "bytes": 29612729,
+      "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-public.jsonl",
+      "bytes": 13308,
+      "sha256": "701fd80e9cb8119e16d71d5bd3f935b3cebd744a31e168a36807c9dab5a55004"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2535,
+      "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+      "bytes": 4074,
+      "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2535,
+      "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+      "bytes": 4074,
+      "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.report.json",
+      "bytes": 324303,
+      "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\report-provenance.json",
+      "bytes": 7705,
+      "sha256": "3d21bb4b0b7dbea10db3737309e59fb25f0694a91807735ad89814f94f6c7d8d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+      "bytes": 72158,
+      "sha256": "80a5baa03493b2f8d137303a28ae1f348109053881130e5de9ab6a04dcfb1cbf"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-copy-provenance.json",
+      "bytes": 74700,
+      "sha256": "3d94fb3db21cf1a82a8fd9dfdeede001104b7fe895b57ea03ceb0e20a5f373e2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-verification.json",
+      "bytes": 7108,
+      "sha256": "cf38707c66c491d0ac1db30f3176d5412f480e3d20587699b6e8e1381730cb73"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collection-verification.json",
+      "bytes": 332549,
+      "sha256": "f9916c1808b9108297fd395d7265a88fcda8cbed797f481bef54dc8c8b94ff26"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.raw-projection.json",
+      "bytes": 337456,
+      "sha256": "f7a35387cd9dd3c1657fecf27b9a62a404a0704c9969412a92a5e0175effcd47"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\release-native-10-v2-scout-observer-feasibility-18\\compact-navigation-wire-terminal.json",
+      "bytes": 5089,
+      "sha256": "61a3086c8158bcdad39107e6df6f5f42e4ef95a7dc692920a4fd2ed00c9f72fd"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\raw-artifact-manifest.json",
+      "bytes": 715,
+      "sha256": "218546fc957043b6b77cd5daf1c81bb153d3db44824c736c71122fe02a3dc176"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+      "bytes": 437094,
+      "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\monitor-history.jsonl",
+      "bytes": 4811825,
+      "sha256": "a03201ad192a67fbbd5429c79452543bbe95c34ce02539c438ccd69292575f0f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+      "bytes": 371,
+      "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2111,
+      "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification.log",
+      "bytes": 877,
+      "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+      "bytes": 36368,
+      "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+      "bytes": 5695,
+      "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+      "bytes": 2257,
+      "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derivation-v1.json",
+      "bytes": 15779,
+      "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derive-verifier-v1.mjs",
+      "bytes": 9843,
+      "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\preparation-v1.json",
+      "bytes": 4186,
+      "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\independent-review-v1.json",
+      "bytes": 8417,
+      "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-artifact-catalog.json",
+      "bytes": 5158,
+      "sha256": "172ced353393f1204823c7892a8aab3244157e30abf215ec912e669538ad0315"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-public-verification.json",
+      "bytes": 1423,
+      "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public-status.json",
+      "bytes": 2590,
+      "sha256": "d3c5259beaba9632fc21cdb2173c986cdb064f1cb452848d519b55c93a57ae3e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public.jsonl",
+      "bytes": 4571,
+      "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+    },
+    {
+      "file": "C:\\Program Files\\nodejs\\node.exe",
+      "bytes": 85202416,
+      "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+    },
+    {
+      "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\seed_capacity_accounts.exe",
+      "bytes": 67982336,
+      "sha256": "b261ed037a2055e6a10964554a0da8a98719b95b5017317b11e623e0ff622094"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\realm-process.json",
+      "bytes": 4338,
+      "sha256": "c467f3371b18a94fbffcfc417ad778af00bd3a1f1b4303cd76e154df9a9acc6a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\spectator-health-before.json",
+      "bytes": 657,
+      "sha256": "67575612a57da52c10ef062c12bd114cd8f03fd4e8f4e671f0fb0db086354aeb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-options-admitted-v2.json",
+      "bytes": 3485,
+      "sha256": "cd66a05c639229d21b3f3883610530718bab45d55da26f181a2b5d99d2a7c6ea"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\monitor-options.json",
+      "bytes": 709,
+      "sha256": "dadb56604660cbda389320fbc73ebfb403d61fc72c018b9de54b0149f720e087"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\source-pins.json",
+      "bytes": 166540,
+      "sha256": "58080f1b64e4c01a7cb8fe2ed7054ba93ce5f2e40d977eee1c86cd5b389c3144"
+    }
+  ],
+  "capacityAccepted": false
+}

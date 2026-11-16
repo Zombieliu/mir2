@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "appliedAt": "2026-10-25T12:15:55.0748893Z",
+  "operation": "Apply exact pre-reviewed rustfmt output to the single authorized test file",
+  "productionFilesWritten": false,
+  "oldTestPrefixRawBytes": 12555,
+  "oldTestPrefixUnchanged": true,
+  "formatterPreparation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\preparation-v1.json",
+    "bytes": 1518,
+    "sha256": "aa4a38eea46f39abe5525254403c7e2438c57384a24d3d23b8876f9a8411f3cc"
+  },
+  "preimage": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-application-v1\\personal_monster_projection_tests-before.rs.txt",
+    "bytes": 30640,
+    "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+  },
+  "candidate": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\personal_monster_projection_tests.rs",
+    "bytes": 30917,
+    "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+  },
+  "sourceAfter": [
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\personal_monster_projection_tests.rs",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    }
+  ],
+  "checksNotPerformed": [
+    "Cargo tests",
+    "Workspace rustfmt37",
+    "Service or capacity run"
+  ]
+}

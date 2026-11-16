@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "kind": "r16-social-budget-adjacent-harness-compatibility",
+  "passed": true,
+  "createdAt": "2026-11-08T23:23:15.589Z",
+  "writeSet": [
+    "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+    "apps/web/scripts/test-npc-shop-surface-integration.mjs",
+    "apps/web/scripts/test-spells-raw-ingress.mjs"
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "bytes": 269660,
+      "sha256": "08766508924829fafdea1c773f1838750e19952b8282b296d1707521385974df"
+    },
+    {
+      "path": "apps/web/scripts/test-npc-shop-surface-integration.mjs",
+      "bytes": 69689,
+      "sha256": "b023cbcac72310d07b96aee713ed0f3984a2c5171442237aad414c2ea8502558"
+    },
+    {
+      "path": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "bytes": 16836,
+      "sha256": "0d9ef49fd8227caeb937b21292dfd48fcb2c1915c0ae16e6a2c7974927c65de6"
+    }
+  ],
+  "frozenPagePin": {
+    "path": "apps/web/app/page.tsx",
+    "bytes": 1138291,
+    "sha256": "5fc2fe55f2c5131de3dc6e9956c1ca4a404afeeed31023dba377053d14f4720b"
+  },
+  "results": [
+    {
+      "test": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "baseline": {
+        "passed": 156,
+        "failed": 24,
+        "log": "worker-npc-buy-baseline.log"
+      },
+      "final": {
+        "passed": 180,
+        "failed": 0,
+        "log": "worker-npc-buy-final-r1.log"
+      }
+    },
+    {
+      "test": "apps/web/scripts/test-npc-shop-surface-integration.mjs",
+      "baseline": {
+        "passed": 33,
+        "failed": 4,
+        "log": "worker-npc-surface-baseline.log"
+      },
+      "final": {
+        "passed": 37,
+        "failed": 0,
+        "log": "worker-npc-surface-final-r1.log"
+      }
+    },
+    {
+      "test": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "baseline": {
+        "passed": 3,
+        "failed": 2,
+        "log": "worker-spells-ingress-baseline.log"
+      },
+      "final": {
+        "passed": 5,
+        "failed": 0,
+        "log": "worker-spells-ingress-final-r1.log"
+      }
+    }
+  ],
+  "remainingFailures": 0,
+  "scope": {
+    "realSocialBudgetHost": true,
+    "runtimeGetterNullForNonSocialCommands": true,
+    "actualOwnerGetterAndCompleteRefs": true,
+    "gatewayHeadUsesActualCaptureHelperWithNoSession": true,
+    "originalAssertionsPreserved": true,
+    "productHostHelperChanged": false,
+    "serviceBrowserOrDesktopStarted": false
+  },
+  "artifacts": [
+    {
+      "path": "worker-npc-buy-baseline.log",
+      "bytes": 71928,
+      "sha256": "ab02b2cfde5be52d042ffb20b80bb0b307f66d38fd8e84c8bf68f5d93d8024f7"
+    },
+    {
+      "path": "worker-npc-buy-final-r1.log",
+      "bytes": 46022,
+      "sha256": "c45b25c92a40aca8de14c2985dc334f3e6a93506bab82c9f59b742663c881ba3"
+    },
+    {
+      "path": "worker-npc-surface-baseline.log",
+      "bytes": 13766,
+      "sha256": "87726f98f96c5b8da49658ee56b0eb53e088ea419a4cc8f80a7ae1fd18201462"
+    },
+    {
+      "path": "worker-npc-surface-final-r1.log",
+      "bytes": 10276,
+      "sha256": "b04b671e458f9f9971b387a22bc0639db00a1c302c472b72c81891a64c783dfc"
+    },
+    {
+      "path": "worker-spells-ingress-baseline.log",
+      "bytes": 3200,
+      "sha256": "45b2822de2f78e6f35ce33a6e52087344b2f6860daeffcdd0ebb116739f2b659"
+    },
+    {
+      "path": "worker-spells-ingress-final-r1.log",
+      "bytes": 1552,
+      "sha256": "a96d37fa84bbda98985422b3dd719a45d08c63db9f0b8415c53ab8b900bc75cf"
+    }
+  ]
+}

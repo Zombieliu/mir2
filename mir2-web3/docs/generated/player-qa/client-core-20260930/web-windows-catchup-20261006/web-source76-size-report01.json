@@ -1,0 +1,1736 @@
+{
+  "ok": true,
+  "generatedAt": "2026-10-12T01:13:35.608Z",
+  "mode": "standalone-thin-client",
+  "webRoot": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web",
+  "outputRoot": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-source76-01",
+  "serverEntry": "mir2-web3/apps/web/server.js",
+  "budgetBytes": 377487360,
+  "sourceStats": {
+    "public": {
+      "exists": true,
+      "bytes": 897698571,
+      "files": 17502,
+      "directories": 483,
+      "links": 0
+    },
+    "nextTotal": {
+      "exists": true,
+      "bytes": 1007606571,
+      "files": 34297,
+      "directories": 2058,
+      "links": 0
+    },
+    "nextCache": {
+      "exists": true,
+      "bytes": 397788440,
+      "files": 9,
+      "directories": 8,
+      "links": 0
+    },
+    "nextDev": {
+      "exists": false,
+      "bytes": 0,
+      "files": 0,
+      "directories": 0,
+      "links": 0
+    },
+    "nextServer": {
+      "exists": true,
+      "bytes": 13377102,
+      "files": 183,
+      "directories": 59,
+      "links": 0
+    },
+    "nextStatic": {
+      "exists": true,
+      "bytes": 5259743,
+      "files": 62,
+      "directories": 50,
+      "links": 0
+    }
+  },
+  "runtimeStats": {
+    "webgpu": {
+      "exists": true,
+      "bytes": 31604995,
+      "files": 2,
+      "directories": 1,
+      "links": 0
+    },
+    "webgl2": {
+      "exists": true,
+      "bytes": 17867552,
+      "files": 2,
+      "directories": 1,
+      "links": 0
+    },
+    "webgl2-shared": {
+      "exists": true,
+      "bytes": 32563533,
+      "files": 2,
+      "directories": 1,
+      "links": 0
+    },
+    "removedLegacyMirror": {
+      "exists": false,
+      "bytes": 0,
+      "files": 0,
+      "directories": 0,
+      "links": 0
+    }
+  },
+  "package": {
+    "exists": true,
+    "bytes": 315967542,
+    "files": 4551,
+    "directories": 752,
+    "links": 0
+  },
+  "excluded": [
+    {
+      "reason": "copied NFT metadata",
+      "entries": 29
+    },
+    {
+      "reason": "external dependency junction",
+      "entries": 1
+    },
+    {
+      "reason": "thin public selection",
+      "entries": 1393
+    }
+  ],
+  "copyStats": {
+    "files": 2058,
+    "bytes": 96490153,
+    "sourceBytes": 116383040,
+    "skipped": {
+      "copied NFT metadata": 29,
+      "external dependency junction": 1,
+      "thin public selection": 1393
+    }
+  },
+  "dependencyStats": {
+    "entries": 36,
+    "files": 1960,
+    "bytes": 57919518,
+    "nativeBindings": 1,
+    "directoryRecords": 0,
+    "targetPlatform": "win32-x64",
+    "nativePackages": [
+      {
+        "name": "@img/sharp-win32-x64",
+        "files": 8,
+        "bytes": 19199007,
+        "destination": "node_modules/@img/sharp-win32-x64"
+      }
+    ],
+    "nativePackageFiles": 8,
+    "nativePackageBytes": 19199007,
+    "warningCount": 59,
+    "warningCodes": {
+      "Error": 59
+    },
+    "warningDetails": [
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-wasm32/versions\":\nCannot find module '@img/sharp-wasm32/versions' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\utility.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"\u001a\\server\\\u001a\":\nCannot find module '\u001a\\server\\\u001a' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\next-server.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linux-arm/sharp.node\":\nCannot find module '@img/sharp-linux-arm/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-darwin-x64/sharp.node\":\nCannot find module '@img/sharp-darwin-x64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-darwin-arm64/sharp.node\":\nCannot find module '@img/sharp-darwin-arm64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linux-x64/sharp.node\":\nCannot find module '@img/sharp-linux-x64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linuxmusl-arm64/sharp.node\":\nCannot find module '@img/sharp-linuxmusl-arm64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linux-arm64/sharp.node\":\nCannot find module '@img/sharp-linux-arm64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linux-ppc64/sharp.node\":\nCannot find module '@img/sharp-linux-ppc64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linux-riscv64/sharp.node\":\nCannot find module '@img/sharp-linux-riscv64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linux-s390x/sharp.node\":\nCannot find module '@img/sharp-linux-s390x/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-win32-arm64/sharp.node\":\nCannot find module '@img/sharp-win32-arm64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-freebsd-wasm32/sharp.node\":\nCannot find module '@img/sharp-freebsd-wasm32/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-linuxmusl-x64/sharp.node\":\nCannot find module '@img/sharp-linuxmusl-x64/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-win32-ia32/sharp.node\":\nCannot find module '@img/sharp-win32-ia32/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-webcontainers-wasm32/sharp.node\":\nCannot find module '@img/sharp-webcontainers-wasm32/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-wasm32/sharp.node\":\nCannot find module '@img/sharp-wasm32/sharp.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-libvips-\u001a/package\":\nCannot find module '@img/sharp-libvips-\u001a/package' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\sharp.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-libvips-dev/include\":\nCannot find module '@img/sharp-libvips-dev/include' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\libvips.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-libvips-dev/cplusplus\":\nCannot find module '@img/sharp-libvips-dev/cplusplus' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\sharp\\dist\\libvips.cjs",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@opentelemetry/api\":\nCannot find module '@opentelemetry/api' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\lib\\trace\\tracer.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"\u001a\\server\\middleware.js\":\nCannot find module '\u001a\\server\\middleware.ts' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\next-server.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@opentelemetry/api\":\nCannot find module '@opentelemetry/api' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\instrumentation-node-extensions.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@next/swc/native/next-swc.\u001a.node\":\nCannot find module '@next/swc/native/next-swc.\u001a.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\swc\\index.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"\u001a/package.json\":\nCannot find module '\u001a/package.json' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\telemetry\\events\\swc-load-failure.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages.runtime.prod.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages-turbo.runtime.dev.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages-turbo.runtime.prod.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages.runtime.dev.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack\":\nCannot find module 'webpack' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"next-rspack/rspack-core\":\nCannot find module 'next-rspack/rspack-core' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/ModuleFilenameHelpers\":\nCannot find module 'webpack/lib/ModuleFilenameHelpers' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/RuntimeGlobals\":\nCannot find module 'webpack/lib/RuntimeGlobals' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/SourceMapDevToolModuleOptionsPlugin\":\nCannot find module 'webpack/lib/SourceMapDevToolModuleOptionsPlugin' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/NormalModule\":\nCannot find module 'webpack/lib/NormalModule' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/util/identifier\":\nCannot find module 'webpack/lib/util/identifier' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/optimize/ConcatenatedModule\":\nCannot find module 'webpack/lib/optimize/ConcatenatedModule' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/javascript/BasicEvaluatedExpression\":\nCannot find module 'webpack/lib/javascript/BasicEvaluatedExpression' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/util/StringXor\":\nCannot find module 'webpack/lib/util/StringXor' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/node/NodeTargetPlugin\":\nCannot find module 'webpack/lib/node/NodeTargetPlugin' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\ssr\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-turbopack/client\":\nCannot find module 'react-server-dom-turbopack/client' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\ssr\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-turbopack/static\":\nCannot find module 'react-server-dom-turbopack/static' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-turbopack/server\":\nCannot find module 'react-server-dom-turbopack/server' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/static\":\nCannot find module 'react-server-dom-webpack/static' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/server\":\nCannot find module 'react-server-dom-webpack/server' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"next-rspack/rspack-core\":\nCannot find module 'next-rspack/rspack-core' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\shared\\lib\\get-rspack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\post-process.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\app-render\\use-flight-response.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"next/dist/build/webpack/plugins/terser-webpack-plugin/src\":\nCannot find module 'next/dist/build/webpack/plugins/terser-webpack-plugin/src' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\bundle5.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@opentelemetry/api\":\nCannot find module '@opentelemetry/api' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\webpack-config.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/server.node\":\nCannot find module 'react-server-dom-webpack/server.node' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\app-render\\react-server.node.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\components\\router-reducer\\fetch-server-response.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\hot-reloader-app.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"babel-plugin-react-compiler\":\nCannot find module 'babel-plugin-react-compiler' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\get-babel-loader-config.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack\":\nCannot find module 'webpack' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\@next\\react-refresh-utils\\dist\\ReactRefreshWebpackPlugin.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\components\\router-reducer\\reducers\\server-action-reducer.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts\":\nCannot find module '@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\web-socket.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"sass\":\nCannot find module 'sass' loaded from C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\sass-loader\\cjs.js",
+        "messageTruncated": false
+      }
+    ]
+  },
+  "publicCopyStats": {
+    "files": 592,
+    "collisions": 123
+  },
+  "mapAtlasSelection": {
+    "manifests": [
+      "generated/map-atlas/manifest.json"
+    ],
+    "pages": 79,
+    "selectedPaths": 80
+  },
+  "localMapSelection": {
+    "sourceSha256": "891e6e66b283c7da142af1b1644e45b341245548cec625ec9bff9274011fb66f",
+    "selectedPaths": [
+      {
+        "path": "original-map/WemadeMir2/Objects2/2704.png",
+        "bytes": 467,
+        "sha256": "f5810f458f8d648e320583e528b44bdd6c833a33a0431a2df95459403732dcb9"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2705.png",
+        "bytes": 634,
+        "sha256": "56c2aa9388ce0e8bfdb7836337bd9ec48858564691ee19b877f714d093922bc6"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2706.png",
+        "bytes": 561,
+        "sha256": "5ba10cb1c9dc0d61d23f973fbcb851fdabf3845dec9c85bf7a18a8fdd7207491"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2707.png",
+        "bytes": 1248,
+        "sha256": "b703e7d99c7007cc12c030a89fe5201413d1cc335c53b9aa339abdf45c5e9e0d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2708.png",
+        "bytes": 462,
+        "sha256": "40b3faa04c27975d745c1750e27955a9254ba6f5f8fa936f6c7a7563de84a5c6"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2709.png",
+        "bytes": 1562,
+        "sha256": "85a45a2712d91027252fee849674b43c597978ae322a592a7222f6dd0114d8ac"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2710.png",
+        "bytes": 1713,
+        "sha256": "cc98c44af6fb3d96f3e68df0223bef7389793071afcfd62cf03c63606c6dd0eb"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2711.png",
+        "bytes": 1681,
+        "sha256": "aaa3553df8581f16b2c461513ebf93e746dc63670050e76465647df29268f969"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2712.png",
+        "bytes": 3406,
+        "sha256": "1e337e92af3e5671e7a957e367707f1c2b0713a4bff02019cb4fe34324c4bd0c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2713.png",
+        "bytes": 427,
+        "sha256": "bb9c2d6f1554356bd853f461c67757d46bf302a91196b6b927fbe260425e3cee"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2716.png",
+        "bytes": 1207,
+        "sha256": "8e0d790df55a6bc8c538a7026168dc2a12858fb000733db6ba21636c2e986f88"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2717.png",
+        "bytes": 1364,
+        "sha256": "151593a8c7bbd68a442ab44758659874f7e73825dc4e7952356a149a3e970863"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2718.png",
+        "bytes": 1502,
+        "sha256": "808b2ab94dda0536f3314bdc9427d70171d7a91abdccd491c447c371c4cb5f0b"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2719.png",
+        "bytes": 1789,
+        "sha256": "b722388843288452102e4722414c21b0f2adb1510ac7bd9921a347e4c47e218d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2720.png",
+        "bytes": 1798,
+        "sha256": "ed173c9babd375bbc6f991d6f0566abf817a672e18a4ee5b9cc8916a2644e4a0"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2721.png",
+        "bytes": 3178,
+        "sha256": "38623c37aea14d6d2209e8d0ef8d2ff3fb09c0518779da4d6224e1d5acbe0eab"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2722.png",
+        "bytes": 479,
+        "sha256": "c9b3bc53cf9e00d2692f61122bb618a49eb3b630d44b79387326c8b9aa645691"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2723.png",
+        "bytes": 1335,
+        "sha256": "1fb9ec09e5712884562ba0c0aca7eacfa27a478ff361854c0a32cf8c45958ecd"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2724.png",
+        "bytes": 1439,
+        "sha256": "f15f5a3f6054aa73bf1e0260701f07f465961edf93fd9d532a7c3a925063be42"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2725.png",
+        "bytes": 1339,
+        "sha256": "c7be7222b09f6b09f5286d2648ba4ac89114841e9e355b4e304c9ecfdc4ee32f"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2728.png",
+        "bytes": 1086,
+        "sha256": "213a0ced8ab44120353ddf751aedc39f1e984a451d1b115e5d034d6e97ae2a31"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2729.png",
+        "bytes": 1138,
+        "sha256": "6fcfc67bda9307162017e7d40350603e7b2ad953a00504ae7e2f641a8e8fd292"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2730.png",
+        "bytes": 1716,
+        "sha256": "d5d422c1b851ec8188bca8d3caf7be4b62cb270dc1c3e46dba12827e50531180"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2731.png",
+        "bytes": 1953,
+        "sha256": "8b2e57888971283697ff62328ef5b08e32155e43fd751cd8d0759849063d26c8"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2732.png",
+        "bytes": 3391,
+        "sha256": "0b658143404e4f38dc286fdf45649f84e70d73e4d2f21db52a3f8a9201f01f03"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2733.png",
+        "bytes": 504,
+        "sha256": "c292db71a8d4b7b84b86459938aa7bf634dbdfd58412d287fee4b967367db590"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2734.png",
+        "bytes": 1329,
+        "sha256": "deff59d406ac7462e666006ef1cb370196d9af708afae83d1c532e7e0ca1399b"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2735.png",
+        "bytes": 1027,
+        "sha256": "6d62c89bf02a937d95a6a9e0cb9dd9796095b9242b177f077b4a61936dc7e83c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2736.png",
+        "bytes": 1133,
+        "sha256": "ba99af2b40654b2883f8b21198644965cbe0ba3d2862a6949043cc5f2b4c8507"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2737.png",
+        "bytes": 1110,
+        "sha256": "62d73c2bb7fd311631731efc9d3bd3ada07e2eca34ec817dd53c4332a786f003"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2740.png",
+        "bytes": 1069,
+        "sha256": "674ee815c3ad1f324ab46a3fae22fe308ec3d9420cbbe4494f5ea98be0e5eb9d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2741.png",
+        "bytes": 1203,
+        "sha256": "9f3114f2a2af69d150f0614fc6ed6f643b20e6f9e1cea2f326522685a9c07e1d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2742.png",
+        "bytes": 1811,
+        "sha256": "1032ddb31f52e848b2fdac587b58469c44044141914e343fa875341b1f08641d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2743.png",
+        "bytes": 1791,
+        "sha256": "28148e83f4c93a78fe4b3c2fe2ef19aa02de95e7d60550968e50eb5bbbe2f569"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2744.png",
+        "bytes": 3580,
+        "sha256": "5ce17e318fc995567792db168b65e6fdf25c75715e8fb942094ef2032c252e67"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2745.png",
+        "bytes": 1424,
+        "sha256": "299daf48458a0bc347d9bb2821f6f752d58b2401a64f70d95ca95bb16066f72b"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2746.png",
+        "bytes": 1049,
+        "sha256": "8ba07537b72d7e435d238c7c5dbd9dd4d33831a66a3a1a82d2a3671f97054dea"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2747.png",
+        "bytes": 1123,
+        "sha256": "82cecbace8c28038e24ad73248ed80e32d961278a934ff8b7d402b7713853a35"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2748.png",
+        "bytes": 957,
+        "sha256": "7d77faa3585d99e04b87423db8c23da7d318f02ffe7e26e700f6b4d3776f200d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2749.png",
+        "bytes": 1058,
+        "sha256": "64bdeca92148f91e65295c208f048bf4c4d48d3cb6f4ac367fd75e1668d9c3d9"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2752.png",
+        "bytes": 1187,
+        "sha256": "614fdbb58b20af8047517faac4fe3291705d28075bc72e0c59c9d4a8e86f5497"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2753.png",
+        "bytes": 1783,
+        "sha256": "44830d1ade9fe3f88e585d14d144eca9a7c11a8b9c5eb7d52b81d38d247eda94"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2754.png",
+        "bytes": 1820,
+        "sha256": "6e0a0f6265fe05f45b629623e0715c19d2357d1e2ba56458446e73df30348c33"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2755.png",
+        "bytes": 3724,
+        "sha256": "32958539ba6e41778f3f067cba37d9b8c0019c918ee02be6919ed26e9ab77936"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2757.png",
+        "bytes": 1582,
+        "sha256": "ba046cb518b1c39d23fea75342ce693224b6adc80f8988a5b5aa3aa0e6602c8c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2758.png",
+        "bytes": 1309,
+        "sha256": "2180d6931fc8198b0f8018f02d64251a5b1e9fca21daaae5cee11dc9830d9991"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2759.png",
+        "bytes": 1058,
+        "sha256": "9e4d818c107b346a11bb0240f9829c5c8f47a73eb27bb907a3c7265f92611661"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2760.png",
+        "bytes": 1149,
+        "sha256": "7986e2696fe6efe1b2b23e8156c26c1f348ac0414b56df62e4ff61d6a65efb61"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2761.png",
+        "bytes": 1780,
+        "sha256": "2ff78901070f3de9e1800b4fdb1d94a8f309613683544a29092cf3ffcbe68401"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2764.png",
+        "bytes": 5099,
+        "sha256": "8e34be13a430085722656ab6d26cec847412f45a759e60286bfc0abb2d8f232d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2765.png",
+        "bytes": 1595,
+        "sha256": "1b8419f200a45b619a96ee246f195d6cb75414f1068ceb45e1e5807a872cc496"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2766.png",
+        "bytes": 1372,
+        "sha256": "561ee2752816086d481ea0538150aa017dd0ff2fda21eacd17b13b0bea8048cc"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2767.png",
+        "bytes": 1583,
+        "sha256": "b58dc78b14ca8335140e7a309a1e4f3ca8a1e9225f7dc5ed59892bd80489554a"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2768.png",
+        "bytes": 1313,
+        "sha256": "9ba4d390b4ee3279706c61b36fae923dc87b68d90972fd8f5c2c211fc0dcc026"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2769.png",
+        "bytes": 1770,
+        "sha256": "fa4cdc4e4d5643669a2805cb95540d3ef9bf63bb1fa13e41d46928ef47353400"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2770.png",
+        "bytes": 1406,
+        "sha256": "c51c9f5810962cfe7195f861f7601142f37a62bf1348b59fee287b6fde95c2fc"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2771.png",
+        "bytes": 1578,
+        "sha256": "56c2d26859909316bac6a51d28881ad82c1b95c45474e8847c7fe0af798d9eaa"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2772.png",
+        "bytes": 1270,
+        "sha256": "7daa0210c7865d7c3d3d041785193b6abd86bcc6c2db6af35c53701eb27057ad"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2773.png",
+        "bytes": 1195,
+        "sha256": "2a09442b1e7984b318bf4e0c7a5cddd4a70f4c490db3940144bb127ad5970c8d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2776.png",
+        "bytes": 1036,
+        "sha256": "6af6054b13d0ecb60633833ef480c0524dea8cbb769e7964d03bbe8121bdc09c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2777.png",
+        "bytes": 1494,
+        "sha256": "5e6579e2f69bea1e8ed85543d7bda1c3d891104bdae21b992db00880ba971adb"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2778.png",
+        "bytes": 1656,
+        "sha256": "19525e6bde3ea0830991c659a1fd91591d02bfbce73bd7f7a8a8144d85ab3cc0"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2779.png",
+        "bytes": 1507,
+        "sha256": "81b72e1d6641007fbb73a8605ff0d17e948e5742a4871565a04a6523707c2cbd"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2780.png",
+        "bytes": 1474,
+        "sha256": "3a191a07bb6948c2059cfdb8202000860ae31a86ebf03e98a43743bcf150c80e"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2781.png",
+        "bytes": 1364,
+        "sha256": "058b5d0eb1fd3b43627ab928c1e83bfbb9908efa04336d63aef5dfc31638f99c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2782.png",
+        "bytes": 1098,
+        "sha256": "4fa727d82cd41fa9269e3559b81d6098a21ceee2c4e692a5574f371a0aa16cf2"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2783.png",
+        "bytes": 1033,
+        "sha256": "99a0995b369963c804d0e02e4e0c2bbaeb3fb46873cbf6f6253b1f1e5756a600"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2785.png",
+        "bytes": 1662,
+        "sha256": "0e2fc25b481b63159053891e060e1ebd94d74e4f25a05d439c3f249011d69708"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2788.png",
+        "bytes": 1581,
+        "sha256": "0597739ad3a0b7ebd3d11b6d38ccf2ea6c0baa0b41edba67e4aebf975c5724b5"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2789.png",
+        "bytes": 1251,
+        "sha256": "dce849299915c9318a58759684ec5ec78fe21b2a016cadb987f8f6b64913b0f3"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2790.png",
+        "bytes": 1235,
+        "sha256": "05cf67da0754064956a258548a8ec54862c6bcdeadcea9e30347930c3b11965a"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2791.png",
+        "bytes": 1061,
+        "sha256": "c0fce5eaac7f855dcd14569f48c46e9299f12bd643d94e5b5554d7056b974809"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2792.png",
+        "bytes": 1144,
+        "sha256": "d398f96a8b0b3750f0f5d743c4d16f15ce9b9b225206792e9de99fe5e577ef0f"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2793.png",
+        "bytes": 1783,
+        "sha256": "d92ddb998608b968745dd28927dc96ff247a3e0093980773730f1d5dbeda65cb"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2794.png",
+        "bytes": 1739,
+        "sha256": "e2ff29db2287930b94e62e77eca975948ecc5ed5b69deada1a4049ed5abcf593"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2795.png",
+        "bytes": 3621,
+        "sha256": "cc12447fc976105a12621b1cc4e49400a95b485a5c13ceb1a1c5acf2d4ebe851"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2796.png",
+        "bytes": 1267,
+        "sha256": "cceb8c9189016486e9d59f7a0eac2c1e9ba266145b18203a2f64081094e185cd"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2797.png",
+        "bytes": 1103,
+        "sha256": "2efb4d6367bb24c408e7662c0842e6fc50b0aad0b3ff26cfc1fecb595dfa1aae"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2800.png",
+        "bytes": 1232,
+        "sha256": "2c04dc70e8de336dbbdb0d26149a2354b0e4593cdd390e3930a21abd12478dc4"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2801.png",
+        "bytes": 1735,
+        "sha256": "d97277d5cfddd179fe873d84594ad714b6f11e4b1fae7e3b6a933f208ed47dc3"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2802.png",
+        "bytes": 1789,
+        "sha256": "8523c61f4c1bff432cf72954f3579b94b746223b28363c7392b0e1ef93ed3ee8"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2803.png",
+        "bytes": 3513,
+        "sha256": "dc16f43b3bcf00ee7431c32f5ffe94c6815c30b61e06bd996b594cbaee03d22c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2804.png",
+        "bytes": 1241,
+        "sha256": "1b1581adf387fd1ec3f5ddf59fcb59710ae00775941f5d86d515dcd3edb68a77"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2805.png",
+        "bytes": 1244,
+        "sha256": "8f8c9db3d26dc7d9c4aba26df051f0d4c4559042bed5d8a4697a4b773d4aa025"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2806.png",
+        "bytes": 1659,
+        "sha256": "f8a34ec63e9e40ce521a2c98f0e946f44b933af3d79fc0c16e541942575d5d4f"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2807.png",
+        "bytes": 1835,
+        "sha256": "10e918a2779f686c7d67bab75c34a9b823096e23d2886ed161fb58e848d5909e"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2808.png",
+        "bytes": 3827,
+        "sha256": "99d86f9686045c49113253c1bc6a6f42967d9def8c6ab863a876d7ecdf53d8ad"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/2809.png",
+        "bytes": 202,
+        "sha256": "8c0d3b376452728a72e7dee3ea98760b817175a4c852eb04cb6aea74b34e1c2c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4301.png",
+        "bytes": 1330,
+        "sha256": "48c7ff403748b308d130f9a344ed2722ded474e227b10d7ea45f8252f297ecb2"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4302.png",
+        "bytes": 1354,
+        "sha256": "3a77c993cb615cbbe6f94a01a7a5e4e6f26f89c3920a3e1ce8f79b94940a056a"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4303.png",
+        "bytes": 3571,
+        "sha256": "d785a6dd717f884a46c2130d06e938cdb386f75bcd08b5e322b68cb2868d615c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4304.png",
+        "bytes": 4583,
+        "sha256": "090ddb67b1bc189ffcf92b6e2fbb41a2730a370cae0df4ea95731192df23f0c4"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4305.png",
+        "bytes": 4842,
+        "sha256": "546b2ba8e0f526f0fae2c08ae54d1014cc206ad7dedba12e5e795560751499b7"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4306.png",
+        "bytes": 2892,
+        "sha256": "c0482fde7873004b799160898f10156a28fec266d0eedfc8228f9d8775b313fa"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4313.png",
+        "bytes": 506,
+        "sha256": "318161a481040704c517b95b317876101da8024c63b05147625b730aa3d0952c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4314.png",
+        "bytes": 2725,
+        "sha256": "60e7b7a69b12e4af815ae1e1833de99415196fd3dd9c33323e190ff5305c56e1"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4315.png",
+        "bytes": 1641,
+        "sha256": "fad50428297aa8ce2378120cef4ecc46c44efe18d986a9ade6b23e4f9053026d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4316.png",
+        "bytes": 181,
+        "sha256": "b247d5fe4b1edc1d3f889d478011c8d22bfd49febacace71a678f973cc22b0a6"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4382.png",
+        "bytes": 1174,
+        "sha256": "9fd44e7eb8c504b0c80dbbb4a746c632e510700b696995711aa5a6262a489556"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4383.png",
+        "bytes": 5999,
+        "sha256": "ff610efbc7b40b8a54bdac4c4255abec045fc3bde535da4f8a37e4838be878f0"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4384.png",
+        "bytes": 1193,
+        "sha256": "aa65deeb69639575a7e5ad0e9f5a177c03cbf6a2f212177c981db7bd8a02467a"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4385.png",
+        "bytes": 5451,
+        "sha256": "3782061eafb5da54314aef23b51783901dea0ea2dc3c05ab5c10b348b8adcbfa"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4386.png",
+        "bytes": 1131,
+        "sha256": "301aa75c71821e534089af30f019d32ecc9a65ed7875a33856a17c1093f944e3"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4387.png",
+        "bytes": 1763,
+        "sha256": "2e5cc9c16ff3e10d9bc0dcecae92d7f2fa9f504fde640c0204da33cad6146e1c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects2/4388.png",
+        "bytes": 4775,
+        "sha256": "81858697379c0d840e49b8585c2f8cdefc5ee42489a3b831dc574350bef6674c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3981.png",
+        "bytes": 811,
+        "sha256": "a81bb120e45ebb2c65a34b4e1442fe17f5051c13b300f8a0b1638cbee7204915"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3982.png",
+        "bytes": 477,
+        "sha256": "0c635da1a29835df623e3532c12803eef3c1c905050a42fdc49835f2f225e15d"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3983.png",
+        "bytes": 1432,
+        "sha256": "24d26d09852e7e22b07f324e34238e5ac45ec3c42aac60385e5cd65b86f11b6b"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3984.png",
+        "bytes": 3590,
+        "sha256": "50a44a54e2bf750614e49e9024d55c0c9457725056bec51a3a54dce1bc6d409c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3985.png",
+        "bytes": 488,
+        "sha256": "c519b1812b9437f1785a63b18ad507cd46bb0cf5b542810e7cf4fc9f9073c6b8"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3986.png",
+        "bytes": 5533,
+        "sha256": "53ac9167f15e26a804a7be0df80619f41ca8bdeabafff5469c8b5f9dc862e5ff"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3987.png",
+        "bytes": 460,
+        "sha256": "1e54a3190a837bb01d1db872c83ded5605dd27b9d786f4be50695bc887dc6ff5"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3988.png",
+        "bytes": 1345,
+        "sha256": "ab7b43709767994dceaf0420bb98c144a168d1d7d53d4bc77cfa72f4af79259b"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/3989.png",
+        "bytes": 1639,
+        "sha256": "a5bd38762cb41d95597c1758f7e186e3ec51212bb4497a377e8b0956eec8e99c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/8005.png",
+        "bytes": 3445,
+        "sha256": "598ba61ecb8d11717359a78dbc22b18ba29c2fd72df1e474eca2ca196495db9c"
+      },
+      {
+        "path": "original-map/WemadeMir2/Objects3/8006.png",
+        "bytes": 3066,
+        "sha256": "a1919a393900840bfcaa1288db058d115f92c5ce58d8167aa5f38d5669da4040"
+      }
+    ],
+    "bytes": 204399,
+    "packagedClosure": {
+      "frames": [
+        {
+          "path": "original-map/WemadeMir2/Objects2/2704.png",
+          "bytes": 467,
+          "sha256": "f5810f458f8d648e320583e528b44bdd6c833a33a0431a2df95459403732dcb9"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2705.png",
+          "bytes": 634,
+          "sha256": "56c2aa9388ce0e8bfdb7836337bd9ec48858564691ee19b877f714d093922bc6"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2706.png",
+          "bytes": 561,
+          "sha256": "5ba10cb1c9dc0d61d23f973fbcb851fdabf3845dec9c85bf7a18a8fdd7207491"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2707.png",
+          "bytes": 1248,
+          "sha256": "b703e7d99c7007cc12c030a89fe5201413d1cc335c53b9aa339abdf45c5e9e0d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2708.png",
+          "bytes": 462,
+          "sha256": "40b3faa04c27975d745c1750e27955a9254ba6f5f8fa936f6c7a7563de84a5c6"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2709.png",
+          "bytes": 1562,
+          "sha256": "85a45a2712d91027252fee849674b43c597978ae322a592a7222f6dd0114d8ac"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2710.png",
+          "bytes": 1713,
+          "sha256": "cc98c44af6fb3d96f3e68df0223bef7389793071afcfd62cf03c63606c6dd0eb"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2711.png",
+          "bytes": 1681,
+          "sha256": "aaa3553df8581f16b2c461513ebf93e746dc63670050e76465647df29268f969"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2712.png",
+          "bytes": 3406,
+          "sha256": "1e337e92af3e5671e7a957e367707f1c2b0713a4bff02019cb4fe34324c4bd0c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2713.png",
+          "bytes": 427,
+          "sha256": "bb9c2d6f1554356bd853f461c67757d46bf302a91196b6b927fbe260425e3cee"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2716.png",
+          "bytes": 1207,
+          "sha256": "8e0d790df55a6bc8c538a7026168dc2a12858fb000733db6ba21636c2e986f88"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2717.png",
+          "bytes": 1364,
+          "sha256": "151593a8c7bbd68a442ab44758659874f7e73825dc4e7952356a149a3e970863"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2718.png",
+          "bytes": 1502,
+          "sha256": "808b2ab94dda0536f3314bdc9427d70171d7a91abdccd491c447c371c4cb5f0b"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2719.png",
+          "bytes": 1789,
+          "sha256": "b722388843288452102e4722414c21b0f2adb1510ac7bd9921a347e4c47e218d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2720.png",
+          "bytes": 1798,
+          "sha256": "ed173c9babd375bbc6f991d6f0566abf817a672e18a4ee5b9cc8916a2644e4a0"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2721.png",
+          "bytes": 3178,
+          "sha256": "38623c37aea14d6d2209e8d0ef8d2ff3fb09c0518779da4d6224e1d5acbe0eab"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2722.png",
+          "bytes": 479,
+          "sha256": "c9b3bc53cf9e00d2692f61122bb618a49eb3b630d44b79387326c8b9aa645691"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2723.png",
+          "bytes": 1335,
+          "sha256": "1fb9ec09e5712884562ba0c0aca7eacfa27a478ff361854c0a32cf8c45958ecd"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2724.png",
+          "bytes": 1439,
+          "sha256": "f15f5a3f6054aa73bf1e0260701f07f465961edf93fd9d532a7c3a925063be42"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2725.png",
+          "bytes": 1339,
+          "sha256": "c7be7222b09f6b09f5286d2648ba4ac89114841e9e355b4e304c9ecfdc4ee32f"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2728.png",
+          "bytes": 1086,
+          "sha256": "213a0ced8ab44120353ddf751aedc39f1e984a451d1b115e5d034d6e97ae2a31"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2729.png",
+          "bytes": 1138,
+          "sha256": "6fcfc67bda9307162017e7d40350603e7b2ad953a00504ae7e2f641a8e8fd292"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2730.png",
+          "bytes": 1716,
+          "sha256": "d5d422c1b851ec8188bca8d3caf7be4b62cb270dc1c3e46dba12827e50531180"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2731.png",
+          "bytes": 1953,
+          "sha256": "8b2e57888971283697ff62328ef5b08e32155e43fd751cd8d0759849063d26c8"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2732.png",
+          "bytes": 3391,
+          "sha256": "0b658143404e4f38dc286fdf45649f84e70d73e4d2f21db52a3f8a9201f01f03"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2733.png",
+          "bytes": 504,
+          "sha256": "c292db71a8d4b7b84b86459938aa7bf634dbdfd58412d287fee4b967367db590"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2734.png",
+          "bytes": 1329,
+          "sha256": "deff59d406ac7462e666006ef1cb370196d9af708afae83d1c532e7e0ca1399b"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2735.png",
+          "bytes": 1027,
+          "sha256": "6d62c89bf02a937d95a6a9e0cb9dd9796095b9242b177f077b4a61936dc7e83c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2736.png",
+          "bytes": 1133,
+          "sha256": "ba99af2b40654b2883f8b21198644965cbe0ba3d2862a6949043cc5f2b4c8507"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2737.png",
+          "bytes": 1110,
+          "sha256": "62d73c2bb7fd311631731efc9d3bd3ada07e2eca34ec817dd53c4332a786f003"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2740.png",
+          "bytes": 1069,
+          "sha256": "674ee815c3ad1f324ab46a3fae22fe308ec3d9420cbbe4494f5ea98be0e5eb9d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2741.png",
+          "bytes": 1203,
+          "sha256": "9f3114f2a2af69d150f0614fc6ed6f643b20e6f9e1cea2f326522685a9c07e1d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2742.png",
+          "bytes": 1811,
+          "sha256": "1032ddb31f52e848b2fdac587b58469c44044141914e343fa875341b1f08641d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2743.png",
+          "bytes": 1791,
+          "sha256": "28148e83f4c93a78fe4b3c2fe2ef19aa02de95e7d60550968e50eb5bbbe2f569"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2744.png",
+          "bytes": 3580,
+          "sha256": "5ce17e318fc995567792db168b65e6fdf25c75715e8fb942094ef2032c252e67"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2745.png",
+          "bytes": 1424,
+          "sha256": "299daf48458a0bc347d9bb2821f6f752d58b2401a64f70d95ca95bb16066f72b"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2746.png",
+          "bytes": 1049,
+          "sha256": "8ba07537b72d7e435d238c7c5dbd9dd4d33831a66a3a1a82d2a3671f97054dea"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2747.png",
+          "bytes": 1123,
+          "sha256": "82cecbace8c28038e24ad73248ed80e32d961278a934ff8b7d402b7713853a35"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2748.png",
+          "bytes": 957,
+          "sha256": "7d77faa3585d99e04b87423db8c23da7d318f02ffe7e26e700f6b4d3776f200d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2749.png",
+          "bytes": 1058,
+          "sha256": "64bdeca92148f91e65295c208f048bf4c4d48d3cb6f4ac367fd75e1668d9c3d9"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2752.png",
+          "bytes": 1187,
+          "sha256": "614fdbb58b20af8047517faac4fe3291705d28075bc72e0c59c9d4a8e86f5497"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2753.png",
+          "bytes": 1783,
+          "sha256": "44830d1ade9fe3f88e585d14d144eca9a7c11a8b9c5eb7d52b81d38d247eda94"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2754.png",
+          "bytes": 1820,
+          "sha256": "6e0a0f6265fe05f45b629623e0715c19d2357d1e2ba56458446e73df30348c33"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2755.png",
+          "bytes": 3724,
+          "sha256": "32958539ba6e41778f3f067cba37d9b8c0019c918ee02be6919ed26e9ab77936"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2757.png",
+          "bytes": 1582,
+          "sha256": "ba046cb518b1c39d23fea75342ce693224b6adc80f8988a5b5aa3aa0e6602c8c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2758.png",
+          "bytes": 1309,
+          "sha256": "2180d6931fc8198b0f8018f02d64251a5b1e9fca21daaae5cee11dc9830d9991"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2759.png",
+          "bytes": 1058,
+          "sha256": "9e4d818c107b346a11bb0240f9829c5c8f47a73eb27bb907a3c7265f92611661"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2760.png",
+          "bytes": 1149,
+          "sha256": "7986e2696fe6efe1b2b23e8156c26c1f348ac0414b56df62e4ff61d6a65efb61"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2761.png",
+          "bytes": 1780,
+          "sha256": "2ff78901070f3de9e1800b4fdb1d94a8f309613683544a29092cf3ffcbe68401"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2764.png",
+          "bytes": 5099,
+          "sha256": "8e34be13a430085722656ab6d26cec847412f45a759e60286bfc0abb2d8f232d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2765.png",
+          "bytes": 1595,
+          "sha256": "1b8419f200a45b619a96ee246f195d6cb75414f1068ceb45e1e5807a872cc496"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2766.png",
+          "bytes": 1372,
+          "sha256": "561ee2752816086d481ea0538150aa017dd0ff2fda21eacd17b13b0bea8048cc"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2767.png",
+          "bytes": 1583,
+          "sha256": "b58dc78b14ca8335140e7a309a1e4f3ca8a1e9225f7dc5ed59892bd80489554a"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2768.png",
+          "bytes": 1313,
+          "sha256": "9ba4d390b4ee3279706c61b36fae923dc87b68d90972fd8f5c2c211fc0dcc026"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2769.png",
+          "bytes": 1770,
+          "sha256": "fa4cdc4e4d5643669a2805cb95540d3ef9bf63bb1fa13e41d46928ef47353400"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2770.png",
+          "bytes": 1406,
+          "sha256": "c51c9f5810962cfe7195f861f7601142f37a62bf1348b59fee287b6fde95c2fc"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2771.png",
+          "bytes": 1578,
+          "sha256": "56c2d26859909316bac6a51d28881ad82c1b95c45474e8847c7fe0af798d9eaa"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2772.png",
+          "bytes": 1270,
+          "sha256": "7daa0210c7865d7c3d3d041785193b6abd86bcc6c2db6af35c53701eb27057ad"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2773.png",
+          "bytes": 1195,
+          "sha256": "2a09442b1e7984b318bf4e0c7a5cddd4a70f4c490db3940144bb127ad5970c8d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2776.png",
+          "bytes": 1036,
+          "sha256": "6af6054b13d0ecb60633833ef480c0524dea8cbb769e7964d03bbe8121bdc09c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2777.png",
+          "bytes": 1494,
+          "sha256": "5e6579e2f69bea1e8ed85543d7bda1c3d891104bdae21b992db00880ba971adb"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2778.png",
+          "bytes": 1656,
+          "sha256": "19525e6bde3ea0830991c659a1fd91591d02bfbce73bd7f7a8a8144d85ab3cc0"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2779.png",
+          "bytes": 1507,
+          "sha256": "81b72e1d6641007fbb73a8605ff0d17e948e5742a4871565a04a6523707c2cbd"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2780.png",
+          "bytes": 1474,
+          "sha256": "3a191a07bb6948c2059cfdb8202000860ae31a86ebf03e98a43743bcf150c80e"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2781.png",
+          "bytes": 1364,
+          "sha256": "058b5d0eb1fd3b43627ab928c1e83bfbb9908efa04336d63aef5dfc31638f99c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2782.png",
+          "bytes": 1098,
+          "sha256": "4fa727d82cd41fa9269e3559b81d6098a21ceee2c4e692a5574f371a0aa16cf2"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2783.png",
+          "bytes": 1033,
+          "sha256": "99a0995b369963c804d0e02e4e0c2bbaeb3fb46873cbf6f6253b1f1e5756a600"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2785.png",
+          "bytes": 1662,
+          "sha256": "0e2fc25b481b63159053891e060e1ebd94d74e4f25a05d439c3f249011d69708"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2788.png",
+          "bytes": 1581,
+          "sha256": "0597739ad3a0b7ebd3d11b6d38ccf2ea6c0baa0b41edba67e4aebf975c5724b5"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2789.png",
+          "bytes": 1251,
+          "sha256": "dce849299915c9318a58759684ec5ec78fe21b2a016cadb987f8f6b64913b0f3"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2790.png",
+          "bytes": 1235,
+          "sha256": "05cf67da0754064956a258548a8ec54862c6bcdeadcea9e30347930c3b11965a"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2791.png",
+          "bytes": 1061,
+          "sha256": "c0fce5eaac7f855dcd14569f48c46e9299f12bd643d94e5b5554d7056b974809"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2792.png",
+          "bytes": 1144,
+          "sha256": "d398f96a8b0b3750f0f5d743c4d16f15ce9b9b225206792e9de99fe5e577ef0f"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2793.png",
+          "bytes": 1783,
+          "sha256": "d92ddb998608b968745dd28927dc96ff247a3e0093980773730f1d5dbeda65cb"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2794.png",
+          "bytes": 1739,
+          "sha256": "e2ff29db2287930b94e62e77eca975948ecc5ed5b69deada1a4049ed5abcf593"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2795.png",
+          "bytes": 3621,
+          "sha256": "cc12447fc976105a12621b1cc4e49400a95b485a5c13ceb1a1c5acf2d4ebe851"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2796.png",
+          "bytes": 1267,
+          "sha256": "cceb8c9189016486e9d59f7a0eac2c1e9ba266145b18203a2f64081094e185cd"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2797.png",
+          "bytes": 1103,
+          "sha256": "2efb4d6367bb24c408e7662c0842e6fc50b0aad0b3ff26cfc1fecb595dfa1aae"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2800.png",
+          "bytes": 1232,
+          "sha256": "2c04dc70e8de336dbbdb0d26149a2354b0e4593cdd390e3930a21abd12478dc4"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2801.png",
+          "bytes": 1735,
+          "sha256": "d97277d5cfddd179fe873d84594ad714b6f11e4b1fae7e3b6a933f208ed47dc3"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2802.png",
+          "bytes": 1789,
+          "sha256": "8523c61f4c1bff432cf72954f3579b94b746223b28363c7392b0e1ef93ed3ee8"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2803.png",
+          "bytes": 3513,
+          "sha256": "dc16f43b3bcf00ee7431c32f5ffe94c6815c30b61e06bd996b594cbaee03d22c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2804.png",
+          "bytes": 1241,
+          "sha256": "1b1581adf387fd1ec3f5ddf59fcb59710ae00775941f5d86d515dcd3edb68a77"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2805.png",
+          "bytes": 1244,
+          "sha256": "8f8c9db3d26dc7d9c4aba26df051f0d4c4559042bed5d8a4697a4b773d4aa025"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2806.png",
+          "bytes": 1659,
+          "sha256": "f8a34ec63e9e40ce521a2c98f0e946f44b933af3d79fc0c16e541942575d5d4f"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2807.png",
+          "bytes": 1835,
+          "sha256": "10e918a2779f686c7d67bab75c34a9b823096e23d2886ed161fb58e848d5909e"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2808.png",
+          "bytes": 3827,
+          "sha256": "99d86f9686045c49113253c1bc6a6f42967d9def8c6ab863a876d7ecdf53d8ad"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/2809.png",
+          "bytes": 202,
+          "sha256": "8c0d3b376452728a72e7dee3ea98760b817175a4c852eb04cb6aea74b34e1c2c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4301.png",
+          "bytes": 1330,
+          "sha256": "48c7ff403748b308d130f9a344ed2722ded474e227b10d7ea45f8252f297ecb2"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4302.png",
+          "bytes": 1354,
+          "sha256": "3a77c993cb615cbbe6f94a01a7a5e4e6f26f89c3920a3e1ce8f79b94940a056a"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4303.png",
+          "bytes": 3571,
+          "sha256": "d785a6dd717f884a46c2130d06e938cdb386f75bcd08b5e322b68cb2868d615c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4304.png",
+          "bytes": 4583,
+          "sha256": "090ddb67b1bc189ffcf92b6e2fbb41a2730a370cae0df4ea95731192df23f0c4"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4305.png",
+          "bytes": 4842,
+          "sha256": "546b2ba8e0f526f0fae2c08ae54d1014cc206ad7dedba12e5e795560751499b7"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4306.png",
+          "bytes": 2892,
+          "sha256": "c0482fde7873004b799160898f10156a28fec266d0eedfc8228f9d8775b313fa"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4313.png",
+          "bytes": 506,
+          "sha256": "318161a481040704c517b95b317876101da8024c63b05147625b730aa3d0952c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4314.png",
+          "bytes": 2725,
+          "sha256": "60e7b7a69b12e4af815ae1e1833de99415196fd3dd9c33323e190ff5305c56e1"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4315.png",
+          "bytes": 1641,
+          "sha256": "fad50428297aa8ce2378120cef4ecc46c44efe18d986a9ade6b23e4f9053026d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4316.png",
+          "bytes": 181,
+          "sha256": "b247d5fe4b1edc1d3f889d478011c8d22bfd49febacace71a678f973cc22b0a6"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4382.png",
+          "bytes": 1174,
+          "sha256": "9fd44e7eb8c504b0c80dbbb4a746c632e510700b696995711aa5a6262a489556"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4383.png",
+          "bytes": 5999,
+          "sha256": "ff610efbc7b40b8a54bdac4c4255abec045fc3bde535da4f8a37e4838be878f0"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4384.png",
+          "bytes": 1193,
+          "sha256": "aa65deeb69639575a7e5ad0e9f5a177c03cbf6a2f212177c981db7bd8a02467a"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4385.png",
+          "bytes": 5451,
+          "sha256": "3782061eafb5da54314aef23b51783901dea0ea2dc3c05ab5c10b348b8adcbfa"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4386.png",
+          "bytes": 1131,
+          "sha256": "301aa75c71821e534089af30f019d32ecc9a65ed7875a33856a17c1093f944e3"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4387.png",
+          "bytes": 1763,
+          "sha256": "2e5cc9c16ff3e10d9bc0dcecae92d7f2fa9f504fde640c0204da33cad6146e1c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects2/4388.png",
+          "bytes": 4775,
+          "sha256": "81858697379c0d840e49b8585c2f8cdefc5ee42489a3b831dc574350bef6674c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3981.png",
+          "bytes": 811,
+          "sha256": "a81bb120e45ebb2c65a34b4e1442fe17f5051c13b300f8a0b1638cbee7204915"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3982.png",
+          "bytes": 477,
+          "sha256": "0c635da1a29835df623e3532c12803eef3c1c905050a42fdc49835f2f225e15d"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3983.png",
+          "bytes": 1432,
+          "sha256": "24d26d09852e7e22b07f324e34238e5ac45ec3c42aac60385e5cd65b86f11b6b"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3984.png",
+          "bytes": 3590,
+          "sha256": "50a44a54e2bf750614e49e9024d55c0c9457725056bec51a3a54dce1bc6d409c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3985.png",
+          "bytes": 488,
+          "sha256": "c519b1812b9437f1785a63b18ad507cd46bb0cf5b542810e7cf4fc9f9073c6b8"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3986.png",
+          "bytes": 5533,
+          "sha256": "53ac9167f15e26a804a7be0df80619f41ca8bdeabafff5469c8b5f9dc862e5ff"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3987.png",
+          "bytes": 460,
+          "sha256": "1e54a3190a837bb01d1db872c83ded5605dd27b9d786f4be50695bc887dc6ff5"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3988.png",
+          "bytes": 1345,
+          "sha256": "ab7b43709767994dceaf0420bb98c144a168d1d7d53d4bc77cfa72f4af79259b"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/3989.png",
+          "bytes": 1639,
+          "sha256": "a5bd38762cb41d95597c1758f7e186e3ec51212bb4497a377e8b0956eec8e99c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/8005.png",
+          "bytes": 3445,
+          "sha256": "598ba61ecb8d11717359a78dbc22b18ba29c2fd72df1e474eca2ca196495db9c"
+        },
+        {
+          "path": "original-map/WemadeMir2/Objects3/8006.png",
+          "bytes": 3066,
+          "sha256": "a1919a393900840bfcaa1288db058d115f92c5ce58d8167aa5f38d5669da4040"
+        }
+      ],
+      "bytes": 204399,
+      "sourceSha256": "891e6e66b283c7da142af1b1644e45b341245548cec625ec9bff9274011fb66f"
+    }
+  },
+  "jsonCompaction": {
+    "files": 231,
+    "sourceBytes": 100378635,
+    "outputBytes": 68065266,
+    "savedBytes": 32313369,
+    "detailsPath": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\thin-build01\\size-report.json-compaction-details.json"
+  },
+  "coreSelection": {
+    "compiledManifest": {
+      "abiVersion": 1,
+      "version": "8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953",
+      "sourceSha256": "1cac4494b0930200a3d5a0a630c30b5577c1644cbd2a9c9a1fdf6b1d2f110aec",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 252883,
+          "sha256": "6820ec58b6366a22d41715e8e93024c2f441ff87f85be2ed602c323ddf94edcf"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e",
+        "sourceSha256": "1cac4494b0930200a3d5a0a630c30b5577c1644cbd2a9c9a1fdf6b1d2f110aec",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 261542,
+            "sha256": "035226d980fa91d1dff93115f408842fbd8580fcf5f9f0cf07f63b0954e0d006"
+          }
+        }
+      },
+      "npcPurchase": {
+        "abiVersion": 1,
+        "version": "93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450",
+        "sourceSha256": "1cac4494b0930200a3d5a0a630c30b5577c1644cbd2a9c9a1fdf6b1d2f110aec",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 167607,
+            "sha256": "70f2eca583a1559f81fd2861b6c69281dec3d72778e4bef61a2f74daee668f1f"
+          }
+        }
+      }
+    },
+    "selectedPaths": [
+      "client-core/8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953/mir2_platform_web.js",
+      "client-core/8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953/mir2_platform_web_bg.wasm",
+      "client-core/95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e/mir2_platform_web.js",
+      "client-core/95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e/mir2_platform_web_bg.wasm",
+      "client-core/93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450/mir2_platform_web.js",
+      "client-core/93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450/mir2_platform_web_bg.wasm"
+    ],
+    "packagedClosure": {
+      "version": "8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953",
+      "abiVersion": 1,
+      "activeVersions": [
+        "8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953",
+        "95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e",
+        "93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450"
+      ],
+      "files": [
+        {
+          "relativePath": "client-core/8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953/mir2_platform_web.js",
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        {
+          "relativePath": "client-core/8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953/mir2_platform_web_bg.wasm",
+          "bytes": 252883,
+          "sha256": "6820ec58b6366a22d41715e8e93024c2f441ff87f85be2ed602c323ddf94edcf"
+        },
+        {
+          "relativePath": "client-core/95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e/mir2_platform_web.js",
+          "bytes": 24721,
+          "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+        },
+        {
+          "relativePath": "client-core/95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e/mir2_platform_web_bg.wasm",
+          "bytes": 261542,
+          "sha256": "035226d980fa91d1dff93115f408842fbd8580fcf5f9f0cf07f63b0954e0d006"
+        },
+        {
+          "relativePath": "client-core/93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450/mir2_platform_web.js",
+          "bytes": 8332,
+          "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+        },
+        {
+          "relativePath": "client-core/93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450/mir2_platform_web_bg.wasm",
+          "bytes": 167607,
+          "sha256": "70f2eca583a1559f81fd2861b6c69281dec3d72778e4bef61a2f74daee668f1f"
+        }
+      ],
+      "exactActiveBundleClosure": true,
+      "leavesPerBundle": 2
+    }
+  },
+  "remoteOriginalUiMediaRootsAdded": [
+    "Mount",
+    "Pet",
+    "Gate"
+  ],
+  "remoteAssetOriginRequired": "Configure MIR2_R2_PROXY_BASE to serve omitted original-ui media paths through the same-origin miss proxy from an immutable asset origin.",
+  "notes": [
+    ".next/cache and .next/dev are compiler caches, not player distribution files.",
+    "The source public directory stays complete for deterministic generation and offline development.",
+    "A browser downloads only the selected WebGPU or WebGL2 runtime, never both backends.",
+    "Original map and allowlisted UI/entity media, including Mount, Pet and Gate non-JSON files, require MIR2_R2_PROXY_BASE for same-origin misses and are cached by mir2-asset-worker.js.",
+    "The audited source original-asset-manifest has Mount entries but no Pet or Gate entries; it is not a complete remote inventory and public release coverage is unverified.",
+    "Selected original-ui JSON and exact root original-asset-manifest.generated.json retain parsed data and token spelling after compaction; output physical sizes change the deterministic asset-version namespace.",
+    "Promote this package only after release:doctor and browser smoke pass against the configured immutable R2 prefix."
+  ]
+}

@@ -1,0 +1,21 @@
+   Compiling mir2-windows-updater v1.0.0 (C:\Users\Administrator\.codex\worktrees\u18\mir2-player-journey\mir2-web3\apps\game-client\windows-updater)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.87s
+     Running tests\real_packages.rs (C:/mir2-build/updater-real-r18\debug\deps\real_packages-ce1ffec8f8fd90d2.exe)
+
+running 1 test
+
+thread 'real_package_delta_preserves_personal_files_and_first_launch_rollback' (56692) panicked at tests\real_packages.rs:148:5:
+assertion `left == right` failed
+  left: 28616
+ right: 28618
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test real_package_delta_preserves_personal_files_and_first_launch_rollback ... FAILED
+
+failures:
+
+failures:
+    real_package_delta_preserves_personal_files_and_first_launch_rollback
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 649.90s
+
+error: test failed, to rerun pass `--test real_packages`

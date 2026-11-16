@@ -1,0 +1,110 @@
+{
+  "passed": true,
+  "checkedAt": "2026-11-13T09:58:50.563Z",
+  "source": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "origin": "https://numeron.obelisk.build",
+  "workerMatchesCandidate": true,
+  "networkAttempts": [
+    {
+      "round": 1,
+      "failures": [
+        {
+          "path": "/game",
+          "status": 0,
+          "curlExit": 35,
+          "stderr": "curl: (35) schannel: failed to receive handshake, SSL/TLS connection failed\r\n",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/mir2-asset-worker.js",
+          "status": 0,
+          "curlExit": 35,
+          "stderr": "curl: (35) schannel: failed to receive handshake, SSL/TLS connection failed\r\n",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+          "status": 0,
+          "curlExit": 35,
+          "stderr": "curl: (35) schannel: failed to receive handshake, SSL/TLS connection failed\r\n",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "failures": []
+    }
+  ],
+  "routes": [
+    {
+      "path": "/version",
+      "status": 200,
+      "bytes": 55,
+      "sha256": "10d2ff5c17a33589a9f171a6553d8af15bdc17f8bfb73552b9fc218f1f767d5c"
+    },
+    {
+      "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+      "status": 200,
+      "bytes": 26425,
+      "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
+    },
+    {
+      "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+      "status": 200,
+      "bytes": 252454,
+      "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+    },
+    {
+      "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+      "status": 200,
+      "bytes": 22689,
+      "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
+    },
+    {
+      "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+      "status": 200,
+      "bytes": 8332,
+      "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+    },
+    {
+      "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+      "status": 200,
+      "bytes": 164087,
+      "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+    },
+    {
+      "path": "/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web.js",
+      "status": 200,
+      "bytes": 6063,
+      "sha256": "3aef998b810fe329edf69a017308f3918151a320e733ff8ab9ff819b5efaf116"
+    },
+    {
+      "path": "/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web_bg.wasm",
+      "status": 200,
+      "bytes": 190701,
+      "sha256": "ea6be941a0d7467b63fccb7522e6f9f18691a2f4f99057c9157cac2ce44bed22"
+    },
+    {
+      "path": "/game",
+      "status": 200,
+      "bytes": 11168,
+      "sha256": "563730d85f2362a101c095e37cbaefa37d1f441d3cd01d51d9997954c43307fe"
+    },
+    {
+      "path": "/mir2-asset-worker.js",
+      "status": 200,
+      "bytes": 40071,
+      "sha256": "1725f95a0a238e2139a84a5aaad31f2d16f8476e28bf805c9a24b2557eb646e1"
+    },
+    {
+      "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+      "status": 200,
+      "bytes": 259326,
+      "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+    }
+  ]
+}

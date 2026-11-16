@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-formal-ladder-v2",
+  "state": "PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN",
+  "preparationOnly": false,
+  "formalStandardLadder": true,
+  "sourceBankSavedCount": 100,
+  "sourceBankFreshAtStart": false,
+  "ordinaryReloginPerCohort": true,
+  "noPreloginAll100": true,
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "profile": "standard",
+    "activityMode": "native",
+    "stages": "2,10,25,50,100",
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "wallSeconds": 18000,
+    "movementIntervalMs": 750,
+    "layout": "dispersed",
+    "attackResults": "v2",
+    "preparationProfile": "ordinary-economic-v1",
+    "preparationHpTarget": 12
+  },
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-bank-plan-pending-v1.json",
+    "bytes": 32017,
+    "sha256": "34292226864e80fe828b1afdb96fe5cfa5a3f51dcb80341af5d2ed72a397508a"
+  },
+  "scenarioSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\scenario-formal-v1.json",
+    "bytes": 3008397,
+    "sha256": "1109e64089150a39bf2b8f784604776874dd99cbabceda58c8db4e1b07bf1dca"
+  },
+  "routeSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "bytes": 2661153,
+    "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+  },
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\resource-profile-v1.json",
+    "bytes": 1965,
+    "sha256": "925ea4dcd2148ad0f844143889f869bc84e3ce133fd0e889c52adda5950387a2"
+  },
+  "fixedGateway": {
+    "tcp": "127.0.0.1:17500",
+    "web": "127.0.0.1:17510",
+    "tokioWorkers": 4,
+    "maxActiveSessions": 100,
+    "maxWsConnections": 128,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "contentProfile": "platinum_176",
+    "zoneDeliveryTrace": true
+  },
+  "monitorWallSeconds": 18300,
+  "authOrigin": {
+    "mode": "copiedExistingLedgerNoOverride",
+    "existingLedgerOverrideAllowed": false,
+    "loginNotBeforeAllowed": false,
+    "loginBudgetWindowMs": 901000,
+    "ordinaryAdmissionLimit": 25,
+    "verificationLimit": 5,
+    "sourceAddressRotation": false,
+    "scope": "Unmodified latest ended formal-v1 traffic ledger plus immutable complete W17 game snapshot/pool/four keys. Original901s pruning and25admission/5verification limits, no origin override/reset/rotation.",
+    "ledgerSource": "Latest actual ordinary-economic-formal-ladder-v1 ended ledger exact bytes"
+  },
+  "sourceQualification": {
+    "state": "PENDING_CURRENT_SOURCE_QUALIFICATION",
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "backendBuildCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "driverSourceCommit": null,
+    "executionSourceCommit": null,
+    "reusedRelease": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    "reusedRootRustReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    "reusedRustTestsPassed": 32,
+    "freshRustTestsPerformed": false,
+    "newRustBuildPerformed": false,
+    "newRootJsReceipt": null,
+    "plannedRootJsReceiptFile": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v19\\root-focused-receipt-v1.json",
+    "freshNodeTestsPassed": null,
+    "qualificationScope": "Future actual current Node qualification covers complete33runtime/45named including the seven reviewed navigation/main/prepare/staging changes. V6/55/Rust32 backend qualification remains historical strict reuse. New actual full16-v2 must cover its true14 dependencies; staging is separately qualified, not claimed as full16 coverage."
+  },
+  "requiredCurrentBasis": {
+    "driverSourceCommit": "11fc9f3b0ef657c10558270bfb16c6566cdc58b4",
+    "nodeReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v17\\root-focused-receipt-v1.json",
+      "bytes": 20898,
+      "sha256": "530c1b5aaeb6ac6d5399db7067c237817bc0230b090a141c1c836a638a35ed9d"
+    },
+    "actualFreshSelectedTests": 864,
+    "namedSourceCount": 42,
+    "runtimeSourceCount": 32,
+    "full16ReuseProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-v17.json",
+      "bytes": 71969,
+      "sha256": "3f84e5859443b19799e380ac5738d693f7834c40adcb09582fe5c58031115300"
+    },
+    "full16DriverDependencyCount": 14,
+    "backendSourceCount": 55,
+    "reusedRustTestsPassed": 32
+  },
+  "formalReference": {
+    "scenario": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "options": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\run-options.json",
+      "bytes": 2986,
+      "sha256": "ac9f21ee7806cdc3a5ffcee4c9688a474dfd11054ebb6e7c473d2b13c124841d"
+    },
+    "resource": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    "policy": {
+      "profile": "standard",
+      "activityMode": "native",
+      "movementIntervalMs": 750,
+      "stages": [
+        2,
+        10,
+        25,
+        50,
+        100
+      ],
+      "stageSeconds": 300,
+      "soakSeconds": 7200,
+      "wallSeconds": 18000,
+      "layout": "dispersed",
+      "combatActors": 10,
+      "resumeSamples": 5,
+      "saveSamples": 5,
+      "commandsPerSecond": 3,
+      "intentionIntervalMs": 750,
+      "variableActionCadence": true,
+      "maximumSendLatenessMs": 250,
+      "movementP95Ms": 750,
+      "chatP95Ms": 1000,
+      "actionTimeoutMs": 2000,
+      "timeoutExclusive": 0.01,
+      "maximumMissedPlanRatio": 0.05,
+      "maximumCorrectionRatio": 0.05,
+      "minimumMovesPerMinute": 30,
+      "minimumCombatHitsPerMinute": 12,
+      "minimumCombatAttacksPerMinute": 18,
+      "aoiRange": 16,
+      "aoiGraceMs": 1000,
+      "nativeChatIntervalMs": 30000,
+      "nativeTurnIntervalMs": 60000,
+      "minimumNativeRunRatio": 0.5,
+      "minimumNativeCellsPerMinute": 80,
+      "maximumEvidenceInFlight": 4,
+      "maximumMemorySlopeMiBPerHour": 32,
+      "memoryWarmupSeconds": 300,
+      "maximumDriverLagP99Ms": 250,
+      "fullAcceptanceEligible": true
+    },
+    "combatActorIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "ownMeasuredTwoAndTenRequiredBefore25": true,
+    "priorProbe21Required": false,
+    "priorProbe21QualificationInherited": false
+  },
+  "diagnostics": {
+    "slowStageThresholdMs": 50,
+    "slowAndStoreProjectionApplied": true,
+    "compactWirePatchApplied": false,
+    "compactWireDiagnosticCertificate": false,
+    "coreCanonicalAoiGateUnchanged": true,
+    "diagnosticsAndGameConjoined": false
+  },
+  "sustainableTwoHourSupplyProven": false,
+  "stageResupply": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceActuallyPassed": false,
+  "executionSourceCommit": null,
+  "actualFreeze": null,
+  "currentFull16ReuseProof": null,
+  "plannedFull16ReuseProof": null,
+  "diagnosticSourceEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics-source-evidence-v1.json",
+    "bytes": 2764,
+    "sha256": "c57232d637cfeafbca324b238c0310713d54c371f6399cf30de8c0690d276d78"
+  },
+  "plannedActualFull16Directory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2",
+  "sourceRevision": {
+    "state": "REVIEWED_SOURCE_DELTA_REQUIRED_FOR_CURRENT_QUALIFICATION",
+    "reviewedCodeCheckpoint": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+    "expectedRuntimeSources": 33,
+    "expectedNamedSources": 45,
+    "expectedChangedSourceRows": [
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 186926,
+        "sha256": "0a094e3a2a11a38e1a92a8af8be4926006e14f05a7e4153f7810b350c6ddd1f0"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 353658,
+        "sha256": "bfe917ac07e74c925a42a87419668e4d91e7dc5c31b7a7d65e7b3b6a3b7c374a"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+        "bytes": 38075,
+        "sha256": "3b6eb9e0d04513c0b03ca5cc880f016f5a2e72b5de76a3ec370e44fd15cd97e7"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs",
+        "bytes": 3701,
+        "sha256": "d236f3e34b26cf419b1291f4892d61fcc4f23d8f5f4695936f57ab524e389196"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs",
+        "bytes": 4050,
+        "sha256": "08efae775038b1ed2f3aab93349c1b5b43b39185fa73a4ef8a4e20eaf880fb19"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "bytes": 20548,
+        "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+        "bytes": 21187,
+        "sha256": "2f76989e0381f6de3321e6eaa5fa7e2447752863d1ce3b82abe376b1a3de6f0d"
+      }
+    ],
+    "allOtherW17NamedSourceBytesMustMatch": true,
+    "allOriginalNamedInputsRetained": true,
+    "additionalNamedInputs": [
+      "mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs",
+      "mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs",
+      "mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs"
+    ],
+    "stagingCoveredByFull16": false
+  },
+  "ledgerContinuation": {
+    "actualSource": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 849,
+      "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c"
+    },
+    "actualPriorFormalOutcomePassed": false,
+    "originalW17LedgerPreserved": true,
+    "oldAttemptsPrunedOnlyByOriginalRuntimePolicy": true,
+    "attemptsAtSource": 11,
+    "gameSnapshotSource": "ordinary-capacity-bank-prepare-v17",
+    "gameSnapshotReplayNotCurrentV1InventoryContinuation": true
+  }
+}

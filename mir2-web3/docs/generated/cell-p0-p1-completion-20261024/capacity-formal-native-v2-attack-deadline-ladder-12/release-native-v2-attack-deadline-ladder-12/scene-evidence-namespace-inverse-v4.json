@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "previousPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-prepared-v3.json",
+    "bytes": 22459,
+    "sha256": "4476955949b0fca177ebc0973161ca4bf7926b381a4f9162b3929484f67f2551"
+  },
+  "sourceBefore": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-inputs.mjs",
+    "bytes": 11761,
+    "sha256": "54bb05e9d8f11c888d5468aa9e26563ce1861d7600fd2c870c67e9cf81137234"
+  },
+  "beforeCopy": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-inputs.mjs.before-scene-namespace-v4.txt",
+    "bytes": 11761,
+    "sha256": "54bb05e9d8f11c888d5468aa9e26563ce1861d7600fd2c870c67e9cf81137234"
+  },
+  "sourceAfter": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-inputs.mjs",
+    "bytes": 11766,
+    "sha256": "bdc10b1aa572b00cb1e0732deaa56e4bf11296d73dc1d2be11eeb239d7addf21"
+  },
+  "from": "sceneStaticCodeEvidenceCommit:CORE_CODE_EVIDENCE_COMMIT",
+  "to": "sceneStaticCodeEvidenceCommit:WIRE_CORE_CODE_EVIDENCE_COMMIT",
+  "inverseRawExact": true,
+  "changedOccurrences": 1,
+  "scope": "Original static execution identity remains historical6d70. Currentd240 geometry compatibility is a separate3-function byte comparison; no static AStar reexecution is asserted.",
+  "historicalStaticCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "currentCompatibilityCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "gatesOrGameplayChanged": false,
+  "actualOperationsExecuted": false,
+  "capacityAccepted": false
+}

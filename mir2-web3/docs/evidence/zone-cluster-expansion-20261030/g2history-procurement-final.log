@@ -1,0 +1,66 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 60 tests
+test procurement::tests::procurement_absent_phase_one_refunds_only_with_expired_finality_proof ... ok
+test procurement::tests::procurement_actor_reference_survives_character_rename ... ok
+test procurement::tests::procurement_cancel_fill_mutually_exclusive ... ok
+test procurement::tests::procurement_cancel_proof_reuses_original_gold_lock_and_new_authorization ... ok
+test procurement::tests::procurement_cancel_retry_waits_fresh_chain_expiry_and_keeps_old_attempt ... ok
+test procurement::tests::procurement_chain_success_database_failure_reconciles_exactly_once ... ok
+test procurement::tests::procurement_concurrent_fills_only_one_winner ... ok
+test procurement::tests::procurement_concurrent_test_package_confirmations_grant_one_batch ... ok
+test procurement::tests::procurement_configured_fee_and_refund_rule_is_frozen_on_order ... ok
+test procurement::tests::procurement_crash_unknown_does_not_unlock ... ok
+test procurement::tests::procurement_disabled_changed_rule_keeps_old_cancel ... ok
+test procurement::tests::procurement_disabled_config_keeps_recovery_domain_and_rejects_partial_config ... ok
+test procurement::tests::procurement_disabled_playtest_recovery_preserves_domain_and_never_enables_charging ... ok
+test procurement::tests::procurement_expiry_requires_chain_clock ... ok
+test procurement::tests::procurement_forgery_and_cross_environment_replay_rejected ... ok
+test procurement::tests::procurement_free_test_package_requires_confirmation_and_grants_once_per_account_version ... ok
+test procurement::tests::procurement_gift_unknown_and_expired_quota_are_not_paid_service ... ok
+test procurement::tests::procurement_insufficient_gold_and_quota_atomic ... ok
+test procurement::tests::procurement_late_worker_submission_never_revives_finalized_job ... ok
+test procurement::tests::procurement_normal_fill_preserves_instance_and_conserves_gold ... ok
+test procurement::tests::procurement_old_schema10_and11_billing_fence_predicate_rejects_new_store ... ok
+test procurement::tests::procurement_old_schema_rejects_new_authority ... ok
+test procurement::tests::procurement_only_finalized_failed_attempt_can_replace_exact_bytes ... ok
+test procurement::tests::procurement_open_watch_survives_offline_until_terminal ... ok
+test procurement::tests::procurement_playtest_flag_rejects_implicit_or_unreadable_opt_in ... ok
+test procurement::tests::procurement_playtest_gate_normalizes_all_three_markers_and_never_allows_production ... ok
+test procurement::tests::procurement_playtest_gate_rejects_conflicting_production_even_without_free_credits ... ok
+test procurement::tests::procurement_playtest_opt_in_requires_the_real_testnet_network_domain ... ok
+test procurement::tests::procurement_publish_failure_waits_proof_deadline ... ok
+test procurement::tests::procurement_real_file_commit_unknown_freezes_and_keeps_durable_outbox ... ok
+test procurement::tests::procurement_real_file_failed_commit_rolls_back_gold_quota_and_outbox ... ok
+test procurement::tests::procurement_registry_absence_cannot_override_known_created_object ... ok
+test procurement::tests::procurement_rule_json_is_complete_strict_bounded_and_version_checked ... ok
+test procurement::tests::procurement_rust_sdk_move_fixed_vector_bytes_and_signatures ... ok
+test procurement::tests::procurement_schema11_cannot_claim_new_quota_authority ... ok
+test procurement::tests::procurement_schema11_without_new_quota_authority_migrates_and_legacy_quotes_remain_compatible ... ok
+test procurement::tests::procurement_short_order_authentication_never_outlives_order ... ok
+test procurement::tests::procurement_signed_transaction_bytes_are_immutable_and_unknown_preserves_them ... ok
+test procurement::tests::procurement_test_package_file_transaction_rollback_and_unknown_commit_are_recoverable ... ok
+test procurement::tests::procurement_test_package_production_gates_ownership_expiry_and_rule_snapshot ... ok
+test procurement::tests::procurement_weak_purpose_key_cannot_authorize_an_intent ... ok
+test procurement::tests::procurement_worker_retains_exact_transaction_across_slow_rpc_and_rejects_expired_owner ... ok
+test procurement::tests::procurement_wrong_bound_equipped_conditions_rejected ... ok
+test procurement_fees::tests::procurement_fees_default_disabled_and_require_explicit_version_approval ... ok
+test procurement_fees::tests::procurement_fees_free_testing_and_unknown_batches_never_become_cash ... ok
+test procurement_fees::tests::procurement_fees_missing_ambiguous_invalid_offer_or_currency_never_produces_sale_quote ... ok
+test procurement_fees::tests::procurement_fees_only_existing_verified_live_applied_receipt_backs_paid_consumption ... ok
+test procurement_fees::tests::procurement_fees_round_whole_package_once_and_reject_integer_overflow ... ok
+test procurement_fees::tests::procurement_fees_use_actual_selected_offer_ratio_not_a_usd_constant ... ok
+test runtime::item_uid_issuance::history::ledger_tests::typed_uid_history_retired_procurement_keeps_original_tree_but_ignores_quote_selector ... ok
+test runtime::procurement::owner_tests::procurement_npc_home_survives_real_snapshot_conversion_on_first_nine_row_page ... ok
+test runtime::procurement::owner_tests::procurement_owner_claim_database_failure_leaves_live_and_receipt_unchanged ... ok
+test runtime::procurement::owner_tests::procurement_owner_delivery_description_is_bounded_and_discloses_omitted_stats ... ok
+test runtime::procurement::owner_tests::procurement_owner_delivery_description_reads_verified_instance_values ... ok
+test runtime::procurement::owner_tests::procurement_owner_full_bag_keeps_original_pending ... ok
+test runtime::procurement::owner_tests::procurement_owner_gold_cap_keeps_pending_without_truncation ... ok
+test runtime::procurement::owner_tests::procurement_owner_npc_test_package_quote_confirm_replay_updates_view_without_spending ... ok
+test runtime::procurement::owner_tests::procurement_owner_offline_pending_claim_preserves_instance_and_replay ... ok
+test runtime::procurement::owner_tests::procurement_owner_publication_quote_freezes_complete_rule_until_confirmed ... ok
+test runtime::procurement::owner_tests::procurement_owner_short_quote_deadline_matches_contract_policy ... ok
+
+test result: ok. 60 passed; 0 failed; 0 ignored; 0 measured; 3196 filtered out; finished in 4.17s

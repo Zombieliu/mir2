@@ -1,0 +1,447 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T05:50:31.581Z",
+  "kind": "Source25 actual client Ranking finite CPU tests and static Core/PUI build",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "parentCommit": "6562c474a67cf1c377a600ae254997be744879b4",
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-client-rust02-snapshot.json",
+    "bytes": 140262,
+    "sha256": "0bd80763db4840087ef60d30d0cde4488684a84e80d4bde899ed4db8393fee29"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-client-rust02-review.json",
+    "bytes": 1067,
+    "sha256": "f11146890072d12123488bf14150b79ea77af8b9ee3c489f0f7ec4a577c17000"
+  },
+  "independentActualResultReviewer": "/root/source24_actual_result_review",
+  "confirmedBlockers": 0,
+  "jobs": [
+    {
+      "name": "core-test01",
+      "config": {
+        "name": "core-test01",
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01.config.json",
+        "bytes": 4008,
+        "sha256": "da23e21f7ba29ac273e9e4fa7e2fd1a46afce39bc7f0451cc4a3dfd910345efe"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01.outer.json",
+        "bytes": 444,
+        "sha256": "28cf5619767d99bfa5a1500e281715ac5c2498587f6e97493a95a2ce642af8ff"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01.stdout.log",
+        "bytes": 14379,
+        "sha256": "b9761dca60ebd2e01e9af9cc2fd5bb95009bb6980f79de3de5ec20613335f58c"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01.stderr.log",
+        "bytes": 319,
+        "sha256": "22234617a9f84065f3a1f5d73df24af500cb3aa7fbffae9c5ab424c95e4e17d2"
+      },
+      "actualOuter": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 121156,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 4773,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "tests": [
+        {
+          "passed": 152,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ],
+      "guards": [
+        {
+          "nonce": "3be998202d37422ea0de5c7d19513c68",
+          "before": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01-cargo-receipts/3be998202d37422ea0de5c7d19513c68/before.json",
+            "bytes": 990,
+            "sha256": "5dc7b0ee88c68731d33b4abdb454ef109f01be89e3310af996c2a4cff1370539"
+          },
+          "after": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01-cargo-receipts/3be998202d37422ea0de5c7d19513c68/after.json",
+            "bytes": 328,
+            "sha256": "4f226a18397da029177bdc043b1cb55689dadd4944e72fe3e92b7ec120dab045"
+          },
+          "probe": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-test01-cargo-receipts/3be998202d37422ea0de5c7d19513c68/probe-process.json",
+            "bytes": 432,
+            "sha256": "c440040445f32b6fc95248b14f38fc8e7e97d1c5af773bb2a5b23cd1f58f1247"
+          },
+          "remainingBytes": "464898428928",
+          "freshnessConservativeMs": 69,
+          "childStartedUtc": "/Date(1791350085999)/",
+          "completedUtc": "/Date(1791350089504)/",
+          "childExitCode": 0,
+          "postChildPolicy": "B"
+        }
+      ]
+    },
+    {
+      "name": "pui-test02",
+      "config": {
+        "name": "pui-test02",
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02.config.json",
+        "bytes": 4043,
+        "sha256": "945afd763278ed1c1dcbb7f68c174721d3e05f0436fd95ab2851d2ee64b0ecab"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02.outer.json",
+        "bytes": 443,
+        "sha256": "636ccbdb30a7b503625c589a69ffe1e3c4e5d6b3d5e6592db3e705969a14bb88"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02.stdout.log",
+        "bytes": 8080,
+        "sha256": "364b3cbcb6834627031fdc554e3a0fee2bd45890a4946bbdc31e93207fff6dda"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02.stderr.log",
+        "bytes": 1245,
+        "sha256": "6952b02a15df7a5345e068974306d6d4328231d0189f7c5827d1674e3c56061f"
+      },
+      "actualOuter": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 122876,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 6421,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "tests": [
+        {
+          "passed": 75,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ],
+      "guards": [
+        {
+          "nonce": "55e14127099e4ae38c8754f406612a5e",
+          "before": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02-cargo-receipts/55e14127099e4ae38c8754f406612a5e/before.json",
+            "bytes": 1022,
+            "sha256": "f2f7cd667de6d76086b9b4fc6eb94818c48066244fb1d06ffdd4f3eb2ded69ac"
+          },
+          "after": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02-cargo-receipts/55e14127099e4ae38c8754f406612a5e/after.json",
+            "bytes": 319,
+            "sha256": "975e19fb375792ca073bf7a9d8d02bf27cfe61d2c4cf1a7273618dd6d646532d"
+          },
+          "probe": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-pui-test02-cargo-receipts/55e14127099e4ae38c8754f406612a5e/probe-process.json",
+            "bytes": 433,
+            "sha256": "1205943e8d2cebc6b238181d380fd3f7ff97ea2db3595f9a8de76f2d9fb661cd"
+          },
+          "remainingBytes": "464761987072",
+          "freshnessConservativeMs": 66,
+          "childStartedUtc": "/Date(1791350158040)/",
+          "completedUtc": "/Date(1791350163272)/",
+          "childExitCode": 0,
+          "postChildPolicy": "B"
+        }
+      ]
+    },
+    {
+      "name": "native-ranking01",
+      "config": {
+        "name": "native-ranking01",
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01.config.json",
+        "bytes": 4100,
+        "sha256": "5e11f979584820f3465dc7e1caa3a90cfdfb9d4fdedc62aa569aef88dcf786f9"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01.outer.json",
+        "bytes": 451,
+        "sha256": "9f0c26d2ee05d986294affee6dd48d8af395d53f7c367341f4685ffe420d3b50"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01.stdout.log",
+        "bytes": 1843,
+        "sha256": "f87414a8d9a878fb1c4a6483fc0148f88d63f21bde17c9bb4f7aa75419a577ad"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01.stderr.log",
+        "bytes": 29184,
+        "sha256": "2b3ccfa5266914b427543e483b20b48258b9cdbcd4f75db2e0a904ec7212b520"
+      },
+      "actualOuter": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 110988,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 115788,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "tests": [
+        {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 1301
+        }
+      ],
+      "guards": [
+        {
+          "nonce": "27e706be9c504274afb5eb92fb6ab732",
+          "before": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01-cargo-receipts/27e706be9c504274afb5eb92fb6ab732/before.json",
+            "bytes": 1038,
+            "sha256": "2f493e8358a70dcd8d6514f087c46e00e7d5bb80c7b0e7dcedd72cbf734cd9b0"
+          },
+          "after": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01-cargo-receipts/27e706be9c504274afb5eb92fb6ab732/after.json",
+            "bytes": 321,
+            "sha256": "5f5a20553446f9068693d0dc71236a58986a523742cdd432e30a88cf5ba236b8"
+          },
+          "probe": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-ranking01-cargo-receipts/27e706be9c504274afb5eb92fb6ab732/probe-process.json",
+            "bytes": 433,
+            "sha256": "b81c602bd1d52592961e774a28b8b7fa46df293a426b659fe43ff2ca0a5bbb33"
+          },
+          "remainingBytes": "464758775808",
+          "freshnessConservativeMs": 64,
+          "childStartedUtc": "/Date(1791350174209)/",
+          "completedUtc": "/Date(1791350288788)/",
+          "childExitCode": 0,
+          "postChildPolicy": "B"
+        }
+      ]
+    },
+    {
+      "name": "core-build02",
+      "config": {
+        "name": "core-build02",
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02.config.json",
+        "bytes": 5249,
+        "sha256": "d3877eba8005a202181acddbe182d40efbf6d088c6ec22e4d9fb3649f4f707a0"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02.outer.json",
+        "bytes": 505,
+        "sha256": "d8235487399d48f0e196a67049299e582baa169304dad531592fe05ed07ea200"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02.stdout.log",
+        "bytes": 2289,
+        "sha256": "54e6e82fb3372247417bdc7fe39035c62049d3a16eee00bff9753c2fc86ad851"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02.stderr.log",
+        "bytes": 1248,
+        "sha256": "7273c3b399edd23d69ee8c3f5c48c8097605c4ae6c2a30d1b39fd645c3f4167d"
+      },
+      "actualOuter": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 123844,
+        "kind": "existing-production-core-builder-guarded01",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 15179,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "tests": [],
+      "guards": [
+        {
+          "nonce": "55ce99d2aa1648c29e737d55e87fa4b8",
+          "before": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02-cargo-receipts/55ce99d2aa1648c29e737d55e87fa4b8/before.json",
+            "bytes": 1087,
+            "sha256": "2831abeac31abcb797fdd042624bc93691acb5c42255997064dbab8b5f2e247a"
+          },
+          "after": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02-cargo-receipts/55ce99d2aa1648c29e737d55e87fa4b8/after.json",
+            "bytes": 319,
+            "sha256": "38010263ceaddcb59e6f0a9b239bc7616155c123a82f32a13ef274dc83ca0d9b"
+          },
+          "probe": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02-cargo-receipts/55ce99d2aa1648c29e737d55e87fa4b8/probe-process.json",
+            "bytes": 452,
+            "sha256": "d4de9e384f9281582995c89e8cc865bd5d664a1384abba821725d759b41e91a9"
+          },
+          "remainingBytes": "464750366720",
+          "freshnessConservativeMs": 71,
+          "childStartedUtc": "/Date(1791350322398)/",
+          "completedUtc": "/Date(1791350324592)/",
+          "childExitCode": 0,
+          "postChildPolicy": "B"
+        },
+        {
+          "nonce": "99e9f76156ed49ef98e9b0c4efb28be1",
+          "before": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02-cargo-receipts/99e9f76156ed49ef98e9b0c4efb28be1/before.json",
+            "bytes": 1046,
+            "sha256": "2421d912e369931c9bbd4c4dce2daa19baff888582446d9efae5398838a9a7d5"
+          },
+          "after": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02-cargo-receipts/99e9f76156ed49ef98e9b0c4efb28be1/after.json",
+            "bytes": 328,
+            "sha256": "ed73cd367ba473f8fc622c578f622713faea22858dbcbb358b12a522152febb7"
+          },
+          "probe": {
+            "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-core-build02-cargo-receipts/99e9f76156ed49ef98e9b0c4efb28be1/probe-process.json",
+            "bytes": 442,
+            "sha256": "e106fb7fc58832a692c0deb30d7e4d7fa820a0162086edfc5fda43b3bcde5e4e"
+          },
+          "remainingBytes": "464751353856",
+          "freshnessConservativeMs": 71,
+          "childStartedUtc": "/Date(1791350313991)/",
+          "completedUtc": "/Date(1791350317901)/",
+          "childExitCode": 0,
+          "postChildPolicy": "B"
+        }
+      ]
+    }
+  ],
+  "toolReturns": [
+    {
+      "key": "source25RankingCore01Actual",
+      "chunkId": "d700b0",
+      "exitCode": 0,
+      "sessionId": null
+    },
+    {
+      "key": "source25RankingPui02Actual",
+      "chunkId": "34167b",
+      "exitCode": 0,
+      "sessionId": null
+    },
+    {
+      "key": "source25RankingNative01Latest",
+      "chunkId": "50c0c4",
+      "exitCode": 0,
+      "sessionId": null
+    },
+    {
+      "key": "source25RankingCoreBuild02Latest",
+      "chunkId": "93dc03",
+      "exitCode": 0,
+      "sessionId": null
+    }
+  ],
+  "testSummary": {
+    "core": 152,
+    "pui": 75,
+    "nativeRanking": 13,
+    "selectedExecutions": 240,
+    "newDistinctDeclarations": 12,
+    "newDeclarationsExecuted": 12,
+    "nativeRankingComposition": "oldRanking7 + new3 + oldPlayerInspect3; not10"
+  },
+  "staticBuild": {
+    "manifest": {
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+      "bytes": 1039,
+      "sha256": "0a15a8d436cd660d171762d2c0558f05ebfb6ad868b86de97b3760baf3e486e5"
+    },
+    "runtimeManifest": {
+      "abiVersion": 1,
+      "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+      "sourceSha256": "d3565817c5d60497add5734ed1aa4b280af25c2983e573c04cb8732d677027f5",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 252590,
+          "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "480c0f52f80f44083067aafee4d998b18ef6388405711ef4f97e2193da81ba9b",
+        "sourceSha256": "d3565817c5d60497add5734ed1aa4b280af25c2983e573c04cb8732d677027f5",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 261575,
+            "sha256": "e55f0f31e5b33b40efd7d666d359be8e3a77f5acd40f9fb55b411ce2c470bad8"
+          }
+        }
+      }
+    },
+    "selectedLeaves": [
+      {
+        "relativePath": "apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+        "path": "E:\\mir2-player-journey/mir2-web3/apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+        "bytes": 24393,
+        "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+      },
+      {
+        "relativePath": "apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+        "path": "E:\\mir2-player-journey/mir2-web3/apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+        "bytes": 252590,
+        "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+      },
+      {
+        "relativePath": "apps/web/public/client-core/480c0f52f80f44083067aafee4d998b18ef6388405711ef4f97e2193da81ba9b/mir2_platform_web.js",
+        "path": "E:\\mir2-player-journey/mir2-web3/apps/web/public/client-core/480c0f52f80f44083067aafee4d998b18ef6388405711ef4f97e2193da81ba9b/mir2_platform_web.js",
+        "bytes": 24721,
+        "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+      },
+      {
+        "relativePath": "apps/web/public/client-core/480c0f52f80f44083067aafee4d998b18ef6388405711ef4f97e2193da81ba9b/mir2_platform_web_bg.wasm",
+        "path": "E:\\mir2-player-journey/mir2-web3/apps/web/public/client-core/480c0f52f80f44083067aafee4d998b18ef6388405711ef4f97e2193da81ba9b/mir2_platform_web_bg.wasm",
+        "bytes": 261575,
+        "sha256": "e55f0f31e5b33b40efd7d666d359be8e3a77f5acd40f9fb55b411ce2c470bad8"
+      }
+    ],
+    "coreWasmBytes": 252590,
+    "puiWasmBytes": 261575,
+    "puiWasmBudgetExclusive": 262144,
+    "puiWasmHeadroom": 569,
+    "jsBudgetInclusive": 204800
+  },
+  "limitations": [
+    "Five actual CargoGuard calls serial with actual GetVolume C>=50GiB and freshness<=2000ms, immutable runner/guard/policy retained.",
+    "Preliminary Fishing format optimization70test/260204B PUI is historical; final Ranking PUI75test/261575B used.",
+    "No Web actual tests/TSC or Backend tests accepted by this client record. No complete Source25 candidate package yet.",
+    "No actual WASM API/instance, renderer runtime, UI/network/socket/HTTP, player flow or mobile acceptance.",
+    "Replica Inspect projection RPC and economic correlated receipt remain open."
+  ],
+  "finiteCpuAccepted": true,
+  "staticClientBuildAccepted": true,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

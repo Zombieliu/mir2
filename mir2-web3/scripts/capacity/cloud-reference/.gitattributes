@@ -1,0 +1,2 @@
+# Preserve the exact audited operator bytes, including its final blank line.
+cloud_test_release_scene_v11.py text eol=lf whitespace=-blank-at-eof

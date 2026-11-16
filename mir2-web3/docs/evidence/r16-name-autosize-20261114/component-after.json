@@ -1,0 +1,213 @@
+{
+  "passed": true,
+  "phase": "after",
+  "scope": "Actual full scene visual-layers component with controlled entities and no world state/server. Physical transparent shared-canvas clicks use the actual source sceneWorldObjectTarget; actor and cell branches are unavailable in this label-only fixture. Not full-game or shared GPU rendering acceptance.",
+  "rows": [
+    {
+      "objectId": "jane",
+      "button": {
+        "x": 336,
+        "y": 334,
+        "width": 48,
+        "height": 12
+      },
+      "children": [
+        {
+          "tag": "SPAN",
+          "text": "Assistant Jane",
+          "colour": "rgba(0, 0, 0, 0)",
+          "bounds": {
+            "x": 320,
+            "y": 336,
+            "width": 81,
+            "height": 16
+          },
+          "gdi": "entity-assistant-jane-auto",
+          "image": {
+            "src": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+            "naturalWidth": 81,
+            "naturalHeight": 16
+          }
+        }
+      ],
+      "physicalNamePick": {
+        "x": 322,
+        "y": 342,
+        "target": {
+          "kind": "entity",
+          "objectId": "jane"
+        }
+      }
+    },
+    {
+      "objectId": "ruben",
+      "button": {
+        "x": 528,
+        "y": 329,
+        "width": 48,
+        "height": 24
+      },
+      "children": [
+        {
+          "tag": "SPAN",
+          "text": "Merchant",
+          "colour": "rgba(0, 0, 0, 0)",
+          "bounds": {
+            "x": 525,
+            "y": 331,
+            "width": 54,
+            "height": 16
+          },
+          "gdi": "entity-merchant-auto",
+          "image": {
+            "src": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+            "naturalWidth": 54,
+            "naturalHeight": 16
+          }
+        },
+        {
+          "tag": "SPAN",
+          "text": "Ruben",
+          "colour": "rgba(0, 0, 0, 0)",
+          "bounds": {
+            "x": 532,
+            "y": 343,
+            "width": 40,
+            "height": 16
+          },
+          "gdi": "entity-ruben-auto",
+          "image": {
+            "src": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+            "naturalWidth": 40,
+            "naturalHeight": 16
+          }
+        }
+      ],
+      "physicalNamePick": {
+        "x": 527,
+        "y": 337,
+        "target": {
+          "kind": "entity",
+          "objectId": "ruben"
+        }
+      }
+    },
+    {
+      "objectId": "fallback",
+      "button": {
+        "x": 336,
+        "y": 430,
+        "width": 48,
+        "height": 12
+      },
+      "children": [
+        {
+          "tag": "STRONG",
+          "text": "Long NPC Name Without A Packed GDI Image",
+          "colour": "rgb(0, 255, 0)",
+          "bounds": {
+            "x": 245.671875,
+            "y": 430,
+            "width": 228.671875,
+            "height": 12
+          },
+          "gdi": null,
+          "image": null
+        }
+      ],
+      "physicalNamePick": {
+        "x": 247,
+        "y": 436,
+        "target": {
+          "kind": "entity",
+          "objectId": "fallback"
+        }
+      }
+    },
+    {
+      "objectId": "three-lines",
+      "button": {
+        "x": 528,
+        "y": 516,
+        "width": 48,
+        "height": 36
+      },
+      "children": [
+        {
+          "tag": "STRONG",
+          "text": "Very Long Title",
+          "colour": "rgb(0, 255, 0)",
+          "bounds": {
+            "x": 515.609375,
+            "y": 516,
+            "width": 72.78125,
+            "height": 12
+          },
+          "gdi": null,
+          "image": null
+        },
+        {
+          "tag": "STRONG",
+          "text": "Second Long Line",
+          "colour": "rgb(255, 255, 255)",
+          "bounds": {
+            "x": 507.65625,
+            "y": 528,
+            "width": 88.6875,
+            "height": 12
+          },
+          "gdi": null,
+          "image": null
+        },
+        {
+          "tag": "STRONG",
+          "text": "Third Line",
+          "colour": "rgb(255, 255, 255)",
+          "bounds": {
+            "x": 527.546875,
+            "y": 540,
+            "width": 48.921875,
+            "height": 12
+          },
+          "gdi": null,
+          "image": null
+        }
+      ],
+      "physicalNamePick": {
+        "x": 517,
+        "y": 522,
+        "target": {
+          "kind": "entity",
+          "objectId": "three-lines"
+        }
+      }
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "app/components/original-client-scene-visual-layers.tsx",
+      "sha256": "bac5a0fb6261f1b7b06d0e2cfe9fc3875f5814d2139b1115758e3ad5a36c3e09"
+    },
+    {
+      "path": "app/components/original-client-scene-rendering.tsx",
+      "sha256": "1008f840eca9c29d3dedc6f926547ff2bab65d17d2bf6854c42521189a2fab35"
+    },
+    {
+      "path": "app/components/crystal-gdi-text.tsx",
+      "sha256": "c925a922c86a9eeeca0a9504d8f6689f84a74a3c477bf3315855d6377e4835b4"
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "e76f7471d399a6f3e4dc6f39d5e6a238309ee70ef1c2b06169db52f44a85b9d7"
+    },
+    {
+      "path": "public/original-ui/gdi-text/manifest.json",
+      "sha256": "e77c5973ca98b709629c5cfd52ce7d26af009fe550bc9a9a1779598d10e9c1a1"
+    }
+  ],
+  "shellPickerSha256": "42b1618ef54ae0c5d669d9a2d860f322ed755c06b6662fbb022e76e149f27265",
+  "pageErrors": [],
+  "requestErrors": [],
+  "browserClosed": true,
+  "serverClosed": true
+}

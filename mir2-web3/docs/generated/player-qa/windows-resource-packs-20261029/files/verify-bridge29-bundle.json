@@ -1,0 +1,18 @@
+{
+  "projectedReport": {
+    "engineSha256": "F3DE7B60F95C65D70EFEE03BCA031047D6D4E8D34268174128535F297D23495D",
+    "files": 9,
+    "gameCandidate": "WN-CANDIDATE-20261011-invited-25",
+    "gameSourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+    "launcherSha256": "AA35CCB647519C8CFA606FAF0B6859EB17CDCDB02B31F0CD647D64C4A9EF3BBB",
+    "passed": true,
+    "schema": "mir2.windows.updater-bundle-verification.v1",
+    "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "sourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "bridge29-cms",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "A47DE0C343563E1EEA677020103F6F22A5FA41C398BF45EA21EE49E7A3D88E96",
+  "sourceSize": 592
+}

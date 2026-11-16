@@ -1,0 +1,79 @@
+{
+  "schema": "r16-v18-ordinary-d001-map-passage/1",
+  "ordinaryMapPassagePassed": true,
+  "mapOnlyScope": true,
+  "q9Operations": 0,
+  "entry": {
+    "proof": "forest-cave-map-v18-r2/onboarding-forest-browser-proof.json",
+    "sha256": "e539ffa523c4bf276e43f28b891cde94ae2968300aa473bfefd8efc1141effc8",
+    "originalRunPassed": false,
+    "proofReused": "server map/location, matching visible owner and successful map assets",
+    "mapInfoSequence": 1934,
+    "ownerLocationSequence": 1935,
+    "map": "D001",
+    "landing": {
+      "x": 151,
+      "y": 362
+    },
+    "httpErrors": 0,
+    "consoleErrors": 0
+  },
+  "continued": {
+    "proof": "forest-cave-map-v18-r3/onboarding-forest-browser-proof.json",
+    "sha256": "7c549870a2cd05a85553276713201ace5f6339c1a5574faa19dbd3dc6549f520",
+    "passed": true,
+    "freshLoginAtSavedD001": true,
+    "interiorAcknowledgedSteps": 5,
+    "d001SceneResponse": {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "d001",
+      "missing": 0,
+      "sourceSprites": 413
+    },
+    "ordinaryExitGate": {
+      "x": 148,
+      "y": 365
+    },
+    "map0Landing": {
+      "x": 143,
+      "y": 40
+    },
+    "exitMapInfoSequence": 601,
+    "exitOwnerLocationSequence": 602,
+    "httpErrors": 0,
+    "consoleErrors": 0,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "exactExperienceRetained": true,
+    "exactReturnPositionRetained": true,
+    "normalLogout": true,
+    "browserClosed": true,
+    "q7": {
+      "current": 2,
+      "required": 4
+    }
+  },
+  "screenshots": [
+    {
+      "path": "forest-cave-map-v18-r3/03-d001-first-real-map-entry.png",
+      "bytes": 381300,
+      "sha256": "450d27e2ce7d1d21d9326dbdfd88d5829b02ab4b58a6b397b9cb1db80e2b3e43",
+      "visuallyReviewed": true,
+      "displayIdentityOutsideCrop": true
+    },
+    {
+      "path": "forest-cave-map-v18-r3/04-d001-after-trusted-interior-walking.png",
+      "bytes": 333781,
+      "sha256": "7f1261c0ef85e8c02a4ac31653df6b26ecb0cd1121f2a956d6c0640d7f84ed69",
+      "visuallyReviewed": true,
+      "displayIdentityOutsideCrop": true
+    },
+    {
+      "path": "forest-cave-map-v18-r3/05-ordinary-d001-exit-map0-landing.png",
+      "bytes": 409451,
+      "sha256": "1bcc050f5469347f01e553f672b2b31b389b092e9b9f144861ca9367f143a8ce",
+      "visuallyReviewed": true,
+      "displayIdentityOutsideCrop": true
+    }
+  ]
+}

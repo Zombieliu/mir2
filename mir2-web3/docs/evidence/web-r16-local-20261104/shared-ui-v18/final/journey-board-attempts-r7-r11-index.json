@@ -1,0 +1,42 @@
+{
+  "phase": "journey-board-attempts-r7-r11",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 5,
+  "bytes": 250908,
+  "entries": [
+    {
+      "path": "journey-board-attempts-r7-r11/forest-board-v19-r10/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-board-v19-r10/onboarding-forest-browser-proof.json",
+      "bytes": 45346,
+      "sha256": "de5d04a5aa531e2a4ac634b23577cfac799133c9d394f0207102e893df5410fc"
+    },
+    {
+      "path": "journey-board-attempts-r7-r11/forest-board-v19-r11/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-board-v19-r11/onboarding-forest-browser-proof.json",
+      "bytes": 48286,
+      "sha256": "18539b6ae31cba502448a9957e704e3b7ee7b424d2016d72acd2d2c15344020c"
+    },
+    {
+      "path": "journey-board-attempts-r7-r11/forest-board-v19-r7/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-board-v19-r7/onboarding-forest-browser-proof.json",
+      "bytes": 62843,
+      "sha256": "2a179ceac01be4f098b6aabe56d8723e8f92101ba253080d28f399d087d557ec"
+    },
+    {
+      "path": "journey-board-attempts-r7-r11/forest-board-v19-r8/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-board-v19-r8/onboarding-forest-browser-proof.json",
+      "bytes": 46119,
+      "sha256": "83611f7da5520b8b0d0708c75d5b3f727f7aa71f328ae0d36ccd10e38a23fd53"
+    },
+    {
+      "path": "journey-board-attempts-r7-r11/forest-board-v19-r9/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-board-v19-r9/onboarding-forest-browser-proof.json",
+      "bytes": 48314,
+      "sha256": "98ca59c94b93c59bf1bd3035c2e2bff638a2fb42f58e4e24b81472f98ec3ad6f"
+    }
+  ]
+}

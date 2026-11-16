@@ -1,0 +1,36 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:03:58.610351+00:00",
+  "producerReceipt": {
+    "filename": "unified-installer-validation-compile.json",
+    "bytes": 1115,
+    "sha256": "7f6c91c14f29000209c462442ed0725b90a028f161dab1ef0f3c0c3d817e0a6a"
+  },
+  "producerReport": {
+    "passed": true,
+    "kind": "validation",
+    "exe": "F:\\mir2-build\\unified-20261029\\installer-validation-output-r11\\Numeron-Legend-of-Rebirth-20261029-unified-r11-LocalValidation-Setup.exe",
+    "bytes": 1024372706,
+    "sha256": "61526737863975826E721704BAD2C03AE6FAB5485DD745EF072E74D6922BD1D3",
+    "fileVersion": "2026.10.29.11       ",
+    "elapsedSeconds": 59.6232242,
+    "pinnedCompilerEngine": "7.1.1",
+    "compilerSha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+    "recipeSha256": "CE9FFFE7F203DD7DB97F95AE6D37D27D386B365014DA7F3C1D0E01EC3B5BAE91",
+    "payloadIncludeSha256": "7F80C75F094D22401C5FCCB7E16F4629573E61CCFC2BF1F61A2F7C9D8CC5C15B",
+    "updaterIncludeSha256": "F36DCADD53B4A7EBB81551A7B74C2449889A46171BB99DAA3843CB10CF82EAAD",
+    "arguments": [
+      "/Qp",
+      "/OF:/mir2-build/unified-20261029/installer-validation-output-r11",
+      "/DMir2ValidationInstall=1",
+      "F:\\mir2-build\\unified-20261029\\installer-r11\\Mir2-Invite.iss"
+    ],
+    "publicRelease": false,
+    "authenticodeStatus": "NotSigned",
+    "installation": "not performed by this helper"
+  },
+  "phase": "Actual normal/isolated full Inno compile admitted after final Candidate proof; original historical pending receipts preserved",
+  "installationByThisPhase": false,
+  "guiByThisPhase": false
+}

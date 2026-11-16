@@ -1,0 +1,11 @@
+{
+  "capturedAt": "2026-10-24T12:40:54.435Z",
+  "files": {
+    "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\run-death-revive-focused.mjs": "ab251d0dc8f371c1819c01110d90e24dbb4aafadd09cedf04f810f34b111dd36",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+  }
+}

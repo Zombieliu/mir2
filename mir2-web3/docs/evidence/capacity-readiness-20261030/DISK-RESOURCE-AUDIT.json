@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "rootObservedAtUtc": "2026-10-30T04:37:22.131094+00:00",
+  "detailObservedAtUtc": "2026-10-30T04:39:47.789300+00:00",
+  "resourceObservedAtUtc": "2026-10-30T04:41:37.421251+00:00",
+  "filesystem": {
+    "totalBytes": 123690532864,
+    "usedBytes": 122871447552,
+    "freeIncludingReservedBytes": 819085312,
+    "availableNonRootBytes": 802308096,
+    "reservedDifferenceBytes": 16777216
+  },
+  "categories": [
+    {
+      "path": "/srv",
+      "bytes": 44630487040
+    },
+    {
+      "path": "/home/ubuntu",
+      "bytes": 28776812544
+    },
+    {
+      "path": "/opt",
+      "bytes": 18342887424
+    },
+    {
+      "path": "/var/backups",
+      "bytes": 13643149312
+    },
+    {
+      "path": "/tmp",
+      "bytes": 4985470976
+    },
+    {
+      "path": "/var/lib/mir2",
+      "bytes": 3595206656
+    },
+    {
+      "path": "/var/log",
+      "bytes": 3434119168
+    },
+    {
+      "path": "/var/lib/postgresql",
+      "bytes": 262193152
+    }
+  ],
+  "publicUpdateRoot": {
+    "path": "/srv/mir2-client-updates",
+    "bytes": 21792366592
+  },
+  "srvDotStageDirectories": {
+    "count": 29,
+    "allocatedBytes": 22837727232,
+    "safeToDeleteVerified": false
+  },
+  "memory": {
+    "MemTotal": "8127732 kB",
+    "MemFree": "532232 kB",
+    "MemAvailable": "1479144 kB",
+    "Buffers": "435832 kB",
+    "Cached": "369020 kB",
+    "SwapTotal": "0 kB",
+    "SwapFree": "0 kB",
+    "Shmem": "146912 kB",
+    "SReclaimable": "603148 kB"
+  },
+  "largestProcesses": [
+    {
+      "pid": 3855184,
+      "name": "mir2-gateway",
+      "rssKiB": 1484216
+    },
+    {
+      "pid": 3855181,
+      "name": "zone_host",
+      "rssKiB": 1095704
+    },
+    {
+      "pid": 2130288,
+      "name": "gate14_validato",
+      "rssKiB": 615540
+    },
+    {
+      "pid": 2130026,
+      "name": "gate14_validato",
+      "rssKiB": 542544
+    },
+    {
+      "pid": 2130154,
+      "name": "gate14_validato",
+      "rssKiB": 538544
+    },
+    {
+      "pid": 2129892,
+      "name": "gate14_validato",
+      "rssKiB": 538224
+    },
+    {
+      "pid": 2468561,
+      "name": "mir2-gateway",
+      "rssKiB": 241536
+    },
+    {
+      "pid": 3396721,
+      "name": "fwupd",
+      "rssKiB": 177900
+    },
+    {
+      "pid": 1974960,
+      "name": "grafana",
+      "rssKiB": 169628
+    },
+    {
+      "pid": 18264,
+      "name": "postgres",
+      "rssKiB": 137136
+    },
+    {
+      "pid": 855802,
+      "name": "mir2-gateway",
+      "rssKiB": 95828
+    },
+    {
+      "pid": 763885,
+      "name": "node",
+      "rssKiB": 77552
+    },
+    {
+      "pid": 958483,
+      "name": "mir2-gateway",
+      "rssKiB": 66960
+    },
+    {
+      "pid": 2130417,
+      "name": "gate14_projecto",
+      "rssKiB": 54620
+    },
+    {
+      "pid": 559670,
+      "name": "python",
+      "rssKiB": 52508
+    }
+  ],
+  "rssAccounting": "RSS includes shared pages; summing it does not measure exclusive physical memory",
+  "readOnly": true,
+  "cleanupPerformed": false,
+  "sourceArtifacts": [
+    {
+      "file": "ROOT-USAGE.json",
+      "sha256": "2f5477a1c748cb8f1d9c31fd86dfb8db0de5ea0e14c7be7ddb1f79e81910af1f"
+    },
+    {
+      "file": "DETAIL-USAGE.json",
+      "sha256": "87521986b90f8f44a517582108d79cacd75259cc20c5197a50b4c0683d82465d"
+    },
+    {
+      "file": "RESOURCE-OWNERS.json",
+      "sha256": "2b78c2fea1d7349a030716fdb2ef400d546e0e5530bd763706cafde7e9fc02dc"
+    }
+  ],
+  "capacityConclusion": "This inventory establishes occupied resources, not a player capacity or permission to delete retained versions/backups."
+}

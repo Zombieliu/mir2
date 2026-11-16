@@ -1,0 +1,2727 @@
+{
+  "formatVersion": 1,
+  "topic": "Simplified Chinese editorial finishing and complete Windows installer verification",
+  "dateAsiaShanghai": "2026-10-29",
+  "status": "technical-topic-complete-r10-installed-chain-and-reinstall-locale-persistence-passed",
+  "complete": true,
+  "completionDefinition": "This topic must separately prove final native rendering/build, attested release, actual Candidate/updater verification, installer compilation and isolated installation. Human frontend/linguistic Accepted and production deployment remain separate.",
+  "checks": [
+    {
+      "name": "editorial-catalog-invariants",
+      "status": "passed",
+      "path": "editorial/validation.json"
+    },
+    {
+      "name": "editorial-generator-12-checks",
+      "status": "passed",
+      "path": "editorial/generator-checks.json"
+    },
+    {
+      "name": "independent-content-name-integration",
+      "status": "passed",
+      "path": "editorial/content-name-integration.json"
+    },
+    {
+      "name": "final-editorial-font-corpus",
+      "status": "passed",
+      "path": "fonts/corpus-verification.json"
+    },
+    {
+      "name": "full-packaging-selftests-before-final-recipe",
+      "status": "passed",
+      "path": "packaging/pre-release-full-selftests.json",
+      "finalReleaseSourceFresh": false
+    },
+    {
+      "name": "final-native-focused-and-gpu",
+      "status": "passed",
+      "path": "native/ui-debug-validation.json",
+      "phase": "873-editorial incremental-debug source ledger, not final clean release attestation"
+    },
+    {
+      "name": "trusted-inno-and-r9-translation-readiness",
+      "status": "passed",
+      "path": "packaging/compiler/readiness.json",
+      "phase": "Compiler signatures, translation closure and dummy syntax fixtures; real full payload outputs proven by later r10 compile receipts"
+    },
+    {
+      "name": "monthly-card-canonical-system-label-delta",
+      "status": "passed",
+      "path": "native/monthly-card-label-fix/validation.json",
+      "phase": "Only billing 20 + GPU39 refreshed; preserve earlier unrelated 54/42 phase"
+    },
+    {
+      "name": "fresh-owned-gutter-base-map-seed",
+      "status": "passed",
+      "path": "packaging/assets/fresh-seed-validation.json",
+      "phase": "Seed pixels only; full 209-map Candidate remains separate"
+    },
+    {
+      "name": "asset-input-recovery-and-production-preflight",
+      "status": "passed",
+      "path": "packaging/assets/recovery/validation.json",
+      "phase": "98880 ignored PNG plus exact signed Monster049 bootstrap; all7 non-map closure checks; actual package phases are separate"
+    },
+    {
+      "name": "short-physical-path-and-ads-guard-correction",
+      "status": "passed",
+      "path": "packaging/short-path-correction/validation.json",
+      "phase": "Same clean Game242,binary/attestation unchanged; PS7+PS5.1 accept normal and reject ADS. Final v5 package proven separately."
+    },
+    {
+      "name": "bounded-quest-practice-regression",
+      "status": "passed",
+      "path": "native/quest-practice-validation.json"
+    },
+    {
+      "name": "clean-simplified-updater-release-precompile",
+      "status": "passed",
+      "path": "updater/sc-release-precompile/validation.json",
+      "phase": "Clean physical sparse11d8,20 tracked inputs,31.09s release; no final Candidate binding/signing/bundle implied"
+    },
+    {
+      "name": "formal-game-candidate-v5-verification",
+      "status": "passed",
+      "path": "candidate/validation.json",
+      "phase": "Game242clean255027files/CMSvalid/currentSourceValidated; original flagfalse retained, explicitcopy/updater/installer separate"
+    },
+    {
+      "name": "explicit-current-source-snapshot-copy-verification",
+      "status": "passed",
+      "path": "candidate/explicit-current-source-copy/validation.json",
+      "phase": "Additional snapshot switchtrue; original formal flagfalse preserved and actualinstaller uses formal root"
+    },
+    {
+      "name": "first-installed-helper-source-audit",
+      "status": "passed",
+      "path": "installer/current-helper-readonly-validation.json",
+      "phase": "Historical first2802B helper audit; final default-assets helper source/syntax and actual chain recorded in reinstall phase"
+    },
+    {
+      "name": "failed-r9-install-uninstalled-preservation",
+      "status": "passed",
+      "path": "windows-live/r9-removal/validation.json",
+      "phase": "R9 removed,normalreg/exe/prefs unchanged,profile seed retained; no historicalshortcutbyte baseline claim"
+    },
+    {
+      "name": "r10-first-silent-install-execution",
+      "status": "passed",
+      "path": "windows-live/r10-first-install/validation.json",
+      "phase": "328.763s actual setup exit0; full installed identity verification and runtime proven in separate later phase"
+    },
+    {
+      "name": "exact-five-updater-root-policy-fix",
+      "status": "passed",
+      "path": "updater/root-policy-fix/validation.json",
+      "phase": "Four normalized sources match81942; Rust5+2+realCMS1,Python30pass3skip. Actualr10start remains separate."
+    },
+    {
+      "name": "first-silent-validation-install-execution",
+      "status": "passed",
+      "path": "windows-live/first-install/validation.json",
+      "phase": "Actual260.369s setup exit0,seedzhCN,noauto-launch; fullinstalledhashes/UI/uninstall/reinstall remain separate"
+    },
+    {
+      "name": "manifest-tool-staged-blob-protection",
+      "status": "passed",
+      "path": "manifest-tool-validation.json",
+      "phase": "10 isolated temporary Git fixture checks; user repository index untouched"
+    },
+    {
+      "name": "updater-simplified-locale-and-win32-delta",
+      "status": "passed",
+      "path": "updater/zh-cn-fix/validation.json",
+      "phase": "12 automated focused tests; source11d8, game release242; final updater binary/package separate"
+    },
+    {
+      "name": "attested-clean-source-release-build",
+      "status": "passed",
+      "path": "release/native-attested-release.json",
+      "phase": "Native-only clean 24216899a build; does not certify later updater or actual packaged installer"
+    },
+    {
+      "name": "actual-candidate-and-updater-verification",
+      "status": "passed",
+      "path": "release/r10-game-and-updater-result.json",
+      "phase": "Game242 plus exact-policy-fixed updater819/r10sequence; actualinstalledr10 startup and Inno still separate"
+    },
+    {
+      "name": "normal-and-isolated-installer-compile",
+      "status": "passed",
+      "path": "installer/r10/validation.json",
+      "phase": "Two actualr10 full Inno outputs,source819/Game242/updaterseq2910; actualinstalled startup separate"
+    },
+    {
+      "name": "r10-first-real-installed-chain-and-ui",
+      "status": "passed",
+      "path": "windows-live/r10-first-runtime/validation.json",
+      "phase": "255027+9 identity checks; actual no-argument Launcher chain; eight actual PNGs; no updater progress image claimed. Reinstall is separate."
+    },
+    {
+      "name": "isolated-installation-and-uninstallation",
+      "status": "passed",
+      "path": "windows-live/r10-reinstall/validation.json",
+      "phase": "Actual separate-AppId uninstall and same immutable Setup reinstall; paths255027,selected7,metadata4,updater9,profile3; full content hashes remain first phase"
+    },
+    {
+      "name": "final-actual-windows-smoke",
+      "status": "passed",
+      "path": "windows-live/final-ui-validation.json",
+      "phase": "First8 and reinstall4 actual PNGs; true no-argument Launcher chains; default installed assets;zhCN persists; no new purchases"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": ".cargo/config.toml",
+      "raw": false
+    },
+    {
+      "path": "Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/audio.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/bag_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/character.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/bag_paint.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_npc_navigation_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_frames.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text_view.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_bar.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_orb.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/localized_help.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_page_shared.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/nonmodal_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays_portable.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/entities.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/game_shop.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/graduation_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_action_basis.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_ingress.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_model.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_source_witness.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hud.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/inventory.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail_service.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/map.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_display.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_monthly_card.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_procurement.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/options_effects.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/pending_operations.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_experience_bar_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hud_bar_draw_plan.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_mail_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_weight_bar_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_guidance.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_intents.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_journey.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_model.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multilingual_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_nonmodal_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_presentation_text.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route_search.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies_fiveclass_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/read_model.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/shop.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_model.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage_interaction.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-bevy/test-fixtures/original-item-true-sizes.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/auth_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/cash_preview.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/chat_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/clock.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/entity_animation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/equipment_pending.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/fishing_click.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/intent.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/interpolation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_names.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip_types.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_compose.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_parcel.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/map_route.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/motion.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_repair_quote.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/ordered_map.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/quest.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-core/src/reconciliation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/client-wire/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/crystal-gdi-text/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/crystal-gdi-text/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/.gitattributes",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/BILLING-HAN-SOURCE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MIR2BillingHan-Regular.ttf",
+      "raw": true,
+      "expectedSha256": "7cc4d33730ae409a198cae325f57db54730f94b193f5d604375701890bb762ce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MULTILINGUAL-SOURCES.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Bold.ttf",
+      "raw": true,
+      "expectedSha256": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Regular.ttf",
+      "raw": true,
+      "expectedSha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Bold.ttf",
+      "raw": true,
+      "expectedSha256": "4e5462d2e8be880317b9f49b5b2da109ddb6a3563d91cc604b67f3535832a555"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Regular.ttf",
+      "raw": true,
+      "expectedSha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "raw": true,
+      "expectedSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Bold.ttf",
+      "raw": true,
+      "expectedSha256": "6a09c8d797cfc803d32cdc731e809424d74cbaff59f503de34ade421a08e5bc2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Regular.ttf",
+      "raw": true,
+      "expectedSha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "raw": true,
+      "expectedSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Bold.ttf",
+      "raw": true,
+      "expectedSha256": "2ac6c6e8a478e23b15f76e4894af1fa2210f8f350e4e6e54aad530bec03efbfb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Regular.ttf",
+      "raw": true,
+      "expectedSha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSans.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansArabic.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansDevanagari.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansSC-BillingHan.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansThai.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/METADATA.pb",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/NotoSansSC-Text400.eot",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/generate-billing-han.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/verify-simplified-font.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/build.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/resources/numeron.png",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/README.md",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/.gitattributes",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/HINDI-UPDATE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Hindi.isl",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Hindi.islu",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Indonesian.isl",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Inno-Setup-LICENSE.txt",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/SOURCES.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/VIETNAMESE-UPDATE.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Vietnamese.isl",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Vietnamese.upstream.isl",
+      "raw": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ar.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.en.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.hi.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.id.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.pt-BR.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ru.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.th.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.vi.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-CN.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-TW.txt",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/assets.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/atlas.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_npc_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/billing_browser.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/branding.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/buried_monster_replay_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture/provenance.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/clipboard.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/cursor.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/effects.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_health.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_overlays.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_presentation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/five_class_bridge_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/frame_sets.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_account_feedback.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_handshake_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_map_identity_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_movement_barrier_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_quest_tooltip_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_creation_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_authority_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_display_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_pointer_settings.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_wire.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hotkey_intent_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lifecycle.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lighting.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_parser.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_player_movement_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_input.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_visual_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/movement_trace.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_display.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_locale.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/nonmodal_panel_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_gold_buy_transport_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_client.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_projection.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/pet_effects.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/refine_wire.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/session_config.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/spell_targeting.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/startup_diagnostics.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/struck_run_guard.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/timing.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/trade_projection.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/window_sizing.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis01-bichon-actors-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-fire-bounce-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-fireball-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-firewall-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-flaming-sword-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-great-fireball-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-hallucination-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-healing-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-lightning-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-soul-fireball-v1.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis03-buried-zombie2-wizard-20261001.json",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/bag_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/capture_context.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_modes_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/hero_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/hud_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/interpolation.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/item_tooltip_query.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/lighting.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/local_motion.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/motion.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/movement_shadow.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/presentation_pose.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_route_plan.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/remote_motion.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/render_diagnostics.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/runtime_ui_capabilities.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/skill_bar_query.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/runtime/src/webgl2_shared_ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/action.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/effect.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/game_shop.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/reducer.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/registry.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/state.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/ui-core/src/storage.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.lock",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/build-updater-release.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/prepare-updater-input.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/verify-updater-bundle.ps1",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/launcher.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/updater.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/download.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/five_class_manifest_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/fs_safe.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/local_io.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model_regression.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/platform.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/progress_trace_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/resume_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/transaction.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/ui.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update_receipt_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "raw": true
+    },
+    {
+      "path": "apps/web/public/original-ui/Items/meta.json",
+      "raw": false
+    },
+    {
+      "path": "apps/web/public/original-ui/MMap/meta.json",
+      "raw": false
+    },
+    {
+      "path": "apps/web/public/original-ui/MagIcon/meta.json",
+      "raw": false
+    },
+    {
+      "path": "apps/web/public/original-ui/Prguse2/meta.json",
+      "raw": false
+    },
+    {
+      "path": "apps/web/public/original-ui/frame-sets.generated.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/daily-weekly-v1.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v1.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2-ui.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-supplies.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v1.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v2-graduation.json",
+      "raw": false
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v2.json",
+      "raw": false
+    },
+    {
+      "path": "onchain/procurement/fixtures/intent-v1.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_176.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_fiveclass.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_buff_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_creature_settings.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_drop_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_guild_settings.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_hero_settings.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_magic_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_mining_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_starter_map_collision.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/localization_bundle.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/platinum_176_bundle.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/platinum_fiveclass_bundle.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/generated/quest_presentation_text.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/common.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/conquest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/content-coverage.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/content.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ar.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/hi.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/id.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/provenance.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ru.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/th.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/vi.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/game.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/help.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-menu-coverage.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-menus.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-prose.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/periodic.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/quest.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/shell.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/validation-report.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/starter_scene.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/data/starter_server_data.json",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_creature_settings.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_guild_settings.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_hero_settings.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_item_image.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_map_events.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_mining.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/crystal_npc_goods.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/fiveclass_tests.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/periodic_quests.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/game-data/src/stone_items.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/Cargo.toml",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/catalog_transport.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/error.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/frame.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/ids.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/io.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/item_image.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/lib.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/packets.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/procurement.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/trace.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/protocol/src/types.rs",
+      "raw": false
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/npc-menu-source.json",
+      "raw": false
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/npc-prose-source.json",
+      "raw": false
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "raw": false
+    }
+  ],
+  "editorial": {
+    "keys": 9769,
+    "overrides": 873,
+    "baselineShared": 2362,
+    "baselineOpenCC": 7407,
+    "countsOverlap": "Overrides replace baseline values; 873 is not an additional key count.",
+    "semanticChecks": 13,
+    "namingKeys": 3545,
+    "namingUniqueChineseTexts": 3068,
+    "humanReviewedKeys": 0,
+    "humanAccepted": false
+  },
+  "sourcePhasePolicy": "Pre-release self-tests and prior topics remain tied to their actual source/run stage. New final-source changes require matching new verification; old reports are not relabeled fresh.",
+  "release": {
+    "available": true,
+    "productionDeployed": false,
+    "humanFrontendAccepted": false,
+    "humanLinguisticAccepted": false,
+    "publicRelease": false,
+    "availabilityScope": "Local internal Candidate Setup artifacts only; unsigned public Authenticode and no production deployment."
+  },
+  "excluded": [
+    "private keys",
+    "full account stores",
+    "raw APPDATA or preferences",
+    "binaries/installers/update archives",
+    "harnesses and fixtures",
+    "complete build logs",
+    "temporary tool distributions"
+  ],
+  "historicalEvidenceUnchanged": [
+    "../native-zh-cn-20261029/README.md",
+    "../billing-entry-ui-20261029/README.md",
+    "../sui-usdc-recharge-v1-20261029/README.md"
+  ],
+  "nativeUiDebug": {
+    "focusedPassed": 54,
+    "focusedIgnored": 2,
+    "separateGpuTests": 2,
+    "captures": 42,
+    "inputFiles": 534,
+    "inputFilesCanonicalSha256": "35ca9060925e27e486398bd3b6b3dd85a033b5b0ff0ec78a0caf0ad3ad7e9fde",
+    "ledgerRawFileSha256": "e89c3b647c0f8c29b30fc6ee3263028ebeed0d631b7941fb41afc1c0f79a4d93",
+    "executableSha256": "70630edc42d528952f334858ef7cbbab541d8ea6d60745c72b3af618f4bf6b22",
+    "executableBytes": 149412864,
+    "cleanReleaseAttestation": false
+  },
+  "monthlyCardDelta": {
+    "focusedPassed": 20,
+    "focusedIgnored": 1,
+    "billingGpuCaptures": 39,
+    "inputFiles": 534,
+    "inputFilesCanonicalSha256": "aed1739e0a0490febca13e900e0d541027b91b353b76eb44e5a2f4641f8c717e",
+    "ledgerRawFileSha256": "64ff0ef384d32d974c59cea3335fa93c52e0f4b691f8016fb45cd488be0db033",
+    "executableSha256": "05482ef64a0ed1558ba607d8312bfeec0b6ddb39c49653150db488e79a2fec05",
+    "executableBytes": 149413376,
+    "cleanReleaseAttestation": false,
+    "countsAreNotAddedToPriorPhase": true
+  },
+  "nativeRelease": {
+    "revision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "worktreeDirty": false,
+    "executableBytes": 132739584,
+    "executableSha256": "6b657f869afc2baa8a086baf9bd39ce77b5011247d8b12a8f92eaeebe3cf2e9d",
+    "proofScope": "Game component only; final updater, installer and actual runtime are proven in separate checks."
+  },
+  "manifestStatus": "final artifact and current-source pins frozen; staged blob verification required after coordinator stages",
+  "componentSourceRevisions": {
+    "nativeGame": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "updater": "81942dda7fa09e869d42fb9560e57abdbd542495"
+  },
+  "gameCandidate": {
+    "candidate": "WN-CANDIDATE-20261029-invited-09",
+    "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "files": 255027,
+    "manifestRows": 255023,
+    "manifestSha256": "ab86b5e083473c003863ead5c2ef09112cadc655684176e7ad757f7c60eb80ed",
+    "manifestAggregateSha256": "2ca14d2c5ec7d2bccf5cbe5d9c2a3540233f070c9b9a68b93abc1368b59a1ddc",
+    "requireCurrentSourceSwitch": false,
+    "currentSourceValidated": true,
+    "detachedCmsValid": true,
+    "explicitCurrentSourceSnapshotVerified": true,
+    "proofScope": "Game component only; final updater, installer and actual runtime are proven in separate checks."
+  },
+  "r9Updater": {
+    "sourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+    "sequence": 2026102909,
+    "files": 9,
+    "launcherSha256": "838c9bb6c2fd0e8478a704907fd98248b9bcdfa5a3c09b3ff07c8100f585d8ae",
+    "engineSha256": "0d23aade70acaa6bb2c00941be5379971e6bd764ae585db8427c2e03dceed363",
+    "detachedCmsVerified": true,
+    "publicAuthenticode": "NotSigned"
+  },
+  "finalUpdater": {
+    "sourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+    "sequence": 2026102910,
+    "files": 9,
+    "launcherSha256": "76d46b6e52246462d4c57f1fb843bc0b0e557d06e735a4c02abdc24c07b957ac",
+    "engineSha256": "10b94f60286afeaae43db0117a9c73b2dccecae1ddd79d562379ac316b40c6bc",
+    "detachedCmsVerified": true,
+    "publicAuthenticode": "NotSigned",
+    "actualInstalledRuntime": "r10 first and reinstall no-argument Launcher chains passed; default installed assets verified after reinstall"
+  },
+  "r9InstallerArtifacts": {
+    "normal": {
+      "bytes": 1017970518,
+      "sha256": "b29f0638cefe77f95d1ced256a02e6260aa6e269b212f53548e39736a1272c20",
+      "publicAuthenticode": "NotSigned",
+      "actualFullPayload": true
+    },
+    "validation": {
+      "bytes": 1017971207,
+      "sha256": "5fd15cf92cfe4cdace0408c5f4e99897a67d2ac8e01b44c1dae71761b7d4de4c",
+      "publicAuthenticode": "NotSigned",
+      "actualFullPayload": true
+    }
+  },
+  "installerArtifacts": {
+    "normal": {
+      "bytes": 1017971015,
+      "sha256": "e7a2438a6c73dcb3d529a75cbb2e7f19f7054c3909466952dcbe4544dc780d7f",
+      "publicAuthenticode": "NotSigned",
+      "actualFullPayload": true,
+      "revision": "r10"
+    },
+    "validation": {
+      "bytes": 1017971039,
+      "sha256": "6a196bc8010b95bed6c94ee9472ee56897bc7a23ac5e02e0bc72eb65176b16c8",
+      "publicAuthenticode": "NotSigned",
+      "actualFullPayload": true,
+      "revision": "r10"
+    }
+  },
+  "historicalRuntimeFailures": [
+    {
+      "phase": "r9-first-installed-launch",
+      "path": "windows-live/r9-startup-failure/validation.json",
+      "passed": false,
+      "gameStarted": false,
+      "blocksFinalDelivery": false,
+      "resolvedBy": "windows-live/r10-reinstall/validation.json"
+    }
+  ],
+  "actualWindowsFirstR10": {
+    "passed": true,
+    "path": "windows-live/r10-first-runtime/validation.json",
+    "screenshots": 8,
+    "updaterProgressScreenshot": false,
+    "credit": 100,
+    "gold": 10000,
+    "usdcOrders": 3,
+    "reinstallPersistencePending": false
+  },
+  "actualWindowsFinal": {
+    "passed": true,
+    "path": "windows-live/final-ui-validation.json",
+    "actualPngs": 12,
+    "firstPngs": 8,
+    "reinstallPngs": 4,
+    "defaultInstalledAssets": true,
+    "localeAfterReinstall": "zh-CN",
+    "credit": 100,
+    "gold": 10000,
+    "usdcOrders": 3,
+    "noPurchases": true,
+    "humanAccepted": false
+  },
+  "limitations": [
+    "Technical topic completion is not human frontend or linguistic Accepted;873 keyed edits are AI/source reviewed,not9769 human approvals.",
+    "Normal Setup was fully compiled and audited; actual local overwrite of existing normal D: installation was not performed.",
+    "Actual validation installs were silent and launched through reviewed helper with isolated APPDATA; interactive validation finish-page launch does not establish isolation.",
+    "Public Setup/updater Authenticode remains NotSigned; pinned detached CMS validation is distinct; no production deployment.",
+    "No updater progress screenshot was captured; actual updater/game process chains are the runtime evidence.",
+    "No pre-r9 shortcut-byte baseline existed; no claim that every historic shortcut byte stayed unchanged.",
+    "Reinstall verifies full paths plus selected7 payload,4 metadata,9 updater and3 profile hashes; only r10-first performed full255027 content hashes.",
+    "54focused/42Mock captures and monthly delta20/39 remain separate historical stages; display GPU not separately executed in editorial finish phase."
+  ]
+}

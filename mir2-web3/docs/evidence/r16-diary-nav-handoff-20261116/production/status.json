@@ -1,0 +1,59 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "controller": "b5e31bffc82ead96b0f624a29ccec7eaf4e02b08",
+  "candidate": "dpl_EsA9a7nDuU7ggAC2xBUqtdmCCasj",
+  "sourceClosure": {
+    "commits": 14,
+    "files": 237,
+    "segmentFiles": [
+      90,
+      59,
+      105
+    ]
+  },
+  "releaseGuards": 111,
+  "backendWorkflow": 43842463384,
+  "stageWorkflow": 43843651431,
+  "checkWorkflow": 43845409806,
+  "promoteWorkflow": 43849334589,
+  "actualProductionTrial": true,
+  "originalPublicR1Accepted": false,
+  "publicR2Executed": false,
+  "restoredProduction": {
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "pid": 1832898
+  },
+  "preexistingRowsUnchanged": {
+    "accounts": {
+      "preexistingRows": 322,
+      "currentRows": 322,
+      "preexistingCanonicalBytes": 2399289,
+      "preexistingSha256": "053be12f66071fb21e215224fb9a9f31f6707ce72d5e2b83a8fb47625ef97836",
+      "preexistingRowsUnchanged": true
+    },
+    "characters": {
+      "preexistingRows": 234,
+      "currentRows": 234,
+      "preexistingCanonicalBytes": 79082,
+      "preexistingSha256": "b7bfc17c9549081600689b834955cc8d6b37d2235fd3cb78da655e5c2d2af270",
+      "preexistingRowsUnchanged": true
+    },
+    "character_saves": {
+      "preexistingRows": 234,
+      "currentRows": 234,
+      "preexistingCanonicalBytes": 2711334,
+      "preexistingSha256": "5fa9f6d9c5ff0e141b7389fd9d0d828fbaed7649cc9f2be51370b18fa389d7f8",
+      "preexistingRowsUnchanged": true
+    }
+  },
+  "originalConfigurationFilesUnchanged": 24,
+  "databaseRestored": false,
+  "restoredUnsignedScTcQrPassed": true,
+  "restoredSignedGameLoginRetested": false,
+  "physicalPhoneCameraTested": false,
+  "goal": "active",
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "next": "Passive timing investigation of approval to game login handoff; do not repeat the unchanged public candidate."
+}

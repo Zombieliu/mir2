@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-25T07:36:57.622Z",
+  "scope": "Publishedv1 script/preparation exactraw retained before independentverifier-only HP fix. V1 has not been run against13 raw.",
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13.mjs",
+      "bytes": 23135,
+      "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verification-preparation-v1.json",
+      "bytes": 3616,
+      "sha256": "684551892ee71850759d53521ff44e9fe4d11ca16d71031db03e71d43c5e7b9c"
+    }
+  ],
+  "copies": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/preimages-v1/verify-ended-probe13.mjs.txt",
+      "bytes": 23135,
+      "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/preimages-v1/verification-preparation-v1.json",
+      "bytes": 3616,
+      "sha256": "684551892ee71850759d53521ff44e9fe4d11ca16d71031db03e71d43c5e7b9c"
+    }
+  ],
+  "liveRunDataRead": false,
+  "capacityAccepted": false
+}

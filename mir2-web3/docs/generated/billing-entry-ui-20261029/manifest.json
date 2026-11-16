@@ -1,0 +1,522 @@
+{
+  "formatVersion": 2,
+  "topic": "Persistent billing entry UI: fiat, onchain USDC, separate monthly card",
+  "evidenceStatus": "ui-technical-candidate-complete-release-gates-open",
+  "complete": true,
+  "artifactHashing": "raw bytes; topic-scoped * -text -whitespace",
+  "sourceHashing": "UTF-8 CRLF to LF for Rust/JSON/text; raw bytes for font/source artifacts explicitly marked -text",
+  "artifactCount": 50,
+  "artifactBytes": 8248570,
+  "artifacts": [
+    {
+      "path": ".gitattributes",
+      "bytes": 21,
+      "sha256": "ffe82f3c5b968ed009c2577fa38f32c83be167799ee565d40a18e3440c57b342"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 88,
+      "sha256": "03355d37f9392a1c3e281e8da7b27ebe544c52f09f39e3c270ca4442bb8890cb"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5318,
+      "sha256": "d17fe71e3d39dad7642ccda4c518c960a218ccef23970569016880d18710ce83"
+    },
+    {
+      "path": "evidence-index.json",
+      "bytes": 10741,
+      "sha256": "748ca7c4713dd33f207a3b83310f5bf7549c5b2d64eb527cb1c519a32977070b"
+    },
+    {
+      "path": "generate-manifest.mjs",
+      "bytes": 4879,
+      "sha256": "a72c3141722e7bd2185ea9e0630d209a38938a653bbb4be20abf13db2d69b3d5"
+    },
+    {
+      "path": "native-mock/focused-result.json",
+      "bytes": 2727,
+      "sha256": "06287ded1e0ef9c6ab8f434c62a8c4cb7b66474858fb3b5494bd045de37ee726"
+    },
+    {
+      "path": "native-mock/font-result.json",
+      "bytes": 2771,
+      "sha256": "e562f105c0b0b6da23f1b5edfb2b81d6a7fb2ab24c847059da800ac17c2b7f68"
+    },
+    {
+      "path": "native-mock/gpu/report.json",
+      "bytes": 547963,
+      "sha256": "bb6c8e50a5985c127f10292c22d215645794922bb561bab11989be87eddd03aa"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 193598,
+      "sha256": "a17ad6f16e84f06a774f7fe00cd003973219370142716021189c773be8876ad4"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-both-disabled-fiat-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-both-disabled-monthly-1024x768.png",
+      "bytes": 193222,
+      "sha256": "3d79cdc8ae3dcdd7eea796f58da044f3e8f5d4d2b283de2ad59fc6d763596fb7"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-both-disabled-usdc-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-fiat-1024x768.png",
+      "bytes": 183853,
+      "sha256": "647d765ac88634825e9b164ae93149ad88f541150eb8181a74970ebef0f72de5"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-fiat-disabled-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-loading-1024x768.png",
+      "bytes": 166365,
+      "sha256": "7bbb9bb7f7449fcea36377fa5b82e08c656a69f985f130cdc950a546bde111dc"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-monthly-1024x768.png",
+      "bytes": 193222,
+      "sha256": "3d79cdc8ae3dcdd7eea796f58da044f3e8f5d4d2b283de2ad59fc6d763596fb7"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-unavailable-1024x768.png",
+      "bytes": 166486,
+      "sha256": "ee5f0a31f67e9e512cf6f726cc6104579c254dfe2b0d87c1fb0ddd186ef3c632"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-usdc-confirmation-1024x768.png",
+      "bytes": 226728,
+      "sha256": "c8c01bc7a9c3fb9721765a042e405e11c59ef70ebf233dd465a5ee2578417693"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-usdc-disabled-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-usdc-expired-review-1024x768.png",
+      "bytes": 216139,
+      "sha256": "b584eedee80634a8c75b18fb4bab2ec51df7b24550190d69c78a63a98e95d31e"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/en-usdc-preparing-1024x768.png",
+      "bytes": 224609,
+      "sha256": "31648c8353539f0ec6996ffaefee906341fa0e17b6f93a74248b488b9656e6ae"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 181035,
+      "sha256": "a635d2531e04ca293326abf8fbd7a7836fee10568c609db829c1de332247cbb0"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-both-disabled-fiat-1024x768.png",
+      "bytes": 179793,
+      "sha256": "4734508980f41a3c142d745386edca1ea285ea9bafa363263a5fbae3e91c4c1f"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-both-disabled-monthly-1024x768.png",
+      "bytes": 180395,
+      "sha256": "b0797ba683fa34551e971180565d04e9997c31880071fe848354e8c88f4ac2ee"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-both-disabled-usdc-1024x768.png",
+      "bytes": 216322,
+      "sha256": "4640f76ecfee148deac4bfa46cecf45556dcc0acf69af5d9f5f9f0f76ad7fd7c"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-fiat-1024x768.png",
+      "bytes": 176999,
+      "sha256": "9dc949a5742058986313db2e8b0e15b38484a8893d70814601dffc8a946179b8"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-fiat-disabled-1024x768.png",
+      "bytes": 179793,
+      "sha256": "4734508980f41a3c142d745386edca1ea285ea9bafa363263a5fbae3e91c4c1f"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-loading-1024x768.png",
+      "bytes": 161557,
+      "sha256": "e5b3f4161ec364a999cfd5f8e947a6f223d5ff53a6575bc454c8d60384d591a8"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-monthly-1024x768.png",
+      "bytes": 180395,
+      "sha256": "b0797ba683fa34551e971180565d04e9997c31880071fe848354e8c88f4ac2ee"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-unavailable-1024x768.png",
+      "bytes": 164195,
+      "sha256": "8b1aceccbf43a3f6ccce67ad6b51cc52e281505a3c3c41f9963cfce16ae77e4c"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-usdc-confirmation-1024x768.png",
+      "bytes": 222437,
+      "sha256": "8ac34685490e406240712110930814858c5b63edc85456866025220d37f1b3c5"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-usdc-disabled-1024x768.png",
+      "bytes": 216322,
+      "sha256": "4640f76ecfee148deac4bfa46cecf45556dcc0acf69af5d9f5f9f0f76ad7fd7c"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-usdc-expired-review-1024x768.png",
+      "bytes": 213209,
+      "sha256": "8782c5889abf4b083dd0a7ddabf475f010239b352d87f30e57957af1acd2efbd"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-CN-usdc-preparing-1024x768.png",
+      "bytes": 221982,
+      "sha256": "f0518b0186b922864d61a618720a4b220e059ab4cf4354f8ccbe350006af4e9c"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 186868,
+      "sha256": "6972ba43cbb9799265f4e09ff9a9c3ede4f2e6d62e1b734d8b9b60e47851de08"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-both-disabled-fiat-1024x768.png",
+      "bytes": 186431,
+      "sha256": "5ecd0c9bd0e5f2805db5690a65204b7189574c79b38b920f111156dd61d09761"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-both-disabled-monthly-1024x768.png",
+      "bytes": 185938,
+      "sha256": "692acaa47edf733901d25c08e1f1269f09d375e3f5318ede170362b99c898465"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-both-disabled-usdc-1024x768.png",
+      "bytes": 226519,
+      "sha256": "bb12367d9ab546e639f86f063c2c6bb8f349a16b5d97f4a677f2cfea1172762b"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-fiat-1024x768.png",
+      "bytes": 183097,
+      "sha256": "55af7c1e22edd487510e3b1ab23272ffab993445c26700454d98dbecd4a74471"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-fiat-disabled-1024x768.png",
+      "bytes": 186431,
+      "sha256": "5ecd0c9bd0e5f2805db5690a65204b7189574c79b38b920f111156dd61d09761"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-loading-1024x768.png",
+      "bytes": 165269,
+      "sha256": "a0f60311e0334c0a1fecf4766122f859aab79cb90d8700e5452bc05cf2a74a0f"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-monthly-1024x768.png",
+      "bytes": 185938,
+      "sha256": "692acaa47edf733901d25c08e1f1269f09d375e3f5318ede170362b99c898465"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-unavailable-1024x768.png",
+      "bytes": 167912,
+      "sha256": "a3f61cdc588dda18aa7ec84a08954ad2bfd393c2b20747888d9762ee915f1936"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-usdc-confirmation-1024x768.png",
+      "bytes": 233847,
+      "sha256": "ead444fbe4dc266fb80ed57079999308142c72de094a1edefe73d839df8ec6d9"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-usdc-disabled-1024x768.png",
+      "bytes": 226519,
+      "sha256": "bb12367d9ab546e639f86f063c2c6bb8f349a16b5d97f4a677f2cfea1172762b"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-usdc-expired-review-1024x768.png",
+      "bytes": 223397,
+      "sha256": "8ab710dc1f941a929e754fcb7b17cbc5feea3eeab3832e160bc0165887bb7e47"
+    },
+    {
+      "path": "native-mock/gpu/screenshots/zh-TW-usdc-preparing-1024x768.png",
+      "bytes": 233090,
+      "sha256": "0bd98769f652dbf61d832ead3e9e1560ee75c3add6969ccc5bc181b453b471eb"
+    },
+    {
+      "path": "native-mock/windows-build-before-startup-fix.json",
+      "bytes": 5436,
+      "sha256": "579a98b2ad72e068e13a01c3a76ab7dd16569e93e3a63b727ea177f645af9839"
+    },
+    {
+      "path": "native-mock/windows-build.json",
+      "bytes": 5651,
+      "sha256": "159e8671a9c18489a320bf8b2b7a4db3f8af6169cf3c20954f93b78261ee22e4"
+    },
+    {
+      "path": "windows-live/evidence/before-ui-change.json",
+      "bytes": 1335,
+      "sha256": "43a88341015cc915c72867c7bb6a06ef1636a42b591e34d24a835ce02f2e9eba"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 90243,
+      "sha256": "52e2d099d0cb57b7ee02e8cd0a536664c5a0b3497dd51ada6fbb25b2b578323f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_display.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 42665,
+      "sha256": "46631d5454a6e90a7a974c7a7fe94823a50f39af7245b84d00554b2312573641"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 77371,
+      "sha256": "0997239a945b8b2c67011320f5d3f0d1418667a9ccbe99e8bd1bce94e4f19b32"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 104034,
+      "sha256": "40f3f61411f7fc6c7c7bda6c95d4d7b6758fb51296e7c8a25badca12bef0b3bd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40697,
+      "sha256": "0c34c9c9cdc1522c6a763fe1b2ab41ef801c531b0b3821bbcc6310f0c585874c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26356,
+      "sha256": "79d084e604e3ab9aa2bf86f6d1ccd5a52c1e9b6dfc3bcfc4229e0c03ca09157f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 609490,
+      "sha256": "dfd90e23e60e0d99a69e981e5497fa56464026cf1f7fd5a39c2ce13c7d66933a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/.gitattributes",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 266,
+      "sha256": "68bd593f87c1ac138dd77aea5bfe57e86c6b7bc8a922792528ad54c007eb62f8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/BILLING-HAN-SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3713,
+      "sha256": "5a3a08443be4f8a3483cb692feaddac87b54e1da84e317c8696c47af8e62cac5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/METADATA.pb",
+      "normalization": "raw bytes",
+      "bytes": 1296,
+      "sha256": "c6c4bdb785793b2de1da177caeeffcd0c90d7680bdab2de8f88ab45007bc59bc"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/NotoSansSC-Text400.eot",
+      "normalization": "raw bytes",
+      "bytes": 2660,
+      "sha256": "0ca2976cbf7b560ca3a5f565b40b9f17fa648b0966cece2b08a1e39cad4b9917"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/generate-billing-han.py",
+      "normalization": "raw bytes",
+      "bytes": 4464,
+      "sha256": "fb3801d4748d15d81826b4db87287deb9d16a408fbe76c0f296785e12221edce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MIR2BillingHan-Regular.ttf",
+      "normalization": "raw bytes",
+      "bytes": 2532,
+      "sha256": "7cc4d33730ae409a198cae325f57db54730f94b193f5d604375701890bb762ce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "normalization": "raw bytes",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "normalization": "raw bytes",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+      "normalization": "raw bytes",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansSC-BillingHan.txt",
+      "normalization": "raw bytes",
+      "bytes": 4388,
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1544,
+      "sha256": "22264165aa5bb1cbb42075e6d57aab9beaea484528249d82e9a3f1fd28b36afa"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1272,
+      "sha256": "d7598658e0d667902ca56ce5f3c2eeaffd23a8db356be60f02f9a391ccd620e5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/verify-simplified-font.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2515,
+      "sha256": "3773d232b420ca1b0ffe6293182aab8821624f5a4cbf9afaa876a6937abe4c39"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 36676,
+      "sha256": "938ae8603f5abfccf72b8a4931d5187d270a3d3875b7fecbecd4904d5adf1a94"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6961,
+      "sha256": "23ce2a3def29ba1797b41e7aed82aab623e5f98305cdab31646875e5dfe8eba1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 120504,
+      "sha256": "1e9b188598b1ca52da35621096507381bc555e98624c78248b0a5fb80c04ceb0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ar.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5564,
+      "sha256": "7c3776d9b2ee08298a01ace3c9afb261bf24eb65bfc77f2421754015358031a3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.en.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3694,
+      "sha256": "0e402ec2e4ecc2b0bdd4e4b553ca44597ca2a9adb1f71b6303e201d8a4ca143c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.hi.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8634,
+      "sha256": "2f730e01b78f75a594563f740323ebfd891183d55e81b4f652b751b45d37e1bb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.id.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3802,
+      "sha256": "8bebe5988998017aa7e3dd2dcc627f44ad00fc8fafb2038a13cc1c298b04036c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.pt-BR.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4090,
+      "sha256": "f18fa8a623baf88dab0fea3feee09689bf3396f7a98d9675e06762a0caf2800e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ru.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6557,
+      "sha256": "46d7df84047cc171c7107b536c0e3197bd40785af94edca0ad2e8448af9658b0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.th.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8731,
+      "sha256": "4f6e19d540ae8c21dc96c3a7d3b5aa6849e1afd6b00d393be709e9a81f6143a0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.vi.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4835,
+      "sha256": "216d6c4e7331d4f32e8155518399c4632c59e3f4f351d1ba2a309214d0d399ef"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-CN.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3256,
+      "sha256": "d8f3b2cb9e8c4ba009b86daaeea0f33104c0c51c17f874eb09cc0fffc74a2645"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-TW.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3244,
+      "sha256": "05349b71035f2ab9cd4dd4d577829343f2f719498d34a055ff576482ef5f95e6"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 174175,
+      "sha256": "a599a46c099052da0512603bc3d9872e35cf6d1d4dc269b520acf430a47c08e2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/billing_browser.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8502,
+      "sha256": "4020e4ebae1c8c447f8d782c885752c406485577bbeb8dbeb1462101beaf18fb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21519,
+      "sha256": "c2a5bce5ea53762cfa8cbaafec903d1a3bc303fbbc7099366fbd83da8838af4b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14894,
+      "sha256": "263aaa462b39a7889ceb989050338c4828d2b9b1373ee87aa013c216da9ec890"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21235,
+      "sha256": "30fd0cdbe48068ee65f80d571d35e98cf4970dde5b664ffdc50217e9dfaeffd2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24561,
+      "sha256": "f2af7f962d5a7c3e1b654d7e123d6d57d86f4573c64da9da0786f3d34ffe9712"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_locale.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13717,
+      "sha256": "3192a50c57a6ab1eba5e793975e90f7aae19dc68e0afe27e82ee68ceef998546"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7712,
+      "sha256": "f053d0448d7ab020086975eaa67751f95580b17013609eaebcbf9fd08339a3d8"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 621415,
+      "sha256": "6c64f1791f8743831f13b3d89aea298c629f0ae0b18722fc4b80f274a9506310"
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11524,
+      "sha256": "aa1c4f8c4f852ae99383f9731645b83050fe05e5ec130f4f674fbc2c26eb9844"
+    }
+  ]
+}

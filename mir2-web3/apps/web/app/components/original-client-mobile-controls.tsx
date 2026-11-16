@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { TUTORIAL_CONTROL_EVENT, TUTORIAL_STEP_EVENT } from "../../lib/tutorial-steps";
 import { CRYSTAL_MOVE_INPUT_INTERVAL_MS } from "./original-client-scene-layout";
@@ -13,7 +13,8 @@ import type {
   TranslateFn,
 } from "./original-client-types";
 import {
-  mir2MobileMoveIntentFromVector,
+  mir2MobileMoveIntentFromNippleData,
+  type Mir2NippleMoveData,
   type Mir2MobileMoveIntent,
   type Mir2MobileMoveMode,
 } from "./original-client-mobile-input";
@@ -25,11 +26,6 @@ type NippleCollection = {
   off?: (event?: string, callback?: (...args: unknown[]) => void) => void;
   destroy: () => void;
   reposition?: () => void;
-};
-
-type NippleMoveData = {
-  vector?: { x?: number; y?: number };
-  force?: number;
 };
 
 type MobileControlsDebug = {
@@ -59,6 +55,8 @@ type OriginalClientMobileControlsProps = {
   onPickGroundDrop: (objectId: string) => void;
   onToggleInventory: () => void;
   onToggleCharacter: () => void;
+  onToggleQuestLog: () => void;
+  onSecondaryOpenChange?: (open: boolean) => void;
   onCastSkill: (skillKey: string) => void;
   onUseItem: (item: ItemActionRef) => void;
 };
@@ -77,12 +75,29 @@ function OriginalClientMobileControlsInner({
   onPickGroundDrop,
   onToggleInventory,
   onToggleCharacter,
+  onToggleQuestLog,
+  onSecondaryOpenChange,
   onCastSkill,
   onUseItem,
 }: OriginalClientMobileControlsProps) {
   const joystickZoneRef = useRef<HTMLDivElement | null>(null);
   const activeIntentRef = useRef<Mir2MobileMoveIntent | null>(null);
   const lastSentRef = useRef<{ direction: string; mode: Mir2MobileMoveMode; at: number } | null>(null);
+  const gestureOwnerRef = useRef<number | null>(null);
+  const nextGestureOwnerRef = useRef(0);
+  const managerGenerationRef = useRef(0);
+  const lifecycleGenerationRef = useRef(0);
+  const lifecycleEligibleRef = useRef(true);
+  const freshStartRequiredRef = useRef(false);
+  const debugHeldRef = useRef(false);
+  const focusedRef = useRef(true);
+  const documentVisibleRef = useRef(true);
+  const pageActiveRef = useRef(true);
+  const disposeManagerRef = useRef<(() => void) | null>(null);
+  const runDebugTimerRef = useRef<number | null>(null);
+  const runDebugSequenceRef = useRef(0);
+  const lastPublishedDebugRef = useRef<MobileControlsDebug | null>(null);
+  const [managerRevision, setManagerRevision] = useState(0);
   const [runLocked, setRunLocked] = useState(true);
   const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [activeIntent, setActiveIntent] = useState<Mir2MobileMoveIntent | null>(null);
@@ -90,6 +105,11 @@ function OriginalClientMobileControlsInner({
   const enabledRef = useRef(enabled);
   const onDirectionIntentRef = useRef(onDirectionIntent);
   const onDirectionStopRef = useRef(onDirectionStop);
+
+  useLayoutEffect(() => {
+    onSecondaryOpenChange?.(enabled && secondaryOpen);
+    return () => onSecondaryOpenChange?.(false);
+  }, [enabled, onSecondaryOpenChange, secondaryOpen]);
 
   const nearestDrop = useMemo(() => nearestGroundDrop(world, player), [world, player]);
   const quickBeltItems = useMemo(() => mobileBeltItems(world.beltItems), [world.beltItems]);
@@ -102,10 +122,6 @@ function OriginalClientMobileControlsInner({
   useEffect(() => {
     runLockedRef.current = runLocked;
   }, [runLocked]);
-
-  useEffect(() => {
-    enabledRef.current = enabled;
-  }, [enabled]);
 
   useEffect(() => {
     const onTutorialStep = (event: Event) => {
@@ -127,15 +143,20 @@ function OriginalClientMobileControlsInner({
 
   const publishDebugState = useCallback((nextIntent: Mir2MobileMoveIntent | null = activeIntentRef.current) => {
     const debugWindow = window as typeof window & { __mir2MobileControls?: MobileControlsDebug };
-    debugWindow.__mir2MobileControls = {
+    const lifecycleGeneration = lifecycleGenerationRef.current;
+    const debugState: MobileControlsDebug = {
       active: Boolean(nextIntent),
       movementBusy: mobileMovementTransportBusy(Date.now(), nextIntent),
       runLocked: runLockedRef.current,
       lastIntent: nextIntent,
       lastSentAt: lastSentRef.current?.at ?? null,
       dispatchDirection: (direction, mode = runLockedRef.current ? "run" : "walk") => {
-        if (!enabledRef.current) return false;
+        if (
+          !enabledRef.current || !lifecycleEligibleRef.current || freshStartRequiredRef.current ||
+          lifecycleGeneration !== lifecycleGenerationRef.current
+        ) return false;
         const intent = { direction, mode, force: 1 };
+        debugHeldRef.current = true;
         activeIntentRef.current = intent;
         setActiveIntent(intent);
         const now = Date.now();
@@ -149,10 +170,39 @@ function OriginalClientMobileControlsInner({
         return true;
       },
     };
+    debugWindow.__mir2MobileControls = debugState;
+    lastPublishedDebugRef.current = debugState;
   }, []);
 
+  const cancelRunDebugTimer = useCallback(() => {
+    runDebugSequenceRef.current += 1;
+    const timer = runDebugTimerRef.current;
+    runDebugTimerRef.current = null;
+    if (timer !== null) window.clearTimeout(timer);
+  }, []);
+
+  const scheduleRunDebugState = useCallback(() => {
+    cancelRunDebugTimer();
+    const sequence = runDebugSequenceRef.current;
+    const lifecycleGeneration = lifecycleGenerationRef.current;
+    const timer = window.setTimeout(() => {
+      const debugWindow = window as typeof window & { __mir2MobileControls?: MobileControlsDebug };
+      if (
+        runDebugTimerRef.current !== timer || runDebugSequenceRef.current !== sequence ||
+        lifecycleGenerationRef.current !== lifecycleGeneration || !enabledRef.current ||
+        !lifecycleEligibleRef.current || debugWindow.__mir2MobileControls !== lastPublishedDebugRef.current
+      ) return;
+      runDebugTimerRef.current = null;
+      publishDebugState();
+    }, 0);
+    runDebugTimerRef.current = timer;
+  }, [cancelRunDebugTimer, publishDebugState]);
+
   const dispatchLatestIntent = useCallback((immediate = false) => {
-    if (!enabledRef.current) return false;
+    if (
+      !enabledRef.current || !lifecycleEligibleRef.current || freshStartRequiredRef.current ||
+      (gestureOwnerRef.current === null && !debugHeldRef.current)
+    ) return false;
     const intent = activeIntentRef.current;
     if (!intent) return false;
 
@@ -179,48 +229,108 @@ function OriginalClientMobileControlsInner({
     return true;
   }, [publishDebugState]);
 
+  const retireGesture = useCallback(() => {
+    const needsStop = lifecycleEligibleRef.current || gestureOwnerRef.current !== null ||
+      activeIntentRef.current !== null || debugHeldRef.current;
+    lifecycleEligibleRef.current = false;
+    cancelRunDebugTimer();
+    freshStartRequiredRef.current = true;
+    lifecycleGenerationRef.current += 1;
+    managerGenerationRef.current += 1;
+    gestureOwnerRef.current = null;
+    debugHeldRef.current = false;
+    activeIntentRef.current = null;
+    lastSentRef.current = null;
+    setActiveIntent(null);
+    disposeManagerRef.current?.();
+    publishDebugState(null);
+    if (needsStop) onDirectionStopRef.current();
+  }, [cancelRunDebugTimer, publishDebugState]);
+
+  const resumeIfEligible = useCallback(() => {
+    if (
+      !enabledRef.current || !focusedRef.current || !documentVisibleRef.current ||
+      !pageActiveRef.current || lifecycleEligibleRef.current
+    ) return;
+    lifecycleEligibleRef.current = true;
+    setManagerRevision((revision) => revision + 1);
+    publishDebugState(null);
+  }, [publishDebugState]);
+
+  useLayoutEffect(() => {
+    enabledRef.current = enabled;
+    if (!enabled) retireGesture();
+    else resumeIfEligible();
+  }, [enabled, retireGesture, resumeIfEligible]);
+
   useEffect(() => {
     publishDebugState(null);
+    documentVisibleRef.current = !document.hidden;
+    focusedRef.current = typeof document.hasFocus === "function" ? document.hasFocus() : true;
+    if (!documentVisibleRef.current || !focusedRef.current) retireGesture();
+    else resumeIfEligible();
+    const onBlur = () => { focusedRef.current = false; retireGesture(); };
+    const onFocus = () => { focusedRef.current = true; resumeIfEligible(); };
+    const onVisibilityChange = () => {
+      documentVisibleRef.current = !document.hidden;
+      if (documentVisibleRef.current) resumeIfEligible();
+      else retireGesture();
+    };
+    const onPageHide = () => { pageActiveRef.current = false; retireGesture(); };
+    const onPageShow = () => { pageActiveRef.current = true; resumeIfEligible(); };
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      retireGesture();
       const debugWindow = window as typeof window & { __mir2MobileControls?: MobileControlsDebug };
       delete debugWindow.__mir2MobileControls;
     };
-  }, [publishDebugState]);
+  }, [publishDebugState, retireGesture, resumeIfEligible]);
 
   useEffect(() => {
-    if (!enabled) {
-      activeIntentRef.current = null;
-      setActiveIntent(null);
-      onDirectionStopRef.current();
-      return;
-    }
-
+    if (!enabled) return;
     const timer = window.setInterval(() => dispatchLatestIntent(false), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
-    return () => {
-      window.clearInterval(timer);
-      activeIntentRef.current = null;
-      setActiveIntent(null);
-      onDirectionStopRef.current();
-    };
+    return () => window.clearInterval(timer);
   }, [dispatchLatestIntent, enabled]);
 
   useEffect(() => {
-    if (!enabled || !joystickZoneRef.current) {
-      activeIntentRef.current = null;
-      setActiveIntent(null);
-      onDirectionStopRef.current();
-      return;
-    }
+    if (!enabled || !lifecycleEligibleRef.current || !joystickZoneRef.current) return;
 
     let disposed = false;
+    const generation = ++managerGenerationRef.current;
     let manager: NippleCollection | null = null;
     let repositionTimer = 0;
+    let startHandler: (() => void) | null = null;
     let moveHandler: ((...args: unknown[]) => void) | null = null;
     let endHandler: (() => void) | null = null;
+    const isCurrent = () => !disposed && enabledRef.current && lifecycleEligibleRef.current &&
+      managerGenerationRef.current === generation;
+    const dispose = () => {
+      if (disposed) return;
+      disposed = true;
+      if (repositionTimer) window.clearTimeout(repositionTimer);
+      if (manager) {
+        if (startHandler) manager.off?.("start", startHandler);
+        if (moveHandler) manager.off?.("move", moveHandler);
+        if (endHandler) manager.off?.("end", endHandler);
+        manager.destroy();
+      }
+      manager = null;
+      if (disposeManagerRef.current === dispose) disposeManagerRef.current = null;
+    };
+    disposeManagerRef.current = dispose;
 
     import("nipplejs")
       .then((module) => {
-        if (disposed || !joystickZoneRef.current) return;
+        if (!isCurrent() || !joystickZoneRef.current) return;
         module.default.setLogLevel("none");
         manager = module.default.create({
           zone: joystickZoneRef.current,
@@ -236,16 +346,18 @@ function OriginalClientMobileControlsInner({
           restOpacity: 0.72,
         }) as NippleCollection;
 
+        const handleStart = () => {
+          if (!isCurrent()) return;
+          gestureOwnerRef.current = ++nextGestureOwnerRef.current;
+          freshStartRequiredRef.current = false;
+          debugHeldRef.current = false;
+        };
+
         const handleMove = (...args: unknown[]) => {
+          if (!isCurrent() || gestureOwnerRef.current === null) return;
           const data = readNippleMoveData(args);
-          const vector = data?.vector;
-          if (!vector) return;
-          const nextIntent = mir2MobileMoveIntentFromVector(
-            {
-              x: Number(vector.x ?? 0),
-              y: Number(vector.y ?? 0),
-              force: Number(data?.force ?? 0),
-            },
+          const nextIntent = mir2MobileMoveIntentFromNippleData(
+            data,
             runLockedRef.current,
             activeIntentRef.current?.direction ?? null,
           );
@@ -253,6 +365,9 @@ function OriginalClientMobileControlsInner({
           activeIntentRef.current = nextIntent;
           setActiveIntent(nextIntent);
           publishDebugState(nextIntent);
+          if (previousIntent && !nextIntent) {
+            onDirectionStopRef.current();
+          }
           if (nextIntent && !previousIntent) {
             publishTutorialControl("touch:move");
           }
@@ -267,17 +382,23 @@ function OriginalClientMobileControlsInner({
         };
 
         const handleEnd = () => {
+          if (!isCurrent() || gestureOwnerRef.current === null) return;
+          gestureOwnerRef.current = null;
           activeIntentRef.current = null;
           setActiveIntent(null);
           onDirectionStopRef.current();
           publishDebugState(null);
         };
 
+        startHandler = handleStart;
         moveHandler = handleMove;
         endHandler = handleEnd;
+        manager.on("start", handleStart);
         manager.on("move", handleMove);
         manager.on("end", handleEnd);
-        repositionTimer = window.setTimeout(() => manager?.reposition?.(), 0);
+        repositionTimer = window.setTimeout(() => {
+          if (isCurrent()) manager?.reposition?.();
+        }, 0);
       })
       .catch((error: unknown) => {
         // Joystick init failing must not crash mobile gameplay; the page stays
@@ -287,19 +408,10 @@ function OriginalClientMobileControlsInner({
       });
 
     return () => {
-      disposed = true;
-      if (repositionTimer) window.clearTimeout(repositionTimer);
-      if (manager) {
-        if (moveHandler) manager.off?.("move", moveHandler);
-        if (endHandler) manager.off?.("end", endHandler);
-        manager.destroy();
-      }
-      manager = null;
-      activeIntentRef.current = null;
-      setActiveIntent(null);
-      onDirectionStopRef.current();
+      if (managerGenerationRef.current === generation) managerGenerationRef.current += 1;
+      dispose();
     };
-  }, [dispatchLatestIntent, enabled, publishDebugState]);
+  }, [dispatchLatestIntent, enabled, managerRevision, publishDebugState]);
 
   if (!enabled) {
     if (!forceVisible) {
@@ -348,6 +460,19 @@ function OriginalClientMobileControlsInner({
             {secondaryOpen ? "×" : "•••"}
           </button>
           <div className="mir-mobile-panel-row">
+            <button
+              type="button"
+              className="mir-mobile-panel-button"
+              data-tutorial-control="touch:panel"
+              aria-label={t("ui.quest", [], "Quest")}
+              onClick={() => {
+                publishTutorialControl("touch:panel");
+                onToggleQuestLog();
+                setSecondaryOpen(false);
+              }}
+            >
+              {mobileCompactLabel(t("ui.quest", [], "Quest"))}
+            </button>
             <button
               type="button"
               className="mir-mobile-panel-button"
@@ -417,9 +542,10 @@ function OriginalClientMobileControlsInner({
             aria-label={t("ui.mobileRun", [], "Run")}
             aria-pressed={runLocked}
             onClick={() => {
+              if (!enabledRef.current || !lifecycleEligibleRef.current) return;
               publishTutorialControl("touch:run");
               setRunLocked((current) => !current);
-              window.setTimeout(() => publishDebugState(), 0);
+              scheduleRunDebugState();
             }}
           >
             {t("ui.mobileRun", [], "Run")}
@@ -496,10 +622,10 @@ function publishTutorialControl(action: string) {
   window.dispatchEvent(new CustomEvent(TUTORIAL_CONTROL_EVENT, { detail: { action } }));
 }
 
-function readNippleMoveData(args: unknown[]): NippleMoveData | null {
+function readNippleMoveData(args: unknown[]): Mir2NippleMoveData | null {
   for (const arg of args) {
     if (!arg || typeof arg !== "object") continue;
-    const maybeData = arg as NippleMoveData & { data?: NippleMoveData };
+    const maybeData = arg as Mir2NippleMoveData & { data?: Mir2NippleMoveData };
     if (maybeData.vector) return maybeData;
     if (maybeData.data?.vector) return maybeData.data;
   }

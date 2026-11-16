@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_REUSED_C743_RELEASE_AND_CURRENT_NODE9",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "coreCodeEvidenceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "driverFrozenFile": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+  "driverManifestBytes": 9465,
+  "driverManifestSha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e",
+  "backendBinarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "historicalBuildDriverCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "historicalBuildDriverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "currentEvidence": [
+    {
+      "tests": 219,
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+        "bytes": 5378,
+        "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-v1.log",
+        "bytes": 59078,
+        "sha256": "4b2d8af950ce74bd775bdb01a14aef9531ac3b6ef1ae9968573b1f7d4af95727"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "staticGeometryCompatibilityProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2535,
+    "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+  },
+  "historicalWrapperEvidence": {
+    "coreCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreFullTests": 187,
+    "wrapperTests": 28,
+    "adapterTests": 8,
+    "notCurrent219Coverage": true
+  },
+  "declarationBasis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-chase-preference-driver-frozen-v1.json",
+    "bytes": 19099,
+    "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+  },
+  "rootExecutionApproval": false,
+  "sealed": false,
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

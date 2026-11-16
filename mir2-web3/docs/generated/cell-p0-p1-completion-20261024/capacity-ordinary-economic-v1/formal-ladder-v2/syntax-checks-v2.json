@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "scope": "Static source syntax records only; no import, mode, services or game tests",
+  "freshChecks": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\formal-contract-v1.mjs",
+        "bytes": 12276,
+        "sha256": "a07b009bfd9a5c77ad9e14ec7e60ce4bd8fa2d9824dc8b8edcb04b29a1c529b5"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\formal-contract-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\run-owned-formal-v1.mjs",
+        "bytes": 23115,
+        "sha256": "6e1b580dfd6c25b197bb465021fc2510bf2f5af860db92b7266834d23bba69e8"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\run-owned-formal-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "unchangedSourceChecksReused": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\freeze-formal-v1.mjs",
+        "bytes": 3640,
+        "sha256": "4d594a2a96d2e39135d468d836c87aa519508521071efd85d7f11d502dd6bb34"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\freeze-formal-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\owned-child-v1.mjs",
+        "bytes": 2722,
+        "sha256": "d1a72ee7ded41adc7285054f2029b1aa0d263186d7096657b9840d7d38d7005f"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\owned-child-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\copy-source-bank-v1.mjs",
+        "bytes": 20932,
+        "sha256": "e3e4c08736aebadf42724dec70c6618d837bc162adc9e019bb5bded0b48a91bb"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\copy-source-bank-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-public.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-row-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\slow-stage-public.mjs",
+        "bytes": 15386,
+        "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\slow-stage-public.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\account-store-public-validator.mjs",
+        "bytes": 5407,
+        "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\account-store-public-validator.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics-v1.mjs",
+        "bytes": 2396,
+        "sha256": "d828eefb489f18c01b2b2176df0b7d119dc5faf3495776f64178f06b387def1b"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "freshCount": 2,
+  "reusedCount": 9,
+  "totalCurrentSources": 11,
+  "allExitZero": true,
+  "previousSyntax": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\syntax-checks-v1.json",
+    "bytes": 6649,
+    "sha256": "0d8c93833d24983a0900d0076bb3f29e128fcd2706987754ff27ce99a0daf3f4"
+  }
+}

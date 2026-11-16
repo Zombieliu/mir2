@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Root explicitly authorized actual source/Release/full16 binding and creation of Root-only seal/readonly helper. This file grants no account, binary, process or gameplay execution permission.",
+  "rootSourceBindingAuthorized": true,
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "actualBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-proof-v1.json",
+    "bytes": 42659,
+    "sha256": "32b40ff986b011892dae5d3abb32128dbea723f1fdbc729c517ae3d7531a0a79"
+  },
+  "independentFinalPresealRequired": true,
+  "rootSealRequired": true,
+  "rootReadonlyGuardRequired": true,
+  "executionAuthorized": false,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

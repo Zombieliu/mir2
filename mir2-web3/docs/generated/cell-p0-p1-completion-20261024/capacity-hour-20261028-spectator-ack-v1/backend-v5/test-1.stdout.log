@@ -1,0 +1,33 @@
+
+running 28 tests
+test routing::tests::native_attack_outcome_tests::a_launched_swing_does_not_require_positive_damage ... ok
+test routing::tests::native_attack_outcome_tests::authentication_and_actual_registered_actor_are_required_before_dispatch ... ok
+test routing::tests::native_attack_outcome_tests::cooldown_and_out_of_range_are_not_launched ... ok
+test routing::tests::native_attack_outcome_tests::earlier_owner_animation_in_predrain_does_not_admit_this_rejected_attack ... ok
+test routing::tests::native_attack_outcome_tests::full_live_fifo_cannot_revoke_a_launched_attack ... ok
+test routing::tests::native_attack_outcome_tests::launched_result_preserves_ordinary_owner_and_peer_animation_identity ... ok
+test routing::tests::native_attack_outcome_tests::manager_admission_overflow_is_an_error_not_a_missing_animation_rejection ... ok
+test routing::tests::native_attack_outcome_tests::missing_target_is_not_launched_and_still_returns_the_ordinary_correction ... ok
+test routing::tests::native_attack_outcome_tests::owner_domain_mismatch_is_rejected_before_the_shared_pipeline ... ok
+test routing::tests::native_attack_outcome_tests::post_dispatch_failure_and_missing_observation_remain_unknown ... ok
+test routing::tests::native_attack_outcome_tests::private_runtime_defaults_to_unsupported_without_executing_legacy_attack ... ok
+test routing::tests::native_attack_outcome_tests::session_bridge_requires_authentication_and_uses_the_shared_typed_route ... ok
+test routing::tests::native_attack_outcome_tests::stale_owner_lease_cannot_enter_the_typed_runtime ... ok
+test routing::tests::native_attack_outcome_tests::strict_dispatch_preserves_authority_errors_without_fabricating_a_decision ... ok
+test routing::tests::native_attack_outcome_tests::teardown_fence_never_becomes_not_launched ... ok
+test session::tests::native_attack_result_binding_is_checked_before_session_identity_changes ... ok
+test zone_rpc::native_attack_tests::absent_typed_result_after_dispatch_is_unknown_instead_of_nonlaunch ... ok
+test zone_rpc::native_attack_tests::incomplete_or_corrupt_wire_results_never_default_to_nonlaunch ... ok
+test zone_rpc::native_attack_tests::invalid_production_requests_fail_before_contacting_the_endpoint ... ok
+test zone_rpc::native_attack_tests::lost_reply_never_contacts_another_endpoint_or_replays_generic_attack ... ok
+test zone_rpc::native_attack_tests::old_host_is_probed_but_receives_no_attack_or_generic_execute ... ok
+test zone_rpc::native_attack_tests::real_host_promotion_and_sequence_gates_cover_dedicated_attack ... ok
+test zone_rpc::native_attack_tests::real_host_rejects_stale_owner_before_entering_runtime ... ok
+test zone_rpc::native_attack_tests::real_host_rejects_unauthenticated_and_mismatched_world_before_runtime_or_journal ... ok
+test zone_rpc::native_attack_tests::real_standby_rejects_dedicated_attack_before_session_creation ... ok
+test zone_rpc::native_attack_tests::retrying_rpc_helper_cannot_send_the_dedicated_mutation ... ok
+test zone_rpc::native_attack_tests::typed_errors_keep_unsupported_preflight_and_unknown_distinct ... ok
+test zone_rpc::native_attack_tests::typed_launch_and_nonlaunch_survive_json_and_messagepack_without_packet_inference ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 1252 filtered out; finished in 13.38s
+

@@ -1,0 +1,207 @@
+{
+  "schema": "mir2.independent-guard-refusal-diagnosis.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-09T12:23:56.1578489+00:00",
+  "noCargoRun": true,
+  "noGuardRun": true,
+  "noProbeRun": true,
+  "noUiRun": true,
+  "noProductOrGuardPolicyWrites": true,
+  "actualOriginalGuardExitCode": 90,
+  "exactOriginalRefusal": "sample-low-overflow",
+  "originalStarted": false,
+  "determination": "Original unchanged CargoGuard completed actual C volume probe and rejected remaining bytes below its fixed 50GiB gate before forwarding Cargo. This is an actual Guard refusal, not a Rust/Cargo compile or test failure and not a pre-probe pin failure.",
+  "actualOriginalRemainingBytes": 51760115712,
+  "requiredBytes": 53687091200,
+  "shortfallBytes": 1926975488,
+  "originalRemainingGiB": 48.20536422729492,
+  "requiredGiB": 50,
+  "shortfallGiB": 1.7946357727050781,
+  "probeNonce": "ce8bbc152ef14c1998c86c4808a30df0",
+  "actualGuardCalls": 1,
+  "actualProbeCalls": 1,
+  "actualCargoCalls": 0,
+  "actualTestsExecuted": 0,
+  "originalProbeReceiptFileCount": 4,
+  "actualProbePid": 213188,
+  "actualProbeExitCode": 0,
+  "probeKilled": false,
+  "originalProbeStderrBytes": 0,
+  "sampleBeginUtc": "2026-10-09T12:09:06.1957093Z",
+  "sampleEndUtc": "2026-10-09T12:09:07.1634568Z",
+  "noBeforeOrAfterCargoReceipt": true,
+  "pinChecks": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+      "declaredSha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689",
+      "actualSha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/LICENSE.0BSD.txt",
+      "declaredSha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d",
+      "actualSha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "declaredSha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "actualSha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "matches": true,
+      "attributes": "Archive, ReparsePoint"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/rustup.exe",
+      "declaredSha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "actualSha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "declaredSha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e",
+      "actualSha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "declaredSha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+      "actualSha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\root-authority.json",
+      "declaredSha256": "481306c38e940c8733718619c993b0b0807aa14ad19adaf83029cd1611ffbf01",
+      "actualSha256": "481306c38e940c8733718619c993b0b0807aa14ad19adaf83029cd1611ffbf01",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\source-acceptance.json",
+      "declaredSha256": "900569e7a7035c59fac4f91394d86efa13b3dd672f450b5fd190190cf540d507",
+      "actualSha256": "900569e7a7035c59fac4f91394d86efa13b3dd672f450b5fd190190cf540d507",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\source-snapshot.json",
+      "declaredSha256": "78626e70f16e882e2e94144bf8dd5abd14e7f47f57e653e1be1739b075c7c2f2",
+      "actualSha256": "78626e70f16e882e2e94144bf8dd5abd14e7f47f57e653e1be1739b075c7c2f2",
+      "matches": true,
+      "attributes": "Archive"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.exe",
+      "declaredSha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e",
+      "actualSha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e",
+      "matches": true,
+      "attributes": "Archive"
+    }
+  ],
+  "originalEvidenceHashes": [
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/cargo.log",
+      "sha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f",
+      "length": 31,
+      "creationUtc": "2026-10-09T12:09:07.2592038Z",
+      "lastWriteUtc": "2026-10-09T12:09:07.2818667Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/guard-policy.json",
+      "sha256": "f3900587229eaacad4b2a41a36eca2f5ae36077e9eaa186ea348468df5861418",
+      "length": 2247,
+      "creationUtc": "2026-10-09T12:09:05.8077315Z",
+      "lastWriteUtc": "2026-10-09T12:09:05.8077315Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/result.json",
+      "sha256": "a98f0aaabd9a85150d7e035c38136b20d5b02618d51bb1d31d6ac8b73a90f6c5",
+      "length": 701,
+      "creationUtc": "2026-10-09T12:09:07.3286934Z",
+      "lastWriteUtc": "2026-10-09T12:09:07.3286934Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/root-authority.json",
+      "sha256": "481306c38e940c8733718619c993b0b0807aa14ad19adaf83029cd1611ffbf01",
+      "length": 530,
+      "creationUtc": "2026-10-09T12:09:05.7974255Z",
+      "lastWriteUtc": "2026-10-09T12:09:05.7979244Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/source-acceptance.json",
+      "sha256": "900569e7a7035c59fac4f91394d86efa13b3dd672f450b5fd190190cf540d507",
+      "length": 561,
+      "creationUtc": "2026-10-09T12:09:05.7984249Z",
+      "lastWriteUtc": "2026-10-09T12:09:05.7984249Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/source-snapshot.json",
+      "sha256": "78626e70f16e882e2e94144bf8dd5abd14e7f47f57e653e1be1739b075c7c2f2",
+      "length": 3007,
+      "creationUtc": "2026-10-09T12:09:05.7856373Z",
+      "lastWriteUtc": "2026-10-09T12:09:05.7856373Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/probe-process.json",
+      "sha256": "6fd00a2255c7dc194edf0033878a5f4dcb4c409b4ba8e8b61162f6dbd09d8554",
+      "length": 442,
+      "creationUtc": "2026-10-09T12:09:07.2408568Z",
+      "lastWriteUtc": "2026-10-09T12:09:07.2413568Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/probe.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "creationUtc": "2026-10-09T12:09:07.2275640Z",
+      "lastWriteUtc": "2026-10-09T12:09:07.2275640Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/probe.stdout.bin",
+      "sha256": "50cb277e2993603921d9f6ca5160aaa8b252fc1beb56a26a437f05242b4d9e8e",
+      "length": 196,
+      "creationUtc": "2026-10-09T12:09:07.2188986Z",
+      "lastWriteUtc": "2026-10-09T12:09:07.2188986Z"
+    },
+    {
+      "path": "work/slg-stonecutting-20261009/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/refusal.json",
+      "sha256": "c062b1ca59986e85d32a2d17aff4141d244ffd6384bc08cae9305b1505c2bff9",
+      "length": 82,
+      "creationUtc": "2026-10-09T12:09:07.2483570Z",
+      "lastWriteUtc": "2026-10-09T12:09:07.2483570Z"
+    }
+  ],
+  "originalGuardSourcePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+  "originalGuardSourceSha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689",
+  "sourceReferences": [
+    {
+      "line": 105,
+      "meaning": "Nonce directory created before actual probe."
+    },
+    {
+      "line": 123,
+      "meaning": "Probe lifecycle/output persisted before sample validation."
+    },
+    {
+      "line": 131,
+      "meaning": "Remaining-byte parse/threshold rejects with sample-low-overflow."
+    },
+    {
+      "line": 157,
+      "meaning": "Refusal written in existing nonce, started=false."
+    },
+    {
+      "line": 158,
+      "meaning": "NOT_FORWARDING exits90."
+    }
+  ],
+  "corrections": [
+    "Task description reported no nonce directories. Actual preserved original metadata proves one original probe/refusal nonce with four files, all at12:09:07 UTC, matching run started12:09:05/finished12:09:07. There was no reviewer Guard/probe/Cargo run and no evidence of a new run during this audit.",
+    "Initial reviewer message described a possible state change before checking timestamps; actual timestamps establish this was the original nonce. Corrected here without modifying the original artifacts."
+  ],
+  "recommendation": "Retain all original failed evidence. Restore C volume capacity above the same fixed original gate using only approved/safe maintenance outside this read-only diagnosis, then use a new check ID and the unchanged original Guard for any retry. Do not lower the threshold or bypass the probe.",
+  "scope": "Finite original refusal source/metadata diagnosis only; no broader source acceptance, Cargo results, account/UI deployment or cleanup approval."
+}

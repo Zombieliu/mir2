@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "scope": "offline C# TextRenderer reference v2; original 0-percent bar added before label",
+  "gameplayPerformed": false,
+  "originalCrystalD3D9Screenshot": false,
+  "fontAlgorithmChanged": false,
+  "exactLiteralDerivationRules": 5,
+  "inverseRestoresOriginalGenerator": true,
+  "generator": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/render-crystal-guild-reference-v2.cs",
+    "bytes": 7771,
+    "sha256": "86cd3e75d3d1e6a8217064bd3ec007cc7e7b72d688cc2078969bf164976bf060"
+  },
+  "previousGenerator": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/render-crystal-guild-reference.cs",
+    "bytes": 6825,
+    "sha256": "6e2c553e2a6ff4642c646e3c8c2ff67dba527b50790083d514bc79c2519ca589"
+  },
+  "executable": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/render-crystal-guild-reference-v2.exe",
+    "bytes": 30720,
+    "sha256": "e880a5936ef3cec9279beadb19403c25fb01cf5965731661e8e8e954ae2955db"
+  },
+  "sourceAsset": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/mir2-assets/original-ui/Prguse2/424.png",
+    "bytes": 1514,
+    "sha256": "8143accb57ff42aae2c8a757e76f32a0e229603240c433d92015d25f50f4253d"
+  },
+  "sourceExportProof": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/assets-export-v1/actual-v1/source-export-proof-v1.json",
+    "bytes": 6534,
+    "sha256": "24fcab8170445950dbcfa2960e5f1314cf20a03c6440ccd1c525af428da81da1"
+  },
+  "metadata": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/glyphbounds.json",
+    "bytes": 4602,
+    "sha256": "00fc9fc1ccba47572da2a1aac0a9db3dd83fd6308941b894e1741d4cb01a63de"
+  },
+  "composite": {
+    "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/guild-notice-statistics-label-reference.png",
+    "bytes": 50065,
+    "sha256": "5d8430c065ce5b9dc5cee966dbf6d2c02993f7f22cbb72647fb438b9a457d9cf"
+  },
+  "allSixLabelPngsByteExact": true,
+  "labels": [
+    {
+      "id": "statistics-headers",
+      "previous": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v1/statistics-headers.png",
+        "bytes": 749,
+        "sha256": "ed08fc24efcf13a7504d64c459d94c4d7539d5a43b8cd5613a359dedce580dd3"
+      },
+      "current": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/statistics-headers.png",
+        "bytes": 749,
+        "sha256": "ed08fc24efcf13a7504d64c459d94c4d7539d5a43b8cd5613a359dedce580dd3"
+      },
+      "rawExact": true
+    },
+    {
+      "id": "guild-hahah",
+      "previous": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v1/guild-hahah.png",
+        "bytes": 334,
+        "sha256": "c45dcf502c1ddc71ef18ae41f96ba6acc015ecc497753c4d1a46bdaedd7b202a"
+      },
+      "current": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/guild-hahah.png",
+        "bytes": 334,
+        "sha256": "c45dcf502c1ddc71ef18ae41f96ba6acc015ecc497753c4d1a46bdaedd7b202a"
+      },
+      "rawExact": true
+    },
+    {
+      "id": "level-0",
+      "previous": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v1/level-0.png",
+        "bytes": 272,
+        "sha256": "70ddc42bed48865e6cea624c9a8e662db9fb13ab1d3a5b1e6cb5a73306d04fb6"
+      },
+      "current": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/level-0.png",
+        "bytes": 272,
+        "sha256": "70ddc42bed48865e6cea624c9a8e662db9fb13ab1d3a5b1e6cb5a73306d04fb6"
+      },
+      "rawExact": true
+    },
+    {
+      "id": "members-1-of-5",
+      "previous": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v1/members-1-of-5.png",
+        "bytes": 310,
+        "sha256": "517cde2fe58100002b09fb590fa2dc36db84cfb19c54208109662a2da8714573"
+      },
+      "current": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/members-1-of-5.png",
+        "bytes": 310,
+        "sha256": "517cde2fe58100002b09fb590fa2dc36db84cfb19c54208109662a2da8714573"
+      },
+      "rawExact": true
+    },
+    {
+      "id": "recruit-label",
+      "previous": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v1/recruit-label.png",
+        "bytes": 411,
+        "sha256": "4d675047bb75ee226a13b5b30aa129d5921069c7c7b6b4bfadbaed4d9ed685ce"
+      },
+      "current": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/recruit-label.png",
+        "bytes": 411,
+        "sha256": "4d675047bb75ee226a13b5b30aa129d5921069c7c7b6b4bfadbaed4d9ed685ce"
+      },
+      "rawExact": true
+    },
+    {
+      "id": "experience-0-percent",
+      "previous": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v1/experience-0-percent.png",
+        "bytes": 241,
+        "sha256": "785b52cd72844a3528d734521aa2384902b37752a59221834ad5bc51a8921f30"
+      },
+      "current": {
+        "file": "C:/mir2-build/guild-pixel-parity-20261028/gdi-reference-v2/experience-0-percent.png",
+        "bytes": 241,
+        "sha256": "785b52cd72844a3528d734521aa2384902b37752a59221834ad5bc51a8921f30"
+      },
+      "rawExact": true
+    }
+  ]
+}

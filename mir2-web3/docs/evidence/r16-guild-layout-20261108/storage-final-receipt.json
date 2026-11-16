@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-08T11:46:49.195Z",
+  "componentSource": {
+    "schema": 1,
+    "component": "app/components/original-client-guild-window.tsx",
+    "previousSha256": "f6a27264811c9185aad867ef78c1b25f98af84ff548b7e6f6511b7c9d3e7795d",
+    "sourceSha256": "8d85f18a7b08e3b08049db48ad2e5c53a87b54c1020a37bde1fbac29f9c54262",
+    "onlyStorageVisibilityChanged": true,
+    "actionGatesUnchanged": true
+  },
+  "controlTest": {
+    "path": "apps/web/scripts/test-r16-guild-controls.mjs",
+    "sha256": "9fcd69d434c9dc9e0fef36dd7d4295dfbd2319dab55f86f349229a4bdfcfa45d",
+    "passed": 16,
+    "failed": 0,
+    "logSha256": "ac3aae9982686354d57e5108f046ff317560e9b3463bf7303601731913a86ebb"
+  },
+  "browser": {
+    "backend": "webgl2-shared",
+    "observedBackends": [
+      {
+        "actor": "owner",
+        "phase": "ordinary-permitted-storage",
+        "backend": "webgl2"
+      }
+    ],
+    "checks": [
+      {
+        "name": "StorageVisibleFromAuthorityEvenWhenActionDataUnavailable",
+        "passed": true
+      },
+      {
+        "name": "OneRealReadOnlyType3Gets112SlotGuildStorageList",
+        "passed": true
+      },
+      {
+        "name": "NormalLogout",
+        "passed": true,
+        "actor": "owner"
+      },
+      {
+        "name": "DurableLogoutKeepsAllPersonalAndGuildGoldItems",
+        "passed": true
+      },
+      {
+        "name": "ZeroWorldAndPersonalOrGuildAssetMutations",
+        "passed": true
+      }
+    ],
+    "beforeRefresh": {
+      "slotCount": 112,
+      "disabledCells": 112
+    },
+    "query": {
+      "type": "guildStorageItemChange",
+      "changeType": 3,
+      "from": 0,
+      "to": 0,
+      "count": 1
+    },
+    "assetPreservation": {
+      "fields": [
+        "gold",
+        "credit",
+        "city_currencies",
+        "inventory_capacity",
+        "inventory_items_json",
+        "belt_items_json",
+        "hero_inventory_items_json",
+        "hero_equipment_items_json",
+        "storage_items_json",
+        "equipment_items_json",
+        "equipment_items_explicit_empty",
+        "npc_purchase_journal",
+        "npc_buy_back_items_json",
+        "npc_used_goods_items_json",
+        "item_rental_records_json",
+        "has_rented_item"
+      ],
+      "personalAndGuildAssetDigestBefore": "087a3a001fb6958fadac8355fad01c27983d4d7a44bd7fe80a188231122e75b1",
+      "personalAndGuildAssetDigestAfter": "087a3a001fb6958fadac8355fad01c27983d4d7a44bd7fe80a188231122e75b1",
+      "durableSaveRevisionAdvanced": true
+    },
+    "pageErrors": 0,
+    "httpErrors": 0,
+    "consoleErrors": 0,
+    "screenshots": [
+      {
+        "name": "en-storage-real-refresh",
+        "sha256": "4fafe21123d4ed67b46b5960b403d490db757a8023fcfb7772ade06882d40536",
+        "clip": {
+          "x": 345,
+          "y": 264,
+          "width": 590,
+          "height": 432
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 960
+        }
+      }
+    ],
+    "proofSha256": "2c3a6ae3859f7f7a75d48c367c4a5f93ad0429dc0edfd765524b9d8525e665a7"
+  },
+  "statsReceiptUnchangedSha256": "ed248f0781b992bc3be4f8c9ebfa2b9218459f86137becaf874bc9ea5b30b873",
+  "originalFixturePrivateUnchanged": true,
+  "onlyThisNewTestEditedByWorker": true,
+  "productEditedByWorkerThisTask": false
+}

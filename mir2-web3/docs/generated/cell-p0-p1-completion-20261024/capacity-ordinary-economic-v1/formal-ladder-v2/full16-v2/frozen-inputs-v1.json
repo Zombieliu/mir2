@@ -1,0 +1,1418 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-v6-full-lifecycle-v2",
+  "state": "FROZEN_ORDINARY_V6_FULL16_NOT_RUN",
+  "frozenAt": "2026-10-27T12:09:00.421Z",
+  "repository": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey",
+  "executionSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "finalBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\final-input-binding-v1.json",
+    "bytes": 50898,
+    "sha256": "014a10a7ca3990263f07447d16376f00e055942c22fa307ce42c9e6452a2db30"
+  },
+  "driver": {
+    "repository": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey",
+    "driverSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+    "state": "CURRENT_COMMITTED_FULL16_LOCAL_CLOSURE",
+    "entryRoots": [
+      "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+      "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+      "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+      "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs"
+    ],
+    "files": [
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+        "bytes": 3794,
+        "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f",
+        "gitBlobBytes": 3794,
+        "gitBlobSha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f",
+        "committedGitObject": "e1e8724b4a3cad8d13dc7eb1d0bd0dcec69f53a4",
+        "gitAttributeFilteredObject": "e1e8724b4a3cad8d13dc7eb1d0bd0dcec69f53a4",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs: text: set\nmir2-web3/apps/web/scripts/playtest-catalog-transport.mjs: eol: lf\nmir2-web3/apps/web/scripts/playtest-catalog-transport.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+        "bytes": 39080,
+        "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410",
+        "gitBlobBytes": 39080,
+        "gitBlobSha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410",
+        "committedGitObject": "91d92a5793fa7c53c4ae5db78741a182486fe7ef",
+        "gitAttributeFilteredObject": "91d92a5793fa7c53c4ae5db78741a182486fe7ef",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs: text: set\nmir2-web3/apps/web/scripts/playtest-lifecycle.mjs: eol: lf\nmir2-web3/apps/web/scripts/playtest-lifecycle.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "bytes": 38923,
+        "sha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53",
+        "gitBlobBytes": 38923,
+        "gitBlobSha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53",
+        "committedGitObject": "ad26033952fe6f649a3da927f38325bb3c9c004f",
+        "gitAttributeFilteredObject": "ad26033952fe6f649a3da927f38325bb3c9c004f",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs: text: set\nmir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs: eol: lf\nmir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/newcomer-v2-supply-policy.mjs",
+        "bytes": 10901,
+        "sha256": "eb0c50969844ce6f5622a7d83336cfe7f4d86dbbe2ac05a83c0daf6e1321e398",
+        "gitBlobBytes": 10901,
+        "gitBlobSha256": "eb0c50969844ce6f5622a7d83336cfe7f4d86dbbe2ac05a83c0daf6e1321e398",
+        "committedGitObject": "bf574fa966370bc89e772da585fd03e453447150",
+        "gitAttributeFilteredObject": "bf574fa966370bc89e772da585fd03e453447150",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/newcomer-v2-supply-policy.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/newcomer-v2-supply-policy.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/newcomer-v2-supply-policy.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/policy.mjs",
+        "bytes": 87501,
+        "sha256": "b36a72ddbfcaa2cf19d6656ab53387f4161b2be0b4904342abf0ca1a87450506",
+        "gitBlobBytes": 87501,
+        "gitBlobSha256": "b36a72ddbfcaa2cf19d6656ab53387f4161b2be0b4904342abf0ca1a87450506",
+        "committedGitObject": "27a56f02e12ad90478c3acf557bb664b491395d8",
+        "gitAttributeFilteredObject": "27a56f02e12ad90478c3acf557bb664b491395d8",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/policy.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/policy.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/policy.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-client.mjs",
+        "bytes": 8454,
+        "sha256": "cc1efb06b93984d203a388bb9f20f042240594434572339ba1ef435fc27dad8e",
+        "gitBlobBytes": 8454,
+        "gitBlobSha256": "cc1efb06b93984d203a388bb9f20f042240594434572339ba1ef435fc27dad8e",
+        "committedGitObject": "966b218c029c284ed35f024492ba426158fced9c",
+        "gitAttributeFilteredObject": "966b218c029c284ed35f024492ba426158fced9c",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-client.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-client.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-client.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "bytes": 33042,
+        "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2",
+        "gitBlobBytes": 33042,
+        "gitBlobSha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2",
+        "committedGitObject": "82f9f135b02be5f531ce8ec741f41cf6a54cff95",
+        "gitAttributeFilteredObject": "82f9f135b02be5f531ce8ec741f41cf6a54cff95",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "bytes": 20548,
+        "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645",
+        "gitBlobBytes": 20548,
+        "gitBlobSha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645",
+        "committedGitObject": "3bf2c67126222ea7e706e9c4209bfb0bd4adb306",
+        "gitAttributeFilteredObject": "3bf2c67126222ea7e706e9c4209bfb0bd4adb306",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "bytes": 14738,
+        "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17",
+        "gitBlobBytes": 14738,
+        "gitBlobSha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17",
+        "committedGitObject": "763eefcb8a2388426bf1cbea54f41d883354828e",
+        "gitAttributeFilteredObject": "763eefcb8a2388426bf1cbea54f41d883354828e",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "bytes": 49463,
+        "sha256": "f5fd90e669f039c83023f203a0332ed85fac6d8a31b4e90aef45c65d48d61314",
+        "gitBlobBytes": 49463,
+        "gitBlobSha256": "f5fd90e669f039c83023f203a0332ed85fac6d8a31b4e90aef45c65d48d61314",
+        "committedGitObject": "ff2dc6dd68c8457bcb4585469c0ccc60a47e433c",
+        "gitAttributeFilteredObject": "ff2dc6dd68c8457bcb4585469c0ccc60a47e433c",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-refresh.mjs",
+        "bytes": 844,
+        "sha256": "ea93b5657ff08d2415015b29cb2f6cc1d4c368bdca6b2c62f889d077b490c58f",
+        "gitBlobBytes": 844,
+        "gitBlobSha256": "ea93b5657ff08d2415015b29cb2f6cc1d4c368bdca6b2c62f889d077b490c58f",
+        "committedGitObject": "50c9d14d3b5e0bc6fdb7a406720400a313070d79",
+        "gitAttributeFilteredObject": "50c9d14d3b5e0bc6fdb7a406720400a313070d79",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-refresh.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-refresh.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-refresh.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-status.mjs",
+        "bytes": 451,
+        "sha256": "240c070810f5386926db49c35fe9caa5b8c684724a684b9452439bb08bbc5dce",
+        "gitBlobBytes": 451,
+        "gitBlobSha256": "240c070810f5386926db49c35fe9caa5b8c684724a684b9452439bb08bbc5dce",
+        "committedGitObject": "48976c93eee3e49196659c15ac31b047845ede80",
+        "gitAttributeFilteredObject": "48976c93eee3e49196659c15ac31b047845ede80",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-status.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-status.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-status.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+        "bytes": 79734,
+        "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1",
+        "gitBlobBytes": 79734,
+        "gitBlobSha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1",
+        "committedGitObject": "38278fe4f4743caff9e17f3d507f3269777192bc",
+        "gitAttributeFilteredObject": "38278fe4f4743caff9e17f3d507f3269777192bc",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-survival.mjs",
+        "bytes": 52409,
+        "sha256": "5fd6b537c7625e00131b62e48734102b363ca2bf813c367e30c1f694191488dd",
+        "gitBlobBytes": 52409,
+        "gitBlobSha256": "5fd6b537c7625e00131b62e48734102b363ca2bf813c367e30c1f694191488dd",
+        "committedGitObject": "86935d3f34040cab2a5598c1e152d3d380ad059d",
+        "gitAttributeFilteredObject": "86935d3f34040cab2a5598c1e152d3d380ad059d",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-survival.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-survival.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-survival.mjs: filter: unspecified"
+      }
+    ],
+    "staticLocalImportEdges": [
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "to": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "to": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-client.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-refresh.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-status.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-client.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-status.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-survival.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-refresh.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/newcomer-v2-supply-policy.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/policy.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      },
+      {
+        "from": "mir2-web3/apps/web/scripts/quest-agent/protocol-survival.mjs",
+        "to": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "kind": "ImportDeclaration"
+      }
+    ],
+    "dynamicUnexpanded": [],
+    "builtinSpecifiers": [
+      "node:child_process",
+      "node:crypto",
+      "node:fs",
+      "node:fs/promises",
+      "node:module",
+      "node:path",
+      "node:url",
+      "node:zlib"
+    ],
+    "externalPackageEntries": [
+      {
+        "specifier": "next/dist/compiled/ws",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\index.js",
+        "bytes": 45840,
+        "sha256": "af354cb13a11abe910cdbcb70943cb450b01b24f322026ae3f88d428d148395d"
+      }
+    ],
+    "parser": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\acorn\\acorn.js",
+      "bytes": 121634,
+      "sha256": "758cead0e9764f94320f938ac169fb95c7eeea30dc675a6e5b1133fae239fa19"
+    },
+    "nodeRuntime": {
+      "version": "v22.18.0",
+      "platform": "win32",
+      "architecture": "x64",
+      "executable": {
+        "file": "C:\\Program Files\\nodejs\\node.exe",
+        "bytes": 85202416,
+        "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+      }
+    },
+    "packageMetadata": [
+      {
+        "path": "mir2-web3/apps/web/package.json",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\package.json",
+        "bytes": 22280,
+        "sha256": "9149ab59b87c138f5aec42d4abfdb1f95006aeaf1ed70fdf736a43ab2fb6dcc9"
+      },
+      {
+        "path": "mir2-web3/apps/web/package-lock.json",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\package-lock.json",
+        "bytes": 76989,
+        "sha256": "4db53d5dfcef25e9a7b3b6f67d066c2d25cd0111f77fc5d109f42165b8e735a7"
+      }
+    ],
+    "scope": "Complete recursive local static/literal-module closure from all six original ordinary full16 roots; external bundled transport entry and parser are pinned, not a claim of a full npm/OS or all map-asset closure."
+  },
+  "backend": {
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "backendBuildCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "executionSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+    "currentDriverCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+    "sourceCount": 55,
+    "rawAndGitObjectsExact": true,
+    "sourceRows": [
+      {
+        "path": "mir2-web3/.cargo/config.toml",
+        "bytes": 30,
+        "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+        "gitBlobBytes": 30,
+        "gitBlobSha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+        "committedGitObject": "8af59dd8cf84353bb1ba6e731b869ef999d49c02"
+      },
+      {
+        "path": "mir2-web3/Cargo.lock",
+        "bytes": 250739,
+        "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98",
+        "gitBlobBytes": 240666,
+        "gitBlobSha256": "ad3c52ac44ccf0b2e53086414e63118a6239fccab2d00eae0b90048a9f51c4df",
+        "committedGitObject": "dad7df03270be8558b5b697c8e5747cf6b3692e5"
+      },
+      {
+        "path": "mir2-web3/Cargo.toml",
+        "bytes": 365,
+        "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+        "gitBlobBytes": 365,
+        "gitBlobSha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+        "committedGitObject": "8c0567acb253eec7f94fad349d0d7de2883b8c16"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/Cargo.toml",
+        "bytes": 3230,
+        "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40",
+        "gitBlobBytes": 3230,
+        "gitBlobSha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40",
+        "committedGitObject": "0f49886bb25a101d82dc4fae89e37d1c120c7a80"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/attack_protocol.rs",
+        "bytes": 11818,
+        "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6",
+        "gitBlobBytes": 11818,
+        "gitBlobSha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6",
+        "committedGitObject": "f93ec10fbe59baf64ab2f616a9141ea7fac87e02"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+        "bytes": 20499,
+        "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085",
+        "gitBlobBytes": 20499,
+        "gitBlobSha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085",
+        "committedGitObject": "cda38fd5fad51c2941fdb99a8da58c312b3bf2a2"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/lib.rs",
+        "bytes": 11322,
+        "sha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7",
+        "gitBlobBytes": 11322,
+        "gitBlobSha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7",
+        "committedGitObject": "e25cc0b390a55dad7d65c8921c08d878fb84e5e5"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing.rs",
+        "bytes": 1397394,
+        "sha256": "aedf166e5aee1f85e1c2a7793dfbdacf40094f0f965836b1ca77a192b469e2f0",
+        "gitBlobBytes": 1397394,
+        "gitBlobSha256": "aedf166e5aee1f85e1c2a7793dfbdacf40094f0f965836b1ca77a192b469e2f0",
+        "committedGitObject": "4784fa4a0ea5083a4a52d57d7667430f77b8e261"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/owner_health.rs",
+        "bytes": 22578,
+        "sha256": "15bd44757d38ea751e0a7345edb188e7224a609d278d2e483b5e97c892f0e573",
+        "gitBlobBytes": 22578,
+        "gitBlobSha256": "15bd44757d38ea751e0a7345edb188e7224a609d278d2e483b5e97c892f0e573",
+        "committedGitObject": "6851d4d699c826993e6e83a12a222b1922648f73"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+        "bytes": 25213,
+        "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654",
+        "gitBlobBytes": 25213,
+        "gitBlobSha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654",
+        "committedGitObject": "698a8cd6e39eaa0bbc95edfd1e5402bf37b004d2"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+        "bytes": 11932,
+        "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e",
+        "gitBlobBytes": 11932,
+        "gitBlobSha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e",
+        "committedGitObject": "0bf62809ac4a9fae602c44a31034c5bbb8989175"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+        "bytes": 6217,
+        "sha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+        "gitBlobBytes": 6217,
+        "gitBlobSha256": "5af7863e03dd56153e6e2891ef497ba84940a250a1a1832d2d4b56263dcd6ac5",
+        "committedGitObject": "3947db2ac12b7288f837b790dfc5712852a5e99b"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+        "bytes": 28187,
+        "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279",
+        "gitBlobBytes": 28187,
+        "gitBlobSha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279",
+        "committedGitObject": "f202b1f44e43f63367132f7ed2e41073131e708f"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+        "bytes": 41476,
+        "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121",
+        "gitBlobBytes": 41476,
+        "gitBlobSha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121",
+        "committedGitObject": "9da866f6107d242654a35417349795daeb147735"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+        "bytes": 17228,
+        "sha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6",
+        "gitBlobBytes": 17228,
+        "gitBlobSha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6",
+        "committedGitObject": "78e5bba22e12fd4fd46207da062a6d5923c5201a"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+        "bytes": 13491,
+        "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+        "gitBlobBytes": 13491,
+        "gitBlobSha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+        "committedGitObject": "67a669562415164700dc3f18015c101025800fd1"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+        "gitBlobBytes": 30917,
+        "gitBlobSha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+        "committedGitObject": "12ac514286328ab35156d32a8419977831c23350"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/session.rs",
+        "bytes": 112616,
+        "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c",
+        "gitBlobBytes": 112616,
+        "gitBlobSha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c",
+        "committedGitObject": "76dd51046b46356d0b056e212a38cd2b903c9fba"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/shared_experience_profiles.rs",
+        "bytes": 14061,
+        "sha256": "b51656c7a2c9f3eec81bf881b8c8281f95f529c94d2dc83f6f40dd8b9dababe5",
+        "gitBlobBytes": 14061,
+        "gitBlobSha256": "b51656c7a2c9f3eec81bf881b8c8281f95f529c94d2dc83f6f40dd8b9dababe5",
+        "committedGitObject": "15596111ab009780de35cf6f49c05c1ff5056453"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/spectator.rs",
+        "bytes": 58692,
+        "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f",
+        "gitBlobBytes": 58692,
+        "gitBlobSha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f",
+        "committedGitObject": "123b2881df36f26502e972f2d0645558ccc252d7"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/web.rs",
+        "bytes": 874138,
+        "sha256": "b248a8efcc0630edac2d4ed7f5726570c3b17dd55f9bb47862492ef8c249c92d",
+        "gitBlobBytes": 874138,
+        "gitBlobSha256": "b248a8efcc0630edac2d4ed7f5726570c3b17dd55f9bb47862492ef8c249c92d",
+        "committedGitObject": "5fa92f932d6cb363b5a0cb9db2ff6d6a61e359d1"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+        "bytes": 58684,
+        "sha256": "bc6f67d9a9ccba9289aae568083d1ee2a4eefa49d56a33a7e6f34171f3a2d463",
+        "gitBlobBytes": 58682,
+        "gitBlobSha256": "0eab28ad98f3f774bc010d69dcf929f6cb478be1a7beeae4cfc27ddba87033cb",
+        "committedGitObject": "70077f72ec9a543dc0b5dfd4f9595258e4d5bd0e"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+        "bytes": 5814,
+        "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5",
+        "gitBlobBytes": 5814,
+        "gitBlobSha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5",
+        "committedGitObject": "675efdfff4b222dfd5cf8b6e3c7528631a0c78c7"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+        "bytes": 18356,
+        "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8",
+        "gitBlobBytes": 18356,
+        "gitBlobSha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8",
+        "committedGitObject": "627fc8dab08dc148891be5502eccbbcda7dafad5"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+        "bytes": 367763,
+        "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+        "gitBlobBytes": 367763,
+        "gitBlobSha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+        "committedGitObject": "5845005ea042f0e03d88c70295c216de75ea1264"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+        "bytes": 18382,
+        "sha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7",
+        "gitBlobBytes": 18382,
+        "gitBlobSha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7",
+        "committedGitObject": "a921a41fd43d3c228cd0c380a54c6b04dadaaa31"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/Cargo.toml",
+        "bytes": 812,
+        "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942",
+        "gitBlobBytes": 812,
+        "gitBlobSha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942",
+        "committedGitObject": "3845bd5d5068fa3609753a81d53df4fb9f8c61d6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config.rs",
+        "bytes": 347044,
+        "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d",
+        "gitBlobBytes": 338269,
+        "gitBlobSha256": "8ff52ae9fc6c78b4e9d09e5a189247be007bfeb7448a0736113ddc5aca24d635",
+        "committedGitObject": "004c0b34eea4d1bb0e9aa3868d59c545c295dc4d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+        "bytes": 10863,
+        "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4",
+        "gitBlobBytes": 10863,
+        "gitBlobSha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4",
+        "committedGitObject": "085b5b3fc4acdef37e0efd8c146cc56f5e1c1df2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+        "bytes": 24828,
+        "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff",
+        "gitBlobBytes": 24828,
+        "gitBlobSha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff",
+        "committedGitObject": "6631363e639e243de4e0256d0591c51fc1057678"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+        "bytes": 22968,
+        "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8",
+        "gitBlobBytes": 22968,
+        "gitBlobSha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8",
+        "committedGitObject": "f89cbaaeaf31fdcc225387c46cd998fa6869f307"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+        "bytes": 53319,
+        "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0",
+        "gitBlobBytes": 53319,
+        "gitBlobSha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0",
+        "committedGitObject": "f16f8567088f2284c84da950e748e3542992796b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/lib.rs",
+        "bytes": 7191,
+        "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3",
+        "gitBlobBytes": 7191,
+        "gitBlobSha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3",
+        "committedGitObject": "61d15dad631ea70fa3538cf9c7c1801ce0fd6d02"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+        "bytes": 94359,
+        "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea",
+        "gitBlobBytes": 94359,
+        "gitBlobSha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea",
+        "committedGitObject": "f172e7937f0d8bb6858985d258f51b4716b227d0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+        "bytes": 20853,
+        "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a",
+        "gitBlobBytes": 20853,
+        "gitBlobSha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a",
+        "committedGitObject": "c368913fbb34b6bf5e0776e221b49d757f9c70c6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+        "bytes": 68633,
+        "sha256": "d93c223e85d5684fac8b9826b1f47707d7968e7b535ef3e36de530965ab4605c",
+        "gitBlobBytes": 68633,
+        "gitBlobSha256": "d93c223e85d5684fac8b9826b1f47707d7968e7b535ef3e36de530965ab4605c",
+        "committedGitObject": "f4ad9054900e3edb6a06d4170baa7af7466d8d7b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+        "bytes": 14691,
+        "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a",
+        "gitBlobBytes": 14691,
+        "gitBlobSha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a",
+        "committedGitObject": "d995c5045660c6e250a25b38fd0c22751ad11e6d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_presence_publication_tests.rs",
+        "bytes": 20354,
+        "sha256": "801f313dece4415a2555f9c62a04c18a3bebc69322dca9092708361d3babe596",
+        "gitBlobBytes": 20354,
+        "gitBlobSha256": "801f313dece4415a2555f9c62a04c18a3bebc69322dca9092708361d3babe596",
+        "committedGitObject": "57aca2b77fb34a83354756da72198e6969e6791a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+        "bytes": 2486,
+        "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17",
+        "gitBlobBytes": 2486,
+        "gitBlobSha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17",
+        "committedGitObject": "f1617c16b4c881ac1298c395e2a172c28d27b13a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+        "gitBlobBytes": 749298,
+        "gitBlobSha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+        "committedGitObject": "fec51937ba5caea60f92632e03b59dc8f568e831"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+        "bytes": 95833,
+        "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276",
+        "gitBlobBytes": 95833,
+        "gitBlobSha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276",
+        "committedGitObject": "0f4168030aa9fb94c4718df08243e269804cce5c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+        "bytes": 3229,
+        "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066",
+        "gitBlobBytes": 3229,
+        "gitBlobSha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066",
+        "committedGitObject": "a5a69dd0c2996fee58d9a180d173173ad9dea7d7"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+        "bytes": 4781,
+        "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00",
+        "gitBlobBytes": 4781,
+        "gitBlobSha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00",
+        "committedGitObject": "7cefee395ed566c1d14b727dc05e8fc952a8c976"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+        "bytes": 3307,
+        "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6",
+        "gitBlobBytes": 3307,
+        "gitBlobSha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6",
+        "committedGitObject": "197122b9e5ead27e7f5603a2b5b5a983c14c400c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+        "bytes": 30181,
+        "sha256": "d10e981ed511146da4bde74175d42b0244a179a5be409ed5f854e7064dad5cc4",
+        "gitBlobBytes": 30181,
+        "gitBlobSha256": "d10e981ed511146da4bde74175d42b0244a179a5be409ed5f854e7064dad5cc4",
+        "committedGitObject": "a6d134015bfeddce8fd0dfce873223db7f058832"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+        "bytes": 12551,
+        "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce",
+        "gitBlobBytes": 12551,
+        "gitBlobSha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce",
+        "committedGitObject": "28286f99399db76c2a4200c594b34b9d66c87815"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+        "bytes": 207478,
+        "sha256": "3d47d0ed8b5c7991ce05871a1819035bce9ddd59e3ff362086ae91af72718803",
+        "gitBlobBytes": 207478,
+        "gitBlobSha256": "3d47d0ed8b5c7991ce05871a1819035bce9ddd59e3ff362086ae91af72718803",
+        "committedGitObject": "24f5778bcfbe55ea5c64bbf3e0fd28ddc5e37695"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+        "bytes": 80522,
+        "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f",
+        "gitBlobBytes": 80522,
+        "gitBlobSha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f",
+        "committedGitObject": "6c9e38a619a08d498660486e20bd021ab7e0817e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+        "bytes": 8041,
+        "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7",
+        "gitBlobBytes": 8041,
+        "gitBlobSha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7",
+        "committedGitObject": "eadc01cd65186b1401ac7037411fb62be056699e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/presence_publication_fixtures.rs",
+        "bytes": 10199,
+        "sha256": "30db48c06b679dc3b57700d4f17cb577fa39977874e5d08d3d3a3fdbde98ea83",
+        "gitBlobBytes": 10199,
+        "gitBlobSha256": "30db48c06b679dc3b57700d4f17cb577fa39977874e5d08d3d3a3fdbde98ea83",
+        "committedGitObject": "9d77d76c29cbe619af90649d6422f942213e17c2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+        "bytes": 64392,
+        "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488",
+        "gitBlobBytes": 64392,
+        "gitBlobSha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488",
+        "committedGitObject": "8f4124c14b577f66dd2ff81e25988ed6c9d1abe6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+        "bytes": 81407,
+        "sha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc",
+        "gitBlobBytes": 81407,
+        "gitBlobSha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc",
+        "committedGitObject": "91fdca2091a52d9c72db5106e65cd0187f38c9b3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+        "bytes": 19135,
+        "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe",
+        "gitBlobBytes": 19135,
+        "gitBlobSha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe",
+        "committedGitObject": "fded582ae83fe9ad81eba3341ec28c19e6d6f99b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+        "bytes": 14196,
+        "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9",
+        "gitBlobBytes": 14196,
+        "gitBlobSha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9",
+        "committedGitObject": "96a3f41c2b0141d3352336735c7350a76e982e60"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+        "bytes": 11438,
+        "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24",
+        "gitBlobBytes": 11438,
+        "gitBlobSha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24",
+        "committedGitObject": "f402581f19eba555fcb921772161457c563af87f"
+      }
+    ],
+    "releasePin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    "manifestPin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\backend-source-v6.json",
+      "bytes": 50669,
+      "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970"
+    },
+    "immutableExecutable": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+      "bytes": 87456256,
+      "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+    },
+    "reusedBuildReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+      "bytes": 2241,
+      "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59"
+    },
+    "reusedRustReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    "reusedRustTestsPassed": 32,
+    "originalV6RustQualification": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+        "bytes": 28585,
+        "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+      },
+      "selectedRustTestsPassed": 32,
+      "sourceUnchanged": true,
+      "allSelectedTestsPassed": true,
+      "fresh": true,
+      "reused": false,
+      "rustReexecuted": true,
+      "executionSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+      "sourceInputCount": 55,
+      "results": [
+        {
+          "name": "format",
+          "command": [
+            "rustup",
+            "run",
+            "1.95.0",
+            "rustfmt",
+            "--edition",
+            "2021",
+            "--config",
+            "skip_children=true",
+            "--check",
+            "apps/gateway/src/web.rs"
+          ],
+          "exitCode": 0,
+          "stdout": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\format.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\format.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "actualTotals": []
+        },
+        {
+          "name": "gateway-owner-health-routing",
+          "command": [
+            "rustup",
+            "run",
+            "1.95.0",
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "4",
+            "-p",
+            "mir2-gateway",
+            "--lib",
+            "owner_health_routing_",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0,
+          "stdout": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-owner-health-routing.stdout.log",
+            "bytes": 3375,
+            "sha256": "4945b835b4041147d83beb75b9ccdeb08043aefe4dafe49fe72af848edcbf1da"
+          },
+          "stderr": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-owner-health-routing.stderr.log",
+            "bytes": 58563,
+            "sha256": "fb613c1da2ee01ed8c4d320fcf4ae39b516e38aa2982a38db520d4011db3c423"
+          },
+          "actualTotals": [
+            {
+              "status": "ok",
+              "passed": 25,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filteredOut": 1246
+            }
+          ]
+        },
+        {
+          "name": "gateway-runtime-tick",
+          "command": [
+            "rustup",
+            "run",
+            "1.95.0",
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "4",
+            "-p",
+            "mir2-gateway",
+            "--lib",
+            "web::tests::runtime_tick_",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0,
+          "stdout": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-runtime-tick.stdout.log",
+            "bytes": 393,
+            "sha256": "5cdd1a782d0e97879c2ab81a61673b52bd06a9f43fea1ed8aa0ea2b48cffce3c"
+          },
+          "stderr": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-runtime-tick.stderr.log",
+            "bytes": 53409,
+            "sha256": "89abf75307690732c6ddc14dfd66ba83fe2ea7d347c609921b3d7e755ed8be1a"
+          },
+          "actualTotals": [
+            {
+              "status": "ok",
+              "passed": 3,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filteredOut": 1268
+            }
+          ]
+        },
+        {
+          "name": "gateway-use-item-routing",
+          "command": [
+            "rustup",
+            "run",
+            "1.95.0",
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "4",
+            "-p",
+            "mir2-gateway",
+            "--lib",
+            "use_item_",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0,
+          "stdout": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-use-item-routing.stdout.log",
+            "bytes": 238,
+            "sha256": "0fe95009ad0c00bf798e7828cfb1b6ff1f1a93056c934cf2f2c8e6bb41ac745c"
+          },
+          "stderr": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-use-item-routing.stderr.log",
+            "bytes": 53409,
+            "sha256": "07ba914d618fcca25bdea996d0ac8b03bd06eb8827aef60cd81fc12334718cb4"
+          },
+          "actualTotals": [
+            {
+              "status": "ok",
+              "passed": 2,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filteredOut": 1269
+            }
+          ]
+        },
+        {
+          "name": "simulation-dead",
+          "command": [
+            "rustup",
+            "run",
+            "1.95.0",
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "4",
+            "-p",
+            "mir2-simulation",
+            "--lib",
+            "dead_player_cannot_move_attack_magic_or_use_normal_potion_until_revived",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0,
+          "stdout": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-dead.stdout.log",
+            "bytes": 224,
+            "sha256": "c200c026dab1953a52c13706d0aa896f164f9161ed413083c2969097db627454"
+          },
+          "stderr": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-dead.stderr.log",
+            "bytes": 43101,
+            "sha256": "26d80ff1967e9810aeb33070825a51168b4c5c471931daecb2fa23adbb90b703"
+          },
+          "actualTotals": [
+            {
+              "status": "ok",
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filteredOut": 2955
+            }
+          ]
+        },
+        {
+          "name": "simulation-potion",
+          "command": [
+            "rustup",
+            "run",
+            "1.95.0",
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "4",
+            "-p",
+            "mir2-simulation",
+            "--lib",
+            "use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0,
+          "stdout": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-potion.stdout.log",
+            "bytes": 219,
+            "sha256": "6ca2da05fc60c6ee3f5a6448397b813cd9c44522f5cbbcce336f16a0666d294a"
+          },
+          "stderr": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-potion.stderr.log",
+            "bytes": 43101,
+            "sha256": "a3125e02f7bcb61805a729ed6e5c5e79ed022c5b1c87916f18df1813ece5f085"
+          },
+          "actualTotals": [
+            {
+              "status": "ok",
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filteredOut": 2955
+            }
+          ]
+        }
+      ],
+      "scope": "Only the newly executed Root selected Rust checks on the complete new backend closure; historical Rust57 and V4 Rust111 are not reused."
+    },
+    "originalV6ReleaseToolPins": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-lib-v6.mjs",
+        "bytes": 22267,
+        "sha256": "ed10735da3b15b1cb201e7d691f33de7dbc7d24d89296a51e67c655bb36f630b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-release-v6.mjs",
+        "bytes": 7075,
+        "sha256": "ec3b2f989481135f71475be2d13fdcd17c8d312ecaba4a72af7b1e69f6bc7c6a"
+      }
+    ],
+    "backendReleaseBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-release-binding-v1.json",
+      "bytes": 1635,
+      "sha256": "8797e521bf98838bb98a6b2a8fff0bb90eca6ff146302095ab409bc281061983"
+    },
+    "currentJsReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v19\\root-focused-receipt-v1.json",
+      "bytes": 23388,
+      "sha256": "6d0063a116df95f7f7f3b9739bd9d62158da95cec859eec70ac9475e53e23ce1"
+    },
+    "rebuildPerformed": false,
+    "newRustBuildPerformed": false,
+    "freshRustTestsPerformed": false,
+    "rustReexecutedForCurrentDriver": false,
+    "scope": "Actual V6 ee06 Rust32/build remain historical executed qualification, strictly reused after current55 raw/GitLF/object/closure equality. Current helper JS is separately qualified by its new actual HEAD/Root receipt. No new backend Release/build/Rust tests."
+  },
+  "profile": {
+    "endpoint": "ws://127.0.0.1:17610/ws",
+    "tcpBind": "127.0.0.1:17600",
+    "webBind": "127.0.0.1:17610",
+    "profile": "full-lifecycle",
+    "durationSeconds": 900,
+    "ordinaryRegistrationCount": 2,
+    "fixtureSeederUsed": false,
+    "precreatedCharacters": 0,
+    "itemGrants": 0,
+    "storeEdits": false,
+    "qaAdminEnabled": false,
+    "normalPlayerGates": true,
+    "nativeAttackV2DriverUsed": false,
+    "nativeAttackV2ServerReleaseExpected": true,
+    "contentProfile": "platinum_176",
+    "routing": "single",
+    "accountBackend": "file",
+    "tokioWorkers": 4,
+    "socketDiagnosticsEnabled": true,
+    "slowStageThresholdMs": 50,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "formalAcceptanceEligible": false,
+    "humanFrontendAccepted": false,
+    "requiredChecks": [
+      "authGuards",
+      "twoAccounts",
+      "mutualVisibility",
+      "movement",
+      "turn",
+      "chat",
+      "chatLatency",
+      "sharedCombat",
+      "mapRoundTrip",
+      "logout",
+      "reloginPersistence",
+      "sharedKill",
+      "sharedDrop",
+      "uniquePickup",
+      "playerDeath",
+      "townRevive"
+    ],
+    "repository": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+    "releaseRecord": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+    "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\backend-source-v6.json",
+    "expectedBackendInputCount": 55,
+    "dynamicBackendInputCount": true,
+    "driverPins": [
+      {
+        "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+        "bytes": 3794,
+        "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-lifecycle.mjs",
+        "bytes": 39080,
+        "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+      },
+      {
+        "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "bytes": 38923,
+        "sha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/newcomer-v2-supply-policy.mjs",
+        "bytes": 10901,
+        "sha256": "eb0c50969844ce6f5622a7d83336cfe7f4d86dbbe2ac05a83c0daf6e1321e398"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/policy.mjs",
+        "bytes": 87501,
+        "sha256": "b36a72ddbfcaa2cf19d6656ab53387f4161b2be0b4904342abf0ca1a87450506"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-client.mjs",
+        "bytes": 8454,
+        "sha256": "cc1efb06b93984d203a388bb9f20f042240594434572339ba1ef435fc27dad8e"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-loadout.mjs",
+        "bytes": 33042,
+        "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "bytes": 20548,
+        "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "bytes": 14738,
+        "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+        "bytes": 49463,
+        "sha256": "f5fd90e669f039c83023f203a0332ed85fac6d8a31b4e90aef45c65d48d61314"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-refresh.mjs",
+        "bytes": 844,
+        "sha256": "ea93b5657ff08d2415015b29cb2f6cc1d4c368bdca6b2c62f889d077b490c58f"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-status.mjs",
+        "bytes": 451,
+        "sha256": "240c070810f5386926db49c35fe9caa5b8c684724a684b9452439bb08bbc5dce"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-supplies.mjs",
+        "bytes": 79734,
+        "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1"
+      },
+      {
+        "file": "apps/web/scripts/quest-agent/protocol-survival.mjs",
+        "bytes": 52409,
+        "sha256": "5fd6b537c7625e00131b62e48734102b363ca2bf813c367e30c1f694191488dd"
+      }
+    ],
+    "entryRootPins": [
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+        "bytes": 38923,
+        "sha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53",
+        "gitBlobBytes": 38923,
+        "gitBlobSha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53",
+        "committedGitObject": "ad26033952fe6f649a3da927f38325bb3c9c004f",
+        "gitAttributeFilteredObject": "ad26033952fe6f649a3da927f38325bb3c9c004f",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs: text: set\nmir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs: eol: lf\nmir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs",
+        "bytes": 39080,
+        "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410",
+        "gitBlobBytes": 39080,
+        "gitBlobSha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410",
+        "committedGitObject": "91d92a5793fa7c53c4ae5db78741a182486fe7ef",
+        "gitAttributeFilteredObject": "91d92a5793fa7c53c4ae5db78741a182486fe7ef",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/playtest-lifecycle.mjs: text: set\nmir2-web3/apps/web/scripts/playtest-lifecycle.mjs: eol: lf\nmir2-web3/apps/web/scripts/playtest-lifecycle.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+        "bytes": 3794,
+        "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f",
+        "gitBlobBytes": 3794,
+        "gitBlobSha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f",
+        "committedGitObject": "e1e8724b4a3cad8d13dc7eb1d0bd0dcec69f53a4",
+        "gitAttributeFilteredObject": "e1e8724b4a3cad8d13dc7eb1d0bd0dcec69f53a4",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs: text: set\nmir2-web3/apps/web/scripts/playtest-catalog-transport.mjs: eol: lf\nmir2-web3/apps/web/scripts/playtest-catalog-transport.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+        "bytes": 49463,
+        "sha256": "f5fd90e669f039c83023f203a0332ed85fac6d8a31b4e90aef45c65d48d61314",
+        "gitBlobBytes": 49463,
+        "gitBlobSha256": "f5fd90e669f039c83023f203a0332ed85fac6d8a31b4e90aef45c65d48d61314",
+        "committedGitObject": "ff2dc6dd68c8457bcb4585469c0ccc60a47e433c",
+        "gitAttributeFilteredObject": "ff2dc6dd68c8457bcb4585469c0ccc60a47e433c",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "bytes": 20548,
+        "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645",
+        "gitBlobBytes": 20548,
+        "gitBlobSha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645",
+        "committedGitObject": "3bf2c67126222ea7e706e9c4209bfb0bd4adb306",
+        "gitAttributeFilteredObject": "3bf2c67126222ea7e706e9c4209bfb0bd4adb306",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs: filter: unspecified"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "bytes": 14738,
+        "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17",
+        "gitBlobBytes": 14738,
+        "gitBlobSha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17",
+        "committedGitObject": "763eefcb8a2388426bf1cbea54f41d883354828e",
+        "gitAttributeFilteredObject": "763eefcb8a2388426bf1cbea54f41d883354828e",
+        "rawToGitMapping": "IDENTICAL_RAW_AND_GIT_BYTES",
+        "gitAttributeRules": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs: text: set\nmir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs: eol: lf\nmir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs: filter: unspecified"
+      }
+    ],
+    "toolPins": [
+      {
+        "file": "source-lib-v1.mjs",
+        "bytes": 13053,
+        "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+      },
+      {
+        "file": "backend-source-lib-v1.mjs",
+        "bytes": 9374,
+        "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+      },
+      {
+        "file": "verify-inputs.mjs",
+        "bytes": 1397,
+        "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+      },
+      {
+        "file": "finalize-inputs-v1.mjs",
+        "bytes": 2989,
+        "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+      },
+      {
+        "file": "freeze-inputs-v1.mjs",
+        "bytes": 1893,
+        "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+      },
+      {
+        "file": "run-owned-full.mjs",
+        "bytes": 14907,
+        "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+      },
+      {
+        "file": "audit-owned-full.mjs",
+        "bytes": 9736,
+        "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+      },
+      {
+        "file": "frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      {
+        "file": "initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      {
+        "file": "author-pending-v1.mjs",
+        "bytes": 16759,
+        "sha256": "44edfc1ba8dc6088b1e4923ed050daefe118dbb4877122aa46e1aa65fce49497"
+      }
+    ],
+    "outputRoot": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\public",
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "executionSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+    "driverSourceCommit": "34036a1ae54c3a21e723cd0df36b7ab40205590b"
+  },
+  "toolPins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\source-lib-v1.mjs",
+      "bytes": 13053,
+      "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-source-lib-v1.mjs",
+      "bytes": 9374,
+      "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\verify-inputs.mjs",
+      "bytes": 1397,
+      "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\finalize-inputs-v1.mjs",
+      "bytes": 2989,
+      "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\freeze-inputs-v1.mjs",
+      "bytes": 1893,
+      "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\run-owned-full.mjs",
+      "bytes": 14907,
+      "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\audit-owned-full.mjs",
+      "bytes": 9736,
+      "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs",
+      "bytes": 16759,
+      "sha256": "44edfc1ba8dc6088b1e4923ed050daefe118dbb4877122aa46e1aa65fce49497"
+    }
+  ],
+  "dataPins": [
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    }
+  ],
+  "actualFull16Passed": false,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

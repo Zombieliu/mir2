@@ -1,0 +1,598 @@
+{
+  "request": {
+    "path": "/api/scene/crystal",
+    "query": "?v=2026-08-14-v7-door-interaction&map=0140&x=8&y=8&width=56&height=72",
+    "status": 200
+  },
+  "mapFileName": "0140.map",
+  "regionBounds": {
+    "minX": 0,
+    "maxX": 16,
+    "minY": 0,
+    "maxY": 19
+  },
+  "cellCount": 340,
+  "spriteCount": 0,
+  "missingAssets": [
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2707.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2707
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2706.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2706
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2705.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2705
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2704.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2704
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2712.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2712
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2711.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2711
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2710.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2710
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2709.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2709
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2708.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2708
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2721.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2721
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2720.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2720
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2719.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2719
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2718.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2718
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2717.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2717
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2716.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2716
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2713.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2713
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2732.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2732
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2731.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2731
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2730.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2730
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2729.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2729
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2728.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2728
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2725.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2725
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2724.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2724
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2723.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2723
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2722.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2722
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2744.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2744
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2743.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2743
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2742.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2742
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2741.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2741
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2740.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2740
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2737.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2737
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2736.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2736
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2735.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2735
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2734.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2734
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2733.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2733
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2755.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2755
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2754.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2754
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2753.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2753
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2752.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2752
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2749.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2749
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2748.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2748
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2747.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2747
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2746.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2746
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2745.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2745
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3981.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3981
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2764.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2764
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2761.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2761
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2760.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2760
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2759.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2759
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2758.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2758
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2757.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2757
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3984.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3984
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3983.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3983
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3982.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3982
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2771.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2771
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2770.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2770
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2769.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2769
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4383.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4383
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4382.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4382
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2768.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2768
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2767.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2767
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2766.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2766
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2765.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2765
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3986.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3986
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3985.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3985
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2779.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2779
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2778.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2778
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2777.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2777
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4385.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4385
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4384.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4384
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2776.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2776
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2773.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2773
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2772.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2772
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3989.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3989
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3988.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3988
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/3987.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 3987
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2788.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2788
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2785.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2785
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4388.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4388
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4387.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4387
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4386.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4386
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2783.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2783
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2782.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2782
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2781.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2781
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2780.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2780
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/8005.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 8005
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4313.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4313
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2795.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2795
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2794.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2794
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2793.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2793
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2792.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2792
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2791.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2791
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2790.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2790
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2789.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2789
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects3/8006.png",
+      "libraryKey": "WemadeMir2/Objects3",
+      "frameIndex": 8006
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4314.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4314
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2803.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2803
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2802.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2802
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2801.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2801
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2800.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2800
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2797.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2797
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2796.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2796
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4315.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4315
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2808.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2808
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2807.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2807
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2806.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2806
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2805.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2805
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2804.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2804
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4316.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4316
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4303.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4303
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4302.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4302
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4301.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4301
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/2809.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 2809
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4304.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4304
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4305.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4305
+    },
+    {
+      "publicPath": "/original-map/WemadeMir2/Objects2/4306.png",
+      "libraryKey": "WemadeMir2/Objects2",
+      "frameIndex": 4306
+    }
+  ]
+}

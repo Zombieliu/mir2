@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Pure read-only W17 whole-source and two-group history consistency preflight; no auth/copy/freeze/owned mode or load",
+  "execution": {
+    "kind": "node --input-type=module -e source",
+    "sourceMaterializedAfterExecution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\actual-source-history-preflight-v1.mjs",
+      "bytes": 1275,
+      "sha256": "27e66d8cd7dfc942fbcbb47585224856fe2923e7d61a123f48fa84f232ecaef6"
+    },
+    "inlineSourceSha256": "f36ffef456d94ab341078f3f008c4d383724ba0f37971220c63f6112b2e85e59",
+    "exitCode": 0,
+    "signal": null,
+    "error": null,
+    "stdout": "{\"source11\":11,\"prior4\":4,\"fullPoolAccounts\":100,\"sourceReadyCharacters\":59,\"sourceRegisteredAccounts\":41,\"sourceW16NewPrepared16\":16,\"sourceW16Historical42\":42,\"historicalPreparedCount\":58,\"expectedThisRun\":42,\"firstRemainingIndex\":58,\"lastRemainingIndex\":99,\"sourceOriginalVerdicts\":[{\"ok\":false,\"preparedCount\":42},{\"ok\":false,\"preparedCount\":16}],\"authPerformed\":false,\"bankCopyPerformed\":false,\"ownedExecutionPerformed\":false}\n",
+    "stderr": ""
+  },
+  "result": {
+    "source11": 11,
+    "prior4": 4,
+    "fullPoolAccounts": 100,
+    "sourceReadyCharacters": 59,
+    "sourceRegisteredAccounts": 41,
+    "sourceW16NewPrepared16": 16,
+    "sourceW16Historical42": 42,
+    "historicalPreparedCount": 58,
+    "expectedThisRun": 42,
+    "firstRemainingIndex": 58,
+    "lastRemainingIndex": 99,
+    "sourceOriginalVerdicts": [
+      {
+        "ok": false,
+        "preparedCount": 42
+      },
+      {
+        "ok": false,
+        "preparedCount": 16
+      }
+    ],
+    "authPerformed": false,
+    "bankCopyPerformed": false,
+    "ownedExecutionPerformed": false
+  },
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\preparation-v1.json",
+    "bytes": 4014,
+    "sha256": "aca1b1771883709fe839d6ada86dbf746e5fdbfc7e76f94d1db00ae76aba91e4"
+  },
+  "rootTwoGroupPreflight": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\history-supplement-v1\\actual-two-group-history-receipt-v1.json",
+    "bytes": 3471,
+    "sha256": "42d81552f82d480aac085d67ff9239e3238ad353abe833475f215eedebb4966e"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

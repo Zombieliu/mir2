@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T03:55:49.534Z",
+  "scope": "Exact inverse proof for the four approved native approach-planning hunks only; not a gameplay acceptance claim.",
+  "baselineCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "originalSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\source-preimage\\playtest-capacity-soak.mjs.txt",
+    "bytes": 143423,
+    "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+  },
+  "finalSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+    "bytes": 144416,
+    "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+  },
+  "originalLfSha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d",
+  "inverseLfSha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d",
+  "exactOriginalLfAfterApprovedInverse": true,
+  "approvedHunks": [
+    "Optional prospective owner point in the existing witness helper; default remains current self for actual attacks.",
+    "Native-only cheap eight-tile witness eligibility before the original four path-target limit.",
+    "Use the filtered native adjacent tiles while baseline still enumerates the original eight.",
+    "Immutable nativeAttackWitness.approachRule metadata."
+  ],
+  "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+  "recordCombatPursuitMovementLfIdentical": true,
+  "recordCombatPursuitMovementLfSha256": "423b310be952265e0dfbc7c40a2802ae3cf78f1c431a6f89fa62d8713ce14cb7",
+  "thresholdsModified": false,
+  "postStrikeTimingModified": false,
+  "baselineActionSelectionModified": false,
+  "prearrivalTransitModified": false,
+  "actualAttackSendValidationModified": false,
+  "sourceEditedByProof": false
+}

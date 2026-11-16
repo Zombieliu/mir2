@@ -1,0 +1,2083 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792878747018-da931241",
+  "actor": "La809f605",
+  "analysisScope": "Read-only stream of17.4MB public driver raw, small report/slow-stage/monitor metadata. No tests, realm, game-source edits, private-account reads or recording payload.",
+  "inputPins": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\reports\\1792878747018-da931241.report.json",
+      "bytes": 326916,
+      "sha256": "f1e003be92a13a195d5f958e45adb005c56823a2f7c4733842b6ae2b3e8edd02"
+    },
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\reports\\1792878747018-da931241.samples.jsonl",
+      "bytes": 17377188,
+      "sha256": "f902a608bc7fbb2fae30c99cc5e577e9706e7ba628060d79c0a3740e88a9aeb0",
+      "rows": 28640
+    },
+    "slowStage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.jsonl",
+      "bytes": 11008,
+      "sha256": "edc4f485d7c892ab404d1a7b49edd718fcd1c00733e42e8279ec95c3b867437c"
+    },
+    "standaloneMonitor": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\monitor-history.jsonl",
+      "bytes": 4376572,
+      "sha256": "8acec749797ef9b789d25eddec03c7c026f21ca629f9dbf04a769d7188536794"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\realm-cleanup.json",
+      "bytes": 2976,
+      "sha256": "7f758896d970b4e527182489232185d0b103a3fcaa7f076bf13ca23c506185f4"
+    }
+  },
+  "selectedEvents": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe07-analysis\\selected-events-v1.json",
+    "bytes": 138849,
+    "sha256": "24ee5947910b0a30fecca32248a2977ca4f8250bb224af131570988c92975d8b"
+  },
+  "rawTypeCounts": {
+    "monitor": 484,
+    "phaseStarted": 5,
+    "action": 11255,
+    "coverage": 1061,
+    "playerLifecycle": 2168,
+    "admitted": 10,
+    "selfTransform": 9416,
+    "fanoutDistribution": 3755,
+    "phaseEnded": 5,
+    "continuousWindow": 134,
+    "window": 16,
+    "stageComplete": 3,
+    "movementCorrection": 2,
+    "combatArrival": 1,
+    "pendingAttackEvidence": 316,
+    "combatScoutAdvanced": 4,
+    "combatChaseDeferred": 2,
+    "continuousFailure": 1,
+    "safetyStop": 1,
+    "finished": 1
+  },
+  "outcome": {
+    "ok": false,
+    "error": "Soak failed fixed rolling activity or delivery gates",
+    "capacityAccepted": false,
+    "stageResults": [
+      {
+        "name": "stage-2",
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "timeoutRatio": 0
+      },
+      {
+        "name": "stage-10",
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "timeoutRatio": 0
+      },
+      {
+        "name": "soak",
+        "seconds": 360,
+        "completed": true,
+        "passed": false,
+        "timeoutRatio": 0.00042918454935622315
+      }
+    ],
+    "fullSoakInterval": {
+      "name": "soak",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792879457051,
+      "endedAtMs": 1792879817149,
+      "completed": true
+    },
+    "continuousFailureCount": 1,
+    "assessedWindows": 134,
+    "firstFailingActor": "La809f605",
+    "role": "combat",
+    "finalSegment": true,
+    "seconds": 51.35843299999996,
+    "nativeOpportunities": 50,
+    "nativeCompleted": 46,
+    "completionRatio": 0.92,
+    "launchedAttacks": 22,
+    "positiveHits": 22,
+    "damage": 88,
+    "ownerAckWaits": 2,
+    "timeoutRatio": 0.04,
+    "activityPassed": false,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "originalFailedContinuousVerdictRetained": true
+  },
+  "failureClassification": [
+    {
+      "line": 27206,
+      "actor": "La809f605",
+      "kind": "attack",
+      "status": "timeout",
+      "phase": "soak",
+      "recordedAtMs": 1792879778687,
+      "sendMonoMs": 1040861.9001,
+      "latencyMs": 901.5223000000697,
+      "scheduledMonoMs": 1040853.2615,
+      "plannedLatencyMs": 910.1622000000207,
+      "targetId": 206701,
+      "requestId": "300",
+      "attackResult": null,
+      "quarantined": true,
+      "beforeOfferedLoadPauseMs": 38462,
+      "beforeFailureVerdictMs": 40057,
+      "classification": "No matching typedV2 outcome by900ms; trace has zero matching owner/target packets and is not truncated. This is an original timeout, not launched-with-no-damage miss or explicit unknown/unavailable."
+    },
+    {
+      "line": 27290,
+      "actor": "La809f605",
+      "kind": "walk",
+      "status": "timeout",
+      "phase": "soak",
+      "recordedAtMs": 1792879781209,
+      "sendMonoMs": 1042259.9186,
+      "latencyMs": 2025.4475000000093,
+      "scheduledMonoMs": 1042233.2615,
+      "plannedLatencyMs": 2052.105899999966,
+      "attackResult": null,
+      "quarantined": false,
+      "beforeOfferedLoadPauseMs": 35940,
+      "beforeFailureVerdictMs": 37535,
+      "classification": "No accepted owner UserLocation by the original2s walk deadline. Original movement timeout; subsequent fresh owner replies are not retrospectively assigned to this pending action."
+    }
+  ],
+  "attackTrace": {
+    "requestId": "300",
+    "packets": 0,
+    "truncated": false,
+    "sentAtWallMs": 1792879777785,
+    "endedAtWallMs": 1792879778687
+  },
+  "settlement": {
+    "offeredLoadPausedAtMs": 1792879817149,
+    "continuousFailureEmittedAtMs": 1792879818744,
+    "verdictAfterPauseMs": 1595,
+    "explanation": "Both timeouts were recorded36–39s before offered load ended. The final continuous segment was emitted during normal finalization; that does not create or erase the earlier failures. Original per-actor final-window2/50 timeout ratio and46/50 completion fail despite the whole-cohort last-window timeout ratio0.00256.",
+    "cleanupChecks": {
+      "sixCountersZero": true,
+      "monitorTerminalPreserved": true,
+      "monitorStoppedBeforeGateway": true,
+      "monitorExitZero": true,
+      "normalOwnedShutdown": true,
+      "processAbsent": true,
+      "portsFree": true
+    },
+    "gatewayExit": {
+      "code": 0,
+      "signal": null
+    },
+    "monitorExit": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "slowStage": {
+    "pin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.jsonl",
+      "bytes": 11008,
+      "sha256": "edc4f485d7c892ab404d1a7b49edd718fcd1c00733e42e8279ec95c3b867437c"
+    },
+    "rows": 128,
+    "groups": [
+      {
+        "group": "bootstrap-2|snapshot.build_and_send",
+        "count": 1,
+        "minMs": 61,
+        "maxMs": 61,
+        "atLeast500": 0
+      },
+      {
+        "group": "bootstrap-2|shared_session.inner_execute",
+        "count": 4,
+        "minMs": 65,
+        "maxMs": 1927,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-2|zone_owner.in_process.execute_request",
+        "count": 4,
+        "minMs": 66,
+        "maxMs": 2023,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-2|session_action.execute",
+        "count": 4,
+        "minMs": 119,
+        "maxMs": 2026,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-2|shared_session.tail",
+        "count": 1,
+        "minMs": 94,
+        "maxMs": 94,
+        "atLeast500": 0
+      },
+      {
+        "group": "bootstrap-10|session_action.execute",
+        "count": 15,
+        "minMs": 50,
+        "maxMs": 1089,
+        "atLeast500": 8
+      },
+      {
+        "group": "bootstrap-10|shared_session.inner_execute",
+        "count": 8,
+        "minMs": 1015,
+        "maxMs": 1078,
+        "atLeast500": 8
+      },
+      {
+        "group": "bootstrap-10|zone_owner.in_process.execute_request",
+        "count": 8,
+        "minMs": 1024,
+        "maxMs": 1087,
+        "atLeast500": 8
+      },
+      {
+        "group": "stage-10|session_action.flush",
+        "count": 2,
+        "minMs": 50,
+        "maxMs": 51,
+        "atLeast500": 0
+      },
+      {
+        "group": "stage-10|serial_gate.zone_outbound_wait",
+        "count": 3,
+        "minMs": 52,
+        "maxMs": 54,
+        "atLeast500": 0
+      },
+      {
+        "group": "stage-10|shared_session.predrain",
+        "count": 1,
+        "minMs": 83,
+        "maxMs": 83,
+        "atLeast500": 0
+      },
+      {
+        "group": "stage-10|zone_owner.in_process.execute_request",
+        "count": 3,
+        "minMs": 54,
+        "maxMs": 85,
+        "atLeast500": 0
+      },
+      {
+        "group": "stage-10|runtime_tick.execute",
+        "count": 3,
+        "minMs": 54,
+        "maxMs": 85,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|flush.save",
+        "count": 4,
+        "minMs": 52,
+        "maxMs": 178,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|session_action.flush",
+        "count": 4,
+        "minMs": 55,
+        "maxMs": 181,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|zone_owner.in_process.execute_request",
+        "count": 7,
+        "minMs": 66,
+        "maxMs": 148,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|runtime_tick.execute",
+        "count": 7,
+        "minMs": 66,
+        "maxMs": 148,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|serial_gate.zone_outbound_wait",
+        "count": 5,
+        "minMs": 52,
+        "maxMs": 197,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|socket_input.queue_residence",
+        "count": 6,
+        "minMs": 80,
+        "maxMs": 3356,
+        "atLeast500": 2
+      },
+      {
+        "group": "soak|zone_cadence.total",
+        "count": 3,
+        "minMs": 116,
+        "maxMs": 139,
+        "atLeast500": 0
+      },
+      {
+        "group": "after-soak-drain|shared_session.inner_execute",
+        "count": 10,
+        "minMs": 301,
+        "maxMs": 436,
+        "atLeast500": 0
+      },
+      {
+        "group": "after-soak-drain|zone_owner.in_process.execute_request",
+        "count": 10,
+        "minMs": 313,
+        "maxMs": 465,
+        "atLeast500": 0
+      },
+      {
+        "group": "after-soak-drain|session_action.execute",
+        "count": 10,
+        "minMs": 313,
+        "maxMs": 465,
+        "atLeast500": 0
+      },
+      {
+        "group": "after-soak-drain|serial_gate.zone_outbound_wait",
+        "count": 4,
+        "minMs": 151,
+        "maxMs": 209,
+        "atLeast500": 0
+      },
+      {
+        "group": "after-soak-drain|zone_cadence.total",
+        "count": 1,
+        "minMs": 105,
+        "maxMs": 105,
+        "atLeast500": 0
+      }
+    ],
+    "critical": [
+      {
+        "line": 67,
+        "observedAtMs": 1792879781142,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 3356,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879777786
+      },
+      {
+        "line": 68,
+        "observedAtMs": 1792879781143,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 229,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879780914
+      },
+      {
+        "line": 69,
+        "observedAtMs": 1792879781309,
+        "stage": "flush.save",
+        "durationMs": 151,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781158
+      },
+      {
+        "line": 70,
+        "observedAtMs": 1792879781309,
+        "stage": "zone_cadence.total",
+        "durationMs": 116,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781193
+      },
+      {
+        "line": 71,
+        "observedAtMs": 1792879781313,
+        "stage": "session_action.flush",
+        "durationMs": 158,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781155
+      },
+      {
+        "line": 72,
+        "observedAtMs": 1792879781315,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 2132,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879779183
+      },
+      {
+        "line": 73,
+        "observedAtMs": 1792879781315,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 161,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781154
+      },
+      {
+        "line": 74,
+        "observedAtMs": 1792879782330,
+        "stage": "zone_cadence.total",
+        "durationMs": 139,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782191
+      },
+      {
+        "line": 75,
+        "observedAtMs": 1792879782332,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 81,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782251
+      },
+      {
+        "line": 76,
+        "observedAtMs": 1792879782332,
+        "stage": "runtime_tick.execute",
+        "durationMs": 81,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782251
+      },
+      {
+        "line": 77,
+        "observedAtMs": 1792879782332,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 80,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782252
+      },
+      {
+        "line": 78,
+        "observedAtMs": 1792879782333,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 112,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782221
+      },
+      {
+        "line": 79,
+        "observedAtMs": 1792879782333,
+        "stage": "runtime_tick.execute",
+        "durationMs": 113,
+        "receiverPhase": "soak",
+        "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782220
+      }
+    ],
+    "queueSpanAlignment": [
+      {
+        "observedAtMs": 1792879781142,
+        "durationMs": 3356,
+        "estimatedStartMs": 1792879777786
+      },
+      {
+        "observedAtMs": 1792879781315,
+        "durationMs": 2132,
+        "estimatedStartMs": 1792879779183
+      }
+    ],
+    "limitation": "Launcher receive times are not exact source span endpoints. Public records have no connection, actor or requestId; near-exact alignment with failed sends supports an input-queue residence correlation, not strict per-request identity or the upstream root cause. Input residence ends before that input waits for the serial gate."
+  },
+  "serverTelemetry": {
+    "fromSampledAtMs": 1792879775378,
+    "toSampledAtMs": 1792879781508,
+    "scope": "gateway shared-owner transaction, may contain multiple maps",
+    "durationMs": 6130,
+    "movementAdmissionsDefinition": "Successful movement handler admission is not proof of authoritative position application or an outbound ACK",
+    "pendingMovementDeadlineLagDefinition": "Owner work start lateness after the original deadline, not a movement ACK latency",
+    "immediateRequests": {
+      "successCount": 5,
+      "failureCount": 0,
+      "duration": {
+        "count": 5,
+        "overBudgetCount": 2,
+        "p50UpperUs": 20000,
+        "p95UpperUs": 5000000,
+        "p99UpperUs": 5000000,
+        "p999UpperUs": 5000000,
+        "processLifetimeMaxBeforeUs": 23426,
+        "processLifetimeMaxAfterUs": 3368839,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "lifecycleRequests": {
+      "successCount": 0,
+      "failureCount": 0,
+      "duration": {
+        "count": 0,
+        "overBudgetCount": 0,
+        "p50UpperUs": null,
+        "p95UpperUs": null,
+        "p99UpperUs": null,
+        "p999UpperUs": null,
+        "processLifetimeMaxBeforeUs": 2027083,
+        "processLifetimeMaxAfterUs": 2027083,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "movementAdmissions": {
+      "successCount": 76,
+      "failureCount": 0,
+      "duration": {
+        "count": 76,
+        "overBudgetCount": 1,
+        "p50UpperUs": 500,
+        "p95UpperUs": 2000,
+        "p99UpperUs": 5000000,
+        "p999UpperUs": 5000000,
+        "processLifetimeMaxBeforeUs": 39174,
+        "processLifetimeMaxAfterUs": 2136134,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 19
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 43
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 10
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "zoneWork": {
+      "count": 61,
+      "overBudgetCount": 0,
+      "p50UpperUs": 1000,
+      "p95UpperUs": 1000,
+      "p99UpperUs": 2000,
+      "p999UpperUs": 2000,
+      "processLifetimeMaxBeforeUs": 19765,
+      "processLifetimeMaxAfterUs": 19765,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 59
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 2
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ]
+    },
+    "ownerTickDeadlineLag": {
+      "count": 61,
+      "overBudgetCount": 1,
+      "p50UpperUs": 10000,
+      "p95UpperUs": 20000,
+      "p99UpperUs": 150000,
+      "p999UpperUs": 150000,
+      "processLifetimeMaxBeforeUs": 50336,
+      "processLifetimeMaxAfterUs": 129801,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 4
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 13
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 19
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 24
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ]
+    },
+    "pendingMovementDeadlineLag": {
+      "count": 0,
+      "overBudgetCount": 0,
+      "p50UpperUs": null,
+      "p95UpperUs": null,
+      "p99UpperUs": null,
+      "p999UpperUs": null,
+      "processLifetimeMaxBeforeUs": 0,
+      "processLifetimeMaxAfterUs": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ]
+    }
+  },
+  "driverLag": {
+    "allSamples": 1061,
+    "allMaxP99Ms": 78.643199,
+    "allMaxMs": 78.643199,
+    "criticalSamples": 15,
+    "criticalMaxP99Ms": 36.241407,
+    "criticalMaxMs": 36.241407,
+    "thresholdP99Ms": 250,
+    "driverGuardStopped": false,
+    "limitation": "One-second event-loop samples cannot establish every microsecond scheduling interval. No observed driver guard breach is not proof that local scheduling had no effect."
+  },
+  "resources": [
+    {
+      "line": 26967,
+      "sampledAt": 1792879771317,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390137344
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 155468,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.15457115928369464,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 243104.61828463714,
+          "otherIoBytesPerSecond": 2324.2224316682377,
+          "ioOperationsPerSecond": 160.22620169651273
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 207409323,
+          "otherIoBytes": 3014984,
+          "readOperations": 4562,
+          "writeOperations": 5831,
+          "otherIoOperations": 175434
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 38736404480,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 17
+          },
+          {
+            "id": "1",
+            "busyPercent": 5
+          },
+          {
+            "id": "10",
+            "busyPercent": 11
+          },
+          {
+            "id": "11",
+            "busyPercent": 5
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 17
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 11
+          },
+          {
+            "id": "16",
+            "busyPercent": 17
+          },
+          {
+            "id": "17",
+            "busyPercent": 5
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 0
+          },
+          {
+            "id": "2",
+            "busyPercent": 11
+          },
+          {
+            "id": "20",
+            "busyPercent": 0
+          },
+          {
+            "id": "21",
+            "busyPercent": 0
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 0
+          },
+          {
+            "id": "24",
+            "busyPercent": 0
+          },
+          {
+            "id": "25",
+            "busyPercent": 0
+          },
+          {
+            "id": "26",
+            "busyPercent": 0
+          },
+          {
+            "id": "27",
+            "busyPercent": 0
+          },
+          {
+            "id": "28",
+            "busyPercent": 0
+          },
+          {
+            "id": "29",
+            "busyPercent": 0
+          },
+          {
+            "id": "3",
+            "busyPercent": 0
+          },
+          {
+            "id": "30",
+            "busyPercent": 0
+          },
+          {
+            "id": "31",
+            "busyPercent": 0
+          },
+          {
+            "id": "4",
+            "busyPercent": 52
+          },
+          {
+            "id": "5",
+            "busyPercent": 0
+          },
+          {
+            "id": "6",
+            "busyPercent": 5
+          },
+          {
+            "id": "7",
+            "busyPercent": 40
+          },
+          {
+            "id": "8",
+            "busyPercent": 5
+          },
+          {
+            "id": "9",
+            "busyPercent": 5
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27040,
+      "sampledAt": 1792879773259,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390141440
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 155734,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.13697219361483007,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 382168.8980432544,
+          "otherIoBytesPerSecond": 3244.0782698249227,
+          "ioOperationsPerSecond": 239.9588053553038
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 208151495,
+          "otherIoBytes": 3021284,
+          "readOperations": 4562,
+          "writeOperations": 5848,
+          "otherIoOperations": 175883
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 38982004736,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 13
+          },
+          {
+            "id": "1",
+            "busyPercent": 19
+          },
+          {
+            "id": "10",
+            "busyPercent": 25
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 13
+          },
+          {
+            "id": "14",
+            "busyPercent": 13
+          },
+          {
+            "id": "15",
+            "busyPercent": 6
+          },
+          {
+            "id": "16",
+            "busyPercent": 13
+          },
+          {
+            "id": "17",
+            "busyPercent": 19
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 6
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 13
+          },
+          {
+            "id": "21",
+            "busyPercent": 0
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 6
+          },
+          {
+            "id": "24",
+            "busyPercent": 13
+          },
+          {
+            "id": "25",
+            "busyPercent": 0
+          },
+          {
+            "id": "26",
+            "busyPercent": 6
+          },
+          {
+            "id": "27",
+            "busyPercent": 0
+          },
+          {
+            "id": "28",
+            "busyPercent": 13
+          },
+          {
+            "id": "29",
+            "busyPercent": 19
+          },
+          {
+            "id": "3",
+            "busyPercent": 6
+          },
+          {
+            "id": "30",
+            "busyPercent": 6
+          },
+          {
+            "id": "31",
+            "busyPercent": 13
+          },
+          {
+            "id": "4",
+            "busyPercent": 25
+          },
+          {
+            "id": "5",
+            "busyPercent": 0
+          },
+          {
+            "id": "6",
+            "busyPercent": 6
+          },
+          {
+            "id": "7",
+            "busyPercent": 56
+          },
+          {
+            "id": "8",
+            "busyPercent": 0
+          },
+          {
+            "id": "9",
+            "busyPercent": 13
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27107,
+      "sampledAt": 1792879775378,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390141440
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156000,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.12564950401511574,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 187470.00472366557,
+          "otherIoBytesPerSecond": 1844.1190363722249,
+          "ioOperationsPerSecond": 121.8705715635333
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 208548369,
+          "otherIoBytes": 3025188,
+          "readOperations": 4562,
+          "writeOperations": 5856,
+          "otherIoOperations": 176133
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39087112192,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 16
+          },
+          {
+            "id": "1",
+            "busyPercent": 34
+          },
+          {
+            "id": "10",
+            "busyPercent": 46
+          },
+          {
+            "id": "11",
+            "busyPercent": 10
+          },
+          {
+            "id": "12",
+            "busyPercent": 4
+          },
+          {
+            "id": "13",
+            "busyPercent": 22
+          },
+          {
+            "id": "14",
+            "busyPercent": 4
+          },
+          {
+            "id": "15",
+            "busyPercent": 16
+          },
+          {
+            "id": "16",
+            "busyPercent": 16
+          },
+          {
+            "id": "17",
+            "busyPercent": 4
+          },
+          {
+            "id": "18",
+            "busyPercent": 4
+          },
+          {
+            "id": "19",
+            "busyPercent": 4
+          },
+          {
+            "id": "2",
+            "busyPercent": 10
+          },
+          {
+            "id": "20",
+            "busyPercent": 10
+          },
+          {
+            "id": "21",
+            "busyPercent": 4
+          },
+          {
+            "id": "22",
+            "busyPercent": 4
+          },
+          {
+            "id": "23",
+            "busyPercent": 10
+          },
+          {
+            "id": "24",
+            "busyPercent": 10
+          },
+          {
+            "id": "25",
+            "busyPercent": 4
+          },
+          {
+            "id": "26",
+            "busyPercent": 4
+          },
+          {
+            "id": "27",
+            "busyPercent": 4
+          },
+          {
+            "id": "28",
+            "busyPercent": 4
+          },
+          {
+            "id": "29",
+            "busyPercent": 4
+          },
+          {
+            "id": "3",
+            "busyPercent": 4
+          },
+          {
+            "id": "30",
+            "busyPercent": 4
+          },
+          {
+            "id": "31",
+            "busyPercent": 4
+          },
+          {
+            "id": "4",
+            "busyPercent": 22
+          },
+          {
+            "id": "5",
+            "busyPercent": 76
+          },
+          {
+            "id": "6",
+            "busyPercent": 100
+          },
+          {
+            "id": "7",
+            "busyPercent": 22
+          },
+          {
+            "id": "8",
+            "busyPercent": 10
+          },
+          {
+            "id": "9",
+            "busyPercent": 88
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27297,
+      "sampledAt": 1792879781286,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390149632
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156890,
+        "handles": 185,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.022826614861583293,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 95791.64643030596,
+          "otherIoBytesPerSecond": 1643.516270033997,
+          "ioOperationsPerSecond": 100.53423992229237
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 209256911,
+          "otherIoBytes": 3032992,
+          "readOperations": 4562,
+          "writeOperations": 5872,
+          "otherIoOperations": 176632
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39365947392,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 0
+          },
+          {
+            "id": "1",
+            "busyPercent": 82
+          },
+          {
+            "id": "10",
+            "busyPercent": 0
+          },
+          {
+            "id": "11",
+            "busyPercent": 22
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 10
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 0
+          },
+          {
+            "id": "16",
+            "busyPercent": 10
+          },
+          {
+            "id": "17",
+            "busyPercent": 0
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 4
+          },
+          {
+            "id": "2",
+            "busyPercent": 4
+          },
+          {
+            "id": "20",
+            "busyPercent": 0
+          },
+          {
+            "id": "21",
+            "busyPercent": 0
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 0
+          },
+          {
+            "id": "24",
+            "busyPercent": 10
+          },
+          {
+            "id": "25",
+            "busyPercent": 4
+          },
+          {
+            "id": "26",
+            "busyPercent": 0
+          },
+          {
+            "id": "27",
+            "busyPercent": 4
+          },
+          {
+            "id": "28",
+            "busyPercent": 16
+          },
+          {
+            "id": "29",
+            "busyPercent": 0
+          },
+          {
+            "id": "3",
+            "busyPercent": 0
+          },
+          {
+            "id": "30",
+            "busyPercent": 0
+          },
+          {
+            "id": "31",
+            "busyPercent": 0
+          },
+          {
+            "id": "4",
+            "busyPercent": 28
+          },
+          {
+            "id": "5",
+            "busyPercent": 22
+          },
+          {
+            "id": "6",
+            "busyPercent": 4
+          },
+          {
+            "id": "7",
+            "busyPercent": 10
+          },
+          {
+            "id": "8",
+            "busyPercent": 16
+          },
+          {
+            "id": "9",
+            "busyPercent": 0
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27315,
+      "sampledAt": 1792879781508,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354817536,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390170112
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156890,
+        "handles": 186,
+        "threads": 22,
+        "rates": {
+          "cpuCores": 0,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 0,
+          "otherIoBytesPerSecond": 1049.1803278688524,
+          "ioOperationsPerSecond": 52.3532522474881
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 209256911,
+          "otherIoBytes": 3034976,
+          "readOperations": 4562,
+          "writeOperations": 5872,
+          "otherIoOperations": 176731
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39363301376,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 1
+          },
+          {
+            "id": "1",
+            "busyPercent": 7
+          },
+          {
+            "id": "10",
+            "busyPercent": 1
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 7
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 1
+          },
+          {
+            "id": "16",
+            "busyPercent": 0
+          },
+          {
+            "id": "17",
+            "busyPercent": 1
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 1
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 19
+          },
+          {
+            "id": "21",
+            "busyPercent": 1
+          },
+          {
+            "id": "22",
+            "busyPercent": 1
+          },
+          {
+            "id": "23",
+            "busyPercent": 1
+          },
+          {
+            "id": "24",
+            "busyPercent": 1
+          },
+          {
+            "id": "25",
+            "busyPercent": 1
+          },
+          {
+            "id": "26",
+            "busyPercent": 1
+          },
+          {
+            "id": "27",
+            "busyPercent": 1
+          },
+          {
+            "id": "28",
+            "busyPercent": 1
+          },
+          {
+            "id": "29",
+            "busyPercent": 1
+          },
+          {
+            "id": "3",
+            "busyPercent": 1
+          },
+          {
+            "id": "30",
+            "busyPercent": 1
+          },
+          {
+            "id": "31",
+            "busyPercent": 1
+          },
+          {
+            "id": "4",
+            "busyPercent": 26
+          },
+          {
+            "id": "5",
+            "busyPercent": 1
+          },
+          {
+            "id": "6",
+            "busyPercent": 1
+          },
+          {
+            "id": "7",
+            "busyPercent": 1
+          },
+          {
+            "id": "8",
+            "busyPercent": 7
+          },
+          {
+            "id": "9",
+            "busyPercent": 1
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27414,
+      "sampledAt": 1792879783870,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354952704,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390309376
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 157265,
+        "handles": 187,
+        "threads": 22,
+        "rates": {
+          "cpuCores": 0.16838796587337224,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 357753.03098338575,
+          "otherIoBytesPerSecond": 2507.4090704984287,
+          "ioOperationsPerSecond": 270.7678491243826
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 210053627,
+          "otherIoBytes": 3040560,
+          "readOperations": 4562,
+          "writeOperations": 5955,
+          "otherIoOperations": 177251
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39785992192,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 0
+          },
+          {
+            "id": "1",
+            "busyPercent": 3
+          },
+          {
+            "id": "10",
+            "busyPercent": 0
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 15
+          },
+          {
+            "id": "13",
+            "busyPercent": 0
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 3
+          },
+          {
+            "id": "16",
+            "busyPercent": 57
+          },
+          {
+            "id": "17",
+            "busyPercent": 9
+          },
+          {
+            "id": "18",
+            "busyPercent": 3
+          },
+          {
+            "id": "19",
+            "busyPercent": 0
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 27
+          },
+          {
+            "id": "21",
+            "busyPercent": 15
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 9
+          },
+          {
+            "id": "24",
+            "busyPercent": 63
+          },
+          {
+            "id": "25",
+            "busyPercent": 0
+          },
+          {
+            "id": "26",
+            "busyPercent": 0
+          },
+          {
+            "id": "27",
+            "busyPercent": 3
+          },
+          {
+            "id": "28",
+            "busyPercent": 15
+          },
+          {
+            "id": "29",
+            "busyPercent": 0
+          },
+          {
+            "id": "3",
+            "busyPercent": 9
+          },
+          {
+            "id": "30",
+            "busyPercent": 3
+          },
+          {
+            "id": "31",
+            "busyPercent": 3
+          },
+          {
+            "id": "4",
+            "busyPercent": 33
+          },
+          {
+            "id": "5",
+            "busyPercent": 15
+          },
+          {
+            "id": "6",
+            "busyPercent": 33
+          },
+          {
+            "id": "7",
+            "busyPercent": 3
+          },
+          {
+            "id": "8",
+            "busyPercent": 3
+          },
+          {
+            "id": "9",
+            "busyPercent": 0
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    }
+  ],
+  "conclusion": {
+    "proven": "Two actual pre-stop delivery deadlines failed for the combat actor. Server immediate-handler and movement-admission counters independently show multi-second requests; public input queue-residence spans align with the failed send times. The original probe remains failed.",
+    "notProven": [
+      "No exact connection/request attribution in slow-stage whitelist.",
+      "No root cause is established for why the serial connection loop did not receive the queued input sooner.",
+      "Low aggregate process CPU/IO and short sampled zoneWork do not prove all locks or every Zone command were fast; zoneWork excludes several waits/command/snapshot paths.",
+      "No supplied evidence identifies spectator JSON/IO, disk saturation, a physical-host limit or a full workload-capacity ceiling."
+    ],
+    "nextStep": "Keep formal04 frozen. Use the separate source-only queue/serial-loop audit to choose bounded instrumentation or a concrete fix; do not relax900ms/2s/rolling gates or reclassify the timeouts."
+  },
+  "sourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 130681,
+      "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    }
+  ]
+}

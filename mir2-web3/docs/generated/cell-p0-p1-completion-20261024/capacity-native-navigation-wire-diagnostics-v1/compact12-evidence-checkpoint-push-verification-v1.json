@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T06:46:28.7561347Z",
+  "branch": "codex/cell-preproduction-p0-p1-20261024",
+  "localHead": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "remoteHeadObserved": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "originalRemoteBranch": "codex/windows-player-journey",
+  "originalRemoteHeadObserved": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "pushExit": 0,
+  "lsRemoteExit": 0,
+  "trackedAndUntrackedTreeClean": true,
+  "driverCoreCodeCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverInputsVerified": 9,
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "documentationOnlyCheckpoint": true,
+  "capacityAccepted": false,
+  "fixedCellImplementationStarted": false,
+  "scope": "Observed real push and ls-remote above; exact current nine source pins re-read. Original remote branch preserved."
+}

@@ -1,0 +1,748 @@
+{
+  "schema": "mir2.r16.postcast-baselines.v1",
+  "runs": [
+    {
+      "tag": "baseline-shared-r1",
+      "receiptSha256": "7560c6633e265207885180ef67b786dbe48497b7492e7c7e13c34cac37be08ab",
+      "base": "09e50e7fe0dd4047ea6eb2d5a1344e2a95f12617",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+        "lib/generated/client_core_runtime.json": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "scratchSha256": "8eff78c66111687bc27893f5b7030638427a7092850c52f53a82a5cfe5f632ac",
+        "instrumentationSha256": "5b239bfd4ce5c4046a4e8afb3ce48e40b3891d9839b7c95f19175e946d65c426",
+        "advancesRuntime": false
+      },
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "runtime": {
+        "bevy": "bevy-7c0a3b5dc8a548d9",
+        "bevyManifestSha256": "fe94d505e148a5ae01704597707bf9611e0d12e64a3efd9860ce27052767d395",
+        "clientCore": {
+          "manifestSha256": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50",
+          "presentation": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+          "sourceSha256": "5ef63b14578c39e5b183ade5668e5bad949c916508fa08bdcae536f7e7ce8ab7",
+          "files": [
+            {
+              "section": "core",
+              "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+              "name": "mir2_platform_web.js",
+              "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+              "bytes": 24393
+            },
+            {
+              "section": "core",
+              "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "1db592d6bf105a7aa88563b0ba7947a214725757713819f353c3377415cab4a2",
+              "bytes": 247982
+            },
+            {
+              "section": "presentation",
+              "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+              "name": "mir2_platform_web.js",
+              "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c",
+              "bytes": 24721
+            },
+            {
+              "section": "presentation",
+              "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "b677b4eac9423037ad867f2c4efd8a1d3f78dfa0b125dffea215223e6b740501",
+              "bytes": 261300
+            },
+            {
+              "section": "npcPurchase",
+              "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+              "name": "mir2_platform_web.js",
+              "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+              "bytes": 8332
+            },
+            {
+              "section": "npcPurchase",
+              "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "279287cba87cab0ce2db344be00d1c3bd5bdc7fffc12e275da5837f8f917dd9d",
+              "bytes": 164684
+            }
+          ]
+        },
+        "loadedPresentation": [
+          {
+            "event": "response",
+            "at": 1794267283966,
+            "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web.js",
+            "status": 200
+          },
+          {
+            "event": "response",
+            "at": 1794267284372,
+            "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web_bg.wasm",
+            "status": 200
+          }
+        ]
+      },
+      "actor": {
+        "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+        "fixtureUnchanged": true,
+        "normalLogout": true,
+        "freshLogin": true,
+        "diskSkill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 473
+        },
+        "initialAmmo": 43,
+        "finalAmmo": 42
+      },
+      "cast": {
+        "target": "Hen",
+        "range": 7,
+        "hit": 5,
+        "realAuthority": {
+          "action": "spell",
+          "direction": "DownLeft",
+          "sourceRevision": 22,
+          "continuityRevision": 15,
+          "bridgeEpoch": 1,
+          "lastNowMs": 1794267315668,
+          "incarnation": 1
+        },
+        "sourceRevision": 22,
+        "evidenceRevision": 1
+      },
+      "walk": {
+        "from": [
+          300,
+          267
+        ],
+        "to": [
+          301,
+          267
+        ],
+        "requestSequence": 805,
+        "ackSequence": 806,
+        "commandToAckMs": 16,
+        "laterCastCommandsDuringObservation": 0,
+        "visualMotionStartedMs": -38,
+        "visualMotionExpiresMs": 562,
+        "sourceAckObservedMs": 9,
+        "oldSpellDeliveriesAfterAck": 21,
+        "ghostSpellAfterAck": {
+          "afterAckMs": 694,
+          "action": "spell",
+          "frame": "0",
+          "asset": "/original-ui/CArmour/05/308.png"
+        },
+        "firstStandingAuthorityAfterMotionMs": 1273,
+        "transitions": [
+          {
+            "afterAckMs": -125,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 23,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Down",
+              "sourceRevision": 23,
+              "continuityRevision": 15,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267317705,
+              "incarnation": 1
+            },
+            "atMovedTile": false
+          },
+          {
+            "afterAckMs": 9,
+            "legacy": "walking",
+            "input": "walking",
+            "sameSpellToken": false,
+            "inputKnown": false,
+            "sourceRevision": 23,
+            "body": "walking",
+            "queue": 0,
+            "authority": {},
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 16,
+            "legacy": "walking",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "walking",
+            "queue": 1,
+            "authority": {
+              "action": "walking",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 17,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267317846,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 642,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "spell",
+            "queue": 0,
+            "authority": {
+              "action": "spell",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 17,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267318472,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 1273,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 17,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267319103,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          }
+        ],
+        "frames": [
+          {
+            "afterAckMs": 0,
+            "action": "standing",
+            "frame": "2",
+            "asset": "/original-ui/CArmour/05/18.png"
+          },
+          {
+            "afterAckMs": 103,
+            "action": "walking",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/44.png"
+          },
+          {
+            "afterAckMs": 694,
+            "action": "spell",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/308.png"
+          },
+          {
+            "afterAckMs": 1382,
+            "action": "standing",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/8.png"
+          }
+        ]
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "sha256": "6cafbe4ef27f816a77e877d6d853dfeed2d48f4cf141e13839a3024df421012d",
+          "sampleOffsetMs": 3
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "sha256": "aef4e3295fe97e9d76d5b64b5a7e4da9a0cc00dd5ddef45e494a056967b93027",
+          "sampleOffsetMs": -17
+        },
+        {
+          "phase": "postcast-walk",
+          "file": "postcast-walk.jpg",
+          "sha256": "6acfa408796f6c5af61e3a4f6871309f69b8ba2f249049dda10c07b65195ac0a",
+          "sampleOffsetMs": 13
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "sha256": "fec18dbc17a05ddede16c598f7a53c69fa5d5936f0ad4b25d92a6c75676bf164",
+          "sampleOffsetMs": -14
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "sha256": "a0d01c9f661d8f4d7e872c0669265be5ae453abe58cf7cd6da3c646c5146b31f",
+          "sampleOffsetMs": -2
+        }
+      ]
+    },
+    {
+      "tag": "baseline-repeat-r2",
+      "receiptSha256": "2ba3eaead55fc5b11d576a29a95dd4f0f5721b9c11ae4f8d2f6e44ffacaefe0e",
+      "base": "09e50e7fe0dd4047ea6eb2d5a1344e2a95f12617",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+        "lib/generated/client_core_runtime.json": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "scratchSha256": "8eff78c66111687bc27893f5b7030638427a7092850c52f53a82a5cfe5f632ac",
+        "instrumentationSha256": "5b239bfd4ce5c4046a4e8afb3ce48e40b3891d9839b7c95f19175e946d65c426",
+        "advancesRuntime": false
+      },
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "runtime": {
+        "bevy": "bevy-7c0a3b5dc8a548d9",
+        "bevyManifestSha256": "fe94d505e148a5ae01704597707bf9611e0d12e64a3efd9860ce27052767d395",
+        "clientCore": {
+          "manifestSha256": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50",
+          "presentation": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+          "sourceSha256": "5ef63b14578c39e5b183ade5668e5bad949c916508fa08bdcae536f7e7ce8ab7",
+          "files": [
+            {
+              "section": "core",
+              "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+              "name": "mir2_platform_web.js",
+              "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+              "bytes": 24393
+            },
+            {
+              "section": "core",
+              "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "1db592d6bf105a7aa88563b0ba7947a214725757713819f353c3377415cab4a2",
+              "bytes": 247982
+            },
+            {
+              "section": "presentation",
+              "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+              "name": "mir2_platform_web.js",
+              "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c",
+              "bytes": 24721
+            },
+            {
+              "section": "presentation",
+              "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "b677b4eac9423037ad867f2c4efd8a1d3f78dfa0b125dffea215223e6b740501",
+              "bytes": 261300
+            },
+            {
+              "section": "npcPurchase",
+              "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+              "name": "mir2_platform_web.js",
+              "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+              "bytes": 8332
+            },
+            {
+              "section": "npcPurchase",
+              "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "279287cba87cab0ce2db344be00d1c3bd5bdc7fffc12e275da5837f8f917dd9d",
+              "bytes": 164684
+            }
+          ]
+        },
+        "loadedPresentation": [
+          {
+            "event": "response",
+            "at": 1794267533738,
+            "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web.js",
+            "status": 200
+          },
+          {
+            "event": "response",
+            "at": 1794267533743,
+            "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web_bg.wasm",
+            "status": 200
+          }
+        ]
+      },
+      "actor": {
+        "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+        "fixtureUnchanged": true,
+        "normalLogout": true,
+        "freshLogin": true,
+        "diskSkill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 474
+        },
+        "initialAmmo": 43,
+        "finalAmmo": 41
+      },
+      "cast": {
+        "target": "Hen",
+        "range": 7,
+        "hit": 5,
+        "realAuthority": {
+          "action": "spell",
+          "direction": "DownLeft",
+          "sourceRevision": 22,
+          "continuityRevision": 11,
+          "bridgeEpoch": 1,
+          "lastNowMs": 1794267565251,
+          "incarnation": 1
+        },
+        "sourceRevision": 22,
+        "evidenceRevision": 1
+      },
+      "walk": {
+        "from": [
+          300,
+          267
+        ],
+        "to": [
+          301,
+          267
+        ],
+        "requestSequence": 803,
+        "ackSequence": 804,
+        "commandToAckMs": 13,
+        "laterCastCommandsDuringObservation": 0,
+        "visualMotionStartedMs": 113,
+        "visualMotionExpiresMs": 713,
+        "sourceAckObservedMs": 128,
+        "oldSpellDeliveriesAfterAck": 18,
+        "ghostSpellAfterAck": null,
+        "firstStandingAuthorityAfterMotionMs": 730,
+        "transitions": [
+          {
+            "afterAckMs": -182,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 23,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Down",
+              "sourceRevision": 23,
+              "continuityRevision": 11,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267567216,
+              "incarnation": 1
+            },
+            "atMovedTile": false
+          },
+          {
+            "afterAckMs": 128,
+            "legacy": "walking",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 11,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267567526,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 730,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 11,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794267568128,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          }
+        ],
+        "frames": [
+          {
+            "afterAckMs": 1,
+            "action": "standing",
+            "frame": "2",
+            "asset": "/original-ui/CArmour/05/18.png"
+          }
+        ]
+      },
+      "secondCast": {
+        "searchMoves": [
+          {
+            "from": [
+              301,
+              267
+            ],
+            "to": [
+              300,
+              267
+            ],
+            "seq": 808
+          },
+          {
+            "from": [
+              300,
+              267
+            ],
+            "to": [
+              299,
+              267
+            ],
+            "seq": 811
+          },
+          {
+            "from": [
+              299,
+              267
+            ],
+            "to": [
+              297,
+              267
+            ],
+            "seq": 813
+          },
+          {
+            "from": [
+              297,
+              267
+            ],
+            "to": [
+              295,
+              267
+            ],
+            "seq": 817
+          },
+          {
+            "from": [
+              295,
+              267
+            ],
+            "to": [
+              295,
+              265
+            ],
+            "seq": 823
+          },
+          {
+            "from": [
+              293,
+              267
+            ],
+            "to": [
+              291,
+              269
+            ],
+            "seq": 829
+          },
+          {
+            "from": [
+              291,
+              269
+            ],
+            "to": [
+              289,
+              271
+            ],
+            "seq": 831
+          },
+          {
+            "from": [
+              289,
+              271
+            ],
+            "to": [
+              288,
+              272
+            ],
+            "seq": 833
+          },
+          {
+            "from": [
+              288,
+              272
+            ],
+            "to": [
+              286,
+              272
+            ],
+            "seq": 835
+          },
+          {
+            "from": [
+              286,
+              272
+            ],
+            "to": [
+              285,
+              273
+            ],
+            "seq": 837
+          }
+        ],
+        "target": {
+          "id": 200202,
+          "name": "Hen",
+          "range": 7
+        },
+        "command": {
+          "seq": 838,
+          "at": 1794267576374
+        },
+        "accepted": {
+          "seq": 844,
+          "at": 1794267576778
+        },
+        "hit": {
+          "seq": 847,
+          "at": 1794267577352,
+          "damage": 5
+        },
+        "firstKnownSpell": {
+          "at": 1794267576814,
+          "token": "world-fishing-source:1:action:2:attack:1794267576776:spell",
+          "pose": {
+            "objectId": "1000",
+            "incarnation": 1,
+            "animationState": "attackRange",
+            "action": "spell",
+            "direction": "DownLeft",
+            "logicalFrameIndex": 0,
+            "queueDepth": 0
+          },
+          "authority": {
+            "action": "spell",
+            "direction": "DownLeft",
+            "sourceRevision": 37,
+            "continuityRevision": 19,
+            "bridgeEpoch": 1,
+            "lastNowMs": 1794267576814,
+            "incarnation": 1
+          }
+        },
+        "firstLoadedBody": "/original-ui/CArmour/05/326.png",
+        "from": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 473
+          },
+          "mp": 257,
+          "equippedAmulets": 42
+        },
+        "after": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 474
+          },
+          "mp": 254,
+          "equippedAmulets": 41
+        }
+      },
+      "secondCastDiagnostic": {
+        "targetId": 200202,
+        "acceptedSequence": 844,
+        "hitSequence": 847,
+        "authoritativeEvidenceRevisions": [
+          1,
+          2
+        ],
+        "newTokenFound": true,
+        "loadoutAfter": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 474
+          },
+          "mp": 254,
+          "equippedAmulets": 41
+        }
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "sha256": "109ef5d46c1ac27b752cb5f4bbb70101c1d188f50e3a1ae398fbc0622aa8679f",
+          "sampleOffsetMs": 2
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "sha256": "662e1b6487c531698f6576af9ede7b3cb7e8b99cbd14ce35ff8fa4c976dd7264",
+          "sampleOffsetMs": 41
+        },
+        {
+          "phase": "postcast-standing",
+          "file": "postcast-standing.jpg",
+          "sha256": "4f3a67671aba26c1ca0c291ae046e6a23fda9008be3d184d71d327eef4edbd2d",
+          "sampleOffsetMs": 15
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "sha256": "cdcd186acc155b6a9a272c767f49b5d213c3990c6d70b47fb1e143ee64990e8c",
+          "sampleOffsetMs": 43
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "sha256": "dc7bff66cd92b09bacea81f972830da83200870c431bfc80ca3cc2d272abb658",
+          "sampleOffsetMs": 1
+        }
+      ]
+    }
+  ]
+}

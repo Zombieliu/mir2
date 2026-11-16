@@ -1,0 +1,19 @@
+{
+  "queriedAt": "2026-11-13T06:48:22.658Z",
+  "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "environment": "production",
+  "since": "1h",
+  "levels": [
+    "error",
+    "fatal"
+  ],
+  "groupBy": "level",
+  "isError": false,
+  "resultText": "## Runtime Log Counts\n\n**Project:** prj_QzS3a2wirTJCixU4tYRVY5nmvSjC\n**Grouped by:** level\n**Showing:** Top 25 groups by log count; this may omit other groups.\n\n| level | count |\n|---|---|",
+  "interpretation": "The grouped query returned no error/fatal rows; this does not prove a complete absence of errors or cover client resource transfer failures.",
+  "drains": {
+    "verified": false,
+    "reason": "List-drains API returned HTTP404; no configuration changes made."
+  }
+}

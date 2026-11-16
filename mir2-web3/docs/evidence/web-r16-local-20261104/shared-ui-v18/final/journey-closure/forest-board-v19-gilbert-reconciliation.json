@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "scope": "ordinary v19 Web NPC transport reconciliation",
+  "sourceProofs": [
+    {
+      "run": "forest-board-v19-r2",
+      "sha256": "456a17208ca7ab815d14063b3c06c234d1df8455855e690c3c17d4cd19b01f77",
+      "originalPass": false,
+      "normalLogout": true
+    },
+    {
+      "run": "forest-board-v19-r3",
+      "sha256": "b3f9d63ab7de657fdd623042a4e1af85cb8b93eaaeaae792af273fb2f506fb4f",
+      "originalPass": false,
+      "normalLogout": false
+    }
+  ],
+  "observed": {
+    "npcObjectId": 1,
+    "exactInteractiveLayer": "sprite",
+    "ordinaryMenuTargets": [
+      "@tele",
+      "@BichonWall"
+    ],
+    "actualMenuCommands": 2,
+    "sameSessionMapInformationSequence": 725,
+    "sameSessionUserLocationSequence": 726,
+    "sameSessionMap": "0",
+    "sameSessionLanding": {
+      "x": 296,
+      "y": 222
+    },
+    "browserVisibleOwnerLandingMatches": true,
+    "goldBefore": 5780,
+    "goldAtNextOrdinaryLogin": 3780,
+    "fare": 2000,
+    "freshOrdinaryLoginPosition": {
+      "x": 288,
+      "y": 616
+    },
+    "landingRetainedAcrossLogout": false,
+    "noSecondTransportRequested": true,
+    "quest8AtNextLogin": {
+      "questId": 2110008,
+      "stage": "readyToTurnIn",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    }
+  }
+}

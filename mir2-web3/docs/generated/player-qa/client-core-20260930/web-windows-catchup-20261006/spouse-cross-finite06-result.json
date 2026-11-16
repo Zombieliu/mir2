@@ -1,0 +1,58 @@
+{
+  "kind": "actual-code-only-existing-script-result",
+  "actualToolChunk": "1707a0",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06.config.json",
+    "bytes": 3675,
+    "sha256": "0f8dcfa3b9389c1ef2b6e938d480edaea8263f2da172de70dc31e7c52e1bf267"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06-source-snapshot.json",
+    "bytes": 9726777,
+    "sha256": "c606288de8718570787069120b71bd024f65213ec68f65dd23ade20cd2cc34ab"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06.outer.json",
+    "bytes": 498,
+    "sha256": "3de0eaf9a896a2a4f24591a6ab8dca12dc660f61dab49d3aa40fde7115bff427",
+    "value": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 83276,
+      "kind": "existing-cross-page-spouse06-code-only-finite",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 4235,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-spouse-cross-finite06.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06.stdout.log",
+    "bytes": 13123,
+    "sha256": "c6125050f6a815b690fbf13e16946426104cc82e98fd8d7260528121d92f4637"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-spouse-cross-finite06.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": 119,
+  "passed": 119,
+  "failed": 0,
+  "skipped": 0,
+  "storagePageGate": 51,
+  "newDistinctStorageTests": 5,
+  "scope": "Existing four-script source harness / AST / finite code checks; no live player or UI evidence.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

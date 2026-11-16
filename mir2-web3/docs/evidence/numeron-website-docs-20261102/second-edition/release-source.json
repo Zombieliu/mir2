@@ -1,0 +1,26 @@
+{
+  "sourceSha": "cf1d1514df315595802e5992d46eced60325aa06",
+  "paths": [
+    "mir2-web3/apps/website/app/[locale]/layout.tsx",
+    "mir2-web3/apps/website/app/[locale]/page.tsx",
+    "mir2-web3/apps/website/app/components/documentation-directory.tsx",
+    "mir2-web3/apps/website/app/components/documentation-page.tsx",
+    "mir2-web3/apps/website/app/components/site-chrome.tsx",
+    "mir2-web3/apps/website/app/documentation.css",
+    "mir2-web3/apps/website/app/globals.css",
+    "mir2-web3/apps/website/app/robots.ts",
+    "mir2-web3/apps/website/app/sitemap.ts",
+    "mir2-web3/apps/website/lib/developer-content.ts",
+    "mir2-web3/apps/website/lib/documentation-types.ts",
+    "mir2-web3/apps/website/lib/documentation.ts",
+    "mir2-web3/apps/website/lib/guide-content.ts",
+    "mir2-web3/apps/website/lib/product-copy.ts",
+    "mir2-web3/apps/website/lib/site-copy.ts",
+    "mir2-web3/apps/website/next.config.mjs",
+    "mir2-web3/apps/website/scripts/check-documentation.mjs",
+    "mir2-web3/apps/website/lib/documentation-navigation.ts",
+    "mir2-web3/apps/website/public/zh-CN/guide-media/windows-login-r16.jpg",
+    "mir2-web3/apps/website/public/zh-CN/guide-media/wallet-qr-expired-r16.jpg"
+  ],
+  "unrelatedIndexEntriesPreserved": true
+}

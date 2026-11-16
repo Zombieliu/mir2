@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-29T20:34:58.545139+00:00",
+  "onlyTestUnitsStopped": true,
+  "units": {
+    "mir2-capacity-5000-20261030-gateway.service": {
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainCode": "0",
+      "ExecMainStatus": "0",
+      "MemoryPeak": "[not set]",
+      "LoadState": "not-found",
+      "ActiveState": "inactive",
+      "lifecycleMessages": [
+        "mir2-capacity-5000-20261030-gateway.service: Deactivated successfully.",
+        "mir2-capacity-5000-20261030-gateway.service: Consumed 13.106s CPU time, 91.6M memory peak, 0B memory swap peak."
+      ]
+    },
+    "mir2-capacity-5000-20261030-redis.service": {
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainCode": "0",
+      "ExecMainStatus": "0",
+      "MemoryPeak": "[not set]",
+      "LoadState": "not-found",
+      "ActiveState": "inactive",
+      "lifecycleMessages": [
+        "mir2-capacity-5000-20261030-redis.service: Deactivated successfully."
+      ]
+    },
+    "mir2-capacity-5000-20261030-watchdog-r2.service": {
+      "MainPID": "0",
+      "Result": "exit-code",
+      "ExecMainCode": "1",
+      "ExecMainStatus": "0",
+      "MemoryPeak": "35508224",
+      "LoadState": "loaded",
+      "ActiveState": "failed",
+      "lifecycleMessages": [
+        "mir2-capacity-5000-20261030-watchdog-r2.service: Failed with result 'exit-code'.",
+        "mir2-capacity-5000-20261030-watchdog-r2.service: Consumed 15.619s CPU time, 33.8M memory peak, 0B memory swap peak."
+      ]
+    }
+  },
+  "originalServices": {
+    "mir2-playtest.service": {
+      "MainPID": "958483",
+      "ActiveState": "active"
+    },
+    "mir2-gateway.service": {
+      "MainPID": "3855184",
+      "ActiveState": "active"
+    },
+    "caddy.service": {
+      "MainPID": "2107428",
+      "ActiveState": "active"
+    }
+  },
+  "originalTestHealth": {
+    "ok": true,
+    "revision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+    "redisHealthy": true
+  },
+  "terminalReason": "operatorStopMarker",
+  "terminalGatewayOomKills": 0,
+  "terminalActive": 0,
+  "databaseAndStateRetained": true,
+  "originalPlayerDatabaseMutatedByThisTask": false,
+  "watchdogMainExitStatus": 0,
+  "watchdogStopPostExitStatus": 5,
+  "watchdogStopPostFailure": "Repeated stop of owned transient units after they had already exited and been garbage-collected; final watchdog Result=exit-code retained, not reset",
+  "watchdogFullySuccessful": false,
+  "watchdogSecondRunOom": false,
+  "scope": "Gateway and Redis normal lifecycle exit; watchdog main exited0 but post-stop hook failed; no capacity or saved-relogin acceptance",
+  "sourceHashes": {
+    "stopRequest": "cccba3e14aa6ae212e244e2dc79a8e6ab6feff9856598ade2371f79e43c8f8da",
+    "stopFinal": "03fcc3620f228186447bbe4bbd792e082871515941ca09042262f3bfce64293d",
+    "postHook": "d624820f75c6d58c00478329915d68893d24f8185cc1085ae30c01e53c80a474"
+  }
+}

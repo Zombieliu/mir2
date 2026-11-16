@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source54 ordinary local browser real play checkpoint",
+  "observedAtUtc": "2026-10-11T02:18:53.404Z",
+  "url": "http://127.0.0.1:19205/",
+  "renderer": "bevy-201eff554f63b9a8",
+  "ordinaryLoginAndStartGame": true,
+  "initialSchedulePanicAbsent": true,
+  "newConsoleErrors": 0,
+  "domMap": {
+    "pending": 0,
+    "completePositiveImages": 898
+  },
+  "document": {
+    "focused": true,
+    "visibility": "visible",
+    "activeElement": "mir2-quest-ui-canvas"
+  },
+  "player": {
+    "name": "WebTest51",
+    "level": 1,
+    "hp": 18,
+    "maxHp": 18,
+    "x": 293,
+    "y": 613
+  },
+  "selectedMonster": {
+    "name": "Scarecrow",
+    "objectId": "206644",
+    "hp": 20,
+    "maxHp": 20,
+    "distanceTiles": 1
+  },
+  "observedBlockers": [
+    "normal nameplate click hits full-stage shared HUD canvas and routes offset tile instead of object ID",
+    "foot tile click selects monster, but HP remains20/20; no attack proof"
+  ],
+  "combatVerified": false,
+  "quest2RewardVerified": false,
+  "source55Required": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

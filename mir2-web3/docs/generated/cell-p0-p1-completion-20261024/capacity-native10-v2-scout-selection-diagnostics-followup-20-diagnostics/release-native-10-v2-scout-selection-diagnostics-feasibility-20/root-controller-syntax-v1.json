@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-26T01:20:31.842006+00:00",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-seal-and-guard-v1.mjs",
+    "bytes": 17598,
+    "sha256": "06429d705d71cdf3af1062070648b146f95f6a2b4d4dd6f7171a2d96d3e6e12b"
+  },
+  "kind": "node--check-only",
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "",
+  "moduleImported": false,
+  "modeExecuted": false
+}

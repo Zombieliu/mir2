@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_K_FULL16_AND_FINAL_SOURCE_REVIEW",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "freshFull16": null,
+  "actualProbeResult": null,
+  "canonicalGeometryProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2563,
+    "sha256": "1e03413bc5a3133e2b44f4a8ebb334cafa07600c48a964186567f59d1c7eaaee"
+  },
+  "ordinaryAccountPoolSize": 100,
+  "maximumControlledActors": 10,
+  "policy": "Original19 stages2/10 each300 seconds, soak360 seconds and16 complete windows; no scene, roles, resource or game threshold change.",
+  "rootExecutionRequired": true,
+  "moduleImported": false,
+  "guardExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -14,6 +14,7 @@ param(
     [switch]$OpenBrowser,
     [switch]$SkipGatewayBuild,
     [switch]$ReuseGateway,
+    [switch]$GatewayOnly,
     [switch]$SelfTest
 )
 
@@ -30,6 +31,8 @@ $WebUrl = "http://127.0.0.1:$WebPort/"
 $GatewayProcess = $null
 $StartedGateway = $false
 $PreviousDevPasskeySecret = $env:MIR2_ALLOW_DEV_PASSKEY_SECRET
+$PreviousDevIdentitySecrets = $env:MIR2_ALLOW_DEV_IDENTITY_SECRETS
+$PreviousSpectatorRecording = $env:MIR2_SPECTATOR_RECORDING_ENABLED
 $PreviousPrebuilt = $env:MIR2_USE_PREBUILT_BEVY_RUNTIME
 $PreviousGatewayWs = $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL
 $PreviousAssetBase = $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL
@@ -40,9 +43,14 @@ $PreviousRecoveryDirectory = $env:MIR2_SAVE_RECOVERY_DIR
 $SaveRecoveryHelper = Join-Path $PSScriptRoot "Initialize-LocalSaveRecovery.ps1"
 
 # The local Web token issuer and Gateway verifier must use the same opt-in
-# development secret. Production never runs through this developer wrapper.
+# development secrets. Production never runs through this developer wrapper.
 try {
     $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = "1"
+    $env:MIR2_ALLOW_DEV_IDENTITY_SECRETS = "1"
+    # Local visual QA does not need persistent spectator replays. At the
+    # production default capture rate they can grow by hundreds of MB per hour
+    # and eventually starve the Gateway's account/save paths of disk space.
+    $env:MIR2_SPECTATOR_RECORDING_ENABLED = "0"
 
 function Test-HttpOk {
     param([string]$Url)
@@ -63,19 +71,27 @@ function Test-ListeningPort {
 function Invoke-StartDeveloperStructuralCleanupSelfTest {
     foreach ($Fault in @("prelaunch-exception", "owned-process-cleanup-shape")) {
         $Before = $env:MIR2_ALLOW_DEV_PASSKEY_SECRET
+        $BeforeIdentity = $env:MIR2_ALLOW_DEV_IDENTITY_SECRETS
+        $BeforeSpectatorRecording = $env:MIR2_SPECTATOR_RECORDING_ENABLED
         $OwnedGatewayStarted = $false
         $OwnedGatewayStopped = $false
         try {
             $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = "selftest-mutated"
+            $env:MIR2_ALLOW_DEV_IDENTITY_SECRETS = "selftest-mutated"
+            $env:MIR2_SPECTATOR_RECORDING_ENABLED = "selftest-mutated"
             if ($Fault -eq "owned-process-cleanup-shape") { $OwnedGatewayStarted = $true }
             throw "injected-$Fault"
         }
         catch { if ($_.Exception.Message -ne "injected-$Fault") { throw } }
         finally {
             $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = $Before
+            $env:MIR2_ALLOW_DEV_IDENTITY_SECRETS = $BeforeIdentity
+            $env:MIR2_SPECTATOR_RECORDING_ENABLED = $BeforeSpectatorRecording
             if ($OwnedGatewayStarted) { $OwnedGatewayStopped = $true }
         }
         if ($env:MIR2_ALLOW_DEV_PASSKEY_SECRET -ne $Before) { throw "$Fault did not restore the parent environment." }
+        if ($env:MIR2_ALLOW_DEV_IDENTITY_SECRETS -ne $BeforeIdentity) { throw "$Fault did not restore the parent identity environment." }
+        if ($env:MIR2_SPECTATOR_RECORDING_ENABLED -ne $BeforeSpectatorRecording) { throw "$Fault did not restore the parent spectator recording environment." }
         if ($OwnedGatewayStarted -and -not $OwnedGatewayStopped) { throw "$Fault did not clean up the owned Gateway." }
     }
     Write-Output "start-developer structural cleanup selftest (no real Gateway): PASS"
@@ -171,6 +187,15 @@ else {
     Write-Host "[start] explicitly reusing healthy Gateway at $GatewayHealthUrl"
 }
 
+    if ($GatewayOnly) {
+        Write-Host "[start] Gateway only: ws://127.0.0.1:$GatewayWebPort/ws"
+        if ($StartedGateway) {
+            Write-Host "[start] Press Ctrl+C to stop the Gateway."
+            Wait-Process -Id $GatewayProcess.Id
+        }
+        return
+    }
+
     $env:MIR2_USE_PREBUILT_BEVY_RUNTIME = "1"
     $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL = "ws://127.0.0.1:$GatewayWebPort/ws"
     if ($AssetBaseUrl) {
@@ -211,6 +236,8 @@ finally {
     $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL = $PreviousGatewayWs
     $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL = $PreviousAssetBase
     $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = $PreviousDevPasskeySecret
+    $env:MIR2_ALLOW_DEV_IDENTITY_SECRETS = $PreviousDevIdentitySecrets
+    $env:MIR2_SPECTATOR_RECORDING_ENABLED = $PreviousSpectatorRecording
     $env:MIR2_GATEWAY_WEB_ADDR = $PreviousWebAddress
     $env:MIR2_GATEWAY_TCP_ADDR = $PreviousTcpAddress
     $env:MIR2_SAVE_RECOVERY_MAC_KEY = $PreviousRecoveryMacKey

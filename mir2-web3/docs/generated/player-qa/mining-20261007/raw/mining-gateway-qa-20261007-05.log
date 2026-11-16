@@ -1,0 +1,654 @@
+warning: unused import: `super::skills::crystal_magic_damage`
+  --> apps\simulation\src\runtime\hero_ai.rs:53:5
+   |
+53 | use super::skills::crystal_magic_damage;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `hero_registry_scan::validate_shared_hero_physical_custody`
+  --> apps\simulation\src\runtime\mod.rs:22:16
+   |
+22 | pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `HeroInventoryResource`
+  --> apps\simulation\src\runtime\items.rs:58:19
+   |
+58 |     BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
+   |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `merged_user_item_stats`
+  --> apps\simulation\src\runtime\npc.rs:35:72
+   |
+35 |     crystal_item_key_for_template, crystal_item_template_for_item_key, merged_user_item_stats,
+   |                                                                        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `hero_inventory_crystal_stat_total`
+  --> apps\simulation\src\runtime\packets.rs:72:22
+   |
+72 | use super::hero_ai::{hero_inventory_crystal_stat_total, hero_inventory_equipment_slots};
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crystal_quest_info_by_id`
+   --> apps\simulation\src\runtime\packets.rs:108:5
+    |
+108 |     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `intelligent_creature_default_rules`
+   --> apps\simulation\src\runtime\packets.rs:125:5
+    |
+125 |     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `ZoneExperienceProfile` and `ZoneGuildExperienceMembership`
+ --> apps\simulation\src\runtime\zone\mod.rs:6:22
+  |
+6 | pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+  |                      ^^^^^^^^^^^^^^^^^^^^^                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:61:22
+   |
+61 |     let target=world.iter_entities().find_map(|entry| {
+   |                      ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7894:25
+     |
+7894 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\session.rs:772:14
+    |
+772 |             .iter_entities()
+    |              ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5017:10
+     |
+5017 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5100:10
+     |
+5100 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: type `HeroSourceVersions` is more private than the item `config::AccountStoreRepositorySave::heroes`
+   --> apps\simulation\src\config.rs:912:5
+    |
+912 |     pub(crate) heroes: hero_registry::HeroSourceVersions,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `config::AccountStoreRepositorySave::heroes` is reachable at visibility `pub(crate)`
+    |
+note: but type `HeroSourceVersions` is only usable at visibility `pub(in crate::config)`
+   --> apps\simulation\src\config_hero_registry.rs:93:1
+    |
+93  | pub(super) struct HeroSourceVersions {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `ZoneCombatEntityRef` is more private than the item `tree_queen_ai::TreeQueenRoot::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\tree_queen_ai.rs:39:5
+   |
+39 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `tree_queen_ai::TreeQueenRoot::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:11:5
+   |
+11 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirPendingSource::source`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:20:5
+   |
+20 |     pub source: ZoneCombatEntityRef,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirPendingSource::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:15:5
+   |
+15 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:42:5
+   |
+42 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:44:5
+   |
+44 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:12:5
+   |
+12 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:38:5
+   |
+38 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:41:5
+   |
+41 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedMapSpell::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:60:5
+   |
+60 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedMapSpell::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HellState::explosion_source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:14:5
+   |
+14 |     pub explosion_source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HellState::explosion_source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `SpiderAiState::parent_ref`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:40:5
+   |
+40 |     pub parent_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `SpiderAiState::parent_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::source`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:52:5
+   |
+52 |     pub source: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::target`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:54:5
+   |
+54 |     pub target: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::target` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:404:8
+    |
+266 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+404 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+408 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: variant `AccountsWithHeroes` is never constructed
+   --> apps\simulation\src\config.rs:489:5
+    |
+486 | enum AccountStoreMutationScope<'a> {
+    |      ------------------------- variant in this enum
+...
+489 |     AccountsWithHeroes { account_ids: &'a [String], hero_ids: &'a [i32], allocate: bool },
+    |     ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `AccountStoreMutationScope` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: field `admitted_minutes` is never read
+  --> apps\simulation\src\config_guild_clock_transactions.rs:13:9
+   |
+6  | pub(in crate::config) struct GuildClockCommitReceipt {
+   |                              ----------------------- field in this struct
+...
+13 |     pub admitted_minutes: u64,
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: `GuildClockCommitReceipt` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `commit_postgres_tick` is never used
+  --> apps\simulation\src\config_guild_clock_transactions.rs:17:26
+   |
+17 | pub(in crate::config) fn commit_postgres_tick(
+   |                          ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `commit_postgres_tick_checked` is never used
+  --> apps\simulation\src\config_guild_clock_transactions.rs:24:26
+   |
+24 | pub(in crate::config) fn commit_postgres_tick_checked(
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `item_identity_path` is never used
+   --> apps\simulation\src\config_file_authority.rs:102:19
+    |
+99  | impl FileAuthority {
+    | ------------------ method in this implementation
+...
+102 |     pub(super) fn item_identity_path(&self, config: &SimulationConfig) -> Result<PathBuf, String> {
+    |                   ^^^^^^^^^^^^^^^^^^
+
+warning: method `refresh_shared_hero_authority` is never used
+ --> apps\simulation\src\config_hero_authority.rs:8:19
+  |
+7 | impl SimulationConfig {
+  | --------------------- method in this implementation
+8 |     pub(crate) fn refresh_shared_hero_authority(&self)->Result<(),String>{
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `shared_guild_authority_snapshot` is never used
+   --> apps\simulation\src\config_shared_guilds.rs:845:19
+    |
+844 | impl SimulationConfig {
+    | --------------------- method in this implementation
+845 |     pub(crate) fn shared_guild_authority_snapshot(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:785:5
+    |
+778 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+785 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: constant `CRYSTAL_BAG_WEIGHT_LIMIT` is never used
+  --> apps\simulation\src\runtime\drops.rs:72:18
+   |
+72 | pub(super) const CRYSTAL_BAG_WEIGHT_LIMIT: u32 = 100;
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `resolved_monster_drop_templates_at_tick` is never used
+   --> apps\simulation\src\runtime\drops.rs:466:15
+    |
+466 | pub(super) fn resolved_monster_drop_templates_at_tick(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_monster_drop_templates` is never used
+   --> apps\simulation\src\runtime\drops.rs:537:15
+    |
+537 | pub(super) fn crystal_monster_drop_templates(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_resolve_group_drop` is never used
+   --> apps\simulation\src\runtime\drops.rs:612:15
+    |
+612 | pub(super) fn crystal_resolve_group_drop(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_drop_entry_should_drop` is never used
+   --> apps\simulation\src\runtime\drops.rs:667:15
+    |
+667 | pub(super) fn crystal_drop_entry_should_drop(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:304:19
+    |
+120 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+304 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:309:15
+    |
+309 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:314:15
+    |
+314 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_equipment_slot` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:180:4
+    |
+180 | fn hero_inventory_equipment_slot(item: &ItemState) -> Option<EquipmentSlot> {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_is_broken` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:185:4
+    |
+185 | fn hero_inventory_item_is_broken(item: &ItemState) -> bool {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_modeled_base_stat` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:189:4
+    |
+189 | fn hero_inventory_item_modeled_base_stat(item: &ItemState, stat: u8) -> i32 {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_crystal_stat` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:197:4
+    |
+197 | fn hero_inventory_item_crystal_stat(item: &ItemState, stat: u8) -> i32 {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_crystal_stat_total` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:214:15
+    |
+214 | pub(super) fn hero_inventory_crystal_stat_total(world: &World, stat: u8) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: enum `CarrierOrigin` is never used
+ --> apps\simulation\src\runtime\hero_registry_carriers.rs:8:17
+  |
+8 | pub(super) enum CarrierOrigin { External, Hero(i32) }
+  |                 ^^^^^^^^^^^^^
+
+warning: struct `HeroCarrierCensus` is never constructed
+  --> apps\simulation\src\runtime\hero_registry_carriers.rs:10:19
+   |
+10 | pub(super) struct HeroCarrierCensus {
+   |                   ^^^^^^^^^^^^^^^^^
+
+warning: methods `node`, `record`, `record_unresolved_legacy`, and `validate` are never used
+  --> apps\simulation\src\runtime\hero_registry_carriers.rs:15:8
+   |
+14 | impl HeroCarrierCensus {
+   | ---------------------- methods in this implementation
+15 |     fn node(&mut self,item:&UserItem,origin:CarrierOrigin)->Result<(),String>{
+   |        ^^^^
+...
+27 |     pub fn record(&mut self,item:&UserItem,origin:CarrierOrigin)->Result<(),String>{
+   |            ^^^^^^
+...
+42 |     pub fn record_unresolved_legacy(&mut self,root:&super::items::ItemState)->Result<(),String>{
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+70 |     pub fn validate(&self,heroes:&BTreeMap<i32,SharedHeroRecord>,owned_ids:&BTreeSet<u64>)->Result<(),String>{
+   |            ^^^^^^^^
+
+warning: function `decode` is never used
+ --> apps\simulation\src\runtime\hero_registry_scan.rs:8:4
+  |
+8 | fn decode<T:DeserializeOwned>(value:&str)->Result<T,String>{serde_json::from_str(value).map_err(|error|format!("invalid Hero custody carr...
+  |    ^^^^^^
+
+warning: function `add_wire` is never used
+ --> apps\simulation\src\runtime\hero_registry_scan.rs:9:4
+  |
+9 | fn add_wire(census:&mut HeroCarrierCensus,item:&UserItem,origin:CarrierOrigin,forbidden_bind:u16)->Result<(),String>{
+  |    ^^^^^^^^
+
+warning: function `add_items` is never used
+  --> apps\simulation\src\runtime\hero_registry_scan.rs:21:4
+   |
+21 | fn add_items(census:&mut HeroCarrierCensus,encoded:&[String],origin:CarrierOrigin,forbidden:u16)->Result<(),String>{
+   |    ^^^^^^^^^
+
+warning: function `add_character` is never used
+  --> apps\simulation\src\runtime\hero_registry_scan.rs:32:4
+   |
+32 | fn add_character(census:&mut HeroCarrierCensus,save:&CharacterSaveRecord,mirrored:bool)->Result<(),String>{
+   |    ^^^^^^^^^^^^^
+
+warning: function `validate_shared_hero_physical_custody` is never used
+  --> apps\simulation\src\runtime\hero_registry_scan.rs:86:15
+   |
+86 | pub(crate) fn validate_shared_hero_physical_custody(store:&AccountStore)->Result<(),String>{
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_is_broken` is never used
+    --> apps\simulation\src\runtime\items.rs:3456:4
+     |
+3456 | fn hero_inventory_item_is_broken(item: &ItemState) -> bool {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_requirement_stat` is never used
+    --> apps\simulation\src\runtime\items.rs:3460:4
+     |
+3460 | fn hero_inventory_requirement_stat(item: &ItemState, stat: u8) -> i32 {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1879:15
+     |
+1879 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_npc_visible_to_character` is never used
+   --> apps\simulation\src\runtime\npc.rs:246:15
+    |
+246 | pub(super) fn crystal_npc_visible_to_character(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+    --> apps\simulation\src\runtime\quests.rs:1094:15
+     |
+1094 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+     |               ^^^^^^^^^^^^^^
+
+warning: function `quest_info_by_id_unchecked` is never used
+   --> apps\simulation\src\runtime\newcomer_v2.rs:231:27
+    |
+231 | pub(in crate::runtime) fn quest_info_by_id_unchecked(quest_id: i32) -> Option<ClientQuestInfo> {
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:926:15
+    |
+926 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `bank_mentor_gain` is never used
+   --> apps\simulation\src\runtime\shared_relationships.rs:321:15
+    |
+321 | pub(super) fn bank_mentor_gain(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4304:8
+     |
+3234 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4304 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `select` is never used
+  --> apps\simulation\src\runtime\zone\experience.rs:41:19
+   |
+40 | impl ZoneExperienceProfile {
+   | -------------------------- method in this implementation
+41 |     pub(super) fn select(
+   |                   ^^^^^^
+
+warning: method `apply_native_monster_direct_damage` is never used
+     --> apps\simulation\src\runtime\zone\runtime.rs:12352:8
+      |
+586   | impl ZoneRuntime {
+      | ---------------- method in this implementation
+...
+12352 |     fn apply_native_monster_direct_damage(
+      |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:68:15
+   |
+68 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:74:15
+   |
+74 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: methods `blocking` and `set_replay_seed` are never used
+   --> apps\simulation\src\runtime\zone\intelligent_creatures.rs:183:12
+    |
+112 | impl ZoneIntelligentCreature {
+    | ---------------------------- methods in this implementation
+...
+183 |     pub fn blocking(&self) -> bool {
+    |            ^^^^^^^^
+...
+187 |     pub fn set_replay_seed(&mut self, seed: u64) {
+    |            ^^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 77 warnings (run `cargo fix --lib -p mir2-simulation` to apply 8 suggestions)
+   Compiling mir2-gateway v0.1.0 (C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\apps\gateway)
+warning: variable does not need to be mutable
+    --> apps\gateway\src\routing.rs:4408:13
+     |
+4408 |         let mut current_player_heals = Vec::new();
+     |             ----^^^^^^^^^^^^^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` on by default
+
+error: linking with `link.exe` failed: exit code: 1104
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/NOLOGO" "C:\\Users\\Administrator\\AppData\\Local\\Temp\\rustcrFJ0kM\\symbols.o" "<257 object files omitted>" "kernel32.lib" "C:\\mir2-build\\gateway-tests-r51\\debug\\deps/{librmp_serde-d146dc6a33cc986d.rlib,librmp-f70f6aabdb0e761d.rlib}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libtest-*,libgetopts-*,libunicode_width-*,librustc_std_workspace_std-*}.rlib" "C:\\mir2-build\\gateway-tests-r51\\debug\\deps/{libaxum-271d166754b1fc39.rlib,libserde_path_to_error-e095e75eb1b8ca3d.rlib,libmatchit-674e7be163346f96.rlib,libtokio_tungstenite-717de7ae0f38dad0.rlib,libtungstenite-5d9960d65c0170da.rlib,libdata_encoding-81000802a0402657.rlib,librand-ed24e95327949986.rlib,librand_chacha-96d9b43c72900ce8.rlib,librand_core-bda23c0f83e00e33.rlib,libgetrandom-bd486248ad9da3f6.rlib,libsha1-d8dd5b77f98740d0.rlib,libaxum_core-34310639b35fad57.rlib,libmime-be6303c0abac6c3d.rlib,libquinn-77ea2c154a8db1b0.rlib,libquinn_udp-154e2659fbebb181.rlib,libquinn_proto-aaae7d7a87067ed9.rlib,liblru_slab-76fcfc0ff7cc6632.rlib,librand_pcg-8cd298e680bcd760.rlib,librustc_hash-b40a8f26de74712c.rlib,libdubhe_network_core-608bac25cbde6192.rlib,libtar-e9836208663e1905.rlib,libfiletime-9a6652c6781aeb83.rlib,libkeyring-d44f5c12f55f9bc7.rlib,libwindows_sys-fcccfaaf7e054fa0.rlib,libwindows_targets-83353e19a27be8fb.rlib,libed25519_consensus-cacafb8728ad4a3f.rlib,libhex-ab5f7a587ac44d91.rlib,libthiserror-5a58541f69614ba4.rlib,libsha2-5c8bc6889a011715.rlib,libopaque_debug-80d1295fb99dee7b.rlib,libblock_buffer-92e61c8a2dffe168.rlib,libcurve25519_dalek_ng-cf860c0a7a6a3b9f.rlib,libsubtle_ng-b79661e6dc93dc42.rlib,libdigest-2b4c4eb70082f79a.rlib,libsemver-9f4355ba44eee0ac.rlib,librand-99e8a1f3be343385.rlib,librand_chacha-42815f7416695155.rlib,libppv_lite86-65840c023b811863.rlib,libzerocopy-b3af1cc636c68b33.rlib,libr2d2_postgres-21dd9d0dd581797a.rlib,libr2d2-772c606d7ede7cc7.rlib,libscheduled_thread_pool-8aaf95e01d29ce7e.rlib,libjsonwebtoken-3474790af5c6779d.rlib,libpem-8c193f0ef0782135.rlib,libsimple_asn1-9ea7eed468742e28.rlib,libtime-1b74b202b1951d87.rlib,libpowerfmt-0366066629f6ae48.rlib,libnum_conv-ce31cbe31b11fc2e.rlib,libderanged-41445facb7e5d8fb.rlib,libtime_core-6367b304be6cf7d3.rlib,libnum_bigint-2d3691ebdd368f4f.rlib,libnum_integer-c7bb774bb0828107.rlib,libnum_traits-56f9b277e314fb66.rlib,libmir2_simulation-e281b2301058322f.rlib,liblibc-628a277442b7a7a8.rlib,libflate2-e93c39ee06435ede.rlib,libminiz_oxide-77f969b4e7f8d35d.rlib,libsimd_adler32-82b2bbc436d61198.rlib,libcrc32fast-71a45df3ee6cf5c6.rlib,libargon2-f168ff1db2c88535.rlib,libcpufeatures-995317b5289dd323.rlib,libblake2-9cda89ea8328ca13.rlib,libdigest-a476dc79471de1ea.rlib,libblock_buffer-23129953b32cc30e.rlib,libcrypto_common-80a07d8a700ac7a7.rlib,libgeneric_array-0d39c40d2ea3766d.rlib,libpassword_hash-476f9e7f8011f074.rlib,libbase64ct-5baae47025be7c88.rlib,libbevy_ecs-a8c98cf0f6170cde.rlib,libslotmap-986c10da8c2c9082.rlib,libbevy_tasks-0348446eb9fd1907.rlib,libasync_channel-9e3a5def18b754e1.rlib,libevent_listener_strategy-a8e0092abc952fb8.rlib,libevent_listener-0be4319a26921f32.rlib,libasync_executor-1957dbeaa086c608.rlib,libfastrand-ff7544043800ffa0.rlib,libasync_task-e2c4ea37420c3a85.rlib,libconcurrent_queue-89aab96c40e0e9b7.rlib,libcrossbeam_utils-4cfb728ffb828f8d.rlib,libfutures_lite-12eecff57c63b2f3.rlib,libfutures_io-aa04e9ee4d18a597.rlib,libparking-895d1b08e86b494d.rlib,libfixedbitset-f50daf6bc6694d63.rlib,libbumpalo-53c13183031751de.rlib,libbevy_reflect-5eacc0e53ec26b27.rlib,liberased_serde-e425b899e0e0561c.rlib,libtypeid-0370061646dce760.rlib,libdowncast_rs-cc4c1d81b91a3dc1.rlib,libderive_more-35f22fdfc7f8ec6a.rlib,libthiserror-3c52b9b91c5eeba2.rlib,libindexmap-016c9ad6fde5cef8.rlib,libhashbrown-870b5503f0bffc20.rlib,libbevy_utils-b822170c6fc77d91.rlib,libthread_local-15b7a2c5ea200037.rlib,libdisqualified-c09f194a4c47a9df.rlib,libbevy_ptr-aab0d04f5526f583.rlib,libnonmax-449a671a285133bd.rlib,libbevy_platform-4d7b368ac8fb2de2.rlib,libhashbrown-5133658d67eeb445.rlib,libequivalent-bf69e0f47555a7c9.rlib,libfoldhash-3027f4e113516b61.rlib,librand_core-dbdf680b0d332020.rlib,libpostgres-69f1b127b82843bb.rlib,libtokio_postgres-1af6806404722ce9.rlib,libphf-342fef8bf990b32f.rlib,libphf_shared-22b2b439909a1362.rlib,libsiphasher-1ef87cab3ee12759.rlib,libwhoami-fc301df678aa72b3.rlib,libparking_lot-2d7e886fc608d3c8.rlib,libparking_lot_core-350136d21d049d55.rlib,liblock_api-de85b07b75c8942a.rlib,libscopeguard-ff96c909ded4fda5.rlib,libpostgres_types-54dee03ec8483e88.rlib,libpostgres_protocol-94cc09ed4cd8fcc3.rlib,libstringprep-38e8dd5c1c476fe6.rlib,libunicode_properties-677a4a9f321e749d.rlib,libunicode_normalization-1312a7d4ce1d83df.rlib,libtinyvec-a678fbd407497add.rlib,libtinyvec_macros-e2e53236f6e402c0.rlib,libunicode_bidi-29b7a6973493411e.rlib,librand-b5e29cb84498d0d3.rlib,libgetrandom-5f3b4b0377c13f20.rlib,libchacha20-62dedfa8ce097e9f.rlib,librand_core-dd5b5de8ec4cbded.rlib,libmd5-f0828b3b6834005e.rlib,libbyteorder-ef03b69be319ab64.rlib,libfallible_iterator-1a626e779b6b2949.rlib,libmir2_game_data-3c87512c25cd8325.rlib,libmir2_protocol-11045ba50aff2c9a.rlib,libhmac-6134517918dc0620.rlib,libsha2-233c82c26040b806.rlib,libcpufeatures-13c3ea7229e88751.rlib,libdigest-b8039dc575cde69f.rlib,libctutils-170cbd77b1c3f775.rlib,libcmov-a03d9137d60546a3.rlib,libconst_oid-af1863522cdfd860.rlib,libcrypto_common-7aac243fc373d91e.rlib,libblock_buffer-8886c10330358d57.rlib,libhybrid_array-0dfc639a4c912b33.rlib,libtypenum-c8fc5bf3dcaacf9e.rlib,libreqwest-a36e128b3080121a.rlib,libserde_urlencoded-ef677027be1ba918.rlib,libryu-1bac28355677978c.rlib,libhyper_rustls-517eeaab1b14ecd3.rlib,libwebpki_roots-f1ea5d53c2a33588.rlib,libtokio_rustls-b9896d970a38e404.rlib,librustls-afa07167b00700e8.rlib,libsubtle-9f8d624f3ecab51e.rlib,libwebpki-a7953d65164c3a25.rlib,libring-c580594553ab617c.rlib,libgetrandom-4b0bba6878a1e9f2.rlib,libuntrusted-24b17eea6cb4ea79.rlib,libcfg_if-59068db8513376d0.rlib,librustls_pki_types-500061868b7616b9.rlib,libzeroize-f9d0f4b5e3fef55b.rlib,libserde_json-bf2a5e1874319709.rlib,libmemchr-92bd7d17e5c1446c.rlib,libzmij-4af8959139dacb54.rlib,libserde-6ce4dbf4bc4a170f.rlib,libserde_core-7d749cd93e25e177.rlib,libtower_http-e9428c32f822db57.rlib,libbitflags-c8daa1c1687fe362.rlib,libtower-7493fa9d650065f3.rlib,libtower_layer-abea24a221aeeaac.rlib,libhyper_util-cbe16bc380005e8e.rlib,libbase64-93d20f66de1a1e7b.rlib,libipnet-63d84d5c6dfc8fff.rlib,libtower_service-bbbcb7f2fee05191.rlib,libtracing-cedb65d828addcb9.rlib,libtracing_core-6e1dd0071c2b2b3e.rlib,libonce_cell-01a5ec62eb147d5f.rlib,libhyper-d7b6e50ed136fda9.rlib,libwant-d0ade955ecf71225.rlib,libtry_lock-d7cd4d34874837b4.rlib,libhttparse-20f3b0e448f76f28.rlib,libatomic_waker-9beb998af85f6048.rlib,libhttpdate-f9ed83d7faacb9c0.rlib,libfutures_channel-50dd3fae95a349e7.rlib,libfutures_util-b61007a21e7fffc3.rlib,libslab-4e767a568d7b14f1.rlib,libfutures_task-08de9a9fcb9fdf86.rlib,libtokio_util-bedf14f37be69149.rlib,libfutures_sink-40aa203714552e51.rlib,libtokio-5a7fc5842d0da86a.rlib,libsocket2-317f213cc023d5a0.rlib,libmio-fcca810bd553691e.rlib,libwindows_sys-b1a03acfa9601a05.rlib,libwindows_link-57fe558fbc78bd39.rlib,libhttp_body_util-0d23637c34eb64ba.rlib,libpin_project_lite-0e767b5bef4d40ae.rlib,libhttp_body-61d9114cc5b46402.rlib,liblog-67ed13b2849989c0.rlib,liburl-d84ea24039c35da2.rlib,libidna-b3ba68e51cb12522.rlib,libidna_adapter-1e09d2595e53dcff.rlib,libicu_properties-683fc4b210687a8c.rlib,libicu_properties_data-60d86a8c67023009.rlib,libicu_normalizer-8b1f7acd2c551417.rlib,libsmallvec-fe974dc15d77cf0e.rlib,libicu_normalizer_data-52da27779bc6f785.rlib,libicu_collections-67d21ad3dfe9150a.rlib,libutf8_iter-9ce41dd9f6284acc.rlib,libpotential_utf-ab671d0a3dfdd644.rlib,libicu_provider-a09e1afda36034b5.rlib,libicu_locale_core-a938a2031e0ead59.rlib,libtinystr-e0e8554cc4ce3a9d.rlib,liblitemap-a94b4751b352b24d.rlib,libwriteable-7cec9b02b3d49c96.rlib,libzerovec-688cc5e600b40267.rlib,libzerotrie-c3f8b6ef2cece540.rlib,libyoke-076411777847fcdb.rlib,libstable_deref_trait-f71679b6167e4e6f.rlib,libzerofrom-10ebf2fe1c97f22f.rlib,libform_urlencoded-69be0b76b978d1f5.rlib,libpercent_encoding-a6357bf6041443d2.rlib,libhttp-1d22b997052ac9b2.rlib,libitoa-92d8b1e9c0939eb2.rlib,libbytes-76765b86e79b9d72.rlib,libsync_wrapper-6679d81cd749422f.rlib,libfutures_core-c83d5fb70b6752de.rlib}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libstd-*,libpanic_unwind-*,libwindows_targets-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,libcfg_if-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "C:\\Users\\Administrator\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows_x86_64_msvc-0.53.1\\lib\\windows.0.53.0.lib" "Kernel32.lib" "kernel32.lib" "legacy_stdio_definitions.lib" "secur32.lib" "advapi32.lib" "kernel32.lib" "bcrypt.lib" "advapi32.lib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/LIBPATH:C:/mir2-build/gateway-tests-r51\\debug\\build\\ring-a9a0714b6535cb5c\\out" "/LIBPATH:C:\\Users\\Administrator\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows_x86_64_msvc-0.53.1\\lib" "/OUT:C:/mir2-build/gateway-tests-r51\\debug\\deps\\mir2_gateway-b035aa43022289bb.exe" "/OPT:REF,NOICF" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1104: 无法打开文件“C:\mir2-build\gateway-tests-r51\debug\deps\mir2_gateway-b035aa43022289bb.exe”␍
+          
+
+warning: `mir2-gateway` (lib test) generated 1 warning
+error: could not compile `mir2-gateway` (lib test) due to 1 previous error; 1 warning emitted

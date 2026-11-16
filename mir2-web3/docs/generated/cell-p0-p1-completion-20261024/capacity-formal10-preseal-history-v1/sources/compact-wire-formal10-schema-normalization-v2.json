@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:31:35.290Z",
+  "scope": "Unsealed formal10 success-only schema normalization; no gate or live data was evaluated.",
+  "oldPreseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v1.json",
+    "bytes": 23162,
+    "sha256": "32e2bf8096c8375ad83ebadad032cd27145123ab08ae2cd210b86364bab6ec29"
+  },
+  "originalSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 12722,
+    "sha256": "ec35d95b35565f0082434e1c76e4b795c356264f43dde1978c4272cc8b96caf1"
+  },
+  "preservedPreimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-helper-v1.mjs.txt",
+    "bytes": 12722,
+    "sha256": "ec35d95b35565f0082434e1c76e4b795c356264f43dde1978c4272cc8b96caf1"
+  },
+  "newSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 12790,
+    "sha256": "d3deb53c016ddf206f6f003d31be83ce6f9970d67c359c3915841dddb0855f11"
+  },
+  "logicalChanges": [
+    {
+      "label": "Actual independent receipt uses lowerCamel hp",
+      "before": "receipt.HP",
+      "after": "receipt.hp",
+      "expectedMatches": 3
+    },
+    {
+      "label": "Actual independent terminal pin uses fixed relative path plus exact bytes/SHA",
+      "before": "JSON.stringify(w.terminal)!==JSON.stringify(terminalPin)",
+      "after": "w.terminal?.path!==`${realm}/${WIRE_TERMINAL}`||w.terminal.bytes!==terminalPin.bytes||w.terminal.sha256!==terminalPin.sha256",
+      "expectedMatches": 1
+    }
+  ],
+  "exactInverseRestoresOriginalBytes": true,
+  "otherLocalInputsUnchanged": 44,
+  "producerSchemaSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\verify-ended-probe13.mjs",
+    "bytes": 23135,
+    "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+  },
+  "originalPolicyUnchanged": true,
+  "originalGameplayThresholdsUnchanged": true,
+  "diagnosticCompletenessNotGameplayGate": true,
+  "sourceGuardExecuted": false,
+  "gateInvoked": false,
+  "liveProbeRawRead": false,
+  "realmStarted": false,
+  "sealed": false
+}

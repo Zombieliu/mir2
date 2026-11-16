@@ -1,0 +1,13 @@
+{
+  "sourceRevision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+  "runId": 37716453313,
+  "artifactId": 11525323477,
+  "artifactZipSha256": "f3d6be85a59f98f622c616e2fe311fbac2f6fdf5b492bcd490abfb53575d3ad6",
+  "archive": "mir2-gateway-linux-x64-20261008-classic-r22.tar.gz",
+  "archiveSha256": "a5b563efa5b65ffc005df307c39a4ed0947b0809d101f7d14a668b70cb88e60b",
+  "binarySha256": "1ba51402a76f4c454674836f869751d63848b5370083a4cf7b71e0654fbf10d3",
+  "binarySizeBytes": 83362336,
+  "buildAndSecurityJobPassed": true,
+  "releaseWorkflowAccepted": true,
+  "deployedToLiveRealm": false
+}

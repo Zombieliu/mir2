@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:51:28.883Z",
+  "scope": "Bounded16/146 clock/projection/schema synthetic validation only, not a real formal run or game acceptance.",
+  "tests": 10,
+  "passed": 10,
+  "failed": 0,
+  "exitCode": 0,
+  "sourceBefore": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-feasibility-gate.mjs",
+      "bytes": 19527,
+      "sha256": "1271b11da525a7c228bcfca473a1255f224e7919826ffd1bc86d25b4d193cdc4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\collect-public.mjs",
+      "bytes": 41882,
+      "sha256": "59f25bff4ca5f6da894b9c6fae157883c10f2efea47365e8c36e25ecd2c98650"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-public.mjs",
+      "bytes": 18729,
+      "sha256": "42b634bdf9f31ecc27e1eda803a8b730e298887316f7b07a6d1dd96a632fbab3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-window-contract.test.mjs",
+      "bytes": 4892,
+      "sha256": "a794d24f8fa5e3644069c2ad8e3c37962374f43a564e1b6d178b4e76066470ff"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-feasibility-gate.mjs",
+      "bytes": 19527,
+      "sha256": "1271b11da525a7c228bcfca473a1255f224e7919826ffd1bc86d25b4d193cdc4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\collect-public.mjs",
+      "bytes": 41882,
+      "sha256": "59f25bff4ca5f6da894b9c6fae157883c10f2efea47365e8c36e25ecd2c98650"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-public.mjs",
+      "bytes": 18729,
+      "sha256": "42b634bdf9f31ecc27e1eda803a8b730e298887316f7b07a6d1dd96a632fbab3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-window-contract.test.mjs",
+      "bytes": 4892,
+      "sha256": "a794d24f8fa5e3644069c2ad8e3c37962374f43a564e1b6d178b4e76066470ff"
+    }
+  ],
+  "sourceUnchanged": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-window-synthetic-v5.log",
+    "bytes": 2316,
+    "sha256": "28a9607ed078b12b5f8f3b45fb966863503e636ecd04a68e8973c3b1f8444210"
+  },
+  "liveRawRead": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

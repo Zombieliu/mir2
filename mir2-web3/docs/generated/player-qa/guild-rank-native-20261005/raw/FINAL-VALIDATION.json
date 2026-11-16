@@ -1,0 +1,10 @@
+{
+  "created_utc": "2026-10-04T18:43:14.352950+00:00",
+  "validation": "read-only reverse applicability; no source mutation",
+  "exit_code": 0,
+  "all_frozen_current_source_sha_match": true,
+  "scoped_cargo_runs_completed": 12,
+  "delivery_json_sha256": "b43c6f12369fb9912541b8aeea83f0055defa7587c86feb829e4cf1a323e5a2f",
+  "delivery_md_sha256": "c8ec5237c8fc8c7b0c63f36c1dfe37ae772f9379c14ca6af9d3c0130c056f572",
+  "native_ingest_sha256": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7"
+}

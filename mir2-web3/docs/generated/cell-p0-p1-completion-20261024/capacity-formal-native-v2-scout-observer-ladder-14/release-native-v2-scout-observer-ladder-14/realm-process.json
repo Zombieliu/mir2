@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "pid": 66160,
+  "runnerPid": 71652,
+  "exe": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\bin\\mir2-gateway.exe",
+  "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "startedAtUtc": "2026-10-25T22:25:45.931Z",
+  "tokioWorkers": 4,
+  "content": "platinum_176",
+  "routing": "single",
+  "accountBackend": "file",
+  "explicitAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "wireDiagnostics": {
+    "version": "v2",
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "wrapperTests": 28,
+    "core187CoversWrapper": false,
+    "terminalFile": "compact-navigation-wire-terminal.json",
+    "terminalOutsideRaw": true,
+    "existingWriter": {
+      "defaultMaxBufferedBytes": 4194304,
+      "addMayRecordFailureAndReturn": true,
+      "durableRowsRequireRawCrosscheck": true
+    }
+  },
+  "storeDiagnostics": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "storeOnly": true,
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+    "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+    "separateFromBaseThreeFourSeven": true,
+    "contributesToGameAcceptance": false
+  },
+  "ordinaryAccountPoolSize": 100,
+  "maximumControlledActors": 100,
+  "coreCodeEvidenceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "sceneSourceSha256": "3e34b754d55e7ba0aa38b7600fb5746b80ef3cb272a2216ba88904e1a12c785d",
+  "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+  "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+  "sceneAnalysisSha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5",
+  "patrolSpan": 2,
+  "attackResults": "v2",
+  "slowStageThresholdMs": 50,
+  "slowStagePublicSchema": "socket-context-v1",
+  "slowStageHelperSha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c",
+  "full16RunId": "1792963911146-f4437694",
+  "slowStagePublicFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public.jsonl",
+  "stdinShutdown": true,
+  "freshPrivateSecrets": 4,
+  "parallelCompilation": false,
+  "capacityAcceptanceEligible": true,
+  "capacityAcceptanceActuallyPassed": false,
+  "spectatorDataDir": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\recordings",
+  "spectatorEnabledFromFrozenDefault": true,
+  "spectatorRecordingFromFrozenDefault": true,
+  "spectatorPublicFromFrozenDefault": true
+}

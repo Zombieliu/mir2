@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T20:05:33.928Z",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\preparation-v1.json",
+    "bytes": 5762,
+    "sha256": "6b9e51ee0f7f81ba71494be9d6f6fee402178fb15b259def90e0dd69e267d0db"
+  },
+  "scope": "Static source-only qualification for Root sealing and explicit ended17 execution. Eight current tool inputs and six exact derivations checked. No target import, synthetic/selfcheck/product test, raw/monitor/recording replay, binary hash or service execution by this reviewer.",
+  "currentSourceSha256": "686f773ac3fad49aa05280dfcac08fcec997b6819deb05aa9699de6037267073",
+  "checkedInputs": [
+    {
+      "path": "verify-ended-probe17-v1.mjs",
+      "bytes": 34205,
+      "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe17-v1.mjs",
+      "bytes": 2257,
+      "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-v1.json",
+      "bytes": 11709,
+      "sha256": "6b24c59c2f494c09fc42cbc1ed9eb3cf8db05bd3452beca421db0c104602079c"
+    },
+    {
+      "path": "derive-verifier-v1.cjs",
+      "bytes": 8635,
+      "sha256": "377d6de698661f2f340b49e2397dc1b4e8ffc1d41505c2c439d0ce04d8e058c7"
+    }
+  ],
+  "derivations": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "hunks": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "hunks": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "hunks": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "f31dbde547f7e725d9ea209cc3e160f36c442891729dccba675db0b59eee927d"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+      },
+      "hunks": 4,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\run-ended-probe16-v1.mjs",
+        "bytes": 2257,
+        "sha256": "944ef34333131c729d3accf43451dbe22962dbab040ec7b66f9b7a1fb3b0f546"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\run-ended-probe17-v1.mjs",
+        "bytes": 2257,
+        "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+      },
+      "hunks": 2,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-v1.mjs",
+        "bytes": 30334,
+        "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\verify-ended-probe17-v1.mjs",
+        "bytes": 34205,
+        "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+      },
+      "hunks": 18,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "rootActualOsReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-root-independent-cleanup-v1.json",
+    "bytes": 325,
+    "sha256": "910bc3000ad785599b31aa3eff558a1671ec0af47855b518031c5360dac050df"
+  },
+  "checks": {
+    "eightCurrentPinsAndAggregateMatch": true,
+    "threeUnmodifiedSharedInputsRawExact16": true,
+    "main18Contract4Runner2HunksForwardAndInverseRawExact": true,
+    "currentBackendC74350Dae1SeparateFromHistoricalDriverD2406759And210": true,
+    "historicalSixDeclarationsOnlyFromPinned19099Basis": true,
+    "actualPrepared196AndAdmitted201SeparatelyHashed": true,
+    "launcher69AndActualPreparedConfigPinned": true,
+    "exactActualCatalogAndPublicDatasetNames": true,
+    "actualMeasuredSecondsDenominatorAndPartialFailureBodiesPreserved": true,
+    "successRequires5_5_6CompleteActualMinuteWindows": true,
+    "existingActionAndContinuousCounterReplayRetained": true,
+    "hpTenStatusProofAndNonVacuousZeroDoseSemanticsRetained": true,
+    "wireTerminalSourceCountsAndSequenceChecksRetained": true,
+    "storeSourceOriginCountsSchemaAndBaseBindingsChecked": true,
+    "storeCompleteNotConjoinedToGameVerdict": true,
+    "newActualRootOsReceiptSchemaAndRunPidsMatch": true,
+    "standardSealerAndExplicitRunnerPreserved": true
+  },
+  "coverageLimits": [
+    "No new per-request typed-result or dual-positive packet matching within900ms is performed. That contract remains in the frozen original Node d240/210 and report; the final tool notes explicitly state this limit.",
+    "Continuous replay checks activity counters; original continuous failure flags and report verdict are preserved. No new server SLO, telemetry hard gate or formal memory acceptance is introduced.",
+    "HP proof raw rows lack some timing/inventory-before fields; the inherited helper preserves its stated limits and zero verified-event successProofChecked=false semantics.",
+    "Store is a separate completed-only diagnostic source; a valid incomplete capture does not itself fail gameplay, and missing rows cannot prove an ongoing holder absent.",
+    "Readline assembles each trusted SHA-bound producer line before64MiB checking; not an adversarial long-line memory guarantee.",
+    "The new325-byte Root OS receipt records a new actual query at20:02:05Z; it is distinct from the earlier stdout-only19:51 check.",
+    "Source eligibility is not actual replay success or formal capacity acceptance."
+  ],
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": []
+  },
+  "actualEndedVerifierExecutedByReviewer": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

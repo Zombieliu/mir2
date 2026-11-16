@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "kind": "public-numeron-browser-ui-final-scoped-summary",
+  "publicOrigin": "https://numeron.obelisk.build",
+  "uiPassed": "3/3",
+  "classes": [
+    "Warrior",
+    "Wizard",
+    "Taoist"
+  ],
+  "normalUiLogouts": 3,
+  "firstRoleActualKeyboardMoves": [
+    [
+      288,
+      615,
+      288,
+      614
+    ],
+    [
+      288,
+      614,
+      289,
+      614
+    ]
+  ],
+  "priorQ1CompletedReadback": "3/3",
+  "allRolesLevel": 2,
+  "allRolesGold": 100,
+  "accountRegistrationOrQuestDeliveryInBrowser": 0,
+  "walletSignaturesOrModelActions": 0,
+  "originalRunnerFalseResultsPreserved": [
+    "proof.json",
+    "ui-proof.json"
+  ],
+  "harnessCorrection": "LogOutSuccess correctly returns select. Existing same-context UI selected Exit to return to login; first role was not logged in again.",
+  "coldAndWarmScope": {
+    "samePrivatePersistentProfileAndBrowser": true,
+    "taskOnlyDisableHttp2": true,
+    "profileReusedFromPriorFailedTwoSecondStartup": true,
+    "staticFontCoreAnd19LoginAssetsReadyAtMs": 139731,
+    "firstRoleNativeQReadyAtMsFromDriverLog": 353024,
+    "firstRoleLogOutAcknowledgedByMs": 366015,
+    "warmWizardNativeQReadyAfterContinuationStartMsFromDriverLog": 14244,
+    "warmTaoistLoginAtMsFromDriverLog": 16072,
+    "warmTaoistNativeQReadyAtMsFromDriverLog": 29395,
+    "browserTotalElapsedMs": 977751,
+    "retainedIdleForDriverCorrectionAndFinalEvidenceIncludedInTotal": true
+  },
+  "resourceDelivery": {
+    "newPrefixInitial404s": 3,
+    "declaredInheritedPrefixFallbackRecovered200s": 3,
+    "inheritedPrefix": "mir2/v/20260818-main-97887dcd",
+    "fallbackBytesAndShaVerifiedByCoordinatorLinuxWithRealNumeronReferer": true,
+    "source": "resource-delivery.json",
+    "zeroInitialHttpErrorClaim": false
+  },
+  "consoleErrors": 4,
+  "consoleWarnings": 12,
+  "pageErrors": 0,
+  "browserClosed": true,
+  "qaAccountsReleased": true,
+  "credentialInputFileUnchanged": true,
+  "screenshots": [
+    "role-1-Warrior-quest.png",
+    "role-2-Wizard-quest.png",
+    "role-3-Taoist-quest.png"
+  ],
+  "detailedReceipt": "receipt.json",
+  "noFurtherBrowserExecution": true
+}

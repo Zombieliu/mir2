@@ -1,0 +1,106 @@
+{
+  "schema": "mir2.r16.move-cast-runtime.v1",
+  "sourceBase": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+  "inputs": {
+    "apps/game-client/platform-web/src/entity_animation_state.rs": "41bb18ddef7d62640f638899655023570f6d78b941c36cf63dfd55d15a043420",
+    "apps/web/app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+    "apps/web/scripts/test-entity-death-animation.mjs": "d568fdbdab9cd4d98e4b6f17ad3d60c00bf96f1eb52b1b39de240ed7ddcaade1",
+    "apps/game-client/runtime/src/lib.rs": "30c4a6c4c5ba43167e0dd9da142d2e53aa23b4c213c8912e06986d698d9e3905"
+  },
+  "version": "bevy-7c0a3b5dc8a548d9",
+  "manifestSha256": "fe94d505e148a5ae01704597707bf9611e0d12e64a3efd9860ce27052767d395",
+  "logSha256": "b0d33e1ee92df24c8c28f1d1eed6f8793e1789ebc6e71322d0707667e115fb9a",
+  "packages": [
+    {
+      "id": "webgpu",
+      "backend": "webgpu",
+      "packageDir": "pkg-webgpu",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2",
+      "questUiAbiVersion": 0,
+      "bagUiAbiVersion": 0,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2-shared",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2-shared",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": true
+    }
+  ],
+  "files": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "85a4b444b21ad82ef9cdd0368abb91dcb38455e25ef985475c657404276be2de",
+      "bytes": 141747,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "547ff37850b21539bea45d6cde261173fae0defe3e6e9484a3a3fae2b15df9fc",
+      "bytes": 31441413,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "bytes": 117805,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "9f23d8edbfe29b7ba95df21e96e3ec80314292e24e6f70d6dc3d0588cb1f7743",
+      "bytes": 16605266,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "e0487a746311be1f159c71fe92cf5e9063670f56d6e2962b6b4b87cb6341997b",
+      "bytes": 139721,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "a8d85668cfd02e11360c36823e4bba2af92e4e7955c8c26411ff0607ecb5d021",
+      "bytes": 32369074,
+      "directAndImmutableMatch": true
+    }
+  ],
+  "budgets": [
+    {
+      "packageId": "webgpu",
+      "binaryenVersion": "wasm-opt version 131 (version_131)",
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+      "wasmBytes": 31441413,
+      "gzipBytes": 6595301,
+      "jsBytes": 141747,
+      "metadataMatched": true
+    },
+    {
+      "packageId": "webgl2",
+      "binaryenVersion": "wasm-opt version 131 (version_131)",
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+      "wasmBytes": 16605266,
+      "gzipBytes": 4274537,
+      "jsBytes": 117805,
+      "metadataMatched": true
+    },
+    {
+      "packageId": "webgl2-shared",
+      "binaryenVersion": "wasm-opt version 131 (version_131)",
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+      "wasmBytes": 32369074,
+      "gzipBytes": 6931592,
+      "jsBytes": 139721,
+      "metadataMatched": true
+    }
+  ]
+}

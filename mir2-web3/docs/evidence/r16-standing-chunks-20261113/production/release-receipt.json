@@ -1,0 +1,704 @@
+{
+  "candidate": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "baselineSource": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "stageRun": "43375902204",
+  "promoteRun": "43376896824",
+  "rollbackRun": "43380032513",
+  "stage": {
+    "schema": 1,
+    "kind": "numeron-r16-release",
+    "passed": true,
+    "domainMovePending": true,
+    "customDomainChanged": false,
+    "oldGameProjectMutatedByHelper": false,
+    "writes": [
+      {
+        "operation": "stage",
+        "site": "game"
+      }
+    ],
+    "rollbacks": [],
+    "credentialsRecorded": false,
+    "operation": "numeron-qr-stage",
+    "sourceSha": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+    "implementationSha": "cf4c6896ce8599b50e6f8783e5b43b0ba8c0a612",
+    "projects": {
+      "original": {
+        "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+        "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+        "rootDirectory": "mir2-web3/apps/web",
+        "nodeVersion": "24.x"
+      },
+      "main": {
+        "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+        "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+        "rootDirectory": null,
+        "nodeVersion": "24.x"
+      },
+      "game": {
+        "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+        "production": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+        "rootDirectory": "mir2-web3/apps/web",
+        "nodeVersion": "26.x"
+      }
+    },
+    "sourceClosure": {
+      "base": "210fa4716a24b7028ad7fd45aae4edb497ec7fd7",
+      "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "ref": "codex/windows-player-journey",
+      "changedFiles": [
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+          "sha": "2d23f472bff5d342edafc72029c2a5b19caab858"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+          "sha": "b2d3cd728c7435cd90534fb2feb8249cffc3478f"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+          "sha": "e1f4d3ec487fa0b5199f88499019e87dae2ace50"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+          "sha": "c6323812a200ea893ab4a939361ac6ce5497cc76"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/page.tsx",
+          "sha": "8a3fa593ac84ce30affaefdd4d6a800e63879b6b"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-0.json",
+          "sha": "2440e35ab53bedbc2f784dc9017a4612167b4866"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-1.json",
+          "sha": "ec1cdfe243fa088a92bf5e4ea5352630c1f0d17a"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-2.json",
+          "sha": "87a22c4aa46def08cb525cf117dd25cd2f6298b8"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-3.json",
+          "sha": "ef5cb5d44533946581d517f56efcbafa8fdf6ec5"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-4.json",
+          "sha": "187951b06c554f7172864997fb6b57019c6c5eae"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-5.json",
+          "sha": "97896d1ce3965491982525657ed61500c8a38620"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-6.json",
+          "sha": "ec563064ab58da8428900276a9b6af18f584e9da"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-7.json",
+          "sha": "f366d09b9579a52403f0609b5bc6a6cfbfd4f6c9"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-0.json",
+          "sha": "2467f033931898cac70f2211e9226fe855018f9c"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-1.json",
+          "sha": "aea45e7079d57c2ed86cc476506678f8ba0dbc23"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-2.json",
+          "sha": "4c5e9b71898f8374b3a8536a0121fe4339a840d2"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-3.json",
+          "sha": "5792b64728d1ee50ff25503eab9160478a650eb1"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-4.json",
+          "sha": "706f7652ac36bad2416305d74b3a1769213a395a"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-5.json",
+          "sha": "371629d262760c4d2d14ddd22f0ad3866ad3f211"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-6.json",
+          "sha": "7eb053454f5751e9a058952818f6cc434a68a90e"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-7.json",
+          "sha": "2b3bec42e6ddb7e3ed563e1afbb286c6e9620808"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/r16-standing-sprites.ts",
+          "sha": "f3ec6b434631f3cc260da79a3891d64b03fac6d8"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/package.json",
+          "sha": "4bd1aaa76e3974a097e6347065e779106d9d6774"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/generate-r16-standing-sprites.mjs",
+          "sha": "edf4f925237aa066b267e5a94b8c5d0153bcc0e0"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/test-r16-standing-sprites.mjs",
+          "sha": "861da8e04ccde4516fa05754d3fce9dc1f34d407"
+        }
+      ]
+    },
+    "assetPublication": {
+      "runId": "42494701555",
+      "artifactId": 13622863928,
+      "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+      "manifestBytes": 15716826
+    },
+    "trafficBefore": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "trafficAfter": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "candidates": {
+      "game": {
+        "id": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+        "url": "numeron-r16-pmsxplskb-obelisk-labs.vercel.app",
+        "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+        "readyState": "INITIALIZING"
+      }
+    }
+  },
+  "promote": {
+    "schema": 1,
+    "kind": "numeron-r16-release",
+    "passed": true,
+    "domainMovePending": true,
+    "customDomainChanged": false,
+    "oldGameProjectMutatedByHelper": false,
+    "writes": [
+      {
+        "operation": "promote",
+        "site": "game",
+        "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed"
+      }
+    ],
+    "rollbacks": [],
+    "credentialsRecorded": false,
+    "operation": "numeron-qr-promote",
+    "sourceSha": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+    "implementationSha": "cf4c6896ce8599b50e6f8783e5b43b0ba8c0a612",
+    "projects": {
+      "original": {
+        "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+        "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+        "rootDirectory": "mir2-web3/apps/web",
+        "nodeVersion": "24.x"
+      },
+      "main": {
+        "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+        "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+        "rootDirectory": null,
+        "nodeVersion": "24.x"
+      },
+      "game": {
+        "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+        "production": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+        "rootDirectory": "mir2-web3/apps/web",
+        "nodeVersion": "26.x"
+      }
+    },
+    "sourceClosure": {
+      "base": "210fa4716a24b7028ad7fd45aae4edb497ec7fd7",
+      "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "ref": "codex/windows-player-journey",
+      "changedFiles": [
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+          "sha": "2d23f472bff5d342edafc72029c2a5b19caab858"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+          "sha": "b2d3cd728c7435cd90534fb2feb8249cffc3478f"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+          "sha": "e1f4d3ec487fa0b5199f88499019e87dae2ace50"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+          "sha": "c6323812a200ea893ab4a939361ac6ce5497cc76"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/page.tsx",
+          "sha": "8a3fa593ac84ce30affaefdd4d6a800e63879b6b"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-0.json",
+          "sha": "2440e35ab53bedbc2f784dc9017a4612167b4866"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-1.json",
+          "sha": "ec1cdfe243fa088a92bf5e4ea5352630c1f0d17a"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-2.json",
+          "sha": "87a22c4aa46def08cb525cf117dd25cd2f6298b8"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-3.json",
+          "sha": "ef5cb5d44533946581d517f56efcbafa8fdf6ec5"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-4.json",
+          "sha": "187951b06c554f7172864997fb6b57019c6c5eae"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-5.json",
+          "sha": "97896d1ce3965491982525657ed61500c8a38620"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-6.json",
+          "sha": "ec563064ab58da8428900276a9b6af18f584e9da"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-7.json",
+          "sha": "f366d09b9579a52403f0609b5bc6a6cfbfd4f6c9"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-0.json",
+          "sha": "2467f033931898cac70f2211e9226fe855018f9c"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-1.json",
+          "sha": "aea45e7079d57c2ed86cc476506678f8ba0dbc23"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-2.json",
+          "sha": "4c5e9b71898f8374b3a8536a0121fe4339a840d2"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-3.json",
+          "sha": "5792b64728d1ee50ff25503eab9160478a650eb1"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-4.json",
+          "sha": "706f7652ac36bad2416305d74b3a1769213a395a"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-5.json",
+          "sha": "371629d262760c4d2d14ddd22f0ad3866ad3f211"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-6.json",
+          "sha": "7eb053454f5751e9a058952818f6cc434a68a90e"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-7.json",
+          "sha": "2b3bec42e6ddb7e3ed563e1afbb286c6e9620808"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/r16-standing-sprites.ts",
+          "sha": "f3ec6b434631f3cc260da79a3891d64b03fac6d8"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/package.json",
+          "sha": "4bd1aaa76e3974a097e6347065e779106d9d6774"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/generate-r16-standing-sprites.mjs",
+          "sha": "edf4f925237aa066b267e5a94b8c5d0153bcc0e0"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/test-r16-standing-sprites.mjs",
+          "sha": "861da8e04ccde4516fa05754d3fce9dc1f34d407"
+        }
+      ]
+    },
+    "assetPublication": {
+      "runId": "42494701555",
+      "artifactId": 13622863928,
+      "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+      "manifestBytes": 15716826
+    },
+    "candidates": {
+      "game": {
+        "id": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+        "url": "numeron-r16-pmsxplskb-obelisk-labs.vercel.app"
+      }
+    },
+    "trafficBefore": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "protectedEntryScene": {
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    "protectedEntryFloor": {
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "bytes": 439896
+    },
+    "protectedEntryPlayerMale": {
+      "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+      "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+      "bytes": 289851
+    },
+    "protectedEntryPlayerFemale": {
+      "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+      "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+      "bytes": 282415
+    },
+    "protectedEntryNpcs": {
+      "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+      "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+      "bytes": 313909
+    },
+    "protectedEntryObjects1": {
+      "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+      "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+      "bytes": 395412
+    },
+    "protectedEntryObjects2": {
+      "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+      "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+      "bytes": 395320
+    },
+    "protectedEntryObjects3": {
+      "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+      "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+      "bytes": 395216
+    },
+    "protectedEntryMonsterStanding": {
+      "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+      "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+      "bytes": 513566
+    },
+    "protectedEntryMonsterWalking": {
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "bytes": 764724
+    },
+    "protectedEntryGameplayLocale": {
+      "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+      "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "bytes": 3283113
+    },
+    "protectedQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "trafficAfter": {
+      "target": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+      "alias": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed"
+    },
+    "publicQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "publicEntryScene": {
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    "publicEntryFloor": {
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "bytes": 439896
+    },
+    "publicEntryPlayerMale": {
+      "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+      "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+      "bytes": 289851
+    },
+    "publicEntryPlayerFemale": {
+      "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+      "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+      "bytes": 282415
+    },
+    "publicEntryNpcs": {
+      "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+      "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+      "bytes": 313909
+    },
+    "publicEntryObjects1": {
+      "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+      "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+      "bytes": 395412
+    },
+    "publicEntryObjects2": {
+      "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+      "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+      "bytes": 395320
+    },
+    "publicEntryObjects3": {
+      "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+      "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+      "bytes": 395216
+    },
+    "publicEntryMonsterStanding": {
+      "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+      "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+      "bytes": 513566
+    },
+    "publicEntryMonsterWalking": {
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "bytes": 764724
+    },
+    "publicEntryGameplayLocale": {
+      "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+      "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "bytes": 3283113
+    }
+  },
+  "rollback": {
+    "schema": 1,
+    "kind": "numeron-r16-release",
+    "passed": true,
+    "domainMovePending": true,
+    "customDomainChanged": false,
+    "oldGameProjectMutatedByHelper": false,
+    "writes": [
+      {
+        "operation": "rollback",
+        "site": "game",
+        "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+      }
+    ],
+    "rollbacks": [],
+    "credentialsRecorded": false,
+    "operation": "numeron-qr-rollback",
+    "sourceSha": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+    "implementationSha": "cf4c6896ce8599b50e6f8783e5b43b0ba8c0a612",
+    "projects": {
+      "original": {
+        "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+        "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+        "rootDirectory": "mir2-web3/apps/web",
+        "nodeVersion": "24.x"
+      },
+      "main": {
+        "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+        "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+        "rootDirectory": null,
+        "nodeVersion": "24.x"
+      },
+      "game": {
+        "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+        "production": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+        "rootDirectory": "mir2-web3/apps/web",
+        "nodeVersion": "26.x"
+      }
+    },
+    "sourceClosure": {
+      "base": "210fa4716a24b7028ad7fd45aae4edb497ec7fd7",
+      "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "ref": "codex/windows-player-journey",
+      "changedFiles": [
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+          "sha": "2d23f472bff5d342edafc72029c2a5b19caab858"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+          "sha": "b2d3cd728c7435cd90534fb2feb8249cffc3478f"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+          "sha": "e1f4d3ec487fa0b5199f88499019e87dae2ace50"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+          "sha": "c6323812a200ea893ab4a939361ac6ce5497cc76"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/app/page.tsx",
+          "sha": "8a3fa593ac84ce30affaefdd4d6a800e63879b6b"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-0.json",
+          "sha": "2440e35ab53bedbc2f784dc9017a4612167b4866"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-1.json",
+          "sha": "ec1cdfe243fa088a92bf5e4ea5352630c1f0d17a"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-2.json",
+          "sha": "87a22c4aa46def08cb525cf117dd25cd2f6298b8"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-3.json",
+          "sha": "ef5cb5d44533946581d517f56efcbafa8fdf6ec5"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-4.json",
+          "sha": "187951b06c554f7172864997fb6b57019c6c5eae"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-5.json",
+          "sha": "97896d1ce3965491982525657ed61500c8a38620"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-6.json",
+          "sha": "ec563064ab58da8428900276a9b6af18f584e9da"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-7.json",
+          "sha": "f366d09b9579a52403f0609b5bc6a6cfbfd4f6c9"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-0.json",
+          "sha": "2467f033931898cac70f2211e9226fe855018f9c"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-1.json",
+          "sha": "aea45e7079d57c2ed86cc476506678f8ba0dbc23"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-2.json",
+          "sha": "4c5e9b71898f8374b3a8536a0121fe4339a840d2"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-3.json",
+          "sha": "5792b64728d1ee50ff25503eab9160478a650eb1"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-4.json",
+          "sha": "706f7652ac36bad2416305d74b3a1769213a395a"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-5.json",
+          "sha": "371629d262760c4d2d14ddd22f0ad3866ad3f211"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-6.json",
+          "sha": "7eb053454f5751e9a058952818f6cc434a68a90e"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-7.json",
+          "sha": "2b3bec42e6ddb7e3ed563e1afbb286c6e9620808"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/r16-standing-sprites.ts",
+          "sha": "f3ec6b434631f3cc260da79a3891d64b03fac6d8"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/package.json",
+          "sha": "4bd1aaa76e3974a097e6347065e779106d9d6774"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/generate-r16-standing-sprites.mjs",
+          "sha": "edf4f925237aa066b267e5a94b8c5d0153bcc0e0"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/test-r16-standing-sprites.mjs",
+          "sha": "861da8e04ccde4516fa05754d3fce9dc1f34d407"
+        }
+      ]
+    },
+    "assetPublication": {
+      "runId": "42494701555",
+      "artifactId": 13622863928,
+      "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+      "manifestBytes": 15716826
+    },
+    "candidates": {
+      "game": {
+        "id": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+        "url": "numeron-r16-pmsxplskb-obelisk-labs.vercel.app"
+      }
+    },
+    "trafficBefore": {
+      "target": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+      "alias": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed"
+    },
+    "trafficAfter": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    }
+  }
+}

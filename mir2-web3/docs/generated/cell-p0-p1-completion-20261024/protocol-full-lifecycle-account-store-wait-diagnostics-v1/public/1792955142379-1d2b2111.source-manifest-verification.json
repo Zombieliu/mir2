@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "sourceManifestSha256": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "sourceManifestFileSha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5",
+  "matchedRawInputs": 50,
+  "matchedRawDriverPins": 6,
+  "releaseSha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "scope": "This fresh50-input account-store-wait-diagnostics Release only; historical source/binary proofs remain unchanged"
+}

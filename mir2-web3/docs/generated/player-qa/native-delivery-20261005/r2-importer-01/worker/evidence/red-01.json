@@ -1,0 +1,30 @@
+{
+  "command": [
+    "node",
+    "--experimental-strip-types",
+    "--test",
+    "--test-reporter=tap",
+    "test/native-r17-publication.test.mjs"
+  ],
+  "exitCode": 1,
+  "finishedUtc": "2026-10-04T22:21:48.045227+00:00",
+  "nodeRuntimeModelOnly": true,
+  "liveR2Acceptance": false,
+  "sourceAtAttempt": [
+    {
+      "path": "index.ts",
+      "size": 2968,
+      "sha256": "353a1d7420659f4c12a3a7dc654351382ec8f7dd7a1c795237777e9372a05dfe"
+    },
+    {
+      "path": "native-r17-publication-plan.json",
+      "size": 42461,
+      "sha256": "3d994ede8b6d1f09fc05488cc271b9dbad1ae2b12503f991931d3c2f409ba94b"
+    },
+    {
+      "path": "test/native-r17-publication.test.mjs",
+      "size": 1489,
+      "sha256": "63533b81849eae92a7346c7673d84db0b412afde44830673c021dff4938b32ed"
+    }
+  ]
+}

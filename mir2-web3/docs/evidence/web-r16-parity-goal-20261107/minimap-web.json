@@ -1,0 +1,605 @@
+{
+  "schema": "mir2.r16.minimap-frame-web-proof.v1",
+  "scope": "ordinary browser and Gateway on an isolated clone",
+  "branch": "codex/windows-player-journey",
+  "sourceBase": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "renderer": "bevy-a46905128c316656",
+  "gatewaySha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+  "sourceFileHash": "712981852d4e6d779a52705c2a01a9f6a2832fd378ef77ffb457e21fae2a3be9",
+  "old": {
+    "frontend": "v21-r3",
+    "rawSha256": "0c289b2881381c5312d2c42c3702e10d4fdf6a5b7b14022abf749a406185ac07",
+    "miniMap": {
+      "original": {
+        "x": 328,
+        "y": 264
+      },
+      "checks": [
+        {
+          "viewport": {
+            "width": 1280,
+            "height": 960
+          },
+          "button": "left",
+          "before": {
+            "x": 328,
+            "y": 264
+          },
+          "pixel": {
+            "x": 1094.2752678571428,
+            "y": 172.5,
+            "goal": {
+              "x": 331,
+              "y": 264
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 704,
+          "first": {
+            "x": 329,
+            "y": 264
+          },
+          "end": {
+            "x": 331,
+            "y": 264
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 1280,
+            "height": 960
+          },
+          "button": "right",
+          "before": {
+            "x": 331,
+            "y": 264
+          },
+          "pixel": {
+            "x": 1094.2682142857143,
+            "y": 172.5,
+            "goal": {
+              "x": 334,
+              "y": 264
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 711,
+          "first": {
+            "x": 332,
+            "y": 264
+          },
+          "end": {
+            "x": 334,
+            "y": 264
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 1024,
+            "height": 768
+          },
+          "button": "left",
+          "before": {
+            "x": 334,
+            "y": 264
+          },
+          "pixel": {
+            "x": 966.2611607142858,
+            "y": 76.5,
+            "goal": {
+              "x": 337,
+              "y": 264
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 716,
+          "first": {
+            "x": 335,
+            "y": 264
+          },
+          "end": {
+            "x": 337,
+            "y": 264
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 1024,
+            "height": 768
+          },
+          "button": "right",
+          "before": {
+            "x": 337,
+            "y": 264
+          },
+          "pixel": {
+            "x": 966.2697321428572,
+            "y": 76.5,
+            "goal": {
+              "x": 340,
+              "y": 264
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 724,
+          "first": {
+            "x": 338,
+            "y": 264
+          },
+          "end": {
+            "x": 340,
+            "y": 264
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        }
+      ],
+      "frame": {
+        "before": {
+          "x": 340,
+          "y": 264
+        },
+        "pixel": {
+          "x": 942.2169642857143,
+          "y": 76.5,
+          "goal": {
+            "x": 327,
+            "y": 264
+          },
+          "pathLength": 14,
+          "raster": [
+            1052,
+            700
+          ],
+          "frame": [
+            120,
+            108
+          ],
+          "top": "IMG"
+        },
+        "sequence": 732,
+        "first": {
+          "x": 339,
+          "y": 264
+        },
+        "stopSequence": 738,
+        "end": {
+          "x": 327,
+          "y": 264
+        },
+        "afterStopMoves": [
+          "run",
+          "run",
+          "run",
+          "run",
+          "run"
+        ],
+        "stopped": false
+      },
+      "modal": null
+    },
+    "ordinaryLogout": true
+  },
+  "fixed": {
+    "frontend": "local Next source test",
+    "rawSha256": "60b6cab1372d95d45963387d6598111c3095101787d628c42aaa33abdf7a2cb3",
+    "miniMap": {
+      "original": {
+        "x": 348,
+        "y": 263
+      },
+      "checks": [
+        {
+          "viewport": {
+            "width": 1280,
+            "height": 960
+          },
+          "button": "left",
+          "before": {
+            "x": 348,
+            "y": 263
+          },
+          "pixel": {
+            "x": 1085,
+            "y": 172,
+            "goal": {
+              "x": 345,
+              "y": 263
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 634,
+          "first": {
+            "x": 347,
+            "y": 263
+          },
+          "end": {
+            "x": 345,
+            "y": 263
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 1280,
+            "height": 960
+          },
+          "button": "right",
+          "before": {
+            "x": 345,
+            "y": 263
+          },
+          "pixel": {
+            "x": 1094,
+            "y": 172,
+            "goal": {
+              "x": 348,
+              "y": 263
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 638,
+          "first": {
+            "x": 346,
+            "y": 263
+          },
+          "end": {
+            "x": 348,
+            "y": 263
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 1024,
+            "height": 768
+          },
+          "button": "left",
+          "before": {
+            "x": 348,
+            "y": 263
+          },
+          "pixel": {
+            "x": 957,
+            "y": 76,
+            "goal": {
+              "x": 345,
+              "y": 263
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 646,
+          "first": {
+            "x": 347,
+            "y": 263
+          },
+          "end": {
+            "x": 345,
+            "y": 263
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 1024,
+            "height": 768
+          },
+          "button": "right",
+          "before": {
+            "x": 345,
+            "y": 263
+          },
+          "pixel": {
+            "x": 966,
+            "y": 76,
+            "goal": {
+              "x": 348,
+              "y": 263
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              120,
+              108
+            ],
+            "top": "IMG"
+          },
+          "sequence": 652,
+          "first": {
+            "x": 346,
+            "y": 263
+          },
+          "end": {
+            "x": 348,
+            "y": 263
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 960,
+            "height": 720
+          },
+          "button": "left",
+          "before": {
+            "x": 348,
+            "y": 263
+          },
+          "pixel": {
+            "x": 897,
+            "y": 72,
+            "goal": {
+              "x": 345,
+              "y": 263
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              112.5,
+              101.25
+            ],
+            "top": "IMG"
+          },
+          "sequence": 656,
+          "first": {
+            "x": 347,
+            "y": 263
+          },
+          "end": {
+            "x": 345,
+            "y": 263
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        },
+        {
+          "viewport": {
+            "width": 960,
+            "height": 720
+          },
+          "button": "right",
+          "before": {
+            "x": 345,
+            "y": 263
+          },
+          "pixel": {
+            "x": 906,
+            "y": 72,
+            "goal": {
+              "x": 348,
+              "y": 263
+            },
+            "pathLength": 4,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              112.5,
+              101.25
+            ],
+            "top": "IMG"
+          },
+          "sequence": 660,
+          "first": {
+            "x": 346,
+            "y": 263
+          },
+          "end": {
+            "x": 348,
+            "y": 263
+          },
+          "moves": [
+            "walk",
+            "run"
+          ]
+        }
+      ],
+      "frame": [
+        {
+          "button": "left",
+          "before": {
+            "x": 348,
+            "y": 263
+          },
+          "pixel": {
+            "x": 883,
+            "y": 72,
+            "goal": {
+              "x": 335,
+              "y": 263
+            },
+            "pathLength": 14,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              112.5,
+              101.25
+            ],
+            "top": "IMG"
+          },
+          "sequence": 664,
+          "first": {
+            "x": 347,
+            "y": 263
+          },
+          "stopSequence": 670,
+          "end": {
+            "x": 343,
+            "y": 263
+          },
+          "afterStopMoves": [],
+          "stopped": true
+        },
+        {
+          "button": "right",
+          "before": {
+            "x": 343,
+            "y": 263
+          },
+          "pixel": {
+            "x": 883,
+            "y": 72,
+            "goal": {
+              "x": 330,
+              "y": 263
+            },
+            "pathLength": 14,
+            "raster": [
+              1052,
+              700
+            ],
+            "frame": [
+              112.5,
+              101.25
+            ],
+            "top": "IMG"
+          },
+          "sequence": 674,
+          "first": {
+            "x": 342,
+            "y": 263
+          },
+          "stopSequence": 679,
+          "end": {
+            "x": 338,
+            "y": 263
+          },
+          "afterStopMoves": [],
+          "stopped": true
+        }
+      ],
+      "modal": {
+        "before": {
+          "x": 338,
+          "y": 263
+        },
+        "pixel": {
+          "x": 906,
+          "y": 72,
+          "goal": {
+            "x": 341,
+            "y": 263
+          },
+          "pathLength": 4,
+          "raster": [
+            1052,
+            700
+          ],
+          "frame": [
+            112.5,
+            101.25
+          ],
+          "top": "IMG"
+        },
+        "end": {
+          "x": 338,
+          "y": 263
+        },
+        "moves": 0
+      }
+    },
+    "ordinaryLogout": true,
+    "networkClean": true,
+    "passed": true
+  }
+}

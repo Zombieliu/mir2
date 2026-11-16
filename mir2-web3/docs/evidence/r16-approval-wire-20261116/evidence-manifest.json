@@ -1,0 +1,126 @@
+{
+  "kind": "r16-passive-approval-control-evidence",
+  "sourceHead": "8d07597646e01deced968aac180b248a1eb616a3",
+  "entries": [
+    {
+      "path": "README.md",
+      "bytes": 5558,
+      "sha256": "9e691806272ee09b0df317f9fdba0588869f67b19b65a43ddb1a39a8ef7522fd"
+    },
+    {
+      "path": "adjacent-observer-tests.log",
+      "bytes": 644,
+      "sha256": "5dfa7388fdbd241741b95bf8bd417fad90bdc6e24e7f96a9e4af75f376e05f29"
+    },
+    {
+      "path": "auth-wire-tests.log",
+      "bytes": 1910,
+      "sha256": "3cebd013157c82e2d69481e5f5165608ccac854e90b343b1f3b5163dd1d79425"
+    },
+    {
+      "path": "evidence-files-in-progress.json",
+      "bytes": 719,
+      "sha256": "361520cb2bfaf369734c070e5cd7a72d9bb92e70d96a704f492d201c2153d06a"
+    },
+    {
+      "path": "historical-runtime-log-scope.json",
+      "bytes": 368,
+      "sha256": "c00b7a965da963f215b69fec7b66b99fcd195c21dbe073f36317add3a70796f5"
+    },
+    {
+      "path": "independent-alias-final.json",
+      "bytes": 187,
+      "sha256": "c0127f8fd8384751a798e2b1a3f99865acc8ffe4a01a669b237cc7617837aa31"
+    },
+    {
+      "path": "independent-http-final.json",
+      "bytes": 422,
+      "sha256": "4c8fe5dc493d8800f25b5c1af904f61b52eba1d12e0c9461e553ae84cea3dae3"
+    },
+    {
+      "path": "preservation-and-scope.json",
+      "bytes": 8965,
+      "sha256": "5ba351985720d131d27cf7de84363f97db9558e3f15b8990a3252985cdccec52"
+    },
+    {
+      "path": "r1-auth-analysis.json",
+      "bytes": 6623,
+      "sha256": "444163b102b4ea0bd6b9ab70dda94528db7cfc34f475a8d2ce96ede35e11af6d"
+    },
+    {
+      "path": "r1-desktop-wire.json",
+      "bytes": 8579,
+      "sha256": "282b4c8dd37d67509e34b66b862cf545adbcc292b3d04bc8e0ae6be3c755a3b1"
+    },
+    {
+      "path": "r1-frozen-qa-inputs.json",
+      "bytes": 3441,
+      "sha256": "5754998bce4ef8bc555b34e4bb78c34a38cded785df8fcdffa84de54075005ae"
+    },
+    {
+      "path": "r1-game-summary.json",
+      "bytes": 3579,
+      "sha256": "de0652dd25322d6407ae790c7814da35778f30b489e8eb9e32802e4e3f923f70"
+    },
+    {
+      "path": "r1-mobile-wire.json",
+      "bytes": 2477,
+      "sha256": "314c5ac5715f9c02427bb16081725e2374b6f9ad634272706d9c69d6ffee1ad7"
+    },
+    {
+      "path": "r1-original-acceptance.json",
+      "bytes": 809,
+      "sha256": "c70fe556dca03f3a0c3c2b31a899254c185d48fed073956629cd9a647207843a"
+    },
+    {
+      "path": "r2-auth-analysis.json",
+      "bytes": 7441,
+      "sha256": "30a1819c12ac36f55b54fbf455659c3fa08aa1bd816c6b77f82954d00d67fde4"
+    },
+    {
+      "path": "r2-desktop-wire.json",
+      "bytes": 10223,
+      "sha256": "0aa772cd0056ee89ac1a854ea52a9ea38eb8cebe09ac8393432b35a51344464e"
+    },
+    {
+      "path": "r2-first-quest-fallback.png",
+      "bytes": 1379274,
+      "sha256": "ce54f24a50eede60c8b2081ecaa7c2cf6bd804e826a9a08578097ad8081424eb"
+    },
+    {
+      "path": "r2-frozen-qa-inputs.json",
+      "bytes": 3833,
+      "sha256": "084fa18bdb7464ec5364b71275128e4daf06235726e53c485ba16e2e7fd39369"
+    },
+    {
+      "path": "r2-game-summary.json",
+      "bytes": 5985,
+      "sha256": "d99c05585b2194defc0a5b5a8a476516f6ae4f0a073d2c54e2025b47dfa78ebd"
+    },
+    {
+      "path": "r2-hud-after-worker-restart.png",
+      "bytes": 1400258,
+      "sha256": "c2ac6c30daa5b1c3e368a20efa4f873d60c6efc5c6678334208dadbd8f9a9ff5"
+    },
+    {
+      "path": "r2-mobile-wire.json",
+      "bytes": 2477,
+      "sha256": "c57db07e9c25330dabbec3b83a6c917d002a0a78469150521636f2fd1a3a42c3"
+    },
+    {
+      "path": "r2-original-acceptance.json",
+      "bytes": 804,
+      "sha256": "63ce2956f681337080da7b25fa4383548fdbd32071782a60a684a134428c8b3a"
+    },
+    {
+      "path": "r2-original-fonts.json",
+      "bytes": 2377,
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "path": "r2-quest-owners.json",
+      "bytes": 1352,
+      "sha256": "fb72f4d22f77b6581b782c9cbaaafaf7df17331234ff277a171d172924416dec"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@mir2/procurement-chain",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "move:test": "sui move test --path src/mir2_procurement",
+    "move:build": "sui move build --path src/mir2_procurement"
+  },
+  "dependencies": {
+    "@0xobelisk/sui-client": "2.0.0",
+    "@0xobelisk/sui-common": "2.0.0",
+    "@mysten/sui": "1.35.0",
+    "@mysten/sui-modern": "npm:@mysten/sui@2.16.2"
+  },
+  "devDependencies": {
+    "@noble/hashes": "1.8.0"
+  }
+}

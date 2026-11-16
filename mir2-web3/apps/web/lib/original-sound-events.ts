@@ -93,6 +93,14 @@ export const ORIGINAL_SOUND_IDS = {
   fishingThrow: 10184,
   fishingPull: 10185,
   fishing: 10186,
+
+  // --- Targeted Crystal magic (action entry, missile launch, bound impact) ---
+  greatFireBallCast: 20340,
+  greatFireBallProjectile: 20341,
+  greatFireBallImpact: 20342,
+  soulFireBallCast: 20640,
+  soulFireBallProjectile: 20641,
+  soulFireBallImpact: 20642,
 } as const;
 
 export type OriginalSoundEvent = keyof typeof ORIGINAL_SOUND_IDS;

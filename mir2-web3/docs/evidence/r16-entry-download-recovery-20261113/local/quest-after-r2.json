@@ -1,0 +1,673 @@
+{
+  "run": "quest-after-r2",
+  "source": "9dc7294c0269eee93086e88ac83d2bc9d93d387e",
+  "localCandidate": "31e9b6a74661-entry-recovery-2bfdd3ba",
+  "renderer": "compatibility",
+  "passed": true,
+  "originalReceiptSha256": "c689444412d6e881e49833659cfc014faa75a0695d4daf1a59cf1591249a429a",
+  "failure": null,
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "sameEntryRecoveryPassed": true,
+  "startGame": {
+    "acknowledgedAt": 1794555949809,
+    "bootstrapAt": 1794555950097,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "map": "0"
+  },
+  "firstPlayable": {
+    "epochMs": 1794555961308,
+    "observedAt": 1794555961320
+  },
+  "earlyWalks": {
+    "passed": true,
+    "firstPlayableAt": 1794555961308,
+    "rows": [
+      {
+        "key": "ArrowRight",
+        "direction": "Right",
+        "to": {
+          "x": 289,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794555963525,
+        "wireAt": 1794555963531,
+        "ackAt": 1794555963565,
+        "renderedAt": 1794555963583,
+        "ackMs": 34,
+        "inputToRenderedMs": 58,
+        "rendered": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      {
+        "key": "ArrowLeft",
+        "direction": "Left",
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794555963589,
+        "wireAt": 1794555964132,
+        "ackAt": 1794555964160,
+        "renderedAt": 1794555964178,
+        "ackMs": 28,
+        "inputToRenderedMs": 589,
+        "rendered": {
+          "x": 288,
+          "y": 616
+        }
+      }
+    ],
+    "returnedToSpawn": true
+  },
+  "continuousWalk": {
+    "startedAt": 1794555964178,
+    "rows": [
+      {
+        "step": 0,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555965109
+      },
+      {
+        "step": 0,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555965704
+      },
+      {
+        "step": 1,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555966339
+      },
+      {
+        "step": 1,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555966941
+      },
+      {
+        "step": 2,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555967515
+      },
+      {
+        "step": 2,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555968116
+      },
+      {
+        "step": 3,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555968746
+      },
+      {
+        "step": 3,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555969324
+      },
+      {
+        "step": 4,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555969915
+      },
+      {
+        "step": 4,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555970506
+      },
+      {
+        "step": 5,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555971139
+      },
+      {
+        "step": 5,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555971742
+      },
+      {
+        "step": 6,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555972315
+      },
+      {
+        "step": 6,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555972905
+      },
+      {
+        "step": 7,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555973505
+      },
+      {
+        "step": 7,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555974127
+      }
+    ],
+    "endedAt": 1794555974127
+  },
+  "npcRecovery": {
+    "reads": [
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555939281,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555959280
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555959481,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555979481
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555980498,
+        "status": 200,
+        "bytes": 313909,
+        "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "headersAt": 1794555980498,
+        "finishedAt": 1794555980498,
+        "closedAt": 1794555980499
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794556030722,
+        "status": 200,
+        "bytes": 313909,
+        "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "headersAt": 1794556030722,
+        "finishedAt": 1794556030722,
+        "closedAt": 1794556030722
+      }
+    ],
+    "passed": true
+  },
+  "controlledRuntimeDelivery": {
+    "kind": "Playwright fixed-byte response; not a WAN cold-download result",
+    "version": "bevy-0c553a754308e5b8",
+    "deliveries": [
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "at": 1794555961413,
+        "status": 200,
+        "bytes": 141747,
+        "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+        "controlledHeaderDelayMs": 0
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 1,
+        "requestedAt": 1794555961418,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555969418
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 2,
+        "requestedAt": 1794555969418,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555969418,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794555984421
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 3,
+        "requestedAt": 1794555984422,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555984422,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794555999437
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 4,
+        "requestedAt": 1794556000447,
+        "bytes": 31452436,
+        "expectedBytes": 31452436,
+        "headersAt": 1794556000447,
+        "status": 200,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "finishedAt": 1794556000450,
+        "closedAt": 1794556000450
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "at": 1794556050806,
+        "status": 200,
+        "bytes": 141747,
+        "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+        "controlledHeaderDelayMs": 0
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 5,
+        "requestedAt": 1794556050810,
+        "bytes": 31452436,
+        "expectedBytes": 31452436,
+        "headersAt": 1794556050810,
+        "status": 200,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "finishedAt": 1794556050813,
+        "closedAt": 1794556050813
+      }
+    ]
+  },
+  "runtimeAttempts": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 503,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    }
+  ],
+  "native": {
+    "passed": true,
+    "waitMs": 40212,
+    "backend": "webgpu",
+    "packageId": "webgpu",
+    "hudReady": true,
+    "questReady": true,
+    "prewarmPassed": true,
+    "prewarmSummary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "fontCache": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    }
+  },
+  "firstSave": {
+    "passed": true,
+    "className": "Warrior",
+    "level": 30,
+    "gold": 76360,
+    "experience": 19497,
+    "fields": [
+      "map_file_name",
+      "position",
+      "direction",
+      "gold",
+      "credit",
+      "experience",
+      "max_experience",
+      "inventory_items_json",
+      "belt_items_json",
+      "equipment_items_json",
+      "equipment_items_explicit_empty",
+      "storage_items_json",
+      "hero_inventory_items_json",
+      "hero_equipment_items_json",
+      "quest_states_json",
+      "skill_states_json"
+    ],
+    "questStateCount": 26
+  },
+  "worker": {
+    "passed": true,
+    "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+    "restored": {
+      "status": 200,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "lifecycle": [
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopping",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopped",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      }
+    ]
+  },
+  "browserRestart": {
+    "firstProcessCount": 8,
+    "allFirstProcessesExited": true,
+    "persistedProfileExists": true,
+    "secondProcessCount": 8
+  },
+  "warm": {
+    "passed": true,
+    "loginKind": "normal-password",
+    "authoritativeStart": {
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "characterIndex": 2
+    },
+    "native": {
+      "passed": true,
+      "waitMs": 1265,
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "hudReady": true,
+      "questReady": true,
+      "prewarmPassed": true,
+      "prewarmSummary": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      }
+    },
+    "saved": true,
+    "logout": {
+      "sentAt": 1794556055161,
+      "acknowledgedAt": 1794556057515,
+      "savedPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "returnedToSelect": true,
+      "gutter": {
+        "x": 64,
+        "y": 480
+      }
+    }
+  },
+  "scope": "Controlled original gates; same-entry fault recovery, ordinary logout, full browser process close, then same-profile normal relogin. Not a current 1-30 route or WAN benchmark."
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792965008290-fc5e2eed",
+      "report": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.report.json",
+      "path": "release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.samples.jsonl",
+      "bytes": 29612729,
+      "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e",
+      "projection": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.raw-projection.json"
+    }
+  ]
+}

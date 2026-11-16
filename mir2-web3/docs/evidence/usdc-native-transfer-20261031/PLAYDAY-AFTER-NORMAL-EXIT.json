@@ -1,0 +1,103 @@
+{
+  "schema": "mir2.playday-after-normal-exit.readonly.v1",
+  "observedAtUtc": "2026-10-30T19:24:29.794569+00:00",
+  "accountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+  "campaignId": "numeron-windows-playtest-20261030",
+  "latestSave": {
+    "characterIndex": 36,
+    "saveVersion": 43,
+    "updatedAt": "2026-10-30T19:23:14.992963+00:00",
+    "level": 3,
+    "revision": 25,
+    "authorityJournal": {
+      "promotionFactCount": 2,
+      "combatFactCount": 0,
+      "questFactCount": 1,
+      "levelFactCount": 1,
+      "appliedKillReceiptCount": 0,
+      "killOutcomeCount": 0
+    }
+  },
+  "sourceDeliverySummary": [
+    {
+      "source": "level_commit",
+      "environment": "test",
+      "source_count": 1,
+      "delivered_count": 1,
+      "last_committed_at_ms": 1793388049909,
+      "first_committed_at_ms": 1793388049909
+    },
+    {
+      "source": "quest_commit",
+      "environment": "test",
+      "source_count": 1,
+      "delivered_count": 1,
+      "last_committed_at_ms": 1793388049909,
+      "first_committed_at_ms": 1793388049909
+    }
+  ],
+  "materializedFacts": [
+    {
+      "count": 1,
+      "source": "level_commit",
+      "utc_days": 1,
+      "max_level": 3,
+      "last_at_ms": 1793388049884,
+      "environment": "test",
+      "first_at_ms": 1793388049884
+    },
+    {
+      "count": 1,
+      "source": "quest_commit",
+      "utc_days": 1,
+      "max_level": null,
+      "last_at_ms": 1793388049885,
+      "environment": "test",
+      "first_at_ms": 1793388049885
+    }
+  ],
+  "activeUtcDaysInCampaign": 1,
+  "gatewayRevision": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "capacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "allSixCapacityZero": true,
+  "redisOwnerLeases": {
+    "database": 0,
+    "liveOrExpiringLeaseCount": 0,
+    "persistentLeaseCount": 0,
+    "vanishedDuringScan": 0,
+    "minPttlMs": null,
+    "maxPttlMs": null,
+    "leaseKeysOrValuesPrinted": false
+  },
+  "cacheHealth": {
+    "backend": "redis",
+    "healthy": true,
+    "routeLeaseCount": 0,
+    "recordCount": 0
+  },
+  "services": {
+    "mir2-playtest.service": {
+      "MainPID": "1177999",
+      "ActiveState": "active",
+      "SubState": "running",
+      "executable": "/opt/mir2-playtest/releases/868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3/mir2-gateway"
+    },
+    "mir2-windows-promotion-worker.service": {
+      "MainPID": "1178052",
+      "ActiveState": "active",
+      "SubState": "running",
+      "executable": "/opt/mir2-playtest/releases/868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3/promotion_worker"
+    }
+  },
+  "relationOrFactOrFinancialMutation": false,
+  "servicesInterrupted": false,
+  "operatorInvoked": false,
+  "dockerStarted": false
+}

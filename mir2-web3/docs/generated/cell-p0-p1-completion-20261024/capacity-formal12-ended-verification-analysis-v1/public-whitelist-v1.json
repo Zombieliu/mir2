@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "scope": "Closed Formal12 ended-tool sources/history and actual execution, independently checked failed-run facts and Root OS proof only. No raw, monitor, executable, recording or private payload copied.",
+  "base": "C:\\mir2-build\\p01-completion-20261024",
+  "destination": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal12-ended-verification-analysis-v1",
+  "sourceCount": 15,
+  "totalBytes": 272843,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\verify-ended-formal12-v1.mjs",
+      "bytes": 31367,
+      "sha256": "1fd990313efba763df9ceb233071adc8e5f65b4172e7981c822a42220d098ef0",
+      "target": "tool/verify-ended-formal12-v1.mjs"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\formal-contract-v1.mjs",
+      "bytes": 6103,
+      "sha256": "10be94d3fc062f442caa9b46f00f4d5eebaeafd0200f39273a2a1881a19e3361",
+      "target": "tool/formal-contract-v1.mjs"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285",
+      "target": "tool/hp-proof-contract-v2.mjs"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a",
+      "target": "tool/expected-formal-policy-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\run-ended-formal12-v1.mjs",
+      "bytes": 2259,
+      "sha256": "9412fe9f12c8433677b81494a984333f8a1248860c7844e6222b8dce6e3ee728",
+      "target": "tool/run-ended-formal12-v1.mjs"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499",
+      "target": "tool/seal-tool-source-v1.mjs"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\derivation-proof-v1.json",
+      "bytes": 35567,
+      "sha256": "2e32a5fc6c8345597bf5064e005dcb925f2aee16dcfd31a10e06340ae4657635",
+      "target": "tool/derivation-proof-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\preparation-v1.json",
+      "bytes": 8492,
+      "sha256": "8fde87b96887f5dc11402753a05e0435bc2c78dbba31496c0774ee63fa0615bc",
+      "target": "tool/preparation-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\independent-review-v1.json",
+      "bytes": 5681,
+      "sha256": "f213fac66f8ce366944abe51dc083bea9469e57eba3d7bfd275edb7234d1f7f8",
+      "target": "tool/independent-review-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 1965,
+      "sha256": "84515e3b03aba3aa5ae072f23ed3d622e648197ffcfcb71c1e38a73a9f850a27",
+      "target": "tool/tool-source-frozen-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\actual-verification.log",
+      "bytes": 1811,
+      "sha256": "43c522260d7cdfc2de1670e288a13d833fff7a5c9c84c8e6455469d31a82df05",
+      "target": "actual/actual-verification.log"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "87803d64b90b7bbce5564a79e8b08f7ea79607b0e6cb6ca4e7d9e3fd684a4a99",
+      "target": "actual/actual-verification-execution-receipt-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-independent-verification-v1\\final-verification.json",
+      "bytes": 159743,
+      "sha256": "38452bccbf6020c4a38b6112591936b4801f4ca13f459b53b6c9c3f6cc4f1dc7",
+      "target": "actual/final-verification.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "379c8d9dd3a7acf898a46aba230ec3c31f74ff448104ea7ba17001448e7b462a",
+      "target": "cleanup/formal12-root-independent-cleanup-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-actual-terminal-independent-facts-v1.json",
+      "bytes": 10025,
+      "sha256": "f570c7df8c7cbc7892965d77b19f32f26e7bb830b987fa444a00eaa7d9a44e06",
+      "target": "facts/formal12-actual-terminal-independent-facts-v1.json"
+    }
+  ],
+  "duplicateReviewReference": {
+    "external": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-ended-tool-independent-review-v1\\review-v1.json",
+      "bytes": 5681,
+      "sha256": "f213fac66f8ce366944abe51dc083bea9469e57eba3d7bfd275edb7234d1f7f8"
+    },
+    "publicCopy": "tool/independent-review-v1.json",
+    "sameRawBytesVerified": true,
+    "recopied": false
+  },
+  "sourceSealInputs": 9,
+  "baseToolInputs": 7,
+  "runId": "1792951023370-34757a8d",
+  "formalResultKnown": true,
+  "independentVerificationPassed": true,
+  "formalRunPassed": false,
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "collectorCopiesNotDuplicated": 196,
+  "rootActualVerifierExitCode": 0,
+  "historyPolicy": "Original prepared/pending/not-executed and preparation-time unknown fields remain historical and unchanged."
+}

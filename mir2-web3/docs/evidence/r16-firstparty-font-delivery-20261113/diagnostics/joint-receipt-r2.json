@@ -1,0 +1,141 @@
+{
+  "kind": "joint-firstparty-runtime-font-read",
+  "startedAt": "2026-11-13T10:33:50.779Z",
+  "origin": "https://numeron.obelisk.build",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "passed": true,
+  "requests": [
+    {
+      "kind": "wasm",
+      "path": "/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestedMs": 2504,
+      "initialPriority": "High",
+      "bytes": 31452436,
+      "encodedDataBytes": 6026738,
+      "requestCacheHeaders": {},
+      "status": 200,
+      "headersMs": 3043,
+      "protocol": "h2",
+      "connectionId": 148,
+      "connectionReused": false,
+      "diskCache": false,
+      "serviceWorker": false,
+      "timing": {
+        "requestTime": 114425.817198,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": 0.127,
+        "connectEnd": 313.541,
+        "sslStart": 0.948,
+        "sslEnd": 313.533,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 313.747,
+        "sendEnd": 313.896,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 538.561,
+        "receiveHeadersEnd": 538.623
+      },
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "age": "22284",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "HIT"
+      },
+      "firstDataMs": 3061,
+      "maxDataGapMs": 2389,
+      "lastDataMs": 107977,
+      "finishMs": 108022,
+      "encodedTotalBytes": 6027010
+    },
+    {
+      "kind": "tc",
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "requestedMs": 2504,
+      "initialPriority": "High",
+      "bytes": 11941968,
+      "encodedDataBytes": 7671393,
+      "requestCacheHeaders": {
+        "cache-control": "no-cache",
+        "pragma": "no-cache"
+      },
+      "status": 200,
+      "headersMs": 3006,
+      "protocol": "h2",
+      "connectionId": 148,
+      "connectionReused": true,
+      "diskCache": false,
+      "serviceWorker": false,
+      "timing": {
+        "requestTime": 114425.818021,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 312.984,
+        "sendEnd": 313.074,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 500.299,
+        "receiveHeadersEnd": 500.348
+      },
+      "headers": {
+        "content-type": "font/ttf",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=14400",
+        "age": "22227",
+        "cf-cache-status": "BYPASS",
+        "x-vercel-cache": "HIT"
+      },
+      "firstDataMs": 3031,
+      "maxDataGapMs": 4253,
+      "lastDataMs": 120187,
+      "finishMs": 120214,
+      "encodedTotalBytes": 7671800
+    }
+  ],
+  "browserClosed": true,
+  "budgets": {
+    "perReadTotalMs": 120000,
+    "positiveByteIdleMs": 15000,
+    "maxBytes": 33554432
+  },
+  "scope": "Exactly one concurrent WASM GET and one TC GET in a fresh ordinary Chrome context; font uses reload like Worker, binary force-cache. No game, fonts registration, Worker, compile/App or protocol overrides. Resource-only diagnostic, not full-game qualification or causal proof.",
+  "versionBefore": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "reads": [
+    {
+      "kind": "wasm",
+      "passed": true,
+      "bytes": 31452436,
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "headersMs": 539.7000000029802,
+      "durationMs": 105519
+    },
+    {
+      "kind": "tc",
+      "passed": true,
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "headersMs": 501.90000000596046,
+      "durationMs": 117709
+    }
+  ],
+  "workersObserved": 0,
+  "versionAfter": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "finishedAt": "2026-11-13T10:35:51.315Z"
+}

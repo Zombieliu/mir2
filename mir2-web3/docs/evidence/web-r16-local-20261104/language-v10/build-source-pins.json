@@ -1,0 +1,113 @@
+{
+  "schema": "mir2.r16.language-source-pins.v1",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "r16Ancestor": "e9117b6691e3f7ec238ff1c1eb77b699b0646c2f",
+  "existingWorkPreserved": true,
+  "buildId": "zk9hlA8LYTLrEX-WIO7SK",
+  "packageManifestSha256": "7cb80da52a2445a71f0706157e60a23b21e71366544f769716c9c9c61a261e43",
+  "nativeKeys": 9902,
+  "nativeLocaleCount": 10,
+  "nativeSlotExceptions": 8,
+  "browserKeys": 32,
+  "browserLocaleCount": 10,
+  "fontsAdded": 9,
+  "licensesAdded": 5,
+  "wireAndWasmDtoChanged": false,
+  "sharedWasmTenLocaleClaim": false,
+  "thinBudgetPass": false,
+  "preparedPackage": {
+    "exists": true,
+    "bytes": 682352660,
+    "files": 29493,
+    "directories": 955,
+    "links": 0
+  },
+  "sources": [
+    {
+      "path": "apps/web/lib/localization.ts",
+      "bytes": 5064,
+      "sha256": "d61382b909f12a00e906e1bb65b94c3d561a9295646bd012912889173a457fff"
+    },
+    {
+      "path": "apps/web/lib/r16-runtime-language.ts",
+      "bytes": 480,
+      "sha256": "7e9a3fb686d792ab125af4fd46894ff2b5a1a5f9e694bdcd55337cd484bf8430"
+    },
+    {
+      "path": "apps/web/lib/r16-native-localization.ts",
+      "bytes": 8949,
+      "sha256": "585de44295716670dac221fa27e4120e2f99a144e7a1fb0c8d87d40ea8d22d54"
+    },
+    {
+      "path": "apps/web/lib/r16-browser-localization.ts",
+      "bytes": 22018,
+      "sha256": "66bff4eb7ecca9c3115333f1920648e78ab149e8ba31cb1442954e34dcc47a2f"
+    },
+    {
+      "path": "apps/web/lib/generated/r16-native-localization.json",
+      "bytes": 6301532,
+      "sha256": "e8d8bf99c8e109a0e6e5fc028ec8ce97b6d927c47c8edbf329fe2ba7bc17c259"
+    },
+    {
+      "path": "apps/web/lib/r16-auth-layout.ts",
+      "bytes": 16183,
+      "sha256": "86196827e58268322f1c1630776c5fb6b16ecb6b18d8b00e8b5fa672cd2023f7"
+    },
+    {
+      "path": "apps/web/lib/crystal-content-localization.ts",
+      "bytes": 3273,
+      "sha256": "631021a0d8c22ec38258e0eac92206a823dec40a70a22084e63db0a5f2a2e42b"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1099461,
+      "sha256": "2e27962f5983bcb60745062a8f2290012df6b9d6b4f5b94ee7e45943ffc09529"
+    },
+    {
+      "path": "apps/web/app/globals.css",
+      "bytes": 136935,
+      "sha256": "807818d49bd4c70e7a0340724c2a2484dffe31bec9176c36a47806f4db8d94bf"
+    },
+    {
+      "path": "apps/web/app/components/original-client-overlays.tsx",
+      "bytes": 92349,
+      "sha256": "bb54c05a67664cc31e7a5ffc3dc5d1087e11a7f1d60a6df091c1afbebc1c16b8"
+    },
+    {
+      "path": "apps/web/app/components/dubhe-wallet-qr-login.tsx",
+      "bytes": 7490,
+      "sha256": "b9212c1c1de88a9628426aa97b744947c43c2bc16b7eeedd3bd3325d0c61357c"
+    },
+    {
+      "path": "apps/web/app/components/original-client-audio-settings.tsx",
+      "bytes": 6720,
+      "sha256": "0438a19701684d6169fab91da23488575b711764f63b7bd4e328bfaedada7749"
+    },
+    {
+      "path": "apps/web/app/components/pwa-game-shell.tsx",
+      "bytes": 11485,
+      "sha256": "98b2f83172882a0981fa1778e126b506e6a638770ee99597e3c75a955e6a546a"
+    },
+    {
+      "path": "apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "bytes": 57966,
+      "sha256": "c1dd1d70913ac01e4d5ea67e54e58b498a1711529494f0309d2b8cc1fa9905d1"
+    },
+    {
+      "path": "apps/web/app/components/original-client-scene-overlays.tsx",
+      "bytes": 25948,
+      "sha256": "b34f91eaf73278cb00696fc1c54246efb6d40c22dc5bf8d0e48d6ff310ee8c81"
+    },
+    {
+      "path": "apps/web/scripts/lib/r16-playable-assets.mjs",
+      "bytes": 33175,
+      "sha256": "0bd2276a2e8efe3737a2494d34b59603dc059052a4fbc0511dcfac74d8bb78e0"
+    },
+    {
+      "path": "apps/web/scripts/generate-r16-native-localization.mjs",
+      "bytes": 13243,
+      "sha256": "746ca738eebf509a974c02b99b6c0cfe7608872f966895c22353158423971f44"
+    }
+  ]
+}

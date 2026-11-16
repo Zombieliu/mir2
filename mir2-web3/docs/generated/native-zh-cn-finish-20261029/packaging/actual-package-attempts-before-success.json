@@ -1,0 +1,91 @@
+{
+  "kind": "actual-package-failures-retained-before-final-result",
+  "attempts": [
+    {
+      "version": 1,
+      "passed": false,
+      "reason": "Strict reparse-point ancestor guard rejected the historical E: junction. Coordinator switched to the physical F: full-pack root; the guard was not relaxed.",
+      "logReceipt": {
+        "filename": "real-candidate-package-v1.log",
+        "bytes": 445,
+        "sha256": "55ac57582253f02bb67c24d2b4e1f23d0c4e79a3f5ccb10966751ff8d09066a9",
+        "included": false
+      },
+      "resultExcerpt": [
+        " 300 |  … em $item) { throw \"reparse-point ancestor rejected: $($item.FullName) …",
+        "     | reparse-point ancestor rejected: E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\generated\\crystal-packs\\full"
+      ]
+    },
+    {
+      "version": 2,
+      "passed": false,
+      "reason": "The clean checkout had no base atlas manifest, so full floor completion failed with ENOENT. Coordinator freshly rebuilt the base seed from committed original-map inputs; no old cache was accepted.",
+      "logReceipt": {
+        "filename": "real-candidate-package-v2.log",
+        "bytes": 2260,
+        "sha256": "56d98934d6e6484b1934c2729767bbd0fee67d16d3dadfaa8e7a4d76c24a14bb",
+        "included": false
+      },
+      "resultExcerpt": [
+        "Error: ENOENT: no such file or directory, open 'F:\\mir2-build\\native-zh-cn-finish-20261029\\checkout\\mir2-web3\\apps\\web\\public\\generated\\map-atlas\\manifest.json'",
+        "  code: 'ENOENT',",
+        "  path: 'F:\\\\mir2-build\\\\native-zh-cn-finish-20261029\\\\checkout\\\\mir2-web3\\\\apps\\\\web\\\\public\\\\generated\\\\map-atlas\\\\manifest.json'",
+        " 961 |  … STEXITCODE -ne 0) { throw 'Candidate floor atlas completion failed' }",
+        "     | Candidate floor atlas completion failed"
+      ]
+    },
+    {
+      "version": 3,
+      "passed": false,
+      "reason": "Map generation/coverage reached its own gate, then overall packaging correctly stopped because a clean checkout lacked ignored CArmour/11/0.png source input. The subsequent frozen asset recovery is separately recorded; no path or asset gate was weakened.",
+      "logReceipt": {
+        "filename": "real-candidate-package-v3.log",
+        "bytes": 44017,
+        "sha256": "fa7c4a1e4a6a4d9bb39a92d1db10acac3915569bd2dda21f7e1731a78241333a",
+        "included": false
+      },
+      "resultExcerpt": [
+        "generatedMapClosure=maps:209,frames:52333,missing:1177,sourceNoDraw:531",
+        "petGuildClosure=libraries:22,png:6224,sounds:11",
+        "entityAtlasClosure=atlases:2,pages:8",
+        "  91 |                      throw \"player sprite frame PNG missing: $pngPath\"",
+        "     | player sprite frame PNG missing:",
+        "     | F:\\mir2-build\\native-zh-cn-finish-20261029\\checkout\\mir2-web3\\apps\\web\\public\\original-ui\\CArmour\\11\\0.png"
+      ]
+    },
+    {
+      "version": 4,
+      "passed": false,
+      "reason": "Source asset closures and map gate passed, then final staging correctly failed when production ADS enumeration could not resolve an overlong physical map-atlas manifest path. No signed Candidate was produced by this attempt. The same clean worktree was moved to a shorter physical path, with no source/gate relaxation.",
+      "logReceipt": {
+        "filename": "real-candidate-package-v4.log",
+        "bytes": 44410,
+        "sha256": "b4fc9285be416d85d8ff523dd1b5e77ba74034f4373c2640fe84285d6bff13e5",
+        "included": false
+      },
+      "sourceAndMapStageExcerpt": [
+        "generatedMapClosure=maps:209,frames:52333,missing:1177,sourceNoDraw:531",
+        "petGuildClosure=libraries:22,png:6224,sounds:11",
+        "entityAtlasClosure=atlases:2,pages:8",
+        "playerSpriteClosure=families:10,libraries:162,frames:157088",
+        "itemIconClosure=files:1004,png:1003",
+        "stateItemClosure=files:219,png:218",
+        "actorClosure=libraries:128,frames:25597"
+      ],
+      "finalErrorExcerpt": [
+        " 380 |  … ) } catch { throw \"ADS enumeration unavailable for $($item.FullName): …",
+        "     | ADS enumeration unavailable for",
+        "     | F:\\mir2-build\\native-zh-cn-finish-20261029\\checkout\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-20261029-invited-09.staging-83c3f0a100f647e7a67bfb088bc36a7e\\mir2-assets\\generated\\map-atlas\\manifest.0d7df9f7d8d5c65b4a9fe92925ae9977f7fded795e3db92880228f7488507761.json: 系统找不到指定的路径。"
+      ],
+      "signedCandidateProduced": false,
+      "coordinatorReportedFinallyRemovedStagingAndTemp": true
+    }
+  ],
+  "finalActualCandidatePassed": true,
+  "finalActualCandidatePending": false,
+  "strictCoverageOrPathGuardsRelaxed": false,
+  "actualPackageV4StatusAtThisPhase": "failed at staging ADS enumeration; no final signed Candidate",
+  "scope": "Historical actual package failures only; subsequent final package outcome, if any, is a separate report.",
+  "actualPackageV5StatusAtThisPhase": "passed exit0; final formal Game Candidate result is separately recorded",
+  "finalOutcomeReport": "../candidate/validation.json"
+}

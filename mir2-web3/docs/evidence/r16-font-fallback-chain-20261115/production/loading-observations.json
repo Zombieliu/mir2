@@ -1,0 +1,1589 @@
+{
+  "clockEpochMs": 1794694358767,
+  "resourceErrors": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 123982,
+      "serviceWorker": true,
+      "category": "fonts"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 123982,
+      "serviceWorker": true,
+      "category": "fonts"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "atMs": 123982,
+      "serviceWorker": true,
+      "category": "fonts"
+    },
+    {
+      "path": "/original-ui/Prguse/995.png",
+      "status": 504,
+      "atMs": 132627,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/960.png",
+      "status": 504,
+      "atMs": 132765,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/961.png",
+      "status": 504,
+      "atMs": 132844,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/360.png",
+      "status": 504,
+      "atMs": 132953,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1202.png",
+      "status": 504,
+      "atMs": 132987,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1203.png",
+      "status": 504,
+      "atMs": 133017,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/950.png",
+      "status": 504,
+      "atMs": 133036,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1204.png",
+      "status": 504,
+      "atMs": 133111,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1205.png",
+      "status": 504,
+      "atMs": 133217,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/15.png",
+      "status": 504,
+      "atMs": 133428,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/917.png",
+      "status": 504,
+      "atMs": 133458,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/918.png",
+      "status": 504,
+      "atMs": 133458,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/956.png",
+      "status": 504,
+      "atMs": 133526,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/997.png",
+      "status": 504,
+      "atMs": 133681,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/193.png",
+      "status": 504,
+      "atMs": 133767,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/16.png",
+      "status": 504,
+      "atMs": 133841,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/919.png",
+      "status": 504,
+      "atMs": 133995,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/966.png",
+      "status": 504,
+      "atMs": 134039,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/965.png",
+      "status": 504,
+      "atMs": 134044,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/989.png",
+      "status": 504,
+      "atMs": 134070,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/979.png",
+      "status": 504,
+      "atMs": 134231,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/17.png",
+      "status": 504,
+      "atMs": 134241,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/616.png",
+      "status": 504,
+      "atMs": 134444,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/951.png",
+      "status": 504,
+      "atMs": 134504,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/14.png",
+      "status": 504,
+      "atMs": 134620,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/957.png",
+      "status": 504,
+      "atMs": 134631,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/270.png",
+      "status": 504,
+      "atMs": 134652,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/276.png",
+      "status": 504,
+      "atMs": 134737,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/530.png",
+      "status": 504,
+      "atMs": 134861,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/206.png",
+      "status": 504,
+      "atMs": 134942,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/273.png",
+      "status": 504,
+      "atMs": 135067,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/210.png",
+      "status": 504,
+      "atMs": 135140,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1656.png",
+      "status": 504,
+      "atMs": 135411,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1657.png",
+      "status": 504,
+      "atMs": 135412,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1658.png",
+      "status": 504,
+      "atMs": 135507,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1290.png",
+      "status": 504,
+      "atMs": 135748,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/710.png",
+      "status": 504,
+      "atMs": 135765,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1292.png",
+      "status": 504,
+      "atMs": 135783,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1293.png",
+      "status": 504,
+      "atMs": 135907,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1294.png",
+      "status": 504,
+      "atMs": 135909,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1296.png",
+      "status": 504,
+      "atMs": 135975,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1295.png",
+      "status": 504,
+      "atMs": 136025,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1297.png",
+      "status": 504,
+      "atMs": 136182,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1291.png",
+      "status": 504,
+      "atMs": 136262,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1299.png",
+      "status": 504,
+      "atMs": 136511,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1298.png",
+      "status": 504,
+      "atMs": 136511,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1300.png",
+      "status": 504,
+      "atMs": 136605,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1301.png",
+      "status": 504,
+      "atMs": 136646,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1302.png",
+      "status": 504,
+      "atMs": 136800,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1304.png",
+      "status": 504,
+      "atMs": 136928,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1305.png",
+      "status": 504,
+      "atMs": 136928,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1303.png",
+      "status": 504,
+      "atMs": 136954,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1307.png",
+      "status": 504,
+      "atMs": 137053,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1306.png",
+      "status": 504,
+      "atMs": 137111,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1309.png",
+      "status": 504,
+      "atMs": 137281,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1310.png",
+      "status": 504,
+      "atMs": 137319,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1308.png",
+      "status": 504,
+      "atMs": 137333,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1311.png",
+      "status": 504,
+      "atMs": 137499,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1312.png",
+      "status": 504,
+      "atMs": 137528,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1315.png",
+      "status": 504,
+      "atMs": 137712,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1313.png",
+      "status": 504,
+      "atMs": 137727,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1316.png",
+      "status": 504,
+      "atMs": 137770,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1314.png",
+      "status": 504,
+      "atMs": 137815,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1317.png",
+      "status": 504,
+      "atMs": 137911,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1318.png",
+      "status": 504,
+      "atMs": 138108,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1319.png",
+      "status": 504,
+      "atMs": 138108,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1321.png",
+      "status": 504,
+      "atMs": 138166,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1320.png",
+      "status": 504,
+      "atMs": 138312,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1323.png",
+      "status": 504,
+      "atMs": 138322,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1322.png",
+      "status": 504,
+      "atMs": 138322,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse2/1324.png",
+      "status": 504,
+      "atMs": 138512,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/156.png",
+      "status": 504,
+      "atMs": 138578,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/157.png",
+      "status": 504,
+      "atMs": 138678,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/158.png",
+      "status": 504,
+      "atMs": 138763,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/287.png",
+      "status": 504,
+      "atMs": 138840,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/288.png",
+      "status": 504,
+      "atMs": 138909,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/289.png",
+      "status": 504,
+      "atMs": 138926,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/516.png",
+      "status": 504,
+      "atMs": 139406,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Title/517.png",
+      "status": 504,
+      "atMs": 139453,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1901.png",
+      "status": 504,
+      "atMs": 139453,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1901.png",
+      "status": 504,
+      "atMs": 139454,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1902.png",
+      "status": 504,
+      "atMs": 139454,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1904.png",
+      "status": 504,
+      "atMs": 139454,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1905.png",
+      "status": 504,
+      "atMs": 139459,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1907.png",
+      "status": 504,
+      "atMs": 139459,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1908.png",
+      "status": 504,
+      "atMs": 139459,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1910.png",
+      "status": 504,
+      "atMs": 139459,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1911.png",
+      "status": 504,
+      "atMs": 139459,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1913.png",
+      "status": 504,
+      "atMs": 139460,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1914.png",
+      "status": 504,
+      "atMs": 139460,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1961.png",
+      "status": 504,
+      "atMs": 139460,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1961.png",
+      "status": 504,
+      "atMs": 139460,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1962.png",
+      "status": 504,
+      "atMs": 139460,
+      "serviceWorker": true,
+      "category": "images"
+    },
+    {
+      "path": "/original-ui/Prguse/1962.png",
+      "status": 504,
+      "atMs": 139460,
+      "serviceWorker": true,
+      "category": "images"
+    }
+  ],
+  "groups": {
+    "fonts": 3,
+    "images": 94
+  },
+  "consoleErrors": 97,
+  "consoleProbeRows": 98,
+  "scope": "The original bounded complete font/113/Native/quest gates passed. These 97 responses through the Worker are retained. Exact final resolution of every failed image URL and global visual parity are not qualified. Do not infer the Worker itself generated every 504 without upstream evidence.",
+  "pageStatic": {
+    "capturedRows": 615,
+    "maxRows": 8192,
+    "droppedRows": 0,
+    "truncated": false,
+    "cleanupComplete": true,
+    "rows": [
+      {
+        "ordinal": 39,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 57509,
+        "outcome": "failed",
+        "initialPriority": "VeryHigh",
+        "headersAtMs": 123982,
+        "status": 504,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "cache-control": "no-store"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.063,
+          "sendEnd": 0.063,
+          "receiveHeadersStart": 66479.949,
+          "receiveHeadersEnd": 66479.949
+        },
+        "finishedAtMs": 123982,
+        "failure": "net::ERR_ABORTED",
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 167,
+        "page": 1,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "category": "runtime",
+        "source": "page-cdp",
+        "requestAtMs": 66417,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 71352,
+        "status": 200,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": {
+          "age": 161841,
+          "cf-cache-status": "HIT",
+          "content-encoding": "gzip",
+          "cache-control": "public, max-age=31536000",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.076,
+          "sendEnd": 0.154,
+          "receiveHeadersStart": 4870.99,
+          "receiveHeadersEnd": 4871.038
+        },
+        "finishedAtMs": 71352,
+        "browserReportedEncodedBytes": 20885,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 168,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page-cdp",
+        "requestAtMs": 66417,
+        "outcome": "failed",
+        "initialPriority": "High",
+        "finishedAtMs": 74418,
+        "failure": "net::ERR_ABORTED",
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 198,
+        "page": 1,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "category": "runtime",
+        "source": "page-cdp",
+        "requestAtMs": 74418,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 75755,
+        "status": 200,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": {
+          "age": 161791,
+          "cf-cache-status": "HIT",
+          "content-encoding": "gzip",
+          "cache-control": "public, max-age=31536000",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.083,
+          "sendEnd": 0.142,
+          "receiveHeadersStart": 1336.264,
+          "receiveHeadersEnd": 1336.299
+        },
+        "finishedAtMs": 90134,
+        "browserReportedEncodedBytes": 6439558,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 222,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90134,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 131441,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "content-length": 16437364,
+          "cache-control": "public, max-age=31536000"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.075,
+          "sendEnd": 0.075,
+          "receiveHeadersStart": 41473.4,
+          "receiveHeadersEnd": 41473.4
+        },
+        "finishedAtMs": 131513,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 223,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90134,
+        "outcome": "failed",
+        "initialPriority": "High",
+        "headersAtMs": 123982,
+        "status": 504,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "cache-control": "no-store"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.043,
+          "sendEnd": 0.043,
+          "receiveHeadersStart": 34017.899,
+          "receiveHeadersEnd": 34017.899
+        },
+        "finishedAtMs": 123989,
+        "failure": "net::ERR_ABORTED",
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 243,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90445,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 131441,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "content-length": 16437364,
+          "cache-control": "public, max-age=31536000"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.458,
+          "sendEnd": 0.458,
+          "receiveHeadersStart": 41015.694,
+          "receiveHeadersEnd": 41015.694
+        },
+        "finishedAtMs": 131544,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 244,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90445,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 124944,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 621572,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.455,
+          "sendEnd": 0.455,
+          "receiveHeadersStart": 34524.525,
+          "receiveHeadersEnd": 34524.525
+        },
+        "finishedAtMs": 124945,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 245,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90445,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 123982,
+        "status": 504,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "cache-control": "no-store"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.867,
+          "sendEnd": 0.867,
+          "receiveHeadersStart": 33560.136,
+          "receiveHeadersEnd": 33560.136
+        },
+        "finishedAtMs": 123989,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 246,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90445,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 125466,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 243520,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.733,
+          "sendEnd": 0.733,
+          "receiveHeadersStart": 35043.493,
+          "receiveHeadersEnd": 35043.493
+        },
+        "finishedAtMs": 125469,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 247,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90445,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 125910,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 37780,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.722,
+          "sendEnd": 0.722,
+          "receiveHeadersStart": 35491.305,
+          "receiveHeadersEnd": 35491.305
+        },
+        "finishedAtMs": 125911,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 248,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 90445,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 126365,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 234892,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.669,
+          "sendEnd": 0.669,
+          "receiveHeadersStart": 35945.708,
+          "receiveHeadersEnd": 35945.708
+        },
+        "finishedAtMs": 126365,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 430,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 124135,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 146893,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 67,
+          "content-length": 11941968,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "HIT",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.069,
+          "sendEnd": 0.069,
+          "receiveHeadersStart": 22751.326,
+          "receiveHeadersEnd": 22751.326
+        },
+        "finishedAtMs": 146995,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 431,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 125000,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 146893,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": false,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 67,
+          "content-length": 11941968,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "HIT",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.062,
+          "sendEnd": 0.062,
+          "receiveHeadersStart": 21887.35,
+          "receiveHeadersEnd": 21887.35
+        },
+        "finishedAtMs": 146953,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 438,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 131513,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 131555,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": true,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 621572,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.071,
+          "sendEnd": 0.071,
+          "receiveHeadersStart": 0.66,
+          "receiveHeadersEnd": 0.66
+        },
+        "finishedAtMs": 131593,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 439,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 131593,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 131606,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": true,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 243520,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.07,
+          "sendEnd": 0.07,
+          "receiveHeadersStart": 0.859,
+          "receiveHeadersEnd": 0.859
+        },
+        "finishedAtMs": 131623,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 440,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 131623,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 131627,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": true,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 37780,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.066,
+          "sendEnd": 0.066,
+          "receiveHeadersStart": 0.767,
+          "receiveHeadersEnd": 0.767
+        },
+        "finishedAtMs": 131630,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      },
+      {
+        "ordinal": 441,
+        "page": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "category": "font",
+        "source": "page-cdp",
+        "requestAtMs": 131630,
+        "outcome": "finished",
+        "initialPriority": "High",
+        "headersAtMs": 131633,
+        "status": 200,
+        "fromServiceWorker": true,
+        "fromDiskCache": true,
+        "protocol": "http/1.1",
+        "cache": {
+          "age": 0,
+          "content-length": 234892,
+          "cf-cache-status": "BYPASS",
+          "x-vercel-cache": "MISS",
+          "cache-control": "public, max-age=14400",
+          "cfPop": "SIN"
+        },
+        "networkTimingMs": {
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.062,
+          "sendEnd": 0.062,
+          "receiveHeadersStart": 0.504,
+          "receiveHeadersEnd": 0.504
+        },
+        "finishedAtMs": 131634,
+        "browserReportedEncodedBytes": 0,
+        "queryRemoved": false
+      }
+    ]
+  },
+  "workerFonts": {
+    "kind": "r16-passive-worker-font-network-v1",
+    "workerUrl": "https://numeron.obelisk.build/mir2-asset-worker.js",
+    "contextScoped": true,
+    "source": "service-worker-upstream-cdp",
+    "setupMs": 4,
+    "finishMs": 41,
+    "workersAttached": 1,
+    "otherContextWorkersIgnored": 0,
+    "droppedRequests": 0,
+    "cleanupComplete": true,
+    "observerErrors": [],
+    "rows": [
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 57498,
+        "observedAtMs": 57497,
+        "encodedBodyBytes": 6299358,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 59104,
+        "netError": "net::ERR_ABORTED",
+        "encodedBytes": 6299358,
+        "encodedBytesComplete": false,
+        "finishedAtMs": 95331,
+        "durationMs": 37833,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "requestAtMs": 89961,
+        "observedAtMs": 89960,
+        "encodedBodyBytes": 13613665,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 90080,
+        "encodedBytes": 13613750,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 131387,
+        "durationMs": 41426,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 95331,
+        "observedAtMs": 95331,
+        "encodedBodyBytes": 0,
+        "netError": "net::ERR_ABORTED",
+        "encodedBytes": 0,
+        "encodedBytesComplete": false,
+        "finishedAtMs": 102331,
+        "durationMs": 7000,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 102332,
+        "observedAtMs": 102331,
+        "encodedBodyBytes": 0,
+        "netError": "net::ERR_ABORTED",
+        "encodedBytes": 0,
+        "encodedBytesComplete": false,
+        "finishedAtMs": 109333,
+        "durationMs": 7001,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 109333,
+        "observedAtMs": 109332,
+        "encodedBodyBytes": 0,
+        "netError": "net::ERR_ABORTED",
+        "encodedBytes": 0,
+        "encodedBytesComplete": false,
+        "finishedAtMs": 116334,
+        "durationMs": 7001,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 116333,
+        "observedAtMs": 116333,
+        "encodedBodyBytes": 27150,
+        "status": 404,
+        "protocol": "http/1.1",
+        "headersAtMs": 116522,
+        "encodedBytes": 27446,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 116701,
+        "durationMs": 368,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 116522,
+        "observedAtMs": 116522,
+        "encodedBodyBytes": 27150,
+        "status": 404,
+        "protocol": "http/1.1",
+        "headersAtMs": 116977,
+        "encodedBytes": 27446,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 117012,
+        "durationMs": 490,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 116977,
+        "observedAtMs": 116977,
+        "encodedBodyBytes": 0,
+        "netError": "net::ERR_ABORTED",
+        "encodedBytes": 0,
+        "encodedBytesComplete": false,
+        "finishedAtMs": 123978,
+        "durationMs": 7001,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+        "requestAtMs": 123979,
+        "observedAtMs": 123978,
+        "encodedBodyBytes": 305337,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 124511,
+        "encodedBytes": 305605,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 124941,
+        "durationMs": 962,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "requestAtMs": 124943,
+        "observedAtMs": 124943,
+        "encodedBodyBytes": 99329,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 125377,
+        "encodedBytes": 99585,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 125461,
+        "durationMs": 518,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "requestAtMs": 125461,
+        "observedAtMs": 125462,
+        "encodedBodyBytes": 19796,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 125895,
+        "encodedBytes": 19967,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 125909,
+        "durationMs": 448,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "requestAtMs": 125910,
+        "observedAtMs": 125910,
+        "encodedBodyBytes": 97900,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 126287,
+        "encodedBytes": 98171,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 126363,
+        "durationMs": 453,
+        "queryRemoved": false
+      },
+      {
+        "source": "service-worker-upstream",
+        "workerGeneration": 1,
+        "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+        "requestAtMs": 126364,
+        "observedAtMs": 126364,
+        "encodedBodyBytes": 7672122,
+        "status": 200,
+        "protocol": "h2",
+        "headersAtMs": 126477,
+        "encodedBytes": 7672310,
+        "encodedBytesComplete": true,
+        "finishedAtMs": 146853,
+        "durationMs": 20489,
+        "queryRemoved": false
+      }
+    ],
+    "limits": [
+      "future-worker requests made before Network.enable may be unobserved; no target is paused",
+      "encodedBytes from loadingFinished includes protocol overhead; failed rows only expose observed encoded body counts",
+      "only exact Worker URL in the supplied browser context is observed; no headers or payloads are accessed"
+    ]
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "schema": "mir2.native.linux-ci.archive.v1",
+  "source": "c8fea016881b24e58b5aff896e5236a703d9c9a4",
+  "runId": 37292261788,
+  "members": 30,
+  "bytes": 116355,
+  "sha256": "35821214a9d7cc4ed51301100a15ae174ca35f847952967b9698bd225b1002f0",
+  "originalsUnchanged": true,
+  "rawZipExtracted": false,
+  "inventory": [
+    {
+      "path": "ci/ARTIFACT-METADATA.json",
+      "bytes": 752,
+      "sha256": "c978e451fa8b23bf52b487f5fb948317bd44e848ec34744e91f2c13b924284d3"
+    },
+    {
+      "path": "ci/REVIEW.json",
+      "bytes": 1372,
+      "sha256": "8fa5f2c9217f9317e1f105a0e9ba525ad59ffe98d159283486590bb1b010c960"
+    },
+    {
+      "path": "ci/RUN.json",
+      "bytes": 4223,
+      "sha256": "21adde924e79d082514d4a7042e1a842cd9ac85f7420aca49f2e6ada47b22f4e"
+    },
+    {
+      "path": "ci/TEST-RECEIPT.json",
+      "bytes": 3526,
+      "sha256": "8f7f10aa43a5d6affeaae08e15029db3cb215483d4db08d722ca7b9777935773"
+    },
+    {
+      "path": "ci/ZIP-INVENTORY.json",
+      "bytes": 5616,
+      "sha256": "da00e21f44bc079bb15c13e445cf868b7f867a16894be13dab549c24549407ea"
+    },
+    {
+      "path": "ci/gh-artifact-zip.json",
+      "bytes": 397,
+      "sha256": "9e9624d7703667f276a160eba37ffe0e68b2dcc1447d97197fe376261612a4b4"
+    },
+    {
+      "path": "ci/gh-artifact-zip.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci/gh-artifact-zip.stdout",
+      "bytes": 51857,
+      "sha256": "6ed5d53d87c792fb774c2503ffdb15c42b6c7a66c78b1a32cb80bab623f257ba"
+    },
+    {
+      "path": "ci/gh-run-log.json",
+      "bytes": 417,
+      "sha256": "113a1be7ee3f7565341af1cbeac216c6904e38ec4ec60357bc4e79a71802610a"
+    },
+    {
+      "path": "ci/gh-run-log.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci/gh-run-log.stdout",
+      "bytes": 201885,
+      "sha256": "2fae1fe0c4a44b9957eebcc0c41935589a06bc475db43d8e77bd04fe9cb42343"
+    },
+    {
+      "path": "root/ci-dispatch-01.json",
+      "bytes": 272,
+      "sha256": "e294a85473179e474b0777fdb7c4627f1f3e3e839cbec3b9eba516e0796e5ecd"
+    },
+    {
+      "path": "root/ci-dispatch-01.txt",
+      "bytes": 60,
+      "sha256": "032fb00a4165cb51a138d1173bbe16a08a9bb8d68e30b316382ec6acb85299c4"
+    },
+    {
+      "path": "root/freeze-linux-first-attempt-01.json",
+      "bytes": 366,
+      "sha256": "0389d93a08b452d932d135db0b95d4420d2a134c1426d395d2466dc930681cf3"
+    },
+    {
+      "path": "root/freeze-linux-first-attempt-01.py",
+      "bytes": 3613,
+      "sha256": "3b9ecb302bb1ebc891f03a3abe65f44d900a47c87de353791983bef5128b38f1"
+    },
+    {
+      "path": "root/freeze_linux_ci.py",
+      "bytes": 4503,
+      "sha256": "8d800e90b4e8571b82f4fe723f30ad14d8dfa24a90d24d12cde82ea10f72e4ac"
+    },
+    {
+      "path": "root/git-commit-01.json",
+      "bytes": 196,
+      "sha256": "77735e42b5f8ead2bde57073777878505b4eaae430edf68c3e47835239ba07d9"
+    },
+    {
+      "path": "root/git-commit-01.txt",
+      "bytes": 4563,
+      "sha256": "57b70b81130fe4558c9d57f3f8ca7c88c63a72d45541231650e1e3e8c63e6646"
+    },
+    {
+      "path": "root/git-push-01.json",
+      "bytes": 248,
+      "sha256": "d9c2610b7d1935fd581233f54c96043eb7c87fb250f7dea84fffe967dde2a6e9"
+    },
+    {
+      "path": "root/git-push-01.txt",
+      "bytes": 139,
+      "sha256": "61c4224e63614c9bce095331bd0981bca1ba99945f4066296d1ca55b520d6964"
+    },
+    {
+      "path": "root/git-remote-01.txt",
+      "bytes": 91,
+      "sha256": "165f31ba7f4b2d3dfde475f2a3757f6161665764b8a61cd8f605d4d77485ac9b"
+    },
+    {
+      "path": "root/retain_linux_ci.py",
+      "bytes": 7208,
+      "sha256": "5d74490c1f1d0981a845290a75763a9ac639446a40d9729233c5b7c654cb738a"
+    },
+    {
+      "path": "source/.gitattributes",
+      "bytes": 1861,
+      "sha256": "7ec879a22eed7822430269fb2d8773926c31024005c6c4f3029e675df7f10938"
+    },
+    {
+      "path": "source/.github/workflows/web-assets-r2-release.yml",
+      "bytes": 43952,
+      "sha256": "8dd265e49be8c1c0e2dcdd38a92f64d857fe3c64420e0933879a06161754e6d0"
+    },
+    {
+      "path": "source/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+      "bytes": 64106,
+      "sha256": "9fd816a5fdf26a937d3d94a5b031c9e992fbb104f49832ba31a703587a0385f8"
+    },
+    {
+      "path": "source/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+      "bytes": 32624,
+      "sha256": "6c389da7832a6dbf027eaaa0fac7dbe584dfe7ec9bcdd29de9786f043e9702c3"
+    },
+    {
+      "path": "source/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs",
+      "bytes": 55347,
+      "sha256": "c08d5a918c4163917b922bb5da5232ef9edc43a340a50c76082753bb6d3f5af0"
+    },
+    {
+      "path": "source/mir2-web3/scripts/native_r17_r2_delivery.py",
+      "bytes": 49384,
+      "sha256": "63b6a8c601551747a927f5bdbaced793ef2904ad36598ecb974cac944899014c"
+    },
+    {
+      "path": "source/mir2-web3/scripts/test_native_r17_interrupt.py",
+      "bytes": 4749,
+      "sha256": "803ac39152e481fd9b43ea303b873b128ef989e85139324d7ab1ad1a7b4d9236"
+    },
+    {
+      "path": "source/mir2-web3/scripts/test_native_r17_r2_delivery.py",
+      "bytes": 74636,
+      "sha256": "22d80025bbdf5092ce0a3a45365163c9fbfc4127e51d70e1496f7578144e9e58"
+    }
+  ]
+}

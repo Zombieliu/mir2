@@ -1,0 +1,427 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v13",
+  "state": "SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING",
+  "sourcePrivate": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private",
+  "sourceReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\preparation-episode-receipt-v1.json",
+    "bytes": 5887,
+    "sha256": "18a77dc03cd9bea30e1a111156b3c34e56fb650deea15bd5d7c1c01ad4ce28c9"
+  },
+  "sourceReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\reports\\1793062645989-7e52f772.preparation-report.json",
+    "bytes": 76683,
+    "sha256": "a8669c0d9c0e7b87faeed7e38d097f55ff4b75b7ffc259b8b4096afd704b8a20"
+  },
+  "sourceCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\cleanup-v1.json",
+    "bytes": 1037,
+    "sha256": "681bb669d408903db1dfc1c366f5b229f648e6ae386ff5538889856ad49f9fb7"
+  },
+  "sourcePreparedIndex": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\prepared-index-v1.json",
+    "bytes": 6241,
+    "sha256": "4f6268f6f77b29e9593a57b88bc5eb1383aa087e826905891574411372e13e0b"
+  },
+  "sourceOwnedProcess": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\owned-process-v1.json",
+    "bytes": 742,
+    "sha256": "53cb735b9059c07fc8de95f31d3f65d239aa457473827cae401d13ce79e9f70b"
+  },
+  "sourceFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\frozen-source-v1.json",
+    "bytes": 98737,
+    "sha256": "dcfec042d69d44afd605751915cb572073cb575d7f7655c7cb365af1b368a57c"
+  },
+  "sourceOriginalVerdict": {
+    "ok": false,
+    "error": "safe Deer funding capital insufficient with 1 Venison after 1 hunts and 8 attempts",
+    "preparedCount": 21,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "sourceControlledPoolAccounts": 100,
+  "sourceReadyCharacters": 22,
+  "sourceRegisteredAccounts": 78,
+  "sourceStoreTotalAccounts": 101,
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "map": "0",
+      "x": 286,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "map": "0",
+      "x": 290,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "map": "0",
+      "x": 288,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "map": "0",
+      "x": 287,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0b",
+      "characterIndex": 12,
+      "map": "0",
+      "x": 289,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0c",
+      "characterIndex": 13,
+      "map": "0",
+      "x": 286,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0d",
+      "characterIndex": 14,
+      "map": "0",
+      "x": 290,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0e",
+      "characterIndex": 15,
+      "map": "0",
+      "x": 286,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0f",
+      "characterIndex": 16,
+      "map": "0",
+      "x": 290,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0g",
+      "characterIndex": 17,
+      "map": "0",
+      "x": 290,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0h",
+      "characterIndex": 18,
+      "map": "0",
+      "x": 287,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0i",
+      "characterIndex": 19,
+      "map": "0",
+      "x": 289,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0j",
+      "characterIndex": 20,
+      "map": "0",
+      "x": 286,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0k",
+      "characterIndex": 21,
+      "map": "0",
+      "x": 290,
+      "y": 618,
+      "normalLogout": true
+    }
+  ],
+  "sourceFailedCharacter": {
+    "name": "L370e2a0l",
+    "characterIndex": 22,
+    "notPrepared": true,
+    "catchTimeNormalLogoutFlag": false,
+    "originalFailure": "safe Deer funding capital insufficient with 1 Venison after 1 hunts and 8 attempts",
+    "lastPublicPreparation": {
+      "initialFreshHp": 18,
+      "initialMaximumHp": 18,
+      "initialHpStock": 1,
+      "initialGold": 0,
+      "initialPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "commands": 36,
+      "movementCommands": 8,
+      "commandCounts": {
+        "clientVersion": 10,
+        "interact": 1,
+        "selectNpcDialog": 1,
+        "run": 4,
+        "walk": 4,
+        "attackV2": 10,
+        "harvest": 6
+      },
+      "reportElapsedMs": 50716.05279999995,
+      "moduleElapsedMs": 50714.58049999992,
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "pathHazardCount": 0,
+      "pathReplanCount": 0,
+      "fundingTargetRejectionCount": 7,
+      "lastCapitalPlanning": {
+        "sequence": 898,
+        "monotonicMs": 1109152.5991,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [
+          {
+            "uniqueId": 4,
+            "quantity": 1,
+            "sellValue": 207,
+            "value": 207
+          }
+        ],
+        "venisonItemCount": 1,
+        "itemsTruncated": false,
+        "capital": 207,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 696,
+          "monotonicMs": 1059463.5289,
+          "price": 40
+        },
+        "quoteAgeMs": 49689.07019999996,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      "finalPublicTransform": {
+        "x": 288,
+        "y": 605
+      },
+      "actualStagingReached": false
+    },
+    "finalExactHp": null,
+    "finalHpStock": null,
+    "coldStoreHpStockReadbackPerformed": false,
+    "scope": "Failed22 remains unprepared. Original capital-insufficient1Venison/1hunt8attempts/7selection failures/36commands8moves~50.716s is retained. Lastcapital207/440 is timestamped planning-only; after/readinessnull, no finalexactHP/stock inference or sale/purchase proof. All100 future normal preparation still required."
+  },
+  "sourcePreparedEligibilityInherited": false,
+  "newCurrentSourceQualification": null,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\accounts.json",
+      "bytes": 327405,
+      "sha256": "b36ea9abf05d098f13d5dc464ca0e627ff9a9475f35f6633691e4d4a70363821",
+      "relative": "accounts.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\capacity-pool.json",
+      "bytes": 21064,
+      "sha256": "586e65d1a79f425983e1ffc24900f25a3d03246ee46070840cda6ccc258004f4",
+      "relative": "capacity-pool.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 717,
+      "sha256": "d53a048ebafa692ab839d225c48fb5f1fe4a90d7a1f81b42894efab50e7d92d6",
+      "relative": "capacity-auth-budget.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+      "relative": "recovery-mac-key.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+      "relative": "identity-session-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+      "relative": "identity-recovery-pepper.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+      "relative": "passkey-auth-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/.mir2-directory-durability"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "dc9d271fbc69bb0072e9338b4e25488fd86987a814761cb8f083ca7cde3c8f29",
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/quarantine/.mir2-directory-durability"
+    }
+  ],
+  "fileCount": 11,
+  "totalBytes": 349840,
+  "recovery": {
+    "expectedControlFiles": [
+      ".mir2-directory-durability",
+      ".mir2-recovery-exclusive.lock",
+      ".mir2-recovery-owner-v1.json",
+      "quarantine/.mir2-directory-durability"
+    ],
+    "journalPayloadsMustEqualZero": true,
+    "preservedDestination": "source-save-recovery-preserved",
+    "activeDestination": "save-recovery",
+    "activeInitialization": "Empty new directory; normal Gateway creates a new path-bound ownership sentinel. Original control files remain unchanged only in preserved archive."
+  },
+  "copyPolicy": {
+    "copyExclusively": true,
+    "sourcePinsBeforeAndAfter": true,
+    "fullStoreAndPoolRawBytes": true,
+    "accountStoreRewritePerformed": false,
+    "poolRewritePerformed": false,
+    "stockOrPositionEditPerformed": false,
+    "authLedgerCopiedUnchanged": true,
+    "loginNotBeforeOverrideAllowed": false,
+    "seederInvoked": false,
+    "secretsValuesReported": false,
+    "latestLedgerSource": "Exact latest actual W12 traffic ledger, same17510 endpoint and100 identities, no reset/rollback/time/origin override"
+  },
+  "scope": "Continue whole actual W12 normally closed cold Store/pool/four secrets/latestledger/current4controls by EXCL raw bytes. Originalfalse21prepared/22ready78registered retained; failed22 capitalinsufficient with1Venison after1hunt8attempts/36cmd8move~50.716s/0hazard0replan remains unprepared. No seed/grant/Store/pool/auth/time/origin edit. SameV6 ee06/55backend/Rust32 strict reuse; new HEAD/currentRootreceipt/count null.",
+  "priorRecoveryArchive": {
+    "directory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\source-save-recovery-preserved",
+    "retainInPlace": true,
+    "copiedToNewActive": false,
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": ".mir2-directory-durability"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relative": ".mir2-recovery-exclusive.lock"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "040c04b604d7de6882111e786ebaad010d63a1d331159d6c3c1e64a97438d1e2",
+        "relative": ".mir2-recovery-owner-v1.json"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "quarantine/.mir2-directory-durability"
+      }
+    ],
+    "scope": "Actual W12 prior preserved four controls remain unchanged in place. Only current W12 active four controls will be preserved in new owned destination; new active recovery is initialized normally by Gateway."
+  },
+  "sourceIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\root-independent-cleanup-v1.json",
+    "bytes": 203,
+    "sha256": "9a8699d68c38b84ee37ad5cc6666b7c158a9a1407e109051fac4e02fae49e714"
+  },
+  "sourceFirst4InventoryReuse": true,
+  "sourceFirst4InventoryReuseScope": "Historical dedicatedfirst4 proof covers onlyfirst4, not all21; original first4.slice semantics remain. No source prepared eligibility inherited."
+}

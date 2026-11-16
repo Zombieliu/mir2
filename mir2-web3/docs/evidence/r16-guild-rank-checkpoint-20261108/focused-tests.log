@@ -1,0 +1,244 @@
+TAP version 13
+# Subtest: adapter source type-checks with its real dependencies
+ok 1 - adapter source type-checks with its real dependencies
+  ---
+  duration_ms: 426.1821
+  type: 'test'
+  ...
+# Subtest: rename sends exactly one ordinary type3 with untrimmed text
+ok 2 - rename sends exactly one ordinary type3 with untrimmed text
+  ---
+  duration_ms: 1.0125
+  type: 'test'
+  ...
+# Subtest: permission requests one explicit bit, not a name change or eight-item batch
+ok 3 - permission requests one explicit bit, not a name change or eight-item batch
+  ---
+  duration_ms: 0.1897
+  type: 'test'
+  ...
+# Subtest: Native own-rank hierarchy, rights and real target are required
+ok 4 - Native own-rank hierarchy, rights and real target are required
+  ---
+  duration_ms: 0.8096
+  type: 'test'
+  ...
+# Subtest: only actual final claim consumes this proof and definitely-unsent retains retry
+ok 5 - only actual final claim consumes this proof and definitely-unsent retains retry
+  ---
+  duration_ms: 0.2887
+  type: 'test'
+  ...
+# Subtest: source/guild/scope/socket/scene/rights changes cannot enter stale commands
+ok 6 - source/guild/scope/socket/scene/rights changes cannot enter stale commands
+  ---
+  duration_ms: 0.5618
+  type: 'test'
+  ...
+# Subtest: exact real status7 actor and nested rank identity confirm rename, not top-level rankIndex
+ok 7 - exact real status7 actor and nested rank identity confirm rename, not top-level rankIndex
+  ---
+  duration_ms: 0.7706
+  type: 'test'
+  ...
+# Subtest: map change preserves entered work and same-physical-owner ACK can finish it
+ok 8 - map change preserves entered work and same-physical-owner ACK can finish it
+  ---
+  duration_ms: 0.1186
+  type: 'test'
+  ...
+# Subtest: rename retry opens strictly after five seconds and never declares success
+ok 9 - rename retry opens strictly after five seconds and never declares success
+  ---
+  duration_ms: 0.2864
+  type: 'test'
+  ...
+# Subtest: permission cooldown is global300ms and does not optimistically mutate server ranks
+ok 10 - permission cooldown is global300ms and does not optimistically mutate server ranks
+  ---
+  duration_ms: 0.4919
+  type: 'test'
+  ...
+# Subtest: permission300ms is input cooldown, not a new deadline for delayed valid send
+ok 11 - permission300ms is input cooldown, not a new deadline for delayed valid send
+  ---
+  duration_ms: 0.1611
+  type: 'test'
+  ...
+# Subtest: retirement releases local controls without fabricating server state
+ok 12 - retirement releases local controls without fabricating server state
+  ---
+  duration_ms: 0.1101
+  type: 'test'
+  ...
+# Subtest: actual adapter type checks with its real projection dependency
+ok 13 - actual adapter type checks with its real projection dependency
+  ---
+  duration_ms: 455.0492
+  type: 'test'
+  ...
+# Subtest: status255 alone replaces the complete roster and confirms exact viewer identity
+ok 14 - status255 alone replaces the complete roster and confirms exact viewer identity
+  ---
+  duration_ms: 1.6028
+  type: 'test'
+  ...
+# Subtest: real status7 single-rank packet replaces its index, never top-level zero or the full table
+ok 15 - real status7 single-rank packet replaces its index, never top-level zero or the full table
+  ---
+  duration_ms: 0.4653
+  type: 'test'
+  ...
+# Subtest: unrelated status7 retains own authority; missing member removes own proof without claiming guild leave
+ok 16 - unrelated status7 retains own authority; missing member removes own proof without claiming guild leave
+  ---
+  duration_ms: 0.2977
+  type: 'test'
+  ...
+# Subtest: status7 requires an existing unique target rank and never upgrades a partial or unknown roster
+ok 17 - status7 requires an existing unique target rank and never upgrades a partial or unknown roster
+  ---
+  duration_ms: 0.4159
+  type: 'test'
+  ...
+# Subtest: status0/1 only change the named member online field, including exact case and unknown names
+ok 18 - status0/1 only change the named member online field, including exact case and unknown names
+  ---
+  duration_ms: 0.388
+  type: 'test'
+  ...
+# Subtest: status2 has only a name and requests a roster instead of inventing id or rank
+ok 19 - status2 has only a name and requests a roster instead of inventing id or rank
+  ---
+  duration_ms: 0.1838
+  type: 'test'
+  ...
+# Subtest: status3/4 remove only the named member, with explicit viewer leave evidence for self
+ok 20 - status3/4 remove only the named member, with explicit viewer leave evidence for self
+  ---
+  duration_ms: 0.3967
+  type: 'test'
+  ...
+# Subtest: status5 uses target name and actual rankIndex while preserving every rank and other member
+ok 21 - status5 uses target name and actual rankIndex while preserving every rank and other member
+  ---
+  duration_ms: 0.5516
+  type: 'test'
+  ...
+# Subtest: real status6 inserts before the lowest rank and shifts its members, not their permissions
+ok 22 - real status6 inserts before the lowest rank and shifts its members, not their permissions
+  ---
+  duration_ms: 0.5126
+  type: 'test'
+  ...
+# Subtest: status6 cannot guess insertion into unknown/sparse state or introduce members/privileges
+ok 23 - status6 cannot guess insertion into unknown/sparse state or introduce members/privileges
+  ---
+  duration_ms: 0.3307
+  type: 'test'
+  ...
+# Subtest: status8 uses viewer id+name in its rank snapshot, not the actor or top-level index
+ok 24 - status8 uses viewer id+name in its rank snapshot, not the actor or top-level index
+  ---
+  duration_ms: 0.3659
+  type: 'test'
+  ...
+# Subtest: status8 can retain an explicitly partial rank with own proof; missing viewer yields no own authority
+ok 25 - status8 can retain an explicitly partial rank with own proof; missing viewer yields no own authority
+  ---
+  duration_ms: 0.1003
+  type: 'test'
+  ...
+# Subtest: rank snapshot repairs an exact moved identity but rejects id/name conflicts
+ok 26 - rank snapshot repairs an exact moved identity but rejects id/name conflicts
+  ---
+  duration_ms: 0.2925
+  type: 'test'
+  ...
+# Subtest: unknown statuses and malformed real-wire fields are invalid without changing previous state
+ok 27 - unknown statuses and malformed real-wire fields are invalid without changing previous state
+  ---
+  duration_ms: 0.2312
+  type: 'test'
+  ...
+# Subtest: duplicate rank/member identities, over-limit arrays and inconsistent previous state fail closed
+ok 28 - duplicate rank/member identities, over-limit arrays and inconsistent previous state fail closed
+  ---
+  duration_ms: 1.1864
+  type: 'test'
+  ...
+# Subtest: accessors, exotic records and throwing proxies cannot supply authority
+ok 29 - accessors, exotic records and throwing proxies cannot supply authority
+  ---
+  duration_ms: 0.316
+  type: 'test'
+  ...
+# Subtest: viewer identity is captured once even when a caller supplies mutable property descriptors
+ok 30 - viewer identity is captured once even when a caller supplies mutable property descriptors
+  ---
+  duration_ms: 0.2367
+  type: 'test'
+  ...
+# Subtest: opaque names and input objects are preserved exactly and outputs do not alias inputs
+ok 31 - opaque names and input objects are preserved exactly and outputs do not alias inputs
+  ---
+  duration_ms: 0.3699
+  type: 'test'
+  ...
+# Subtest: rename emits one ordinary type3 preserving the exact Native UTF16 name
+ok 32 - rename emits one ordinary type3 preserving the exact Native UTF16 name
+  ---
+  duration_ms: 1.8802
+  type: 'test'
+  ...
+# Subtest: rename rejects non-u8 identity and names outside Native 3..20 UTF16/backslash rule
+ok 33 - rename rejects non-u8 identity and names outside Native 3..20 UTF16/backslash rule
+  ---
+  duration_ms: 0.3159
+  type: 'test'
+  ...
+# Subtest: each exact permission key emits a single ordinary type5 for that checkbox only
+ok 34 - each exact permission key emits a single ordinary type5 for that checkbox only
+  ---
+  duration_ms: 0.5558
+  type: 'test'
+  ...
+# Subtest: actual checkbox submits once immediately, stays server-owned, and never submits rename
+ok 35 - actual checkbox submits once immediately, stays server-owned, and never submits rename
+  ---
+  duration_ms: 1.1187
+  type: 'test'
+  ...
+# Subtest: actual Save renames only and retains the untrimmed draft on local rejection and option receipt
+ok 36 - actual Save renames only and retains the untrimmed draft on local rejection and option receipt
+  ---
+  duration_ms: 0.3035
+  type: 'test'
+  ...
+# Subtest: Host rename and option barriers are independent and generate no hidden action
+ok 37 - Host rename and option barriers are independent and generate no hidden action
+  ---
+  duration_ms: 0.3264
+  type: 'test'
+  ...
+# Subtest: missing callbacks or invalid rank/name cannot invoke a fallback or a batch
+ok 38 - missing callbacks or invalid rank/name cannot invoke a fallback or a batch
+  ---
+  duration_ms: 0.4746
+  type: 'test'
+  ...
+# Subtest: ExtraWindows forwards the independent callbacks and Host barriers without the old batch prop
+ok 39 - ExtraWindows forwards the independent callbacks and Host barriers without the old batch prop
+  ---
+  duration_ms: 3.5512
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 39
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 963.4397

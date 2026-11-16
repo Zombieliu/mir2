@@ -1,0 +1,17 @@
+{
+  "kind": "manual-source-review",
+  "skill": "vercel:react-best-practices",
+  "reviewed": [
+    "One document listener with cleanup and one current foreground reader",
+    "QR ref synchronized before callbacks; current owner/expiry checked before work",
+    "Decoded QR gets a paint opportunity before download; no auth URL or bearer in lifecycle event",
+    "Existing labels/roles/focus restore preserved; no CSS or wallet API changes",
+    "Only primary-font prewarm code already in Page is invoked; no new dependency or model call"
+  ],
+  "screenshotsInspected": [
+    "world-r1-qr-pending-actual-component.png",
+    "world-r2-qr-pending-actual-component.png",
+    "world-r2-first-entry-diary-open.png",
+    "shared-font-complete.png"
+  ]
+}

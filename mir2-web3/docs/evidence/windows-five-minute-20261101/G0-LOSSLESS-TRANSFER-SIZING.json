@@ -1,0 +1,43 @@
+{
+  "schema": "mir2.offline.lossless-transfer-sizing.v1",
+  "recordedUtc": "2026-11-01T14:54:15.962101+00:00",
+  "diagnosticOnly": true,
+  "coldAcceptance": false,
+  "networkRequested": false,
+  "codecIntegratedInUpdater": false,
+  "sourceRuntimeRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "rows": [
+    {
+      "sourceLocalPath": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\packed-r19\\generations\\aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47\\catalog.json",
+      "decodedBytes": 68666544,
+      "decodedSha256": "45fde1922c1435069d0a8e7389e2da1a08a22b7dcd290276dbc012f29db8e311",
+      "encodedLocalPath": "E:\\mir2-release\\windows-five-minute-20261101\\transport-sizing\\catalog.json.gz",
+      "encodedBytes": 16591384,
+      "encodedSha256": "ff2e91730ca1264d677fa3d631adf88b7629c3d11e2fabddc7626dbd344a8690",
+      "codec": "gzip",
+      "level": 6,
+      "encodeSecondsWorkstation": 0.9676087999978336,
+      "decodeSecondsWorkstation": 0.1876098000066122,
+      "decodedExact": true
+    },
+    {
+      "sourceLocalPath": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\packed-r19\\generations\\aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47\\mir2-platform-windows.exe",
+      "decodedBytes": 133801984,
+      "decodedSha256": "a0f28413dce9362ecfb1a10a414f45f5572520a13289731831152d8858d0d4b2",
+      "encodedLocalPath": "E:\\mir2-release\\windows-five-minute-20261101\\transport-sizing\\mir2-platform-windows.exe.gz",
+      "encodedBytes": 51938803,
+      "encodedSha256": "9362f02a57884c3be82860f176f113a611d065b02c0a9abf90dd4c61808fdbd9",
+      "codec": "gzip",
+      "level": 6,
+      "encodeSecondsWorkstation": 3.4031563000025926,
+      "decodeSecondsWorkstation": 0.4432563000009395,
+      "decodedExact": true
+    }
+  ],
+  "notes": [
+    "Compression envelopes are experimental local files, not signed or published release objects.",
+    "Normal identity-only Source and existing CMS/pack checks remain unchanged.",
+    "Workstation encode/decode time is not a 4CPU/8GiB acceptance result.",
+    "Existing full Inno Setup is already compressed; do not subtract these savings again from its 1.04GB size."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "scope": "Correction of a helper-label inference; original cohort unchanged.",
+  "applicationSource": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+  "cohortPassed": true,
+  "legacyHelperMode": "compatibility",
+  "language": "en-US",
+  "actualReady": {
+    "name": "bevyRuntimeReady",
+    "epochMs": 1794807857067,
+    "detail": {
+      "reused": false,
+      "backend": "webgpu",
+      "compiledBackend": "webgpu",
+      "fallbackFrom": null,
+      "packageId": "webgpu"
+    }
+  },
+  "correctConclusion": "The previous English compatibility-labelled helper actually selected and compiled webgpu with no backend fallback. Public cold failure remains unchanged."
+}

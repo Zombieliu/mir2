@@ -1,0 +1,427 @@
+{
+  "schemaVersion": 1,
+  "scope": "Preserved failed ordinary-client capacity diagnostics only. These probes do not certify capacity, frontend acceptance, full two-computer play, or Cell partitioning.",
+  "archiveAccess": "Explicit --archive-root C:/mir2-build/p01-completion-20261024 is required. Relative manifest paths never authorize private files or a default external directory.",
+  "interpretation": [
+    "All seven reports retain their original raw bytes and failed flags. No old or short report is promoted to this round capacity acceptance.",
+    "Older development binaries do not prove the frozen new Rust backend. Their monitor records fail the current v2 telemetry contract and are retained as invalid observations, not reconstructed.",
+    "Observed monster maxima include corpses. Discrete public snapshots are not continuous per-monster death/remove/revival proof.",
+    "Cleanup records cover their recorded realm/process and connection counters; they do not prove a global absence of ghosts or all historical sessions.",
+    "Preserved source preimages and source-pins record each diagnostic driver revision; later driver fixes do not rewrite earlier results."
+  ],
+  "counts": {
+    "originalReports": 7,
+    "copiedOriginalPublicFiles": 48,
+    "archivedRawFiles": 7,
+    "archivedRawBytes": 14613638,
+    "archivedRawRows": 24449,
+    "monitorRows": 818,
+    "currentV2InvalidMonitorRows": 422,
+    "capacityAccepted": 0
+  },
+  "runs": [
+    {
+      "runId": "1792852782794-f1476a1d",
+      "binary": "older-development",
+      "binarySha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+      "report": "capacity-diagnostics/probe-natural-5/reports/1792852782794-f1476a1d.report.json",
+      "rawProjection": "capacity-diagnostics/probe-natural-5/reports/1792852782794-f1476a1d.raw-projection.json",
+      "rawArchivePath": "probe-natural-5/reports/1792852782794-f1476a1d.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        2,
+        5
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 2,
+      "soakCombat": [],
+      "rollingCombat": [],
+      "rawRows": 488,
+      "monitorRows": 37,
+      "currentV2InvalidMonitorRows": 37,
+      "originalError": "Actor Lf04f0600 died or lost presence; no automatic resurrection",
+      "note": "Invalid setup: two movement witnesses died before the fighter was admitted."
+    },
+    {
+      "runId": "1792853206032-d849fbda",
+      "binary": "older-development",
+      "binarySha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+      "report": "capacity-diagnostics/probe-natural-5-02/reports/1792853206032-d849fbda.report.json",
+      "rawProjection": "capacity-diagnostics/probe-natural-5-02/reports/1792853206032-d849fbda.raw-projection.json",
+      "rawArchivePath": "probe-natural-5-02/reports/1792853206032-d849fbda.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        5
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 5,
+      "soakCombat": [],
+      "rollingCombat": [],
+      "rawRows": 1927,
+      "monitorRows": 62,
+      "currentV2InvalidMonitorRows": 62,
+      "originalError": "Stage 5 did not satisfy the fixed activity, latency or coverage gates",
+      "note": "No attacks; the declared observer coverage excluded nearby candidate monsters."
+    },
+    {
+      "runId": "1792853910738-69505bbc",
+      "binary": "older-development",
+      "binarySha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+      "report": "capacity-diagnostics/probe-natural-5-02/run03/reports/1792853910738-69505bbc.report.json",
+      "rawProjection": "capacity-diagnostics/probe-natural-5-02/run03/reports/1792853910738-69505bbc.raw-projection.json",
+      "rawArchivePath": "probe-natural-5-02/run03/reports/1792853910738-69505bbc.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        5
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 5,
+      "soakCombat": [],
+      "rollingCombat": [],
+      "rawRows": 1407,
+      "monitorRows": 52,
+      "currentV2InvalidMonitorRows": 52,
+      "originalError": "Stage 5 did not satisfy the fixed activity, latency or coverage gates",
+      "note": "No attacks; the old pursuit distance heuristic deferred real detours."
+    },
+    {
+      "runId": "1792854301701-cb47cee2",
+      "binary": "older-development",
+      "binarySha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+      "report": "capacity-diagnostics/probe-natural-5-02/run04/reports/1792854301701-cb47cee2.report.json",
+      "rawProjection": "capacity-diagnostics/probe-natural-5-02/run04/reports/1792854301701-cb47cee2.raw-projection.json",
+      "rawArchivePath": "probe-natural-5-02/run04/reports/1792854301701-cb47cee2.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        2
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 2,
+      "soakCombat": [
+        {
+          "actor": "L8d384901",
+          "attacks": 33,
+          "hits": 33
+        }
+      ],
+      "rollingCombat": [
+        {
+          "window": 1,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "L8d384901",
+              "attacks": 17,
+              "hits": 17
+            }
+          ]
+        },
+        {
+          "window": 2,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "L8d384901",
+              "attacks": 0,
+              "hits": 0
+            }
+          ]
+        },
+        {
+          "window": 3,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "L8d384901",
+              "attacks": 0,
+              "hits": 0
+            }
+          ]
+        },
+        {
+          "window": 4,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "L8d384901",
+              "attacks": 0,
+              "hits": 0
+            }
+          ]
+        },
+        {
+          "window": 5,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "L8d384901",
+              "attacks": 16,
+              "hits": 16
+            }
+          ]
+        },
+        {
+          "window": 6,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "L8d384901",
+              "attacks": 0,
+              "hits": 0
+            }
+          ]
+        }
+      ],
+      "rawRows": 3250,
+      "monitorRows": 216,
+      "currentV2InvalidMonitorRows": 216,
+      "originalError": "Soak failed fixed rolling activity or delivery gates",
+      "note": "Two-actor diagnostic with one fighter: short stage passed, six-minute rolling activity failed."
+    },
+    {
+      "runId": "1792854957028-bcdabf40",
+      "binary": "older-development",
+      "binarySha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+      "report": "capacity-diagnostics/probe-natural-5-02/run05/reports/1792854957028-bcdabf40.report.json",
+      "rawProjection": "capacity-diagnostics/probe-natural-5-02/run05/reports/1792854957028-bcdabf40.raw-projection.json",
+      "rawArchivePath": "probe-natural-5-02/run05/reports/1792854957028-bcdabf40.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        5
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 5,
+      "soakCombat": [],
+      "rollingCombat": [],
+      "rawRows": 1398,
+      "monitorRows": 55,
+      "currentV2InvalidMonitorRows": 55,
+      "originalError": "Stage 5 did not satisfy the fixed activity, latency or coverage gates",
+      "note": "No attacks; temporarily absent paths erased pursuit progress and permitted fallback loops."
+    },
+    {
+      "runId": "1792855739500-1962792b",
+      "binary": "frozen-new-release",
+      "binarySha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+      "report": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/reports/1792855739500-1962792b.report.json",
+      "rawProjection": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/reports/1792855739500-1962792b.raw-projection.json",
+      "rawArchivePath": "release-accessibility-5-01/native-5-gate-01/reports/1792855739500-1962792b.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        5
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 5,
+      "soakCombat": [
+        {
+          "actor": "Ld7b3a602",
+          "attacks": 100,
+          "hits": 99
+        }
+      ],
+      "rollingCombat": [
+        {
+          "window": 1,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 31,
+              "hits": 30
+            }
+          ]
+        },
+        {
+          "window": 2,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 20,
+              "hits": 20
+            }
+          ]
+        },
+        {
+          "window": 3,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 0,
+              "hits": 0
+            }
+          ]
+        },
+        {
+          "window": 4,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 19,
+              "hits": 19
+            }
+          ]
+        },
+        {
+          "window": 5,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 8,
+              "hits": 8
+            }
+          ]
+        },
+        {
+          "window": 6,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 22,
+              "hits": 22
+            }
+          ]
+        }
+      ],
+      "rawRows": 8251,
+      "monitorRows": 203,
+      "currentV2InvalidMonitorRows": 0,
+      "originalError": "Soak failed fixed rolling activity or delivery gates",
+      "note": "Native five-actor local supply failed six-minute rolling attack/hit gates; no scout branch yet."
+    },
+    {
+      "runId": "1792857141547-1233ee1e",
+      "binary": "frozen-new-release",
+      "binarySha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+      "report": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.report.json",
+      "rawProjection": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.raw-projection.json",
+      "rawArchivePath": "release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.samples.jsonl",
+      "originalOk": false,
+      "originalPlayableCapacityAccepted": false,
+      "verifiedCapacityAccepted": false,
+      "profile": "probe",
+      "activityMode": "native",
+      "stages": [
+        5
+      ],
+      "stageSeconds": 30,
+      "soakSeconds": 360,
+      "peakControlledActors": 5,
+      "soakCombat": [
+        {
+          "actor": "Ld7b3a602",
+          "attacks": 98,
+          "hits": 97
+        }
+      ],
+      "rollingCombat": [
+        {
+          "window": 1,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 31,
+              "hits": 31
+            }
+          ]
+        },
+        {
+          "window": 2,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 23,
+              "hits": 23
+            }
+          ]
+        },
+        {
+          "window": 3,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 8,
+              "hits": 8
+            }
+          ]
+        },
+        {
+          "window": 4,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 0,
+              "hits": 0
+            }
+          ]
+        },
+        {
+          "window": 5,
+          "passed": false,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 17,
+              "hits": 17
+            }
+          ]
+        },
+        {
+          "window": 6,
+          "passed": true,
+          "combat": [
+            {
+              "actor": "Ld7b3a602",
+              "attacks": 19,
+              "hits": 18
+            }
+          ]
+        }
+      ],
+      "rawRows": 7728,
+      "monitorRows": 193,
+      "currentV2InvalidMonitorRows": 0,
+      "originalError": "Soak failed fixed rolling activity or delivery gates",
+      "note": "Bounded scout executed, but native five-actor supply still failed six-minute rolling attack/hit gates."
+    }
+  ],
+  "supplyDiagnostic": "capacity-diagnostics/native-5-gate-02-supply-diagnostics.json"
+}

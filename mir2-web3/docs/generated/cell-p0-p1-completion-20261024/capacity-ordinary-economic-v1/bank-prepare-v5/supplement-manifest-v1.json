@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "scope": "Single authorized public scalar supplement; original33 originals and copied-evidence-manifest remain unchanged.",
+  "originalArchiveManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v5\\copied-evidence-manifest.json",
+    "bytes": 13350,
+    "sha256": "e8093b114436a438995670dc44417c5c43fc5185212b4d6db3d026327368969c"
+  },
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\public-incremental-aoi-qualification-v1.json",
+        "bytes": 9289,
+        "sha256": "96d7ec08fd3bc7050b8baa95766cfdcc2c89dc9acbadd275e32619e6a620c8bc"
+      },
+      "file": "public-incremental-aoi-qualification-v1.json",
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v5\\public-incremental-aoi-qualification-v1.json",
+        "bytes": 9289,
+        "sha256": "96d7ec08fd3bc7050b8baa95766cfdcc2c89dc9acbadd275e32619e6a620c8bc"
+      },
+      "rawByteExact": true,
+      "sourceUnchangedAfterCopy": true
+    }
+  ],
+  "copiedFiles": 1,
+  "copiedBytes": 9289,
+  "interpretation": "Preparation elapsed15.145s is less than the20s planner memory TTL. This evidence does not establish TTL expiry. Raw/full snapshot and incremental packet qualification differ; no root-cause or capacity acceptance is asserted.",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "privateOrLargePayloadCopied": false
+}

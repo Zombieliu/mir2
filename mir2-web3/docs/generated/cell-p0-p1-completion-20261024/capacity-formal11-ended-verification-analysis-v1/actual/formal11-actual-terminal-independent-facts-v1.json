@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:09:41.0156168Z",
+  "scope": "Read-only independent cross-check of actual ended Formal11 v2 terminal artifacts, original report/public catalog and cleanup; no second raw replay and no historical outcome reclassification.",
+  "verdict": {
+    "actualTerminalEvidenceConsistent": true,
+    "independentVerificationPassed": true,
+    "formalRunPassed": false,
+    "capacityAccepted": false,
+    "P0Accepted": false,
+    "P2Authorized": false,
+    "originalFailurePreserved": true,
+    "blockingFindingIds": []
+  },
+  "runId": "1792942371568-1e322224",
+  "actualExecution": {
+    "seal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\tool-source-frozen-v1.json",
+      "bytes": 1954,
+      "sha256": "cd460c0b4851e3cd48611c04395e87a9af052df856549815e14356bd863f1b94"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "3035659fa893d500334b5074b63f7688a643311a9b68a633e34a73c339979587"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\actual-verification.log",
+      "bytes": 1809,
+      "sha256": "4ce88a0a28e3a5c74c5f37604cc0486b6122feae35a589923823c02563c08fe7"
+    },
+    "final": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\final-verification.json",
+      "bytes": 650410,
+      "sha256": "1341193001cc95cda4116b71bcd6d8dff749ff54e8d82c75054d535736524eb2"
+    },
+    "checkedInputs": 9,
+    "everyCurrentToolSourceRawMatched": true,
+    "sourceBeforeAfterIdentical": true,
+    "exitCode": 0,
+    "outputAndLogPinsMatched": true
+  },
+  "originalReport": {
+    "pin": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\release-native-v2-personal-projection-ladder-11\\reports\\1792942371568-1e322224.report.json",
+      "bytes": 436729,
+      "sha256": "08f558c26ef0faf557e3a8fe5b84d50db39f1b388de1b47beb603eda604ee46e"
+    },
+    "reportOk": false,
+    "peakControlledActors": 31,
+    "highestMeasuredStage": 25,
+    "highestPassedStage": 25,
+    "completedStages": [
+      {
+        "name": "stage-2",
+        "actors": 2,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.304,
+        "completePassingWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "actors": 10,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.294,
+        "completePassingWindows": 5
+      },
+      {
+        "name": "stage-25",
+        "actors": 25,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.188,
+        "completePassingWindows": 5
+      }
+    ],
+    "totalCompletePassingMinuteWindows": 15,
+    "minimumWindowSeconds": 60.018,
+    "stoppedAdmissionPhase": [
+      {
+        "name": "bootstrap-50",
+        "kind": "bootstrap",
+        "targetActors": 50,
+        "startedAtMs": 1792943448036,
+        "endedAtMs": 1792943625457,
+        "completed": false
+      }
+    ],
+    "unreachedMeasurements": [
+      "stage-50",
+      "stage-100",
+      "soak",
+      "post-resume-observation"
+    ],
+    "resumeSamples": 0,
+    "saveSamples": 0
+  },
+  "failureWindow": {
+    "actor": "L9fe97305",
+    "phases": [
+      "ramp"
+    ],
+    "seconds": 60.3209375,
+    "gameActions": 75,
+    "v2AttackRequests": 7,
+    "attackSuccess": 5,
+    "attackTimeouts": 2,
+    "timeoutRatio": 0.02666666666666667,
+    "requiredTimeoutExclusive": 0.01,
+    "correctionRatio": 0,
+    "nativeCompleted": 73,
+    "nativeOpportunities": 75,
+    "gaps": 0,
+    "activityPassed": true,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "originalFailed": true
+  },
+  "publicBindings": {
+    "catalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json",
+      "bytes": 62973,
+      "sha256": "819a199e5cfc060463b65893bfdc78896891ffc9a6ddf2c2ffa5e819421d9d78"
+    },
+    "publicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\public-verification.json",
+      "bytes": 7106,
+      "sha256": "3a30990ebc66aba51d4bfdb41c96a3d628ffd90b72207b2cb9d3b6b86d70cb0d"
+    },
+    "collectionVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\collection-verification.json",
+      "bytes": 463763,
+      "sha256": "62902ab7eb58343c220518bd0de30c48c1e56afa71432e80ecc0b348c5be7328"
+    },
+    "reportProvenance": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\release-native-v2-personal-projection-ladder-11\\report-provenance.json",
+      "bytes": 6618,
+      "sha256": "eec4a995436382ce939f22af011b9edfa30e51532c5bf3ad1c4687be011bfcd3"
+    },
+    "catalogActualBasename": "collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json",
+    "reportAndAllThreeVerdictsRemainFalse": true,
+    "originalCopiesVerifiedByEndedTool": 171,
+    "reviewerDidNotRepeatAllPublicCopies": true
+  },
+  "identities": {
+    "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputs": 44,
+    "gatewaySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneSourceSha256": "2ecf0c1b01920809daa4004db7fe926092005a974c322e78bbd2a156a6326889",
+    "sourceConfigSha256": "edab91a9dd170c19c601ea6c260480657a85f51a7929d09f7a6df7208b6343dd"
+  },
+  "cleanup": {
+    "realmCleanup": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\release-native-v2-personal-projection-ladder-11\\realm-cleanup.json",
+      "bytes": 4871,
+      "sha256": "022bdac42b23ef9e8b09c184b92e87bfb4d04c74e79dd3ec2ec1936e5d85ddb5"
+    },
+    "rootOsProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "18c777e45d9742bf73152560778ab36f614b031f68d7df2e0bc2b8847fa31460"
+    },
+    "allSevenTrue": true,
+    "gatewayExit0": true,
+    "monitorExit0": true,
+    "gatewayPid": 58172,
+    "monitorPid": 69080,
+    "originalProcessesAbsent": true,
+    "originalPortsFree": true,
+    "reviewerPerformedNewOsQuery": false
+  },
+  "hp": {
+    "totalRows": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "notContinuousHpCoverage": true
+  },
+  "wire": {
+    "present": true,
+    "sourceValid": true,
+    "countsMatch": true,
+    "uninstallSucceeded": true,
+    "complete": true
+  },
+  "v1RefusalPreserved": {
+    "seal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 1955,
+      "sha256": "798799c298c188d98cf7d8bd2f9399591ead9f6fae7e1bd521edc1b2ec36aade"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 672,
+      "sha256": "4ecaa21fc07466f1d3b32e689bd409ccd8f862308fa1b7af72cfae8e9c5455b4"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\actual-verification.log",
+      "bytes": 1435,
+      "sha256": "3c86c7718d4889eade40d0bb70c5a0d19104bc9a93ae3bbcd2f28bcf86c76ee5"
+    },
+    "exitCode": 1,
+    "finalReceiptAbsent": true,
+    "cause": "ENOENT for the constructed catalog basename before raw replay; v2 used the actual immutable catalog name in a new directory."
+  },
+  "rawReplayBoundary": {
+    "rows": 115596,
+    "bytes": 68831794,
+    "sha256": "2a0a9def47282a9c02c3b46500782cb09dcf7ee0684c3638e862ecaf331cdc78",
+    "continuousReplayWindows": 316,
+    "continuousFailures": 1,
+    "reviewerRepeatedRawMonitorOrRecordingScan": false
+  },
+  "limits": [
+    "The true independent result is a consistency/replay result, not a passed formal capacity result. The original report remains failed during admission to50 after31 controlled actors.",
+    "This review directly read only closed JSON/log/source artifacts and checked their hashes/clocks. The whole raw replay and monitor validation were performed by Root executing the separately sealed ended-v2 tool.",
+    "Potential poll-deadline findings or a future driver repair do not change this run original timeout counts or verdict; even one remaining timeout among75 exceeds the original strict1% limit."
+  ],
+  "privateDataRead": false,
+  "root11OrFrozenToolsChanged": false,
+  "testsOrRealmsStarted": false
+}

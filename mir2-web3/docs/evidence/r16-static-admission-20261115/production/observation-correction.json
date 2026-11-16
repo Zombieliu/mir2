@@ -1,0 +1,25 @@
+{
+  "firstCacheAudit": {
+    "valid": false,
+    "cacheCount": 0,
+    "claimedMissing92NotEvidence": true,
+    "rawSha256": "ea7f793829f420bec92bffa47448a5931e13e816e0ce7f04eb7a5c50bb39d054",
+    "wrongPrefix": "mir2-asset-cache-static-",
+    "actualSchemaPrefix": "mir2-asset-cache-sw8-static-"
+  },
+  "initialSyntheticFixture": {
+    "declaredPassed": true,
+    "coverageInvalid": true,
+    "reason": "Fixture mirrored the same mistaken prefix; did not test actual Worker cacheName.",
+    "sha256": "664051e1ddd1edb52ae9ff0b93275afe47e5d70cd5a535b422c6378c316005e5"
+  },
+  "correction": {
+    "workerCacheNamesEvaluatedFromActualSource": true,
+    "unitTests": 15,
+    "realChromePassed": true,
+    "zeroNetworkDuringAudit": true,
+    "secondPublicFullFlowExecuted": true,
+    "secondComplete92BodiesMatch": true,
+    "originalSecondPublicGateStillFalse": true
+  }
+}

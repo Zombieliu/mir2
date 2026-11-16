@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "state": "DRAFT_WAITING_ACTUAL_FUNCTIONAL_SCHEMA_NOT_IMPORTABLE",
+  "source": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/source-lib-v1.mjs",
+  "target": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+  "rules": [
+    {
+      "label": "Rust direct44 and historical Node commit",
+      "from": "export const OLD_COMMIT='5c2e713863d3e9556a92f856b11df2396c73b137';",
+      "to": "export const OLD_COMMIT='d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16';\nexport const DRIVER_COMMIT=OLD_COMMIT;",
+      "count": 1
+    },
+    {
+      "label": "old44 manifest",
+      "from": "backend-source-personal-monster-projection-v1.json",
+      "to": "backend-source-attack-deadline-diagnostics-v1.json",
+      "count": 1
+    },
+    {
+      "label": "old44 bytes",
+      "from": "OLD_MANIFEST_BYTES=32926",
+      "to": "OLD_MANIFEST_BYTES=35581",
+      "count": 1
+    },
+    {
+      "label": "old44 rawSHA",
+      "from": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52",
+      "to": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e",
+      "count": 1
+    },
+    {
+      "label": "old44 files aggregate",
+      "from": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+      "to": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+      "count": 1
+    },
+    {
+      "label": "reject former1980 binary",
+      "from": "OLD_BINARY_SHAS=Object.freeze([",
+      "to": "OLD_BINARY_SHAS=Object.freeze(['1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318',",
+      "count": 1
+    },
+    {
+      "label": "exact expanded50 path allowlist and seven source pins",
+      "from": "export const EXPECTED_INPUT_COUNT=44,ALLOWED_DELTAS=Object.freeze(['mir2-web3/apps/gateway/src/web.rs']);",
+      "to": "export const NEW_INPUTS=Object.freeze(['mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs','mir2-web3/apps/simulation/src/config.rs','mir2-web3/apps/simulation/src/config_file_authority.rs','mir2-web3/apps/simulation/src/config_shared_guilds.rs','mir2-web3/apps/simulation/src/config_guild_clock_driver.rs','mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs'].sort());\nexport const EXPECTED_INPUT_COUNT=50,ALLOWED_DELTAS=Object.freeze(['mir2-web3/apps/simulation/src/lib.rs',...NEW_INPUTS].sort());\nexport const SOURCE_CANDIDATE=Object.freeze({path:path.join(BASE,'formal12-account-store-diagnostics-v1/source-candidate-v1.json'),bytes:6682,sha256:'fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7'});\nexport const DRIVER_FROZEN=Object.freeze({path:path.join(BASE,'capacity-attack-deadline-driver-frozen-v1.json'),bytes:6759,sha256:'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b'});\nexport const DRIVER_SHA='5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9';",
+      "count": 1
+    },
+    {
+      "label": "new manifest output",
+      "from": "backend-source-attack-deadline-diagnostics-v1.json'),RECEIPT",
+      "to": "backend-source-account-store-wait-diagnostics-v1.json'),RECEIPT",
+      "count": 1
+    },
+    {
+      "label": "new build receipt",
+      "from": "attack-deadline-diagnostics-v1-build-receipt.json",
+      "to": "account-store-wait-diagnostics-v1-build-receipt.json",
+      "count": 1
+    },
+    {
+      "label": "new Release output",
+      "from": "release-attack-deadline-diagnostics-v1.json",
+      "to": "release-account-store-wait-diagnostics-v1.json",
+      "count": 1
+    },
+    {
+      "label": "new immutable log",
+      "from": "p0-attack-deadline-diagnostics-v1-release-build.log",
+      "to": "p0-account-store-wait-diagnostics-v1-release-build.log",
+      "count": 1
+    },
+    {
+      "label": "separate newRust validation and unchanged historical Node evidence",
+      "from": "async function finalBinding(expectedHead){\n  const binding=await read(BINDING_FILE);if(binding.schemaVersion!==1||binding.state!=='FINAL_COMMITTED_BACKEND_SOURCE'||binding.sourceCommit!==expectedHead||!isHex(binding.sourceCommit)||!Array.isArray(binding.sourcePins)||binding.sourcePins.length!==1||!binding.sourcePins.every(validSourcePin)||!same(binding.sourcePins.map(p=>p.path),ALLOWED_DELTAS))throw Error('PENDING_FINAL_COMMITTED_BACKEND_SOURCE: real new HEAD, exact web raw pin, actual validation and new Node9 freeze must bind before capture/build');\n  const {value:validation}=await exactExternalReference(binding.rootFunctionalValidation,{json:true});\n  if(validation.schemaVersion!==1||!Array.isArray(validation.sourcePins)||validation.sourcePins.length!==1||!validation.sourcePins.every(validSourcePin)||!same(canonicalPins(validation.sourcePins),canonicalPins(binding.sourcePins))||validation.checks?.rustFocusedPassed!==true||validation.checks?.rustfmtPassed!==true||validation.checks?.nodeRegressionPassed!==true||!Array.isArray(validation.actualChecks)||validation.actualChecks.length!==3)throw Error('Actual functional validation must bind the exact web raw pin and all three successful checks');\n  const expected={rustFocused:8,nodeRegression:210,rustfmt:1},seen=new Set();for(const check of validation.actualChecks){if(!check||!Object.hasOwn(expected,check.kind)||seen.has(check.kind)||!same(Object.keys(check).sort(),['exitCode','failed','kind','log','passed','receipt'])||check.exitCode!==0||check.failed!==0||check.passed!==expected[check.kind])throw Error('Functional actualChecks must contain exactly rustFocused8, nodeRegression210 and rustfmt1 actual passing results');seen.add(check.kind);await exactExternalReference(check.log);await exactExternalReference(check.receipt,{json:true});}\n  const {value:driver}=await exactExternalReference(binding.driverFrozenManifest,{json:true});\n  if(driver.schemaVersion!==1||driver.actualCodeCommit!==expectedHead||driver.driverSourceCommit!==expectedHead||!Array.isArray(driver.files)||driver.files.length!==9||!same(driver.files.map(p=>p.file).sort(),[...NODE_INPUTS].sort())||driver.files.some(p=>!Number.isSafeInteger(p.bytes)||p.bytes<=0||!isSha(p.sha256))||driver.sourceSha256!==sha(JSON.stringify(driver.files))||validation.driverSourceSha256!==driver.sourceSha256||!same(validation.driverSourcePins,driver.files))throw Error('Actual new committed Node9 freeze must match validation and cannot reuse db4e as current');\n  return{binding,driver};\n}\n",
+      "to": "/* FUNCTIONAL_BINDING_VALIDATOR_BODY_PENDING */\n",
+      "count": 1
+    },
+    {
+      "label": "baseline strict pin unchanged",
+      "from": "if(oldBytes.length!==OLD_MANIFEST_BYTES",
+      "to": "if(oldBytes.length!==OLD_MANIFEST_BYTES",
+      "count": 1
+    },
+    {
+      "label": "baseline truthful scope",
+      "from": "throw Error('The direct5c2/44 baseline certificate differs')",
+      "to": "throw Error('The directd240/44 baseline certificate differs')",
+      "count": 1
+    },
+    {
+      "label": "exact50 closure from actual git changes",
+      "from": "allowed=old.files.map(p=>p.path).sort();if(expected.length!==44||!same(expected,allowed))throw Error('68f→newHEAD backend Rust/Cargo closure must remain exactly the prior44 paths');",
+      "to": "allowed=[...new Set([...old.files.map(p=>p.path),...NEW_INPUTS])].sort();if(expected.length!==50||!same(expected,allowed))throw Error('68f→newHEAD backend Rust/Cargo closure must be exactly prior44 plus six named diagnostics inputs');",
+      "count": 1
+    },
+    {
+      "label": "seven actual source deltas",
+      "from": "throw Error('Only web.rs may differ from the direct5c2/44 backend baseline')",
+      "to": "throw Error('Only lib.rs and six named Simulation diagnostics paths may differ from directd240/44 baseline')",
+      "count": 1
+    },
+    {
+      "label": "new source pin identity",
+      "from": "throw Error('Final web raw pin differs')",
+      "to": "throw Error('Final diagnostic source raw pin differs')",
+      "count": 1
+    },
+    {
+      "label": "Node current raw plus both committed Git identities",
+      "from": "if(bytes.length!==item.bytes||sha(bytes)!==item.sha256||filtered!==committed)throw Error('Actual current Node9 raw/Git-filtered input differs from its new freeze');driverSourceBindings.push({file:item.file,bytes:bytes.length,sha256:sha(bytes),gitAttributeFilteredObject:filtered,committedGitObject:committed});",
+      "to": "const historicalCommitted=git(repository,['rev-parse',DRIVER_COMMIT+':'+relative]).toString('utf8').trim();if(bytes.length!==item.bytes||sha(bytes)!==item.sha256||filtered!==committed||committed!==historicalCommitted)throw Error('Unchanged historical d240 Node9 raw/Git-filtered input differs from actual6759 freeze');driverSourceBindings.push({file:item.file,bytes:bytes.length,sha256:sha(bytes),driverSourceCommit:DRIVER_COMMIT,gitAttributeFilteredObject:filtered,committedGitObject:committed,historicalDriverGitObject:historicalCommitted});",
+      "count": 1
+    },
+    {
+      "label": "new source count",
+      "from": "sourceInputCount:44,allowedDeltas:ALLOWED_DELTAS",
+      "to": "sourceInputCount:50,allowedDeltas:ALLOWED_DELTAS",
+      "count": 1
+    },
+    {
+      "label": "new50 truthful expansion",
+      "from": "closureExpansionReason:'No path expansion: direct5c2/44 certificate retained, only web.rs may differ. All other43 raw/GitLF entries and the original four-None fixture inverse remain exact.'",
+      "to": "closureExpansionReason:'Directd240/44 certificate expands by exactly six named Simulation diagnostics paths; only oldlib.rs changes, other43 raw/GitLF inputs and original four-None fixture inverse remain exact.'",
+      "count": 1
+    },
+    {
+      "label": "distinct Node provenance output",
+      "from": "driverFrozenManifest:binding.driverFrozenManifest,driverSourceSha256:driver.sourceSha256",
+      "to": "driverSourceCommit:DRIVER_COMMIT,driverFrozenManifest:binding.driverFrozenManifest,driverSourceSha256:driver.sourceSha256,driverEvidenceReusedNotRerun:true",
+      "count": 1
+    },
+    {
+      "label": "frozen50 guard",
+      "from": "manifest.sourceInputCount!==44||manifest.files?.length!==44",
+      "to": "manifest.sourceInputCount!==50||manifest.files?.length!==50",
+      "count": 1
+    },
+    {
+      "label": "frozen historical driver role guard",
+      "from": "manifest.driverSourceSha256!==current.driverSourceSha256",
+      "to": "manifest.driverSourceCommit!==DRIVER_COMMIT||manifest.driverEvidenceReusedNotRerun!==true||manifest.driverSourceSha256!==current.driverSourceSha256",
+      "count": 1
+    },
+    {
+      "label": "new failure scope",
+      "from": "throw Error('Frozen44/source/Node9/validation identity differs from the exact committed current source')",
+      "to": "throw Error('Frozen50/source and distinct historical Node9/validation identity differ from the exact committed current source')",
+      "count": 1
+    }
+  ],
+  "oldFinalBindingBody": "async function finalBinding(expectedHead){\n  const binding=await read(BINDING_FILE);if(binding.schemaVersion!==1||binding.state!=='FINAL_COMMITTED_BACKEND_SOURCE'||binding.sourceCommit!==expectedHead||!isHex(binding.sourceCommit)||!Array.isArray(binding.sourcePins)||binding.sourcePins.length!==1||!binding.sourcePins.every(validSourcePin)||!same(binding.sourcePins.map(p=>p.path),ALLOWED_DELTAS))throw Error('PENDING_FINAL_COMMITTED_BACKEND_SOURCE: real new HEAD, exact web raw pin, actual validation and new Node9 freeze must bind before capture/build');\n  const {value:validation}=await exactExternalReference(binding.rootFunctionalValidation,{json:true});\n  if(validation.schemaVersion!==1||!Array.isArray(validation.sourcePins)||validation.sourcePins.length!==1||!validation.sourcePins.every(validSourcePin)||!same(canonicalPins(validation.sourcePins),canonicalPins(binding.sourcePins))||validation.checks?.rustFocusedPassed!==true||validation.checks?.rustfmtPassed!==true||validation.checks?.nodeRegressionPassed!==true||!Array.isArray(validation.actualChecks)||validation.actualChecks.length!==3)throw Error('Actual functional validation must bind the exact web raw pin and all three successful checks');\n  const expected={rustFocused:8,nodeRegression:210,rustfmt:1},seen=new Set();for(const check of validation.actualChecks){if(!check||!Object.hasOwn(expected,check.kind)||seen.has(check.kind)||!same(Object.keys(check).sort(),['exitCode','failed','kind','log','passed','receipt'])||check.exitCode!==0||check.failed!==0||check.passed!==expected[check.kind])throw Error('Functional actualChecks must contain exactly rustFocused8, nodeRegression210 and rustfmt1 actual passing results');seen.add(check.kind);await exactExternalReference(check.log);await exactExternalReference(check.receipt,{json:true});}\n  const {value:driver}=await exactExternalReference(binding.driverFrozenManifest,{json:true});\n  if(driver.schemaVersion!==1||driver.actualCodeCommit!==expectedHead||driver.driverSourceCommit!==expectedHead||!Array.isArray(driver.files)||driver.files.length!==9||!same(driver.files.map(p=>p.file).sort(),[...NODE_INPUTS].sort())||driver.files.some(p=>!Number.isSafeInteger(p.bytes)||p.bytes<=0||!isSha(p.sha256))||driver.sourceSha256!==sha(JSON.stringify(driver.files))||validation.driverSourceSha256!==driver.sourceSha256||!same(validation.driverSourcePins,driver.files))throw Error('Actual new committed Node9 freeze must match validation and cannot reuse db4e as current');\n  return{binding,driver};\n}\n",
+  "sourceCaptureExecuted": false,
+  "buildExecuted": false
+}

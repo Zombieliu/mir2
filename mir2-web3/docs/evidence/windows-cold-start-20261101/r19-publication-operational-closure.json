@@ -1,0 +1,108 @@
+{
+  "schema": "mir2.r19.delivery-operational-closure.v1",
+  "observedUtc": "2026-11-01T14:17:40.448477+00:00",
+  "operationalClosurePassed": true,
+  "coldAcceptance": false,
+  "nativeImmutableObjectVerification": {
+    "id": "r19-final-immutable-verify",
+    "passed": true,
+    "index": null,
+    "result": {
+      "planSha256": "00074f463da8fe757bc81ad0e5337f69a09e6f9bdfcd0fad3c7aa94db3ba3083",
+      "action": "verify",
+      "receipts": [
+        {
+          "planSha256": "00074f463da8fe757bc81ad0e5337f69a09e6f9bdfcd0fad3c7aa94db3ba3083",
+          "verified": true,
+          "objects": 115
+        }
+      ]
+    }
+  },
+  "r2DefaultChannels": [
+    {
+      "name": "root",
+      "unchanged": true,
+      "currentSha256": "0a4f338b680de8b06c0f4f6b576415910e28c086ea77f5e63022b038a1d39807",
+      "sequence": 2026110103
+    },
+    {
+      "name": "fiveclass",
+      "unchanged": true,
+      "currentSha256": "023892174bb623a35e708c2e464e97e886bef694e7eaec21beed3c290e2deb70",
+      "sequence": 2026110103
+    },
+    {
+      "name": "unified",
+      "unchanged": true,
+      "currentSha256": "64185c436352269bba25febbdd45bf0f3aac4187a1bc7bdb61dddeff363787bd",
+      "sequence": 2026110103
+    },
+    {
+      "name": "retained15",
+      "unchanged": true,
+      "currentSha256": "074daf1243e982d4aaf9598060978e140e88cf30d0485566162cf8a938724fb4",
+      "sequence": 2026110103
+    },
+    {
+      "name": "retained16",
+      "unchanged": true,
+      "currentSha256": "22129c50582099ead4f02e16a471ad865e98a6739a108b4ce5bdafc5df5dd5df",
+      "sequence": 2026110103
+    },
+    {
+      "name": "baseline",
+      "unchanged": true,
+      "currentSha256": null,
+      "sequence": null
+    },
+    {
+      "name": "packed",
+      "unchanged": true,
+      "currentSha256": "e8cd6e7a3bae1e1e0e19284a9d0ff2cc30506b48c57aa83958cd560f619bb36f",
+      "sequence": 2026110104
+    }
+  ],
+  "originPromotionNotStarted": true,
+  "originDefaultSelectors": {
+    "baseline": {
+      "kind": "absent",
+      "sequence": null
+    },
+    "five-class": {
+      "kind": "symlink",
+      "sequence": 2026110103
+    },
+    "legacy": {
+      "kind": "symlink",
+      "sequence": 2026110103
+    },
+    "packed": {
+      "kind": "symlink",
+      "sequence": 2026110104
+    },
+    "retained15": {
+      "kind": "symlink",
+      "sequence": 2026110103
+    },
+    "retained16": {
+      "kind": "symlink",
+      "sequence": 2026110103
+    },
+    "unified": {
+      "kind": "symlink",
+      "sequence": 2026110103
+    }
+  },
+  "temporaryPublisherRetirement": {
+    "localPath": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\publication-prep\\TEMPORARY-PUBLISHER-RETIRED.json",
+    "sha256": "2d59c08da4c52407f3400a00ca8f3bbf3bc887165b6e869fe1e25ee67d55e704",
+    "routeAndBothWritersDeleted": true,
+    "secretDiscarded": true
+  },
+  "publicReadOnlyHashInstallerRetained": true,
+  "canonicalRefMovedOrPushed": false,
+  "websiteDefaultChangedByR19": false,
+  "newPaidServiceOpened": false,
+  "nextRequiredInput": "Qualified existing mirror configuration or agreed new service access; no additional complete cold run started"
+}

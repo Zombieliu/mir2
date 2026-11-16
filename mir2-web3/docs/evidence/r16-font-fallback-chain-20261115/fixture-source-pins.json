@@ -1,0 +1,56 @@
+{
+  "source": "f310 map baseline plus whole-font fallback admission; original navigation and save gates unchanged",
+  "scripts": [
+    {
+      "name": "focused-driver.mjs",
+      "sha256": "163b9e0faefdbe90554d06948961737d98509c29a9f4ebc5e2b3024b600ba77f",
+      "previousSha256": "4ac574960804f533cd4ca37c55227c7217e54bb40d11586c17538551745bf72f"
+    },
+    {
+      "name": "profile.mjs",
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159",
+      "previousSha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+    },
+    {
+      "name": "route-intent-gate.mjs",
+      "sha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728",
+      "previousSha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728"
+    },
+    {
+      "name": "route-plan-probe.mjs",
+      "sha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c",
+      "previousSha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c"
+    },
+    {
+      "name": "verify-original-fonts.mjs",
+      "sha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+      "previousSha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d"
+    },
+    {
+      "name": "verify-prewarm.mjs",
+      "sha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+      "previousSha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e"
+    },
+    {
+      "name": "prepare-store-visit.mjs",
+      "sha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11",
+      "previousSha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11"
+    },
+    {
+      "name": "hunt-navigation-game.mjs",
+      "sha256": "1bd82fde47a2aad2939467407a04451f14a008fb98c3053f9533dc91672d52d1",
+      "previousSha256": "1bd82fde47a2aad2939467407a04451f14a008fb98c3053f9533dc91672d52d1"
+    }
+  ],
+  "previousFixture": "r16-map-world-baseline/fixture-r6",
+  "newReadOnlyProbe": "actual running ServiceWorker declares wholeFontChain helpers; no request or world state mutation",
+  "retainedFailure": "fixture-r1/run-1; all owned processes terminal. Additional read-only Login packet/count observation and verification of the normal filled form. Original actions and deadlines unchanged.",
+  "additionalReadOnlyProbe": "Visibility and controlled input lengths before/after ordinary fill/click; no value, credential or auth response payload recorded.",
+  "additionalGateProbe": "Observe incoming/outgoing type, key names and lengths, never auth field values. Server packets explicitly forwarded unchanged. Original actions and deadlines retained.",
+  "webSocketInterceptionRemoved": true,
+  "reason": "No route-intent gate is armed or used in this cross-map lifecycle. It obscures normal page framesent observation (baseline reached real cross-map but reported zero baseline reads). Use the real unmodified browser WebSocket. Original collision-response hold, source checks, inputs, authority predicates and deadlines remain unchanged.",
+  "rootCause": "Prior candidates reloaded their document during pending password login after cache namespace cleanup; no-loginSubmit milestones survived because document changed. Real old baseline completed authentication. New source guards current state at scheduling and timer, and records actual cleanup plus no document navigation during login. No WebSocket interception or auth bypass.",
+  "cachePreconditionCorrection": "R7 now authenticates without reload but a fixture incorrectly assumes all old cached fonts survive real namespace cleanup. Record actual misses and let the game load normal sources; no cache injection. Original post-entry six-font hashes, 113/113, Native120, movement8s, source/lifecycle/save gates are unchanged.",
+  "baselineReadPreconditionCorrection": "The product explicitly avoids duplicate version reads if a matching full current baseline already arrives. R8 restored real map0 controls but an obsolete fixture asserted >=1 read. Require actual later WorldSnapshot matching map/player/active quest and a newer scene on the same connection/session; accept 0..3 reads. Original native/113/6fonts/movement/late-data/save gates unchanged. Unit tests still force the missing-baseline read branch.",
+  "observerCorrection": "The added read-only auth observer incorrectly matched String(undefined), then dereferenced missing payload. Its five exceptions obscured sent clientVersion/login frames and caused wireFailures=5 in R9 despite normal saved gameplay. Null-safe metadata observation verified with actual extracted function. Original wireFailures==0, complete authority and all other gates retained. Earlier zero observed read counts are not asserted to be actual network zeros."
+}

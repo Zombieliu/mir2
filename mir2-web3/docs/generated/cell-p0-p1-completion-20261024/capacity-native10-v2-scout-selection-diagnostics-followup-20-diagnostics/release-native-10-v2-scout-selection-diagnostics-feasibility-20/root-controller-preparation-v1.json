@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "preparedAt": "2026-10-26T01:35:07.202859+00:00",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-seal-and-guard-v1.mjs",
+    "bytes": 17598,
+    "sha256": "06429d705d71cdf3af1062070648b146f95f6a2b4d4dd6f7171a2d96d3e6e12b"
+  },
+  "syntax": {
+    "exitCode": 0,
+    "evidence": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-controller-syntax-v1.json",
+      "bytes": 475,
+      "sha256": "a260616eb524707891cc5c1ca85d85c1624150e9b842053d90bc098f3a7de6f2"
+    },
+    "kind": "actual node--check only; target module not imported"
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\verify-inputs.mjs",
+      "bytes": 14340,
+      "sha256": "a421f94c8e86bd94745b57d883cb47613179eaac27d1eb53ed59baefe2ae115b"
+    }
+  ],
+  "sourceDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-controller-derivation-v1.json",
+    "bytes": 4690,
+    "sha256": "1a3ef6b83af432f9d524aee478ae45f7dfc8b64392ce3c48f9e81bad2f2918b3"
+  },
+  "moduleImported": false,
+  "modeExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

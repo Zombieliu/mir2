@@ -1,0 +1,679 @@
+{
+  "schema": "mir2.r16.web-targeted-spell.v1",
+  "passed": true,
+  "sourceHead": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+  "scope": {
+    "isolatedFileWorld": true,
+    "ordinaryHeadlessWebUi": true,
+    "nativeProductionTransport": false,
+    "nativeRenderer": false,
+    "nativeWindow": false,
+    "copiedLevel30Fixture": true,
+    "production": false
+  },
+  "gateway": {
+    "sha256": "68287cb59058786dcdac6420a7ead59f997933cfa744e09f36d891696ecfdaa7",
+    "routingSha256": "1b318a3b61323a8ada5c3a6a2f92c58daf7f601594229ff15dcff6577cac8b36",
+    "baselineGatewaySource": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+    "changedGameFilesSinceBaseline": [
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs"
+    ],
+    "zoneSourceSha256": "2580b4f9ca5fef670539131f73fec8aa1db407613cb5b620e03a4f96a653c6df"
+  },
+  "fixture": {
+    "sha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+    "class": "Wizard",
+    "originalOrdinaryBindingVerified": true,
+    "unchanged": true,
+    "isolatedStoreChanged": true
+  },
+  "stages": [
+    "reserve-private-loopback",
+    "prepare-frozen-web-source",
+    "web-ordinary-entry",
+    "ordinary-F11-bind-GreatFireBall",
+    "ordinary-walk-out-to-field",
+    "ordinary-natural-monster-target",
+    "normal-target-projectile-hit",
+    "fresh-same-role-targeted-skill-readback"
+  ],
+  "browsers": [
+    {
+      "tag": "web-cast",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 151,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 8,
+        "ObjectNpc": 23,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 3,
+        "NPCUpdate": 5,
+        "NPCResponse": 4,
+        "MentorUpdate": 2,
+        "LoverUpdate": 1,
+        "GuildStatus": 2,
+        "GuildMemberChange": 2,
+        "ObjectGuildNameChanged": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 2,
+        "UserLocation": 17,
+        "ObjectRemove": 10,
+        "ObjectHealth": 2,
+        "HealthChanged": 1,
+        "Magic": 1,
+        "ObjectMagic": 1,
+        "ObjectMana": 1,
+        "ObjectProjectile": 1,
+        "ObjectStruck": 1,
+        "DamageIndicator": 1,
+        "ObjectDied": 1,
+        "GainExperience": 1,
+        "MagicLeveled": 1,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "keepAlive": 2,
+        "magicKey": 1,
+        "run": 14,
+        "walk": 2,
+        "magic": 1,
+        "logOut": 1
+      }
+    },
+    {
+      "tag": "fresh-readback",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 151,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectMonster": 4,
+        "ObjectSpell": 41,
+        "ObjectNpc": 7,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 2,
+        "NPCUpdate": 4,
+        "NPCResponse": 4,
+        "MentorUpdate": 1,
+        "LoverUpdate": 1,
+        "GuildStatus": 1,
+        "GuildMemberChange": 1,
+        "ObjectGuildNameChanged": 1,
+        "ObjectHealth": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 1,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "logOut": 1,
+        "keepAlive": 1
+      }
+    }
+  ],
+  "errors": [],
+  "web": {
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourcePageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+    "variant": "first",
+    "combatHostSha256": "77075ec50d0e8e1df025ac7cedef943cf9c9012d03b748584cbf87c0a8e1d26e"
+  },
+  "initialSkills": [
+    {
+      "spell": "FireBall",
+      "key": "fireball",
+      "hotkey": 0,
+      "icon": 0,
+      "castKind": "target",
+      "mpCost": 3,
+      "delayMs": 1800
+    },
+    {
+      "spell": "GreatFireBall",
+      "key": "greatfireball",
+      "hotkey": 0,
+      "icon": 4,
+      "castKind": "target",
+      "mpCost": 5,
+      "delayMs": 1800
+    },
+    {
+      "spell": "FireWall",
+      "key": "firewall",
+      "hotkey": 0,
+      "icon": 21,
+      "castKind": "ground",
+      "mpCost": 30,
+      "delayMs": 1800
+    },
+    {
+      "spell": "Lightning",
+      "key": "lightning",
+      "hotkey": 0,
+      "icon": 9,
+      "castKind": "direction",
+      "mpCost": 38,
+      "delayMs": 1800
+    }
+  ],
+  "ordinary": [
+    {
+      "op": "F11 bind",
+      "spell": "GreatFireBall",
+      "slot": 9,
+      "source": "content.magic.GreatFireBall.description",
+      "wire": [
+        "magicKey"
+      ],
+      "readBack": true
+    }
+  ],
+  "initialUI": {
+    "hudNavigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": false
+    },
+    "combat": {
+      "frame": 17,
+      "identity": {
+        "connectionGeneration": 1,
+        "controllerRun": 2,
+        "ownerRevision": 1,
+        "playerObjectId": 1000,
+        "sessionGeneration": 1
+      },
+      "map": "0",
+      "modelRevision": 5,
+      "ready": true,
+      "revision": 5,
+      "version": 1
+    }
+  },
+  "cast": {
+    "spell": "GreatFireBall",
+    "key": "Ctrl+F1",
+    "learnedRange": 9,
+    "variant": "first",
+    "attempts": [
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          678
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 29,
+          "sequence": 760
+        },
+        "targetWasNatural": true
+      }
+    ],
+    "before": {
+      "skill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 501
+      },
+      "mp": 541,
+      "equippedAmulets": 0
+    },
+    "initialCandidates": [
+      {
+        "objectId": 200203,
+        "name": "Hen",
+        "range": 7,
+        "position": [
+          297,
+          274
+        ],
+        "point": [
+          360,
+          582
+        ]
+      }
+    ],
+    "admitted": {
+      "objectId": 1000,
+      "targetId": 200203,
+      "name": "Hen",
+      "origin": {
+        "x": 300,
+        "y": 267
+      },
+      "target": {
+        "x": 297,
+        "y": 274
+      },
+      "range": 7,
+      "atMs": 456,
+      "sequence": 765
+    },
+    "hit": {
+      "attackerVerified": true,
+      "hitMs": 8,
+      "death": true,
+      "targetHealth": [
+        0
+      ],
+      "projectile": true,
+      "damage": 5
+    },
+    "after": {
+      "skill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 503
+      },
+      "mp": 536,
+      "equippedAmulets": 0
+    },
+    "wire": [
+      {
+        "packet": "Magic",
+        "seq": 764,
+        "atMs": 452,
+        "spell": "GreatFireBall",
+        "targetId": 200203,
+        "cast": true
+      },
+      {
+        "packet": "ObjectMagic",
+        "seq": 765,
+        "atMs": 456,
+        "objectId": 1000,
+        "spell": "GreatFireBall",
+        "targetId": 200203,
+        "cast": true
+      },
+      {
+        "packet": "ObjectMana",
+        "seq": 766,
+        "atMs": 458,
+        "objectId": 1000,
+        "percent": 100
+      },
+      {
+        "packet": "ObjectProjectile",
+        "seq": 767,
+        "atMs": 461,
+        "spell": "GreatFireBall"
+      },
+      {
+        "packet": "ObjectStruck",
+        "seq": 768,
+        "atMs": 464,
+        "objectId": 200203,
+        "attackerId": 1000
+      },
+      {
+        "packet": "DamageIndicator",
+        "seq": 769,
+        "atMs": 468,
+        "objectId": 200203
+      },
+      {
+        "packet": "ObjectHealth",
+        "seq": 770,
+        "atMs": 470,
+        "objectId": 200203,
+        "percent": 0
+      },
+      {
+        "packet": "ObjectDied",
+        "seq": 771,
+        "atMs": 473,
+        "objectId": 200203
+      },
+      {
+        "packet": "MagicLeveled",
+        "seq": 773,
+        "atMs": 745,
+        "objectId": 1000,
+        "spell": "GreatFireBall"
+      }
+    ]
+  },
+  "navigation": [
+    {
+      "from": [
+        328,
+        264
+      ],
+      "waypoint": [
+        326,
+        262
+      ],
+      "after": [
+        327,
+        263
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        327,
+        263
+      ],
+      "waypoint": [
+        325,
+        261
+      ],
+      "after": [
+        326,
+        262
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    },
+    {
+      "from": [
+        324,
+        260
+      ],
+      "waypoint": [
+        322,
+        260
+      ],
+      "after": [
+        322,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        322,
+        260
+      ],
+      "waypoint": [
+        320,
+        260
+      ],
+      "after": [
+        320,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        320,
+        260
+      ],
+      "waypoint": [
+        318,
+        260
+      ],
+      "after": [
+        318,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        318,
+        260
+      ],
+      "waypoint": [
+        316,
+        260
+      ],
+      "after": [
+        316,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        316,
+        260
+      ],
+      "waypoint": [
+        314,
+        260
+      ],
+      "after": [
+        314,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        314,
+        260
+      ],
+      "waypoint": [
+        312,
+        260
+      ],
+      "after": [
+        312,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        312,
+        260
+      ],
+      "waypoint": [
+        310,
+        260
+      ],
+      "after": [
+        310,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        310,
+        260
+      ],
+      "waypoint": [
+        308,
+        260
+      ],
+      "after": [
+        308,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        308,
+        260
+      ],
+      "waypoint": [
+        306,
+        260
+      ],
+      "after": [
+        306,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        306,
+        260
+      ],
+      "waypoint": [
+        304,
+        262
+      ],
+      "after": [
+        304,
+        262
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        304,
+        262
+      ],
+      "waypoint": [
+        302,
+        264
+      ],
+      "after": [
+        302,
+        264
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        302,
+        264
+      ],
+      "waypoint": [
+        300,
+        266
+      ],
+      "after": [
+        300,
+        266
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        300,
+        266
+      ],
+      "waypoint": [
+        300,
+        267
+      ],
+      "after": [
+        300,
+        267
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    }
+  ],
+  "normalLogout": true,
+  "freshReadback": {
+    "skill": {
+      "hotkey": 9,
+      "level": 0,
+      "experience": 503
+    },
+    "mp": 536,
+    "equippedAmulets": 0
+  },
+  "freshNormalLogout": true,
+  "diskSkill": {
+    "hotkey": 9,
+    "level": 0,
+    "experience": 503
+  },
+  "stopped": {
+    "gateway": true,
+    "next": true
+  }
+}

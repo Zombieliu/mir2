@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN",
+  "purpose": "reused-ordinary-earned-bank-relogin-functional-pilot",
+  "actors": 2,
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "profile": "probe",
+    "activityMode": "native",
+    "stages": "2",
+    "stageSeconds": 30,
+    "soakSeconds": 30,
+    "wallSeconds": 3600,
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "movementIntervalMs": 750,
+    "layout": "dispersed",
+    "attackResults": "v2",
+    "preparationProfile": "ordinary-economic-v1",
+    "preparationHpTarget": 12
+  },
+  "scenario": {
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "anchors": [
+      {
+        "x": 285,
+        "y": 602
+      },
+      {
+        "x": 288,
+        "y": 602
+      }
+    ],
+    "monsterNames": [
+      "Deer"
+    ],
+    "preparation": {
+      "stagingPoints": [
+        {
+          "x": 286,
+          "y": 616
+        },
+        {
+          "x": 289,
+          "y": 616
+        }
+      ]
+    }
+  },
+  "routeSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "bytes": 2661153,
+    "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+  },
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\resource-profile-v1.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  },
+  "fixedGateway": {
+    "tcp": "127.0.0.1:17500",
+    "web": "127.0.0.1:17510",
+    "tokioWorkers": 4,
+    "maxActiveSessions": 100,
+    "maxWsConnections": 128,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "contentProfile": "platinum_176",
+    "zoneDeliveryTrace": true
+  },
+  "monitorWallSeconds": 4200,
+  "preparationScope": {
+    "maxSecondsPerActor": 600,
+    "maxDeerAttemptsPerActor": 8,
+    "targetHp": 12,
+    "stageResupply": false,
+    "sustainableTwoHourStockProven": false,
+    "liveHostileSafetyKnown": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "scope": "Two normally saved V3 ordinary-earned characters are reused with exact names/indices and ordinary Login/StartGame. New active recovery is initialized normally only after the old control-only tree is preserved byte-for-byte. Functional30s stage+30s soak only; original safety and native gates unchanged. No capacity or two-hour supply claim.",
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "reusedOrdinaryEarnedBank": true,
+  "freshZeroCharacterPool": false,
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+    "bytes": 7710,
+    "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+  },
+  "scenarioReuse": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\scenario-v1.json",
+    "bytes": 2980130,
+    "sha256": "b5c48f1c04a2da1edeb8495454299e84dc50a8d9f2034f162ae25075f0b1f8f2"
+  }
+}

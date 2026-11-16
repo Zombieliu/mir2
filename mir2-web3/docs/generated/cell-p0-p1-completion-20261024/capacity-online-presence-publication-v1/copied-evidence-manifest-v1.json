@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v11\\episode-50\\reports\\1793028633124-850c0ce2.report.json",
+      "file": "v11-original-report.json",
+      "bytes": 60049,
+      "sha256": "0e7fefe07aa92acc00a69badd2512a195f6361c3043dba73d1c6cb3fb11efef6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-owner-action-pose-v11-analysis-v1\\findings-v1.json",
+      "file": "v11-findings.json",
+      "bytes": 385901,
+      "sha256": "53922798396395be51ba6ff07938773b2e14bf4e3b8e690fa93d3cd0df44d75e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-owner-action-pose-v11-analysis-v1\\selected-anonymous.jsonl",
+      "file": "v11-selected-anonymous.jsonl",
+      "bytes": 68200,
+      "sha256": "dd7b05de16c3ed69dffa5920d53aa56e6731ff7f49303bfade83f754c6a53e69"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\v11-execute-wait-audit-v1\\README.md",
+      "file": "v11-execute-wait-audit.md",
+      "bytes": 3573,
+      "sha256": "f0089bef09d7b1bf88835e6acaf0f48febd2cb586eb189ae5bcf4fd0c27c33a1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\v11-execute-wait-audit-v1\\findings-v1.json",
+      "file": "v11-execute-wait-findings.json",
+      "bytes": 168798,
+      "sha256": "31317772c6ed4496b1b363d7d53e958b129b0506e32a9c69af134b4bb6217839"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\v11-execute-wait-audit-v1\\stream-provenance-v1.json",
+      "file": "v11-execute-wait-provenance.json",
+      "bytes": 3619,
+      "sha256": "07908accd03e5bc32f9fe0abfe184a495d685c9a1700c3036d8e926a37547126"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-v11-stage50-root-run-execution-v1.json",
+      "file": "v11-root-run-execution.json",
+      "bytes": 911,
+      "sha256": "4fb4b21a6b1684184df517cabc7ad847bc784527a91c4cd9ad1437d109f6854f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-v11-stage50-root-prepare-execution-v1.json",
+      "file": "v11-root-prepare-execution.json",
+      "bytes": 896,
+      "sha256": "43ac5bdb7291212c860424e0e91212ee21dcf85bb50790a55927dfcaadf036f7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-v11-root-guard-execution-v1.json",
+      "file": "v11-root-guard-execution.json",
+      "bytes": 865,
+      "sha256": "8c3cc086bbb5a5dbeaa635f98f03d727ecd5f3daace5837d022b3b4b857d6182"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-v11-stage50-root-independent-cleanup-v1.json",
+      "file": "v11-root-independent-cleanup.json",
+      "bytes": 7606,
+      "sha256": "d4b0dd9eccd6f3497e1ef6c2f3081a2e347ae25466bd6535d61d224bb2934d35"
+    }
+  ]
+}

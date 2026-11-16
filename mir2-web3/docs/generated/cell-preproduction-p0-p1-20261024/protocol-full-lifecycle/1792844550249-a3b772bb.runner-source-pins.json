@@ -1,0 +1,9 @@
+{
+  "scope": "Corrected ordinary non-harvest bounded runner. Gateway executable unchanged.",
+  "sha256": {
+    "mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs": "7461feb4f288c9c99222a8bff1e618bc93bdc65950057ccf722b166a1a412ab3",
+    "mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.test.mjs": "0c662006df20d9cce43cd07d66a46ee824ee86c9fe522d1020ea44281cdedbfe",
+    "mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs": "a0c1fbca712787c1a97e599250dc87234217bb8483d5b6c2e29f2b48ded09d55",
+    "mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.test.mjs": "7ae64d5994f3209db83a57c7bcb4c809a0013add55dbc58a65bdfe7dbfa23af3"
+  }
+}

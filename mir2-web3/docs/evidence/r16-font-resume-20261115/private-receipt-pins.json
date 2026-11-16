@@ -1,0 +1,167 @@
+[
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/world-r1/run-1/receipt.json",
+    "bytes": 10864,
+    "sha256": "b89d039cc42301dc768394d8263ea5f8ec0d9643a74d5bed46dc2c79a53d41bc"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r1/run-1/receipt.json",
+    "bytes": 54527,
+    "sha256": "01f744472d5e5c334aa3520797105d36a621f3edd73b0c277c9d2367cd2e9cea"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r2/run-2/receipt.json",
+    "bytes": 23881,
+    "sha256": "23be40542c765f07ab540cd82eeaf81b4115fd3a766520dd8b37b2d33790f594"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r3/run-1/receipt.json",
+    "bytes": 51107,
+    "sha256": "082c7c9c18d39b3efd28ad47ed88b49fc864e46fb4c6bcb636f535e4cfb3138e"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r4/run-1/receipt.json",
+    "bytes": 41712,
+    "sha256": "147c8f552abf42af27c0062804080bfe4f8723a7ba1718c3c7ad66e36fe45c33"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/baseline.json",
+    "bytes": 5135,
+    "sha256": "01e967325c71ce753e1704d34c56dca0234cc1ab93b3140cab01d23d82abe277"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/ranges-r1.log",
+    "bytes": 7499,
+    "sha256": "b64560f24ded23d83fee069ffb2378c1a51d4ef7e17e27c7919de8892c9d50ea"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/ranges-r2.log",
+    "bytes": 3748,
+    "sha256": "144fea716343a86b4e1f4ea75e22cc495cabd681ea912c5b51d346c61207777e"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/ranges-r3.log",
+    "bytes": 4949,
+    "sha256": "18c87ac8f240868dbacc09bf63ecc5ff02d4b4fc566a6210ec8f528a6590146d"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/expanded-r1.log",
+    "bytes": 38508,
+    "sha256": "ed45c078995e07b9acc3e600bb4825eeeb2175b525c8ec3c6647d49fd56709a9"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/before-range-test.log",
+    "bytes": 968,
+    "sha256": "b5ea2a1a526ff862d117d41aaca07d21cb95a9d7c6f5f7928b257c6149d58eca"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/login-r1.log",
+    "bytes": 19979,
+    "sha256": "1bab2ea1fbe55c68db1399ff18f4391b16ce28b9fc659e7e1659508d976b4842"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/login-before.log",
+    "bytes": 1840,
+    "sha256": "f6c48784ca32584a7552c55870d74d132d854c918728b1a8546cea0751a31d88"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/browser-defaults-login-r1.log",
+    "bytes": 4876,
+    "sha256": "9e834768dc83000ba321a0dd7f56c954001113f7e9c393acfc913ec65dbf55ce"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/browser-r1/receipt.json",
+    "bytes": 38842,
+    "sha256": "dd95b6a76b98f199b4c1366defd1ec47b03b2b3bd6766e5824374e368c8144bb"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/build-receipt-r1.json",
+    "bytes": 12792,
+    "sha256": "2894a197465331a6883c8e9f3fbcfd67d9f1566aacd3d52e467bbf68461664c2"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/candidate-source.json",
+    "bytes": 7114,
+    "sha256": "c2bcd5bd10a78453d1faf97854bfbc9f5686a882d0908716802f8182a397eb3a"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-resume-20261115/next-build-r1.log",
+    "bytes": 2394,
+    "sha256": "546340dba85cbc2f2c6d2f0c0473d1634f21e08d92390ba5ad268f58d970bc97"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/build-receipt-r1.json",
+    "bytes": 13026,
+    "sha256": "4cdd6286323223e397da2a0e62cb50dd66a75680d996272d7260f057e20d98a4"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/candidate-source.json",
+    "bytes": 7352,
+    "sha256": "43b8f0aaa0988fcb9b9250d9152367ec1717d5faf64a3b9a03bdcab589e69a1c"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/next-build-r1.log",
+    "bytes": 2389,
+    "sha256": "225b36d5cb1926da2bbe00b358f9dc06a84f660348274e57bedb044f998e2664"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/font-cache-audit/receipt.json",
+    "bytes": 8929,
+    "sha256": "0aa4591aaf6effb2b378f2ebfabd6e7df2fd9c61ad2ceda6e481b025481f14e3"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/font-alternative-probe.json",
+    "bytes": 1386,
+    "sha256": "275f0a20e1558b618717ce8b082e5df94805157cb0946c6dbcd041d961b3ca31"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/font-compression-feasibility.json",
+    "bytes": 694,
+    "sha256": "5e3adb2adfeef081b218556b68c77cb095fa233eb572f7add9c6f18fae02d6b5"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/public-readback.json",
+    "bytes": 432,
+    "sha256": "53ca66188e18ee6fb772c94049f1fdb1ecd005bba732776d0e4d562fff7d423b"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r1/preparation.json",
+    "bytes": 4321,
+    "sha256": "8a748a85c55f24295128a3b4d88c576ab789de10912b0d45a8938cd3fde69c18"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r2/preparation.json",
+    "bytes": 4441,
+    "sha256": "f0ca5c2dfa9941168552e370d82543479b3b263bb0b05ca3f2ca59a12b80d6dc"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r3/preparation.json",
+    "bytes": 4463,
+    "sha256": "53b8992d2ceec8452c740b438ef150f50eabeb007c4823b579f6648ccdca0e64"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r4/preparation.json",
+    "bytes": 4620,
+    "sha256": "b2ef07aeb021fb6311c350aea1e9f12da93b1396eb8890bd9ff18d8690bbf910"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r1/run-1/original-fonts.json",
+    "bytes": 2377,
+    "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r4/run-1/original-fonts.json",
+    "bytes": 2377,
+    "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r4/run-1/first-entry-diary-keys.json",
+    "bytes": 2711,
+    "sha256": "83b0b93f67b3b4836832fbc77ede965c4cd2f1e9b213565dd1f5a227bfe851f4"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-login-20261115/world-r4/run-1/reopened-diary-keys.json",
+    "bytes": 2705,
+    "sha256": "564c190c1c2d87b475a878649c24590b0feb984ce4e8081932319d89fe3d786f"
+  }
+]

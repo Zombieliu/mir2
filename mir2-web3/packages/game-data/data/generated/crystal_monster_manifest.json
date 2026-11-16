@@ -7,6 +7,7 @@
   "monsters": [
     {
       "monster_index": 1,
+      "accuracy": 255,
       "name": "ArcherGuard",
       "image": 139,
       "ai": 57,
@@ -39,6 +40,7 @@
     },
     {
       "monster_index": 2,
+      "accuracy": 255,
       "name": "ArcherGuard1",
       "image": 120,
       "ai": 57,
@@ -71,6 +73,7 @@
     },
     {
       "monster_index": 3,
+      "accuracy": 255,
       "name": "Guard",
       "image": 0,
       "ai": 6,
@@ -103,6 +106,7 @@
     },
     {
       "monster_index": 4,
+      "accuracy": 255,
       "name": "Guard1",
       "image": 1,
       "ai": 58,
@@ -135,6 +139,7 @@
     },
     {
       "monster_index": 5,
+      "accuracy": 255,
       "name": "Guard2",
       "image": 123,
       "ai": 6,
@@ -167,6 +172,7 @@
     },
     {
       "monster_index": 6,
+      "accuracy": 255,
       "name": "Sentry",
       "image": 2,
       "ai": 6,
@@ -199,6 +205,7 @@
     },
     {
       "monster_index": 7,
+      "accuracy": 15,
       "name": "Trainer",
       "image": 140,
       "ai": 56,
@@ -231,6 +238,7 @@
     },
     {
       "monster_index": 8,
+      "accuracy": 15,
       "name": "TrainingMob",
       "image": 123,
       "ai": 56,
@@ -263,6 +271,7 @@
     },
     {
       "monster_index": 9,
+      "accuracy": 20,
       "name": "BoneFamiliar",
       "image": 78,
       "ai": 23,
@@ -295,6 +304,7 @@
     },
     {
       "monster_index": 10,
+      "accuracy": 25,
       "name": "Shinsu",
       "image": 79,
       "ai": 18,
@@ -327,6 +337,7 @@
     },
     {
       "monster_index": 11,
+      "accuracy": 25,
       "name": "Shinsu1",
       "image": 80,
       "ai": 18,
@@ -359,6 +370,7 @@
     },
     {
       "monster_index": 12,
+      "accuracy": 15,
       "name": "HolyDeva",
       "image": 117,
       "ai": 38,
@@ -391,6 +403,7 @@
     },
     {
       "monster_index": 13,
+      "accuracy": 15,
       "name": "Clone",
       "image": 0,
       "ai": 55,
@@ -423,6 +436,7 @@
     },
     {
       "monster_index": 14,
+      "accuracy": 50,
       "name": "AssassinClone",
       "image": 0,
       "ai": 59,
@@ -455,6 +469,7 @@
     },
     {
       "monster_index": 15,
+      "accuracy": 0,
       "name": "VampireSpider",
       "image": 359,
       "ai": 60,
@@ -487,6 +502,7 @@
     },
     {
       "monster_index": 16,
+      "accuracy": 0,
       "name": "SpittingToad",
       "image": 360,
       "ai": 61,
@@ -519,6 +535,7 @@
     },
     {
       "monster_index": 17,
+      "accuracy": 0,
       "name": "SnakeTotem",
       "image": 361,
       "ai": 62,
@@ -551,6 +568,7 @@
     },
     {
       "monster_index": 18,
+      "accuracy": 0,
       "name": "CharmedSnake",
       "image": 368,
       "ai": 63,
@@ -583,6 +601,7 @@
     },
     {
       "monster_index": 19,
+      "accuracy": 0,
       "name": "BabyPig",
       "image": 10000,
       "ai": 64,
@@ -615,6 +634,7 @@
     },
     {
       "monster_index": 20,
+      "accuracy": 0,
       "name": "Chick",
       "image": 10001,
       "ai": 64,
@@ -647,6 +667,7 @@
     },
     {
       "monster_index": 21,
+      "accuracy": 0,
       "name": "Kitten",
       "image": 10002,
       "ai": 64,
@@ -679,6 +700,7 @@
     },
     {
       "monster_index": 22,
+      "accuracy": 0,
       "name": "BabySkeleton",
       "image": 10003,
       "ai": 64,
@@ -711,6 +733,7 @@
     },
     {
       "monster_index": 23,
+      "accuracy": 0,
       "name": "Baekdon",
       "image": 10004,
       "ai": 64,
@@ -743,6 +766,7 @@
     },
     {
       "monster_index": 24,
+      "accuracy": 0,
       "name": "Wimaen",
       "image": 10005,
       "ai": 64,
@@ -775,6 +799,7 @@
     },
     {
       "monster_index": 25,
+      "accuracy": 0,
       "name": "BlackKitten",
       "image": 10006,
       "ai": 64,
@@ -807,6 +832,7 @@
     },
     {
       "monster_index": 26,
+      "accuracy": 0,
       "name": "BabyDragon",
       "image": 10007,
       "ai": 64,
@@ -839,6 +865,7 @@
     },
     {
       "monster_index": 27,
+      "accuracy": 0,
       "name": "OlympicFlame",
       "image": 10008,
       "ai": 64,
@@ -871,6 +898,7 @@
     },
     {
       "monster_index": 28,
+      "accuracy": 0,
       "name": "BabySnowMan",
       "image": 10009,
       "ai": 64,
@@ -903,6 +931,7 @@
     },
     {
       "monster_index": 29,
+      "accuracy": 3,
       "name": "Hen",
       "image": 3,
       "ai": 1,
@@ -935,6 +964,7 @@
     },
     {
       "monster_index": 30,
+      "accuracy": 4,
       "name": "Deer",
       "image": 4,
       "ai": 2,
@@ -967,6 +997,7 @@
     },
     {
       "monster_index": 31,
+      "accuracy": 4,
       "name": "Deer1",
       "image": 4,
       "ai": 2,
@@ -999,6 +1030,7 @@
     },
     {
       "monster_index": 32,
+      "accuracy": 7,
       "name": "Pig",
       "image": 142,
       "ai": 1,
@@ -1031,6 +1063,7 @@
     },
     {
       "monster_index": 33,
+      "accuracy": 7,
       "name": "Bull",
       "image": 143,
       "ai": 1,
@@ -1063,6 +1096,7 @@
     },
     {
       "monster_index": 34,
+      "accuracy": 7,
       "name": "Sheep",
       "image": 103,
       "ai": 2,
@@ -1095,6 +1129,7 @@
     },
     {
       "monster_index": 35,
+      "accuracy": 10,
       "name": "Wolf",
       "image": 104,
       "ai": 9,
@@ -1127,6 +1162,7 @@
     },
     {
       "monster_index": 36,
+      "accuracy": 12,
       "name": "Currish",
       "image": 104,
       "ai": 9,
@@ -1159,6 +1195,7 @@
     },
     {
       "monster_index": 37,
+      "accuracy": 6,
       "name": "Yob",
       "image": 8,
       "ai": 0,
@@ -1191,6 +1228,7 @@
     },
     {
       "monster_index": 38,
+      "accuracy": 6,
       "name": "Yob0",
       "image": 8,
       "ai": 0,
@@ -1223,6 +1261,7 @@
     },
     {
       "monster_index": 39,
+      "accuracy": 5,
       "name": "Scarecrow",
       "image": 5,
       "ai": 0,
@@ -1255,6 +1294,7 @@
     },
     {
       "monster_index": 40,
+      "accuracy": 5,
       "name": "Scarecrow0",
       "image": 5,
       "ai": 0,
@@ -1287,6 +1327,7 @@
     },
     {
       "monster_index": 41,
+      "accuracy": 5,
       "name": "Scarecrow1",
       "image": 5,
       "ai": 0,
@@ -1319,6 +1360,7 @@
     },
     {
       "monster_index": 42,
+      "accuracy": 5,
       "name": "HookingCat",
       "image": 6,
       "ai": 0,
@@ -1351,6 +1393,7 @@
     },
     {
       "monster_index": 43,
+      "accuracy": 5,
       "name": "HookingCat0",
       "image": 6,
       "ai": 0,
@@ -1383,6 +1426,7 @@
     },
     {
       "monster_index": 44,
+      "accuracy": 5,
       "name": "RakingCat",
       "image": 7,
       "ai": 0,
@@ -1415,6 +1459,7 @@
     },
     {
       "monster_index": 45,
+      "accuracy": 5,
       "name": "RakingCat0",
       "image": 7,
       "ai": 0,
@@ -1447,6 +1492,7 @@
     },
     {
       "monster_index": 46,
+      "accuracy": 8,
       "name": "SpittingSpider",
       "image": 12,
       "ai": 4,
@@ -1479,6 +1525,7 @@
     },
     {
       "monster_index": 47,
+      "accuracy": 12,
       "name": "CannibalPlant",
       "image": 10,
       "ai": 5,
@@ -1511,6 +1558,7 @@
     },
     {
       "monster_index": 48,
+      "accuracy": 6,
       "name": "Oma",
       "image": 9,
       "ai": 0,
@@ -1543,6 +1591,7 @@
     },
     {
       "monster_index": 49,
+      "accuracy": 6,
       "name": "Oma0",
       "image": 9,
       "ai": 0,
@@ -1575,6 +1624,7 @@
     },
     {
       "monster_index": 50,
+      "accuracy": 10,
       "name": "OmaFighter",
       "image": 17,
       "ai": 0,
@@ -1607,6 +1657,7 @@
     },
     {
       "monster_index": 51,
+      "accuracy": 10,
       "name": "OmaFighter0",
       "image": 17,
       "ai": 0,
@@ -1639,6 +1690,7 @@
     },
     {
       "monster_index": 52,
+      "accuracy": 15,
       "name": "OmaWarrior",
       "image": 18,
       "ai": 0,
@@ -1671,6 +1723,7 @@
     },
     {
       "monster_index": 53,
+      "accuracy": 20,
       "name": "OmaWarrior1",
       "image": 18,
       "ai": 0,
@@ -1703,6 +1756,7 @@
     },
     {
       "monster_index": 54,
+      "accuracy": 17,
       "name": "OmaWarrior2",
       "image": 18,
       "ai": 0,
@@ -1735,6 +1789,7 @@
     },
     {
       "monster_index": 55,
+      "accuracy": 7,
       "name": "ForestYeti",
       "image": 11,
       "ai": 0,
@@ -1767,6 +1822,7 @@
     },
     {
       "monster_index": 56,
+      "accuracy": 7,
       "name": "ForestYeti0",
       "image": 11,
       "ai": 0,
@@ -1799,6 +1855,7 @@
     },
     {
       "monster_index": 57,
+      "accuracy": 15,
       "name": "FrostTiger",
       "image": 102,
       "ai": 34,
@@ -1831,6 +1888,7 @@
     },
     {
       "monster_index": 58,
+      "accuracy": 1,
       "name": "ChestnutTree",
       "image": 13,
       "ai": 3,
@@ -1863,6 +1921,7 @@
     },
     {
       "monster_index": 59,
+      "accuracy": 1,
       "name": "ChestnutTree1",
       "image": 13,
       "ai": 3,
@@ -1895,6 +1954,7 @@
     },
     {
       "monster_index": 60,
+      "accuracy": 1,
       "name": "ChestnutTree2",
       "image": 13,
       "ai": 3,
@@ -1927,6 +1987,7 @@
     },
     {
       "monster_index": 61,
+      "accuracy": 1,
       "name": "EbonyTree",
       "image": 14,
       "ai": 3,
@@ -1959,6 +2020,7 @@
     },
     {
       "monster_index": 62,
+      "accuracy": 1,
       "name": "CherryTree",
       "image": 16,
       "ai": 3,
@@ -1991,6 +2053,7 @@
     },
     {
       "monster_index": 63,
+      "accuracy": 1,
       "name": "LargeMushroom",
       "image": 15,
       "ai": 3,
@@ -2023,6 +2086,7 @@
     },
     {
       "monster_index": 64,
+      "accuracy": 11,
       "name": "RedSnake",
       "image": 111,
       "ai": 0,
@@ -2055,6 +2119,7 @@
     },
     {
       "monster_index": 65,
+      "accuracy": 11,
       "name": "RedSnake0",
       "image": 111,
       "ai": 0,
@@ -2087,6 +2152,7 @@
     },
     {
       "monster_index": 66,
+      "accuracy": 11,
       "name": "RedViper",
       "image": 111,
       "ai": 0,
@@ -2119,6 +2185,7 @@
     },
     {
       "monster_index": 67,
+      "accuracy": 12,
       "name": "TigerSnake",
       "image": 112,
       "ai": 0,
@@ -2151,6 +2218,7 @@
     },
     {
       "monster_index": 68,
+      "accuracy": 12,
       "name": "TigerSnake0",
       "image": 112,
       "ai": 0,
@@ -2183,6 +2251,7 @@
     },
     {
       "monster_index": 69,
+      "accuracy": 12,
       "name": "TigerViper",
       "image": 112,
       "ai": 0,
@@ -2215,6 +2284,7 @@
     },
     {
       "monster_index": 70,
+      "accuracy": 10,
       "name": "Keratoid",
       "image": 106,
       "ai": 0,
@@ -2247,6 +2317,7 @@
     },
     {
       "monster_index": 71,
+      "accuracy": 10,
       "name": "Keratoid0",
       "image": 106,
       "ai": 0,
@@ -2279,6 +2350,7 @@
     },
     {
       "monster_index": 72,
+      "accuracy": 7,
       "name": "ShellNipper",
       "image": 105,
       "ai": 0,
@@ -2311,6 +2383,7 @@
     },
     {
       "monster_index": 73,
+      "accuracy": 9,
       "name": "ShellNipper0",
       "image": 105,
       "ai": 0,
@@ -2343,6 +2416,7 @@
     },
     {
       "monster_index": 74,
+      "accuracy": 15,
       "name": "SkyStinger",
       "image": 108,
       "ai": 0,
@@ -2375,6 +2449,7 @@
     },
     {
       "monster_index": 75,
+      "accuracy": 20,
       "name": "SkyStinger0",
       "image": 108,
       "ai": 0,
@@ -2407,6 +2482,7 @@
     },
     {
       "monster_index": 76,
+      "accuracy": 12,
       "name": "VisceralWorm",
       "image": 110,
       "ai": 0,
@@ -2439,6 +2515,7 @@
     },
     {
       "monster_index": 77,
+      "accuracy": 13,
       "name": "SandWorm",
       "image": 109,
       "ai": 35,
@@ -2471,6 +2548,7 @@
     },
     {
       "monster_index": 78,
+      "accuracy": 5,
       "name": "GiantKeratoid",
       "image": 107,
       "ai": 0,
@@ -2503,6 +2581,7 @@
     },
     {
       "monster_index": 79,
+      "accuracy": 17,
       "name": "GiantKeratoid1",
       "image": 107,
       "ai": 0,
@@ -2535,6 +2614,7 @@
     },
     {
       "monster_index": 80,
+      "accuracy": 15,
       "name": "GiantKeratoid2",
       "image": 107,
       "ai": 0,
@@ -2567,6 +2647,7 @@
     },
     {
       "monster_index": 81,
+      "accuracy": 11,
       "name": "CaveBat",
       "image": 19,
       "ai": 0,
@@ -2599,6 +2680,7 @@
     },
     {
       "monster_index": 82,
+      "accuracy": 11,
       "name": "CaveBat0",
       "image": 19,
       "ai": 0,
@@ -2631,6 +2713,7 @@
     },
     {
       "monster_index": 83,
+      "accuracy": 12,
       "name": "CaveMaggot",
       "image": 20,
       "ai": 7,
@@ -2663,6 +2746,7 @@
     },
     {
       "monster_index": 84,
+      "accuracy": 10,
       "name": "Scorpion",
       "image": 21,
       "ai": 9,
@@ -2695,6 +2779,7 @@
     },
     {
       "monster_index": 85,
+      "accuracy": 11,
       "name": "Skeleton",
       "image": 22,
       "ai": 0,
@@ -2727,6 +2812,7 @@
     },
     {
       "monster_index": 86,
+      "accuracy": 11,
       "name": "Skeleton0",
       "image": 22,
       "ai": 0,
@@ -2759,6 +2845,7 @@
     },
     {
       "monster_index": 87,
+      "accuracy": 15,
       "name": "AxeSkeleton",
       "image": 24,
       "ai": 8,
@@ -2791,6 +2878,7 @@
     },
     {
       "monster_index": 88,
+      "accuracy": 15,
       "name": "AxeSkeleton0",
       "image": 24,
       "ai": 8,
@@ -2823,6 +2911,7 @@
     },
     {
       "monster_index": 89,
+      "accuracy": 15,
       "name": "AxeSkeleton9",
       "image": 24,
       "ai": 8,
@@ -2855,6 +2944,7 @@
     },
     {
       "monster_index": 90,
+      "accuracy": 11,
       "name": "BoneFighter",
       "image": 23,
       "ai": 0,
@@ -2887,6 +2977,7 @@
     },
     {
       "monster_index": 91,
+      "accuracy": 11,
       "name": "BoneFighter0",
       "image": 23,
       "ai": 0,
@@ -2919,6 +3010,7 @@
     },
     {
       "monster_index": 92,
+      "accuracy": 12,
       "name": "BoneWarrior",
       "image": 25,
       "ai": 0,
@@ -2951,6 +3043,7 @@
     },
     {
       "monster_index": 93,
+      "accuracy": 12,
       "name": "BoneWarrior0",
       "image": 25,
       "ai": 0,
@@ -2983,6 +3076,7 @@
     },
     {
       "monster_index": 94,
+      "accuracy": 14,
       "name": "BoneElite",
       "image": 26,
       "ai": 0,
@@ -3015,6 +3109,7 @@
     },
     {
       "monster_index": 95,
+      "accuracy": 14,
       "name": "BoneElite1",
       "image": 26,
       "ai": 0,
@@ -3047,6 +3142,7 @@
     },
     {
       "monster_index": 96,
+      "accuracy": 14,
       "name": "BoneElite2",
       "image": 26,
       "ai": 0,
@@ -3079,6 +3175,7 @@
     },
     {
       "monster_index": 97,
+      "accuracy": 14,
       "name": "BoneElite9",
       "image": 26,
       "ai": 0,
@@ -3111,6 +3208,7 @@
     },
     {
       "monster_index": 98,
+      "accuracy": 15,
       "name": "Ancient_AxeSkeleton",
       "image": 24,
       "ai": 8,
@@ -3143,6 +3241,7 @@
     },
     {
       "monster_index": 99,
+      "accuracy": 15,
       "name": "Ancient_AxeSkeleton0",
       "image": 24,
       "ai": 8,
@@ -3175,6 +3274,7 @@
     },
     {
       "monster_index": 100,
+      "accuracy": 15,
       "name": "Ancient_Skeleton",
       "image": 22,
       "ai": 0,
@@ -3207,6 +3307,7 @@
     },
     {
       "monster_index": 101,
+      "accuracy": 15,
       "name": "Ancient_Skeleton0",
       "image": 22,
       "ai": 0,
@@ -3239,6 +3340,7 @@
     },
     {
       "monster_index": 102,
+      "accuracy": 11,
       "name": "Ancient_BoneFighter",
       "image": 23,
       "ai": 0,
@@ -3271,6 +3373,7 @@
     },
     {
       "monster_index": 103,
+      "accuracy": 11,
       "name": "Ancient_BoneFighter0",
       "image": 23,
       "ai": 0,
@@ -3303,6 +3406,7 @@
     },
     {
       "monster_index": 104,
+      "accuracy": 12,
       "name": "Ancient_BoneWarrior",
       "image": 25,
       "ai": 0,
@@ -3335,6 +3439,7 @@
     },
     {
       "monster_index": 105,
+      "accuracy": 12,
       "name": "Ancient_BoneWarrior0",
       "image": 25,
       "ai": 0,
@@ -3367,6 +3472,7 @@
     },
     {
       "monster_index": 106,
+      "accuracy": 14,
       "name": "Ancient_BoneElite",
       "image": 26,
       "ai": 0,
@@ -3399,6 +3505,7 @@
     },
     {
       "monster_index": 107,
+      "accuracy": 9,
       "name": "BoneWhoo",
       "image": 194,
       "ai": 0,
@@ -3431,6 +3538,7 @@
     },
     {
       "monster_index": 108,
+      "accuracy": 12,
       "name": "Zombie1",
       "image": 73,
       "ai": 26,
@@ -3463,6 +3571,7 @@
     },
     {
       "monster_index": 109,
+      "accuracy": 12,
       "name": "Zombie10",
       "image": 73,
       "ai": 26,
@@ -3495,6 +3604,7 @@
     },
     {
       "monster_index": 110,
+      "accuracy": 13,
       "name": "Zombie2",
       "image": 69,
       "ai": 24,
@@ -3527,6 +3637,7 @@
     },
     {
       "monster_index": 111,
+      "accuracy": 13,
       "name": "Zombie20",
       "image": 69,
       "ai": 24,
@@ -3559,6 +3670,7 @@
     },
     {
       "monster_index": 112,
+      "accuracy": 13,
       "name": "Zombie3",
       "image": 70,
       "ai": 25,
@@ -3591,6 +3703,7 @@
     },
     {
       "monster_index": 113,
+      "accuracy": 13,
       "name": "Zombie30",
       "image": 70,
       "ai": 25,
@@ -3623,6 +3736,7 @@
     },
     {
       "monster_index": 114,
+      "accuracy": 12,
       "name": "Zombie4",
       "image": 71,
       "ai": 25,
@@ -3655,6 +3769,7 @@
     },
     {
       "monster_index": 115,
+      "accuracy": 12,
       "name": "Zombie40",
       "image": 71,
       "ai": 25,
@@ -3687,6 +3802,7 @@
     },
     {
       "monster_index": 116,
+      "accuracy": 12,
       "name": "Zombie5",
       "image": 72,
       "ai": 25,
@@ -3719,6 +3835,7 @@
     },
     {
       "monster_index": 117,
+      "accuracy": 12,
       "name": "Zombie50",
       "image": 72,
       "ai": 25,
@@ -3751,6 +3868,7 @@
     },
     {
       "monster_index": 118,
+      "accuracy": 15,
       "name": "Ghoul",
       "image": 74,
       "ai": 0,
@@ -3783,6 +3901,7 @@
     },
     {
       "monster_index": 119,
+      "accuracy": 20,
       "name": "Ghoul1",
       "image": 74,
       "ai": 0,
@@ -3815,6 +3934,7 @@
     },
     {
       "monster_index": 120,
+      "accuracy": 15,
       "name": "Ghoul2",
       "image": 74,
       "ai": 0,
@@ -3847,6 +3967,7 @@
     },
     {
       "monster_index": 121,
+      "accuracy": 15,
       "name": "Ghoul4",
       "image": 74,
       "ai": 0,
@@ -3879,6 +4000,7 @@
     },
     {
       "monster_index": 122,
+      "accuracy": 13,
       "name": "PriestZombie",
       "image": 69,
       "ai": 24,
@@ -3911,6 +4033,7 @@
     },
     {
       "monster_index": 123,
+      "accuracy": 13,
       "name": "PriestZombie0",
       "image": 69,
       "ai": 24,
@@ -3943,6 +4066,7 @@
     },
     {
       "monster_index": 124,
+      "accuracy": 13,
       "name": "ClZombie",
       "image": 70,
       "ai": 25,
@@ -3975,6 +4099,7 @@
     },
     {
       "monster_index": 125,
+      "accuracy": 13,
       "name": "ClZombie0",
       "image": 70,
       "ai": 25,
@@ -4007,6 +4132,7 @@
     },
     {
       "monster_index": 126,
+      "accuracy": 12,
       "name": "NdZombie",
       "image": 71,
       "ai": 25,
@@ -4039,6 +4165,7 @@
     },
     {
       "monster_index": 127,
+      "accuracy": 12,
       "name": "NdZombie0",
       "image": 71,
       "ai": 25,
@@ -4071,6 +4198,7 @@
     },
     {
       "monster_index": 128,
+      "accuracy": 12,
       "name": "CrawlerZombie",
       "image": 72,
       "ai": 25,
@@ -4103,6 +4231,7 @@
     },
     {
       "monster_index": 129,
+      "accuracy": 12,
       "name": "CrawlerZombie0",
       "image": 72,
       "ai": 25,
@@ -4135,6 +4264,7 @@
     },
     {
       "monster_index": 130,
+      "accuracy": 12,
       "name": "ShamanZombie",
       "image": 73,
       "ai": 26,
@@ -4167,6 +4297,7 @@
     },
     {
       "monster_index": 131,
+      "accuracy": 12,
       "name": "ShamanZombie0",
       "image": 73,
       "ai": 26,
@@ -4199,6 +4330,7 @@
     },
     {
       "monster_index": 132,
+      "accuracy": 12,
       "name": "RotNdZombie",
       "image": 71,
       "ai": 25,
@@ -4231,6 +4363,7 @@
     },
     {
       "monster_index": 133,
+      "accuracy": 12,
       "name": "RotShamanZombie",
       "image": 73,
       "ai": 26,
@@ -4263,6 +4396,7 @@
     },
     {
       "monster_index": 134,
+      "accuracy": 12,
       "name": "Zombie51",
       "image": 73,
       "ai": 26,
@@ -4295,6 +4429,7 @@
     },
     {
       "monster_index": 135,
+      "accuracy": 15,
       "name": "HiGreatGhoul",
       "image": 74,
       "ai": 0,
@@ -4327,6 +4462,7 @@
     },
     {
       "monster_index": 136,
+      "accuracy": 16,
       "name": "WhiteSerpent",
       "image": 114,
       "ai": 0,
@@ -4359,6 +4495,7 @@
     },
     {
       "monster_index": 137,
+      "accuracy": 20,
       "name": "Ghoul10",
       "image": 74,
       "ai": 0,
@@ -4391,6 +4528,7 @@
     },
     {
       "monster_index": 138,
+      "accuracy": 16,
       "name": "BlueViper",
       "image": 115,
       "ai": 0,
@@ -4423,6 +4561,7 @@
     },
     {
       "monster_index": 139,
+      "accuracy": 16,
       "name": "BlueViper0",
       "image": 115,
       "ai": 0,
@@ -4455,6 +4594,7 @@
     },
     {
       "monster_index": 140,
+      "accuracy": 16,
       "name": "YellowViper",
       "image": 116,
       "ai": 0,
@@ -4487,6 +4627,7 @@
     },
     {
       "monster_index": 141,
+      "accuracy": 16,
       "name": "YellowViper0",
       "image": 116,
       "ai": 0,
@@ -4519,6 +4660,7 @@
     },
     {
       "monster_index": 142,
+      "accuracy": 16,
       "name": "GuardianViper",
       "image": 114,
       "ai": 0,
@@ -4551,6 +4693,7 @@
     },
     {
       "monster_index": 143,
+      "accuracy": 25,
       "name": "Yimoogi",
       "image": 113,
       "ai": 36,
@@ -4583,6 +4726,7 @@
     },
     {
       "monster_index": 144,
+      "accuracy": 1,
       "name": "TreasureBox",
       "image": 164,
       "ai": 3,
@@ -4615,6 +4759,7 @@
     },
     {
       "monster_index": 145,
+      "accuracy": 15,
       "name": "EliteArcher",
       "image": 64,
       "ai": 8,
@@ -4647,6 +4792,7 @@
     },
     {
       "monster_index": 146,
+      "accuracy": 17,
       "name": "EliteStatue",
       "image": 65,
       "ai": 15,
@@ -4679,6 +4825,7 @@
     },
     {
       "monster_index": 147,
+      "accuracy": 17,
       "name": "EliteGuardian",
       "image": 66,
       "ai": 15,
@@ -4711,6 +4858,7 @@
     },
     {
       "monster_index": 148,
+      "accuracy": 17,
       "name": "EvilSpider",
       "image": 61,
       "ai": 0,
@@ -4743,6 +4891,7 @@
     },
     {
       "monster_index": 149,
+      "accuracy": 15,
       "name": "EvilHog",
       "image": 76,
       "ai": 0,
@@ -4775,6 +4924,7 @@
     },
     {
       "monster_index": 150,
+      "accuracy": 13,
       "name": "BlackMaggot",
       "image": 38,
       "ai": 0,
@@ -4807,6 +4957,7 @@
     },
     {
       "monster_index": 151,
+      "accuracy": 13,
       "name": "BlackMaggot0",
       "image": 38,
       "ai": 0,
@@ -4839,6 +4990,7 @@
     },
     {
       "monster_index": 152,
+      "accuracy": 13,
       "name": "Centipede",
       "image": 37,
       "ai": 0,
@@ -4871,6 +5023,7 @@
     },
     {
       "monster_index": 153,
+      "accuracy": 13,
       "name": "Centipede0",
       "image": 37,
       "ai": 0,
@@ -4903,6 +5056,7 @@
     },
     {
       "monster_index": 154,
+      "accuracy": 13,
       "name": "GiantWorm",
       "image": 36,
       "ai": 0,
@@ -4935,6 +5089,7 @@
     },
     {
       "monster_index": 155,
+      "accuracy": 13,
       "name": "GiantWorm0",
       "image": 36,
       "ai": 0,
@@ -4967,6 +5122,7 @@
     },
     {
       "monster_index": 156,
+      "accuracy": 13,
       "name": "WhimperingBee",
       "image": 35,
       "ai": 0,
@@ -4999,6 +5155,7 @@
     },
     {
       "monster_index": 157,
+      "accuracy": 13,
       "name": "WhimperingBee0",
       "image": 35,
       "ai": 0,
@@ -5031,6 +5188,7 @@
     },
     {
       "monster_index": 158,
+      "accuracy": 13,
       "name": "Tongs",
       "image": 39,
       "ai": 0,
@@ -5063,6 +5221,7 @@
     },
     {
       "monster_index": 159,
+      "accuracy": 13,
       "name": "Tongs0",
       "image": 39,
       "ai": 0,
@@ -5095,6 +5254,7 @@
     },
     {
       "monster_index": 160,
+      "accuracy": 17,
       "name": "EvilTongs",
       "image": 40,
       "ai": 0,
@@ -5127,6 +5287,7 @@
     },
     {
       "monster_index": 161,
+      "accuracy": 20,
       "name": "EvilTongs1",
       "image": 40,
       "ai": 0,
@@ -5159,6 +5320,7 @@
     },
     {
       "monster_index": 162,
+      "accuracy": 20,
       "name": "EvilTongs2",
       "image": 40,
       "ai": 0,
@@ -5191,6 +5353,7 @@
     },
     {
       "monster_index": 163,
+      "accuracy": 17,
       "name": "EvilTongs9",
       "image": 40,
       "ai": 0,
@@ -5223,6 +5386,7 @@
     },
     {
       "monster_index": 164,
+      "accuracy": 50,
       "name": "EvilCentipede",
       "image": 41,
       "ai": 14,
@@ -5255,6 +5419,7 @@
     },
     {
       "monster_index": 165,
+      "accuracy": 15,
       "name": "WedgeMoth",
       "image": 44,
       "ai": 7,
@@ -5287,6 +5452,7 @@
     },
     {
       "monster_index": 166,
+      "accuracy": 19,
       "name": "BugBat",
       "image": 42,
       "ai": 0,
@@ -5319,6 +5485,7 @@
     },
     {
       "monster_index": 167,
+      "accuracy": 18,
       "name": "BugBatMaggot",
       "image": 43,
       "ai": 12,
@@ -5351,6 +5518,7 @@
     },
     {
       "monster_index": 168,
+      "accuracy": 13,
       "name": "RedBoar",
       "image": 45,
       "ai": 0,
@@ -5383,6 +5551,7 @@
     },
     {
       "monster_index": 169,
+      "accuracy": 13,
       "name": "RedBoar0",
       "image": 45,
       "ai": 0,
@@ -5415,6 +5584,7 @@
     },
     {
       "monster_index": 170,
+      "accuracy": 15,
       "name": "RedBoar3",
       "image": 45,
       "ai": 0,
@@ -5447,6 +5617,7 @@
     },
     {
       "monster_index": 171,
+      "accuracy": 13,
       "name": "BlackBoar",
       "image": 46,
       "ai": 0,
@@ -5479,6 +5650,7 @@
     },
     {
       "monster_index": 172,
+      "accuracy": 13,
       "name": "BlackBoar0",
       "image": 46,
       "ai": 0,
@@ -5511,6 +5683,7 @@
     },
     {
       "monster_index": 173,
+      "accuracy": 15,
       "name": "BlackBoar3",
       "image": 46,
       "ai": 0,
@@ -5543,6 +5716,7 @@
     },
     {
       "monster_index": 174,
+      "accuracy": 17,
       "name": "WhiteBoar",
       "image": 48,
       "ai": 0,
@@ -5575,6 +5749,7 @@
     },
     {
       "monster_index": 175,
+      "accuracy": 17,
       "name": "WhiteBoar0",
       "image": 48,
       "ai": 0,
@@ -5607,6 +5782,7 @@
     },
     {
       "monster_index": 176,
+      "accuracy": 20,
       "name": "WhiteBoar1",
       "image": 48,
       "ai": 0,
@@ -5639,6 +5815,7 @@
     },
     {
       "monster_index": 177,
+      "accuracy": 13,
       "name": "SnakeScorpion",
       "image": 47,
       "ai": 0,
@@ -5671,6 +5848,7 @@
     },
     {
       "monster_index": 178,
+      "accuracy": 13,
       "name": "SnakeScorpion0",
       "image": 47,
       "ai": 0,
@@ -5703,6 +5881,7 @@
     },
     {
       "monster_index": 179,
+      "accuracy": 13,
       "name": "SnakeScorpion3",
       "image": 47,
       "ai": 0,
@@ -5735,6 +5914,7 @@
     },
     {
       "monster_index": 180,
+      "accuracy": 20,
       "name": "EvilSnake",
       "image": 49,
       "ai": 0,
@@ -5767,6 +5947,7 @@
     },
     {
       "monster_index": 181,
+      "accuracy": 20,
       "name": "EvilSnake1",
       "image": 49,
       "ai": 0,
@@ -5799,6 +5980,7 @@
     },
     {
       "monster_index": 182,
+      "accuracy": 13,
       "name": "Ancient_BlackMaggot",
       "image": 38,
       "ai": 0,
@@ -5831,6 +6013,7 @@
     },
     {
       "monster_index": 183,
+      "accuracy": 13,
       "name": "Ancient_BlackMaggot0",
       "image": 38,
       "ai": 0,
@@ -5863,6 +6046,7 @@
     },
     {
       "monster_index": 184,
+      "accuracy": 13,
       "name": "Ancient_SnakeScorpion",
       "image": 47,
       "ai": 0,
@@ -5895,6 +6079,7 @@
     },
     {
       "monster_index": 185,
+      "accuracy": 13,
       "name": "Ancient_SnakeScorpion0",
       "image": 47,
       "ai": 0,
@@ -5927,6 +6112,7 @@
     },
     {
       "monster_index": 186,
+      "accuracy": 13,
       "name": "Ancient_RedBoar",
       "image": 45,
       "ai": 0,
@@ -5959,6 +6145,7 @@
     },
     {
       "monster_index": 187,
+      "accuracy": 13,
       "name": "Ancient_RedBoar0",
       "image": 45,
       "ai": 0,
@@ -5991,6 +6178,7 @@
     },
     {
       "monster_index": 188,
+      "accuracy": 13,
       "name": "Ancient_BlackBoar",
       "image": 46,
       "ai": 0,
@@ -6023,6 +6211,7 @@
     },
     {
       "monster_index": 189,
+      "accuracy": 13,
       "name": "Ancient_BlackBoar0",
       "image": 46,
       "ai": 0,
@@ -6055,6 +6244,7 @@
     },
     {
       "monster_index": 190,
+      "accuracy": 17,
       "name": "Ancient_WhiteBoar",
       "image": 48,
       "ai": 0,
@@ -6087,6 +6277,7 @@
     },
     {
       "monster_index": 191,
+      "accuracy": 17,
       "name": "Ancient_KingHog",
       "image": 76,
       "ai": 0,
@@ -6119,6 +6310,7 @@
     },
     {
       "monster_index": 192,
+      "accuracy": 15,
       "name": "GiantRat",
       "image": 63,
       "ai": 0,
@@ -6151,6 +6343,7 @@
     },
     {
       "monster_index": 193,
+      "accuracy": 15,
       "name": "GiantRat0",
       "image": 63,
       "ai": 0,
@@ -6183,6 +6376,7 @@
     },
     {
       "monster_index": 194,
+      "accuracy": 17,
       "name": "ZumaArcher",
       "image": 64,
       "ai": 8,
@@ -6215,6 +6409,7 @@
     },
     {
       "monster_index": 195,
+      "accuracy": 17,
       "name": "ZumaArcher0",
       "image": 64,
       "ai": 8,
@@ -6247,6 +6442,7 @@
     },
     {
       "monster_index": 196,
+      "accuracy": 17,
       "name": "ZumaArcher3",
       "image": 64,
       "ai": 8,
@@ -6279,6 +6475,7 @@
     },
     {
       "monster_index": 197,
+      "accuracy": 17,
       "name": "ZumaStatue",
       "image": 65,
       "ai": 15,
@@ -6311,6 +6508,7 @@
     },
     {
       "monster_index": 198,
+      "accuracy": 17,
       "name": "ZumaStatue0",
       "image": 65,
       "ai": 15,
@@ -6343,6 +6541,7 @@
     },
     {
       "monster_index": 199,
+      "accuracy": 17,
       "name": "ZumaStatue3",
       "image": 65,
       "ai": 15,
@@ -6375,6 +6574,7 @@
     },
     {
       "monster_index": 200,
+      "accuracy": 17,
       "name": "ZumaGuardian",
       "image": 66,
       "ai": 15,
@@ -6407,6 +6607,7 @@
     },
     {
       "monster_index": 201,
+      "accuracy": 17,
       "name": "ZumaGuardian0",
       "image": 66,
       "ai": 15,
@@ -6439,6 +6640,7 @@
     },
     {
       "monster_index": 202,
+      "accuracy": 17,
       "name": "ZumaGuardian3",
       "image": 66,
       "ai": 15,
@@ -6471,6 +6673,7 @@
     },
     {
       "monster_index": 203,
+      "accuracy": 25,
       "name": "ZumaGuardian00",
       "image": 66,
       "ai": 15,
@@ -6503,6 +6706,7 @@
     },
     {
       "monster_index": 204,
+      "accuracy": 25,
       "name": "RedThunderZuma",
       "image": 67,
       "ai": 16,
@@ -6535,6 +6739,7 @@
     },
     {
       "monster_index": 205,
+      "accuracy": 30,
       "name": "ZumaTaurus",
       "image": 68,
       "ai": 17,
@@ -6567,6 +6772,7 @@
     },
     {
       "monster_index": 206,
+      "accuracy": 100,
       "name": "ZumaTaurus9",
       "image": 68,
       "ai": 17,
@@ -6599,6 +6805,7 @@
     },
     {
       "monster_index": 207,
+      "accuracy": 15,
       "name": "Ancient_GiantRat",
       "image": 63,
       "ai": 0,
@@ -6631,6 +6838,7 @@
     },
     {
       "monster_index": 208,
+      "accuracy": 15,
       "name": "Ancient_GiantRat0",
       "image": 63,
       "ai": 0,
@@ -6663,6 +6871,7 @@
     },
     {
       "monster_index": 209,
+      "accuracy": 15,
       "name": "Ancient_ZumaArcher",
       "image": 64,
       "ai": 8,
@@ -6695,6 +6904,7 @@
     },
     {
       "monster_index": 210,
+      "accuracy": 15,
       "name": "Ancient_ZumaArcher0",
       "image": 64,
       "ai": 8,
@@ -6727,6 +6937,7 @@
     },
     {
       "monster_index": 211,
+      "accuracy": 15,
       "name": "Ancient_ZumaStatue",
       "image": 65,
       "ai": 15,
@@ -6759,6 +6970,7 @@
     },
     {
       "monster_index": 212,
+      "accuracy": 15,
       "name": "Ancient_ZumaStatue0",
       "image": 65,
       "ai": 15,
@@ -6791,6 +7003,7 @@
     },
     {
       "monster_index": 213,
+      "accuracy": 15,
       "name": "Ancient_ZumaGuardian",
       "image": 66,
       "ai": 15,
@@ -6823,6 +7036,7 @@
     },
     {
       "monster_index": 214,
+      "accuracy": 15,
       "name": "Ancient_ZumaGuardian0",
       "image": 66,
       "ai": 15,
@@ -6855,6 +7069,7 @@
     },
     {
       "monster_index": 215,
+      "accuracy": 15,
       "name": "Ancient_RedThunderZuma",
       "image": 67,
       "ai": 16,
@@ -6887,6 +7102,7 @@
     },
     {
       "monster_index": 216,
+      "accuracy": 16,
       "name": "RedFoxMan",
       "image": 128,
       "ai": 45,
@@ -6919,6 +7135,7 @@
     },
     {
       "monster_index": 217,
+      "accuracy": 5,
       "name": "BlackFoxMan",
       "image": 127,
       "ai": 44,
@@ -6951,6 +7168,7 @@
     },
     {
       "monster_index": 218,
+      "accuracy": 16,
       "name": "WhiteFoxMan",
       "image": 129,
       "ai": 46,
@@ -6983,6 +7201,7 @@
     },
     {
       "monster_index": 219,
+      "accuracy": 17,
       "name": "TrapRock",
       "image": 130,
       "ai": 47,
@@ -7015,6 +7234,7 @@
     },
     {
       "monster_index": 220,
+      "accuracy": 17,
       "name": "TrapRock1",
       "image": 130,
       "ai": 47,
@@ -7047,6 +7267,7 @@
     },
     {
       "monster_index": 221,
+      "accuracy": 17,
       "name": "GuardianRock",
       "image": 131,
       "ai": 48,
@@ -7079,6 +7300,7 @@
     },
     {
       "monster_index": 222,
+      "accuracy": 13,
       "name": "ElectricElement",
       "image": 132,
       "ai": 49,
@@ -7111,6 +7333,7 @@
     },
     {
       "monster_index": 223,
+      "accuracy": 18,
       "name": "CloudElement",
       "image": 133,
       "ai": 49,
@@ -7143,6 +7366,7 @@
     },
     {
       "monster_index": 224,
+      "accuracy": 16,
       "name": "HedgeKekTal",
       "image": 135,
       "ai": 51,
@@ -7175,6 +7399,7 @@
     },
     {
       "monster_index": 225,
+      "accuracy": 16,
       "name": "BigHedgeKekTal",
       "image": 136,
       "ai": 51,
@@ -7207,6 +7432,7 @@
     },
     {
       "monster_index": 226,
+      "accuracy": 16,
       "name": "BrownFrogSpider",
       "image": 138,
       "ai": 0,
@@ -7239,6 +7465,7 @@
     },
     {
       "monster_index": 227,
+      "accuracy": 16,
       "name": "RedFrogSpider",
       "image": 137,
       "ai": 0,
@@ -7271,6 +7498,7 @@
     },
     {
       "monster_index": 228,
+      "accuracy": 16,
       "name": "GreatFoxSpirit",
       "image": 134,
       "ai": 50,
@@ -7303,6 +7531,7 @@
     },
     {
       "monster_index": 229,
+      "accuracy": 13,
       "name": "SpiderFrog",
       "image": 81,
       "ai": 0,
@@ -7335,6 +7564,7 @@
     },
     {
       "monster_index": 230,
+      "accuracy": 13,
       "name": "SpiderFrog0",
       "image": 81,
       "ai": 0,
@@ -7367,6 +7597,7 @@
     },
     {
       "monster_index": 231,
+      "accuracy": 13,
       "name": "HoroBlaster",
       "image": 82,
       "ai": 0,
@@ -7399,6 +7630,7 @@
     },
     {
       "monster_index": 232,
+      "accuracy": 13,
       "name": "HoroBlaster0",
       "image": 82,
       "ai": 0,
@@ -7431,6 +7663,7 @@
     },
     {
       "monster_index": 233,
+      "accuracy": 13,
       "name": "BlueHoroBlaster",
       "image": 83,
       "ai": 0,
@@ -7463,6 +7696,7 @@
     },
     {
       "monster_index": 234,
+      "accuracy": 13,
       "name": "BlueHoroBlaster0",
       "image": 83,
       "ai": 0,
@@ -7495,6 +7729,7 @@
     },
     {
       "monster_index": 235,
+      "accuracy": 13,
       "name": "KekTal",
       "image": 84,
       "ai": 0,
@@ -7527,6 +7762,7 @@
     },
     {
       "monster_index": 236,
+      "accuracy": 13,
       "name": "KekTal0",
       "image": 84,
       "ai": 0,
@@ -7559,6 +7795,7 @@
     },
     {
       "monster_index": 237,
+      "accuracy": 13,
       "name": "VioletKekTal",
       "image": 85,
       "ai": 0,
@@ -7591,6 +7828,7 @@
     },
     {
       "monster_index": 238,
+      "accuracy": 13,
       "name": "VioletKekTal0",
       "image": 85,
       "ai": 0,
@@ -7623,6 +7861,7 @@
     },
     {
       "monster_index": 239,
+      "accuracy": 15,
       "name": "Khazard",
       "image": 86,
       "ai": 27,
@@ -7655,6 +7894,7 @@
     },
     {
       "monster_index": 240,
+      "accuracy": 15,
       "name": "Dark",
       "image": 28,
       "ai": 8,
@@ -7687,6 +7927,7 @@
     },
     {
       "monster_index": 241,
+      "accuracy": 15,
       "name": "Dark0",
       "image": 28,
       "ai": 8,
@@ -7719,6 +7960,7 @@
     },
     {
       "monster_index": 242,
+      "accuracy": 12,
       "name": "Dung",
       "image": 27,
       "ai": 7,
@@ -7751,6 +7993,7 @@
     },
     {
       "monster_index": 243,
+      "accuracy": 12,
       "name": "Dung0",
       "image": 27,
       "ai": 7,
@@ -7783,6 +8026,7 @@
     },
     {
       "monster_index": 244,
+      "accuracy": 13,
       "name": "WoomaSoldier",
       "image": 29,
       "ai": 0,
@@ -7815,6 +8059,7 @@
     },
     {
       "monster_index": 245,
+      "accuracy": 13,
       "name": "WoomaSoldier0",
       "image": 29,
       "ai": 0,
@@ -7847,6 +8092,7 @@
     },
     {
       "monster_index": 246,
+      "accuracy": 13,
       "name": "WoomaFighter",
       "image": 30,
       "ai": 0,
@@ -7879,6 +8125,7 @@
     },
     {
       "monster_index": 247,
+      "accuracy": 13,
       "name": "WoomaFighter0",
       "image": 30,
       "ai": 0,
@@ -7911,6 +8158,7 @@
     },
     {
       "monster_index": 248,
+      "accuracy": 13,
       "name": "WoomaWarrior",
       "image": 31,
       "ai": 0,
@@ -7943,6 +8191,7 @@
     },
     {
       "monster_index": 249,
+      "accuracy": 13,
       "name": "WoomaWarrior0",
       "image": 31,
       "ai": 0,
@@ -7975,6 +8224,7 @@
     },
     {
       "monster_index": 250,
+      "accuracy": 20,
       "name": "FlamingWooma",
       "image": 32,
       "ai": 10,
@@ -8007,6 +8257,7 @@
     },
     {
       "monster_index": 251,
+      "accuracy": 20,
       "name": "FlamingWooma0",
       "image": 32,
       "ai": 10,
@@ -8039,6 +8290,7 @@
     },
     {
       "monster_index": 252,
+      "accuracy": 20,
       "name": "FlamingWooma2",
       "image": 32,
       "ai": 10,
@@ -8071,6 +8323,7 @@
     },
     {
       "monster_index": 253,
+      "accuracy": 17,
       "name": "WoomaGuardian",
       "image": 33,
       "ai": 0,
@@ -8103,6 +8356,7 @@
     },
     {
       "monster_index": 254,
+      "accuracy": 20,
       "name": "WoomaGuardian1",
       "image": 33,
       "ai": 0,
@@ -8135,6 +8389,7 @@
     },
     {
       "monster_index": 255,
+      "accuracy": 17,
       "name": "WoomaGuardian2",
       "image": 33,
       "ai": 0,
@@ -8167,6 +8422,7 @@
     },
     {
       "monster_index": 256,
+      "accuracy": 20,
       "name": "WoomaTaurus",
       "image": 34,
       "ai": 11,
@@ -8199,6 +8455,7 @@
     },
     {
       "monster_index": 257,
+      "accuracy": 20,
       "name": "WoomaTaurus1",
       "image": 34,
       "ai": 11,
@@ -8231,6 +8488,7 @@
     },
     {
       "monster_index": 258,
+      "accuracy": 20,
       "name": "WoomaTaurus9",
       "image": 34,
       "ai": 11,
@@ -8263,6 +8521,7 @@
     },
     {
       "monster_index": 259,
+      "accuracy": 13,
       "name": "Ancient_WoomaSoldier",
       "image": 29,
       "ai": 0,
@@ -8295,6 +8554,7 @@
     },
     {
       "monster_index": 260,
+      "accuracy": 13,
       "name": "Ancient_WoomaFighter",
       "image": 30,
       "ai": 0,
@@ -8327,6 +8587,7 @@
     },
     {
       "monster_index": 261,
+      "accuracy": 13,
       "name": "Ancient_WoomaWarrior",
       "image": 31,
       "ai": 0,
@@ -8359,6 +8620,7 @@
     },
     {
       "monster_index": 262,
+      "accuracy": 20,
       "name": "Ancient_FlamingWooma",
       "image": 32,
       "ai": 10,
@@ -8391,6 +8653,7 @@
     },
     {
       "monster_index": 263,
+      "accuracy": 17,
       "name": "Ancient_WoomaGuardian",
       "image": 33,
       "ai": 0,
@@ -8423,6 +8686,7 @@
     },
     {
       "monster_index": 264,
+      "accuracy": 30,
       "name": "Ancient_WoomaTaurus",
       "image": 34,
       "ai": 11,
@@ -8455,6 +8719,7 @@
     },
     {
       "monster_index": 265,
+      "accuracy": 17,
       "name": "EvilTongs20",
       "image": 40,
       "ai": 0,
@@ -8487,6 +8752,7 @@
     },
     {
       "monster_index": 266,
+      "accuracy": 15,
       "name": "EvilTongs21",
       "image": 40,
       "ai": 0,
@@ -8519,6 +8785,7 @@
     },
     {
       "monster_index": 267,
+      "accuracy": 17,
       "name": "EvilSnake20",
       "image": 49,
       "ai": 0,
@@ -8551,6 +8818,7 @@
     },
     {
       "monster_index": 268,
+      "accuracy": 15,
       "name": "EvilSnake21",
       "image": 49,
       "ai": 0,
@@ -8583,6 +8851,7 @@
     },
     {
       "monster_index": 269,
+      "accuracy": 17,
       "name": "Ghoul20",
       "image": 74,
       "ai": 0,
@@ -8615,6 +8884,7 @@
     },
     {
       "monster_index": 270,
+      "accuracy": 17,
       "name": "Ghoul21",
       "image": 74,
       "ai": 0,
@@ -8647,6 +8917,7 @@
     },
     {
       "monster_index": 271,
+      "accuracy": 19,
       "name": "ZumaArcher20",
       "image": 64,
       "ai": 8,
@@ -8679,6 +8950,7 @@
     },
     {
       "monster_index": 272,
+      "accuracy": 19,
       "name": "ZumaArcher21",
       "image": 64,
       "ai": 8,
@@ -8711,6 +8983,7 @@
     },
     {
       "monster_index": 273,
+      "accuracy": 19,
       "name": "ZumaStatue20",
       "image": 65,
       "ai": 15,
@@ -8743,6 +9016,7 @@
     },
     {
       "monster_index": 274,
+      "accuracy": 19,
       "name": "ZumaStatue21",
       "image": 65,
       "ai": 15,
@@ -8775,6 +9049,7 @@
     },
     {
       "monster_index": 275,
+      "accuracy": 16,
       "name": "ZumaGuardian20",
       "image": 66,
       "ai": 15,
@@ -8807,6 +9082,7 @@
     },
     {
       "monster_index": 276,
+      "accuracy": 16,
       "name": "ZumaGuardian21",
       "image": 66,
       "ai": 15,
@@ -8839,6 +9115,7 @@
     },
     {
       "monster_index": 277,
+      "accuracy": 17,
       "name": "WhiteBoar20",
       "image": 48,
       "ai": 0,
@@ -8871,6 +9148,7 @@
     },
     {
       "monster_index": 278,
+      "accuracy": 20,
       "name": "WhiteBoar21",
       "image": 48,
       "ai": 0,
@@ -8903,6 +9181,7 @@
     },
     {
       "monster_index": 279,
+      "accuracy": 17,
       "name": "WoomaGuardian5",
       "image": 33,
       "ai": 0,
@@ -8935,6 +9214,7 @@
     },
     {
       "monster_index": 280,
+      "accuracy": 20,
       "name": "WoomaGuardian6",
       "image": 33,
       "ai": 0,
@@ -8967,6 +9247,7 @@
     },
     {
       "monster_index": 281,
+      "accuracy": 25,
       "name": "KingScorpion",
       "image": 75,
       "ai": 19,
@@ -8999,6 +9280,7 @@
     },
     {
       "monster_index": 282,
+      "accuracy": 25,
       "name": "KingHog",
       "image": 76,
       "ai": 0,
@@ -9031,6 +9313,7 @@
     },
     {
       "monster_index": 283,
+      "accuracy": 25,
       "name": "IncarnatedWT",
       "image": 34,
       "ai": 11,
@@ -9063,6 +9346,7 @@
     },
     {
       "monster_index": 284,
+      "accuracy": 20,
       "name": "IncarnatedZT",
       "image": 68,
       "ai": 22,
@@ -9095,6 +9379,7 @@
     },
     {
       "monster_index": 285,
+      "accuracy": 28,
       "name": "DarkDevil",
       "image": 77,
       "ai": 20,
@@ -9127,6 +9412,7 @@
     },
     {
       "monster_index": 286,
+      "accuracy": 15,
       "name": "BloodPriest",
       "image": 69,
       "ai": 24,
@@ -9159,6 +9445,7 @@
     },
     {
       "monster_index": 287,
+      "accuracy": 15,
       "name": "BloodPriest0",
       "image": 69,
       "ai": 24,
@@ -9191,6 +9478,7 @@
     },
     {
       "monster_index": 288,
+      "accuracy": 13,
       "name": "CursedShaman",
       "image": 73,
       "ai": 26,
@@ -9223,6 +9511,7 @@
     },
     {
       "monster_index": 289,
+      "accuracy": 13,
       "name": "CursedShaman0",
       "image": 73,
       "ai": 26,
@@ -9255,6 +9544,7 @@
     },
     {
       "monster_index": 290,
+      "accuracy": 17,
       "name": "CursedPriest",
       "image": 69,
       "ai": 24,
@@ -9287,6 +9577,7 @@
     },
     {
       "monster_index": 291,
+      "accuracy": 17,
       "name": "CursedPriest0",
       "image": 69,
       "ai": 24,
@@ -9319,6 +9610,7 @@
     },
     {
       "monster_index": 292,
+      "accuracy": 12,
       "name": "CursedZombie",
       "image": 70,
       "ai": 0,
@@ -9351,6 +9643,7 @@
     },
     {
       "monster_index": 293,
+      "accuracy": 12,
       "name": "CursedZombie0",
       "image": 70,
       "ai": 0,
@@ -9383,6 +9676,7 @@
     },
     {
       "monster_index": 294,
+      "accuracy": 12,
       "name": "HungryZombie",
       "image": 71,
       "ai": 0,
@@ -9415,6 +9709,7 @@
     },
     {
       "monster_index": 295,
+      "accuracy": 12,
       "name": "HungryZombie0",
       "image": 71,
       "ai": 0,
@@ -9447,6 +9742,7 @@
     },
     {
       "monster_index": 296,
+      "accuracy": 12,
       "name": "ShiZombie",
       "image": 70,
       "ai": 0,
@@ -9479,6 +9775,7 @@
     },
     {
       "monster_index": 297,
+      "accuracy": 12,
       "name": "ShiZombie0",
       "image": 70,
       "ai": 0,
@@ -9511,6 +9808,7 @@
     },
     {
       "monster_index": 298,
+      "accuracy": 14,
       "name": "ToxicZombie",
       "image": 71,
       "ai": 0,
@@ -9543,6 +9841,7 @@
     },
     {
       "monster_index": 299,
+      "accuracy": 14,
       "name": "ToxicZombie0",
       "image": 71,
       "ai": 0,
@@ -9575,6 +9874,7 @@
     },
     {
       "monster_index": 300,
+      "accuracy": 15,
       "name": "GreatGhoul",
       "image": 74,
       "ai": 0,
@@ -9607,6 +9907,7 @@
     },
     {
       "monster_index": 301,
+      "accuracy": 30,
       "name": "BombSpider",
       "image": 50,
       "ai": 40,
@@ -9639,6 +9940,7 @@
     },
     {
       "monster_index": 302,
+      "accuracy": 1,
       "name": "RootSpider",
       "image": 51,
       "ai": 39,
@@ -9671,6 +9973,7 @@
     },
     {
       "monster_index": 303,
+      "accuracy": 15,
       "name": "SpiderBat",
       "image": 52,
       "ai": 7,
@@ -9703,6 +10006,7 @@
     },
     {
       "monster_index": 304,
+      "accuracy": 17,
       "name": "VenomSpider",
       "image": 53,
       "ai": 4,
@@ -9735,6 +10039,7 @@
     },
     {
       "monster_index": 305,
+      "accuracy": 17,
       "name": "VenomSpider0",
       "image": 53,
       "ai": 4,
@@ -9767,6 +10072,7 @@
     },
     {
       "monster_index": 306,
+      "accuracy": 17,
       "name": "VenomSpider3",
       "image": 53,
       "ai": 4,
@@ -9799,6 +10105,7 @@
     },
     {
       "monster_index": 307,
+      "accuracy": 16,
       "name": "GangSpider",
       "image": 54,
       "ai": 0,
@@ -9831,6 +10138,7 @@
     },
     {
       "monster_index": 308,
+      "accuracy": 16,
       "name": "GangSpider0",
       "image": 54,
       "ai": 0,
@@ -9863,6 +10171,7 @@
     },
     {
       "monster_index": 309,
+      "accuracy": 16,
       "name": "GangSpider3",
       "image": 54,
       "ai": 0,
@@ -9895,6 +10204,7 @@
     },
     {
       "monster_index": 310,
+      "accuracy": 16,
       "name": "GreatSpider",
       "image": 55,
       "ai": 0,
@@ -9927,6 +10237,7 @@
     },
     {
       "monster_index": 311,
+      "accuracy": 16,
       "name": "GreatSpider0",
       "image": 55,
       "ai": 0,
@@ -9959,6 +10270,7 @@
     },
     {
       "monster_index": 312,
+      "accuracy": 16,
       "name": "GreatSpider3",
       "image": 55,
       "ai": 0,
@@ -9991,6 +10303,7 @@
     },
     {
       "monster_index": 313,
+      "accuracy": 18,
       "name": "LureSpider",
       "image": 56,
       "ai": 4,
@@ -10023,6 +10336,7 @@
     },
     {
       "monster_index": 314,
+      "accuracy": 18,
       "name": "LureSpider0",
       "image": 56,
       "ai": 4,
@@ -10055,6 +10369,7 @@
     },
     {
       "monster_index": 315,
+      "accuracy": 18,
       "name": "LureSpider3",
       "image": 56,
       "ai": 4,
@@ -10087,6 +10402,7 @@
     },
     {
       "monster_index": 316,
+      "accuracy": 17,
       "name": "BigApe",
       "image": 57,
       "ai": 0,
@@ -10119,6 +10435,7 @@
     },
     {
       "monster_index": 317,
+      "accuracy": 17,
       "name": "BigApe0",
       "image": 57,
       "ai": 0,
@@ -10151,6 +10468,7 @@
     },
     {
       "monster_index": 318,
+      "accuracy": 17,
       "name": "BigApe3",
       "image": 57,
       "ai": 0,
@@ -10183,6 +10501,7 @@
     },
     {
       "monster_index": 319,
+      "accuracy": 17,
       "name": "EvilApe",
       "image": 58,
       "ai": 0,
@@ -10215,6 +10534,7 @@
     },
     {
       "monster_index": 320,
+      "accuracy": 17,
       "name": "EvilApe0",
       "image": 58,
       "ai": 0,
@@ -10247,6 +10567,7 @@
     },
     {
       "monster_index": 321,
+      "accuracy": 25,
       "name": "GreyEvilApe",
       "image": 59,
       "ai": 0,
@@ -10279,6 +10600,7 @@
     },
     {
       "monster_index": 322,
+      "accuracy": 12,
       "name": "RedEvilApe",
       "image": 60,
       "ai": 0,
@@ -10311,6 +10633,7 @@
     },
     {
       "monster_index": 323,
+      "accuracy": 15,
       "name": "CrystalSpider",
       "image": 61,
       "ai": 37,
@@ -10343,6 +10666,7 @@
     },
     {
       "monster_index": 324,
+      "accuracy": 23,
       "name": "RedMoonEvil",
       "image": 62,
       "ai": 13,
@@ -10375,6 +10699,7 @@
     },
     {
       "monster_index": 325,
+      "accuracy": 25,
       "name": "RedMoonEvil1",
       "image": 62,
       "ai": 13,
@@ -10407,6 +10732,7 @@
     },
     {
       "monster_index": 326,
+      "accuracy": 17,
       "name": "EvilApeSobo",
       "image": 58,
       "ai": 0,
@@ -10439,6 +10765,7 @@
     },
     {
       "monster_index": 327,
+      "accuracy": 17,
       "name": "EvilBigApe",
       "image": 58,
       "ai": 0,
@@ -10471,6 +10798,7 @@
     },
     {
       "monster_index": 328,
+      "accuracy": 20,
       "name": "ValeBat",
       "image": 203,
       "ai": 0,
@@ -10503,6 +10831,7 @@
     },
     {
       "monster_index": 329,
+      "accuracy": 20,
       "name": "ValeBat2",
       "image": 203,
       "ai": 0,
@@ -10535,6 +10864,7 @@
     },
     {
       "monster_index": 330,
+      "accuracy": 20,
       "name": "Weaver",
       "image": 204,
       "ai": 0,
@@ -10567,6 +10897,7 @@
     },
     {
       "monster_index": 331,
+      "accuracy": 20,
       "name": "VenomWeaver",
       "image": 205,
       "ai": 0,
@@ -10599,6 +10930,7 @@
     },
     {
       "monster_index": 332,
+      "accuracy": 20,
       "name": "CrackingWeaver",
       "image": 206,
       "ai": 0,
@@ -10631,6 +10963,7 @@
     },
     {
       "monster_index": 333,
+      "accuracy": 20,
       "name": "ArmingWeaver",
       "image": 207,
       "ai": 0,
@@ -10663,6 +10996,7 @@
     },
     {
       "monster_index": 334,
+      "accuracy": 20,
       "name": "CrystalWeaver",
       "image": 208,
       "ai": 0,
@@ -10695,6 +11029,7 @@
     },
     {
       "monster_index": 335,
+      "accuracy": 20,
       "name": "GreaterWeaver",
       "image": 212,
       "ai": 0,
@@ -10727,6 +11062,7 @@
     },
     {
       "monster_index": 336,
+      "accuracy": 20,
       "name": "SpiderWarrior",
       "image": 213,
       "ai": 0,
@@ -10759,6 +11095,7 @@
     },
     {
       "monster_index": 337,
+      "accuracy": 20,
       "name": "SpiderBarbarian",
       "image": 214,
       "ai": 0,
@@ -10791,6 +11128,7 @@
     },
     {
       "monster_index": 339,
+      "accuracy": 17,
       "name": "FlyingStatue",
       "image": 202,
       "ai": 0,
@@ -10823,6 +11161,7 @@
     },
     {
       "monster_index": 340,
+      "accuracy": 20,
       "name": "StoningStatue",
       "image": 201,
       "ai": 0,
@@ -10855,6 +11194,7 @@
     },
     {
       "monster_index": 341,
+      "accuracy": 13,
       "name": "ToxicGhoul",
       "image": 88,
       "ai": 28,
@@ -10887,6 +11227,7 @@
     },
     {
       "monster_index": 342,
+      "accuracy": 13,
       "name": "ToxicGhoul0",
       "image": 88,
       "ai": 28,
@@ -10919,6 +11260,7 @@
     },
     {
       "monster_index": 343,
+      "accuracy": 13,
       "name": "RoninGhoul",
       "image": 87,
       "ai": 0,
@@ -10951,6 +11293,7 @@
     },
     {
       "monster_index": 344,
+      "accuracy": 13,
       "name": "RoninGhoul0",
       "image": 87,
       "ai": 0,
@@ -10983,6 +11326,7 @@
     },
     {
       "monster_index": 345,
+      "accuracy": 5,
       "name": "BoneArcher",
       "image": 92,
       "ai": 8,
@@ -11015,6 +11359,7 @@
     },
     {
       "monster_index": 346,
+      "accuracy": 5,
       "name": "BoneArcher0",
       "image": 92,
       "ai": 8,
@@ -11047,6 +11392,7 @@
     },
     {
       "monster_index": 347,
+      "accuracy": 13,
       "name": "BoneBlademan",
       "image": 91,
       "ai": 0,
@@ -11079,6 +11425,7 @@
     },
     {
       "monster_index": 348,
+      "accuracy": 13,
       "name": "BoneBlademan0",
       "image": 91,
       "ai": 0,
@@ -11111,6 +11458,7 @@
     },
     {
       "monster_index": 349,
+      "accuracy": 13,
       "name": "BoneSpearman",
       "image": 90,
       "ai": 29,
@@ -11143,6 +11491,7 @@
     },
     {
       "monster_index": 350,
+      "accuracy": 13,
       "name": "BoneSpearman0",
       "image": 90,
       "ai": 29,
@@ -11175,6 +11524,7 @@
     },
     {
       "monster_index": 351,
+      "accuracy": 15,
       "name": "BoneCaptain",
       "image": 89,
       "ai": 0,
@@ -11207,6 +11557,7 @@
     },
     {
       "monster_index": 352,
+      "accuracy": 15,
       "name": "BoneCaptain0",
       "image": 89,
       "ai": 0,
@@ -11239,6 +11590,7 @@
     },
     {
       "monster_index": 353,
+      "accuracy": 20,
       "name": "BoneLord",
       "image": 93,
       "ai": 30,
@@ -11271,6 +11623,7 @@
     },
     {
       "monster_index": 354,
+      "accuracy": 13,
       "name": "Ancient_ToxicGhoul",
       "image": 88,
       "ai": 28,
@@ -11303,6 +11656,7 @@
     },
     {
       "monster_index": 355,
+      "accuracy": 13,
       "name": "Ancient_RoninGhoul",
       "image": 87,
       "ai": 0,
@@ -11335,6 +11689,7 @@
     },
     {
       "monster_index": 356,
+      "accuracy": 15,
       "name": "Ancient_BoneArcher",
       "image": 92,
       "ai": 8,
@@ -11367,6 +11722,7 @@
     },
     {
       "monster_index": 357,
+      "accuracy": 13,
       "name": "Ancient_BoneBlademan",
       "image": 91,
       "ai": 0,
@@ -11399,6 +11755,7 @@
     },
     {
       "monster_index": 358,
+      "accuracy": 13,
       "name": "Ancient_BoneSpearman",
       "image": 90,
       "ai": 29,
@@ -11431,6 +11788,7 @@
     },
     {
       "monster_index": 359,
+      "accuracy": 15,
       "name": "Ancient_BoneCaptain",
       "image": 89,
       "ai": 0,
@@ -11463,6 +11821,7 @@
     },
     {
       "monster_index": 360,
+      "accuracy": 20,
       "name": "Ancient_BoneLord",
       "image": 93,
       "ai": 30,
@@ -11495,6 +11854,7 @@
     },
     {
       "monster_index": 361,
+      "accuracy": 14,
       "name": "Minotaur",
       "image": 94,
       "ai": 0,
@@ -11527,6 +11887,7 @@
     },
     {
       "monster_index": 362,
+      "accuracy": 14,
       "name": "Minotaur0",
       "image": 94,
       "ai": 0,
@@ -11559,6 +11920,7 @@
     },
     {
       "monster_index": 363,
+      "accuracy": 15,
       "name": "IceMinotaur",
       "image": 95,
       "ai": 0,
@@ -11591,6 +11953,7 @@
     },
     {
       "monster_index": 364,
+      "accuracy": 15,
       "name": "IceMinotaur0",
       "image": 95,
       "ai": 0,
@@ -11623,6 +11986,7 @@
     },
     {
       "monster_index": 365,
+      "accuracy": 15,
       "name": "ElectricMinotaur",
       "image": 96,
       "ai": 0,
@@ -11655,6 +12019,7 @@
     },
     {
       "monster_index": 366,
+      "accuracy": 15,
       "name": "ElectricMinotaur0",
       "image": 96,
       "ai": 0,
@@ -11687,6 +12052,7 @@
     },
     {
       "monster_index": 367,
+      "accuracy": 15,
       "name": "WindMinotaur",
       "image": 97,
       "ai": 0,
@@ -11719,6 +12085,7 @@
     },
     {
       "monster_index": 368,
+      "accuracy": 15,
       "name": "WindMinotaur0",
       "image": 97,
       "ai": 0,
@@ -11751,6 +12118,7 @@
     },
     {
       "monster_index": 369,
+      "accuracy": 15,
       "name": "FireMinotaur",
       "image": 98,
       "ai": 0,
@@ -11783,6 +12151,7 @@
     },
     {
       "monster_index": 370,
+      "accuracy": 15,
       "name": "FireMinotaur0",
       "image": 98,
       "ai": 0,
@@ -11815,6 +12184,7 @@
     },
     {
       "monster_index": 371,
+      "accuracy": 18,
       "name": "RightGuard",
       "image": 99,
       "ai": 31,
@@ -11847,6 +12217,7 @@
     },
     {
       "monster_index": 372,
+      "accuracy": 18,
       "name": "RightGuard0",
       "image": 99,
       "ai": 31,
@@ -11879,6 +12250,7 @@
     },
     {
       "monster_index": 373,
+      "accuracy": 18,
       "name": "LeftGuard",
       "image": 100,
       "ai": 32,
@@ -11911,6 +12283,7 @@
     },
     {
       "monster_index": 374,
+      "accuracy": 18,
       "name": "LeftGuard0",
       "image": 100,
       "ai": 32,
@@ -11943,6 +12316,7 @@
     },
     {
       "monster_index": 375,
+      "accuracy": 22,
       "name": "MinotaurKing",
       "image": 101,
       "ai": 33,
@@ -11975,6 +12349,7 @@
     },
     {
       "monster_index": 376,
+      "accuracy": 15,
       "name": "AxeOma",
       "image": 118,
       "ai": 0,
@@ -12007,6 +12382,7 @@
     },
     {
       "monster_index": 377,
+      "accuracy": 15,
       "name": "AxeOma0",
       "image": 118,
       "ai": 0,
@@ -12039,6 +12415,7 @@
     },
     {
       "monster_index": 378,
+      "accuracy": 18,
       "name": "SwordOma",
       "image": 119,
       "ai": 0,
@@ -12071,6 +12448,7 @@
     },
     {
       "monster_index": 379,
+      "accuracy": 18,
       "name": "SwordOma0",
       "image": 119,
       "ai": 0,
@@ -12103,6 +12481,7 @@
     },
     {
       "monster_index": 380,
+      "accuracy": 15,
       "name": "CrossbowOma",
       "image": 120,
       "ai": 8,
@@ -12135,6 +12514,7 @@
     },
     {
       "monster_index": 381,
+      "accuracy": 15,
       "name": "CrossbowOma0",
       "image": 120,
       "ai": 8,
@@ -12167,6 +12547,7 @@
     },
     {
       "monster_index": 382,
+      "accuracy": 15,
       "name": "WingedOma",
       "image": 121,
       "ai": 0,
@@ -12199,6 +12580,7 @@
     },
     {
       "monster_index": 383,
+      "accuracy": 15,
       "name": "WingedOma0",
       "image": 121,
       "ai": 0,
@@ -12231,6 +12613,7 @@
     },
     {
       "monster_index": 384,
+      "accuracy": 17,
       "name": "FlailOma",
       "image": 122,
       "ai": 0,
@@ -12263,6 +12646,7 @@
     },
     {
       "monster_index": 385,
+      "accuracy": 17,
       "name": "FlailOma0",
       "image": 122,
       "ai": 0,
@@ -12295,6 +12679,7 @@
     },
     {
       "monster_index": 386,
+      "accuracy": 18,
       "name": "OmaGuard",
       "image": 123,
       "ai": 0,
@@ -12327,6 +12712,7 @@
     },
     {
       "monster_index": 387,
+      "accuracy": 18,
       "name": "OmaGuard0",
       "image": 123,
       "ai": 0,
@@ -12359,6 +12745,7 @@
     },
     {
       "monster_index": 388,
+      "accuracy": 15,
       "name": "YinDevilNode",
       "image": 124,
       "ai": 42,
@@ -12391,6 +12778,7 @@
     },
     {
       "monster_index": 389,
+      "accuracy": 15,
       "name": "YangDevilNode",
       "image": 125,
       "ai": 42,
@@ -12423,6 +12811,7 @@
     },
     {
       "monster_index": 390,
+      "accuracy": 20,
       "name": "OmaKing",
       "image": 126,
       "ai": 43,
@@ -12455,6 +12844,7 @@
     },
     {
       "monster_index": 391,
+      "accuracy": 25,
       "name": "OmaKingSpirit",
       "image": 126,
       "ai": 0,
@@ -12487,6 +12877,7 @@
     },
     {
       "monster_index": 392,
+      "accuracy": 25,
       "name": "EvilMir",
       "image": 900,
       "ai": 52,
@@ -12519,6 +12910,7 @@
     },
     {
       "monster_index": 393,
+      "accuracy": 30,
       "name": "00",
       "image": 901,
       "ai": 53,
@@ -12551,6 +12943,7 @@
     },
     {
       "monster_index": 394,
+      "accuracy": 30,
       "name": "MirStatue",
       "image": 902,
       "ai": 54,
@@ -12583,6 +12976,7 @@
     },
     {
       "monster_index": 395,
+      "accuracy": 16,
       "name": "ManectricHammer",
       "image": 221,
       "ai": 0,
@@ -12615,6 +13009,7 @@
     },
     {
       "monster_index": 396,
+      "accuracy": 16,
       "name": "ManectricClub",
       "image": 222,
       "ai": 0,
@@ -12647,6 +13042,7 @@
     },
     {
       "monster_index": 397,
+      "accuracy": 16,
       "name": "ManectricClaw",
       "image": 223,
       "ai": 0,
@@ -12679,6 +13075,7 @@
     },
     {
       "monster_index": 398,
+      "accuracy": 16,
       "name": "ManectricStaff",
       "image": 224,
       "ai": 0,
@@ -12711,6 +13108,7 @@
     },
     {
       "monster_index": 399,
+      "accuracy": 16,
       "name": "ManectricSlave",
       "image": 233,
       "ai": 0,
@@ -12743,6 +13141,7 @@
     },
     {
       "monster_index": 400,
+      "accuracy": 16,
       "name": "Demon1",
       "image": 226,
       "ai": 0,
@@ -12775,6 +13174,7 @@
     },
     {
       "monster_index": 401,
+      "accuracy": 16,
       "name": "Demon2",
       "image": 227,
       "ai": 0,
@@ -12807,6 +13207,7 @@
     },
     {
       "monster_index": 402,
+      "accuracy": 18,
       "name": "ManectricBlest",
       "image": 228,
       "ai": 0,
@@ -12839,6 +13240,7 @@
     },
     {
       "monster_index": 403,
+      "accuracy": 18,
       "name": "ManectricKing",
       "image": 229,
       "ai": 0,
@@ -12871,6 +13273,7 @@
     },
     {
       "monster_index": 404,
+      "accuracy": 18,
       "name": "FrozenDoor",
       "image": 230,
       "ai": 0,
@@ -12903,6 +13306,7 @@
     },
     {
       "monster_index": 405,
+      "accuracy": 18,
       "name": "IcePilar",
       "image": 231,
       "ai": 0,
@@ -12935,6 +13339,7 @@
     },
     {
       "monster_index": 406,
+      "accuracy": 10,
       "name": "GhastlyLeecher",
       "image": 152,
       "ai": 0,
@@ -12967,6 +13372,7 @@
     },
     {
       "monster_index": 407,
+      "accuracy": 15,
       "name": "MutatedManworm",
       "image": 154,
       "ai": 0,
@@ -12999,6 +13405,7 @@
     },
     {
       "monster_index": 408,
+      "accuracy": 10,
       "name": "CrazyManworm",
       "image": 155,
       "ai": 0,
@@ -13031,6 +13438,7 @@
     },
     {
       "monster_index": 409,
+      "accuracy": 10,
       "name": "CyanoGhast",
       "image": 153,
       "ai": 0,
@@ -13063,6 +13471,7 @@
     },
     {
       "monster_index": 410,
+      "accuracy": 15,
       "name": "DreamDevourer",
       "image": 163,
       "ai": 0,
@@ -13095,6 +13504,7 @@
     },
     {
       "monster_index": 411,
+      "accuracy": 15,
       "name": "DarkDevourer",
       "image": 159,
       "ai": 0,
@@ -13127,6 +13537,7 @@
     },
     {
       "monster_index": 412,
+      "accuracy": 18,
       "name": "HellSlasher",
       "image": 215,
       "ai": 0,
@@ -13159,6 +13570,7 @@
     },
     {
       "monster_index": 413,
+      "accuracy": 18,
       "name": "HellPirate",
       "image": 216,
       "ai": 0,
@@ -13191,6 +13603,7 @@
     },
     {
       "monster_index": 414,
+      "accuracy": 18,
       "name": "HellCannibal",
       "image": 217,
       "ai": 0,
@@ -13223,6 +13636,7 @@
     },
     {
       "monster_index": 415,
+      "accuracy": 18,
       "name": "HellBolt",
       "image": 219,
       "ai": 0,
@@ -13255,6 +13669,7 @@
     },
     {
       "monster_index": 416,
+      "accuracy": 18,
       "name": "WitchDoctor",
       "image": 220,
       "ai": 0,
@@ -13287,6 +13702,7 @@
     },
     {
       "monster_index": 417,
+      "accuracy": 18,
       "name": "CaveWitch",
       "image": 220,
       "ai": 0,
@@ -13319,6 +13735,7 @@
     },
     {
       "monster_index": 418,
+      "accuracy": 18,
       "name": "HellKeeper",
       "image": 218,
       "ai": 79,
@@ -13351,6 +13768,7 @@
     },
     {
       "monster_index": 419,
+      "accuracy": 21,
       "name": "MubZombie",
       "image": 263,
       "ai": 0,
@@ -13383,6 +13801,7 @@
     },
     {
       "monster_index": 420,
+      "accuracy": 22,
       "name": "FrozenZombie",
       "image": 264,
       "ai": 0,
@@ -13415,6 +13834,7 @@
     },
     {
       "monster_index": 421,
+      "accuracy": 20,
       "name": "DemonWolf",
       "image": 266,
       "ai": 0,
@@ -13447,6 +13867,7 @@
     },
     {
       "monster_index": 422,
+      "accuracy": 19,
       "name": "UndeadWolf",
       "image": 265,
       "ai": 0,
@@ -13479,6 +13900,7 @@
     },
     {
       "monster_index": 423,
+      "accuracy": 21,
       "name": "WhiteMammoth",
       "image": 267,
       "ai": 0,
@@ -13511,6 +13933,7 @@
     },
     {
       "monster_index": 424,
+      "accuracy": 19,
       "name": "DarkBeast",
       "image": 268,
       "ai": 0,
@@ -13543,6 +13966,7 @@
     },
     {
       "monster_index": 425,
+      "accuracy": 19,
       "name": "LightBeast",
       "image": 269,
       "ai": 0,
@@ -13575,6 +13999,7 @@
     },
     {
       "monster_index": 426,
+      "accuracy": 24,
       "name": "BloodBaboon",
       "image": 270,
       "ai": 0,
@@ -13607,6 +14032,7 @@
     },
     {
       "monster_index": 427,
+      "accuracy": 20,
       "name": "HardenRhino",
       "image": 271,
       "ai": 0,
@@ -13639,6 +14065,7 @@
     },
     {
       "monster_index": 428,
+      "accuracy": 20,
       "name": "DeathCrawler",
       "image": 261,
       "ai": 0,
@@ -13671,6 +14098,7 @@
     },
     {
       "monster_index": 429,
+      "accuracy": 20,
       "name": "BurningZombie",
       "image": 262,
       "ai": 0,
@@ -13703,6 +14131,7 @@
     },
     {
       "monster_index": 430,
+      "accuracy": 25,
       "name": "AncBringer",
       "image": 272,
       "ai": 0,
@@ -13735,6 +14164,7 @@
     },
     {
       "monster_index": 431,
+      "accuracy": 25,
       "name": "BeastKing",
       "image": 272,
       "ai": 0,
@@ -13767,6 +14197,7 @@
     },
     {
       "monster_index": 432,
+      "accuracy": 16,
       "name": "Hydra",
       "image": 371,
       "ai": 181,
@@ -13799,6 +14230,7 @@
     },
     {
       "monster_index": 433,
+      "accuracy": 16,
       "name": "SmallDrake",
       "image": 372,
       "ai": 182,
@@ -13831,6 +14263,7 @@
     },
     {
       "monster_index": 434,
+      "accuracy": 16,
       "name": "Manticore",
       "image": 373,
       "ai": 0,
@@ -13863,6 +14296,7 @@
     },
     {
       "monster_index": 435,
+      "accuracy": 16,
       "name": "KeelWarrior",
       "image": 374,
       "ai": 0,
@@ -13895,6 +14329,7 @@
     },
     {
       "monster_index": 436,
+      "accuracy": 16,
       "name": "KeelArcher",
       "image": 375,
       "ai": 0,
@@ -13927,6 +14362,7 @@
     },
     {
       "monster_index": 437,
+      "accuracy": 16,
       "name": "SandStorm",
       "image": 378,
       "ai": 0,
@@ -13959,6 +14395,7 @@
     },
     {
       "monster_index": 438,
+      "accuracy": 16,
       "name": "Lamia",
       "image": 376,
       "ai": 186,
@@ -13991,6 +14428,7 @@
     },
     {
       "monster_index": 439,
+      "accuracy": 16,
       "name": "Slave2",
       "image": 66,
       "ai": 15,
@@ -14023,6 +14461,7 @@
     },
     {
       "monster_index": 440,
+      "accuracy": 0,
       "name": "FineSoul",
       "image": 353,
       "ai": 174,
@@ -14055,6 +14494,7 @@
     },
     {
       "monster_index": 441,
+      "accuracy": 0,
       "name": "Bear",
       "image": 354,
       "ai": 0,
@@ -14087,6 +14527,7 @@
     },
     {
       "monster_index": 442,
+      "accuracy": 15,
       "name": "TurtleGrass",
       "image": 352,
       "ai": 173,
@@ -14119,6 +14560,7 @@
     },
     {
       "monster_index": 443,
+      "accuracy": 0,
       "name": "Leopard",
       "image": 355,
       "ai": 0,
@@ -14151,6 +14593,7 @@
     },
     {
       "monster_index": 444,
+      "accuracy": 0,
       "name": "Minion_Warrior",
       "image": 3,
       "ai": 0,
@@ -14183,6 +14626,7 @@
     },
     {
       "monster_index": 445,
+      "accuracy": 0,
       "name": "Minion_Warlock",
       "image": 3,
       "ai": 0,
@@ -14215,6 +14659,7 @@
     },
     {
       "monster_index": 446,
+      "accuracy": 0,
       "name": "Minion_Priest",
       "image": 3,
       "ai": 0,
@@ -14247,6 +14692,7 @@
     },
     {
       "monster_index": 447,
+      "accuracy": 0,
       "name": "Minion_Rouge",
       "image": 3,
       "ai": 0,
@@ -14279,6 +14725,7 @@
     },
     {
       "monster_index": 448,
+      "accuracy": 25,
       "name": "Chieftain_Warrior",
       "image": 221,
       "ai": 0,
@@ -14311,6 +14758,7 @@
     },
     {
       "monster_index": 449,
+      "accuracy": 0,
       "name": "Chieftain_Warlock",
       "image": 222,
       "ai": 0,
@@ -14343,6 +14791,7 @@
     },
     {
       "monster_index": 450,
+      "accuracy": 25,
       "name": "Chieftain_Priest",
       "image": 223,
       "ai": 86,
@@ -14375,6 +14824,7 @@
     },
     {
       "monster_index": 451,
+      "accuracy": 25,
       "name": "Chieftain_Rouge",
       "image": 224,
       "ai": 44,
@@ -14407,6 +14857,7 @@
     },
     {
       "monster_index": 452,
+      "accuracy": 25,
       "name": "Chieftain_Archer",
       "image": 233,
       "ai": 0,
@@ -14439,6 +14890,7 @@
     },
     {
       "monster_index": 453,
+      "accuracy": 65,
       "name": "Master_DragonYang",
       "image": 229,
       "ai": 88,
@@ -14471,6 +14923,7 @@
     },
     {
       "monster_index": 454,
+      "accuracy": 15,
       "name": "Jar1",
       "image": 280,
       "ai": 119,
@@ -14503,6 +14956,7 @@
     },
     {
       "monster_index": 455,
+      "accuracy": 15,
       "name": "Jar2",
       "image": 281,
       "ai": 120,
@@ -14535,6 +14989,7 @@
     },
     {
       "monster_index": 456,
+      "accuracy": 23,
       "name": "FightingCat",
       "image": 273,
       "ai": 0,
@@ -14567,6 +15022,7 @@
     },
     {
       "monster_index": 457,
+      "accuracy": 23,
       "name": "FireCat",
       "image": 274,
       "ai": 44,
@@ -14599,6 +15055,7 @@
     },
     {
       "monster_index": 458,
+      "accuracy": 23,
       "name": "CatWidow",
       "image": 275,
       "ai": 112,
@@ -14631,6 +15088,7 @@
     },
     {
       "monster_index": 459,
+      "accuracy": 23,
       "name": "StainHammerCat",
       "image": 276,
       "ai": 0,
@@ -14663,6 +15121,7 @@
     },
     {
       "monster_index": 460,
+      "accuracy": 23,
       "name": "BlackHammerCat",
       "image": 277,
       "ai": 116,
@@ -14695,6 +15154,7 @@
     },
     {
       "monster_index": 461,
+      "accuracy": 23,
       "name": "StrayCat",
       "image": 278,
       "ai": 117,
@@ -14727,6 +15187,7 @@
     },
     {
       "monster_index": 462,
+      "accuracy": 23,
       "name": "CatShaman",
       "image": 279,
       "ai": 118,
@@ -14759,6 +15220,7 @@
     },
     {
       "monster_index": 463,
+      "accuracy": 25,
       "name": "SeedingsGeneral",
       "image": 282,
       "ai": 121,
@@ -14791,6 +15253,7 @@
     },
     {
       "monster_index": 464,
+      "accuracy": 16,
       "name": "RestlessJar",
       "image": 283,
       "ai": 122,
@@ -14823,6 +15286,7 @@
     },
     {
       "monster_index": 465,
+      "accuracy": 28,
       "name": "GeneralMeowMeow",
       "image": 284,
       "ai": 123,
@@ -14855,6 +15319,7 @@
     },
     {
       "monster_index": 466,
+      "accuracy": 0,
       "name": "TucsonEgg",
       "image": 292,
       "ai": 128,
@@ -14887,6 +15352,7 @@
     },
     {
       "monster_index": 467,
+      "accuracy": 0,
       "name": "YoungTucson",
       "image": 293,
       "ai": 0,
@@ -14919,6 +15385,7 @@
     },
     {
       "monster_index": 468,
+      "accuracy": 19,
       "name": "Armadillo",
       "image": 290,
       "ai": 124,
@@ -14951,6 +15418,7 @@
     },
     {
       "monster_index": 469,
+      "accuracy": 20,
       "name": "ArmadilloElder",
       "image": 291,
       "ai": 125,
@@ -14983,6 +15451,7 @@
     },
     {
       "monster_index": 470,
+      "accuracy": 18,
       "name": "VisceralWorm2",
       "image": 110,
       "ai": 0,
@@ -15015,6 +15484,7 @@
     },
     {
       "monster_index": 471,
+      "accuracy": 18,
       "name": "SandSnail",
       "image": 294,
       "ai": 115,
@@ -15047,6 +15517,7 @@
     },
     {
       "monster_index": 472,
+      "accuracy": 20,
       "name": "CannibalTentacles",
       "image": 295,
       "ai": 130,
@@ -15079,6 +15550,7 @@
     },
     {
       "monster_index": 473,
+      "accuracy": 18,
       "name": "Tucson",
       "image": 286,
       "ai": 0,
@@ -15111,6 +15583,7 @@
     },
     {
       "monster_index": 474,
+      "accuracy": 19,
       "name": "TucsonFighter",
       "image": 287,
       "ai": 44,
@@ -15143,6 +15616,7 @@
     },
     {
       "monster_index": 475,
+      "accuracy": 19,
       "name": "TucsonMage",
       "image": 288,
       "ai": 126,
@@ -15175,6 +15649,7 @@
     },
     {
       "monster_index": 476,
+      "accuracy": 19,
       "name": "TucsonWarrior",
       "image": 289,
       "ai": 127,
@@ -15207,6 +15682,7 @@
     },
     {
       "monster_index": 477,
+      "accuracy": 25,
       "name": "TucsonGeneral",
       "image": 296,
       "ai": 131,
@@ -15239,6 +15715,7 @@
     },
     {
       "monster_index": 478,
+      "accuracy": 30,
       "name": "FrozenSolider",
       "image": 363,
       "ai": 0,
@@ -15271,6 +15748,7 @@
     },
     {
       "monster_index": 479,
+      "accuracy": 30,
       "name": "FrozenFighter",
       "image": 364,
       "ai": 44,
@@ -15303,6 +15781,7 @@
     },
     {
       "monster_index": 480,
+      "accuracy": 30,
       "name": "FrozenArcher",
       "image": 365,
       "ai": 8,
@@ -15335,6 +15814,7 @@
     },
     {
       "monster_index": 481,
+      "accuracy": 30,
       "name": "FrozenKnight",
       "image": 366,
       "ai": 0,
@@ -15367,6 +15847,7 @@
     },
     {
       "monster_index": 482,
+      "accuracy": 30,
       "name": "FrozenGolem",
       "image": 367,
       "ai": 0,
@@ -15399,6 +15880,7 @@
     },
     {
       "monster_index": 483,
+      "accuracy": 35,
       "name": "IcePhantom",
       "image": 368,
       "ai": 0,
@@ -15431,6 +15913,7 @@
     },
     {
       "monster_index": 484,
+      "accuracy": 30,
       "name": "SnowWolf",
       "image": 369,
       "ai": 179,
@@ -15463,6 +15946,7 @@
     },
     {
       "monster_index": 485,
+      "accuracy": 35,
       "name": "FrozenWarewolf",
       "image": 370,
       "ai": 180,
@@ -15495,6 +15979,7 @@
     },
     {
       "monster_index": 486,
+      "accuracy": 30,
       "name": "FrozenMiner",
       "image": 380,
       "ai": 187,
@@ -15527,6 +16012,7 @@
     },
     {
       "monster_index": 487,
+      "accuracy": 30,
       "name": "FrozenAxeman",
       "image": 381,
       "ai": 188,
@@ -15559,6 +16045,7 @@
     },
     {
       "monster_index": 488,
+      "accuracy": 30,
       "name": "FrozenMagician",
       "image": 382,
       "ai": 189,
@@ -15591,6 +16078,7 @@
     },
     {
       "monster_index": 489,
+      "accuracy": 30,
       "name": "SnowYeti",
       "image": 383,
       "ai": 190,
@@ -15623,6 +16111,7 @@
     },
     {
       "monster_index": 490,
+      "accuracy": 26,
       "name": "IceCrystalSolider",
       "image": 384,
       "ai": 102,
@@ -15655,6 +16144,7 @@
     },
     {
       "monster_index": 491,
+      "accuracy": 45,
       "name": "DarkWraith",
       "image": 385,
       "ai": 192,
@@ -15687,6 +16177,7 @@
     },
     {
       "monster_index": 492,
+      "accuracy": 40,
       "name": "DarkSpirit",
       "image": 386,
       "ai": 181,
@@ -15719,6 +16210,7 @@
     },
     {
       "monster_index": 493,
+      "accuracy": 30,
       "name": "SinseokMiner",
       "image": 387,
       "ai": 102,
@@ -15751,6 +16243,7 @@
     },
     {
       "monster_index": 494,
+      "accuracy": 18,
       "name": "BloodyLureSpider",
       "image": 56,
       "ai": 4,
@@ -15783,6 +16276,7 @@
     },
     {
       "monster_index": 495,
+      "accuracy": 13,
       "name": "GhostZombie",
       "image": 70,
       "ai": 25,
@@ -15815,6 +16309,7 @@
     },
     {
       "monster_index": 496,
+      "accuracy": 13,
       "name": "DarkPriestZombie",
       "image": 69,
       "ai": 24,
@@ -15847,6 +16342,7 @@
     },
     {
       "monster_index": 497,
+      "accuracy": 15,
       "name": "ChainGhoul",
       "image": 74,
       "ai": 0,
@@ -15879,6 +16375,7 @@
     },
     {
       "monster_index": 498,
+      "accuracy": 255,
       "name": "Guard3",
       "image": 377,
       "ai": 6,
@@ -15911,6 +16408,7 @@
     },
     {
       "monster_index": 499,
+      "accuracy": 255,
       "name": "ArcherGuard3",
       "image": 378,
       "ai": 80,
@@ -15943,6 +16441,7 @@
     },
     {
       "monster_index": 500,
+      "accuracy": 75,
       "name": "GameShop_Guard",
       "image": 0,
       "ai": 23,
@@ -15975,6 +16474,7 @@
     },
     {
       "monster_index": 501,
+      "accuracy": 0,
       "name": "Football",
       "image": 149,
       "ai": 68,
@@ -16007,6 +16507,7 @@
     },
     {
       "monster_index": 502,
+      "accuracy": 255,
       "name": "Royal_Guard",
       "image": 0,
       "ai": 6,
@@ -16039,6 +16540,7 @@
     },
     {
       "monster_index": 503,
+      "accuracy": 255,
       "name": "Royal_Archer",
       "image": 139,
       "ai": 57,
@@ -16071,6 +16573,7 @@
     },
     {
       "monster_index": 504,
+      "accuracy": 255,
       "name": "Royal_Lieutenant",
       "image": 1,
       "ai": 6,
@@ -16103,6 +16606,7 @@
     },
     {
       "monster_index": 505,
+      "accuracy": 15,
       "name": "PKSpirit",
       "image": 226,
       "ai": 38,
@@ -16135,6 +16639,7 @@
     },
     {
       "monster_index": 506,
+      "accuracy": 0,
       "name": "Frog",
       "image": 10010,
       "ai": 64,
@@ -16167,6 +16672,7 @@
     },
     {
       "monster_index": 512,
+      "accuracy": 0,
       "name": "RedTurtle",
       "image": 169,
       "ai": 0,
@@ -16199,6 +16705,7 @@
     },
     {
       "monster_index": 513,
+      "accuracy": 0,
       "name": "GreenTurtle",
       "image": 170,
       "ai": 0,
@@ -16231,6 +16738,7 @@
     },
     {
       "monster_index": 514,
+      "accuracy": 0,
       "name": "BlueTurtle",
       "image": 171,
       "ai": 0,
@@ -16263,6 +16771,7 @@
     },
     {
       "monster_index": 515,
+      "accuracy": 0,
       "name": "TowerTurtle",
       "image": 185,
       "ai": 0,
@@ -16295,6 +16804,7 @@
     },
     {
       "monster_index": 516,
+      "accuracy": 0,
       "name": "FinialTurtle",
       "image": 186,
       "ai": 72,
@@ -16327,6 +16837,7 @@
     },
     {
       "monster_index": 517,
+      "accuracy": 0,
       "name": "Hugger",
       "image": 161,
       "ai": 70,
@@ -16359,6 +16870,7 @@
     },
     {
       "monster_index": 518,
+      "accuracy": 0,
       "name": "PoisonHugger",
       "image": 160,
       "ai": 69,
@@ -16391,6 +16903,7 @@
     },
     {
       "monster_index": 519,
+      "accuracy": 0,
       "name": "MutatedHugger",
       "image": 162,
       "ai": 40,
@@ -16423,6 +16936,7 @@
     },
     {
       "monster_index": 520,
+      "accuracy": 25,
       "name": "HellKnight1",
       "image": 243,
       "ai": 97,
@@ -16455,6 +16969,7 @@
     },
     {
       "monster_index": 521,
+      "accuracy": 25,
       "name": "HellKnight2",
       "image": 244,
       "ai": 97,
@@ -16487,6 +17002,7 @@
     },
     {
       "monster_index": 522,
+      "accuracy": 25,
       "name": "HellKnight3",
       "image": 245,
       "ai": 97,
@@ -16519,6 +17035,7 @@
     },
     {
       "monster_index": 523,
+      "accuracy": 25,
       "name": "HellKnight4",
       "image": 246,
       "ai": 97,
@@ -16551,6 +17068,7 @@
     },
     {
       "monster_index": 524,
+      "accuracy": 25,
       "name": "HellBomb1",
       "image": 903,
       "ai": 99,
@@ -16583,6 +17101,7 @@
     },
     {
       "monster_index": 525,
+      "accuracy": 25,
       "name": "HellBomb2",
       "image": 904,
       "ai": 99,
@@ -16615,6 +17134,7 @@
     },
     {
       "monster_index": 526,
+      "accuracy": 25,
       "name": "HellBomb3",
       "image": 905,
       "ai": 99,
@@ -16647,6 +17167,7 @@
     },
     {
       "monster_index": 527,
+      "accuracy": 40,
       "name": "HellLord",
       "image": 247,
       "ai": 98,
@@ -16679,6 +17200,7 @@
     },
     {
       "monster_index": 537,
+      "accuracy": 0,
       "name": "Hydrax",
       "image": 338,
       "ai": 0,
@@ -16711,6 +17233,7 @@
     },
     {
       "monster_index": 538,
+      "accuracy": 0,
       "name": "HornedSorceror",
       "image": 346,
       "ai": 169,
@@ -16743,6 +17266,7 @@
     },
     {
       "monster_index": 540,
+      "accuracy": 0,
       "name": "HornedArcher",
       "image": 341,
       "ai": 164,
@@ -16775,6 +17299,7 @@
     },
     {
       "monster_index": 541,
+      "accuracy": 0,
       "name": "HornedCommander",
       "image": 348,
       "ai": 171,
@@ -16807,6 +17332,7 @@
     },
     {
       "monster_index": 542,
+      "accuracy": 0,
       "name": "HornedMage",
       "image": 339,
       "ai": 163,
@@ -16839,6 +17365,7 @@
     },
     {
       "monster_index": 544,
+      "accuracy": 0,
       "name": "HornedWarrior",
       "image": 343,
       "ai": 165,
@@ -16871,6 +17398,7 @@
     },
     {
       "monster_index": 545,
+      "accuracy": 0,
       "name": "BoulderSpirit",
       "image": 347,
       "ai": 170,
@@ -16903,6 +17431,7 @@
     },
     {
       "monster_index": 546,
+      "accuracy": 0,
       "name": "WarriorScroll",
       "image": 414,
       "ai": 210,
@@ -16935,6 +17464,7 @@
     },
     {
       "monster_index": 547,
+      "accuracy": 0,
       "name": "TaoistScroll",
       "image": 415,
       "ai": 210,
@@ -16967,6 +17497,7 @@
     },
     {
       "monster_index": 548,
+      "accuracy": 0,
       "name": "WizardScroll",
       "image": 416,
       "ai": 210,
@@ -16999,6 +17530,7 @@
     },
     {
       "monster_index": 549,
+      "accuracy": 0,
       "name": "AssassinScroll",
       "image": 417,
       "ai": 210,
@@ -17031,6 +17563,7 @@
     },
     {
       "monster_index": 550,
+      "accuracy": 0,
       "name": "ZumaStatue22",
       "image": 65,
       "ai": 15,
@@ -17063,6 +17596,7 @@
     },
     {
       "monster_index": 551,
+      "accuracy": 0,
       "name": "ZumaGuardian22",
       "image": 66,
       "ai": 15,
@@ -17095,6 +17629,7 @@
     },
     {
       "monster_index": 552,
+      "accuracy": 0,
       "name": "ZumaArcher22",
       "image": 64,
       "ai": 8,
@@ -17127,6 +17662,7 @@
     },
     {
       "monster_index": 553,
+      "accuracy": 0,
       "name": "WedgeMoth22",
       "image": 44,
       "ai": 7,
@@ -17159,6 +17695,7 @@
     },
     {
       "monster_index": 554,
+      "accuracy": 0,
       "name": "Michelangelo",
       "image": 185,
       "ai": 0,
@@ -17191,6 +17728,7 @@
     },
     {
       "monster_index": 555,
+      "accuracy": 0,
       "name": "Raphael",
       "image": 169,
       "ai": 0,
@@ -17223,6 +17761,7 @@
     },
     {
       "monster_index": 556,
+      "accuracy": 0,
       "name": "Donatello",
       "image": 185,
       "ai": 0,
@@ -17255,6 +17794,7 @@
     },
     {
       "monster_index": 557,
+      "accuracy": 0,
       "name": "BoneSpearman22",
       "image": 90,
       "ai": 29,
@@ -17287,6 +17827,7 @@
     },
     {
       "monster_index": 558,
+      "accuracy": 0,
       "name": "BoneBlademan22",
       "image": 0,
       "ai": 0,
@@ -17319,6 +17860,7 @@
     },
     {
       "monster_index": 559,
+      "accuracy": 0,
       "name": "BoneArcher22",
       "image": 92,
       "ai": 8,
@@ -17351,6 +17893,7 @@
     },
     {
       "monster_index": 560,
+      "accuracy": 0,
       "name": "BoneCaptain22",
       "image": 0,
       "ai": 0,
@@ -17383,6 +17926,7 @@
     },
     {
       "monster_index": 561,
+      "accuracy": 0,
       "name": "SeaTurtle",
       "image": 185,
       "ai": 0,
@@ -17415,6 +17959,7 @@
     },
     {
       "monster_index": 562,
+      "accuracy": 20,
       "name": "TreeQueen",
       "image": 307,
       "ai": 142,
@@ -17447,6 +17992,7 @@
     },
     {
       "monster_index": 563,
+      "accuracy": 45,
       "name": "Ancient_ZumaTaurus",
       "image": 68,
       "ai": 17,
@@ -17479,6 +18025,7 @@
     },
     {
       "monster_index": 564,
+      "accuracy": 0,
       "name": "Frozen_ZumaStatue",
       "image": 209,
       "ai": 15,
@@ -17511,6 +18058,7 @@
     },
     {
       "monster_index": 565,
+      "accuracy": 0,
       "name": "Frozen_ZumaGuardian",
       "image": 210,
       "ai": 15,
@@ -17543,6 +18091,7 @@
     },
     {
       "monster_index": 566,
+      "accuracy": 0,
       "name": "Frozen_RedZuma",
       "image": 211,
       "ai": 16,
@@ -17575,6 +18124,7 @@
     },
     {
       "monster_index": 567,
+      "accuracy": 0,
       "name": "StoneTrap",
       "image": 358,
       "ai": 255,
@@ -17607,6 +18157,7 @@
     },
     {
       "monster_index": 568,
+      "accuracy": 0,
       "name": "SabukGate",
       "image": 950,
       "ai": 81,
@@ -17639,6 +18190,7 @@
     },
     {
       "monster_index": 569,
+      "accuracy": 0,
       "name": "PalaceWallLeft",
       "image": 951,
       "ai": 82,
@@ -17671,6 +18223,7 @@
     },
     {
       "monster_index": 570,
+      "accuracy": 0,
       "name": "PalaceWall1",
       "image": 952,
       "ai": 82,
@@ -17703,6 +18256,7 @@
     },
     {
       "monster_index": 571,
+      "accuracy": 0,
       "name": "PalaceWall2",
       "image": 953,
       "ai": 82,
@@ -17735,6 +18289,7 @@
     },
     {
       "monster_index": 572,
+      "accuracy": 0,
       "name": "MudZombie",
       "image": 263,
       "ai": 108,

@@ -1,0 +1,584 @@
+{
+  "schemaVersion": 1,
+  "id": "fishing-source23-combined-build-result01",
+  "generatedAtUtc": "2026-10-07T02:01:25.807Z",
+  "parentCommit": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "scope": "Source23 current frozen fishing/sharedanimation/nullable transform delta. Originalbuilders and static source/resource closure only, no player/UI/runtime/network/WASM API.",
+  "finiteResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-finite-result01.json",
+    "bytes": 25598,
+    "sha256": "dc3f7d952147b40d9f5d73342ef92c4bb681854fa8b683c818b1aa6ae7da4e6d"
+  },
+  "actionChainReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-action-chain-review01.json",
+    "bytes": 25594,
+    "sha256": "ae8904d0a7aa327b4122e49e1b3710e4cb43e946d93c189f0c3fa719315cbdf6"
+  },
+  "source": {
+    "client": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-snapshot.json",
+      "bytes": 148546,
+      "sha256": "37211548ac2b7a6b81d8e7462e660a60ecc7eeca3154ecf1d64d450432723753"
+    },
+    "backend": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-backend01-snapshot.json",
+      "bytes": 145500,
+      "sha256": "5c5dfba040a433c7502977d31f7dd28316cfc6586c7967f17f6158b421791bcf"
+    },
+    "nodeAtRun": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node05-snapshot.json",
+      "bytes": 9776291,
+      "sha256": "996468bae73436afa857edc1265a4894a0e79104a028fb24e66492cc95641e0f"
+    },
+    "next": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01-source-snapshot.json",
+      "bytes": 9760353,
+      "sha256": "42fe88a5985f2cada99cb1ac2ef292c05e455d5b402f68a4c6ecf7e4809e436a"
+    },
+    "thin": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-source-snapshot.json",
+      "bytes": 23804849,
+      "sha256": "d2f89332ebb4c08988f68f9c98648780d16087f96b399e087208719b755f15f9"
+    },
+    "postNextTsc": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc06-source-snapshot.json",
+      "bytes": 9755741,
+      "sha256": "a339e5863446bdac31c2221bc2e0261f0d38e85e06424489cf6325441933d1c8"
+    }
+  },
+  "sourceReview": {
+    "node": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node05-source-review06.json",
+      "bytes": 9643,
+      "sha256": "c7c3f08fc7f94b82b23738c44862bc99d706d09e2eae2a60820d43af12831fec"
+    },
+    "next": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01-source-review.json",
+      "bytes": 4089,
+      "sha256": "48f1595427931c573bc9f1a229ea27a9ab4f44d1b933c145fe21eaf82bbe2032"
+    }
+  },
+  "builds": {
+    "corePui": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-core-static05.json",
+      "bytes": 16573,
+      "sha256": "343e2ad6c01eab7d774e93408c9cc3ae234d87ed0c56dc877f5dfb4c26fb5d7c"
+    },
+    "renderer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-renderer-static05.json",
+      "bytes": 27976,
+      "sha256": "888a47403fa15459cadd316518b77d7af348060480fb28d22de068e77c402b2a"
+    },
+    "native": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-static05.json",
+      "bytes": 6346,
+      "sha256": "593f0b19d5d3d7f0f0d6d7ce7934ed0f0fd9a1225c5e26a65e7fca548c317876"
+    },
+    "gateway": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-gateway-static01.json",
+      "bytes": 6343,
+      "sha256": "01dc8659c75465cbbb3c2e15d5c1e4559d9aeba849a93746e643f6ce15433e15"
+    },
+    "next": {
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01.config.json",
+        "bytes": 3791,
+        "sha256": "6a4d711aa1d18d9d4ddfbb5441ee79e363863a7c2bf2f04fcb8ff5ec087848b8"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 76480,
+        "kind": "Source23 original production Next webpack fishing standalone static build01 dist06",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 80826,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01.outer.json",
+        "bytes": 541,
+        "sha256": "7c15fa58c2774a19560a5c0eaca1817413b4059ceac6aa778a00483c0fab4434"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01.stdout.log",
+        "bytes": 2257,
+        "sha256": "f318f54c823827d16677fec36d0ea6afbe6d29220101523e8c2f537cd30d4acc"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "thin": {
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01.config.json",
+        "bytes": 4060,
+        "sha256": "1742d37e56569fcf241cde19df4ee806bfe1ef0ef1c5e274f6551d85179b7180"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 107428,
+        "kind": "Source23 original production Thin06 fishing standalone static build01",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 19976,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01.outer.json",
+        "bytes": 529,
+        "sha256": "ba26d450957e637d45321c041aa291baf79768466cbd8598829c3b1e90c34863"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01.stdout.log",
+        "bytes": 21895,
+        "sha256": "47db8feec2d231da1e669aa429ae0475a47bb0fb6b68a71f10e781cb11140362"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "core": {
+    "manifest": {
+      "abiVersion": 1,
+      "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+      "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 252590,
+          "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b",
+        "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 22264,
+            "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 259415,
+            "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+          }
+        }
+      }
+    },
+    "immutableLeaves": [
+      {
+        "relativePath": "apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa\\mir2_platform_web.js",
+        "bytes": 24393,
+        "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+      },
+      {
+        "relativePath": "apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa\\mir2_platform_web_bg.wasm",
+        "bytes": 252590,
+        "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+      },
+      {
+        "relativePath": "apps/web/public/client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web.js",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b\\mir2_platform_web.js",
+        "bytes": 22264,
+        "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+      },
+      {
+        "relativePath": "apps/web/public/client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web_bg.wasm",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b\\mir2_platform_web_bg.wasm",
+        "bytes": 259415,
+        "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+      }
+    ],
+    "wasmStrictBelow": 262144,
+    "jsMaximum": 204800,
+    "coreWasmBytes": 252590,
+    "puiWasmBytes": 259415,
+    "coreVersion": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+    "puiVersion": "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b",
+    "byteBudgetAccepted": true,
+    "metadataOnlyValidation": true,
+    "apiInstanceExecution": false
+  },
+  "renderer": {
+    "manifest": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\bevy_runtime_version.json",
+      "bytes": 1711,
+      "sha256": "a2dc7560bebacdabe990e54c226122da738a678fecdc3b443cb1e0f85d0075d3"
+    },
+    "version": "bevy-8e38472ba5cf5ef3",
+    "actualCargoCalls": 4,
+    "actualVersionCalls": 1,
+    "actualVariantBuilds": 3,
+    "immutableLeaves": [
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 31842665,
+        "sha256": "045a67f547ae00976ebb934067750d6e7c9cfcc4517aac1903c64d5345ee6580"
+      },
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\pkg-webgl2-shared\\mir2_bevy_runtime.js",
+        "bytes": 132320,
+        "sha256": "d9253e1dcba5e198ad6594bfe98304f79d106b7b2bf7f695e0cd48a87248866e"
+      },
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 17743841,
+        "sha256": "cac15ba3bfb55bb2741be39f2a5a0e0ea386f61a580c07c3e092fd6af294530b"
+      },
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/pkg-webgl2/mir2_bevy_runtime.js",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\pkg-webgl2\\mir2_bevy_runtime.js",
+        "bytes": 117176,
+        "sha256": "465a615a2f3e05359031db763c738657d3c62ee89c7ce5547391f721c450a81f"
+      },
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 30880674,
+        "sha256": "cde02551dc95ea53c6a5eb0ef7344b45ef5e8647a92c7c1667fc0668ecd89ed4"
+      },
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/pkg-webgpu/mir2_bevy_runtime.js",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\pkg-webgpu\\mir2_bevy_runtime.js",
+        "bytes": 134346,
+        "sha256": "56548489d9c1d6debbf7e2b5b624dd24e63ecc354c12ebc1fdb470ad64d1abe4"
+      },
+      {
+        "relativePath": "apps/web/public/bevy-runtime-releases/bevy-8e38472ba5cf5ef3/runtime-manifest.json",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime-releases\\bevy-8e38472ba5cf5ef3\\runtime-manifest.json",
+        "bytes": 1711,
+        "sha256": "a2dc7560bebacdabe990e54c226122da738a678fecdc3b443cb1e0f85d0075d3"
+      }
+    ],
+    "allOriginalBudgetsPassed": true,
+    "immutableReleaseGitIgnored": true,
+    "forceAddedToGit": false,
+    "metadataOnlyValidation": true
+  },
+  "native": {
+    "executable": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+      "bytes": 104656384,
+      "sha256": "2c473cae9153b8af53e4dddb5fb700d214f5cf1ece780cad32dd4eaa5a5563ee"
+    },
+    "actualOuter": {
+      "owner": "Root",
+      "exitCode": 0,
+      "guardPid": 102264,
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 458816,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-native-build05.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false,
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-build05.outer.json",
+        "bytes": 449,
+        "sha256": "21f3f88dd676e33f961525d6736735f91771219e6fe8f37e94a43a6060c63ebf"
+      }
+    },
+    "declared432SourcesMatched": true,
+    "launched": false
+  },
+  "gateway": {
+    "executable": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-gateway.exe",
+      "bytes": 105714688,
+      "sha256": "ac512de8899da64c0c82c4273f08c4954dce2a03780518e716774221f862f544"
+    },
+    "actualOuter": {
+      "owner": "Root",
+      "exitCode": 0,
+      "guardPid": 103804,
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 111743,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-gateway-build01.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false,
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-gateway-build01.outer.json",
+        "bytes": 450,
+        "sha256": "35cf602a105688f2ba7bc0502706605df94f0d80c3f9ff9eafdaf1c17e9e8343"
+      }
+    },
+    "declared486SourcesMatched": true,
+    "launched": false
+  },
+  "next": {
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-06",
+    "declaredInputCount": 27439,
+    "outputs": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01-output-snapshot.json",
+      "bytes": 7822926,
+      "sha256": "0d8c41d7fb0e3d41a1319bfd481fc725b5fb34d808b1911994045c8497ceac3a"
+    },
+    "regularFiles": 19006,
+    "directoriesIncludingRoot": 308,
+    "bytes": 599650114,
+    "sourceLinks": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-06\\standalone\\mir2-web3\\apps\\web\\node_modules",
+        "relativePath": "standalone/mir2-web3/apps/web/node_modules",
+        "target": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules",
+        "resolved": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules"
+      }
+    ],
+    "linksTraversed": 0,
+    "nftClosure": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-next01-nft-closure.json",
+      "bytes": 14444829,
+      "sha256": "8ad7ae6e57e86904a910e07a739461b22dcb95ecfffdf57f9a3b8a36fa914c91"
+    },
+    "nftTraceCount": 61,
+    "nftUniqueReferences": 37094,
+    "nftRegularFiles": 37092,
+    "nftDirectories": 2,
+    "nftMissing": 0,
+    "nftPrivateReferences": 0,
+    "strictTypeScript": true,
+    "strictTypeScriptSeconds": 11.7,
+    "staticPages": 13,
+    "metadataAllowanceChecks": [
+      {
+        "relativePath": "apps/web/tsconfig.json",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+          "bytes": 4566,
+          "sha256": "4edef348f8f51cb02f4266fe3873176e01629a34f9cc353085d35cfd83a20ca7"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+          "bytes": 4688,
+          "sha256": "7d343d999c649afac146e9ab55d4828285674895c978afe07b5a27ace00afbaf"
+        },
+        "allowedExactDataChange": true
+      },
+      {
+        "relativePath": "apps/web/next-env.d.ts",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\next-env.d.ts",
+          "bytes": 285,
+          "sha256": "784ad1c027bfc6552dffbfff7a7f8e83f1ba0cb1dfb717d6f50bee9cca979b9b"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\next-env.d.ts",
+          "bytes": 285,
+          "sha256": "d64cb544404c737f40b15f516bc24a010cf9d490ece8246c8db0b20f5aaf2e55"
+        },
+        "allowedExactDataChange": true
+      }
+    ]
+  },
+  "thin": {
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-06",
+    "declaredInputSnapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-source-snapshot.json",
+      "bytes": 23804849,
+      "sha256": "d2f89332ebb4c08988f68f9c98648780d16087f96b399e087208719b755f15f9"
+    },
+    "declaredInputRecords": 63205,
+    "uniqueNormalizedWindowsPaths": 63187,
+    "duplicateAliasGroups": 18,
+    "aliasBytesAndHashesEqual": true,
+    "outputSnapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-output-snapshot.json",
+      "bytes": 2924659,
+      "sha256": "fc65ccdc9c1f1641e6ef7b10330704157f1280488c0c607c81f842caa9b45826"
+    },
+    "report": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-size-report.json",
+      "bytes": 21895,
+      "sha256": "47db8feec2d231da1e669aa429ae0475a47bb0fb6b68a71f10e781cb11140362"
+    },
+    "stats": {
+      "regularFiles": 7301,
+      "directoriesIncludingRoot": 776,
+      "links": 0,
+      "bytes": 373049068
+    },
+    "capBytes": 377487360,
+    "headroomBytes": 4438292,
+    "coreSelection": {
+      "compiledManifest": {
+        "abiVersion": 1,
+        "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+        "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 252590,
+            "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+          }
+        },
+        "presentation": {
+          "abiVersion": 1,
+          "version": "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b",
+          "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+          "files": {
+            "mir2_platform_web.js": {
+              "bytes": 22264,
+              "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+            },
+            "mir2_platform_web_bg.wasm": {
+              "bytes": 259415,
+              "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+            }
+          }
+        }
+      },
+      "selectedPaths": [
+        "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+        "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+        "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web.js",
+        "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web_bg.wasm"
+      ],
+      "packagedClosure": {
+        "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+        "abiVersion": 1,
+        "activeVersions": [
+          "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+          "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b"
+        ],
+        "files": [
+          {
+            "relativePath": "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          {
+            "relativePath": "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+            "bytes": 252590,
+            "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+          },
+          {
+            "relativePath": "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web.js",
+            "bytes": 22264,
+            "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+          },
+          {
+            "relativePath": "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web_bg.wasm",
+            "bytes": 259415,
+            "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+          }
+        ],
+        "exactActiveBundleClosure": true,
+        "leavesPerBundle": 2
+      }
+    },
+    "jsonCompaction": {
+      "details": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-size-report.json-compaction-details.json",
+        "bytes": 65777,
+        "sha256": "b82f37b7ecdb2562419b9752936df43f973dba22946abcfaa59392fc073f83a9"
+      },
+      "files": 231,
+      "currentPairsActuallyRehashed": 231,
+      "samePriorSourceAndOutputPairs": true,
+      "priorSource22StaticExtra": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-bag-belt-source22-thin02-static-extra.json",
+        "bytes": 157742,
+        "sha256": "c7c104d5177efc732f6cb485464b5f42f1c1b3e3826b0508fb80d2c424e7dd61"
+      },
+      "tokenConclusion": "Qualified historical token preservation carry only because all231 actual source/output bytes and hashes equal Source22/21/20/19/18. No new parser/lexer execution."
+    },
+    "warningReview": {
+      "count": 44,
+      "multisetSameAsSource22": true,
+      "messageAndDuplicateCountsCompared": true,
+      "runtimeMeaningUnverified": true
+    },
+    "staticExtra": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-static-extra.json",
+      "bytes": 157944,
+      "sha256": "9dfdd06fda7c84a3abacaf6aff85c4c9564dacab8ac577570b0a93caffab779d"
+    },
+    "remoteOriginalUiMediaCoverage": "Original immutable remote asset inventory and production asset-origin coverage remain unverified; source has Mount but no complete Pet/Gate inventory. Static package only.",
+    "historicalTypes": "Retained04/05 route types remain explicit TSsource inputs; nozero oldpath/runtimepackage claim."
+  },
+  "independentReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "readOnly": true,
+    "executions": 0,
+    "writes": 0,
+    "confirmedProductOrBuildBlockers": 0,
+    "sourceAndFiniteAccepted": true,
+    "coreRendererNativeGatewayStaticAccepted": true,
+    "nextFull63185DedupRegularPinsMatched": true,
+    "thinFull70714DedupRegularPinsMatched": true,
+    "fixtureMaterialCountCorrection": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-web-finite06.json",
+      "bytes": 11505,
+      "sha256": "8b3789784af980d4f41be6d25e60b8966d3874f923551f8c9fb6cc79ebe11c1a"
+    },
+    "thinMaterialCountQualification": "63205 declared records/63187 unique normalized Windows paths/18 samepin slashaliases; original frozenJSON retained."
+  },
+  "summary": {
+    "staticProductionCombinationAccepted": true,
+    "actualOriginalNodeTests": 218,
+    "passedNodeTests": 218,
+    "stage5InternalGroups": 357,
+    "strictCodeOnlyTsc05AndPostNext06Passed": true,
+    "backendPasses": 242,
+    "currentPuiPasses": 64,
+    "selectedHistoricalClientScope": "FinalRust07 PUI64 is a newactual CPU run of whole PUI suite. Prior Rust04 Core141/default44+3oldignored/Native-fishing6/Runtime-animation17 and prior Rust03 Native-input133 are historical actual executions; final epochs only modified presentation-ui-gated codecs whose source consumption is separate from these unchanged effective configurations. Do not claim all432 or all executions freshly rerun in Rust07."
+  },
+  "sourcePublication": {
+    "source22Published": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+    "source23CommitAndPush": "pending Root actual scoped publication at creation",
+    "ignoredRendererReleaseNotForcePublished": true
+  },
+  "limits": [
+    "OriginalCargoGuard/PolicyB actual calls strictlyserial,50GiB/fresh<=2s unchanged,individualresults hold actualreceipts",
+    "Three actual byte-budget failures and actualBag63pass1fail retained;preparedCorebuild04neverexecuted",
+    "No actualplayerlogin/combat/save/relogin/UI/mobile,WASMAPI/server/HTTP/socketprobe",
+    "No overallpercentage, fullacceptance denominator,Candidate100 orgoalcompletion",
+    "Originalassetorigin Pet/Gatecoverage and44warningruntime effectsremainunverified"
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

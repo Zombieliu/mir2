@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.five-class-d917-native-red.v1",
+  "createdUtc": "2026-10-11T20:32:49.982264+00:00",
+  "run": "d917-native-full01",
+  "exitCode": 101,
+  "passed": 912,
+  "failed": 75,
+  "originalIgnored": 7,
+  "sourceDrift": [],
+  "compiledSourceSnapshotSha256": "a8d18782c8740b5ae6a5dfa32d515df4ede5bd62ecf876a87681902db41e96ab",
+  "cargoLogSha256": "44bcc7579bf225970f8538b41f78b34c8712d70e2aafedcc94cef9cc42485ed4",
+  "resourceRootInitiallyUnavailable": true,
+  "originalKeyedMapBuilderNowExecuted": true,
+  "twoNewTestStandingExpectationsCorrectedToRealSource500ms": true,
+  "currentRepairedSourceTested": false,
+  "releaseBuilt": false,
+  "published": false,
+  "humanAccepted": false,
+  "oldCompiledBinarySingleAssetDiagnostic": {
+    "passed": 1,
+    "notCurrentSourceQualification": true,
+    "logSha256": "63bd776b23db2a95b7eca05f90f41fa784edda5dfb99d566c6a9107387766058"
+  },
+  "archive": {
+    "path": "d917-native-red-original-evidence01.zip",
+    "sha256": "c65909e49773e6eca3b80daf8616f141f82f25505102995f98442d74564d96ed",
+    "bytes": 236353
+  }
+}

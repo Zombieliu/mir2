@@ -1,0 +1,13 @@
+{
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+  "baseline": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "signedScripts": 19,
+  "run": "first-party-standing-chunks",
+  "scope": "Only exact source/deployment/baseline/run identities updated; same real mouse/keyboard input,8s walk/120s Native,privacy,one login-only Testnet signature. No request interception,resource prefill or relaxed evidence thresholds.",
+  "passiveObserver": {
+    "script": "terrain-observation.mjs",
+    "exactNextPaths": 16,
+    "scope": "Only records CDP response metadata for the 16 expected standing chunks; no fetch,interception,state change,auth change or threshold change."
+  }
+}

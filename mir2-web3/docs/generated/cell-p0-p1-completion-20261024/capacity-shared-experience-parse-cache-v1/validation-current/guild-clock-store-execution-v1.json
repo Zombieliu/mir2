@@ -1,0 +1,48 @@
+{
+  "name": "guild-clock-store",
+  "command": [
+    "C:/Users/Administrator/.cargo/bin/rustup.exe",
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "durationMs": 409.1683000000012,
+  "totals": [
+    {
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 2945
+    }
+  ],
+  "passed": true,
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    }
+  ]
+}

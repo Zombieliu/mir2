@@ -1,0 +1,186 @@
+{
+  "schema": "mir2.r16.web_sparse_scene_resume.v1",
+  "date": "2026-11-10",
+  "base": "a2502ffd2f3f1bd564ad3649c5c3632c7c3d14c6",
+  "productionCandidate": {
+    "buildId": "65moI48z07JCKiullFNWj",
+    "receiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+    "sourceSha256": {
+      "app/page.tsx": "c4f7a2dca29da8db325f913a58a190f99a220b7832f33339af71ec0d4e89bf7e"
+    }
+  },
+  "checkCounts": {
+    "sceneAndAsset": 32,
+    "combatAndInput": 203,
+    "stage5Groups": 520
+  },
+  "sparseTile": {
+    "x": 298,
+    "y": 273
+  },
+  "baseline": {
+    "renderer": "webgpu",
+    "receiptSha256": "02c4d0a2fe6ff9b3691192fb890aebd91f523d736921c769a592431ff2031a27",
+    "buildReceiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+    "sourceSaveSha256": "677312ad579da5f3431832b6ec6df7e99adea0f133391c229977bf4d7ff6b0fb",
+    "priorNormalLogoutReceiptSha256": "1454ad54c0bd419c103257a0d970b81a345cdac18b9537918b21dc2ddbfe2b80",
+    "startGameResult": 4,
+    "response": {
+      "status": 200,
+      "missingAssets": 0,
+      "bodySha256": "da8dd37fecf606b00398ee3e367b1f33d48a304cdc53ec0e42c615d086aa278b",
+      "name": "0.map",
+      "dimensions": {
+        "width": 700,
+        "height": 700
+      },
+      "playBounds": {
+        "minX": 272,
+        "maxX": 320,
+        "minY": 262,
+        "maxY": 298
+      },
+      "regionBounds": {
+        "minX": 244,
+        "maxX": 348,
+        "minY": 240,
+        "maxY": 341
+      },
+      "inPlayBounds": true,
+      "inRegionBounds": true,
+      "cells": 5674,
+      "sprites": 1035,
+      "ownSparseCell": false
+    },
+    "outcome": "retry",
+    "userNotice": "Retry",
+    "startGameToSceneOutcomeMs": 1630.754,
+    "rendererRequested": false
+  },
+  "candidate": [
+    {
+      "renderer": "webgpu",
+      "receiptSha256": "d39ba8668278c26974c7f945e5062b5b097db5ca44e73e50d0f1c7d07d06eb2c",
+      "buildReceiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+      "sourceSaveSha256": "677312ad579da5f3431832b6ec6df7e99adea0f133391c229977bf4d7ff6b0fb",
+      "priorNormalLogoutReceiptSha256": "1454ad54c0bd419c103257a0d970b81a345cdac18b9537918b21dc2ddbfe2b80",
+      "startGameResult": 4,
+      "response": {
+        "status": 200,
+        "missingAssets": 0,
+        "bodySha256": "da8dd37fecf606b00398ee3e367b1f33d48a304cdc53ec0e42c615d086aa278b",
+        "name": "0.map",
+        "dimensions": {
+          "width": 700,
+          "height": 700
+        },
+        "playBounds": {
+          "minX": 272,
+          "maxX": 320,
+          "minY": 262,
+          "maxY": 298
+        },
+        "regionBounds": {
+          "minX": 244,
+          "maxX": 348,
+          "minY": 240,
+          "maxY": 341
+        },
+        "inPlayBounds": true,
+        "inRegionBounds": true,
+        "cells": 5674,
+        "sprites": 1035,
+        "ownSparseCell": false
+      },
+      "outcome": "ready",
+      "userNotice": null,
+      "startGameToSceneOutcomeMs": 1760.534,
+      "rendererRequested": true,
+      "firstWorldClick": {
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "command": "attack",
+        "damage": "ObjectStruck"
+      },
+      "saved": {
+        "position": {
+          "x": 298,
+          "y": 273
+        },
+        "level": 30,
+        "logout": 646
+      }
+    },
+    {
+      "renderer": "shared",
+      "receiptSha256": "521684c1703af0d108cb3a01429af4e185b1ddb49a353e561541b945d2e978c4",
+      "buildReceiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+      "sourceSaveSha256": "6c36451f89ee43ac5354c1211de2690ddb39fa9a17b431992b05f9a7f000cb7c",
+      "priorNormalLogoutReceiptSha256": "03a98198149233b6054af31800c7a65d27996ac416e19d22003c0f3dfafa3839",
+      "startGameResult": 4,
+      "response": {
+        "status": 200,
+        "missingAssets": 0,
+        "bodySha256": "da8dd37fecf606b00398ee3e367b1f33d48a304cdc53ec0e42c615d086aa278b",
+        "name": "0.map",
+        "dimensions": {
+          "width": 700,
+          "height": 700
+        },
+        "playBounds": {
+          "minX": 272,
+          "maxX": 320,
+          "minY": 262,
+          "maxY": 298
+        },
+        "regionBounds": {
+          "minX": 244,
+          "maxX": 348,
+          "minY": 240,
+          "maxY": 341
+        },
+        "inPlayBounds": true,
+        "inRegionBounds": true,
+        "cells": 5674,
+        "sprites": 1035,
+        "ownSparseCell": false
+      },
+      "outcome": "ready",
+      "userNotice": null,
+      "startGameToSceneOutcomeMs": 1703.229,
+      "rendererRequested": true,
+      "firstWorldClick": {
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "command": "attack",
+        "damage": "ObjectStruck"
+      },
+      "saved": {
+        "position": {
+          "x": 298,
+          "y": 273
+        },
+        "level": 30,
+        "logout": 646
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "sparse-scene-resume.png",
+      "sha256": "44046966be78fbdb2fdf905bdd6ced89cf5f89ab9c2b3b11a69e8b3b4f3f24a4"
+    }
+  ]
+}

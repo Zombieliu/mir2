@@ -1,0 +1,19 @@
+{
+  "manifestSha256": "0130f025581b8d57f56b8b52670446ff57cf88d41954117b49a08f62089a5c14",
+  "sourceSha256": "e8449e70bc75bfbbc2df220a54d59bd67b635c830eb2e253ad3a4cf01f317bd7",
+  "newImmutableFiles": [
+    "mir2-web3/apps/web/public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web.js",
+    "mir2-web3/apps/web/public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web_bg.wasm",
+    "mir2-web3/apps/web/public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web.js",
+    "mir2-web3/apps/web/public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web_bg.wasm",
+    "mir2-web3/apps/web/public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web.js",
+    "mir2-web3/apps/web/public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web_bg.wasm",
+    "mir2-web3/apps/web/public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web.js",
+    "mir2-web3/apps/web/public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web_bg.wasm"
+  ],
+  "catalogVersion": "42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6",
+  "catalogWasmBytes": 195564,
+  "allOriginalPackageBudgetsPreserved": true,
+  "oldImmutableFilesOverwritten": false,
+  "rendererManifestInCanonicalChanged": false
+}

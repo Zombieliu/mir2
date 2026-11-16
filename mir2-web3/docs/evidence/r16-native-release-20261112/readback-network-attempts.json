@@ -1,0 +1,82 @@
+{
+  "origin": "https://numeron.obelisk.build",
+  "attempts": [
+    {
+      "round": 1,
+      "rows": [
+        {
+          "path": "/version",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 55,
+          "sha256": "6604775e13e32982e9f9bf57145a8b889f8174dae196ada27188c2bb9f1e7748"
+        },
+        {
+          "path": "/game",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 11168,
+          "sha256": "6d75a4d510bcad67725a45ddf45d940d32197fe7f743c924ca69a5be25f9c2cb"
+        },
+        {
+          "path": "/mir2-asset-worker.js",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 31322,
+          "sha256": "a3ee48352fd28d992d677b68ec17867280fb68895794fbff2800c4f70e759e71"
+        },
+        {
+          "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 26425,
+          "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
+        },
+        {
+          "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 252454,
+          "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+        },
+        {
+          "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 22689,
+          "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
+        },
+        {
+          "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 259326,
+          "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+        },
+        {
+          "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 8332,
+          "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+        },
+        {
+          "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+          "status": 200,
+          "curlExit": 0,
+          "stderr": "",
+          "bytes": 164087,
+          "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+        }
+      ]
+    }
+  ]
+}

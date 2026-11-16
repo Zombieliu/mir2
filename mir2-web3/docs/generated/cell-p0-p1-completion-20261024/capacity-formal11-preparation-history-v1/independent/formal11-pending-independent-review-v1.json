@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T14:13:45.2418824Z",
+  "state": "PENDING_FORMAL11_TEMPLATE_READ_ONLY_QA_COMPLETE",
+  "prepared": {
+    "sha256": "94a278e73504c869afba7360b3b784f6e31c26a4e2f4f838e6c8573c2cac87bf",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\TEMPLATE-PREPARED-v3.json",
+    "bytes": 18283
+  },
+  "previousPrepared": {
+    "sha256": "e3869511d80368abdc4749dac1cdef2ec956b79a109dade56c07fcb9a1f6f6c1",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\TEMPLATE-PREPARED-v2.json",
+    "bytes": 16379
+  },
+  "namespaceCorrection": {
+    "sha256": "831099f2804b97947f92b73b0fab01d396ce2445642e0c2b28b716024e2c3684",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\evidence-namespace-correction-v3.json",
+    "bytes": 4597
+  },
+  "verdict": {
+    "eligibleForAccountPreparationNow": false,
+    "pendingTemplateContractPassed": true,
+    "eligibleForRealmExecutionNow": false,
+    "eligibleForSealNow": false,
+    "eligibleForSourceGuardNow": false,
+    "capacityAccepted": false,
+    "namespaceFindingF1Closed": true,
+    "fixedCellStarted": false,
+    "blockingFindingIdsForPendingTemplate": []
+  },
+  "scope": "Prepared-only review. Fresh Probe15 run, success/collection/independent schema/source closure are not yet final and this review gives no formal execution approval.",
+  "rawClosure": {
+    "wireAndDriverContractRawPinsUnchanged": true,
+    "v2Current60PinsWereCheckedBeforeV3": true,
+    "currentPinRecordsMatched": 68,
+    "v3FiveImportMutationsExactlyReverseToPreservedV2Files": true,
+    "sourceAggregate": "cae4add5222ee86c844c55b0a463daa42c24baadd49df2cf93f21e38a3f4f135",
+    "aggregateIndependentlyRecomputed": true,
+    "pendingFirstGuardsAndNoRuntimeFilesObserved": true
+  },
+  "preservedContract": {
+    "freshProbe15RequiredMinuteWindows": [
+      5,
+      5,
+      6
+    ],
+    "freshProbe15RequiredPhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "cohorts": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "originalResourceAnd100SceneRawExact": true,
+    "caps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "originalFormal10PolicyJsonExact": true,
+    "resumeSamples": 5,
+    "soakSeconds": 7200,
+    "wallSeconds": 18000,
+    "failedAndPartialEvidenceRetained": true,
+    "originalPhaseWindowAndHpDictionaryModulesRawExact": true,
+    "actualElapsedPhaseAndTrue60SecondWindowContractsRemain": true,
+    "inputLibSameAsReviewed15ExceptCaps": true,
+    "completeFormalMinuteWindows": 146,
+    "stageSeconds": 300,
+    "saveSamples": 5,
+    "allSixReportMetadataSourceAndSidecarChecksPresent": true,
+    "postResumeSeconds": 60
+  },
+  "namespaceFinding": {
+    "historicalWireEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "wireIdentityAndOriginalWrapperEvidenceUnchanged": true,
+    "originalIssue": "Five formal entry/success-helper modules imported historical wire CORE6d70 for top-level driver evidence metadata, while Probe15 uses b84d/db4e/13+200 at that top level.",
+    "resolution": "Each of the five modules aliases wire CORE as WIRE_CORE_CODE_EVIDENCE_COMMIT and explicitly imports top-level CORE from driver-report. Their remaining bytes exactly reverse to the preserved old modules.",
+    "id": "F1",
+    "currentDriverEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd"
+  },
+  "futureFinalizationRequirements": [
+    "Bind only the actual fresh Probe15 success and its exact original report/raw/monitor/public catalog/provenance/public verification/independent result and normal cleanup. Failed or partial15 must remain a refusal and cannot inherit a later probe.",
+    "Reconcile the actual newly authored Ended15 verifier schema, revision, source manifest and complete source closure. The pending two-source array assumption is not certified for that future producer.",
+    "Bind fresh44 Release/full16 and new5c2e runtime separately from historical b84d Node9/200 and6d wire187/28/8 evidence, then issue a new final current closure and independent preseal review.",
+    "Keep formal11 unsealed/unprovisioned until those requirements pass; this prepared review cannot satisfy the final gate."
+  ],
+  "actions": {
+    "targetModulesImported": false,
+    "cargoExecuted": false,
+    "rawOrRecordingScanned": false,
+    "realmStarted": false,
+    "trackedOrFrozenInputsWritten": false,
+    "sourceGuardExecuted": false,
+    "accountsCreated": 0,
+    "testsExecuted": false,
+    "actualGateExecuted": false
+  },
+  "limits": [
+    "The writer reports33 syntax checks. This reviewer only reads/hash-checks source and provenance and does not rerun them.",
+    "Current15 real probe is ongoing; no terminal status, capacity acceptance, P0 pass or P2 permission is inferred.",
+    "The formal profile remains the original full standard. Static compact scene evidence and conditional supply do not prove180launch/120positive per minute or two-hour capacity."
+  ]
+}

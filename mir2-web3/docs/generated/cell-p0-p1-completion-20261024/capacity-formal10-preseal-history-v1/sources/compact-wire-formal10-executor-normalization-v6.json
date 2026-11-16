@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:55:47.413Z",
+  "scope": "Final unexecuted external formal10 seal executor only: output state must exactly match existing input-lib.verifyRelease; revision names follow this preserved correction.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\seal-compact-wire-formal10-v5.mjs",
+    "bytes": 8034,
+    "sha256": "ee9245233a3640851afb5f2783ea48003c49b9d05599620aa86a34ae38302f0a"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\seal-compact-wire-formal10-v6.mjs",
+    "bytes": 8008,
+    "sha256": "f41409bf89547f8d7500f9ac2eb34a85e8a2d075419361fe1d24e0b7fcd9e471"
+  },
+  "rules": [
+    [
+      "compact-wire-formal10-preseal-input-check-v5.json",
+      "compact-wire-formal10-preseal-input-check-v6.json"
+    ],
+    [
+      "preseal-independent-review-v5.json",
+      "preseal-independent-review-v6.json"
+    ],
+    [
+      "state:'formal10-final-reviewed-sources-only-no-accounts-or-realm'",
+      "state:'final-source-bound-not-executed'"
+    ]
+  ],
+  "exactInverseRestoresOriginalBytes": true,
+  "template47FilesChanged": false,
+  "coreProductChanged": false,
+  "sealed": false,
+  "realmStarted": false
+}

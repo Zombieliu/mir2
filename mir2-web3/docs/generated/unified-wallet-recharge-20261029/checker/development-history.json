@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "finalSyntheticSelftest": "selftest-r5.json",
+  "finalCaseCount": 21,
+  "actualTargetExecution": false,
+  "prior": [
+    {
+      "receipt": {
+        "filename": "unified-final-targeted-checker-selftest.json",
+        "bytes": 888,
+        "sha256": "da3629fc30fd70a0e739ed3331d28c2d77e71a3e2cd8d2872da6ed88fa3efa13"
+      },
+      "passed": false,
+      "caseCount": 0,
+      "failure": "Committed source blob unavailable: apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "phase": "Historical setup/cleanup development; not added to r5count"
+    },
+    {
+      "receipt": {
+        "filename": "unified-final-targeted-checker-selftest-r2.json",
+        "bytes": 3901,
+        "sha256": "e28cb92f60a0ab00bf94172d9e832070108946ca414547d54d5fe5c59cc2c51d"
+      },
+      "passed": false,
+      "caseCount": 16,
+      "failure": "Object reference not set to an instance of an object.",
+      "phase": "Historical setup/cleanup development; not added to r5count"
+    },
+    {
+      "receipt": {
+        "filename": "unified-final-targeted-checker-selftest-r3.json",
+        "bytes": 3901,
+        "sha256": "6cfa58a2480736d310493b6fb8cf95ecb52c5c351c943e39ab10aef8b9251479"
+      },
+      "passed": false,
+      "caseCount": 16,
+      "failure": "Object reference not set to an instance of an object.",
+      "phase": "Historical setup/cleanup development; not added to r5count"
+    },
+    {
+      "receipt": {
+        "filename": "unified-final-targeted-checker-selftest-r4.json",
+        "bytes": 4312,
+        "sha256": "e6ceea98f4e558e93a24577c9bf36415d228a89c163ec117fa28ba9f56aeac53"
+      },
+      "passed": true,
+      "caseCount": 19,
+      "failure": null,
+      "phase": "Historical setup/cleanup development; not added to r5count"
+    }
+  ]
+}

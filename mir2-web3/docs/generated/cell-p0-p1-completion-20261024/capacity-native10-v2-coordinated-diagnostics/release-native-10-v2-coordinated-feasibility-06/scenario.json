@@ -1,0 +1,77 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 252,
+      "y": 671
+    },
+    {
+      "x": 256,
+      "y": 671
+    },
+    {
+      "x": 237,
+      "y": 665
+    },
+    {
+      "x": 236,
+      "y": 650
+    },
+    {
+      "x": 246,
+      "y": 646
+    },
+    {
+      "x": 260,
+      "y": 670
+    },
+    {
+      "x": 266,
+      "y": 648
+    },
+    {
+      "x": 279,
+      "y": 661
+    },
+    {
+      "x": 278,
+      "y": 673
+    },
+    {
+      "x": 248,
+      "y": 678
+    }
+  ],
+  "patrolSpan": 2,
+  "monsterNames": [
+    "Deer",
+    "Scarecrow"
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        5
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  ],
+  "generated": {
+    "staticOnly": true,
+    "purpose": "Unique ordinary ten-player natural-supply feasibility retry; only observer4 anchor252645 to246646 changed after03 path/recording evidence. Not formal capacity acceptance.",
+    "staticReadinessSource": "C:/mir2-build/p01-completion-20261024/partition-native10-actor4-home-candidate-v1.json",
+    "staticReviewSource": "C:/mir2-build/p01-completion-20261024/partition-native10-actor4-home-review-v1.json",
+    "canonicalTargetCount": 32,
+    "priorCanonicalTargetsPreserved": 31,
+    "sustainableSupplyAccepted": false
+  }
+}

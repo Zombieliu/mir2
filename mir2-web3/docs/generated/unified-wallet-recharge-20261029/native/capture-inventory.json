@@ -1,0 +1,459 @@
+{
+  "passed": true,
+  "collectedAtUtc": "2026-10-29T15:54:17.994279+00:00",
+  "phase": "Initial pre-SC-fix integrated GPU phase; inventory of existing files, no new capture",
+  "total": 64,
+  "includedRepresentativeCaptures": 10,
+  "notInstalledWindowsAcceptance": true,
+  "humanAccepted": false,
+  "files": [
+    {
+      "path": "native-gpu-billing/en-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 195162,
+      "sha256": "e89bde603c8379fda6e50b844f8ca38cea057a6f0c593e3c705d19bf1a0fc2d9",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-both-disabled-fiat-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-both-disabled-monthly-1024x768.png",
+      "bytes": 194785,
+      "sha256": "2ce54fd3dc674865b1f4475902788709e14c54a478bbc72515197e6c12470492",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-both-disabled-usdc-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-fiat-1024x768.png",
+      "bytes": 183853,
+      "sha256": "647d765ac88634825e9b164ae93149ad88f541150eb8181a74970ebef0f72de5",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-fiat-disabled-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-loading-1024x768.png",
+      "bytes": 166365,
+      "sha256": "7bbb9bb7f7449fcea36377fa5b82e08c656a69f985f130cdc950a546bde111dc",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-monthly-1024x768.png",
+      "bytes": 194785,
+      "sha256": "2ce54fd3dc674865b1f4475902788709e14c54a478bbc72515197e6c12470492",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-unavailable-1024x768.png",
+      "bytes": 166486,
+      "sha256": "ee5f0a31f67e9e512cf6f726cc6104579c254dfe2b0d87c1fb0ddd186ef3c632",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-usdc-confirmation-1024x768.png",
+      "bytes": 226728,
+      "sha256": "c8c01bc7a9c3fb9721765a042e405e11c59ef70ebf233dd465a5ee2578417693",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-usdc-disabled-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-usdc-expired-review-1024x768.png",
+      "bytes": 216139,
+      "sha256": "b584eedee80634a8c75b18fb4bab2ec51df7b24550190d69c78a63a98e95d31e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/en-usdc-preparing-1024x768.png",
+      "bytes": 224609,
+      "sha256": "31648c8353539f0ec6996ffaefee906341fa0e17b6f93a74248b488b9656e6ae",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 180657,
+      "sha256": "1ecc40192318faff29f6c512c2540172b14b0601c1274a96c3eb789f69c68297",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-both-disabled-fiat-1024x768.png",
+      "bytes": 179254,
+      "sha256": "0a307c7bac59c0ac40137bb0d83c59ce30afa327fbe1ab42dbef68d2fd425dc2",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-both-disabled-monthly-1024x768.png",
+      "bytes": 180018,
+      "sha256": "a8f9480ad63d129a55f092b515cec8082d3245b86b0cf510b635a2f0023043a9",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-both-disabled-usdc-1024x768.png",
+      "bytes": 216625,
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-fiat-1024x768.png",
+      "bytes": 176659,
+      "sha256": "8253b987ae8117fe908a8604a2b2a045a6051a42b4cdc7254331e7514048a0a9",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-fiat-disabled-1024x768.png",
+      "bytes": 179254,
+      "sha256": "0a307c7bac59c0ac40137bb0d83c59ce30afa327fbe1ab42dbef68d2fd425dc2",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-loading-1024x768.png",
+      "bytes": 161486,
+      "sha256": "de0a97eefad9c3668df3517c69410246fdaa02c8c6addd77739bffee89037466",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-monthly-1024x768.png",
+      "bytes": 180018,
+      "sha256": "a8f9480ad63d129a55f092b515cec8082d3245b86b0cf510b635a2f0023043a9",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-unavailable-1024x768.png",
+      "bytes": 164120,
+      "sha256": "718a642c5ec438710e50eed71ef311fb990762ede78acb5ed0ea0b9c008eff1e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-usdc-confirmation-1024x768.png",
+      "bytes": 222776,
+      "sha256": "6117abb3d66e34054f2b7ce37870a93d537dcaa4464a51d46c32aa9bc4075466",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-usdc-disabled-1024x768.png",
+      "bytes": 216625,
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-usdc-expired-review-1024x768.png",
+      "bytes": 212902,
+      "sha256": "7f38486cfbc11ba7ff950e17861ec142a9489f3f497f26f807f0c47c6632f938",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-CN-usdc-preparing-1024x768.png",
+      "bytes": 222285,
+      "sha256": "7a47753f4c3d77bf76707b38160dd24b286f8f2a001036949123639e62a8cb7b",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 186403,
+      "sha256": "bf1ef915e46f33b98fbad1363a6e164229cc907a49279f362ec4f75dcc098067",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-both-disabled-fiat-1024x768.png",
+      "bytes": 186477,
+      "sha256": "4d8e20a26822ba9c0cb7907e2e43f82dfac8ef8724c75606640053e5b2e5ffcd",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-both-disabled-monthly-1024x768.png",
+      "bytes": 185473,
+      "sha256": "1865f1446019231326797b4895c776f73d66b0c4bc2069dd710d58754981eb0e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-both-disabled-usdc-1024x768.png",
+      "bytes": 226575,
+      "sha256": "f20819f27ee85dcd94f5651cc7157725fa14324bede2388c72614faa3f9d82a4",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-fiat-1024x768.png",
+      "bytes": 183143,
+      "sha256": "b404c45000ee571166b516ffc409e390334819717626d35647c372d1999020ae",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-fiat-disabled-1024x768.png",
+      "bytes": 186477,
+      "sha256": "4d8e20a26822ba9c0cb7907e2e43f82dfac8ef8724c75606640053e5b2e5ffcd",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-loading-1024x768.png",
+      "bytes": 165315,
+      "sha256": "35fffbd7d5e3880cfa202d597abafc5b9c013d801695505ab732227cd02e9483",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-monthly-1024x768.png",
+      "bytes": 185473,
+      "sha256": "1865f1446019231326797b4895c776f73d66b0c4bc2069dd710d58754981eb0e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-unavailable-1024x768.png",
+      "bytes": 167967,
+      "sha256": "0f832ea800e4e8f278089849936e9ae88af54f66391e1609e691753b01614298",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-usdc-confirmation-1024x768.png",
+      "bytes": 233903,
+      "sha256": "f907341eb17255ee1528afce94c057268371933129e2caaf4b74c1e37b90ed57",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-usdc-disabled-1024x768.png",
+      "bytes": 226575,
+      "sha256": "f20819f27ee85dcd94f5651cc7157725fa14324bede2388c72614faa3f9d82a4",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-usdc-expired-review-1024x768.png",
+      "bytes": 223452,
+      "sha256": "1fe91f9d37e53eac5b013784a34d04fbce1cd38f4abeaa485d7c249e5069dda7",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-billing/zh-TW-usdc-preparing-1024x768.png",
+      "bytes": 233145,
+      "sha256": "c4d016d1a3533f9003664e77c52fae1c80cec9566ab4cf426f64a387ff712314",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-claims-1024x768.png",
+      "bytes": 133324,
+      "sha256": "dcdafa3d12a4d3839f829dae4772f40e13da7f761ed5ff6fb9d7e0d4a5c76fc8",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-delivery-confirm-1024x768.png",
+      "bytes": 257676,
+      "sha256": "50116294479302dbbee7137761f827d94f2256c469d35c8cc05ae41d9546e451",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-mine-1024x768.png",
+      "bytes": 120961,
+      "sha256": "8304c7422869a59e748ef189c02b8db682ba7963c7c5df10d29f11ae4e43ed64",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-public-1024x768.png",
+      "bytes": 145138,
+      "sha256": "d1ee81a82904779c83cf88b8cfbac84f7f92c3920f8ea598b3fafe8a2cd3c6d5",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-publish-1024x768.png",
+      "bytes": 173617,
+      "sha256": "5c3fe2f7bfb8f65e19b4a26fa3f700412a2482c81b4d504c588d5f251bcdd208",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-publish-confirm-1024x768.png",
+      "bytes": 244746,
+      "sha256": "418e2bf4de282e26fb094b5e0a71194e6b8dbe460ad64324ae4f6cf0ac4511c3",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-procurement/procurement-service-1024x768.png",
+      "bytes": 167675,
+      "sha256": "e14ca0227ee84a50cfca116ea8e1a0ee6925201c740942e2ad9fabaf5d59f45a",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-sc-gameplay/zh-CN-bag-item-tooltip-1024x768.png",
+      "bytes": 82019,
+      "sha256": "7c2594d4c1c1f42f6d0062e2e8fd0f5184bad52f65256a716da96f9525c265e3",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-sc-gameplay/zh-CN-npc-opaque-name-1024x768.png",
+      "bytes": 81306,
+      "sha256": "11f120304ade1ab440961399a4c06fa72171a3e8f79b458fa0f0e86cdc27f685",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-sc-gameplay/zh-CN-quest-diary-detail-1024x768.png",
+      "bytes": 683828,
+      "sha256": "6b21a45e06c5c32486aee0dc72172ac24b7102923e65d4eb5d8760809a2eb432",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-guild-gdi/guild-main-window-english-1024x768.png",
+      "bytes": 101428,
+      "sha256": "f7c5b144411e41df694ad1b6cddfb03ad2301b677fdf88423bfbe08bb40cd43a",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/01-wallet-entry-en-offscreen-fixture.png",
+      "bytes": 2480764,
+      "sha256": "a8a8c3622347ba969992aea149a106a122312483853325e5109fba8c35df2893",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/02-wallet-entry-zh-TW-offscreen-fixture.png",
+      "bytes": 2483349,
+      "sha256": "d7881a248aca1689b554744c1f2d3a06521530f78c356f5039c4de100b06cc87",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/03-wallet-pending-zh-TW-offscreen-fixture.png",
+      "bytes": 1619460,
+      "sha256": "e73fde0c41d70b2f32042771bffcdd19fdbfe937446ca632a5fd7be50b0f6a45",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/04-wallet-pending-en-offscreen-fixture.png",
+      "bytes": 1614367,
+      "sha256": "28b36cea160fe621edc10a344347d723d6b211b52c3f9db9bcd7d114e79fb285",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/05-wallet-pending-zh-CN-all-locales-offscreen-fixture.png",
+      "bytes": 1615415,
+      "sha256": "1553b507e0a5f7da4f0ddd74068a402a69d6bd0202f9c205fbd00f592b7ee86e",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/06-wallet-pending-zh-TW-all-locales-offscreen-fixture.png",
+      "bytes": 1619460,
+      "sha256": "e73fde0c41d70b2f32042771bffcdd19fdbfe937446ca632a5fd7be50b0f6a45",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/07-wallet-pending-en-all-locales-offscreen-fixture.png",
+      "bytes": 1614367,
+      "sha256": "28b36cea160fe621edc10a344347d723d6b211b52c3f9db9bcd7d114e79fb285",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/08-wallet-pending-pt-BR-all-locales-offscreen-fixture.png",
+      "bytes": 1616409,
+      "sha256": "1ca9df3936a38bdcacb187e737de80594483e3d94ec1cd10cc19bfd68afd7870",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/09-wallet-pending-ru-all-locales-offscreen-fixture.png",
+      "bytes": 1616842,
+      "sha256": "975c86755413b82b5087c0c3a5e9024ef347392ebd83d5d46cc7c4c5f843e2d8",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/10-wallet-pending-hi-all-locales-offscreen-fixture.png",
+      "bytes": 1612922,
+      "sha256": "87b7ba9dd73af9a5dc884ffa976ba96b87c8155011ecaf9e66b7f53862ffa3f2",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/11-wallet-pending-id-all-locales-offscreen-fixture.png",
+      "bytes": 1618578,
+      "sha256": "5ebfc2321360649bafd1ddb2e563da1746a3f38d90b2fd2b16956fbe3c4193e3",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/12-wallet-pending-vi-all-locales-offscreen-fixture.png",
+      "bytes": 1617893,
+      "sha256": "d08d17273299c044deca6f678200d03f123cdbb5acf2808f75cc99b8fbe39340",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/13-wallet-pending-th-all-locales-offscreen-fixture.png",
+      "bytes": 1614013,
+      "sha256": "fa503f0bf8e803988a4654106952d65e8de799a0f5f6ccebe16350de8a023b2c",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "native-gpu-wallet/14-wallet-pending-ar-all-locales-offscreen-fixture.png",
+      "bytes": 1612312,
+      "sha256": "f404e0ea0c9e673a27fec709f5d3323091064ce2bb808d942da93df5be829778",
+      "width": 1024,
+      "height": 768
+    }
+  ]
+}

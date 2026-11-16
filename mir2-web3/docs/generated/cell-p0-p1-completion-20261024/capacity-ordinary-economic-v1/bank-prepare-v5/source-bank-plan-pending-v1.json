@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v5",
+  "state": "SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING",
+  "sourcePrivate": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private",
+  "sourceReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\preparation-episode-receipt-v1.json",
+    "bytes": 5806,
+    "sha256": "0e1f1a303433ce19a5ae3498ea7ece630c5464e9073e0dc00bb2e6737830ca85"
+  },
+  "sourceReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\reports\\1793052124616-e760d348.preparation-report.json",
+    "bytes": 18120,
+    "sha256": "d39fa7b6dba73518b7e9d0d1dddca48742d045b47911ef8d4f657d07d1839a62"
+  },
+  "sourceCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\cleanup-v1.json",
+    "bytes": 1036,
+    "sha256": "ef140703a94a2f0b50c322bea0e8d241c905655d8d6e2ede4fca314d8c6326d0"
+  },
+  "sourcePreparedIndex": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\prepared-index-v1.json",
+    "bytes": 1603,
+    "sha256": "8c3ac2b658f44f0ee6bc42c7ebe0b9921a600c6bb35e9ba3179962d18c22bb03"
+  },
+  "sourceOwnedProcess": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\owned-process-v1.json",
+    "bytes": 671,
+    "sha256": "f5f7e28aaf4594c50b99ebd5c9fd92a0eca2eeab0e30dd6210c087cf75fd8f13"
+  },
+  "sourceFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\frozen-source-v1.json",
+    "bytes": 85716,
+    "sha256": "e3613a784209db9f13999cdafa86fe66a47c4667ba064da026c4b8f587deca0a"
+  },
+  "sourceOriginalVerdict": {
+    "ok": false,
+    "error": "No walk path on 0 from 304,613 to 289,617",
+    "preparedCount": 4,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "sourceControlledPoolAccounts": 100,
+  "sourceReadyCharacters": 5,
+  "sourceRegisteredAccounts": 95,
+  "sourceStoreTotalAccounts": 101,
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    }
+  ],
+  "sourceFailedCharacter": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "notPrepared": true,
+    "catchTimeNormalLogoutFlag": false,
+    "originalFailure": "No walk path on 0 from 304,613 to 289,617",
+    "lastPublicPreparation": {
+      "observedExactHp": 18,
+      "maximumHp": 18,
+      "purchasedHp": 12,
+      "soldVenison": 2,
+      "goldEarned": 495,
+      "actualStagingReached": false
+    },
+    "scope": "V4 fifth actor recovered/earned HP stock but failed the original return path and remains not prepared. V5 must use ordinary fresh relogin/recovery/preparation; no inherited readiness, wrapper grant, HP/position/item edit or origin reset."
+  },
+  "sourcePreparedEligibilityInherited": false,
+  "newCurrentSourceQualification": null,
+  "files": [
+    {
+      "relative": "accounts.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\accounts.json",
+      "bytes": 125731,
+      "sha256": "3a10460e314161ed3a7af5806f3881584b65fda4042a60f3b780e8a938c58f6a"
+    },
+    {
+      "relative": "capacity-pool.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\capacity-pool.json",
+      "bytes": 20677,
+      "sha256": "66ba44b172325fd429398362401af211bd3b3f7de76d8d553f0fbce6a37a4325"
+    },
+    {
+      "relative": "capacity-auth-budget.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 453,
+      "sha256": "533480682819fd70669a1a0184d8642641a154f9558427ac346f69ef0ab3a00b"
+    },
+    {
+      "relative": "recovery-mac-key.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a"
+    },
+    {
+      "relative": "identity-session-secret.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024"
+    },
+    {
+      "relative": "identity-recovery-pepper.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e"
+    },
+    {
+      "relative": "passkey-auth-secret.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72"
+    },
+    {
+      "relative": "save-recovery/.mir2-directory-durability",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+    },
+    {
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "e6332a6f5376d4a0ffc61d412cf83aced574e23e9ab8bff5db232c30ddf0714e"
+    },
+    {
+      "relative": "save-recovery/quarantine/.mir2-directory-durability",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+    }
+  ],
+  "fileCount": 11,
+  "totalBytes": 147515,
+  "recovery": {
+    "expectedControlFiles": [
+      ".mir2-directory-durability",
+      ".mir2-recovery-exclusive.lock",
+      ".mir2-recovery-owner-v1.json",
+      "quarantine/.mir2-directory-durability"
+    ],
+    "journalPayloadsMustEqualZero": true,
+    "preservedDestination": "source-save-recovery-preserved",
+    "activeDestination": "save-recovery",
+    "activeInitialization": "Empty new directory; normal Gateway creates a new path-bound ownership sentinel. Original control files remain unchanged only in preserved archive."
+  },
+  "copyPolicy": {
+    "copyExclusively": true,
+    "sourcePinsBeforeAndAfter": true,
+    "fullStoreAndPoolRawBytes": true,
+    "accountStoreRewritePerformed": false,
+    "poolRewritePerformed": false,
+    "stockOrPositionEditPerformed": false,
+    "authLedgerCopiedUnchanged": true,
+    "loginNotBeforeOverrideAllowed": false,
+    "seederInvoked": false,
+    "secretsValuesReported": false,
+    "latestLedgerSource": "same actual V4 cold bank; no older V3/V2 traffic replay"
+  },
+  "scope": "Continue the exact normally closed actual V4 partial bank. Complete current Store/pool, four same secrets, latest V4 client auth ledger and current four active recovery controls are copied EXCL without editing any values. V4 no-path false/prepared4 is retained; all100 start with zero new prepared evidence. Fifth ready identity/HP12 purchase is not inherited preparation. First4 need fresh stock/no-economic-command proof. Backend is immutable V6 ee06 reused32 Rust; current helper JS needs its actual new commit and Root receipt.",
+  "priorRecoveryArchive": {
+    "directory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\source-save-recovery-preserved",
+    "retainInPlace": true,
+    "copiedToNewActive": false,
+    "files": [
+      {
+        "relative": ".mir2-directory-durability",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      },
+      {
+        "relative": ".mir2-recovery-exclusive.lock",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "relative": ".mir2-recovery-owner-v1.json",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "77239c86e0c1dcf135f91ef2c6c98cec58c021d337a433d3ab68295f52b1c46c"
+      },
+      {
+        "relative": "quarantine/.mir2-directory-durability",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    ],
+    "scope": "V4 source-preserved controls remain byte-identical in place and are not copied into new active recovery. Only current V4 active controls are preserved in the new package."
+  },
+  "sourceIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\root-independent-cleanup-v1.json",
+    "bytes": 225,
+    "sha256": "1026eba9ce43ab87e45cfb3a93461474e8dbb8f70d8619ede0cab65e79455898"
+  },
+  "sourceFirst4InventoryReuse": true
+}

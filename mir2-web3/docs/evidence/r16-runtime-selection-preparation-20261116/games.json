@@ -1,0 +1,876 @@
+{
+  "passed": true,
+  "publicNetworkAcceptance": false,
+  "cohorts": [
+    {
+      "cohort": "world-r1",
+      "source": "r16-selection-aef8e659",
+      "mode": "compatibility",
+      "language": "en-US",
+      "passed": true,
+      "rawReceiptSha256": "bc1f238bcd7620c93153d58ac904655e5f8037ca87881de0ae8d75c877e72e3b",
+      "scope": "Fresh ordinary Warrior in Bichon, complete original standing/walking body verification and a natural DOM walking frame; local shared Zone AI1/2 idle-roam candidate Gateway, reused real asset CacheStorage and cleared browser HTTP cache. Not public-network, pure-GPU/all-directions or complete1:1 acceptance.",
+      "preparationBeforeFirstPlayableMs": 8975,
+      "firstRequestBeforeFirstPlayableMs": 8974,
+      "runtimeReadyAfterFirstPlayableMs": 1675,
+      "nativeReadyAfterFirstPlayableMs": 25080,
+      "movementAckMs": 108,
+      "wasmRequestsAcrossTwoDocuments": 2,
+      "runtimeRequests": [
+        {
+          "at": 1794768442141,
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+        },
+        {
+          "at": 1794768485844,
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+        }
+      ],
+      "runtimeMarks": [
+        {
+          "name": "bevyRuntimePreparationStart",
+          "epochMs": 1794768442140,
+          "detail": {
+            "backend": "webgpu",
+            "packageId": "webgpu",
+            "stage": "character-select"
+          }
+        },
+        {
+          "name": "bevyRuntimeDownload",
+          "epochMs": 1794768442141,
+          "detail": {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0,
+            "preparation": true
+          }
+        },
+        {
+          "name": "firstPlayableFrame",
+          "epochMs": 1794768451115,
+          "detail": {
+            "mapFileName": "0",
+            "player": {
+              "x": 288,
+              "y": 616
+            },
+            "playerObjectId": "1000",
+            "worldTick": 3,
+            "runtimePhase": "deferred",
+            "sceneAssets": {
+              "key": "0.map:244:580:348:681",
+              "ready": true,
+              "interactionReady": true,
+              "visualReady": false,
+              "status": "timeout",
+              "aborted": false,
+              "total": 115,
+              "loaded": 24,
+              "failed": 0,
+              "pending": 91,
+              "durationMs": 30,
+              "failedUrls": []
+            }
+          }
+        },
+        {
+          "name": "bevyRuntimeStart",
+          "epochMs": 1794768451119,
+          "detail": {
+            "runtimeVersion": "bevy-0c553a754308e5b8",
+            "runtimeAssetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c"
+          }
+        },
+        {
+          "name": "bevyRuntimeReady",
+          "epochMs": 1794768452790,
+          "detail": {
+            "reused": false,
+            "backend": "webgpu",
+            "compiledBackend": "webgpu",
+            "fallbackFrom": null,
+            "packageId": "webgpu"
+          }
+        }
+      ],
+      "fonts": {
+        "passed": true,
+        "expected": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "cacheReadsOnly": true,
+        "rows": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "present": true,
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "present": true,
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "present": true,
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "present": true,
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "present": true,
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "present": true,
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "hud113": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "diaryKeys": {
+        "passed": true,
+        "label": "first-entry",
+        "before": {
+          "at": 1794768476348,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-web3-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 20,
+            "openRevision": 1
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            }
+          },
+          "keyboard": null,
+          "first": 1794768451115
+        },
+        "opened": {
+          "at": 1794768476643,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-web3-canvas",
+          "quest": {
+            "ready": true,
+            "open": true,
+            "generation": 2,
+            "revision": 21,
+            "openRevision": 2
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768476481,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768451115
+        },
+        "closed": {
+          "at": 1794768477370,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-web3-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 24,
+            "openRevision": 3
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768477329,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "handled": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": null,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": true,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768451115
+        },
+        "zeroGameplayMutations": true,
+        "scope": "Actual installed Edge, original Native runtime and normal configured Q. HUD readiness is observed, never forced or simulated."
+      },
+      "reopenedDiaryKeys": {
+        "passed": true,
+        "label": "reopened",
+        "before": {
+          "at": 1794768494536,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-web3-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 2,
+            "openRevision": 1
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            }
+          },
+          "keyboard": null,
+          "first": 1794768493487
+        },
+        "opened": {
+          "at": 1794768494763,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-web3-canvas",
+          "quest": {
+            "ready": true,
+            "open": true,
+            "generation": 2,
+            "revision": 3,
+            "openRevision": 2
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768494669,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768493487
+        },
+        "closed": {
+          "at": 1794768495218,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-web3-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 4,
+            "openRevision": 3
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768495186,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "handled": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": null,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": true,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768493487
+        },
+        "zeroGameplayMutations": true,
+        "scope": "Actual installed Edge, original Native runtime and normal configured Q. HUD readiness is observed, never forced or simulated."
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "bodyDelivery": {
+        "passed": true,
+        "bodyPassed": true,
+        "framePassed": true,
+        "originalVisualBudgetMs": 65000,
+        "expectedJsonBytes": 764724,
+        "expectedJsonSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngCount": 240,
+        "scope": "Controlled local transport failures, original full payload and visible exact-PNG natural frame. No valid body prefill, forced actor motion, WebSocket interception or pure-GPU/all-directions acceptance."
+      }
+    },
+    {
+      "cohort": "world-r2",
+      "source": "r16-selection-aef8e659",
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "passed": true,
+      "rawReceiptSha256": "50595cb1149b7d133e24532f6e93eb01adbd6befe9cdfe6c1b61c71cfdaf3f98",
+      "scope": "Fresh ordinary Warrior in Bichon, complete original standing/walking body verification and a natural DOM walking frame; local shared Zone AI1/2 idle-roam candidate Gateway, reused real asset CacheStorage and cleared browser HTTP cache. Not public-network, pure-GPU/all-directions or complete1:1 acceptance.",
+      "preparationBeforeFirstPlayableMs": 8350,
+      "firstRequestBeforeFirstPlayableMs": 8349,
+      "runtimeReadyAfterFirstPlayableMs": 733,
+      "nativeReadyAfterFirstPlayableMs": 52755,
+      "movementAckMs": 147,
+      "wasmRequestsAcrossTwoDocuments": 2,
+      "runtimeRequests": [
+        {
+          "at": 1794768528240,
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm"
+        },
+        {
+          "at": 1794768597815,
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm"
+        }
+      ],
+      "runtimeMarks": [
+        {
+          "name": "bevyRuntimePreparationStart",
+          "epochMs": 1794768528239,
+          "detail": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared",
+            "stage": "character-select"
+          }
+        },
+        {
+          "name": "bevyRuntimeDownload",
+          "epochMs": 1794768528239,
+          "detail": {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0,
+            "preparation": true
+          }
+        },
+        {
+          "name": "firstPlayableFrame",
+          "epochMs": 1794768536589,
+          "detail": {
+            "mapFileName": "0",
+            "player": {
+              "x": 288,
+              "y": 616
+            },
+            "playerObjectId": "1000",
+            "worldTick": 3,
+            "runtimePhase": "deferred",
+            "sceneAssets": {
+              "key": "0.map:244:580:348:681",
+              "ready": true,
+              "interactionReady": true,
+              "visualReady": false,
+              "status": "timeout",
+              "aborted": false,
+              "total": 115,
+              "loaded": 24,
+              "failed": 0,
+              "pending": 91,
+              "durationMs": 19,
+              "failedUrls": []
+            }
+          }
+        },
+        {
+          "name": "bevyRuntimeStart",
+          "epochMs": 1794768536596,
+          "detail": {
+            "runtimeVersion": "bevy-0c553a754308e5b8",
+            "runtimeAssetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c"
+          }
+        },
+        {
+          "name": "bevyRuntimeReady",
+          "epochMs": 1794768537322,
+          "detail": {
+            "reused": false,
+            "backend": "webgl2",
+            "compiledBackend": "webgl2",
+            "fallbackFrom": null,
+            "packageId": "webgl2-shared"
+          }
+        }
+      ],
+      "fonts": {
+        "passed": true,
+        "expected": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "cacheReadsOnly": true,
+        "rows": [
+          {
+            "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+            "present": true,
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "present": true,
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "present": true,
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "present": true,
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "present": true,
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "present": true,
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "hud113": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "diaryKeys": {
+        "passed": true,
+        "label": "first-entry",
+        "before": {
+          "at": 1794768589385,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-quest-ui-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 38,
+            "openRevision": 1
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            }
+          },
+          "keyboard": null,
+          "first": 1794768536589
+        },
+        "opened": {
+          "at": 1794768589508,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-quest-ui-canvas",
+          "quest": {
+            "ready": true,
+            "open": true,
+            "generation": 2,
+            "revision": 39,
+            "openRevision": 2
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768589435,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768536589
+        },
+        "closed": {
+          "at": 1794768589768,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-quest-ui-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 40,
+            "openRevision": 3
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768589749,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "handled": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": null,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": true,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768536589
+        },
+        "zeroGameplayMutations": true,
+        "scope": "Actual installed Edge, original Native runtime and normal configured Q. HUD readiness is observed, never forced or simulated."
+      },
+      "reopenedDiaryKeys": {
+        "passed": true,
+        "label": "reopened",
+        "before": {
+          "at": 1794768606302,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-quest-ui-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 2,
+            "openRevision": 1
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            }
+          },
+          "keyboard": null,
+          "first": 1794768605629
+        },
+        "opened": {
+          "at": 1794768606526,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-quest-ui-canvas",
+          "quest": {
+            "ready": true,
+            "open": true,
+            "generation": 2,
+            "revision": 4,
+            "openRevision": 2
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768606403,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768605629
+        },
+        "closed": {
+          "at": 1794768606868,
+          "owner": "bevy",
+          "interactive": true,
+          "canvas": "#mir2-quest-ui-canvas",
+          "quest": {
+            "ready": true,
+            "open": false,
+            "generation": 2,
+            "revision": 5,
+            "openRevision": 3
+          },
+          "hud": {
+            "ready": true,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "keyboard": {
+            "at": 1794768606839,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "handled": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": null,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": true,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "first": 1794768605629
+        },
+        "zeroGameplayMutations": true,
+        "scope": "Actual installed Edge, original Native runtime and normal configured Q. HUD readiness is observed, never forced or simulated."
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "bodyDelivery": {
+        "passed": true,
+        "bodyPassed": true,
+        "framePassed": true,
+        "originalVisualBudgetMs": 65000,
+        "expectedJsonBytes": 764724,
+        "expectedJsonSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngCount": 240,
+        "scope": "Controlled local transport failures, original full payload and visible exact-PNG natural frame. No valid body prefill, forced actor motion, WebSocket interception or pure-GPU/all-directions acceptance."
+      }
+    }
+  ]
+}

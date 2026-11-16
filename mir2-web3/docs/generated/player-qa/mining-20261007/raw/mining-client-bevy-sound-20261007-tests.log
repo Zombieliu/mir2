@@ -1,0 +1,26 @@
+binary=C:\mir2-build\mining-native-isolated-20261006\mining-client-bevy-sound-tests-328b6515d182eaa5.exe
+
+running 2 tests
+test audio::tests::mining_hit_wall_uses_original_allowlisted_clip_and_packet_sequence ... ok
+test audio::tests::mining_real_clip_loads_and_spawns_one_gameplay_player ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1255 filtered out; finished in 0.01s
+
+
+running 1 test
+test audio::tests::gameplay_sound_queue_is_allowlisted_bounded_and_generation_scoped ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1256 filtered out; finished in 0.00s
+
+
+running 1 test
+test audio::tests::gameplay_sound_uses_real_loaded_handle_once_and_disabled_audio_drops_pending ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1256 filtered out; finished in 0.01s
+
+
+running 1 test
+test audio::tests::same_frame_ui_and_gameplay_sounds_keep_independent_players ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1256 filtered out; finished in 0.01s
+

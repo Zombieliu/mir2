@@ -1,0 +1,687 @@
+{
+  "schemaVersion": 1,
+  "sourcePackage": "C:/mir2-build/p01-completion-20261024/ordinary-v6-full-lifecycle-v1",
+  "realmStamp": "1793057632464-9c427e44",
+  "runId": "1793057646570-c2fb7dc7",
+  "copiedFileCount": 51,
+  "copiedBytes": 3865212,
+  "copyMode": "COPYFILE_EXCL; no overwrite or transformation",
+  "allRawCopiesMatched": true,
+  "sourceUnchangedBeforeAfter": true,
+  "copiedFiles": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\source-lib-v1.mjs",
+        "bytes": 13053,
+        "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+      },
+      "destination": "tools/source-lib-v1.mjs",
+      "bytes": 13053,
+      "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-source-lib-v1.mjs",
+        "bytes": 9374,
+        "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+      },
+      "destination": "tools/backend-source-lib-v1.mjs",
+      "bytes": 9374,
+      "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\verify-inputs.mjs",
+        "bytes": 1397,
+        "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+      },
+      "destination": "tools/verify-inputs.mjs",
+      "bytes": 1397,
+      "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\finalize-inputs-v1.mjs",
+        "bytes": 2989,
+        "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+      },
+      "destination": "tools/finalize-inputs-v1.mjs",
+      "bytes": 2989,
+      "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\freeze-inputs-v1.mjs",
+        "bytes": 1893,
+        "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+      },
+      "destination": "tools/freeze-inputs-v1.mjs",
+      "bytes": 1893,
+      "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\run-owned-full.mjs",
+        "bytes": 14907,
+        "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+      },
+      "destination": "tools/run-owned-full.mjs",
+      "bytes": 14907,
+      "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\audit-owned-full.mjs",
+        "bytes": 9736,
+        "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+      },
+      "destination": "tools/audit-owned-full.mjs",
+      "bytes": 9736,
+      "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "destination": "tools/frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "destination": "tools/initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\author-pending-v1.mjs",
+        "bytes": 16759,
+        "sha256": "03b3e11e5784575c5d2f3b2b96491a0390a348a5371e960bdb927d9eb49c26a7"
+      },
+      "destination": "tools/author-pending-v1.mjs",
+      "bytes": 16759,
+      "sha256": "03b3e11e5784575c5d2f3b2b96491a0390a348a5371e960bdb927d9eb49c26a7",
+      "role": "reviewed-owned-tool",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\authoring-receipt-v1.json",
+        "bytes": 4463,
+        "sha256": "4d33c101cbde4ff94b6a49810116caa5be0132698c2f89d0242b4a8045d4f8dd"
+      },
+      "destination": "preparation/authoring-receipt-v1.json",
+      "bytes": 4463,
+      "sha256": "4d33c101cbde4ff94b6a49810116caa5be0132698c2f89d0242b4a8045d4f8dd",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-release-binding-pending-v1.json",
+        "bytes": 1160,
+        "sha256": "e1ee1d57a60ba5816f36bcacfa49b2c0e5ffefbec6ab1be4483b463cb2bc49ae"
+      },
+      "destination": "preparation/backend-release-binding-pending-v1.json",
+      "bytes": 1160,
+      "sha256": "e1ee1d57a60ba5816f36bcacfa49b2c0e5ffefbec6ab1be4483b463cb2bc49ae",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\candidate-driver-preview-v1.json",
+        "bytes": 10188,
+        "sha256": "bef9ac21b05c6f85d522205b8935a371752470e6f01d03e59f245f7b178cb28f"
+      },
+      "destination": "preparation/candidate-driver-preview-v1.json",
+      "bytes": 10188,
+      "sha256": "bef9ac21b05c6f85d522205b8935a371752470e6f01d03e59f245f7b178cb28f",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\config-pending-v1.json",
+        "bytes": 3609,
+        "sha256": "d74e62c41e5892ed80a68ee7796f919f1580099d26287eb5f4ec9ade130656dd"
+      },
+      "destination": "preparation/config-pending-v1.json",
+      "bytes": 3609,
+      "sha256": "d74e62c41e5892ed80a68ee7796f919f1580099d26287eb5f4ec9ade130656dd",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\derivation-v1.json",
+        "bytes": 10990,
+        "sha256": "14bdd3e34265629b01ed985e7ccad91dbedcd321653952c167fc25e4e5e62c9a"
+      },
+      "destination": "preparation/derivation-v1.json",
+      "bytes": 10990,
+      "sha256": "14bdd3e34265629b01ed985e7ccad91dbedcd321653952c167fc25e4e5e62c9a",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\README-PENDING.md",
+        "bytes": 2648,
+        "sha256": "b78e928824ad3b237cf854d8b6d03c51718fab5a5f89bc8cbe26b4800fa6e051"
+      },
+      "destination": "preparation/README-PENDING.md",
+      "bytes": 2648,
+      "sha256": "b78e928824ad3b237cf854d8b6d03c51718fab5a5f89bc8cbe26b4800fa6e051",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\root-pending-tools-review-v1.json",
+        "bytes": 1226,
+        "sha256": "11204df5b1d8034419a12155ea6cb5d8f064ada7a266b4099c8e2bbb56d1cc2c"
+      },
+      "destination": "preparation/root-pending-tools-review-v1.json",
+      "bytes": 1226,
+      "sha256": "11204df5b1d8034419a12155ea6cb5d8f064ada7a266b4099c8e2bbb56d1cc2c",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-checks-v1.json",
+        "bytes": 7814,
+        "sha256": "732c75d397076c6dfee2c67d38b339e1c328508d89a9c1744fdaafac2e7c0814"
+      },
+      "destination": "preparation/syntax-checks-v1.json",
+      "bytes": 7814,
+      "sha256": "732c75d397076c6dfee2c67d38b339e1c328508d89a9c1744fdaafac2e7c0814",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-source-lib-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-source-lib-v1.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-backend-source-lib-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-backend-source-lib-v1.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-verify-inputs.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-verify-inputs.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-finalize-inputs-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-finalize-inputs-v1.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-freeze-inputs-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-freeze-inputs-v1.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-run-owned-full.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-run-owned-full.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-audit-owned-full.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-audit-owned-full.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-frozen-audit-support.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-frozen-audit-support.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-author-pending-v1.mjs.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "preparation/syntax-author-pending-v1.mjs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "unaltered-authoring-or-Root-review",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-release-binding-v1.json",
+        "bytes": 1634,
+        "sha256": "9b50ff3f97e2e945fc149aab16c5b646f42c5a5b7dbbec328110cb90fd3584e8"
+      },
+      "destination": "inputs/backend-release-binding-v1.json",
+      "bytes": 1634,
+      "sha256": "9b50ff3f97e2e945fc149aab16c5b646f42c5a5b7dbbec328110cb90fd3584e8",
+      "role": "actual-final-and-frozen-input",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\final-current-driver-v1.json",
+        "bytes": 18310,
+        "sha256": "177431db8c72a2bbe19e92a1d1a1158367f5c89a9147e669b979d14903ea1e91"
+      },
+      "destination": "inputs/final-current-driver-v1.json",
+      "bytes": 18310,
+      "sha256": "177431db8c72a2bbe19e92a1d1a1158367f5c89a9147e669b979d14903ea1e91",
+      "role": "actual-final-and-frozen-input",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\final-input-binding-v1.json",
+        "bytes": 49059,
+        "sha256": "3fcf2b2b7bd5666fa53d968ab7d6d088e7f2f2dbb5b29feef892ab3028baae58"
+      },
+      "destination": "inputs/final-input-binding-v1.json",
+      "bytes": 49059,
+      "sha256": "3fcf2b2b7bd5666fa53d968ab7d6d088e7f2f2dbb5b29feef892ab3028baae58",
+      "role": "actual-final-and-frozen-input",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\frozen-inputs-v1.json",
+        "bytes": 66852,
+        "sha256": "cfb6fd6ed09e72393afe61d089024dd067d7b4ced5a782fa41de2cd329802c90"
+      },
+      "destination": "inputs/frozen-inputs-v1.json",
+      "bytes": 66852,
+      "sha256": "cfb6fd6ed09e72393afe61d089024dd067d7b4ced5a782fa41de2cd329802c90",
+      "role": "actual-final-and-frozen-input",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.audit-source.mjs",
+        "bytes": 9736,
+        "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+      },
+      "destination": "run/1793057632464-9c427e44.audit-source.mjs",
+      "bytes": 9736,
+      "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.backend-source.json",
+        "bytes": 50669,
+        "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970"
+      },
+      "destination": "run/1793057632464-9c427e44.backend-source.json",
+      "bytes": 50669,
+      "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.independent-audit.json",
+        "bytes": 1866,
+        "sha256": "df0043fce0c26b7e08ab3053e6732ca4b71524512ea2bdb65ece72a4643a7c4c"
+      },
+      "destination": "run/1793057632464-9c427e44.independent-audit.json",
+      "bytes": 1866,
+      "sha256": "df0043fce0c26b7e08ab3053e6732ca4b71524512ea2bdb65ece72a4643a7c4c",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.prepared-profile.json",
+        "bytes": 10605,
+        "sha256": "96424c6908d3eee2ea1fc531971c624edb310e69e2c8176ead2ee4e74777c0c6"
+      },
+      "destination": "run/1793057632464-9c427e44.prepared-profile.json",
+      "bytes": 10605,
+      "sha256": "96424c6908d3eee2ea1fc531971c624edb310e69e2c8176ead2ee4e74777c0c6",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.realm-evidence.json",
+        "bytes": 36403,
+        "sha256": "f4a3adec5a5cbda8a3da45c2b7e35a538368adaffea9e59776778d1422f69329"
+      },
+      "destination": "run/1793057632464-9c427e44.realm-evidence.json",
+      "bytes": 36403,
+      "sha256": "f4a3adec5a5cbda8a3da45c2b7e35a538368adaffea9e59776778d1422f69329",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.release-input.json",
+        "bytes": 2257,
+        "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+      },
+      "destination": "run/1793057632464-9c427e44.release-input.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.runner-source.mjs",
+        "bytes": 14907,
+        "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+      },
+      "destination": "run/1793057632464-9c427e44.runner-source.mjs",
+      "bytes": 14907,
+      "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.source-manifest-verification.json",
+        "bytes": 780,
+        "sha256": "72a8707b30363c025932f1d40b771bd4f68c34fefac01b1ee6827580c95ca209"
+      },
+      "destination": "run/1793057632464-9c427e44.source-manifest-verification.json",
+      "bytes": 780,
+      "sha256": "72a8707b30363c025932f1d40b771bd4f68c34fefac01b1ee6827580c95ca209",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.zone-metrics.json",
+        "bytes": 23593,
+        "sha256": "97ad70dae121a5f7698f9285c76462aff8047b1aa06e31f1d6bc7306e3b1270f"
+      },
+      "destination": "run/1793057632464-9c427e44.zone-metrics.json",
+      "bytes": 23593,
+      "sha256": "97ad70dae121a5f7698f9285c76462aff8047b1aa06e31f1d6bc7306e3b1270f",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-a.trace.jsonl",
+        "bytes": 979451,
+        "sha256": "0881d61e003a0b10121c8169334a7ff0c2011f531edd366143f3fd2f14745aa6"
+      },
+      "destination": "run/1793057646570-c2fb7dc7-a.trace.jsonl",
+      "bytes": 979451,
+      "sha256": "0881d61e003a0b10121c8169334a7ff0c2011f531edd366143f3fd2f14745aa6",
+      "role": "original-redacted-public-trace",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-b.trace.jsonl",
+        "bytes": 904582,
+        "sha256": "bd43c2f921092e173966fa4244905217e096faf6aaa29bb83f094cd9ce5a45b1"
+      },
+      "destination": "run/1793057646570-c2fb7dc7-b.trace.jsonl",
+      "bytes": 904582,
+      "sha256": "bd43c2f921092e173966fa4244905217e096faf6aaa29bb83f094cd9ce5a45b1",
+      "role": "original-redacted-public-trace",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-guard-newCharacter.trace.jsonl",
+        "bytes": 3486,
+        "sha256": "270efea1e427e29060400fa4f3395b858d52f3a5217b172f37745025a4e26369"
+      },
+      "destination": "run/1793057646570-c2fb7dc7-guard-newCharacter.trace.jsonl",
+      "bytes": 3486,
+      "sha256": "270efea1e427e29060400fa4f3395b858d52f3a5217b172f37745025a4e26369",
+      "role": "original-redacted-public-trace",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-guard-startGame.trace.jsonl",
+        "bytes": 3448,
+        "sha256": "82f93edf03f054950d89fe06d2f3e1f93b3dda94e07e9f47e88c55ac53b31bad"
+      },
+      "destination": "run/1793057646570-c2fb7dc7-guard-startGame.trace.jsonl",
+      "bytes": 3448,
+      "sha256": "82f93edf03f054950d89fe06d2f3e1f93b3dda94e07e9f47e88c55ac53b31bad",
+      "role": "original-redacted-public-trace",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-relogin-0.trace.jsonl",
+        "bytes": 684855,
+        "sha256": "fb608ef176c6dd893caad96253789d45ce3a44a5b45eb019c30ea20ed143aa9b"
+      },
+      "destination": "run/1793057646570-c2fb7dc7-relogin-0.trace.jsonl",
+      "bytes": 684855,
+      "sha256": "fb608ef176c6dd893caad96253789d45ce3a44a5b45eb019c30ea20ed143aa9b",
+      "role": "original-redacted-public-trace",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-relogin-1.trace.jsonl",
+        "bytes": 680801,
+        "sha256": "ff65627ebaa59340e64281b045c32da6f82dd73e9353fc50498c03104fe0c31f"
+      },
+      "destination": "run/1793057646570-c2fb7dc7-relogin-1.trace.jsonl",
+      "bytes": 680801,
+      "sha256": "ff65627ebaa59340e64281b045c32da6f82dd73e9353fc50498c03104fe0c31f",
+      "role": "original-redacted-public-trace",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7.report.json",
+        "bytes": 109554,
+        "sha256": "1879df81f1662f75c9a78e6eef5b7bc79743605e66ceb96c6779ce92289755fd"
+      },
+      "destination": "run/1793057646570-c2fb7dc7.report.json",
+      "bytes": 109554,
+      "sha256": "1879df81f1662f75c9a78e6eef5b7bc79743605e66ceb96c6779ce92289755fd",
+      "role": "original-public-run-artifact",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\root-independent-cleanup-v1.json",
+        "bytes": 258,
+        "sha256": "25357f93e278f41f30d3541176ba304ae460ca7607d80ed71bd94eaf8ef42e02"
+      },
+      "destination": "cleanup/root-independent-cleanup-v1.json",
+      "bytes": 258,
+      "sha256": "25357f93e278f41f30d3541176ba304ae460ca7607d80ed71bd94eaf8ef42e02",
+      "role": "actual-independent-Root-OS-check",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\root-focused-receipt-v1.json",
+        "bytes": 20859,
+        "sha256": "48f32bd71d4e7476463998a0db898248b3037397892f4101719c2efffff4b8c4"
+      },
+      "destination": "qualification/root-focused-receipt-v1.json",
+      "bytes": 20859,
+      "sha256": "48f32bd71d4e7476463998a0db898248b3037397892f4101719c2efffff4b8c4",
+      "role": "current-Root647-metadata-only",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+        "bytes": 2241,
+        "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59"
+      },
+      "destination": "qualification/reused-v6-build-receipt.json",
+      "bytes": 2241,
+      "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59",
+      "role": "original-V6-build-metadata-reused-not-rerun",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+        "bytes": 28585,
+        "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+      },
+      "destination": "qualification/reused-v6-rust32-receipt.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d",
+      "role": "original-V6-Rust32-metadata-reused-not-rerun",
+      "exclusiveCopy": true,
+      "sourceUnchangedBeforeAfter": true
+    }
+  ],
+  "exclusions": [
+    "private/ account Store and recovery",
+    "four secret values/files",
+    "registration credential files",
+    "gateway stdout/stderr",
+    "complete spectator/AI-live recordings",
+    "executables",
+    "Root647 stdout/stderr duplicated copies"
+  ],
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

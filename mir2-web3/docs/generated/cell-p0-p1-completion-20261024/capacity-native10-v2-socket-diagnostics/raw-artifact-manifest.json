@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792885245847-0368d2eb",
+      "report": "capacity-native10-v2-socket-diagnostics/release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.report.json",
+      "path": "release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.samples.jsonl",
+      "bytes": 17808660,
+      "sha256": "a42c137132dd966434a46e735dafdd9fd53dd63d6f97983c06ea7f265b4286dc",
+      "projection": "capacity-native10-v2-socket-diagnostics/release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.raw-projection.json"
+    }
+  ]
+}

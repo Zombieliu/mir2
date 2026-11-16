@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:17:20.710Z",
+  "cause": "Static reviewer found per-kind status dictionary lacked a cardinality bound. No actualrun verifier had executed.",
+  "original": {
+    "path": "verify-ended-formal10-v2.mjs",
+    "bytes": 27524,
+    "sha256": "e98c3fdbc84e8dd8f14d76bdd793ea6ea4eeaaf4c2fc65b083908260fae5bdba"
+  },
+  "derived": {
+    "path": "verify-ended-formal10-v3.mjs",
+    "bytes": 27968,
+    "sha256": "3c689714ec1c9849b87e9730eb99ac192847f94250b7d805af890305373da6fc"
+  },
+  "edits": [
+    {
+      "before": "function addMetric(m,r,weight=1){assert.ok(typeof r.kind==='string'&&r.kind.length<=80);",
+      "after": "function addMetric(m,r,weight=1){assert.ok(typeof r.kind==='string'&&r.kind.length>0&&r.kind.length<=80&&!['__proto__','prototype','constructor'].includes(r.kind));assert.ok(typeof r.status==='string'&&r.status.length>0&&r.status.length<=80&&!['__proto__','prototype','constructor'].includes(r.status));"
+    },
+    {
+      "before": "v.count+=weight;v.status[r.status]",
+      "after": "assert.ok(Object.hasOwn(v.status,r.status)||Object.keys(v.status).length<128);v.count+=weight;v.status[r.status]"
+    },
+    {
+      "before": "assert.ok(typeof r.type==='string'&&r.type.length<=80);",
+      "after": "assert.ok(typeof r.type==='string'&&r.type.length>0&&r.type.length<=80&&!['__proto__','prototype','constructor'].includes(r.type));"
+    },
+    {
+      "before": "if(r.type==='action'){",
+      "after": "if(r.type==='action'){assert.ok(typeof r.actor==='string'&&r.actor.length>0&&r.actor.length<=80);"
+    }
+  ],
+  "inverseRawExact": true,
+  "actualRunRead": false,
+  "productSourceChanged": false
+}

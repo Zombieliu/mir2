@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "qualifiedFrontendAncestor": "ea4b1c363eb9089bf0fbe57245660782cae3fe70",
+  "inheritedBranchSource": "cf12f2d5f4af4a3de2279f4d332cfa37a4e0d74d",
+  "runtimeAndFrontendTreesEqual": [
+    {
+      "path": "mir2-web3/apps/web",
+      "qualifiedTree": "b723c5256f973713f6823a859859acf652245504",
+      "inheritedTree": "b723c5256f973713f6823a859859acf652245504"
+    },
+    {
+      "path": "mir2-web3/apps/game-client",
+      "qualifiedTree": "ac34a160596032ec0e8302201161ac7943f80218",
+      "inheritedTree": "ac34a160596032ec0e8302201161ac7943f80218"
+    },
+    {
+      "path": "mir2-web3/packages",
+      "qualifiedTree": "41880ee338949c623edf3f774a6c40ff1dedc1e5",
+      "inheritedTree": "41880ee338949c623edf3f774a6c40ff1dedc1e5"
+    },
+    {
+      "path": "mir2-web3/config",
+      "qualifiedTree": "3beea9fee0dc1a5d3e53abe625882a248816ab4f",
+      "inheritedTree": "3beea9fee0dc1a5d3e53abe625882a248816ab4f"
+    }
+  ],
+  "separateBackendAndDocsDelta": [
+    "mir2-web3/apps/gateway/src/routing.rs",
+    "mir2-web3/apps/gateway/src/routing/replica_restore.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/shared_experience_projection_singleflight_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/tick_leaf_probe_tests.rs",
+    "mir2-web3/apps/gateway/src/shared_experience_profiles.rs",
+    "mir2-web3/apps/gateway/src/shared_mentor.rs",
+    "mir2-web3/apps/simulation/src/config.rs",
+    "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
+    "mir2-web3/docs/evidence/comparable-capacity-20261113/shared-experience-projection.native.json",
+    "mir2-web3/docs/evidence/comparable-capacity-20261113/shared-tick-native-v6.diagnostic.json"
+  ],
+  "newBackendBuiltOrDeployedThisRound": false,
+  "publicGatewayRevision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "localGatewayQualificationOnly": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "prebuiltCoreAndRendererUnchanged": true
+}

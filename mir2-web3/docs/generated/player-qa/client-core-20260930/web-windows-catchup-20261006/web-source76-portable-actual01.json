@@ -1,0 +1,56 @@
+{
+  "owner": "Root",
+  "kind": "source76 actual original portable31 incl canonical genuine148 PNG copy and109 metadata hashes",
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/portable-tests01-config.json",
+    "bytes": 4314,
+    "sha256": "cdef4e0a39e720d4e3801794431b9465c4f656cc6d53a0eba60d3830f441cb9d"
+  },
+  "fullAcceptancePin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-full-input-acceptance01.json",
+    "bytes": 1160,
+    "sha256": "9278550f63f9d26e857bd6990a673f9ae3bd64a1e51261582855b84be7538c1e"
+  },
+  "actualNextProofPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-next-actual01.json",
+    "bytes": 2861,
+    "sha256": "ac7c646f7e941893d5966e8dcea2cb7121836c93f27f678ef1d8eb5fd8d47c68"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 83136,
+    "kind": "Root approved original Source76 portable31 on own actual Next output and canonical genuine148 PNG closure",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2072,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/portable-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stats": {
+    "tests": 31,
+    "pass": 31,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "closedStdoutPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/portable-tests01/stdout.txt",
+    "bytes": 8002,
+    "sha256": "1fe9c63884dc1160494af538bb27c71daa085e469416e18f3c2b83948ae70baa"
+  },
+  "closedStderrPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/portable-tests01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "originalPostGuardReturned": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

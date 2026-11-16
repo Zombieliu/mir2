@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "scope": "Public scalar projection of actual failed actor5 exact health, stable identity and nearby monsters. No damage attacker attribution or held-inventory inference from spectator emptiness. Original false verdict preserved.",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\public-health-guard-evidence-v1.json",
+      "file": "public-health-guard-evidence-v1.json",
+      "bytes": 15243,
+      "sha256": "30f1af250da5a7a1b978aa98f32d8fbec1e0402310cd0ba6f06859ba9578324e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\extract-public-health-guard-evidence-v1.mjs",
+      "file": "extract-public-health-guard-evidence-v1.mjs",
+      "bytes": 6851,
+      "sha256": "d818813c4faa6ae27dc13440e8adb878c578633dac331ca581daa7d1ae88e764"
+    }
+  ]
+}

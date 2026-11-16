@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "profile": "newcomer-v2",
+  "minimumHpRatio": 0.35,
+  "hp": { "minimum": 4, "target": 24 },
+  "casterMinimumLevel": 7,
+  "potionTiers": [
+    { "minLevel": 1, "name": "small", "hpItemIndex": 658, "mpItemIndex": 659, "mpMinimum": 4, "mpTarget": 12 },
+    { "minLevel": 16, "name": "medium", "hpItemIndex": 660, "mpItemIndex": 661, "mpMinimum": 8, "mpTarget": 20 },
+    { "minLevel": 25, "name": "large", "hpItemIndex": 662, "mpItemIndex": 663, "mpMinimum": 12, "mpTarget": 24 }
+  ],
+  "amulet": {
+    "minimumLevel": 18,
+    "minimum": 4,
+    "target": 100,
+    "questMinimum": { "2110020": 100, "2110021": 48 }
+  },
+  "poison": { "minimumLevel": 14, "minimum": 4, "target": 20 },
+  "wizardTownReserve": { "firstQuestId": 2110010, "lastQuestId": 2110021, "minimum": 2, "target": 2 },
+  "travelRecommendation": { "townTeleport": 1, "randomTeleport": 2 },
+  "merchants": {
+    "potions": { "name": "Alchemist_Samuel", "mapFileName": "0", "x": 324, "y": 291 },
+    "general": { "name": "Merchant_Bull", "mapFileName": "0", "x": 374, "y": 296 },
+    "poison": { "name": "Specialist_Travis", "mapFileName": "0109", "x": 4, "y": 9 }
+  }
+}

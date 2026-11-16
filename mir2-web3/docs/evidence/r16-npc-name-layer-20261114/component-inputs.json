@@ -1,0 +1,180 @@
+{
+  "kind": "prepared-local-NPC-name-layer-component-smoke",
+  "preparedAtUtc": "2026-11-13T23:10:59.441401+00:00",
+  "notExecuted": true,
+  "baselineRevision": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "normalizedCSSDifferenceOnlyReviewedNameZ": true,
+  "snapshots": [
+    {
+      "snapshot": true,
+      "label": "baseline-globals.css",
+      "path": "inputs/baseline-globals.css",
+      "bytes": 137606,
+      "sha256": "e6becfc82ef9f2fcf097c093cb0a54032f743ff3fe6c1420692c5f045585e3ac",
+      "originalSource": {
+        "repository": "E:\\mir2-player-journey",
+        "gitRevision": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+        "path": "mir2-web3/apps/web/app/globals.css"
+      }
+    },
+    {
+      "snapshot": true,
+      "label": "candidate-globals.css",
+      "path": "inputs/candidate-globals.css",
+      "bytes": 137696,
+      "sha256": "de93c78177e4e23a775ac8ae73805967e6ab598dcbd9b60df2f542956a58e4cd",
+      "originalSource": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\globals.css",
+        "kind": "root-owned working candidate"
+      }
+    },
+    {
+      "snapshot": true,
+      "label": "crystal-world-depth.ts",
+      "path": "inputs/crystal-world-depth.ts",
+      "bytes": 3072,
+      "sha256": "1b2436b59d268838c2738d267c7028a2ebfd72ecae559b9a3b2c082d8c5cc5ee",
+      "originalSource": {
+        "path": "C:\\r16-ui-asset-recovery-20261113\\source\\mir2-web3\\apps\\web\\lib\\crystal-world-depth.ts"
+      }
+    },
+    {
+      "snapshot": true,
+      "label": "npc-15-meta.json",
+      "path": "inputs/npc-15-meta.json",
+      "bytes": 11962,
+      "sha256": "d26801e8be1bb9aaf33befa8e7e21228a14d16f0ff108f2dede935c0390a1096",
+      "originalSource": {
+        "path": "C:\\r16-ui-asset-recovery-20261113\\source\\mir2-web3\\apps\\web\\public\\original-ui\\NPC\\15\\meta.json"
+      }
+    },
+    {
+      "snapshot": true,
+      "label": "npc-15-3.png",
+      "path": "inputs/npc-15-3.png",
+      "bytes": 2814,
+      "sha256": "178cd3b6e1b20402ad106a6757d28d800377cfde020620aee2bd1f45c90ecda2",
+      "originalSource": {
+        "path": "C:\\r16-ui-asset-recovery-20261113\\source\\mir2-web3\\apps\\web\\public\\original-ui\\NPC\\15\\3.png"
+      }
+    }
+  ],
+  "liveInputs": [
+    {
+      "snapshot": false,
+      "label": "reviewed-root-candidate-CSS",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/globals.css",
+      "bytes": 137696,
+      "sha256": "de93c78177e4e23a775ac8ae73805967e6ab598dcbd9b60df2f542956a58e4cd"
+    },
+    {
+      "snapshot": false,
+      "label": "installed-Chrome-executable",
+      "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      "bytes": 4149912,
+      "sha256": "19349f9d510cb374be6d9e77568fa456b11f2e3e9b011660b63dc99d27c52a3a"
+    },
+    {
+      "snapshot": false,
+      "label": "installed-playwright",
+      "path": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright/index.js",
+      "bytes": 648,
+      "sha256": "4e98f65f0a9d9bcab8cffc0c5cfdd87fd3f5b0be74fc494ff166a466b204cd44"
+    },
+    {
+      "snapshot": false,
+      "label": "installed-playwrightPackage",
+      "path": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright/package.json",
+      "bytes": 2012,
+      "sha256": "5cb33bf4a5f7971e28d395f625af147eb42cc14423d204c61e02d14ba9014de8"
+    },
+    {
+      "snapshot": false,
+      "label": "installed-core",
+      "path": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright-core/package.json",
+      "bytes": 1550,
+      "sha256": "5ad804ce5343706c6ef7d29d8a97821c8e4fa780c9bfdf8488dc5d36aea2e8a7"
+    },
+    {
+      "snapshot": false,
+      "label": "installed-typescript",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+      "bytes": 9112572,
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+    },
+    {
+      "snapshot": false,
+      "label": "installed-typescriptPackage",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/package.json",
+      "bytes": 3620,
+      "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+    },
+    {
+      "snapshot": false,
+      "label": "prepared-smoke-script",
+      "path": "C:/r16-npc-name-layer-20261114/smoke.mjs",
+      "bytes": 13602,
+      "sha256": "d91588a4477960f877b56b3a7ace8438115d4b2d36c43aefd43118beea5898cb"
+    }
+  ],
+  "qualifiedSourceReferences": [
+    {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "bytes": 62331,
+      "sha256": "8365cdd41569c95329ad509b581e6bb64b2af757afeffcd9d1c6cfe766b4dbab"
+    },
+    {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/original-client-scene-rendering.tsx",
+      "bytes": 40881,
+      "sha256": "1008f840eca9c29d3dedc6f926547ff2bab65d17d2bf6854c42521189a2fab35"
+    },
+    {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/lib/crystal-world-depth.ts",
+      "bytes": 3072,
+      "sha256": "1b2436b59d268838c2738d267c7028a2ebfd72ecae559b9a3b2c082d8c5cc5ee"
+    },
+    {
+      "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/lib/scene-effect-runtime.ts",
+      "bytes": 9979,
+      "sha256": "f4d96acd45883a6b210ca01437d5f112cc844129ee25571eac4ee6e0f7ca4ee8"
+    }
+  ],
+  "chrome": {
+    "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "sha256": "19349f9d510cb374be6d9e77568fa456b11f2e3e9b011660b63dc99d27c52a3a"
+  },
+  "playwright": {
+    "packageContext": "F:/mir2-builds/web-r16-20261104/tools/package.json",
+    "entry": "F:\\mir2-builds\\web-r16-20261104\\tools\\node_modules\\playwright\\index.js",
+    "packageVersion": "1.55.1"
+  },
+  "typescript": {
+    "packageContext": "E:/mir2-player-journey/mir2-web3/apps/web/package.json",
+    "entry": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\typescript.js"
+  },
+  "fixture": {
+    "viewport": {
+      "width": 640,
+      "height": 360
+    },
+    "deviceScaleFactor": 1,
+    "actorAnchor": {
+      "x": 300,
+      "y": 160
+    },
+    "nameAnchor": {
+      "x": 300,
+      "y": 142
+    },
+    "text": "守卫",
+    "frameMeta": {
+      "width": 84,
+      "height": 88,
+      "x": 6,
+      "y": -48
+    },
+    "bodyZ": "computed by the pinned actual depth module, not a CSS override"
+  },
+  "networkPolicy": "Future execution serves only loopback CSS/HTML/PNG, blocks any non-loopback page request and installs no Service Worker. No public site or credentials.",
+  "acceptanceScope": "Component structural/pixel-comparison smoke plus pending local screenshot review; not full game, input, font/GDI AutoSize, deployment or parity acceptance"
+}

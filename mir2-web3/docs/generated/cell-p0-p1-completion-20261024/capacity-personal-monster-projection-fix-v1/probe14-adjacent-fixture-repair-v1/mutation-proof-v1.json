@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "scope": "Two test files only; fixture setup, movement preconditions, death presentation, and one explicitly authorized lifecycle FIFO expectation update.",
+  "cargoOrRuntimeExecuted": false,
+  "productionSourceChanged": false,
+  "originalMovementTimesDistancesAndGenericStepUnchanged": true,
+  "renamedTest": {
+    "before": "live_aoi_order_monster_lifecycle_and_personal_rewards_keep_the_existing_direct_path",
+    "after": "live_aoi_order_monster_lifecycle_uses_fifo_and_personal_rewards_stay_direct"
+  },
+  "mutations": [
+    {
+      "path": "apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "before": {
+        "bytes": 26272,
+        "sha256": "95da0e53b5c0ec844c85a383b327e07130a41d2aa09846272720dfe63874f7d3"
+      },
+      "after": {
+        "bytes": 27740,
+        "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af"
+      },
+      "exactRawInverse": true,
+      "rules": [
+        {
+          "purpose": "Install explicit fixture collision before joining players",
+          "from": "        let mut state = SharedInProcessZoneState::new();",
+          "to": "        let mut state = SharedInProcessZoneState::new();\n        assert!(state\n            .zone_manager\n            .install_empty_zone(ZoneRuntime::new_with_collision(\n                ZoneKey::for_map(\"live-aoi-order-fixture\"),\n                ZoneCollision::unbounded(),\n            )));"
+        },
+        {
+          "purpose": "Verify both real Walk priming transforms",
+          "from": "        pair.step(0, false, 1000);\n        pair.step(1, false, 1000);",
+          "to": "        pair.step(0, false, 1000);\n        pair.assert_position(0, Point { x: 100, y: 99 });\n        pair.step(1, false, 1000);\n        pair.assert_position(\n            1,\n            Point {\n                x: 109,\n                y: 99 + distance,\n            },\n        );"
+        },
+        {
+          "purpose": "Add explicit assertion helper without changing generic step semantics",
+          "from": "    fn visible(&self) -> bool {",
+          "to": "    fn assert_position(&self, index: usize, expected: Point) {\n        let actual = self\n            .shared\n            .lock()\n            .unwrap()\n            .zone_manager\n            .player_transform(&self.sessions[index])\n            .map(|(position, _)| position);\n        assert_eq!(actual, Some(expected), \"fixture movement must really occur\");\n    }\n\n    fn visible(&self) -> bool {"
+        },
+        {
+          "purpose": "Verify owner Run really crossed old-remove boundary",
+          "from": "    let delayed_owner_response = pair.step(0, true, 1750); // 15 -> 17, leaves view.\n    assert!(!pair.visible());",
+          "to": "    let delayed_owner_response = pair.step(0, true, 1750); // 15 -> 17, leaves view.\n    pair.assert_position(0, Point { x: 100, y: 97 });\n    assert!(!pair.visible());"
+        },
+        {
+          "purpose": "Verify peer Run really reentered old-remove boundary",
+          "from": "    pair.step(1, true, 1750); // 17 -> 15, enters view again.\n    assert!(pair.visible());",
+          "to": "    pair.step(1, true, 1750); // 17 -> 15, enters view again.\n    pair.assert_position(1, Point { x: 109, y: 112 });\n    assert!(pair.visible());"
+        },
+        {
+          "purpose": "Verify peer Run really entered old-create boundary",
+          "from": "    pair.step(1, true, 1750); // 17 -> 15, queues the first visibility entry.\n    assert!(pair.visible());",
+          "to": "    pair.step(1, true, 1750); // 17 -> 15, queues the first visibility entry.\n    pair.assert_position(1, Point { x: 109, y: 114 });\n    assert!(pair.visible());"
+        },
+        {
+          "purpose": "Verify owner Run really left old-create boundary",
+          "from": "    let newer_owner_response = pair.step(0, true, 1750); // 15 -> 17, leaves again.\n    assert!(!pair.visible());",
+          "to": "    let newer_owner_response = pair.step(0, true, 1750); // 15 -> 17, leaves again.\n    pair.assert_position(0, Point { x: 100, y: 97 });\n    assert!(!pair.visible());"
+        },
+        {
+          "purpose": "Verify unregistered owner Run displacement",
+          "from": "    let owner = pair.step(0, true, 1750);\n    assert!(owner.iter()",
+          "to": "    let owner = pair.step(0, true, 1750);\n    pair.assert_position(0, Point { x: 100, y: 97 });\n    assert!(owner.iter()"
+        },
+        {
+          "purpose": "Verify unregistered peer Run displacement",
+          "from": "    assert_eq!(absent, None);\n    pair.step(1, true, 1750);\n    let pending",
+          "to": "    assert_eq!(absent, None);\n    pair.step(1, true, 1750);\n    pair.assert_position(1, Point { x: 109, y: 112 });\n    let pending"
+        },
+        {
+          "purpose": "Rename explicitly updated lifecycle FIFO contract",
+          "from": "fn live_aoi_order_monster_lifecycle_and_personal_rewards_keep_the_existing_direct_path() {",
+          "to": "fn live_aoi_order_monster_lifecycle_uses_fifo_and_personal_rewards_stay_direct() {"
+        },
+        {
+          "purpose": "Update lifecycle FIFO expectation; retain personal reward isolation and exactly-once delivery",
+          "from": "    assert_eq!(direct, expected);\n    assert!(drain_live(&mut live).is_empty());",
+          "to": "    assert_eq!(direct, vec![ServerPacket::GainExperience { amount: 17 }]);\n    assert_eq!(drain_live(&mut live), expected[..2]);\n    assert!(drain_live(&mut live).is_empty());\n    let peer_pending = pair\n        .shared\n        .lock()\n        .unwrap()\n        .take_pending_zone_packets(&pair.keys[1]);\n    assert!(!peer_pending\n        .iter()\n        .any(|packet| matches!(packet, ServerPacket::GainExperience { .. })));"
+        }
+      ]
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "before": {
+        "bytes": 12970,
+        "sha256": "83d1bd558fad894ebeb7862de11eaf81b71f442d7bb57b11ebc2acefb3fa1267"
+      },
+      "after": {
+        "bytes": 13491,
+        "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+      },
+      "exactRawInverse": true,
+      "rules": [
+        {
+          "purpose": "Present actual private Death output before TownRevive, without mutating owner-dead IDs",
+          "from": "    runtime\n        .inner\n        .execute(WorldCommand::ClientPacket(ClientPacket::Chat {\n            message: \"@DIE\".to_string(),\n            linked_items: Vec::new(),\n        }))\n        .expect(\"private death fixture should execute\");\n    let revive_packets",
+          "to": "    let mut death_packets = runtime\n        .inner\n        .execute(WorldCommand::ClientPacket(ClientPacket::Chat {\n            message: \"@DIE\".to_string(),\n            linked_items: Vec::new(),\n        }))\n        .expect(\"private death fixture should execute\");\n    assert!(death_packets\n        .iter()\n        .any(|packet| matches!(packet, ServerPacket::Death { .. })));\n    runtime.filter_stale_owner_dead_entity_packets(&mut death_packets);\n    assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));\n    let zone_still_has_positive_hp = shared\n        .lock()\n        .expect(\"shared state should lock\")\n        .zone_manager\n        .player_vitals(&session_id)\n        .is_some_and(|(hp, _, _)| hp > 0);\n    assert!(zone_still_has_positive_hp);\n    let revive_packets"
+        }
+      ]
+    }
+  ]
+}

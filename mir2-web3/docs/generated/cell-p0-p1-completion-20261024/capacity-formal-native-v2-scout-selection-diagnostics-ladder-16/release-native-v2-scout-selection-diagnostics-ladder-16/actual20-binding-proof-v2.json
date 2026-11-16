@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T02:19:16.627151+00:00",
+  "state": "ACTUAL_FRESH_PROBE20_BOUND_UNSEALED_NOT_EXECUTED",
+  "boundBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\bound-formal16-binding-v1.json",
+    "bytes": 14871,
+    "sha256": "731fb797fa4a902b7d62271f4bd6915810e241811b8c21d5ad2325ff643ffdaf"
+  },
+  "pendingBindingOriginalUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\pending-formal16-binding-v1.json",
+    "bytes": 1354,
+    "sha256": "99f46c3914cd18dd155d4b4ce08326da25e10573eeb3eb3660ba8b3c5124e55f"
+  },
+  "actualEndedSources": {
+    "seal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2290,
+      "sha256": "6f8f20969d6c5915edb60672b83556bd36a356e06c7249ddcb247890aec65a19"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "1337e647fc24034d55670eae39d2946385cfefe8263ee48773c39484d070f68d"
+    },
+    "final": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\final-verification.json",
+      "bytes": 442311,
+      "sha256": "bd4897fb45dc67d1d65e2fe488021081bcf599e745febb9d66b83659cd4b5df0"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\actual-verification.log",
+      "bytes": 878,
+      "sha256": "470d4519772fabad4c60e830caceedfbb6e86f0f28ddf02eda06e07e8afa055a"
+    },
+    "sourceInputs": 11,
+    "sourceBeforeAfterIdentical": true
+  },
+  "metadataChanges": [
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\preparation-plan.json",
+        "bytes": 18488,
+        "sha256": "e0d04d5131a4dba584c6f4ce924fa68fc23b303d6f39531ac97da88827bd8e9d"
+      },
+      "beforeImage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\preparation-plan.json.before-actual-probe20-v2.txt",
+        "bytes": 6355,
+        "sha256": "cacfb5424283fcf7fe948237dce218ad8751604a4750302e1a0fd2e4ceb8ff96"
+      },
+      "changedTopLevelFields": [
+        "actualProbe20",
+        "formalStarted",
+        "independentEndedActualPassed",
+        "sourceOnlyPartialNotFinalClosure",
+        "state",
+        "syntaxExecuted"
+      ],
+      "deletedTopLevelFields": [],
+      "otherTopLevelValuesSemanticExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\copied-baseline-inputs.json",
+        "bytes": 1114,
+        "sha256": "a1ddc414e52483b47ed6662a6075352c3ea681d948749a4322c51499c8dbaf8e"
+      },
+      "beforeImage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\copied-baseline-inputs.json.before-actual-probe20-v2.txt",
+        "bytes": 928,
+        "sha256": "ea874463a06daf0f9b86f0b4d9ae0223e4dbe83bb9d272b05eed0ee8c480bd5d"
+      },
+      "changedTopLevelFields": [
+        "actualProbe20IndependentEnded",
+        "state"
+      ],
+      "deletedTopLevelFields": [],
+      "otherTopLevelValuesSemanticExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\candidate-release-binding.json",
+        "bytes": 12273,
+        "sha256": "a7a3a3bf09f7771592db5315867a31da6d7cf7f4462dc4863326c72520a0de69"
+      },
+      "beforeImage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\candidate-release-binding.json.before-actual-probe20-v2.txt",
+        "bytes": 11994,
+        "sha256": "432f3d48db82509cadb7d1c6c4b42745eff5aecaacebde14be15489afc58131c"
+      },
+      "changedTopLevelFields": [
+        "reason"
+      ],
+      "deletedTopLevelFields": [],
+      "otherTopLevelValuesSemanticExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-controller-preparation-v1.json",
+        "bytes": 1562,
+        "sha256": "d507274488465d48f970e44a7a859faabd811351edfb6692c595347f007da36b"
+      },
+      "beforeImage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-controller-preparation-v1.json.before-actual-probe20-v2.txt",
+        "bytes": 1561,
+        "sha256": "cf6590654d5d8213f34aeee4e10f33fbeea13b15759882b0339815203cd27dab"
+      },
+      "changedTopLevelFields": [
+        "formalConfigurationStillPending"
+      ],
+      "deletedTopLevelFields": [],
+      "otherTopLevelValuesSemanticExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\ROOT-CONTROLLER.md",
+        "bytes": 1455,
+        "sha256": "9d50356baaab9ff9d9f8e19cd5c51670c930c925eec202d293802cfbe85946a1"
+      },
+      "beforeImage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\ROOT-CONTROLLER.md.before-actual-probe20-v2.txt",
+        "bytes": 1351,
+        "sha256": "b5d84a9a2063a492541200de47228b4cb0ff96784c010aa66b4471839c6c7d10"
+      },
+      "scope": "Only pending independent-ended wording becomes actual-bound; final independent source review and Root execution still required."
+    }
+  ],
+  "allChangedKeyPresenceUnionChecked": true,
+  "actualConsumerSchemaMatchesInheritedStrictHelper": {
+    "schemaVersion": 1,
+    "verifierRevision": 2,
+    "currentDriverTests": 232,
+    "sourceSealFiles": 11,
+    "prepared201Admitted206Distinct": true,
+    "originalPhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "originalPhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "scoutAppendixNotGameGate": true,
+    "storeNotGameGate": true
+  },
+  "historicalPendingProducerFactsPreserved": true,
+  "gamePolicyScenarioResourceThresholdsUnchanged": true,
+  "runtimeModuleImported": false,
+  "rootModeExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

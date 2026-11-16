@@ -1,0 +1,24 @@
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\stage5.rs:2634:9
+     |
+2634 |         session_a.save_active_character();
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2634 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 105 warnings (run `cargo fix --lib -p mir2-simulation --tests` to apply 9 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 56.14s
+     Running unittests src\lib.rs (C:/r16-targeted-spells-20261110/cargo\debug\deps\mir2_simulation-fbd46dff1eda8db6.exe)
+
+running 4 tests
+test runtime::zone::runtime::player_magic_cooldown_tests::accepted_soulfire_uses_zone_clock_until_exact_spell_ready_time ... ok
+test runtime::zone::runtime::player_magic_cooldown_tests::cooldown_getter_includes_global_gate_without_cross_owner_leakage ... ok
+test runtime::zone::runtime::player_magic_cooldown_tests::soulfire_reagent_preflight_uses_the_actual_wild_monster_target_rules ... ok
+test runtime::zone::runtime::player_magic_cooldown_tests::uncast_and_rejected_magic_do_not_create_or_extend_cooldown ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3386 filtered out; finished in 0.08s

@@ -1,0 +1,239 @@
+{
+  "schema": "mir2.native.signed-release.library-root-review.v1",
+  "recordedUtc": "2026-10-05T07:38:06.654357+00:00",
+  "compiledSourceRevision": "b87aa8a8ac94d569893a1ee653be49d857d2b063",
+  "engineSourceRevision": "48454bba7623694ca7432613af52bee28e83970e",
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "selectedExistingIgnoredTests": {
+    "fresh": 1,
+    "delta": 1,
+    "failed": 0
+  },
+  "fresh": {
+    "commandElapsedSeconds": 3310.506763799989,
+    "checkUpdateElapsedMs": 2383185,
+    "localPhases": [
+      {
+        "cacheHits": 0,
+        "completed": 125965,
+        "copyFlushMs": 0,
+        "elapsedMs": 26989,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "checking-installed",
+        "total": 125965,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 1667,
+        "copyFlushMs": 0,
+        "elapsedMs": 2180,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 1667,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 3564,
+        "copyFlushMs": 0,
+        "elapsedMs": 5741,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 3564,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 11380,
+        "copyFlushMs": 0,
+        "elapsedMs": 16967,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 11380,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 9780,
+        "copyFlushMs": 0,
+        "elapsedMs": 14669,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 9780,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 23081,
+        "copyFlushMs": 0,
+        "elapsedMs": 34092,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 23081,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 33996,
+        "copyFlushMs": 0,
+        "elapsedMs": 48871,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 33996,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 6859,
+        "copyFlushMs": 0,
+        "elapsedMs": 6436,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 6859,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 14111,
+        "copyFlushMs": 0,
+        "elapsedMs": 21788,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 14111,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 17248,
+        "copyFlushMs": 0,
+        "elapsedMs": 25608,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 17248,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 4278,
+        "copyFlushMs": 0,
+        "elapsedMs": 6547,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 4278,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 0,
+        "completed": 1,
+        "copyFlushMs": 0,
+        "elapsedMs": 686,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 1,
+        "writtenBytes": 0
+      },
+      {
+        "cacheHits": 125965,
+        "completed": 125965,
+        "copyFlushMs": 496613,
+        "elapsedMs": 618834,
+        "outcome": "complete",
+        "payloadResolveMs": 309,
+        "phase": "staging",
+        "total": 125965,
+        "writtenBytes": 753611651
+      },
+      {
+        "completed": 125972,
+        "elapsedMs": 85638,
+        "outcome": "complete",
+        "phase": "preparing",
+        "total": 125972
+      },
+      {
+        "completed": 125972,
+        "elapsedMs": 1429363,
+        "outcome": "complete",
+        "phase": "installing",
+        "total": 125972
+      },
+      {
+        "completed": 125972,
+        "elapsedMs": 884554,
+        "outcome": "complete",
+        "phase": "recovering",
+        "total": 125972
+      }
+    ],
+    "bundleEventElapsedSumMs": 185213,
+    "targetFiles": 125965,
+    "bundles": 11,
+    "bundleBytes": 620189573,
+    "pendingRecheckPayloads": 0,
+    "rollback": "real quarantine rollback to incomplete seed"
+  },
+  "delta": {
+    "commandElapsedSeconds": 304.5562168000033,
+    "deltaCheckUpdateMs": 56347,
+    "fallbackCheckUpdateMs": 54819,
+    "deltaPayloadBytes": 27334062,
+    "rollback": "direct transaction rollback/full old byte verification",
+    "acceptedRecheckGamePayloads": 0
+  },
+  "cmsPublication": {
+    "schema": "mir2.windows.signed-publication-plan.v1",
+    "passed": true,
+    "sourceRevision": "48454bba7623694ca7432613af52bee28e83970e",
+    "gameCandidate": "WN-CANDIDATE-20261004-invited-17",
+    "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+    "objects": 36,
+    "objectsSha256": "1084f10c192a0f0751352898c9a8f2caab3a3f32e506a5fd1f0a7650713fcdaa",
+    "sequence": 13,
+    "planPath": "C:\\mir2-playtest-releases\\20261004-native-r18\\current-signed-release-qa-01\\publication-proof-01\\verified\\PUBLICATION-PLAN.json",
+    "planSha256": "335E80D1692C105E9423FB53A54D000FE3BFFC6BC24EF71BFEEDBDBE9A6F8A16",
+    "cmsVerified": true,
+    "published": false,
+    "credentialsUsed": false
+  },
+  "scope": {
+    "releaseProfileLibrary": true,
+    "fileMappedSource": true,
+    "shippedExeOrInstallerExecuted": false,
+    "gameLaunched": false,
+    "actualHealthLaunchAcceptance": false,
+    "realAccountOrAppDataTested": false,
+    "syntheticPersonalWitnesses": 4,
+    "networkThroughputMeasured": false,
+    "cloudflareAuthenticated": false,
+    "publicFeedChanged": false,
+    "originObjectsAppendedThisPhase": false,
+    "userInstallTouched": false
+  },
+  "freshBaselinePhysicalInputs": {
+    "ordinaryFiles": 20,
+    "directories": 5,
+    "installerRecipeDeclaresFiles": 29,
+    "recipeFontFilesNotCopiedByLibraryFixture": 9
+  },
+  "boundaries": [
+    "check_update timing includes stage/prepare/install but excludes subsequent full target checks and rollback",
+    "bundle event elapsed includes local transfer/extract/cache validation, not public network speed",
+    "size/SHA verification is actual125965 targets; no native/game or another laptop acceptance",
+    "delta accept is direct test API, not health; fresh retry rejection type is not asserted specifically",
+    "engine13 is preseeded in fresh; delta starts oldengine/seed11 and calls actual updater",
+    "manual preparation failure observation remains failed; CRLF input correction is a new helper"
+  ]
+}

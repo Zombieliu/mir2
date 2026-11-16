@@ -1,0 +1,74 @@
+
+running 8 tests
+test runtime::zone::runtime::player_action_cadence_tests::accepted_cast_blocks_melee_until_the_600ms_action_boundary ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::flame_field_retains_its_longer_crystal_global_delay ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::melee_blocks_cast_until_550ms_without_extending_the_swing_cooldown ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::movement_blocks_cast_until_600ms_and_the_public_getter_agrees ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::new_movement_after_cast_waits_for_action_lock_then_runs_once ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::taoist_uses_the_later_of_global_delay_and_own_skill_delay ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::warrior_shoulder_dash_cannot_repeat_or_move_before_its_action_lock ... FAILED
+test runtime::zone::runtime::player_action_cadence_tests::wizard_cannot_alternate_spells_to_bypass_crystal_global_delay ... FAILED
+
+failures:
+
+---- runtime::zone::runtime::player_action_cadence_tests::accepted_cast_blocks_melee_until_the_600ms_action_boundary stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::accepted_cast_blocks_melee_until_the_600ms_action_boundary' (94556) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:152:5:
+assertion failed: zone_outbounds_contain_accepted_player_action(&out, &owner, OWNER)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- runtime::zone::runtime::player_action_cadence_tests::flame_field_retains_its_longer_crystal_global_delay stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::flame_field_retains_its_longer_crystal_global_delay' (84724) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:91:5:
+rejected requests must not animate or launch another hit: [ToSession { session_id: SessionId("cadence-owner"), packets: [UserLocation { location: UserLocation { position: Point { x: 10, y: 10 }, direction: Right } }, Magic { spell: FireBall, target_id: 20001, target: Point { x: 11, y: 10 }, cast: true, level: 0, secondary_target_ids: [] }] }, ToMany { session_ids: [SessionId("cadence-owner")], packets: [ObjectMagic { object_id: 10001, location: Point { x: 10, y: 10 }, direction: Right, spell: FireBall, target_id: 20001, target: Point { x: 11, y: 10 }, cast: true, level: 0, self_broadcast: false, secondary_target_ids: [] }, ObjectMana { info: ObjectManaInfo { object_id: 10001, percent: 100 } }, ObjectProjectile { spell: FireBall, source_id: 10001, destination_id: 20001 }] }]
+
+---- runtime::zone::runtime::player_action_cadence_tests::melee_blocks_cast_until_550ms_without_extending_the_swing_cooldown stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::melee_blocks_cast_until_550ms_without_extending_the_swing_cooldown' (96460) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:158:5:
+assertion failed: zone_outbounds_contain_accepted_player_action(&zone.handle(melee(&owner, 0)),
+    &owner, OWNER)
+
+---- runtime::zone::runtime::player_action_cadence_tests::movement_blocks_cast_until_600ms_and_the_public_getter_agrees stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::movement_blocks_cast_until_600ms_and_the_public_getter_agrees' (90640) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:170:5:
+assertion `left == right` failed
+  left: Point { x: 10, y: 10 }
+ right: Point { x: 10, y: 11 }
+
+---- runtime::zone::runtime::player_action_cadence_tests::new_movement_after_cast_waits_for_action_lock_then_runs_once stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::new_movement_after_cast_waits_for_action_lock_then_runs_once' (92216) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:183:5:
+assertion `left == right` failed
+  left: Point { x: 10, y: 11 }
+ right: Point { x: 10, y: 10 }
+
+---- runtime::zone::runtime::player_action_cadence_tests::taoist_uses_the_later_of_global_delay_and_own_skill_delay stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::taoist_uses_the_later_of_global_delay_and_own_skill_delay' (96984) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:91:5:
+rejected requests must not animate or launch another hit: [ToSession { session_id: SessionId("cadence-owner"), packets: [UserLocation { location: UserLocation { position: Point { x: 10, y: 10 }, direction: Right } }, Magic { spell: SoulFireBall, target_id: 20001, target: Point { x: 11, y: 10 }, cast: true, level: 0, secondary_target_ids: [] }] }, ToMany { session_ids: [SessionId("cadence-owner")], packets: [ObjectMagic { object_id: 10001, location: Point { x: 10, y: 10 }, direction: Right, spell: SoulFireBall, target_id: 20001, target: Point { x: 11, y: 10 }, cast: true, level: 0, self_broadcast: false, secondary_target_ids: [] }, ObjectMana { info: ObjectManaInfo { object_id: 10001, percent: 100 } }, ObjectProjectile { spell: SoulFireBall, source_id: 10001, destination_id: 20001 }] }]
+
+---- runtime::zone::runtime::player_action_cadence_tests::warrior_shoulder_dash_cannot_repeat_or_move_before_its_action_lock stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::warrior_shoulder_dash_cannot_repeat_or_move_before_its_action_lock' (96192) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:207:5:
+assertion `left == right` failed
+  left: Point { x: 10, y: 10 }
+ right: Point { x: 10, y: 11 }
+
+---- runtime::zone::runtime::player_action_cadence_tests::wizard_cannot_alternate_spells_to_bypass_crystal_global_delay stdout ----
+
+thread 'runtime::zone::runtime::player_action_cadence_tests::wizard_cannot_alternate_spells_to_bypass_crystal_global_delay' (96548) panicked at apps\simulation\src\runtime\zone\runtime\player_action_cadence_tests.rs:91:5:
+rejected requests must not animate or launch another hit: [ToSession { session_id: SessionId("cadence-owner"), packets: [UserLocation { location: UserLocation { position: Point { x: 10, y: 10 }, direction: Right } }, Magic { spell: GreatFireBall, target_id: 20001, target: Point { x: 11, y: 10 }, cast: true, level: 0, secondary_target_ids: [] }] }, ToMany { session_ids: [SessionId("cadence-owner")], packets: [ObjectMagic { object_id: 10001, location: Point { x: 10, y: 10 }, direction: Right, spell: GreatFireBall, target_id: 20001, target: Point { x: 11, y: 10 }, cast: true, level: 0, self_broadcast: false, secondary_target_ids: [] }, ObjectMana { info: ObjectManaInfo { object_id: 10001, percent: 100 } }, ObjectProjectile { spell: GreatFireBall, source_id: 10001, destination_id: 20001 }] }]
+
+
+failures:
+    runtime::zone::runtime::player_action_cadence_tests::accepted_cast_blocks_melee_until_the_600ms_action_boundary
+    runtime::zone::runtime::player_action_cadence_tests::flame_field_retains_its_longer_crystal_global_delay
+    runtime::zone::runtime::player_action_cadence_tests::melee_blocks_cast_until_550ms_without_extending_the_swing_cooldown
+    runtime::zone::runtime::player_action_cadence_tests::movement_blocks_cast_until_600ms_and_the_public_getter_agrees
+    runtime::zone::runtime::player_action_cadence_tests::new_movement_after_cast_waits_for_action_lock_then_runs_once
+    runtime::zone::runtime::player_action_cadence_tests::taoist_uses_the_later_of_global_delay_and_own_skill_delay
+    runtime::zone::runtime::player_action_cadence_tests::warrior_shoulder_dash_cannot_repeat_or_move_before_its_action_lock
+    runtime::zone::runtime::player_action_cadence_tests::wizard_cannot_alternate_spells_to_bypass_crystal_global_delay
+
+test result: FAILED. 0 passed; 8 failed; 0 ignored; 0 measured; 1914 filtered out; finished in 0.10s
+

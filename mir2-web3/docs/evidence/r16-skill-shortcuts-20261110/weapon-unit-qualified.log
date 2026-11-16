@@ -1,0 +1,652 @@
+TAP version 13
+# Subtest: actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates
+ok 1 - actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates
+  ---
+  duration_ms: 19.3952
+  type: 'test'
+  ...
+# Subtest: actual hook ingests a late current baseline once, retains proof gates and never replays a select
+ok 2 - actual hook ingests a late current baseline once, retains proof gates and never replays a select
+  ---
+  duration_ms: 5.4935
+  type: 'test'
+  ...
+# Subtest: actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges
+ok 3 - actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges
+  ---
+  duration_ms: 141.6599
+  type: 'test'
+  ...
+# Subtest: actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data
+ok 4 - actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data
+  ---
+  duration_ms: 883.9426
+  type: 'test'
+  ...
+# Subtest: actual learned-skill packets retire the physical combat source while cast timing preserves it
+ok 5 - actual learned-skill packets retire the physical combat source while cast timing preserves it
+  ---
+  duration_ms: 341.9505
+  type: 'test'
+  ...
+# Subtest: actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners
+ok 6 - actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners
+  ---
+  duration_ms: 75.7573
+  type: 'test'
+  ...
+# Subtest: cached combat diagnostics never poll, send, withdraw or consume a proof
+ok 7 - cached combat diagnostics never poll, send, withdraw or consume a proof
+  ---
+  duration_ms: 0.9072
+  type: 'test'
+  ...
+# Subtest: diagnostics record disabled facts and a real rejected snapshot without bypassing either gate
+ok 8 - diagnostics record disabled facts and a real rejected snapshot without bypassing either gate
+  ---
+  duration_ms: 0.2174
+  type: 'test'
+  ...
+# Subtest: persistent weapon state survives incomplete snapshots and retires at a fresh character session
+ok 9 - persistent weapon state survives incomplete snapshots and retires at a fresh character session
+  ---
+  duration_ms: 0.89
+  type: 'test'
+  ...
+# Subtest: persistent weapon state cannot cross an ambiguous or replaced learned row
+ok 10 - persistent weapon state cannot cross an ambiguous or replaced learned row
+  ---
+  duration_ms: 1.0123
+  type: 'test'
+  ...
+# Subtest: persistent weapon wire dispatch shares the native 1000 ms interval and handles uncertain sends
+ok 11 - persistent weapon wire dispatch shares the native 1000 ms interval and handles uncertain sends
+  ---
+  duration_ms: 0.8218
+  type: 'test'
+  ...
+# Subtest: independent exact combat caps preserve old fallback and recognize compiled startup waiting
+ok 12 - independent exact combat caps preserve old fallback and recognize compiled startup waiting
+  ---
+  duration_ms: 0.1483
+  type: 'test'
+  ...
+# Subtest: combat capabilities explicitly distinguish forced-player input v2 from ordinary v1
+ok 13 - combat capabilities explicitly distinguish forced-player input v2 from ordinary v1
+  ---
+  duration_ms: 0.3896
+  type: 'test'
+  ...
+# Subtest: new host omits forced input for strict v1 runtimes and preserves monster dispatch
+ok 14 - new host omits forced input for strict v1 runtimes and preserves monster dispatch
+  ---
+  duration_ms: 0.3277
+  type: 'test'
+  ...
+# Subtest: v2 receives held and released forced input while downgrade removes the field
+ok 15 - v2 receives held and released forced input while downgrade removes the field
+  ---
+  duration_ms: 0.2288
+  type: 'test'
+  ...
+# Subtest: actual setter and event capture preserve raw null/zero and explicit slot16
+ok 16 - actual setter and event capture preserve raw null/zero and explicit slot16
+  ---
+  duration_ms: 0.163
+  type: 'test'
+  ...
+# Subtest: pure repeated peek then one claim allows exactly one actual dispatch
+ok 17 - pure repeated peek then one claim allows exactly one actual dispatch
+  ---
+  duration_ms: 0.2141
+  type: 'test'
+  ...
+# Subtest: definitelyUnsent burns sequence without automatic replay
+ok 18 - definitelyUnsent burns sequence without automatic replay
+  ---
+  duration_ms: 0.1866
+  type: 'test'
+  ...
+# Subtest: outcomeUnknown burns sequence without automatic replay
+ok 19 - outcomeUnknown burns sequence without automatic replay
+  ---
+  duration_ms: 0.1291
+  type: 'test'
+  ...
+# Subtest: synchronous owner/runtime/skill/target/map mutations prevent final claim
+ok 20 - synchronous owner/runtime/skill/target/map mutations prevent final claim
+  ---
+  duration_ms: 0.6535
+  type: 'test'
+  ...
+# Subtest: nested synchronous same-proof listener cannot claim or resend twice
+ok 21 - nested synchronous same-proof listener cannot claim or resend twice
+  ---
+  duration_ms: 0.1979
+  type: 'test'
+  ...
+# Subtest: serialization binds plain exact command and rejects extra or malformed wire
+ok 22 - serialization binds plain exact command and rejects extra or malformed wire
+  ---
+  duration_ms: 0.2457
+  type: 'test'
+  ...
+# Subtest: raw exact local row/spell survives only actual unique current binding
+ok 23 - raw exact local row/spell survives only actual unique current binding
+  ---
+  duration_ms: 0.7033
+  type: 'test'
+  ...
+# Subtest: bad current nonarray stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+ok 24 - bad current nonarray stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+  ---
+  duration_ms: 0.2248
+  type: 'test'
+  ...
+# Subtest: bad current oversize stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+ok 25 - bad current oversize stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+  ---
+  duration_ms: 0.1383
+  type: 'test'
+  ...
+# Subtest: actual cast clock uses current connection observation and exact nonzero actor delay
+ok 26 - actual cast clock uses current connection observation and exact nonzero actor delay
+  ---
+  duration_ms: 0.2152
+  type: 'test'
+  ...
+# Subtest: combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session
+ok 27 - combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session
+  ---
+  duration_ms: 0.2516
+  type: 'test'
+  ...
+# Subtest: delay before first cast is metadata; repeated delay never resets real start
+ok 28 - delay before first cast is metadata; repeated delay never resets real start
+  ---
+  duration_ms: 0.2066
+  type: 'test'
+  ...
+# Subtest: confirmed owner packet metadata survives before the first complete raw model
+ok 29 - confirmed owner packet metadata survives before the first complete raw model
+  ---
+  duration_ms: 0.3252
+  type: 'test'
+  ...
+# Subtest: same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover
+ok 30 - same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover
+  ---
+  duration_ms: 0.2657
+  type: 'test'
+  ...
+# Subtest: failed sink setup burns global namespace; clock rollback and throwing providers withdraw
+ok 31 - failed sink setup burns global namespace; clock rollback and throwing providers withdraw
+  ---
+  duration_ms: 0.3751
+  type: 'test'
+  ...
+# Subtest: clear and same owner reopen preserve edge highwater; frozen frame withdraws ready
+ok 32 - clear and same owner reopen preserve edge highwater; frozen frame withdraws ready
+  ---
+  duration_ms: 0.2207
+  type: 'test'
+  ...
+# Subtest: production integration captures raw before coalescing and final event proof claim is adjacent to socket send
+ok 33 - production integration captures raw before coalescing and final event proof claim is adjacent to socket send
+  ---
+  duration_ms: 87.0133
+  type: 'test'
+  ...
+# Subtest: synchronous cancel retires in-flight proof; replay fails and fresh tick output works
+ok 34 - synchronous cancel retires in-flight proof; replay fails and fresh tick output works
+  ---
+  duration_ms: 0.4797
+  type: 'test'
+  ...
+# Subtest: synchronous clear retires in-flight proof; replay fails and fresh tick output works
+ok 35 - synchronous clear retires in-flight proof; replay fails and fresh tick output works
+  ---
+  duration_ms: 0.265
+  type: 'test'
+  ...
+# Subtest: enabled false synchronously withdraws proof and held work, with valid re-enable and no replay
+ok 36 - enabled false synchronously withdraws proof and held work, with valid re-enable and no replay
+  ---
+  duration_ms: 0.3108
+  type: 'test'
+  ...
+# Subtest: actual Page HP overlay callback and combat producer block immediately before React render
+ok 37 - actual Page HP overlay callback and combat producer block immediately before React render
+  ---
+  duration_ms: 106.2242
+  type: 'test'
+  ...
+# Subtest: UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently
+ok 38 - UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently
+  ---
+  duration_ms: 0.4068
+  type: 'test'
+  ...
+# Subtest: UI hold retired owner/runtime and stale release cannot unblock a new token
+ok 39 - UI hold retired owner/runtime and stale release cannot unblock a new token
+  ---
+  duration_ms: 0.2328
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof
+ok 40 - actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof
+  ---
+  duration_ms: 215.3449
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints
+ok 41 - actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints
+  ---
+  duration_ms: 318.3964
+  type: 'test'
+  ...
+# Subtest: actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag
+ok 42 - actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag
+  ---
+  duration_ms: 313.8024
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture
+ok 43 - actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture
+  ---
+  duration_ms: 159.1352
+  type: 'test'
+  ...
+# Subtest: actual Shell bag UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 44 - actual Shell bag UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 147.8383
+  type: 'test'
+  ...
+# Subtest: actual Shell character UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 45 - actual Shell character UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 152.5011
+  type: 'test'
+  ...
+# Subtest: actual Shell hud UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 46 - actual Shell hud UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 181.2353
+  type: 'test'
+  ...
+# Subtest: actual Shell spells UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 47 - actual Shell spells UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 155.9315
+  type: 'test'
+  ...
+# Subtest: actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold
+ok 48 - actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold
+  ---
+  duration_ms: 109.4994
+  type: 'test'
+  ...
+# Subtest: actual bag rejected or throwing terminal releases captured hold after router lease cleared
+ok 49 - actual bag rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 205.5474
+  type: 'test'
+  ...
+# Subtest: actual character rejected or throwing terminal releases captured hold after router lease cleared
+ok 50 - actual character rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 214.3589
+  type: 'test'
+  ...
+# Subtest: actual spells rejected or throwing terminal releases captured hold after router lease cleared
+ok 51 - actual spells rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 198.7825
+  type: 'test'
+  ...
+# Subtest: actual bag no-lease cleanup releases orphan captured token
+ok 52 - actual bag no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 50.2574
+  type: 'test'
+  ...
+# Subtest: actual character no-lease cleanup releases orphan captured token
+ok 53 - actual character no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 52.1479
+  type: 'test'
+  ...
+# Subtest: actual hud no-lease cleanup releases orphan captured token
+ok 54 - actual hud no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 51.0382
+  type: 'test'
+  ...
+# Subtest: actual spells no-lease cleanup releases orphan captured token
+ok 55 - actual spells no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 49.7569
+  type: 'test'
+  ...
+# Subtest: actual bag old rejected terminal cannot cancel synchronously new lease or token
+ok 56 - actual bag old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 48.7379
+  type: 'test'
+  ...
+# Subtest: actual character old rejected terminal cannot cancel synchronously new lease or token
+ok 57 - actual character old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 50.7093
+  type: 'test'
+  ...
+# Subtest: actual spells old rejected terminal cannot cancel synchronously new lease or token
+ok 58 - actual spells old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 51.2229
+  type: 'test'
+  ...
+# Subtest: actual Shell stale painted Quest button swallows one gesture before Bag/HUD world leases and compatibility mouse dispatch
+ok 59 - actual Shell stale painted Quest button swallows one gesture before Bag/HUD world leases and compatibility mouse dispatch
+  ---
+  duration_ms: 230.1526
+  type: 'test'
+  ...
+# Subtest: actual Shell painted Bag and Character own overlapping stale Quest paint while HUD foreground and modal swallow world gestures
+ok 60 - actual Shell painted Bag and Character own overlapping stale Quest paint while HUD foreground and modal swallow world gestures
+  ---
+  duration_ms: 359.5433
+  type: 'test'
+  ...
+# Subtest: actual Shell captured Quest terminal survives newly appearing NPC owner without cancelling that new owner
+ok 61 - actual Shell captured Quest terminal survives newly appearing NPC owner without cancelling that new owner
+  ---
+  duration_ms: 100.3333
+  type: 'test'
+  ...
+# Subtest: actual Shell window blur, resize and cleanup clear captured Quest gestures through the real effect
+ok 62 - actual Shell window blur, resize and cleanup clear captured Quest gestures through the real effect
+  ---
+  duration_ms: 149.039
+  type: 'test'
+  ...
+# Subtest: actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile
+ok 63 - actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile
+  ---
+  duration_ms: 56.6019
+  type: 'test'
+  ...
+# Subtest: actual shared canvas routes drop labels to pickup and empty world to original tile action
+ok 64 - actual shared canvas routes drop labels to pickup and empty world to original tile action
+  ---
+  duration_ms: 27.3656
+  type: 'test'
+  ...
+# Subtest: actual surface router refuses world-target lookup under HUD, modal and foreground owners
+ok 65 - actual surface router refuses world-target lookup under HUD, modal and foreground owners
+  ---
+  duration_ms: 87.4266
+  type: 'test'
+  ...
+# Subtest: actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target
+ok 66 - actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target
+  ---
+  duration_ms: 27.7799
+  type: 'test'
+  ...
+# Subtest: independent exact capabilities and small touch stage preserve compatibility
+ok 67 - independent exact capabilities and small touch stage preserve compatibility
+  ---
+  duration_ms: 2.3875
+  type: 'test'
+  ...
+# Subtest: host captures raw null/zero/localized metadata and strict pointer DTO
+ok 68 - host captures raw null/zero/localized metadata and strict pointer DTO
+  ---
+  duration_ms: 1.1707
+  type: 'test'
+  ...
+# Subtest: request must belong to burned controller run and exact revision; no replay
+ok 69 - request must belong to burned controller run and exact revision; no replay
+  ---
+  duration_ms: 0.6471
+  type: 'test'
+  ...
+# Subtest: transport proof requires exact unique local row and explicit spell throughout reorder
+ok 70 - transport proof requires exact unique local row and explicit spell throughout reorder
+  ---
+  duration_ms: 0.4846
+  type: 'test'
+  ...
+# Subtest: same complete ACK snapshot is retained before a later ACK-less coalesced model
+ok 71 - same complete ACK snapshot is retained before a later ACK-less coalesced model
+  ---
+  duration_ms: 0.7134
+  type: 'test'
+  ...
+# Subtest: HMR same-runtime replacement and late old cleanup cannot claim new sink or old ACK
+ok 72 - HMR same-runtime replacement and late old cleanup cannot claim new sink or old ACK
+  ---
+  duration_ms: 0.5339
+  type: 'test'
+  ...
+# Subtest: crossing and wrong terminal pointer cannot save, owner drift revokes proof
+ok 73 - crossing and wrong terminal pointer cannot save, owner drift revokes proof
+  ---
+  duration_ms: 0.4703
+  type: 'test'
+  ...
+# Subtest: failed setup burns a fresh run and unsent/settled requests cannot replay
+ok 74 - failed setup burns a fresh run and unsent/settled requests cannot replay
+  ---
+  duration_ms: 1.0925
+  type: 'test'
+  ...
+# Subtest: actual cast observations use explicit spell, local owner and milliseconds, never snapshot serial
+ok 75 - actual cast observations use explicit spell, local owner and milliseconds, never snapshot serial
+  ---
+  duration_ms: 1.0457
+  type: 'test'
+  ...
+# Subtest: metadata validates actual sparse frames rather than count or names
+ok 76 - metadata validates actual sparse frames rather than count or names
+  ---
+  duration_ms: 2.6022
+  type: 'test'
+  ...
+# Subtest: current-owner nonarray learned capture withdraws through later timer ticks and valid capture recovers
+ok 77 - current-owner nonarray learned capture withdraws through later timer ticks and valid capture recovers
+  ---
+  duration_ms: 0.8555
+  type: 'test'
+  ...
+# Subtest: current-owner oversize learned capture withdraws through later timer ticks and valid capture recovers
+ok 78 - current-owner oversize learned capture withdraws through later timer ticks and valid capture recovers
+  ---
+  duration_ms: 0.6719
+  type: 'test'
+  ...
+# Subtest: bad current capture preserves pending send-time tuple and request highwater without replay
+ok 79 - bad current capture preserves pending send-time tuple and request highwater without replay
+  ---
+  duration_ms: 0.3867
+  type: 'test'
+  ...
+# Subtest: real host empty baseline with null metadata requires fresh exact runtime echo
+ok 80 - real host empty baseline with null metadata requires fresh exact runtime echo
+  ---
+  duration_ms: 0.6896
+  type: 'test'
+  ...
+# Subtest: real host empty baseline with empty metadata requires fresh exact runtime echo
+ok 81 - real host empty baseline with empty metadata requires fresh exact runtime echo
+  ---
+  duration_ms: 0.3475
+  type: 'test'
+  ...
+# Subtest: empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging
+ok 82 - empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging
+  ---
+  duration_ms: 0.205
+  type: 'test'
+  ...
+# Subtest: finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing
+ok 83 - finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing
+  ---
+  duration_ms: 0.7348
+  type: 'test'
+  ...
+# Subtest: diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim
+ok 84 - diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim
+  ---
+  duration_ms: 0.5643
+  type: 'test'
+  ...
+# Subtest: status diagnostics expose only the first finite refusal and never raw status or error
+ok 85 - status diagnostics expose only the first finite refusal and never raw status or error
+  ---
+  duration_ms: 1.2047
+  type: 'test'
+  ...
+# Subtest: input and lifecycle diagnostics remain observational and sanitize auxiliary reasons
+ok 86 - input and lifecycle diagnostics remain observational and sanitize auxiliary reasons
+  ---
+  duration_ms: 0.8553
+  type: 'test'
+  ...
+# Subtest: early host refusals retain old short circuit runtime calls and withdrawal output
+ok 87 - early host refusals retain old short circuit runtime calls and withdrawal output
+  ---
+  duration_ms: 0.7749
+  type: 'test'
+  ...
+# Subtest: actual page supports HalfMoon enable, disable and re-enable without becoming passive
+ok 88 - actual page supports HalfMoon enable, disable and re-enable without becoming passive
+  ---
+  duration_ms: 1.2226
+  type: 'test'
+  ...
+# Subtest: actual page rejects foreign, malformed and unrelated toggle acknowledgements
+ok 89 - actual page rejects foreign, malformed and unrelated toggle acknowledgements
+  ---
+  duration_ms: 0.3071
+  type: 'test'
+  ...
+# Subtest: actual snapshot projection preserves the authoritative toggle state separately from skill kind
+ok 90 - actual snapshot projection preserves the authoritative toggle state separately from skill kind
+  ---
+  duration_ms: 0.1662
+  type: 'test'
+  ...
+# Subtest: passive Slaying acknowledgements never turn the skill into an active toggle
+ok 91 - passive Slaying acknowledgements never turn the skill into an active toggle
+  ---
+  duration_ms: 0.1751
+  type: 'test'
+  ...
+# Subtest: actual modal captures before Character/Bag/HUD/world, outside clicks and second pointer cannot save
+ok 92 - actual modal captures before Character/Bag/HUD/world, outside clicks and second pointer cannot save
+  ---
+  duration_ms: 26.9
+  type: 'test'
+  ...
+# Subtest: actual page yields foreground Bag, crossing or revision retires capture
+ok 93 - actual page yields foreground Bag, crossing or revision retires capture
+  ---
+  duration_ms: 30.8405
+  type: 'test'
+  ...
+# Subtest: fixed stage UI canvas is interactive for Spells in GPU and shared GL2 while world canvas stays in its composite
+ok 94 - fixed stage UI canvas is interactive for Spells in GPU and shared GL2 while world canvas stays in its composite
+  ---
+  duration_ms: 4.9778
+  type: 'test'
+  ...
+# Subtest: actual modal fences existing shortcuts and held keyboard movement before dispatch
+ok 95 - actual modal fences existing shortcuts and held keyboard movement before dispatch
+  ---
+  duration_ms: 18.5628
+  type: 'test'
+  ...
+# Subtest: actual Page empty-Spells eligibility preserves every refusal and its short-circuit HUD/focus reads
+ok 96 - actual Page empty-Spells eligibility preserves every refusal and its short-circuit HUD/focus reads
+  ---
+  duration_ms: 1150.5487
+  type: 'test'
+  ...
+# Subtest: public Spells diagnostic transports only the finite host report and never substitutes for readiness
+ok 97 - public Spells diagnostic transports only the finite host report and never substitutes for readiness
+  ---
+  duration_ms: 81.7258
+  type: 'test'
+  ...
+# Subtest: actual Page detaches complete raw snapshot after connection/session guard, before coalescing
+ok 98 - actual Page detaches complete raw snapshot after connection/session guard, before coalescing
+  ---
+  duration_ms: 132.6061
+  type: 'test'
+  ...
+# Subtest: actual sendRaw checks proof after synchronous mir2:action and directly before socket send
+ok 99 - actual sendRaw checks proof after synchronous mir2:action and directly before socket send
+  ---
+  duration_ms: 187.0337
+  type: 'test'
+  ...
+# Subtest: actual Page bootstrap accepts authenticated empty learned after Bag owner initialization without retagging old cache or replaying ACK
+ok 100 - actual Page bootstrap accepts authenticated empty learned after Bag owner initialization without retagging old cache or replaying ACK
+  ---
+  duration_ms: 59.214
+  type: 'test'
+  ...
+# Subtest: actual Spells bootstrap rejects stale socket/session/scene/version/self/map and suspended sources
+ok 101 - actual Spells bootstrap rejects stale socket/session/scene/version/self/map and suspended sources
+  ---
+  duration_ms: 688.116
+  type: 'test'
+  ...
+# Subtest: actual Spells bootstrap distinguishes genuine empty learned from missing null nonarray and overflow without normalizing raw fields
+ok 102 - actual Spells bootstrap distinguishes genuine empty learned from missing null nonarray and overflow without normalizing raw fields
+  ---
+  duration_ms: 194.4261
+  type: 'test'
+  ...
+# Subtest: hook captures runtime, complete pre-runtime baseline and aborts metadata on cleanup
+ok 103 - hook captures runtime, complete pre-runtime baseline and aborts metadata on cleanup
+  ---
+  duration_ms: 62.2744
+  type: 'test'
+  ...
+# Subtest: unrequested hook does not create controller or install a sink
+ok 104 - unrequested hook does not create controller or install a sink
+  ---
+  duration_ms: 10.0393
+  type: 'test'
+  ...
+# Subtest: hook diagnostic dedupes finite values on existing lifecycle and ignores retired callbacks
+ok 105 - hook diagnostic dedupes finite values on existing lifecycle and ignores retired callbacks
+  ---
+  duration_ms: 14.8299
+  type: 'test'
+  ...
+# Subtest: unrequested and absent runtime diagnostics require no host or runtime read
+ok 106 - unrequested and absent runtime diagnostics require no host or runtime read
+  ---
+  duration_ms: 24.6074
+  type: 'test'
+  ...
+# Subtest: hook diagnostic uses the existing callback lifecycle without new polling or runtime access
+ok 107 - hook diagnostic uses the existing callback lifecycle without new polling or runtime access
+  ---
+  duration_ms: 0.6558
+  type: 'test'
+  ...
+1..107
+# tests 107
+# suites 0
+# pass 107
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6215.6348

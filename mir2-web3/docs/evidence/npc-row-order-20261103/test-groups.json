@@ -1,0 +1,51 @@
+{
+  "native": [
+    {
+      "exitCode": 0,
+      "filter": "world_depth::tests",
+      "result": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1239 filtered out; finished in 0.00s"
+    },
+    {
+      "exitCode": 0,
+      "filter": "atlas::tests",
+      "result": "test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 1207 filtered out; finished in 0.28s"
+    },
+    {
+      "exitCode": 0,
+      "filter": "atlas::self_occlusion_redraw_tests",
+      "result": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1239 filtered out; finished in 0.01s"
+    },
+    {
+      "exitCode": 0,
+      "filter": "map_parser::tests",
+      "result": "test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 1200 filtered out; finished in 0.09s"
+    },
+    {
+      "exitCode": 0,
+      "filter": "entity_presentation::tests",
+      "result": "test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 1185 filtered out; finished in 0.38s"
+    },
+    {
+      "exitCode": 0,
+      "filter": "companion::tests",
+      "result": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1237 filtered out; finished in 0.01s"
+    }
+  ],
+  "runtime": {
+    "passed": 26,
+    "failed": 0,
+    "ignored": 0,
+    "newNativeSortZAndLegacyFallbackPassed": true
+  },
+  "initialFailures": [
+    {
+      "kind": "obsolete-test-expectation",
+      "detail": "Old absolute Z and same-cell live-body occlusion assumptions corrected against Crystal; next-row occlusion remains tested."
+    },
+    {
+      "kind": "cross-manifest-shared-build-cache",
+      "detail": "Standalone cdylib/rlib test build overwrote un-hashed runtime artifacts; only the fixed F: development package cache was cleared and Native revalidated."
+    }
+  ],
+  "runtimeLockRestored": true
+}

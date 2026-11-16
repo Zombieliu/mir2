@@ -1,0 +1,10 @@
+
+running 5 tests
+test quest_journey::newcomer_v2_guidance_tests::v2_bundle_has_six_chapters_and_projects_all_twenty_six_server_tasks ... ok
+test quest_journey::newcomer_v2_guidance_tests::v1_bundle_and_profile_selection_remain_available ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_uses_reviewed_jane_and_board_endpoints ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_chapter_selection_never_treats_level_as_completion ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_keeps_at_most_three_server_objective_groups_in_the_hud_projection ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 854 filtered out; finished in 0.00s
+

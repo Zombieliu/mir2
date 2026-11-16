@@ -1,0 +1,274 @@
+{
+  "source": "ea4b1c363eb9089bf0fbe57245660782cae3fe70",
+  "baseSource": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "commits": [
+    "e83c60216c68953edad68b842a41ff8402908434",
+    "b0cc37a3dbc1d1092ee9befe76165883108d2c15",
+    "e4549595e1face90a3c90df4610d559b3a99d604",
+    "eb97b0ccaa3dd9469842dd3f0445eae1119ceb4a",
+    "4515fe8400285b2beb9c5b48480d020c538db738",
+    "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
+  ],
+  "files": [
+    {
+      "status": "modified",
+      "filename": ".github/scripts/numeron-r16-release.mjs",
+      "sha": "0c1b698e8a025af9349f036772725c212ff24061"
+    },
+    {
+      "status": "modified",
+      "filename": ".github/scripts/test-numeron-r16-release.mjs",
+      "sha": "c7e2ccf82762165a62b440047ea9f9d18a888f1b"
+    },
+    {
+      "status": "modified",
+      "filename": ".github/scripts/test-numeron-release-entry.mjs",
+      "sha": "8652a3ee07df1f348ad5f0c008dec5126167b718"
+    },
+    {
+      "status": "modified",
+      "filename": ".github/workflows/gateway-release.yml",
+      "sha": "994f8a947e374a33a8f93e4d3429e480cd4b8746"
+    },
+    {
+      "status": "modified",
+      "filename": ".github/workflows/promotion-website-release.yml",
+      "sha": "16bb035b8da83e3b5192532ba3394ce3b2d3005b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "sha": "0e57fe6da9a9b0c4df08fafdb0f82f4173cfcb8a"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "sha": "1a1c90f28769f66399eac36302221931704cea5e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "sha": "789c3c762abadf2400be12d22b2de399855f0925"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "sha": "aab7b723b3717cac9d3b33a8dc983db33da446da"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-waterfall.mjs",
+      "sha": "0f505ff80bb57b87dff4a340c7130959d8cd5cd6"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "sha": "cca6c14de54ffac1fb8ac40b90640623b922e6a9"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "a592c9645b80e45d5d17dde4871db02419a9b395"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "3393b106ad8fdd4b9ac64c30d1b63828b8dd0cf0"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "sha": "4f5b50e6215997a38f847171293427aa1f3ec290"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "sha": "f858d08116fc0a30f055aa644017bb41377828a1"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "sha": "0ba16bb1ed9cf499c60529b4784fe304a39bee64"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "5326401285977f49d05f0def698d1da604f9453c"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
+      "sha": "420f6edd780c48b53f0494e97a4aaa2c9f1aaf11"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-tick-gate.causal.json",
+      "sha": "07e35cb38c21bc8dbb729df6f1f7ab32ef647360"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace100.closed.json",
+      "sha": "c22fdf486c68f631e410df2c4086dce10f0d50c1"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace2.closed.json",
+      "sha": "5a5978195ccde21dd708b446563319c843e6ca21"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/README.md",
+      "sha": "8b49f44d8abdad65d85755f4888db20db72e12db"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/default-vendor-arrival.png",
+      "sha": "7efabd2db0e5f47489ed31cf423df374f0d23552"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/qualification.json",
+      "sha": "741d505239d9e7987a11c0cda252c6f61d4b4f90"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/webgl2-vendor-arrival.png",
+      "sha": "a5aef1c2d11817a4c4cd1ca49e151e1ca7f6c089"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/README.md",
+      "sha": "f5057b58a51231e648a7c8f14ea2767aa70aeace"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/README.md",
+      "sha": "74cc624f59133f86516eb796a5bf2d576c83d8e0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/checks.json",
+      "sha": "06b9fdb709f8cc50788043d31dce0320d1f68ce6"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-control.json",
+      "sha": "7fbc63035f40bd66b6820333f0d17d964f2c1555"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-shared-quest.png",
+      "sha": "7d5b1f2928399b6de08ee2369e5c108f44372c4b"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-static-waterfall.json",
+      "sha": "2d5b0a05de37d301199fa25c9f482f8e4f465e3e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/post-control-production.json",
+      "sha": "66b28be46329556169faf08336708be58bad026e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/ready.json",
+      "sha": "7f6249ff8ff4cf514e5fd4735883eb5e92c52003"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/legacy-text-vendor-arrival.png",
+      "sha": "d1e264fd945a423372a626cb4cc58382edd70ab7"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-browser-verification.json",
+      "sha": "12a7cb018506478d88d2cfa931cc80484a08a477"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-default-vendor-arrival.png",
+      "sha": "9df9fe6abbe5132584a7bbf7dc77d694c8fa4363"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-linux-ci-verification.json",
+      "sha": "4470545b042746f73900b26ef161a2b095542818"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-private-inputs.json",
+      "sha": "11a371a45cd34a24bbf142967bbeab36884c5912"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-production-readback.json",
+      "sha": "0a68886aac8e1d499c48db8ca60a853ac8d4ee66"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-release-source-remote.json",
+      "sha": "394f85494aac9264b2e3e63934b3c4a9d64d08e4"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-validation.json",
+      "sha": "f8fd3fe9be21ab0981e4f8a52a690ca7e8e18696"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-webgl2-vendor-arrival.png",
+      "sha": "1d8b6b0083376b3aca41e6af7a97da0621b393e5"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/qualification.json",
+      "sha": "5fce7e12229763e65799d187d9f075eb28d68ea9"
+    }
+  ],
+  "frontendBindings": [
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "localBuiltSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "committedSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "localBuiltSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "committedSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "localBuiltSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "committedSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "localBuiltSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "committedSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "eolOnly": false
+    }
+  ],
+  "otherRuntimeAndPackageInputsUnchanged": true,
+  "localQualificationSha256": "f89ad1e60ccfd7581cde4609cd7d6f1ed03d7467c40e44980975c820b2bb938d",
+  "baseline": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "remoteCompare": {
+    "checkedAt": "2026-11-14T13:43:50.019Z",
+    "status": "ahead",
+    "aheadBy": 6,
+    "behindBy": 0,
+    "mergeBase": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+    "commitsMatched": true,
+    "allFileBlobsMatched": true
+  },
+  "releaseGuardTests": {
+    "passed": 80,
+    "failed": 0
+  },
+  "formalDomainChanged": false
+}

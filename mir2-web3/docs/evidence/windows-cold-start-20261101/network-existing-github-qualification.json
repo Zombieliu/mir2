@@ -1,0 +1,46 @@
+{
+  "schema": "mir2.existing-github-path-qualification.v1",
+  "diagnosticOnly": true,
+  "coldAcceptance": false,
+  "newReleaseCreated": false,
+  "newAssetUploaded": false,
+  "redirectTokensStored": false,
+  "probes": [
+    {
+      "sourceLocalPath": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\existing-github8m.result.json",
+      "sourceSha256": "2a95b2bd6340a87b553ea1c3c319d1b2e972666cb6ef5590d45821f93c281a78",
+      "sourceBytes": 403,
+      "metrics": {
+        "http_code": 0,
+        "size_download": 0,
+        "speed_download": 0,
+        "time_starttransfer": 15.010434,
+        "time_total": 15.010436,
+        "proxy_used": 0,
+        "ssl_verify_result": 0,
+        "exitcode": 28,
+        "num_redirects": 0,
+        "effectiveHostname": "github.com"
+      },
+      "qualified20Mbps": false
+    },
+    {
+      "sourceLocalPath": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\diagnostics\\existing-github-api8m.result.json",
+      "sourceSha256": "ee1a1b787a3b611bd50676a23ddcb75b3197518c153b59b089f779f056276b74",
+      "sourceBytes": 455,
+      "metrics": {
+        "http_code": 206,
+        "size_download": 1407760,
+        "speed_download": 31035,
+        "time_starttransfer": 2.191119,
+        "time_total": 45.359303,
+        "proxy_used": 0,
+        "ssl_verify_result": 0,
+        "exitcode": 28,
+        "num_redirects": 1,
+        "effectiveHostname": "release-assets.githubusercontent.com"
+      },
+      "qualified20Mbps": false
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T15:52:07.0794004Z",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\authored-source-01.json",
+  "authoredSourceSha256": "272547f889c13a5d027ee6d8d41cd7b7e423bd4acf82f568a2c1f06befa7b759",
+  "authoredFileCount": 9,
+  "shaAndLengthMismatches": 0,
+  "baselineCommit": "4644753b78c201cfa7dccc6cf6d694ce10021235",
+  "newTestFunctions": 16,
+  "newTestsByScope": {
+    "item_grants": 8,
+    "quest": 4,
+    "mining": 2,
+    "fishing": 2
+  },
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Accepted only for original CargoGuard focused tests. Reviewed actual nine authored source paths and sixteen new tests. Whole batch planning validates template carriers and real grid capacity on a cloned inventory; UID0 stays a private placeholder until complete planning, all new roots are assigned before publication, and partial mint failure burns IDs without partial inventory delivery. Nonempty shadow/fenced grants reject even merge-only requests. Quest item rewards and carry items prepare before completion/currency/task consumption; trusted synthetic equipment issuance is completed before any live quest publication, with exact assigned UID retained by replace_equipment. Mining authority failure leaves stones/pickaxe/inventory unchanged. Fishing failure cancels autocast before success/spawn/reel wear, while preserving the existing chance-counter increment. Legacy issuance uses the prior local allocator and inventory whole-item custody remains unchanged. Static review found no confirmed P0/P1 or compilation blocker. This is not an assertion that tests passed, nor durable atomic account publication or normal gateway/NPC/UI acceptance.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\run-check.ps1",
+    "sha256": "336918685c95623a918e7c5dd627e0d15dd587c8f7cd89baa66b0417db12ca9c",
+    "comparisonBase": "work/slg-production-p02b-20261008/run-check.ps1",
+    "observedChanges": [
+      "independent review 05 to 01",
+      "current bounded source-acceptance scope",
+      "four added test filter kinds",
+      "private current-round target directory"
+    ],
+    "originalToolPinsVerified": 7,
+    "policyTemplatePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-transport-source37-native-transport-test01.policy.json",
+    "policyTemplateSha256": "0510be32e885c39302f7d4f278b651c7c949eddcff40b7a4e5a797833eb92ca9",
+    "actualProbe": true,
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "postChildPolicy": "B",
+    "serialOfflineLocked": true
+  },
+  "privateCache": {
+    "receiptPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\private-cache.json",
+    "receiptSha256": "a96dcc232a2ddb64417b9b23840c60c91c2375f84b8c55707ab7c63d961343e6",
+    "destination": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\target",
+    "files": 2353,
+    "bytes": 2284474688,
+    "executablesSkipped": 38,
+    "noUserProcessClosureReported": true,
+    "noDeletionReported": true,
+    "cachePayloadNotIndependentlyRehashed": true
+  },
+  "limits": [
+    "Only controlled File opt-in paths; public catalog and normal gateway remain disabled.",
+    "Remaining generic grants/normalization, fresh world drops, script/GM, mail, full-server census and PostgreSQL issuance remain outstanding.",
+    "Focused and adjacent tests must run through the unchanged original Guard; no test pass claimed by this source review.",
+    "New fault-message translations and frontend behavior are not accepted in this round."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}

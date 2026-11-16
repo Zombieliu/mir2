@@ -1,0 +1,96 @@
+{
+  "phase": "journey-q9-v19",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 14,
+  "bytes": 4735853,
+  "entries": [
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 419661,
+      "sha256": "06f866bd93f593eb76bf27e53a71ad59f1f39899547601e31dae76ddbd2ca870"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/02-fresh-v2-native-task-card.png",
+      "bytes": 418345,
+      "sha256": "d64724ba40577c12d73b3b13d7b49f6636c7f0533fc3914bf5c5a12a75b528c1"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/03-before-acceptQuest-2110009.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/03-before-acceptQuest-2110009.png",
+      "bytes": 298953,
+      "sha256": "542e9e99c9e5cb89789311b0f62388a2a56c3afdecc2f97dce62536495f1129a"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/04-d001-first-real-map-entry.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/04-d001-first-real-map-entry.png",
+      "bytes": 381390,
+      "sha256": "310e42379de83c3922fcc566f371c098c13a84307f1000b89bdf00c830593733"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/05-d001-after-trusted-interior-walking.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/05-d001-after-trusted-interior-walking.png",
+      "bytes": 333343,
+      "sha256": "e609a6fd8688ab792e38b3ff052c4c44551cecbfbad4f4665d45cfe5a25108d7"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/06-ordinary-d001-exit-map0-landing.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/06-ordinary-d001-exit-map0-landing.png",
+      "bytes": 408712,
+      "sha256": "1ad0390fc3b2fccd8b5ade1813c785664cefef3f30bbba1834f081d1bc2cfe64"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/07-failure-safe-masked.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/07-failure-safe-masked.png",
+      "bytes": 408712,
+      "sha256": "1ad0390fc3b2fccd8b5ade1813c785664cefef3f30bbba1834f081d1bc2cfe64"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r1/onboarding-forest-browser-proof.json",
+      "bytes": 218963,
+      "sha256": "e248712fe205713deebca1d176801b74fd1d8bb389a3f83079c2731f62988fa7"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r2/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r2/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 409367,
+      "sha256": "4185b345db771b8a04af7c1f4bcfb8c98025efa771526f3c024ef86fec792151"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r2/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r2/02-fresh-v2-native-task-card.png",
+      "bytes": 409367,
+      "sha256": "4185b345db771b8a04af7c1f4bcfb8c98025efa771526f3c024ef86fec792151"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r2/03-before-saved-q9-native-diary-turn-in.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r2/03-before-saved-q9-native-diary-turn-in.png",
+      "bytes": 291209,
+      "sha256": "b931f6197f57c05d5925537fa9b65c45079e9d553ea7ad7a89d16c27e8b6f146"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r2/04-next-quest-2110009-completed.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r2/04-next-quest-2110009-completed.png",
+      "bytes": 293243,
+      "sha256": "d445841ab4559b9e127101b200ac7910d02ccd783cb7662c1e0cdcbf471c14ea"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r2/05-saved-progress-native-diary.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r2/05-saved-progress-native-diary.png",
+      "bytes": 409367,
+      "sha256": "4185b345db771b8a04af7c1f4bcfb8c98025efa771526f3c024ef86fec792151"
+    },
+    {
+      "path": "journey-q9-v19/forest-q9-v19-r2/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-q9-v19-r2/onboarding-forest-browser-proof.json",
+      "bytes": 35221,
+      "sha256": "52f51a696c255ff67cd107e0d95c163540ba671cbd7fc7d5f3278d5af5dc33fe"
+    }
+  ]
+}

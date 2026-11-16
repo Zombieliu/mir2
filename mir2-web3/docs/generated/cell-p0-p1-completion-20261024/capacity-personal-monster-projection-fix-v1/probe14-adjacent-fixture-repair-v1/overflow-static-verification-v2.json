@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "purpose": "One overflow test expectation maintenance; transient viewport health is not a durable personal receipt. No production logic changed.",
+  "source": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+    "bytes": 28187,
+    "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+  },
+  "proof": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\overflow-mutation-proof-v2.json",
+    "bytes": 3682,
+    "sha256": "faaef41c2998e5844930d26708b711c2f693b5329d3ae83a1157e8957758e90e"
+  },
+  "rawInversePassed": true,
+  "checks": [
+    {
+      "command": "rustup run 1.95.0 rustfmt --check --edition 2021 --config skip_children=true apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check -- apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "exitCode": 0
+    }
+  ],
+  "cargoExecuted": false,
+  "testsExecuted": false,
+  "sourceWriteWindowReleased": true
+}

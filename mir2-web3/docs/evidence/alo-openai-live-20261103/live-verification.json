@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-11-03T07:38:31.269Z",
+  "passed": true,
+  "provider": "openai-real-http",
+  "model": "gpt-6-luna",
+  "actualModelCalls": 3,
+  "mockProviderCalls": 0,
+  "inputTokens": 5971,
+  "outputTokens": 406,
+  "calls": [
+    {
+      "inputTokens": 1317,
+      "model": "gpt-6-luna",
+      "outputTokens": 112,
+      "providerModel": "gpt-6-luna",
+      "requestId": "req_bd307daba9ff4ed2a00f7634e09ead14",
+      "responseId": "resp_00b445a28e41eb46016ae98a00f93c87d2a3170c386d1c1ee8",
+      "status": "completed"
+    },
+    {
+      "model": "gpt-6-luna",
+      "status": "completed",
+      "providerModel": "gpt-6-luna",
+      "responseId": "resp_0b02d597168273be016ae98b9b5e8087d29d1c3beac9b0989a",
+      "requestId": "req_3e2f69bbaf394affa8d6eaa8fb9c5817",
+      "inputTokens": 2044,
+      "outputTokens": 121
+    },
+    {
+      "model": "gpt-6-luna",
+      "status": "completed",
+      "providerModel": "gpt-6-luna",
+      "responseId": "resp_0d40db86d333a785016ae98c6f25c087d29ad51fbb6e2fc16f",
+      "requestId": "req_3ab631824dbf4e66a82350348e3c96da",
+      "inputTokens": 2610,
+      "outputTokens": 173
+    }
+  ],
+  "completedKills": 2,
+  "requestedKills": 2,
+  "pickupsDuringHunt": 0,
+  "restart": {
+    "oldPid": 51972,
+    "newPid": 61988,
+    "identityPreserved": true,
+    "policyVersion": 2,
+    "habits": {
+      "assistBeforeLoot": true,
+      "lootOnlyAfterCombat": true,
+      "askBeforeLeaving": true
+    },
+    "recoveredKills": 2,
+    "recoveredRequestedKills": 2,
+    "oldTaskPaused": true,
+    "modelCallsBeforeNewInstruction": 1
+  },
+  "nextAdventure": {
+    "objective": "follow",
+    "loot": "never",
+    "reply": "上次的真实击杀记录显示完成了2只（1/2、2/2）；现在只跟随你，不拾取。",
+    "references": [
+      "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2:kill:1",
+      "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2:kill:2"
+    ],
+    "actualFollowDecisions": 1,
+    "lootDecisions": 0,
+    "savedActorPosition": {
+      "x": 290,
+      "y": 616
+    },
+    "savedOwnerPosition": {
+      "x": 292,
+      "y": 616
+    },
+    "savedWithinTwoTiles": true
+  },
+  "privateConfiguration": {
+    "keyStoredInWindowsCredentialManager": true,
+    "apiKeyInProfileOrEvidence": false,
+    "model": "gpt-6-luna",
+    "passwordFreeProxyConfigured": true,
+    "tlsVerificationDisabled": false
+  },
+  "originalUserGameStopped": false,
+  "originalGamePid": 60840,
+  "originalPrivateStateHash": "818e64d81a8e28867fef229891326809176e8d68fc7aec6e2119d9fbc992a931",
+  "realHumanTrial": false,
+  "monetaryCostActual": null
+}

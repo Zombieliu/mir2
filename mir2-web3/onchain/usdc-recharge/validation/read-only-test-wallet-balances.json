@@ -1,0 +1,38 @@
+{
+  "observedAt": "2026-10-28T18:50:28.463Z",
+  "operation": "read-only",
+  "chainIdentifier": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+  "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+  "rows": [
+    {
+      "role": "sponsor",
+      "address": "0xc587ba127b47874e1c83fbea209456b8eaa6b0948b2f9412544a44ea4d6e7487",
+      "usdc": {
+        "balance": "0",
+        "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+        "coinBalance": "0",
+        "addressBalance": "0"
+      }
+    },
+    {
+      "role": "buyer",
+      "address": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "usdc": {
+        "balance": "0",
+        "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+        "coinBalance": "0",
+        "addressBalance": "0"
+      }
+    },
+    {
+      "role": "seller",
+      "address": "0x52c333cf89ab4dfe3b2167b445a69f357a16f4c1b34e427e698bbcd98996deca",
+      "usdc": {
+        "balance": "0",
+        "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+        "coinBalance": "0",
+        "addressBalance": "0"
+      }
+    }
+  ]
+}

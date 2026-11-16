@@ -1,0 +1,24 @@
+{
+  "recordedAt": "2026-11-13T00:40:07.335747+00:00",
+  "candidate": "63977fd7e102-ui-assets-fa52144b",
+  "runtime": "bevy-0c553a754308e5b8",
+  "rustTestsUnique": 48,
+  "nodeReleaseTests": 38,
+  "browserCases": 4,
+  "coldAndWarmSessions": 8,
+  "featureCandidatePassed": true,
+  "newCandidatePublished": true,
+  "projectCandidate100": false,
+  "humanAccepted": false,
+  "existingProduction": "432c58a07e44db021679aab9a6562a02c9124b10",
+  "noBackendProtocolChanges": true,
+  "originalGates": {
+    "movementMs": 8000,
+    "sharedUiMs": 120000
+  },
+  "publicationPassed": true,
+  "publishedSource": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "deployment": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+  "functionalPublicSamplePassed": true,
+  "publicationEvidence": "production/README.md"
+}

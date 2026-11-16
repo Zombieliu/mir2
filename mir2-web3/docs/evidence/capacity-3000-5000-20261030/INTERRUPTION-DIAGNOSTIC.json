@@ -1,0 +1,130 @@
+{
+  "schema": "mir2.capacity.first-pilot-interruption.public.v1",
+  "sourceSha256": "767903a27f2eef3f770b92d16e0f9d9951c244502dc9d7146ec2e430da203eb3",
+  "watchdog": {
+    "state": {
+      "MainPID": "0",
+      "Result": "oom-kill",
+      "ExecMainStatus": "9",
+      "MemoryPeak": "[not set]",
+      "ActiveState": "failed"
+    },
+    "oomKillerReported": true,
+    "configuredMemoryMaxBytesReportedByCoordinator": 33554432,
+    "memoryPeakMeasured": false
+  },
+  "testServices": {
+    "gatewayDeactivatedSuccessfully": true,
+    "gatewayTransportUnregisterCompleted": true,
+    "redisUserRequestedShutdown": true,
+    "redisReadyToExit": true,
+    "redisDeactivatedSuccessfully": true,
+    "twoClientNormalLogoutReceiptsEstablished": false,
+    "saveReloginEstablished": false
+  },
+  "lastMonitorSnapshot": {
+    "schemaVersion": 1,
+    "sampledAt": 1793305525790,
+    "stop": false,
+    "reason": null,
+    "scope": "shared-host-protection-synthetic-pilot-not-capacity-acceptance",
+    "health": {
+      "maxWsConnections": 160,
+      "maxActiveSessions": 128,
+      "maxReconnectLeases": 128,
+      "maxLoginInFlight": 8,
+      "maxNewCharacterInFlight": 4,
+      "maxStartGameInFlight": 4,
+      "currentWsConnections": 2,
+      "currentActiveSessions": 2,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "memory": {
+      "currentBytes": 132911104,
+      "definition": "Linux cgroup v2 memory.current bytes; includes charged cache; not RSS"
+    },
+    "host": {
+      "memAvailableBytes": 1394962432,
+      "memTotalBytes": 8322797568,
+      "diskAvailableBytes": 637689856,
+      "load": [
+        1.20361328125,
+        1.43310546875,
+        1.4697265625
+      ],
+      "cpuTotalTicks": 5656932372,
+      "cpuIdleTicks": 4590066511,
+      "busyPercent": 29.279700654817585
+    },
+    "resourceLimits": {
+      "cpuQuotaCores": 1,
+      "memoryMaxBytes": 536870912
+    },
+    "elapsedSeconds": 263.903,
+    "gatewayCgroup": {
+      "memoryCurrentBytes": 132911104,
+      "memoryMaxBytes": 536870912,
+      "cpuQuotaCores": 1.0,
+      "memoryEvents": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0
+      },
+      "cpuStat": {
+        "usage_usec": 13004109,
+        "user_usec": 12503951,
+        "system_usec": 500158,
+        "core_sched.force_idle_usec": 0,
+        "nr_periods": 1382,
+        "nr_throttled": 18,
+        "throttled_usec": 15226,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      }
+    },
+    "redisCgroup": {
+      "memoryCurrentBytes": 4644864,
+      "memoryMaxBytes": 33554432,
+      "cpuQuotaCores": 0.1,
+      "memoryEvents": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0
+      },
+      "cpuStat": {
+        "usage_usec": 1243636,
+        "user_usec": 647966,
+        "system_usec": 595670,
+        "core_sched.force_idle_usec": 0,
+        "nr_periods": 2220,
+        "nr_throttled": 1,
+        "throttled_usec": 76684,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      }
+    }
+  },
+  "interpretation": {
+    "firstAttemptPassed": false,
+    "infrastructureFailureObserved": true,
+    "gatewaySaturationEstablished": false,
+    "oldFailurePreserved": true,
+    "rawJournalAndSessionIdentifiersIncluded": false,
+    "lastMonitorIsNotPostShutdownHealthProof": true
+  },
+  "secondAttempt": {
+    "status": "failed-no-further-retry",
+    "registeredAgain": false,
+    "summaryFile": "RUNTIME-SUMMARY-R2.json",
+    "noCapacityAcceptanceClaimed": true
+  }
+}

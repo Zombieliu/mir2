@@ -1,0 +1,12 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 2 tests
+test zone_rpc::canonical_recovery_pg_tests::canonical_recovery_cold_host_without_original_session_reuses_durable_base_and_effect_identity ... ok
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::canonical_recovery_pg_tests::canonical_recovery_host_post_commit_gap_recovers_source_world_and_reset_without_second_debit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1529 filtered out; finished in 12.36s

@@ -1,0 +1,111 @@
+{
+  "revision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "locale": "zh-CN",
+  "origin": "https://numeron.obelisk.build",
+  "plainGamePath": "/game",
+  "normalSystemNetwork": true,
+  "desktopChromeHeadless": true,
+  "noInterception": true,
+  "scope": "Unsigned real create, pending status and normal in-game Cancel only.",
+  "checks": {
+    "exactRevision": true,
+    "nativeBrowserLocale": true,
+    "noSplitLocaleRequestsBeforeAuth": true,
+    "localizedTitle": true,
+    "firstPartyLink": true,
+    "renderedQr": true,
+    "sameIntentPending": true,
+    "localizedPending": true,
+    "normalCancel": true,
+    "pollingStopped": true,
+    "remainedLogin": true
+  },
+  "posts": [
+    {
+      "kind": "create",
+      "atMs": 18069,
+      "status": 200,
+      "approvalLinkVerified": true
+    },
+    {
+      "kind": "poll",
+      "atMs": 24922,
+      "status": 200,
+      "state": "pending"
+    }
+  ],
+  "sceneChunkRequests": [],
+  "phases": [
+    {
+      "phase": "verify-revision",
+      "atMs": 232
+    },
+    {
+      "phase": "plain-game",
+      "atMs": 3104
+    },
+    {
+      "phase": "one-qr-click",
+      "atMs": 18041
+    },
+    {
+      "phase": "same-intent-pending",
+      "atMs": 26056
+    },
+    {
+      "phase": "normal-cancel",
+      "atMs": 26772
+    },
+    {
+      "phase": "passed",
+      "atMs": 30096
+    }
+  ],
+  "forbiddenEdges": 0,
+  "passed": true,
+  "chromeVersion": "157.0.8103.78",
+  "gameNetwork": {
+    "protocol": "h2",
+    "defaultPeer": "loopback-proxy",
+    "cloudflareEdge": true,
+    "tlsVerified": true
+  },
+  "htmlLanguage": "zh-CN",
+  "renderedQr": {
+    "valid": true,
+    "width": 240,
+    "height": 240,
+    "matched": 2401,
+    "total": 2401
+  },
+  "pollsAfterCancel": 0,
+  "createAttempts": 1,
+  "validCreateBodies": 1,
+  "qrWire": [
+    {
+      "kind": "create",
+      "atMs": 18069,
+      "initialPriority": "High",
+      "decodedBodyBytes": 1320,
+      "encodedBodyBytes": 840,
+      "status": 200,
+      "protocol": "h2",
+      "cdpResponseEventMs": 6852,
+      "networkHeadersMs": 6851,
+      "bodyMs": 6863
+    },
+    {
+      "kind": "poll",
+      "atMs": 24922,
+      "initialPriority": "High",
+      "decodedBodyBytes": 20,
+      "encodedBodyBytes": 44,
+      "status": 200,
+      "protocol": "h2",
+      "cdpResponseEventMs": 1814,
+      "networkHeadersMs": 1813,
+      "bodyMs": 1814
+    }
+  ],
+  "browserClosed": true
+}

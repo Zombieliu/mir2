@@ -1,0 +1,8 @@
+{
+  "existingClustersStopped": false,
+  "processId": 67376,
+  "data": "E:\\mir2-capacity-goal-20261030\\pgdata",
+  "atUtc": "2026-10-30T06:07:22.5349434Z",
+  "stillRunning": false,
+  "cleanStop": true
+}

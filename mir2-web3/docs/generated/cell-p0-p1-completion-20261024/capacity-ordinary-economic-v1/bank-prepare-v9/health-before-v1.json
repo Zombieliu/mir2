@@ -1,0 +1,35 @@
+{
+  "capacity": {
+    "maxWsConnections": 128,
+    "maxActiveSessions": 100,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "ok": true,
+  "sessionCacheHealthy": true,
+  "observedAt": "2026-10-26T23:36:59.957Z",
+  "sixCountersZero": true,
+  "ownedGateway": {
+    "pid": 70292,
+    "exe": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "creationTime": "2026-10-26T23:36:59.5274390Z"
+  },
+  "reusedPartialBank": {
+    "sourcePlan": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\source-bank-plan-pending-v1.json",
+      "bytes": 11274,
+      "sha256": "4f87b523f57c0a11c27e38bd3341daa688c48b316e44f616cc6798119237ff5f"
+    },
+    "copiedLedgerRequired": true,
+    "loginNotBeforeOverridden": false,
+    "sourceStoreCompleteRawCopy": true
+  }
+}

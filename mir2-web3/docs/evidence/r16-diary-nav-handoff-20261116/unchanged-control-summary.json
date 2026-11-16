@@ -1,0 +1,25 @@
+{
+  "applicationSource": "c4b2e44c5ed2ca59050f092dbeb8ec7702b7a8a5",
+  "passed": true,
+  "ackMs": 130,
+  "nativeMs": 23283,
+  "originalR2NotReproduced": true,
+  "originalR2RemainsFailed": true,
+  "passiveReadOnly": true,
+  "originalDeadlinesUnchanged": true,
+  "wrongHudSelectorInInitialControl": true,
+  "hudNavigationRowsUnavailableInControl": true,
+  "restoration": {
+    "restored": true,
+    "overlays": 24,
+    "rawWipPreserved": 29,
+    "controlPassed": true,
+    "originalR2FailureNotReproduced": true,
+    "originalR2RemainsFailed": true,
+    "allLocalHandlesClosed": true,
+    "scope": "Passive C4B replay only; HUD diagnostic initially used wrong DOM field and recorded no navigation entries. Key/quest/HUD states captured. Does not prove original failure cause.",
+    "ackMs": 130,
+    "nativeMs": 23283,
+    "at": "2026-11-16T08:59:44.093Z"
+  }
+}

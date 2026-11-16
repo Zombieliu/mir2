@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "attemptAt": "2026-10-27T00:00:34.774Z",
+  "verifier": "C:/mir2-build/p01-completion-20261024/verify-full16-reuse-v1.mjs",
+  "verifierBytes": 14910,
+  "verifierSha256": "5c07e1c5451c6ba5156b1609156dbeabfef4ca5254e81580ff985782f7183349",
+  "actualExitCode": 1,
+  "actualError": "Actual runtime14 source differs: mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+  "cause": "Verifier read realm.sourcePins values as objects, but actual pinned realm schema stores SHA256 strings; no proof output produced.",
+  "proofOutputProduced": false,
+  "fullLifecycleRerunPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

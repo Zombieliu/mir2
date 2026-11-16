@@ -1,0 +1,8314 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-06T06:10:20.010Z",
+  "passed": false,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-or-Digit3-keydown-up-only"
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "0c37a0082782be781376ccb452fda18ea6f4235a29fbbd678e7db066b81049ac",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "class",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2120015,
+        "minLevel": 15,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 5000,
+        "experience": 0,
+        "kills": [],
+        "flags": []
+      },
+      {
+        "id": 2110008,
+        "minLevel": 15,
+        "startNpcId": 0,
+        "finishNpcId": 24,
+        "gold": 500,
+        "experience": 40000,
+        "kills": [
+          {
+            "monster": "Oma",
+            "monsterIndex": 48,
+            "count": 2,
+            "message": "Defeat 2 Oma."
+          }
+        ],
+        "flags": [
+          {
+            "number": 2210081,
+            "message": "Complete your class practice",
+            "kind": "classPractice",
+            "requirements": {
+              "warrior": [
+                "Slaying learned",
+                "normal attack landed with Slaying learned"
+              ],
+              "wizard": [
+                "GreatFireBall learned",
+                "GreatFireBall damage committed"
+              ],
+              "taoist": [
+                "SpiritSword learned",
+                "normal attack landed with SpiritSword learned"
+              ],
+              "assassin": [
+                "DoubleSlash learned",
+                "DoubleSlash attack damage committed"
+              ],
+              "archer": [
+                "DoubleShot learned",
+                "DoubleShot damage committed"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": false,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "fresh-authority-q8-board-continuation",
+    "q8-ordinary-board-turn-in"
+  ],
+  "screenshots": [
+    "01-current-native-task-card-before-measured-readiness.png",
+    "02-fresh-v2-native-task-card.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 19,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 26,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 27,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 3780,
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 449,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2120015
+      ]
+    },
+    {
+      "sequence": 629,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 630,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 631,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 632,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 633,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 634,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 635,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 636,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 637,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 638,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206604
+    },
+    {
+      "sequence": 639,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 640,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 641,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 642,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 643,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 644,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 645,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 646,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 647,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 693,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 30,
+      "objectId": 206641
+    },
+    {
+      "sequence": 713,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 717,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 721,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Down"
+    },
+    {
+      "sequence": 723,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 725,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 727,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Up"
+    },
+    {
+      "sequence": 729,
+      "method": "ObjectHealth",
+      "phase": "q8-ordinary-board-turn-in",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 733,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 736,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 738,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 740,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 745,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Up"
+    },
+    {
+      "sequence": 747,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Up"
+    },
+    {
+      "sequence": 749,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 755,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 759,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 766,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 772,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 777,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 781,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 787,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 792,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 797,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 801,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 808,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 814,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 819,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 824,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 829,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 834,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 839,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 844,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 850,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 855,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 861,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 866,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 870,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 876,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 880,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 886,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 890,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 897,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 902,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 908,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 912,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 917,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 922,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 927,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 932,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 939,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 944,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 950,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 954,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 959,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 965,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 970,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 975,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 980,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 986,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 992,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 996,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1001,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1007,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1012,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1016,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1022,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1028,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1034,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1039,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1044,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1048,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1054,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1059,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1063,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1070,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1076,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1080,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1086,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1091,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1095,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1101,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1106,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1112,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1117,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1122,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1127,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1133,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1137,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1142,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1147,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1153,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1159,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1165,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1170,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1174,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1180,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1185,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1189,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1195,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1199,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1206,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1211,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1217,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1221,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1227,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1232,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1237,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1242,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1249,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1254,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1259,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1263,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1269,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1273,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1278,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1284,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1290,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1295,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1300,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1305,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1310,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1315,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1321,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1325,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1331,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1336,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1342,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1347,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1353,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1358,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1363,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1368,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1373,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1378,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1384,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1390,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1395,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1399,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1405,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1410,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1416,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1421,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1425,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1428,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1431,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1436,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1441,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1446,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1452,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1457,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1462,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1467,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1473,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1479,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1484,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1489,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1493,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1499,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1503,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1508,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1514,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1520,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1526,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1530,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1536,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1540,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1545,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1551,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1555,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1562,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1567,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1572,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1577,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1583,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1587,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1592,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1598,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1603,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1610,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1615,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1619,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1625,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1630,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1635,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1639,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1644,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1651,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1656,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1661,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1666,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1672,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1677,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1682,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1685,
+      "method": "ObjectHealth",
+      "phase": "q8-ordinary-board-turn-in",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 1687,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1693,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1697,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1705,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1710,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1715,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1719,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1724,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1729,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1735,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1739,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1746,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1751,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1756,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1762,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1767,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1771,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1776,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1780,
+      "method": "ObjectHealth",
+      "phase": "q8-ordinary-board-turn-in",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 1782,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1787,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1793,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1799,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1805,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1809,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1815,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1819,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1825,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1830,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1834,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1840,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1843,
+      "method": "ObjectHealth",
+      "phase": "q8-ordinary-board-turn-in",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 1847,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1853,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1858,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1862,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1864,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1866,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1872,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1877,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1882,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1887,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1893,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1899,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1903,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1909,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1914,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1918,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1920,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1923,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1928,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1934,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1939,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1944,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1950,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1955,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1959,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1965,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1970,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1974,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1981,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1987,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1992,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1996,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2001,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2007,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2011,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2016,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2022,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2028,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2034,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2039,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2043,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2049,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2053,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2058,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2063,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2068,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2075,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2081,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2085,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2090,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2095,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2101,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2105,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2111,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2117,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2123,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2128,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2133,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2138,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2143,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2148,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2153,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2159,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2165,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2170,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2175,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2180,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    },
+    {
+      "sequence": 2185,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Right"
+    },
+    {
+      "sequence": 2190,
+      "method": "UserLocation",
+      "phase": "q8-ordinary-board-turn-in",
+      "direction": "Left"
+    }
+  ],
+  "questOperations": [],
+  "movement": [
+    {
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 588,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 713,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 616
+      },
+      "position": {
+        "x": 290,
+        "y": 616
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 339,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 717,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 616
+      },
+      "position": {
+        "x": 290,
+        "y": 617
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 737,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 721,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 617
+      },
+      "position": {
+        "x": 291,
+        "y": 617
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 454,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 723,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 617
+      },
+      "position": {
+        "x": 292,
+        "y": 617
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 474,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 725,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 617
+      },
+      "position": {
+        "x": 292,
+        "y": 616
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 314,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 727,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 616
+      },
+      "position": {
+        "x": 293,
+        "y": 616
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 464,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 733,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 616
+      },
+      "position": {
+        "x": 294,
+        "y": 616
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 523,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 736,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 616
+      },
+      "position": {
+        "x": 295,
+        "y": 616
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 450,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 738,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 616
+      },
+      "position": {
+        "x": 296,
+        "y": 616
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 540,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 740,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 616
+      },
+      "position": {
+        "x": 296,
+        "y": 615
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 310,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 745,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 615
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 747,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 450,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 749,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 638,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 755,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 759,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 562,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 766,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 680,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 772,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 575,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 777,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 781,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 690,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 787,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 610,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 792,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 681,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 797,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 436,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 801,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 455,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 808,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 626,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 814,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 563,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 819,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 705,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 824,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 620,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 829,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 606,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 834,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 681,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 839,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 555,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 844,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 715,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 850,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 426,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 855,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 697,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 861,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 559,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 866,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 530,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 870,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 736,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 876,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 460,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 880,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 737,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 886,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 443,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 890,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 457,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 897,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 541,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 902,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 611,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 908,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 528,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 912,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 444,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 917,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 527,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 922,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 436,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 927,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 416,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 932,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 773,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 939,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 595,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 944,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 563,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 950,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 531,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 954,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 548,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 959,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 581,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 965,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 685,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 970,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 698,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 975,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 680,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 980,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 986,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 681,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 992,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 529,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 996,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 562,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1001,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 689,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1007,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 565,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1012,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 552,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1016,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 607,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1022,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 528,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1028,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 705,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1034,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 736,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1039,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 603,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1044,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 531,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1048,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 699,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1054,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 683,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1059,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 537,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1063,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1070,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 711,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1076,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 545,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1080,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 608,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1086,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 696,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1091,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 531,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1095,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 705,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1101,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 533,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1106,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 644,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1112,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1117,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 415,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1122,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 456,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1127,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 600,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1133,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 445,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1137,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 436,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1142,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 488,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1147,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 582,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1153,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 545,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1159,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 585,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1165,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 797,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1170,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 458,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1174,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 686,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1180,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 700,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1185,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 305,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1189,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 578,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1195,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 407,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1199,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 543,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1206,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 549,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1211,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 604,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1217,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 441,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1221,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 706,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1227,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 663,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1232,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 561,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1237,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 701,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1242,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 559,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1249,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 732,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1254,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 600,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1259,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 411,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1263,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 697,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1269,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 416,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1273,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 533,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1278,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 686,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1284,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 681,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1290,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 412,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1295,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 412,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1300,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 436,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1305,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 410,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1310,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 418,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1315,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 594,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1321,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1325,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 577,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1331,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 734,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1336,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 417,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1342,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 416,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1347,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 684,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1353,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 552,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1358,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 502,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1363,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 591,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1368,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 576,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1373,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 560,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1378,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 305,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1384,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 727,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1390,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 677,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1395,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 541,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1399,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 480,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1405,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 560,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1410,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 588,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1416,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 842,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1421,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 541,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1428,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 410,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1431,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 544,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1436,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 549,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1441,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 526,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1446,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 692,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1452,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 691,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1457,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 548,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1462,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 665,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1467,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 518,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1473,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 555,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1479,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 696,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1484,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 564,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1489,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 545,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1493,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 659,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1499,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 446,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1503,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 307,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1508,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 533,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1514,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 416,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1520,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 684,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1526,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 407,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1530,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 563,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1536,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 595,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1540,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 327,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1545,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 445,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1551,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 317,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1555,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 582,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1562,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 523,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1567,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 517,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1572,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 529,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1577,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 721,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1583,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1587,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 532,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1592,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 669,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1598,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 566,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1603,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 543,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1610,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 678,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1615,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 535,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1619,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 545,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1625,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 556,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1630,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 815,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1635,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 536,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1639,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 522,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1644,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 419,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1651,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 537,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1656,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1661,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 523,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1666,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 852,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1672,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 297,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 722,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1682,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 410,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1687,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 682,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1693,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 410,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1697,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 587,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1705,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 698,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1710,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 688,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1715,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 541,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1719,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 464,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1724,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 426,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1729,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 562,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1735,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 543,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1739,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 451,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1746,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 547,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1751,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 491,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1756,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 579,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1762,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 750,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1767,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 297,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 435,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1776,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 400,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1782,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 466,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1787,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 692,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1793,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 565,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1799,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 555,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1805,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 571,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1809,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 694,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1815,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1819,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 690,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1825,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 856,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1830,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 297,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 614,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1840,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1847,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 480,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1853,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 618,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1858,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 441,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1864,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 302,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1866,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 562,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1872,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 680,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1877,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 667,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1882,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 565,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1887,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 539,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1893,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 682,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1899,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 543,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1903,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 561,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1909,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 740,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1914,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 305,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1920,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 572,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1923,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 674,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1928,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 524,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1934,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 531,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1939,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 421,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1944,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 694,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1950,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 589,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1955,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 290,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1959,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 592,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1965,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 550,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1970,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1974,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 383,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1981,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 555,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1987,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 772,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1992,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 458,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1996,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2001,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 701,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2007,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 450,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2011,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2016,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 591,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2022,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 411,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2028,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 606,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2034,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 565,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2039,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 529,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2043,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 579,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2049,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 294,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2053,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 417,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2058,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 412,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2063,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 435,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2068,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 293,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2075,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 562,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2081,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 542,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2085,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 523,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2090,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 525,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2095,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 666,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2101,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 506,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2105,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 603,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2111,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 707,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2117,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 820,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2123,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 592,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2128,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 726,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2133,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 549,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2138,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 696,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2143,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 593,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2148,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 573,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2153,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 677,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2159,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 680,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2165,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 681,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2170,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 694,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2175,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 689,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2180,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 572,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 2185,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 586,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 2190,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    }
+  ],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 47,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 277,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 306,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 335,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 364,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [
+    {
+      "phase": "q8-ordinary-board-turn-in",
+      "name": "Error",
+      "hash": "341dc8611f39dde2704a8ba34894aab59805ef31fdda9638b688d9555f73fcc1"
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "ea0f53a994127e32f5f0e81ecffa7bfa94cc723f3605b50ab8b606a334668b0f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "10779bcd7766258ee9db4a24840647515111bffec6ad14bbec19d45f4b333410",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "d782ad4d3bd7daf0aa6e6e7fd8e664e4c077456961b50b6c4f447029615f500e",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "c3f5587e0a25f0cc782720626e7703e1221ed73ca68046cef9638405a68f5e5c",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "890e29e0e399d1ddf31b9bbdd98caab16055147f6eec5ef7b838d110eea067b9",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "61fdeae57d46984f86e4d3009362dfa77417b5cff2ebd8153fcd6d6859909e89",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "4506ca4d4e402264ef7ad5a1c2a8184a0bd3838730ee7171c1d54148d7c26413",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "65aa0433984573bd1793e6df5774367506441ec9725e709f1c764a59276923db",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "723b7fbaff2ea39eb1153feaee831007b1a429a681fe7f43e53d8afac07fd624",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "b48c58483a99a71cd596bd3cfbfe90501b53508ff05a039ee863e5770b483c33",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "3b37994a0b5c6cb74aca2e55a2345a43a2271acb2d7ba15b15e6ab948dfd1a02",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "e7b04965b373b19d80236efeedff6769f3ce23534c3b5c0ae8c9605da631abef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "5494001c44c56166ce9a494a53df432e2f6dd7b5d850ba75e7ef89da1f01765b",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-ordinary-board-turn-in",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "4f764194c5fd6d3b43f62057fdd101cbdf1042093bd0b30f523a835d9d1ea21c"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "8451787505b92274af7f4f9c5565a2d36fb71a19b64069aaae93a263df9e3e4d"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "de3a4df98b48ebb21205189f96cf5ea97dc16e0de77b20d1cb834ab3c030e071"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "de3a4df98b48ebb21205189f96cf5ea97dc16e0de77b20d1cb834ab3c030e071"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "de3a4df98b48ebb21205189f96cf5ea97dc16e0de77b20d1cb834ab3c030e071"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "c6f153a355e7251268cf73ba9d6373b87db1f93302d01609f22e2f9707f60e05"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "keepAlive": 35,
+    "npcPurchaseOwner": 1,
+    "walk": 291
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": false,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793945425469,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 27,
+      "receivedAtMs": 1793945441421,
+      "method": "UserInformation",
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 705,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 600000,
+    "maxSteps": 2300
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 957
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    }
+  ],
+  "resumeState": {
+    "hp": 149,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "progression": {
+      "level": 15,
+      "experience": 876,
+      "maxExperience": 40000
+    },
+    "gold": 3780,
+    "smallHpMedicine": 3,
+    "equipment": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      },
+      {
+        "name": "SharpSword",
+        "slot": "weapon",
+        "durabilityCurrent": 18000,
+        "durabilityMax": 18000
+      }
+    ],
+    "playerLevel": 15,
+    "knownFencing": true,
+    "fencingBooks": 0,
+    "bagEquipment": [
+      {
+        "name": "WoodenSword",
+        "slot": 0,
+        "equipSlot": "weapon"
+      }
+    ],
+    "clothingInBag": [],
+    "clothingEquipped": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour"
+      }
+    ],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 0,
+        "quantity": 3,
+        "key": "Digit1"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2120015
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "readyToTurnIn",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 47,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "boardContinuation": {
+    "q8": {
+      "questId": 2110008,
+      "stage": "readyToTurnIn",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    "alreadyCompleted": false,
+    "hp": 149,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "gold": 3780
+  },
+  "keyboardPanelChecks": [
+    {
+      "phase": "fresh-authority-q8-board-continuation",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "finishedAt": "2026-11-06T06:19:19.008Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 4,
+          "required": 4,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120015,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110008,
+      "stage": "readyToTurnIn",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006,
+    2110007,
+    2120015
+  ],
+  "lastFullSnapshot": {
+    "sequence": 703,
+    "receivedAtMs": 1793945441831,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "inSafeZone": true,
+    "mapFileName": "0",
+    "hp": 149,
+    "maxHp": 149,
+    "progression": {
+      "level": 15,
+      "experience": 876,
+      "maxExperience": 40000
+    },
+    "gold": 3780,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 2190,
+    "packet": "UserLocation",
+    "position": {
+      "x": 295,
+      "y": 614
+    },
+    "direction": "Left",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 286,
+  "finalVitals": {
+    "hp": 149,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": false,
+    "position": {
+      "x": 295,
+      "y": 614
+    }
+  }
+}

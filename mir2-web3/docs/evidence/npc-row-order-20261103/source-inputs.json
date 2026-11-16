@@ -1,0 +1,17 @@
+{
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "uncommittedIntegration": true,
+  "files": {
+    "apps/game-client/platform-windows/src/world_depth.rs": "29655ff5da45acc5ae2df397cc24e5d655da0c58edf5bf709210ddeaee0f8f15",
+    "apps/game-client/platform-windows/src/main.rs": "7f38cd7e94850ff3ca150cd5645cff597788bb495f552426784892f94067cf45",
+    "apps/game-client/platform-windows/src/map_parser.rs": "ca44b36246da4295dbb1e9122dae7adbd37b83bedf7bf487615ebdb19cdd193c",
+    "apps/game-client/platform-windows/src/atlas.rs": "b1762864e227bb982d64925b6c66d9b3e6adfbf689fe2f231285e127b83f1d67",
+    "apps/game-client/platform-windows/src/entity_presentation.rs": "32eec1cd9ff15864f2c98838c837e2c141029b20e5b0b6faad8f61f63121606a",
+    "apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs": "2b4e89eebc76334f49526d64188d566f52fed936b02d8e9bc46a079f84fa4cde",
+    "apps/game-client/runtime/src/lib.rs": "04b718f65ec59ccfa0c49a26dcc4197f83f54f841425f34cf368df95f4a38aac",
+    "apps/game-client/platform-windows/Cargo.lock": "16a4204573038f56ee1e036c7392f3ff3ea43319ccbeb6d3c5aed393f1a3b9d9"
+  },
+  "nativeSha256": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+  "runtimeLockRestored": true
+}

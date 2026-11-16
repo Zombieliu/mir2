@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.mentor-linux-root-native-subset-review.v1",
+  "atUtc": "2026-11-14T21:38:19.647863+00:00",
+  "sourceRevision": "7016023970a07a1764a67f8171d0df5bfb9542ca",
+  "canonicalIntegrationRevision": "33c75002cf6a78c1bd2005c9ace0476d34816c7a",
+  "windowsSourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "runId": 43638440652,
+  "wholeRunFreshOfficialSuccess": true,
+  "twoOfficialZipSizesAndShaIndependentlyRehashedByRoot": true,
+  "elfHeaderSizeAndShaIndependentlyRehashedByRoot": true,
+  "binarySha256": "08d4d0d88b680142990a85a0905208c605dc5b4ecb366d34a6004051e0711498",
+  "binaryBytes": 104000312,
+  "nativeGateAndMapAuditReviewedByRoot": true,
+  "all1620MapsNotIndependentlyRehashedAgainByRoot": true,
+  "subsetAuditSha256": "9f2de6d6965fb442306ebc7bc87acafa02182d6306b223a50defe19dd23e76d7",
+  "fullCandidateVerificationPassed": false,
+  "ELFExecutedLocally": false,
+  "publicServiceDeployed": false,
+  "capacityQualified": false
+}

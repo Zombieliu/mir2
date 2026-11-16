@@ -1,0 +1,29 @@
+{
+  "sourceLibrary": "Prguse.Lib",
+  "sourceLibrarySha256": "584b67694a420a29c98f51b04cdf681acf1ed071c15c57014fdfd59c762a3c96",
+  "frames": [
+    {
+      "index": 361,
+      "width": 16,
+      "height": 15,
+      "pngSha256": "2b9062123356ce26898b849c3854e7128128432bcd073daf9792c9d344e9ce5f",
+      "bytes": 364
+    },
+    {
+      "index": 362,
+      "width": 16,
+      "height": 15,
+      "pngSha256": "4c07ebaf3b0cfdd71da4b8adb2f7a93f2dfc3fa3699613f0d89abf83e9d1abe9",
+      "bytes": 364
+    },
+    {
+      "index": 363,
+      "width": 16,
+      "height": 15,
+      "pngSha256": "73d61a79f66ae143130538454329a5c5d4c6f064caec193986600f80f1c670a1",
+      "bytes": 378
+    }
+  ],
+  "originalSourcePixels": true,
+  "pairedVisualAccepted": false
+}

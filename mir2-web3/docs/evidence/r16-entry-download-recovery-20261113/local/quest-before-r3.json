@@ -1,0 +1,320 @@
+{
+  "run": "quest-before-r3",
+  "source": null,
+  "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+  "renderer": "compatibility",
+  "passed": false,
+  "originalReceiptSha256": "22c09ab0c40a18648f0b913640ffe6225fe2fd2d9a6465e799a8cf241a284186",
+  "failure": {
+    "stage": "verify-hosted-font-policy-and-wait-native-hud",
+    "message": "Baseline failed the original120s Native gate without same-entry recovery"
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "sameEntryRecoveryPassed": false,
+  "startGame": {
+    "acknowledgedAt": 1794555306660,
+    "bootstrapAt": 1794555306947,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "map": "0"
+  },
+  "firstPlayable": {
+    "epochMs": 1794555318244,
+    "observedAt": 1794555318246
+  },
+  "earlyWalks": {
+    "passed": true,
+    "firstPlayableAt": 1794555318244,
+    "rows": [
+      {
+        "key": "ArrowRight",
+        "direction": "Right",
+        "to": {
+          "x": 289,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794555320451,
+        "wireAt": 1794555320457,
+        "ackAt": 1794555320466,
+        "renderedAt": 1794555320510,
+        "ackMs": 9,
+        "inputToRenderedMs": 59,
+        "rendered": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      {
+        "key": "ArrowLeft",
+        "direction": "Left",
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794555320510,
+        "wireAt": 1794555321056,
+        "ackAt": 1794555321058,
+        "renderedAt": 1794555321084,
+        "ackMs": 2,
+        "inputToRenderedMs": 574,
+        "rendered": {
+          "x": 288,
+          "y": 616
+        }
+      }
+    ],
+    "returnedToSpawn": true
+  },
+  "continuousWalk": {
+    "startedAt": 1794555321084,
+    "rows": [
+      {
+        "step": 0,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555322070
+      },
+      {
+        "step": 0,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555322627
+      },
+      {
+        "step": 1,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555323264
+      },
+      {
+        "step": 1,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555323826
+      },
+      {
+        "step": 2,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555324447
+      },
+      {
+        "step": 2,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555325081
+      },
+      {
+        "step": 3,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555325638
+      },
+      {
+        "step": 3,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555326245
+      },
+      {
+        "step": 4,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555326853
+      },
+      {
+        "step": 4,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555327455
+      },
+      {
+        "step": 5,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555328043
+      },
+      {
+        "step": 5,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555328647
+      },
+      {
+        "step": 6,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555329231
+      },
+      {
+        "step": 6,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555329855
+      },
+      {
+        "step": 7,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794555330447
+      },
+      {
+        "step": 7,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794555331061
+      }
+    ],
+    "endedAt": 1794555331061
+  },
+  "npcRecovery": {
+    "reads": [
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555296222,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555316234
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794555316436,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555336436
+      }
+    ]
+  },
+  "controlledRuntimeDelivery": {
+    "kind": "Playwright fixed-byte response; not a WAN cold-download result",
+    "version": "bevy-0c553a754308e5b8",
+    "deliveries": [
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "at": 1794555318351,
+        "status": 200,
+        "bytes": 141747,
+        "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+        "controlledHeaderDelayMs": 0
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 1,
+        "requestedAt": 1794555318353,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794555326355
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 2,
+        "requestedAt": 1794555326355,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555326355,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794555341357
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 3,
+        "requestedAt": 1794555341358,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794555341358,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794555356375
+      }
+    ]
+  },
+  "runtimeAttempts": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 503,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": true
+    },
+    {
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 200,
+      "protocol": "http/1.1",
+      "fromDiskCache": false
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    },
+    {
+      "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    }
+  ],
+  "native": null,
+  "worker": null,
+  "warm": null,
+  "scope": "Valid predecessor baseline: original 120s Native gate failed; no manual reentry rescue."
+}

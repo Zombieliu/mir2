@@ -1,0 +1,483 @@
+{
+  "schema": "mir2.r16.web_combat_input.v1",
+  "date": "2026-11-10",
+  "base": "7ceeef84e7c962d4d1018bf2660804d158c6fe96",
+  "productionCandidate": {
+    "buildId": "UHZ32AoS7wziNnKbxvonJ",
+    "receiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+    "sourceSha256": {
+      "app/page.tsx": "424f6c4d5875ebdfa2b0126936ce1628d860582abe99ded69325d7b6e9318f1a",
+      "app/original-client-shell.tsx": "f6ecdd6af4bfeda2cff3eb0c656daf1dafba0f5ca8187faee5925421cb28ad9e",
+      "app/components/original-client-shell-types.ts": "7cffa116365fec4f109a6879c36222b7c78ab3be7f0afe3489f09a0771397c2f"
+    }
+  },
+  "gatewaySha256": "1353a70a503827c7bc56d8d8211e3c9c83c3e0d03baccc7989770166ca928d1e",
+  "checks": {
+    "native": {
+      "bevy-belt-identity.log": {
+        "passed": 1,
+        "sha256": "a178c8cc38d69ca28b71bd7dd4fd83c227e630506c186bd8c31baf64daf8cdad"
+      },
+      "bevy-foreground-overlap.log": {
+        "passed": 1,
+        "sha256": "117bb736c32b27ba1a06738ae10533858e2dbaf62d2651019f8a3d391b3d23ab"
+      },
+      "bevy-nonmodal.log": {
+        "passed": 4,
+        "sha256": "92d7ec4149caa42b3a67e865a4a95859e361397aba63380e1636cf5820062655"
+      },
+      "bevy-shared-item-clock.log": {
+        "passed": 1,
+        "sha256": "21710c0eb629566f8e0054c1e0199a0ce01dc3cc9408ddcac487fbed7e276a8a"
+      },
+      "native-hotkey.log": {
+        "passed": 16,
+        "sha256": "a97eace7b90af63b26436c0aff174bf3e13c26c7e54a5b00dcd831a74a5b7a5b"
+      },
+      "native-nonmodal.log": {
+        "passed": 10,
+        "sha256": "53e3e905abdb307a2ce5658ca810d6f8385f305d7345d7a7883b5d62702c8dfa"
+      },
+      "native-world-click.log": {
+        "passed": 1,
+        "sha256": "b3974fa2b0e9c28bd65321289110aff47fa0d333c8a73b3d3a64ff7bdb9f753d"
+      }
+    },
+    "webFocused": 203,
+    "stage5Groups": 520
+  },
+  "potion": {
+    "initialHp": 70,
+    "initialStackCount": 5,
+    "baseline": [
+      {
+        "renderer": "webgpu",
+        "receiptSha256": "304dc59e28bcbc26990d3f07a6e7dc4aa34db1d89e8d5e5d3a389cb5b7fd20af",
+        "buildReceiptSha256": "1afa18386da3fb9ca1146a33a5bf0460e2ea70a5bed039f677cb1ca15f384620",
+        "rapidKeys": {
+          "gapMs": 85.39999997615814,
+          "requestCount": 2,
+          "successfulAcks": 2,
+          "beltCount": 3
+        },
+        "rapidCrossSurface": {
+          "gapMs": 29.90000009536743,
+          "requestCount": 2,
+          "successfulAcks": 2,
+          "beltCount": 1
+        },
+        "chatUseRequests": 0,
+        "saved": {
+          "count": 1,
+          "hp": 136,
+          "sameUid": true
+        }
+      },
+      {
+        "renderer": "shared",
+        "receiptSha256": "92a737a950e75fd2f8459711870bdb86325a7f30e56890c545001eb71e49b1e0",
+        "buildReceiptSha256": "1afa18386da3fb9ca1146a33a5bf0460e2ea70a5bed039f677cb1ca15f384620",
+        "rapidKeys": {
+          "gapMs": 73.5,
+          "requestCount": 2,
+          "successfulAcks": 2,
+          "beltCount": 3
+        },
+        "rapidCrossSurface": {
+          "gapMs": 29.5,
+          "requestCount": 2,
+          "successfulAcks": 2,
+          "beltCount": 1
+        },
+        "chatUseRequests": 0,
+        "saved": {
+          "count": 1,
+          "hp": 126,
+          "sameUid": true
+        }
+      }
+    ],
+    "candidate": [
+      {
+        "renderer": "webgpu",
+        "receiptSha256": "3ab8a515275182fe59bcbd277ba62e1a79bd951691c2825c6c563dc8360f4ce0",
+        "buildReceiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+        "rapidKeys": {
+          "gapMs": 71.10000002384186,
+          "requestCount": 1,
+          "successfulAcks": 1,
+          "beltCount": 4
+        },
+        "rapidCrossSurface": {
+          "gapMs": 20.300000071525574,
+          "requestCount": 1,
+          "successfulAcks": 1,
+          "beltCount": 3
+        },
+        "chatUseRequests": 0,
+        "saved": {
+          "count": 3,
+          "hp": 196,
+          "sameUid": true
+        }
+      },
+      {
+        "renderer": "shared",
+        "receiptSha256": "8d9c7a9f98a2fcc7b288192a75ea5081eb11fd737104b8a2104351b280db62ad",
+        "buildReceiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+        "rapidKeys": {
+          "gapMs": 81.70000004768372,
+          "requestCount": 1,
+          "successfulAcks": 1,
+          "beltCount": 4
+        },
+        "rapidCrossSurface": {
+          "gapMs": 20.799999952316284,
+          "requestCount": 1,
+          "successfulAcks": 1,
+          "beltCount": 3
+        },
+        "chatUseRequests": 0,
+        "saved": {
+          "count": 3,
+          "hp": 196,
+          "sameUid": true
+        }
+      }
+    ]
+  },
+  "npc": {
+    "baseline": {
+      "receiptSha256": "de57998baf374cebbebf6fbff6a020610ebe1d4451d877c1e5633d7904e44bd3",
+      "buildReceiptSha256": "1afa18386da3fb9ca1146a33a5bf0460e2ea70a5bed039f677cb1ca15f384620",
+      "owner": "react-existing-fallback",
+      "npc": "MirGuide_Peter",
+      "tile": {
+        "x": 328,
+        "y": 258
+      },
+      "dialogueUseRequests": 1,
+      "dialogueBeltCount": 4,
+      "afterCloseBeltCount": 3,
+      "closeToNextUseMs": 72.991,
+      "closeToServerSnapshotMs": 447.501
+    },
+    "candidate": {
+      "receiptSha256": "2eccb93d71a6067581ced44d0ac79e45ba55025cbca99ad972155697c5a2debb",
+      "buildReceiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+      "owner": "react-existing-fallback",
+      "npc": "MirGuide_Peter",
+      "tile": {
+        "x": 328,
+        "y": 258
+      },
+      "dialogueUseRequests": 0,
+      "dialogueBeltCount": 5,
+      "afterCloseBeltCount": 4,
+      "closeToNextUseMs": 50.352,
+      "closeToServerSnapshotMs": 448.539
+    },
+    "reopenAndPointer": {
+      "receiptSha256": "e2b486671bdcc2346ae8ab47f3cb8c99a178345d7443e7a09f120f2ed30df98d",
+      "point": {
+        "x": 386,
+        "y": 733
+      },
+      "dialogueOpenAtUse": true,
+      "successfulAck": true,
+      "savedBeltCount": 3
+    },
+    "rejectedPriorCandidateReceiptSha256": "ed8d4c9054728a46719ac8ae6d4663e3a3e50fcb891523af59289daaf249aa87f",
+    "rejectedPriorCandidateReason": "The closed React panel still left a raw dialog in the latest server snapshot for about 533 ms."
+  },
+  "bag": {
+    "baseline": [
+      {
+        "renderer": "webgpu",
+        "receiptSha256": "7c4d4f26f077d0a8c7abc48aa5eefbc06e58defee2497045d47caeec6ad1756c",
+        "buildReceiptSha256": "1afa18386da3fb9ca1146a33a5bf0460e2ea70a5bed039f677cb1ca15f384620",
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "playerTile": {
+          "x": 298,
+          "y": 273
+        },
+        "inside": {
+          "point": {
+            "x": 548,
+            "y": 190
+          },
+          "requests": 0
+        },
+        "outside": {
+          "point": {
+            "x": 584,
+            "y": 468
+          },
+          "whileBagOpen": 0,
+          "hitWhileOpen": false,
+          "commandSeq": 793,
+          "objectAttackSeq": 798,
+          "objectStruckSeq": 799
+        },
+        "saved": {
+          "position": {
+            "x": 298,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 807
+        }
+      },
+      {
+        "renderer": "shared",
+        "receiptSha256": "24533c8b75bee956f61ee6f8eba8de83b3b8f91fb82c23eef0519e193999d742",
+        "buildReceiptSha256": "1afa18386da3fb9ca1146a33a5bf0460e2ea70a5bed039f677cb1ca15f384620",
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "playerTile": {
+          "x": 298,
+          "y": 273
+        },
+        "inside": {
+          "point": {
+            "x": 548,
+            "y": 190
+          },
+          "requests": 0
+        },
+        "outside": {
+          "point": {
+            "x": 584,
+            "y": 468
+          },
+          "whileBagOpen": 0,
+          "hitWhileOpen": false,
+          "commandSeq": 793,
+          "objectAttackSeq": 798,
+          "objectStruckSeq": 799
+        },
+        "saved": {
+          "position": {
+            "x": 298,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 807
+        }
+      }
+    ],
+    "intermediateCandidateFromOriginalSave": [
+      {
+        "renderer": "webgpu",
+        "receiptSha256": "1454ad54c0bd419c103257a0d970b81a345cdac18b9537918b21dc2ddbfe2b80",
+        "buildReceiptSha256": "78b9afa8d2ccabf30f7e1c5785f872102ed7653c903a127adcf71874c1a24e80",
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "playerTile": {
+          "x": 298,
+          "y": 273
+        },
+        "inside": {
+          "point": {
+            "x": 548,
+            "y": 190
+          },
+          "requests": 0
+        },
+        "outside": {
+          "point": {
+            "x": 584,
+            "y": 468
+          },
+          "whileBagOpen": 1,
+          "hitWhileOpen": true,
+          "commandSeq": 776,
+          "objectAttackSeq": 781,
+          "objectStruckSeq": 782
+        },
+        "saved": {
+          "position": {
+            "x": 298,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 790
+        }
+      },
+      {
+        "renderer": "shared",
+        "receiptSha256": "03a98198149233b6054af31800c7a65d27996ac416e19d22003c0f3dfafa3839",
+        "buildReceiptSha256": "78b9afa8d2ccabf30f7e1c5785f872102ed7653c903a127adcf71874c1a24e80",
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "playerTile": {
+          "x": 298,
+          "y": 273
+        },
+        "inside": {
+          "point": {
+            "x": 548,
+            "y": 190
+          },
+          "requests": 0
+        },
+        "outside": {
+          "point": {
+            "x": 584,
+            "y": 468
+          },
+          "whileBagOpen": 1,
+          "hitWhileOpen": true,
+          "commandSeq": 793,
+          "objectAttackSeq": 798,
+          "objectStruckSeq": 799
+        },
+        "saved": {
+          "position": {
+            "x": 298,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 807
+        }
+      }
+    ],
+    "finalCandidateFromOriginalSave": [
+      {
+        "renderer": "webgpu",
+        "receiptSha256": "2c693dc8d1f3c3596a99f3936fa30d1c88cc5b79a519446d3716146aa212971a",
+        "buildReceiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "playerTile": {
+          "x": 298,
+          "y": 273
+        },
+        "inside": {
+          "point": {
+            "x": 548,
+            "y": 190
+          },
+          "requests": 0
+        },
+        "outside": {
+          "point": {
+            "x": 584,
+            "y": 468
+          },
+          "whileBagOpen": 1,
+          "hitWhileOpen": true,
+          "commandSeq": 793,
+          "objectAttackSeq": 798,
+          "objectStruckSeq": 799
+        },
+        "saved": {
+          "position": {
+            "x": 298,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 807
+        }
+      },
+      {
+        "renderer": "shared",
+        "receiptSha256": "717a1cd4a3fda6786dd906f8cfe49e886feb399bece5434dfba27eb824909db6",
+        "buildReceiptSha256": "6ae30ea4288c7da9863520cee2c05851ef23b6ee7f60ad149e9e393991abc5f3",
+        "target": {
+          "id": "200203",
+          "name": "Hen",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "playerTile": {
+          "x": 298,
+          "y": 273
+        },
+        "inside": {
+          "point": {
+            "x": 548,
+            "y": 190
+          },
+          "requests": 0
+        },
+        "outside": {
+          "point": {
+            "x": 584,
+            "y": 468
+          },
+          "whileBagOpen": 1,
+          "hitWhileOpen": true,
+          "commandSeq": 793,
+          "objectAttackSeq": 798,
+          "objectStruckSeq": 800
+        },
+        "saved": {
+          "position": {
+            "x": 298,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 808
+        }
+      }
+    ],
+    "fieldSaveSceneLoad": [
+      {
+        "renderer": "webgpu",
+        "receiptSha256": "444197529e39254a09ac356de4a12f0a21351f66961e89ec2937ab8b03ded3eb",
+        "startGameResult": 4,
+        "sceneReadyWithin60Seconds": false
+      },
+      {
+        "renderer": "shared",
+        "receiptSha256": "47d86af8b892f205b12d2cb0375f2fddb860033242056633590476ab48d06fcf",
+        "startGameResult": 4,
+        "sceneReadyWithin60Seconds": false
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "file": "bag-open-webgpu.png",
+      "sha256": "ecd954c3ce7f132cb522b090bde6cec57e3c7455c990194b3d32a91f8710a544"
+    },
+    {
+      "file": "npc-dialog.png",
+      "sha256": "5d7a62021a3bb988d016b74d0a40c9f4cf7ed08910224f0523d695066864959b"
+    }
+  ]
+}

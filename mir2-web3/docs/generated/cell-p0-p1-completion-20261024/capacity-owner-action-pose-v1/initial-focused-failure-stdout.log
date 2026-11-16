@@ -1,0 +1,181 @@
+TAP version 13
+# Subtest: worldSnapshot replaces rather than merges the observed cache
+ok 1 - worldSnapshot replaces rather than merges the observed cache
+  ---
+  duration_ms: 1.2868
+  type: 'test'
+  ...
+# Subtest: real movement packet fields update self and remote entities
+ok 2 - real movement packet fields update self and remote entities
+  ---
+  duration_ms: 0.2584
+  type: 'test'
+  ...
+# Subtest: late self ObjectStruck cannot roll back a newer acknowledged owner transform
+ok 3 - late self ObjectStruck cannot roll back a newer acknowledged owner transform
+  ---
+  duration_ms: 0.4768
+  type: 'test'
+  ...
+# Subtest: remote ObjectStruck retains its public action position and direction
+ok 4 - remote ObjectStruck retains its public action position and direction
+  ---
+  duration_ms: 0.1743
+  type: 'test'
+  ...
+# Subtest: ObjectMonster and NewMonsterInfo use their location payload to upsert monsters
+ok 5 - ObjectMonster and NewMonsterInfo use their location payload to upsert monsters
+  ---
+  duration_ms: 0.2501
+  type: 'test'
+  ...
+# Subtest: incremental packets retain Crystal neutral disposition for passive and guard AI families
+ok 6 - incremental packets retain Crystal neutral disposition for passive and guard AI families
+  ---
+  duration_ms: 0.2797
+  type: 'test'
+  ...
+# Subtest: ObjectHealth keeps percent separate from absolute hp
+ok 7 - ObjectHealth keeps percent separate from absolute hp
+  ---
+  duration_ms: 0.1841
+  type: 'test'
+  ...
+# Subtest: fresh self percentages drive control without altering exact HP evidence
+ok 8 - fresh self percentages drive control without altering exact HP evidence
+  ---
+  duration_ms: 0.1725
+  type: 'test'
+  ...
+# Subtest: percentage HP estimates stay conservative and do not revive a dead self
+ok 9 - percentage HP estimates stay conservative and do not revive a dead self
+  ---
+  duration_ms: 0.6577
+  type: 'test'
+  ...
+# Subtest: rounded self percent zero remains low-health control rather than an authoritative death
+ok 10 - rounded self percent zero remains low-health control rather than an authoritative death
+  ---
+  duration_ms: 0.3111
+  type: 'test'
+  ...
+# Subtest: poison packets keep the current self movement-control mask observable
+ok 11 - poison packets keep the current self movement-control mask observable
+  ---
+  duration_ms: 0.1265
+  type: 'test'
+  ...
+# Subtest: an omitted snapshot poison field does not clear current paralysis
+ok 12 - an omitted snapshot poison field does not clear current paralysis
+  ---
+  duration_ms: 0.1372
+  type: 'test'
+  ...
+# Subtest: death retains a harvestable corpse and revive restores its lifecycle flag
+ok 13 - death retains a harvestable corpse and revive restores its lifecycle flag
+  ---
+  duration_ms: 0.1381
+  type: 'test'
+  ...
+# Subtest: remove and teleport-out retire entities from the visible observation
+ok 14 - remove and teleport-out retire entities from the visible observation
+  ---
+  duration_ms: 0.094
+  type: 'test'
+  ...
+# Subtest: MapChanged clears old-map observations while retaining the relocated self
+ok 15 - MapChanged clears old-map observations while retaining the relocated self
+  ---
+  duration_ms: 0.1183
+  type: 'test'
+  ...
+# Subtest: actual MapInformation clears stale AOI and waits for subsequent UserLocation landing
+ok 16 - actual MapInformation clears stale AOI and waits for subsequent UserLocation landing
+  ---
+  duration_ms: 0.2033
+  type: 'test'
+  ...
+# Subtest: visibility and self death packets update observed lifecycle without inventing hp
+ok 17 - visibility and self death packets update observed lifecycle without inventing hp
+  ---
+  duration_ms: 0.2601
+  type: 'test'
+  ...
+# Subtest: HealthChanged restores exact self vitals after Revived
+ok 18 - HealthChanged restores exact self vitals after Revived
+  ---
+  duration_ms: 0.099
+  type: 'test'
+  ...
+# Subtest: UserInformation restores exact self and maximum vitals from its public fields
+ok 19 - UserInformation restores exact self and maximum vitals from its public fields
+  ---
+  duration_ms: 0.1044
+  type: 'test'
+  ...
+# Subtest: late own ObjectAttack preserves the acknowledged tile while updating direction
+ok 20 - late own ObjectAttack preserves the acknowledged tile while updating direction
+  ---
+  duration_ms: 0.1389
+  type: 'test'
+  ...
+# Subtest: late own ObjectRangeAttack preserves the acknowledged tile while updating direction
+ok 21 - late own ObjectRangeAttack preserves the acknowledged tile while updating direction
+  ---
+  duration_ms: 0.0645
+  type: 'test'
+  ...
+# Subtest: late own ObjectMagic preserves the acknowledged tile while updating direction
+ok 22 - late own ObjectMagic preserves the acknowledged tile while updating direction
+  ---
+  duration_ms: 0.0582
+  type: 'test'
+  ...
+# Subtest: remote attack range-attack and magic keep their public position and direction
+ok 23 - remote attack range-attack and magic keep their public position and direction
+  ---
+  duration_ms: 0.2194
+  type: 'test'
+  ...
+# Subtest: real own movement and push packets still relocate after an action pose
+ok 24 - real own movement and push packets still relocate after an action pose
+  ---
+  duration_ms: 0.1267
+  type: 'test'
+  ...
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# AssertionError [ERR_ASSERTION]: Crystal effect frames must anchor from the tile top-left DrawLocation
+#     at file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/test-scene-effect-runtime.mjs:124:8
+#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26)
+#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: '',
+#   expected: /VIEWPORT_ENTITY_LEFT_ORIGIN[\\s\\S]*VIEWPORT_ENTITY_TOP_ORIGIN/,
+#   operator: 'match'
+# }
+# Node.js v22.18.0
+# Subtest: apps\\web\\scripts\\test-scene-effect-runtime.mjs
+not ok 2 - apps\\web\\scripts\\test-scene-effect-runtime.mjs
+  ---
+  duration_ms: 315.1172
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-scene-effect-runtime.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 24
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 329.468

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "source": "b19ca73072db16ac7f351857aa752ecc57953591",
+  "checked": 2771,
+  "publicGdiInputs": 12,
+  "unexpectedDifferences": 0,
+  "transforms": [
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+      "kind": "fixed published bevy-0c553a754308e5b8 manifest",
+      "sha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+    }
+  ],
+  "build": {
+    "candidate": "b19ca73072db-name-autosize-7d9e407b",
+    "id": "twLw4KivOhoiCO5yJSu1j",
+    "dist": ".next-name-autosize-r1",
+    "durationMs": 36826,
+    "receiptSha256": "1b258f1748d537714e88a8841f529cc0deb3dd788dda799607f63d237bc99f5a"
+  },
+  "sourceInputsSha256": "a3f23aa89133557601e9b27700b79cf5a8c08b48ea15a61dc3d96da5fbdb7f2a",
+  "fixedAsset": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "scope": "Fresh physical source/assets/dependency copy. All tracked non-public Web inputs, all twelve GDI public inputs and shared keyboard input copied from the committed candidate, except the declared fixed published runtime manifest. Foreign WIP excluded.",
+  "browserQualification": "separate"
+}

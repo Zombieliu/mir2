@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent bounded source-only review of preparation-specific acquisition-geometry candidate. No live qualification, no tests rerun by this reviewer.",
+  "inputs": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\capacity-ordinary-supplies.mjs",
+      "bytes": 67325,
+      "sha256": "fd76a778c7535b1bbe13d3784ebbb96a4bd3f6ebd5b966201859ee5798992f44"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\capacity-ordinary-supplies.test.mjs",
+      "bytes": 146238,
+      "sha256": "6acd66cbd3e20434870e3cc7a3e895002fb04a6f7130da4637de77e412cfbf6d"
+    }
+  ],
+  "findings": {
+    "blockingFindingIds": [],
+    "qualifiedGeometry": "Only authenticated current or closed ordinary-AI0 history, per-position TTL and original live/closed qualification, no quarantine/blocked identity, default clearance8 => 8x6 new-acquisition rectangle.",
+    "fallback": "Unknown/owned/nonAI0/malformed/current conflict/expired or quarantined identities and explicitly larger requested radius retain square>=8.",
+    "retreat": "Inside geometry requires weighted rectangular distance and physical Chebyshev distance both not decrease; occupancy always blocked. Planner/beforeMovement/pace-after-send guard use same function and every physical Run cell.",
+    "unchanged": "Original70%/600s/2048/3commands/3replans and poison/released-hit failure guards remain. No movement refresh/TTL renewal/cache clearing/extra recovery credit added.",
+    "limits": "This is not a disengagement or damage immunity contract. Retained/forced targets may reach16; fixture43step/static334of335 and multi-AOI replay are not live acceptance."
+  },
+  "authorReportedChecks": {
+    "priorCompleteHelper": {
+      "passed": 250,
+      "scope": "Before final explicit historical-point-TTL read"
+    },
+    "finalRelated": {
+      "passed": 30
+    },
+    "syntaxPassed": 2,
+    "independentlyReexecuted": false
+  },
+  "verdict": {
+    "sourceReviewNoBlockingFindings": true,
+    "candidateOnly": true,
+    "eligibleForLiveNow": false,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  }
+}

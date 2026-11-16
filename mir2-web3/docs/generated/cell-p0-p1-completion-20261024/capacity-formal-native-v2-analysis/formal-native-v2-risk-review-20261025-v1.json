@@ -1,0 +1,620 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-24T19:43:12.473Z",
+  "repositoryCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "scope": "Lightweight read-only formal02 continuity and spectator memory-budget review during the parent-owned probe06. Small source/JSON inputs only; no recording/raw scan, product import, tests, compilation, source mutation or realm startup.",
+  "staticOnly": true,
+  "capacityAccepted": false,
+  "probe06VerdictRead": false,
+  "launchAssessment": {
+    "newUnconditionalStaticBlockerFound": false,
+    "conditionalDecision": "If genuine06 passes its original six60s windows, exact source/release closure and normal owned cleanup, formal02 can attempt the unchanged2/10/25/50/100 ladder. This does not predict passing100 or the two-hour soak.",
+    "originalSpecRetained": {
+      "stageSeconds": 300,
+      "soakSeconds": 7200,
+      "wallSeconds": 18000,
+      "movementIntervalMs": 750,
+      "attacksPerFighterMinute": 18,
+      "positiveHitsPerFighterMinute": 12,
+      "minimumRunRatio": 0.5,
+      "timeoutExclusive": 0.01,
+      "maximumCorrectionRatio": 0.05,
+      "memoryWarmupSeconds": 300,
+      "maximumMemorySlopeMiBPerHour": 32
+    },
+    "failureRule": "Preserve an original failed100 attempt and its full configuration. Any lower-N two-hour workload must be a separate prospective frozen profile, never a shortened or reclassified old run."
+  },
+  "scenario": {
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "totalAnchors": 100,
+    "combatClusterCount": 1,
+    "first10Matches04ByFrozenReadiness": {
+      "exactAnchors": true,
+      "exactMap": true,
+      "exactPatrolSpan": true,
+      "exactMonsterNames": true,
+      "exactFilteredRoles": true,
+      "observer4": {
+        "x": 246,
+        "y": 646
+      }
+    },
+    "prefixes": [
+      {
+        "count": 2,
+        "combatActors": 0,
+        "movementObservers": 2,
+        "fighterIndices": [],
+        "canonicalUniqueTargets": 0,
+        "declaredFootprintOverlapCount": 0,
+        "staticBootstrapFailures": 0,
+        "isolatedObserverCountsPerFighter": [],
+        "conditionalPositiveHitsPerMinuteByFixedDamage": {
+          "3": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0
+        },
+        "failedOptimisticAllocations": []
+      },
+      {
+        "count": 10,
+        "combatActors": 1,
+        "movementObservers": 9,
+        "fighterIndices": [
+          5
+        ],
+        "canonicalUniqueTargets": 32,
+        "declaredFootprintOverlapCount": 0,
+        "staticBootstrapFailures": 0,
+        "isolatedObserverCountsPerFighter": [
+          {
+            "index": 5,
+            "isolatedObservers": 0
+          }
+        ],
+        "conditionalPositiveHitsPerMinuteByFixedDamage": {
+          "3": 64.69999999999999,
+          "5": 36.23333333333334,
+          "10": 20.700000000000003,
+          "25": 7.7666666666666675
+        },
+        "failedOptimisticAllocations": [
+          {
+            "damage": 25,
+            "perFighterDemand": 12,
+            "required": 12,
+            "maxAllocatedUpper": 7.7666666666666675
+          },
+          {
+            "damage": 25,
+            "perFighterDemand": 18,
+            "required": 18,
+            "maxAllocatedUpper": 7.7666666666666675
+          }
+        ]
+      },
+      {
+        "count": 25,
+        "combatActors": 2,
+        "movementObservers": 23,
+        "fighterIndices": [
+          5,
+          15
+        ],
+        "canonicalUniqueTargets": 112,
+        "declaredFootprintOverlapCount": 0,
+        "staticBootstrapFailures": 0,
+        "isolatedObserverCountsPerFighter": [
+          {
+            "index": 5,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 15,
+            "isolatedObservers": 0
+          }
+        ],
+        "conditionalPositiveHitsPerMinuteByFixedDamage": {
+          "3": 231.4333333333335,
+          "5": 129.36666666666665,
+          "10": 74.76666666666662,
+          "25": 27.29999999999996
+        },
+        "failedOptimisticAllocations": [
+          {
+            "damage": 25,
+            "perFighterDemand": 18,
+            "required": 36,
+            "maxAllocatedUpper": 27.299999999999965
+          }
+        ]
+      },
+      {
+        "count": 50,
+        "combatActors": 5,
+        "movementObservers": 45,
+        "fighterIndices": [
+          5,
+          15,
+          25,
+          35,
+          45
+        ],
+        "canonicalUniqueTargets": 154,
+        "declaredFootprintOverlapCount": 0,
+        "staticBootstrapFailures": 0,
+        "isolatedObserverCountsPerFighter": [
+          {
+            "index": 5,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 15,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 25,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 35,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 45,
+            "isolatedObservers": 0
+          }
+        ],
+        "conditionalPositiveHitsPerMinuteByFixedDamage": {
+          "3": 310.70000000000005,
+          "5": 173.73333333333343,
+          "10": 100.20000000000024,
+          "25": 36.766666666666666
+        },
+        "failedOptimisticAllocations": [
+          {
+            "damage": 25,
+            "perFighterDemand": 12,
+            "required": 60,
+            "maxAllocatedUpper": 36.766666666666666
+          },
+          {
+            "damage": 25,
+            "perFighterDemand": 18,
+            "required": 90,
+            "maxAllocatedUpper": 36.766666666666666
+          }
+        ]
+      },
+      {
+        "count": 100,
+        "combatActors": 10,
+        "movementObservers": 90,
+        "fighterIndices": [
+          5,
+          15,
+          25,
+          35,
+          45,
+          55,
+          65,
+          75,
+          85,
+          95
+        ],
+        "canonicalUniqueTargets": 154,
+        "declaredFootprintOverlapCount": 0,
+        "staticBootstrapFailures": 0,
+        "isolatedObserverCountsPerFighter": [
+          {
+            "index": 5,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 15,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 25,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 35,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 45,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 55,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 65,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 75,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 85,
+            "isolatedObservers": 0
+          },
+          {
+            "index": 95,
+            "isolatedObservers": 0
+          }
+        ],
+        "conditionalPositiveHitsPerMinuteByFixedDamage": {
+          "3": 310.70000000000005,
+          "5": 173.73333333333343,
+          "10": 100.20000000000024,
+          "25": 36.766666666666666
+        },
+        "failedOptimisticAllocations": [
+          {
+            "damage": 5,
+            "perFighterDemand": 18,
+            "required": 180,
+            "maxAllocatedUpper": 173.73333333333343
+          },
+          {
+            "damage": 10,
+            "perFighterDemand": 12,
+            "required": 120,
+            "maxAllocatedUpper": 100.20000000000022
+          },
+          {
+            "damage": 10,
+            "perFighterDemand": 18,
+            "required": 180,
+            "maxAllocatedUpper": 100.20000000000024
+          },
+          {
+            "damage": 25,
+            "perFighterDemand": 12,
+            "required": 120,
+            "maxAllocatedUpper": 36.766666666666666
+          },
+          {
+            "damage": 25,
+            "perFighterDemand": 18,
+            "required": 180,
+            "maxAllocatedUpper": 36.766666666666666
+          }
+        ]
+      }
+    ]
+  },
+  "foreseeableContinuityRisks": [
+    {
+      "risk": "Natural target stock and later DPS",
+      "observation": "50 and100 prefixes have the same154 canonical target IDs while fighters increase5 to10. For100, fixed-damage3/5/10/25 optimistic positive-hit rates are310.7/173.7333/100.2/36.7667 per minute. The fixed10 model is below120 required positive hits. The fixed5 model does not support180 all-positive attempts; this is not a standalone attempt-rate upper bound.",
+      "monitor": "Each fighter separate60s18 attacks/12 verified hits, actual damage and level progression, distinct live reachable targets, corpse and respawn state; never replace with group totals or lifetime stock."
+    },
+    {
+      "risk": "Finite respawn and corpse cycles",
+      "observation": "Deer/Scarecrow initial positions and nominal refresh do not establish any moving60s supply window. Harvest-sensitive dead monsters wait until harvested or removed as well as respawn due; ordinary unharvested corpse expiration is180000ms. Preserve existing refresh content and no harvest/QA additions.",
+      "monitor": "Per-fighter attacks/hits and idle gaps, confirmed living HP vs corpses, pursue/scout/fallback/deferred/quarantine branches. Do not infer exact respawn from a visible count."
+    },
+    {
+      "risk": "Shared-cluster scheduling fairness",
+      "observation": "One shared cluster and targetClaims de-duplicate currently pending attacks but do not implement the optimistic static max-flow allocation or ensure fair target scheduling. Several fighters may chase or prefer the same nearby stock.",
+      "monitor": "Per-fighter counters, target selection bounds, movement opportunity completion and claim/fallback distribution. Global hit totals cannot rescue a starved fighter."
+    },
+    {
+      "risk": "Ordinary login waits and continuous workload",
+      "observation": "Admission keeps original25 admission+5 verification login budget per901000ms. Existing clients keep playing during later admission waits; early fighters can level and consume stock before100. Continuous activity also includes home travel and waits, with no new pause.",
+      "monitor": "Actual admission ledger/window waits, early-fighter level/damage, continuous actor windows during ramp and every newly admitted home transit."
+    },
+    {
+      "risk": "Dynamic obstruction, hostile neighbors and controlled hints",
+      "observation": "Static homes have no declared footprint overlap and static bootstrap has no failures, but live wandering Scarecrows, neighboring excluded cats, ground movement and pursuit can still obstruct or damage actors. Native union adds real current owner receipts and at most7 hinted cells per other active connection; it retains stale AOI cells and may conservatively block routes. It cannot guarantee zero correction, external collision or50%Run.",
+      "monitor": "Per-actor HP/death, corrected moves, Run fraction/cells, navigation-blocked/native completion, driver lag and actual map. Retain original error and opportunity denominators."
+    },
+    {
+      "risk": "Active observer boundaries",
+      "observation": "Current source binds coverage only to ready/inGame/living current same-map declared movement observers, not future or retired connections. Initial ready precedes home arrival; final settle checks actual home arrival, and real attacks still require a current16-cell witness. Role counts are0/1/2/5/10;25 prefix has2 fighters or8%, not10%.",
+      "monitor": "Actual admitted peers, post-resume active coverage, same-map witness/fanout and per-actor home arrival; do not treat declaration as proof of live AOI."
+    },
+    {
+      "risk": "Long-run immutable ambiguous-target quarantine",
+      "observation": "Original per-actor quarantine is retained. A long run can lose usable actor/target pairs even though aggregate stock exists; source stops rather than evicting old identities after64 targets.",
+      "monitor": "Miss/unresolved attack evidence, permanent failed-target count and typed launch/missing/unknown results; do not recycle identities or raise the64 bound."
+    }
+  ],
+  "spectatorMemory": {
+    "launcherDefaultsVerified": "formal02 strips all inherited MIR2_ variables and sets only a dedicated spectator data directory, retaining enabled/recording/public defaults.",
+    "defaults": {
+      "captureIntervalMs": 250,
+      "ringFramesPerMap": 2400,
+      "approximateFillSecondsAt4Hz": 600,
+      "inputMaxEntities": 2048,
+      "payloadBytesPerFrameMaximum": 2097152,
+      "serializedPayloadBytesAcrossFullRingMaximum": 5033164800,
+      "serializedPayloadGiB": 4.6875,
+      "eventsPerFrame": 512,
+      "pendingEventsAfterTrimMaximum": 2048,
+      "seenObjectStaleMs": 15000,
+      "recordingWriteBufferBytes": 65536,
+      "replayFramesPerRequest": 10000,
+      "recordingRetentionHours": 168
+    },
+    "exactScope": "Frame count is bounded per map. The2MiB guard is encoded world+events payload, not a bound on serde_json Value/BTree/string heap, outer metadata, temporary clone peaks, allocator retained pages or process RSS/private bytes.",
+    "possibleWarmupExplanation": "The parent observed private bytes rising during06 before a ten-minute ring could fill. That is consistent with filling retained frame history but does not establish the cause, a leak, a stable plateau or memory acceptance.",
+    "positiveBounds": [
+      "Ring pops the oldest frame whenever length exceeds configured2400.",
+      "Pending events are trimmed to2048 and each accepted frame contains at most512 events.",
+      "Current merged entity/drop IDs and last-seen tables are pruned by15s staleness on subsequent publishes.",
+      "AttackV2 connection keeps one completed result Option; it does not append one result per attack.",
+      "Zone request telemetry uses fixed bucket arrays and cumulative counters, not an ever-growing sample history."
+    ],
+    "remainingProductionBudgetIssues": [
+      "maps BTreeMap has no map eviction. The map0-only formal profile bounds this test to one map; general multi-map operation has no audited global map budget here.",
+      "max_entities2048 is applied per input snapshot; the latest-world merge unions IDs across sources and is not globally capped at2048. Ground-drop arrays and map decoration are not capped by that entity setting.",
+      "The frame-size guard is after merge/clone/encoding. It prevents accepting an oversized ring frame, but it does not bound latest-world or temporary allocation before rejection.",
+      "Replay returns at most10000 frames per request but a byte/concurrency heap budget was not audited; the player-only capacity profile does not request replay.",
+      "Recording disk cleanup runs at hub initialization only. During a long running process there is no rolling byte quota or periodic prune in this code;64KiB only bounds one buffered write operation."
+    ],
+    "unchangedProfileMonitoring": [
+      "Keep original300s stage100, then original300s memory warmup and32MiB/hour gate.",
+      "Do not infer complete replacement solely from600s wall time: capture interval is a maximum4Hz. Record bufferedFrames=2400 and publishedFramesTotal delta>=2400 since final cohort/density expansion; skipped or delayed captures can take longer.",
+      "Correlate private/working-set slope with activeMaps, bufferedFrames, published/persisted/dropped/recordingErrors counters and observed frame/recording bytes; report RSS/allocator limitations explicitly.",
+      "Use the actual declared resource and disk guards. If growth or failure remains, preserve it; lower-N follow-up requires a separate prospective profile."
+    ]
+  },
+  "references": [
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 23,
+      "finding": "250ms default capture"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 26,
+      "finding": "2400 default ring frames"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 31,
+      "finding": "2MiB encoded payload maximum"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 33,
+      "finding": "64KiB recording buffer"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 355,
+      "finding": "Per-map retained frame/world/seen-ID state"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 367,
+      "finding": "Map dictionary without eviction"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 405,
+      "finding": "Disk retention prune only at hub initialization"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 437,
+      "finding": "Per-input sanitize and max_entities"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 459,
+      "finding": "Latest-world merge, stale-prune and previous-world clone"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 474,
+      "finding": "Pending-event trim to2048"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 493,
+      "finding": "Per-frame512 latest events"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 505,
+      "finding": "Encoded payload guard after merge/encode"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 524,
+      "finding": "Frame clone and bounded ring push/pop"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 654,
+      "finding": "Per-replay request frames vector"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 664,
+      "finding": "Replay frame-count bound"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 687,
+      "finding": "Per-input entity bound; uncapped drops and copied map metadata"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 760,
+      "finding": "Merge world arrays across input sources"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 822,
+      "finding": "Current merged objects and seen IDs staleness pruning"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 1049,
+      "finding": "Explicit64KiB buffered write and flush"
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 1065,
+      "finding": "Startup retention helper"
+    },
+    {
+      "file": "apps/gateway/src/attack_protocol.rs",
+      "line": 97,
+      "finding": "One completed correlated outcome per connection"
+    },
+    {
+      "file": "apps/gateway/src/attack_protocol.rs",
+      "line": 138,
+      "finding": "Previous completed slot cleared on new sequence"
+    },
+    {
+      "file": "apps/gateway/src/attack_protocol.rs",
+      "line": 170,
+      "finding": "Replace completed slot"
+    },
+    {
+      "file": "apps/gateway/src/zone_metrics.rs",
+      "line": 87,
+      "finding": "Histogram scalar counters plus fixed bucket array"
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 2727,
+      "finding": "Native respawn due scheduler"
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 2763,
+      "finding": "Harvest-sensitive corpse waits until harvested or removed"
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 14340,
+      "finding": "Ordinary corpse180000ms expiry"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 535,
+      "finding": "Real active current-connection owner and observer view"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 654,
+      "finding": "Conservative native navigation obstacle union"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 680,
+      "finding": "One immutable pending navigation hint"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 1013,
+      "finding": "Witnessed shared combat and target selection"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 1138,
+      "finding": "Synchronous pre-send movement conflict and original blocked opportunity"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 1597,
+      "finding": "Ready admission and continuous activity before later login-window waits"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 1614,
+      "finding": "Original measured stage followed by soak and memory gate"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "line": 1686,
+      "finding": "Run/cell continuous gates include ordinary ramp and login waits"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-owned.mjs",
+      "line": 23,
+      "finding": "Inherited MIR2_ environment removed; spectator defaults retained with independent data directory"
+    }
+  ],
+  "sourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 129465,
+      "sha256": "854a6281bfcd164176477f70dc88a41e1478a8b425448d810e197970f695c4db"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\scenario.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-options.json",
+      "bytes": 3068,
+      "sha256": "e1527c9aa14b3ee1deb60d3202e4a0b9bbc3e7b616a357bf81f6bfd7c3b92d87"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-owned.mjs",
+      "bytes": 16294,
+      "sha256": "2e28fa5fe23077097615e93c835f862400abf455228141752b5665f461ad1285"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\scenario-prefix-readiness.json",
+      "bytes": 1851,
+      "sha256": "7a1e4fc52f39680c7c53f37898bb75eda742437a9173880c44c2848272677794"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-stage-two-name-safe-home-supply-plan-v3.json",
+      "bytes": 229425,
+      "sha256": "1fbdd41fda6398f96457f4de293fc3b5bfe6fbb34529bcc2500d4dd8abc2331a"
+    }
+  ],
+  "operations": {
+    "trackedFilesWritten": false,
+    "testsOrBuildsRun": false,
+    "realmStarted": false,
+    "largeRawOrRecordingScanned": false,
+    "externalRiskArtifactOnly": true
+  }
+}

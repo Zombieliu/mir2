@@ -1,0 +1,1506 @@
+TAP version 13
+# Subtest: real canonical and web sources independently match the selected safe zones and unambiguous AI0 names
+ok 1 - real canonical and web sources independently match the selected safe zones and unambiguous AI0 names
+  ---
+  duration_ms: 45.106
+  type: 'test'
+  ...
+# Subtest: cache retains only immutable trusted selected data and rechecks profile admission
+ok 2 - cache retains only immutable trusted selected data and rechecks profile admission
+  ---
+  duration_ms: 0.4841
+  type: 'test'
+  ...
+# Subtest: missing or noncanonical selected maps fail instead of borrowing Map0 protection
+ok 3 - missing or noncanonical selected maps fail instead of borrowing Map0 protection
+  ---
+  duration_ms: 16.4307
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects west edge
+ok 4 - village inclusive rectangle protects west edge
+  ---
+  duration_ms: 0.2103
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects east edge
+ok 5 - village inclusive rectangle protects east edge
+  ---
+  duration_ms: 0.0573
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects north edge
+ok 6 - village inclusive rectangle protects north edge
+  ---
+  duration_ms: 0.0389
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects south edge
+ok 7 - village inclusive rectangle protects south edge
+  ---
+  duration_ms: 0.0876
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects northwest corner
+ok 8 - village inclusive rectangle protects northwest corner
+  ---
+  duration_ms: 0.036
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects northeast corner
+ok 9 - village inclusive rectangle protects northeast corner
+  ---
+  duration_ms: 0.1922
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects southwest corner
+ok 10 - village inclusive rectangle protects southwest corner
+  ---
+  duration_ms: 0.1895
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects southeast corner
+ok 11 - village inclusive rectangle protects southeast corner
+  ---
+  duration_ms: 0.0728
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village west remains unprotected
+ok 12 - one physical cell outside village west remains unprotected
+  ---
+  duration_ms: 0.0544
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village east remains unprotected
+ok 13 - one physical cell outside village east remains unprotected
+  ---
+  duration_ms: 0.0271
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village north remains unprotected
+ok 14 - one physical cell outside village north remains unprotected
+  ---
+  duration_ms: 0.0197
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village south remains unprotected
+ok 15 - one physical cell outside village south remains unprotected
+  ---
+  duration_ms: 0.0222
+  type: 'test'
+  ...
+# Subtest: every actual physical cell must independently satisfy the geometry
+ok 16 - every actual physical cell must independently satisfy the geometry
+  ---
+  duration_ms: 0.1011
+  type: 'test'
+  ...
+# Subtest: only trusted loader specs on the exact selected map can protect
+ok 17 - only trusted loader specs on the exact selected map can protect
+  ---
+  duration_ms: 0.0841
+  type: 'test'
+  ...
+# Subtest: known normal AI0 names allow absent optional AI but reject conflicting or malformed actual AI
+ok 18 - known normal AI0 names allow absent optional AI but reject conflicting or malformed actual AI
+  ---
+  duration_ms: 0.0944
+  type: 'test'
+  ...
+# Subtest: only canonical hostile unowned monster DTOs qualify
+ok 19 - only canonical hostile unowned monster DTOs qualify
+  ---
+  duration_ms: 0.066
+  type: 'test'
+  ...
+# Subtest: ordinary AI0 classification authenticates all identity gates without granting cell protection
+ok 20 - ordinary AI0 classification authenticates all identity gates without granting cell protection
+  ---
+  duration_ms: 0.0805
+  type: 'test'
+  ...
+# Subtest: actual normal unowned ObjectMonster carries a separate immutable planner certificate withoutinventing health or disposition
+ok 21 - actual normal unowned ObjectMonster carries a separate immutable planner certificate withoutinventing health or disposition
+  ---
+  duration_ms: 0.1832
+  type: 'test'
+  ...
+# Subtest: wire certification rejects missing malformed owned neutral or ambiguous identities and catalog replies
+ok 22 - wire certification rejects missing malformed owned neutral or ambiguous identities and catalog replies
+  ---
+  duration_ms: 0.246
+  type: 'test'
+  ...
+# Subtest: wire certificates are bound to the exact loader spec and map and cannot be reconstructed
+ok 23 - wire certificates are bound to the exact loader spec and map and cannot be reconstructed
+  ---
+  duration_ms: 0.1073
+  type: 'test'
+  ...
+# Subtest: default is held-only noop and economic profile has explicit bounded inputs
+ok 24 - default is held-only noop and economic profile has explicit bounded inputs
+  ---
+  duration_ms: 1.9064
+  type: 'test'
+  ...
+# Subtest: same local owner ID 1000 and map cannot conceal a changed character name
+ok 25 - same local owner ID 1000 and map cannot conceal a changed character name
+  ---
+  duration_ms: 4.7576
+  type: 'test'
+  ...
+# Subtest: earned ordinary gold buys only live HP rows in bounded batches and proves exact stock/debit
+ok 26 - earned ordinary gold buys only live HP rows in bounded batches and proves exact stock/debit
+  ---
+  duration_ms: 0.8289
+  type: 'test'
+  ...
+# Subtest: held Venison alone funds purchases without selling any starter gear
+ok 27 - held Venison alone funds purchases without selling any starter gear
+  ---
+  duration_ms: 1.3707
+  type: 'test'
+  ...
+# Subtest: zero-wallet preparation uses actual Deer combat, harvest, same-tile pickup and ordinary sale
+ok 28 - zero-wallet preparation uses actual Deer combat, harvest, same-tile pickup and ordinary sale
+  ---
+  duration_ms: 6.3374
+  type: 'test'
+  ...
+# Subtest: stale, late, ACK-only and non-exact debit cannot prove a purchase
+    # Subtest: stale
+    ok 1 - stale
+      ---
+      duration_ms: 1.237
+      type: 'test'
+      ...
+    # Subtest: late
+    ok 2 - late
+      ---
+      duration_ms: 2.9642
+      type: 'test'
+      ...
+    # Subtest: ackOnly
+    ok 3 - ackOnly
+      ---
+      duration_ms: 0.9176
+      type: 'test'
+      ...
+    # Subtest: wrongDebit
+    ok 4 - wrongDebit
+      ---
+      duration_ms: 0.6789
+      type: 'test'
+      ...
+    1..4
+ok 29 - stale, late, ACK-only and non-exact debit cannot prove a purchase
+  ---
+  duration_ms: 6.4111
+  type: 'test'
+  ...
+# Subtest: wrong merchant, disabled link, wrong goods and wrong panel reject before buying
+    # Subtest: {"wrongNpc":true}
+    ok 1 - {"wrongNpc":true}
+      ---
+      duration_ms: 0.7153
+      type: 'test'
+      ...
+    # Subtest: {"disabledLink":true}
+    ok 2 - {"disabledLink":true}
+      ---
+      duration_ms: 0.649
+      type: 'test'
+      ...
+    # Subtest: {"wrongRow":true}
+    ok 3 - {"wrongRow":true}
+      ---
+      duration_ms: 0.2483
+      type: 'test'
+      ...
+    # Subtest: {"panel":1}
+    ok 4 - {"panel":1}
+      ---
+      duration_ms: 0.2389
+      type: 'test'
+      ...
+    1..4
+ok 30 - wrong merchant, disabled link, wrong goods and wrong panel reject before buying
+  ---
+  duration_ms: 2.1845
+  type: 'test'
+  ...
+# Subtest: owner/map transitions, death, nonpreparation, routes and finite budgets fail without activation
+    # Subtest: {"changeMap":true}
+    ok 1 - {"changeMap":true}
+      ---
+      duration_ms: 0.492
+      type: 'test'
+      ...
+    # Subtest: {"changeOwner":true}
+    ok 2 - {"changeOwner":true}
+      ---
+      duration_ms: 0.5669
+      type: 'test'
+      ...
+    # Subtest: {"failPhase":true}
+    ok 3 - {"failPhase":true}
+      ---
+      duration_ms: 0.176
+      type: 'test'
+      ...
+    # Subtest: {"navigationFailure":true}
+    ok 4 - {"navigationFailure":true}
+      ---
+      duration_ms: 0.2276
+      type: 'test'
+      ...
+    # Subtest: {"maxCommands":1}
+    ok 5 - {"maxCommands":1}
+      ---
+      duration_ms: 0.2069
+      type: 'test'
+      ...
+    # Subtest: {"timeoutMs":1}
+    ok 6 - {"timeoutMs":1}
+      ---
+      duration_ms: 0.1137
+      type: 'test'
+      ...
+    1..6
+ok 31 - owner/map transitions, death, nonpreparation, routes and finite budgets fail without activation
+  ---
+  duration_ms: 2.1554
+  type: 'test'
+  ...
+# Subtest: full inventory and insufficient finite hunting proceeds never send an unaffordable buy
+ok 32 - full inventory and insufficient finite hunting proceeds never send an unaffordable buy
+  ---
+  duration_ms: 2.2898
+  type: 'test'
+  ...
+# Subtest: cohort readiness is revalidated after peers prepare and never trusts old ready state
+ok 33 - cohort readiness is revalidated after peers prepare and never trusts old ready state
+  ---
+  duration_ms: 0.8046
+  type: 'test'
+  ...
+# Subtest: fresh authoritative staging membership permits normal nearby hostiles and records the qualified protection
+ok 34 - fresh authoritative staging membership permits normal nearby hostiles and records the qualified protection
+  ---
+  duration_ms: 0.5477
+  type: 'test'
+  ...
+# Subtest: false missing and nonboolean membership retain the original eight-cell hostile staging guard
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 1.5244
+      type: 'test'
+      ...
+    # Subtest: undefined
+    ok 2 - undefined
+      ---
+      duration_ms: 0.3014
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 3 - true
+      ---
+      duration_ms: 0.2191
+      type: 'test'
+      ...
+    1..3
+ok 35 - false missing and nonboolean membership retain the original eight-cell hostile staging guard
+  ---
+  duration_ms: 2.2614
+  type: 'test'
+  ...
+# Subtest: cohort membership never reuses an old true receipt after false missing stale or mismatched staging evidence
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 0.3305
+      type: 'test'
+      ...
+    # Subtest: missing
+    ok 2 - missing
+      ---
+      duration_ms: 0.2169
+      type: 'test'
+      ...
+    # Subtest: old-sequence
+    ok 3 - old-sequence
+      ---
+      duration_ms: 0.178
+      type: 'test'
+      ...
+    # Subtest: expired
+    ok 4 - expired
+      ---
+      duration_ms: 0.2604
+      type: 'test'
+      ...
+    # Subtest: wrong-position
+    ok 5 - wrong-position
+      ---
+      duration_ms: 0.2444
+      type: 'test'
+      ...
+    1..5
+ok 36 - cohort membership never reuses an old true receipt after false missing stale or mismatched staging evidence
+  ---
+  duration_ms: 1.4834
+  type: 'test'
+  ...
+# Subtest: a newer invalid snapshot retires the older true staging receipt even after the live cache becomes legal again
+ok 37 - a newer invalid snapshot retires the older true staging receipt even after the live cache becomes legal again
+  ---
+  duration_ms: 0.3085
+  type: 'test'
+  ...
+# Subtest: known poison or Dazed still rejects preparation and cohort readiness inside a fresh authoritative safe zone
+    # Subtest: playerPoison
+    ok 1 - playerPoison
+      ---
+      duration_ms: 0.4608
+      type: 'test'
+      ...
+    # Subtest: ownerPoison
+    ok 2 - ownerPoison
+      ---
+      duration_ms: 0.449
+      type: 'test'
+      ...
+    # Subtest: dazed
+    ok 3 - dazed
+      ---
+      duration_ms: 0.6301
+      type: 'test'
+      ...
+    1..3
+ok 38 - known poison or Dazed still rejects preparation and cohort readiness inside a fresh authoritative safe zone
+  ---
+  duration_ms: 1.7202
+  type: 'test'
+  ...
+# Subtest: existing held HP stacks reduce purchases and are counted only once across bag and belt
+ok 39 - existing held HP stacks reduce purchases and are counted only once across bag and belt
+  ---
+  duration_ms: 0.6081
+  type: 'test'
+  ...
+# Subtest: an empty authoritative Deer field exhausts its finite refresh budget
+ok 40 - an empty authoritative Deer field exhausts its finite refresh budget
+  ---
+  duration_ms: 1.7308
+  type: 'test'
+  ...
+# Subtest: v2 physical hunting never silently falls back to legacy attack
+ok 41 - v2 physical hunting never silently falls back to legacy attack
+  ---
+  duration_ms: 0.3255
+  type: 'test'
+  ...
+# Subtest: fresh NPCGoods and NPCSell services may close their text dialog without losing merchant binding
+ok 42 - fresh NPCGoods and NPCSell services may close their text dialog without losing merchant binding
+  ---
+  duration_ms: 0.713
+  type: 'test'
+  ...
+# Subtest: closing a service dialog cannot excuse foreign dialog, changed NPC/owner/map or stale service receipt
+    # Subtest: foreignServiceDialog
+    ok 1 - foreignServiceDialog
+      ---
+      duration_ms: 0.3025
+      type: 'test'
+      ...
+    # Subtest: replaceServiceNpc
+    ok 2 - replaceServiceNpc
+      ---
+      duration_ms: 0.2835
+      type: 'test'
+      ...
+    # Subtest: serviceOwnerChange
+    ok 3 - serviceOwnerChange
+      ---
+      duration_ms: 0.28
+      type: 'test'
+      ...
+    # Subtest: serviceMapChange
+    ok 4 - serviceMapChange
+      ---
+      duration_ms: 1.0263
+      type: 'test'
+      ...
+    # Subtest: staleServicePacket
+    ok 5 - staleServicePacket
+      ---
+      duration_ms: 0.5795
+      type: 'test'
+      ...
+    # Subtest: noServicePacket
+    ok 6 - noServicePacket
+      ---
+      duration_ms: 0.5985
+      type: 'test'
+      ...
+    # Subtest: foreign NPCSell dialog
+    ok 7 - foreign NPCSell dialog
+      ---
+      duration_ms: 0.5631
+      type: 'test'
+      ...
+    1..7
+ok 43 - closing a service dialog cannot excuse foreign dialog, changed NPC/owner/map or stale service receipt
+  ---
+  duration_ms: 4.0008
+  type: 'test'
+  ...
+# Subtest: real five-pass Deer skinning retries typed deadlines and the sixth transfer earns actual stock
+    # Subtest: direct inventory transfer
+    ok 1 - direct inventory transfer
+      ---
+      duration_ms: 11.8761
+      type: 'test'
+      ...
+    # Subtest: same-tile public pickup
+    ok 2 - same-tile public pickup
+      ---
+      duration_ms: 5.2735
+      type: 'test'
+      ...
+    1..2
+ok 44 - real five-pass Deer skinning retries typed deadlines and the sixth transfer earns actual stock
+  ---
+  duration_ms: 17.4349
+  type: 'test'
+  ...
+# Subtest: timeout-looking non-deadline errors and mismatched typed labels retain their identity
+    # Subtest: Error:ordinary-owner timed out waiting for Deer corpse 20 funding harvest
+    ok 1 - Error:ordinary-owner timed out waiting for Deer corpse 20 funding harvest
+      ---
+      duration_ms: 0.5189
+      type: 'test'
+      ...
+    # Subtest: SafetyStop:timed out guard
+    ok 2 - SafetyStop:timed out guard
+      ---
+      duration_ms: 0.4067
+      type: 'test'
+      ...
+    # Subtest: Error:ordinary-owner timed out waiting for unrelated wait
+    ok 3 - Error:ordinary-owner timed out waiting for unrelated wait
+      ---
+      duration_ms: 0.3371
+      type: 'test'
+      ...
+    1..3
+ok 45 - timeout-looking non-deadline errors and mismatched typed labels retain their identity
+  ---
+  duration_ms: 1.5437
+  type: 'test'
+  ...
+# Subtest: global wall budget, health change and closed transport are never retried as empty skin passes
+    # Subtest: {"timeoutMs":7000}
+    ok 1 - {"timeoutMs":7000}
+      ---
+      duration_ms: 0.7085
+      type: 'test'
+      ...
+    # Subtest: {"harvestHealthDrop":true}
+    ok 2 - {"harvestHealthDrop":true}
+      ---
+      duration_ms: 0.4299
+      type: 'test'
+      ...
+    # Subtest: {"closeOnHarvestWait":true}
+    ok 3 - {"closeOnHarvestWait":true}
+      ---
+      duration_ms: 0.3982
+      type: 'test'
+      ...
+    1..3
+ok 46 - global wall budget, health change and closed transport are never retried as empty skin passes
+  ---
+  duration_ms: 1.7398
+  type: 'test'
+  ...
+# Subtest: normalized deadline errors retain code, exact wait label and original cause
+ok 47 - normalized deadline errors retain code, exact wait label and original cause
+  ---
+  duration_ms: 0.6919
+  type: 'test'
+  ...
+# Subtest: late staging resolver runs once after purchase and freezes its copied point for fresh readiness
+ok 48 - late staging resolver runs once after purchase and freezes its copied point for fresh readiness
+  ---
+  duration_ms: 0.5235
+  type: 'test'
+  ...
+# Subtest: late staging resolver reuses current fresh snapshot without adding a refresh or economic command
+ok 49 - late staging resolver reuses current fresh snapshot without adding a refresh or economic command
+  ---
+  duration_ms: 0.4179
+  type: 'test'
+  ...
+# Subtest: no candidate or an asynchronous resolver fails closed without restarting preparation budgets
+ok 50 - no candidate or an asynchronous resolver fails closed without restarting preparation budgets
+  ---
+  duration_ms: 0.3129
+  type: 'test'
+  ...
+# Subtest: late point choice cannot reset the global wall or bypass owner/map and final fresh safety
+ok 51 - late point choice cannot reset the global wall or bypass owner/map and final fresh safety
+  ---
+  duration_ms: 0.2823
+  type: 'test'
+  ...
+# Subtest: a queued Deer lost during ordinary pacing is not attacked and consumes the original hunt budget
+    # Subtest: missing
+    ok 1 - missing
+      ---
+      duration_ms: 662.6894
+      type: 'test'
+      ...
+    # Subtest: dead
+    ok 2 - dead
+      ---
+      duration_ms: 3.0422
+      type: 'test'
+      ...
+    # Subtest: zero-hp
+    ok 3 - zero-hp
+      ---
+      duration_ms: 5.6458
+      type: 'test'
+      ...
+    # Subtest: unknown-hp
+    ok 4 - unknown-hp
+      ---
+      duration_ms: 3.8289
+      type: 'test'
+      ...
+    # Subtest: renamed
+    ok 5 - renamed
+      ---
+      duration_ms: 659.2296
+      type: 'test'
+      ...
+    1..5
+ok 52 - a queued Deer lost during ordinary pacing is not attacked and consumes the original hunt budget
+  ---
+  duration_ms: 1336.6718
+  type: 'test'
+  ...
+# Subtest: a nearby non-Deer threat excludes the dangerous Deer before a bounded safe alternative hunt
+ok 53 - a nearby non-Deer threat excludes the dangerous Deer before a bounded safe alternative hunt
+  ---
+  duration_ms: 3.5579
+  type: 'test'
+  ...
+# Subtest: target loss cannot disguise owner safety changes or transport failures during pacing
+    # Subtest: owner-name
+    ok 1 - owner-name
+      ---
+      duration_ms: 655.2642
+      type: 'test'
+      ...
+    # Subtest: owner-map
+    ok 2 - owner-map
+      ---
+      duration_ms: 664.5353
+      type: 'test'
+      ...
+    # Subtest: owner-health
+    ok 3 - owner-health
+      ---
+      duration_ms: 657.8722
+      type: 'test'
+      ...
+    # Subtest: transport
+    ok 4 - transport
+      ---
+      duration_ms: 659.4009
+      type: 'test'
+      ...
+    1..4
+ok 54 - target loss cannot disguise owner safety changes or transport failures during pacing
+  ---
+  duration_ms: 2637.5838
+  type: 'test'
+  ...
+# Subtest: exact canonical IDs match without permitting ambiguous or malformed target identities
+    # Subtest: malformed-id
+    ok 1 - malformed-id
+      ---
+      duration_ms: 658.4318
+      type: 'test'
+      ...
+    # Subtest: ambiguous-id
+    ok 2 - ambiguous-id
+      ---
+      duration_ms: 654.0395
+      type: 'test'
+      ...
+    1..2
+ok 55 - exact canonical IDs match without permitting ambiguous or malformed target identities
+  ---
+  duration_ms: 1314.1586
+  type: 'test'
+  ...
+# Subtest: only boolean dead false confirms a live target after pacing; malformed or absent state cannot be hunted
+    # Subtest: dead-string
+    ok 1 - dead-string
+      ---
+      duration_ms: 662.4391
+      type: 'test'
+      ...
+    # Subtest: dead-one
+    ok 2 - dead-one
+      ---
+      duration_ms: 652.5873
+      type: 'test'
+      ...
+    # Subtest: dead-zero
+    ok 3 - dead-zero
+      ---
+      duration_ms: 654.1969
+      type: 'test'
+      ...
+    # Subtest: dead-null
+    ok 4 - dead-null
+      ---
+      duration_ms: 655.0336
+      type: 'test'
+      ...
+    # Subtest: dead-missing
+    ok 5 - dead-missing
+      ---
+      duration_ms: 656.5106
+      type: 'test'
+      ...
+    # Subtest: dead-false-string
+    ok 6 - dead-false-string
+      ---
+      duration_ms: 667.7599
+      type: 'test'
+      ...
+    1..6
+ok 56 - only boolean dead false confirms a live target after pacing; malformed or absent state cannot be hunted
+  ---
+  duration_ms: 3949.2141
+  type: 'test'
+  ...
+# Subtest: all preparation routes retain at least eight hostile cells even when funding requests zero clearance
+ok 57 - all preparation routes retain at least eight hostile cells even when funding requests zero clearance
+  ---
+  duration_ms: 2.6252
+  type: 'test'
+  ...
+# Subtest: real navigator can leave the three-Scarecrow birth halos without a safe-zone exemption or extra refreshes
+ok 58 - real navigator can leave the three-Scarecrow birth halos without a safe-zone exemption or extra refreshes
+  ---
+  duration_ms: 7.4027
+  type: 'test'
+  ...
+# Subtest: real navigator detours around the entire eight-cell halo, including unknown-AI hostile observations
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 4.5852
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 2 - true
+      ---
+      duration_ms: 3.3132
+      type: 'test'
+      ...
+    1..2
+ok 59 - real navigator detours around the entire eight-cell halo, including unknown-AI hostile observations
+  ---
+  duration_ms: 8.1238
+  type: 'test'
+  ...
+# Subtest: a hostile arriving during queued Run pacing blocks its intermediate or landing cell before actual send
+    # Subtest: true
+    ok 1 - true
+      ---
+      duration_ms: 0.6286
+      type: 'test'
+      ...
+    # Subtest: false
+    ok 2 - false
+      ---
+      duration_ms: 0.4395
+      type: 'test'
+      ...
+    1..2
+ok 60 - a hostile arriving during queued Run pacing blocks its intermediate or landing cell before actual send
+  ---
+  duration_ms: 1.2664
+  type: 'test'
+  ...
+# Subtest: inside a halo ordinary movement may maintain or increase distance but cannot approach the threat
+    # Subtest: true
+    ok 1 - true
+      ---
+      duration_ms: 0.3304
+      type: 'test'
+      ...
+    # Subtest: false
+    ok 2 - false
+      ---
+      duration_ms: 0.3353
+      type: 'test'
+      ...
+    1..2
+ok 61 - inside a halo ordinary movement may maintain or increase distance but cannot approach the threat
+  ---
+  duration_ms: 0.8484
+  type: 'test'
+  ...
+# Subtest: all dangerous Deer exhaust the original eight hunt attempts without any attack or fake funding credit
+ok 62 - all dangerous Deer exhaust the original eight hunt attempts without any attack or fake funding credit
+  ---
+  duration_ms: 0.6156
+  type: 'test'
+  ...
+# Subtest: friendly, unclassified or owned Deer are not ordinary neutral funding targets
+    # Subtest: friendly
+    ok 1 - friendly
+      ---
+      duration_ms: 3.8975
+      type: 'test'
+      ...
+    # Subtest: unknown
+    ok 2 - unknown
+      ---
+      duration_ms: 5.0524
+      type: 'test'
+      ...
+    # Subtest: owned
+    ok 3 - owned
+      ---
+      duration_ms: 3.2816
+      type: 'test'
+      ...
+    1..3
+ok 63 - friendly, unclassified or owned Deer are not ordinary neutral funding targets
+  ---
+  duration_ms: 12.4251
+  type: 'test'
+  ...
+# Subtest: an owner transform changed during movement pacing cannot retarget an already queued direction
+ok 64 - an owner transform changed during movement pacing cannot retarget an already queued direction
+  ---
+  duration_ms: 0.3195
+  type: 'test'
+  ...
+# Subtest: fresh danger during a real funding approach uses the existing finite target-loss path
+ok 65 - fresh danger during a real funding approach uses the existing finite target-loss path
+  ---
+  duration_ms: 5.2028
+  type: 'test'
+  ...
+# Subtest: path hazard history is bounded at 32 scalar rows and unrelated navigation errors stay terminal
+ok 66 - path hazard history is bounded at 32 scalar rows and unrelated navigation errors stay terminal
+  ---
+  duration_ms: 1.1108
+  type: 'test'
+  ...
+# Subtest: nonempty unknown and malformed dispositions remain threats for Deer selection and queued Run dispatch
+    # Subtest: "Unknown"
+    ok 1 - "Unknown"
+      ---
+      duration_ms: 0.8344
+      type: 'test'
+      ...
+    # Subtest: "unsupported"
+    ok 2 - "unsupported"
+      ---
+      duration_ms: 0.6337
+      type: 'test'
+      ...
+    # Subtest: "Neutral"
+    ok 3 - "Neutral"
+      ---
+      duration_ms: 0.6438
+      type: 'test'
+      ...
+    # Subtest: 0
+    ok 4 - 0
+      ---
+      duration_ms: 0.6709
+      type: 'test'
+      ...
+    # Subtest: false
+    ok 5 - false
+      ---
+      duration_ms: 0.7614
+      type: 'test'
+      ...
+    # Subtest: {}
+    ok 6 - {}
+      ---
+      duration_ms: 0.9936
+      type: 'test'
+      ...
+    # Subtest: ["neutral"]
+    ok 7 - ["neutral"]
+      ---
+      duration_ms: 0.8647
+      type: 'test'
+      ...
+    1..7
+ok 67 - nonempty unknown and malformed dispositions remain threats for Deer selection and queued Run dispatch
+  ---
+  duration_ms: 5.8198
+  type: 'test'
+  ...
+# Subtest: only canonical neutral and friendly dispositions are exempt from the preparation threat halo
+    # Subtest: neutral
+    ok 1 - neutral
+      ---
+      duration_ms: 0.2648
+      type: 'test'
+      ...
+    # Subtest: friendly
+    ok 2 - friendly
+      ---
+      duration_ms: 0.1575
+      type: 'test'
+      ...
+    1..2
+ok 68 - only canonical neutral and friendly dispositions are exempt from the preparation threat halo
+  ---
+  duration_ms: 0.5798
+  type: 'test'
+  ...
+# Subtest: canonical static protection admits a real three-Scarecrow return route without another refresh
+ok 69 - canonical static protection admits a real three-Scarecrow return route without another refresh
+  ---
+  duration_ms: 47.4157
+  type: 'test'
+  ...
+# Subtest: a protected Run landing never excuses an unprotected intermediate cell or the reverse
+    # Subtest: outside then inside
+    ok 1 - outside then inside
+      ---
+      duration_ms: 0.678
+      type: 'test'
+      ...
+    # Subtest: inside then outside
+    ok 2 - inside then outside
+      ---
+      duration_ms: 0.389
+      type: 'test'
+      ...
+    1..2
+ok 70 - a protected Run landing never excuses an unprotected intermediate cell or the reverse
+  ---
+  duration_ms: 1.3368
+  type: 'test'
+  ...
+# Subtest: static ordinary protection never admits occupied cells, unknown AI or owned monsters
+    # Subtest: occupied
+    ok 1 - occupied
+      ---
+      duration_ms: 0.445
+      type: 'test'
+      ...
+    # Subtest: unknown name
+    ok 2 - unknown name
+      ---
+      duration_ms: 0.4094
+      type: 'test'
+      ...
+    # Subtest: non AI0
+    ok 3 - non AI0
+      ---
+      duration_ms: 0.3399
+      type: 'test'
+      ...
+    # Subtest: malformed AI
+    ok 4 - malformed AI
+      ---
+      duration_ms: 0.3787
+      type: 'test'
+      ...
+    # Subtest: owned
+    ok 5 - owned
+      ---
+      duration_ms: 0.4124
+      type: 'test'
+      ...
+    # Subtest: empty owner
+    ok 6 - empty owner
+      ---
+      duration_ms: 0.4056
+      type: 'test'
+      ...
+    # Subtest: unknown disposition
+    ok 7 - unknown disposition
+      ---
+      duration_ms: 0.3725
+      type: 'test'
+      ...
+    1..7
+ok 71 - static ordinary protection never admits occupied cells, unknown AI or owned monsters
+  ---
+  duration_ms: 3.2267
+  type: 'test'
+  ...
+# Subtest: missing or hand-made protection retains the original strict movement barrier
+    # Subtest: no spec
+    ok 1 - no spec
+      ---
+      duration_ms: 0.4669
+      type: 'test'
+      ...
+    # Subtest: hand-made spec
+    ok 2 - hand-made spec
+      ---
+      duration_ms: 0.3513
+      type: 'test'
+      ...
+    1..2
+ok 72 - missing or hand-made protection retains the original strict movement barrier
+  ---
+  duration_ms: 1.0139
+  type: 'test'
+  ...
+# Subtest: real ordinary navigation round-trips from village to Deer funding and back to merchants and staging
+ok 73 - real ordinary navigation round-trips from village to Deer funding and back to merchants and staging
+  ---
+  duration_ms: 19.125
+  type: 'test'
+  ...
+# Subtest: protected planner obstacles are re-read using the live owner transform without bypassing final readiness
+ok 74 - protected planner obstacles are re-read using the live owner transform without bypassing final readiness
+  ---
+  duration_ms: 0.7619
+  type: 'test'
+  ...
+# Subtest: trusted Scarecrow AOI loss cannot restore a coarse halo over the protected289617 return target
+ok 75 - trusted Scarecrow AOI loss cannot restore a coarse halo over the protected289617 return target
+  ---
+  duration_ms: 4.0435
+  type: 'test'
+  ...
+# Subtest: trusted AOI memory rebuilds every recent outside-zone trail and occupied cell, not just the final point
+ok 76 - trusted AOI memory rebuilds every recent outside-zone trail and occupied cell, not just the final point
+  ---
+  duration_ms: 0.6556
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on unknown name and cannot hide its old shared coarse memory
+ok 77 - trusted old ID is revoked immediately on unknown name and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.2835
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on unknown disposition and cannot hide its old shared coarse memory
+ok 78 - trusted old ID is revoked immediately on unknown disposition and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1743
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on owned and cannot hide its old shared coarse memory
+ok 79 - trusted old ID is revoked immediately on owned and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1628
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on empty owner and cannot hide its old shared coarse memory
+ok 80 - trusted old ID is revoked immediately on empty owner and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.236
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on non AI0 and cannot hide its old shared coarse memory
+ok 81 - trusted old ID is revoked immediately on non AI0 and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1596
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on malformed AI and cannot hide its old shared coarse memory
+ok 82 - trusted old ID is revoked immediately on malformed AI and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1568
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on foreign kind and cannot hide its old shared coarse memory
+ok 83 - trusted old ID is revoked immediately on foreign kind and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1547
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on foreign class and cannot hide its old shared coarse memory
+ok 84 - trusted old ID is revoked immediately on foreign class and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1432
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on neutral and cannot hide its old shared coarse memory
+ok 85 - trusted old ID is revoked immediately on neutral and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1808
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on dead and cannot hide its old shared coarse memory
+ok 86 - trusted old ID is revoked immediately on dead and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1681
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on unknown life and cannot hide its old shared coarse memory
+ok 87 - trusted old ID is revoked immediately on unknown life and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1446
+  type: 'test'
+  ...
+# Subtest: trusted old ID is revoked immediately on duplicate ID and cannot hide its old shared coarse memory
+ok 88 - trusted old ID is revoked immediately on duplicate ID and cannot hide its old shared coarse memory
+  ---
+  duration_ms: 0.1375
+  type: 'test'
+  ...
+# Subtest: unknown hostile memory remains a complete shared coarse barrier after the observed entity leaves AOI
+ok 89 - unknown hostile memory remains a complete shared coarse barrier after the observed entity leaves AOI
+  ---
+  duration_ms: 778.5023
+  type: 'test'
+  ...
+# Subtest: fresh raw receipts renew trust beyond20s but repeated getters alone never renew that qualification
+ok 90 - fresh raw receipts renew trust beyond20s but repeated getters alone never renew that qualification
+  ---
+  duration_ms: 2.515
+  type: 'test'
+  ...
+# Subtest: a quarantined ID cannot regain an exemption before old unknown shared trails have expired
+ok 91 - a quarantined ID cannot regain an exemption before old unknown shared trails have expired
+  ---
+  duration_ms: 0.4024
+  type: 'test'
+  ...
+# Subtest: normal moving navigation longer than20s keeps genuine receipt-qualified protection without resetting budgets
+ok 92 - normal moving navigation longer than20s keeps genuine receipt-qualified protection without resetting budgets
+  ---
+  duration_ms: 4.6993
+  type: 'test'
+  ...
+# Subtest: trusted trail overflow revokes the corresponding allowed ID and falls back to shared coarse protection
+ok 93 - trusted trail overflow revokes the corresponding allowed ID and falls back to shared coarse protection
+  ---
+  duration_ms: 85.6214
+  type: 'test'
+  ...
+# Subtest: real canonical loader map and navigator return304613 to289617 after the two observed Crow IDs leave AOI
+ok 94 - real canonical loader map and navigator return304613 to289617 after the two observed Crow IDs leave AOI
+  ---
+  duration_ms: 30.783
+  type: 'test'
+  ...
+# Subtest: forbidden-before-allowed reads crossing quarantine expiry retain the complete outside-zone halo
+ok 95 - forbidden-before-allowed reads crossing quarantine expiry retain the complete outside-zone halo
+  ---
+  duration_ms: 0.66
+  type: 'test'
+  ...
+# Subtest: ID-cap overflow remains globally quarantined when slots free before an unknown shared trail expires
+ok 96 - ID-cap overflow remains globally quarantined when slots free before an unknown shared trail expires
+  ---
+  duration_ms: 13.7892
+  type: 'test'
+  ...
+# Subtest: own hostile guards before movement and queued dispatch safely replan without replaying the unsafe command
+    # Subtest: before-movement
+    ok 1 - before-movement
+      ---
+      duration_ms: 5.6976
+      type: 'test'
+      ...
+    # Subtest: send
+    ok 2 - send
+      ---
+      duration_ms: 4.7232
+      type: 'test'
+      ...
+    1..2
+ok 97 - own hostile guards before movement and queued dispatch safely replan without replaying the unsafe command
+  ---
+  duration_ms: 10.7202
+  type: 'test'
+  ...
+# Subtest: replans are at most three per actor and do not reset the wall or command budget
+    # Subtest: replans
+    ok 1 - replans
+      ---
+      duration_ms: 0.3545
+      type: 'test'
+      ...
+    # Subtest: wall
+    ok 2 - wall
+      ---
+      duration_ms: 0.1579
+      type: 'test'
+      ...
+    # Subtest: commands
+    ok 3 - commands
+      ---
+      duration_ms: 0.1483
+      type: 'test'
+      ...
+    1..3
+ok 98 - replans are at most three per actor and do not reset the wall or command budget
+  ---
+  duration_ms: 0.8846
+  type: 'test'
+  ...
+# Subtest: a queued side effect or changed HP map transport is never cleared to make a send guard retryable
+    # Subtest: queued
+    ok 1 - queued
+      ---
+      duration_ms: 0.258
+      type: 'test'
+      ...
+    # Subtest: hp
+    ok 2 - hp
+      ---
+      duration_ms: 0.1275
+      type: 'test'
+      ...
+    # Subtest: map
+    ok 3 - map
+      ---
+      duration_ms: 0.1133
+      type: 'test'
+      ...
+    # Subtest: transport
+    ok 4 - transport
+      ---
+      duration_ms: 0.0998
+      type: 'test'
+      ...
+    1..4
+ok 99 - a queued side effect or changed HP map transport is never cleared to make a send guard retryable
+  ---
+  duration_ms: 0.7757
+  type: 'test'
+  ...
+# Subtest: raw-certified individual position receipts renew only their own identity beyond20s without new raw snapshots
+ok 100 - raw-certified individual position receipts renew only their own identity beyond20s without new raw snapshots
+  ---
+  duration_ms: 8.3637
+  type: 'test'
+  ...
+# Subtest: actual ObjectMonster shape withoutHP or disposition supports bounded individual receipts and cached AOI history
+ok 101 - actual ObjectMonster shape withoutHP or disposition supports bounded individual receipts and cached AOI history
+  ---
+  duration_ms: 9.1686
+  type: 'test'
+  ...
+# Subtest: real canonical map navigation handles real ObjectRemove AOI departure without recreating the protected target coarse barrier
+ok 102 - real canonical map navigation handles real ObjectRemove AOI departure without recreating the protected target coarse barrier
+  ---
+  duration_ms: 24.0725
+  type: 'test'
+  ...
+# Subtest: real incremental lifecycle and identity conflicts revoke normal history and quarantine sameID reuse
+    # Subtest: ObjectName{"objectId":71,"name":"UnknownMonster"}
+    ok 1 - ObjectName{"objectId":71,"name":"UnknownMonster"}
+      ---
+      duration_ms: 0.5942
+      type: 'test'
+      ...
+    # Subtest: ObjectPlayer{"objectId":71,"name":"player","location":{"x":287,"y":616}}
+    ok 2 - ObjectPlayer{"objectId":71,"name":"player","location":{"x":287,"y":616}}
+      ---
+      duration_ms: 0.4268
+      type: 'test'
+      ...
+    # Subtest: ObjectRevived{"objectId":71}
+    ok 3 - ObjectRevived{"objectId":71}
+      ---
+      duration_ms: 0.2934
+      type: 'test'
+      ...
+    # Subtest: ObjectDied{"objectId":71}
+    ok 4 - ObjectDied{"objectId":71}
+      ---
+      duration_ms: 0.3866
+      type: 'test'
+      ...
+    # Subtest: ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":987}
+    ok 5 - ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":987}
+      ---
+      duration_ms: 0.4627
+      type: 'test'
+      ...
+    # Subtest: ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":1,"dead":false,"masterObjectId":0}
+    ok 6 - ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":1,"dead":false,"masterObjectId":0}
+      ---
+      duration_ms: 0.3831
+      type: 'test'
+      ...
+    # Subtest: ObjectMonster{"objectId":71,"name":"UnknownMonster","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":0}
+    ok 7 - ObjectMonster{"objectId":71,"name":"UnknownMonster","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":0}
+      ---
+      duration_ms: 0.3232
+      type: 'test'
+      ...
+    # Subtest: ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":0,"class":"Warrior"}
+    ok 8 - ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":0,"class":"Warrior"}
+      ---
+      duration_ms: 0.3149
+      type: 'test'
+      ...
+    # Subtest: ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":0,"disposition":"friendly"}
+    ok 9 - ObjectMonster{"objectId":71,"name":"Scarecrow","location":{"x":287,"y":616},"ai":0,"dead":false,"masterObjectId":0,"disposition":"friendly"}
+      ---
+      duration_ms: 0.3326
+      type: 'test'
+      ...
+    1..9
+ok 103 - real incremental lifecycle and identity conflicts revoke normal history and quarantine sameID reuse
+  ---
+  duration_ms: 4.1992
+  type: 'test'
+  ...
+# Subtest: self ACK duplicate receipts and getters do not renew a wire identity, and position packets cannot reopen an expired or removed live segment
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 1.2892
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 2 - true
+      ---
+      duration_ms: 0.9337
+      type: 'test'
+      ...
+    1..2
+ok 104 - self ACK duplicate receipts and getters do not renew a wire identity, and position packets cannot reopen an expired or removed live segment
+  ---
+  duration_ms: 2.4375
+  type: 'test'
+  ...
+# Subtest: normal ObjectRemove reentry gains a new live segment without delaying matching normal proofs or dropping old outside trails
+ok 105 - normal ObjectRemove reentry gains a new live segment without delaying matching normal proofs or dropping old outside trails
+  ---
+  duration_ms: 0.9397
+  type: 'test'
+  ...
+# Subtest: normal real ObjectRemove then ObjectMonster reentry preserves the canonical return route without fresh-per-step snapshots
+ok 106 - normal real ObjectRemove then ObjectMonster reentry preserves the canonical return route without fresh-per-step snapshots
+  ---
+  duration_ms: 27.3192
+  type: 'test'
+  ...
+# Subtest: quiet normal history retains only its original planner position lifetime across real AOI departure and still revokes unknown reuse
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 2.7911
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 2 - true
+      ---
+      duration_ms: 1189.7404
+      type: 'test'
+      ...
+    1..2
+ok 107 - quiet normal history retains only its original planner position lifetime across real AOI departure and still revokes unknown reuse
+  ---
+  duration_ms: 1212.3326
+  type: 'test'
+  ...
+# Subtest: actual raw null owner and class followed by wire omission reopens normal AOI without extra quarantine
+ok 108 - actual raw null owner and class followed by wire omission reopens normal AOI without extra quarantine
+  ---
+  duration_ms: 22.0925
+  type: 'test'
+  ...
+# Subtest: W6 cold331590 static observed threats can approach the declared region on real map0 before the actual strict resolver selects a point
+ok 109 - W6 cold331590 static observed threats can approach the declared region on real map0 before the actual strict resolver selects a point
+  ---
+  duration_ms: 55.2878
+  type: 'test'
+  ...
+# {"scope":"W6 frame21 static nearby monster replay on canonical map0; not live AI prediction","commands":33,"movementCommands":30,"elapsedMs":19501,"pathReplanCount":0,"resolverCalls":1,"finalPoint":{"x":290,"y":615}}
+# Subtest: nearby strict resolver rejection never approaches or retries, while an unsuccessful distant approach still requires fresh visible occupancy
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 0.3429
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 2 - true
+      ---
+      duration_ms: 0.2111
+      type: 'test'
+      ...
+    1..2
+ok 110 - nearby strict resolver rejection never approaches or retries, while an unsuccessful distant approach still requires fresh visible occupancy
+  ---
+  duration_ms: 0.8396
+  type: 'test'
+  ...
+# Subtest: the approach cannot reset the actor wall or command budget or invoke the resolver after exhaustion
+    # Subtest: wall
+    ok 1 - wall
+      ---
+      duration_ms: 0.5654
+      type: 'test'
+      ...
+    # Subtest: commands
+    ok 2 - commands
+      ---
+      duration_ms: 0.1491
+      type: 'test'
+      ...
+    1..2
+ok 111 - the approach cannot reset the actor wall or command budget or invoke the resolver after exhaustion
+  ---
+  duration_ms: 0.8966
+  type: 'test'
+  ...
+# Subtest: preparation runs one worker, saves before next login and preserves all100 pool entries
+ok 112 - preparation runs one worker, saves before next login and preserves all100 pool entries
+  ---
+  duration_ms: 259.34
+  type: 'test'
+  ...
+# Subtest: ready bank characters are normally logged in again and reuse only actual held stock
+ok 113 - ready bank characters are normally logged in again and reuse only actual held stock
+  ---
+  duration_ms: 62.3241
+  type: 'test'
+  ...
+# Subtest: one persistent ledger is inherited and updated for each real admission without verification relogins
+ok 114 - one persistent ledger is inherited and updated for each real admission without verification relogins
+  ---
+  duration_ms: 57.7464
+  type: 'test'
+  ...
+# Subtest: existing auth ledger cannot be overridden by a new login origin
+ok 115 - existing auth ledger cannot be overridden by a new login origin
+  ---
+  duration_ms: 41.0902
+  type: 'test'
+  ...
+# Subtest: absent auth ledger keeps the original901s initial wait unless an origin is explicit
+ok 116 - absent auth ledger keeps the original901s initial wait unless an origin is explicit
+  ---
+  duration_ms: 32.592
+  type: 'test'
+  ...
+# Subtest: a failed preparation stops further admission and normally closes its active actor
+ok 117 - a failed preparation stops further admission and normally closes its active actor
+  ---
+  duration_ms: 37.3259
+  type: 'test'
+  ...
+# Subtest: stale readiness and normal logout errors cannot count as prepared
+ok 118 - stale readiness and normal logout errors cannot count as prepared
+  ---
+  duration_ms: 94.2622
+  type: 'test'
+  ...
+# Subtest: AbortSignal after a saved actor stops the next admission without activating anyone
+ok 119 - AbortSignal after a saved actor stops the next admission without activating anyone
+  ---
+  duration_ms: 40.7979
+  type: 'test'
+  ...
+# Subtest: finite wall and complete scenario bounds fail before sending later commands
+ok 120 - finite wall and complete scenario bounds fail before sending later commands
+  ---
+  duration_ms: 86.6873
+  type: 'test'
+  ...
+# Subtest: late staging chooses declared preferred point, otherwise skips live occupants and saved assignments
+ok 121 - late staging chooses declared preferred point, otherwise skips live occupants and saved assignments
+  ---
+  duration_ms: 0.6234
+  type: 'test'
+  ...
+# Subtest: late staging never leaves the current visible declared catalogue or uses a map transfer
+ok 122 - late staging never leaves the current visible declared catalogue or uses a map transfer
+  ---
+  duration_ms: 0.4421
+  type: 'test'
+  ...
+# Subtest: a persisted pool truncation cannot be hidden by a still-complete in-memory pool
+ok 123 - a persisted pool truncation cannot be hidden by a still-complete in-memory pool
+  ---
+  duration_ms: 62.4343
+  type: 'test'
+  ...
+# Subtest: invalid cancellation input rejects before creating output or starting monitor
+ok 124 - invalid cancellation input rejects before creating output or starting monitor
+  ---
+  duration_ms: 2.5758
+  type: 'test'
+  ...
+# Subtest: the default real CapacityClient constructor receives fixed v2 preparation context
+ok 125 - the default real CapacityClient constructor receives fixed v2 preparation context
+  ---
+  duration_ms: 33.1164
+  type: 'test'
+  ...
+# Subtest: explicit legacy preparation is rejected before any monitor or client is created
+ok 126 - explicit legacy preparation is rejected before any monitor or client is created
+  ---
+  duration_ms: 1.18
+  type: 'test'
+  ...
+# Subtest: final normal drain position, map and name must match readiness before indexing a saved actor
+ok 127 - final normal drain position, map and name must match readiness before indexing a saved actor
+  ---
+  duration_ms: 101.1303
+  type: 'test'
+  ...
+# Subtest: ordinary recovery runs once after login before equip and helper, without activation
+ok 128 - ordinary recovery runs once after login before equip and helper, without activation
+  ---
+  duration_ms: 43.5671
+  type: 'test'
+  ...
+# Subtest: held recovery failure stops admission and normally drains without equipping or preparing
+ok 129 - held recovery failure stops admission and normally drains without equipping or preparing
+  ---
+  duration_ms: 35.2972
+  type: 'test'
+  ...
+# Subtest: recovery and equip consume the same600s helper budget while auth waiting remains excluded
+ok 130 - recovery and equip consume the same600s helper budget while auth waiting remains excluded
+  ---
+  duration_ms: 42.0809
+  type: 'test'
+  ...
+# Subtest: an exhausted recovery budget cannot be restarted for the helper or next actor
+ok 131 - an exhausted recovery budget cannot be restarted for the helper or next actor
+  ---
+  duration_ms: 37.5713
+  type: 'test'
+  ...
+# Subtest: recovery and equip spend the existing2048 command allowance before the helper with one readiness refresh reserved
+ok 132 - recovery and equip spend the existing2048 command allowance before the helper with one readiness refresh reserved
+  ---
+  duration_ms: 38.453
+  type: 'test'
+  ...
+1..132
+# tests 244
+# suites 0
+# pass 244
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 11829.4507

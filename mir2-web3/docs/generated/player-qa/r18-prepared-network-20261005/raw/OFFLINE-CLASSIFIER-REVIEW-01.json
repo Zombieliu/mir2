@@ -1,0 +1,267 @@
+{
+  "schema": "mir2.r18-offline-closed-window-recheck.v1",
+  "createdUtc": "2026-10-04T17:18:47.443Z",
+  "sourceRevision": "321316b791120a6fe549e4006623e63333a5543f",
+  "binarySha256": "4064f6bce2337bbd1d251b37e7219163fd524828ddb83d90031232a0b1e25ca8",
+  "frozenInputsSha256": "b7ac4b4f33cc746248a6e6c0f2d9d97a5822fc4be5e953e5f1e08aad34dfc0c0",
+  "classifierSha256": "f78103fb5ddb1516caac0f0b088bacd01421c5d9ede603a5c75a3c2b2c95dc0d",
+  "noGatewayExecuted": true,
+  "noNetworkAccess": true,
+  "immutableOriginalFilesPreserved": true,
+  "privateStoresKeysOrRawLogsRead": false,
+  "verificationComplete": true,
+  "verifiedInputs": [
+    {
+      "relativePath": "public-receipts/death-receipts/report.json",
+      "sha256": "6e452747059e5e98197f9d2fd873f40f8f2049253fcf4b9793b1be503e683eef",
+      "bytes": 78463
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Wizard.jsonl",
+      "sha256": "4b1055e1e0c842cef54a4c78ad8f231be71d613fe462e51da722299d00f5fb67",
+      "bytes": 6881750
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Wizard-fresh-load.jsonl",
+      "sha256": "69d4c8344bcd1c9830b56fb5728218658dadb60b825648228253700fa21b75a6",
+      "bytes": 2016301
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Taoist.jsonl",
+      "sha256": "1db85ac403842118ab349457c11aaffe1bb02418e29c5e3a8bbea8840ab190d7",
+      "bytes": 11096370
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Taoist-fresh-load.jsonl",
+      "sha256": "11ecc705be0b23d3915ebff4530eeae7eebe45f43f46fbaef68c72087a610da2",
+      "bytes": 1968190
+    }
+  ],
+  "classes": [
+    {
+      "className": "Warrior",
+      "actualDeath": {
+        "status": "inconclusive",
+        "deathSequence": null,
+        "positiveOwnerHitCount": 122,
+        "zeroHpSequence": null,
+        "reason": "Require actual incoming positive damage, owner Death and exact terminal HP 0; rounded 0% is insufficient",
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "status": "inconclusive",
+      "noFreshLoadExecuted": true
+    },
+    {
+      "className": "Wizard",
+      "status": "passed",
+      "originalDeadWindowReproducedExactly": true,
+      "terminalWorldReproducedExactly": true,
+      "normalLogoutReproducedExactly": true,
+      "freshWorldReproducedExactly": true,
+      "freshQuietReproducedExactly": true,
+      "deadWindow": {
+        "fromMs": 1791132094064,
+        "endMs": 1791132100473,
+        "ownerId": 1000
+      },
+      "actualMagicInputSequence": 1080,
+      "baselineSequence": 1076,
+      "absoluteMpObservationSequences": [
+        1084,
+        1089,
+        1092,
+        1094,
+        1097,
+        1100,
+        1105,
+        1108,
+        1111,
+        1116,
+        1119
+      ],
+      "absoluteMpSpendCount": 0,
+      "materialConsumptionCount": 0,
+      "matchingCastCount": 0,
+      "unattributedTargetDamageCount": 0,
+      "ownerHpAmbiguityCount": 0,
+      "ownerLifeMutationCount": 0,
+      "sameOnlineCorpse": {
+        "sequence": 1122,
+        "hp": 0,
+        "explicitDead": true
+      },
+      "normalLogout": {
+        "status": "passed",
+        "reason": null,
+        "connectionId": "b0099e64-2b9a-4150-9ef8-e019b334827b",
+        "ownerId": 1000,
+        "sentSequence": 1123,
+        "ackSequence": 1124,
+        "ackMs": 1791132101553,
+        "closedMs": 1791132101593,
+        "normalCloseConfirmed": true,
+        "sourceBoundSaveAcknowledged": true,
+        "window": {
+          "connectionId": "b0099e64-2b9a-4150-9ef8-e019b334827b",
+          "ownerId": 1000,
+          "afterSequence": 1122,
+          "fromMs": 1791132100616,
+          "endMs": 1791132101593,
+          "normalCloseConfirmed": true
+        },
+        "directPrivateStoreInspection": false,
+        "directDurableHp0Verified": false,
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "freshLoad": {
+        "status": "passed",
+        "connectionId": "ae7324b2-e1c4-42e7-a3ed-1012b10b7349",
+        "sequence": 698,
+        "hp": 128,
+        "mp": 541,
+        "maxHp": 128,
+        "maxMp": 541,
+        "explicitDead": false,
+        "location": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        }
+      },
+      "quiet": {
+        "status": "passed",
+        "window": {
+          "connectionId": "ae7324b2-e1c4-42e7-a3ed-1012b10b7349",
+          "ownerId": 1000,
+          "afterSequence": 706,
+          "fromMs": 1791132106536,
+          "endMs": 1791132112009
+        },
+        "durationMs": 5473,
+        "authorityCount": 9
+      },
+      "freshLifeReceiptsDoNotChangeClosedDeadVerdict": true,
+      "directPrivateStoreInspection": false,
+      "directDurableHp0Verified": false
+    },
+    {
+      "className": "Taoist",
+      "status": "passed",
+      "originalDeadWindowReproducedExactly": true,
+      "terminalWorldReproducedExactly": true,
+      "normalLogoutReproducedExactly": true,
+      "freshWorldReproducedExactly": true,
+      "freshQuietReproducedExactly": true,
+      "deadWindow": {
+        "fromMs": 1791132169074,
+        "endMs": 1791132175097,
+        "ownerId": 1000
+      },
+      "actualMagicInputSequence": 1474,
+      "baselineSequence": 1470,
+      "absoluteMpObservationSequences": [
+        1481,
+        1484,
+        1487,
+        1489,
+        1491,
+        1494,
+        1499,
+        1502,
+        1505,
+        1510,
+        1513,
+        1516
+      ],
+      "absoluteMpSpendCount": 0,
+      "materialConsumptionCount": 0,
+      "matchingCastCount": 0,
+      "unattributedTargetDamageCount": 0,
+      "ownerHpAmbiguityCount": 0,
+      "ownerLifeMutationCount": 0,
+      "sameOnlineCorpse": {
+        "sequence": 1519,
+        "hp": 0,
+        "explicitDead": true
+      },
+      "normalLogout": {
+        "status": "passed",
+        "reason": null,
+        "connectionId": "837a4b81-ef4b-40e3-b7c9-5af59fd26888",
+        "ownerId": 1000,
+        "sentSequence": 1520,
+        "ackSequence": 1523,
+        "ackMs": 1791132176171,
+        "closedMs": 1791132176220,
+        "normalCloseConfirmed": true,
+        "sourceBoundSaveAcknowledged": true,
+        "window": {
+          "connectionId": "837a4b81-ef4b-40e3-b7c9-5af59fd26888",
+          "ownerId": 1000,
+          "afterSequence": 1519,
+          "fromMs": 1791132175218,
+          "endMs": 1791132176220,
+          "normalCloseConfirmed": true
+        },
+        "directPrivateStoreInspection": false,
+        "directDurableHp0Verified": false,
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "freshLoad": {
+        "status": "passed",
+        "connectionId": "75de6be4-ddd3-4b39-b2af-54025d8662b4",
+        "sequence": 660,
+        "hp": 239,
+        "mp": 260,
+        "maxHp": 239,
+        "maxMp": 260,
+        "explicitDead": false,
+        "location": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        }
+      },
+      "quiet": {
+        "status": "passed",
+        "window": {
+          "connectionId": "75de6be4-ddd3-4b39-b2af-54025d8662b4",
+          "ownerId": 1000,
+          "afterSequence": 666,
+          "fromMs": 1791132180965,
+          "endMs": 1791132186490
+        },
+        "durationMs": 5525,
+        "authorityCount": 9
+      },
+      "freshLifeReceiptsDoNotChangeClosedDeadVerdict": true,
+      "directPrivateStoreInspection": false,
+      "directDurableHp0Verified": false
+    }
+  ],
+  "sevenMonsterMechanicsAccepted": false,
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,486 @@
+{
+  "schema": "mir2.native.r23.fixed-origin-plan.v1",
+  "accountId": "85bf64d86ea9221e172d26feba9fd47e",
+  "bucket": "mir2-web3-assets",
+  "r2Prefix": "mir2/native/windows-invited/",
+  "originBase": "https://165.154.65.136.sslip.io/client-updates/",
+  "publicBase": "https://assets.mir2.obelisk.build/client-updates/",
+  "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "sourcePlanSha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0",
+  "rootVerificationSha256": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf",
+  "objectsSha256": "7dfe395deef5cefb54d73c9fb8ee87c6cc1620c7950457c6f5563da74fdff8cd",
+  "candidate": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 18,
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "feedSha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2",
+    "signatureSha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4"
+  },
+  "expectedCurrent": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 17,
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "feedSha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+    "signatureSha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276"
+  },
+  "installerOriginEvidence": {
+    "status": "not_uploaded_or_verified",
+    "expectedSha256": "ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03",
+    "expectedSize": 29245069,
+    "requestedOriginRelativePath": "installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe",
+    "actualPublicBuildReceipt": "root-reviewed reused R19 Bootstrap artifact; independently full-hashed by generator",
+    "sourceFixture": "C:\\mir2-playtest-releases\\20261007-mining-r19\\bootstrap-03\\artifacts\\Numeron-Legend-of-Rebirth-20261007-r19-Bootstrap.exe",
+    "noLiveCheckThisPhase": true
+  },
+  "objects": [
+    {
+      "path": "feeds/s18-2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2/latest.json",
+      "size": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2",
+      "index": 0,
+      "r2Key": "mir2/native/windows-invited/feeds/s18-2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2/latest.json",
+      "originRelativePath": "feeds/s18-2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2/latest.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "feeds/s18-2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2/latest.p7s",
+      "size": 1614,
+      "sha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4",
+      "index": 1,
+      "r2Key": "mir2/native/windows-invited/feeds/s18-2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2/latest.p7s",
+      "originRelativePath": "feeds/s18-2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2/latest.p7s",
+      "contentType": "application/pkcs7-signature",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe",
+      "size": 29245069,
+      "sha256": "ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03",
+      "index": 2,
+      "r2Key": "mir2/native/windows-invited/installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe",
+      "originRelativePath": "installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/BUILD-ATTESTATION.json",
+      "size": 2416,
+      "sha256": "62254955d4376366dfdbe2976c93bcaf4a688cca8e6b283ac1ed61b5ab85ff90",
+      "index": 3,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/BUILD-ATTESTATION.json",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/BUILD-ATTESTATION.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/CONTROLS.txt",
+      "size": 10612,
+      "sha256": "b9ad2a5a01b3ecbe673a3d38b1974b38492d3a62a0e28932eb8367ce19ebf7c6",
+      "index": 4,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/CONTROLS.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/CONTROLS.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/DELIVERY.json",
+      "size": 10560382,
+      "sha256": "0216b702405aa3e67c196b6823bfe1814c2585c5e2feb89e9462da94d8850070",
+      "index": 5,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/DELIVERY.json",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/DELIVERY.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/DELIVERY.p7s",
+      "size": 1614,
+      "sha256": "bc70e2fb24d94ec4c3e313410ff43461236827d189018620b5dfa5cc49e0f41b",
+      "index": 6,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/DELIVERY.p7s",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/DELIVERY.p7s",
+      "contentType": "application/pkcs7-signature",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/KNOWN-ISSUES.md",
+      "size": 2152,
+      "sha256": "d2a2ffca1d2170ee0a0f2e3d3fdf0eff644f2fe4472c5ba7e6120ce12c4eadc9",
+      "index": 7,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/KNOWN-ISSUES.md",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/KNOWN-ISSUES.md",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/MULTILINGUAL-SOURCES.json",
+      "size": 8618,
+      "sha256": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11",
+      "index": 8,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/MULTILINGUAL-SOURCES.json",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/MULTILINGUAL-SOURCES.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/NotoSansTC-OFL.txt",
+      "size": 4481,
+      "sha256": "e35ffdebb2225b49814c31889cbb3ce69cb3509e6a9f431edaba5e1a6de8cd15",
+      "index": 9,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/NotoSansTC-OFL.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/NotoSansTC-OFL.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSans.txt",
+      "size": 4396,
+      "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a",
+      "index": 10,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSans.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSans.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansArabic.txt",
+      "size": 4382,
+      "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af",
+      "index": 11,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansArabic.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansArabic.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansDevanagari.txt",
+      "size": 4386,
+      "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331",
+      "index": 12,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansDevanagari.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansDevanagari.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansThai.txt",
+      "size": 4380,
+      "sha256": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c",
+      "index": 13,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansThai.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/OFL-NotoSansThai.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "2012c0163c8ec418ed09ed9d3953337db1a246bb1b2d3191abe6b0ba485eb03e",
+      "index": 14,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/PACKAGE-MANIFEST.json",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/PACKAGE-MANIFEST.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/README-START.txt",
+      "size": 49328,
+      "sha256": "5bc26223994015306280ee17952cafe2d30d61b1649f8a0ff7f1de3cc40b8bbd",
+      "index": 15,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/README-START.txt",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/README-START.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "18a8a318b39cbd116c467603eeaeb5f4bc6cbc8725a647399a37289177011851",
+      "index": 16,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/RELEASE-STATEMENT.json",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/RELEASE-STATEMENT.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "6d645a7063bffa645c3923d3fd06762af52f394cba6cedb1ba1e4a3a6cb92e57",
+      "index": 17,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/RELEASE-STATEMENT.p7s",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/RELEASE-STATEMENT.p7s",
+      "contentType": "application/pkcs7-signature",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "size": 1221,
+      "sha256": "d8c2e7d380c4b37e90695c825e89e1c75ecf6738ce04e67780b4439a002957ee",
+      "index": 18,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/33deb94cec326e508bdc1bba79fdd7169822d1e2cb7cf51fe80c8c0ff070361e.m2b.gz",
+      "size": 55168206,
+      "sha256": "33deb94cec326e508bdc1bba79fdd7169822d1e2cb7cf51fe80c8c0ff070361e",
+      "index": 19,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/33deb94cec326e508bdc1bba79fdd7169822d1e2cb7cf51fe80c8c0ff070361e.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/33deb94cec326e508bdc1bba79fdd7169822d1e2cb7cf51fe80c8c0ff070361e.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/40b977ddf72dd5db5d403e0e01a38435d7c2190b1509f39eb873397731e62b77.m2b.gz",
+      "size": 55861872,
+      "sha256": "40b977ddf72dd5db5d403e0e01a38435d7c2190b1509f39eb873397731e62b77",
+      "index": 20,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/40b977ddf72dd5db5d403e0e01a38435d7c2190b1509f39eb873397731e62b77.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/40b977ddf72dd5db5d403e0e01a38435d7c2190b1509f39eb873397731e62b77.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "size": 46880707,
+      "sha256": "41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710",
+      "index": 21,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "size": 65601792,
+      "sha256": "53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b",
+      "index": 22,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "size": 12699904,
+      "sha256": "541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb",
+      "index": 23,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "size": 66861961,
+      "sha256": "565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2",
+      "index": 24,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "size": 65556826,
+      "sha256": "6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e",
+      "index": 25,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "size": 66910012,
+      "sha256": "84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7",
+      "index": 26,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/90d296b063520ecd9999ac3e1749e333938d38120952aa33a49e5e693e21ca94.m2b.gz",
+      "size": 36362191,
+      "sha256": "90d296b063520ecd9999ac3e1749e333938d38120952aa33a49e5e693e21ca94",
+      "index": 27,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/90d296b063520ecd9999ac3e1749e333938d38120952aa33a49e5e693e21ca94.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/90d296b063520ecd9999ac3e1749e333938d38120952aa33a49e5e693e21ca94.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "size": 60066659,
+      "sha256": "a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799",
+      "index": 28,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "size": 59737743,
+      "sha256": "ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe",
+      "index": 29,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/bbafc78ff7b9348eb7212633547628d7f4f9c8541f4dacc51677d9c77128832e.m2b.gz",
+      "size": 60714274,
+      "sha256": "bbafc78ff7b9348eb7212633547628d7f4f9c8541f4dacc51677d9c77128832e",
+      "index": 30,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/bbafc78ff7b9348eb7212633547628d7f4f9c8541f4dacc51677d9c77128832e.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/bbafc78ff7b9348eb7212633547628d7f4f9c8541f4dacc51677d9c77128832e.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/cd63cd12239342b444346e880b558c1a673ba818b9fb0f0d88e1c478540e6834.m2d.gz",
+      "size": 25532760,
+      "sha256": "cd63cd12239342b444346e880b558c1a673ba818b9fb0f0d88e1c478540e6834",
+      "index": 31,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/cd63cd12239342b444346e880b558c1a673ba818b9fb0f0d88e1c478540e6834.m2d.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/cd63cd12239342b444346e880b558c1a673ba818b9fb0f0d88e1c478540e6834.m2d.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "size": 60049370,
+      "sha256": "e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9",
+      "index": 32,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "size": 65610644,
+      "sha256": "e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b",
+      "index": 33,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/ff375cb31db49932972ee527916907555961f7f08bfc064fa36e1721eabbad92.m2b.gz",
+      "size": 63784644,
+      "sha256": "ff375cb31db49932972ee527916907555961f7f08bfc064fa36e1721eabbad92",
+      "index": 34,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/delivery/ff375cb31db49932972ee527916907555961f7f08bfc064fa36e1721eabbad92.m2b.gz",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/delivery/ff375cb31db49932972ee527916907555961f7f08bfc064fa36e1721eabbad92.m2b.gz",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/mir2-client.toml",
+      "size": 231,
+      "sha256": "58a5a7cf2ed6e880a7a7f259243dd9ab96150fc43e1a346e6fc79b8de6ee3641",
+      "index": 35,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-client.toml",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/mir2-client.toml",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261009-invited-23/mir2-platform-windows.exe",
+      "size": 111343104,
+      "sha256": "cf7bdb16ad307a744a910f3e17b7d21c78482e556676788bab7b0682913171e1",
+      "index": 36,
+      "r2Key": "mir2/native/windows-invited/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-platform-windows.exe",
+      "originRelativePath": "releases/game-WN-CANDIDATE-20261009-invited-23/mir2-platform-windows.exe",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.json",
+      "size": 421,
+      "sha256": "82fed6853aed2ed3d8c8c7520b9d4b84aacd4ac2723c2e47506eb4d001cb99b0",
+      "index": 37,
+      "r2Key": "mir2/native/windows-invited/releases/updater-9213EC3FE1A992F7-s15/ENGINE.json",
+      "originRelativePath": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.json",
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.p7s",
+      "size": 1614,
+      "sha256": "c19efee65316762e459ae48afc6123184e4c66defcb33f274fec046c66908a2b",
+      "index": 38,
+      "r2Key": "mir2/native/windows-invited/releases/updater-9213EC3FE1A992F7-s15/ENGINE.p7s",
+      "originRelativePath": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.p7s",
+      "contentType": "application/pkcs7-signature",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/Mir2Updater.exe",
+      "size": 1952256,
+      "sha256": "9213ec3fe1a992f757ea48c53981afa661765b42e637c1ad811e326060b170b8",
+      "index": 39,
+      "r2Key": "mir2/native/windows-invited/releases/updater-9213EC3FE1A992F7-s15/Mir2Updater.exe",
+      "originRelativePath": "releases/updater-9213EC3FE1A992F7-s15/Mir2Updater.exe",
+      "contentType": "application/octet-stream",
+      "cacheControl": "public, max-age=31536000, immutable"
+    }
+  ],
+  "admission": "admitted",
+  "knownPrevious": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 17,
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "feedSha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+    "signatureSha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276"
+  },
+  "predecessorProof": {
+    "sourcePlanSha256": "ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee",
+    "rootVerificationSha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf"
+  },
+  "promotionOriginPair": {
+    "json": "latest.json",
+    "signature": "latest.p7s"
+  },
+  "operationPolicy": {
+    "originHeaderMs": 30000,
+    "noProgressMs": 90000,
+    "importMs": 2400000,
+    "r2SettleAllowanceMs": 120000,
+    "promoteMs": 300000,
+    "controlSeconds": 150,
+    "importControlSeconds": 2460,
+    "promoteControlSeconds": 360,
+    "publicSeconds": 2460,
+    "slowStreamPolicyBytesPerSecond": 65536,
+    "measuredSpeed": false
+  },
+  "preparation": {
+    "publicationRootReceiptAvailable": true,
+    "originObjectsUploaded": false,
+    "r2AuthorityValidated": false,
+    "actualStagePromoteAccepted": false,
+    "actualDeadlinePolicyAccepted": false,
+    "requiredGameSourceRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+    "gameManifestSha256": "2012c0163c8ec418ed09ed9d3953337db1a246bb1b2d3191abe6b0ba485eb03e",
+    "requiredVerifier": "Actual pinned Windows CMS; exact R23/sourcefaefb696; unchanged signed s15 engine b4390ee4",
+    "verifierExecutedThisPhase": true,
+    "verifierReceiptSource": "fixtures/actual-cms18/ROOT-VERIFICATION.json",
+    "requiredGameCandidate": "WN-CANDIDATE-20261009-invited-23",
+    "gameVersionSha256": "d8c2e7d380c4b37e90695c825e89e1c75ecf6738ce04e67780b4439a002957ee"
+  }
+}

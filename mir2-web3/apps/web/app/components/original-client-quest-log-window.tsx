@@ -12,14 +12,21 @@ import {
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
+import {
+  NEWCOMER_V2_CHAPTERS,
+  localizeNewcomerV2Text,
+  newcomerV2ChapterForQuest,
+  newcomerV2GraduationFor,
+  newcomerV2JourneyProgress,
+  type NewcomerV2ChapterProgress,
+  type NewcomerV2GraduationGoalKey,
+  type NewcomerV2JourneyProgress,
+} from "../../lib/newcomer-v2-journey";
+import { formatQuestText, localizeNewcomerV2Graduation, type QuestTranslateFn } from "../../lib/quest-localization";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
-type TranslateFn = (
-  key: string,
-  params?: Array<string | number>,
-  fallback?: string,
-) => string;
+type TranslateFn = QuestTranslateFn;
 
 type QuestStage = "available" | "inProgress" | "readyToTurnIn" | "completed";
 
@@ -95,11 +102,14 @@ export type QuestLogWindowProps = {
   onTrackQuest?: (questId: number) => void;
   onShareQuest?: (questId: number) => void;
   onAbandonQuest?: (questId: number) => void;
-  /** Quest Diary actions; bound quests are enabled only by the active NPC dialog predicates. */
+  /** Quest actions are enabled by the shared client policy and current server facts. */
   onAcceptQuest?: (questId: number) => void;
   onFinishQuest?: (questId: number, selectedItemIndex?: number) => void;
   canAcceptQuest?: (questId: number) => boolean;
   canFinishQuest?: (questId: number, selectedItemIndex?: number) => boolean;
+  isQuestActionPending?: (questId: number, action: "accept" | "finish") => boolean;
+  questClientStatus?: "loading" | "ready" | "error";
+  onRetryQuestClient?: () => void;
   onClose: () => void;
   /**
    * Lowercase class key of the local player. Rewrites class-blind onboarding copy
@@ -107,6 +117,13 @@ export type QuestLogWindowProps = {
    * aren't told to melee. Optional + defensive: absent → objective shown verbatim.
    */
   playerClass?: string | null;
+  /** Actual server-reported self level. Missing values deliberately hide graduation. */
+  playerLevel?: number | null;
+  /** Session-local presentation state; never a quest or world command. */
+  graduationSelection?: {
+    selected: NewcomerV2GraduationGoalKey | null;
+    toggle: (goal: NewcomerV2GraduationGoalKey) => void;
+  };
 };
 
 type QuestStageFilter = "all" | QuestStage;
@@ -181,13 +198,21 @@ export function QuestLogWindow({
   onFinishQuest,
   canAcceptQuest,
   canFinishQuest,
+  isQuestActionPending,
+  questClientStatus,
+  onRetryQuestClient,
   onClose,
   playerClass,
+  playerLevel,
+  graduationSelection,
 }: QuestLogWindowProps) {
   const [stageFilter, setStageFilter] = useState<QuestStageFilter>("all");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedRewards, setSelectedRewards] = useState<Record<number, number>>({});
+  const [localGraduationGoal, setLocalGraduationGoal] =
+    useState<NewcomerV2GraduationGoalKey | null>(null);
+  const selectedGraduationGoal = graduationSelection ? graduationSelection.selected : localGraduationGoal;
   const [position, setPosition] = useState<QuestWindowPosition | null>(null);
   const windowRef = useRef<HTMLElement | null>(null);
   const dragRef = useRef<{
@@ -209,6 +234,11 @@ export function QuestLogWindow({
     currentPage * QUEST_LOG_ROWS_PER_PAGE,
     currentPage * QUEST_LOG_ROWS_PER_PAGE + QUEST_LOG_ROWS_PER_PAGE,
   );
+  const newcomerV2Journey = useMemo(() => newcomerV2JourneyProgress(quests), [quests]);
+  const newcomerV2Graduation = useMemo(
+    () => localizeNewcomerV2Graduation(newcomerV2GraduationFor(quests, playerLevel, playerClass), t),
+    [playerClass, playerLevel, quests, t],
+  );
 
   const selected = useMemo(() => {
     if (selectedId !== null) {
@@ -219,8 +249,22 @@ export function QuestLogWindow({
     }
     return visible[0] ?? filtered[0] ?? null;
   }, [filtered, quests, selectedId, stageFilter, visible]);
+  const selectedNewcomerV2Chapter = selected ? newcomerV2ChapterForQuest(selected.questId) : null;
+  const selectedNewcomerV2Progress = selectedNewcomerV2Chapter && newcomerV2Journey
+    ? newcomerV2Journey.chapters.find((chapter) => chapter.id === selectedNewcomerV2Chapter.id) ?? null
+    : null;
   const selectedRewardIndex = selected ? selectedRewards[selected.questId] : undefined;
   const needsRewardSelection = Boolean(selected?.rewards?.selectItems?.length);
+  const selectedActionPending = Boolean(selected && isQuestActionPending?.(
+    selected.questId, selected.stage === "available" ? "accept" : "finish",
+  ));
+  const clientFeedback = questClientStatus === "loading"
+    ? t("ui.questClientLoading", [], "Preparing quest actions…")
+    : questClientStatus === "error"
+      ? t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry.")
+      : selectedActionPending
+        ? t("ui.questActionPending", [], "Your request is being processed. Please wait.")
+        : undefined;
   const canAcceptSelected = Boolean(
     selected
       && selected.stage === "available"
@@ -234,6 +278,10 @@ export function QuestLogWindow({
       && (!needsRewardSelection || selectedRewardIndex !== undefined)
       && (!canFinishQuest || canFinishQuest(selected.questId, selectedRewardIndex)),
   );
+
+  const graduationGoal = newcomerV2Graduation?.goals.find(
+    (goal) => goal.key === selectedGraduationGoal,
+  ) ?? null;
 
   useEffect(() => {
     setPage(0);
@@ -381,7 +429,11 @@ export function QuestLogWindow({
         <span style={style.titleText}>{t("ui.quest", [], "Quest Log")}</span>
       </div>
       <div style={style.close}>
-        <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
+        <SpriteButton
+          sprite={FRAME.closeButton}
+          label={t("ui.close", [], "Close")}
+          onClick={onClose}
+        />
       </div>
       <div style={style.help}>
         <SpriteButton sprite={FRAME.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
@@ -452,10 +504,29 @@ export function QuestLogWindow({
         />
       </div>
 
-      <div style={style.detail} data-quest-detail={selected?.questId ?? ""}>
+      {newcomerV2Journey ? (
+        <div
+          style={style.newcomerV2Journey}
+          data-testid="newcomer-v2-journey-progress"
+          data-newcomer-v2-current-chapter={newcomerV2Journey.currentChapter?.id ?? ""}
+          title={newcomerV2JourneyTooltip(newcomerV2Journey, t)}
+        >
+          {newcomerV2JourneyLabel(newcomerV2Journey, t)}
+        </div>
+      ) : null}
+
+      <div style={{ ...style.detail, ...(clientFeedback ? { height: 92 } : null) }} data-quest-detail={selected?.questId ?? ""}>
         {selected ? (
           <>
             <div style={style.detailTitle}>{selected.title}</div>
+            {selectedNewcomerV2Chapter && selectedNewcomerV2Progress ? (
+              <div
+                style={style.newcomerV2Chapter}
+                data-newcomer-v2-chapter={selectedNewcomerV2Chapter.id}
+              >
+                {newcomerV2ChapterLabel(selectedNewcomerV2Progress, t)}
+              </div>
+            ) : null}
             <div style={style.detailStageRow}>
               <span style={{ ...style.detailStageTag, color: stageColor(selected.stage) }}>
                 {stageLabel(t, selected.stage)}
@@ -542,8 +613,50 @@ export function QuestLogWindow({
         ) : (
           <div style={style.empty}>{t("ui.questSelectHint", [], "Select a quest to view details.")}</div>
         )}
+        {newcomerV2Graduation ? (
+          <div style={style.graduation} data-testid="newcomer-graduation">
+            <div style={style.graduationTitle}>{newcomerV2Graduation.title}</div>
+            <div style={style.graduationChoices} role="group" aria-label={newcomerV2Graduation.title}>
+              {newcomerV2Graduation.goals.map((goal) => {
+                const selectedGoal = goal.key === selectedGraduationGoal;
+                return (
+                  <button
+                    key={goal.key}
+                    type="button"
+                    data-testid={`newcomer-graduation-${goal.key}`}
+                    aria-pressed={selectedGoal}
+                    onClick={() => {
+                      if (graduationSelection) graduationSelection.toggle(goal.key);
+                      else setLocalGraduationGoal((current) => current === goal.key ? null : goal.key);
+                    }}
+                    style={{ ...style.graduationButton, ...(selectedGoal ? style.graduationButtonSelected : null) }}
+                  >
+                    {goal.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={style.graduationGoal} data-testid="newcomer-graduation-goal" aria-live="polite">
+              {graduationGoal ? <>
+                <strong>{graduationGoal.title}</strong>
+                <span>{graduationGoal.requirements}</span>
+                <span>{graduationGoal.normalAcquisition}</span>
+              </> : <span>{t("quest.ui.chooseGoal", [], "Next goal: choose equipment, skill, or challenge in the Quest Log")}</span>}
+            </div>
+          </div>
+        ) : null}
       </div>
 
+      {clientFeedback ? (
+        <div style={style.questClientStatus} role={questClientStatus === "error" ? "alert" : "status"}>
+          <span>{clientFeedback}</span>
+          {questClientStatus === "error" ? (
+            <button type="button" style={style.retryButton} onClick={onRetryQuestClient} data-testid="quest-client-retry">
+              {t("ui.retry", [], "Retry")}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <div style={style.actions}>
         {selected?.stage === "available" ? (
           <button
@@ -551,13 +664,13 @@ export function QuestLogWindow({
             data-testid="quest-accept-button"
             disabled={!canAcceptSelected}
             title={
-              !canAcceptSelected
+              clientFeedback ?? (!canAcceptSelected
                 ? t(
                     "content.quest.generic.stage.available.objective",
                     [],
                     "Talk to the quest giver to accept this quest.",
                   )
-                : undefined
+                : undefined)
             }
             style={{ ...style.actionButton, ...(!canAcceptSelected ? style.actionButtonDisabled : null) }}
             onClick={() => {
@@ -573,7 +686,7 @@ export function QuestLogWindow({
             data-testid="quest-finish-button"
             disabled={!canFinishSelected}
             title={
-              needsRewardSelection && selectedRewardIndex === undefined
+              clientFeedback ?? (needsRewardSelection && selectedRewardIndex === undefined
                 ? t("client.YouMustSelectRewardItem", [], "Select a reward first.")
                 : !canFinishSelected
                   ? t(
@@ -581,7 +694,7 @@ export function QuestLogWindow({
                       [],
                       "Return to the quest NPC to turn in this quest.",
                     )
-                  : undefined
+                  : undefined)
             }
             style={{ ...style.actionButton, ...(!canFinishSelected ? style.actionButtonDisabled : null) }}
             onClick={() => {
@@ -621,6 +734,39 @@ export function QuestLogWindow({
       </div>
     </section>
   );
+}
+
+function newcomerV2JourneyLabel(
+  journey: NewcomerV2JourneyProgress,
+  t: TranslateFn,
+): string {
+  const label = t("quest.ui.main", [], "Current main quest");
+  const total = journey.chapters.reduce((count, chapter) => count + chapter.questIds.length, 0);
+  return `${label} ${journey.completedRecordedQuestCount}/${total}`;
+}
+
+function newcomerV2JourneyTooltip(
+  journey: NewcomerV2JourneyProgress,
+  t: TranslateFn,
+): string {
+  return journey.currentChapter
+    ? newcomerV2ChapterLabel(journey.currentChapter, t)
+    : newcomerV2JourneyLabel(journey, t);
+}
+
+function newcomerV2ChapterLabel(
+  chapter: NewcomerV2ChapterProgress,
+  t: TranslateFn,
+): string {
+  const ordinal = formatQuestText(t, "quest.chapter.progress", "Chapter {progress}", {
+    progress: `${chapter.number}/${NEWCOMER_V2_CHAPTERS.length}`,
+  });
+  const title = t.systemText?.(chapter.title.en) ?? localizeNewcomerV2Text(chapter.title, t);
+  const progress = formatQuestText(t, "quest.ui.chapterProgress", "This chapter {done}/{total}", {
+    done: chapter.completedRecordedQuestCount,
+    total: chapter.questIds.length,
+  });
+  return [ordinal, title, progress].join(" · ");
 }
 
 function QuestRewardView({
@@ -833,7 +979,9 @@ const style: Record<string, CSSProperties> = {
   tab: {
     flex: 1,
     minWidth: 0,
-    border: "1px solid rgba(190, 157, 99, 0.5)",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(190, 157, 99, 0.5)",
     background: "linear-gradient(180deg, rgba(52, 32, 18, 0.92), rgba(28, 17, 9, 0.92))",
     color: "#cbb38a",
     height: 28,
@@ -874,7 +1022,9 @@ const style: Record<string, CSSProperties> = {
     flex: "0 0 22px",
     padding: "0 6px",
     boxSizing: "border-box",
-    border: "1px solid transparent",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "transparent",
     background: "rgba(20, 13, 7, 0.4)",
     color: "#e3d3af",
     textAlign: "left",
@@ -899,6 +1049,18 @@ const style: Record<string, CSSProperties> = {
     lineHeight: "16px",
   },
   pageNext: { position: "absolute", left: 214, top: 256 },
+  newcomerV2Journey: {
+    position: "absolute",
+    left: 10,
+    top: 256,
+    width: 116,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    color: "#d7bd7a",
+    fontSize: 9,
+    lineHeight: "16px",
+  },
   detail: {
     position: "absolute",
     left: 10,
@@ -913,6 +1075,7 @@ const style: Record<string, CSSProperties> = {
     padding: "6px 8px",
   },
   detailTitle: { color: "#f8e6bb", fontSize: 12, fontWeight: 700, marginBottom: 2 },
+  newcomerV2Chapter: { color: "#d7bd7a", fontSize: 9, marginBottom: 3, lineHeight: "12px" },
   detailStageRow: { display: "flex", gap: 8, alignItems: "baseline", marginBottom: 3, flexWrap: "wrap" },
   detailStageTag: { fontSize: 10, fontWeight: 700 },
   detailTracker: { fontSize: 10, color: "#b7a884" },
@@ -927,6 +1090,27 @@ const style: Record<string, CSSProperties> = {
   objectiveTextDone: { color: "#9c8d6f", textDecoration: "line-through" },
   objectiveCount: { flex: "0 0 auto", fontSize: 10, color: "#cbb38a" },
   detailReturn: { fontSize: 10, color: "#b7a884", marginBottom: 4 },
+  graduation: {
+    margin: "4px 0",
+    padding: "4px",
+    border: "1px solid rgba(214, 180, 110, 0.38)",
+    background: "rgba(49, 32, 13, 0.36)",
+  },
+  graduationTitle: { color: "#e6c979", fontSize: 10, fontWeight: 700, marginBottom: 3 },
+  graduationChoices: { display: "flex", gap: 3, marginBottom: 3 },
+  graduationButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(190, 157, 99, 0.5)",
+    background: "rgba(21, 13, 6, 0.65)",
+    color: "#d6c6a5",
+    fontSize: 9,
+    padding: "2px 1px",
+    cursor: "pointer",
+  },
+  graduationButtonSelected: { borderColor: "#f2d278", color: "#f8e6bb" },
+  graduationGoal: { display: "flex", flexDirection: "column", gap: 1, fontSize: 9, lineHeight: 1.25, color: "#cbb38a" },
   progressRow: { display: "flex", justifyContent: "space-between", fontSize: 10, color: "#cbb38a", marginBottom: 2 },
   progressTrack: {
     position: "relative",
@@ -986,6 +1170,27 @@ const style: Record<string, CSSProperties> = {
     width: 292,
     display: "flex",
     gap: 6,
+  },
+  questClientStatus: {
+    position: "absolute",
+    left: 10,
+    top: 374,
+    width: 292,
+    display: "flex",
+    alignItems: "center",
+    gap: 4,
+    fontSize: 10,
+    lineHeight: "12px",
+    color: "#f4dcaf",
+  },
+  retryButton: {
+    flexShrink: 0,
+    border: "1px solid rgba(190, 157, 99, 0.56)",
+    background: "#392410",
+    color: "#f4dcaf",
+    fontSize: 10,
+    padding: "3px 4px",
+    cursor: "pointer",
   },
   actionButton: {
     flex: 1,

@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "base": "f6e30a0ee8021d745ecce35e295edf5f60e39964",
+  "checked": 974,
+  "missing": [],
+  "unexpectedDifferences": [],
+  "candidateInputs": [
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "72aeb6697c929dd24a7c1c570d72eb02cd33ceb914c1f3a4d2931074e27ae23e",
+      "bytes": 12426
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "sha256": "a16626bcbd405102a6c9e9cb03252c1b60ddc3c7772859506359ab78a6b129ee",
+      "bytes": 3125
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "sha256": "76c2755c68f439b98b027478c06dec86ba92c993edf18ad32c5e8ec5c07205dd",
+      "bytes": 1307
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "sha256": "22cee4887853438fad9323f4f5b698aec12a968b4e630a1a5599e79e8b548c61",
+      "bytes": 17798
+    }
+  ],
+  "declaredTransforms": [
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "kind": "CRLF working-copy serialization; identical committed text after Git LF normalization",
+      "candidateSha256": "ad6401295c2f0825415473df1edd87cf223104603500bfbabd32c1595d635fe0",
+      "committedSha256": "6bbaf7459854e3d14cbd0c41d583ae07829bd89f9cbf324c4337088d8f4e8c63"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+      "kind": "Fixed published prebuilt runtime manifest, same validated build/release contract",
+      "version": "bevy-0c553a754308e5b8",
+      "sha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+    }
+  ],
+  "shellExactCommittedSha256": "88a69c9edd8b8884252a3d555ec8e798f4b0d7a1479b2f2f5909a349c10999de",
+  "scope": "All tracked non-public Web code/config checked, not just changed files. Neither transform changes candidate feature source; raw comparisons retained separately."
+}

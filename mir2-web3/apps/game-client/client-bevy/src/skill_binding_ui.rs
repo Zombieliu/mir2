@@ -3,7 +3,7 @@
 //! This module deliberately contains no Bevy UI entities and no input or
 //! gateway code.  It is the small state machine shared by those adapters:
 //! selection is checked against the authoritative learned-skill list,
-//! assignment is limited to F1-F8, and merging a local assignment into a
+//! assignment supports the sixteen player slots, and merging a local assignment into a
 //! [`SkillModel`] changes only `hotkey`.
 
 use bevy::prelude::Resource;
@@ -11,11 +11,11 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::skill_model::{SkillBinding, SkillModel};
 
-/// Crystal exposes exactly eight assignable function-key slots.
+/// Crystal exposes sixteen assignable player skill slots.
 pub const MIN_SKILL_HOTKEY: u8 = 1;
-pub const MAX_SKILL_HOTKEY: u8 = 8;
+pub const MAX_SKILL_HOTKEY: u8 = 16;
 /// The persisted state can never contain more entries than there are slots.
-pub const MAX_SKILL_HOTKEY_BINDINGS: usize = 8;
+pub const MAX_SKILL_HOTKEY_BINDINGS: usize = 16;
 
 /// One learned skill assigned to one Crystal function-key slot.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -185,14 +185,12 @@ impl SkillBindingUi {
     /// Refresh against a new authoritative model.
     ///
     /// Stale assignments and a selection for an unlearned skill are removed.
-    /// Existing local assignments win on refresh; otherwise a valid server
-    /// hotkey is imported once. This makes reconnect/bootstrap deterministic
-    /// without allowing a refresh to resurrect an unknown skill.
+    /// Server hotkeys replace the transient cache, including explicit zero.
+    /// A previous character's local file must never override this authority.
     pub fn refresh(&mut self, model: &SkillModel) {
         let learned = |skill_id: u32| model.skills.iter().any(|skill| skill.id == skill_id);
 
-        self.bindings.retain(|binding| learned(binding.skill_id));
-        self.normalize_bindings();
+        self.bindings.clear();
 
         if let Some(skill_id) = self.selected_skill_id {
             if !learned(skill_id) {
@@ -389,6 +387,8 @@ mod tests {
 
     fn model(ids: &[u32]) -> SkillModel {
         SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
             skills: ids
                 .iter()
                 .map(|id| skill(*id, &format!("Skill{id}")))
@@ -431,7 +431,7 @@ mod tests {
         assert!(!ui.assign_selected_key(1, &model));
         assert!(ui.toggle_assign_key());
         assert!(!ui.assign_selected_key(0, &model));
-        assert!(!ui.assign_selected_key(9, &model));
+        assert!(!ui.assign_selected_key(17, &model));
         assert!(ui.assign_selected_key(1, &model));
         assert_eq!(ui.binding_for_skill(10).unwrap().hotkey, 1);
     }
@@ -495,6 +495,23 @@ mod tests {
         assert_eq!(merged.bindings, source.bindings);
     }
 
+    #[test]
+    fn global_file_cannot_override_same_skill_id_in_another_character() {
+        let mut ui: SkillBindingUi =
+            serde_json::from_value(serde_json::json!({"bindings":[{"skillId":10,"hotkey":16}]}))
+                .unwrap();
+        let mut server = model(&[10]);
+        server.bindings[0].hotkey = Some(3);
+        ui.refresh(&server);
+        assert_eq!(ui.skill_for_hotkey(3), Some(10));
+        assert!(ui.skill_for_hotkey(16).is_none());
+        server.bindings[0].hotkey = Some(0);
+        ui.refresh(&server);
+        assert!(ui.bindings.is_empty());
+        server.bindings[0].hotkey = None;
+        ui.refresh(&server);
+        assert!(ui.bindings.is_empty());
+    }
     #[test]
     fn refresh_imports_server_keys_and_removes_stale_entries() {
         let first = model(&[10, 20]);
@@ -567,6 +584,8 @@ mod tests {
     #[test]
     fn missing_binding_row_is_added_without_touching_known_skill_data() {
         let source = SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
             skills: vec![skill(10, "FireBall")],
             bindings: Vec::new(),
         };

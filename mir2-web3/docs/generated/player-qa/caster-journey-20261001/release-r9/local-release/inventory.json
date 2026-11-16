@@ -1,0 +1,423 @@
+{
+  "schema": "mir2.r9.local-release-doc-evidence.v1",
+  "createdUtc": "2026-10-01T18:43:32.241611+00:00",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "feedSequence": 5,
+  "published": false,
+  "gameLaunchedByThisTask": false,
+  "installedClientTouchedByThisTask": false,
+  "scope": "Exact local Candidate/build/installer evidence and real signed-package updater QA 2/2; publication and actual installed-client proof are separate root-owned records",
+  "filesCopied": 55,
+  "copiedTotalBytes": 154535,
+  "aggregateSha256": "C0B172FC1FB5B69EDEFB0A82A3DB530A5689F52CF3067BFF04524FFF2EC0E00E",
+  "originalVerifierFilename": "WN-CANDIDATE-20261001-invited-09-verification.json",
+  "originalVerifierSha256": "4A8D968402ED8B7A8133538A38AE3286E95335FA4AA7AB787AC8A313840B53F6",
+  "privacyCheck": {
+    "filesScanned": 55,
+    "credentialPatternMatches": 0,
+    "privateCredentialOrStoreKeys": 0,
+    "rawAccountStoreTraceFilesCopied": 0,
+    "publicSignaturesAndFingerprintMetadataOnly": true
+  },
+  "sourceRoots": {
+    "release": "C:\\mir2-playtest-releases\\20261001-native-r9",
+    "candidate": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+    "canonicalVerifier": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight",
+    "realQAReport": "C:\\mir2-updater-qa\\real-r8-r9-final-v1"
+  },
+  "gitAttributes": {
+    "json": "text unset in parent caster .gitattributes",
+    "log": "text unset in parent caster .gitattributes",
+    "py": "text unset in parent caster .gitattributes",
+    "md": "text eol=lf; copied Markdown source already LF",
+    "gitOperationsPerformed": false
+  },
+  "files": [
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "r9-release-receipt.json",
+      "copiedRelative": "r9-release-receipt.json",
+      "size": 7309,
+      "sha256": "C91BF5A3EE8045C3FEF7A3CA4444DB2750840FF57278961FBBD439B93120E79D"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "candidate-verification-reuse.json",
+      "copiedRelative": "candidate-verification-reuse.json",
+      "size": 2717,
+      "sha256": "5C44839707428E2E874118D447A0CAC99852C2B1AFD039EC99CCE46D69D26E3A"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-process.json",
+      "copiedRelative": "build-package-process.json",
+      "size": 849,
+      "sha256": "23BFC1834950382B7A9A5CD341864218225504DE1B924654D6E4F22E6AFB1107"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-process-attempt5.json",
+      "copiedRelative": "build-package-process-attempt5.json",
+      "size": 849,
+      "sha256": "23BFC1834950382B7A9A5CD341864218225504DE1B924654D6E4F22E6AFB1107"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "release-process.json",
+      "copiedRelative": "release-process.json",
+      "size": 376,
+      "sha256": "8D1CBAF2372AD8274AE3D12A46EE46DB5403FF996868AD3ED6826D7AFBFCBF4E"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater-bundle-verification.json",
+      "copiedRelative": "updater-bundle-verification.json",
+      "size": 592,
+      "sha256": "E7C8B0640893EE60996DD469BA5425C8A2A3FF9CCF612EFDF3E92B6486111794"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "candidate-final-verification.log",
+      "copiedRelative": "candidate-final-verification.log",
+      "size": 192,
+      "sha256": "3E8F878A7D22079DA317850A568300BC16623027C2F9835E220BAC4F5862879F"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-client.log",
+      "copiedRelative": "package-client.log",
+      "size": 4191,
+      "sha256": "5BF9C0F7C1009303AC7D5E4EABA812B4A19AECCB3FA1D9318ECD3DB831F5860B"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-attested-client.log",
+      "copiedRelative": "build-attested-client.log",
+      "size": 56884,
+      "sha256": "F3B5048067BAA749CB30810F2CE3D880581B7260BC2E9D570F7B5642ABF5667F"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater-build.log",
+      "copiedRelative": "updater-build.log",
+      "size": 3081,
+      "sha256": "5B1A2DE0822E3F842AE68560BF1CAADAA86E14833B069E7C8407D3E51BF99037"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater-bundle-verification.log",
+      "copiedRelative": "updater-bundle-verification.log",
+      "size": 594,
+      "sha256": "1309004558DD67E9E4498F0594F7A1E330746BF80A35E7C5C6A200E8F92E2BFE"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "installer-input.log",
+      "copiedRelative": "installer-input.log",
+      "size": 1006,
+      "sha256": "8AD85A2F0F4A4181F5EDD5087444DB110B1877758E6777FB40102835EA4EFFA0"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater-installer-input.log",
+      "copiedRelative": "updater-installer-input.log",
+      "size": 72,
+      "sha256": "42F9065DEECBF4A4DCE4C0F2417E90214302EFD5F917ABAF7FA659B4F6DF9262"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "update-archive.log",
+      "copiedRelative": "update-archive.log",
+      "size": 1073,
+      "sha256": "770AC67E82A4EA52E690BEBF282622A8FEE798C70ECC63ECBD4D566C9386B104"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "installer-template-copy.json",
+      "copiedRelative": "installer-template-copy.json",
+      "size": 8186,
+      "sha256": "F5950C95CC909B684A73F66EE1CBD12B1239940CFCEEF283E20771A2CD1D6850"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "short-worktree-input-preparation.json",
+      "copiedRelative": "short-worktree-input-preparation.json",
+      "size": 3788,
+      "sha256": "529FCBAF7F0E544056B4F1EC88947C6A42587A5AD0B3FB3578BA058F54C8C6BE"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "short-worktree-staging-path-preflight.json",
+      "copiedRelative": "short-worktree-staging-path-preflight.json",
+      "size": 1291,
+      "sha256": "C2BABE4AD8910E260989EF5B6E8F4A864AFF69C2822C8C94464AAD2D97B14B6C"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "installer-build/installer-input-verification.json",
+      "copiedRelative": "installer-input-verification.json",
+      "size": 910,
+      "sha256": "4FFC1F465505551B9A5A62C421E0C8F536E6757DB8648D9192076C2FA8EC64B0"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater/BUILD-UPDATER.json",
+      "copiedRelative": "updater/BUILD-UPDATER.json",
+      "size": 616,
+      "sha256": "47A5DBAE3869AD84BEEF933602024C0AE2171EC613FFC497C81CA91DD7B3F6A6"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater/bundle/UPDATER-BUNDLE.json",
+      "copiedRelative": "updater/bundle/UPDATER-BUNDLE.json",
+      "size": 1286,
+      "sha256": "047DEB57427F0E8651649365676F0AF04E97BE0F5874BCD0EDE5A758F1620C27"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater/engine-release/ENGINE.json",
+      "copiedRelative": "updater/engine-release/ENGINE.json",
+      "size": 421,
+      "sha256": "228EAB00392ACA20009FB4BD9086808995FEDD0A78EB40B509C755FF66EC06C0"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "updater/feed/latest.json",
+      "copiedRelative": "updater/feed/latest.json",
+      "size": 1157,
+      "sha256": "BEBFB5193DE19DD4107C1E5CC4BAC89C092B83094D86FE49F4A10DD3A291E487"
+    },
+    {
+      "sourceRoot": "candidate",
+      "sourceRelative": "BUILD-ATTESTATION.json",
+      "copiedRelative": "candidate/BUILD-ATTESTATION.json",
+      "size": 1493,
+      "sha256": "1FD9D1D881054D7BAFAA1B71A9E80816C8F54FD5BC62E77F06433CF24A92BA10"
+    },
+    {
+      "sourceRoot": "candidate",
+      "sourceRelative": "VERSION.json",
+      "copiedRelative": "candidate/VERSION.json",
+      "size": 1221,
+      "sha256": "533069F3BF09CE831F7D5D59F44F4E9BB84DC8651EB20AE5DF76B80DD555A02A"
+    },
+    {
+      "sourceRoot": "candidate",
+      "sourceRelative": "RELEASE-STATEMENT.json",
+      "copiedRelative": "candidate/RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "DB4861E04B58F6CFE20C0A2938C77920FCD9435636CBBED590611D0E7CE026B6"
+    },
+    {
+      "sourceRoot": "canonicalVerifier",
+      "sourceRelative": "WN-CANDIDATE-20261001-invited-09-verification.json",
+      "copiedRelative": "WN-CANDIDATE-20261001-invited-09-verification.json",
+      "size": 1866,
+      "sha256": "4A8D968402ED8B7A8133538A38AE3286E95335FA4AA7AB787AC8A313840B53F6"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-process-attempt1.json",
+      "copiedRelative": "previous-attempts/build-package-process-attempt1.json",
+      "size": 416,
+      "sha256": "0A75033286D9068294A448364D7B16E748F92BD81834115AF1DA06D63D7CBD17"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-client-attempt1.log",
+      "copiedRelative": "previous-attempts/package-client-attempt1.log",
+      "size": 1065,
+      "sha256": "F8D0E566F8534CA665FDF23B6C9A1BD85A49FCCDE3A40BE4E833D33EDEC18E20"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-error.log",
+      "copiedRelative": "previous-attempts/build-package-error.log",
+      "size": 423,
+      "sha256": "EE1D25428620850FBF937192FCE9E3984BF2714A7D8C8B43751AC7383D6651F0"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-process-attempt2.json",
+      "copiedRelative": "previous-attempts/build-package-process-attempt2.json",
+      "size": 842,
+      "sha256": "8982AE52B39D419F102769FC2145D3B9599D0BF39B3BECF3C0A9800F276A3A2C"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-client-attempt2.log",
+      "copiedRelative": "previous-attempts/package-client-attempt2.log",
+      "size": 3195,
+      "sha256": "DA5BB10377D655852C7B679F46822771011288BDD5760A58F912C9971384F950"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-attempt2-error.log",
+      "copiedRelative": "previous-attempts/package-attempt2-error.log",
+      "size": 543,
+      "sha256": "92A99B4E4C51D98A88D83B1E4CBF957E803CA223D3F7FEC8586751663A40C26C"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-process-attempt3.json",
+      "copiedRelative": "previous-attempts/build-package-process-attempt3.json",
+      "size": 1009,
+      "sha256": "07EB9A61B45F0C2E41FF61E30050B2CC91D6EDB45C9813DB6B17183B23337516"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-client-attempt3.log",
+      "copiedRelative": "previous-attempts/package-client-attempt3.log",
+      "size": 3455,
+      "sha256": "75A1E53A2986B97179A11280064CA143056C2B3625BC64AB1F15F8E8FF4810BC"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-attempt3-error.log",
+      "copiedRelative": "previous-attempts/package-attempt3-error.log",
+      "size": 709,
+      "sha256": "4FF99BABAB87E3402737BD90CC9E28D94C13FFC641096A43D4CC80FF87BFB1E5"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "build-package-process-attempt4.json",
+      "copiedRelative": "previous-attempts/build-package-process-attempt4.json",
+      "size": 842,
+      "sha256": "FDAD57A69A161444A13E0901FE48D67593C9C284912D9BED9771BCF551A9CEA1"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-client-attempt4.log",
+      "copiedRelative": "previous-attempts/package-client-attempt4.log",
+      "size": 3455,
+      "sha256": "3B9746B5041704B1F0635D1DEF5CBCA72283559A667DACF1C86D2664B76A66F4"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "package-attempt4-error.log",
+      "copiedRelative": "previous-attempts/package-attempt4-error.log",
+      "size": 459,
+      "sha256": "2AF4850BFE3DD536657432A33EAC2ECFB6D1215338D754A2B0662FB1F1B1EC68"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "prepare-real-fixtures-final.py",
+      "copiedRelative": "qa/prepare-real-fixtures-final.py",
+      "size": 17162,
+      "sha256": "ADAE1F93370619B19423274004C66FB45800CFA09080A9453294CD1BF8C038A3"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-integration-final-process.json",
+      "copiedRelative": "qa/real-integration-final-process.json",
+      "size": 2875,
+      "sha256": "C80963AC9BB1540E773C426533F440F087C3ACAEA961CC778CFE56E5A1991186"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-r8-r9-final-fixtures.json",
+      "copiedRelative": "qa/real-r8-r9-final-fixtures.json",
+      "size": 3542,
+      "sha256": "0AD06A7A87B585640DAB5A776C68042633B37790533D20E6BFB976768CC23728"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-package-integration-final.log",
+      "copiedRelative": "qa/real-package-integration-final.log",
+      "size": 275,
+      "sha256": "429E9DA38651093F307B7C62D718B94F431453E6BFC9FA72B05434365FB912CB"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-final-manifest-delta-preflight.json",
+      "copiedRelative": "qa/real-final-manifest-delta-preflight.json",
+      "size": 1950,
+      "sha256": "C3ADAEB6E21CE5D912A7ECFB43D2DAAB3331670734F041D5687B87082AC3B3F2"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-final-old-r8-preflight.json",
+      "copiedRelative": "qa/real-final-old-r8-preflight.json",
+      "size": 738,
+      "sha256": "09013B2006F8007289A0D633CCA59E091D400586570B4A44E7565A7AE1C52D85"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-final-helper-preflight-attempt1.json",
+      "copiedRelative": "qa/real-final-helper-preflight-attempt1.json",
+      "size": 431,
+      "sha256": "1FD1E301D3819F40650ED971BBF1D54CF945F42A67A6D279219D45884B60024F"
+    },
+    {
+      "sourceRoot": "realQAReport",
+      "sourceRelative": "report.json",
+      "copiedRelative": "qa/report.json",
+      "size": 1033,
+      "sha256": "8F532DEE245745282B68914EC3537418F20A2C03F52646574F2A0693C99D7422"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-update-qa-evidence.json",
+      "copiedRelative": "qa/real-update-qa-evidence.json",
+      "size": 2130,
+      "sha256": "FAFBFFA76E099094349CEB969F5488C85686C51B32C06DFF92C6882F9C2E2550"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-update-qa-final.md",
+      "copiedRelative": "qa/real-update-qa-final.md",
+      "size": 2798,
+      "sha256": "FA8B714A495A887B67B8773355A4D98BBEAB3805B69E549A54BC6C47085882F6"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-integration-preflight-attempt1.json",
+      "copiedRelative": "qa/previous-attempts/real-integration-preflight-attempt1.json",
+      "size": 470,
+      "sha256": "9E7FABCD1827DBA38846DE629C3D5C74527DF29213265D2BF7B44CECBBC799FA"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-integration-preflight-attempt2.json",
+      "copiedRelative": "qa/previous-attempts/real-integration-preflight-attempt2.json",
+      "size": 794,
+      "sha256": "3039A905614B9FD653C6992D7D23676A4677AB81EA2195EA2BABA5363323F093"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-integration-preflight-attempt3.json",
+      "copiedRelative": "qa/previous-attempts/real-integration-preflight-attempt3.json",
+      "size": 515,
+      "sha256": "5CAD0A798EB3070D8FF11A8A9E9517D703317A09E2496A66E5E7B893708CA8D0"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-fixture-preflight-attempt1.log",
+      "copiedRelative": "qa/previous-attempts/real-fixture-preflight-attempt1.log",
+      "size": 78,
+      "sha256": "03F999EE61952687CB29C7D392AE65EFC4815F9639439E3C821A5D49ABA4FB9F"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-integration-helper-attempt2.log",
+      "copiedRelative": "qa/previous-attempts/real-integration-helper-attempt2.log",
+      "size": 369,
+      "sha256": "F4A6FA5D92FBE15506F0CF660BBC53F1A69DB4DEF693126A6EBE60E4A0B12520"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-integration-helper-attempt3.log",
+      "copiedRelative": "qa/previous-attempts/real-integration-helper-attempt3.log",
+      "size": 120,
+      "sha256": "2B022E961ADA1F8646CF0AF8F7F4F8C7493802788F05A1D9B0DCAE78029675A9"
+    },
+    {
+      "sourceRoot": "release",
+      "sourceRelative": "real-input-long-path-diagnostic.log",
+      "copiedRelative": "qa/previous-attempts/real-input-long-path-diagnostic.log",
+      "size": 115,
+      "sha256": "7EE5E4D208E02101EF261F64B7CEA150D686B06F97CB52480ADCFDECDDE3B028"
+    }
+  ]
+}

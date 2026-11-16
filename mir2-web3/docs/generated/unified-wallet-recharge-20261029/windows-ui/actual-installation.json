@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "windows-live/installer-first.json",
+    "bytes": 801,
+    "sha256": "d9f49ce58315a9de8c5c53e9b8f692dd137d4da9431adeb63ab5cb8774b5a112"
+  },
+  "producerReport": {
+    "passed": true,
+    "exitCode": 0,
+    "setup": "F:\\mir2-build\\unified-20261029\\installer-validation-output-r11\\Numeron-Legend-of-Rebirth-20261029-unified-r11-LocalValidation-Setup.exe",
+    "setupSha256": "61526737863975826E721704BAD2C03AE6FAB5485DD745EF072E74D6922BD1D3",
+    "installDirectory": "F:/mir2-build/unified-20261029/installed-validation",
+    "arguments": [
+      "/VERYSILENT",
+      "/SUPPRESSMSGBOXES",
+      "/NORESTART",
+      "/SP-",
+      "/CURRENTUSER",
+      "/NOICONS",
+      "/TASKS=\"\"",
+      "/LANG=chinesesimplified",
+      "/DIR=\"F:/mir2-build/unified-20261029/installed-validation\"",
+      "/LOG=\"C:/mir2-build/unified-20261029/unified-installer-first.log\""
+    ],
+    "elapsedSeconds": 259.3697881,
+    "normalInstallationTouched": false,
+    "publicFeedChanged": false
+  },
+  "phase": "Independent actual runtime or read-only observation; no source/test/build rerun by curator"
+}

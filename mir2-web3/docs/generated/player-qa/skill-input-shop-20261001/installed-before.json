@@ -1,0 +1,50 @@
+{
+  "path": "F:\\mir2\\Mir2Invite\\game",
+  "attestation": {
+    "schema": "mir2.windows.build-attestation.v2",
+    "exeSha256": "37DDEC37222B29DF588A3903D30D9155869E7BB878D4ECB316126656FA40BFEE",
+    "exeSizeBytes": 110323200,
+    "gitRevision": "c7eacee12599a535065ddfe81c0539450f65a5bb",
+    "worktreeDirty": false,
+    "worktreeStatusScope": "git-status-z+diff+all-untracked-content-v2",
+    "worktreeStatusSha256": "F6433A9BC3E856642E88008877BA56CBD635B556773E252AD42BC6555C8451A1",
+    "worktreeStatusLineCount": 0,
+    "cargoVersion": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+    "rustcVersion": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "buildCommand": {
+      "executable": "cargo",
+      "toolchain": "+1.95.0",
+      "subcommand": "build",
+      "manifestPath": "apps/game-client/platform-windows/Cargo.toml",
+      "bin": "mir2-platform-windows",
+      "release": true,
+      "locked": true,
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "release",
+      "targetDir": "target-attested-windows-candidate",
+      "extraArgs": []
+    },
+    "pathRemapping": {
+      "enabled": true,
+      "environmentVariable": "RUSTFLAGS",
+      "flags": [
+        {
+          "sourceToken": "<REPO_ROOT>",
+          "destination": "."
+        },
+        {
+          "sourceToken": "<CARGO_HOME>",
+          "destination": "cargo-home"
+        }
+      ]
+    },
+    "buildCompletedUtc": "2026-09-30T03:02:24.2345462+00:00",
+    "publisherAuthenticode": {
+      "required": false,
+      "status": "internal-candidate-only",
+      "thumbprint": null,
+      "timestampRequired": false
+    }
+  },
+  "nativeGameRunning": false
+}

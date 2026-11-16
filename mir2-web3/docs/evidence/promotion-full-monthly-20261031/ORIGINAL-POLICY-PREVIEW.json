@@ -1,0 +1,39 @@
+{
+  "status": "previewed",
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "campaignId": "numeron-windows-playtest-20261030",
+  "previewCanonicalSha256": "0ecd82bdf4c657f5eb844b1a3a58313e437a5f01bfb1d48b43c2df4b01b6bd0f",
+  "previewFileSha256": "ebc55d93bc3c31048e9298a75cc1c59012756650df6176725913ded086046495",
+  "rulesSha256": "f14689c96d15bfd3046d1cfa1c5e20b253783691aac10d4a0b705012d4ccb1d2",
+  "commissionBeforeMicroUsd": "164839",
+  "commissionAfterMicroUsd": "1000000",
+  "readOnly": true,
+  "clockProofs": {
+    "shared_conquests": {
+      "table": "shared_conquests",
+      "count": 1,
+      "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+      "metadataOnly": true
+    },
+    "shared_guild_clock": {
+      "table": "shared_guild_clock",
+      "count": 1,
+      "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+      "metadataOnly": true
+    }
+  },
+  "sourceHoldMetadataProof": {
+    "schema": "mir2.full-monthly.source-hold-observation-metadata.v1",
+    "table": "promotion_revenue_source_holds",
+    "metadataOnly": true,
+    "rowCount": 1,
+    "changedObservationTimestamps": 0,
+    "primaryKeysSha256": "704e1e252ef165f71c6a68e14672ff0e2eb307829667e0704fad60b6850dce42",
+    "allBusinessAndUnknownFieldsSha256": "6f4d830cae4f97758b4ed738e0ed8dbe8b57c70a0caff36460fe348aa5891af2",
+    "beforeFullRowHashesSha256": "4ca067db8be241403664e3ec6ca5b4f773c5e17b08fde9c6ef10bef80165d0cf",
+    "afterFullRowHashesSha256": "4ca067db8be241403664e3ec6ca5b4f773c5e17b08fde9c6ef10bef80165d0cf",
+    "permittedField": "updated_at_ms",
+    "monotonicNondecreasing": true,
+    "changedRowScope": "test/current_campaign/inactive/payment_source_verified/zero_target_reversal"
+  }
+}

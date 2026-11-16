@@ -4,21 +4,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
+import { verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
 const manifestPath = path.join(webRoot, "lib", "generated", "bevy_runtime_version.json");
-const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+const manifest = verifyBevyRuntimeVersion(JSON.parse(fs.readFileSync(manifestPath, "utf8")), manifestPath);
 const filesByPath = new Map(manifest.files.map((entry) => [entry.path, entry]));
 
 const MAX_WASM_BYTES = 31 * 1024 * 1024;
 const MAX_GZIP_BYTES = 7 * 1024 * 1024;
 const MAX_WRAPPER_BYTES = 200 * 1024;
 
-const packages = [
-  { backend: "webgpu", directory: "pkg-webgpu" },
-  { backend: "webgl2", directory: "pkg-webgl2" },
-];
+const packages = manifest.packages.map((entry) => ({ backend: entry.id, directory: entry.packageDir }));
 
 for (const runtimePackage of packages) {
   const relativeWasmPath = `public/bevy-runtime/${runtimePackage.directory}/mir2_bevy_runtime_bg.wasm`;

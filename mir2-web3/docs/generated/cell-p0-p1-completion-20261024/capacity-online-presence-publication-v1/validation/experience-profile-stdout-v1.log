@@ -1,0 +1,26 @@
+
+running 21 tests
+test runtime::shared_experience_profile::tests::authority_parse_cache_bounds_identity_count_and_retained_json_bytes ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_contention_and_cache_poison_bypass_only_the_cache ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_exact_bytes_reuse_and_full_decode_errors ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_oversized_json_is_parsed_without_retention ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_rechecks_checkpoint_option_identity_and_other_store ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_warm_hit_does_not_bypass_frozen_file_authority ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_warm_hit_does_not_bypass_store_poison ... ok
+test runtime::shared_experience_profile::tests::authority_parse_cache_warm_reads_still_refresh_partners_epochs_and_guilds ... ok
+test runtime::shared_experience_profile::tests::locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity ... ok
+test runtime::shared_experience_profile::tests::normal_quest_world_rate_precedes_current_gain_exp_and_obeys_map_gate ... ok
+test runtime::shared_experience_profile::tests::source_drop_template_branch_maps_rate_stacks_duration_and_expires_without_changing_exp ... ok
+test runtime::shared_experience_profile::tests::source_idle_tick_buff_projection_does_not_extend_expiry_and_renewal_gets_new_anchor ... ok
+test runtime::shared_experience_profile::tests::source_issued_native_selection_survives_later_npc_can_gain_exp_false ... ok
+test runtime::shared_experience_profile::tests::source_no_guild_selection_still_validates_the_actual_gain_amount ... ok
+test runtime::shared_experience_profile::tests::source_normal_exp_potion_maps_item_luck_to_exp_rate_and_stacks_real_remaining_time ... ok
+test runtime::shared_experience_profile::tests::source_npc_can_gain_exp_action_controls_personal_and_captured_recipient_only ... ok
+test runtime::shared_experience_profile::tests::source_personal_gain_context_requires_current_epoch_map_and_actual_buff ... ok
+test runtime::shared_experience_profile::tests::source_personal_gain_rechecks_expired_actual_buffs_but_keeps_equipment_rates ... ok
+test runtime::shared_experience_profile::tests::source_real_exp_potion_safe_use_accepted_walk_resume_and_native_death ... ok
+test runtime::shared_experience_profile::tests::source_safe_clock_sync_freezes_actual_exp_and_rejects_old_stacked_instances ... ok
+test runtime::shared_experience_profile::tests::source_safe_clock_upgrades_only_actual_finite_legacy_exp_drop_durations ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 2930 filtered out; finished in 4.75s
+

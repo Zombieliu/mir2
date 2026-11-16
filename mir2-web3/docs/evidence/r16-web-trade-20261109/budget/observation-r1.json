@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "audit": "r16-cross-social-budget",
+  "status": "open",
+  "parityPassed": false,
+  "evidenceKind": "actual-typescript-module-memory-reproduction",
+  "nativeContract": {
+    "file": "apps/game-client/client-bevy/src/social.rs",
+    "maxPending": 8,
+    "variants": [
+      "GroupSwitch",
+      "GroupAdd",
+      "GroupRemove",
+      "GroupInviteAccept",
+      "GuildInfo",
+      "GuildRosterRead",
+      "GuildMember",
+      "GuildRankRename",
+      "GuildRankPermission",
+      "GuildNotice",
+      "GuildInviteAccept",
+      "GuildStorageGold",
+      "GuildStorageItem",
+      "TradeRequest",
+      "TradeReply",
+      "TradeGold",
+      "TradeDeposit",
+      "TradeRetrieve",
+      "TradeConfirm",
+      "TradeCancel"
+    ],
+    "rustExecuted": false,
+    "comparison": "source constant and existing mixed-operation regression"
+  },
+  "fixture": {
+    "syntheticOnly": true,
+    "samePhysicalOwner": true,
+    "groupNames": "Absent0..Absent7",
+    "groupEmpty": true,
+    "guildOwnRankIndex": 0,
+    "guildTargetRankIndex": 2,
+    "guildPermission": "CanStoreItem",
+    "enabled": true,
+    "clock": 1000
+  },
+  "observed": {
+    "groupEntered": 8,
+    "sameQueueNinthRejected": true,
+    "ninthGuildPermissionEntered": true,
+    "combinedUnresolved": 9,
+    "noAcknowledgementsSupplied": true
+  },
+  "expectedNativeAdmission": {
+    "afterEightPending": false
+  },
+  "limits": {
+    "pageHostExecuted": false,
+    "socketSendEntered": false,
+    "rustExecuted": false,
+    "productFilesWritten": 0,
+    "servicesStarted": 0,
+    "networkConnections": 0,
+    "runtimeFinallyNote": "Page permission finally clears its UI/throttle row; this does not acknowledge a server operation."
+  },
+  "sourcePins": {
+    "apps/game-client/client-bevy/src/social.rs": "17dd0a98c36f2cae7a1c6a8ee5d81cc3470adb6530e287820b247764cfc7cf2b",
+    "apps/web/lib/group-operations.ts": "08fce78a67fef84c380bb4084aa052bfb86f7e9957f2104fbe1b9440ecc2c8ea",
+    "apps/web/lib/guild-rank-operations.ts": "172ba45b0f074657cb6f416d0a6337fe38baf2e7b93f87d902bf849edec304ee",
+    "apps/web/lib/social-parity-actions.ts": "5acb357f9df207a9ad5ddf852799ab2f6f8e7aa7eff18d8bb733db00959c016d"
+  }
+}

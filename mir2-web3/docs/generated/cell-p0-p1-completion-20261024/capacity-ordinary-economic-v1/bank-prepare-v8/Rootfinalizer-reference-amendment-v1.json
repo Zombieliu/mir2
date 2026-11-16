@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "Root-finalizer-reference-amendment",
+  "scope": "Append-only external metadata. Existing W8 preparation/derivation preserve the v8 pin as the draft available at their authoring time; neither file is rewritten.",
+  "originalReferences": {
+    "preparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\preparation-v1.json",
+      "bytes": 6752,
+      "sha256": "a672a96b70e90cbf5bf0f2d340a1777c3fa55abff2107db1d97d19c5c3eccf1f"
+    },
+    "derivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\derivation-v1.json",
+      "bytes": 39624,
+      "sha256": "b09356dc4a574633801054a76c35ffed730bffbc2b8170846ef85fc0a03e7db2"
+    },
+    "draftFinalizer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v8.mjs",
+      "bytes": 3829,
+      "sha256": "bee09e88ced4b55b6ee201f7166fb88aad9b1e543551f804ee2c6c49c88c6d26"
+    }
+  },
+  "draftV8": {
+    "status": "DRAFT_ONLY_NOT_EXECUTED",
+    "executionStateBasis": "Root preexecute review reports v8 was never executed; no actual execution receipt is claimed.",
+    "defect": "v8 calls backendBinding while the on-disk binding remains PENDING, but the immutable reader requires finalized metadata before that call."
+  },
+  "selectedV9": {
+    "finalizer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+      "bytes": 4541,
+      "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+    },
+    "status": "SELECTED_FOR_ROOT_ACTUAL_USE",
+    "syntaxCheckReportedByRoot": {
+      "exitCode": 0,
+      "independentlyReexecutedHere": false
+    },
+    "ordering": "Root reports the previously validated order: final metadata becomes available before backendBinding validation. On validation failure, original pending binding/config raw bytes are restored and an error receipt is retained.",
+    "actualExecutionReceipt": null,
+    "executionPerformedByThisAmendment": false
+  },
+  "laterW8PublicArchive": {
+    "requiredFinalizers": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+        "bytes": 4541,
+        "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v8.mjs",
+        "bytes": 3829,
+        "sha256": "bee09e88ced4b55b6ee201f7166fb88aad9b1e543551f804ee2c6c49c88c6d26"
+      }
+    ],
+    "requiredAmendment": "Rootfinalizer-reference-amendment-v1.json",
+    "interpretation": "Archive v9 as the selected actual tool with its eventual true execution receipt; retain v8 as an unexecuted draft and this concise reference correction. Never claim v8 passed an execution."
+  },
+  "oldPreparationAndDerivationUnchanged": true,
+  "sourceChanged": false,
+  "gitInvoked": false,
+  "freezeExecuted": false,
+  "loadStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

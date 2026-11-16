@@ -1,0 +1,126 @@
+{
+  "fixtureOnly": true,
+  "origin": "http://127.0.0.1:7368",
+  "results": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "en",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "pt-BR",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "ru",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "hi",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "id",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "vi",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "th",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    },
+    {
+      "locale": "ar",
+      "passed": true,
+      "requests": [
+        {
+          "path": "/api/promotions/bootstrap",
+          "method": "GET",
+          "season": "numeron-windows-playtest-20261030"
+        }
+      ],
+      "sockets": 0
+    }
+  ]
+}

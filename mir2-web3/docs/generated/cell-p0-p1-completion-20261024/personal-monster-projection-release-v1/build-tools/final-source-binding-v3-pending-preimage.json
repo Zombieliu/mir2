@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FINAL_COMMITTED_BACKEND_SOURCE",
+  "sourceCommit": null,
+  "sourcePins": null,
+  "rootFunctionalValidation": null,
+  "reason": "Preparation only. Root must provide a new clean committed40hex HEAD, exactly five final raw source pins and the strict actual functional-validation receipt pin. Capture, build and Release capture must reject this state. No current source, final HEAD or test outcome is fabricated."
+}

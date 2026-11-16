@@ -1,0 +1,256 @@
+{
+  "schema": "mir2.full-monthly.public-website-verification.v1",
+  "observedAtUtc": "2026-10-30T22:16:12.079Z",
+  "sourceSha": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "deploymentId": "dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+  "records": [
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/version",
+      "status": 200,
+      "characters": 55,
+      "sha256": "4b91130a230454b11a31b31c45b78e3cfad07da6dc0371de81b31974cc7c55e7",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2-web3-web.vercel.app",
+      "path": "/version",
+      "status": 200,
+      "characters": 55,
+      "sha256": "4b91130a230454b11a31b31c45b78e3cfad07da6dc0371de81b31974cc7c55e7",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/zh-CN",
+      "status": 200,
+      "characters": 61328,
+      "sha256": "9f2763ba5c84de44db7a3ffb49fc73a1d262693eab38d8385cf4d5631882d641",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/game",
+      "status": 200,
+      "characters": 9989,
+      "sha256": "62acbbe85b67deecd80d664553b7f854fc6a663cfb1f06fcebd7fa24efe24b86",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/api/promotions/bootstrap",
+      "status": 200,
+      "characters": 1839,
+      "sha256": "f1b12f5777dfc6f8977454419a0a8bece1559a6725b4022f29d66c06e4aa8118",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/promotions?lang=zh-CN",
+      "status": 200,
+      "characters": 15988,
+      "sha256": "fb1039cc7bfe1d57d6feea4af60a3955977e7441ea70f9525c99dee7d4d92539",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/css/4e52633b59eebed2.css?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 17218,
+      "sha256": "176f11515f02661958fb58306db39a072593a6d0d08513cb3a992a44e66294ba",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/css/908fe4432bbaaff2.css?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 2690,
+      "sha256": "41011e552d66cbbb32b8b4c339cbfd7e92639181cffd9c5d6b4b05f980249b7d",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/css/01185ea816269f32.css?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 96547,
+      "sha256": "947a51f7b11e09eca95b71a751b73baee6b2c540833ca5041dfda85affee9cd2",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/webpack-36cb6c1fc4869431.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 4132,
+      "sha256": "a0ee0df109446715af36eb345762868a0d7bb24f5b9f01ff13d0629f2c205735",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/9028-7172eda64ce94c2f.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 18111,
+      "sha256": "6fc87918b974773d0d3d42807f69fb0d741af31edd8df05befd7082c635c9e8c",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/main-app-328ef8029036f00a.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 516,
+      "sha256": "7435151efd0fa890ffdf4ad89bbf6f52a5ee68cb8c2f1757d5222fabe0f1429e",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/3794-edda17d25691182f.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 222395,
+      "sha256": "4e5a953423cecbd6f13d69a079a6fe6b4195e445fb268d0320247a1c39428b5c",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/4bd1b696-c2f6e0877b6c10aa.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 199865,
+      "sha256": "c44812d818aed0a5034941164dcad78b5bb7d8a00daed7a33efe3ebc6ccfb492",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/app/layout-6701f0e96e6e8c58.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 44847,
+      "sha256": "e31802cdf5011efdb7a80a9008d1ddeff948f2c4e6f64a054e7929fd06814763",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/app/promotions/page-6af261f696798363.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 139,
+      "sha256": "55e5a5a23791dfe2ae9026dd6e51208decec036e029e56d40806ed9a9f022eb1",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/5024-e37421197ab33604.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 96585,
+      "sha256": "e646628bf1dfdba4177c3e3d9fa6cfdf86426c8313a2bc48e19d09b70c498280",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/7325-b5ea88a4aa2d2d58.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 127791,
+      "sha256": "5d0e67da89fb347751665385defb197f923c3a6ad98ff391d59750757ddba2f7",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+      "status": 200,
+      "characters": 112541,
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/api/promotions/bootstrap?campaignId=numeron-20261101-testnet",
+      "status": 200,
+      "characters": 1358,
+      "sha256": "4e660641b410f555bb28f7a16eee51c7cb307cf00ce5bd323ac8ed24c6857d5d",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/api/promotions/bootstrap?campaignId=numeron-chain-acceptance-20261029-fullchain",
+      "status": 200,
+      "characters": 2135,
+      "sha256": "2e03df7d9db834d6b6a0366eb9060101bd6f560b7bec992bd2a84bf592ab6272",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    },
+    {
+      "origin": "https://mir2.obelisk.build",
+      "path": "/api/promotions/bootstrap?campaignId=numeron-playtest-20261029",
+      "status": 200,
+      "characters": 1757,
+      "sha256": "d1fbdbc43f24833e601fc84d81cadb1dd690d077ba609e85b1348bf0c6cc7872",
+      "reader": "curl.exe, unauthenticated GET, existing network proxy respected"
+    }
+  ],
+  "assetsVerified": 13,
+  "markers": [
+    {
+      "marker": "monthly_purchase_full",
+      "present": true
+    },
+    {
+      "marker": "data-promotion-revenue-basis",
+      "present": true
+    },
+    {
+      "marker": "不按赛季剩余时长折算",
+      "present": true
+    },
+    {
+      "marker": "充值点券本身不计佣",
+      "present": true
+    },
+    {
+      "marker": "退款会扣回对应佣金",
+      "present": true
+    },
+    {
+      "marker": "promotion-migration-confirm",
+      "present": true
+    },
+    {
+      "marker": "data-promotion-live-updates",
+      "present": true
+    }
+  ],
+  "profile": {
+    "authenticated": false,
+    "gameClient": "windows",
+    "campaignId": "numeron-windows-playtest-20261030",
+    "environment": "test",
+    "commissionEnabled": true,
+    "payoutEnabled": false,
+    "revenueRecognition": null
+  },
+  "legacy": [
+    {
+      "campaignId": "numeron-20261101-testnet",
+      "gameClient": "web",
+      "payoutEnabled": false,
+      "startsAtMs": 1793462400000,
+      "endsAtMs": 1801411200000,
+      "revenueRecognition": null
+    },
+    {
+      "campaignId": "numeron-chain-acceptance-20261029-fullchain",
+      "gameClient": "web",
+      "payoutEnabled": true,
+      "startsAtMs": 1793258649320,
+      "endsAtMs": 1793259549320,
+      "revenueRecognition": null
+    },
+    {
+      "campaignId": "numeron-playtest-20261029",
+      "gameClient": "web",
+      "payoutEnabled": false,
+      "startsAtMs": 1793219738449,
+      "endsAtMs": 1793824538449,
+      "revenueRecognition": null
+    }
+  ],
+  "limits": {
+    "readOnly": true,
+    "walletOrUserLoginAccessed": false,
+    "authenticatedEarningsVerified": false,
+    "backendPolicyChangePerformed": false
+  }
+}

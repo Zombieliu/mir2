@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "scope": "fresh ordinary two-client full16 functional verification; separate from capacity, P0 and frontend acceptance",
+  "realmStamp": "1793057632464-9c427e44",
+  "runId": "1793057646570-c2fb7dc7",
+  "profile": "full-lifecycle",
+  "profileBudgetSeconds": 900,
+  "actualRequiredChecks": 16,
+  "fullLifecyclePassed": true,
+  "all16Passed": true,
+  "ordinarySentCommands": 351,
+  "registrationMode": "two-fresh-ordinary-registrations",
+  "firstNoLootAttemptPreserved": true,
+  "firstDropAttempts": [
+    {
+      "attempt": 1,
+      "sharedKill": "passed",
+      "sharedDrop": "failed"
+    },
+    {
+      "attempt": 2,
+      "sharedKill": "passed",
+      "sharedDrop": "passed"
+    }
+  ],
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": "d9ec9d2094ee058bfa909b05bbcf45dcf4a28b39",
+  "backendInputCount": 55,
+  "localRuntimeModules": 14,
+  "originalEntryRoots": 6,
+  "binarySha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6",
+  "originalRustTestsStrictlyReused": 32,
+  "newBuildPerformed": false,
+  "newRustTestsPerformed": false,
+  "currentNodeQualification": {
+    "total": 647,
+    "suites": [
+      264,
+      328,
+      55
+    ],
+    "namedSourceInputs": 42,
+    "sourceUnchanged": true,
+    "logsCopiedHere": false
+  },
+  "cleanup": {
+    "gatewayPid": 56936,
+    "normalExitCode": 0,
+    "sixCountersZeroBeforeAfter": true,
+    "pidAbsent": true,
+    "portsFree": true,
+    "independentRootCheckedAt": "2026-10-26T23:36:06.8928018Z"
+  },
+  "rootPrivateValueAuditPassed": true,
+  "offlinePublicTraceFieldAnd16ReceiptValidationPassed": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalCapacityAcceptance": false,
+  "humanFrontendAccepted": false,
+  "twoComputerAccepted": false,
+  "p2Started": false
+}

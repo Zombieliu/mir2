@@ -1,0 +1,22 @@
+{
+  "parent": "71a7bf898d1855c4c4a45bbb0a80b51e2a8f2065",
+  "candidate": "r16-selection-aef8e659",
+  "builtId": "ZMCK5Xwe_LW1wLAwN66iZ",
+  "dist": ".next-runtime-selection-r1",
+  "durationMs": 44251,
+  "version": "20261108-r16-08ec86d5105c",
+  "runtime": "bevy-0c553a754308e5b8",
+  "status": {
+    "code": 0,
+    "signal": null
+  },
+  "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+  "buildConfigSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+  "priorRuntimeQualifiedUnmodified": true,
+  "checkedExistingAppLibFiles": 2179,
+  "newAppLibFiles": 1,
+  "generatedOverride": 1,
+  "allPinnedInputs": 32,
+  "sourceReceiptSha256": "609efb6cfdb09e01508beed346333ea6aecf93d54c572d11628e7ff4e653dcbb",
+  "privateOverlaysRestored": true
+}

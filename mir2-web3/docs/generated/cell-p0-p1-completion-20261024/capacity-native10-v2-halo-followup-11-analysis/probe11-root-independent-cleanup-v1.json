@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T04:52:12.2609157+00:00",
+  "runId": "1792902924884-3b7017e1",
+  "liveOwnedProcesses": [],
+  "portListeners": [],
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorExit": {
+    "code": 0,
+    "signal": null
+  },
+  "checks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "capacityAccepted": false
+}

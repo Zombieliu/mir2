@@ -1,0 +1,27 @@
+
+running 22 tests
+test native_wallet_visual_tests::native_wallet_login_offscreen_fixture ... ignored, explicit bounded offscreen GPU fixture; run alone with --test-threads=1; no window or connection
+test wallet_login::tests::native_wallet_login_ecs_cancel_discards_approval_and_removes_owned_qr ... ok
+test wallet_login::tests::native_wallet_login_ecs_countdown_expires_using_monotonic_lifetime ... ok
+test wallet_login::tests::native_wallet_login_ecs_exact_connection_stamp_change_retires_challenge ... ok
+test wallet_login::tests::native_wallet_login_ecs_failed_auth_admission_clears_view_without_password_fallback ... ok
+test wallet_login::tests::native_wallet_login_ecs_refresh_discards_old_results_and_submits_new_proof_once ... ok
+test wallet_login::tests::native_wallet_login_ecs_screen_change_retires_challenge_before_approval ... ok
+test wallet_login::tests::native_wallet_login_qa_auto_begin_requires_both_explicit_gates ... ok
+test wallet_login::tests::native_wallet_login_qr_has_exact_matrix_quiet_zone_and_nearest_sampling ... ok
+test wallet_login::tests::native_wallet_login_worker_wait_stops_immediately_when_cancelled ... ok
+test wallet_login_http::tests::approved_wallet_proof_is_exchanged_for_canonical_player_before_login ... ok
+test wallet_login_http::tests::cancellation_before_create_or_after_status_prevents_exchange ... ok
+test wallet_login_http::tests::cancellation_during_exchange_discards_the_returned_session ... ok
+test wallet_login_http::tests::creation_and_pending_poll_keep_private_intent_out_of_the_qr_and_debug ... ok
+test wallet_login_http::tests::exchange_must_return_matching_canonical_identity_and_live_session ... ok
+test wallet_login_http::tests::invalid_proof_never_reaches_the_single_use_exchange ... ok
+test wallet_login_http::tests::local_expiry_skips_polling_entirely ... ok
+test wallet_login_http::tests::malformed_creation_and_untrusted_approval_urls_fail_closed ... ok
+test wallet_login_http::tests::origins_are_explicit_normalized_and_secure ... ok
+test wallet_login_http::tests::private_intents_cannot_be_polled_through_a_changed_origin ... ok
+test wallet_login_http::tests::redirects_and_oversized_json_are_rejected_without_response_details ... ok
+test wallet_login_http::tests::rejected_and_expired_statuses_do_not_exchange ... ok
+
+test result: ok. 21 passed; 0 failed; 1 ignored; 0 measured; 1163 filtered out; finished in 0.04s
+

@@ -1,0 +1,8 @@
+C:\Users\Administrator\.codex\worktrees\crowded-combat-control\mir2-player-journey\mir2-web3\apps\game-client\platform-
+windows\scripts\test-candidate-map-scope.ps1 : The term 'Get-FileHash' is not recognized as the name of a cmdlet, funct
+ion, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path 
+is correct and try again.
+    + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [test-candidate-map-scope.ps1], CommandNotFoundExc 
+   eption
+    + FullyQualifiedErrorId : CommandNotFoundException,test-candidate-map-scope.ps1
+ 

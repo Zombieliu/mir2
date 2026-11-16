@@ -1,0 +1,66 @@
+{
+  "schema": "mir2.five-class-d917-native-checks.v1",
+  "createdUtc": "2026-10-11T23:02:31.208787+00:00",
+  "run": "d917-native-full04",
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-platform-windows",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--manifest-path",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml",
+    "--",
+    "--test-threads=1"
+  ],
+  "exitCode": 0,
+  "groups": [
+    {
+      "passed": 987,
+      "failed": 0,
+      "ignored": 7
+    }
+  ],
+  "distinctPassingNames": 987,
+  "typedCombinationTests": [
+    "entity_presentation::tests::native_double_slash_movement_gate_follows_both_typed_source_phases",
+    "entity_presentation::tests::native_double_slash_movement_gate_keeps_struck_and_chained_source_fifo_finite",
+    "input::tests::native_back_step_held_escape_preserves_jump_until_all_eight_source_frames_finish",
+    "input::tests::native_back_step_queued_after_struck_blocks_held_escape_and_early_local_camera",
+    "input::tests::native_double_slash_held_escape_waits_for_both_source_phases_without_hit_cooldown_lock"
+  ],
+  "sourceSnapshotSha256": "9e0c38be07378bd8c6766fd106f8963625d938250c6932c4d8242a81e7c7d042",
+  "sourceDrift": [],
+  "reviewSha256": "9c228c66f29b8a7c182df2415fa9a4adc292171143cb8878fda977cd3856b440",
+  "cargoLogSha256": "13a9d3a568f339beba520078e4ae129d2b93c3613a24ccfb75f5fd029aec4ea4",
+  "realNativeReleaseBuilt": false,
+  "published": false,
+  "humanAccepted": false,
+  "originalFormattingFailureRetained": true,
+  "originalFull01FailureRetained": {
+    "report": "d917-native-red01.json",
+    "sha256": "446fcf42cc92dd6fd286a3bcafaf87f38deda045c57664e6a45ef263d8adb56a",
+    "archive": "d917-native-red-original-evidence01.zip",
+    "archiveSha256": "c65909e49773e6eca3b80daf8616f141f82f25505102995f98442d74564d96ed"
+  },
+  "originalFull02FailureRetained": {
+    "report": "d917-native-red02.json",
+    "sha256": "4460691df3f44ad1405bf198d90ee00d36ff0299fe73ed9381f65d73c9cc0d86",
+    "archive": "d917-native-red-original-evidence02.zip",
+    "archiveSha256": "07fbb2b5febd24ab5a7ae360efa9d314853c48c91783480d149819817543db0f"
+  },
+  "originalFull03FailureRetained": {
+    "report": "d917-native-red03.json",
+    "sha256": "d894532a2398dd6b62c2d57e6a658bd5e94758c8acaa485cda342c9e1aade5d7",
+    "archive": "d917-native-red-original-evidence03.zip",
+    "archiveSha256": "10e8bd282573746303e6be66e3ae888bbdac1800439efcec08bf900950d4b58a"
+  },
+  "archive": {
+    "path": "d917-native-original-evidence01.zip",
+    "sha256": "f1b16e690fcb95196f94740dc39cc7f4bec5e7b03063241fef9c900b0ea5a42a",
+    "bytes": 213455
+  }
+}

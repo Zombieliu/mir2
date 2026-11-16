@@ -1,0 +1,1084 @@
+{
+  "kind": "real-chrome-static-header-admission",
+  "expected": "overloaded",
+  "passed": false,
+  "expectedOutcomeObserved": true,
+  "scope": "Local HTTP/1.1, 72 simultaneous image consumers plus one duplicate and two complete original fonts. Each fixture image deliberately uses the same pinned PNG; this verifies scheduling/body/cache behavior, not game pixel parity or public speed.",
+  "publicNetworkUsed": false,
+  "gameAccountUsed": false,
+  "workerSha256": "5b45ec68a5efd1b2fe96aa78efcb917fbaa40e8a47a02ee3279a468e141fbbb3",
+  "imageSha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+  "headerDelayMs": 1100,
+  "headerBudgetMs": 7000,
+  "requests": [
+    {
+      "path": "/favicon.ico",
+      "requestAt": 1794697397750
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAt": 1794697397789,
+      "activeFonts": 1,
+      "closedAt": 1794697401294
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "requestAt": 1794697397790,
+      "activeFonts": 2,
+      "closedAt": 1794697401295
+    },
+    {
+      "path": "/original-ui/Prguse/5000.png",
+      "requestAt": 1794697397790,
+      "activeImages": 1,
+      "activeFonts": 2,
+      "headersAt": 1794697398901,
+      "closedAt": 1794697398902
+    },
+    {
+      "path": "/original-ui/Prguse/5001.png",
+      "requestAt": 1794697397792,
+      "activeImages": 2,
+      "activeFonts": 2,
+      "headersAt": 1794697398902,
+      "closedAt": 1794697398902
+    },
+    {
+      "path": "/original-ui/Prguse/5002.png",
+      "requestAt": 1794697397792,
+      "activeImages": 3,
+      "activeFonts": 2,
+      "headersAt": 1794697398902,
+      "closedAt": 1794697398902
+    },
+    {
+      "path": "/original-ui/Prguse/5003.png",
+      "requestAt": 1794697397793,
+      "activeImages": 4,
+      "activeFonts": 2,
+      "headersAt": 1794697398902,
+      "closedAt": 1794697398902
+    },
+    {
+      "path": "/original-ui/Prguse/5004.png",
+      "requestAt": 1794697398904,
+      "activeImages": 1,
+      "activeFonts": 2,
+      "headersAt": 1794697400005,
+      "closedAt": 1794697400005
+    },
+    {
+      "path": "/original-ui/Prguse/5005.png",
+      "requestAt": 1794697398904,
+      "activeImages": 2,
+      "activeFonts": 2,
+      "headersAt": 1794697400005,
+      "closedAt": 1794697400005
+    },
+    {
+      "path": "/original-ui/Prguse/5006.png",
+      "requestAt": 1794697398904,
+      "activeImages": 3,
+      "activeFonts": 2,
+      "headersAt": 1794697400005,
+      "closedAt": 1794697400005
+    },
+    {
+      "path": "/original-ui/Prguse/5007.png",
+      "requestAt": 1794697398904,
+      "activeImages": 4,
+      "activeFonts": 2,
+      "headersAt": 1794697400005,
+      "closedAt": 1794697400005
+    },
+    {
+      "path": "/original-ui/Prguse/5008.png",
+      "requestAt": 1794697400006,
+      "activeImages": 1,
+      "activeFonts": 2,
+      "headersAt": 1794697401117,
+      "closedAt": 1794697401117
+    },
+    {
+      "path": "/original-ui/Prguse/5009.png",
+      "requestAt": 1794697400006,
+      "activeImages": 2,
+      "activeFonts": 2,
+      "headersAt": 1794697401117,
+      "closedAt": 1794697401117
+    },
+    {
+      "path": "/original-ui/Prguse/5010.png",
+      "requestAt": 1794697400006,
+      "activeImages": 3,
+      "activeFonts": 2,
+      "headersAt": 1794697401117,
+      "closedAt": 1794697401117
+    },
+    {
+      "path": "/original-ui/Prguse/5011.png",
+      "requestAt": 1794697400006,
+      "activeImages": 4,
+      "activeFonts": 2,
+      "headersAt": 1794697401117,
+      "closedAt": 1794697401117
+    },
+    {
+      "path": "/original-ui/Prguse/5012.png",
+      "requestAt": 1794697401118,
+      "activeImages": 1,
+      "activeFonts": 2,
+      "headersAt": 1794697402224,
+      "closedAt": 1794697402224
+    },
+    {
+      "path": "/original-ui/Prguse/5013.png",
+      "requestAt": 1794697401118,
+      "activeImages": 2,
+      "activeFonts": 2,
+      "headersAt": 1794697402224,
+      "closedAt": 1794697402224
+    },
+    {
+      "path": "/original-ui/Prguse/5014.png",
+      "requestAt": 1794697401118,
+      "activeImages": 3,
+      "activeFonts": 2,
+      "headersAt": 1794697402225,
+      "closedAt": 1794697402225
+    },
+    {
+      "path": "/original-ui/Prguse/5015.png",
+      "requestAt": 1794697401118,
+      "activeImages": 4,
+      "activeFonts": 2,
+      "headersAt": 1794697402225,
+      "closedAt": 1794697402225
+    },
+    {
+      "path": "/original-ui/Prguse/5016.png",
+      "requestAt": 1794697401305,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "headersAt": 1794697402414,
+      "closedAt": 1794697402414
+    },
+    {
+      "path": "/original-ui/Prguse/5017.png",
+      "requestAt": 1794697401307,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "headersAt": 1794697402414,
+      "closedAt": 1794697402414
+    },
+    {
+      "path": "/original-ui/Prguse/5018.png",
+      "requestAt": 1794697402225,
+      "activeImages": 3,
+      "activeFonts": 0,
+      "headersAt": 1794697403327,
+      "closedAt": 1794697403327
+    },
+    {
+      "path": "/original-ui/Prguse/5019.png",
+      "requestAt": 1794697402225,
+      "activeImages": 4,
+      "activeFonts": 0,
+      "headersAt": 1794697403327,
+      "closedAt": 1794697403327
+    },
+    {
+      "path": "/original-ui/Prguse/5020.png",
+      "requestAt": 1794697402225,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "headersAt": 1794697403327,
+      "closedAt": 1794697403327
+    },
+    {
+      "path": "/original-ui/Prguse/5021.png",
+      "requestAt": 1794697402225,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "headersAt": 1794697403327,
+      "closedAt": 1794697403327
+    },
+    {
+      "path": "/original-ui/Prguse/5022.png",
+      "requestAt": 1794697402415,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "headersAt": 1794697403515,
+      "closedAt": 1794697403515
+    },
+    {
+      "path": "/original-ui/Prguse/5023.png",
+      "requestAt": 1794697402415,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "headersAt": 1794697403515,
+      "closedAt": 1794697403516
+    },
+    {
+      "path": "/original-ui/Prguse/5024.png",
+      "requestAt": 1794697403327,
+      "activeImages": 3,
+      "activeFonts": 0,
+      "headersAt": 1794697404435,
+      "closedAt": 1794697404435
+    },
+    {
+      "path": "/original-ui/Prguse/5025.png",
+      "requestAt": 1794697403327,
+      "activeImages": 4,
+      "activeFonts": 0,
+      "headersAt": 1794697404435,
+      "closedAt": 1794697404435
+    },
+    {
+      "path": "/original-ui/Prguse/5026.png",
+      "requestAt": 1794697403328,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "headersAt": 1794697404435,
+      "closedAt": 1794697404435
+    },
+    {
+      "path": "/original-ui/Prguse/5027.png",
+      "requestAt": 1794697403328,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "headersAt": 1794697404435,
+      "closedAt": 1794697404435
+    },
+    {
+      "path": "/original-ui/Prguse/5028.png",
+      "requestAt": 1794697403516,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "headersAt": 1794697404626,
+      "closedAt": 1794697404626
+    },
+    {
+      "path": "/original-ui/Prguse/5029.png",
+      "requestAt": 1794697403516,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "headersAt": 1794697404626,
+      "closedAt": 1794697404626
+    },
+    {
+      "path": "/original-ui/Prguse/5030.png",
+      "requestAt": 1794697404435,
+      "activeImages": 3,
+      "activeFonts": 0,
+      "closedAt": 1794697404801
+    },
+    {
+      "path": "/original-ui/Prguse/5031.png",
+      "requestAt": 1794697404436,
+      "activeImages": 4,
+      "activeFonts": 0,
+      "closedAt": 1794697404802
+    },
+    {
+      "path": "/original-ui/Prguse/5032.png",
+      "requestAt": 1794697404436,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "closedAt": 1794697404805
+    },
+    {
+      "path": "/original-ui/Prguse/5033.png",
+      "requestAt": 1794697404436,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5034.png",
+      "requestAt": 1794697404626,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5035.png",
+      "requestAt": 1794697404626,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5037.png",
+      "requestAt": 1794697404803,
+      "activeImages": 5,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5036.png",
+      "requestAt": 1794697404803,
+      "activeImages": 6,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5038.png",
+      "requestAt": 1794697404803,
+      "activeImages": 7,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5039.png",
+      "requestAt": 1794697404806,
+      "activeImages": 7,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5040.png",
+      "requestAt": 1794697404806,
+      "activeImages": 8,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5041.png",
+      "requestAt": 1794697404806,
+      "activeImages": 9,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5050.png",
+      "requestAt": 1794697404806,
+      "activeImages": 10,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5051.png",
+      "requestAt": 1794697404806,
+      "activeImages": 11,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5052.png",
+      "requestAt": 1794697404806,
+      "activeImages": 12,
+      "activeFonts": 0,
+      "closedAt": 1794697404808
+    },
+    {
+      "path": "/original-ui/Prguse/5053.png",
+      "requestAt": 1794697404806,
+      "activeImages": 13,
+      "activeFonts": 0,
+      "closedAt": 1794697404809
+    },
+    {
+      "path": "/original-ui/Prguse/5054.png",
+      "requestAt": 1794697404808,
+      "activeImages": 2,
+      "activeFonts": 0,
+      "closedAt": 1794697404809
+    },
+    {
+      "path": "/original-ui/Prguse/5055.png",
+      "requestAt": 1794697404808,
+      "activeImages": 3,
+      "activeFonts": 0,
+      "closedAt": 1794697404809
+    }
+  ],
+  "browser": {
+    "images": [
+      {
+        "path": "/original-ui/Prguse/5000.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 1123
+      },
+      {
+        "path": "/original-ui/Prguse/5001.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 1124
+      },
+      {
+        "path": "/original-ui/Prguse/5002.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 1124
+      },
+      {
+        "path": "/original-ui/Prguse/5003.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 1124
+      },
+      {
+        "path": "/original-ui/Prguse/5004.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 2225
+      },
+      {
+        "path": "/original-ui/Prguse/5005.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 2225
+      },
+      {
+        "path": "/original-ui/Prguse/5006.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 2225
+      },
+      {
+        "path": "/original-ui/Prguse/5007.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 2225
+      },
+      {
+        "path": "/original-ui/Prguse/5008.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 3336
+      },
+      {
+        "path": "/original-ui/Prguse/5009.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 3337
+      },
+      {
+        "path": "/original-ui/Prguse/5010.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 3337
+      },
+      {
+        "path": "/original-ui/Prguse/5011.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 3337
+      },
+      {
+        "path": "/original-ui/Prguse/5012.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 4444
+      },
+      {
+        "path": "/original-ui/Prguse/5013.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 4445
+      },
+      {
+        "path": "/original-ui/Prguse/5014.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 4445
+      },
+      {
+        "path": "/original-ui/Prguse/5015.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 4445
+      },
+      {
+        "path": "/original-ui/Prguse/5016.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 4633
+      },
+      {
+        "path": "/original-ui/Prguse/5017.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 4633
+      },
+      {
+        "path": "/original-ui/Prguse/5018.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 5546
+      },
+      {
+        "path": "/original-ui/Prguse/5019.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 5547
+      },
+      {
+        "path": "/original-ui/Prguse/5020.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 5547
+      },
+      {
+        "path": "/original-ui/Prguse/5021.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 5547
+      },
+      {
+        "path": "/original-ui/Prguse/5022.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 5735
+      },
+      {
+        "path": "/original-ui/Prguse/5023.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 5735
+      },
+      {
+        "path": "/original-ui/Prguse/5024.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 6654
+      },
+      {
+        "path": "/original-ui/Prguse/5025.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 6655
+      },
+      {
+        "path": "/original-ui/Prguse/5026.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 6655
+      },
+      {
+        "path": "/original-ui/Prguse/5027.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 6656
+      },
+      {
+        "path": "/original-ui/Prguse/5028.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 6845
+      },
+      {
+        "path": "/original-ui/Prguse/5029.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 6845
+      },
+      {
+        "path": "/original-ui/Prguse/5030.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5031.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5032.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5033.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5034.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5035.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5036.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7019
+      },
+      {
+        "path": "/original-ui/Prguse/5037.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5038.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5039.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5040.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5041.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5042.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5043.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5044.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5045.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5046.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5047.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7020
+      },
+      {
+        "path": "/original-ui/Prguse/5048.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5049.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5050.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5051.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5052.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5053.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5054.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7021
+      },
+      {
+        "path": "/original-ui/Prguse/5055.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5056.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5057.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5058.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5059.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5060.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5061.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5062.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5063.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5064.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5065.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5066.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5067.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5068.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5069.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5070.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5071.png",
+        "status": 504,
+        "complete": false,
+        "atMs": 7022
+      },
+      {
+        "path": "/original-ui/Prguse/5000.png",
+        "status": 200,
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4",
+        "complete": true,
+        "decoded": true,
+        "atMs": 1123
+      }
+    ],
+    "fonts": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "status": 200,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+        "complete": true,
+        "decoded": false,
+        "atMs": 3611
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "status": 200,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "complete": true,
+        "decoded": false,
+        "atMs": 3575
+      }
+    ],
+    "cached": [
+      {
+        "path": "/original-ui/Prguse/5000.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5001.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5002.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5003.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5004.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5005.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5006.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5007.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5008.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5009.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5010.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5011.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5012.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5013.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5014.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5015.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5016.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5017.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5018.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5019.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5020.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5021.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5022.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5023.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5024.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5025.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5026.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5027.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5028.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "/original-ui/Prguse/5029.png",
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      }
+    ],
+    "imageSuccess": 30,
+    "imageFailure": 42,
+    "cacheBodiesCorrect": true,
+    "elapsedMs": 7040
+  },
+  "peakImagesAtServer": 13,
+  "pageErrors": [],
+  "unexpectedOrigins": [],
+  "imagesWhileFontsActive": true,
+  "browserClosed": true,
+  "serverClosed": true
+}

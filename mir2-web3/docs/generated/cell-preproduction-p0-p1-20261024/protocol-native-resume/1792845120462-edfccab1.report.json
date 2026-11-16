@@ -1,0 +1,563 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792845120462-edfccab1",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "sourceRunId": "1792844742353-ccf6fb6e",
+  "actor": 0,
+  "accountId": "ptaf85551a6",
+  "name": "Af85551a6",
+  "characterIndex": 3,
+  "scope": "real-public-nativeResumeV1-protocol-with-unclean-socket-loss",
+  "startedAt": "2026-10-24T12:32:00.462Z",
+  "checks": {
+    "ordinaryLogin": {
+      "status": "passed",
+      "evidence": {
+        "name": "Af85551a6",
+        "characterIndex": 3,
+        "objectId": 1000,
+        "mapFileName": "0",
+        "x": 299,
+        "y": 623,
+        "direction": "Right"
+      }
+    },
+    "stepBeforeDrop": {
+      "status": "passed",
+      "evidence": {
+        "from": {
+          "mapFileName": "0",
+          "x": 299,
+          "y": 623
+        },
+        "to": {
+          "x": 300,
+          "y": 623,
+          "direction": "Right"
+        },
+        "receipt": 631
+      }
+    },
+    "uncleanTransportLoss": {
+      "status": "passed",
+      "evidence": {
+        "logoutSent": false,
+        "closed": true,
+        "priorGeneration": 1,
+        "latestOwnerState": {
+          "name": "Af85551a6",
+          "playerObjectId": 1000,
+          "mapFileName": "0",
+          "x": 300,
+          "y": 623,
+          "direction": "Right",
+          "inventory": {
+            "gold": 26,
+            "inventory": [
+              {
+                "uniqueId": "2",
+                "itemIndex": 0,
+                "name": "(HP)DrugSmall",
+                "count": 1,
+                "slot": "2"
+              }
+            ],
+            "equipment": [
+              {
+                "uniqueId": "0",
+                "itemIndex": 0,
+                "name": "WoodenSword",
+                "count": 1,
+                "slot": "weapon"
+              },
+              {
+                "uniqueId": "1",
+                "itemIndex": 0,
+                "name": "BaseDress(M)",
+                "count": 1,
+                "slot": "armour"
+              },
+              {
+                "uniqueId": "3",
+                "itemIndex": 0,
+                "name": "Candle",
+                "count": 1,
+                "slot": "torch"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "nativeResume": {
+      "status": "passed",
+      "evidence": {
+        "characterIndex": 3,
+        "generation": 2,
+        "receipt": 9
+      }
+    },
+    "sameState": {
+      "status": "passed",
+      "evidence": {
+        "state": {
+          "name": "Af85551a6",
+          "playerObjectId": 1000,
+          "mapFileName": "0",
+          "x": 300,
+          "y": 623,
+          "direction": "Right",
+          "inventory": {
+            "gold": 26,
+            "inventory": [
+              {
+                "uniqueId": "2",
+                "itemIndex": 0,
+                "name": "(HP)DrugSmall",
+                "count": 1,
+                "slot": "2"
+              }
+            ],
+            "equipment": [
+              {
+                "uniqueId": "0",
+                "itemIndex": 0,
+                "name": "WoodenSword",
+                "count": 1,
+                "slot": "weapon"
+              },
+              {
+                "uniqueId": "1",
+                "itemIndex": 0,
+                "name": "BaseDress(M)",
+                "count": 1,
+                "slot": "armour"
+              },
+              {
+                "uniqueId": "3",
+                "itemIndex": 0,
+                "name": "Candle",
+                "count": 1,
+                "slot": "torch"
+              }
+            ]
+          }
+        },
+        "snapshotReceipt": 10,
+        "actorCopies": 1
+      }
+    },
+    "rotatedTicket": {
+      "status": "passed",
+      "evidence": {
+        "fromGeneration": 1,
+        "toGeneration": 2,
+        "changed": true,
+        "receipt": 11
+      }
+    },
+    "replayRejected": {
+      "status": "passed",
+      "evidence": {
+        "code": "unavailable",
+        "receipt": 9
+      }
+    },
+    "resumedOwnerLive": {
+      "status": "passed",
+      "evidence": {
+        "direction": "Up",
+        "receipt": 19,
+        "actorCopies": 1
+      }
+    },
+    "logout": {
+      "status": "passed",
+      "evidence": {
+        "packet": "LogOutSuccess",
+        "receipt": 26
+      }
+    }
+  },
+  "nativeClientUiAccepted": false,
+  "serverRestartResumeTested": false,
+  "resumeReadinessBaseline": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "resumeReadinessSamples": [
+    {
+      "elapsedMs": 3,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 267,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 532,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 797,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 1060,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 1325,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 1590,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 1855,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 2119,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 2382,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 2647,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 2912,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 3176,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 3441,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 3704,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 3969,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 4234,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 4498,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 4762,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "elapsedMs": 5027,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 1,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  ],
+  "resumeReadiness": {
+    "elapsedMs": 5027,
+    "samples": [
+      {
+        "elapsedMs": 3,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 267,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 532,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 797,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 1060,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 1325,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 1590,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 1855,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 2119,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 2382,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 2647,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 2912,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 3176,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 3441,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 3704,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 3969,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 4234,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 4498,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 4762,
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      {
+        "elapsedMs": 5027,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 1,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      }
+    ],
+    "ticketUseCount": 0,
+    "scope": "One retained original owner on an initially empty isolated realm; no resume rejection is retried."
+  },
+  "ok": true,
+  "finishedAt": "2026-10-24T12:32:26.786Z"
+}

@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-11-13T08:36:15.151Z",
+  "alias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "deployments": [
+    {
+      "i": 1,
+      "id": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "state": "READY",
+      "target": "production",
+      "url": "numeron-r16-rgcu2lecc-obelisk-labs.vercel.app",
+      "source": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+    },
+    {
+      "i": 2,
+      "id": "dpl_XPzRmyXdXVbC96weq8xUEeW9KCkF",
+      "state": "READY",
+      "target": "production",
+      "url": "numeron-r16-b816pd1yi-obelisk-labs.vercel.app",
+      "source": "9dc7294c0269eee93086e88ac83d2bc9d93d387e",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+    }
+  ]
+}

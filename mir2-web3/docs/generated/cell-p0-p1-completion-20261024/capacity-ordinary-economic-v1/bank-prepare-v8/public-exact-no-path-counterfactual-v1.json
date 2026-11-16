@@ -1,0 +1,1455 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "836a405414d6d811c2370175a81ed6d50b9ee5cc",
+  "scope": "Bounded anonymous static counterfactual only; not a live capacity/preparation pass",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "staticCounterfactualOnly": true,
+  "sources": {
+    "samples": {
+      "file": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v8/episode/reports/1793056344585-0defddbe.preparation.jsonl",
+      "bytes": 333957,
+      "sha256": "b3e9e5046f909f0c4a116d2058293593441dcc0154e8f35b5aea4e4a0809980b"
+    },
+    "recording": {
+      "file": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v8/episode/recordings/0-498071.jsonl",
+      "bytes": 3173404,
+      "sha256": "ff0be4dfe73925c9a4c5f7e8b4d57d4782730f3237f52306b145dff21cd2b9e4"
+    },
+    "collisionMap": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    }
+  },
+  "start": {
+    "x": 331,
+    "y": 590
+  },
+  "target": {
+    "x": 289,
+    "y": 617
+  },
+  "radius": 8,
+  "safeZones": [
+    {
+      "location": {
+        "x": 267,
+        "y": 256
+      },
+      "size": 10,
+      "start_point": false
+    },
+    {
+      "location": {
+        "x": 288,
+        "y": 616
+      },
+      "size": 10,
+      "start_point": true
+    },
+    {
+      "location": {
+        "x": 304,
+        "y": 256
+      },
+      "size": 10,
+      "start_point": false
+    },
+    {
+      "location": {
+        "x": 328,
+        "y": 264
+      },
+      "size": 10,
+      "start_point": false
+    },
+    {
+      "location": {
+        "x": 331,
+        "y": 330
+      },
+      "size": 10,
+      "start_point": false
+    },
+    {
+      "location": {
+        "x": 650,
+        "y": 629
+      },
+      "size": 10,
+      "start_point": false
+    }
+  ],
+  "sourceManifests": {
+    "canonical": {
+      "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    "web": {
+      "path": "apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    }
+  },
+  "actual": {
+    "explicitForbiddenTotal": 2140,
+    "sharedMemoryPositions": 16,
+    "ownMirrorPositions": 17,
+    "allowedIDs": [
+      206008,
+      206013,
+      206026,
+      206032,
+      206033,
+      206039,
+      206105,
+      206117,
+      206124,
+      206129,
+      206130,
+      206136,
+      206610,
+      206623,
+      206644
+    ],
+    "unknownCoarseMemory": 0,
+    "globalQuarantine": 0,
+    "occupancyTotal": 26,
+    "transferPointTotal": 69
+  },
+  "sharedMemory": [
+    {
+      "objectId": 206644,
+      "name": "scarecrow",
+      "x": 293,
+      "y": 614,
+      "remainingMs": 4712,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206610,
+      "name": "scarecrow",
+      "x": 300,
+      "y": 597,
+      "remainingMs": 2581,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206013,
+      "name": "rakingcat",
+      "x": 301,
+      "y": 596,
+      "remainingMs": 2549,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206026,
+      "name": "rakingcat",
+      "x": 320,
+      "y": 589,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206117,
+      "name": "hookingcat",
+      "x": 321,
+      "y": 588,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206623,
+      "name": "scarecrow",
+      "x": 321,
+      "y": 631,
+      "remainingMs": 8488,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206032,
+      "name": "rakingcat",
+      "x": 322,
+      "y": 595,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206039,
+      "name": "rakingcat",
+      "x": 325,
+      "y": 583,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206130,
+      "name": "hookingcat",
+      "x": 327,
+      "y": 582,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206105,
+      "name": "hookingcat",
+      "x": 315,
+      "y": 578,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206008,
+      "name": "rakingcat",
+      "x": 327,
+      "y": 574,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206033,
+      "name": "rakingcat",
+      "x": 333,
+      "y": 578,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206136,
+      "name": "hookingcat",
+      "x": 337,
+      "y": 589,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206136,
+      "name": "hookingcat",
+      "x": 338,
+      "y": 588,
+      "remainingMs": 18422,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206124,
+      "name": "hookingcat",
+      "x": 340,
+      "y": 577,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206129,
+      "name": "hookingcat",
+      "x": 342,
+      "y": 600,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    }
+  ],
+  "ownMirror": [
+    {
+      "objectId": 206644,
+      "name": "scarecrow",
+      "x": 293,
+      "y": 614,
+      "remainingMs": 4712,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206610,
+      "name": "scarecrow",
+      "x": 300,
+      "y": 597,
+      "remainingMs": 2581,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206013,
+      "name": "rakingcat",
+      "x": 301,
+      "y": 596,
+      "remainingMs": 2549,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206026,
+      "name": "rakingcat",
+      "x": 320,
+      "y": 589,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206117,
+      "name": "hookingcat",
+      "x": 321,
+      "y": 588,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206623,
+      "name": "scarecrow",
+      "x": 321,
+      "y": 631,
+      "remainingMs": 8488,
+      "allowed": true,
+      "currentlyVisible": false
+    },
+    {
+      "objectId": 206032,
+      "name": "rakingcat",
+      "x": 322,
+      "y": 595,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206039,
+      "name": "rakingcat",
+      "x": 325,
+      "y": 583,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206130,
+      "name": "hookingcat",
+      "x": 327,
+      "y": 582,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206105,
+      "name": "hookingcat",
+      "x": 315,
+      "y": 578,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206008,
+      "name": "rakingcat",
+      "x": 327,
+      "y": 574,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206033,
+      "name": "rakingcat",
+      "x": 333,
+      "y": 578,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206136,
+      "name": "hookingcat",
+      "x": 337,
+      "y": 589,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206136,
+      "name": "hookingcat",
+      "x": 338,
+      "y": 588,
+      "remainingMs": 18422,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206124,
+      "name": "hookingcat",
+      "x": 340,
+      "y": 577,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206129,
+      "name": "hookingcat",
+      "x": 342,
+      "y": 600,
+      "remainingMs": 20000,
+      "allowed": true,
+      "currentlyVisible": true
+    },
+    {
+      "objectId": 206136,
+      "name": "hookingcat",
+      "x": 339,
+      "y": 587,
+      "currentlyVisible": true,
+      "allowed": true,
+      "source": "recording-frame76-confirmed-third-own-mirror-point"
+    }
+  ],
+  "occupancy": [
+    {
+      "x": 320,
+      "y": 589,
+      "objectId": 206026,
+      "kind": "monster"
+    },
+    {
+      "x": 321,
+      "y": 588,
+      "objectId": 206117,
+      "kind": "monster"
+    },
+    {
+      "x": 321,
+      "y": 598,
+      "objectId": 214501,
+      "kind": "monster"
+    },
+    {
+      "x": 322,
+      "y": 595,
+      "objectId": 206032,
+      "kind": "monster"
+    },
+    {
+      "x": 322,
+      "y": 587,
+      "objectId": 206208,
+      "kind": "monster"
+    },
+    {
+      "x": 325,
+      "y": 583,
+      "objectId": 206039,
+      "kind": "monster"
+    },
+    {
+      "x": 325,
+      "y": 600,
+      "objectId": 206201,
+      "kind": "monster"
+    },
+    {
+      "x": 326,
+      "y": 599,
+      "objectId": 206220,
+      "kind": "monster"
+    },
+    {
+      "x": 327,
+      "y": 582,
+      "objectId": 206130,
+      "kind": "monster"
+    },
+    {
+      "x": 315,
+      "y": 578,
+      "objectId": 206105,
+      "kind": "monster"
+    },
+    {
+      "x": 330,
+      "y": 597,
+      "objectId": 206542,
+      "kind": "monster"
+    },
+    {
+      "x": 331,
+      "y": 581,
+      "objectId": 206221,
+      "kind": "monster"
+    },
+    {
+      "x": 327,
+      "y": 574,
+      "objectId": 206008,
+      "kind": "monster"
+    },
+    {
+      "x": 333,
+      "y": 578,
+      "objectId": 206033,
+      "kind": "monster"
+    },
+    {
+      "x": 337,
+      "y": 589,
+      "objectId": 206136,
+      "kind": "monster"
+    },
+    {
+      "x": 340,
+      "y": 577,
+      "objectId": 206124,
+      "kind": "monster"
+    },
+    {
+      "x": 340,
+      "y": 586,
+      "objectId": 206227,
+      "kind": "monster"
+    },
+    {
+      "x": 342,
+      "y": 600,
+      "objectId": 206129,
+      "kind": "monster"
+    },
+    {
+      "x": 342,
+      "y": 606,
+      "objectId": 206703,
+      "kind": "monster"
+    },
+    {
+      "x": 342,
+      "y": 592,
+      "objectId": 206716,
+      "kind": "monster"
+    },
+    {
+      "x": 343,
+      "y": 592,
+      "objectId": 206214,
+      "kind": "monster"
+    },
+    {
+      "x": 343,
+      "y": 586,
+      "objectId": 206713,
+      "kind": "monster"
+    },
+    {
+      "x": 344,
+      "y": 591,
+      "objectId": 210400,
+      "kind": "monster"
+    },
+    {
+      "x": 345,
+      "y": 599,
+      "objectId": 206719,
+      "kind": "monster"
+    },
+    {
+      "x": 345,
+      "y": 580,
+      "objectId": 214502,
+      "kind": "monster"
+    },
+    {
+      "x": 347,
+      "y": 576,
+      "objectId": 206215,
+      "kind": "monster"
+    }
+  ],
+  "transfers": [
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0122",
+      "bounds": {
+        "maxX": 347,
+        "maxY": 188,
+        "minX": 347,
+        "minY": 188
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0102",
+      "bounds": {
+        "maxX": 308,
+        "maxY": 264,
+        "minX": 308,
+        "minY": 264
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0108",
+      "bounds": {
+        "maxX": 326,
+        "maxY": 288,
+        "minX": 326,
+        "minY": 288
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0104",
+      "bounds": {
+        "maxX": 322,
+        "maxY": 247,
+        "minX": 322,
+        "minY": 247
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0107",
+      "bounds": {
+        "maxX": 354,
+        "maxY": 319,
+        "minX": 354,
+        "minY": 319
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0125",
+      "bounds": {
+        "maxX": 295,
+        "maxY": 251,
+        "minX": 295,
+        "minY": 251
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0125",
+      "bounds": {
+        "maxX": 295,
+        "maxY": 250,
+        "minX": 295,
+        "minY": 250
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0103",
+      "bounds": {
+        "maxX": 335,
+        "maxY": 299,
+        "minX": 335,
+        "minY": 299
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0103",
+      "bounds": {
+        "maxX": 335,
+        "maxY": 300,
+        "minX": 335,
+        "minY": 300
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0103",
+      "bounds": {
+        "maxX": 344,
+        "maxY": 308,
+        "minX": 344,
+        "minY": 308
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0103",
+      "bounds": {
+        "maxX": 345,
+        "maxY": 308,
+        "minX": 345,
+        "minY": 308
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0105",
+      "bounds": {
+        "maxX": 295,
+        "maxY": 284,
+        "minX": 295,
+        "minY": 284
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0105",
+      "bounds": {
+        "maxX": 295,
+        "maxY": 285,
+        "minX": 295,
+        "minY": 285
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0105",
+      "bounds": {
+        "maxX": 305,
+        "maxY": 276,
+        "minX": 305,
+        "minY": 276
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0106",
+      "bounds": {
+        "maxX": 307,
+        "maxY": 311,
+        "minX": 307,
+        "minY": 311
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0106",
+      "bounds": {
+        "maxX": 307,
+        "maxY": 310,
+        "minX": 307,
+        "minY": 310
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0106",
+      "bounds": {
+        "maxX": 317,
+        "maxY": 302,
+        "minX": 317,
+        "minY": 302
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0106",
+      "bounds": {
+        "maxX": 317,
+        "maxY": 301,
+        "minX": 317,
+        "minY": 301
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0101",
+      "bounds": {
+        "maxX": 289,
+        "maxY": 292,
+        "minX": 289,
+        "minY": 292
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0101",
+      "bounds": {
+        "maxX": 286,
+        "maxY": 296,
+        "minX": 286,
+        "minY": 296
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0128",
+      "bounds": {
+        "maxX": 278,
+        "maxY": 239,
+        "minX": 278,
+        "minY": 239
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0129",
+      "bounds": {
+        "maxX": 284,
+        "maxY": 236,
+        "minX": 284,
+        "minY": 236
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0123",
+      "bounds": {
+        "maxX": 271,
+        "maxY": 256,
+        "minX": 271,
+        "minY": 256
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0124",
+      "bounds": {
+        "maxX": 283,
+        "maxY": 268,
+        "minX": 283,
+        "minY": 268
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0110",
+      "bounds": {
+        "maxX": 396,
+        "maxY": 230,
+        "minX": 396,
+        "minY": 230
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0110",
+      "bounds": {
+        "maxX": 396,
+        "maxY": 229,
+        "minX": 396,
+        "minY": 229
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0111",
+      "bounds": {
+        "maxX": 400,
+        "maxY": 225,
+        "minX": 400,
+        "minY": 225
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0111",
+      "bounds": {
+        "maxX": 399,
+        "maxY": 225,
+        "minX": 399,
+        "minY": 225
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0112",
+      "bounds": {
+        "maxX": 404,
+        "maxY": 221,
+        "minX": 404,
+        "minY": 221
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0112",
+      "bounds": {
+        "maxX": 403,
+        "maxY": 221,
+        "minX": 403,
+        "minY": 221
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0137",
+      "bounds": {
+        "maxX": 414,
+        "maxY": 243,
+        "minX": 414,
+        "minY": 243
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0137",
+      "bounds": {
+        "maxX": 415,
+        "maxY": 241,
+        "minX": 415,
+        "minY": 241
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0137",
+      "bounds": {
+        "maxX": 416,
+        "maxY": 241,
+        "minX": 416,
+        "minY": 241
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0121",
+      "bounds": {
+        "maxX": 315,
+        "maxY": 613,
+        "minX": 315,
+        "minY": 613
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0130",
+      "bounds": {
+        "maxX": 266,
+        "maxY": 630,
+        "minX": 266,
+        "minY": 630
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0131",
+      "bounds": {
+        "maxX": 271,
+        "maxY": 621,
+        "minX": 271,
+        "minY": 621
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0136",
+      "bounds": {
+        "maxX": 295,
+        "maxY": 649,
+        "minX": 295,
+        "minY": 649
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0132",
+      "bounds": {
+        "maxX": 283,
+        "maxY": 636,
+        "minX": 283,
+        "minY": 636
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0132",
+      "bounds": {
+        "maxX": 282,
+        "maxY": 636,
+        "minX": 282,
+        "minY": 636
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0132",
+      "bounds": {
+        "maxX": 282,
+        "maxY": 635,
+        "minX": 282,
+        "minY": 635
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0138",
+      "bounds": {
+        "maxX": 274,
+        "maxY": 636,
+        "minX": 274,
+        "minY": 636
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0141",
+      "bounds": {
+        "maxX": 302,
+        "maxY": 622,
+        "minX": 302,
+        "minY": 622
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0141",
+      "bounds": {
+        "maxX": 311,
+        "maxY": 631,
+        "minX": 311,
+        "minY": 631
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0140",
+      "bounds": {
+        "maxX": 307,
+        "maxY": 627,
+        "minX": 307,
+        "minY": 627
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0115",
+      "bounds": {
+        "maxX": 314,
+        "maxY": 474,
+        "minX": 314,
+        "minY": 474
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "D011",
+      "bounds": {
+        "maxX": 43,
+        "maxY": 111,
+        "minX": 43,
+        "minY": 111
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "D401",
+      "bounds": {
+        "maxX": 664,
+        "maxY": 215,
+        "minX": 664,
+        "minY": 215
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "D401",
+      "bounds": {
+        "maxX": 663,
+        "maxY": 215,
+        "minX": 663,
+        "minY": 215
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 324,
+        "maxY": 41,
+        "minX": 324,
+        "minY": 41
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 325,
+        "maxY": 42,
+        "minX": 325,
+        "minY": 42
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 326,
+        "maxY": 43,
+        "minX": 326,
+        "minY": 43
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 326,
+        "maxY": 42,
+        "minX": 326,
+        "minY": 42
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 325,
+        "maxY": 41,
+        "minX": 325,
+        "minY": 41
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 325,
+        "maxY": 40,
+        "minX": 325,
+        "minY": 40
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "1",
+      "bounds": {
+        "maxX": 326,
+        "maxY": 40,
+        "minX": 326,
+        "minY": 40
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "2",
+      "bounds": {
+        "maxX": 666,
+        "maxY": 86,
+        "minX": 666,
+        "minY": 86
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "2",
+      "bounds": {
+        "maxX": 667,
+        "maxY": 87,
+        "minX": 667,
+        "minY": 87
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "2",
+      "bounds": {
+        "maxX": 667,
+        "maxY": 88,
+        "minX": 667,
+        "minY": 88
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "HELL00",
+      "bounds": {
+        "maxX": 316,
+        "maxY": 649,
+        "minX": 316,
+        "minY": 649
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "HELL00",
+      "bounds": {
+        "maxX": 315,
+        "maxY": 650,
+        "minX": 315,
+        "minY": 650
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "HELL00",
+      "bounds": {
+        "maxX": 316,
+        "maxY": 650,
+        "minX": 316,
+        "minY": 650
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "HELL00",
+      "bounds": {
+        "maxX": 315,
+        "maxY": 649,
+        "minX": 315,
+        "minY": 649
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "HELL00",
+      "bounds": {
+        "maxX": 315,
+        "maxY": 648,
+        "minX": 315,
+        "minY": 648
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "HELL00",
+      "bounds": {
+        "maxX": 314,
+        "maxY": 649,
+        "minX": 314,
+        "minY": 649
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0127",
+      "bounds": {
+        "maxX": 310,
+        "maxY": 600,
+        "minX": 310,
+        "minY": 600
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0101",
+      "bounds": {
+        "maxX": 286,
+        "maxY": 296,
+        "minX": 286,
+        "minY": 296
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "0122",
+      "bounds": {
+        "maxX": 347,
+        "maxY": 189,
+        "minX": 347,
+        "minY": 189
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "D001",
+      "bounds": {
+        "maxX": 147,
+        "maxY": 33,
+        "minX": 147,
+        "minY": 33
+      }
+    },
+    {
+      "mapFileName": "0",
+      "toMapFileName": "D001",
+      "bounds": {
+        "maxX": 148,
+        "maxY": 34,
+        "minX": 148,
+        "minY": 34
+      }
+    }
+  ],
+  "observedExtraTrail": [
+    {
+      "frame": 76,
+      "capturedAtMs": 1793056375934,
+      "objectId": 206136,
+      "name": "HookingCat",
+      "x": 339,
+      "y": 587,
+      "hp": 30,
+      "dead": false
+    },
+    {
+      "frame": 77,
+      "capturedAtMs": 1793056376185,
+      "objectId": 206136,
+      "name": "HookingCat",
+      "x": 338,
+      "y": 588,
+      "hp": 30,
+      "dead": false
+    },
+    {
+      "frame": 82,
+      "capturedAtMs": 1793056377954,
+      "objectId": 206136,
+      "name": "HookingCat",
+      "x": 337,
+      "y": 589,
+      "hp": 30,
+      "dead": false
+    }
+  ],
+  "counterfactuals": [
+    {
+      "label": "actual17-exact-reconstruction",
+      "retainedPositions": 17,
+      "forbiddenCells": 2140,
+      "hasPath": false,
+      "steps": null,
+      "routeSample": []
+    },
+    {
+      "label": "omit-extra339587-only",
+      "retainedPositions": 16,
+      "forbiddenCells": 2128,
+      "hasPath": false,
+      "steps": null,
+      "routeSample": []
+    },
+    {
+      "label": "remove-occupancy-only",
+      "retainedPositions": 17,
+      "forbiddenCells": 2140,
+      "hasPath": false,
+      "steps": null,
+      "routeSample": []
+    },
+    {
+      "label": "remove-transfers-only",
+      "retainedPositions": 17,
+      "forbiddenCells": 2140,
+      "hasPath": false,
+      "steps": null,
+      "routeSample": []
+    },
+    {
+      "label": "closed206013-natural-expiry-only",
+      "retainedPositions": 16,
+      "forbiddenCells": 2107,
+      "hasPath": false,
+      "steps": null,
+      "routeSample": []
+    },
+    {
+      "label": "closed206610-natural-expiry-only",
+      "retainedPositions": 16,
+      "forbiddenCells": 2107,
+      "hasPath": false,
+      "steps": null,
+      "routeSample": []
+    },
+    {
+      "label": "closed206013-and206610-natural-expiry",
+      "retainedPositions": 15,
+      "forbiddenCells": 1818,
+      "hasPath": true,
+      "steps": 73,
+      "routeSample": [
+        {
+          "x": 331,
+          "y": 591
+        },
+        {
+          "x": 331,
+          "y": 592
+        },
+        {
+          "x": 331,
+          "y": 593
+        },
+        {
+          "x": 291,
+          "y": 615
+        },
+        {
+          "x": 290,
+          "y": 616
+        },
+        {
+          "x": 289,
+          "y": 617
+        }
+      ]
+    },
+    {
+      "label": "closed206644-natural-expiry-only",
+      "retainedPositions": 16,
+      "forbiddenCells": 2088,
+      "hasPath": true,
+      "steps": 56,
+      "routeSample": [
+        {
+          "x": 331,
+          "y": 591
+        },
+        {
+          "x": 331,
+          "y": 592
+        },
+        {
+          "x": 331,
+          "y": 593
+        },
+        {
+          "x": 291,
+          "y": 616
+        },
+        {
+          "x": 290,
+          "y": 616
+        },
+        {
+          "x": 289,
+          "y": 617
+        }
+      ]
+    },
+    {
+      "label": "all-four-closed-natural-expiry",
+      "retainedPositions": 13,
+      "forbiddenCells": 1477,
+      "hasPath": true,
+      "steps": 56,
+      "routeSample": [
+        {
+          "x": 331,
+          "y": 591
+        },
+        {
+          "x": 331,
+          "y": 592
+        },
+        {
+          "x": 331,
+          "y": 593
+        },
+        {
+          "x": 291,
+          "y": 616
+        },
+        {
+          "x": 290,
+          "y": 616
+        },
+        {
+          "x": 289,
+          "y": 617
+        }
+      ]
+    }
+  ],
+  "interpretation": "No unsafe movement was sent. Known normal-AI0 outside-zone historical halos jointly sealed the current route. Only their existing natural expiry may remove them; no cache clearing or premature exemption is justified. Live AI may change before retry."
+}

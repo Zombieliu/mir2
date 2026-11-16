@@ -1,0 +1,16 @@
+{
+  "source": "Source78",
+  "action": "ordinary character key then native Spells tab",
+  "spellsDiagnostic": {
+    "ready": false,
+    "reason": "baseline-missing"
+  },
+  "compatCharacterCount": 1,
+  "emptySkillsTextVisible": false,
+  "normalLoginAndStartGame": true,
+  "credentialsEmitted": false,
+  "privateRuntimeOrRawSnapshotRead": false,
+  "viewportOverridden": false,
+  "cacheCleared": false,
+  "goalComplete": false
+}

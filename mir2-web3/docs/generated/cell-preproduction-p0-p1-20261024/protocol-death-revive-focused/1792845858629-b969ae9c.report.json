@@ -1,0 +1,1986 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792845858629-b969ae9c",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "sourceReport": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-preproduction-p0-p1-20261024\\protocol-full-lifecycle\\1792844742353-ccf6fb6e.core-projection.report.json",
+  "startedAt": "2026-10-24T12:44:18.631Z",
+  "scope": "one-bounded-real-ordinary-two-socket-death-and-town-revive-continuation",
+  "totalBudgetMs": 480000,
+  "exposureBudgetMs": 180000,
+  "checks": {
+    "ordinaryTwoLogin": {
+      "status": "passed",
+      "evidence": {
+        "actors": [
+          {
+            "name": "Af85551a6",
+            "characterIndex": 3,
+            "objectId": 1000,
+            "mapFileName": "0",
+            "x": 286,
+            "y": 612,
+            "direction": "Right"
+          },
+          {
+            "name": "Bf85551a6",
+            "characterIndex": 4,
+            "objectId": 1000,
+            "mapFileName": "0",
+            "x": 284,
+            "y": 612,
+            "direction": "Up"
+          }
+        ],
+        "before": [
+          {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 286,
+            "y": 612,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          },
+          {
+            "name": "Bf85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 284,
+            "y": 612,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          }
+        ]
+      }
+    },
+    "armourRemoval": {
+      "status": "passed",
+      "evidence": {
+        "armourRemoved": true,
+        "uniqueId": 1,
+        "to": 0,
+        "receipt": 714,
+        "owner": {
+          "name": "Af85551a6",
+          "objectId": 1000,
+          "map": "0",
+          "x": 286,
+          "y": 612,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        }
+      }
+    },
+    "ordinaryApproach": {
+      "status": "passed",
+      "evidence": {
+        "owners": [
+          {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 296,
+            "y": 607,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          },
+          {
+            "name": "Bf85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 291,
+            "y": 612,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          }
+        ],
+        "currentCats": [
+          {
+            "objectId": 206013,
+            "name": "RakingCat",
+            "x": 297,
+            "y": 601,
+            "hp": 32
+          }
+        ]
+      }
+    },
+    "sharedDeath": {
+      "status": "passed",
+      "evidence": {
+        "actor": "Af85551a6",
+        "observerId": 50018,
+        "mapFileName": "0",
+        "location": {
+          "x": 298,
+          "y": 591
+        },
+        "ownerDeathReceipt": 1118,
+        "observerDeathReceipt": 1021
+      }
+    },
+    "townRevive": {
+      "status": "passed",
+      "evidence": {
+        "actor": "Af85551a6",
+        "fromMap": "0",
+        "toMap": "0",
+        "hp": 18,
+        "location": {
+          "x": 288,
+          "y": 616
+        },
+        "requestReceipt": 1126,
+        "revivedReceipt": 1145,
+        "aliveSnapshotReceipt": 1169,
+        "observerPacket": "ObjectRevived",
+        "observerReceipt": 1024,
+        "ack": 1145,
+        "owners": [
+          {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          },
+          {
+            "name": "Bf85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 299,
+            "y": 596,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          }
+        ],
+        "observerActor": []
+      }
+    },
+    "logout": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": 0,
+          "receipt": 1222
+        },
+        {
+          "actor": 1,
+          "receipt": 1047
+        }
+      ]
+    },
+    "realmDrain": {
+      "status": "passed"
+    }
+  },
+  "samples": [
+    {
+      "at": "2026-10-24T12:44:50.903Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 296,
+        "y": 607,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206013,
+          "x": 297,
+          "y": 601,
+          "distance": 6
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:44:55.990Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 297,
+        "y": 602,
+        "hp": 14,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 607,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 590,
+          "distance": 12
+        },
+        {
+          "objectId": 206013,
+          "x": 297,
+          "y": 601,
+          "distance": 1
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:08.417Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 15,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 298,
+          "y": 601,
+          "distance": 10
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:10.535Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 13,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 299,
+          "y": 599,
+          "distance": 8
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:12.618Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 10,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 299,
+          "y": 599,
+          "distance": 8
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:14.770Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 7,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 299,
+          "y": 598,
+          "distance": 7
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:16.871Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 5,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 299,
+          "y": 598,
+          "distance": 7
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:18.954Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 5,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 299,
+          "y": 598,
+          "distance": 7
+        }
+      ]
+    },
+    {
+      "at": "2026-10-24T12:45:21.088Z",
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 2,
+        "maxHp": 18,
+        "dead": false
+      },
+      "observer": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "cats": [
+        {
+          "objectId": 206007,
+          "x": 299,
+          "y": 591,
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "x": 299,
+          "y": 598,
+          "distance": 7
+        }
+      ]
+    }
+  ],
+  "provocations": [
+    {
+      "objectId": 206013,
+      "name": "RakingCat",
+      "target": {
+        "x": 297,
+        "y": 601
+      },
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 297,
+        "y": 602,
+        "hp": 14,
+        "maxHp": 18,
+        "dead": false
+      },
+      "commandSequence": 843
+    },
+    {
+      "objectId": 206007,
+      "name": "RakingCat",
+      "target": {
+        "x": 299,
+        "y": 591
+      },
+      "owner": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 15,
+        "maxHp": 18,
+        "dead": false
+      },
+      "commandSequence": 1027
+    }
+  ],
+  "fullLifecycleAccepted": false,
+  "visualAccepted": false,
+  "loadAccepted": false,
+  "routeWitness": "Correction after preserved blocked interpolation: visit every supplied western-corridor waypoint exactly with live collision-aware ordinary Walk; fresh live cats alone supply attack IDs.",
+  "predecessorFailures": [
+    "1792845433696-23f84151.report.json",
+    "1792845654430-cb5de189.report.json"
+  ],
+  "corridor": [
+    {
+      "x": 288,
+      "y": 617
+    },
+    {
+      "x": 286,
+      "y": 617
+    },
+    {
+      "x": 285,
+      "y": 616
+    },
+    {
+      "x": 284,
+      "y": 616
+    },
+    {
+      "x": 282,
+      "y": 616
+    },
+    {
+      "x": 283,
+      "y": 615
+    },
+    {
+      "x": 283,
+      "y": 614
+    },
+    {
+      "x": 284,
+      "y": 613
+    },
+    {
+      "x": 284,
+      "y": 612
+    },
+    {
+      "x": 286,
+      "y": 612
+    },
+    {
+      "x": 287,
+      "y": 611
+    },
+    {
+      "x": 289,
+      "y": 611
+    },
+    {
+      "x": 291,
+      "y": 611
+    },
+    {
+      "x": 292,
+      "y": 611
+    },
+    {
+      "x": 293,
+      "y": 610
+    },
+    {
+      "x": 294,
+      "y": 610
+    },
+    {
+      "x": 294,
+      "y": 609
+    },
+    {
+      "x": 296,
+      "y": 607
+    },
+    {
+      "x": 298,
+      "y": 605
+    },
+    {
+      "x": 299,
+      "y": 604
+    },
+    {
+      "x": 299,
+      "y": 602
+    },
+    {
+      "x": 299,
+      "y": 600
+    }
+  ],
+  "preflight": {
+    "checkedAt": "2026-10-24T12:44:10.219Z",
+    "scope": "Read-only local packet-evidence estimate, not an internal-cache inspection",
+    "windowSeconds": 900,
+    "loginPolicy": {
+      "peerLimit": 30,
+      "deviceLimit": 30,
+      "pairLimit": 8,
+      "accountLimit": 50,
+      "successClearsPairAndAccount": true,
+      "source": "apps/gateway/src/web.rs:7311"
+    },
+    "evidenceFiles": 27,
+    "observedLoginRequestsInWindow": 5,
+    "observedRateLimitRejectionsInWindow": [],
+    "plannedLoginRequests": 2,
+    "estimatedPeerRoom": 25,
+    "returnStaticPaths": [
+      {
+        "from": {
+          "x": 300,
+          "y": 617
+        },
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "steps": 12
+      },
+      {
+        "from": {
+          "x": 300,
+          "y": 622
+        },
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "steps": 12
+      }
+    ],
+    "route": [
+      {
+        "target": {
+          "x": 288,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": null
+      },
+      {
+        "target": {
+          "x": 288,
+          "y": 617
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 286,
+          "y": 617
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 285,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 284,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 282,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 283,
+          "y": 615
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 283,
+          "y": 614
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 284,
+          "y": 613
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 284,
+          "y": 612
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 286,
+          "y": 612
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 287,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 289,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 291,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 292,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 293,
+          "y": 610
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 294,
+          "y": 610
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 294,
+          "y": 609
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 296,
+          "y": 607
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 298,
+          "y": 605
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 299,
+          "y": 604
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 299,
+          "y": 602
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 299,
+          "y": 600
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      }
+    ],
+    "capacity": {
+      "maxWsConnections": null,
+      "maxActiveSessions": null,
+      "maxReconnectLeases": null,
+      "maxLoginInFlight": null,
+      "maxNewCharacterInFlight": null,
+      "maxStartGameInFlight": null,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "ok": true
+  },
+  "initialCapacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "resumeCorridorAt": {
+    "index": 9,
+    "distance": 0
+  },
+  "navigation": [
+    {
+      "actor": 0,
+      "target": {
+        "x": 287,
+        "y": 611
+      },
+      "radius": 1,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 720,
+      "throughSequence": 720,
+      "successfulSteps": 0,
+      "preflightPath": [
+        {
+          "x": 286,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 105
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 286,
+        "y": 612
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 696,
+      "throughSequence": 696,
+      "successfulSteps": 0,
+      "preflightPath": [
+        {
+          "x": 284,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 105
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 289,
+        "y": 611
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 289,
+        "y": 611,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 724,
+      "throughSequence": 740,
+      "successfulSteps": 3,
+      "preflightPath": [
+        {
+          "x": 286,
+          "y": 612
+        },
+        {
+          "x": 287,
+          "y": 612
+        },
+        {
+          "x": 288,
+          "y": 612
+        },
+        {
+          "x": 289,
+          "y": 611
+        }
+      ],
+      "preflightObstacleCount": 103
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 289,
+        "y": 611
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 704,
+      "throughSequence": 704,
+      "successfulSteps": 0,
+      "preflightPath": [
+        {
+          "x": 284,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 105
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 291,
+        "y": 611
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 289,
+        "y": 611,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 611,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 743,
+      "throughSequence": 745,
+      "successfulSteps": 2,
+      "preflightPath": [
+        {
+          "x": 289,
+          "y": 611
+        },
+        {
+          "x": 290,
+          "y": 611
+        },
+        {
+          "x": 291,
+          "y": 611
+        }
+      ],
+      "preflightObstacleCount": 103
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 291,
+        "y": 611
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 708,
+      "throughSequence": 712,
+      "successfulSteps": 2,
+      "preflightPath": [
+        {
+          "x": 284,
+          "y": 612
+        },
+        {
+          "x": 285,
+          "y": 612
+        },
+        {
+          "x": 286,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 105
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 292,
+        "y": 611
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 611,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 292,
+        "y": 611,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 752,
+      "throughSequence": 756,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 291,
+          "y": 611
+        },
+        {
+          "x": 292,
+          "y": 611
+        }
+      ],
+      "preflightObstacleCount": 101
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 292,
+        "y": 611
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 718,
+      "throughSequence": 723,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 286,
+          "y": 612
+        },
+        {
+          "x": 287,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 104
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 293,
+        "y": 610
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 292,
+        "y": 611,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 293,
+        "y": 610,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 762,
+      "throughSequence": 765,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 292,
+          "y": 611
+        },
+        {
+          "x": 293,
+          "y": 610
+        }
+      ],
+      "preflightObstacleCount": 100
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 293,
+        "y": 610
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 728,
+      "throughSequence": 731,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 287,
+          "y": 612
+        },
+        {
+          "x": 288,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 103
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 294,
+        "y": 610
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 293,
+        "y": 610,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 610,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 770,
+      "throughSequence": 772,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 293,
+          "y": 610
+        },
+        {
+          "x": 294,
+          "y": 610
+        }
+      ],
+      "preflightObstacleCount": 99
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 294,
+        "y": 610
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 289,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 736,
+      "throughSequence": 739,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 288,
+          "y": 612
+        },
+        {
+          "x": 289,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 104
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 294,
+        "y": 609
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 610,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 609,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 778,
+      "throughSequence": 780,
+      "successfulSteps": 1,
+      "preflightPath": [
+        {
+          "x": 294,
+          "y": 610
+        },
+        {
+          "x": 294,
+          "y": 609
+        }
+      ],
+      "preflightObstacleCount": 99
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 294,
+        "y": 609
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 289,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 289,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 744,
+      "throughSequence": 744,
+      "successfulSteps": 0,
+      "preflightPath": [
+        {
+          "x": 289,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 104
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 296,
+        "y": 607
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 609,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 296,
+        "y": 607,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 783,
+      "throughSequence": 787,
+      "successfulSteps": 2,
+      "preflightPath": [
+        {
+          "x": 294,
+          "y": 609
+        },
+        {
+          "x": 295,
+          "y": 608
+        },
+        {
+          "x": 296,
+          "y": 607
+        }
+      ],
+      "preflightObstacleCount": 97
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 296,
+        "y": 607
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 289,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 750,
+      "throughSequence": 752,
+      "successfulSteps": 2,
+      "preflightPath": [
+        {
+          "x": 289,
+          "y": 612
+        },
+        {
+          "x": 290,
+          "y": 612
+        },
+        {
+          "x": 291,
+          "y": 612
+        }
+      ],
+      "preflightObstacleCount": 104
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 297,
+        "y": 601
+      },
+      "radius": 1,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 296,
+        "y": 607,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 297,
+        "y": 602,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 796,
+      "throughSequence": 821,
+      "successfulSteps": 5,
+      "preflightPath": [
+        {
+          "x": 296,
+          "y": 607
+        },
+        {
+          "x": 296,
+          "y": 606
+        },
+        {
+          "x": 296,
+          "y": 605
+        },
+        {
+          "x": 297,
+          "y": 604
+        },
+        {
+          "x": 297,
+          "y": 603
+        },
+        {
+          "x": 297,
+          "y": 602
+        }
+      ],
+      "preflightObstacleCount": 96
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 297,
+        "y": 602
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 607,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 765,
+      "throughSequence": 790,
+      "successfulSteps": 6,
+      "preflightPath": [
+        {
+          "x": 291,
+          "y": 612
+        },
+        {
+          "x": 292,
+          "y": 611
+        },
+        {
+          "x": 293,
+          "y": 610
+        },
+        {
+          "x": 294,
+          "y": 610
+        },
+        {
+          "x": 294,
+          "y": 609
+        },
+        {
+          "x": 294,
+          "y": 608
+        },
+        {
+          "x": 294,
+          "y": 607
+        }
+      ],
+      "preflightObstacleCount": 98
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 299,
+        "y": 590
+      },
+      "radius": 1,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 297,
+        "y": 602,
+        "hp": 14,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 298,
+        "y": 591,
+        "hp": 9,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 856,
+      "throughSequence": 978,
+      "successfulSteps": 17,
+      "preflightPath": [
+        {
+          "x": 297,
+          "y": 602
+        },
+        {
+          "x": 297,
+          "y": 603
+        },
+        {
+          "x": 297,
+          "y": 604
+        },
+        {
+          "x": 298,
+          "y": 604
+        },
+        {
+          "x": 299,
+          "y": 604
+        },
+        {
+          "x": 299,
+          "y": 603
+        },
+        {
+          "x": 299,
+          "y": 602
+        },
+        {
+          "x": 299,
+          "y": 601
+        },
+        {
+          "x": 299,
+          "y": 600
+        },
+        {
+          "x": 299,
+          "y": 599
+        },
+        {
+          "x": 299,
+          "y": 598
+        },
+        {
+          "x": 299,
+          "y": 597
+        },
+        {
+          "x": 299,
+          "y": 596
+        },
+        {
+          "x": 299,
+          "y": 595
+        },
+        {
+          "x": 299,
+          "y": 594
+        },
+        {
+          "x": 299,
+          "y": 593
+        },
+        {
+          "x": 299,
+          "y": 592
+        },
+        {
+          "x": 299,
+          "y": 591
+        }
+      ],
+      "preflightObstacleCount": 96
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 298,
+        "y": 591
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 294,
+        "y": 607,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 299,
+        "y": 596,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 841,
+      "throughSequence": 929,
+      "successfulSteps": 14,
+      "preflightPath": [
+        {
+          "x": 294,
+          "y": 607
+        },
+        {
+          "x": 295,
+          "y": 607
+        },
+        {
+          "x": 296,
+          "y": 606
+        },
+        {
+          "x": 296,
+          "y": 605
+        },
+        {
+          "x": 297,
+          "y": 604
+        },
+        {
+          "x": 297,
+          "y": 603
+        },
+        {
+          "x": 297,
+          "y": 602
+        },
+        {
+          "x": 297,
+          "y": 601
+        },
+        {
+          "x": 296,
+          "y": 601
+        },
+        {
+          "x": 296,
+          "y": 600
+        },
+        {
+          "x": 296,
+          "y": 599
+        },
+        {
+          "x": 296,
+          "y": 598
+        },
+        {
+          "x": 296,
+          "y": 597
+        },
+        {
+          "x": 296,
+          "y": 596
+        }
+      ],
+      "preflightObstacleCount": 97
+    }
+  ],
+  "incomingDamage": {
+    "positiveReceipts": [
+      {
+        "sequence": 832,
+        "damage": 3
+      },
+      {
+        "sequence": 835,
+        "damage": 1
+      },
+      {
+        "sequence": 863,
+        "damage": 4
+      },
+      {
+        "sequence": 866,
+        "damage": 2
+      },
+      {
+        "sequence": 988,
+        "damage": 3
+      },
+      {
+        "sequence": 1010,
+        "damage": 3
+      },
+      {
+        "sequence": 1039,
+        "damage": 2
+      },
+      {
+        "sequence": 1055,
+        "damage": 3
+      },
+      {
+        "sequence": 1073,
+        "damage": 3
+      },
+      {
+        "sequence": 1087,
+        "damage": 2
+      },
+      {
+        "sequence": 1104,
+        "damage": 3
+      },
+      {
+        "sequence": 1121,
+        "damage": 2
+      }
+    ],
+    "total": 31,
+    "scope": "Actual owner incoming damage; public Death does not identify a unique killing source."
+  },
+  "armourRestoration": {
+    "receipt": 1214,
+    "equipped": true
+  },
+  "finalCapacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "ok": true,
+  "finishedAt": "2026-10-24T12:45:28.107Z"
+}

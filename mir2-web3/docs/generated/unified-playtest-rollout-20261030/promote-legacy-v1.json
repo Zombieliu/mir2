@@ -1,0 +1,81 @@
+{
+  "schema": "mir2.windows.r2-publication-receipt.v1",
+  "mode": "promote",
+  "passed": true,
+  "startedUtc": "2026-10-29T19:46:45.517381+00:00",
+  "planSha256": "1a8fd86b5d218398e18d20fa9d83a649be05ab807259475f7999cbf9d9f1137b",
+  "candidate": {
+    "channel": "invited",
+    "feedSha256": "a0b33137248ff3a509e008b2ae58bc1c62c56e6e2b01f7071d1345f97e052527",
+    "platform": "windows-x64",
+    "schema": "mir2.windows.r2-channel.v1",
+    "sequence": 33,
+    "signatureSha256": "7114ba8034abc94e31bd6386a94269a4ca64ef01a5238d77e5d014993c0ee2f2",
+    "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf"
+  },
+  "expectedCurrent": {
+    "channel": "invited",
+    "feedSha256": "cfc78a45e30c8079857cffb2bf6c02c8266a1c9c85fef4022368b43e8d11317c",
+    "platform": "windows-x64",
+    "schema": "mir2.windows.r2-channel.v1",
+    "sequence": 23,
+    "signatureSha256": "a59383d661f1b16ce18a62f47ec6c78c3a3ccabf462a5fc2637dfe036211712a",
+    "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f"
+  },
+  "uploadedObjects": [],
+  "resumedObjects": [],
+  "verifiedObjects": [
+    {
+      "path": "feeds/s33-a0b33137248ff3a509e008b2ae58bc1c62c56e6e2b01f7071d1345f97e052527/latest.json",
+      "size": 1160,
+      "sha256": "a0b33137248ff3a509e008b2ae58bc1c62c56e6e2b01f7071d1345f97e052527"
+    },
+    {
+      "path": "feeds/s33-a0b33137248ff3a509e008b2ae58bc1c62c56e6e2b01f7071d1345f97e052527/latest.p7s",
+      "size": 1614,
+      "sha256": "7114ba8034abc94e31bd6386a94269a4ca64ef01a5238d77e5d014993c0ee2f2"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "8f50807c9171b28d77424a113c2a55a8ab5dcdd507e3051222c49863e2efc748"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "60405c35155aedff69fa87b42212780bf5a02d9e668fcca567f3a45dca7acf10"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "88c2aa59547fc111fb94338e542327130be7f4429db87915b3ca39b018ad171f"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/VERSION.json",
+      "size": 1221,
+      "sha256": "481da3f3ee5afab88a9b20f2deb5a70e359b859c53671d9099b6213e5748fbab"
+    },
+    {
+      "path": "releases/updater-C7B2A20912225637-s33/ENGINE.json",
+      "size": 421,
+      "sha256": "c31c8167bfe937c3992bd2dab0d4999a0f6098863eade66d692231a7ade086e3"
+    },
+    {
+      "path": "releases/updater-C7B2A20912225637-s33/ENGINE.p7s",
+      "size": 1614,
+      "sha256": "2eeaac713f21345d343f0137bf1220b232b629530d3cd56b8ea76d33270358c6"
+    },
+    {
+      "path": "releases/updater-C7B2A20912225637-s33/Mir2Updater.exe",
+      "size": 2184192,
+      "sha256": "c7b2a2091222563780c11dbf31544fd889491f5e15dd0c702820bcecbee7cedb"
+    }
+  ],
+  "pointerAttempted": true,
+  "pointerChanged": true,
+  "transport": "fixed-expiring-packed-worker-v1",
+  "downloadScope": "legacy",
+  "readyClosureVerified": true,
+  "aliasesVerified": true,
+  "finishedUtc": "2026-10-29T19:47:20.634612+00:00"
+}

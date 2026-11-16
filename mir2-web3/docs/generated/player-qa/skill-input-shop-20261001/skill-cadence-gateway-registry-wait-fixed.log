@@ -1,0 +1,6 @@
+
+running 1 test
+test routing::tests::shared_in_process_registry_routes_monster_attack_through_zone_native_combat ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 867 filtered out; finished in 3.60s
+

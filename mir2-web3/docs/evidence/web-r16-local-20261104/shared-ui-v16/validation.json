@@ -1,0 +1,167 @@
+{
+  "schema": "mir2.web-r16-public-evidence-validation/1",
+  "createdAt": "2026-11-05T15:31:28.635Z",
+  "archiveValidationPassed": true,
+  "copiedFiles": 43,
+  "copiedBytes": 2086218,
+  "approvedPngCount": 20,
+  "secretScan": {
+    "privateSourcesReadOnlyInsideNode": true,
+    "exactSensitiveStringCount": 19,
+    "exactValueMatches": 0,
+    "knownKeyPatternMatches": 0,
+    "privateValuesWritten": false
+  },
+  "sourceAndTargetHashesVerified": true,
+  "originalsChangedOrRemoved": false,
+  "binaryPolicy": "Only the fixed twenty masked/cropped v15 browser-r6 PNGs reported as visually reviewed by Root; each matches the sealed proof SHA.",
+  "tests": [
+    {
+      "file": "tests/display-v14-final-language-tests.log",
+      "result": "passed",
+      "tests": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "file": "tests/display-v14-renderer-gates.log",
+      "result": "passed",
+      "tests": 47,
+      "passed": 47,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "file": "tests/shop-host-identity-focused-20261105.log",
+      "result": "passed",
+      "tests": 245,
+      "passed": 245,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "file": "tests/package-gateway-preflight-tests-20261105.log",
+      "result": "passed",
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "file": "tests/display-v16-companion-window-tests.log",
+      "result": "passed",
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "file": "tests/shop-host-identity-red-20261105.log",
+      "result": "failed-before-fix",
+      "tests": 4,
+      "passed": 1,
+      "failed": 3,
+      "skipped": 0
+    },
+    {
+      "file": "tests/portable-shared-font-and-quest-regression.log",
+      "result": "passed",
+      "passed": 34,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 464
+    },
+    {
+      "file": "tests/portable-skills-font-owner-tests.log",
+      "result": "passed",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 825
+    },
+    {
+      "file": "tests/native-full-catalog-display-regression.log",
+      "result": "passed",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 1721
+    },
+    {
+      "file": "tests/quest_ui-display_tests-fixed-display-bridge-tests.log",
+      "result": "passed",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 824
+    },
+    {
+      "file": "tests/native_i18n-portable-tests-fixed-display-bridge-tests.log",
+      "result": "passed",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 820
+    }
+  ],
+  "testCountsAreIndependentAndNotSummed": true,
+  "languageWindowMatrix": {
+    "run": "display-v15-browser-r6",
+    "completedSessions": 10,
+    "screenshots": 20,
+    "sourceProofPassed": true,
+    "fullTranslationAccepted": false
+  },
+  "failedAndPartialEvidence": [
+    {
+      "file": "failures/v14/quest4-login-boundary-receipt.json",
+      "available": true,
+      "role": "failed-v14-ordinary-login-gateway-binding",
+      "overallPassed": false
+    },
+    {
+      "file": "partials/v15/quest4-clothing-quote-partial-receipt.json",
+      "available": true,
+      "role": "quote-received-no-purchase-before-host-identity-fix",
+      "overallPassed": false
+    },
+    {
+      "file": "partials/v16/quest4-clothing-equipped-partial-receipt.json",
+      "available": true,
+      "role": "clothing-purchase-equipped-potion-step-incomplete",
+      "overallPassed": false
+    }
+  ],
+  "boundaries": {
+    "distributionIntegrityIsSeparateFromUiAcceptance": true,
+    "v14ConnectionFailureRetained": true,
+    "preFixHostFailureRetained": true,
+    "thin360MiBGatePassed": false,
+    "fullGameplayPassed": false,
+    "candidate100Claimed": false,
+    "englishBitmapLabelsAccepted": false,
+    "residualChineseAcceptedAsTranslated": false,
+    "emptySkillsWindowProvesBodyTranslation": false,
+    "nativeSharedClientPassed": false,
+    "nativeBoundary": "Native window showed background only; usable login, character selection, city and shared-save acceptance remain open.",
+    "finalQuest4Result": "Pending coordinator's separately sealed final result; no v16-r2 in-progress files are included.",
+    "threeLanguageFollowup": "Pending separately sealed coordinator evidence.",
+    "memoryPreservation": "Original save/identity/habit/model-count checks passed; memory episodes/growth and runtime-session counts increased by seven and are explicitly retained in the source proof."
+  },
+  "excluded": [
+    "private data and credentials",
+    "raw or unfinished browser runs",
+    "executed drivers",
+    "nonapproved screenshots",
+    "12 MB diagnostic JSON-difference log",
+    "3.9 MB preparation dump",
+    "mutable v16 quest4-r2 files"
+  ],
+  "mappingSha256": "223ef0a9cb7fc58c68197ec574723e3c47a36cc91fa8aec9b4580cb023a5fb09",
+  "copyScript": {
+    "source": "tools/archive-shared-ui-v16-evidence-20261105.mjs",
+    "bytes": 12068,
+    "sha256": "eafade126f47cc5f9778d17a596249524e93f5d2550d1568a01644ccdcf7d739"
+  }
+}

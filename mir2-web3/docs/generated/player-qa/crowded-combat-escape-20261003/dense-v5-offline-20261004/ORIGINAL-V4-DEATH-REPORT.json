@@ -1,0 +1,2101 @@
+{
+  "schema": "mir2.prepared-dense-network-phase.v2",
+  "phase": "death",
+  "preparedState": true,
+  "sourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "binarySha256": "1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab",
+  "unsafeQaEnabled": false,
+  "originalMonsterStatsClock": true,
+  "rawFailuresPreserved": true,
+  "classes": [
+    {
+      "className": "Warrior",
+      "phase": "death",
+      "status": "inconclusive",
+      "cases": [],
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false,
+      "bootstrap": {
+        "characterIndex": 1,
+        "startAckSequence": 12,
+        "fingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Warrior",
+          "level": 30,
+          "gold": 18800,
+          "dead": false,
+          "knownSpells": [],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 419,
+        "playerMaxHp": 419,
+        "playerMp": 116,
+        "playerMaxMp": 116,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 6
+          },
+          {
+            "stat": 2,
+            "value": 0
+          },
+          {
+            "stat": 3,
+            "value": 1
+          },
+          {
+            "stat": 4,
+            "value": 8
+          },
+          {
+            "stat": 5,
+            "value": 10
+          },
+          {
+            "stat": 6,
+            "value": 0
+          },
+          {
+            "stat": 7,
+            "value": 0
+          },
+          {
+            "stat": 8,
+            "value": 0
+          },
+          {
+            "stat": 9,
+            "value": 0
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 15
+          },
+          {
+            "stat": 12,
+            "value": 419
+          },
+          {
+            "stat": 13,
+            "value": 116
+          },
+          {
+            "stat": 16,
+            "value": 350
+          },
+          {
+            "stat": 17,
+            "value": 81
+          },
+          {
+            "stat": 18,
+            "value": 60
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "death": {
+        "status": "inconclusive",
+        "reason": "Actual hostile damage/death did not form within declared budget",
+        "death": {
+          "status": "inconclusive",
+          "deathSequence": null,
+          "positiveOwnerHitCount": 125,
+          "zeroHpSequence": null,
+          "reason": "Require actual incoming positive damage, owner Death and exact terminal HP 0; rounded 0% is insufficient",
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        }
+      },
+      "finalFingerprint": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "class": "Warrior",
+        "level": 30,
+        "gold": 18800,
+        "dead": false,
+        "knownSpells": [],
+        "inventory": [],
+        "equipment": [
+          {
+            "uniqueId": "0",
+            "name": "WoodenSword",
+            "key": "crystal-item-221",
+            "count": 1,
+            "slot": "weapon",
+            "durability": 4000
+          },
+          {
+            "uniqueId": "1",
+            "name": "BaseDress(M)",
+            "key": "crystal-item-317",
+            "count": 1,
+            "slot": "armour",
+            "durability": 5000
+          },
+          {
+            "uniqueId": "3",
+            "name": "Candle",
+            "key": "crystal-item-722",
+            "count": 1,
+            "slot": "torch",
+            "durability": 8000
+          }
+        ],
+        "belt": [
+          {
+            "uniqueId": "4",
+            "name": "(HP)DrugSmall",
+            "key": "crystal-item-658",
+            "count": 20,
+            "slot": "0",
+            "durability": 0
+          },
+          {
+            "uniqueId": "5",
+            "name": "(MP)DrugSmall",
+            "key": "crystal-item-659",
+            "count": 10,
+            "slot": "1",
+            "durability": 0
+          }
+        ]
+      },
+      "logoutAckSequence": 3660,
+      "relogin": {
+        "characterIndex": 1,
+        "startAckSequence": 12,
+        "fingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Warrior",
+          "level": 30,
+          "gold": 18800,
+          "dead": false,
+          "knownSpells": [],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 232,
+        "playerMaxHp": 419,
+        "playerMp": 116,
+        "playerMaxMp": 116,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 6
+          },
+          {
+            "stat": 2,
+            "value": 0
+          },
+          {
+            "stat": 3,
+            "value": 1
+          },
+          {
+            "stat": 4,
+            "value": 8
+          },
+          {
+            "stat": 5,
+            "value": 10
+          },
+          {
+            "stat": 6,
+            "value": 0
+          },
+          {
+            "stat": 7,
+            "value": 0
+          },
+          {
+            "stat": 8,
+            "value": 0
+          },
+          {
+            "stat": 9,
+            "value": 0
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 15
+          },
+          {
+            "stat": 12,
+            "value": 419
+          },
+          {
+            "stat": 13,
+            "value": 116
+          },
+          {
+            "stat": 16,
+            "value": 350
+          },
+          {
+            "stat": 17,
+            "value": 81
+          },
+          {
+            "stat": 18,
+            "value": 60
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "persistenceMatched": true,
+      "finalLogoutAckSequence": 654,
+      "cleanupErrors": [],
+      "normalLogoutConfirmed": true
+    },
+    {
+      "className": "Wizard",
+      "phase": "death",
+      "status": "failed",
+      "cases": [],
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false,
+      "bootstrap": {
+        "characterIndex": 2,
+        "startAckSequence": 12,
+        "fingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Wizard",
+          "level": 30,
+          "gold": 18300,
+          "dead": false,
+          "knownSpells": [
+            "FireBall"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 128,
+        "playerMaxHp": 128,
+        "playerMp": 541,
+        "playerMaxMp": 541,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 2
+          },
+          {
+            "stat": 2,
+            "value": 0
+          },
+          {
+            "stat": 3,
+            "value": 1
+          },
+          {
+            "stat": 4,
+            "value": 6
+          },
+          {
+            "stat": 5,
+            "value": 8
+          },
+          {
+            "stat": 6,
+            "value": 4
+          },
+          {
+            "stat": 7,
+            "value": 4
+          },
+          {
+            "stat": 8,
+            "value": 0
+          },
+          {
+            "stat": 9,
+            "value": 0
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 15
+          },
+          {
+            "stat": 12,
+            "value": 128
+          },
+          {
+            "stat": 13,
+            "value": 541
+          },
+          {
+            "stat": 16,
+            "value": 230
+          },
+          {
+            "stat": 17,
+            "value": 22
+          },
+          {
+            "stat": 18,
+            "value": 24
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "death": {
+        "status": "failed",
+        "death": {
+          "status": "qualified",
+          "deathSequence": 1006,
+          "positiveOwnerHitCount": 31,
+          "zeroHpSequence": 1006,
+          "reason": null,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        },
+        "deadActions": {
+          "status": "failed",
+          "window": {
+            "fromMs": 1791102916121,
+            "endMs": 1791102921995,
+            "ownerId": 1000
+          },
+          "castBarrier": {
+            "status": "passed",
+            "spell": "FireBall",
+            "actualMagicInputSequence": 1018,
+            "baselineSnapshotSequence": 1014,
+            "eligibility": {
+              "status": "eligible",
+              "spell": "FireBall",
+              "ownerId": 1000,
+              "knownSkillObserved": true,
+              "mpCost": 3,
+              "mpCostKnown": true,
+              "beforeMp": 541,
+              "absoluteMpProvenance": {
+                "ownerId": 1000,
+                "absolute": true,
+                "source": "worldSnapshot",
+                "observedMs": 1791102916434
+              },
+              "enoughMp": true,
+              "validTarget": true,
+              "castControlClear": true,
+              "target": {
+                "objectId": 293202,
+                "kind": "monster",
+                "disposition": "hostile",
+                "x": 59,
+                "y": 55,
+                "dead": false
+              },
+              "ignoringOwnerDeathOnly": true
+            },
+            "matchingTargetInput": true,
+            "reason": null,
+            "verified": true
+          },
+          "castBarrierVerified": true,
+          "attemptedCommands": [
+            {
+              "sequence": 1015,
+              "type": "walk",
+              "spell": null,
+              "targetId": null
+            },
+            {
+              "sequence": 1016,
+              "type": "run",
+              "spell": null,
+              "targetId": null
+            },
+            {
+              "sequence": 1017,
+              "type": "attack",
+              "spell": null,
+              "targetId": 293202
+            },
+            {
+              "sequence": 1018,
+              "type": "magic",
+              "spell": "FireBall",
+              "targetId": 293202
+            }
+          ],
+          "illegalLivingReceipts": [
+            {
+              "sequence": 1032,
+              "tsMs": 1791102917753,
+              "packet": "DamageIndicator",
+              "payload": {
+                "damage": 8,
+                "damageType": 0,
+                "objectId": 293202,
+                "typed": true
+              },
+              "state": {
+                "map": "D021",
+                "x": 59,
+                "y": 56,
+                "direction": "Up",
+                "ownerId": 1000,
+                "hp": 0,
+                "maxHp": 128,
+                "mp": 538,
+                "maxMp": 541,
+                "hpProvenance": {
+                  "ownerId": 1000,
+                  "absolute": true,
+                  "source": "worldSnapshot",
+                  "observedMs": 1791102917641
+                },
+                "mpProvenance": {
+                  "ownerId": 1000,
+                  "absolute": true,
+                  "source": "worldSnapshot",
+                  "observedMs": 1791102917641
+                },
+                "exactHp": true,
+                "exactMp": true,
+                "dead": true,
+                "poison": 0,
+                "inSafeZone": false,
+                "actor": {
+                  "objectId": 293202,
+                  "kind": "monster",
+                  "name": "CaveBat",
+                  "ai": 0,
+                  "disposition": "hostile",
+                  "x": 59,
+                  "y": 55,
+                  "direction": "Down",
+                  "hp": 17,
+                  "dead": false
+                }
+              }
+            }
+          ],
+          "preparatoryMagicReceipts": [],
+          "revivalBeforeExplicitRequest": null,
+          "snapshotsAfterCommands": 12,
+          "exactDeadSnapshotsAfterCommands": 12,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        },
+        "attackBaselineEligible": true,
+        "attackTargetId": 293202,
+        "magicApplicable": true,
+        "magicEligibility": {
+          "status": "eligible",
+          "spell": "FireBall",
+          "ownerId": 1000,
+          "knownSkillObserved": true,
+          "mpCost": 3,
+          "mpCostKnown": true,
+          "beforeMp": 541,
+          "absoluteMpProvenance": {
+            "ownerId": 1000,
+            "absolute": true,
+            "source": "worldSnapshot",
+            "observedMs": 1791102916434
+          },
+          "enoughMp": true,
+          "validTarget": true,
+          "castControlClear": true,
+          "target": {
+            "objectId": 293202,
+            "kind": "monster",
+            "disposition": "hostile",
+            "x": 59,
+            "y": 55,
+            "dead": false
+          },
+          "ignoringOwnerDeathOnly": true
+        },
+        "castBarrierVerified": true,
+        "preparedDeathClone": true,
+        "deadFingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Wizard",
+          "level": 30,
+          "gold": 18300,
+          "dead": true,
+          "knownSpells": [
+            "FireBall"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "deadLogoutAck": 1069
+      },
+      "deadRelogin": {
+        "characterIndex": 2,
+        "startAckSequence": 12,
+        "fingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Wizard",
+          "level": 30,
+          "gold": 18300,
+          "dead": true,
+          "knownSpells": [
+            "FireBall"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 0,
+        "playerMaxHp": 128,
+        "playerMp": 538,
+        "playerMaxMp": 541,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 2
+          },
+          {
+            "stat": 2,
+            "value": 0
+          },
+          {
+            "stat": 3,
+            "value": 1
+          },
+          {
+            "stat": 4,
+            "value": 6
+          },
+          {
+            "stat": 5,
+            "value": 8
+          },
+          {
+            "stat": 6,
+            "value": 4
+          },
+          {
+            "stat": 7,
+            "value": 4
+          },
+          {
+            "stat": 8,
+            "value": 0
+          },
+          {
+            "stat": 9,
+            "value": 0
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 15
+          },
+          {
+            "stat": 12,
+            "value": 128
+          },
+          {
+            "stat": 13,
+            "value": 541
+          },
+          {
+            "stat": 16,
+            "value": 230
+          },
+          {
+            "stat": 17,
+            "value": 22
+          },
+          {
+            "stat": 18,
+            "value": 24
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "deadPersistenceMatched": true,
+      "revival": {
+        "ackSequence": 688,
+        "location": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        },
+        "hp": 128,
+        "actualAlive": true,
+        "expectedBindPoint": {
+          "map_file_name": "0",
+          "position": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        "town": true,
+        "stop": {
+          "status": "passed",
+          "durationMs": 5507,
+          "requiredMs": 5000,
+          "anchor": {
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "direction": "Down"
+          },
+          "anchorSequence": 764,
+          "window": {
+            "anchorMs": 1791102927013,
+            "endMs": 1791102932520,
+            "ownerId": 1000
+          },
+          "authoritySampleCount": 10,
+          "snapshotCount": 10,
+          "observedToEnd": true,
+          "extraInputs": [],
+          "driftReceipts": [],
+          "positiveOwnerHits": 0,
+          "deathReceiptSequence": null,
+          "allLateReceiptsRetained": true,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        }
+      },
+      "revivedFingerprint": {
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "direction": "Down",
+        "class": "Wizard",
+        "level": 30,
+        "gold": 18300,
+        "dead": false,
+        "knownSpells": [
+          "FireBall"
+        ],
+        "inventory": [],
+        "equipment": [
+          {
+            "uniqueId": "0",
+            "name": "WoodenSword",
+            "key": "crystal-item-221",
+            "count": 1,
+            "slot": "weapon",
+            "durability": 4000
+          },
+          {
+            "uniqueId": "1",
+            "name": "BaseDress(M)",
+            "key": "crystal-item-317",
+            "count": 1,
+            "slot": "armour",
+            "durability": 5000
+          },
+          {
+            "uniqueId": "3",
+            "name": "Candle",
+            "key": "crystal-item-722",
+            "count": 1,
+            "slot": "torch",
+            "durability": 8000
+          }
+        ],
+        "belt": [
+          {
+            "uniqueId": "4",
+            "name": "(HP)DrugSmall",
+            "key": "crystal-item-658",
+            "count": 20,
+            "slot": "0",
+            "durability": 0
+          },
+          {
+            "uniqueId": "5",
+            "name": "(MP)DrugSmall",
+            "key": "crystal-item-659",
+            "count": 10,
+            "slot": "1",
+            "durability": 0
+          }
+        ]
+      },
+      "revivedLogoutAck": 804,
+      "revivedRelogin": {
+        "characterIndex": 2,
+        "startAckSequence": 14,
+        "fingerprint": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down",
+          "class": "Wizard",
+          "level": 30,
+          "gold": 18300,
+          "dead": false,
+          "knownSpells": [
+            "FireBall"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 128,
+        "playerMaxHp": 128,
+        "playerMp": 541,
+        "playerMaxMp": 541,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 2
+          },
+          {
+            "stat": 2,
+            "value": 0
+          },
+          {
+            "stat": 3,
+            "value": 1
+          },
+          {
+            "stat": 4,
+            "value": 6
+          },
+          {
+            "stat": 5,
+            "value": 8
+          },
+          {
+            "stat": 6,
+            "value": 4
+          },
+          {
+            "stat": 7,
+            "value": 4
+          },
+          {
+            "stat": 8,
+            "value": 0
+          },
+          {
+            "stat": 9,
+            "value": 0
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 15
+          },
+          {
+            "stat": 12,
+            "value": 128
+          },
+          {
+            "stat": 13,
+            "value": 541
+          },
+          {
+            "stat": 16,
+            "value": 230
+          },
+          {
+            "stat": 17,
+            "value": 22
+          },
+          {
+            "stat": 18,
+            "value": 24
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "revivedPersistenceMatched": true,
+      "logoutAckSequence": 670,
+      "cleanupErrors": [],
+      "normalLogoutConfirmed": true
+    },
+    {
+      "className": "Taoist",
+      "phase": "death",
+      "status": "completed",
+      "cases": [],
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false,
+      "bootstrap": {
+        "characterIndex": 3,
+        "startAckSequence": 12,
+        "fingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Taoist",
+          "level": 30,
+          "gold": 18300,
+          "dead": false,
+          "knownSpells": [
+            "Healing"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 239,
+        "playerMaxHp": 239,
+        "playerMp": 260,
+        "playerMaxMp": 260,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 2
+          },
+          {
+            "stat": 2,
+            "value": 2
+          },
+          {
+            "stat": 3,
+            "value": 6
+          },
+          {
+            "stat": 4,
+            "value": 6
+          },
+          {
+            "stat": 5,
+            "value": 8
+          },
+          {
+            "stat": 6,
+            "value": 0
+          },
+          {
+            "stat": 7,
+            "value": 0
+          },
+          {
+            "stat": 8,
+            "value": 4
+          },
+          {
+            "stat": 9,
+            "value": 4
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 18
+          },
+          {
+            "stat": 12,
+            "value": 239
+          },
+          {
+            "stat": 13,
+            "value": 260
+          },
+          {
+            "stat": 16,
+            "value": 275
+          },
+          {
+            "stat": 17,
+            "value": 33
+          },
+          {
+            "stat": 18,
+            "value": 33
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "death": {
+        "status": "passed",
+        "death": {
+          "status": "qualified",
+          "deathSequence": 1354,
+          "positiveOwnerHitCount": 57,
+          "zeroHpSequence": 1354,
+          "reason": null,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        },
+        "deadActions": {
+          "status": "passed",
+          "window": {
+            "fromMs": 1791102984582,
+            "endMs": 1791102990419,
+            "ownerId": 1000
+          },
+          "castBarrier": {
+            "status": "passed",
+            "spell": "Healing",
+            "actualMagicInputSequence": 1368,
+            "baselineSnapshotSequence": 1364,
+            "eligibility": {
+              "status": "eligible",
+              "spell": "Healing",
+              "ownerId": 1000,
+              "knownSkillObserved": true,
+              "mpCost": 3,
+              "mpCostKnown": true,
+              "beforeMp": 260,
+              "absoluteMpProvenance": {
+                "ownerId": 1000,
+                "absolute": true,
+                "source": "worldSnapshot",
+                "observedMs": 1791102984808
+              },
+              "enoughMp": true,
+              "validTarget": true,
+              "castControlClear": true,
+              "target": {
+                "objectId": 1000,
+                "kind": "selfPlayer",
+                "disposition": "friendly",
+                "x": 59,
+                "y": 56,
+                "dead": true
+              },
+              "ignoringOwnerDeathOnly": true
+            },
+            "matchingTargetInput": true,
+            "reason": null,
+            "verified": true
+          },
+          "castBarrierVerified": true,
+          "attemptedCommands": [
+            {
+              "sequence": 1365,
+              "type": "walk",
+              "spell": null,
+              "targetId": null
+            },
+            {
+              "sequence": 1366,
+              "type": "run",
+              "spell": null,
+              "targetId": null
+            },
+            {
+              "sequence": 1367,
+              "type": "attack",
+              "spell": null,
+              "targetId": 293202
+            },
+            {
+              "sequence": 1368,
+              "type": "magic",
+              "spell": "Healing",
+              "targetId": 1000
+            }
+          ],
+          "illegalLivingReceipts": [],
+          "preparatoryMagicReceipts": [],
+          "revivalBeforeExplicitRequest": null,
+          "snapshotsAfterCommands": 11,
+          "exactDeadSnapshotsAfterCommands": 11,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        },
+        "attackBaselineEligible": true,
+        "attackTargetId": 293202,
+        "magicApplicable": true,
+        "magicEligibility": {
+          "status": "eligible",
+          "spell": "Healing",
+          "ownerId": 1000,
+          "knownSkillObserved": true,
+          "mpCost": 3,
+          "mpCostKnown": true,
+          "beforeMp": 260,
+          "absoluteMpProvenance": {
+            "ownerId": 1000,
+            "absolute": true,
+            "source": "worldSnapshot",
+            "observedMs": 1791102984808
+          },
+          "enoughMp": true,
+          "validTarget": true,
+          "castControlClear": true,
+          "target": {
+            "objectId": 1000,
+            "kind": "selfPlayer",
+            "disposition": "friendly",
+            "x": 59,
+            "y": 56,
+            "dead": true
+          },
+          "ignoringOwnerDeathOnly": true
+        },
+        "castBarrierVerified": true,
+        "preparedDeathClone": true,
+        "deadFingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Taoist",
+          "level": 30,
+          "gold": 18300,
+          "dead": true,
+          "knownSpells": [
+            "Healing"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "deadLogoutAck": 1410
+      },
+      "deadRelogin": {
+        "characterIndex": 3,
+        "startAckSequence": 12,
+        "fingerprint": {
+          "map": "D021",
+          "x": 59,
+          "y": 56,
+          "direction": "Down",
+          "class": "Taoist",
+          "level": 30,
+          "gold": 18300,
+          "dead": true,
+          "knownSpells": [
+            "Healing"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 0,
+        "playerMaxHp": 239,
+        "playerMp": 257,
+        "playerMaxMp": 260,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 2
+          },
+          {
+            "stat": 2,
+            "value": 2
+          },
+          {
+            "stat": 3,
+            "value": 6
+          },
+          {
+            "stat": 4,
+            "value": 6
+          },
+          {
+            "stat": 5,
+            "value": 8
+          },
+          {
+            "stat": 6,
+            "value": 0
+          },
+          {
+            "stat": 7,
+            "value": 0
+          },
+          {
+            "stat": 8,
+            "value": 4
+          },
+          {
+            "stat": 9,
+            "value": 4
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 18
+          },
+          {
+            "stat": 12,
+            "value": 239
+          },
+          {
+            "stat": 13,
+            "value": 260
+          },
+          {
+            "stat": 16,
+            "value": 275
+          },
+          {
+            "stat": 17,
+            "value": 33
+          },
+          {
+            "stat": 18,
+            "value": 33
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "deadPersistenceMatched": true,
+      "revival": {
+        "ackSequence": 669,
+        "location": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        },
+        "hp": 239,
+        "actualAlive": true,
+        "expectedBindPoint": {
+          "map_file_name": "0",
+          "position": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        "town": true,
+        "stop": {
+          "status": "passed",
+          "durationMs": 5439,
+          "requiredMs": 5000,
+          "anchor": {
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "direction": "Down"
+          },
+          "anchorSequence": 745,
+          "window": {
+            "anchorMs": 1791102995723,
+            "endMs": 1791103001162,
+            "ownerId": 1000
+          },
+          "authoritySampleCount": 10,
+          "snapshotCount": 10,
+          "observedToEnd": true,
+          "extraInputs": [],
+          "driftReceipts": [],
+          "positiveOwnerHits": 0,
+          "deathReceiptSequence": null,
+          "allLateReceiptsRetained": true,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        }
+      },
+      "revivedFingerprint": {
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "direction": "Down",
+        "class": "Taoist",
+        "level": 30,
+        "gold": 18300,
+        "dead": false,
+        "knownSpells": [
+          "Healing"
+        ],
+        "inventory": [],
+        "equipment": [
+          {
+            "uniqueId": "0",
+            "name": "WoodenSword",
+            "key": "crystal-item-221",
+            "count": 1,
+            "slot": "weapon",
+            "durability": 4000
+          },
+          {
+            "uniqueId": "1",
+            "name": "BaseDress(M)",
+            "key": "crystal-item-317",
+            "count": 1,
+            "slot": "armour",
+            "durability": 5000
+          },
+          {
+            "uniqueId": "3",
+            "name": "Candle",
+            "key": "crystal-item-722",
+            "count": 1,
+            "slot": "torch",
+            "durability": 8000
+          }
+        ],
+        "belt": [
+          {
+            "uniqueId": "4",
+            "name": "(HP)DrugSmall",
+            "key": "crystal-item-658",
+            "count": 20,
+            "slot": "0",
+            "durability": 0
+          },
+          {
+            "uniqueId": "5",
+            "name": "(MP)DrugSmall",
+            "key": "crystal-item-659",
+            "count": 10,
+            "slot": "1",
+            "durability": 0
+          }
+        ]
+      },
+      "revivedLogoutAck": 785,
+      "revivedRelogin": {
+        "characterIndex": 3,
+        "startAckSequence": 14,
+        "fingerprint": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down",
+          "class": "Taoist",
+          "level": 30,
+          "gold": 18300,
+          "dead": false,
+          "knownSpells": [
+            "Healing"
+          ],
+          "inventory": [],
+          "equipment": [
+            {
+              "uniqueId": "0",
+              "name": "WoodenSword",
+              "key": "crystal-item-221",
+              "count": 1,
+              "slot": "weapon",
+              "durability": 4000
+            },
+            {
+              "uniqueId": "1",
+              "name": "BaseDress(M)",
+              "key": "crystal-item-317",
+              "count": 1,
+              "slot": "armour",
+              "durability": 5000
+            },
+            {
+              "uniqueId": "3",
+              "name": "Candle",
+              "key": "crystal-item-722",
+              "count": 1,
+              "slot": "torch",
+              "durability": 8000
+            }
+          ],
+          "belt": [
+            {
+              "uniqueId": "4",
+              "name": "(HP)DrugSmall",
+              "key": "crystal-item-658",
+              "count": 20,
+              "slot": "0",
+              "durability": 0
+            },
+            {
+              "uniqueId": "5",
+              "name": "(MP)DrugSmall",
+              "key": "crystal-item-659",
+              "count": 10,
+              "slot": "1",
+              "durability": 0
+            }
+          ]
+        },
+        "playerHp": 239,
+        "playerMaxHp": 239,
+        "playerMp": 260,
+        "playerMaxMp": 260,
+        "playerCrystalStats": [
+          {
+            "stat": 0,
+            "value": 2
+          },
+          {
+            "stat": 1,
+            "value": 2
+          },
+          {
+            "stat": 2,
+            "value": 2
+          },
+          {
+            "stat": 3,
+            "value": 6
+          },
+          {
+            "stat": 4,
+            "value": 6
+          },
+          {
+            "stat": 5,
+            "value": 8
+          },
+          {
+            "stat": 6,
+            "value": 0
+          },
+          {
+            "stat": 7,
+            "value": 0
+          },
+          {
+            "stat": 8,
+            "value": 4
+          },
+          {
+            "stat": 9,
+            "value": 4
+          },
+          {
+            "stat": 10,
+            "value": 5
+          },
+          {
+            "stat": 11,
+            "value": 18
+          },
+          {
+            "stat": 12,
+            "value": 239
+          },
+          {
+            "stat": 13,
+            "value": 260
+          },
+          {
+            "stat": 16,
+            "value": 275
+          },
+          {
+            "stat": 17,
+            "value": 33
+          },
+          {
+            "stat": 18,
+            "value": 33
+          },
+          {
+            "stat": 30,
+            "value": 0
+          },
+          {
+            "stat": 31,
+            "value": 0
+          },
+          {
+            "stat": 32,
+            "value": 0
+          },
+          {
+            "stat": 33,
+            "value": 0
+          },
+          {
+            "stat": 34,
+            "value": 0
+          },
+          {
+            "stat": 35,
+            "value": 0
+          },
+          {
+            "stat": 36,
+            "value": 0
+          }
+        ]
+      },
+      "revivedPersistenceMatched": true,
+      "logoutAckSequence": 670,
+      "cleanupErrors": [],
+      "normalLogoutConfirmed": true
+    }
+  ],
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false,
+  "normalLogoutConfirmed": true,
+  "driverCompleted": true,
+  "mechanicsAllCasesPassed": false
+}

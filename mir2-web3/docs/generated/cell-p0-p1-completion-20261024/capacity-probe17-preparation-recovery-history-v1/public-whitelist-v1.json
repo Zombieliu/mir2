@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T20:09:13.138Z",
+  "scope": "Two actual preparation refusals plus post-run collector repair; stdout-only failure limitations retained",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json.before-node-path-v1.txt",
+        "bytes": 342,
+        "sha256": "91f2f045e5b5610ad352683090eef6b54dbf24702b411b84f15093f8c8d7f86d"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/path-repair/backend-library-binding.json.before-node-path-v1.txt"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json",
+        "bytes": 346,
+        "sha256": "55a7e8475c2ce8b178c4ecd89274a0e29718c08deef44e00ee73729447808883"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/path-repair/backend-library-binding.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\metadata-path-guard-failure-and-repair-v1.json",
+        "bytes": 3356,
+        "sha256": "a72be9a2e051b1d823c1df1b97a14cb2ef3bf296f8802c3fdb976d4a7fe148a3"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/path-repair/metadata-path-guard-failure-and-repair-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-before-path-guard-failure-v1.json",
+        "bytes": 33193,
+        "sha256": "d6a54fba126d58c258462fe39bffc68a78b33cb7959b78591ef75e3ead5d72ad"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/seals/launcher-source-frozen-before-path-guard-failure-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-before-powershell-guard-failure-v1.json",
+        "bytes": 33193,
+        "sha256": "3c4a349693be80922ce2b7161ce8daf20592ae9cb10c7c7f691100eee9aa57fb"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/seals/launcher-source-frozen-before-powershell-guard-failure-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-v1.json",
+        "bytes": 33193,
+        "sha256": "6c5610464c3ddf69c607ad882b36e42b316fbe1f8dab17c38c0457b591db5b16"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/seals/launcher-source-frozen-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v2.json",
+        "bytes": 31015,
+        "sha256": "cafad350d557a62587d119d6a131eb1cd0ed6496287172b1038933f4f1871ccc"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/preparation/runtime-prepared-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v3.json",
+        "bytes": 31015,
+        "sha256": "3a80bedf5390884069be2f3bac42d42202fb1afc9280bd585545bcd8ed6f5c41"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/preparation/runtime-prepared-v3.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v4.json",
+        "bytes": 31015,
+        "sha256": "c988176e9409357eee0b0101851a8197ca0ab25d913d1224ab01dd1a2b50b6a1"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/preparation/runtime-prepared-v4.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\initialize-private.ps1.before-fresh50-binding-repair-v1.txt",
+        "bytes": 2226,
+        "sha256": "95f66e1b42a00182563adfe8a99cded539340b006f7a89ad2c80908b7c941169"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/initialize-private.ps1.before-fresh50-binding-repair-v1.txt"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recover-drained-owned.ps1.before-fresh50-binding-repair-v1.txt",
+        "bytes": 3195,
+        "sha256": "d312a0bd57a2d77159ba61817a4a793798e39ab98fcef512aa6660e69fc25a37"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/recover-drained-owned.ps1.before-fresh50-binding-repair-v1.txt"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\initialize-private.ps1",
+        "bytes": 2226,
+        "sha256": "12fa31e59cfc1729a8d9b332cdd2cb0f044281a1910bcd388386a479b78bc9bf"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/initialize-private.ps1"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recover-drained-owned.ps1",
+        "bytes": 3195,
+        "sha256": "92345903964b600be994b59874ccd953ae3d4e70c0b88987665edcac48c31583"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/recover-drained-owned.ps1"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-powershell-binding-repair-v1.json",
+        "bytes": 2458,
+        "sha256": "9a8066a28939d6fd2b5c01f088017cea457b03628d0daf5591686d6f848642a5"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/root-powershell-binding-repair-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-powershell-parse-v1.json",
+        "bytes": 675,
+        "sha256": "1d40ae2bbe5af6281417044204d76f2d0b379be9e0467f15ea3101ca3e9c4be8"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/root-powershell-parse-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-repair-probe17-powershell-binding-v1.mjs",
+        "bytes": 3246,
+        "sha256": "3904f1eaa933aaefb5b499a9ba57c7662a94e70afb67c0834d87df17ee6780ad"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/powershell-repair/root-repair-probe17-powershell-binding-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\source-guard-readonly-before-powershell-guard-failure-v1.json",
+        "bytes": 2293,
+        "sha256": "dd1ca31962b48e50a7240a4f3bc56431d15cc84ac6b0af630ac7e58672967be0"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/control/source-guard-readonly-before-powershell-guard-failure-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\source-guard-readonly-verification.json",
+        "bytes": 2293,
+        "sha256": "5ae389a82ec9b3349239de4fcc6a94ea93b7c7f0842c55c7ea4d9d372e46ce6f"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/control/source-guard-readonly-verification.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-seal-and-guard-v1.mjs",
+        "bytes": 13790,
+        "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/control/root-seal-and-guard-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-runtime-independent-review-v1\\review-v1.json",
+        "bytes": 5137,
+        "sha256": "319883ccb2acbfc0ef7bfb784f71b31ea0ee79246c25ea90e08b3c4d7cca8cf5"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/review/runtime-review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-runtime-independent-review-v1\\review-v2.json",
+        "bytes": 3371,
+        "sha256": "79f7c7b18ab97105235995997623d15cf073ef8ad92970bf29d24c2ed786ef55"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/review/runtime-review-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-runtime-independent-review-v1\\review-v3.json",
+        "bytes": 5833,
+        "sha256": "fcb913b89653a491c0a2f3acb6d26bbc2c6081f353fcc597e82a2776e5d09244"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/review/runtime-review-v3.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public.mjs",
+        "bytes": 43717,
+        "sha256": "fa890d028335d38b7bce79806e88f379522723031806dd263fbf8feade55513b"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/posthoc-collector/collect-public.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2.mjs",
+        "bytes": 43753,
+        "sha256": "c9f20b36990fb2ed92462360bfad9df4a9798c5f96bc5ab31f36037c5baf473c"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/posthoc-collector/collect-public-current50-v2.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2-derivation-v1.json",
+        "bytes": 5732,
+        "sha256": "1419117bfdf61dbb57d1bebe8c3c742463a42149266f1f8cfd626819853b953c"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/posthoc-collector/collect-public-current50-v2-derivation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-post-collector-independent-review-v1\\review-v1.json",
+        "bytes": 3008,
+        "sha256": "984b3304d3487bc3bdc3b64551bf261fa01c94e77cd7589fc1b11e27e22e651e"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/review/posthoc-collector-review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-public-verification-stdout-v1.log",
+        "bytes": 5023,
+        "sha256": "8f5bb8891496a2cb1da96580b669eb87c2dd454144449f3d4db3ddd96617b1cf"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/execution/base-public-verifier-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-public-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "capacity-probe17-preparation-recovery-history-v1/execution/base-public-verifier-stderr-v1.log"
+    }
+  ],
+  "privateOrBinaryCopied": false,
+  "rawOrRecordingCopied": false,
+  "gameVerdictChanged": false,
+  "capacityAccepted": false
+}

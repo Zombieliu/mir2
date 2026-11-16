@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T06:02:48.879Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "state": "independent-static-preseal-review-no-blocking-found",
+  "scope": "Read-only raw-byte/hash and source-text inspection of compact probe12 preparation, execution guards and public collectors. No product or template modules imported or executed.",
+  "directory": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12",
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe12-preseal-input-check-v1.json",
+    "bytes": 13008,
+    "sha256": "4d34eb4df00d9a9271f40f4604b80c1c9d6b05e6835787c288181c328eddf7f4"
+  },
+  "localClosure": {
+    "reviewedFileCount": 31,
+    "reviewedSourceSha256": "8edaf888ad4303094ecc2d6bc38ac9dfc9aad48804511b5381c78db1e4de3e6a",
+    "allReviewedFileRawPinsMatched": true,
+    "syntaxDeclaredScripts": 19,
+    "syntaxStatusSource": "Writer preseal receipt only; reviewer did not rerun syntax or tests."
+  },
+  "identity": {
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "sceneSourceSha256": "4854eb58f6468ad4f8092dd375dc5363f42071470f92be4219a14df1321b163f",
+    "sourceGuardAndFull16EnforcementRead": true,
+    "sourceGuardExecutedByReviewer": false,
+    "gitStateIndependentlyExecutedByReviewer": false
+  },
+  "scene": {
+    "localScenario": {
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "staticSourceClosureCount": 10,
+    "span": 2,
+    "bodySide": 3,
+    "staticHaloSide": 5,
+    "first10ExactAndRepaired100PinnedByContract": true,
+    "repairCollection": {
+      "files": 39,
+      "bytes": 7719976,
+      "manifest": {
+        "bytes": 7084,
+        "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+      }
+    },
+    "publicStaticInventoryCount": 41,
+    "publicStaticInventoryScope": "39 repair artifacts, their collection manifest, and the separately pinned 3473-byte independent summary addendum.",
+    "liveRiskBoundariesRetained": [
+      "100-actor representative static scout tour totals 886 steps, with long 53-65 step legs and unchanged 24-ACK/20-second scout budgets.",
+      "Conditional positive-hit supply does not prove 180 launched attacks per minute or a fresh two-hour soak.",
+      "Prior failed11 remains failed; a new explicit scene does not inherit old capacity acceptance."
+    ]
+  },
+  "configuration": {
+    "runOptionChangedKeysComparedWithFailed11": [
+      "resourceProfile",
+      "scenarioFile",
+      "scope"
+    ],
+    "policyJsonExactFailed11": true,
+    "resourceRawExactFailed11AndOriginal06": true,
+    "resourceProfile": {
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    "explicitAdmissionCaps": [
+      24,
+      10,
+      10,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "configuredPhases": [
+      {
+        "name": "stage-2",
+        "actors": 2,
+        "seconds": 300,
+        "full60SecondWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "actors": 10,
+        "seconds": 300,
+        "full60SecondWindows": 5
+      },
+      {
+        "name": "soak",
+        "actors": 10,
+        "seconds": 360,
+        "full60SecondWindows": 6
+      }
+    ],
+    "fullAcceptanceEligible": false
+  },
+  "publicEvidence": {
+    "child": "capacity-native10-v2-compact-halo-followup-12-diagnostics",
+    "explicitWhitelistAndRealpathGuardsRead": true,
+    "rawArchivesRemainExternal": true,
+    "partialAndFailureOriginalBytesPreserved": true,
+    "normalProcessCleanupAndDiagnosticsCompleteSeparate": true,
+    "probeCapacityAcceptedAlwaysFalse": true,
+    "privateStoreCredentialsRecordingPayloadOrExeNotCopied": true
+  },
+  "preparationState": {
+    "checkedAbsent": [
+      "private",
+      "bin",
+      "accounts.json",
+      "source-pins.json",
+      "preparation.lock",
+      "execution.lock",
+      "realm-process.json"
+    ],
+    "allAbsent": true
+  },
+  "reviewExecution": {
+    "rawHashAndTextInspectionOnly": true,
+    "astar": false,
+    "modelRecalculation": false,
+    "search": false,
+    "moduleImport": false,
+    "sourceGuard": false,
+    "syntaxOrTests": false,
+    "prepareOrProvision": false,
+    "realmOrLoad": false,
+    "trackedFilesChanged": false
+  },
+  "verdict": {
+    "blockingFindings": [],
+    "noBlockingFound": true,
+    "suitableToSeal": true,
+    "authorizesPrepareOrRun": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "limits": "This review verifies the pinned source contracts and preparation boundary, not runtime behavior, actual dynamic supply, a fresh successful probe or formal capacity. Root retains execution authorization after final seal."
+}

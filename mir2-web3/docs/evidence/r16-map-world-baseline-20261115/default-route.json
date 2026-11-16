@@ -1,0 +1,779 @@
+{
+  "passed": true,
+  "scope": "Actual shared Quest entrance navigation from ReagentStore0108 to Bichon0, unmodified late collision after ordinary logout, fresh socket password-login and a new supply objective. Warm asset caches; local9244; not public-network or cold-performance qualification.",
+  "phases": [
+    {
+      "phase": "interior-route",
+      "at": 1794684742124
+    },
+    {
+      "phase": "pending-logout",
+      "at": 1794684747962
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "at": 1794684774436
+    }
+  ],
+  "collision": [
+    {
+      "phase": "interior-route",
+      "map": "0108",
+      "url": "/api/scene/collision?map=0108&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+      "at": 1794684742756
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+      "at": 1794684748029,
+      "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+      "heldAt": 1794684748257,
+      "bounds": {
+        "minX": 0,
+        "maxX": 255,
+        "minY": 0,
+        "maxY": 255
+      },
+      "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+      "releasedAt": 1794684751837,
+      "fulfilledAt": 1794684751842
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+      "at": 1794684751889
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+      "at": 1794684751890
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+      "at": 1794684751890
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+      "at": 1794684751890
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+      "at": 1794684752218
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+      "at": 1794684752505
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+      "at": 1794684752876
+    },
+    {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+      "at": 1794684753282
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+      "at": 1794684774734
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+      "at": 1794684775013
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+      "at": 1794684775013
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+      "at": 1794684775013
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+      "at": 1794684775013
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+      "at": 1794684775365
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+      "at": 1794684775657
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+      "at": 1794684775909
+    },
+    {
+      "phase": "fresh-supply-goal",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+      "at": 1794684776215
+    }
+  ],
+  "portalSource": {
+    "manifestSha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "from": 4,
+    "file": "0108",
+    "to": 1,
+    "map_index": 1,
+    "source": {
+      "x": 10,
+      "y": 13
+    },
+    "destination": {
+      "x": 326,
+      "y": 289
+    },
+    "need_hole": false,
+    "need_move": false,
+    "conquest_index": 0,
+    "show_on_big_map": false,
+    "icon": 0
+  },
+  "initial": {
+    "map": "0108",
+    "position": {
+      "x": 8,
+      "y": 12
+    }
+  },
+  "entranceControl": {
+    "stamp": {
+      "generation": 2,
+      "revision": 2,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "sceneRevision": 3,
+      "playerObjectId": 1000,
+      "mapFileName": "0108"
+    },
+    "rect": {
+      "type": "navigateQuestRoute",
+      "left": 19,
+      "top": 295,
+      "width": 282,
+      "height": 25
+    },
+    "point": {
+      "x": 288,
+      "y": 403.5
+    }
+  },
+  "interiorPlan": {
+    "at": 1794684742876,
+    "phase": "interior-route",
+    "query": {
+      "version": 1,
+      "stamp": {
+        "generation": 2,
+        "revision": 2,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0108"
+      },
+      "mapIndex": 4,
+      "mapFileName": "0108",
+      "width": 15,
+      "height": 18,
+      "origin": {
+        "x": 8,
+        "y": 12
+      },
+      "destination": {
+        "x": 10,
+        "y": 13
+      },
+      "routeTarget": {
+        "type": "entrance"
+      },
+      "occupiedTiles": [
+        {
+          "x": 7,
+          "y": 7
+        }
+      ],
+      "rejectedEdges": []
+    },
+    "result": {
+      "destination": {
+        "x": 10,
+        "y": 13
+      },
+      "error": null,
+      "mapFileName": "0108",
+      "mapIndex": 4,
+      "ok": true,
+      "origin": {
+        "x": 8,
+        "y": 12
+      },
+      "radius": 0,
+      "stamp": {
+        "connectionGeneration": 1,
+        "generation": 2,
+        "mapFileName": "0108",
+        "playerObjectId": 1000,
+        "revision": 2,
+        "sceneRevision": 3,
+        "sessionGeneration": 1
+      },
+      "steps": [
+        {
+          "x": 9,
+          "y": 13
+        },
+        {
+          "x": 10,
+          "y": 13
+        }
+      ],
+      "version": 1
+    }
+  },
+  "transfer": {
+    "packet": "MapInformation",
+    "payload": {
+      "bigMapIndex": 101,
+      "fileName": "0",
+      "lights": 0,
+      "mapDarkLight": 0,
+      "mapIndex": 1,
+      "miniMapIndex": 101,
+      "music": 0,
+      "spawnFlags": {
+        "fire": false,
+        "lightning": false
+      },
+      "title": "BichonProvince",
+      "weatherParticles": 0
+    },
+    "type": "packet",
+    "seq": 14,
+    "at": 1794684746489
+  },
+  "afterTransfer": {
+    "map": "0",
+    "position": {
+      "x": 325,
+      "y": 290
+    }
+  },
+  "landingAck": {
+    "packet": "UserLocation",
+    "payload": {
+      "direction": "Down",
+      "x": 325,
+      "y": 290
+    },
+    "type": "packet",
+    "seq": 16,
+    "at": 1794684746490
+  },
+  "afterMapMoves": [],
+  "postMapControls": {
+    "stamp": {
+      "generation": 2,
+      "revision": 6,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "sceneRevision": 4,
+      "playerObjectId": 1000,
+      "mapFileName": "0"
+    },
+    "rects": [
+      {
+        "type": "navigateQuestRoute",
+        "left": 19,
+        "top": 255,
+        "width": 282,
+        "height": 25
+      },
+      {
+        "type": "questLocalUi",
+        "left": 19,
+        "top": 306,
+        "width": 282,
+        "height": 25
+      },
+      {
+        "type": "openDestinationMap",
+        "left": 19,
+        "top": 335,
+        "width": 282,
+        "height": 25
+      },
+      {
+        "type": "toggleSupplies",
+        "left": 19,
+        "top": 364,
+        "width": 282,
+        "height": 25
+      }
+    ],
+    "quests": [
+      {
+        "id": 2110001,
+        "stage": "completed"
+      },
+      {
+        "id": 2110002,
+        "stage": "completed"
+      },
+      {
+        "id": 2110003,
+        "stage": "inProgress"
+      },
+      {
+        "id": 154,
+        "stage": "available"
+      }
+    ]
+  },
+  "baselineReads": [
+    {
+      "type": "clientVersion",
+      "seq": 17,
+      "at": 1794684746674
+    }
+  ],
+  "interiorMoves": [
+    {
+      "type": "walk",
+      "direction": "DownRight",
+      "seq": 10,
+      "at": 1794684742899
+    },
+    {
+      "type": "walk",
+      "direction": "Right",
+      "seq": 12,
+      "at": 1794684743497
+    }
+  ],
+  "pendingControl": {
+    "stamp": {
+      "generation": 2,
+      "revision": 6,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "sceneRevision": 4,
+      "playerObjectId": 1000,
+      "mapFileName": "0"
+    },
+    "rect": {
+      "type": "navigateQuestRoute",
+      "left": 19,
+      "top": 255,
+      "width": 282,
+      "height": 25
+    },
+    "point": {
+      "x": 288,
+      "y": 363.5
+    }
+  },
+  "pendingLogout": {
+    "at": 1794684751837,
+    "normalAck": true,
+    "noMoveBeforeAck": true
+  },
+  "held": {
+    "phase": "pending-logout",
+    "map": "0",
+    "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+    "at": 1794684748029,
+    "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+    "heldAt": 1794684748257,
+    "bounds": {
+      "minX": 0,
+      "maxX": 255,
+      "minY": 0,
+      "maxY": 255
+    },
+    "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+    "releasedAt": 1794684751837,
+    "fulfilledAt": 1794684751842
+  },
+  "reopened": {
+    "map": "0",
+    "position": {
+      "x": 325,
+      "y": 290
+    }
+  },
+  "supplies": {
+    "open": {
+      "stamp": {
+        "generation": 2,
+        "revision": 2,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "rect": {
+        "type": "toggleSupplies",
+        "left": 19,
+        "top": 342,
+        "width": 282,
+        "height": 25
+      },
+      "point": {
+        "x": 288,
+        "y": 450.5
+      }
+    },
+    "vendor": {
+      "stamp": {
+        "generation": 2,
+        "revision": 2,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "rect": {
+        "type": "selectSupplyVendor",
+        "left": 19,
+        "top": 313,
+        "width": 282,
+        "height": 25
+      },
+      "point": {
+        "x": 288,
+        "y": 421.5
+      }
+    },
+    "control": {
+      "stamp": {
+        "generation": 2,
+        "revision": 2,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "rect": {
+        "type": "navigateQuestRoute",
+        "left": 19,
+        "top": 331,
+        "width": 282,
+        "height": 25
+      },
+      "point": {
+        "x": 288,
+        "y": 439.5
+      }
+    },
+    "plan": {
+      "at": 1794684777285,
+      "phase": "fresh-supply-goal",
+      "query": {
+        "version": 1,
+        "stamp": {
+          "generation": 2,
+          "revision": 2,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "sceneRevision": 3,
+          "playerObjectId": 1000,
+          "mapFileName": "0"
+        },
+        "mapIndex": 1,
+        "mapFileName": "0",
+        "width": 700,
+        "height": 700,
+        "origin": {
+          "x": 325,
+          "y": 290
+        },
+        "destination": {
+          "x": 324,
+          "y": 291
+        },
+        "routeTarget": {
+          "type": "supply",
+          "vendor": "potions"
+        },
+        "occupiedTiles": [
+          {
+            "x": 324,
+            "y": 291
+          },
+          {
+            "x": 310,
+            "y": 283
+          },
+          {
+            "x": 329,
+            "y": 289
+          },
+          {
+            "x": 341,
+            "y": 275
+          }
+        ],
+        "rejectedEdges": []
+      },
+      "result": {
+        "destination": {
+          "x": 325,
+          "y": 290
+        },
+        "error": null,
+        "mapFileName": "0",
+        "mapIndex": 1,
+        "ok": true,
+        "origin": {
+          "x": 325,
+          "y": 290
+        },
+        "radius": 2,
+        "stamp": {
+          "connectionGeneration": 1,
+          "generation": 2,
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "revision": 2,
+          "sceneRevision": 3,
+          "sessionGeneration": 1
+        },
+        "steps": [],
+        "version": 1
+      }
+    },
+    "chat": [
+      "[Mode: Peaceful]",
+      "[Pet: Attack and Move]",
+      "Planning a route to (324, 291)…",
+      "You have arrived near (324, 291). Talk to the NPC to continue."
+    ]
+  },
+  "manualStep": {
+    "at": 1794684777550,
+    "ackAt": 1794684777703,
+    "moves": [
+      {
+        "type": "walk",
+        "direction": "Down",
+        "seq": 31,
+        "at": 1794684777593
+      }
+    ],
+    "position": {
+      "x": 325,
+      "y": 291
+    }
+  },
+  "finalTile": {
+    "x": 325,
+    "y": 291
+  },
+  "planners": [
+    {
+      "phase": "old-session",
+      "rows": [
+        {
+          "at": 1794684742876,
+          "phase": "interior-route",
+          "query": {
+            "version": 1,
+            "stamp": {
+              "generation": 2,
+              "revision": 2,
+              "connectionGeneration": 1,
+              "sessionGeneration": 1,
+              "sceneRevision": 3,
+              "playerObjectId": 1000,
+              "mapFileName": "0108"
+            },
+            "mapIndex": 4,
+            "mapFileName": "0108",
+            "width": 15,
+            "height": 18,
+            "origin": {
+              "x": 8,
+              "y": 12
+            },
+            "destination": {
+              "x": 10,
+              "y": 13
+            },
+            "routeTarget": {
+              "type": "entrance"
+            },
+            "occupiedTiles": [
+              {
+                "x": 7,
+                "y": 7
+              }
+            ],
+            "rejectedEdges": []
+          },
+          "result": {
+            "destination": {
+              "x": 10,
+              "y": 13
+            },
+            "error": null,
+            "mapFileName": "0108",
+            "mapIndex": 4,
+            "ok": true,
+            "origin": {
+              "x": 8,
+              "y": 12
+            },
+            "radius": 0,
+            "stamp": {
+              "connectionGeneration": 1,
+              "generation": 2,
+              "mapFileName": "0108",
+              "playerObjectId": 1000,
+              "revision": 2,
+              "sceneRevision": 3,
+              "sessionGeneration": 1
+            },
+            "steps": [
+              {
+                "x": 9,
+                "y": 13
+              },
+              {
+                "x": 10,
+                "y": 13
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "errors": 0,
+      "dropped": 0,
+      "paused": 0,
+      "closed": true
+    },
+    {
+      "phase": "fresh-session",
+      "rows": [
+        {
+          "at": 1794684777285,
+          "phase": "fresh-supply-goal",
+          "query": {
+            "version": 1,
+            "stamp": {
+              "generation": 2,
+              "revision": 2,
+              "connectionGeneration": 1,
+              "sessionGeneration": 1,
+              "sceneRevision": 3,
+              "playerObjectId": 1000,
+              "mapFileName": "0"
+            },
+            "mapIndex": 1,
+            "mapFileName": "0",
+            "width": 700,
+            "height": 700,
+            "origin": {
+              "x": 325,
+              "y": 290
+            },
+            "destination": {
+              "x": 324,
+              "y": 291
+            },
+            "routeTarget": {
+              "type": "supply",
+              "vendor": "potions"
+            },
+            "occupiedTiles": [
+              {
+                "x": 324,
+                "y": 291
+              },
+              {
+                "x": 310,
+                "y": 283
+              },
+              {
+                "x": 329,
+                "y": 289
+              },
+              {
+                "x": 341,
+                "y": 275
+              }
+            ],
+            "rejectedEdges": []
+          },
+          "result": {
+            "destination": {
+              "x": 325,
+              "y": 290
+            },
+            "error": null,
+            "mapFileName": "0",
+            "mapIndex": 1,
+            "ok": true,
+            "origin": {
+              "x": 325,
+              "y": 290
+            },
+            "radius": 2,
+            "stamp": {
+              "connectionGeneration": 1,
+              "generation": 2,
+              "mapFileName": "0",
+              "playerObjectId": 1000,
+              "revision": 2,
+              "sceneRevision": 3,
+              "sessionGeneration": 1
+            },
+            "steps": [],
+            "version": 1
+          }
+        }
+      ],
+      "errors": 0,
+      "dropped": 0,
+      "paused": 0,
+      "closed": true
+    }
+  ]
+}

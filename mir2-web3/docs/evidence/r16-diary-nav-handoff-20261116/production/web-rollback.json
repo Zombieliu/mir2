@@ -1,0 +1,20 @@
+{
+  "method": "authenticated Vercel connector request_rollback",
+  "from": "dpl_EsA9a7nDuU7ggAC2xBUqtdmCCasj",
+  "to": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "ownershipCheckedImmediatelyBeforeAction": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_EsA9a7nDuU7ggAC2xBUqtdmCCasj",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "checkedAt": "2026-11-16T10:39:37.263Z"
+  },
+  "aliasReadBack": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "checkedAt": "2026-11-16T10:39:58.404Z"
+  },
+  "databaseRestoreAllowed": false,
+  "githubRollbackWorkflowDispatched": false
+}

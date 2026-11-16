@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.r18.failed-timing-release-closure.v1",
+  "coldAccepted": false,
+  "seconds": 649.1000591,
+  "defaultChannelsPromoted": false,
+  "websitePromoted": false,
+  "publicSetupRerequestedByVerifier": false,
+  "publicCmsVerified": 21,
+  "temporaryIngressRouteDeleted": "fbe69e92abea48c6a2cb84cee293a9fd",
+  "temporaryWorkersDeleted": [
+    "mir2-r18-fixed-publisher-ingress",
+    "mir2-r18-publisher-0f5351f92992"
+  ],
+  "temporaryPublisherTokenDiscarded": true,
+  "immutableObjectsRetained": true,
+  "sourceAndRuntimeLogsRetained": true
+}

@@ -9,6 +9,10 @@ use mir2_protocol::{
 
 use super::types::{ZoneObject, ZonePlayer, ZonePlayerBuff};
 
+const CRYSTAL_MAGIC_SHIELD_BUFF_TYPE: u8 = 24;
+const CRYSTAL_MAGIC_SHIELD_UP_EFFECT: u8 = 6;
+const CRYSTAL_MAGIC_SHIELD_DOWN_EFFECT: u8 = 7;
+
 pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
     ServerPacket::ObjectPlayer {
         info: ObjectPlayerInfo {
@@ -22,7 +26,7 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             level: player.level,
             location: player.position.clone(),
             direction: player.direction,
-            hair: 0,
+            hair: player.hair,
             light: player.light,
             weapon: player.weapon,
             weapon_effect: player.weapon_effect,
@@ -30,16 +34,22 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             poison: player.poison,
             dead: player.dead,
             hidden: player.hidden,
-            effect: player.effect,
+            effect: if !player.dead && player.buffs.contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE) {
+                CRYSTAL_MAGIC_SHIELD_UP_EFFECT
+            } else if !player.dead && player.buffs.contains_key(&25) {
+                13 // Source ElementalBarrier's AOI re-entry appearance.
+            } else {
+                player.effect
+            },
             wing_effect: player.wing_effect,
             extra: false,
             mount_type: player.mount_type,
             riding_mount: player.riding_mount,
             fishing: player.fishing,
             transform_type: player.transform_type,
-            element_orb_effect: 0,
-            element_orb_level: 0,
-            element_orb_max: 0,
+            element_orb_effect: player.element_orb_effect,
+            element_orb_level: player.element_orb_level,
+            element_orb_max: player.element_orb_max,
             buffs: player
                 .buffs
                 .values()
@@ -95,6 +105,11 @@ pub(crate) fn apply_observer_action_state(
             object_id,
         } if *object_id == owner_local_object_id => {
             player.buffs.remove(buff_type);
+            if *buff_type == CRYSTAL_MAGIC_SHIELD_BUFF_TYPE
+                && player.effect == CRYSTAL_MAGIC_SHIELD_UP_EFFECT
+            {
+                player.effect = 0;
+            }
         }
         ServerPacket::PauseBuff {
             buff_type,
@@ -137,7 +152,8 @@ pub(crate) fn apply_observer_action_state(
         ServerPacket::ObjectPoisoned { object_id, poison }
             if *object_id == owner_local_object_id =>
         {
-            player.poison = *poison;
+            player.poison =
+                (*poison & !player.native_status_poison) | player.active_status_poison(now_ms);
         }
         ServerPacket::ObjectLevelEffects {
             object_id,
@@ -181,12 +197,27 @@ pub(crate) fn apply_observer_action_state(
         }
         ServerPacket::ObjectDied { info } if info.object_id == owner_local_object_id => {
             player.dead = true;
+            player.clear_status_poisons();
+            player.buffs.remove(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE);
+            player.effect = 0;
         }
         ServerPacket::ObjectRevived { info } if info.object_id == owner_local_object_id => {
+            if player.dead {
+                player.life_generation = player.life_generation.saturating_add(1);
+            }
             player.dead = false;
+            player.clear_status_poisons();
         }
         ServerPacket::ObjectEffect { info } if info.object_id == owner_local_object_id => {
-            player.effect = info.effect;
+            player.effect = if info.effect == CRYSTAL_MAGIC_SHIELD_DOWN_EFFECT {
+                if player.effect == CRYSTAL_MAGIC_SHIELD_UP_EFFECT {
+                    0
+                } else {
+                    player.effect
+                }
+            } else {
+                info.effect
+            };
         }
         _ => {}
     }
@@ -657,7 +688,11 @@ pub(crate) fn observer_action_packet(
         }),
         ServerPacket::ObjectPoisoned { object_id, poison } => Some(ServerPacket::ObjectPoisoned {
             object_id: rebase_object_id(*object_id),
-            poison: *poison,
+            poison: if *object_id == owner_local_object_id {
+                player.poison
+            } else {
+                *poison
+            },
         }),
         ServerPacket::MagicDelay {
             object_id,
@@ -935,6 +970,12 @@ pub(crate) fn shared_object_action_packet(
                 direction: movement.direction,
             },
         }),
+        // This is the personal inventory transaction's acknowledgement for
+        // the corpse it consumed. Keep the corpse id intact; the Zone
+        // canonicalizes its transform and validates the target lifecycle.
+        ServerPacket::ObjectHarvested { movement } => Some(ServerPacket::ObjectHarvested {
+            movement: movement.clone(),
+        }),
         ServerPacket::ObjectSpell { info } => Some(ServerPacket::ObjectSpell {
             info: ObjectSpellInfo {
                 object_id: player.object_id,
@@ -1144,9 +1185,6 @@ pub(crate) fn apply_retained_zone_object_packet(object: &mut ZoneObject, packet:
         }
         ServerPacket::ObjectHealth { info } if info.object_id == object.object_id => {
             object.health = Some(info.clone());
-            if info.percent == 0 {
-                update_retained_dead(&mut object.packet, true);
-            }
         }
         ServerPacket::ObjectMana { info } if info.object_id == object.object_id => {
             object.mana = Some(info.clone());

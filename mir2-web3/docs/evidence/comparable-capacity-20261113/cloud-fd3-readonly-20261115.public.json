@@ -1,0 +1,230 @@
+{
+  "schema": "mir2.cloud-fd3-readonly-public-observation.v1",
+  "statusObservedAtUtc": "2026-11-15T04:53:41.822948+00:00",
+  "sourceOperatorSha256": "046f8a2fe0e030ab727a54d8bce8e936e0d4f210db84cbec3b83d6955573098e",
+  "privateStatusReceiptSha256": "27bb33f099b45b2074ccad2a25e8d41119a9ea0b5cd8029ca516a29d23880bcf",
+  "identity": {
+    "pid": 1242617,
+    "invocationId": "54b0b00891c344a58ab8e5a6d05ddb5b",
+    "startTicks": 1553569321
+  },
+  "sourceRevision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "binarySha256": "11fc151644ecb75ccb5a86789cefb2010a062ef48c3a9ddfd5ccf29b67dfe926",
+  "environmentCaps": {
+    "MIR2_GATEWAY_MAX_ACTIVE_SESSIONS": "51",
+    "MIR2_GATEWAY_MAX_WS_CONNECTIONS": "66",
+    "MIR2_GATEWAY_MAX_RECONNECT_LEASES": "51"
+  },
+  "serviceLimits": {
+    "MemoryHigh": "1468006400",
+    "MemoryMax": "1677721600",
+    "CPUQuotaPerSecUSec": "infinity"
+  },
+  "capacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0,
+    "maxActiveSessions": 51,
+    "maxWsConnections": 66,
+    "maxReconnectLeases": 51,
+    "maxLoginInFlight": 2,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2
+  },
+  "redisCurrentCounts": {
+    "recordCount": 0,
+    "routeLeaseCount": 0,
+    "staleRecordCount": 0
+  },
+  "nineCurrentCountsTypedZero": true,
+  "protectedStableFingerprintSha256": "e06264d5953ca400544e21433f18d8cec1fc33ae418a6b895c476281a85c6f71",
+  "readonly": true,
+  "noServiceMutationBegan": true,
+  "vpnOperations": false,
+  "capacityQualified": false,
+  "memoryObservation": {
+    "schema": "mir2.cloud-memory-readonly.v1",
+    "observedAtUtc": "2026-11-15T04:58:47.065666+00:00",
+    "logicalCpuCount": 4,
+    "hostMemory": {
+      "MemTotalKiB": 8127732,
+      "MemFreeKiB": 335140,
+      "MemAvailableKiB": 1523136,
+      "BuffersKiB": 90064,
+      "CachedKiB": 1393852,
+      "SwapTotalKiB": 0,
+      "SwapFreeKiB": 0
+    },
+    "testPid": 1242617,
+    "testStartTicks": 1553569321,
+    "testProcess": {
+      "pid": 1242617,
+      "name": "mir2-gateway",
+      "rssKiB": 302248,
+      "swapKiB": 0,
+      "threads": 13
+    },
+    "testCgroup": {
+      "path": "/sys/fs/cgroup/system.slice/mir2-playtest.service",
+      "rawNumericValues": {
+        "memory.current": "237297664",
+        "memory.max": "1677721600",
+        "memory.high": "1468006400",
+        "memory.swap.current": "0",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+      }
+    },
+    "topRssProcesses": [
+      {
+        "pid": 3855184,
+        "name": "mir2-gateway",
+        "rssKiB": 1511268,
+        "swapKiB": 0,
+        "threads": 11
+      },
+      {
+        "pid": 3855181,
+        "name": "zone_host",
+        "rssKiB": 1125644,
+        "swapKiB": 0,
+        "threads": 6
+      },
+      {
+        "pid": 2130288,
+        "name": "gate14_validato",
+        "rssKiB": 639092,
+        "swapKiB": 0,
+        "threads": 8
+      },
+      {
+        "pid": 2130026,
+        "name": "gate14_validato",
+        "rssKiB": 561604,
+        "swapKiB": 0,
+        "threads": 9
+      },
+      {
+        "pid": 2130154,
+        "name": "gate14_validato",
+        "rssKiB": 555496,
+        "swapKiB": 0,
+        "threads": 9
+      },
+      {
+        "pid": 2129892,
+        "name": "gate14_validato",
+        "rssKiB": 554896,
+        "swapKiB": 0,
+        "threads": 9
+      },
+      {
+        "pid": 1242617,
+        "name": "mir2-gateway",
+        "rssKiB": 302248,
+        "swapKiB": 0,
+        "threads": 13
+      },
+      {
+        "pid": 1974960,
+        "name": "grafana",
+        "rssKiB": 175264,
+        "swapKiB": 0,
+        "threads": 17
+      },
+      {
+        "pid": 18264,
+        "name": "postgres",
+        "rssKiB": 144048,
+        "swapKiB": 0,
+        "threads": 1
+      },
+      {
+        "pid": 855802,
+        "name": "mir2-gateway",
+        "rssKiB": 94036,
+        "swapKiB": 0,
+        "threads": 10
+      },
+      {
+        "pid": 763885,
+        "name": "node",
+        "rssKiB": 80112,
+        "swapKiB": 0,
+        "threads": 12
+      },
+      {
+        "pid": 852644,
+        "name": "postgres",
+        "rssKiB": 62704,
+        "swapKiB": 0,
+        "threads": 1
+      },
+      {
+        "pid": 2809537,
+        "name": "node",
+        "rssKiB": 58112,
+        "swapKiB": 0,
+        "threads": 11
+      },
+      {
+        "pid": 1520883,
+        "name": "next-server (v1",
+        "rssKiB": 57816,
+        "swapKiB": 0,
+        "threads": 11
+      },
+      {
+        "pid": 1242625,
+        "name": "postgres",
+        "rssKiB": 55960,
+        "swapKiB": 0,
+        "threads": 1
+      },
+      {
+        "pid": 3855205,
+        "name": "postgres",
+        "rssKiB": 55604,
+        "swapKiB": 0,
+        "threads": 1
+      },
+      {
+        "pid": 2130417,
+        "name": "gate14_projecto",
+        "rssKiB": 54316,
+        "swapKiB": 0,
+        "threads": 2
+      },
+      {
+        "pid": 1242628,
+        "name": "postgres",
+        "rssKiB": 53648,
+        "swapKiB": 0,
+        "threads": 1
+      },
+      {
+        "pid": 1242641,
+        "name": "postgres",
+        "rssKiB": 53400,
+        "swapKiB": 0,
+        "threads": 1
+      },
+      {
+        "pid": 559670,
+        "name": "python",
+        "rssKiB": 52764,
+        "swapKiB": 0,
+        "threads": 1
+      }
+    ],
+    "readableRssProcesses": 80,
+    "unreadableOrRacedProcesses": 0,
+    "sumProcessRssIsNotUniquePhysicalMemory": true,
+    "readOnly": true,
+    "serviceConfigVpnOrPowerOperation": false,
+    "capacityQualified": false
+  },
+  "privateMemoryReceiptSha256": "49e1e466bab7594f8467f9a6e6a8cf41d765e3e96537d0d75b87eade9a3410b5"
+}

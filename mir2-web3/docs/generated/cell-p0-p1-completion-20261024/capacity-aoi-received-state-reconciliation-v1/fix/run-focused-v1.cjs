@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{spawnSync}=require('node:child_process');
+const mode=process.argv[2],pattern=process.argv[3];if(!['red','green','adjacent'].includes(mode)||!pattern)throw Error('Explicit check required');
+const root=__dirname,project='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3',test=path.join(project,'apps/web/scripts/playtest-capacity-soak.test.mjs');
+const pin=file=>{const b=fs.readFileSync(file);return{file,bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex')}};
+const before=['playtest-capacity-soak-core.mjs','playtest-capacity-soak.mjs','playtest-capacity-soak.test.mjs'].map(n=>pin(path.join(project,'apps/web/scripts',n)));
+const args=['--test','--test-reporter=tap','--test-name-pattern='+pattern,test],startedAt=new Date().toISOString(),r=spawnSync(process.execPath,args,{cwd:project,encoding:'utf8',windowsHide:true}),endedAt=new Date().toISOString();
+const stdout=path.join(root,mode+'-stdout-v1.log'),stderr=path.join(root,mode+'-stderr-v1.log');fs.writeFileSync(stdout,r.stdout,{flag:'wx'});fs.writeFileSync(stderr,r.stderr,{flag:'wx'});
+const counts=Object.fromEntries(['tests','pass','fail','cancelled','skipped','todo'].map(k=>[k,Number(r.stdout.match(new RegExp('^# '+k+' (\\d+)','m'))?.[1]??-1)]));
+const after=before.map(p=>pin(p.file)),value={schemaVersion:1,kind:mode,args,startedAt,endedAt,exitCode:r.status,signal:r.signal,counts,stdout:pin(stdout),stderr:pin(stderr),sourceBefore:before,sourceAfter:after,sourceBeforeAfterRawExact:JSON.stringify(before)===JSON.stringify(after),networkOrRealmStarted:false};
+fs.writeFileSync(path.join(root,mode+'-execution-v1.json'),JSON.stringify(value,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(value));if(mode==='red'?r.status===0:r.status!==0)process.exitCode=2;

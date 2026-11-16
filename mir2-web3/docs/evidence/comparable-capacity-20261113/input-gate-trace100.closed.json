@@ -1,0 +1,53 @@
+{
+  "schema": "mir2.input-gate-diagnostic-trace100.closed.v1",
+  "diagnosticOnly": true,
+  "capacityQualified": false,
+  "sourceRevision": "525e74364ab87ad49e84c26c8dd22db9fe9348d5",
+  "binarySha256": "4c6a18829d3bc50972d2dd84b2682a5f16347ba3dc77b396c9fdc9e2dc16fac5",
+  "planSha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+  "controllerActualExitCode": 1,
+  "driverActualExitCode": 1,
+  "serverActualExitCode": 0,
+  "normalStopProven": true,
+  "allOwnedExitedNoKill": true,
+  "measurementStartedAtUtc": "2026-11-14T11:43:21.078Z",
+  "measurementPlannedEndAtUtc": "2026-11-14T11:48:21.078Z",
+  "measurementSloPassed": false,
+  "runCompleted": true,
+  "windowCounts": {
+    "passed": 119,
+    "total": 500
+  },
+  "actionCounts": {
+    "offered": 16000,
+    "completed": 15114,
+    "timeout": 139,
+    "notSent": 747,
+    "rejected": 0
+  },
+  "all100NormalLogout": true,
+  "all100TransportClose": true,
+  "equipment12Passed": true,
+  "fresh0And99Passed": true,
+  "fileReadbackActualExitCode": 1,
+  "fileReadbackGatedBeforePrivateStoreRead": true,
+  "enhancedVerifierActualExitCode": 1,
+  "resourcesRowCount": 3069,
+  "controllerSha256": "bfc0ec5d4c33cde645d55d4a3dc908037e18abe410084c0a6ee6f38190b38cbc",
+  "reportSha256": "3a81c3eb707ef5f23a4d40ac3e3df2a24fdd81e85d4c77937633c2f10cdb9c60",
+  "eventsSha256": "2a9fb34010c087732a6e42b9f6869c57c1be635ef198bd7d081ded3de8bbe01c",
+  "eventsBytes": 530696778,
+  "sourceLogSha256": "f1d43bad0118e928f13d8841cda52cdd636ca7e6278341cc383452dff6540b2d",
+  "fileReadbackSha256": "daa7a3ec0823a138105560b82e9bcb847ae10223113dd2424625f30fdb7fb2e1",
+  "enhancedVerifierSha256": "8414beb541e648405522fa193c8759f7a80a4858558e7888a1254dcd94b6b392",
+  "selectedForensicsSha256": "b3479f9b06c11b87186f12786c0ea7619f3d34c23163b940113be678e5f89ee8",
+  "selectedForensicJobActualExitCodes": [
+    0,
+    0
+  ],
+  "newAuthReservationsRetained": 114,
+  "fullAuthHistoryAttemptCount": 1413,
+  "tickGateCausalProofSha256": "89a853cea0a31741e7d49c9dde91e86421bab0ec9d415b371c5f80841d8f5b51",
+  "sourceTraceBudgetExhausted": false,
+  "publicCloudServiceChanged": false
+}

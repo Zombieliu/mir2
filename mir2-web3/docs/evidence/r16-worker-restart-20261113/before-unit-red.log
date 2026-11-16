@@ -1,0 +1,182 @@
+TAP version 13
+# Subtest: a restarted worker serves the complete already-versioned HUD cache without another network read
+not ok 1 - a restarted worker serves the complete already-versioned HUD cache without another network read
+  ---
+  duration_ms: 506.9676
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:83:1'
+  failureType: 'testCodeFailure'
+  error: 'native waitUntil must be synchronous'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    Object.waitUntil (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:60:26)
+    cacheFirst (evalmachine.<anonymous>:274:12)
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:86:45)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: an uncached frame after restart retains exact-release remote fallbacks and original cache tier
+not ok 2 - an uncached frame after restart retains exact-release remote fallbacks and original cache tier
+  ---
+  duration_ms: 2.1583
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:97:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    504 !== 200
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 504
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:100:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: an explicit newer configuration cannot be replaced by an older delayed restore
+not ok 3 - an explicit newer configuration cannot be replaced by an older delayed restore
+  ---
+  duration_ms: 2.0869
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:105:1'
+  failureType: 'testCodeFailure'
+  error: 'the restart must actually read persisted configuration'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:114:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: overlapping configuration writes are serialized so a restart restores the latest release
+not ok 4 - overlapping configuration writes are serialized so a restart restores the latest release
+  ---
+  duration_ms: 1.1138
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:123:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    0 !== 1
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:132:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: CacheStorage denial preserves active in-memory fallbacks and reports non-durable configuration
+not ok 5 - CacheStorage denial preserves active in-memory fallbacks and reports non-durable configuration
+  ---
+  duration_ms: 0.9446
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:137:1'
+  failureType: 'testCodeFailure'
+  error: 'storage denied'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    Object.keys (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:138:90)
+    cleanupOldCaches (evalmachine.<anonymous>:705:30)
+    evalmachine.<anonymous>:142:5
+    Object.message (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:52:29)
+    configure (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:78:21)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:139:47)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: corrupt persisted metadata is ignored without fetching a stored arbitrary remote URL
+not ok 6 - corrupt persisted metadata is ignored without fetching a stored arbitrary remote URL
+  ---
+  duration_ms: 6.4768
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:146:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+
+      assert(entry)
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:148:85)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: configuration cleanup keeps its single metadata record and the current versioned cache
+not ok 7 - configuration cleanup keeps its single metadata record and the current versioned cache
+  ---
+  duration_ms: 481.2851
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:155:1'
+  failureType: 'testCodeFailure'
+  error: 'native waitUntil must be synchronous'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    Object.waitUntil (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:60:26)
+    cacheFirst (evalmachine.<anonymous>:274:12)
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:157:31)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: reset waits for an older pending configuration write and cannot resurrect it
+not ok 8 - reset waits for an older pending configuration write and cannot resurrect it
+  ---
+  duration_ms: 2.2254
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-lifecycle.mjs:165:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+
+      assert(writeStarted)
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs:171:91)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: restart restoration leaves auth, other origins, POST and explicit scene reload outside the worker
+ok 9 - restart restoration leaves auth, other origins, POST and explicit scene reload outside the worker
+  ---
+  duration_ms: 1.5606
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 1
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1056.4177

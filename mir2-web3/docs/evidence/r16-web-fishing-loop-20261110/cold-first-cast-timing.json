@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "baselineSourceForNativeTransport": "243497e69985b1f53eb29d4b3272f6eb64dcf7f5",
+  "scope": {
+    "web": "Production-mode WebGPU with physical browser input and real WebSocket",
+    "native": "R16 Rust Windows transport, frozen source with scratch-only probe and typed receipts",
+    "windowsWindowRendered": false,
+    "publicDeployment": false,
+    "sameFixturePerRun": true,
+    "unsafeOrAdminCommands": false
+  },
+  "fixtureSha256": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+  "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6",
+  "webBuildReceiptSha256": "58bc82e3bb921f02d27e6c32afe5027f766a913be07fbc8fc0318b1daa1ef8ec",
+  "webBevyVersion": "bevy-b27119c94bf94458",
+  "nativeProbeSha256": "6d95eba1deb876c2156fc463358e8e6396e9fff8c03467957c9d792716d1ad19",
+  "gatewaySha256": {
+    "priorQualifiedBinary": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+    "freshCandidate": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490"
+  },
+  "timersMs": {
+    "bootstrapGrace": 15000,
+    "inputWake": 75,
+    "baseTick": 300
+  },
+  "ackToProgressMs": {
+    "progressPercents": [0, 25, 50, 75, 100],
+    "priorWeb": [0, 9661.521, 9752.723, 9848.588, 9937.579],
+    "fixedWeb": [0, 697.788, 791.065, 881.286, 974.667],
+    "priorNative": [0, 9253.667, 9347.733, 9441.288, 9534.609],
+    "fixedNative": [0, 684.325, 779.353, 872.592, 966.369]
+  },
+  "startToCastAckMs": {
+    "priorWeb": 5903.925,
+    "fixedWeb": 5961.171,
+    "priorNative": 5900.838,
+    "fixedNative": 5911.2
+  },
+  "allFourRuns": {
+    "normalLogout": true,
+    "castsPerRun": 1,
+    "fishingPoint": [339, 247],
+    "savedPosition": [342, 244],
+    "savedDirection": "DownLeft",
+    "savedBait": 14,
+    "savedRodDurability": 9999,
+    "savedHookDurability": 7999,
+    "savedReelDurability": {
+      "bothWeb": 5999,
+      "bothNative": 6000
+    },
+    "ownedProcessesClosed": true,
+    "sourceFixtureUnchanged": true
+  },
+  "originalFailedNativeProbe": {
+    "reason": "Scratch readiness check expected a string playerObjectId where the original snapshot supplied a number",
+    "sha256": "55fcdbd887427dca52f89478659293f534bcb5c02f19c8ac5ccb6b7a2bd4830bf"
+  },
+  "originalReceiptsSha256": {
+    "pairedSummary": "fe97d9bc28f25a93bb96c3d19ad67e1baab5a1636007dade547b5cb1c8b3c03d",
+    "priorWeb": "02b16165486a4890a66e19af720600288cf5c23a500ea4c9fe7d29243233af04",
+    "fixedWeb": "5ee3dc4e015a69880da87ebdbf6768b17715211933d041c15abb2189f57a9a4d",
+    "priorNative": "dcad3d427e54dcf31d07b34a9f848da4f2ce4c7772cbd8e2055f1cc70b623265",
+    "fixedNative": "1d74cf0a51db84bd5590b55e17dfd54b8c5ef00a25a82cdf1b5e54519b59c336"
+  },
+  "regression": {
+    "gatewayBuild": "cargo +1.95.0 build --locked --offline -p mir2-gateway --bin mir2-gateway",
+    "gatewayTests": "cargo +1.95.0 test --locked --offline -p mir2-gateway --lib runtime_tick_",
+    "passed": 4,
+    "failed": 0
+  }
+}

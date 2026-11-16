@@ -1,0 +1,22 @@
+{
+  "candidate": "bfbee7018917-bootstrap-chunks-14dc8914",
+  "scripts": {
+    "entry-player-probe.mjs": "7440b8191578dda59a3f0e2a09027a4ef9a6c642284ed5f7033a8ac34b0a4b46",
+    "invoke.mjs": "bbdca1c902feaa5d517a0ddc8c852f3ed29cb963961b9751569861617e0ff1be",
+    "profile.mjs": "3c40d2cb928b0799a4f59b7d621997f2e906572473591a45fe990a5f88b32930",
+    "run.mjs": "164652d32be1adf63645c749a7088557c820c3d22c9d71262d0f363a9c94e05c",
+    "standing-faces.mjs": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+    "ui-asset-fault.mjs": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "6b922e132244d229807aa6d113eaa05131060f6ee4f622f22d692f24f72e6f8a"
+  },
+  "predecessorPreparationSha256": "cdb14eea09d0d2729e8ce7e0dfb0219fc4921565988a6580621e66049e0311bd",
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "originalFirstPlayableObservationMs": 60000,
+  "addedFault": "Each scene/floor/locale canonical JSON has two real noheaders20s attempts; immutable Next chunks then travel normally. Existing NPC/runtime/font slow/transient fixtures retained.",
+  "evidenceChange": "The old exact static HTTP proof now alternatively accepts a fully observed production JS body matching its frozen SHA and offline parsed original payload bytes/SHA. No fabricated HTTP completion, data injection or lowered gate.",
+  "noPublicResources": true,
+  "noUserStateInjection": true
+}

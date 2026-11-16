@@ -1,0 +1,325 @@
+{
+  "copiedAt": "2026-10-26T10:09:04.036Z",
+  "files": [
+    {
+      "file": "implementation/implementation-receipt-v1.json",
+      "bytes": 4738,
+      "sha256": "e796c95f760132f01415ca13f7087f04e26e8627d645147afca407c8c66acc0c"
+    },
+    {
+      "file": "implementation/preimage-v1.json",
+      "bytes": 537,
+      "sha256": "8c131ca03f5440162ea0dbfcd87e62e606f554ec539975c9dafb3cb46166b012"
+    },
+    {
+      "file": "implementation/shared_experience_profile.rs.before-cache-v1.txt",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    },
+    {
+      "file": "implementation/shared_experience_profile.rs.before-default-oracle-correction-v1.txt",
+      "bytes": 94044,
+      "sha256": "d04cc6158bcf12a1b6b5f665b7680aeb8a91d09bc0e59c1b65cb747fe23112cf"
+    },
+    {
+      "file": "implementation/shared_experience_profile.rs.before-root-format-v1.txt",
+      "bytes": 93889,
+      "sha256": "1b4e603500b9b8bb8bf0482d750306a6a5886ed3eb9eeeb0e4387f9329880277"
+    },
+    {
+      "file": "implementation/source-diff-v1.patch",
+      "bytes": 20043,
+      "sha256": "2f3bc74a6d71485589218fb95a1d1b085f4d401372086a75073eadaeb6b729dd"
+    },
+    {
+      "file": "validation-format-failure/format-execution-v1.json",
+      "bytes": 859,
+      "sha256": "74d129c8ab6df6e0a36aed5e2ba45b8511d43d95b7ac731376c2285654a37d7f"
+    },
+    {
+      "file": "validation-format-failure/format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "validation-format-failure/format-stdout-v1.log",
+      "bytes": 3850,
+      "sha256": "c8fc717b6d236e3bdcfab9ec5c69ec8d98b38385503ffca1163dc2470ac914fd"
+    },
+    {
+      "file": "validation-format-failure/root-focused-receipt-v1.json",
+      "bytes": 1373,
+      "sha256": "2b25ad9234eeef086fb9f0898a0a529f94b25b216fb44e4971e66688c6e40ac2"
+    },
+    {
+      "file": "validation-format-failure/run-focused-v1.mjs",
+      "bytes": 4820,
+      "sha256": "5c28baacc08b41b977783fa773403ab68dc38af50cedfd385119cde27469592e"
+    },
+    {
+      "file": "validation-format-failure/source-after-v1.json",
+      "bytes": 11186,
+      "sha256": "29a1575fb4c953f372f377c2a12b0e9b42c762e93954ec2d8f31f81e4caa9825"
+    },
+    {
+      "file": "validation-format-failure/source-before-v1.json",
+      "bytes": 11186,
+      "sha256": "29a1575fb4c953f372f377c2a12b0e9b42c762e93954ec2d8f31f81e4caa9825"
+    },
+    {
+      "file": "validation-default-oracle-failure/experience-profile-execution-v1.json",
+      "bytes": 1167,
+      "sha256": "6da238fb04bc1afa016a98c44089c2f3862c2f34cffe641681faaa3f94ff6dea"
+    },
+    {
+      "file": "validation-default-oracle-failure/experience-profile-stderr-v1.log",
+      "bytes": 54945,
+      "sha256": "5e26d8efb98c0ab82f87b95e52d41b9270330393eb03d49d11ae0760c299210c"
+    },
+    {
+      "file": "validation-default-oracle-failure/experience-profile-stdout-v1.log",
+      "bytes": 3072,
+      "sha256": "661a474d1f83b8152614ed5884774b27cdac045bd4438e4ef4c392825ecace43"
+    },
+    {
+      "file": "validation-default-oracle-failure/format-execution-v1.json",
+      "bytes": 854,
+      "sha256": "4c885b768e96cfeff9214637c5232ac3da0af9d9a117eeaad7d6d278cd2c4ba9"
+    },
+    {
+      "file": "validation-default-oracle-failure/format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "validation-default-oracle-failure/format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "validation-default-oracle-failure/root-focused-receipt-v1.json",
+      "bytes": 2728,
+      "sha256": "cfc465659b763f71492712788e0f77c9a10cf9d9490c7c46196b2ebf7e84ba6b"
+    },
+    {
+      "file": "validation-default-oracle-failure/run-focused-v2.mjs",
+      "bytes": 4820,
+      "sha256": "3ad084798b32c2a18a065d01cec72bdf7c154886f6e35d3feda28c4a162ac149"
+    },
+    {
+      "file": "validation-default-oracle-failure/source-after-v1.json",
+      "bytes": 11186,
+      "sha256": "894fa9c9810047dae3a95c6f0dfc35801f956ad92a37b1e9fc0ca13d6b3e605f"
+    },
+    {
+      "file": "validation-default-oracle-failure/source-before-v1.json",
+      "bytes": 11186,
+      "sha256": "894fa9c9810047dae3a95c6f0dfc35801f956ad92a37b1e9fc0ca13d6b3e605f"
+    },
+    {
+      "file": "validation-current/admission-lock-order-execution-v1.json",
+      "bytes": 1193,
+      "sha256": "886379d9794a0f02e27b587f45673ca43140008ddbc6db3517bc947ad6b864af"
+    },
+    {
+      "file": "validation-current/admission-lock-order-stderr-v1.log",
+      "bytes": 53869,
+      "sha256": "3e64ca77e9e66c0e026e0c583948de08c6d053f9951cf790e8fa76dc28286e73"
+    },
+    {
+      "file": "validation-current/admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "130db78452259019a5ac6a1a4d6b31ba90e6e633885b1f9947e295ec20713426"
+    },
+    {
+      "file": "validation-current/experience-profile-execution-v1.json",
+      "bytes": 1160,
+      "sha256": "0b3bfb0ef7a790572c5a1f72a6ffb61634482187117ca82401211bc3f79f1b6e"
+    },
+    {
+      "file": "validation-current/experience-profile-stderr-v1.log",
+      "bytes": 43609,
+      "sha256": "689c30716c1eeeba5eb76f00489406e31a8298727840c0a772af5946f075f029"
+    },
+    {
+      "file": "validation-current/experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "7a03e0c2f3a4969c0a82ae3b0e1b3b306925e940719f5029b6734c24959af3a3"
+    },
+    {
+      "file": "validation-current/format-execution-v1.json",
+      "bytes": 866,
+      "sha256": "e2c41cb429cbd43be4c774a46a17427b084e6ca5566295a407bdf6bf872bc5a8"
+    },
+    {
+      "file": "validation-current/format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "validation-current/format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "validation-current/guild-clock-store-execution-v1.json",
+      "bytes": 1170,
+      "sha256": "9602febf443895ad409d44cc1746cffd24764a18366d76cf82d1981da4566b34"
+    },
+    {
+      "file": "validation-current/guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "file": "validation-current/guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+    },
+    {
+      "file": "validation-current/guild-kill-durability-execution-v1.json",
+      "bytes": 1146,
+      "sha256": "5b4ad80d60cf621d5d910208d7ddc00b59a4f342c70adae43eaa37f2d1537e8c"
+    },
+    {
+      "file": "validation-current/guild-kill-durability-stderr-v1.log",
+      "bytes": 54316,
+      "sha256": "928390e6ee06a52468cb71047f2f61fe31ded6afc8216c459cea620bc75bdef0"
+    },
+    {
+      "file": "validation-current/guild-kill-durability-stdout-v1.log",
+      "bytes": 700,
+      "sha256": "9d09a0c53baa9346ed95dfa417a1c73676d713bde31d893fb5db5e30f9386762"
+    },
+    {
+      "file": "validation-current/kill-award-commit-execution-v1.json",
+      "bytes": 1180,
+      "sha256": "8ed2a1ccc2147adf81b0a10ea8039b9abdf05051c09ca32ed8cf935c6c1f2565"
+    },
+    {
+      "file": "validation-current/kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "eb28d1255d0f081a66226232b4281a0f50f85c7733a0da56977c361a66eb580e"
+    },
+    {
+      "file": "validation-current/kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "e559fda2b305933bc676986bb03e0be0db1212cb9358b60f99f3278a165df2f1"
+    },
+    {
+      "file": "validation-current/root-focused-receipt-v1.json",
+      "bytes": 9543,
+      "sha256": "7870f577ab2d0a8e1db728acc3332682aede8fa32f7922e08450b2ea4e864c23"
+    },
+    {
+      "file": "validation-current/run-focused-v3.mjs",
+      "bytes": 4820,
+      "sha256": "a034cb2d68410cbcac43de16815ea9fdf6a1bbee613022170a8588c6a8efa497"
+    },
+    {
+      "file": "validation-current/source-after-v1.json",
+      "bytes": 11186,
+      "sha256": "91988b44c93cbc81074bd63d64b033065e2b87feef0c01190892d40e4bd55b85"
+    },
+    {
+      "file": "validation-current/source-before-v1.json",
+      "bytes": 11186,
+      "sha256": "91988b44c93cbc81074bd63d64b033065e2b87feef0c01190892d40e4bd55b85"
+    },
+    {
+      "file": "validation-current/store-durability-execution-v1.json",
+      "bytes": 1156,
+      "sha256": "14894d52e8185b9c97dc366170bb89b4792b5b9e9223255b257ca31d332e907a"
+    },
+    {
+      "file": "validation-current/store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+    },
+    {
+      "file": "validation-current/store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+    },
+    {
+      "file": "baseline-control/actual-control-receipt-v1.json",
+      "bytes": 1846,
+      "sha256": "84fa9bd16e6b11cba6c625c3123c1db66fbbe81936854d600b4e35108e3318e3"
+    },
+    {
+      "file": "baseline-control/candidate-preserved-v1.rs.txt",
+      "bytes": 94359,
+      "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea"
+    },
+    {
+      "file": "baseline-control/control-stderr-v1.log",
+      "bytes": 54609,
+      "sha256": "113674463c701f3219b79765c18b9fba0c09eadbe1be9caa638b71666e7c28bc"
+    },
+    {
+      "file": "baseline-control/control-stdout-v1.log",
+      "bytes": 700,
+      "sha256": "21a3149e44a66a26fde69de5e0692872bf1a5224e055224f0baeb56682dddb9f"
+    },
+    {
+      "file": "baseline-control/run-c-baseline-control-v1.mjs",
+      "bytes": 2928,
+      "sha256": "47a967f0187be33264832e8ffcb2bc22828534de533f0ac87c433ea7fe1a0107"
+    },
+    {
+      "file": "shared-experience-parse-cache-source-change-validation-v1.json",
+      "bytes": 3313,
+      "sha256": "92eda292c128dc4dd5a9e3ada8ab0356a326ffe76095ff932efa8a1c03bfef3c"
+    },
+    {
+      "file": "steady-aoi-v4-stage50-root-independent-cleanup-v1.json",
+      "bytes": 1032,
+      "sha256": "40274f6bcf5fa919193b1da3721f4a10a990d6ff53c0d536698d312799884820"
+    },
+    {
+      "file": "steady-aoi-v4-stage50-root-prepare-stdout-v1.log",
+      "bytes": 333,
+      "sha256": "4ccae872512ae7949e1b87608ff0c8eae5f12e7bd852b4d04719056839769e1f"
+    },
+    {
+      "file": "steady-aoi-v4-stage50-root-prepare-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "steady-aoi-v4-stage50-root-run-stdout-v1.log",
+      "bytes": 4138,
+      "sha256": "12fb42ac9a603b89dd0089f3f0191093459da6b6aecf114aa6b4a7581395f2a2"
+    },
+    {
+      "file": "steady-aoi-v4-stage50-root-run-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "aoi-pair-findings-v1.json",
+      "bytes": 18443,
+      "sha256": "aecc0084faa73bbd8c0a4307f6ee35f65365659d517b87c3d306fd1af50183c2"
+    },
+    {
+      "file": "aoi-slow-store-findings-v1.json",
+      "bytes": 29378,
+      "sha256": "aa75a9da54c6acc9c6124718f5adebe240884a0457b833bf63be739f800dade8"
+    },
+    {
+      "file": "resource-comparison-v1.json",
+      "bytes": 34462,
+      "sha256": "8e2287117ddb871ecb5b7ad73cf5a72f3a0d96332ad76d10c7ec424080b6b505"
+    },
+    {
+      "file": "original-episode-receipt-v1.json",
+      "bytes": 2686,
+      "sha256": "9a419d508464e075a4e5627398d4db1546b7380257fcd2269fdaf78f15ae8217"
+    },
+    {
+      "file": "original-realm-cleanup-v1.json",
+      "bytes": 6552,
+      "sha256": "7d44df5b32ea4b6bb21b0d89ac926cb2dbc242aceaeb71046a4084053d6b01c8"
+    }
+  ]
+}

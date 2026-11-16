@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792871143682-f3d8c161",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\reports\\1792871143682-f3d8c161.report.json",
+    "bytes": 209270,
+    "sha256": "2a546805d6febe580db7f0a33da4e23a1fc11c8bc9dd7af428b5cb1487f570e2"
+  },
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "backendBinarySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+  "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+  "originalBackendReleaseReused": true,
+  "feasibilityRunId": "1792870589933-af9ef086",
+  "navigationCoordination": {
+    "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+    "maximumHintCellsPerConnection": 7,
+    "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+  },
+  "scope": "Identity sidecar only. Original formal driver report bytes and verdict are unchanged; independent complete raw verifier adjudicates acceptance.",
+  "capacityAcceptanceAdjudicated": false
+}

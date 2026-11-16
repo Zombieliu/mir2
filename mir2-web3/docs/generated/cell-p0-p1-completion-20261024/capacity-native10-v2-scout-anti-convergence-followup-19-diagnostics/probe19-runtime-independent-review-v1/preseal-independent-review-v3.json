@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T23:41:58.858Z",
+  "scope": "Final static actual-bound Probe19 source/controller review. No target import, guard, full16 rerun, seed, realm, syntax rerun or protocol trace parsing performed.",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\runtime-prepared-v3.json",
+    "bytes": 41625,
+    "sha256": "c79e49a3d439e18f97ac5ccbf85ef80227444d84f03d285a0ade750821757183"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\root-seal-and-guard-v1.mjs",
+    "bytes": 17593,
+    "sha256": "06229ef67a7053c2e3f0a6d597a9952999a63255be3ea72987eacf98f284d455"
+  },
+  "actualMetadata": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\actual-metadata-binding-v3.json",
+    "bytes": 12478,
+    "sha256": "ca94386e296d89d204d534fd4ade6362ae0bda210c354d347116c7e135da2a11"
+  },
+  "controllerPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\root-controller-preparation-v1.json",
+    "bytes": 1407,
+    "sha256": "8f434e7c11f6d0e06a6baab6a8c52066cd4f378020fa9f2177291d9a59c1f38a"
+  },
+  "actualFull16Prerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+    "bytes": 9348,
+    "sha256": "9e21969af766c6a11983354af92b0c71722ae991719f15c80724f0aae8694b26"
+  },
+  "checks": {
+    "localSourcePins": 66,
+    "externalSourcePins": 36,
+    "localAggregate": "ea59a3dc48a68bbdf50f914fb6273648b12ccdffa2b8121576de4eb2c79566f5",
+    "externalAggregate": "7005679d05aab82b93b57ebca281a9ec15490f256b9aa8c3b31100bcaa8382cf",
+    "rawFilesHashedHere": 96,
+    "sixPublicTracePinsMatchedToPriorOpaqueHashAndSizeOnly": 6,
+    "allRawOrExistingOpaquePinsMatched": true,
+    "sixPendingMetadataPreimagesExact": true,
+    "otherV2SourcesUnchanged": true,
+    "controllerFourLiteralForwardAndInverseRawExact": true,
+    "preSealUsesActualFull16ProjectApiWithoutOwnFreezeCycle": true,
+    "dynamicPreparedReviewAndWxSeparateModesPreserved": true,
+    "sourceCap128Preserved": true,
+    "expectedUniqueSealFiles": 116,
+    "preparationRequiredReferences": 27,
+    "allPreparationReferencesPresent": true,
+    "syntaxArray28ActualZeroAndControllerSchemaMatched": true,
+    "B1CanonicalPathAndRawPinContractClosed": true,
+    "B2WindowsAndSlashTraversalSplitRestored": true,
+    "current226AndSevenSubsetLazyHistoricalDeclarationBasisPreserved": true,
+    "backendCDriverExecutionJAndHistoricalBuildD240Wrapper6dSeparated": true,
+    "canonicalRoot19GeometryProofAndThreeUnchangedBodiesPreserved": true,
+    "originalPolicyResourceScenarioAndMinute5_5_6Preserved": true,
+    "ordinaryPool100Active2_10Preserved": true,
+    "baseSlow347AndStoreIndependentNonGameDataSetsPreserved": true,
+    "freshFull16RunId": "1792971074413-d1b0416a",
+    "freshFull16OrdinarySentCommands": 349,
+    "freshFull16Actual16AndNormalCleanupBound": true,
+    "runtimeStatesAbsent": true
+  },
+  "metadataChangedFields": [
+    {
+      "name": "candidate-release-binding.json",
+      "fields": [
+        "state",
+        "full16"
+      ]
+    },
+    {
+      "name": "current-driver-binding.json",
+      "fields": [
+        "state"
+      ]
+    },
+    {
+      "name": "launcher-source-prepared-v1.json",
+      "fields": [
+        "state",
+        "backendBuildCommit",
+        "actualInputsBound",
+        "sourceFreezeNotSealed",
+        "rootExecutionRequired",
+        "full16",
+        "accountsCreated"
+      ]
+    },
+    {
+      "name": "preparation-plan.json",
+      "fields": [
+        "state",
+        "backendBuildCommit",
+        "actualInputsBound",
+        "sourceFreezeNotSealed",
+        "rootExecutionRequired",
+        "full16",
+        "accountsCreated"
+      ]
+    },
+    {
+      "name": "final-inputs-approved.json",
+      "fields": [
+        "state",
+        "backendBuildCommit",
+        "actualInputsBound",
+        "sourceFreezeNotSealed",
+        "rootExecutionRequired",
+        "full16",
+        "accountsCreated"
+      ]
+    },
+    {
+      "name": "static-preparation-verification.json",
+      "fields": [
+        "state",
+        "backendBuildCommit",
+        "actualInputsBound",
+        "sourceFreezeNotSealed",
+        "rootExecutionRequired",
+        "full16",
+        "accountsCreated"
+      ]
+    }
+  ],
+  "limitations": [
+    "Eligibility covers only Root source seal and read-only guard. Actual Probe19 has not run and capacity remains false.",
+    "Six ordinary full16 drivers and349 ordinary commands are separate from capacity Node226 regression. No independent per-request900ms replay is claimed.",
+    "Six closed public traces were not rehashed or parsed in this review; exact pins and sizes match the prior opaque-hash prerequisite. Root controller will recheck raw source pins during actual modes."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "guardExecuted": false,
+    "realmStarted": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

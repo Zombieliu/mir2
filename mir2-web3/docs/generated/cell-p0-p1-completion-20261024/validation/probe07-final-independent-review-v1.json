@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-24T21:51:53.757Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Independent static final probe07 closure and source/configuration comparison. No product module import, prepare, seeder, build, test suite, collector or realm execution.",
+  "manifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-patrol-feasibility-07/launcher-source-frozen-v1.json",
+    "bytes": 7273,
+    "sha256": "f65e4ad9bc09701a0890a4e7505997c4d0d48485c9505684cf58e73dd4c95dc1"
+  },
+  "sourceSha256": "d46da0b283810c91e26cf6824b026dee18962be722dce6cf27794b81defa4d19",
+  "scriptSourceSha256": "cbe2a35cfcfe82b7941a23fd4cbb0a023e6676ae19bb06946283d4add3fae3f9",
+  "checkedLauncherPins": 25,
+  "scriptCount": 12,
+  "checkedDriverPins": 9,
+  "checkedBackendPins": 39,
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "actualAndHealthCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "environmentChanges": [
+    "Gateway ID/path/batch name",
+    "Existing SlowStage50 enabled"
+  ],
+  "originalScenarioBytesEqual06": true,
+  "originalResourceProfileBytesEqual06": true,
+  "fullPolicyComparedTo": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.report.json",
+    "bytes": 172239,
+    "sha256": "3cff9154f0ed9ea1c7b80089b144074f8b1fd86849620675d30f8c9eadb27da4"
+  },
+  "allowedPolicyChanges": {
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "wallSeconds": 3600
+  },
+  "unchangedPolicyExamples": {
+    "minimumRunRatio": 0.5,
+    "attacksPerMinute": 18,
+    "positiveHitsPerMinute": 12,
+    "movementCadenceMs": 750,
+    "timeoutExclusive": 0.01,
+    "correctionMaximum": 0.05
+  },
+  "reviewedBoundaries": [
+    "12 source scripts, helper/test/log/config/collectors are in final raw-byte pin closure.",
+    "Original 461f/855b backend39 and current099 driver9 raw/Git inputs match; backend has no changes through driver HEAD.",
+    "Actual six process caps and health expectations match06, Tokio4/file/single/platinum176 unchanged.",
+    "Probe remains non-accepting: fullAcceptanceEligible=false and collected capacityAccepted=false; passing report requires actual2/10/soak300/300/360 and5/5/6 complete report/raw windows.",
+    "Collectors preserve original failed/partial report bytes, independent normal cleanup/diagnostic completeness, private/path containment and external large raw archives.",
+    "Slow-stage maxima are nonnegative safe integers; public rows remain8KiB bounded; independent sidecar patrol declaration check is present."
+  ],
+  "limitations": [
+    "Static approval permits preparation under root coordination; it does not establish gameplay feasibility or formal capacity.",
+    "Fresh process identity, health, copied executable verification, receipts and normal cleanup remain runtime checks.",
+    "Formal03 stays failed and formal02 stall is not claimed resolved."
+  ],
+  "blockingFindings": [],
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "kind": "normal UI warehouse store and take back with both save/relogin checkpoints",
+  "capturedAt": "2026-10-11T12:18:37.547Z",
+  "localURL": "http://127.0.0.1:19205/",
+  "runtimeEvidence": "web-source67-runtime-start-actual01.json",
+  "depositEvidence": "web-source67-storage-deposit01.json",
+  "normalActions": [
+    "Store Item",
+    "visible Candle inventory card",
+    "empty warehouse slot",
+    "Close inventory",
+    "Alt+x",
+    "same existing local account Login",
+    "Start Game button",
+    "InnKeeper Anthony nameplate",
+    "Access",
+    "Take Back",
+    "Bag 1",
+    "visible Candle warehouse card",
+    "vacated inventory slot 8",
+    "Close inventory",
+    "Alt+x",
+    "same existing local account Login",
+    "Start Game button",
+    "InnKeeper Anthony nameplate",
+    "Access"
+  ],
+  "checkpoints": [
+    {
+      "phase": "before deposit",
+      "gold": 180,
+      "bagItems": 5,
+      "bagCandles": 3,
+      "storageItems": 0
+    },
+    {
+      "phase": "deposit acknowledged",
+      "gold": 180,
+      "bagItems": 4,
+      "bagCandles": 2,
+      "storageItems": 1,
+      "storageCandles": 1
+    },
+    {
+      "phase": "deposit saved and relogged",
+      "gold": 180,
+      "bagItems": 4,
+      "bagCandles": 2,
+      "storageItems": 1,
+      "storageCandles": 1
+    },
+    {
+      "phase": "take back acknowledged",
+      "gold": 180,
+      "bagItems": 5,
+      "bagCandles": 3,
+      "storageItems": 0
+    },
+    {
+      "phase": "take back saved and relogged",
+      "gold": 180,
+      "bagItems": 5,
+      "bagCandles": 3,
+      "storageItems": 0,
+      "visibleBagSpace": "5/40",
+      "visibleWarehouseCapacity": "0/80"
+    }
+  ],
+  "passiveCaptures": [
+    {
+      "phase": "first relogin warehouse Access",
+      "truncated": false,
+      "hasMore": false,
+      "frames": [
+        {
+          "seq": 1088723,
+          "direction": "in",
+          "type": "packet",
+          "packet": "UserStorage"
+        },
+        {
+          "seq": 1088725,
+          "direction": "in",
+          "type": "packet",
+          "packet": "NPCStorage"
+        }
+      ]
+    },
+    {
+      "phase": "take back",
+      "truncated": false,
+      "hasMore": false,
+      "frames": [
+        {
+          "seq": 1094542,
+          "direction": "out",
+          "type": "takeBackItemV2"
+        },
+        {
+          "seq": 1094548,
+          "direction": "in",
+          "type": "packet",
+          "packet": "TakeBackItemV2",
+          "success": true
+        }
+      ]
+    },
+    {
+      "phase": "second relogin warehouse Access",
+      "truncated": false,
+      "hasMore": false,
+      "frames": [
+        {
+          "seq": 1108032,
+          "direction": "in",
+          "type": "packet",
+          "packet": "UserStorage"
+        },
+        {
+          "seq": 1108033,
+          "direction": "in",
+          "type": "packet",
+          "packet": "NPCStorage"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "file": "web-source67-storage-deposit01.json",
+      "bytes": 2394,
+      "sha256": "6e4ebc80331c800f734239e6b7b938168896d23dd1aff7a797508e7f174e4d36"
+    },
+    {
+      "file": "web-source67-storage-deposit01.png",
+      "bytes": 114890,
+      "sha256": "1ea9667063d51979e0551c7441f688f55041e24910e146586686be0406ebc669"
+    },
+    {
+      "file": "web-source67-storage-deposit-relogin01.png",
+      "bytes": 116118,
+      "sha256": "c65c6539fd7002a12515e86c526c12e93a2a6f509953d21663eaa52189608395"
+    },
+    {
+      "file": "web-source67-storage-withdraw-relogin01.png",
+      "bytes": 116393,
+      "sha256": "7c4b1292e394a4d27481cb4c8e70e6e519c9b52106625965d54b2ee16aaf0775"
+    }
+  ],
+  "interactionNotes": [
+    "Switching to Bag 1 clears the automatically selected warehouse item; select the visible warehouse Candle card again before choosing an inventory destination.",
+    "The Start Game locator timed out once after second Login submission; a fresh full UI state showed Start Game and ordinary entry succeeded without another Login submission.",
+    "The earlier deposit evidence has historical pending relogin flags; this subsequent actual proof closes both checkpoints."
+  ],
+  "knownVisualGaps": [
+    "Warehouse map renders fallback tiles with black areas",
+    "Warehouse Candle tooltip displays raw 8000/8000 durability"
+  ],
+  "privacy": {
+    "credentialsAccountIdsRequestIdsItemUidsAuthorityAndRawFramesOmitted": true,
+    "gameOrWasmStateRead": false,
+    "adminQaOrTeleportCommandsUsed": false
+  },
+  "acceptance": {
+    "normalDepositPassed": true,
+    "depositSaveReloginPassed": true,
+    "normalTakeBackPassed": true,
+    "takeBackSaveReloginPassed": true,
+    "compatibilityStorageUiAccepted": true,
+    "sharedStorageOwnerClaimed": false,
+    "completeAssetCoverageAccepted": false,
+    "mobileDeviceAccepted": false,
+    "candidate100": false,
+    "humanFrontendAccepted": false,
+    "overallPercentage": null,
+    "goalComplete": false
+  }
+}

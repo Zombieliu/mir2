@@ -1,0 +1,38 @@
+
+running 33 tests
+test web::reconnect_handoff::tests::a_closed_notification_channel_without_ready_is_failure ... ok
+test web::reconnect_handoff::tests::canceling_waiter_does_not_consume_pending_or_ready_for_another_waiter ... ok
+test web::reconnect_handoff::tests::close_waits_for_ready_without_holding_registry_lock ... ok
+test web::reconnect_handoff::tests::debug_and_failure_display_do_not_expose_identity_fields ... ok
+test web::reconnect_handoff::tests::live_and_unknown_tcp_or_foreign_owner_cannot_wait ... ok
+test web::reconnect_handoff::tests::poisoned_registry_cannot_announce_ready_or_register_waiters ... ok
+test web::reconnect_handoff::tests::ready_before_first_poll_is_retained ... ok
+test web::reconnect_handoff::tests::ready_broadcasts_to_all_existing_waiters_without_consuming_the_token ... ok
+test web::reconnect_handoff::tests::registration_conflict_never_replaces_live_or_closed_binding ... ok
+test web::reconnect_handoff::tests::registry_tokens_bindings_and_waiters_can_cross_executor_threads ... ok
+test web::reconnect_handoff::tests::same_key_and_owner_get_a_new_identity_and_old_waiter_cannot_complete_it ... ok
+test web::reconnect_handoff::tests::stale_guard_drop_cannot_remove_same_key_and_owner_successor ... ok
+test web::reconnect_handoff::tests::stale_guard_ready_fails_closed_and_cannot_complete_successor ... ok
+test web::reconnect_handoff::tests::unfinished_guard_drop_fails_every_waiter_and_removes_its_binding ... ok
+test web::web_reconnect_handoff_store_tests::a_fresh_socket_binding_can_publish_a_second_handoff_without_reusing_the_first_token ... ok
+test web::web_reconnect_handoff_store_tests::a_ready_notification_cannot_authorize_a_lease_without_its_bound_token ... ok
+test web::web_reconnect_handoff_store_tests::account_and_identity_revocation_fences_invalidate_the_old_revision_permanently ... ok
+test web::web_reconnect_handoff_store_tests::an_old_token_with_the_same_owner_cannot_consume_a_new_teardown ... ok
+test web::web_reconnect_handoff_store_tests::capacity_wait_does_not_preserve_authorization_revoked_after_consumption ... ok
+test web::web_reconnect_handoff_store_tests::expired_saved_lease_cannot_be_consumed_even_with_a_current_identity_and_token ... ok
+test web::web_reconnect_handoff_store_tests::identity_expiry_is_checked_at_capture_revalidation_and_consumption ... ok
+test web::web_reconnect_handoff_store_tests::identity_helper_observes_shared_cache_revocation_without_consuming_the_lease ... ok
+test web::web_reconnect_handoff_store_tests::identity_helper_rejects_auth_account_and_current_identity_changes ... ok
+test web::web_reconnect_handoff_store_tests::identity_helper_rejects_real_identity_revocation_without_mutating_the_saved_world ... ok
+test web::web_reconnect_handoff_store_tests::notification_follows_publication_consumes_once_and_preserves_the_world ... ok
+test web::web_reconnect_handoff_store_tests::overlapping_revocations_do_not_reopen_capture_when_only_one_fence_ends ... ok
+test web::web_reconnect_handoff_store_tests::shared_authority_revoked_after_local_consumption_cannot_authorize_bootstrap_or_restore_again ... ok
+test web::web_reconnect_handoff_store_tests::two_notified_waiters_compete_for_exactly_one_saved_session ... ok
+test web::web_reconnect_handoff_store_tests::wrong_key_account_owner_or_token_never_consumes_the_legitimate_lease ... ok
+test web::web_reconnect_persistence_wait_tests::reconnect_handoff_is_visible_while_committed_movement_drain_is_still_blocked ... ok
+test web::web_reconnect_persistence_wait_tests::reconnect_handoff_journaled_checkpoint_never_announces_ready_or_restores ... ok
+test web::web_reconnect_persistence_wait_tests::reconnect_handoff_live_role_still_denies_a_second_route_without_waiting ... ok
+test web::web_reconnect_persistence_wait_tests::reconnect_handoff_waits_for_real_checkpoint_persistence_and_replays_without_world_mutation ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 1747 filtered out; finished in 30.84s
+

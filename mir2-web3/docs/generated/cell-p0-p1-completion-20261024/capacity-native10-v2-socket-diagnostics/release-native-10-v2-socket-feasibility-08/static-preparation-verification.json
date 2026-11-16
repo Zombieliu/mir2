@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-24T23:35:50.806Z",
+  "state": "static-template-only",
+  "allScriptSyntaxPassed": true,
+  "scriptCount": 15,
+  "originalSceneResourceAndPolicyPreserved": true,
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "helperSchema": "exact-3-4-7-key-socket-context-v1",
+  "helperSyntheticEvidence": "25/25 reused frozen evidence; not rerun",
+  "full16RunId": "1792884517374-04264602",
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,1 @@
+{"atUtc": "2026-10-30T05:23:27.098137+00:00", "reason": "Correct installed-status prose after source freeze; no runtime setting changed", "oldSha256": "cee9dd1f877c8d5d4f590b5dccb8cb686615dd17e8b05f6775fce326210ea47a", "installedFiles": {"/etc/mir2-retention/README.md": "3a01fe2eb431bf93567450a35259cd35b497b286b20aef3a2e472ee2ab4c01cb"}}

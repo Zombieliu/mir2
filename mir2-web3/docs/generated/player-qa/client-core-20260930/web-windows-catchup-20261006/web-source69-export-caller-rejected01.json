@@ -1,0 +1,20 @@
+{
+  "kind": "Source69 original caller preexecution rejection",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source69-warehouse-map-local-20261011-01\\root-approved01\\export01-config.json",
+    "bytes": 4959,
+    "sha256": "122daff6487cde992cb4c6eb27f2d20c1474bbda9253fcaed70b721a179f45fd"
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "exitCode": 1,
+  "reason": "nonliteral bounded builder argument",
+  "argumentIndex": 4,
+  "semicolonDelimiterRejected": true,
+  "productStarted": false,
+  "pngsWritten": 0,
+  "stdoutStderrOuterAbsent": true,
+  "sourcesChanged": false,
+  "originalCallerOrGuardModified": false,
+  "resolution": "Use unchanged exporter supported repeated --frames, one library per literal argument"
+}

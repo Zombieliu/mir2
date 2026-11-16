@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "owner": "Root",
+  "source": "Source66",
+  "localURL": "http://127.0.0.1:19205/",
+  "originalCallerBodyBytes": 4569,
+  "originalCallerBodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "oldWeb": {
+    "pid": 53752,
+    "parentPid": 61460,
+    "ownershipChecksAllPassed": true,
+    "normalPlayerSaveAndLogoutBeforeStop": true,
+    "exitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "originalCallerClosed": true,
+    "oldRuntimePreserved": true
+  },
+  "newWeb": {
+    "pid": 57816,
+    "parentPid": 63652,
+    "loopbackPort": 19205,
+    "exeAndArgsAndParentConfigAndPinMatched": true,
+    "loopbackListenerObserved": true,
+    "ordinaryBrowserReloadLoadedLegendOfMirAndLoginForm": true,
+    "running": true,
+    "originalCallerRunning": true,
+    "exited": false,
+    "disposed": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source66-npc-visible-range-20261011-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3164,
+    "sha256": "8c43f6db7dd3354a61fd3ef207c3b119083f2035df638ffb845c36356cda245d"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source66-npc-visible-range-20261011-01\\root-approved01\\web-runtime-source-review01.json",
+    "bytes": 7702,
+    "sha256": "110c719ad931ae8f10d623f8368c4ceacbba28e73e16842f28923bc11c3e623e"
+  },
+  "files": 4066,
+  "ordinaryDirectoriesIncludingRoot": 513,
+  "links": 0,
+  "bytes": 284885459,
+  "capBytes": 377487360,
+  "capPassed": true,
+  "fullHashDifferences": 0,
+  "fullMembershipDifferences": 0,
+  "packageCopyDifferences": 0,
+  "ordinaryAncestors": 1036,
+  "ancestorDifferences": 0,
+  "controlCount": 9,
+  "controlDifferences": 0,
+  "thinDiagnostics": {
+    "warningCount": 59,
+    "warningCodes": {
+      "Error": 59
+    },
+    "allWarningsRetainedInOriginalReport": true,
+    "all59MessagesUntruncated": true
+  },
+  "sameImmutableMediaProxyAndCompiledGatewayWS": true,
+  "GatewayPrivateConfigReadOrChanged": false,
+  "GatewayRestarted": false,
+  "Next03CompileCarried": true,
+  "Next04Executed": false,
+  "loginActionSubmitted": true,
+  "startGameAndStorageLivePending": true,
+  "uiOperatedForNewRuntime": true,
+  "productionPublished": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

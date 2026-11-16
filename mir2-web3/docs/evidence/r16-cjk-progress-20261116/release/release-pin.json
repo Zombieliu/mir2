@@ -1,0 +1,33 @@
+{
+  "source": "306066f29590d1e2e14155d83644fbc19f11a4c3",
+  "base": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "baseline": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "checkpoint": "7de1b38dd26d969bc5daf7cae64261ab70e3285c",
+  "commits": 3,
+  "totalFiles": 62,
+  "segments": [
+    {
+      "base": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "source": "7de1b38dd26d969bc5daf7cae64261ab70e3285c",
+      "commits": 2,
+      "files": 37
+    },
+    {
+      "base": "7de1b38dd26d969bc5daf7cae64261ab70e3285c",
+      "source": "306066f29590d1e2e14155d83644fbc19f11a4c3",
+      "commits": 1,
+      "files": 29
+    }
+  ],
+  "independentGitHubComparisons": true,
+  "onlyAllowedControllerPinFieldsChanged": true,
+  "compiledAppLibFiles": 2181,
+  "generatedInputException": 1,
+  "worker": {
+    "bytes": 72815,
+    "sha256": "5369d5c2a5c51a89e892ad5e283d63b36a2bf0f24cc035b5a3d81cd5e599bbdb"
+  },
+  "candidate": "r16-cjk-progress-d90b62f7",
+  "controllerSha256": "93caf71ec8f4665d64fc1684382b8f0ab40655711de639344f1f9fe475a4c730",
+  "publicDeploy": false
+}

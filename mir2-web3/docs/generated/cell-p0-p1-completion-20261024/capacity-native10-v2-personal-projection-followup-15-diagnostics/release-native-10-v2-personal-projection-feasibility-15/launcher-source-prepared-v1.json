@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_FOR_INDEPENDENT_PRESEAL_ONLY",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "driverExecutionSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "actualNodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "backendInputCount": 44,
+  "preparedHistory": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\TEMPLATE-PREPARED-v2.json",
+    "bytes": 21685,
+    "sha256": "15d4a6e8a748c01f6d99e477fda4c07ddec8e22f9d37466e7e1a587a9ea97148"
+  },
+  "actualBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-proof-v1.json",
+    "bytes": 42659,
+    "sha256": "32b40ff986b011892dae5d3abb32128dbea723f1fdbc729c517ae3d7531a0a79"
+  },
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false
+}

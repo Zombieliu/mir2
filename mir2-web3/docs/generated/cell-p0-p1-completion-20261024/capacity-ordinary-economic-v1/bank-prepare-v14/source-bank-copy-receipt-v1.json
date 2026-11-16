@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "sourcePlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\source-bank-plan-pending-v1.json",
+    "bytes": 15068,
+    "sha256": "3b450538f6107db972c749a40ba090b55e4c5cacf42df74c5292459ffa1c85de"
+  },
+  "sourceFiles": 11,
+  "totalBytes": 441799,
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\accounts.json",
+        "bytes": 419444,
+        "sha256": "e01bce97d07c2ee5b138fd96a88b08c14f5c90c9d19237f932ce15f213637900",
+        "relative": "accounts.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\accounts.json",
+        "bytes": 419444,
+        "sha256": "e01bce97d07c2ee5b138fd96a88b08c14f5c90c9d19237f932ce15f213637900"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\capacity-pool.json",
+        "bytes": 21248,
+        "sha256": "9b0160429b992e269df5df716537ce23791f8255bef1171b356b9e398b1b2a59",
+        "relative": "capacity-pool.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\capacity-pool.json",
+        "bytes": 21248,
+        "sha256": "9b0160429b992e269df5df716537ce23791f8255bef1171b356b9e398b1b2a59"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\capacity-auth-budget.json",
+        "bytes": 453,
+        "sha256": "04edb880fb6dcbd87d03f4b8ebc92d6c11a81ece1a5b1c82ab4790296722ee72",
+        "relative": "capacity-auth-budget.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\capacity-auth-budget.json",
+        "bytes": 453,
+        "sha256": "04edb880fb6dcbd87d03f4b8ebc92d6c11a81ece1a5b1c82ab4790296722ee72"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+        "relative": "recovery-mac-key.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+        "relative": "identity-session-secret.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+        "relative": "identity-recovery-pepper.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+        "relative": "passkey-auth-secret.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\save-recovery\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "save-recovery/.mir2-directory-durability"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "cfb1414dd240e4566dcbb18b81c489cd5eb890d2f5c43d2fcff1ecc93b60cb16",
+        "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "cfb1414dd240e4566dcbb18b81c489cd5eb890d2f5c43d2fcff1ecc93b60cb16"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "save-recovery/quarantine/.mir2-directory-durability"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    }
+  ],
+  "sourceUnchangedAfterCopy": true,
+  "sourcePoolAccounts": 100,
+  "sourceReadyCharacters": 30,
+  "sourcePreparedCount": 29,
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "map": "0",
+      "x": 286,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "map": "0",
+      "x": 290,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "map": "0",
+      "x": 288,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "map": "0",
+      "x": 287,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0b",
+      "characterIndex": 12,
+      "map": "0",
+      "x": 289,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0c",
+      "characterIndex": 13,
+      "map": "0",
+      "x": 286,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0d",
+      "characterIndex": 14,
+      "map": "0",
+      "x": 290,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0e",
+      "characterIndex": 15,
+      "map": "0",
+      "x": 286,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0f",
+      "characterIndex": 16,
+      "map": "0",
+      "x": 290,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0g",
+      "characterIndex": 17,
+      "map": "0",
+      "x": 287,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0h",
+      "characterIndex": 18,
+      "map": "0",
+      "x": 289,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0i",
+      "characterIndex": 19,
+      "map": "0",
+      "x": 290,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0j",
+      "characterIndex": 20,
+      "map": "0",
+      "x": 286,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0k",
+      "characterIndex": 21,
+      "map": "0",
+      "x": 290,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0l",
+      "characterIndex": 22,
+      "map": "0",
+      "x": 288,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0m",
+      "characterIndex": 23,
+      "map": "0",
+      "x": 285,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0n",
+      "characterIndex": 24,
+      "map": "0",
+      "x": 287,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0o",
+      "characterIndex": 25,
+      "map": "0",
+      "x": 288,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0p",
+      "characterIndex": 26,
+      "map": "0",
+      "x": 289,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0q",
+      "characterIndex": 27,
+      "map": "0",
+      "x": 285,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0r",
+      "characterIndex": 28,
+      "map": "0",
+      "x": 291,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0s",
+      "characterIndex": 29,
+      "map": "0",
+      "x": 285,
+      "y": 617,
+      "normalLogout": true
+    }
+  ],
+  "sourceFailedThirtiethPromoted": false,
+  "sourcePreparedEligibilityInherited": false,
+  "sourceOriginalFailureRetained": true,
+  "actualV13PartialBankContinuation": true,
+  "trafficLedgerSource": "ordinary-capacity-bank-prepare-v13",
+  "sourceRecoveryPreserved": true,
+  "sourcePriorRecoveryArchiveRetainedInPlace": true,
+  "priorRecoveryArchiveCopiedToActive": false,
+  "activeRecoveryInitiallyEmpty": true,
+  "recoveryJournalPayloads": 0,
+  "authLedgerCopiedUnchanged": true,
+  "loginNotBeforeOverridden": false,
+  "accountStoreRewritePerformed": false,
+  "poolRewritePerformed": false,
+  "stockOrPositionEditPerformed": false,
+  "seederInvoked": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

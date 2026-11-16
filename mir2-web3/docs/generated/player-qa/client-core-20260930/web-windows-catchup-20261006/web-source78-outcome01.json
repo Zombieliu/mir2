@@ -1,0 +1,186 @@
+{
+  "owner": "Root",
+  "round": "Source78",
+  "parentCommit": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "resolved": "ordinary empty Spells baseline-missing compatibility fallback; authenticated physical baseline delivered at new-controller bootstrap",
+  "codeFiles": [
+    {
+      "relativePath": "apps/web/lib/bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 22960,
+        "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+      }
+    },
+    {
+      "relativePath": "apps/web/lib/use-bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 2823,
+        "sha256": "780e587c8d87bb50cc280e29b90d9a1467e03c723e58cbf4719bf6e1f0dbec94"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 3383,
+        "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 12404,
+        "sha256": "68ef1d3e4304c39eeda5e105517eef8f0a7ff6145043ffe3f17221bf80631a29"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 23504,
+        "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 2790,
+        "sha256": "27efb2dd14c35fde07264019ecd22ce7b940b369a3bbc3c4214d57016059edae"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 6853,
+        "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+      }
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "before": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\app\\page.tsx",
+        "bytes": 1099365,
+        "sha256": "cbd8de41a129c5f50549d22da364fa91bf483300d3d4c1ca89099f85ffbcfe07"
+      }
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "before": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      },
+      "after": {
+        "path": "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/root-after/apps/web/app/original-client-shell.tsx",
+        "bytes": 335016,
+        "sha256": "e82fe9a79838ae9e76b4af88811169d3da2bbc0a8e9f40ebe5fd77bc7905e6c3"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-page-gate.mjs",
+      "before": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs",
+        "bytes": 9600,
+        "sha256": "d10cad9061efccc7d55a8e3902cecf763f2fffcd54787fd40e2ac48972921c3e"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\after\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15829,
+        "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\before\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 6550,
+        "sha256": "2da5b3773f58bedcb16b005083eaa6cf5063e51864d128a50229ae294ac49a58"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 16039,
+        "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+      }
+    }
+  ],
+  "actualCurrentNode": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-actual03.json",
+    "bytes": 3332,
+    "sha256": "91be454659a13e81ff6f5c563264be9ee5d66732b65624e82334c2e7fd8dabd7"
+  },
+  "actualUnchangedPortable": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-portable-actual01.json",
+    "bytes": 2801,
+    "sha256": "6794334be0f9d7ca2523d5293d328c2a365ca60992c245203509bfaa4da8dd2a"
+  },
+  "portableInputsUnchangedByBootstrapRepair": true,
+  "currentNodeTests": 144,
+  "unchangedPortableTests": 34,
+  "actualNext": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-next-actual02.json",
+    "bytes": 2632,
+    "sha256": "16455ab926a82e5aa1e765a7862aad3cda907250d281d61b34e5841fc7abdb6b"
+  },
+  "actualThin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-actual03.json",
+    "bytes": 5110,
+    "sha256": "8f8ad67d9d635575c725d80df302c60fc4353fbadd4f37f0c25b72fc8440fa29"
+  },
+  "package": {
+    "files": 5260,
+    "directories": 752,
+    "bytes": 313460618,
+    "links": 0
+  },
+  "publicBrowserProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-native-qa01.json",
+    "bytes": 2938,
+    "sha256": "eba61449365bfd9d83a1916a646f731b9c4d0715ca8d1e26cc3b0d1ac67ccc20"
+  },
+  "ordinaryUiAccepted": {
+    "emptySpellsBootstrapAndRelogin": true,
+    "learnedSkillAssignmentOrCasting": false,
+    "mobile": false,
+    "fullWebWindowsParity": false,
+    "candidate100": false,
+    "goalComplete": false
+  },
+  "initialFailuresPreserved": [
+    "current dependency test fixtures 3 failures",
+    "input display-case Thin01 failure",
+    "public initial baseline-missing"
+  ],
+  "security": {
+    "oldRawCacheRetag": false,
+    "rawAckCaptureChanged": false,
+    "transportProofGuardsWeakened": false,
+    "extraHookFetchOrPolling": false,
+    "source65GatewayChanged": false,
+    "mainTsconfigUnchanged": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    }
+  },
+  "review": {
+    "readOnlyAgentNoBlockingIssue": true,
+    "rootLedSourceAndActualExecution": true
+  },
+  "remaining": [
+    "shared stacked amount confirmation/cancel/Escape",
+    "nonstarter equipment and nonempty skills/hotkey/casting",
+    "Bag2 and other panel gameplay branches",
+    "ordinary battle/quest and mobile/touch complete QA",
+    "final human frontend Candidate100 acceptance"
+  ],
+  "overallProgressPercent": null,
+  "backendParityIncreased": false,
+  "candidate100": false,
+  "goalComplete": false
+}

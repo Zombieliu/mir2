@@ -1,0 +1,35 @@
+{
+  "owner": "Root",
+  "priorRootDataVerificationTimedOut": true,
+  "toolReportedAutomaticKernelReset": true,
+  "manualResetCalled": false,
+  "productFailedOrRerunForDataTimeout": false,
+  "originalNextClosedExitCode": 0,
+  "originalNextPostguardPassed": true,
+  "recoveryOnlyBuiltInFsPathCryptoImports": true,
+  "productImportsEvalSpawnNetwork": false,
+  "membershipRecheckedWithLinearSets": true,
+  "all71058DeclaredInputsHashed": true,
+  "inputHashDifferences": 0,
+  "internalFiles": 71056,
+  "unknownOrMissingFiles": 0,
+  "all61NftFilesVerifiedWithoutRewrite": true,
+  "nftUnknownTargets": 0,
+  "fullInputAcceptancePin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-full-input-acceptance01.json",
+    "bytes": 1080,
+    "sha256": "c01d077abb9ef6d1a15ff184334d3fbc69ec97ad544657d3581538b4acad9030"
+  },
+  "finitePackageCountsRecomputedFromActualReportStructure": true,
+  "compiledPackageLeaves222AllMatchActualNext": true,
+  "zeroProductChangesDuringRecovery": true,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "nftTargetRows": 130518,
+  "priorSource74LogoutObservationException": {
+    "oneLoginScreenshotMistakenlyEmittedInToolOutput": true,
+    "savedCopiedOrPublishedAsQaArtifact": false,
+    "subsequentLoginScreenshots": false,
+    "privateValuesIncludedInThisRecord": false
+  }
+}

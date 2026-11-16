@@ -1,0 +1,54 @@
+{
+  "candidate": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "passed": false,
+  "productionQualificationPassed": false,
+  "runs": [
+    {
+      "run": 1,
+      "passed": false,
+      "failure": {
+        "phase": "inspect-world-paint",
+        "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-npcs"
+      },
+      "roleCreated": true,
+      "closed": true,
+      "detail": "public-run-1.json"
+    },
+    {
+      "run": 2,
+      "passed": false,
+      "failure": {
+        "phase": "verify-six-original-font-cache-bodies",
+        "code": "AUTOMATION_FAILED"
+      },
+      "roleCreated": true,
+      "closed": true,
+      "detail": "public-run-2.json"
+    },
+    {
+      "run": 3,
+      "passed": false,
+      "failure": {
+        "phase": "desktop-click-ready",
+        "code": "LOGIN_RESOURCES_DID_NOT_SETTLE"
+      },
+      "roleCreated": false,
+      "closed": true,
+      "detail": "public-run-3.json"
+    }
+  ],
+  "qrPairs": [
+    {
+      "file": "candidate-qr-pair.json",
+      "passed": true
+    },
+    {
+      "file": "rollback-qr-pair.json",
+      "passed": true
+    }
+  ],
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "noThresholdRelaxation": true,
+  "scope": "Three distinct ordinary cold public runs on the same immutable candidate; failures retained separately. No combined pass is inferred from checks in different runs."
+}

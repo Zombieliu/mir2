@@ -1,0 +1,248 @@
+{
+  "source": "9dc7294c0269eee93086e88ac83d2bc9d93d387e",
+  "deployment": "dpl_XPzRmyXdXVbC96weq8xUEeW9KCkF",
+  "implementation": "82efae2f89760a8760a9f81dda3f8b647289b9ac",
+  "passed": false,
+  "failure": {
+    "phase": "ordinary-first-playable-scene",
+    "code": "FIRST_PLAYABLE_SCENE_NOT_OBSERVED"
+  },
+  "timings": {
+    "clockEpochMs": 1794557778461,
+    "authoritativeLoginSuccessMs": 58124,
+    "startIntentMs": 88951,
+    "startAckMs": 92397,
+    "authoritativeStarterMapMs": 92406,
+    "authoritativeSelfMs": 92406,
+    "logoutIntentMs": 212633,
+    "logoutAckMs": 213823,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 58128,
+    "starterRegionWireHeadersMs": 59599.666,
+    "starterRegionResponseEventMs": 59600,
+    "starterRegionBodyMs": null,
+    "starterRegionCommitMs": null,
+    "sceneSpritesReadyMs": null,
+    "localeRequestMs": null,
+    "localeBodyMs": null,
+    "localeReadyMs": null,
+    "firstPlayableFrameMs": null,
+    "rendererBodyMs": null
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "returnedToSelect": true,
+    "exactVersionedStarterRegion": false
+  },
+  "protocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 0,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "staticEntry": {
+    "passed": false,
+    "runtimeStaticProved": false,
+    "checks": {
+      "completeCapture": true,
+      "exactStaticHttpBody": false,
+      "afterAuthBeforeStart": false,
+      "authoritativeSpawn": true,
+      "staticSceneCommit": false,
+      "exactFirstPlayable": false,
+      "noMatchingDynamicRequest": false
+    },
+    "source": null,
+    "sceneKey": null,
+    "authoritativeSpawn": {
+      "x": 288,
+      "y": 616
+    },
+    "firstPlayableSpawn": null,
+    "selectedRequest": null,
+    "staticRequests": 5,
+    "matchingDynamicRequests": 2,
+    "droppedRows": 0,
+    "selection": {
+      "loginSuccessMs": 58124,
+      "selectReadyMs": 88126,
+      "startSubmitMs": 88949,
+      "requestMs": null,
+      "screenAtRequest": null,
+      "screenTransitions": [
+        {
+          "screen": "login",
+          "atMs": 17073
+        },
+        {
+          "screen": "openingLogin",
+          "atMs": 58129
+        },
+        {
+          "screen": "select",
+          "atMs": 88145
+        },
+        {
+          "screen": "game",
+          "atMs": 92500
+        }
+      ]
+    },
+    "asset": null
+  },
+  "staticBody": {
+    "passed": false,
+    "status": "no-complete-static-http",
+    "correlations": [],
+    "asset": null
+  },
+  "sceneGate": {
+    "game": true,
+    "stageVisible": true,
+    "pending": true,
+    "interactionReady": false,
+    "hasRenderPlayer": true,
+    "hasMapRegion": false,
+    "camera": {
+      "x": 288,
+      "y": 616
+    },
+    "preloadStatus": null,
+    "preloadInteractionReady": false,
+    "sceneSpriteLibrariesReady": false,
+    "pendingSceneSpriteLibraryCount": 16,
+    "gpuEntityRendererRuntimePending": false,
+    "retryVisible": true,
+    "sharedHudReady": false,
+    "sharedHudVisible": false,
+    "marks": [
+      {
+        "name": "assetManifestStart",
+        "atMs": 0.29999999701976776,
+        "epochMs": 1794557794145
+      },
+      {
+        "name": "assetManifestReady",
+        "atMs": 140.5,
+        "epochMs": 1794557794285
+      },
+      {
+        "name": "sceneAssetsReady",
+        "atMs": 1387.3999999910593,
+        "epochMs": 1794557795532,
+        "phase": "idle-or-other"
+      },
+      {
+        "name": "loginSuccess",
+        "atMs": 42440,
+        "epochMs": 1794557836585
+      },
+      {
+        "name": "gameplayLocaleStart",
+        "atMs": 42443.89999999106,
+        "epochMs": 1794557836589
+      },
+      {
+        "name": "selectReady",
+        "atMs": 72442.29999999702,
+        "epochMs": 1794557866587
+      },
+      {
+        "name": "startGameSubmit",
+        "atMs": 73265.79999999702,
+        "epochMs": 1794557867410
+      },
+      {
+        "name": "startGamePacket",
+        "atMs": 76711.70000000298,
+        "epochMs": 1794557870856
+      },
+      {
+        "name": "userInformationReady",
+        "atMs": 76719.39999999106,
+        "epochMs": 1794557870864
+      },
+      {
+        "name": "sceneAssetsStart",
+        "atMs": 76804.79999999702,
+        "epochMs": 1794557870949,
+        "phase": "idle-or-other"
+      },
+      {
+        "name": "sceneBlueprintStart",
+        "atMs": 76841.59999999404,
+        "epochMs": 1794557870986
+      },
+      {
+        "name": "gameplayLocaleFailed",
+        "atMs": 108843.70000000298,
+        "epochMs": 1794557902988
+      }
+    ],
+    "firstPlayable": null,
+    "screens": [
+      {
+        "screen": "login",
+        "epochMs": 1794557795534
+      },
+      {
+        "screen": "openingLogin",
+        "epochMs": 1794557836590
+      },
+      {
+        "screen": "select",
+        "epochMs": 1794557866606
+      },
+      {
+        "screen": "game",
+        "epochMs": 1794557870961
+      }
+    ]
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "returnedToSelect": true,
+  "desktopClosed": true,
+  "mobileClosed": true,
+  "approval": {
+    "passed": true,
+    "officialPwa": true,
+    "mobileBrowserEmulation": true,
+    "virtualPasskey": true,
+    "approveUiClicks": 1,
+    "approveRelayRequests": 1,
+    "loginOnlyConsentVisible": true,
+    "relayApprovedExactSession": true,
+    "forbiddenCount": 0,
+    "operations": {
+      "http-read": 153,
+      "exact-login-session-read": 1,
+      "signed-login-approval": 1
+    },
+    "walletClosed": true
+  },
+  "rawGameReceiptSha256": "a20c9bacb8f707409b2b858e3d45a802bf27a94f82a47c9b14838dd0fa99f4b8",
+  "rawSummarySha256": "fd241d6a1366ca8057eb5fa0fd69d6267ad27e6daff3ecc55dd27eaa4f7ea33a",
+  "scope": "One ordinary public alias run, exact source pinned. New virtual-passkey Testnet wallet and one login-only approval; no physical phone claim. First scene not committed, movement/Native/fonts/Worker not reached; no combined complete pass from separate runs."
+}

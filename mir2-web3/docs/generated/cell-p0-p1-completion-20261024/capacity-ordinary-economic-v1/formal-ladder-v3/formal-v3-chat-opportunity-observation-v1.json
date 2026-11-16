@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only original formal-v3 W4 observation; no capacity promotion or counterfactual pass claim",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v3\\episode\\reports\\1793108451635-24ed2e6c.report.json",
+    "bytes": 76581,
+    "sha256": "fb2c06c0b0539536353f65b111ba3de29df65356cf9e3282b2425be97800ff8b"
+  },
+  "samples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v3\\episode\\reports\\1793108451635-24ed2e6c.samples.jsonl",
+    "bytes": 2773051,
+    "sha256": "a8f3ea6f52ab0843f7e39942ad760e00f84286df8d14fde6e59fdd2922e822ba",
+    "rows": 2575,
+    "parsedOnce": true
+  },
+  "failedWindow": {
+    "index": 4,
+    "start": 1793108664166,
+    "end": 1793108724231,
+    "seconds": 60.065,
+    "chatPassed": false,
+    "chatSuccesses": 4,
+    "selfChatSuccesses": 4,
+    "peerChatSuccesses": 0,
+    "chatP95Ms": 4
+  },
+  "chatSendPositions": [
+    {
+      "line": 1738,
+      "actor": "L370e2a00",
+      "at": 1793108676647,
+      "sentAtMs": 225025.7723,
+      "positions": [
+        {
+          "actor": "L370e2a00",
+          "line": 1732,
+          "at": 1793108675842,
+          "monotonicMs": 224250.6121,
+          "point": {
+            "x": 244,
+            "y": 596
+          },
+          "source": "UserLocation",
+          "ageMs": 775.160200000013
+        },
+        {
+          "actor": "L370e2a01",
+          "line": 1734,
+          "at": 1793108675908,
+          "monotonicMs": 224316.6133,
+          "point": {
+            "x": 234,
+            "y": 590
+          },
+          "source": "UserLocation",
+          "ageMs": 709.1590000000142
+        }
+      ],
+      "distance": 10
+    },
+    {
+      "line": 1740,
+      "actor": "L370e2a01",
+      "at": 1793108676678,
+      "sentAtMs": 225056.072,
+      "positions": [
+        {
+          "actor": "L370e2a00",
+          "line": 1732,
+          "at": 1793108675842,
+          "monotonicMs": 224250.6121,
+          "point": {
+            "x": 244,
+            "y": 596
+          },
+          "source": "UserLocation",
+          "ageMs": 805.4598999999871
+        },
+        {
+          "actor": "L370e2a01",
+          "line": 1734,
+          "at": 1793108675908,
+          "monotonicMs": 224316.6133,
+          "point": {
+            "x": 234,
+            "y": 590
+          },
+          "source": "UserLocation",
+          "ageMs": 739.4586999999883
+        }
+      ],
+      "distance": 10
+    },
+    {
+      "line": 1969,
+      "actor": "L370e2a00",
+      "at": 1793108706650,
+      "sentAtMs": 255026.475,
+      "positions": [
+        {
+          "actor": "L370e2a00",
+          "line": 1964,
+          "at": 1793108705847,
+          "monotonicMs": 254254.6082,
+          "point": {
+            "x": 244,
+            "y": 597
+          },
+          "source": "UserLocation",
+          "ageMs": 771.866800000018
+        },
+        {
+          "actor": "L370e2a01",
+          "line": 1966,
+          "at": 1793108705910,
+          "monotonicMs": 254317.5666,
+          "point": {
+            "x": 234,
+            "y": 590
+          },
+          "source": "UserLocation",
+          "ageMs": 708.9084000000148
+        }
+      ],
+      "distance": 10
+    },
+    {
+      "line": 1971,
+      "actor": "L370e2a01",
+      "at": 1793108706680,
+      "sentAtMs": 255057.9997,
+      "positions": [
+        {
+          "actor": "L370e2a00",
+          "line": 1964,
+          "at": 1793108705847,
+          "monotonicMs": 254254.6082,
+          "point": {
+            "x": 244,
+            "y": 597
+          },
+          "source": "UserLocation",
+          "ageMs": 803.3914999999979
+        },
+        {
+          "actor": "L370e2a01",
+          "line": 1966,
+          "at": 1793108705910,
+          "monotonicMs": 254317.5666,
+          "point": {
+            "x": 234,
+            "y": 590
+          },
+          "source": "UserLocation",
+          "ageMs": 740.4330999999947
+        }
+      ],
+      "distance": 10
+    }
+  ],
+  "otherSuccessfulMoveOrTurnSendPoints": {
+    "withinRange8": 108,
+    "total": 156,
+    "rule": "At each original planned movement/turn send mono, join each of the two client owner latest successful UserLocation receipts at or before the send. These are owner positions in the same Node clock, not spectator or cross-namespace monster mapping.",
+    "firstAfterFirstSelfChat": {
+      "line": 1756,
+      "actor": "L370e2a01",
+      "at": 1793108678942,
+      "sentAtMs": 227318.5612,
+      "kind": "run",
+      "distance": 8,
+      "positions": [
+        {
+          "actor": "L370e2a00",
+          "line": 1753,
+          "mono": 227257.526,
+          "point": {
+            "x": 243,
+            "y": 598
+          },
+          "at": 1793108678849
+        },
+        {
+          "actor": "L370e2a01",
+          "line": 1749,
+          "mono": 226541.1917,
+          "point": {
+            "x": 236,
+            "y": 590
+          },
+          "at": 1793108678132
+        }
+      ]
+    },
+    "firstAfterSecondSelfChat": {
+      "line": 1982,
+      "actor": "L370e2a01",
+      "at": 1793108708179,
+      "sentAtMs": 256555.6512,
+      "kind": "walk",
+      "distance": 8,
+      "positions": [
+        {
+          "actor": "L370e2a00",
+          "line": 1979,
+          "mono": 256523.8283,
+          "point": {
+            "x": 242,
+            "y": 598
+          },
+          "at": 1793108708116
+        },
+        {
+          "actor": "L370e2a01",
+          "line": 1977,
+          "mono": 255806.9925,
+          "point": {
+            "x": 235,
+            "y": 590
+          },
+          "at": 1793108707399
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Original failed report retained unchanged.",
+    "A new policy changes future command timing; observed later near points do not certify a counterfactual successful run.",
+    "This record does not prove server overload, new capacity, full durable relogin or500 all-fighter support."
+  ],
+  "sourceModifiedByObservation": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

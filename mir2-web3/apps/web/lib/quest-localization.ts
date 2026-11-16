@@ -2,12 +2,66 @@ import {
   localizeCrystalEntityName,
   localizeCrystalItemName,
 } from "./crystal-content-localization";
+import {
+  localizeNewcomerV2Text,
+  newcomerV2ObjectiveTextFor,
+  newcomerV2QuestCopyFor,
+  stripQuestObjectiveProgress,
+  type NewcomerV2Graduation,
+} from "./newcomer-v2-journey";
 
-export type QuestTranslateFn = (
+export type QuestTranslateFn = ((
   key: string,
   params?: Array<string | number>,
   fallback?: string,
-) => string;
+) => string) & { systemText?: (value: string) => string };
+
+export function formatQuestText(
+  t: QuestTranslateFn,
+  key: string,
+  fallback: string,
+  args: Readonly<Record<string, string | number>>,
+): string {
+  return t(key, [], fallback).replace(/\{([a-z]+)\}/gi, (token, name: string) =>
+    Object.hasOwn(args, name) ? String(args[name]) : token,
+  );
+}
+
+/** The compatibility chooser presents the same local-only handoff as Native. */
+export function localizeNewcomerV2Graduation(
+  graduation: NewcomerV2Graduation | null,
+  t: QuestTranslateFn,
+): NewcomerV2Graduation | null {
+  if (!graduation) return null;
+  const system = (value: string) => t.systemText?.(value) ?? value;
+  const labels = {
+    equipment: "game.006",
+    skill: "common.6df1bb18a59a",
+    challenge: "common.27cf1792f7bb",
+  };
+  return {
+    ...graduation,
+    title: t("quest.journey.copy.6", [], graduation.title),
+    goals: graduation.goals.map((goal) => ({
+      ...goal,
+      label: t(labels[goal.key], [], goal.label),
+      title: localizeCrystalItemName(goal.title, t),
+      requirements: goal.key === "challenge"
+        ? formatQuestText(t, "quest.feedback.83", "{difficulty} difficulty · {map}", {
+            difficulty: t("common.8e588cd18774", [], "Medium"),
+            // Native resolves the configured D605 through the Crystal map index.
+            map: t("content.map.186.name", [], "Insect Cave N 2F"),
+          })
+        : [system(goal.requirements), goal.key === "equipment"
+            ? t("quest.feedback.81", [], "Equipment target.")
+            : t("quest.feedback.82", [], "Next skill goal.")].join(" "),
+      normalAcquisition: goal.key === "challenge"
+        ? [system(goal.normalAcquisition), t("quest.journey.copy.58", [],
+            "Fight Centipede and Tongs; stay alert for a medium challenge.")].join(" ")
+        : system(goal.normalAcquisition),
+    })),
+  };
+}
 
 export type LocalizableQuestEntry = {
   questId: number;
@@ -58,6 +112,11 @@ export function localizeQuestEntry<T extends LocalizableQuestEntry>(
   quest: T,
   t: QuestTranslateFn,
 ): T {
+  const newcomerV2Copy = newcomerV2QuestCopyFor(quest.questId);
+  if (newcomerV2Copy) {
+    return localizeNewcomerV2QuestEntry(quest, newcomerV2Copy, t);
+  }
+
   const questKey = CRYSTAL_QUEST_KEY_BY_ID[quest.questId];
   if (!questKey) return quest;
 
@@ -105,28 +164,126 @@ export function localizeQuestEntry<T extends LocalizableQuestEntry>(
   }
 
   if (quest.rewards) {
-    localized.rewards = {
-      ...quest.rewards,
-      ...(quest.rewards.items
-        ? {
-            items: quest.rewards.items.map((item) => ({
-              ...item,
-              name: localizeCrystalItemName(item.name, t),
-            })),
-          }
-        : {}),
-      ...(quest.rewards.selectItems
-        ? {
-            selectItems: quest.rewards.selectItems.map((item) => ({
-              ...item,
-              name: localizeCrystalItemName(item.name, t),
-            })),
-          }
-        : {}),
-    };
+    localized.rewards = localizeQuestRewards(quest.rewards, t);
   }
 
   return localized;
+}
+
+function localizeNewcomerV2QuestEntry<T extends LocalizableQuestEntry>(
+  quest: T,
+  copy: NonNullable<ReturnType<typeof newcomerV2QuestCopyFor>>,
+  t: QuestTranslateFn,
+): T {
+  const targetCopyApplies = quest.stage === "inProgress" || quest.stage === "readyToTurnIn";
+  const prefix = `quest.${quest.questId}`;
+  const originalDescription = quest.descriptionLines?.join("\n") ?? "";
+  const description = t(`${prefix}.description`, [], originalDescription);
+  const localized = {
+    ...quest,
+    title: t(`${prefix}.title`, [], localizeNewcomerV2Text(copy.title, t)),
+    ...(description !== originalDescription ? { descriptionLines: [description] } : {}),
+    ...(targetCopyApplies && !t.systemText ? { objective: localizeNewcomerV2Text(copy.objective, t) } : {}),
+  } as T;
+
+  if (quest.objectives?.length) {
+    localized.objectives = quest.objectives.map((objective) => ({
+      ...objective,
+      label: localizeNewcomerObjective(quest.questId, objective.label, t, objective.required !== undefined),
+    }));
+  }
+
+  if (t.systemText) {
+    localized.objective = quest.stage === "inProgress" && localized.objectives?.length
+      ? localized.objectives.map(({ label }) => label).join(" · ")
+      : localizeNewcomerObjective(quest.questId, quest.objective, t);
+    localized.progressLabel = localizeNewcomerProgressLabel(quest.progressLabel, t);
+    if (quest.tracker !== undefined) {
+      localized.tracker = quest.tracker === quest.title + " is available." || quest.tracker === quest.title + " completed."
+        ? ""
+        : localizeNewcomerObjective(quest.questId, quest.tracker, t);
+    }
+  }
+  if (quest.npc) localized.npc = localizeCrystalEntityName(quest.npc, t);
+  if (quest.rewards) localized.rewards = localizeQuestRewards(quest.rewards, t);
+
+  return localized;
+}
+
+function localizeNewcomerObjective(questId: number, label: string, t: QuestTranslateFn, hasCounter?: boolean): string {
+  const copy = newcomerV2ObjectiveTextFor(questId, label);
+  const systemText = t.systemText;
+  if (!systemText) return copy ? localizeNewcomerV2Text(copy, t) : label;
+  const source = stripQuestObjectiveProgress(label);
+  const sentence = source.replace(/[.。]$/, "");
+  if (!copy) {
+    const instruction = localizeNewcomerInstruction(questId, sentence, t);
+    if (instruction !== null) return instruction;
+    if (hasCounter !== undefined) return label;
+    return systemText(label);
+  }
+
+  const defeat = /^Defeat (\d+) (.+)$/.exec(sentence);
+  const kill = /^Kill (.+)$/.exec(sentence);
+  let translated = systemText(copy.en);
+  if (defeat) {
+    const [, count, name] = defeat;
+    translated = formatQuestText(t, "quest.objective.defeat", "Defeat {count} {name}.", { count, name: systemText(name) });
+  } else if (kill) {
+    translated = formatQuestText(t, "quest.objective.kill", "Kill {name}", { name: systemText(kill[1]) });
+  }
+  return hasCounter ? translated : translated + label.trim().slice(source.length);
+}
+
+function localizeNewcomerInstruction(questId: number, text: string, t: QuestTranslateFn): string | null {
+  switch (text) {
+    case "Return to Assistant Jane":
+      return formatQuestText(t, "quest.action.return", "Return to {name}", {
+        name: t("content.npc.3.name", [], "Assistant Jane"),
+      });
+    case "Return to the Bichon Wall Board":
+      return t("quest.journey.copy.17", [], text);
+    case "Return to the Quest Diary":
+      return t("quest.journey.copy.18", [], text);
+    case "Return to the quest endpoint":
+    case "Return to the quest NPC and hand in the task":
+      return t("content.quest.generic.stage.readyToTurnIn.objective", [], text);
+    case "No automatic completion condition":
+      return t(`quest.${questId}.description`, [], text);
+    case "Main-node reward claimed":
+    case "Growth reward claimed":
+      return t("content.quest.generic.stage.completed.objective", [], text);
+    default:
+      return null;
+  }
+}
+
+function localizeNewcomerProgressLabel(label: string, t: QuestTranslateFn): string {
+  const count = /^Progress (\d+\/\d+)$/.exec(label);
+  if (count) return t("ui.questProgressHeading", [], "Progress") + " " + count[1];
+  const level = /^Level (\d+)\+(?:, up to (\d+))?$/.exec(label);
+  if (level) {
+    return formatQuestText(t, "quest.ui.levelTitle", "Lv {level} {title}", {
+      level: level[2] ? level[1] + "–" + level[2] : level[1] + "+",
+      title: "",
+    }).trim();
+  }
+  if (label === "Available.") return t("ui.questStage.available", [], label);
+  if (label === "Ready to turn in." || label === "Completed.") {
+    const stage = label === "Completed." ? "completed" : "readyToTurnIn";
+    return t("content.quest.generic.stage." + stage + ".progressLabel", [], label);
+  }
+  return t.systemText?.(label) ?? label;
+}
+
+function localizeQuestRewards(rewards: NonNullable<LocalizableQuestEntry["rewards"]>, t: QuestTranslateFn) {
+  const localizeItems = (items: NonNullable<typeof rewards.items>) =>
+    items.map((item) => ({ ...item, name: localizeCrystalItemName(item.name, t) }));
+  return {
+    ...rewards,
+    ...(rewards.items ? { items: localizeItems(rewards.items) } : {}),
+    ...(rewards.selectItems ? { selectItems: localizeItems(rewards.selectItems) } : {}),
+  };
 }
 
 export function localizeQuestLog<T extends LocalizableQuestEntry>(

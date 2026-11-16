@@ -1,0 +1,3149 @@
+TAP version 13
+# Subtest: real canonical and web sources independently match the selected safe zones and unambiguous AI0 names
+ok 1 - real canonical and web sources independently match the selected safe zones and unambiguous AI0 names
+  ---
+  duration_ms: 41.4959
+  type: 'test'
+  ...
+# Subtest: cache retains only immutable trusted selected data and rechecks profile admission
+ok 2 - cache retains only immutable trusted selected data and rechecks profile admission
+  ---
+  duration_ms: 0.5183
+  type: 'test'
+  ...
+# Subtest: missing or noncanonical selected maps fail instead of borrowing Map0 protection
+ok 3 - missing or noncanonical selected maps fail instead of borrowing Map0 protection
+  ---
+  duration_ms: 14.2142
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects west edge
+ok 4 - village inclusive rectangle protects west edge
+  ---
+  duration_ms: 0.2194
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects east edge
+ok 5 - village inclusive rectangle protects east edge
+  ---
+  duration_ms: 0.0591
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects north edge
+ok 6 - village inclusive rectangle protects north edge
+  ---
+  duration_ms: 0.0442
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects south edge
+ok 7 - village inclusive rectangle protects south edge
+  ---
+  duration_ms: 0.0954
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects northwest corner
+ok 8 - village inclusive rectangle protects northwest corner
+  ---
+  duration_ms: 0.0427
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects northeast corner
+ok 9 - village inclusive rectangle protects northeast corner
+  ---
+  duration_ms: 0.2007
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects southwest corner
+ok 10 - village inclusive rectangle protects southwest corner
+  ---
+  duration_ms: 0.21
+  type: 'test'
+  ...
+# Subtest: village inclusive rectangle protects southeast corner
+ok 11 - village inclusive rectangle protects southeast corner
+  ---
+  duration_ms: 0.0764
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village west remains unprotected
+ok 12 - one physical cell outside village west remains unprotected
+  ---
+  duration_ms: 0.0633
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village east remains unprotected
+ok 13 - one physical cell outside village east remains unprotected
+  ---
+  duration_ms: 0.0293
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village north remains unprotected
+ok 14 - one physical cell outside village north remains unprotected
+  ---
+  duration_ms: 0.022
+  type: 'test'
+  ...
+# Subtest: one physical cell outside village south remains unprotected
+ok 15 - one physical cell outside village south remains unprotected
+  ---
+  duration_ms: 0.0207
+  type: 'test'
+  ...
+# Subtest: every actual physical cell must independently satisfy the geometry
+ok 16 - every actual physical cell must independently satisfy the geometry
+  ---
+  duration_ms: 0.111
+  type: 'test'
+  ...
+# Subtest: only trusted loader specs on the exact selected map can protect
+ok 17 - only trusted loader specs on the exact selected map can protect
+  ---
+  duration_ms: 0.0919
+  type: 'test'
+  ...
+# Subtest: known normal AI0 names allow absent optional AI but reject conflicting or malformed actual AI
+ok 18 - known normal AI0 names allow absent optional AI but reject conflicting or malformed actual AI
+  ---
+  duration_ms: 0.0943
+  type: 'test'
+  ...
+# Subtest: only canonical hostile unowned monster DTOs qualify
+ok 19 - only canonical hostile unowned monster DTOs qualify
+  ---
+  duration_ms: 0.0689
+  type: 'test'
+  ...
+# Subtest: ordinary AI0 classification authenticates all identity gates without granting cell protection
+ok 20 - ordinary AI0 classification authenticates all identity gates without granting cell protection
+  ---
+  duration_ms: 0.0814
+  type: 'test'
+  ...
+# Subtest: default is held-only noop and economic profile has explicit bounded inputs
+ok 21 - default is held-only noop and economic profile has explicit bounded inputs
+  ---
+  duration_ms: 1.6677
+  type: 'test'
+  ...
+# Subtest: same local owner ID 1000 and map cannot conceal a changed character name
+ok 22 - same local owner ID 1000 and map cannot conceal a changed character name
+  ---
+  duration_ms: 4.006
+  type: 'test'
+  ...
+# Subtest: earned ordinary gold buys only live HP rows in bounded batches and proves exact stock/debit
+ok 23 - earned ordinary gold buys only live HP rows in bounded batches and proves exact stock/debit
+  ---
+  duration_ms: 0.9148
+  type: 'test'
+  ...
+# Subtest: held Venison alone funds purchases without selling any starter gear
+ok 24 - held Venison alone funds purchases without selling any starter gear
+  ---
+  duration_ms: 1.1154
+  type: 'test'
+  ...
+# Subtest: zero-wallet preparation uses actual Deer combat, harvest, same-tile pickup and ordinary sale
+ok 25 - zero-wallet preparation uses actual Deer combat, harvest, same-tile pickup and ordinary sale
+  ---
+  duration_ms: 7.9785
+  type: 'test'
+  ...
+# Subtest: stale, late, ACK-only and non-exact debit cannot prove a purchase
+    # Subtest: stale
+    ok 1 - stale
+      ---
+      duration_ms: 2.1132
+      type: 'test'
+      ...
+    # Subtest: late
+    ok 2 - late
+      ---
+      duration_ms: 1.8558
+      type: 'test'
+      ...
+    # Subtest: ackOnly
+    ok 3 - ackOnly
+      ---
+      duration_ms: 0.9107
+      type: 'test'
+      ...
+    # Subtest: wrongDebit
+    ok 4 - wrongDebit
+      ---
+      duration_ms: 1.0399
+      type: 'test'
+      ...
+    1..4
+ok 26 - stale, late, ACK-only and non-exact debit cannot prove a purchase
+  ---
+  duration_ms: 6.6046
+  type: 'test'
+  ...
+# Subtest: wrong merchant, disabled link, wrong goods and wrong panel reject before buying
+    # Subtest: {"wrongNpc":true}
+    ok 1 - {"wrongNpc":true}
+      ---
+      duration_ms: 0.758
+      type: 'test'
+      ...
+    # Subtest: {"disabledLink":true}
+    ok 2 - {"disabledLink":true}
+      ---
+      duration_ms: 0.5589
+      type: 'test'
+      ...
+    # Subtest: {"wrongRow":true}
+    ok 3 - {"wrongRow":true}
+      ---
+      duration_ms: 0.2819
+      type: 'test'
+      ...
+    # Subtest: {"panel":1}
+    ok 4 - {"panel":1}
+      ---
+      duration_ms: 0.2219
+      type: 'test'
+      ...
+    1..4
+ok 27 - wrong merchant, disabled link, wrong goods and wrong panel reject before buying
+  ---
+  duration_ms: 2.1244
+  type: 'test'
+  ...
+# Subtest: owner/map transitions, death, nonpreparation, routes and finite budgets fail without activation
+    # Subtest: {"changeMap":true}
+    ok 1 - {"changeMap":true}
+      ---
+      duration_ms: 0.4762
+      type: 'test'
+      ...
+    # Subtest: {"changeOwner":true}
+    ok 2 - {"changeOwner":true}
+      ---
+      duration_ms: 0.5058
+      type: 'test'
+      ...
+    # Subtest: {"failPhase":true}
+    ok 3 - {"failPhase":true}
+      ---
+      duration_ms: 0.244
+      type: 'test'
+      ...
+    # Subtest: {"navigationFailure":true}
+    ok 4 - {"navigationFailure":true}
+      ---
+      duration_ms: 0.1902
+      type: 'test'
+      ...
+    # Subtest: {"maxCommands":1}
+    ok 5 - {"maxCommands":1}
+      ---
+      duration_ms: 0.243
+      type: 'test'
+      ...
+    # Subtest: {"timeoutMs":1}
+    ok 6 - {"timeoutMs":1}
+      ---
+      duration_ms: 0.1334
+      type: 'test'
+      ...
+    1..6
+ok 28 - owner/map transitions, death, nonpreparation, routes and finite budgets fail without activation
+  ---
+  duration_ms: 2.3203
+  type: 'test'
+  ...
+# Subtest: full inventory and insufficient finite hunting proceeds never send an unaffordable buy
+ok 29 - full inventory and insufficient finite hunting proceeds never send an unaffordable buy
+  ---
+  duration_ms: 3.4668
+  type: 'test'
+  ...
+# Subtest: cohort readiness is revalidated after peers prepare and never trusts old ready state
+ok 30 - cohort readiness is revalidated after peers prepare and never trusts old ready state
+  ---
+  duration_ms: 1.3208
+  type: 'test'
+  ...
+# Subtest: fresh authoritative staging membership permits normal nearby hostiles and records the qualified protection
+ok 31 - fresh authoritative staging membership permits normal nearby hostiles and records the qualified protection
+  ---
+  duration_ms: 0.493
+  type: 'test'
+  ...
+# Subtest: false missing and nonboolean membership retain the original eight-cell hostile staging guard
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 0.3454
+      type: 'test'
+      ...
+    # Subtest: undefined
+    ok 2 - undefined
+      ---
+      duration_ms: 0.2349
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 3 - true
+      ---
+      duration_ms: 0.2647
+      type: 'test'
+      ...
+    1..3
+ok 32 - false missing and nonboolean membership retain the original eight-cell hostile staging guard
+  ---
+  duration_ms: 1.041
+  type: 'test'
+  ...
+# Subtest: cohort membership never reuses an old true receipt after false missing stale or mismatched staging evidence
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 0.4036
+      type: 'test'
+      ...
+    # Subtest: missing
+    ok 2 - missing
+      ---
+      duration_ms: 0.2537
+      type: 'test'
+      ...
+    # Subtest: old-sequence
+    ok 3 - old-sequence
+      ---
+      duration_ms: 0.2068
+      type: 'test'
+      ...
+    # Subtest: expired
+    ok 4 - expired
+      ---
+      duration_ms: 0.2053
+      type: 'test'
+      ...
+    # Subtest: wrong-position
+    ok 5 - wrong-position
+      ---
+      duration_ms: 0.2534
+      type: 'test'
+      ...
+    1..5
+ok 33 - cohort membership never reuses an old true receipt after false missing stale or mismatched staging evidence
+  ---
+  duration_ms: 1.5712
+  type: 'test'
+  ...
+# Subtest: a newer invalid snapshot retires the older true staging receipt even after the live cache becomes legal again
+ok 34 - a newer invalid snapshot retires the older true staging receipt even after the live cache becomes legal again
+  ---
+  duration_ms: 0.9708
+  type: 'test'
+  ...
+# Subtest: known poison or Dazed still rejects preparation and cohort readiness inside a fresh authoritative safe zone
+    # Subtest: playerPoison
+    ok 1 - playerPoison
+      ---
+      duration_ms: 0.4572
+      type: 'test'
+      ...
+    # Subtest: ownerPoison
+    ok 2 - ownerPoison
+      ---
+      duration_ms: 0.4268
+      type: 'test'
+      ...
+    # Subtest: dazed
+    ok 3 - dazed
+      ---
+      duration_ms: 0.4847
+      type: 'test'
+      ...
+    1..3
+ok 35 - known poison or Dazed still rejects preparation and cohort readiness inside a fresh authoritative safe zone
+  ---
+  duration_ms: 1.5564
+  type: 'test'
+  ...
+# Subtest: existing held HP stacks reduce purchases and are counted only once across bag and belt
+ok 36 - existing held HP stacks reduce purchases and are counted only once across bag and belt
+  ---
+  duration_ms: 0.5582
+  type: 'test'
+  ...
+# Subtest: an empty authoritative Deer field exhausts its finite refresh budget
+ok 37 - an empty authoritative Deer field exhausts its finite refresh budget
+  ---
+  duration_ms: 1.8092
+  type: 'test'
+  ...
+# Subtest: v2 physical hunting never silently falls back to legacy attack
+ok 38 - v2 physical hunting never silently falls back to legacy attack
+  ---
+  duration_ms: 0.3678
+  type: 'test'
+  ...
+# Subtest: fresh NPCGoods and NPCSell services may close their text dialog without losing merchant binding
+ok 39 - fresh NPCGoods and NPCSell services may close their text dialog without losing merchant binding
+  ---
+  duration_ms: 0.7426
+  type: 'test'
+  ...
+# Subtest: closing a service dialog cannot excuse foreign dialog, changed NPC/owner/map or stale service receipt
+    # Subtest: foreignServiceDialog
+    ok 1 - foreignServiceDialog
+      ---
+      duration_ms: 0.3357
+      type: 'test'
+      ...
+    # Subtest: replaceServiceNpc
+    ok 2 - replaceServiceNpc
+      ---
+      duration_ms: 0.2891
+      type: 'test'
+      ...
+    # Subtest: serviceOwnerChange
+    ok 3 - serviceOwnerChange
+      ---
+      duration_ms: 0.2436
+      type: 'test'
+      ...
+    # Subtest: serviceMapChange
+    ok 4 - serviceMapChange
+      ---
+      duration_ms: 0.2925
+      type: 'test'
+      ...
+    # Subtest: staleServicePacket
+    ok 5 - staleServicePacket
+      ---
+      duration_ms: 1.1351
+      type: 'test'
+      ...
+    # Subtest: noServicePacket
+    ok 6 - noServicePacket
+      ---
+      duration_ms: 1.0207
+      type: 'test'
+      ...
+    # Subtest: foreign NPCSell dialog
+    ok 7 - foreign NPCSell dialog
+      ---
+      duration_ms: 0.5708
+      type: 'test'
+      ...
+    1..7
+ok 40 - closing a service dialog cannot excuse foreign dialog, changed NPC/owner/map or stale service receipt
+  ---
+  duration_ms: 4.2966
+  type: 'test'
+  ...
+# Subtest: real five-pass Deer skinning retries typed deadlines and the sixth transfer earns actual stock
+    # Subtest: direct inventory transfer
+    ok 1 - direct inventory transfer
+      ---
+      duration_ms: 9.1054
+      type: 'test'
+      ...
+    # Subtest: same-tile public pickup
+    ok 2 - same-tile public pickup
+      ---
+      duration_ms: 5.5151
+      type: 'test'
+      ...
+    1..2
+ok 41 - real five-pass Deer skinning retries typed deadlines and the sixth transfer earns actual stock
+  ---
+  duration_ms: 14.8909
+  type: 'test'
+  ...
+# Subtest: timeout-looking non-deadline errors and mismatched typed labels retain their identity
+    # Subtest: Error:ordinary-owner timed out waiting for Deer corpse 20 funding harvest
+    ok 1 - Error:ordinary-owner timed out waiting for Deer corpse 20 funding harvest
+      ---
+      duration_ms: 0.6991
+      type: 'test'
+      ...
+    # Subtest: SafetyStop:timed out guard
+    ok 2 - SafetyStop:timed out guard
+      ---
+      duration_ms: 0.4188
+      type: 'test'
+      ...
+    # Subtest: Error:ordinary-owner timed out waiting for unrelated wait
+    ok 3 - Error:ordinary-owner timed out waiting for unrelated wait
+      ---
+      duration_ms: 0.3505
+      type: 'test'
+      ...
+    1..3
+ok 42 - timeout-looking non-deadline errors and mismatched typed labels retain their identity
+  ---
+  duration_ms: 1.7419
+  type: 'test'
+  ...
+# Subtest: global wall budget, health change and closed transport are never retried as empty skin passes
+    # Subtest: {"timeoutMs":7000}
+    ok 1 - {"timeoutMs":7000}
+      ---
+      duration_ms: 0.7744
+      type: 'test'
+      ...
+    # Subtest: {"harvestHealthDrop":true}
+    ok 2 - {"harvestHealthDrop":true}
+      ---
+      duration_ms: 0.4443
+      type: 'test'
+      ...
+    # Subtest: {"closeOnHarvestWait":true}
+    ok 3 - {"closeOnHarvestWait":true}
+      ---
+      duration_ms: 0.4465
+      type: 'test'
+      ...
+    1..3
+ok 43 - global wall budget, health change and closed transport are never retried as empty skin passes
+  ---
+  duration_ms: 2.3601
+  type: 'test'
+  ...
+# Subtest: normalized deadline errors retain code, exact wait label and original cause
+ok 44 - normalized deadline errors retain code, exact wait label and original cause
+  ---
+  duration_ms: 0.7089
+  type: 'test'
+  ...
+# Subtest: late staging resolver runs once after purchase and freezes its copied point for fresh readiness
+ok 45 - late staging resolver runs once after purchase and freezes its copied point for fresh readiness
+  ---
+  duration_ms: 0.4656
+  type: 'test'
+  ...
+# Subtest: late staging resolver reuses current fresh snapshot without adding a refresh or economic command
+ok 46 - late staging resolver reuses current fresh snapshot without adding a refresh or economic command
+  ---
+  duration_ms: 0.2614
+  type: 'test'
+  ...
+# Subtest: no candidate or an asynchronous resolver fails closed without restarting preparation budgets
+ok 47 - no candidate or an asynchronous resolver fails closed without restarting preparation budgets
+  ---
+  duration_ms: 0.2381
+  type: 'test'
+  ...
+# Subtest: late point choice cannot reset the global wall or bypass owner/map and final fresh safety
+ok 48 - late point choice cannot reset the global wall or bypass owner/map and final fresh safety
+  ---
+  duration_ms: 0.2072
+  type: 'test'
+  ...
+# Subtest: a queued Deer lost during ordinary pacing is not attacked and consumes the original hunt budget
+    # Subtest: missing
+    ok 1 - missing
+      ---
+      duration_ms: 665.6474
+      type: 'test'
+      ...
+    # Subtest: dead
+    ok 2 - dead
+      ---
+      duration_ms: 1.5593
+      type: 'test'
+      ...
+    # Subtest: zero-hp
+    ok 3 - zero-hp
+      ---
+      duration_ms: 1.4976
+      type: 'test'
+      ...
+    # Subtest: unknown-hp
+    ok 4 - unknown-hp
+      ---
+      duration_ms: 1.2328
+      type: 'test'
+      ...
+    # Subtest: renamed
+    ok 5 - renamed
+      ---
+      duration_ms: 664.4126
+      type: 'test'
+      ...
+    1..5
+ok 49 - a queued Deer lost during ordinary pacing is not attacked and consumes the original hunt budget
+  ---
+  duration_ms: 1335.6207
+  type: 'test'
+  ...
+# Subtest: a nearby non-Deer threat excludes the dangerous Deer before a bounded safe alternative hunt
+ok 50 - a nearby non-Deer threat excludes the dangerous Deer before a bounded safe alternative hunt
+  ---
+  duration_ms: 2.4071
+  type: 'test'
+  ...
+# Subtest: target loss cannot disguise owner safety changes or transport failures during pacing
+    # Subtest: owner-name
+    ok 1 - owner-name
+      ---
+      duration_ms: 661.5623
+      type: 'test'
+      ...
+    # Subtest: owner-map
+    ok 2 - owner-map
+      ---
+      duration_ms: 652.064
+      type: 'test'
+      ...
+    # Subtest: owner-health
+    ok 3 - owner-health
+      ---
+      duration_ms: 653.3703
+      type: 'test'
+      ...
+    # Subtest: transport
+    ok 4 - transport
+      ---
+      duration_ms: 654.0402
+      type: 'test'
+      ...
+    1..4
+ok 51 - target loss cannot disguise owner safety changes or transport failures during pacing
+  ---
+  duration_ms: 2621.5698
+  type: 'test'
+  ...
+# Subtest: exact canonical IDs match without permitting ambiguous or malformed target identities
+    # Subtest: malformed-id
+    ok 1 - malformed-id
+      ---
+      duration_ms: 654.3193
+      type: 'test'
+      ...
+    # Subtest: ambiguous-id
+    ok 2 - ambiguous-id
+      ---
+      duration_ms: 656.3922
+      type: 'test'
+      ...
+    1..2
+ok 52 - exact canonical IDs match without permitting ambiguous or malformed target identities
+  ---
+  duration_ms: 1312.2512
+  type: 'test'
+  ...
+# Subtest: only boolean dead false confirms a live target after pacing; malformed or absent state cannot be hunted
+    # Subtest: dead-string
+    ok 1 - dead-string
+      ---
+      duration_ms: 654.1356
+      type: 'test'
+      ...
+    # Subtest: dead-one
+    ok 2 - dead-one
+      ---
+      duration_ms: 652.5515
+      type: 'test'
+      ...
+    # Subtest: dead-zero
+    ok 3 - dead-zero
+      ---
+      duration_ms: 656.213
+      type: 'test'
+      ...
+    # Subtest: dead-null
+    ok 4 - dead-null
+      ---
+      duration_ms: 657.1171
+      type: 'test'
+      ...
+    # Subtest: dead-missing
+    ok 5 - dead-missing
+      ---
+      duration_ms: 651.7874
+      type: 'test'
+      ...
+    # Subtest: dead-false-string
+    ok 6 - dead-false-string
+      ---
+      duration_ms: 656.4714
+      type: 'test'
+      ...
+    1..6
+ok 53 - only boolean dead false confirms a live target after pacing; malformed or absent state cannot be hunted
+  ---
+  duration_ms: 3928.9497
+  type: 'test'
+  ...
+# Subtest: all preparation routes retain at least eight hostile cells even when funding requests zero clearance
+ok 54 - all preparation routes retain at least eight hostile cells even when funding requests zero clearance
+  ---
+  duration_ms: 1.6152
+  type: 'test'
+  ...
+# Subtest: real navigator can leave the three-Scarecrow birth halos without a safe-zone exemption or extra refreshes
+ok 55 - real navigator can leave the three-Scarecrow birth halos without a safe-zone exemption or extra refreshes
+  ---
+  duration_ms: 5.8263
+  type: 'test'
+  ...
+# Subtest: real navigator detours around the entire eight-cell halo, including unknown-AI hostile observations
+    # Subtest: false
+    ok 1 - false
+      ---
+      duration_ms: 4.9746
+      type: 'test'
+      ...
+    # Subtest: true
+    ok 2 - true
+      ---
+      duration_ms: 2.96
+      type: 'test'
+      ...
+    1..2
+ok 56 - real navigator detours around the entire eight-cell halo, including unknown-AI hostile observations
+  ---
+  duration_ms: 8.1982
+  type: 'test'
+  ...
+# Subtest: a hostile arriving during queued Run pacing blocks its intermediate or landing cell before actual send
+    # Subtest: true
+    ok 1 - true
+      ---
+      duration_ms: 0.4565
+      type: 'test'
+      ...
+    # Subtest: false
+    ok 2 - false
+      ---
+      duration_ms: 0.1866
+      type: 'test'
+      ...
+    1..2
+ok 57 - a hostile arriving during queued Run pacing blocks its intermediate or landing cell before actual send
+  ---
+  duration_ms: 0.875
+  type: 'test'
+  ...
+# Subtest: inside a halo ordinary movement may maintain or increase distance but cannot approach the threat
+    # Subtest: true
+    ok 1 - true
+      ---
+      duration_ms: 0.2547
+      type: 'test'
+      ...
+    # Subtest: false
+    ok 2 - false
+      ---
+      duration_ms: 0.1608
+      type: 'test'
+      ...
+    1..2
+ok 58 - inside a halo ordinary movement may maintain or increase distance but cannot approach the threat
+  ---
+  duration_ms: 0.5509
+  type: 'test'
+  ...
+# Subtest: all dangerous Deer exhaust the original eight hunt attempts without any attack or fake funding credit
+ok 59 - all dangerous Deer exhaust the original eight hunt attempts without any attack or fake funding credit
+  ---
+  duration_ms: 0.7023
+  type: 'test'
+  ...
+# Subtest: friendly, unclassified or owned Deer are not ordinary neutral funding targets
+    # Subtest: friendly
+    ok 1 - friendly
+      ---
+      duration_ms: 3.5075
+      type: 'test'
+      ...
+    # Subtest: unknown
+    ok 2 - unknown
+      ---
+      duration_ms: 4.3989
+      type: 'test'
+      ...
+    # Subtest: owned
+    ok 3 - owned
+      ---
+      duration_ms: 3.0253
+      type: 'test'
+      ...
+    1..3
+ok 60 - friendly, unclassified or owned Deer are not ordinary neutral funding targets
+  ---
+  duration_ms: 11.1284
+  type: 'test'
+  ...
+# Subtest: an owner transform changed during movement pacing cannot retarget an already queued direction
+ok 61 - an owner transform changed during movement pacing cannot retarget an already queued direction
+  ---
+  duration_ms: 0.2943
+  type: 'test'
+  ...
+# Subtest: fresh danger during a real funding approach uses the existing finite target-loss path
+ok 62 - fresh danger during a real funding approach uses the existing finite target-loss path
+  ---
+  duration_ms: 5.9616
+  type: 'test'
+  ...
+# Subtest: path hazard history is bounded at 32 scalar rows and unrelated navigation errors stay terminal
+ok 63 - path hazard history is bounded at 32 scalar rows and unrelated navigation errors stay terminal
+  ---
+  duration_ms: 0.7691
+  type: 'test'
+  ...
+# Subtest: nonempty unknown and malformed dispositions remain threats for Deer selection and queued Run dispatch
+    # Subtest: "Unknown"
+    ok 1 - "Unknown"
+      ---
+      duration_ms: 0.7284
+      type: 'test'
+      ...
+    # Subtest: "unsupported"
+    ok 2 - "unsupported"
+      ---
+      duration_ms: 0.5572
+      type: 'test'
+      ...
+    # Subtest: "Neutral"
+    ok 3 - "Neutral"
+      ---
+      duration_ms: 0.557
+      type: 'test'
+      ...
+    # Subtest: 0
+    ok 4 - 0
+      ---
+      duration_ms: 0.5579
+      type: 'test'
+      ...
+    # Subtest: false
+    ok 5 - false
+      ---
+      duration_ms: 0.6847
+      type: 'test'
+      ...
+    # Subtest: {}
+    ok 6 - {}
+      ---
+      duration_ms: 0.5717
+      type: 'test'
+      ...
+    # Subtest: ["neutral"]
+    ok 7 - ["neutral"]
+      ---
+      duration_ms: 0.5433
+      type: 'test'
+      ...
+    1..7
+ok 64 - nonempty unknown and malformed dispositions remain threats for Deer selection and queued Run dispatch
+  ---
+  duration_ms: 4.601
+  type: 'test'
+  ...
+# Subtest: only canonical neutral and friendly dispositions are exempt from the preparation threat halo
+    # Subtest: neutral
+    ok 1 - neutral
+      ---
+      duration_ms: 0.269
+      type: 'test'
+      ...
+    # Subtest: friendly
+    ok 2 - friendly
+      ---
+      duration_ms: 0.2563
+      type: 'test'
+      ...
+    1..2
+ok 65 - only canonical neutral and friendly dispositions are exempt from the preparation threat halo
+  ---
+  duration_ms: 0.6882
+  type: 'test'
+  ...
+# Subtest: canonical static protection admits a real three-Scarecrow return route without another refresh
+ok 66 - canonical static protection admits a real three-Scarecrow return route without another refresh
+  ---
+  duration_ms: 40.3461
+  type: 'test'
+  ...
+# Subtest: a protected Run landing never excuses an unprotected intermediate cell or the reverse
+    # Subtest: outside then inside
+    ok 1 - outside then inside
+      ---
+      duration_ms: 0.3771
+      type: 'test'
+      ...
+    # Subtest: inside then outside
+    ok 2 - inside then outside
+      ---
+      duration_ms: 0.1744
+      type: 'test'
+      ...
+    1..2
+ok 67 - a protected Run landing never excuses an unprotected intermediate cell or the reverse
+  ---
+  duration_ms: 0.7632
+  type: 'test'
+  ...
+# Subtest: static ordinary protection never admits occupied cells, unknown AI or owned monsters
+    # Subtest: occupied
+    ok 1 - occupied
+      ---
+      duration_ms: 0.3247
+      type: 'test'
+      ...
+    # Subtest: unknown name
+    ok 2 - unknown name
+      ---
+      duration_ms: 0.1513
+      type: 'test'
+      ...
+    # Subtest: non AI0
+    ok 3 - non AI0
+      ---
+      duration_ms: 0.1346
+      type: 'test'
+      ...
+    # Subtest: malformed AI
+    ok 4 - malformed AI
+      ---
+      duration_ms: 0.1407
+      type: 'test'
+      ...
+    # Subtest: owned
+    ok 5 - owned
+      ---
+      duration_ms: 0.1489
+      type: 'test'
+      ...
+    # Subtest: empty owner
+    ok 6 - empty owner
+      ---
+      duration_ms: 0.1315
+      type: 'test'
+      ...
+    # Subtest: unknown disposition
+    ok 7 - unknown disposition
+      ---
+      duration_ms: 0.1227
+      type: 'test'
+      ...
+    1..7
+ok 68 - static ordinary protection never admits occupied cells, unknown AI or owned monsters
+  ---
+  duration_ms: 1.4585
+  type: 'test'
+  ...
+# Subtest: missing or hand-made protection retains the original strict movement barrier
+    # Subtest: no spec
+    ok 1 - no spec
+      ---
+      duration_ms: 0.214
+      type: 'test'
+      ...
+    # Subtest: hand-made spec
+    ok 2 - hand-made spec
+      ---
+      duration_ms: 0.1346
+      type: 'test'
+      ...
+    1..2
+ok 69 - missing or hand-made protection retains the original strict movement barrier
+  ---
+  duration_ms: 0.4825
+  type: 'test'
+  ...
+# Subtest: real ordinary navigation round-trips from village to Deer funding and back to merchants and staging
+ok 70 - real ordinary navigation round-trips from village to Deer funding and back to merchants and staging
+  ---
+  duration_ms: 12.7477
+  type: 'test'
+  ...
+# Subtest: protected planner obstacles are re-read using the live owner transform without bypassing final readiness
+ok 71 - protected planner obstacles are re-read using the live owner transform without bypassing final readiness
+  ---
+  duration_ms: 0.665
+  type: 'test'
+  ...
+# Subtest: profile requires explicit measured resource envelope and distinguishes it from enforced quotas
+ok 72 - profile requires explicit measured resource envelope and distinguishes it from enforced quotas
+  ---
+  duration_ms: 1.1798
+  type: 'test'
+  ...
+# Subtest: monitor endpoint excludes remote hosts, credentials, redirection inputs and non-health paths
+ok 73 - monitor endpoint excludes remote hosts, credentials, redirection inputs and non-health paths
+  ---
+  duration_ms: 0.2361
+  type: 'test'
+  ...
+# Subtest: health projection emits only public finite capacity fields and fails closed on missing counters
+ok 74 - health projection emits only public finite capacity fields and fails closed on missing counters
+  ---
+  duration_ms: 0.2552
+  type: 'test'
+  ...
+# Subtest: resource sample binds PID, executable, full core inventory and monotonic cumulative counters
+ok 75 - resource sample binds PID, executable, full core inventory and monotonic cumulative counters
+  ---
+  duration_ms: 0.8326
+  type: 'test'
+  ...
+# Subtest: real cumulative counter deltas produce cores and I/O rates without inventing process network bytes
+ok 76 - real cumulative counter deltas produce cores and I/O rates without inventing process network bytes
+  ---
+  duration_ms: 0.2846
+  type: 'test'
+  ...
+# Subtest: private-memory and host safety reserve violations stop immediately and cannot recover to pass
+ok 77 - private-memory and host safety reserve violations stop immediately and cannot recover to pass
+  ---
+  duration_ms: 0.566
+  type: 'test'
+  ...
+# Subtest: transient CPU burst resets but sustained CPU oversubscription requests drain at the original threshold
+ok 78 - transient CPU burst resets but sustained CPU oversubscription requests drain at the original threshold
+  ---
+  duration_ms: 0.3134
+  type: 'test'
+  ...
+# Subtest: missing process identity, PID reuse, stale samples and NIC counter reset invalidate continuity
+ok 79 - missing process identity, PID reuse, stale samples and NIC counter reset invalidate continuity
+  ---
+  duration_ms: 0.2793
+  type: 'test'
+  ...
+# Subtest: NIC removal, addition, rename and duplicate identity cannot silently reduce host bandwidth rate
+ok 80 - NIC removal, addition, rename and duplicate identity cannot silently reduce host bandwidth rate
+  ---
+  duration_ms: 0.3595
+  type: 'test'
+  ...
+# Subtest: health endpoint provenance requires the pinned PID to own that exact loopback listener
+ok 81 - health endpoint provenance requires the pinned PID to own that exact loopback listener
+  ---
+  duration_ms: 0.3121
+  type: 'test'
+  ...
+# Subtest: CLI rejects duplicate arguments and credentials have no command-line option
+ok 82 - CLI rejects duplicate arguments and credentials have no command-line option
+  ---
+  duration_ms: 0.2149
+  type: 'test'
+  ...
+# Subtest: Windows CIM producer samples the owned test process and every host logical core
+ok 83 - Windows CIM producer samples the owned test process and every host logical core
+  ---
+  duration_ms: 7600.962
+  type: 'test'
+  ...
+# Subtest: density classifies actual entity kinds and counts drops separately without serializing identities or payloads
+ok 84 - density classifies actual entity kinds and counts drops separately without serializing identities or payloads
+  ---
+  duration_ms: 1.3778
+  type: 'test'
+  ...
+# Subtest: density separates per-map admitted active cohorts from visible counts and excludes paused, closed, unready and absent owners
+ok 85 - density separates per-map admitted active cohorts from visible counts and excludes paused, closed, unready and absent owners
+  ---
+  duration_ms: 6.3602
+  type: 'test'
+  ...
+# Subtest: density accumulates bounded sampled independent maxima without rewriting prior samples or returned summaries
+ok 86 - density accumulates bounded sampled independent maxima without rewriting prior samples or returned summaries
+  ---
+  duration_ms: 0.906
+  type: 'test'
+  ...
+# Subtest: phase raw boundaries and report windows use one explicit clock, and completed never claims assessment success
+ok 87 - phase raw boundaries and report windows use one explicit clock, and completed never claims assessment success
+  ---
+  duration_ms: 0.3293
+  type: 'test'
+  ...
+# Subtest: an aborted bootstrap closes its real interval as incomplete and invalid clocks cannot manufacture duration
+ok 88 - an aborted bootstrap closes its real interval as incomplete and invalid clocks cannot manufacture duration
+  ---
+  duration_ms: 0.2393
+  type: 'test'
+  ...
+# Subtest: 500-actor density requires explicit target metadata and retains aggregate-only sampling and map-history bounds
+ok 89 - 500-actor density requires explicit target metadata and retains aggregate-only sampling and map-history bounds
+  ---
+  duration_ms: 3.1605
+  type: 'test'
+  ...
+# Subtest: 500-actor phase windows require the context opt-in while retaining real counts, clocks and incomplete preparation
+ok 90 - 500-actor phase windows require the context opt-in while retaining real counts, clocks and incomplete preparation
+  ---
+  duration_ms: 0.2743
+  type: 'test'
+  ...
+# Subtest: sustain keeps only actual scalar identity, exact world HP, gold and complete HP658 bag plus belt stock
+ok 91 - sustain keeps only actual scalar identity, exact world HP, gold and complete HP658 bag plus belt stock
+  ---
+  duration_ms: 0.7646
+  type: 'test'
+  ...
+# Subtest: sustain incomplete or malformed actual inventories are unknown instead of zero and missing exact HP never uses owner percent
+ok 92 - sustain incomplete or malformed actual inventories are unknown instead of zero and missing exact HP never uses owner percent
+  ---
+  duration_ms: 0.6008
+  type: 'test'
+  ...
+# Subtest: sustain accepts numeric or canonical string UID zero and still rejects duplicate zero across bag and belt
+ok 93 - sustain accepts numeric or canonical string UID zero and still rejects duplicate zero across bag and belt
+  ---
+  duration_ms: 0.5295
+  type: 'test'
+  ...
+# Subtest: sustain safe-zone membership is only the current raw boolean on the same actual scalar receipt
+ok 94 - sustain safe-zone membership is only the current raw boolean on the same actual scalar receipt
+  ---
+  duration_ms: 0.234
+  type: 'test'
+  ...
+# Subtest: sustain replaces an older complete scalar with a newer incomplete actual snapshot without reusing its known stock or HP
+ok 95 - sustain replaces an older complete scalar with a newer incomplete actual snapshot without reusing its known stock or HP
+  ---
+  duration_ms: 0.0975
+  type: 'test'
+  ...
+# Subtest: sustain actual minute windows separate ACKs, proven quantities and numeric HP increases without replaying stalled minutes
+ok 96 - sustain actual minute windows separate ACKs, proven quantities and numeric HP increases without replaying stalled minutes
+  ---
+  duration_ms: 0.1576
+  type: 'test'
+  ...
+# Subtest: sustain no-receipt minute reports scalar age and unknown net change without manufacturing freshness
+ok 97 - sustain no-receipt minute reports scalar age and unknown net change without manufacturing freshness
+  ---
+  duration_ms: 0.109
+  type: 'test'
+  ...
+# Subtest: sustain moving an HP stack from bag to belt preserves net stock and cannot prove consumption or healing
+ok 98 - sustain moving an HP stack from bag to belt preserves net stock and cannot prove consumption or healing
+  ---
+  duration_ms: 0.0841
+  type: 'test'
+  ...
+# Subtest: sustain identity and connection changes never splice stock deltas across owners, maps or resumed local IDs
+ok 99 - sustain identity and connection changes never splice stock deltas across owners, maps or resumed local IDs
+  ---
+  duration_ms: 0.2179
+  type: 'test'
+  ...
+# Subtest: sustain stops minute publication at the existing offered-load end and drains with the actual final receipt
+ok 100 - sustain stops minute publication at the existing offered-load end and drains with the actual final receipt
+  ---
+  duration_ms: 0.1092
+  type: 'test'
+  ...
+# Subtest: sustain actor storage stays bounded by the explicit cohort policy and retains no raw snapshot history
+ok 101 - sustain actor storage stays bounded by the explicit cohort policy and retains no raw snapshot history
+  ---
+  duration_ms: 1.1412
+  type: 'test'
+  ...
+# Subtest: legacy capacity policies keep their defaults, actor ceiling and report metadata
+ok 102 - legacy capacity policies keep their defaults, actor ceiling and report metadata
+  ---
+  duration_ms: 1.4118
+  type: 'test'
+  ...
+# Subtest: the explicit 500 target declares finite native stages and a fifty-fighter default
+ok 103 - the explicit 500 target declares finite native stages and a fifty-fighter default
+  ---
+  duration_ms: 0.2796
+  type: 'test'
+  ...
+# Subtest: the 500 target retains original latency, activity, resource and command safeguards
+ok 104 - the 500 target retains original latency, activity, resource and command safeguards
+  ---
+  duration_ms: 0.4277
+  type: 'test'
+  ...
+# Subtest: large account pools require the explicit target and retain dedicated account validation
+ok 105 - large account pools require the explicit target and retain dedicated account validation
+  ---
+  duration_ms: 2.328
+  type: 'test'
+  ...
+# Subtest: ordinary economic preparation is an explicitly named bounded plan and cannot rewrite old held-only reports
+ok 106 - ordinary economic preparation is an explicitly named bounded plan and cannot rewrite old held-only reports
+  ---
+  duration_ms: 0.3151
+  type: 'test'
+  ...
+# Subtest: preparation runs one worker, saves before next login and preserves all100 pool entries
+ok 107 - preparation runs one worker, saves before next login and preserves all100 pool entries
+  ---
+  duration_ms: 192.3734
+  type: 'test'
+  ...
+# Subtest: ready bank characters are normally logged in again and reuse only actual held stock
+ok 108 - ready bank characters are normally logged in again and reuse only actual held stock
+  ---
+  duration_ms: 37.4349
+  type: 'test'
+  ...
+# Subtest: one persistent ledger is inherited and updated for each real admission without verification relogins
+ok 109 - one persistent ledger is inherited and updated for each real admission without verification relogins
+  ---
+  duration_ms: 37.3525
+  type: 'test'
+  ...
+# Subtest: existing auth ledger cannot be overridden by a new login origin
+ok 110 - existing auth ledger cannot be overridden by a new login origin
+  ---
+  duration_ms: 40.5918
+  type: 'test'
+  ...
+# Subtest: absent auth ledger keeps the original901s initial wait unless an origin is explicit
+ok 111 - absent auth ledger keeps the original901s initial wait unless an origin is explicit
+  ---
+  duration_ms: 35.592
+  type: 'test'
+  ...
+# Subtest: a failed preparation stops further admission and normally closes its active actor
+ok 112 - a failed preparation stops further admission and normally closes its active actor
+  ---
+  duration_ms: 37.6166
+  type: 'test'
+  ...
+# Subtest: stale readiness and normal logout errors cannot count as prepared
+ok 113 - stale readiness and normal logout errors cannot count as prepared
+  ---
+  duration_ms: 80.7203
+  type: 'test'
+  ...
+# Subtest: AbortSignal after a saved actor stops the next admission without activating anyone
+ok 114 - AbortSignal after a saved actor stops the next admission without activating anyone
+  ---
+  duration_ms: 36.7858
+  type: 'test'
+  ...
+# Subtest: finite wall and complete scenario bounds fail before sending later commands
+ok 115 - finite wall and complete scenario bounds fail before sending later commands
+  ---
+  duration_ms: 69.3957
+  type: 'test'
+  ...
+# Subtest: late staging chooses declared preferred point, otherwise skips live occupants and saved assignments
+ok 116 - late staging chooses declared preferred point, otherwise skips live occupants and saved assignments
+  ---
+  duration_ms: 0.4035
+  type: 'test'
+  ...
+# Subtest: late staging never leaves the current visible declared catalogue or uses a map transfer
+ok 117 - late staging never leaves the current visible declared catalogue or uses a map transfer
+  ---
+  duration_ms: 0.2762
+  type: 'test'
+  ...
+# Subtest: a persisted pool truncation cannot be hidden by a still-complete in-memory pool
+ok 118 - a persisted pool truncation cannot be hidden by a still-complete in-memory pool
+  ---
+  duration_ms: 40.5627
+  type: 'test'
+  ...
+# Subtest: invalid cancellation input rejects before creating output or starting monitor
+ok 119 - invalid cancellation input rejects before creating output or starting monitor
+  ---
+  duration_ms: 1.6787
+  type: 'test'
+  ...
+# Subtest: the default real CapacityClient constructor receives fixed v2 preparation context
+ok 120 - the default real CapacityClient constructor receives fixed v2 preparation context
+  ---
+  duration_ms: 35.2035
+  type: 'test'
+  ...
+# Subtest: explicit legacy preparation is rejected before any monitor or client is created
+ok 121 - explicit legacy preparation is rejected before any monitor or client is created
+  ---
+  duration_ms: 1.4361
+  type: 'test'
+  ...
+# Subtest: final normal drain position, map and name must match readiness before indexing a saved actor
+ok 122 - final normal drain position, map and name must match readiness before indexing a saved actor
+  ---
+  duration_ms: 111.9718
+  type: 'test'
+  ...
+# Subtest: ordinary recovery runs once after login before equip and helper, without activation
+ok 123 - ordinary recovery runs once after login before equip and helper, without activation
+  ---
+  duration_ms: 36.4762
+  type: 'test'
+  ...
+# Subtest: held recovery failure stops admission and normally drains without equipping or preparing
+ok 124 - held recovery failure stops admission and normally drains without equipping or preparing
+  ---
+  duration_ms: 33.6437
+  type: 'test'
+  ...
+# Subtest: recovery and equip consume the same600s helper budget while auth waiting remains excluded
+ok 125 - recovery and equip consume the same600s helper budget while auth waiting remains excluded
+  ---
+  duration_ms: 36.6153
+  type: 'test'
+  ...
+# Subtest: an exhausted recovery budget cannot be restarted for the helper or next actor
+ok 126 - an exhausted recovery budget cannot be restarted for the helper or next actor
+  ---
+  duration_ms: 37.9942
+  type: 'test'
+  ...
+# Subtest: recovery and equip spend the existing2048 command allowance before the helper with one readiness refresh reserved
+ok 127 - recovery and equip spend the existing2048 command allowance before the helper with one readiness refresh reserved
+  ---
+  duration_ms: 32.2468
+  type: 'test'
+  ...
+# Subtest: capacity policy has finite ceilings and never quietly relaxes fixed gates
+ok 128 - capacity policy has finite ceilings and never quietly relaxes fixed gates
+  ---
+  duration_ms: 3.3041
+  type: 'test'
+  ...
+# Subtest: ten ordinary native probe actors retain every fixed gate and cannot qualify for formal acceptance
+ok 129 - ten ordinary native probe actors retain every fixed gate and cannot qualify for formal acceptance
+  ---
+  duration_ms: 0.7043
+  type: 'test'
+  ...
+# Subtest: movement diagnostic can measure 50 active actors but never qualifies as mixed gameplay acceptance
+ok 130 - movement diagnostic can measure 50 active actors but never qualifies as mixed gameplay acceptance
+  ---
+  duration_ms: 0.2142
+  type: 'test'
+  ...
+# Subtest: movement diagnostic retains collision failures but never continues transport, AOI or idle-load failures
+ok 131 - movement diagnostic retains collision failures but never continues transport, AOI or idle-load failures
+  ---
+  duration_ms: 0.5557
+  type: 'test'
+  ...
+# Subtest: one real peer admits at most 25 within an entire 15-minute window and reserves only 5 verification logins
+ok 132 - one real peer admits at most 25 within an entire 15-minute window and reserves only 5 verification logins
+  ---
+  duration_ms: 0.4168
+  type: 'test'
+  ...
+# Subtest: private pool accepts 100 dedicated actors but refuses original players, duplicate identities and endpoint substitution
+ok 133 - private pool accepts 100 dedicated actors but refuses original players, duplicate identities and endpoint substitution
+  ---
+  duration_ms: 0.5333
+  type: 'test'
+  ...
+# Subtest: fixed-rate plans report omitted offered load and never replay a backlog after a driver stall
+ok 134 - fixed-rate plans report omitted offered load and never replay a backlog after a driver stall
+  ---
+  duration_ms: 0.1402
+  type: 'test'
+  ...
+# Subtest: native mode is explicit, keeps baseline defaults, and requires a declared ordinary combat share
+ok 135 - native mode is explicit, keeps baseline defaults, and requires a declared ordinary combat share
+  ---
+  duration_ms: 0.1877
+  type: 'test'
+  ...
+# Subtest: preparation held HP verifies one exact inventory UID with both consumption and exact healing before70%
+ok 136 - preparation held HP verifies one exact inventory UID with both consumption and exact healing before70%
+  ---
+  duration_ms: 4.0669
+  type: 'test'
+  ...
+# Subtest: preparation held HP verifies one exact belt UID with both consumption and exact healing before70%
+ok 137 - preparation held HP verifies one exact belt UID with both consumption and exact healing before70%
+  ---
+  duration_ms: 0.8785
+  type: 'test'
+  ...
+# Subtest: preparation held HP healthy owner needs a fresh full raw receipt but sends no drug or measurement action
+ok 138 - preparation held HP healthy owner needs a fresh full raw receipt but sends no drug or measurement action
+  ---
+  duration_ms: 0.4152
+  type: 'test'
+  ...
+# Subtest: preparation held HP exact health cue may request one paced complete raw receipt without replacing the proof
+ok 139 - preparation held HP exact health cue may request one paced complete raw receipt without replacing the proof
+  ---
+  duration_ms: 1.1178
+  type: 'test'
+  ...
+# Subtest: preparation held HP missing-exact-hp fails before any dose and keeps owner inactive
+ok 140 - preparation held HP missing-exact-hp fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.4369
+  type: 'test'
+  ...
+# Subtest: preparation held HP coarse-only-hp fails before any dose and keeps owner inactive
+ok 141 - preparation held HP coarse-only-hp fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.3187
+  type: 'test'
+  ...
+# Subtest: preparation held HP missing-max-hp fails before any dose and keeps owner inactive
+ok 142 - preparation held HP missing-max-hp fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.3543
+  type: 'test'
+  ...
+# Subtest: preparation held HP incomplete-bag fails before any dose and keeps owner inactive
+ok 143 - preparation held HP incomplete-bag fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.2552
+  type: 'test'
+  ...
+# Subtest: preparation held HP incomplete-belt fails before any dose and keeps owner inactive
+ok 144 - preparation held HP incomplete-belt fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.4856
+  type: 'test'
+  ...
+# Subtest: preparation held HP dead fails before any dose and keeps owner inactive
+ok 145 - preparation held HP dead fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.3399
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-owner fails before any dose and keeps owner inactive
+ok 146 - preparation held HP wrong-owner fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.2684
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-map fails before any dose and keeps owner inactive
+ok 147 - preparation held HP wrong-map fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.197
+  type: 'test'
+  ...
+# Subtest: preparation held HP no-held-drug fails before any dose and keeps owner inactive
+ok 148 - preparation held HP no-held-drug fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.2644
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-658-name fails before any dose and keeps owner inactive
+ok 149 - preparation held HP wrong-658-name fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.404
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-item-index fails before any dose and keeps owner inactive
+ok 150 - preparation held HP wrong-item-index fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.3761
+  type: 'test'
+  ...
+# Subtest: preparation held HP unknown-quantity fails before any dose and keeps owner inactive
+ok 151 - preparation held HP unknown-quantity fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.3767
+  type: 'test'
+  ...
+# Subtest: preparation held HP ambiguous-selector fails before any dose and keeps owner inactive
+ok 152 - preparation held HP ambiguous-selector fails before any dose and keeps owner inactive
+  ---
+  duration_ms: 0.3415
+  type: 'test'
+  ...
+# Subtest: preparation held HP ack-only cannot replace the conjunctive raw proof
+ok 153 - preparation held HP ack-only cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.6934
+  type: 'test'
+  ...
+# Subtest: preparation held HP consumption-only cannot replace the conjunctive raw proof
+ok 154 - preparation held HP consumption-only cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.4826
+  type: 'test'
+  ...
+# Subtest: preparation held HP hp-only cannot replace the conjunctive raw proof
+ok 155 - preparation held HP hp-only cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.315
+  type: 'test'
+  ...
+# Subtest: preparation held HP rejected cannot replace the conjunctive raw proof
+ok 156 - preparation held HP rejected cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.3753
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-uid cannot replace the conjunctive raw proof
+ok 157 - preparation held HP wrong-uid cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.3835
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-grid cannot replace the conjunctive raw proof
+ok 158 - preparation held HP wrong-grid cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.3807
+  type: 'test'
+  ...
+# Subtest: preparation held HP missing-ack cannot replace the conjunctive raw proof
+ok 159 - preparation held HP missing-ack cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.3095
+  type: 'test'
+  ...
+# Subtest: preparation held HP incomplete-after cannot replace the conjunctive raw proof
+ok 160 - preparation held HP incomplete-after cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.3156
+  type: 'test'
+  ...
+# Subtest: preparation held HP coarse-after cannot replace the conjunctive raw proof
+ok 161 - preparation held HP coarse-after cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.2982
+  type: 'test'
+  ...
+# Subtest: preparation held HP late-after cannot replace the conjunctive raw proof
+ok 162 - preparation held HP late-after cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.4016
+  type: 'test'
+  ...
+# Subtest: preparation held HP insufficient-hp cannot replace the conjunctive raw proof
+ok 163 - preparation held HP insufficient-hp cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.9403
+  type: 'test'
+  ...
+# Subtest: preparation held HP owner-after cannot replace the conjunctive raw proof
+ok 164 - preparation held HP owner-after cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.2308
+  type: 'test'
+  ...
+# Subtest: preparation held HP map-after cannot replace the conjunctive raw proof
+ok 165 - preparation held HP map-after cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.2088
+  type: 'test'
+  ...
+# Subtest: preparation held HP death-after cannot replace the conjunctive raw proof
+ok 166 - preparation held HP death-after cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.2375
+  type: 'test'
+  ...
+# Subtest: preparation held HP wrong-decrement cannot replace the conjunctive raw proof
+ok 167 - preparation held HP wrong-decrement cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.2039
+  type: 'test'
+  ...
+# Subtest: preparation held HP late-health-drop cannot replace the conjunctive raw proof
+ok 168 - preparation held HP late-health-drop cannot replace the conjunctive raw proof
+  ---
+  duration_ms: 0.2212
+  type: 'test'
+  ...
+# Subtest: preparation held HP validates the actual emergency selector input after pacing and never sends a changed UID
+ok 169 - preparation held HP validates the actual emergency selector input after pacing and never sends a changed UID
+  ---
+  duration_ms: 0.2551
+  type: 'test'
+  ...
+# Subtest: preparation held HP cannot temporarily ready an owner or bypass the actor deadline
+ok 170 - preparation held HP cannot temporarily ready an owner or bypass the actor deadline
+  ---
+  duration_ms: 0.2033
+  type: 'test'
+  ...
+# Subtest: preparation held HP accepts the actual tooltip-source template contract instead of requiring synthetic top-level itemIndex
+ok 171 - preparation held HP accepts the actual tooltip-source template contract instead of requiring synthetic top-level itemIndex
+  ---
+  duration_ms: 0.4182
+  type: 'test'
+  ...
+# Subtest: preparation held HP accepts actual non-HP class view info1 to realInfo3 with needsDose=false
+ok 172 - preparation held HP accepts actual non-HP class view info1 to realInfo3 with needsDose=false
+  ---
+  duration_ms: 0.2922
+  type: 'test'
+  ...
+# Subtest: preparation held HP accepts actual non-HP class view info1 to realInfo3 with needsDose=true
+ok 173 - preparation held HP accepts actual non-HP class view info1 to realInfo3 with needsDose=true
+  ---
+  duration_ms: 0.2933
+  type: 'test'
+  ...
+# Subtest: preparation held HP requires valid non-HP resolved indexes despite allowing a class view change
+ok 174 - preparation held HP requires valid non-HP resolved indexes despite allowing a class view change
+  ---
+  duration_ms: 0.2569
+  type: 'test'
+  ...
+# Subtest: preparation held HP still rejects selected exact DrugSmall whose actual info658 resolves to conflicting659
+ok 175 - preparation held HP still rejects selected exact DrugSmall whose actual info658 resolves to conflicting659
+  ---
+  duration_ms: 0.2886
+  type: 'test'
+  ...
+# Subtest: preparation held HP naturally restored by a newer raw receipt during pacing needs no dose
+ok 176 - preparation held HP naturally restored by a newer raw receipt during pacing needs no dose
+  ---
+  duration_ms: 0.2602
+  type: 'test'
+  ...
+# Subtest: preparation held HP hp-above-maximum cannot be treated as complete raw inventory or health
+ok 177 - preparation held HP hp-above-maximum cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.4306
+  type: 'test'
+  ...
+# Subtest: preparation held HP string-dead cannot be treated as complete raw inventory or health
+ok 178 - preparation held HP string-dead cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.3156
+  type: 'test'
+  ...
+# Subtest: preparation held HP numeric-dead cannot be treated as complete raw inventory or health
+ok 179 - preparation held HP numeric-dead cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.3183
+  type: 'test'
+  ...
+# Subtest: preparation held HP missing-dead cannot be treated as complete raw inventory or health
+ok 180 - preparation held HP missing-dead cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.3413
+  type: 'test'
+  ...
+# Subtest: preparation held HP null-non-hp-record cannot be treated as complete raw inventory or health
+ok 181 - preparation held HP null-non-hp-record cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.3875
+  type: 'test'
+  ...
+# Subtest: preparation held HP malformed-non-hp-record cannot be treated as complete raw inventory or health
+ok 182 - preparation held HP malformed-non-hp-record cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.4083
+  type: 'test'
+  ...
+# Subtest: preparation held HP duplicate-non-hp-uid cannot be treated as complete raw inventory or health
+ok 183 - preparation held HP duplicate-non-hp-uid cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.2208
+  type: 'test'
+  ...
+# Subtest: preparation held HP unknown-non-hp-quantity cannot be treated as complete raw inventory or health
+ok 184 - preparation held HP unknown-non-hp-quantity cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.2254
+  type: 'test'
+  ...
+# Subtest: preparation held HP conflicting-template cannot be treated as complete raw inventory or health
+ok 185 - preparation held HP conflicting-template cannot be treated as complete raw inventory or health
+  ---
+  duration_ms: 0.2085
+  type: 'test'
+  ...
+# Subtest: preparation held HP missing consumed UID in malformed after inventory is never zero-consumption proof null
+ok 186 - preparation held HP missing consumed UID in malformed after inventory is never zero-consumption proof null
+  ---
+  duration_ms: 0.3817
+  type: 'test'
+  ...
+# Subtest: preparation held HP missing consumed UID in malformed after inventory is never zero-consumption proof [object Object]
+ok 187 - preparation held HP missing consumed UID in malformed after inventory is never zero-consumption proof [object Object]
+  ---
+  duration_ms: 0.3017
+  type: 'test'
+  ...
+# Subtest: preparation held HP shares the same2048 dispatch quota and never sends past it
+ok 188 - preparation held HP shares the same2048 dispatch quota and never sends past it
+  ---
+  duration_ms: 0.333
+  type: 'test'
+  ...
+# Subtest: preparation held HP ignores a complete raw snapshot received before its own paced refresh
+ok 189 - preparation held HP ignores a complete raw snapshot received before its own paced refresh
+  ---
+  duration_ms: 0.2909
+  type: 'test'
+  ...
+# Subtest: native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+ok 190 - native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+  ---
+  duration_ms: 1.0127
+  type: 'test'
+  ...
+# Subtest: native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+ok 191 - native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+  ---
+  duration_ms: 0.2323
+  type: 'test'
+  ...
+# Subtest: native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+ok 192 - native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+  ---
+  duration_ms: 0.2598
+  type: 'test'
+  ...
+# Subtest: native HP maintenance rejected cannot credit recovery and fails closed
+ok 193 - native HP maintenance rejected cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3935
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-uid cannot credit recovery and fails closed
+ok 194 - native HP maintenance wrong-uid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.2431
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-grid cannot credit recovery and fails closed
+ok 195 - native HP maintenance wrong-grid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.173
+  type: 'test'
+  ...
+# Subtest: native HP maintenance ack-only cannot credit recovery and fails closed
+ok 196 - native HP maintenance ack-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.165
+  type: 'test'
+  ...
+# Subtest: native HP maintenance effect-only cannot credit recovery and fails closed
+ok 197 - native HP maintenance effect-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.1616
+  type: 'test'
+  ...
+# Subtest: native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+ok 198 - native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.1504
+  type: 'test'
+  ...
+# Subtest: native HP maintenance late-proof cannot credit recovery and fails closed
+ok 199 - native HP maintenance late-proof cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.2296
+  type: 'test'
+  ...
+# Subtest: passive sustain observes raw full receipts and counts repeated HP proof packets once without sending or crediting extra work
+ok 200 - passive sustain observes raw full receipts and counts repeated HP proof packets once without sending or crediting extra work
+  ---
+  duration_ms: 1.1228
+  type: 'test'
+  ...
+# Subtest: passive sustain keeps an ACK-only failed recovery separate from consumption and HP increase
+ok 201 - passive sustain keeps an ACK-only failed recovery separate from consumption and HP increase
+  ---
+  duration_ms: 0.3659
+  type: 'test'
+  ...
+# Subtest: passive sustain drain uses only the original final refresh and cannot label an unsuccessful refresh as a new receipt
+ok 202 - passive sustain drain uses only the original final refresh and cannot label an unsuccessful refresh as a new receipt
+  ---
+  duration_ms: 0.8116
+  type: 'test'
+  ...
+# Subtest: native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+ok 203 - native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+  ---
+  duration_ms: 1.2946
+  type: 'test'
+  ...
+# Subtest: native HP pending evidence retains offered gameplay and drain captures the existing dose
+ok 204 - native HP pending evidence retains offered gameplay and drain captures the existing dose
+  ---
+  duration_ms: 21.3996
+  type: 'test'
+  ...
+# Subtest: native engine offers HP before gameplay and auxiliary without hiding missed opportunities
+ok 205 - native engine offers HP before gameplay and auxiliary without hiding missed opportunities
+  ---
+  duration_ms: 26.7343
+  type: 'test'
+  ...
+# Subtest: ordinary preparation is opt-in and requires distinct explicit per-actor staging instead of hostile homes
+ok 206 - ordinary preparation is opt-in and requires distinct explicit per-actor staging instead of hostile homes
+  ---
+  duration_ms: 0.617
+  type: 'test'
+  ...
+# Subtest: ordinary preparation uses the canonical same-map protection spec and ignores an injected configuration replacement
+ok 207 - ordinary preparation uses the canonical same-map protection spec and ignores an injected configuration replacement
+  ---
+  duration_ms: 44.2557
+  type: 'test'
+  ...
+# Subtest: ordinary preparation rejects non-platinum route profiles even after the real map protection has been cached
+ok 208 - ordinary preparation rejects non-platinum route profiles even after the real map protection has been cached
+  ---
+  duration_ms: 0.9492
+  type: 'test'
+  ...
+# Subtest: ordinary preparation rejects a context map mismatch before any supply facade or command
+ok 209 - ordinary preparation rejects a context map mismatch before any supply facade or command
+  ---
+  duration_ms: 0.2689
+  type: 'test'
+  ...
+# Subtest: ordinary preparation deducts trusted protection setup time from the explicit remaining helper budget
+ok 210 - ordinary preparation deducts trusted protection setup time from the explicit remaining helper budget
+  ---
+  duration_ms: 0.2593
+  type: 'test'
+  ...
+# Subtest: ordinary preparation setup cannot clamp an exhausted explicit helper budget back to one millisecond
+ok 211 - ordinary preparation setup cannot clamp an exhausted explicit helper budget back to one millisecond
+  ---
+  duration_ms: 0.2487
+  type: 'test'
+  ...
+# Subtest: ordinary preparation consumes actual full snapshot receipts and joins only after a fresh cohort barrier
+ok 212 - ordinary preparation consumes actual full snapshot receipts and joins only after a fresh cohort barrier
+  ---
+  duration_ms: 3.4547
+  type: 'test'
+  ...
+# Subtest: ordinary preparation forwards actual safe-zone membership and nearby hostile counts through the fresh activation barrier
+ok 213 - ordinary preparation forwards actual safe-zone membership and nearby hostile counts through the fresh activation barrier
+  ---
+  duration_ms: 0.8745
+  type: 'test'
+  ...
+# Subtest: passive sustain starts at the existing fresh preparation activation barrier without an additional refresh
+ok 214 - passive sustain starts at the existing fresh preparation activation barrier without an additional refresh
+  ---
+  duration_ms: 1.4741
+  type: 'test'
+  ...
+# Subtest: ordinary preparation navigator sends its actual Walk through the bounded supply facade and shared budget
+ok 215 - ordinary preparation navigator sends its actual Walk through the bounded supply facade and shared budget
+  ---
+  duration_ms: 3.4533
+  type: 'test'
+  ...
+# Subtest: ordinary preparation trusted same-map spec reaches the real helper and navigator for a protected cell beside a live normal monster
+ok 216 - ordinary preparation trusted same-map spec reaches the real helper and navigator for a protected cell beside a live normal monster
+  ---
+  duration_ms: 1.5824
+  type: 'test'
+  ...
+# Subtest: ordinary preparation failure records sanitized module status and rethrows the same error without activation or credit
+ok 217 - ordinary preparation failure records sanitized module status and rethrows the same error without activation or credit
+  ---
+  duration_ms: 0.4263
+  type: 'test'
+  ...
+# Subtest: ordinary cohort activation fails without a fresh receipt and never partially activates a cohort
+ok 218 - ordinary cohort activation fails without a fresh receipt and never partially activates a cohort
+  ---
+  duration_ms: 0.6915
+  type: 'test'
+  ...
+# Subtest: ordinary preparation rejects active actors, blocked staging and transfer staging before sending
+ok 219 - ordinary preparation rejects active actors, blocked staging and transfer staging before sending
+  ---
+  duration_ms: 0.5009
+  type: 'test'
+  ...
+# Subtest: ordinary preparation keepAlive uses the original budget only after ready while funding and HP evidence retain control
+ok 220 - ordinary preparation keepAlive uses the original budget only after ready while funding and HP evidence retain control
+  ---
+  duration_ms: 0.6679
+  type: 'test'
+  ...
+# Subtest: 500 actor opt-in reaches explicit home and navigation validation while legacy callers keep their ceiling
+ok 221 - 500 actor opt-in reaches explicit home and navigation validation while legacy callers keep their ceiling
+  ---
+  duration_ms: 9.0039
+  type: 'test'
+  ...
+# Subtest: ordinary supply commands reach the capacity wire with the original budget and no QA command admission
+ok 222 - ordinary supply commands reach the capacity wire with the original budget and no QA command admission
+  ---
+  duration_ms: 0.3868
+  type: 'test'
+  ...
+# Subtest: native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+ok 223 - native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+  ---
+  duration_ms: 3.5597
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original movement-budget boundary
+ok 224 - native post-strike segment retains the original movement-budget boundary
+  ---
+  duration_ms: 0.6401
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original time-budget boundary
+ok 225 - native post-strike segment retains the original time-budget boundary
+  ---
+  duration_ms: 0.5818
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original route-loop boundary
+ok 226 - native post-strike segment retains the original route-loop boundary
+  ---
+  duration_ms: 0.4367
+  type: 'test'
+  ...
+# Subtest: native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+ok 227 - native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+  ---
+  duration_ms: 1.8015
+  type: 'test'
+  ...
+# Subtest: native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+ok 228 - native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+  ---
+  duration_ms: 1.0094
+  type: 'test'
+  ...
+# Subtest: native attack witness uses nearest eligible peer with original order on equal separation
+ok 229 - native attack witness uses nearest eligible peer with original order on equal separation
+  ---
+  duration_ms: 0.2419
+  type: 'test'
+  ...
+# Subtest: native attack witness is reselected with its current namespace and cursor immediately before the real send
+ok 230 - native attack witness is reselected with its current namespace and cursor immediately before the real send
+  ---
+  duration_ms: 0.9989
+  type: 'test'
+  ...
+# Subtest: native attack witness loss before send retains the original incomplete opportunity without a fake attack
+ok 231 - native attack witness loss before send retains the original incomplete opportunity without a fake attack
+  ---
+  duration_ms: 73.5955
+  type: 'test'
+  ...
+# Subtest: native initial no-witness selection can use another genuinely witnessed adjacent target
+ok 232 - native initial no-witness selection can use another genuinely witnessed adjacent target
+  ---
+  duration_ms: 0.4365
+  type: 'test'
+  ...
+# Subtest: native initial no-witness target with no approach route retains the original bounded scout fallback
+ok 233 - native initial no-witness target with no approach route retains the original bounded scout fallback
+  ---
+  duration_ms: 0.9687
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+ok 234 - native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+  ---
+  duration_ms: 0.8885
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+ok 235 - native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+  ---
+  duration_ms: 0.6166
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+ok 236 - native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+  ---
+  duration_ms: 0.5688
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+ok 237 - native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+  ---
+  duration_ms: 0.7318
+  type: 'test'
+  ...
+# Subtest: native witnessed approach skips cheap ineligible targets before the original four path-target limit
+ok 238 - native witnessed approach skips cheap ineligible targets before the original four path-target limit
+  ---
+  duration_ms: 0.39
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a not-ready observer without replacing real membership with distance
+ok 239 - native witnessed approach rejects a not-ready observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1966
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a dead observer without replacing real membership with distance
+ok 240 - native witnessed approach rejects a dead observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1415
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+ok 241 - native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1036
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+ok 242 - native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1279
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-target observer without replacing real membership with distance
+ok 243 - native witnessed approach rejects a missing-target observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1513
+  type: 'test'
+  ...
+# Subtest: native witnessed approach retains the original four path targets and eight adjacent destinations
+ok 244 - native witnessed approach retains the original four path targets and eight adjacent destinations
+  ---
+  duration_ms: 101.9284
+  type: 'test'
+  ...
+# Subtest: native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+ok 245 - native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+  ---
+  duration_ms: 6.5467
+  type: 'test'
+  ...
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 246 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 0.7319
+  type: 'test'
+  ...
+# Subtest: navigation coordination is native-only and preserves the baseline obstacle and send path
+ok 247 - navigation coordination is native-only and preserves the baseline obstacle and send path
+  ---
+  duration_ms: 0.2166
+  type: 'test'
+  ...
+# Subtest: navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+ok 248 - navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+  ---
+  duration_ms: 0.2256
+  type: 'test'
+  ...
+# Subtest: navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+ok 249 - navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+  ---
+  duration_ms: 1.1195
+  type: 'test'
+  ...
+# Subtest: navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+ok 250 - navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+  ---
+  duration_ms: 0.5458
+  type: 'test'
+  ...
+# Subtest: navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+ok 251 - navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+  ---
+  duration_ms: 0.505
+  type: 'test'
+  ...
+# Subtest: navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+ok 252 - navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+  ---
+  duration_ms: 0.4621
+  type: 'test'
+  ...
+# Subtest: native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+ok 253 - native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+  ---
+  duration_ms: 0.2938
+  type: 'test'
+  ...
+# Subtest: native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+ok 254 - native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+  ---
+  duration_ms: 31.8637
+  type: 'test'
+  ...
+# Subtest: native primed fallback keeps the original first Walk when no original corner route has a legal Run
+ok 255 - native primed fallback keeps the original first Walk when no original corner route has a legal Run
+  ---
+  duration_ms: 0.479
+  type: 'test'
+  ...
+# Subtest: native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+ok 256 - native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+  ---
+  duration_ms: 0.1854
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+ok 257 - native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+  ---
+  duration_ms: 1.7984
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains diagonal side-cell collision checks
+ok 258 - native fallback Run preference retains diagonal side-cell collision checks
+  ---
+  duration_ms: 0.2155
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference cannot enter a transfer in its first or second step
+ok 259 - native fallback Run preference cannot enter a transfer in its first or second step
+  ---
+  duration_ms: 0.2749
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains routeAllowed on the complete route to each original goal
+ok 260 - native fallback Run preference retains routeAllowed on the complete route to each original goal
+  ---
+  duration_ms: 0.2903
+  type: 'test'
+  ...
+# Subtest: attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback
+ok 261 - attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback
+  ---
+  duration_ms: 0.7166
+  type: 'test'
+  ...
+# Subtest: attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays
+ok 262 - attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays
+  ---
+  duration_ms: 0.1742
+  type: 'test'
+  ...
+# Subtest: V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage
+ok 263 - V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage
+  ---
+  duration_ms: 1.0573
+  type: 'test'
+  ...
+# Subtest: active observer coverage binds only declared living movement clients and never borrows a future home
+ok 264 - active observer coverage binds only declared living movement clients and never borrows a future home
+  ---
+  duration_ms: 1.6477
+  type: 'test'
+  ...
+# Subtest: scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+ok 265 - scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+  ---
+  duration_ms: 0.6656
+  type: 'test'
+  ...
+# Subtest: temporary observer coverage loss and restore do not wash a live pursuit movement budget
+ok 266 - temporary observer coverage loss and restore do not wash a live pursuit movement budget
+  ---
+  duration_ms: 0.6439
+  type: 'test'
+  ...
+# Subtest: pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+ok 267 - pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+  ---
+  duration_ms: 1.0747
+  type: 'test'
+  ...
+# Subtest: pending attack packet subscriptions are removed after synchronous send failure and transport close
+ok 268 - pending attack packet subscriptions are removed after synchronous send failure and transport close
+  ---
+  duration_ms: 0.6977
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 269 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 0.2936
+  type: 'test'
+  ...
+# Subtest: native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+ok 270 - native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+  ---
+  duration_ms: 0.326
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 271 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 3.186
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 272 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.2541
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 273 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.385
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 274 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.2416
+  type: 'test'
+  ...
+# Subtest: native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+ok 275 - native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+  ---
+  duration_ms: 0.1738
+  type: 'test'
+  ...
+# Subtest: native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+ok 276 - native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+  ---
+  duration_ms: 0.2808
+  type: 'test'
+  ...
+# Subtest: native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+ok 277 - native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+  ---
+  duration_ms: 0.868
+  type: 'test'
+  ...
+# Subtest: native hunt does not credit a newly planned route when the target moves during each authoritative step
+ok 278 - native hunt does not credit a newly planned route when the target moves during each authoritative step
+  ---
+  duration_ms: 0.5376
+  type: 'test'
+  ...
+# Subtest: native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+ok 279 - native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+  ---
+  duration_ms: 4.2321
+  type: 'test'
+  ...
+# Subtest: native hunt defers an authoritative position loop even when replanned routes claim progress
+ok 280 - native hunt defers an authoritative position loop even when replanned routes claim progress
+  ---
+  duration_ms: 0.2554
+  type: 'test'
+  ...
+# Subtest: native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+ok 281 - native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+  ---
+  duration_ms: 86.6828
+  type: 'test'
+  ...
+# Subtest: native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+ok 282 - native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+  ---
+  duration_ms: 0.3958
+  type: 'test'
+  ...
+# Subtest: native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+ok 283 - native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+  ---
+  duration_ms: 0.2385
+  type: 'test'
+  ...
+# Subtest: native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+ok 284 - native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+  ---
+  duration_ms: 0.483
+  type: 'test'
+  ...
+# Subtest: native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+ok 285 - native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+  ---
+  duration_ms: 0.7465
+  type: 'test'
+  ...
+# Subtest: native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+ok 286 - native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+  ---
+  duration_ms: 0.4544
+  type: 'test'
+  ...
+# Subtest: native hunt movement hook keeps all corrected and successful actions in the original denominator
+ok 287 - native hunt movement hook keeps all corrected and successful actions in the original denominator
+  ---
+  duration_ms: 1.1541
+  type: 'test'
+  ...
+# Subtest: native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+ok 288 - native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+  ---
+  duration_ms: 22.303
+  type: 'test'
+  ...
+# Subtest: native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+ok 289 - native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+  ---
+  duration_ms: 0.762
+  type: 'test'
+  ...
+# Subtest: native timing follows authoritative level, attack speed and slow while preserving the 550/600ms difference
+ok 290 - native timing follows authoritative level, attack speed and slow while preserving the 550/600ms difference
+  ---
+  duration_ms: 0.1999
+  type: 'test'
+  ...
+# Subtest: native attack pacing uses the real sparse WorldSnapshot zero-stat contract without guessing absent or malformed blocks
+ok 291 - native attack pacing uses the real sparse WorldSnapshot zero-stat contract without guessing absent or malformed blocks
+  ---
+  duration_ms: 0.2435
+  type: 'test'
+  ...
+# Subtest: native calendar never catches up by violating elapsed cooldown after jitter or a stall
+ok 292 - native calendar never catches up by violating elapsed cooldown after jitter or a stall
+  ---
+  duration_ms: 0.0468
+  type: 'test'
+  ...
+# Subtest: native evidence waiting cannot be hidden as reduced offered load or mislabeled busy
+ok 293 - native evidence waiting cannot be hidden as reduced offered load or mislabeled busy
+  ---
+  duration_ms: 0.1383
+  type: 'test'
+  ...
+# Subtest: native login-window waiting cannot degrade to all Walk and recover its capacity verdict later
+ok 294 - native login-window waiting cannot degrade to all Walk and recover its capacity verdict later
+  ---
+  duration_ms: 0.5483
+  type: 'test'
+  ...
+# Subtest: native continuous running starts with Walk, validates both Run cells, and resets after a long pause
+ok 295 - native continuous running starts with Walk, validates both Run cells, and resets after a long pause
+  ---
+  duration_ms: 0.2332
+  type: 'test'
+  ...
+# Subtest: explicit native anchors prove full-map reachability without widening automatic or baseline placement
+ok 296 - explicit native anchors prove full-map reachability without widening automatic or baseline placement
+  ---
+  duration_ms: 17.6426
+  type: 'test'
+  ...
+# Subtest: explicit wide native patrol uses two lawful steps toward a four-cell corner and preserves all collision checks
+ok 297 - explicit wide native patrol uses two lawful steps toward a four-cell corner and preserves all collision checks
+  ---
+  duration_ms: 0.5601
+  type: 'test'
+  ...
+# Subtest: native combat clusters cover the exact cohort and contain hunting inside declared observer footprints
+ok 298 - native combat clusters cover the exact cohort and contain hunting inside declared observer footprints
+  ---
+  duration_ms: 0.8367
+  type: 'test'
+  ...
+# Subtest: native patrol returns from the captured detour to a reachable declared corner when home is occupied
+ok 299 - native patrol returns from the captured detour to a reachable declared corner when home is occupied
+  ---
+  duration_ms: 15.9309
+  type: 'test'
+  ...
+# Subtest: primed native patrol chooses a lawful clear two-cell corner before an avoidable edge detour
+ok 300 - primed native patrol chooses a lawful clear two-cell corner before an avoidable edge detour
+  ---
+  duration_ms: 0.4129
+  type: 'test'
+  ...
+# Subtest: native navigation diagnostics retain the first blocked streak with bounded occupants while every failed opportunity still fails load gates
+ok 301 - native navigation diagnostics retain the first blocked streak with bounded occupants while every failed opportunity still fails load gates
+  ---
+  duration_ms: 26.473
+  type: 'test'
+  ...
+# Subtest: native corrected Walk detours around the refused first cell until expiry without hiding the correction
+ok 302 - native corrected Walk detours around the refused first cell until expiry without hiding the correction
+  ---
+  duration_ms: 0.5213
+  type: 'test'
+  ...
+# Subtest: native correction avoidance never guesses a Run blocker and keeps a bounded private-safe diagnostic
+ok 303 - native correction avoidance never guesses a Run blocker and keeps a bounded private-safe diagnostic
+  ---
+  duration_ms: 25.0684
+  type: 'test'
+  ...
+# Subtest: real Bichon collision map and BorderVillage NPCs produce a full four-corner native Run patrol
+ok 304 - real Bichon collision map and BorderVillage NPCs produce a full four-corner native Run patrol
+  ---
+  duration_ms: 163.0671
+  type: 'test'
+  ...
+# Subtest: native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive
+ok 305 - native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive
+  ---
+  duration_ms: 40.7945
+  type: 'test'
+  ...
+# Subtest: native pending evidence is recorded separately and never sends another attack into an ambiguous hit window
+ok 306 - native pending evidence is recorded separately and never sends another attack into an ambiguous hit window
+  ---
+  duration_ms: 0.3466
+  type: 'test'
+  ...
+# Subtest: histograms preserve a real latency tail without retaining per-action samples
+ok 307 - histograms preserve a real latency tail without retaining per-action samples
+  ---
+  duration_ms: 1.9658
+  type: 'test'
+  ...
+# Subtest: measurement phases retain five and six complete actual minutes after late then early timer jitter
+ok 308 - measurement phases retain five and six complete actual minutes after late then early timer jitter
+  ---
+  duration_ms: 6.7546
+  type: 'test'
+  ...
+# Subtest: measurement phases use actual elapsed duration for whole-phase rates while seconds keeps the profile contract
+ok 309 - measurement phases use actual elapsed duration for whole-phase rates while seconds keeps the profile contract
+  ---
+  duration_ms: 0.3898
+  type: 'test'
+  ...
+# Subtest: measurement phases preserve short probes and non-minute tails without promoting a partial window
+ok 310 - measurement phases preserve short probes and non-minute tails without promoting a partial window
+  ---
+  duration_ms: 1.4358
+  type: 'test'
+  ...
+# Subtest: measurement phases retain the configured multi-actor native chat boundary despite positive clock jitter
+ok 311 - measurement phases retain the configured multi-actor native chat boundary despite positive clock jitter
+  ---
+  duration_ms: 0.5971
+  type: 'test'
+  ...
+# Subtest: measurement phases retain failed partial-minute actions in whole-phase and continuous verdicts
+ok 312 - measurement phases retain failed partial-minute actions in whole-phase and continuous verdicts
+  ---
+  duration_ms: 1.5036
+  type: 'test'
+  ...
+# Subtest: measurement phases fail closed on backward or invalid clocks without completing or inventing a window
+ok 313 - measurement phases fail closed on backward or invalid clocks without completing or inventing a window
+  ---
+  duration_ms: 0.3194
+  type: 'test'
+  ...
+# Subtest: measurement phases preserve existing stall stops and never split one stalled interval into several minute windows
+ok 314 - measurement phases preserve existing stall stops and never split one stalled interval into several minute windows
+  ---
+  duration_ms: 1.2377
+  type: 'test'
+  ...
+# Subtest: idle, correction-only, omitted planned load and swing-only actors cannot pass as sustained players
+ok 315 - idle, correction-only, omitted planned load and swing-only actors cannot pass as sustained players
+  ---
+  duration_ms: 0.5312
+  type: 'test'
+  ...
+# Subtest: each declared combat actor needs positive damage with shared health and a sustained attack rate
+ok 316 - each declared combat actor needs positive damage with shared health and a sustained attack rate
+  ---
+  duration_ms: 0.2127
+  type: 'test'
+  ...
+# Subtest: ramp and auth-window activity failures remain latched after later measured stages recover
+ok 317 - ramp and auth-window activity failures remain latched after later measured stages recover
+  ---
+  duration_ms: 0.3567
+  type: 'test'
+  ...
+# Subtest: native resume pauses only its selected owner while peers retain activity obligations
+ok 318 - native resume pauses only its selected owner while peers retain activity obligations
+  ---
+  duration_ms: 0.6105
+  type: 'test'
+  ...
+# Subtest: planned disconnect waits existing observer obligations while newly offered peer actions keep running
+ok 319 - planned disconnect waits existing observer obligations while newly offered peer actions keep running
+  ---
+  duration_ms: 0.1269
+  type: 'test'
+  ...
+# Subtest: drain includes observer evidence created by the captured owner acknowledgement
+ok 320 - drain includes observer evidence created by the captured owner acknowledgement
+  ---
+  duration_ms: 0.1033
+  type: 'test'
+  ...
+# Subtest: short final participation still retains real rejection, correction and latency failures
+ok 321 - short final participation still retains real rejection, correction and latency failures
+  ---
+  duration_ms: 0.3943
+  type: 'test'
+  ...
+# Subtest: AOI denominator includes a player whose ObjectPlayer was never delivered, using actual 16-cell geometry
+ok 322 - AOI denominator includes a player whose ObjectPlayer was never delivered, using actual 16-cell geometry
+  ---
+  duration_ms: 0.4807
+  type: 'test'
+  ...
+# Subtest: native-resume AOI grace restarts for planned absence but duplicates and later ghosts stay failed
+ok 323 - native-resume AOI grace restarts for planned absence but duplicates and later ghosts stay failed
+  ---
+  duration_ms: 0.19
+  type: 'test'
+  ...
+# Subtest: fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+ok 324 - fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+  ---
+  duration_ms: 0.0686
+  type: 'test'
+  ...
+# Subtest: real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+ok 325 - real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+  ---
+  duration_ms: 0.1783
+  type: 'test'
+  ...
+# Subtest: shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+ok 326 - shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+  ---
+  duration_ms: 0.1761
+  type: 'test'
+  ...
+# Subtest: a real rejection is not downgraded to a miss merely because a swing packet was also delivered
+ok 327 - a real rejection is not downgraded to a miss merely because a swing packet was also delivered
+  ---
+  duration_ms: 0.0611
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics preserve remove and reentry wire order with projection before and after
+ok 328 - player lifecycle diagnostics preserve remove and reentry wire order with projection before and after
+  ---
+  duration_ms: 0.6961
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics retain same-membership owner coordinate replacements but omit ordinary peer movement
+ok 329 - player lifecycle diagnostics retain same-membership owner coordinate replacements but omit ordinary peer movement
+  ---
+  duration_ms: 15.2061
+  type: 'test'
+  ...
+# Subtest: self transform diagnostics preserve unsolicited public position changes with fixed fields and no peer or unchanged-coordinate traffic
+ok 330 - self transform diagnostics preserve unsolicited public position changes with fixed fields and no peer or unchanged-coordinate traffic
+  ---
+  duration_ms: 22.2288
+  type: 'test'
+  ...
+# Subtest: captured ACK then old self Struck leaves the next native Walk planned from the actual owner tile
+ok 331 - captured ACK then old self Struck leaves the next native Walk planned from the actual owner tile
+  ---
+  duration_ms: 0.8468
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics keep a bounded remembered identity and projection footprint
+ok 332 - player lifecycle diagnostics keep a bounded remembered identity and projection footprint
+  ---
+  duration_ms: 13.7201
+  type: 'test'
+  ...
+# Subtest: player lifecycle diagnostics persist real socket receive order through the existing bounded writer without secrets
+ok 333 - player lifecycle diagnostics persist real socket receive order through the existing bounded writer without secrets
+  ---
+  duration_ms: 165.3875
+  type: 'test'
+  ...
+# Subtest: guards, dead or disappeared targets and temporarily failed targets are never reused as ordinary combat load
+ok 334 - guards, dead or disappeared targets and temporarily failed targets are never reused as ordinary combat load
+  ---
+  duration_ms: 0.2225
+  type: 'test'
+  ...
+# Subtest: patrol anchors exclude disconnected regions, blocked cells and legal doorway hazards
+ok 335 - patrol anchors exclude disconnected regions, blocked cells and legal doorway hazards
+  ---
+  duration_ms: 3.5679
+  type: 'test'
+  ...
+# Subtest: spacing-four scenario generation uses reachable cells and labels static visibility as unaccepted planning
+ok 336 - spacing-four scenario generation uses reachable cells and labels static visibility as unaccepted planning
+  ---
+  duration_ms: 293.2159
+  type: 'test'
+  ...
+# Subtest: long-term growth is distinct from a filled cache plateau
+ok 337 - long-term growth is distinct from a filled cache plateau
+  ---
+  duration_ms: 0.4358
+  type: 'test'
+  ...
+# Subtest: one-hour monitor history retains stable time span for both 1Hz and 2Hz producers in bounded memory
+ok 338 - one-hour monitor history retains stable time span for both 1Hz and 2Hz producers in bounded memory
+  ---
+  duration_ms: 2.0446
+  type: 'test'
+  ...
+# Subtest: public evidence redacts tickets and fails closed if its bounded write queue overflows
+ok 339 - public evidence redacts tickets and fails closed if its bounded write queue overflows
+  ---
+  duration_ms: 2.6908
+  type: 'test'
+  ...
+# Subtest: long native-ticket rotation keeps bounded history and never retains bulky snapshots or raw secrets in receipts
+ok 340 - long native-ticket rotation keeps bounded history and never retains bulky snapshots or raw secrets in receipts
+  ---
+  duration_ms: 16.7448
+  type: 'test'
+  ...
+# Subtest: native combat arrival uses real socket movement without observers and keeps the entire transit in continuous activity
+ok 341 - native combat arrival uses real socket movement without observers and keeps the entire transit in continuous activity
+  ---
+  duration_ms: 5000.6801
+  type: 'test'
+  ...
+# Subtest: real socket protocol stops after auth rejection without retry, StartGame or rewriting account progress
+ok 342 - real socket protocol stops after auth rejection without retry, StartGame or rewriting account progress
+  ---
+  duration_ms: 157.8616
+  type: 'test'
+  ...
+# Subtest: a stop from the parent monitor drains a moving ordinary actor, preserves failure and never retries login
+ok 343 - a stop from the parent monitor drains a moving ordinary actor, preserves failure and never retries login
+  ---
+  duration_ms: 2215.0745
+  type: 'test'
+  ...
+# Subtest: a real socket gameplay rejection during unmeasured ramp latches failure and drains normally
+ok 344 - a real socket gameplay rejection during unmeasured ramp latches failure and drains normally
+  ---
+  duration_ms: 2194.455
+  type: 'test'
+  ...
+# Subtest: missing monitor prevents private-account reads, login and all gameplay
+ok 345 - missing monitor prevents private-account reads, login and all gameplay
+  ---
+  duration_ms: 3.2725
+  type: 'test'
+  ...
+# Subtest: slow real socket acknowledgements expose offered-load gaps instead of silently lowering the requested activity
+ok 346 - slow real socket acknowledgements expose offered-load gaps instead of silently lowering the requested activity
+  ---
+  duration_ms: 22597.1723
+  type: 'test'
+  ...
+# Subtest: two real sockets both have SelfPlayer 1000 while movement and removal use each receiver's distinct Zone identity
+ok 347 - two real sockets both have SelfPlayer 1000 while movement and removal use each receiver's distinct Zone identity
+  ---
+  duration_ms: 2299.2637
+  type: 'test'
+  ...
+# Subtest: a complete bounded socket probe produces real movement samples but cannot claim 50-player or combat acceptance
+ok 348 - a complete bounded socket probe produces real movement samples but cannot claim 50-player or combat acceptance
+  ---
+  duration_ms: 69137.8774
+  type: 'test'
+  ...
+# Subtest: native 650ms real socket probe produces sustained two-cell Runs and honest offered load
+ok 349 - native 650ms real socket probe produces sustained two-cell Runs and honest offered load
+  ---
+  duration_ms: 41745.5879
+  type: 'test'
+  ...
+# Subtest: native 750ms real socket probe produces sustained two-cell Runs and honest offered load
+ok 350 - native 750ms real socket probe produces sustained two-cell Runs and honest offered load
+  ---
+  duration_ms: 41724.9704
+  type: 'test'
+  ...
+# Subtest: native 750ms real socket probe produces sustained two-cell Runs and honest offered load with explicit wide patrol
+ok 351 - native 750ms real socket probe produces sustained two-cell Runs and honest offered load with explicit wide patrol
+  ---
+  duration_ms: 41811.1749
+  type: 'test'
+  ...
+# Subtest: attack-results v2 fails closed against a legacy server after the original15s capability deadline
+ok 352 - attack-results v2 fails closed against a legacy server after the original15s capability deadline
+  ---
+  duration_ms: 15107.4608
+  type: 'test'
+  ...
+# Subtest: native real sockets keep running while old observer evidence is pending and attacks respect current stats
+ok 353 - native real sockets keep running while old observer evidence is pending and attacks respect current stats
+  ---
+  duration_ms: 9627.1774
+  type: 'test'
+  ...
+# Subtest: native real sockets never reclaim an unresolved attack target when old damage arrives after the prior retry window
+ok 354 - native real sockets never reclaim an unresolved attack target when old damage arrives after the prior retry window
+  ---
+  duration_ms: 8455.2081
+  type: 'test'
+  ...
+# Subtest: native real sockets read sparse authoritative zero AttackSpeed without inventing pacing
+ok 355 - native real sockets read sparse authoritative zero AttackSpeed without inventing pacing
+  ---
+  duration_ms: 9620.2923
+  type: 'test'
+  ...
+# Subtest: native real sockets keep same-position correction and target movement diagnostic while the actual900ms timeout still fails the1percent gate
+ok 356 - native real sockets keep same-position correction and target movement diagnostic while the actual900ms timeout still fails the1percent gate
+  ---
+  duration_ms: 4373.0022
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket launched preserves explicit admission, damage and failure accounting
+ok 357 - attack-results v2 real socket launched preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 4772.5525
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket notLaunched preserves explicit admission, damage and failure accounting
+ok 358 - attack-results v2 real socket notLaunched preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 3510.0946
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket missing preserves explicit admission, damage and failure accounting
+ok 359 - attack-results v2 real socket missing preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 4387.0719
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket wrong-id preserves explicit admission, damage and failure accounting
+ok 360 - attack-results v2 real socket wrong-id preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 4355.5119
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket late preserves explicit admission, damage and failure accounting
+ok 361 - attack-results v2 real socket late preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 4733.287
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket launched-no-damage preserves explicit admission, damage and failure accounting
+ok 362 - attack-results v2 real socket launched-no-damage preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 4385.009
+  type: 'test'
+  ...
+# Subtest: attack-results v2 real socket unavailable preserves explicit admission, damage and failure accounting
+ok 363 - attack-results v2 real socket unavailable preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 3509.4644
+  type: 'test'
+  ...
+# (node:56180) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: attack-results v2 real socket unknown preserves explicit admission, damage and failure accounting
+ok 364 - attack-results v2 real socket unknown preserves explicit admission, damage and failure accounting
+  ---
+  duration_ms: 3512.3437
+  type: 'test'
+  ...
+# Subtest: native chase preference avoids the formal25 duplicated approach after a real peer ACK without sharing owner1000 identity
+ok 365 - native chase preference avoids the formal25 duplicated approach after a real peer ACK without sharing owner1000 identity
+  ---
+  duration_ms: 10.6476
+  type: 'test'
+  ...
+# Subtest: native chase preference keeps first4 claimed fallback when three preferred alternatives have no path
+ok 366 - native chase preference keeps first4 claimed fallback when three preferred alternatives have no path
+  ---
+  duration_ms: 88.3112
+  type: 'test'
+  ...
+# Subtest: native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence
+ok 367 - native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence
+  ---
+  duration_ms: 6.8233
+  type: 'test'
+  ...
+# Subtest: native chase preference uses a symmetric first-receipt label tiebreak regardless of client iteration order
+ok 368 - native chase preference uses a symmetric first-receipt label tiebreak regardless of client iteration order
+  ---
+  duration_ms: 20.8999
+  type: 'test'
+  ...
+# Subtest: native chase preference honors an earlier actual receipt before lexical actor order
+ok 369 - native chase preference honors an earlier actual receipt before lexical actor order
+  ---
+  duration_ms: 10.1867
+  type: 'test'
+  ...
+# Subtest: native chase preference expires at the original receipt age and reacquires only from a new real ACK
+ok 370 - native chase preference expires at the original receipt age and reacquires only from a new real ACK
+  ---
+  duration_ms: 10.1457
+  type: 'test'
+  ...
+# Subtest: native chase preference records the fractional actual receipt clock and ignores duplicate ACK processing
+ok 371 - native chase preference records the fractional actual receipt clock and ignores duplicate ACK processing
+  ---
+  duration_ms: 7.1631
+  type: 'test'
+  ...
+# Subtest: native chase preference rejects invalid, zero, corrected and unmatched movement evidence
+ok 372 - native chase preference rejects invalid, zero, corrected and unmatched movement evidence
+  ---
+  duration_ms: 45.7914
+  type: 'test'
+  ...
+# Subtest: native chase preference clears a stale or malformed new receipt clock without inventing coordination progress
+ok 373 - native chase preference clears a stale or malformed new receipt clock without inventing coordination progress
+  ---
+  duration_ms: 38.1844
+  type: 'test'
+  ...
+# Subtest: native chase preference does not arise from pure plans or a throwing ordinary movement send
+ok 374 - native chase preference does not arise from pure plans or a throwing ordinary movement send
+  ---
+  duration_ms: 73.6672
+  type: 'test'
+  ...
+# Subtest: native chase preference ignores inactive, wrong-map, noncombat, invalid-target and already-attacking peers
+ok 375 - native chase preference ignores inactive, wrong-map, noncombat, invalid-target and already-attacking peers
+  ---
+  duration_ms: 88.1065
+  type: 'test'
+  ...
+# Subtest: native chase preference resume drops socket receipt preference while retaining spent chase and quarantine budgets
+ok 376 - native chase preference resume drops socket receipt preference while retaining spent chase and quarantine budgets
+  ---
+  duration_ms: 3.4644
+  type: 'test'
+  ...
+# Subtest: native chase preference leaves baseline candidate choice and every declared gameplay gate unchanged
+ok 377 - native chase preference leaves baseline candidate choice and every declared gameplay gate unchanged
+  ---
+  duration_ms: 3.4928
+  type: 'test'
+  ...
+# Subtest: V2 deadline evidence handles already recorded before the final poll without extending the receipt window
+ok 378 - V2 deadline evidence handles already recorded before the final poll without extending the receipt window
+  ---
+  duration_ms: 1.6389
+  type: 'test'
+  ...
+# Subtest: V2 deadline evidence handles the inclusive 900ms boundary without extending the receipt window
+ok 379 - V2 deadline evidence handles the inclusive 900ms boundary without extending the receipt window
+  ---
+  duration_ms: 0.5611
+  type: 'test'
+  ...
+# Subtest: V2 deadline evidence handles a typed result after 900ms without extending the receipt window
+ok 380 - V2 deadline evidence handles a typed result after 900ms without extending the receipt window
+  ---
+  duration_ms: 0.337
+  type: 'test'
+  ...
+# Subtest: V2 deadline evidence handles owner damage after 900ms without extending the receipt window
+ok 381 - V2 deadline evidence handles owner damage after 900ms without extending the receipt window
+  ---
+  duration_ms: 0.3057
+  type: 'test'
+  ...
+# Subtest: V2 deadline evidence handles observer damage after 900ms without extending the receipt window
+ok 382 - V2 deadline evidence handles observer damage after 900ms without extending the receipt window
+  ---
+  duration_ms: 0.2986
+  type: 'test'
+  ...
+# Subtest: V2 deadline evidence handles a different request id before 900ms without extending the receipt window
+ok 383 - V2 deadline evidence handles a different request id before 900ms without extending the receipt window
+  ---
+  duration_ms: 0.3008
+  type: 'test'
+  ...
+# Subtest: capacity wait marks only its real elapsed deadline with a typed label and the original message
+ok 384 - capacity wait marks only its real elapsed deadline with a typed label and the original message
+  ---
+  duration_ms: 29.4305
+  type: 'test'
+  ...
+# Subtest: capacity wait preserves guard failure without a timeout marker
+ok 385 - capacity wait preserves guard failure without a timeout marker
+  ---
+  duration_ms: 0.2721
+  type: 'test'
+  ...
+# Subtest: capacity wait preserves predicate failure without a timeout marker
+ok 386 - capacity wait preserves predicate failure without a timeout marker
+  ---
+  duration_ms: 0.0588
+  type: 'test'
+  ...
+# Subtest: capacity wait preserves transport failure without a timeout marker
+ok 387 - capacity wait preserves transport failure without a timeout marker
+  ---
+  duration_ms: 0.039
+  type: 'test'
+  ...
+# Subtest: capacity wait preserves deadline-predicate failure without a timeout marker
+ok 388 - capacity wait preserves deadline-predicate failure without a timeout marker
+  ---
+  duration_ms: 0.0424
+  type: 'test'
+  ...
+# Subtest: capacity wait preserves closed failure without a timeout marker
+ok 389 - capacity wait preserves closed failure without a timeout marker
+  ---
+  duration_ms: 0.0383
+  type: 'test'
+  ...
+# Subtest: V2 final evidence read preserves ordinary wait failure semantics
+ok 390 - V2 final evidence read preserves ordinary wait failure semantics
+  ---
+  duration_ms: 0.2154
+  type: 'test'
+  ...
+# Subtest: V2 final evidence read preserves guard failure semantics
+ok 391 - V2 final evidence read preserves guard failure semantics
+  ---
+  duration_ms: 0.0682
+  type: 'test'
+  ...
+# Subtest: V2 final evidence read preserves failure failure semantics
+ok 392 - V2 final evidence read preserves failure failure semantics
+  ---
+  duration_ms: 0.1174
+  type: 'test'
+  ...
+# Subtest: V2 final evidence read preserves closed failure semantics
+ok 393 - V2 final evidence read preserves closed failure semantics
+  ---
+  duration_ms: 0.0759
+  type: 'test'
+  ...
+# Subtest: observer scout preference keeps the original cyclic no-hint plan and emits no selection credit
+ok 394 - observer scout preference keeps the original cyclic no-hint plan and emits no selection credit
+  ---
+  duration_ms: 0.3109
+  type: 'test'
+  ...
+# Subtest: observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility
+ok 395 - observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility
+  ---
+  duration_ms: 0.5993
+  type: 'test'
+  ...
+# Subtest: observer scout preference preserves the exact cyclic fallback when its hint fails within the four-search budget
+ok 396 - observer scout preference preserves the exact cyclic fallback when its hint fails within the four-search budget
+  ---
+  duration_ms: 0.8372
+  type: 'test'
+  ...
+# Subtest: observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback
+ok 397 - observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback
+  ---
+  duration_ms: 2.3873
+  type: 'test'
+  ...
+# Subtest: observer scout preference allows expired exclusions and own claims using wall-clock eligibility
+ok 398 - observer scout preference allows expired exclusions and own claims using wall-clock eligibility
+  ---
+  duration_ms: 0.4813
+  type: 'test'
+  ...
+# Subtest: observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets
+ok 399 - observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets
+  ---
+  duration_ms: 0.2829
+  type: 'test'
+  ...
+# Subtest: observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts
+ok 400 - observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts
+  ---
+  duration_ms: 0.2654
+  type: 'test'
+  ...
+# Subtest: observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit
+ok 401 - observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit
+  ---
+  duration_ms: 10.2301
+  type: 'test'
+  ...
+# Subtest: observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup
+ok 402 - observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup
+  ---
+  duration_ms: 1.0085
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting
+ok 403 - scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting
+  ---
+  duration_ms: 0.806
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries
+ok 404 - scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries
+  ---
+  duration_ms: 4.1698
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence compares declared coordinates across clusters rather than local home indices
+ok 405 - scout anti-convergence compares declared coordinates across clusters rather than local home indices
+  ---
+  duration_ms: 0.5513
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence retains original hint order when all hints are shared or only one remains
+ok 406 - scout anti-convergence retains original hint order when all hints are shared or only one remains
+  ---
+  duration_ms: 0.9529
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit
+ok 407 - scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit
+  ---
+  duration_ms: 0.5385
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence failed preferred paths keep the exact cyclic fallback within four total searches
+ok 408 - scout anti-convergence failed preferred paths keep the exact cyclic fallback within four total searches
+  ---
+  duration_ms: 1.7284
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence does not introduce distance sorting when no other scout shares a hint
+ok 409 - scout anti-convergence does not introduce distance sorting when no other scout shares a hint
+  ---
+  duration_ms: 0.2908
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+ok 410 - scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+  ---
+  duration_ms: 0.3561
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+ok 411 - scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+  ---
+  duration_ms: 0.1856
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics count mixed alternatives and report the existing stable reordering
+ok 412 - scout selection diagnostics count mixed alternatives and report the existing stable reordering
+  ---
+  duration_ms: 0.5774
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+ok 413 - scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+  ---
+  duration_ms: 0.2421
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+ok 414 - scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+  ---
+  duration_ms: 0.4132
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+ok 415 - scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+  ---
+  duration_ms: 2.4727
+  type: 'test'
+  ...
+# Subtest: scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+ok 416 - scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+  ---
+  duration_ms: 0.6204
+  type: 'test'
+  ...
+# Subtest: scout target waypoint invalidation safely falls back without rebuilding the finite scout
+ok 417 - scout target waypoint invalidation safely falls back without rebuilding the finite scout
+  ---
+  duration_ms: 4.5154
+  type: 'test'
+  ...
+# Subtest: scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+ok 418 - scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+  ---
+  duration_ms: 1.2984
+  type: 'test'
+  ...
+# Subtest: scout target waypoint does not redirect an ordinary established scout or reset its saved state
+ok 419 - scout target waypoint does not redirect an ordinary established scout or reset its saved state
+  ---
+  duration_ms: 0.1935
+  type: 'test'
+  ...
+# Subtest: scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+ok 420 - scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+  ---
+  duration_ms: 0.519
+  type: 'test'
+  ...
+# Subtest: AOI received state clears a ghost clock during the actual in-range interval between polls
+ok 421 - AOI received state clears a ghost clock during the actual in-range interval between polls
+  ---
+  duration_ms: 0.2323
+  type: 'test'
+  ...
+# Subtest: AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications
+ok 422 - AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications
+  ---
+  duration_ms: 0.3804
+  type: 'test'
+  ...
+# Subtest: AOI received state clears missing only for exactly one entry or no longer required visibility
+ok 423 - AOI received state clears missing only for exactly one entry or no longer required visibility
+  ---
+  duration_ms: 0.1507
+  type: 'test'
+  ...
+# Subtest: AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair
+ok 424 - AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair
+  ---
+  duration_ms: 0.0861
+  type: 'test'
+  ...
+# Subtest: AOI received state hook follows real decoded owner peer Join Leave snapshot and map state
+ok 425 - AOI received state hook follows real decoded owner peer Join Leave snapshot and map state
+  ---
+  duration_ms: 0.4839
+  type: 'test'
+  ...
+# Subtest: old development endpoints explicitly lack telemetry; a required frozen profile fails closed
+ok 426 - old development endpoints explicitly lack telemetry; a required frozen profile fails closed
+  ---
+  duration_ms: 2.0753
+  type: 'test'
+  ...
+# Subtest: the complete fixed histogram and counters survive public whitelist projection
+ok 427 - the complete fixed histogram and counters survive public whitelist projection
+  ---
+  duration_ms: 1.0783
+  type: 'test'
+  ...
+# Subtest: window percentiles subtract raw bucket counts rather than lifetime percentile/max values
+ok 428 - window percentiles subtract raw bucket counts rather than lifetime percentile/max values
+  ---
+  duration_ms: 2.0196
+  type: 'test'
+  ...
+# Subtest: profile deltas keep failed completions and exact over-budget fractions
+ok 429 - profile deltas keep failed completions and exact over-budget fractions
+  ---
+  duration_ms: 0.3114
+  type: 'test'
+  ...
+# Subtest: empty windows and overflow retain null quantiles instead of passing as zero latency
+ok 430 - empty windows and overflow retain null quantiles instead of passing as zero latency
+  ---
+  duration_ms: 0.4603
+  type: 'test'
+  ...
+# Subtest: unknown versions, incomplete telemetry, saturation, unsafe integers and inconsistent buckets are rejected
+ok 431 - unknown versions, incomplete telemetry, saturation, unsafe integers and inconsistent buckets are rejected
+  ---
+  duration_ms: 0.3887
+  type: 'test'
+  ...
+# Subtest: movement admission has its own counters and never becomes proof of position application
+ok 432 - movement admission has its own counters and never becomes proof of position application
+  ---
+  duration_ms: 0.4782
+  type: 'test'
+  ...
+# Subtest: counter resets, bucket redistribution and process-lifetime reversal invalidate a profile delta
+ok 433 - counter resets, bucket redistribution and process-lifetime reversal invalidate a profile delta
+  ---
+  duration_ms: 0.3317
+  type: 'test'
+  ...
+1..433
+# tests 519
+# suites 0
+# pass 519
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 311211.3225

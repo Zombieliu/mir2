@@ -1,0 +1,733 @@
+{
+  "captured_at_utc": "2026-10-04T07:51:53.790343+00:00",
+  "project": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+  "crystal": "E:/mir2/Crystal",
+  "head_observed": "17b44e08f4253bfc0905dfb951e978d82bf78ada",
+  "working_tree_may_contain_pending_root_integration": true,
+  "files": [
+    {
+      "origin": "crystal",
+      "relative_path": "Server/MirObjects/MapObject.cs",
+      "absolute_path": "E:/mir2/Crystal/Server/MirObjects/MapObject.cs",
+      "sha256": "f465ee5fe84bc9fe6ab3ef9dd0c138c8c6b1dee83d1ea5b007cc5cb3afe53f7f",
+      "bytes": 35194,
+      "total_lines": 1030,
+      "sections": [
+        {
+          "start_line": 61,
+          "end_line": 73,
+          "excerpt_sha256": "e83fc450859930844262dcfed1d5e627f3443d10a67c62ea17432ac2c3176c4c"
+        }
+      ]
+    },
+    {
+      "origin": "crystal",
+      "relative_path": "Server/MirObjects/HumanObject.cs",
+      "absolute_path": "E:/mir2/Crystal/Server/MirObjects/HumanObject.cs",
+      "sha256": "c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3",
+      "bytes": 353159,
+      "total_lines": 8675,
+      "sections": [
+        {
+          "start_line": 56,
+          "end_line": 71,
+          "excerpt_sha256": "6d606aaeffb0b0f947327d66b46aa5e7f7180dbd224b51a20f3251e9e4c10f27"
+        },
+        {
+          "start_line": 117,
+          "end_line": 159,
+          "excerpt_sha256": "951092f64d9e68991ead96185674c86f733f7f0bae1242820e8df755d6babc3c"
+        },
+        {
+          "start_line": 214,
+          "end_line": 226,
+          "excerpt_sha256": "1385749077f24a8fb5ba662537b441d0b9cd42b2401ad20fe13c00c9dad3b0f0"
+        },
+        {
+          "start_line": 544,
+          "end_line": 558,
+          "excerpt_sha256": "849f4647b9cb7c4a1bb21aa895f2338bdc4ef89d948cb198b9bf0a248f7c5540"
+        },
+        {
+          "start_line": 845,
+          "end_line": 872,
+          "excerpt_sha256": "a91bdb463daa2f5d271ed3e520a9ff4efa61bd92a150c77a9bc9a1d770d402d4"
+        },
+        {
+          "start_line": 1690,
+          "end_line": 1721,
+          "excerpt_sha256": "0785b03b0d0bcda5ac2ed048272187b6b76d8cf1bbef46f9248e62d5d23c2623"
+        }
+      ]
+    },
+    {
+      "origin": "crystal",
+      "relative_path": "Server/MirObjects/MonsterObject.cs",
+      "absolute_path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+      "sha256": "2cc4e673c589ad57452b4682c3bcb155b4b6b3027b1d3ee52a18a5ae1b7df98e",
+      "bytes": 147722,
+      "total_lines": 3870,
+      "sections": [
+        {
+          "start_line": 966,
+          "end_line": 1003,
+          "excerpt_sha256": "f446ab9948053e73a2db971323410b6836995f93df49390f1a1d8369c8fc76c4"
+        },
+        {
+          "start_line": 1480,
+          "end_line": 1515,
+          "excerpt_sha256": "ac561695c778de5feb71b14e85f64768a803d70caef5a37a076d1c05cbb8d32f"
+        }
+      ]
+    },
+    {
+      "origin": "crystal",
+      "relative_path": "Server/MirObjects/PlayerObject.cs",
+      "absolute_path": "E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs",
+      "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11",
+      "bytes": 586620,
+      "total_lines": 14716,
+      "sections": [
+        {
+          "start_line": 203,
+          "end_line": 264,
+          "excerpt_sha256": "0d3cc02be4ad1bf55730456ac20cfb3989199beb59545f9adf0514b3277d8073"
+        },
+        {
+          "start_line": 638,
+          "end_line": 656,
+          "excerpt_sha256": "f66d63ad265c9be9a123dccb271c7d795ae3b41a77dffa4094d6f95f449d5c27"
+        },
+        {
+          "start_line": 794,
+          "end_line": 850,
+          "excerpt_sha256": "75b7ad59bff9ede36a5dd96d29d155016a841a6a943a2188b519ab45c6f70a52"
+        },
+        {
+          "start_line": 891,
+          "end_line": 950,
+          "excerpt_sha256": "5ca3f86deb36268ca4fe906354d0cd15a7fc17eb6b45758b7b22fe4d5f1b389b"
+        },
+        {
+          "start_line": 1069,
+          "end_line": 1107,
+          "excerpt_sha256": "28e55ef7dbef4ae4e108cc8738962a8a4c6e1ca8097a51194d9d7efc0ca93cae"
+        },
+        {
+          "start_line": 1379,
+          "end_line": 1445,
+          "excerpt_sha256": "7bb4f600ac0be5ac03a528e92e76df01d1b68383bf26f4c4e2e7077642284271"
+        }
+      ]
+    },
+    {
+      "origin": "crystal",
+      "relative_path": "Server/MirDatabase/CharacterInfo.cs",
+      "absolute_path": "E:/mir2/Crystal/Server/MirDatabase/CharacterInfo.cs",
+      "sha256": "6333e9bc37dbf43dea5b070f11a21854761a781287eb7231a9d46690113e653d",
+      "bytes": 23920,
+      "total_lines": 771,
+      "sections": [
+        {
+          "start_line": 50,
+          "end_line": 60,
+          "excerpt_sha256": "18d02307c6cfdfaff32ec25c0bfd107793ce5c97b2ce84965f51bc7d6eb4f6b1"
+        },
+        {
+          "start_line": 163,
+          "end_line": 181,
+          "excerpt_sha256": "759072269caddc6bd9ba234a65bb83d639ffc9404af7c9eeeddc3342494328e4"
+        },
+        {
+          "start_line": 414,
+          "end_line": 425,
+          "excerpt_sha256": "88a47370609dd1f2e545ce2448087220c0beb2a8bbcd3a695aa6b014e38c0d07"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/config.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "0723a5ba732b0606f8d3a63483b9f525286976546f2f0b879730aa04c965dca3",
+      "bytes": 303189,
+      "total_lines": 7725,
+      "sections": [
+        {
+          "start_line": 1796,
+          "end_line": 1828,
+          "excerpt_sha256": "617aa8d880d28ee6de1f35fafa20512be90eea526906e658f72fa7c07e1f7e45"
+        },
+        {
+          "start_line": 1875,
+          "end_line": 1882,
+          "excerpt_sha256": "9b5f750966ecf25cddc094d90ede1a36a156f93cedd2c2c1c6513a15b6f46ede"
+        },
+        {
+          "start_line": 7593,
+          "end_line": 7607,
+          "excerpt_sha256": "0ef1cc77a0960e59cc9f0d60755a678826cbf5480118ef92cc8337de68ac69fb"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/components.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/components.rs",
+      "sha256": "2a0476d302bd7dee542e7bc70dda720b72d67752cd68ba2b8e74fdfafe10da42",
+      "bytes": 8626,
+      "total_lines": 304,
+      "sections": [
+        {
+          "start_line": 64,
+          "end_line": 70,
+          "excerpt_sha256": "c6ec47eaa2ee1949d02f54d2acc642c5c86e7c2beb1fb6b1bf9b5695597fd30a"
+        },
+        {
+          "start_line": 195,
+          "end_line": 204,
+          "excerpt_sha256": "0331df6ce33ea234b41ccd636900dd8cf09bdcd1c0c71f5f27d41500cd0e4f59"
+        },
+        {
+          "start_line": 296,
+          "end_line": 304,
+          "excerpt_sha256": "3bd8f28cfac0850a3f07398be76ca46316c094717e88e7c03a039d65def4231d"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/resources.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/resources.rs",
+      "sha256": "cf4276868ca4d7806aa0b996feca0c3edff142f03740dd4f5de93342e31b9468",
+      "bytes": 36844,
+      "total_lines": 1126,
+      "sections": [
+        {
+          "start_line": 488,
+          "end_line": 548,
+          "excerpt_sha256": "5d3c811c355b12df9ddc5c65a653aafaf4adbf2dda53d331010d6bac30f5b523"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/leveling.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/leveling.rs",
+      "sha256": "6760018dc57f9663b3f5ea48272750600f3af2c3ae3348e4026bd142ca1b4d3a",
+      "bytes": 14467,
+      "total_lines": 246,
+      "sections": [
+        {
+          "start_line": 20,
+          "end_line": 139,
+          "excerpt_sha256": "621ae1889cf8da8aa9c06bb0f91412a80912a885f22f9f93d6a53b08e0cccb48"
+        },
+        {
+          "start_line": 188,
+          "end_line": 225,
+          "excerpt_sha256": "62efe281e394622b1d1919ad830cd04ceac7602ff5dd1e5371547e2f6080140d"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/combat.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/combat.rs",
+      "sha256": "828e3067c75ab3b78fcb025fee1b348b5bebc5294e1dfa9f1c098545d998bed2",
+      "bytes": 143295,
+      "total_lines": 4032,
+      "sections": [
+        {
+          "start_line": 383,
+          "end_line": 455,
+          "excerpt_sha256": "3555aac10d3872851d23000377e7a39da48c9c22d49a90ad98f6cfaa7dd58518"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/session.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "8a76ff18387252ad49ad65870e9de01174dbf07a23cce243aa2f94af91425e2c",
+      "bytes": 90670,
+      "total_lines": 2356,
+      "sections": [
+        {
+          "start_line": 126,
+          "end_line": 133,
+          "excerpt_sha256": "33e6894305562a380693df4f21a1ee394eed04198fb209fa22fbe2484160b911"
+        },
+        {
+          "start_line": 702,
+          "end_line": 713,
+          "excerpt_sha256": "186ca9c4193e755feef64d819fe72062a10e09a23cec5a8c2a4b017c446affa6"
+        },
+        {
+          "start_line": 898,
+          "end_line": 915,
+          "excerpt_sha256": "79742d23a6480b7e07826ce4d5e768f02942e1c2d2e8f2c74e680b2f18636b11"
+        },
+        {
+          "start_line": 961,
+          "end_line": 1024,
+          "excerpt_sha256": "2941771278df8d0b2a150ba22814bd404816f549f4a55b9749fe95fa1bee4df8"
+        },
+        {
+          "start_line": 1061,
+          "end_line": 1094,
+          "excerpt_sha256": "ebfca8ecceda6797ae6d95bbbc6dbb9da189d4c53b49f4b87d19cbe958ce062e"
+        },
+        {
+          "start_line": 1118,
+          "end_line": 1135,
+          "excerpt_sha256": "0fca97dbb79c04aed14e0199fcd45744a4d5319bc280479c18ac6cd576d8b79b"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/save.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "c225ffc95bab7c7c6d6b98424d29d978aeb55b6b43883d582597dbdd021f0c2e",
+      "bytes": 163658,
+      "total_lines": 4040,
+      "sections": [
+        {
+          "start_line": 65,
+          "end_line": 70,
+          "excerpt_sha256": "20c71d954fc957fa675696ba7afcb7bfcbfae1111bfb06cfaa8f7d5c95688622"
+        },
+        {
+          "start_line": 231,
+          "end_line": 267,
+          "excerpt_sha256": "07bcf7749024aa973c830a39cc89644328d8a0d8a6d014e2b8455a007622c7a5"
+        },
+        {
+          "start_line": 508,
+          "end_line": 565,
+          "excerpt_sha256": "186d330d32434a5085b447d07f96ad4dd7763a7a84ecb29d5b40a220aeeb3464"
+        },
+        {
+          "start_line": 1761,
+          "end_line": 1801,
+          "excerpt_sha256": "0a972deb791ee94eb30ebb572919606024889a57dcf88c6c556fd35635301ac9"
+        },
+        {
+          "start_line": 2544,
+          "end_line": 2566,
+          "excerpt_sha256": "d12676c53b4c81ec65838972ab8436b20d45261597ffdcc97e833719383428dd"
+        },
+        {
+          "start_line": 2705,
+          "end_line": 2754,
+          "excerpt_sha256": "06c64e9b6b86b8a90001bce55bb5d2f67ee221726b1df35017ea803c56f36ae7"
+        },
+        {
+          "start_line": 3818,
+          "end_line": 3865,
+          "excerpt_sha256": "4f27a546b1211d0b95affbf149f082c2a0a3a1793a44f893e70c63bfaa6b21b1"
+        },
+        {
+          "start_line": 3867,
+          "end_line": 3895,
+          "excerpt_sha256": "f7dca01049b44209c1cf7796f316249cb9c400824f1579c2fa1b5fd119e658c6"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/map.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/map.rs",
+      "sha256": "0bcef916974d723bfc0ce7993fc0cd75f6dc920c6acd981ae014bde4d5b714f7",
+      "bytes": 82425,
+      "total_lines": 2251,
+      "sections": [
+        {
+          "start_line": 2086,
+          "end_line": 2136,
+          "excerpt_sha256": "7810656b0748eb864fd6b6d397e6608f5724e1919b71e6698ef56cac99e4fa3b"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/movement.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/movement.rs",
+      "sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7",
+      "bytes": 36326,
+      "total_lines": 1024,
+      "sections": [
+        {
+          "start_line": 331,
+          "end_line": 402,
+          "excerpt_sha256": "2912a3ea861b001c7af4206e0e6ecbfb60df60518053a8ee61a9bf4accf77e87"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/items.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "bytes": 166139,
+      "total_lines": 4449,
+      "sections": [
+        {
+          "start_line": 2710,
+          "end_line": 2735,
+          "excerpt_sha256": "6efc91981b01d55f634be044e550f21e2d61fc0dff8e4fbaeb36e1a6c704fd21"
+        },
+        {
+          "start_line": 3012,
+          "end_line": 3041,
+          "excerpt_sha256": "49497472ca1a53baffce5d4dc02803c148f40fb76f232e464359ac4790ab6368"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/buffs.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/buffs.rs",
+      "sha256": "4f9e9347fdda70d9a0eb6666557ec5b86da4cbec547f9cae77115fabe8df1e7d",
+      "bytes": 22087,
+      "total_lines": 691,
+      "sections": [
+        {
+          "start_line": 445,
+          "end_line": 478,
+          "excerpt_sha256": "76b66945839034d0f13681f282b9ece728246fa7e50f4aa0f8ea77ef5d8e36cd"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/packets.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/packets.rs",
+      "sha256": "26d6e65016bf240a76df3a27098b7d25dfb24a499306805469a41504e5117c91",
+      "bytes": 386103,
+      "total_lines": 10463,
+      "sections": [
+        {
+          "start_line": 7913,
+          "end_line": 7952,
+          "excerpt_sha256": "91c920c0711958ddc831e236cc5d4590c7d1b106283b7dd65b5064dcfd15ddf0"
+        },
+        {
+          "start_line": 8020,
+          "end_line": 8043,
+          "excerpt_sha256": "3a70145164e99a5ae202ea84b9ddbae7f9897b31c5432efa836bb3c1e83cf5c6"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/drops.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs",
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+      "bytes": 173251,
+      "total_lines": 5133,
+      "sections": [
+        {
+          "start_line": 3535,
+          "end_line": 3550,
+          "excerpt_sha256": "6de4521e8eee977aa1de58ada3ce38ae86b6e4ce304c81addbe9f74a155a19b1"
+        },
+        {
+          "start_line": 3604,
+          "end_line": 3624,
+          "excerpt_sha256": "20924d1fb0f0bff0771ed702d1fd76e78de6ceb555414aa5d6d5c47b5d5572eb"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/shared_kill_experience.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_kill_experience.rs",
+      "sha256": "5a0442328090a94d481c13501df37bc9695d467efa975226a8e5b5cb3b95c981",
+      "bytes": 6244,
+      "total_lines": 177,
+      "sections": [
+        {
+          "start_line": 28,
+          "end_line": 77,
+          "excerpt_sha256": "4604a095096aaa136e3d0141e81cbfdbe82587f2938bd2e851033433a38256c6"
+        },
+        {
+          "start_line": 79,
+          "end_line": 177,
+          "excerpt_sha256": "19a6caf8e814a52a058cc4dab1fb0a3c44c39caf08823afdd313999ed21bbca5"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/prepared_kill_experience.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs",
+      "sha256": "de218dd898b15011ce561d81e191b3ceb2fb2598d13986174972fc96965bf805",
+      "bytes": 10361,
+      "total_lines": 251,
+      "sections": [
+        {
+          "start_line": 65,
+          "end_line": 249,
+          "excerpt_sha256": "376f1f76cd6f1ab4456a610926148b46832bc0fcbe23c05e29c8e6f3aaf3fb0b"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/shared_guild_experience.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs",
+      "sha256": "dcc41918cadd0b2c97ddab09a8db5b0494c4fe48ecab203443a47877f391bbfb",
+      "bytes": 13396,
+      "total_lines": 369,
+      "sections": [
+        {
+          "start_line": 161,
+          "end_line": 171,
+          "excerpt_sha256": "144a7755734e928135d4b366c34f07b9f054341df326d1a22d5d5d008ca92781"
+        },
+        {
+          "start_line": 250,
+          "end_line": 296,
+          "excerpt_sha256": "fe33b7aeadf8d95c1452c2da3c6b03e2c81ffff69b2d2e37b993053b0303353f"
+        },
+        {
+          "start_line": 297,
+          "end_line": 368,
+          "excerpt_sha256": "418c95a151cccfb2489419faa009d6c8073d5c1fb28e58888477d3c39037e151"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/world_runtime.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/world_runtime.rs",
+      "sha256": "2f7f9c352b3821edf17411cc41269e772553c80da68ea729bdb8fc6625cd12aa",
+      "bytes": 57536,
+      "total_lines": 1607,
+      "sections": [
+        {
+          "start_line": 38,
+          "end_line": 51,
+          "excerpt_sha256": "fe6fbc7a8c2934b7ca4cceb4daed94cd29c8fa71966bbd9182c41fbcbee1e76a"
+        },
+        {
+          "start_line": 453,
+          "end_line": 462,
+          "excerpt_sha256": "a378a66c7f91cd7b70105b69a8b15d19c1c9dcdf789e48d43cc4d35869e6c0d5"
+        },
+        {
+          "start_line": 804,
+          "end_line": 818,
+          "excerpt_sha256": "bae74d840ba0d5b718fef6706cbd50322b69229654cf838ab1f495657782f561"
+        },
+        {
+          "start_line": 1014,
+          "end_line": 1028,
+          "excerpt_sha256": "355b07b9175b76fb9c39d06e5bf70609647132f98d6f4bdd843741d3264318b4"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/zone/types.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "sha256": "c5afdeffcb4c09ba6d18baf52deb19debe4b04bc228ee6884e64eed786c64015",
+      "bytes": 49533,
+      "total_lines": 1483,
+      "sections": [
+        {
+          "start_line": 498,
+          "end_line": 514,
+          "excerpt_sha256": "65027d7b43513f0762e09b25a59bbff07e66b9e9e55b181b653e9eb5c7ba1d46"
+        },
+        {
+          "start_line": 1212,
+          "end_line": 1235,
+          "excerpt_sha256": "88bd35ce13edb2caaaef783fb4f7893de4fe7603fca5be51116d27550340a49b"
+        },
+        {
+          "start_line": 1332,
+          "end_line": 1354,
+          "excerpt_sha256": "480d3fb85a5b06a9af6da987de451ed39d7e5de142e5263a2fa19a3643d60b73"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "c0197140c96026d031eac1ea5289b582375f809fdbe1db330de8ff365ec94832",
+      "bytes": 669961,
+      "total_lines": 17910,
+      "sections": [
+        {
+          "start_line": 1222,
+          "end_line": 1237,
+          "excerpt_sha256": "a58ffc482a381faa15b8cd0bb0230ab0bec4fe8acaf49bd6622b6aa26949f24b"
+        },
+        {
+          "start_line": 1354,
+          "end_line": 1412,
+          "excerpt_sha256": "beb7106b51531af239ac6acac8674fe7c74946ee864acd98f8cbe7a7d89446b7"
+        },
+        {
+          "start_line": 9353,
+          "end_line": 9478,
+          "excerpt_sha256": "9acae7206758fec4951dd35a7c15a7c6dc0fb43aa26b4023562cfb93d994d7cf"
+        },
+        {
+          "start_line": 10172,
+          "end_line": 10246,
+          "excerpt_sha256": "ad49191569327c30f49f05e1f97c824a3990882392c929a9cbbf4b037a371941"
+        },
+        {
+          "start_line": 10317,
+          "end_line": 10345,
+          "excerpt_sha256": "a6c9c11440bf698e4da15d2cb3f0e170ab26fa48e32167b1fc6f2a83c02e6b49"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0",
+      "bytes": 17639,
+      "total_lines": 474,
+      "sections": [
+        {
+          "start_line": 135,
+          "end_line": 162,
+          "excerpt_sha256": "d317bb5f08ad2e616ed017f8c30aa8d06d594f9730dac9ba8f8e8ba4ba316566"
+        },
+        {
+          "start_line": 198,
+          "end_line": 255,
+          "excerpt_sha256": "6f660c110d969cd36f58201188a8e20ede58a535122177a2f4135c57b0cc5407"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/zone/manager.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "e20291384650381e07f9b2c466808b44ec2605fcf8340f82f763f6e9a8e964c5",
+      "bytes": 31545,
+      "total_lines": 790,
+      "sections": [
+        {
+          "start_line": 293,
+          "end_line": 306,
+          "excerpt_sha256": "7045138ecba10b2256bae71c3d7f03c72a6bc95c577ceccb3f83e8fbca4314a2"
+        },
+        {
+          "start_line": 634,
+          "end_line": 648,
+          "excerpt_sha256": "7a2564536e494063d8bb2901394e7923933a28bdddabb0db47be31a23fd81e35"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/gateway/src/routing.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs",
+      "sha256": "b9a3ccd3c114bff2666a3d2416ed3e10dea4691b729a79ed13f570c220788323",
+      "bytes": 1200408,
+      "total_lines": 30317,
+      "sections": [
+        {
+          "start_line": 9240,
+          "end_line": 9313,
+          "excerpt_sha256": "7a543a1e093363cf2b135be6a12f9fa397a3802d6a441619dad8ed47ae086207"
+        },
+        {
+          "start_line": 10094,
+          "end_line": 10102,
+          "excerpt_sha256": "ff7b9c3e0d46a3c699439bd36af56550f3e2c091dc7cacf3d6a4de60729942c4"
+        },
+        {
+          "start_line": 10158,
+          "end_line": 10226,
+          "excerpt_sha256": "5e2d063a841e359a4256ddf0882852bc1b346446e55f61c4b308ce34f3e75c2f"
+        },
+        {
+          "start_line": 10384,
+          "end_line": 10509,
+          "excerpt_sha256": "189269b3a90b5fe92eb0cfd0b8f59eca8106d8083c31527264fcec2f60384939"
+        },
+        {
+          "start_line": 10721,
+          "end_line": 10747,
+          "excerpt_sha256": "02b5a0c59bc8903ac5ed34d2b187290fc500b4384fa902c9202bedc096e1b87a"
+        },
+        {
+          "start_line": 10865,
+          "end_line": 10954,
+          "excerpt_sha256": "3105a571c54c505a58b2457f0de85445704f0a187e76037210f82676fc119a5b"
+        },
+        {
+          "start_line": 14212,
+          "end_line": 14226,
+          "excerpt_sha256": "b64a6aeb8c3d43365455269939bd28596be8bcc7038593a30cf1df3917998b03"
+        },
+        {
+          "start_line": 14493,
+          "end_line": 14521,
+          "excerpt_sha256": "16565a224cb4dc54427d693b7b0703884870cc057ed7273dda062fb552ac204e"
+        },
+        {
+          "start_line": 14915,
+          "end_line": 14938,
+          "excerpt_sha256": "139806ae20fe4aa866c19cf594f9d30bf8aedec35e63670e4531f2b5ab882f6a"
+        },
+        {
+          "start_line": 26602,
+          "end_line": 26667,
+          "excerpt_sha256": "5c2986ea42029c97671b0e93232d308cf497873fcf2594777ac7ac38883062be"
+        }
+      ]
+    },
+    {
+      "origin": "project",
+      "relative_path": "apps/simulation/src/runtime/shared_guild_experience_tests.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_guild_experience_tests.rs",
+      "sha256": "94ce33eac85eba58dd517f3a757421c5b1fa560b52a99e3120397029b650585b",
+      "bytes": 13179,
+      "total_lines": 329,
+      "sections": [
+        {
+          "start_line": 1,
+          "end_line": 72,
+          "excerpt_sha256": "ba777ff9d364a78e833e6b494d6d51d9dc02bafbb3af6cd1bd26ccb85642d64b"
+        }
+      ]
+    }
+  ],
+  "negative_source_checks": {
+    "Crystal CharacterInfo complete-file Dead token count": 0,
+    "Crystal CanGainExp independent default true": true,
+    "Crystal SetHP preserves prior Dead": true,
+    "explicitly_not_concluded": "Normal TCP/WSS, new RED execution, dead XP persistence, or frontend acceptance"
+  },
+  "previous_frozen_ownership_manifest": "C:/mir2-playtest-releases/20261004-native-r17/exp-drop-audit/implementation-01/source-manifest.json",
+  "previous_twelve_file_hash_comparison": {
+    "apps/simulation/src/runtime/zone/types.rs": true,
+    "apps/simulation/src/runtime/zone/runtime.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/checkpoint.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/entity_combat.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/vampire_ai.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs": true,
+    "apps/simulation/src/runtime/zone/runtime/journey_events.rs": true,
+    "apps/simulation/tests/shared_monster_ownership.rs": true,
+    "docs/CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md": true
+  },
+  "planned_tests_executed": false,
+  "source_edits": [],
+  "live_or_player_store_access": false
+}

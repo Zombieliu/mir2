@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "parent": "6b6ce88212d63683a932c6b6f580fcc727891a05",
+  "checked": 2759,
+  "unexpectedDifferences": [],
+  "transforms": [
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+      "kind": "fixed published bevy-0c553a754308e5b8 runtime manifest",
+      "sha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+    }
+  ],
+  "build": {
+    "candidate": "6b6ce88212d6-name-hit-43423a22",
+    "id": "Hw_2Y1bJX5_eZr_ZHkbjZ",
+    "dist": ".next-name-hit-r1",
+    "receiptSha256": "4c303a28423f3fb05feb00d25ea8418f9651fd753fae8ec5f9fa44f13e3c9683"
+  },
+  "sourceInputsSha256": "24b04ed0200d8f56cb3785648152194cfe380b19b7667a23eebc9edcefebcb04",
+  "changedFiles": [
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "e25017764dfafaa4dff62cc63a3b0aa171ba0013de849a035c1678048a9fcfa2",
+      "bytes": 374468
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-world-marker-input.mjs",
+      "sha256": "3c2241f4251538aeb9b2564dec97196700e1894e777c47f853935e8e19697562",
+      "bytes": 36996
+    }
+  ],
+  "inheritedNpcPatch": "92d809e30686b594c73baf62f1523cff3f7149b8",
+  "fixedAsset": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "scope": "Every tracked non-public Web input and one imported shared keyboard file byte-compared to committed candidate. One declared fixed-runtime manifest transform. No foreign Shell or Native working changes included. Browser qualification is separate."
+}

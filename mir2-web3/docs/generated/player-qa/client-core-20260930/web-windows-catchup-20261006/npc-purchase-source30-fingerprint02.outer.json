@@ -1,0 +1,16 @@
+{
+  "owner": "Root",
+  "exitCode": 0,
+  "builderPid": 148240,
+  "kind": "Source30 data-only two fingerprint tests; only actually used Node tool pin, corrected unused stale Next/TS tool preflight",
+  "exited": true,
+  "disposed": true,
+  "elapsedMs": 252,
+  "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-fingerprint02.config.json",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

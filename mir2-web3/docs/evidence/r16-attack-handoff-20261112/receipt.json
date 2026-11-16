@@ -1,0 +1,611 @@
+{
+  "kind": "r16-current-action-and-attack-cadence-candidate",
+  "localCandidatePartial": true,
+  "productionDeployed": false,
+  "liveProductionSource": "51d2dcc3463accb5a0b1ec7dfadbf7c05db153c1",
+  "base": "2f2a411d512cbc75adf310d3fee1d1aa9d0ca9e0",
+  "build": {
+    "candidate": "2f2a411d512c-r16-attack-handoff-7973ba74",
+    "receiptSha256": "4b58f435734bcd71f2c7c9d119741034f6ee34c9a3c0861c453978f4d6a69045",
+    "buildId": "x6JzniH3DApkF_jGaMELw",
+    "sourceArchiveSha256": "965e4be2143c1f73e862aa94eeb1f23e1c7e533cf782728bf91103b5e8a757a8",
+    "runtime": "bevy-84ef836460a84e03",
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/app/api/asset-manifest/route.ts",
+        "sha256": "3dbc19919580029c8564933cb45f8188dc69ff53ec5d024c398163c28199ca69",
+        "gitBlob": "7ddfb682b960c6e7b106c62d822198fb3dc6ef67"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+        "sha256": "83db3eef407f5b14aaa0292d0636c0d8c924317c6d10d2d3a28aa800476d3803",
+        "gitBlob": "541a0df7a4ed07c0a9e91ef4be2742921117c3b4"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-entity-animation-runtime.ts",
+        "sha256": "f0f7086f95c6aaf5bcd75a0bf5dda35e1180c175070d42a7e055ed409119a15e",
+        "gitBlob": "eaa81509078b1690051160ac5940d2033d94419c"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+        "sha256": "2cdec232b9e043879dfa11951f1e1f8899d75260ebb17af9d90a0fe7e3de82e1",
+        "gitBlob": "c104b9e005b39d6384ce31192a70d58c825befd6"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+        "sha256": "f4a07e1bf403062896f564f466118c41cadebea8ac0f963690429ff4433de42b",
+        "gitBlob": "29a1ac6e3dc7f0792f7ce67e62a82a449bc35d6f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha256": "be204ab94a9c156cd7313f44c9b79e788e256b2deb0cd22347344ff940d6538b",
+        "gitBlob": "5e6de817c931153b1d66a1751c350803876974ab"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha256": "7badba45d19a388a394a930462f375508af6e4966b9828d85b634b71f2ff86ec",
+        "gitBlob": "87a86fdc0c22be63aab4d77420867f09e9614c94"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/asset-cache-packs.ts",
+        "sha256": "53d339b09b586638350ce8e25f82c8fa6e05160527d4840db78ad9802ee57de3",
+        "gitBlob": "4b63603b516e555d4c8af20339cee2ef96f05c4c"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/asset-prewarm-request.ts",
+        "sha256": "52ca7ece0c1211d8e7c73cf7b97a91205434adee7fb35f966d4bf7e46e252237",
+        "gitBlob": "0a67f3546b246313c03dbd3b36979aa2867d2664"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+        "sha256": "55c19495f636efb3cd8a7ff573ce0c8ae42d9482dba37ea26606e28b7d379b51",
+        "gitBlob": "577f2df4675cb89685a72c87b61069dd5470d62a"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
+        "sha256": "c90805cb1979e915db825dc14ff51f8963db4b3f2e95f8fb63446e53750cd8fb",
+        "gitBlob": "f1f8c4eb3ec21f43ffbae66585f657105c26b5ec"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/client-core-runtime.ts",
+        "sha256": "55825f02e7b999bdc3e97c1ab991b059f605b0289cfda05242a65ad0fa6df51b",
+        "gitBlob": "2fb8593c7b94f8c178ebe1ddf79a225cd924afeb"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/client-presentation-runtime.ts",
+        "sha256": "cbe8bfe8ec4fcb8427dfae5a19ccad150f8013f536c9da09f9b5f0361a711951",
+        "gitBlob": "5f4d85cb917d4fdb019924f1b9de66beda699749"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+        "sha256": "4facb5c9be60665619d9d8f0806469381145344b91d3f4d15b0ef5d2255d08ff",
+        "gitBlob": "886b5f37e7571a47d8a931772ba5f525a339aabd"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/native-attack-movement.ts",
+        "sha256": "ccc6d8e6e59d24043c8a2c21badb30f98f29987915c4081bbdc727714403f55d",
+        "gitBlob": "077a538a1f3f0346761e04277662a8648ed4aea5"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+        "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+        "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+        "sha256": "6eb91c281c98cf1ef9e120c4e2204b44eba805e83f2698c709976ae417c1ab18",
+        "gitBlob": "4d702deee9894bbc789d1a12faeeebd832d651c7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+        "sha256": "2ef7f93a848eab806cb51ce7efd3198745445714cc5d1932f876a6f504412757",
+        "gitBlob": "84abf6349c210535ee66f87d7df85bbe802c447f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/scene-bootstrap-race.ts",
+        "sha256": "95c0bbbbd6b02bf2992d3a3f5a45e9a95dfa55501a1b9b8092aca4583d65ae5e",
+        "gitBlob": "0c8914c74b60e0916d27d197a939bcd2eb4fb54f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+        "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+        "gitBlob": "1c6e01e81a30d7c69da3357684d582a20d1ce3b5"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+        "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d",
+        "gitBlob": "baeaa46d50c82eb6153042f56b2bd92fd86cc879"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+        "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a",
+        "gitBlob": "4c7fe9b30c5165dbf02ff3f0e24d60544d2d3c2a"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+        "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c",
+        "gitBlob": "7b53c1b678180f5d850692e9b1a6278386eb80c0"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+        "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d",
+        "gitBlob": "8702d9e6c719333372fa40f12b4371ddc96b304b"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+        "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96",
+        "gitBlob": "58de992c48dc7cf9ee8ed7d8a4a73f980ffddb37"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha256": "18920fbeaa0eeb7966400e84a9cf16bc9ddba4fbb46d74128425557ea11697b5",
+        "gitBlob": "6c01f5fbb4ebabbfb4b36046547fca96513f58c6"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-manifest-identity.mjs",
+        "sha256": "d2d893dc620d456780661fcbd00c3578bab0de95db6059796d76cb3285541275",
+        "gitBlob": "e7f0cab1075bbdf51dbeea46cb67329d9cad7374"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-policy.mjs",
+        "sha256": "0850af13f4625d9baf8a79c382f49f786e29d46a0345a786475a1bb7e79041fd",
+        "gitBlob": "4c17df721848b36654d676c2e0691dfcf2f373df"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+        "sha256": "2888b949059e3e707c2f598ea6500b5458a733c00da0fc465201a9c9e2ba665e",
+        "gitBlob": "7504043b189228cd4c807ba6b3c6146cc9dc19a8"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+        "sha256": "6d0b93117fcce3c016e930b952fb7210d7475d8f4724eb7d51fc1e37acb34e29",
+        "gitBlob": "5bfb7efc02ab8415bc9c83ce065e27db59e02fcf"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-combat-input.mjs",
+        "sha256": "a483178879ef5802fd7394ec91cbb731c4fc3ba698042683892ab762d9bd6ce6",
+        "gitBlob": "6712f1fbea65eadce414ac69366fdf89deb9aeb4"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs",
+        "sha256": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+        "gitBlob": "d3eb2215de8feb20cd61f7dbfdb3dc61cf44f377"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+        "sha256": "5701d2da2cdff11006d50739d40bed415ee6d8cc171bd939b6c5c4bbd1d71417",
+        "gitBlob": "fd40aa76569dd6bb15f0f85047873f18e6a8810c"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+        "sha256": "701ef29e8f7b8bcad39bd96eab128f2cc2e5cb515aa944da2325439e068feffe",
+        "gitBlob": "cad13b48adaaf626c47e389d0991c7c98a157420"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+        "sha256": "b8274be68e4e3db03c64ab8bb9c6cbcf8917ce61b0ba3915eaa1514d67db60c1",
+        "gitBlob": "21b8b941717839e726394d7e8245be2cfa3fc606"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-client-core-runtime.mjs",
+        "sha256": "cc8b453e0057402db73ac8bf42518f6c41e520de726bd5c0401e778efb9594f7",
+        "gitBlob": "20617a8db9ef15ba1b62e2c70991ba69198d872a"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-native-attack-movement.mjs",
+        "sha256": "afd243664dfa0c706cd03a2e9a5d29306a37e926f87036ed01eb88eb4d9fc38b",
+        "gitBlob": "401f346461ba2157d91bff293e893356f2c2900f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-newcomer-v2-journey.mjs",
+        "sha256": "26b4ffb843ac0dcf524542aca620fb7a1e37e0968495d7fb8ad098c9c97a5d95",
+        "gitBlob": "f25f94561799231bef7afae98b124a95ecc598b2"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-player-attack-input.mjs",
+        "sha256": "deef089b0117e07f27cfbea02e1bcd8c490f568903d228ea9816352b874cb5fe",
+        "gitBlob": "0383a20884d84695f495690a75b88de98c4ab16c"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-belt-shortcut-diagnostics.mjs",
+        "sha256": "e1ed3f52aa8b9e2c1674d3bb32e48e13937c68066b38726dccc07ff59ff1becb",
+        "gitBlob": "eb8e2d0c1bf161ae8f7b0e4b4cd24d70beb0aa65"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-group-hover.mjs",
+        "sha256": "b28529983e1195bde2c47f7406af4ee40e531e7453f1c78b70f2ba88a97776c2",
+        "gitBlob": "fa4f30eda5912770a582dbd6de77441d25228bee"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-language-parity.mjs",
+        "sha256": "51395153080a33985df3632fe286ffb85d36e821d95147043fa6717d169e8995",
+        "gitBlob": "b7f907871cb96a889588cae5da2320e711a213b7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+        "sha256": "ab05b17ad0763186079eabc97288b11080c1595db006e1ddf0926a85545bc7dc",
+        "gitBlob": "6abdf0aa794f891528aeacd3113cbf17ede85696"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-route-correction.mjs",
+        "sha256": "11856a6d4a004f8bbc4d9ca2af2837c9a1c6eb8a2e1ea6873eabb193a2c1fce3",
+        "gitBlob": "f5b9b8936e30d2104fd2d1b8bba7c9a0fddc79b8"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+        "sha256": "c0f4d3966e4b66ce05dc2c1200a41e5b8a61fcf9138acd9f3286847311891a81",
+        "gitBlob": "ff7983341e0fcadd3aad4a95629ceae129107aca"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-bootstrap-race.mjs",
+        "sha256": "439cf1a6c90fd47b0d8bba09b9852799a939a2edfeef26c78ade1c0057fdcbd2",
+        "gitBlob": "4d34c16993eb07ef5f704de40e47f1261d0f76d6"
+      }
+    ],
+    "sharedSourceOverlayCount": 57,
+    "sharedSourceOverlayListSha256": "6dbc841462f31b7a8c0a91411284d38c08f5ca4d6463a243bcba3ae450ca825f",
+    "additionalTestsAfterBuild": [
+      {
+        "file": "mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+        "sha256": "edb62e0e390edee100b486d4c95e89708ade353afdbb02868b9ebba5a98e2af5"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+        "sha256": "2e3ff7526c95bbb3dc9c7eb262525ef0638f80f323fa98a02b1075ee4de8114a"
+      }
+    ]
+  },
+  "windowsReference": [
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "gitBlob": "5d65c011f63a3bacaa121aeec6a97d48323883ec"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "gitBlob": "2eb8d94ce36e0c16883faaa8f1b8a644fa381f16"
+    }
+  ],
+  "core": {
+    "sourceSha256": "9040a9c6fa2316782e99ac33b6331dc637990b0d79263231480990f2c0c2bac1",
+    "bundles": [
+      {
+        "version": "a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a",
+        "sourceSha256": "9040a9c6fa2316782e99ac33b6331dc637990b0d79263231480990f2c0c2bac1",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 26425,
+            "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 252454,
+            "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+          }
+        }
+      },
+      {
+        "version": "b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594",
+        "sourceSha256": "9040a9c6fa2316782e99ac33b6331dc637990b0d79263231480990f2c0c2bac1",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 22689,
+            "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 259326,
+            "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+          }
+        }
+      },
+      {
+        "version": "809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c",
+        "sourceSha256": "9040a9c6fa2316782e99ac33b6331dc637990b0d79263231480990f2c0c2bac1",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 164087,
+            "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+          }
+        }
+      }
+    ],
+    "byteLimitExclusive": 262144
+  },
+  "validation": {
+    "focusedWeb": 122,
+    "nativeAttackChannel": 13,
+    "npcAndStage5NodeEntries": 181,
+    "presentationRust": 101,
+    "npcPolicyRust": 17,
+    "actualWasmAndPageReplay": 19,
+    "worldFishingFeedback": 8,
+    "preexistingSceneStaticAssertionFailed": true,
+    "allRepositoryTestsPassed": false
+  },
+  "fixture": {
+    "kind": "current-file-snapshot-not-inherited-historical-acceptance",
+    "source": "C:/r16-hud-health-qa-20261110/candidate-r6-webgpu/private/data/accounts.json",
+    "currentSha256": "c76da7766fee19d261bfaa6f67f0ede82704c85485fecd17a31db8453013095e",
+    "historicalReceiptFileSha256": "d5d2aa1abe7fd0eb036769e1f20204eee0670b3f35bc5558a4db1fc7e141f444",
+    "historicalReceiptMatchesCurrent": false,
+    "level": 30,
+    "map": "0",
+    "position": {
+      "x": 296,
+      "y": 273
+    },
+    "editedSaveFields": false,
+    "usedSameSnapshotForBothRenderers": true,
+    "originalSourceUnchanged": true
+  },
+  "failedBrowserProbes": [
+    {
+      "run": "browser-r2-webgpu",
+      "failure": {
+        "stage": "exact-production-ordinary-Warrior-login-and-StartGame",
+        "message": "loopback health http://127.0.0.1:20471/game"
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceUnchanged": true,
+      "rawReceiptSha256": "fdcbf05ceffe2dd7139d892b3927be7119006fe8d9e93ae8f2f84f1d4d2044ce"
+    },
+    {
+      "run": "browser-r3-webgpu",
+      "failure": {
+        "stage": "observe-cold-commit-or-localized-retry",
+        "message": "The expression evaluated to a falsy value:\n\n  assert(proof.runtimeHttp.some(r=>r.status===200&&r.path.includes(expectedRuntime)))\n"
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceUnchanged": true,
+      "rawReceiptSha256": "0d2f833da5f38a2cda632587c254c8510476fade546fdca17add4b401e6f0209"
+    },
+    {
+      "run": "browser-r4-webgpu",
+      "failure": {
+        "stage": "observe-cold-commit-or-localized-retry",
+        "message": "actual selected R16 runtime body observed"
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceUnchanged": true,
+      "rawReceiptSha256": "90c7fa96c0572afbb65608c7afde6e8db5c6bd739b681dba88729a4ce92efc9b"
+    },
+    {
+      "run": "browser-r5-webgpu",
+      "failure": {
+        "stage": "enable-New-movement-in-the-existing-character-session",
+        "message": "New movement persisted through real Options control"
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceUnchanged": true,
+      "rawReceiptSha256": "6f31d21c08a4067856d4b55a4da684a13d4821b1dd4fd3ec889029c36b1cea40"
+    }
+  ],
+  "lanes": [
+    {
+      "mode": "webgpu",
+      "actualRuntime": {
+        "activeBackend": "webgpu",
+        "browserResponseStatus": 200,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "independentImmutableUrlSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+        "independentReadBytes": 31441753,
+        "pinnedSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+        "actualBrowserBodyHashObserved": false,
+        "browserInspectorBodyReadError": "ec1ba480ae96bde6dc969bc471c1baf2b3fd640421e7bdd926447a98613051d1"
+      },
+      "sourceSnapshotSha256": "c76da7766fee19d261bfaa6f67f0ede82704c85485fecd17a31db8453013095e",
+      "typedOutcome": {
+        "requestId": "1",
+        "result": "launched",
+        "resultBeforeBody": true
+      },
+      "trustedInputs": [
+        {
+          "type": "pointerdown",
+          "button": 0,
+          "trusted": true,
+          "observedAction": "standing",
+          "observedFrame": 3
+        },
+        {
+          "type": "pointerup",
+          "button": 0,
+          "trusted": true,
+          "observedAction": "standing",
+          "observedFrame": 3
+        },
+        {
+          "type": "pointerdown",
+          "button": 2,
+          "trusted": true,
+          "observedAction": "attack1",
+          "observedFrame": 1
+        },
+        {
+          "type": "pointerup",
+          "button": 2,
+          "trusted": true,
+          "observedAction": "attack1",
+          "observedFrame": 1
+        }
+      ],
+      "observedAttackFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wireRelativeToLastObservedAttackFrameMs": -6.97900390625,
+      "existingObservationToleranceMs": 12,
+      "visibleMovementAfterLastObservedAttackFrameMs": 296.699951171875,
+      "clickToFirstMovementWireMs": 434.321044921875,
+      "attackWireToBodyMs": 1070.656005859375,
+      "attackWireToMoveMs": 1865.43310546875,
+      "extraAttackCount": 0,
+      "from": {
+        "x": 296,
+        "y": 273
+      },
+      "destination": {
+        "x": 296,
+        "y": 271
+      },
+      "savedPosition": {
+        "x": 296,
+        "y": 271
+      },
+      "savedLevel": 30,
+      "actorRendererDebug": {
+        "enabled": false,
+        "ready": true,
+        "canvasHidden": false,
+        "domFallback": false,
+        "entityCount": 0,
+        "layerCount": 0
+      },
+      "visibleDomBody": {
+        "path": "/original-ui/CArmour/03/171.png",
+        "loaded": true,
+        "visible": true
+      },
+      "sourceUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "rawReceiptSha256": "57d2b2e642c65c97614792564c0aa3e3e1635bab0bdf766b7d8ff2e752b53f36",
+      "fullSixFramesObserved": true,
+      "pureGpuEntitiesCovered": false,
+      "strictFinalPaintBoundaryProven": false
+    },
+    {
+      "mode": "webgl2",
+      "actualRuntime": {
+        "activeBackend": "webgl2",
+        "browserResponseStatus": 200,
+        "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "independentImmutableUrlSha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+        "independentReadBytes": 32369572,
+        "pinnedSha256": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+        "actualBrowserBodyHashObserved": false,
+        "browserInspectorBodyReadError": "ec1ba480ae96bde6dc969bc471c1baf2b3fd640421e7bdd926447a98613051d1"
+      },
+      "sourceSnapshotSha256": "c76da7766fee19d261bfaa6f67f0ede82704c85485fecd17a31db8453013095e",
+      "typedOutcome": {
+        "requestId": "1",
+        "result": "launched",
+        "resultBeforeBody": true
+      },
+      "trustedInputs": [
+        {
+          "type": "pointerdown",
+          "button": 0,
+          "trusted": true,
+          "observedAction": "standing",
+          "observedFrame": 1
+        },
+        {
+          "type": "pointerup",
+          "button": 0,
+          "trusted": true,
+          "observedAction": "standing",
+          "observedFrame": 1
+        },
+        {
+          "type": "pointerdown",
+          "button": 2,
+          "trusted": true,
+          "observedAction": "attack1",
+          "observedFrame": 0
+        },
+        {
+          "type": "pointerup",
+          "button": 2,
+          "trusted": true,
+          "observedAction": "attack1",
+          "observedFrame": 0
+        }
+      ],
+      "observedAttackFrames": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "wireRelativeToLastObservedAttackFrameMs": -5.266845703125,
+      "existingObservationToleranceMs": 12,
+      "visibleMovementAfterLastObservedAttackFrameMs": 351.89990234375,
+      "clickToFirstMovementWireMs": 465.033203125,
+      "attackWireToBodyMs": 993.390869140625,
+      "attackWireToMoveMs": 1744.258056640625,
+      "extraAttackCount": 0,
+      "from": {
+        "x": 296,
+        "y": 273
+      },
+      "destination": {
+        "x": 296,
+        "y": 271
+      },
+      "savedPosition": {
+        "x": 296,
+        "y": 271
+      },
+      "savedLevel": 30,
+      "actorRendererDebug": {
+        "enabled": false,
+        "ready": true,
+        "canvasHidden": false,
+        "domFallback": false,
+        "entityCount": 0,
+        "layerCount": 0
+      },
+      "visibleDomBody": {
+        "path": "/original-ui/CArmour/03/170.png",
+        "loaded": true,
+        "visible": true
+      },
+      "sourceUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "rawReceiptSha256": "b669f36716729ea36d54b3960c9fdfa7ac998b8715420e44a7bd8ea799694bed",
+      "fullSixFramesObserved": false,
+      "pureGpuEntitiesCovered": false,
+      "strictFinalPaintBoundaryProven": false
+    }
+  ],
+  "open": [
+    "shared WebGL2 final attack frame 5 was not observed",
+    "strict packet boundary against final painted frame has not been proved; observed offsets are within the original 12 ms sampling tolerance",
+    "both actor layers used DOM bodies; pure GPU entities untested",
+    "Hosted Zone RPC transport and public rollout untested",
+    "live chasing, spells and other professions remain to test",
+    "current three-profession full 1–30 routes and Native Windows window acceptance remain open"
+  ],
+  "globalCandidateComplete": false
+}

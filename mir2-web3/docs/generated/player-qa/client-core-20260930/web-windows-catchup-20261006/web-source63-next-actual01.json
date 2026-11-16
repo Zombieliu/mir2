@@ -1,0 +1,63 @@
+{
+  "owner": "Root",
+  "kind": "Source63 strict Next actual",
+  "actual": {
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "callerExitCode": 0,
+    "builderPid": 58908,
+    "elapsedMs": 103431,
+    "typeScriptSeconds": 12.2,
+    "staticPages": 13,
+    "stderrBytes": 0
+  },
+  "input": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/next-build01-config02.json",
+      "bytes": 4862,
+      "sha256": "2451c6b6f35280251f0c5aa8d9c0df71fbdae16c895b93e8bad035d51c27bdaf"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source63-npc-shop-last-action-20261011-01\\preparation\\source63-source-snapshot02.json",
+      "bytes": 6597726,
+      "sha256": "a80f1579968f20eaff7d88c9480cda8aa37409e3509df9bb6a0789010ff09d2b"
+    },
+    "fullPrePostSourceCount": 19584,
+    "sourceDifferences": 0,
+    "ownedStrictType": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.source63-build01.json",
+      "bytes": 5071,
+      "sha256": "6914f2a3a439692bd79f39eb95e407942fb80a6369d3bacf2a09ff9d9e25f06e"
+    },
+    "mainTsconfigPreserved": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    }
+  },
+  "outputs": {
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/next-build01/stdout.log",
+      "bytes": 2024,
+      "sha256": "a6a016b925b8e31064a9b9acb1f847b2aaf7d47b419605607739fa7bde966134"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/next-build01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/next-build01/outer.json",
+      "bytes": 529,
+      "sha256": "cfed58f00e50695caa253a5dbc1f5f0782ef132a9aca4f6db67962035c8e7d41"
+    }
+  },
+  "rust": "Unchanged original renderer/Core leaves carried from Source54/58 accepted evidence; no new Rust/Native build in Source63",
+  "nextBuildAccepted": true,
+  "thinBuildAccepted": false,
+  "runtimeLaunched": false,
+  "uiPurchaseAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

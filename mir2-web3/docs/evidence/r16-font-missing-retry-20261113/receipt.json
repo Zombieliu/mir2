@@ -1,0 +1,762 @@
+{
+  "kind": "r16-font-mixed-source-failure-retry-candidate",
+  "passed": true,
+  "published": false,
+  "publicVersion": "f6acaad6b0046553bcc5d2fb15784b29877f5eb9",
+  "sourceHead": "eb8e4d29cfcc27d1b058070366d0b3b5bebdba85",
+  "sourceFiles": {
+    "mir2-web3/apps/web/public/mir2-asset-worker.js": "1725f95a0a238e2139a84a5aaad31f2d16f8476e28bf805c9a24b2557eb646e1",
+    "mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs": "4b1bfb7edddbb41833fe38135bb873d10eee614b57dfdc9506303351b87dfbc7",
+    "mir2-web3/apps/web/scripts/smoke-asset-font-retry.mjs": "9f8cbc177b395a61bec4e7b7982db12bd3b39af37d1564c41d32daabfa7600e0"
+  },
+  "candidate": "eb8e4d29cfcc-font-missing-retry-80259818",
+  "buildReceiptSha256": "59de11b7bfd1769e4c3cbce9e2ec788d8b6a4078e991e61ee876af76eca4f211",
+  "buildId": "t-20KCQibzQG5OyXZ9byS",
+  "tests": {
+    "passed": 101,
+    "failed": 0,
+    "skipped": 0,
+    "initialRed": {
+      "tests": 11,
+      "passed": 4,
+      "failed": 7
+    },
+    "addedAfterRed": "two complete-font empty/206 boundaries; 13 new tests total"
+  },
+  "originalFontBytes": 29517096,
+  "browserRepro": {
+    "before": {
+      "passed": false,
+      "completedFonts": 5,
+      "selectedFontLoaded": false
+    },
+    "after": {
+      "passed": true,
+      "completedFonts": 6,
+      "selectedFontLoaded": true
+    },
+    "fontPins": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "modes": [
+    {
+      "mode": "default-webgpu",
+      "passed": true,
+      "newRoleLevel": 1,
+      "coldNativeWaitMs": 41280,
+      "warmNativeWaitMs": 1451,
+      "sameBuild": "eb8e4d29cfcc-font-missing-retry-80259818",
+      "renderer": "bevy-84ef836460a84e03",
+      "fontPins": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "sourceFaults": [
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 503,
+          "scope": "temporary-current-font-failure"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 404,
+          "scope": "application-font-missing"
+        },
+        {
+          "path": "/mir2/v/older-release/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 404,
+          "scope": "inherited-font-missing"
+        }
+      ],
+      "first": {
+        "nativeHudReady": true,
+        "nativeQuestReady": true,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diary": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        },
+        "logoutPosition": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "warm": {
+        "nativeHudReady": true,
+        "nativeQuestReady": true,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diary": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "authoritativeStart": {
+          "x": 289,
+          "y": 616
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "logoutPosition": {
+          "x": 288,
+          "y": 616
+        },
+        "saved": true
+      },
+      "immediateQCloseMoves": [
+        {
+          "index": 0,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 1,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 2,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 3,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 4,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 5,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 6,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 7,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        }
+      ],
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "browserRestart": {
+        "firstProcessCount": 8,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 8
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true,
+      "graduateControlRecordUnchanged": true,
+      "raw": {
+        "path": "C:/r16-font-missing-retry-20261113/game/quest-after-r1/entry-visual-receipt.json",
+        "sha256": "02d28ceaf617d6837d1fd330a162dc8f74caf5d61c522efcbbe13f26659985cd"
+      }
+    },
+    {
+      "mode": "shared-webgl2",
+      "passed": true,
+      "newRoleLevel": 1,
+      "coldNativeWaitMs": 41361,
+      "warmNativeWaitMs": 1467,
+      "sameBuild": "eb8e4d29cfcc-font-missing-retry-80259818",
+      "renderer": "bevy-84ef836460a84e03",
+      "fontPins": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "sourceFaults": [
+        {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 503,
+          "scope": "temporary-current-font-failure"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 404,
+          "scope": "application-font-missing"
+        },
+        {
+          "path": "/mir2/v/older-release/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 404,
+          "scope": "inherited-font-missing"
+        }
+      ],
+      "first": {
+        "nativeHudReady": true,
+        "nativeQuestReady": true,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diary": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        },
+        "logoutPosition": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "warm": {
+        "nativeHudReady": true,
+        "nativeQuestReady": true,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diary": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "authoritativeStart": {
+          "x": 289,
+          "y": 616
+        },
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        },
+        "logoutPosition": {
+          "x": 288,
+          "y": 616
+        },
+        "saved": true
+      },
+      "immediateQCloseMoves": [
+        {
+          "index": 0,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 1,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 2,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 3,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 4,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 5,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 6,
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "key": "ArrowLeft",
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 7,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "key": "ArrowRight",
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        }
+      ],
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "browserRestart": {
+        "firstProcessCount": 8,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 8
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "originalFixtureUnchanged": true,
+      "graduateControlRecordUnchanged": true,
+      "raw": {
+        "path": "C:/r16-font-missing-retry-20261113/game/quest-after-r2/entry-visual-receipt.json",
+        "sha256": "86bf3e9ebda8e06cbce8cbcaa12a681efa4664327ef523f0838822150ee718f3"
+      }
+    }
+  ],
+  "originalFilesUnchanged": 65,
+  "limits": [
+    "Two original-font loopback render paths, not WAN cold measurements; public Native failure remains recorded.",
+    "The observed production six-font404 pattern is consistent with this reproduced bug, but cross-origin timing without TAO cannot prove individual upstream HTTP status/header absence or exclude skin failures.",
+    "No fonts subset/replacement, renderer/WASM, game rules, assets, permissions or save schema changes.",
+    "The new role and normal logout transform are tested; original graduate control save is preserved. This is not a replay from level1 to30.",
+    "Existing NPC name fragments, mixed English and full language parity remain open; no global Candidate100 or human Accepted claim.",
+    "No public role, wallet, network/DNS/Gateway or production release by this candidate verification."
+  ],
+  "rawLogs": [
+    {
+      "path": "C:/r16-font-missing-retry-20261113/regression.log",
+      "sha256": "bf7cd4177737f78cfb4e193a8d80cedc5aea39414ed6dc40c4b3a5467b9942ee"
+    },
+    {
+      "path": "C:/r16-font-missing-retry-red-20261113.log",
+      "sha256": "a4d6a542616cc3fa1c4b9c85c9435edbe4e8a9d35f624f5949745d9de8f6c93d"
+    },
+    {
+      "path": "C:/r16-font-missing-retry-20261113/production-build-font-missing-r1.log",
+      "sha256": "c67b8fa7796717093800ed464640aa68bce373ae325c1808c88a356f6fc11722"
+    }
+  ]
+}

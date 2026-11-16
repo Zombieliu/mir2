@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "syntaxOnly": true,
+  "executionPerformed": false,
+  "loadPerformed": false,
+  "startedAt": "2026-10-26T23:59:43.6342946Z",
+  "finishedAt": "2026-10-26T23:59:43.6869466Z",
+  "command": [
+    "node",
+    "--check",
+    "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v1.mjs"
+  ],
+  "exitCode": 0,
+  "output": "",
+  "tool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v1.mjs",
+    "bytes": 14910,
+    "sha256": "5c07e1c5451c6ba5156b1609156dbeabfef4ca5254e81580ff985782f7183349"
+  }
+}

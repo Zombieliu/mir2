@@ -1,0 +1,199 @@
+TAP version 13
+# newcomer v2 journey tests passed
+# Subtest: scripts\\test-newcomer-v2-journey.mjs
+ok 1 - scripts\\test-newcomer-v2-journey.mjs
+  ---
+  duration_ms: 451.6883
+  type: 'test'
+  ...
+# Subtest: the Web R16 onboarding projection is the exact canonical Native gameplay baseline
+ok 2 - the Web R16 onboarding projection is the exact canonical Native gameplay baseline
+  ---
+  duration_ms: 0.8521
+  type: 'test'
+  ...
+# Subtest: the Web profile and automatic tutorial policy come from the shared baseline helper
+ok 3 - the Web profile and automatic tutorial policy come from the shared baseline helper
+  ---
+  duration_ms: 38.2437
+  type: 'test'
+  ...
+# Subtest: all three Page Quest consumers use the same R16 profile helper without a deployment override
+ok 4 - all three Page Quest consumers use the same R16 profile helper without a deployment override
+  ---
+  duration_ms: 35.39
+  type: 'test'
+  ...
+# Subtest: fresh keyboard, touch and controller entry cannot automatically start the legacy card tutorial
+ok 5 - fresh keyboard, touch and controller entry cannot automatically start the legacy card tutorial
+  ---
+  duration_ms: 55.4434
+  type: 'test'
+  ...
+# Subtest: Native Candidate default TOML and the package parameter resolve to the same canonical Quest profile
+ok 6 - Native Candidate default TOML and the package parameter resolve to the same canonical Quest profile
+  ---
+  duration_ms: 460.3351
+  type: 'test'
+  ...
+# Subtest: Native explicit historical profiles remain selectable and unknown profile values are rejected
+ok 7 - Native explicit historical profiles remain selectable and unknown profile values are rejected
+  ---
+  duration_ms: 398.8812
+  type: 'test'
+  ...
+# Subtest: the Native host uses the canonical fallback and retains explicit TOML profile precedence
+ok 8 - the Native host uses the canonical fallback and retains explicit TOML profile precedence
+  ---
+  duration_ms: 8.4184
+  type: 'test'
+  ...
+# Subtest: R16 source UI closure is exactly 319 including Wizard layers and the native NPC sale/repair skin
+ok 9 - R16 source UI closure is exactly 319 including Wizard layers and the native NPC sale/repair skin
+  ---
+  duration_ms: 15.0095
+  type: 'test'
+  ...
+# Subtest: no opt-in preserves the existing selector and empty closure
+ok 10 - no opt-in preserves the existing selector and empty closure
+  ---
+  duration_ms: 0.7116
+  type: 'test'
+  ...
+# Subtest: forest/cave frames require an explicit append scope and retain finite library boundaries
+ok 11 - forest/cave frames require an explicit append scope and retain finite library boundaries
+  ---
+  duration_ms: 9.1674
+  type: 'test'
+  ...
+# Subtest: legacy common manifests cannot silently add forest/cave frames or a later map
+ok 12 - legacy common manifests cannot silently add forest/cave frames or a later map
+  ---
+  duration_ms: 105.9233
+  type: 'test'
+  ...
+# Subtest: map route closes only its exact monster libraries and legacy background alternatives
+ok 13 - map route closes only its exact monster libraries and legacy background alternatives
+  ---
+  duration_ms: 8.8239
+  type: 'test'
+  ...
+# Subtest: manifest path and SHA are a required pair and bind exact bytes
+ok 14 - manifest path and SHA are a required pair and bind exact bytes
+  ---
+  duration_ms: 248.4085
+  type: 'test'
+  ...
+# Subtest: traversal, absolute, secret, unsupported and duplicate-case paths are refused
+ok 15 - traversal, absolute, secret, unsupported and duplicate-case paths are refused
+  ---
+  duration_ms: 150.9252
+  type: 'test'
+  ...
+# Subtest: missing requirements, entries and physical files all fail closed
+ok 16 - missing requirements, entries and physical files all fail closed
+  ---
+  duration_ms: 215.177
+  type: 'test'
+  ...
+# Subtest: equal-length byte tampering and declared size mismatches fail
+ok 17 - equal-length byte tampering and declared size mismatches fail
+  ---
+  duration_ms: 215.0034
+  type: 'test'
+  ...
+# Subtest: a selected junction or symlink is never followed
+ok 18 - a selected junction or symlink is never followed
+  ---
+  duration_ms: 158.9047
+  type: 'test'
+  ...
+# Subtest: packaging requires its physical sidecar and does not fall back to another public tree
+ok 19 - packaging requires its physical sidecar and does not fall back to another public tree
+  ---
+  duration_ms: 175.0524
+  type: 'test'
+  ...
+# Subtest: the named development full-pack source is materialized as a finite physical closure
+ok 20 - the named development full-pack source is materialized as a finite physical closure
+  ---
+  duration_ms: 426.3544
+  type: 'test'
+  ...
+# Subtest: verified finite opt-in copies only selected additions and preserves JSON bytes
+ok 21 - verified finite opt-in copies only selected additions and preserves JSON bytes
+  ---
+  duration_ms: 983.151
+  type: 'test'
+  ...
+# Subtest: ordinary JSON compaction remains enabled outside byte-preserved opt-in
+ok 22 - ordinary JSON compaction remains enabled outside byte-preserved opt-in
+  ---
+  duration_ms: 465.4685
+  type: 'test'
+  ...
+# Subtest: common UI is a complete finite catalog with original scope unchanged and no world sprite wildcard
+ok 23 - common UI is a complete finite catalog with original scope unchanged and no world sprite wildcard
+  ---
+  duration_ms: 27.2021
+  type: 'test'
+  ...
+# Subtest: ordinary newcomer death/revive retains all 22 Monster/016 frames without expanding the R16 respawn set
+ok 24 - ordinary newcomer death/revive retains all 22 Monster/016 frames without expanding the R16 respawn set
+  ---
+  duration_ms: 660.2314
+  type: 'test'
+  ...
+# Subtest: common fonts are exactly the bundled Windows families and licenses with no font wildcard
+ok 25 - common fonts are exactly the bundled Windows families and licenses with no font wildcard
+  ---
+  duration_ms: 138.9369
+  type: 'test'
+  ...
+# Subtest: Monster/007 full raw fallback includes the complete eight-direction Standing animation pinned to its real source metadata
+ok 26 - Monster/007 full raw fallback includes the complete eight-direction Standing animation pinned to its real source metadata
+  ---
+  duration_ms: 141.9726
+  type: 'test'
+  ...
+# Subtest: all thirteen R16 monster profiles have complete physical raw fallbacks matching pinned source metadata and PNG hashes
+ok 27 - all thirteen R16 monster profiles have complete physical raw fallbacks matching pinned source metadata and PNG hashes
+  ---
+  duration_ms: 10109.1892
+  type: 'test'
+  ...
+# Verified 13 source metadata SHA256 pins and all 2602 physical PNG hashes (10957186 bytes).
+# Subtest: common manifests reject any missing raw frame across all thirteen profiles even with otherwise consistent file and path pins
+ok 28 - common manifests reject any missing raw frame across all thirteen profiles even with otherwise consistent file and path pins
+  ---
+  duration_ms: 28044.9005
+  type: 'test'
+  ...
+# Independently removed and rejected all 2602 required raw frames.
+# Subtest: common scope requires every pinned UI/first-play/raw family while schema1 stays exact
+ok 29 - common scope requires every pinned UI/first-play/raw family while schema1 stays exact
+  ---
+  duration_ms: 251.2909
+  type: 'test'
+  ...
+# Subtest: the complete raw catalog has an explicit 22k engineering file bound while 360MiB and 8MiB byte guards stay unchanged
+ok 30 - the complete raw catalog has an explicit 22k engineering file bound while 360MiB and 8MiB byte guards stay unchanged
+  ---
+  duration_ms: 273.2576
+  type: 'test'
+  ...
+# Subtest: the explicit raw Sound source fills only selected missing clips into a physical SHA-verified sidecar
+ok 31 - the explicit raw Sound source fills only selected missing clips into a physical SHA-verified sidecar
+  ---
+  duration_ms: 14648.8853
+  type: 'test'
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 31
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 57592.6752

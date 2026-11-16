@@ -1,0 +1,300 @@
+{
+  "physicalLayout": {
+    "physicalBuildSourceCreated": true,
+    "crossDriveDependencyLinks": false,
+    "sourceDeletedOrModified": false,
+    "priorJunctionPreserved": true,
+    "seconds": 34.016
+  },
+  "transforms": {
+    "kind": "bounded local build transforms",
+    "runtime": "bevy-0c553a754308e5b8",
+    "runtimeManifestSha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "sourceSnapshotSha256": "3282dab684009b3ed4d70ec9c67cb67dc485f8a16d486285c430a91bfbd31dfe",
+    "isolatedTsconfig": "tsconfig.world-snapshot-gzip.json",
+    "productionDeployment": false
+  },
+  "nativeIncludeSourceSupplement": [
+    {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-CATALOG.v0.2.json",
+      "bytes": 6619,
+      "sha256": "55b94756f535a50b1cf6031cb6f88ae1c6aa03741acb911d436cafe8d042d1a8"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/daily-weekly-v1.json",
+      "bytes": 9945,
+      "sha256": "39bf59c5e0a4a2d014a74ab8c70c18af26055b6e446c100710afe12831e8c01e"
+    },
+    {
+      "path": "mir2-web3/config/promotion-windows-playtest-20261030.test.json",
+      "bytes": 1686,
+      "sha256": "ce3f08958fa23588ff7739715f9d05b75beaef0d11e04627c5c7dc364079c948"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+      "bytes": 35163,
+      "sha256": "59b4e1b8a0dcc9f95de7871a178f715d6ce1baefe96e263f38e5d4328d4dccf7"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0015_shared_item_identity.sql",
+      "bytes": 790,
+      "sha256": "4870f4f07eb2a9c921a3c96e523edc0c7a871127ce99a6b83e824d2ff11f95f2"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0001_core.sql",
+      "bytes": 11207,
+      "sha256": "1f58efe484d5c9e9c85747b3165c4e1647148a089f1140d656171457450674c5"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0002_normalized_projections.sql",
+      "bytes": 6268,
+      "sha256": "fa1498f09bd50867481c26f031217e90443cdc874e55e64e61e49a63c3415f80"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0003_zone_owner_leases.sql",
+      "bytes": 1232,
+      "sha256": "41d09f643cd0ba965fe74ffa2aa49f3d3a34ece8cb562f66ae5e7bb0322f9785"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0004_city_currencies.sql",
+      "bytes": 790,
+      "sha256": "273ffc4c3f0cf0bc90d8af6087c11ed47c2b375aceb96e575982f402f8ee0932"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0005_game_economy_outbox.sql",
+      "bytes": 2287,
+      "sha256": "fbe3abe3096f7f945c158fb55127fdde403b6dfece50e74d071a494da1bf253c"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0006_game_economy_bootstrap.sql",
+      "bytes": 982,
+      "sha256": "81c7ed5af89b430e274203e696339fbfbe30d32be9a18ee2831444c48da9ee87"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0007_admin_read_audits.sql",
+      "bytes": 291,
+      "sha256": "f8b939b9bf964f2d8fe57549c9753da5e6a3e5abefd8cf92152bebcc46b0f69c"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0008_ai_daily_reports.sql",
+      "bytes": 2945,
+      "sha256": "3ea7ebadd66f08b4e866f311a9006e41439865be8e6c32ca0ec8853746917e86"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0009_world_director_approval.sql",
+      "bytes": 1074,
+      "sha256": "56416f34910e994c5081baa15c7440481e3c1921637fd3009ab627d0fdd926fb"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0010_commercial_identity.sql",
+      "bytes": 4134,
+      "sha256": "4480dd22241412e8ddce8b430621d2c0fe1ab3b5edb048ca1e3f8e8218fb1ecb"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0011_game_economy_trade_projections.sql",
+      "bytes": 2083,
+      "sha256": "ce33062d2f1f5fd283eb1ff8548e7e8cf705a32cca1bca0727e52052ffdb66b7"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0012_shared_guild_authority.sql",
+      "bytes": 1084,
+      "sha256": "19cfcdde7085ec0ac70db3ff62dc26118f3852fa98a69b13d5f33d649d493069"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0013_shared_guild_clock.sql",
+      "bytes": 945,
+      "sha256": "6bf0ef3d243999bbe2fc7eec253fba40615ddaf983ae211723cb2da0231a659f"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0014_shared_hero_authority.sql",
+      "bytes": 2620,
+      "sha256": "37cadf609973dc542c5a09ab4e4e60bfa77ec10f424617703c6b460825990cbd"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0015_sealed_stone_authority.sql",
+      "bytes": 518,
+      "sha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0016_shared_conquest_authority.sql",
+      "bytes": 548,
+      "sha256": "50602f4f904d39be532cbe45206283723534daaf6a3936734a593f27fd015db6"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0017_sealed_stone_authority.sql",
+      "bytes": 518,
+      "sha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0018_procurement_authority_guard.sql",
+      "bytes": 2161,
+      "sha256": "53b63e26318a345c9fc7dc571e6f6a50c9b4534829130a2ea4519446a7f03ac4"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0019_sui_usdc_billing_authority.sql",
+      "bytes": 8967,
+      "sha256": "0aa353ae9dfe0f782be9c424a83603ad832f82a211a832847e2aac385b277222"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0017_promotion_program.sql",
+      "bytes": 17148,
+      "sha256": "4b7b592bc08e2321053c794aa2fcfdf1bb1589866a8845a335c67aea3714bc57"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0018_promotion_payment_provenance.sql",
+      "bytes": 2271,
+      "sha256": "e516dbb20e398dc9fec8413767f5842c4bd366832a340afa6547477df3ec6c01"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0019_promotion_game_sources.sql",
+      "bytes": 2632,
+      "sha256": "8cc16862273114eb2a7854cee6f0a3e0d4edd9637b6c2cfe1ca2d0115f2e1c64"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0020_promotion_payout_execution.sql",
+      "bytes": 7560,
+      "sha256": "9448c97a90a57fa52118dbdad93af42b00ea0a22ff4be1dcfc58b398a224cf08"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0021_promotion_live_readiness.sql",
+      "bytes": 1138,
+      "sha256": "01055ac62c57ef8a9e35851732101b5a75fffe4e61a0ccdca34eb9b482536f17"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0022_promotion_production_approval.sql",
+      "bytes": 3030,
+      "sha256": "2bbfb5b3d923f0aae8430a5923d3b8ece27cd6d4a64b8ee61f03d0ebff33f6aa"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0023_promotion_revenue_share.sql",
+      "bytes": 1099,
+      "sha256": "a39bab87c0db68218d0295033047042eb3f58465a7a2da1122e47b71837f5e34"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0024_sui_usdc_native_transfer_authority.sql",
+      "bytes": 24082,
+      "sha256": "4b4ae0484245469f95b0b90fe0202e3e92073657a7d68191c4554132ec9c9d8f"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0025_promotion_attribution_migration.sql",
+      "bytes": 6405,
+      "sha256": "e130ee2c7dbccfc6e92a652d64f00981c9f42ecfc91d9acae4473a5d0690fd4e"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0020_zone_character_save_operations.sql",
+      "bytes": 4005,
+      "sha256": "cb3c2496a63a402842ab3b148efb81b5817e2679ea23d93e790283e55a734d9e"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0021_zone_player_drop_operations.sql",
+      "bytes": 10286,
+      "sha256": "cdb4bced0ebe324fadef5af0f48d75da3d516a33f2cd81904e9f144c0c92a98c"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0022_zone_player_drop_recovery_receipts.sql",
+      "bytes": 2253,
+      "sha256": "cf75d57c42615ab149286090b7d2cb6fdcd5449acfd11cf328bf14624cdb2b5d"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0023_zone_player_drop_admissions.sql",
+      "bytes": 4590,
+      "sha256": "67dc03dc340f443a4e4188a9ec9eeaa95a84a46bbcbbce03b04dcf5b429a8e6d"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0024_mail_item_transfer_receipts.sql",
+      "bytes": 1774,
+      "sha256": "7f5c64d1dcd3881eb6366e2042865f662df293be29fd47c161277a0bf9e3cc82"
+    },
+    {
+      "path": "mir2-web3/onchain/procurement/fixtures/intent-v1.json",
+      "bytes": 3418,
+      "sha256": "9b76eab5853a715b745cb3facfefb1849774f3c20c10969ebbc0fc2c2682ace9"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v1.json",
+      "bytes": 41856,
+      "sha256": "6952068b9827aa90f44a0b58296637cf83b298d57483912ca274fdfba3c0822e"
+    },
+    {
+      "path": "mir2-web3/infra/clickhouse/initdb/002_gameplay_events.sql",
+      "bytes": 1825,
+      "sha256": "f64c6a6769af44de9c0e0b9ce61bdfb96b171303a374797531823ed952d605be"
+    },
+    {
+      "path": "mir2-web3/onchain/procurement/service/driver.mjs",
+      "bytes": 24520,
+      "sha256": "aa622628b23bfacda15fcbb2febc13f35f46b7248966859f59edaa0de7d243d3"
+    },
+    {
+      "path": "mir2-web3/onchain/procurement/service/canonical.mjs",
+      "bytes": 4978,
+      "sha256": "630b96f7a69ebdce0fa869549c9c6ef9a27b8b036fc5e5d004c118f5eb88deb1"
+    },
+    {
+      "path": "mir2-web3/onchain/procurement/service/grpc.mjs",
+      "bytes": 15242,
+      "sha256": "0e6ab7cb4062fa2686325754f85b67e082f1498514af96a466b920f294d37b0c"
+    },
+    {
+      "path": "mir2-web3/onchain/procurement/package-lock.json",
+      "bytes": 96306,
+      "sha256": "82f8387732b94714df61b79fc6a90a14c516feadf49a28428fe517b9bbe9f3d6"
+    },
+    {
+      "path": "mir2-web3/infra/regional/profile.json",
+      "bytes": 2378,
+      "sha256": "9038048609fb03827b8a578e2faf66ea7f0933dd7b262a159f2694c2af66cf45"
+    },
+    {
+      "path": "mir2-web3/onchain/usdc-recharge/service/cli.mjs",
+      "bytes": 1076,
+      "sha256": "855348ec1f2851b41a447cf0646654cde19e9235a32d824a48321b9162e73e2a"
+    },
+    {
+      "path": "mir2-web3/onchain/usdc-recharge/service/driver.mjs",
+      "bytes": 35880,
+      "sha256": "af77ed2cfb6654aa827b3a53e1fd832dc5a55e3f95f9e0816543e6d2647863fd"
+    },
+    {
+      "path": "mir2-web3/onchain/usdc-recharge/service/model.mjs",
+      "bytes": 22553,
+      "sha256": "371d4a48819b068f458cb121d45a04f0b0708fb2448805ea7db03df6dc71b7cf"
+    },
+    {
+      "path": "mir2-web3/onchain/usdc-recharge/package.json",
+      "bytes": 322,
+      "sha256": "bd40b7a7178a36f2a3923af9f506287e4e0c4b24707584b8b45a1785d53c4b6e"
+    },
+    {
+      "path": "mir2-web3/onchain/usdc-recharge/package-lock.json",
+      "bytes": 10581,
+      "sha256": "94ed1a8ceaf9ba48bd4b4184e893dcd09bbb6e7b6780e5088750199cdf2a6bb3"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+      "bytes": 4624,
+      "sha256": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2-ui.json",
+      "bytes": 5436,
+      "sha256": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v1.json",
+      "bytes": 28662,
+      "sha256": "49c1ba49d4c3af4fadf3a53ea2618ba5d998ec829fd72f45349498e246e941b3"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v2-graduation.json",
+      "bytes": 2664,
+      "sha256": "4e3b37f8ac9969219e1e03b566c391f59860f083e1156b7cf88d5f433ccb5655"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-supplies.json",
+      "bytes": 1152,
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    }
+  ],
+  "noMigrationExecuted": true
+}

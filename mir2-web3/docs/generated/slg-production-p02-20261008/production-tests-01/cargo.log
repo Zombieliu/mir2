@@ -1,0 +1,39 @@
+   Compiling mir2-production v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\production)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.84s
+     Running unittests src\lib.rs (E:\mir2-player-journey\work\slg-production-p02-20261008\..\slg-production-20261008\target\debug\deps\mir2_production-df39479b85c02a77.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\production.rs (E:\mir2-player-journey\work\slg-production-p02-20261008\..\slg-production-20261008\target\debug\deps\production-bbc7a160e5e25c1a.exe)
+
+running 19 tests
+test batch_plans_use_existing_intermediates_and_preserve_real_yield_surplus ... ok
+test batch_ten_and_large_uid_preserve_cost_timing_quantity_and_bound_refunds ... ok
+test bundled_catalog_is_disabled_and_source_families_compose ... ok
+test cancel_returns_only_direct_composite_inputs_with_per_material_floor ... ok
+test catalog_traversal_memoizes_shared_upstream_dependencies ... ok
+test edited_catalog_rejects_old_preview_but_exact_durable_request_replays ... ok
+test exact_completion_refuses_cancel_and_owner_or_access_change_refuses_operation ... ok
+test failed_gold_material_binding_or_time_overflow_never_creates_job ... ok
+test generated_checkpoint_budget_is_checked_before_any_economic_change ... ok
+test immutable_recipe_snapshot_survives_offline_restore_and_catalog_edit ... ok
+test invalid_catalog_cycles_missing_inputs_duplicates_and_overflow_reject ... ok
+test lots_require_unique_uid_correct_template_and_server_eligibility ... ok
+test preparation_never_mutates_inventory_or_ledger_and_preserves_custody ... ok
+test restored_checkpoint_rejects_changed_request_recipe_snapshot_and_duplicate_active_jobs ... ok
+test restored_checkpoint_rejects_tampered_materials_status_and_clock ... ok
+test restored_state_reserves_space_for_terminal_receipts ... ok
+test stable_request_replay_is_exact_and_changed_payload_conflicts ... ok
+test upstream_facility_and_conflicting_template_bindings_are_required ... ok
+test upstream_gate_or_unbound_intermediate_disables_final_recipe ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+
+   Doc-tests mir2_production
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

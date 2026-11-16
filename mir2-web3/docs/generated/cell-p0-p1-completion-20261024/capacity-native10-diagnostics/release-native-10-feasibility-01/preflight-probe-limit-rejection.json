@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T16:25:06.1672080+00:00",
+  "phase": "preflight-only",
+  "profile": "probe",
+  "requestedActors": 10,
+  "requestedStageSeconds": 30,
+  "requestedSoakSeconds": 360,
+  "exitCode": 1,
+  "error": "Stages must increase, with an absolute maximum of 100 actors",
+  "actualGuard": "Existing probe actor cap is 5 in capacityPolicy",
+  "gameplayStarted": false,
+  "charactersCreatedByDriver": 0,
+  "gatewayPid": 49440,
+  "capacityAccepted": false,
+  "formalRunStarted": false,
+  "capacity": {
+    "maxWsConnections": 24,
+    "maxActiveSessions": 10,
+    "maxReconnectLeases": 10,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "monitor": "Stopped by external CtrlC after preflight rejection; original monitor history retained; no graceful terminal marker"
+}

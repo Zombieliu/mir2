@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T18:34:45.4640028Z",
+  "endedAt": "2026-10-25T18:36:05.8371978Z",
+  "command": "rustup",
+  "arguments": [
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "config_account_store_diagnostics::tests::",
+    "-j",
+    "4",
+    "--",
+    "--test-threads=1"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "toolchain": "1.95.0",
+  "buildJobs": 4,
+  "visualStudioTarget": "x64",
+  "externalTargetDirectory": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target",
+  "sourceBefore": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceUnchanged": true,
+  "exitCode": 0,
+  "tests": {
+    "status": "ok",
+    "passed": 3,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 2935
+  },
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\focused-v1.log",
+    "bytes": 46679,
+    "sha256": "64aa992eb5051f43088e476e43baafee73d7849a3b3d9a29d66345cd24a3a7b9"
+  },
+  "scope": "Three focused account-store diagnostic tests only; no realm, capacity or production acceptance."
+}

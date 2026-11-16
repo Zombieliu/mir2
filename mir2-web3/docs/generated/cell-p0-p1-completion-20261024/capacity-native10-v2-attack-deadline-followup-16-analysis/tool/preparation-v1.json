@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-25T17:38:34.834Z",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-probe16-v1.mjs",
+      "bytes": 30334,
+      "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "f31dbde547f7e725d9ea209cc3e160f36c442891729dccba675db0b59eee927d"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe16-v1.mjs",
+      "bytes": 2257,
+      "sha256": "944ef34333131c729d3accf43451dbe22962dbab040ec7b66f9b7a1fb3b0f546"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-pending-v1.json",
+      "bytes": 27038,
+      "sha256": "216733c4309471f5b316d6a330352f63dc146f224ba1b5804b11318d310a05bb"
+    },
+    {
+      "path": "verify-ended-probe16-draft-v1.mjs",
+      "bytes": 30338,
+      "sha256": "67b407e48f40f467de0bd4ec8919021b6b833c09854d5c0c11c6e9d20d11fdc8"
+    },
+    {
+      "path": "preparation-pending-v1.json",
+      "bytes": 3653,
+      "sha256": "34a38898ce839f1e09855abf8f970e0611f453610ef2115a71e9bfadbd6548c3"
+    },
+    {
+      "path": "actual-run-id-binding-v1.json",
+      "bytes": 1444,
+      "sha256": "2cc419aba47362f2b9a1eed40744f0ceacd6c08c4019599a296f08ff6e9de75b"
+    }
+  ],
+  "sourceSha256": "61bcbc84c646eb3ce94eb0a638ba9bd8c5c6b58baf3fc04b71c068c9b1241ac1",
+  "syntax": {
+    "previousFiveNodeChecks": [
+      {
+        "file": "verify-ended-probe16-draft-v1.mjs",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "file": "probe-contract-v1.mjs",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "file": "hp-proof-contract-v2.mjs",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "file": "run-ended-probe16-v1.mjs",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "file": "seal-tool-source-v1.mjs",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "finalMainChangedOnlyRunIdLiteral": true,
+    "targetImportsExecuted": false,
+    "rawRunRead": false,
+    "behaviorTestsExecuted": false
+  },
+  "expectedRunId": "1792949214664-bea1433d",
+  "expectedGatewayPid": 65608,
+  "expectedMonitorPid": 70448,
+  "expectedRuntime": {
+    "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendInputs": 44,
+    "binarySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "wireHistoricalCoreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3"
+  },
+  "expectedResult": {
+    "file": "final-verification.json",
+    "schemaVersion": 1,
+    "verifierRevision": 2,
+    "independentVerificationPassed": "true only after actual closed raw/public/source/cleanup verification",
+    "probePassed": "original report plus strict actual5/5/6 true>=60s windows and all original gates; failure remains legitimate",
+    "capacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "hp": "Ten statuses; zero events => successProofChecked:false,verifiedEventsChecked:0,noVerifiedDoseObserved:true",
+    "wireDiagnostics": "Source/count/uninstall proof; bounded diagnostic incompleteness never changes original game verdict"
+  },
+  "actualRunIdBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-run-id-binding-v1.json",
+    "bytes": 1444,
+    "sha256": "2cc419aba47362f2b9a1eed40744f0ceacd6c08c4019599a296f08ff6e9de75b"
+  },
+  "sourceSeal": {
+    "file": "tool-source-frozen-v1.json",
+    "filesAfterRootSeal": 12,
+    "includes": "Ten current source/proof/history files plus preparation-v1.json and copied independent-review-v1.json",
+    "requiresReviewVerdict": {
+      "toolSourceContractPassed": true,
+      "eligibleForRootSealing": true,
+      "blockingFindingIds": []
+    }
+  },
+  "rootSealEntry": "seal-tool-source-v1.mjs --seal-reviewed-tool-source --prepared-sha256=<this rawSHA> --review-file=<actual review> --review-sha256=<actual review SHA>",
+  "rootEndedEntry": "run-ended-probe16-v1.mjs --seal-sha256=<actualtoolseal rawSHA> --verify-ended-probe16 --run=1792949214664-bea1433d",
+  "mustWaitFor": "Root session50905 CLOSED, ended notification, original collector/public verifier success and BASE/probe16-root-independent-cleanup-v1.json actual OS proof. No actual verification before these exist.",
+  "sourceSealPermittedOnlyAfterRootEnded": true,
+  "actualVerificationExecuted": false,
+  "actualVerificationResult": null,
+  "toolSourceSealed": false,
+  "capacityAccepted": false,
+  "privateDataRead": false,
+  "frozenProbe16SourceChanged": false
+}

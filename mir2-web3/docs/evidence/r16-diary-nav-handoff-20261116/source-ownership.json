@@ -1,0 +1,11 @@
+{
+  "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+  "beforeWorkingSha256": "ae851410fafd1a8ff49d47b2390782534436aec68bd8e7a987bfdd6c2191e3cc",
+  "afterWorkingSha256": "2fc240a525efe5c699e92015bd3e5c8606c9f96fe130e5268aa7f4d8779ca2d1",
+  "beforePublishedSha256": "93b791369d2d40e3af85e701401f9a4049752778944295d1c2924a0c41978b72",
+  "publishedCandidateSha256": "a1b76929fd0c11446948e13c0ad6fc48ac0870ea17f49d5f64df470c355b415c",
+  "inverseWorkingByteMatch": true,
+  "inversePublishedByteMatch": true,
+  "requiresPartialStaging": true,
+  "onlyOwnedPropsCommentAndShortcutChanged": true
+}

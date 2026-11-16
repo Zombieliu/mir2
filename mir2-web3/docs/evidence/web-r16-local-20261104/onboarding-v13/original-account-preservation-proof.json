@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.r16.original-account-preservation.v1",
+  "oldSaves": 12,
+  "currentSaves": 13,
+  "originalSaveMissingCount": 0,
+  "originalProtectedFieldChanges": [],
+  "protectedFieldsChecked": [
+    "character",
+    "experience",
+    "max_experience",
+    "gold",
+    "credit",
+    "city_currencies",
+    "inventory_capacity",
+    "inventory_items_json",
+    "belt_items_json",
+    "hero_inventory_items_json",
+    "hero_equipment_items_json",
+    "hero_inventory_capacity",
+    "storage_items_json",
+    "equipment_items_json",
+    "equipment_items_explicit_empty",
+    "skill_states_json",
+    "item_rental_records_json",
+    "has_rented_item"
+  ],
+  "oldQuestRows": 0,
+  "oldQuestRowsKept": true,
+  "allOriginalProtectedFieldsUnchanged": true,
+  "liveReadOnlyAudit": true
+}

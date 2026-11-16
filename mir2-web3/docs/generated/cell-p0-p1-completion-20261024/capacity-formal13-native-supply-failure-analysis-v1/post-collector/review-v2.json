@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-10-25T20:41:29.0124263+00:00",
+  "runId": "1792959622496-365f0175",
+  "proofFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2-derivation-v1.json",
+  "proofSha256": "a08201cea196ca8434195201a11f5f05bfc42fb277aae7f42cc5be9a6c56418f",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public.mjs",
+    "bytes": 43271,
+    "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2.mjs",
+    "bytes": 43374,
+    "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+  },
+  "runtimeSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\launcher-source-frozen-v1.json",
+    "bytes": 43488,
+    "sha256": "55d2344aa547e8c1a00dbb9b0d457c5637dc3a388606cc817a7d6c44f4f22c4a",
+    "fileCount": 100,
+    "originalCollectorRawPinMatched": true
+  },
+  "rootDiffReviewed": true,
+  "forwardAndReverseExact": true,
+  "changes": [
+    "catalog scope identity ladder10 to ladder13",
+    "explicit public allowlist for posthoc collector and derivation proof"
+  ],
+  "actualNodeSyntaxReceiptReviewed": true,
+  "runtimeInputsModified": false,
+  "gameplayGatesOrVerdictModified": false,
+  "approvedForEndedCollection": true,
+  "capacityAccepted": false,
+  "priorReceiptFailure": {
+    "bytes": 6,
+    "reason": "PowerShell bare true literal caused record construction error; null receipt preserved; not a collector execution",
+    "file": "C:/mir2-build/p01-completion-20261024/formal13-post-collector-independent-review-v1/review-v1.json",
+    "sha256": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789"
+  }
+}

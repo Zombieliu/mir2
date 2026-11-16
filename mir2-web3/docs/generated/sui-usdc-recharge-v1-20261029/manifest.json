@@ -1,0 +1,567 @@
+{
+  "formatVersion": 1,
+  "artifactHashing": "raw bytes; this topic has scoped * -text",
+  "sourceHashing": "UTF-8 CRLF to LF",
+  "artifactCount": 68,
+  "artifactBytes": 3866552,
+  "artifacts": [
+    {
+      "path": ".gitattributes",
+      "bytes": 20,
+      "sha256": "e97602ab9cac70102245345c5ab0fc9830df8b17f1072b188265a662a3a547ae"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 145,
+      "sha256": "ebf3cbeaebfb952699034842bd727db79d8727730fa2ceedf27ce91d9dc84eb4"
+    },
+    {
+      "path": "README.md",
+      "bytes": 10292,
+      "sha256": "6b9058cd1a04d4e89dd293877a2438403e9c6a7483b55f870956b30d13c3d092"
+    },
+    {
+      "path": "binaries.json",
+      "bytes": 1507,
+      "sha256": "3886a2fb776fab23500058d4f5745d6e0d18ea6b739f991086ba5e7443f4dbb1"
+    },
+    {
+      "path": "browser-mock/desktop-chain-paid-game-pending.png",
+      "bytes": 66649,
+      "sha256": "3ab6360340c2e7854b13e69b5f9402a5f8915f586e5ee82b33fa0dcafa7eb84a"
+    },
+    {
+      "path": "browser-mock/mobile-game-delivered.png",
+      "bytes": 58428,
+      "sha256": "8719c4ca3504b0081bdbab9799a5772fb01b2545a5a00cecfe8779a4305c9e1e"
+    },
+    {
+      "path": "browser-mock/report.json",
+      "bytes": 3506,
+      "sha256": "902830733bd779a023255836b00123c1185caa092564828a7fb10b7bd1da60e7"
+    },
+    {
+      "path": "evidence-index.json",
+      "bytes": 4152,
+      "sha256": "919512012435ea660efe0bf0286169b8c5767f1384b8202612eb5d98f6c96c89"
+    },
+    {
+      "path": "generate-manifest.mjs",
+      "bytes": 4091,
+      "sha256": "39fd6f1116011f1c3f577ff81653b5c0d60d9689bcad84960997764151ddd27a"
+    },
+    {
+      "path": "live-failed-first/address-gas-helper-fix-validation.json",
+      "bytes": 1872,
+      "sha256": "0f616a9a04fa5ff43a762ae84eeb66bbd5749d21ac6679d1bcb186d617ab73ed"
+    },
+    {
+      "path": "live-failed-first/failure-summary.json",
+      "bytes": 4842,
+      "sha256": "e22f26fa71696d786bf60790d48255740a018d8000fdb30e2c663c6fafd84ef0"
+    },
+    {
+      "path": "live-failed-first/invoice-after-expiry-audit.json",
+      "bytes": 1085,
+      "sha256": "b195c35153ec5e322a3830559cdb57e02531a0686d68590186f21e63ff004c60"
+    },
+    {
+      "path": "live-failed-first/invoice-before-payment-audit.json",
+      "bytes": 3648,
+      "sha256": "ebb1e227ba53c53452795180b90eaead84c4498d9e62bab412db5f32a5525e64"
+    },
+    {
+      "path": "live-failed-first/payment-refusal-audit.json",
+      "bytes": 2074,
+      "sha256": "26ad5cfde7e3a39635991f3a28b30e1823968245a218f553980395a7a88cc77d"
+    },
+    {
+      "path": "live-failed-first/personal-message-proof-metadata.json",
+      "bytes": 398,
+      "sha256": "3b04002c17ef48c4a04c3b4bf91339b0be4778000bf13d580f9b67d54cca6640"
+    },
+    {
+      "path": "live-real/final-recharge-audit.json",
+      "bytes": 8550,
+      "sha256": "43963939eddb07c6f402387016fdae605495658c33ff30b620b1ad341f3ec5ab"
+    },
+    {
+      "path": "live-real/global-uniqueness-audit.json",
+      "bytes": 1298,
+      "sha256": "e70be5a7a3ad8e1a491191c9b44e48bdf0d44f979a6f42729cd101560f972d3e"
+    },
+    {
+      "path": "live-real/payment-finalized-receipt.json",
+      "bytes": 2896,
+      "sha256": "aa319f02e755964545b5a6998c7b103e77847fd4aca9c38c6b9ff4b8a203a643"
+    },
+    {
+      "path": "live-real/public-duplicate-delivery-verification.json",
+      "bytes": 879,
+      "sha256": "4f198ed0cf972fa9b8c79e37301fa83c21252f5d542bf23641ff7daaf267a907"
+    },
+    {
+      "path": "live-real/public-v4-disabled-sales-recovery-verification.json",
+      "bytes": 1014,
+      "sha256": "688069cf286b5d9876f7409a5e929b7feb6f3d65e977e9623423de99e5c2f36b"
+    },
+    {
+      "path": "live-real/reviewed-rollover-operation.json",
+      "bytes": 2074,
+      "sha256": "427ad1f6cbe95d9a49dc147cb2aa4182b260596ae393fffa4271ec9afad4c2a2"
+    },
+    {
+      "path": "native-mock/billing-gpu.log",
+      "bytes": 28000,
+      "sha256": "61a586dfe563bb2e5cb4892a47fffdaf1f18093c85038d35f4ad16d90e737716"
+    },
+    {
+      "path": "native-mock/billing-logic.log",
+      "bytes": 29599,
+      "sha256": "22607f716834d26ba8862dfe962139a2d8b8d9d733bf20963d79dc4baa2db004"
+    },
+    {
+      "path": "native-mock/gpu/en-stripe-1024x768.png",
+      "bytes": 191080,
+      "sha256": "4baf49c9ceaf39d8ba7d4c3fe8ee45d3afda6bf0274f0723269c88f8cd47e559"
+    },
+    {
+      "path": "native-mock/gpu/en-usdc-confirmation-1024x768.png",
+      "bytes": 223476,
+      "sha256": "768c99b0db92656de60e4fd44020c3b568c58308e448fb66ffa8e7b3b1321f71"
+    },
+    {
+      "path": "native-mock/gpu/en-usdc-expired-review-1024x768.png",
+      "bytes": 212827,
+      "sha256": "9ee39e67a12b34412ed22d9eb1aab08ef65a5f2f6f5c555d81c81f56485eb799"
+    },
+    {
+      "path": "native-mock/gpu/en-usdc-preparing-1024x768.png",
+      "bytes": 221310,
+      "sha256": "252bd326f352f2bdde0a2a896ea3dfbe27ebaa0c3b1547e4d9f5ee3e6240c23f"
+    },
+    {
+      "path": "native-mock/gpu/en-usdc-sales-disabled-1024x768.png",
+      "bytes": 216069,
+      "sha256": "0d6f0153db6b632b09fef9d785de27299e858a2c7cb5852a0a6f4539ce8412ce"
+    },
+    {
+      "path": "native-mock/gpu/report.json",
+      "bytes": 142699,
+      "sha256": "d38eaf6ced368dafbda639c898a20c72dc4c5ee609e21fb7e09a5e2782af328a"
+    },
+    {
+      "path": "native-mock/gpu/zh-TW-stripe-1024x768.png",
+      "bytes": 188348,
+      "sha256": "7cdaac778a94f2c76bf8bf2af9205776bea1b663d3091ef17cb42f03ecace57b"
+    },
+    {
+      "path": "native-mock/gpu/zh-TW-usdc-confirmation-1024x768.png",
+      "bytes": 231086,
+      "sha256": "c59b786982a24f1df39e578938df78d99887566b0238bfab22f306d01180fdbd"
+    },
+    {
+      "path": "native-mock/gpu/zh-TW-usdc-expired-review-1024x768.png",
+      "bytes": 220576,
+      "sha256": "debcc5a254da1bc9da3e8c98f6d71668cd4ca0a628f52c6c8d78d8650a13c407"
+    },
+    {
+      "path": "native-mock/gpu/zh-TW-usdc-preparing-1024x768.png",
+      "bytes": 230253,
+      "sha256": "6f829ee5debb2d870ebf67e0c33964ee1f2ab93bd1a4dfb9d61c33722501f682"
+    },
+    {
+      "path": "native-mock/gpu/zh-TW-usdc-sales-disabled-1024x768.png",
+      "bytes": 223665,
+      "sha256": "2a5db3eeb297cb91e315781534b2eca768cdcf20ed46bee2fbb2ecd9eb0edf50"
+    },
+    {
+      "path": "native-mock/windows-build.json",
+      "bytes": 838,
+      "sha256": "6573d6fe246d2275f757189606e6dac98d3988a08296920690aceaf6a6ca88ac"
+    },
+    {
+      "path": "native-mock/windows-build.log",
+      "bytes": 60147,
+      "sha256": "ea9b28d1ab52b10ab348449a7107b0858897d76916e04f361cb799f37bfd38ed"
+    },
+    {
+      "path": "native-mock/windows-host.log",
+      "bytes": 54438,
+      "sha256": "f6b55af7b1d3fdf6cf99f73441b246a9149c77c2151c7a84b7659aab8b742fb0"
+    },
+    {
+      "path": "rust/gateway-billing-adjacent.log",
+      "bytes": 2274,
+      "sha256": "3981409481d31a973d5122c8fcb030ad15647e4776a31c4742ea5e1f4eaab70b"
+    },
+    {
+      "path": "rust/gateway-build-final-v3.log",
+      "bytes": 57581,
+      "sha256": "93b13623aaf4583b176b3fd7cf2083ea28a197bef170925879bccdb166e00593"
+    },
+    {
+      "path": "rust/gateway-build-final-v4.log",
+      "bytes": 57581,
+      "sha256": "5a442f90c30a8f2d1e6ba6fc383081bf087222dfad08bf4124770868a26e8f8f"
+    },
+    {
+      "path": "rust/gateway-stripe-adjacent.log",
+      "bytes": 559,
+      "sha256": "55affdcb1af0494e471fc72710c5df6f00e11bf19acf91758873fd9f28eec942"
+    },
+    {
+      "path": "rust/gateway-usdc-final-v3.log",
+      "bytes": 56592,
+      "sha256": "3a5961c8968033c1f1aa951186ca8b02b1ebebde6aafde29b49d089d9ac554da"
+    },
+    {
+      "path": "rust/gateway-usdc-final-v4.log",
+      "bytes": 56862,
+      "sha256": "2f9347f75e9e7b89e477e7bf32c3d95c51e1c839a66d19e566a686a4c26a0d87"
+    },
+    {
+      "path": "rust/simulation-billing-final.log",
+      "bytes": 2721,
+      "sha256": "516906a73f332d514c5b525cfa29f88d89f8c2b2a7c92d286726434460c8f27d"
+    },
+    {
+      "path": "rust/simulation-procurement-adjacent.log",
+      "bytes": 5649,
+      "sha256": "0573fcbddd386221e8d3fad02998454972f3dd485a32f016d7e677fe01827715"
+    },
+    {
+      "path": "rust/simulation-schema-adjacent.log",
+      "bytes": 496,
+      "sha256": "4b512cc8f381f8e796908e58127849760ba1e36808c7db8fd52225b7803b3006"
+    },
+    {
+      "path": "rust/simulation-usdc-final.log",
+      "bytes": 46946,
+      "sha256": "55bf533264653d2280e1c308860375112c70d53188cca88cda807e81632bd14f"
+    },
+    {
+      "path": "sql/package-lock.json",
+      "bytes": 615,
+      "sha256": "93a8f9f5cd345299a28aabcda41530bffe0707b658c772757e7e3e44242d3132"
+    },
+    {
+      "path": "sql/package.json",
+      "bytes": 230,
+      "sha256": "f4677e0ec3fad0ef326f1b445f640d12dff8cb86ea8a06b8225e2e543f5d7270"
+    },
+    {
+      "path": "sql/result.json",
+      "bytes": 3947,
+      "sha256": "806a0adc1bcaca88916824949183382a7256c10f1207e23134480a268d193302"
+    },
+    {
+      "path": "sql/test-migration.mjs",
+      "bytes": 11621,
+      "sha256": "f0b2a0c4333244c2dfd930535e1b55c76501e57b4a2ea452a40ec2994c422684"
+    },
+    {
+      "path": "windows-live/evidence/final-after-pay-click.json",
+      "bytes": 6426,
+      "sha256": "4d301462807ea429fab8053ebb28cb161926230ce850717e9c0a3cc9ad99d6a0"
+    },
+    {
+      "path": "windows-live/evidence/final-order-created.json",
+      "bytes": 4762,
+      "sha256": "9894546f383f2e22a2055887e3617ae9e3d8eb3868cb3a09371b7d4af2590ee5"
+    },
+    {
+      "path": "windows-live/evidence/v4-final-relogin-confirmed.json",
+      "bytes": 6566,
+      "sha256": "add1b35e2c0beb0ba40f226023ffbdb7b0505395a7bedcd325c11c830bd1a886"
+    },
+    {
+      "path": "windows-live/evidence/v4-restart-sales-disabled.json",
+      "bytes": 6565,
+      "sha256": "c0d71db8995cdd6771bc07aa697a8c597ac8236cabfc90b0f04a45f74b633eb0"
+    },
+    {
+      "path": "windows-live/screenshot-associations.json",
+      "bytes": 2743,
+      "sha256": "6c4c7d2c90147306575dc051e722286034093bd48789663176b1e0c4164ca321"
+    },
+    {
+      "path": "windows-live/screenshots/05-native-final-order-zero-credit.jpg",
+      "bytes": 111571,
+      "sha256": "98ae7c0126585f65af46d950bc24f0db1993ee5921319bfec28d646c635459e4"
+    },
+    {
+      "path": "windows-live/screenshots/05-native-final-order-zero-credit.jpg.json",
+      "bytes": 396,
+      "sha256": "6e46dcca6996b0e618e6e9b11497045045aeb00deb8827bbda2100fcacfa5697"
+    },
+    {
+      "path": "windows-live/screenshots/06-native-real-100-credits-delivered.jpg",
+      "bytes": 109936,
+      "sha256": "2b334e5d341b0bb9e89dbc24eae1e8db72f22739d403c1b056e472b5ecd400b4"
+    },
+    {
+      "path": "windows-live/screenshots/06-native-real-100-credits-delivered.jpg.json",
+      "bytes": 396,
+      "sha256": "8c11758ad69d9fafc1ce58bff43ebe0f76be4457d2c08b42ccd873fdb20e0049"
+    },
+    {
+      "path": "windows-live/screenshots/07-native-repeat-refresh-100.jpg",
+      "bytes": 109649,
+      "sha256": "3fbbe6f8f0f263d4eb6596efd4a3c3a8aae3edc92127fdb896078439235b044d"
+    },
+    {
+      "path": "windows-live/screenshots/07-native-repeat-refresh-100.jpg.json",
+      "bytes": 396,
+      "sha256": "fe828c2ceb777a0afb342463aebd925f2e1ba310f7314c6243c1cdb768776209"
+    },
+    {
+      "path": "windows-live/screenshots/08-native-shop-100-credits-gold-unchanged.jpg",
+      "bytes": 222422,
+      "sha256": "0178e84b07c8cefdaecf90066d0638f2c3e47d1c937031e0273abac92066a1b4"
+    },
+    {
+      "path": "windows-live/screenshots/08-native-shop-100-credits-gold-unchanged.jpg.json",
+      "bytes": 396,
+      "sha256": "170599600052ea1f8e02b4dcd139f4b09b1035bccb15156975069175cec5ffcf"
+    },
+    {
+      "path": "windows-live/screenshots/09-native-v4-relogin-shop-100.jpg",
+      "bytes": 219521,
+      "sha256": "1dc6c96b20fd214c4dfeaa4e13b023316d25706d8e4d0966315869b4e8f5faf0"
+    },
+    {
+      "path": "windows-live/screenshots/09-native-v4-relogin-shop-100.jpg.json",
+      "bytes": 396,
+      "sha256": "97ec108e03251b13dcda03585331cd065c5eafcfc37dd299bd8dd3f466aa8633"
+    },
+    {
+      "path": "windows-live/screenshots/10-native-v4-relogin-disabled-sales-delivered.jpg",
+      "bytes": 106510,
+      "sha256": "1fe2331bb0e13ff17e15332762d1c3eaf9485475d99d4f711b3bd49e9432bfe6"
+    },
+    {
+      "path": "windows-live/screenshots/10-native-v4-relogin-disabled-sales-delivered.jpg.json",
+      "bytes": 396,
+      "sha256": "22dc89a411e6fdf6319691db0235ddac9e1d794b2acb65ba791b32ef331e2085"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 82121,
+      "sha256": "463ced90304befea2db3a2508a134f58fea963a645c8e5a951437f92add0e200"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 94588,
+      "sha256": "9a0ed7f319bc8e317c21d18073f9632374f0637c67a6c484a790678f0031a495"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/billing_browser.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8502,
+      "sha256": "4020e4ebae1c8c447f8d782c885752c406485577bbeb8dbeb1462101beaf18fb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 792084,
+      "sha256": "c45c8eef9ef53bf99ef739e0b53b2bfe0b60b06df1c7e262ab39ded67c11bb0a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21519,
+      "sha256": "c2a5bce5ea53762cfa8cbaafec903d1a3bc303fbbc7099366fbd83da8838af4b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 95388,
+      "sha256": "ecdd99bc05e535729f6f052cb379382df9528fe33a905578a7aa5d59ac36e4d2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40085,
+      "sha256": "c00d2c00d7a1f0e78deb612f2d4fa07e6dab03c7c1fe984eeca51f23ee54b3b5"
+    },
+    {
+      "path": "apps/gateway/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11376,
+      "sha256": "03121d2acda4cc3baa8edb42c7cf8a2739b815ad424e3db23bb1990b9893d88e"
+    },
+    {
+      "path": "apps/gateway/src/main.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11908,
+      "sha256": "6823c371b263329f50157f8ddc8935ddedd022b76f794f37ae4a9a241f8d643a"
+    },
+    {
+      "path": "apps/gateway/src/sui_usdc_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27519,
+      "sha256": "9328ad0bceb9cfa1e5ff6055fd4aa981f4699cf43ad66eec43af00db5edb7e34"
+    },
+    {
+      "path": "apps/gateway/src/sui_usdc_billing_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15095,
+      "sha256": "af2c85fb1300d29b7b349a7db8e80463d19c970a34813c63938f38ba406d95ec"
+    },
+    {
+      "path": "apps/gateway/src/sui_usdc_checkout.html",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1977,
+      "sha256": "a3acd5d58b0da37c242bed686b1ffbfcc5606b643036dcc55eefd1d4951f95a6"
+    },
+    {
+      "path": "apps/gateway/src/sui_usdc_checkout.js",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9540,
+      "sha256": "0616f3df0a4b5507578ede6533d8955c993eb0a8664d1f92e5406a63cd11562e"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 892572,
+      "sha256": "d2532b9ac0a708752c057073958e5b20b94d37a35a9f1cc6dceb4f149fe40c8d"
+    },
+    {
+      "path": "apps/gateway/src/web_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24365,
+      "sha256": "513aaa84fbba210d1aa76bc245789b7fcadc967830cae360e03e6704650534ff"
+    },
+    {
+      "path": "apps/gateway/src/web_sui_usdc.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11838,
+      "sha256": "1a0d17a4ab8e6dbdaf339687dbdd479c257124b0cd74cc17a1bb06411bb4a68d"
+    },
+    {
+      "path": "apps/simulation/src/billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 34488,
+      "sha256": "09136645e40a2401abd32c3dfab2d6bbeacb9e275b4342071aa5c62941ccddf1"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 340178,
+      "sha256": "955209592fc313d8348a89a3e88f32df9f78ce1d26167d9fe58439c0bc32cf65"
+    },
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 32735,
+      "sha256": "c88ae52a55dc926a956854eeae970b2755dd507ecd1541eb627bea6c7af3834b"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7264,
+      "sha256": "0e5e6df32acd9bda0d462fbf3805833459024138149b75db732f587c5a62a780"
+    },
+    {
+      "path": "apps/simulation/src/procurement.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 80136,
+      "sha256": "da79737d13c02daad45d1e93a5dab977a327e0303b0da280887833f53e8e86cf"
+    },
+    {
+      "path": "apps/simulation/src/procurement/tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 55797,
+      "sha256": "b36764bc80f7623ce4b4e2db2bb078a07d1111984775c137e72638be5fca021e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9249,
+      "sha256": "90de6a7640b7f3946453e4d95ebbdaa9b24cedf176e4b668a20a7aebc20fa839"
+    },
+    {
+      "path": "apps/simulation/src/sui_usdc_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 35464,
+      "sha256": "3887ed633058d52842ed79dc677e515205d139d00768f336678acd2ed7a2e808"
+    },
+    {
+      "path": "apps/simulation/src/sui_usdc_billing_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28853,
+      "sha256": "2622323a0f18ab41b7ff4a33942e97c518e2a92559aa75b2a35af60995c4ad35"
+    },
+    {
+      "path": "docs/SUI-USDC-RECHARGE-V1.zh-CN.md",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18644,
+      "sha256": "81a309ee3fae9c4baf852f1713e34238edd56e313c4f96746f0ab2179110a289"
+    },
+    {
+      "path": "infra/postgres/migrations/0019_sui_usdc_billing_authority.sql",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8967,
+      "sha256": "0aa353ae9dfe0f782be9c424a83603ad832f82a211a832847e2aac385b277222"
+    },
+    {
+      "path": "onchain/usdc-recharge/UPSTREAM.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2673,
+      "sha256": "b8c3081fdb809adc245b4f52cab850c1492467616bc9410e74694b622e13fad0"
+    },
+    {
+      "path": "onchain/usdc-recharge/package-lock.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10547,
+      "sha256": "ce74134567732a3633acfa4f08382887359116c3453981765c29d8751e2cac5b"
+    },
+    {
+      "path": "onchain/usdc-recharge/package.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 270,
+      "sha256": "a1e10937535de662d0422108f767b2b3033e6a7eaec9ac718f061de0469c6fe8"
+    },
+    {
+      "path": "onchain/usdc-recharge/service/cli.mjs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1076,
+      "sha256": "855348ec1f2851b41a447cf0646654cde19e9235a32d824a48321b9162e73e2a"
+    },
+    {
+      "path": "onchain/usdc-recharge/service/driver.mjs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17177,
+      "sha256": "55c30a9d559af58f0a71915d69858b00ab98c1e5a500d400eb328e96864a5d63"
+    },
+    {
+      "path": "onchain/usdc-recharge/service/model.mjs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6736,
+      "sha256": "d50b360dbc156edeeb94712964acd9baf63104a963bf7e39b0d959f0627ec4b9"
+    },
+    {
+      "path": "onchain/usdc-recharge/src/mir2_usdc_recharge/Move.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 380,
+      "sha256": "f39f5229bff0fa656a0297572def44fb5587da897cbc4e31d8d00d01484db0ae"
+    },
+    {
+      "path": "onchain/usdc-recharge/src/mir2_usdc_recharge/sources/recharge.move",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11748,
+      "sha256": "f02e2928b2751c03d87d81af701948d116d76dfde4b35b5471a164b05f33830f"
+    },
+    {
+      "path": "onchain/usdc-recharge/test/driver.test.mjs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17588,
+      "sha256": "d532316b902c0efc7866de39e660ad7a1d82b6266a9dfadc4d09cfb0cfff3d20"
+    }
+  ]
+}

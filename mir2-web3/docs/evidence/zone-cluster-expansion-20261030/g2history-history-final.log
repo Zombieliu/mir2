@@ -1,0 +1,40 @@
+    Finished `test` profile [unoptimized] target(s) in 55.70s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 34 tests
+test runtime::game_shop_gift::tests::gift_history_visitor_rejects_wrong_owner_or_invalid_monthly_binding_before_visiting ... ok
+test runtime::game_shop_gift::tests::gift_history_visitor_retains_retired_monthly_uids_and_ignores_all_ordinary_mail_bodies ... ok
+test runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward ... ok
+test runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes ... ok
+test runtime::inventory::exact_drop_uid_tests::fresh_drop_sessions_share_authority_without_using_planning_ids_as_history ... ok
+test runtime::item_uid_issuance::history::ledger_tests::typed_uid_history_cut_stone_tombstone_keeps_carrier_not_serial_or_request_text ... ok
+test runtime::item_uid_issuance::history::ledger_tests::typed_uid_history_redeemed_monthly_receipt_retains_uid_and_checks_actual_account ... ok
+test runtime::item_uid_issuance::history::ledger_tests::typed_uid_history_retired_procurement_keeps_original_tree_but_ignores_quote_selector ... ok
+test runtime::item_uid_issuance::history::ledger_tests::typed_uid_history_shared_guild_storage_keeps_full_tree_and_rejects_broken_carrier ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_legacy_equipment_does_not_invent_a_grid_identity ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_npc_journal_counts_only_validated_committed_server_uid ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_ordinary_player_text_never_becomes_a_uid_carrier ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_reads_raw_nested_ids_and_allows_retained_mirrors ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_real_npc_resale_and_rental_save_carriers_are_included ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_rejects_every_malformed_declared_save_asset_field ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_rejects_malformed_terminal_system_asset_payloads ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_released_hero_keeps_tree_history_and_sealed_carrier_reference ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_removed_child_retains_captured_slot_identity ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_terminal_system_custody_and_exact_reference_ids_are_retained ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_unknown_store_schema_is_not_silently_certified ... ok
+test runtime::item_uid_issuance::history::tests::typed_uid_history_wire_fresh_zero_siblings_use_only_original_real_ids ... ok
+test runtime::item_uid_issuance::tests::history_refresh_keeps_legacy_worlds_and_rejects_missing_or_mismatched_durable_config ... ok
+test runtime::item_uid_issuance::tests::typed_uid_history_invalid_declared_carrier_rejects_binding_without_raising_floor ... ok
+test runtime::item_uid_issuance::tests::typed_uid_history_player_send_mail_json_cannot_poison_file_authority ... ok
+test runtime::item_uid_issuance::tests::typed_uid_history_refresh_preflights_active_save_before_publishing_store_floor ... ok
+test runtime::item_uid_issuance::tests::uid_issuance_raises_reserved_custody_floor_and_catalog_selector_is_not_history ... ok
+test runtime::npc_purchase_transaction::tests::legacy_missing_journal_enables_persistent_actor_and_ordinary_save_keeps_history ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history ... ok
+test runtime::npc_purchase_transaction::tests::uid_tests::global_uid_merged_purchase_retains_retired_incoming_identity_in_history_floor ... ok
+test runtime::production::uid_planning_tests::production_uid_history_growth_after_reservation_rejects_then_retires_the_colliding_uid ... ok
+test runtime::production::uid_planning_tests::production_uid_history_preserves_running_collected_and_cancelled_debits ... ok
+test runtime::production::uid_planning_tests::production_uid_history_requires_actual_owner_and_valid_ledger_before_visiting ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_duplicate_max_history_rejected_without_real_floor_update ... ok
+test runtime::zone::runtime::owner_health_tests::owner_health_manager_retains_same_life_history_but_rejects_old_admission_and_revived_life ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 3222 filtered out; finished in 5.82s

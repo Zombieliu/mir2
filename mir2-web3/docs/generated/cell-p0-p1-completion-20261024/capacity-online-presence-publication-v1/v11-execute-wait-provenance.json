@@ -1,0 +1,144 @@
+{
+  "slow-stage-public": {
+    "input": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v11\\episode-50\\slow-stage-public.jsonl",
+    "bytes": 10255248,
+    "sha256": "e56090b6e7d4b892475e7c9a5f3bf1f46b97ce852c9e4d6583286273f7d31c44",
+    "rows": 107945,
+    "parseErrors": 0,
+    "keys": {
+      "observedAtMs": 107945,
+      "stage": 107945,
+      "durationMs": 107945,
+      "connection": 64908,
+      "queuedPhase": 3191,
+      "phaseElapsedMs": 3191,
+      "inputClass": 3191
+    },
+    "types": {
+      "observedAtMs": {
+        "int": 107945
+      },
+      "stage": {
+        "str": 107945
+      },
+      "durationMs": {
+        "int": 107945
+      },
+      "connection": {
+        "int": 64908
+      },
+      "queuedPhase": {
+        "str": 3191
+      },
+      "phaseElapsedMs": {
+        "int": 3191
+      },
+      "inputClass": {
+        "str": 3191
+      }
+    },
+    "omittedKeys": {},
+    "first": [
+      {
+        "observedAtMs": 1793028633570,
+        "stage": "session_action.execute",
+        "durationMs": 52,
+        "connection": 1,
+        "sourceLine": 1
+      },
+      {
+        "observedAtMs": 1793028633573,
+        "stage": "socket_turn.input",
+        "durationMs": 54,
+        "connection": 1,
+        "sourceLine": 2
+      }
+    ],
+    "fullReadPasses": 1,
+    "hashPass": "sha256 updated on every raw byte in the same single stream used for parsing",
+    "captureComplete": true
+  },
+  "store-stage-public": {
+    "input": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v11\\episode-50\\store-stage-public.jsonl",
+    "bytes": 2256462,
+    "sha256": "6fbaac33b32efd6326c2eb74960f867f5f5fbe8f7df4ce3e437b5ebd5a0e1c49",
+    "rows": 10240,
+    "parseErrors": 0,
+    "keys": {
+      "observedAtMs": 10240,
+      "stage": 10240,
+      "durationMs": 10240,
+      "operation": 10240,
+      "traceId": 10240,
+      "startedUnixMs": 10240,
+      "maxStartUs": 10240,
+      "maxEndUs": 10240,
+      "samples": 10240,
+      "totalUs": 10240
+    },
+    "types": {
+      "observedAtMs": {
+        "int": 10240
+      },
+      "stage": {
+        "str": 10240
+      },
+      "durationMs": {
+        "int": 10240
+      },
+      "operation": {
+        "str": 10240
+      },
+      "traceId": {
+        "int": 10240
+      },
+      "startedUnixMs": {
+        "int": 10240
+      },
+      "maxStartUs": {
+        "int": 10240
+      },
+      "maxEndUs": {
+        "int": 10240
+      },
+      "samples": {
+        "int": 10240
+      },
+      "totalUs": {
+        "int": 10240
+      }
+    },
+    "omittedKeys": {},
+    "first": [
+      {
+        "observedAtMs": 1793028815873,
+        "stage": "account_store.store_wait",
+        "durationMs": 50,
+        "operation": "guild_lookup",
+        "traceId": 37620,
+        "startedUnixMs": 1793028815823,
+        "maxStartUs": 0,
+        "maxEndUs": 50277,
+        "samples": 1,
+        "totalUs": 50277,
+        "sourceLine": 1
+      },
+      {
+        "observedAtMs": 1793028818066,
+        "stage": "account_store.store_wait",
+        "durationMs": 70,
+        "operation": "experience_admission",
+        "traceId": 38368,
+        "startedUnixMs": 1793028817991,
+        "maxStartUs": 0,
+        "maxEndUs": 70935,
+        "samples": 1,
+        "totalUs": 70934,
+        "sourceLine": 2
+      }
+    ],
+    "fullReadPasses": 1,
+    "hashPass": "sha256 updated on every raw byte in the same single stream used for parsing",
+    "captureComplete": true
+  }
+}

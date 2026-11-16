@@ -1,0 +1,81 @@
+{
+  "owner": "Root",
+  "kind": "Source74 strict Next01 compiled but original postguard rejected generated control mutation",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\next-build01-config.json",
+    "bytes": 5301,
+    "sha256": "8d974bef9fcb583077ebcd13ae62dee70cfc6a4c213daba15b512a9610d05c46"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-strict-final-snapshot01.json",
+    "bytes": 41212380,
+    "sha256": "930d9221620e964acaaad1393827712041421b6993ae080101b23c2319b6e1ae"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 85940,
+    "kind": "Source74 original strict Next after actual portable27 and complete thirty shared skins",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 60711,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "originalCallerExitCode": 1,
+  "originalCallerClosed": true,
+  "originalCallerPostguardCompleted": false,
+  "originalCallerRefusal": "post source pin mismatch: apps/web/next-env.d.ts",
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\next-build01\\stdout.log",
+    "bytes": 2438,
+    "sha256": "b3b018d170496e18f3117bdd1d82672412bb2704b24b6d24215294eddc3403d7"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\next-build01\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "strictTypesFinished": true,
+  "generatedPages": 13,
+  "rootIndependentAllInputHashes": 36760,
+  "rootIndependentChangedInputs": [
+    {
+      "relativePath": "apps/web/next-env.d.ts",
+      "before": {
+        "bytes": 294,
+        "sha256": "2e109e71276edba6191fc9952b1e26ed636bbb8d857b6bf252770bceb8d5da43"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\next-env.d.ts",
+        "bytes": 294,
+        "sha256": "fbd379dea51d9171e2a118464bcb25513d3d2b3aa9c809e02fbd67ea1dc58f3f"
+      },
+      "change": "Only Next generated output-directory references; strict options unchanged"
+    },
+    {
+      "relativePath": "apps/web/tsconfig.source73-build03.json",
+      "before": {
+        "bytes": 5491,
+        "sha256": "31ddda9412e7cc3a343bf37497168a929e4ca526b7a4e5b8a7fd585833b9dda0"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\tsconfig.source73-build03.json",
+        "bytes": 5632,
+        "sha256": "9c53bbb6217d17b0d22bbe9ca72d5106e7884d5da2a5a05c8445881dd785287c"
+      },
+      "change": "Only Next generated output-directory references; strict options unchanged"
+    }
+  ],
+  "allOther36758InputsMatched": true,
+  "mainTsconfigUnchanged": true,
+  "accepted": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

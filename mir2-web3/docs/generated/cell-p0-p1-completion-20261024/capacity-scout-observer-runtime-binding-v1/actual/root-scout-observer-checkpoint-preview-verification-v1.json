@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T21:11:20.064Z",
+  "result": {
+    "files": 3989,
+    "frozenBackendFiles": 32,
+    "historicalBackendPins": 32,
+    "additionalReleases": 6,
+    "additionalBackendInputs": 251,
+    "fullRuns": 7,
+    "failedReportsPreserved": 0,
+    "capacityReports": 29,
+    "capacityAccepted": 0,
+    "archivedFiles": 29,
+    "archivedRows": 671956,
+    "archivedMonitorRows": 8112,
+    "invalidMonitorRows": 422
+  },
+  "readmesChecked": 10,
+  "readmeLocalLinksChecked": 233,
+  "primaryHistoricalBackendExplicit": true,
+  "finalIndexCreated": false,
+  "rustBuildReusedOnlyAfterFutureExactSourceGuard": true,
+  "newNodeRegressionPassed": 219,
+  "formal13Failed": true,
+  "capacityAccepted": false,
+  "fixedCellStarted": false
+}

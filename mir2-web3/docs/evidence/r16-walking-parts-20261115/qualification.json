@@ -1,0 +1,996 @@
+{
+  "schema": "mir2.r16-walking-parts-qualification.v1",
+  "source": "d3aefa26d9b9a2d3aa4c12c6aebee94372cea9a6",
+  "parent": "213fc1737ffc6da3b84de98eed2f92b59c30a51d",
+  "buildParent": "e157c2d132995132497c7bc2750ad96283bae794",
+  "candidate": "e157-walking-parts-e83d7a4c",
+  "builtId": "AcN9Ftykc7S00_oVK5bx0",
+  "buildMs": 46002,
+  "sourceBinding": [
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "cb4a1db3bcf524a47f81cf0dc1fb37cc56bc65630499c9ba075a0a6944cead60",
+      "gitLfSha256": "cb4a1db3bcf524a47f81cf0dc1fb37cc56bc65630499c9ba075a0a6944cead60"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+      "sha256": "fcf4c83967a33d4fbea6d4312a98b6ff4bac9ad4a0011a444eb6048ea017f235",
+      "gitLfSha256": "fcf4c83967a33d4fbea6d4312a98b6ff4bac9ad4a0011a444eb6048ea017f235"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "sha256": "faea3ce539acb4a3394934551f921129b212813c872a279105c157b161d1813c",
+      "gitLfSha256": "faea3ce539acb4a3394934551f921129b212813c872a279105c157b161d1813c"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "sha256": "421285031400e7698fae4838ed6d91fdc7b9c71843851d30c759363a3ec6b42d",
+      "gitLfSha256": "421285031400e7698fae4838ed6d91fdc7b9c71843851d30c759363a3ec6b42d"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "sha256": "bef2fab93848d11fc903b679496aedcd9c6a9aa35967044c09bda3196b4a4c98",
+      "gitLfSha256": "bef2fab93848d11fc903b679496aedcd9c6a9aa35967044c09bda3196b4a4c98"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "5a08756ce3a92af3cbb2adc772988e6f920dd1b6b8a88999eba19d0e416d0385",
+      "gitLfSha256": "5a08756ce3a92af3cbb2adc772988e6f920dd1b6b8a88999eba19d0e416d0385"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/pinned-entry-actor-parts.ts",
+      "sha256": "2b14290314cfed12c67a65b49d59c0e21a1ec49dd8eb0046d002c821522f05e1",
+      "gitLfSha256": "2b14290314cfed12c67a65b49d59c0e21a1ec49dd8eb0046d002c821522f05e1"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-pinned-entry-actor-parts.mjs",
+      "sha256": "a41878e06326137f456723d537ce10760a5331ff2b6dc9cb93e3be4b3f134a85",
+      "gitLfSha256": "a41878e06326137f456723d537ce10760a5331ff2b6dc9cb93e3be4b3f134a85"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/r16-entry-walking-parts.json",
+      "sha256": "0a82525bd50cf5963580fceffb6b6d9e8518082fa54b3b31f96d73c1b23f92c3",
+      "gitLfSha256": "0a82525bd50cf5963580fceffb6b6d9e8518082fa54b3b31f96d73c1b23f92c3"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9.json",
+      "sha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+      "gitLfSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b.json",
+      "sha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+      "gitLfSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97.json",
+      "sha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+      "gitLfSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa.json",
+      "sha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+      "gitLfSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa"
+    },
+    {
+      "path": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d.json",
+      "sha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+      "gitLfSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/lib/verify-r16-walking-chunks.mjs",
+      "sha256": "15edb5298b30e46adb7e613c74a69c21821b79d25ec9e8380eafe709dec411ce",
+      "gitLfSha256": "15edb5298b30e46adb7e613c74a69c21821b79d25ec9e8380eafe709dec411ce",
+      "verificationOnly": true
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-r16-walking-chunk-verification.mjs",
+      "sha256": "583586d782cf53f759bb74d9f6808e0170f8d1a0a8afb043f32e07cb53573e05",
+      "gitLfSha256": "583586d782cf53f759bb74d9f6808e0170f8d1a0a8afb043f32e07cb53573e05",
+      "verificationOnly": true
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/verify-r16-walking-build.mjs",
+      "sha256": "9bf0b247f793887b5c724910c51d604c67a7e447f017574c2b2f584a690b0258",
+      "gitLfSha256": "9bf0b247f793887b5c724910c51d604c67a7e447f017574c2b2f584a690b0258",
+      "verificationOnly": true
+    }
+  ],
+  "foreignWork": {
+    "checked": 30,
+    "preserved": 29,
+    "independentChanges": [
+      "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md"
+    ]
+  },
+  "runtimeVersion": "bevy-0c553a754308e5b8",
+  "assetVersion": "20261108-r16-08ec86d5105c",
+  "sourceBaseFilesVerified": 2177,
+  "generatedMetadataOverrides": 1,
+  "foreignAnimationWipRetainedAndExcluded": true,
+  "tests": {
+    "passed": 269,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "15 selected entry, runtime, font, route-adapter and part-verification test files; not the whole frontend/workspace."
+  },
+  "parts": {
+    "compiled": {
+      "passed": true,
+      "parts": [
+        {
+          "passed": true,
+          "libraryKey": "Monster/000",
+          "scriptBytes": 210772,
+          "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+          "payloadBytes": 210658,
+          "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/003",
+          "scriptBytes": 60903,
+          "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+          "payloadBytes": 60788,
+          "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/004",
+          "scriptBytes": 151295,
+          "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+          "payloadBytes": 151180,
+          "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/005",
+          "scriptBytes": 176960,
+          "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+          "payloadBytes": 176845,
+          "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/139",
+          "scriptBytes": 165475,
+          "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+          "payloadBytes": 165361,
+          "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+          "imageCount": 48
+        }
+      ],
+      "payloadBytes": 764724,
+      "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "pngs": 240,
+      "libraries": 5,
+      "directions": 8,
+      "framesPerDirection": 6,
+      "scope": "Complete AST/JSON extraction from observed scripts, exact aggregate digest and PNG decoding; no module execution or resource prefill."
+    },
+    "globalObservationBudgetMs": 20000,
+    "maxActivePartReads": 2,
+    "originalPayloadBytes": 764724,
+    "partPayloadBytes": 764832,
+    "originalSingleScriptBytes": 764839,
+    "compiledPartScriptBytes": 765405
+  },
+  "originalMoveBudgetMs": 8000,
+  "originalVisualBudgetMs": 65000,
+  "originalNativeBudgetMs": 120000,
+  "cases": [
+    {
+      "label": "combined-r1",
+      "passed": false,
+      "mode": "compatibility",
+      "language": "en-US",
+      "failure": {
+        "stage": "ordinary-create-new-warrior-and-enter-original-town",
+        "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'header-timeout'\n"
+      },
+      "movement": {
+        "passed": true,
+        "ackMs": 112,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 288,
+          "y": 617
+        }
+      },
+      "walking": {
+        "passed": true,
+        "payloadBytes": 764724,
+        "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "parts": [
+          {
+            "passed": true,
+            "libraryKey": "Monster/000",
+            "scriptBytes": 210772,
+            "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+            "payloadBytes": 210658,
+            "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/003",
+            "scriptBytes": 60903,
+            "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+            "payloadBytes": 60788,
+            "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/004",
+            "scriptBytes": 151295,
+            "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+            "payloadBytes": 151180,
+            "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/005",
+            "scriptBytes": 176960,
+            "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+            "payloadBytes": 176845,
+            "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/139",
+            "scriptBytes": 165475,
+            "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+            "payloadBytes": 165361,
+            "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+            "imageCount": 48
+          }
+        ],
+        "pngCount": 240,
+        "source": "compiled-parts",
+        "compiledAfterFirstMs": null,
+        "frameAfterFirstMs": null,
+        "visibleFrame": {
+          "atMs": 18297,
+          "verifiedMs": 18297,
+          "objectId": "271806",
+          "path": "/original-ui/Monster/003/56.png",
+          "index": 56,
+          "direction": 4,
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "naturalWidth": 24,
+          "naturalHeight": 27,
+          "pngBytes": 514,
+          "pngSha256": "05b16b617bfdb0443a73a160562c2b60fa6325ff802277d564a1dee6ca3dd10a",
+          "pixelSha256": "867dd40380596ec4a3c7762ceba2622a8a1d44a5b85c3ce1c9525e44126c677b",
+          "rect": {
+            "x": 817,
+            "y": 322,
+            "width": 24,
+            "height": 27
+          },
+          "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+        },
+        "originalVisualBudgetMs": 65000
+      },
+      "native": {
+        "ready": true,
+        "afterFirstMs": 90952
+      },
+      "primaryFontStartAfterRuntimeMs": 8004,
+      "primaryAdmission": "header-timeout",
+      "prewarm": null,
+      "fonts": null,
+      "diary": false,
+      "reopenedDiary": false,
+      "saved": null,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "runtimeNetwork": [
+        {
+          "kind": "runtime",
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 16515,
+          "priority": "High",
+          "bytesObserved": 0,
+          "redirected": false,
+          "failure": "net::ERR_ABORTED",
+          "failedMs": 24516
+        },
+        {
+          "kind": "runtime",
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 24516,
+          "priority": "High",
+          "bytesObserved": 0,
+          "redirected": false,
+          "failure": "net::ERR_ABORTED",
+          "failedMs": 32520
+        },
+        {
+          "kind": "runtime",
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 32518,
+          "priority": "High",
+          "bytesObserved": 31452436,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/wasm",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headersMs": 32573,
+          "finishedMs": 33204
+        }
+      ],
+      "fontCachePostFailure": null
+    },
+    {
+      "label": "combined-r2",
+      "passed": false,
+      "mode": "compatibility",
+      "language": "en-US",
+      "failure": {
+        "stage": "ordinary-create-new-warrior-and-enter-original-town",
+        "message": "original shared Native120s"
+      },
+      "movement": {
+        "passed": true,
+        "ackMs": 134,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 288,
+          "y": 617
+        }
+      },
+      "walking": {
+        "passed": true,
+        "payloadBytes": 764724,
+        "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "parts": [
+          {
+            "passed": true,
+            "libraryKey": "Monster/000",
+            "scriptBytes": 210772,
+            "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+            "payloadBytes": 210658,
+            "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/003",
+            "scriptBytes": 60903,
+            "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+            "payloadBytes": 60788,
+            "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/004",
+            "scriptBytes": 151295,
+            "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+            "payloadBytes": 151180,
+            "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/005",
+            "scriptBytes": 176960,
+            "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+            "payloadBytes": 176845,
+            "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/139",
+            "scriptBytes": 165475,
+            "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+            "payloadBytes": 165361,
+            "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+            "imageCount": 48
+          }
+        ],
+        "pngCount": 240,
+        "source": "compiled-parts",
+        "compiledAfterFirstMs": 298,
+        "frameAfterFirstMs": 319,
+        "visibleFrame": {
+          "atMs": 14842,
+          "verifiedMs": 14843,
+          "objectId": "206302",
+          "path": "/original-ui/Monster/004/78.png",
+          "index": 78,
+          "direction": 7,
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "naturalWidth": 64,
+          "naturalHeight": 76,
+          "pngBytes": 2271,
+          "pngSha256": "94219026c40268ab06a06777dfe24671984ba58cdc50611d90e3406a8318fe18",
+          "pixelSha256": "22e7efc4ab95611651312c8b0002fb5d787b973113bcd83cc62dece4bc5b7922",
+          "rect": {
+            "x": 505,
+            "y": 198,
+            "width": 64,
+            "height": 76
+          },
+          "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+        },
+        "originalVisualBudgetMs": 65000
+      },
+      "native": null,
+      "primaryFontStartAfterRuntimeMs": 7996,
+      "primaryAdmission": null,
+      "prewarm": null,
+      "fonts": null,
+      "diary": false,
+      "reopenedDiary": false,
+      "saved": null,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "runtimeNetwork": [
+        {
+          "kind": "runtime",
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 14644,
+          "priority": "High",
+          "bytesObserved": 0,
+          "redirected": false,
+          "failure": "net::ERR_ABORTED",
+          "failedMs": 22645
+        },
+        {
+          "kind": "runtime",
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 22645,
+          "priority": "High",
+          "bytesObserved": 31077946,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/wasm",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headersMs": 30115
+        }
+      ],
+      "fontCachePostFailure": null
+    },
+    {
+      "label": "default",
+      "passed": true,
+      "mode": "compatibility",
+      "language": "en-US",
+      "failure": null,
+      "movement": {
+        "passed": true,
+        "ackMs": 126,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 288,
+          "y": 617
+        }
+      },
+      "walking": {
+        "passed": true,
+        "payloadBytes": 764724,
+        "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "parts": [
+          {
+            "passed": true,
+            "libraryKey": "Monster/000",
+            "scriptBytes": 210772,
+            "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+            "payloadBytes": 210658,
+            "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/003",
+            "scriptBytes": 60903,
+            "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+            "payloadBytes": 60788,
+            "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/004",
+            "scriptBytes": 151295,
+            "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+            "payloadBytes": 151180,
+            "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/005",
+            "scriptBytes": 176960,
+            "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+            "payloadBytes": 176845,
+            "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/139",
+            "scriptBytes": 165475,
+            "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+            "payloadBytes": 165361,
+            "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+            "imageCount": 48
+          }
+        ],
+        "pngCount": 240,
+        "source": "compiled-parts",
+        "compiledAfterFirstMs": 331,
+        "frameAfterFirstMs": 2322,
+        "visibleFrame": {
+          "atMs": 16890,
+          "verifiedMs": 16891,
+          "objectId": "206515",
+          "path": "/original-ui/Monster/004/56.png",
+          "index": 56,
+          "direction": 4,
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "naturalWidth": 60,
+          "naturalHeight": 64,
+          "pngBytes": 1591,
+          "pngSha256": "42bde392b04d8b92dfc7fca40e4c7c19f50b23d00e35482df417681107eaa0fc",
+          "pixelSha256": "a90b8d454b7318cf1d723243ccb89dfd5421685c4b003d24300a9f069bcebeb5",
+          "rect": {
+            "x": 426,
+            "y": 238,
+            "width": 60,
+            "height": 64
+          },
+          "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+        },
+        "originalVisualBudgetMs": 65000
+      },
+      "native": {
+        "ready": true,
+        "afterFirstMs": 109640
+      },
+      "primaryFontStartAfterRuntimeMs": 144,
+      "primaryAdmission": "headers",
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "fonts": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "present": true,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "present": true,
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "present": true,
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "present": true,
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "diary": true,
+      "reopenedDiary": true,
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "runtimeNetwork": [
+        {
+          "kind": "runtime",
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 14689,
+          "priority": "High",
+          "bytesObserved": 31452436,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/wasm",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headersMs": 14718,
+          "finishedMs": 15247
+        },
+        {
+          "kind": "runtime",
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 141555,
+          "priority": "High",
+          "bytesObserved": 31452436,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/wasm",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headersMs": 141570,
+          "finishedMs": 141867
+        }
+      ],
+      "fontCachePostFailure": null
+    },
+    {
+      "label": "shared-tw",
+      "passed": false,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "failure": {
+        "stage": "ordinary-create-new-warrior-and-enter-original-town",
+        "message": "original shared Native120s"
+      },
+      "movement": {
+        "passed": true,
+        "ackMs": 127,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 288,
+          "y": 617
+        }
+      },
+      "walking": {
+        "passed": true,
+        "payloadBytes": 764724,
+        "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "parts": [
+          {
+            "passed": true,
+            "libraryKey": "Monster/000",
+            "scriptBytes": 210772,
+            "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+            "payloadBytes": 210658,
+            "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/003",
+            "scriptBytes": 60903,
+            "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+            "payloadBytes": 60788,
+            "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/004",
+            "scriptBytes": 151295,
+            "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+            "payloadBytes": 151180,
+            "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/005",
+            "scriptBytes": 176960,
+            "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+            "payloadBytes": 176845,
+            "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+            "imageCount": 48
+          },
+          {
+            "passed": true,
+            "libraryKey": "Monster/139",
+            "scriptBytes": 165475,
+            "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+            "payloadBytes": 165361,
+            "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+            "imageCount": 48
+          }
+        ],
+        "pngCount": 240,
+        "source": "compiled-parts",
+        "compiledAfterFirstMs": 28309,
+        "frameAfterFirstMs": 31246,
+        "visibleFrame": {
+          "atMs": 46250,
+          "verifiedMs": 46250,
+          "objectId": "271806",
+          "path": "/original-ui/Monster/003/38.png",
+          "index": 38,
+          "direction": 1,
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "naturalWidth": 44,
+          "naturalHeight": 49,
+          "pngBytes": 951,
+          "pngSha256": "4a816f8505a86f1ffb4f00912bce1c3105cedf8b0d0bf836e2f583a5d3d936a6",
+          "pixelSha256": "a87c7882c2facae1fd6f63e4ef508e0f18752d00f021cee526968d53948f132d",
+          "rect": {
+            "x": 821,
+            "y": 292,
+            "width": 44,
+            "height": 49
+          },
+          "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+        },
+        "originalVisualBudgetMs": 65000
+      },
+      "native": null,
+      "primaryFontStartAfterRuntimeMs": 167,
+      "primaryAdmission": null,
+      "prewarm": null,
+      "fonts": null,
+      "diary": false,
+      "reopenedDiary": false,
+      "saved": null,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "runtimeNetwork": [
+        {
+          "kind": "runtime",
+          "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "requestMs": 15132,
+          "priority": "High",
+          "bytesObserved": 32378001,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/wasm",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headersMs": 15176,
+          "finishedMs": 15883
+        }
+      ],
+      "fontCachePostFailure": [
+        {
+          "name": "mir2-asset-cache-sw8-static-critical-20261108-r16-08ec86d5105c-d00abd9aaac3",
+          "rows": [
+            {
+              "path": "/original-ui/fonts/NotoSansTC.ttf",
+              "ownOrigin": true,
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+              "ownOrigin": true,
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+              "ownOrigin": true,
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+              "ownOrigin": true,
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+              "ownOrigin": true,
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cacheAudit": {
+    "scope": "Read existing font CacheStorage responses in a copy of the terminal failed profile. No game entry, font HTTP fetch, response prefill or cache writes.",
+    "passed": true,
+    "caches": [
+      {
+        "name": "mir2-asset-cache-sw8-static-critical-20261108-r16-08ec86d5105c-d00abd9aaac3",
+        "rows": [
+          {
+            "path": "/original-ui/fonts/NotoSansTC.ttf",
+            "ownOrigin": true,
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+            "ownOrigin": true,
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+            "ownOrigin": true,
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+            "ownOrigin": true,
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+            "ownOrigin": true,
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      }
+    ],
+    "fontNetworkRequests": 0,
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "fontRangeProbe": {
+    "scope": "Read-only 64KiB Range transport probe; not a full font digest or browser performance qualification.",
+    "rows": [
+      {
+        "base": "https://numeron.obelisk.build",
+        "status": 200,
+        "headersMs": 2118,
+        "contentRange": null,
+        "contentLength": null,
+        "acceptRanges": null,
+        "encoding": null
+      },
+      {
+        "base": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+        "status": 206,
+        "headersMs": 1098,
+        "contentRange": "bytes 0-NaN/16437364",
+        "contentLength": "65536",
+        "acceptRanges": "bytes",
+        "encoding": null,
+        "bytes": 65536,
+        "sha256": "8e5b96cfdc4d85d056db5ed847fc8bf6e87e5e9da4a7f74ba004fe6b997ab04c",
+        "completeMs": 1264
+      },
+      {
+        "base": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+        "status": 206,
+        "headersMs": 978,
+        "contentRange": "bytes 0-NaN/16437364",
+        "contentLength": "65536",
+        "acceptRanges": "bytes",
+        "encoding": null,
+        "bytes": 65536,
+        "sha256": "8e5b96cfdc4d85d056db5ed847fc8bf6e87e5e9da4a7f74ba004fe6b997ab04c",
+        "completeMs": 1372
+      }
+    ]
+  },
+  "fontRangeReference": {
+    "sourceFontBytes": 16437364,
+    "sourceFontSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "prefix65536Sha256": "8e5b96cfdc4d85d056db5ed847fc8bf6e87e5e9da4a7f74ba004fe6b997ab04c",
+    "prefixMatchesRangeProbe": true,
+    "hypotheticalRangeParts": 16,
+    "implemented": false
+  },
+  "sourceOfNativeFontReadiness": "apps/game-client/runtime/src/portable_ui_fonts.rs: readiness_from checks the legacy SC face and all six fallback locales; unchanged in this round.",
+  "public": {
+    "deployed": false,
+    "expectedWeb": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "expectedDeployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "expectedGateway": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "readback": {
+      "checkedAt": "2026-11-15T07:35:43.474Z",
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "ok": true
+        }
+      ]
+    },
+    "alias": {
+      "alias": "numeron.obelisk.build",
+      "deploymentId": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "redirect": null,
+      "deletedAt": null,
+      "checkedAt": "2026-11-15T07:35:40.917Z"
+    },
+    "ssh": {
+      "checkedAt": "2026-11-15T07:38:06.452183+00:00",
+      "user": "ubuntu",
+      "readOnly": true,
+      "hostKeyVerified": true,
+      "source": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+      "ok": true,
+      "connectionClosed": true
+    }
+  },
+  "overallCandidate100": false,
+  "overallAccepted100": false,
+  "completeTwoCohortLocalQualification": false,
+  "remaining": [
+    "Complete large SC font delivery and the original Native120 gate",
+    "Malformed public Range Content-Range response and absent first-party range forwarding",
+    "The combined Native partial-body failure",
+    "Two complete public cohorts and matched release qualification",
+    "Known six inherited fixture failures, other quest/hunt routes, three classes1–30, Alo, visual/language gaps and physical client acceptance"
+  ]
+}

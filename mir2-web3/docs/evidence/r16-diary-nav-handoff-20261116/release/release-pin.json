@@ -1,0 +1,39 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "base": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "baseline": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "checkpoint": "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+  "commits": 14,
+  "totalFiles": 237,
+  "segments": [
+    {
+      "base": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "source": "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+      "commits": 5,
+      "files": 90
+    },
+    {
+      "base": "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+      "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+      "commits": 4,
+      "files": 59
+    },
+    {
+      "base": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+      "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+      "commits": 5,
+      "files": 105
+    }
+  ],
+  "independentGitHubComparisons": true,
+  "onlyAllowedControllerPinFieldsChanged": true,
+  "compiledAppLibFiles": 2181,
+  "generatedInputException": 1,
+  "worker": {
+    "bytes": 73875,
+    "sha256": "2333c5f6c64c05c2485c65bf4965df859e25d0bc446f72ac72ab716885f4aba2"
+  },
+  "candidate": "r16-diary-nav-259e9823",
+  "controllerSha256": "821e0c66d927704e1c3a703a75ca6e7fc5ff43b1f48122e6a2f741cbab69a82e",
+  "publicDeploy": false
+}

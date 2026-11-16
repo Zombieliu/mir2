@@ -1,0 +1,852 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline V12 death/presence diagnosis only; original false report verdicts retained. No load, tests, builds, game changes, threshold changes, or automatic resurrection.",
+  "originalFalseVerdictsPreserved": {
+    "ok": false,
+    "playableCapacityAccepted": false,
+    "movementCapacityAccepted": false,
+    "combatCapacityAccepted": false,
+    "visualAccepted": false,
+    "safetyStopped": true,
+    "capacityUpperBound": null,
+    "peakControlledActors": 50,
+    "peakServerActive": 50,
+    "diagnosticCompleted": false
+  },
+  "fatal": {
+    "actor": "actor-1",
+    "reason": "died-or-lost-presence-no-automatic-resurrection",
+    "reportPhaseEndAt": 1793032493788,
+    "clockMeaning": "phase end bounds the stop; not an exact death event timestamp"
+  },
+  "identity": {
+    "candidates": [
+      50045
+    ],
+    "status": "unique",
+    "evidence": [
+      {
+        "actor": "actor-1",
+        "zoneObjectID": 50045,
+        "firstAt": 1793032327973,
+        "lastAt": 1793032504318,
+        "count": 836,
+        "seenBy": "actor-4",
+        "source": "peer",
+        "sourceLine": 5531
+      }
+    ],
+    "rule": "Global evidence must come from another observer peer/projection; local self1000 excluded"
+  },
+  "measurement": {
+    "name": "stage-50",
+    "kind": "measurement",
+    "targetActors": 50,
+    "startedAtMs": 1793032479040,
+    "endedAtMs": 1793032493788,
+    "completed": false,
+    "wallSeconds": 14.748
+  },
+  "steadyOnline": {
+    "samples": 15,
+    "declaredActors": 50,
+    "minimumOnlineActors": 50,
+    "maximumOnlineActors": 50,
+    "lastOnlineActors": 50
+  },
+  "continuousActivity": {
+    "fatalActor": {
+      "actor": "actor-1",
+      "role": "combat",
+      "activeSeconds": 14.75389049999998,
+      "plannedPauseSeconds": 11.486671000000031,
+      "assessedWindows": 1,
+      "activeSecondsMeaning": "Continuous actor activity includes pre-measurement ramp/settle; not measurement duration"
+    },
+    "bootstrapMaximumActiveSeconds": 126.3379682,
+    "measurementMaximumActiveSeconds": 14.75389049999998,
+    "clockSources": {
+      "bootstrap": "/bootstrapContinuousAcceptance/actors/*/activeSeconds",
+      "measurement": "/continuousAcceptance/actors/*/activeSeconds",
+      "wallTime": "/phaseWindows measurement startedAtMs/endedAtMs",
+      "meaning": "Bootstrap activeSeconds 126.3379682 is pre-measurement actor activity; measurement wall time is 14.748s. Activity clocks may differ slightly at sampling/stop boundaries and are not substitutes for wall duration."
+    }
+  },
+  "deathAssessment": {
+    "directRetainedObjectDiedOrExactZeroRows": 0,
+    "actorStateRows": 0,
+    "lastRecordedExactHp": {
+      "sourceLine": 44176,
+      "at": 1793032475290,
+      "owner": {
+        "objectId": 1000,
+        "hp": 14,
+        "maxHp": 18,
+        "dead": false,
+        "actor": null,
+        "position": {
+          "x": 232,
+          "y": 623
+        }
+      },
+      "target": {
+        "objectId": 206527,
+        "hp": 21,
+        "maxHp": 25,
+        "dead": false,
+        "actor": null,
+        "position": {
+          "x": 231,
+          "y": 624
+        }
+      },
+      "packetCount": 5
+    },
+    "lastRecordedMp": {
+      "source": "post-cleanup-final-durable-save",
+      "mp": 14,
+      "maxMp": 14
+    },
+    "presenceAroundFatal": [
+      {
+        "sourceLine": 50028,
+        "at": 1793032493733,
+        "source": "ObjectRemove",
+        "beforeSelf": {
+          "objectId": 1000,
+          "actor": "actor-1",
+          "position": {
+            "x": 233,
+            "y": 623
+          }
+        },
+        "afterSelf": {
+          "objectId": 1000,
+          "actor": "actor-1",
+          "position": {
+            "x": 233,
+            "y": 623
+          }
+        }
+      },
+      {
+        "sourceLine": 50314,
+        "at": 1793032498228,
+        "source": "ObjectRemove",
+        "beforeSelf": {
+          "objectId": 1000,
+          "actor": "actor-1",
+          "position": {
+            "x": 233,
+            "y": 623
+          }
+        },
+        "afterSelf": {
+          "objectId": 1000,
+          "actor": "actor-1",
+          "position": {
+            "x": 233,
+            "y": 623
+          }
+        }
+      },
+      {
+        "sourceLine": 50358,
+        "at": 1793032499756,
+        "source": "ObjectRemove",
+        "beforeSelf": {
+          "objectId": 1000,
+          "actor": "actor-1",
+          "position": {
+            "x": 233,
+            "y": 623
+          }
+        },
+        "afterSelf": {
+          "objectId": 1000,
+          "actor": "actor-1",
+          "position": {
+            "x": 233,
+            "y": 623
+          }
+        }
+      }
+    ],
+    "firstSubsequentAbsentSelf": {
+      "sourceLine": 50524,
+      "at": 1793032504811,
+      "source": "worldSnapshot",
+      "beforeSelf": {
+        "objectId": 1000,
+        "actor": "actor-1",
+        "position": {
+          "x": 233,
+          "y": 623
+        }
+      },
+      "afterSelf": null
+    },
+    "conclusion": "Final durable saved HP=0/18 and MP=14/14 corroborates the exact-zero-health/death path. Owner projection remains present immediately before and after the stop; pure presence loss is not supported by retained lifecycle evidence. The final save was read after cleanup and cannot prove exact fatal-instant HP, lethal source, cadence or death time.",
+    "predicateSource": "protocol-observation.mjs hasAuthoritativePlayerDeath: dead===true OR exact playerHp<=0 OR exact entity.hp<=0. Percent-only health is not a death proof.",
+    "finalDurableEvidence": {
+      "file": "final-saved-actor-state-v1.json",
+      "state": {
+        "hp": 0,
+        "max_hp": 18,
+        "mp": 14,
+        "max_mp": 14,
+        "revision": 27,
+        "position": {
+          "x": 233,
+          "y": 623
+        },
+        "level": 1,
+        "deadStored": null,
+        "exactHpNonpositive": true,
+        "deadMeaning": "CharacterSaveRecord has no dead scalar in its current schema. exactHpNonpositive is derived only from the saved exact HP, not from percent or report text."
+      },
+      "readAfterCleanup": true,
+      "storeReadPasses": 1
+    }
+  },
+  "hpMaintenance": {
+    "records": [
+      {
+        "sourceLine": 25074,
+        "type": "nativeHpRecovery",
+        "at": 1793032411299,
+        "hpBefore": 11,
+        "maximumHp": 18,
+        "actor": "actor-1",
+        "phase": "settle",
+        "status": "sent"
+      },
+      {
+        "sourceLine": 25380,
+        "type": "nativeHpRecovery",
+        "at": 1793032412249,
+        "hpBefore": 11,
+        "maximumHp": 18,
+        "actor": "actor-1",
+        "phase": "settle",
+        "status": "verified",
+        "consumed": true,
+        "hpIncreaseObserved": false,
+        "acknowledgement": {
+          "sequence": 2179,
+          "monotonicMs": 318902.9955
+        },
+        "consumption": {
+          "sequence": 2180,
+          "monotonicMs": 319000.3501,
+          "quantity": 0
+        }
+      },
+      {
+        "sourceLine": 25409,
+        "type": "nativeHpRecovery",
+        "at": 1793032412569,
+        "actor": "actor-1",
+        "phase": "settle",
+        "status": "not-sent",
+        "reason": "no-held-hp-item"
+      }
+    ],
+    "lastConfirmedItemConsumption": {
+      "sourceLine": 25380,
+      "type": "nativeHpRecovery",
+      "at": 1793032412249,
+      "hpBefore": 11,
+      "maximumHp": 18,
+      "actor": "actor-1",
+      "phase": "settle",
+      "status": "verified",
+      "consumed": true,
+      "hpIncreaseObserved": false,
+      "acknowledgement": {
+        "sequence": 2179,
+        "monotonicMs": 318902.9955
+      },
+      "consumption": {
+        "sequence": 2180,
+        "monotonicMs": 319000.3501,
+        "quantity": 0
+      }
+    },
+    "postConsumptionNotice": {
+      "sourceLine": 25409,
+      "type": "nativeHpRecovery",
+      "at": 1793032412569,
+      "actor": "actor-1",
+      "phase": "settle",
+      "status": "not-sent",
+      "reason": "no-held-hp-item"
+    },
+    "proofMeaning": "verified=UseItem acknowledgement plus inventory consumption; hpIncreaseObserved=false does not prove that HP never increased"
+  },
+  "damageAttribution": {
+    "retainedNearFatalPacketCount": 15,
+    "retainedVictimDamageOrDeathPacketCount": 0,
+    "lastOwnerSnapshotSeries": [
+      {
+        "sourceLine": 31974,
+        "at": 1793032436130,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 243,
+            "y": 632
+          }
+        },
+        "target": {
+          "objectId": 206620,
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 242,
+            "y": 632
+          }
+        },
+        "packetCount": 4
+      },
+      {
+        "sourceLine": 33441,
+        "at": 1793032441307,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 238,
+            "y": 636
+          }
+        },
+        "target": {
+          "objectId": 206549,
+          "hp": 25,
+          "maxHp": 25,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 237,
+            "y": 637
+          }
+        },
+        "packetCount": 5
+      },
+      {
+        "sourceLine": 35997,
+        "at": 1793032449473,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 230,
+            "y": 623
+          }
+        },
+        "target": {
+          "objectId": 206635,
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 229,
+            "y": 622
+          }
+        },
+        "packetCount": 1
+      },
+      {
+        "sourceLine": 36736,
+        "at": 1793032452425,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 230,
+            "y": 623
+          }
+        },
+        "target": {
+          "objectId": 206629,
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 230,
+            "y": 622
+          }
+        },
+        "packetCount": 4
+      },
+      {
+        "sourceLine": 37930,
+        "at": 1793032456115,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 231,
+            "y": 622
+          }
+        },
+        "target": {
+          "objectId": 206647,
+          "hp": 17,
+          "maxHp": 20,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 230,
+            "y": 621
+          }
+        },
+        "packetCount": 1
+      },
+      {
+        "sourceLine": 39662,
+        "at": 1793032461311,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 232,
+            "y": 622
+          }
+        },
+        "target": {
+          "objectId": 206503,
+          "hp": 21,
+          "maxHp": 25,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 231,
+            "y": 622
+          }
+        },
+        "packetCount": 1
+      },
+      {
+        "sourceLine": 40598,
+        "at": 1793032464215,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 232,
+            "y": 622
+          }
+        },
+        "target": {
+          "objectId": 206539,
+          "hp": 22,
+          "maxHp": 25,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 231,
+            "y": 622
+          }
+        },
+        "packetCount": 6
+      },
+      {
+        "sourceLine": 41351,
+        "at": 1793032466425,
+        "owner": {
+          "objectId": 1000,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 232,
+            "y": 622
+          }
+        },
+        "target": {
+          "objectId": 206335,
+          "hp": 23,
+          "maxHp": 25,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 231,
+            "y": 621
+          }
+        },
+        "packetCount": 1
+      },
+      {
+        "sourceLine": 43425,
+        "at": 1793032473098,
+        "owner": {
+          "objectId": 1000,
+          "hp": 17,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 232,
+            "y": 623
+          }
+        },
+        "target": {
+          "objectId": 206518,
+          "hp": 23,
+          "maxHp": 25,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 232,
+            "y": 624
+          }
+        },
+        "packetCount": 5
+      },
+      {
+        "sourceLine": 44176,
+        "at": 1793032475290,
+        "owner": {
+          "objectId": 1000,
+          "hp": 14,
+          "maxHp": 18,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 232,
+            "y": 623
+          }
+        },
+        "target": {
+          "objectId": 206527,
+          "hp": 21,
+          "maxHp": 25,
+          "dead": false,
+          "actor": null,
+          "position": {
+            "x": 231,
+            "y": 624
+          }
+        },
+        "packetCount": 5
+      }
+    ],
+    "sourceAndFrequency": "Unavailable. No recorded near-fatal victim damage receipts or per-actor health telemetry. HP differences across action-start snapshots cannot identify attack source, cadence, healing, or exact lethal time.",
+    "outgoingDamageWarning": "Near-fatal DamageIndicator values 3,4,2 target monsters, not the fatal actor. Do not count them as incoming damage.",
+    "nearbyMonsterAttackPoseCandidates": [
+      {
+        "atMs": 1793032472875,
+        "objectId": 206518,
+        "position": {
+          "x": 232,
+          "y": 624
+        },
+        "direction": "Up",
+        "actorPosition": {
+          "x": 232,
+          "y": 623
+        }
+      },
+      {
+        "atMs": 1793032475275,
+        "objectId": 206527,
+        "position": {
+          "x": 231,
+          "y": 624
+        },
+        "direction": "UpRight",
+        "actorPosition": {
+          "x": 232,
+          "y": 623
+        }
+      }
+    ],
+    "candidateLimit": "These are two public target-monster attack poses facing the owner tile, 2.4s apart, not a victim-linked damage sequence or lethal attribution. The final 18.498s after the last owner HP snapshot lack retained damage/death packets."
+  },
+  "gatewayLatency": {
+    "allTraceChains": 29814,
+    "measurementProducedChains": 2615,
+    "measurementProducedOverOneSecondCount": 7,
+    "measurementOverOneSecondTraces": [
+      {
+        "serverTraceID": 27795,
+        "registration": 6,
+        "recipientZoneID": 50005,
+        "targetObjectID": 50006,
+        "kind": "ObjectRemove",
+        "position": null,
+        "producerUnixMs": 1793032484870,
+        "estimatedSentUnixMs": 1793032486040.415,
+        "producerToSentUs": 1170415,
+        "queueAgeUs": 1170388,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          316217,
+          318538,
+          318539,
+          318540,
+          318541
+        ]
+      },
+      {
+        "serverTraceID": 29240,
+        "registration": 31,
+        "recipientZoneID": 50030,
+        "targetObjectID": 50027,
+        "kind": "ObjectPlayer",
+        "position": {
+          "x": 227,
+          "y": 571
+        },
+        "producerUnixMs": 1793032492418,
+        "estimatedSentUnixMs": 1793032493588.274,
+        "producerToSentUs": 1170274,
+        "queueAgeUs": 1170228,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          331412,
+          333784,
+          333785,
+          333786,
+          333787
+        ]
+      },
+      {
+        "serverTraceID": 27835,
+        "registration": 6,
+        "recipientZoneID": 50005,
+        "targetObjectID": 50009,
+        "kind": "ObjectRemove",
+        "position": null,
+        "producerUnixMs": 1793032484897,
+        "estimatedSentUnixMs": 1793032486040.24,
+        "producerToSentUs": 1143240,
+        "queueAgeUs": 1143217,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          316412,
+          318542,
+          318543,
+          318544,
+          318545
+        ]
+      },
+      {
+        "serverTraceID": 27903,
+        "registration": 26,
+        "recipientZoneID": 50025,
+        "targetObjectID": 50014,
+        "kind": "ObjectPlayer",
+        "position": {
+          "x": 244,
+          "y": 589
+        },
+        "producerUnixMs": 1793032485664,
+        "estimatedSentUnixMs": 1793032486796.179,
+        "producerToSentUs": 1132179,
+        "queueAgeUs": 1132129,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          317522,
+          319963,
+          319964,
+          319965,
+          319966
+        ]
+      },
+      {
+        "serverTraceID": 27934,
+        "registration": 26,
+        "recipientZoneID": 50025,
+        "targetObjectID": 50028,
+        "kind": "ObjectPlayer",
+        "position": {
+          "x": 227,
+          "y": 576
+        },
+        "producerUnixMs": 1793032485672,
+        "estimatedSentUnixMs": 1793032486796.085,
+        "producerToSentUs": 1124085,
+        "queueAgeUs": 1124046,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          317664,
+          319967,
+          319968,
+          319969,
+          319970
+        ]
+      },
+      {
+        "serverTraceID": 27330,
+        "registration": 26,
+        "recipientZoneID": 50025,
+        "targetObjectID": 50014,
+        "kind": "ObjectRemove",
+        "position": null,
+        "producerUnixMs": 1793032482704,
+        "estimatedSentUnixMs": 1793032483818.25,
+        "producerToSentUs": 1114250,
+        "queueAgeUs": 1114222,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          311440,
+          313746,
+          313747,
+          313748,
+          313749
+        ]
+      },
+      {
+        "serverTraceID": 27364,
+        "registration": 26,
+        "recipientZoneID": 50025,
+        "targetObjectID": 50025,
+        "kind": "UserLocation",
+        "position": {
+          "x": 241,
+          "y": 573
+        },
+        "producerUnixMs": 1793032482809,
+        "estimatedSentUnixMs": 1793032483818.453,
+        "producerToSentUs": 1009453,
+        "queueAgeUs": 1009428,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          311746,
+          313740,
+          313741,
+          313742,
+          313744
+        ]
+      }
+    ],
+    "measurementMaximumProducerToSentUs": 1170415,
+    "fatalPlusMinusWindow": {
+      "from": 1793032488788,
+      "to": 1793032495788,
+      "maximumProducerToSentUs": 1175648,
+      "overOneSecondCount": 7
+    },
+    "fatalRecipientOverOneSecondWithinThirtySeconds": [
+      {
+        "serverTraceID": 24426,
+        "registration": 46,
+        "recipientZoneID": 50045,
+        "targetObjectID": 50041,
+        "kind": "ObjectPlayer",
+        "position": {
+          "x": 216,
+          "y": 615
+        },
+        "producerUnixMs": 1793032465892,
+        "estimatedSentUnixMs": 1793032467141.915,
+        "producerToSentUs": 1249915,
+        "queueAgeUs": 1249887,
+        "gateWaitUs": 0,
+        "sourceLines": [
+          277863,
+          280706,
+          280707,
+          280708,
+          280709
+        ]
+      }
+    ],
+    "conclusion": "At least one AOI delivery produced during the measurement exceeded one second before send/flush; this is independent of, and does not establish the cause of, the actor death/presence stop."
+  },
+  "rawInputPins": {
+    "samples": {
+      "sha256": "4aee8f6a839bd9a06a71e0bd128f71563e2d2c0cdd0578edb2fa8b1d6b4ce10d",
+      "bytes": 28566718,
+      "lines": 50599,
+      "oversizeLines": 0,
+      "fullReadPasses": 1
+    },
+    "stderr": {
+      "sha256": "cce17a98a27b20327751c2db29d32343df0a49a69ad65d5cbf9b4a06950031f7",
+      "bytes": 55942556,
+      "lines": 341976,
+      "oversizeLines": 0,
+      "fullReadPasses": 1,
+      "acceptedDeliveryRows": 149298,
+      "acceptedSlowSpanRows": 44706,
+      "ignoredLines": 147972,
+      "rejectedDeliveryRows": 0,
+      "rejectedSlowSpanRows": 0
+    },
+    "report": {
+      "bytes": 77751,
+      "sha256": "824b290e05fe917d3d290a08c2951a9e4aa4ba0f6ac880bf38c33354172c67b4"
+    },
+    "finalStore": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-50\\private\\accounts.json",
+      "bytes": 469387,
+      "sha256": "e0175df377732a3906d904278ce4260ee6b7a09e89a9f8c866ccd57b841e2094",
+      "physicalReadPasses": 1,
+      "sizeBefore": 469387,
+      "sizeAfter": 469387,
+      "lastModifiedBeforeUtc": "2026-10-26T16:35:07.045Z",
+      "lastModifiedAfterUtc": "2026-10-26T16:35:07.045Z",
+      "stableDuringRead": true
+    }
+  },
+  "anonymousStreams": {
+    "samples": {
+      "file": "all-strict-anonymous-samples.jsonl",
+      "rows": 50599,
+      "bytes": 23670806,
+      "sha256": "96279834c8e26b65ff3570886833e10da1210791abb8c841ad54434db0c1f532"
+    },
+    "stderr": {
+      "file": "all-strict-anonymous-stderr.jsonl",
+      "rows": 194004,
+      "bytes": 54737938,
+      "sha256": "aa14cca1b096e67f68d4e780c7c39b2e61b84a21f8d9c847d4796352cebf2c6a"
+    },
+    "selected": {
+      "file": "selected-anonymous.jsonl",
+      "rows": 1154,
+      "bytes": 349957,
+      "sha256": "9d4f0b6800311b15ab95f76af41667732755f03d7b8f6a0deb4593bb48452695"
+    }
+  },
+  "limits": [
+    "Damage/health packet retention is limited to public fields recorded by the driver; absence is not absence of server damage. Pending attack windows may overlap; receipt dedup uses traceActor, receiver, sequence and packet.",
+    "Final HP/MP cannot be invented from ObjectHealth percentage or absent HealthChanged records. Owner snapshots are action-start observations, not continuous health telemetry.",
+    "UserLocation target is recipient global ID. Local1000 is never a global mapping or an automatic cross-client actor match.",
+    "Gateway trace IDs group server stages only. No client trace ID exists; latency is producer-to-send/flush, not client receive.",
+    "read_gate and completion_to_pop recordedUnixMs may be delayed emission: do not subtract duration to establish exact intervals. health stages overlap and must not be added.",
+    "normalDepth/ownerDepth are dequeue snapshots. completion_to_pop includes idle receive waits; a long duration does not alone prove backlog.",
+    "A stale or delayed presentation diagnosis requires packet/health evidence, not merely coincidence with a slow span.",
+    "Strict allowlists discard text, account/auth/password fields and runtime JSON. Unknown schema types are marked other; raw originals are not re-read."
+  ]
+}

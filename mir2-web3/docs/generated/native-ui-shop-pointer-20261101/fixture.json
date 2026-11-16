@@ -1,0 +1,15 @@
+{
+  "files": [
+    "npc-shop-waiting-zh-CN.png",
+    "npc-shop-ready-zh-CN.png"
+  ],
+  "liveLogin": false,
+  "locale": "zh-CN",
+  "purchaseSent": false,
+  "realSocket": false,
+  "scope": "offline GPU rendering of production widgets with explicit local source fixtures",
+  "states": [
+    "no-source-visible-and-disabled",
+    "canonical-BUYSELL-source-ready"
+  ]
+}

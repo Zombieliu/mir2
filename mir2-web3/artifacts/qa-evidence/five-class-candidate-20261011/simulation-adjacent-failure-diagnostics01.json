@@ -1,0 +1,209 @@
+{
+  "schema": "mir2-readonly-failure-diagnosis/1",
+  "reviewer": "/root/five_class_content_audit",
+  "createdUtc": "2026-10-11T09:02:25.312000+00:00",
+  "baselineCommit": "64b6b10c05732048da9c6bf5ccb0a491d2d053d3",
+  "rootRunEvidence": [
+    {
+      "resultPath": "work/fiveclass-20261010/simulation-native-entity-test01/result.json",
+      "resultSha256": "8c489b6901be5d4a391879a9bda7e0b6d5bc9c2d091c80827a73c94de0f0e06b",
+      "cargoLogPath": "work/fiveclass-20261010/simulation-native-entity-test01/cargo.log",
+      "cargoLogSha256": "d344905639e9605073dc8f228c8810895f91f2c4baca88c0e79bc813098f37ff",
+      "executedByRoot": true,
+      "reviewerExecuted": false,
+      "passed": 19,
+      "failed": 3,
+      "sourceDrift": []
+    },
+    {
+      "resultPath": "work/fiveclass-20261010/simulation-classic-player-hit-test01/result.json",
+      "resultSha256": "e3897c3bf649cc5aa718ffb8c203219a9f99d547f44224b245eb990926c4779b",
+      "cargoLogPath": "work/fiveclass-20261010/simulation-classic-player-hit-test01/cargo.log",
+      "cargoLogSha256": "a719740bce6624b9393dec96b8a31e09c2e705fd789d123e5b2653ce9494f1ad",
+      "executedByRoot": true,
+      "reviewerExecuted": false,
+      "passed": 1,
+      "failed": 2,
+      "sourceDrift": []
+    }
+  ],
+  "failedSourceCopies": [
+    {
+      "sourcePath": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "preservedBeforePath": "work/fiveclass-20261010/legacy-fixture-repair01/before-entity_combat.rs",
+      "sha256": "a517fd7dcab1bcb38adc08f2a66e497ad98c8e7f534069db4f91d74e7477db72"
+    },
+    {
+      "sourcePath": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "preservedBeforePath": "work/fiveclass-20261010/legacy-fixture-repair01/before-runtime.rs",
+      "sha256": "e6cb8db6e28eb67fd67e05342696a8cd543893c005b7accd777fb8c9ad1f60b5"
+    }
+  ],
+  "exactBaselineComparisons": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "fixture",
+      "baselineFunctionSha256LF": "efce24695dd6ed2a981a7293730aa33779081befbe109ab2408c489dd30d63cf",
+      "failedInputFunctionSha256LF": "efce24695dd6ed2a981a7293730aa33779081befbe109ab2408c489dd30d63cf",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "spawn_target_child",
+      "baselineFunctionSha256LF": "e816467ccf85418ab6962924b096828408d4d57da5c345c79cf13c9c2a58cd86",
+      "failedInputFunctionSha256LF": "e816467ccf85418ab6962924b096828408d4d57da5c345c79cf13c9c2a58cd86",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "native_entity_player_reference_rejects_pre_revival_generation",
+      "baselineFunctionSha256LF": "18fc04d9b8ea5af8c685bb7f4c9f3cf2dc5798de250d69cbec71e53f91ece797",
+      "failedInputFunctionSha256LF": "18fc04d9b8ea5af8c685bb7f4c9f3cf2dc5798de250d69cbec71e53f91ece797",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "native_entity_target_relations_retire_both_deaths_and_never_cross_player_lives",
+      "baselineFunctionSha256LF": "6cb4b26a233a59d3ab10e382a39324399778c35c3c3df76c3896b5f348f12fdd",
+      "failedInputFunctionSha256LF": "6cb4b26a233a59d3ab10e382a39324399778c35c3c3df76c3896b5f348f12fdd",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "native_entity_dazed_blocks_actual_pet_attacks_but_not_pursuit_while_frozen_blocks_both",
+      "baselineFunctionSha256LF": "07af4898717befefd288eaccaadf63a590ff4abd86c849989849e3f3bcc8bd75",
+      "failedInputFunctionSha256LF": "07af4898717befefd288eaccaadf63a590ff4abd86c849989849e3f3bcc8bd75",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "native_entity_player_ref",
+      "baselineFunctionSha256LF": "6f566a5e4f2f6d7f7ac3ddfc2a4a406f3394ff488e12b65d932fe40a0108ea27",
+      "failedInputFunctionSha256LF": "6f566a5e4f2f6d7f7ac3ddfc2a4a406f3394ff488e12b65d932fe40a0108ea27",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "function": "set_native_entity_target",
+      "baselineFunctionSha256LF": "01248a4a25ceb87e71aceebc5632969d3d9747a2781bbc09eb17f99375ac8ecf",
+      "failedInputFunctionSha256LF": "01248a4a25ceb87e71aceebc5632969d3d9747a2781bbc09eb17f99375ac8ecf",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "function": "sync_player_vitals",
+      "baselineFunctionSha256LF": "41b1d4decf566c07f755cb8c43d3a034703b29ee4ff9f16b8d8d2af14d22c278",
+      "failedInputFunctionSha256LF": "41b1d4decf566c07f755cb8c43d3a034703b29ee4ff9f16b8d8d2af14d22c278",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "function": "join_player_with_class",
+      "baselineFunctionSha256LF": "55e51ce5ef88e3523db48860f3b37b8404ff355d98f1098ec173aa87977d4560",
+      "failedInputFunctionSha256LF": "55e51ce5ef88e3523db48860f3b37b8404ff355d98f1098ec173aa87977d4560",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "function": "all_mode_shared_melee_can_kill_and_routes_authoritative_damage",
+      "baselineFunctionSha256LF": "fd193ad147b5966cb1636e679d9438ca6dff4f71725af0e7da76d42d8dc70f30",
+      "failedInputFunctionSha256LF": "fd193ad147b5966cb1636e679d9438ca6dff4f71725af0e7da76d42d8dc70f30",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "function": "all_mode_shared_range_attack_damages_remote_player",
+      "baselineFunctionSha256LF": "0b57be3075644e6bd0e2d196bb8aef7fee20c742ba05292d593bbf91797a2e29",
+      "failedInputFunctionSha256LF": "0b57be3075644e6bd0e2d196bb8aef7fee20c742ba05292d593bbf91797a2e29",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "function": "all_mode_shared_magic_damages_remote_player_and_spends_mana",
+      "baselineFunctionSha256LF": "a504268382ac4aef72ba073e68dedfb83658dc981f7e6f57b49341c82aa44048",
+      "failedInputFunctionSha256LF": "a504268382ac4aef72ba073e68dedfb83658dc981f7e6f57b49341c82aa44048",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "function": "owned_pet_can_attack",
+      "baselineFunctionSha256LF": "f21826bb23322f81e828f8576dffff0ec404fc9c9793b0931277937fb3c5740f",
+      "reviewedCurrentFunctionSha256LF": "f21826bb23322f81e828f8576dffff0ec404fc9c9793b0931277937fb3c5740f",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "function": "selected_owned_pet_target",
+      "baselineFunctionSha256LF": "1d2a6cb74814370f6490de48c7515cdd97950919f49480d11e254a5298dba68f",
+      "reviewedCurrentFunctionSha256LF": "1d2a6cb74814370f6490de48c7515cdd97950919f49480d11e254a5298dba68f",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "function": "owned_pet_can_move_now",
+      "baselineFunctionSha256LF": "4231baf412a13c9e60e6138c47afae9c34972accf80f0a45a015b00248779fbc",
+      "reviewedCurrentFunctionSha256LF": "4231baf412a13c9e60e6138c47afae9c34972accf80f0a45a015b00248779fbc",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "function": "owned_pet_can_launch_now",
+      "baselineFunctionSha256LF": "bdbaa6d6e18d3f5b2841b633fe38eb48f373ae90846b41c8270f1cb81eedc31e",
+      "reviewedCurrentFunctionSha256LF": "bdbaa6d6e18d3f5b2841b633fe38eb48f373ae90846b41c8270f1cb81eedc31e",
+      "exactLfEqual": true
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "function": "owned_human_spell_delay",
+      "baselineFunctionSha256LF": "cc81a71b2a73eaa864fe4c0347f04584783141672ef3ecfad7a100c750538a04",
+      "reviewedCurrentFunctionSha256LF": "cc81a71b2a73eaa864fe4c0347f04584783141672ef3ecfad7a100c750538a04",
+      "exactLfEqual": true
+    }
+  ],
+  "classification": [
+    {
+      "test": "native_entity_player_reference_rejects_pre_revival_generation",
+      "cause": "Existing SyncPlayerVitals dead=None does not revive. hp0 then hp100 retains player.dead and same life_generation0.",
+      "type": "existing fixture/lifecycle-intent omission",
+      "correction": "real SyncPlayerVitalsAndLife (0,true),(100,false); retain stale proof rejection and exact HP100."
+    },
+    {
+      "test": "native_entity_target_relations_retire_both_deaths_and_never_cross_player_lives",
+      "cause": "Same no-revival intent leaves current player dead, so current proof still cannot be targeted. Source assignment correctly rejects dead target.",
+      "type": "existing fixture/lifecycle-intent omission",
+      "correction": "real explicit death/revive command; retain target retirement/current versus old proof assertions."
+    },
+    {
+      "test": "native_entity_dazed_blocks_actual_pet_attacks_but_not_pursuit_while_frozen_blocks_both",
+      "cause": "Stationary 9001 with nextAI=u64::MAX never targets pet/master and Master has no target. Generic hostility alone does not satisfy Source pet attack relation, so no lawful pursuit target.",
+      "type": "existing fixture/legal-target omission",
+      "correction": "actual set_native_entity_target(9001,&petReference,551), then unchanged poison550/source kill560 and all movement/attack/expiry times."
+    },
+    {
+      "test": "all_mode_shared_range_attack_damages_remote_player",
+      "cause": "Old test expects immediate death/ToAll. New real Archer typed queue intentionally follows Source550+50*distance impact and AOI ToMany. Source weapon admission was already installed by class-aware helper.",
+      "type": "fixture obsolete after intentional Source-correct Archer behavior",
+      "correction": "100 launch;849 HP40/no target damage;850 HP0/damage40; exact ObjectRangeAttack target102 and actual ToMany target recipient."
+    },
+    {
+      "test": "all_mode_shared_magic_damages_remote_player_and_spends_mana",
+      "cause": "FireBall already delayed by500+50*distance in baseline, but test asserted instant HP. Named Wizard was actually Warrior with DC only, not MC.",
+      "type": "existing fixture/Source delay and class-stat omission",
+      "correction": "real Wizard MC50;100 launch MP95;799 HP40/no target damage;800 HP0/damage40, MP95 and original ObjectMagic packet checks."
+    }
+  ],
+  "baselineRunRecommendation": {
+    "neededForRuntimeBaselineClaim": true,
+    "method": "Root-controlled clean checkout/worktree at exact baseline with original lock, same guarded native_entity_ and all_mode_shared_ filters, one Cargo window at a time. Never revert current high-conflict files or call a static equality comparison an executed baseline failure.",
+    "notPerformedByReviewer": true
+  },
+  "reviewReferences": [
+    "work/fiveclass-20261010/legacy-fixture-repair-review01.json",
+    "work/fiveclass-20261010/legacy-fixture-repair-review02.json"
+  ],
+  "limits": [
+    "Source equality and causal diagnosis only, not an old-baseline execution result.",
+    "Original failed result/log hashes remain preserved and are not converted to green by this report.",
+    "No product/test writes, Cargo/builds, gameplay or real-account operations performed by reviewer."
+  ]
+}

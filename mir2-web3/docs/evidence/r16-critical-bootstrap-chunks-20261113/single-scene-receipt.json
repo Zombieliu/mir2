@@ -1,0 +1,65 @@
+{
+  "kind": "single-fixed-production-scene-chrome-read",
+  "startedAt": "2026-11-13T08:36:17.527Z",
+  "origin": "https://numeron.obelisk.build",
+  "expectedSource": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+  "expectedSha": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+  "expectedBytes": 458475,
+  "passed": true,
+  "scope": "One standalone exact static scene read in a clean normal-network Chrome context, with source/version/alias mapping gates. No login, cache prefill, request interception, network flags, protocol override or game state changes. Not a full game cold-load qualification.",
+  "network": {
+    "removedProxyEnvironmentNames": [
+      "ALL_PROXY",
+      "HTTPS_PROXY",
+      "HTTP_PROXY",
+      "NO_PROXY"
+    ],
+    "systemProxy": {
+      "enabled": false,
+      "serverConfigured": false,
+      "autoConfigConfigured": true
+    },
+    "defaultBrowserNetwork": true
+  },
+  "budgets": {
+    "headerMs": 20000,
+    "idleMs": 8000,
+    "bodyMs": 24000
+  },
+  "rows": [
+    {
+      "requestMs": 2342,
+      "method": "GET",
+      "bytes": 458475,
+      "status": 200,
+      "headersMs": 2550,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "age": "15314",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "HIT",
+        "vary": "accept-encoding"
+      },
+      "maxGapMs": 31,
+      "firstDataMs": 2556,
+      "lastDataMs": 2620,
+      "finishMs": 2647,
+      "encodedBytes": 35653
+    }
+  ],
+  "browserClosed": true,
+  "versionBefore": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "readMs": 345,
+  "actualBytes": 458475,
+  "actualSha": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+  "versionAfter": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "finishedAt": "2026-11-13T08:36:20.565Z",
+  "durationMs": 3038
+}

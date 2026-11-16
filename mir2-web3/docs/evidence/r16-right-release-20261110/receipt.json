@@ -1,0 +1,774 @@
+{
+  "base": "0bd1b138b47aa8f72a76eb914547f99620d7d605",
+  "candidate": {
+    "buildId": "_V3KsRrYop-O-w11tmE5J",
+    "runtime": "bevy-48c1f266331da4cb",
+    "buildReceiptSha256": "87315b26291581147ee84ac42c5c70775525e48d8a3b4e0d6fb05342095f0418",
+    "sourceArchiveSha256": "6c78f5b44a226db583d84eb92712490588ad0b124a619b2c7225e4b7de9700a8",
+    "paths": {
+      "apps/web/app/page.tsx": "4ff0627e8832e5ad725cbe730228e5c3bfc560da53b868e5ce4c2ec5bfe25404",
+      "apps/web/app/original-client-shell.tsx": "15ddd6c7bb0b6376ca05976c39180903e35ce914d47e46674ec3f98cc2219b13",
+      "apps/web/app/components/original-client-shell-types.ts": "5c8ed024c19c00baa826a1289e83bf24114a360b122625788ca20acf363aa1ec"
+    },
+    "gatewaySha256": "1353a70a503827c7bc56d8d8211e3c9c83c3e0d03baccc7989770166ca928d1e",
+    "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6"
+  },
+  "clock": "Chrome CDP monotonic TimeTicks. Post-release duration uses the upper bound of the physical pointerup bracket.",
+  "classic": {
+    "heldBefore": [
+      {
+        "run": "baseline-classic-hold-webgpu-r1",
+        "rawSha256": "974de0a6dc0f94d87e6e5afe2ad1e8a11c3ff8eb5f6263b2ed0c7d5da62a8525",
+        "buildId": "Q1uIxiLliOmrj0ODGy9fD",
+        "renderer": "webgpu",
+        "cursor": {
+          "x": 584,
+          "y": 596
+        },
+        "ground": {
+          "x": 297,
+          "y": 273
+        },
+        "actor": "Hen",
+        "holdMs": 369.6,
+        "releaseBracketMs": 6.351,
+        "observeMs": 1650,
+        "before": 1,
+        "during": 0,
+        "after": 1,
+        "accepted": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 297,
+              "y": 270
+            },
+            "type": "walk",
+            "direction": "DownLeft",
+            "ack": "UserLocation",
+            "sendMsFromReleaseUpper": -202.987,
+            "ackMsFromReleaseLower": -176.766
+          },
+          {
+            "from": {
+              "x": 297,
+              "y": 270
+            },
+            "to": {
+              "x": 295,
+              "y": 272
+            },
+            "type": "run",
+            "direction": "DownLeft",
+            "ack": "UserLocation",
+            "sendMsFromReleaseUpper": 405.802,
+            "ackMsFromReleaseLower": 428.141
+          }
+        ],
+        "saved": {
+          "position": {
+            "x": 295,
+            "y": 272
+          },
+          "level": 30,
+          "logout": 643
+        }
+      },
+      {
+        "run": "baseline-classic-hold-shared-r1",
+        "rawSha256": "cc120ab5526ce8071f2f63776d1001c4788e04f3d0ce60a22e5eff849a05eefc",
+        "buildId": "Q1uIxiLliOmrj0ODGy9fD",
+        "renderer": "shared",
+        "cursor": {
+          "x": 584,
+          "y": 596
+        },
+        "ground": {
+          "x": 297,
+          "y": 273
+        },
+        "actor": "Hen",
+        "holdMs": 366.6,
+        "releaseBracketMs": 5.364,
+        "observeMs": 1650,
+        "before": 1,
+        "during": 0,
+        "after": 1,
+        "accepted": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 296,
+              "y": 271
+            },
+            "type": "run",
+            "direction": "DownLeft",
+            "ack": "UserLocation",
+            "sendMsFromReleaseUpper": -229.214,
+            "ackMsFromReleaseLower": -186.718
+          },
+          {
+            "from": {
+              "x": 296,
+              "y": 271
+            },
+            "to": {
+              "x": 294,
+              "y": 273
+            },
+            "type": "run",
+            "direction": "DownLeft",
+            "ack": "UserLocation",
+            "sendMsFromReleaseUpper": 378.209,
+            "ackMsFromReleaseLower": 390.061
+          }
+        ],
+        "saved": {
+          "position": {
+            "x": 294,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 643
+        }
+      }
+    ],
+    "heldAfter": [
+      {
+        "run": "candidate-r4-classic-hold-webgpu",
+        "rawSha256": "65d18a4ef7466b1926518f685cbf900485a3e034d9639f4fa1614e72a959d1fd",
+        "buildId": "_V3KsRrYop-O-w11tmE5J",
+        "renderer": "webgpu",
+        "cursor": {
+          "x": 584,
+          "y": 596
+        },
+        "ground": {
+          "x": 297,
+          "y": 273
+        },
+        "actor": "Hen",
+        "holdMs": 367.8,
+        "releaseBracketMs": 6.706,
+        "observeMs": 1650,
+        "before": 1,
+        "during": 0,
+        "after": 0,
+        "accepted": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 297,
+              "y": 270
+            },
+            "type": "walk",
+            "direction": "DownLeft",
+            "ack": "UserLocation",
+            "sendMsFromReleaseUpper": -258.37,
+            "ackMsFromReleaseLower": -230.451
+          }
+        ],
+        "saved": {
+          "position": {
+            "x": 297,
+            "y": 270
+          },
+          "level": 30,
+          "logout": 639
+        }
+      },
+      {
+        "run": "candidate-r4-classic-hold-shared",
+        "rawSha256": "22df70b9679f4e521bf44818645076f23792a74a73ec5a06e62040b48a86052c",
+        "buildId": "_V3KsRrYop-O-w11tmE5J",
+        "renderer": "shared",
+        "cursor": {
+          "x": 584,
+          "y": 596
+        },
+        "ground": {
+          "x": 297,
+          "y": 273
+        },
+        "actor": "Hen",
+        "holdMs": 363.6,
+        "releaseBracketMs": 6.187,
+        "observeMs": 1650,
+        "before": 1,
+        "during": 0,
+        "after": 0,
+        "accepted": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 296,
+              "y": 271
+            },
+            "type": "run",
+            "direction": "DownLeft",
+            "ack": "UserLocation",
+            "sendMsFromReleaseUpper": -254.177,
+            "ackMsFromReleaseLower": -223.294
+          }
+        ],
+        "saved": {
+          "position": {
+            "x": 296,
+            "y": 271
+          },
+          "level": 30,
+          "logout": 640
+        }
+      }
+    ],
+    "shortBefore": {
+      "run": "candidate-r1-classic-tap-shared",
+      "rawSha256": "f7074f49b58bd6b78ce499c0f55a7e00b47a7ebf893cf884d4a934a534dd5d3c",
+      "buildId": "9pX_wse6Zz5i9Nn13Swu1",
+      "renderer": "shared",
+      "cursor": {
+        "x": 584,
+        "y": 596
+      },
+      "ground": {
+        "x": 297,
+        "y": 273
+      },
+      "actor": "Hen",
+      "holdMs": 48.7,
+      "releaseBracketMs": 9.315,
+      "observeMs": 1650,
+      "before": 0,
+      "during": 1,
+      "after": 1,
+      "accepted": [
+        {
+          "from": {
+            "x": 298,
+            "y": 269
+          },
+          "to": {
+            "x": 297,
+            "y": 270
+          },
+          "type": "run",
+          "direction": "DownLeft",
+          "ack": "UserLocation",
+          "sendMsFromReleaseUpper": -1.314,
+          "ackMsFromReleaseLower": 20.033
+        },
+        {
+          "from": {
+            "x": 297,
+            "y": 270
+          },
+          "to": {
+            "x": 296,
+            "y": 271
+          },
+          "type": "walk",
+          "direction": "DownLeft",
+          "ack": "UserLocation",
+          "sendMsFromReleaseUpper": 599.672,
+          "ackMsFromReleaseLower": 615.966
+        }
+      ],
+      "saved": null
+    },
+    "shortAfter": {
+      "run": "candidate-r4-classic-idle-tap-shared",
+      "rawSha256": "1095537b1113b1d813f9845f4accc367550e83498c684684527574b03975f08b",
+      "buildId": "_V3KsRrYop-O-w11tmE5J",
+      "renderer": "shared",
+      "cursor": {
+        "x": 584,
+        "y": 596
+      },
+      "ground": {
+        "x": 297,
+        "y": 273
+      },
+      "actor": "Hen",
+      "holdMs": 48,
+      "releaseBracketMs": 6.71,
+      "observeMs": 1650,
+      "before": 0,
+      "during": 1,
+      "after": 0,
+      "accepted": [
+        {
+          "from": {
+            "x": 298,
+            "y": 269
+          },
+          "to": {
+            "x": 297,
+            "y": 270
+          },
+          "type": "run",
+          "direction": "DownLeft",
+          "ack": "UserLocation",
+          "sendMsFromReleaseUpper": -1.172,
+          "ackMsFromReleaseLower": 15.769
+        }
+      ],
+      "saved": {
+        "position": {
+          "x": 297,
+          "y": 270
+        },
+        "level": 30,
+        "logout": 639
+      },
+      "preTapIdle": {
+        "sinceLastOrdinaryAckMs": 1480.937,
+        "zoneRunGraceMs": 1200,
+        "lastAck": 635
+      },
+      "tapAuthority": {
+        "command": "run",
+        "acceptedTiles": 1
+      }
+    }
+  },
+  "options": {
+    "before": {
+      "run": "baseline-new-move-webgpu-r4",
+      "rawSha256": "32ba5af76dc7bbd3cae5a8f5009c4c004341b09af905ca08957d3242bdb29c3d",
+      "persistedNewMove": true,
+      "uiHeld": [
+        "hud"
+      ],
+      "movementPackets": 0
+    },
+    "after": {
+      "run": "candidate-r4-new-move-direct-webgpu",
+      "rawSha256": "08321607e27f984a8e49042269e99c2c9d98192b3382973cd0b0a81760ab1fdf",
+      "buildId": "_V3KsRrYop-O-w11tmE5J",
+      "renderer": "webgpu",
+      "cursor": {
+        "x": 440,
+        "y": 368
+      },
+      "ground": {
+        "x": 294,
+        "y": 266
+      },
+      "actor": null,
+      "holdMs": 67.9,
+      "releaseBracketMs": 6.107,
+      "observeMs": 5200,
+      "before": 0,
+      "during": 1,
+      "after": 2,
+      "accepted": [
+        {
+          "from": {
+            "x": 298,
+            "y": 269
+          },
+          "to": {
+            "x": 297,
+            "y": 268
+          },
+          "type": "run",
+          "direction": "UpLeft",
+          "ack": "UserLocation",
+          "sendMsFromReleaseUpper": -1.923,
+          "ackMsFromReleaseLower": 19.807
+        },
+        {
+          "from": {
+            "x": 297,
+            "y": 268
+          },
+          "to": {
+            "x": 295,
+            "y": 266
+          },
+          "type": "run",
+          "direction": "UpLeft",
+          "ack": "UserLocation",
+          "sendMsFromReleaseUpper": 603.521,
+          "ackMsFromReleaseLower": 635.199
+        },
+        {
+          "from": {
+            "x": 295,
+            "y": 266
+          },
+          "to": {
+            "x": 294,
+            "y": 266
+          },
+          "type": "walk",
+          "direction": "Left",
+          "ack": "UserLocation",
+          "sendMsFromReleaseUpper": 1213.284,
+          "ackMsFromReleaseLower": 1227.582
+        }
+      ],
+      "saved": {
+        "position": {
+          "x": 294,
+          "y": 266
+        },
+        "level": 30,
+        "logout": 647
+      },
+      "options": {
+        "physical": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "x": 1135,
+            "y": 798
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "x": 1135,
+            "y": 798
+          }
+        ],
+        "noRelog": true,
+        "uiHeld": [],
+        "wasmReady": true
+      }
+    }
+  },
+  "moving": [
+    {
+      "run": "webgpu-second-oma-hud-r8",
+      "rawSha256": "a66c2bf9c9c1efcbcd62c62cbc3ddf8a98c6a25e8a03d1bff031655de83abd4f",
+      "renderer": "webgpu",
+      "cursor": {
+        "x": 1112,
+        "y": 468
+      },
+      "targetId": "205631",
+      "targetName": "Oma",
+      "targetStart": {
+        "x": 272,
+        "y": 411
+      },
+      "targetMoves": [
+        {
+          "seq": 638,
+          "packet": "ObjectWalk",
+          "x": 271,
+          "y": 410
+        },
+        {
+          "seq": 651,
+          "packet": "ObjectWalk",
+          "x": 270,
+          "y": 409
+        }
+      ],
+      "acceptedWalks": [
+        {
+          "from": {
+            "x": 262,
+            "y": 410
+          },
+          "to": {
+            "x": 263,
+            "y": 409
+          },
+          "sendSeq": 634,
+          "ackSeq": 635
+        },
+        {
+          "from": {
+            "x": 263,
+            "y": 409
+          },
+          "to": {
+            "x": 264,
+            "y": 408
+          },
+          "sendSeq": 636,
+          "ackSeq": 637
+        },
+        {
+          "from": {
+            "x": 264,
+            "y": 408
+          },
+          "to": {
+            "x": 265,
+            "y": 407
+          },
+          "sendSeq": 640,
+          "ackSeq": 642
+        },
+        {
+          "from": {
+            "x": 265,
+            "y": 407
+          },
+          "to": {
+            "x": 266,
+            "y": 406
+          },
+          "sendSeq": 648,
+          "ackSeq": 649
+        },
+        {
+          "from": {
+            "x": 266,
+            "y": 406
+          },
+          "to": {
+            "x": 267,
+            "y": 406
+          },
+          "sendSeq": 652,
+          "ackSeq": 653
+        },
+        {
+          "from": {
+            "x": 267,
+            "y": 406
+          },
+          "to": {
+            "x": 268,
+            "y": 407
+          },
+          "sendSeq": 655,
+          "ackSeq": 657
+        },
+        {
+          "from": {
+            "x": 268,
+            "y": 407
+          },
+          "to": {
+            "x": 269,
+            "y": 408
+          },
+          "sendSeq": 658,
+          "ackSeq": 660
+        }
+      ],
+      "walksSentAfterFirstTargetMove": 5,
+      "hit": {
+        "player": {
+          "x": 269,
+          "y": 408
+        },
+        "target": {
+          "x": 270,
+          "y": 409
+        },
+        "seq": 680,
+        "msAfterClick": 5105.337
+      },
+      "subsequentDeathSeq": null,
+      "saved": {
+        "position": {
+          "x": 269,
+          "y": 408
+        },
+        "level": 30,
+        "logout": 710
+      }
+    },
+    {
+      "run": "shared-second-oma-hud-r9",
+      "rawSha256": "082b16b8983d22354cafa35c9d24103c2670b5be3786bcc766f904b64946b833",
+      "renderer": "shared",
+      "cursor": {
+        "x": 1118,
+        "y": 472
+      },
+      "targetId": "205631",
+      "targetName": "Oma",
+      "targetStart": {
+        "x": 272,
+        "y": 411
+      },
+      "targetMoves": [
+        {
+          "seq": 638,
+          "packet": "ObjectWalk",
+          "x": 271,
+          "y": 410
+        },
+        {
+          "seq": 651,
+          "packet": "ObjectWalk",
+          "x": 270,
+          "y": 409
+        }
+      ],
+      "acceptedWalks": [
+        {
+          "from": {
+            "x": 262,
+            "y": 410
+          },
+          "to": {
+            "x": 263,
+            "y": 409
+          },
+          "sendSeq": 634,
+          "ackSeq": 635
+        },
+        {
+          "from": {
+            "x": 263,
+            "y": 409
+          },
+          "to": {
+            "x": 264,
+            "y": 408
+          },
+          "sendSeq": 636,
+          "ackSeq": 637
+        },
+        {
+          "from": {
+            "x": 264,
+            "y": 408
+          },
+          "to": {
+            "x": 265,
+            "y": 407
+          },
+          "sendSeq": 640,
+          "ackSeq": 642
+        },
+        {
+          "from": {
+            "x": 265,
+            "y": 407
+          },
+          "to": {
+            "x": 266,
+            "y": 406
+          },
+          "sendSeq": 648,
+          "ackSeq": 649
+        },
+        {
+          "from": {
+            "x": 266,
+            "y": 406
+          },
+          "to": {
+            "x": 267,
+            "y": 406
+          },
+          "sendSeq": 652,
+          "ackSeq": 653
+        },
+        {
+          "from": {
+            "x": 267,
+            "y": 406
+          },
+          "to": {
+            "x": 268,
+            "y": 407
+          },
+          "sendSeq": 655,
+          "ackSeq": 656
+        },
+        {
+          "from": {
+            "x": 268,
+            "y": 407
+          },
+          "to": {
+            "x": 269,
+            "y": 408
+          },
+          "sendSeq": 659,
+          "ackSeq": 661
+        }
+      ],
+      "walksSentAfterFirstTargetMove": 5,
+      "hit": {
+        "player": {
+          "x": 269,
+          "y": 408
+        },
+        "target": {
+          "x": 270,
+          "y": 409
+        },
+        "seq": 682,
+        "msAfterClick": 5085.751
+      },
+      "subsequentDeathSeq": 706,
+      "saved": {
+        "position": {
+          "x": 269,
+          "y": 408
+        },
+        "level": 30,
+        "logout": 719
+      }
+    }
+  ],
+  "openHitTest": {
+    "run": "webgpu-oma-lateral-r5",
+    "rawSha256": "fd83a977238db26dc33df349f23f091e91b0e431cda1044825a2d373b9dec9a5",
+    "target": "Oma 205606",
+    "firstHit": "ChestnutTree1 213601",
+    "sampledPixels": 154,
+    "treeHits": 148,
+    "outsideCanvas": 6
+  },
+  "checks": {
+    "focused": {
+      "passed": 212,
+      "logSha256": "ec2c2431e2b7c0c2fbc9d80fdd3c5129f51b05bbd9b3bc572366d2b02c09c2ef"
+    },
+    "stage5": {
+      "passed": 520,
+      "logSha256": "64f68c11cd84bcab7f28c49cf045c922d09a6fd4f0048e6906addd16ea0e6721"
+    },
+    "native": {
+      "passed": 7,
+      "logSha256": "acdbd81f256f09e27dce6083ba55a1306ce9380552044effe12590af37aa61a8",
+      "binarySha256": "f73b99c02718c00a00959752f0b38586916bc94b7053ebf41ca180149b2c73b1"
+    }
+  },
+  "screenshots": [
+    {
+      "file": "classic-right-release.png",
+      "run": "candidate-r4-classic-hold-webgpu",
+      "sha256": "1856e12c9b89d83ab8e79b6a2885012714006ffa12e7399578764b5a1eb88e29"
+    },
+    {
+      "file": "options-closed.png",
+      "run": "candidate-r4-new-move-direct-webgpu",
+      "sha256": "d1623684633304d218071379da59792dbc101fa6683d7500e061ea749a55d295"
+    },
+    {
+      "file": "new-move-arrival.png",
+      "run": "candidate-r4-new-move-direct-webgpu",
+      "sha256": "74097520ea25dd173771754d337e158e10e1166e9770cadc33708ec36bd1d0ce"
+    },
+    {
+      "file": "moving-oma-hit.png",
+      "run": "shared-second-oma-hud-r9",
+      "sha256": "988ae5d033857aa2717999ad292f0d324972a480a41d063dd446ba915ee67be2"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "readOnly": true,
+  "startedAt": "2026-10-28T15:26:47.721Z",
+  "configSource": "C:/mir2-build/procurement-testnet-20261028/evidence/driver-config.json",
+  "observations": [
+    {
+      "operation": "queryFinality",
+      "payload": {
+        "digest": "HLXrxYBPxWicch7jh4VeQANZMs1v9tGLbh1ib4pqvYyc"
+      },
+      "durationMs": 4296,
+      "ok": true,
+      "result": {
+        "known": true,
+        "finalized": true,
+        "success": true,
+        "checkpoint": "400198288",
+        "digest": "HLXrxYBPxWicch7jh4VeQANZMs1v9tGLbh1ib4pqvYyc",
+        "events": [
+          {
+            "type": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dubhe_events::Dubhe_Object_Created",
+            "parsedJson": {
+              "dapp_key": "f279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::dapp_key::DappKey",
+              "object_type": [
+                111,
+                114,
+                100,
+                101,
+                114
+              ],
+              "object_id": "0xeac26f0ab0dbcd1b114103baf1f95a1e54653e70fb294551bee3ff985bb66a56",
+              "entity_id": [
+                112,
+                205,
+                170,
+                82,
+                248,
+                93,
+                30,
+                30,
+                120,
+                127,
+                164,
+                7,
+                73,
+                207,
+                95,
+                58,
+                215,
+                34,
+                69,
+                166,
+                57,
+                159,
+                223,
+                220,
+                36,
+                202,
+                168,
+                163,
+                8,
+                7,
+                161,
+                79
+              ]
+            },
+            "id": {
+              "txDigest": "HLXrxYBPxWicch7jh4VeQANZMs1v9tGLbh1ib4pqvYyc",
+              "eventSeq": "0"
+            },
+            "bcs": "U2YyNzkwOTkwNjUzODFjZmZiNTc1YjVjMWZhNGNmZjg2Nzc0ZDM3ZGZmZjc3YmMzYmVhOWMyZjY2OGM0OWQ4ODA6OmRhcHBfa2V5OjpEYXBwS2V5BW9yZGVy6sJvCrDbzRsRQQO68flaHlRlPnD7KUVRvuP/mFu2alYgcM2qUvhdHh54f6QHSc9fOtciRaY5n9/cJMqoowgHoU8="
+          }
+        ],
+        "objectChanges": [
+          {
+            "type": "mutated",
+            "objectId": "0x712f0a2decbbe2e7c8ce4294bc478da9346d35b6ce22f274ad054a03638be0c9",
+            "objectType": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dapp_service::DappStorage",
+            "version": "1070239929",
+            "digest": "6prEwRwjBLbwEkJmgQ86fZoYfRgRywj8bGdeby81Qbut"
+          },
+          {
+            "type": "created",
+            "objectId": "0xeac26f0ab0dbcd1b114103baf1f95a1e54653e70fb294551bee3ff985bb66a56",
+            "objectType": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dapp_service::ObjectStorage<0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::Order>",
+            "version": "1070239929",
+            "digest": "ANdzgjis7tQ98hSy8Bw9jCD7E4P1cshLscsEabNgn9t7"
+          },
+          {
+            "type": "created",
+            "objectId": "0xf93ee6b3dffe30422dbebaf8511811fe3ba85a79f6e9a3903117d5739a563f87",
+            "objectType": "0x2::dynamic_field::Field<0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dapp_service::ObjectEntityIdKey,address>",
+            "version": "1070239929",
+            "digest": "XuMRkWTYNLK9LMBjzdQmLA8hMXHqxWGxcdq7g9xrERm"
+          }
+        ],
+        "gasUsed": {
+          "computationCost": "1000000",
+          "storageCost": "10070000",
+          "storageRebate": "4627937",
+          "nonRefundableStorageFee": "463"
+        },
+        "error": null
+      }
+    },
+    {
+      "operation": "queryOrder",
+      "payload": {
+        "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f"
+      },
+      "durationMs": 5161,
+      "ok": false,
+      "error": "Transaction%205Xm8udf2FjdwHJiY51qTyQbxz3TJGudySz4xpuq491ir%20not%20found",
+      "code": "NOT_FOUND"
+    }
+  ],
+  "completedAt": "2026-10-28T15:26:52.886Z"
+}

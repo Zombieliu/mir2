@@ -1,0 +1,51 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "files": [
+    {
+      "name": "build-receipt.json",
+      "bytes": 5319,
+      "sha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5"
+    },
+    {
+      "name": "candidate-qualification.json",
+      "bytes": 1361,
+      "sha256": "0627c7766825ac9d551315f12b5d413e35442787a505b67f4b3048605ecb33de"
+    },
+    {
+      "name": "source-closure.json",
+      "bytes": 1945,
+      "sha256": "05bf44477d534a597a0845c323aef692b57b37af607f6b4a0911e9a8e3532683"
+    },
+    {
+      "name": "walking-chunk.json",
+      "bytes": 1013,
+      "sha256": "fe3faaa9ee7c618e2909155736e357f09967bea4013db88ba4e7712830ba16c5"
+    },
+    {
+      "name": "source-pin-qualified.json",
+      "bytes": 2954,
+      "sha256": "1e38a769cc4852c64f3e977d98e7e09f7941759769530d208f68eb6f5bbd98d8"
+    },
+    {
+      "name": "stage-readback.json",
+      "bytes": 365,
+      "sha256": "e5cb8fa4cddc0d582d0dcbb16e8be4d976af44355643a8b7cce9c2e849f64571"
+    },
+    {
+      "name": "observer-offline-tests.json",
+      "bytes": 4388,
+      "sha256": "719cc99bb02d8d70757b9caa06b3ea04fa922d1740cd5d3aa5b539b97fc7158d"
+    },
+    {
+      "name": "prior-cold-critical-path.json",
+      "bytes": 19789,
+      "sha256": "e428d282d09f3cfe885369e7bc06607ccb829f96d7c503b6f110aaeb27622c9a"
+    },
+    {
+      "name": "checks.json",
+      "bytes": 878,
+      "sha256": "82c7202f165a550e3ec4b5a1cb143c3ec37135671c0a608239d6eba1a59f919f"
+    }
+  ],
+  "scope": "Immutable source/build/check/readback and prior-performance evidence. Stage is not promotion. Local and public functional qualification are separate."
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "only four fixed upload-stage data files",
+  "files": [
+    {
+      "file": "asset-0.bin",
+      "uid": 1000,
+      "size": 723520,
+      "sha256": "014c18e1e49666877ebcda9e21935c22b46d8950aa2bd1b35a67824946cae42b",
+      "modeBefore": "0o664",
+      "modeAfter": "0o600"
+    },
+    {
+      "file": "asset-1.bin",
+      "uid": 1000,
+      "size": 32275,
+      "sha256": "e8ca68605b5c27e925476cae6e055cceb9552157075d6e45b8aa9d4cb76f05a8",
+      "modeBefore": "0o664",
+      "modeAfter": "0o600"
+    },
+    {
+      "file": "asset-2.bin",
+      "uid": 1000,
+      "size": 15671,
+      "sha256": "72f73b42bc7b95a91144fe0f135ede2ad343fbfed488c75095f98ed427caf497",
+      "modeBefore": "0o664",
+      "modeAfter": "0o600"
+    },
+    {
+      "file": "asset-3.bin",
+      "uid": 1000,
+      "size": 697,
+      "sha256": "3b8a6097b20b32fc1bb8d371efdefffe564af7bf1c75bc098bfd10be097c02ad",
+      "modeBefore": "0o664",
+      "modeAfter": "0o600"
+    }
+  ]
+}

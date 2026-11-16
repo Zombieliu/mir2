@@ -1,0 +1,52 @@
+{
+  "at": "2026-11-16T07:52:41.384Z",
+  "goal": "active",
+  "parent": "bf97cdd479c25d71bcb7f51438740fc5d3ee95c8",
+  "candidate": "r16-diary-world-615e1a69",
+  "unitChecks": 66,
+  "originalLocalR1Accepted": false,
+  "supplementalLocalResults": [
+    {
+      "label": "webgpu-tc",
+      "passed": true,
+      "actualBackend": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "ackMs": 116,
+      "nativeMs": 111853,
+      "originalPublicQuestHelperPassed": true,
+      "ordinaryLogoutAndReentry": true
+    },
+    {
+      "label": "webgl2-tc",
+      "passed": true,
+      "actualBackend": {
+        "selectedBackend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "ackMs": 115,
+      "nativeMs": 23280,
+      "originalPublicQuestHelperPassed": true,
+      "ordinaryLogoutAndReentry": true
+    }
+  ],
+  "rawAncillaryCaptureOnly": true,
+  "frozenPublicQHelperSha256": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+  "originalProductionFeaR1RemainsFailed": true,
+  "productionR2NotExecuted": true,
+  "productionSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "productionChanged": false,
+  "priorPublicQSpecificCauseNotEstablished": true,
+  "remaining": [
+    "public object-pack no-header delivery",
+    "public Native120s qualification",
+    "mixed-language and pixel parity",
+    "remaining full WindowsR16 goal gates"
+  ],
+  "allOwnedHandlesClosed": true,
+  "privateOverlaysRestored": 21,
+  "originalWipPreserved": 29,
+  "wholeParityCandidate": false,
+  "humanAccepted": false
+}

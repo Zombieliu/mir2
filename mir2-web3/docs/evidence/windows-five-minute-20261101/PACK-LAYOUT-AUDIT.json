@@ -1,0 +1,1481 @@
+{
+  "schema": "mir2.windows.pack-layout-offline-audit.v1",
+  "createdUtc": "2026-11-01T14:48:59.686911+00:00",
+  "scope": {
+    "networkRequests": 0,
+    "packPayloadFullReads": 0,
+    "packHeaderBytesRead": 1088,
+    "resourceQaRun": false,
+    "packBuildRun": false,
+    "runtimeTraceRun": false,
+    "firstMapAcceptance": false,
+    "writes": "This create-only report only"
+  },
+  "identity": {
+    "canonicalHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+    "canonicalWorkingTreeClean": false,
+    "boundedWorkingTreeStatus": [
+      " M mir2-web3/apps/game-client/platform-windows/src/assets.rs",
+      " M mir2-web3/apps/game-client/platform-windows/src/generation_launch.rs",
+      " M mir2-web3/apps/game-client/resource-pack/src/lib.rs",
+      "MM mir2-web3/apps/game-client/windows-updater/src/bin/launcher.rs",
+      "MM mir2-web3/apps/game-client/windows-updater/src/bin/updater.rs",
+      "M  mir2-web3/apps/game-client/windows-updater/src/generation.rs",
+      "A  mir2-web3/apps/game-client/windows-updater/src/generation_install_seed.rs",
+      "?? mir2-web3/apps/game-client/platform-windows/src/generation_launch_tests.rs",
+      "?? mir2-web3/apps/game-client/resource-pack/src/read_profile.rs",
+      "?? mir2-web3/apps/game-client/resource-pack/tests/read_profile.rs"
+    ],
+    "sourceInterpretation": "Current bounded files include other writers work in progress. Source pins identify the observed bytes; artifact sizes and pack layout are frozen R19. No claim that uncommitted source is shipped.",
+    "artifactGameEngineSource": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "candidate": "WN-CANDIDATE-20261101-unified-19",
+    "catalog": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\packed-r19\\generations\\aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47\\catalog.json",
+      "sizeBytes": 68666544,
+      "sha256": "45FDE1922C1435069D0A8E7389E2DA1A08A22B7DCD290276DBC012F29DB8E311"
+    },
+    "generation": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\packed-r19\\generations\\aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47\\GENERATION.json",
+      "sizeBytes": 6993,
+      "sha256": "AED057B4515A6E045EBEE0C36C1EBBAA6F7A21E3A6296EE1E8AB3B440EB73E47"
+    },
+    "candidateManifest": {
+      "path": "C:\\m2c17\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-19\\PACKAGE-MANIFEST.json",
+      "sizeBytes": 49713416,
+      "sha256": "7030CE09DB3B55AA38C1E37F1B3E611EC397416D0F81830DC50161591B2D4695"
+    },
+    "priorActualFullVerifier": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\packed-r19\\VERIFY-PACKED-GENERATION.json.packs.json",
+      "sizeBytes": 391,
+      "sha256": "CBFC667B8C49CA02A7C348EF338360A788C27D27705D4F21EECBA5357EFDEAB7"
+    },
+    "script": {
+      "path": "E:\\mir2-release\\windows-five-minute-20261101\\analyze-pack-layout.py",
+      "sizeBytes": 26265,
+      "sha256": "8F00D515AA02E7BE53DE7D8CC1DB8BE3A461BBCCB54704EE89B0C2170297E3D7"
+    }
+  },
+  "validatedHere": {
+    "catalogPinnedSha": true,
+    "exact255063LogicalPathSizeShaSetEqualsCandidateManifest": true,
+    "packHeadersAndSizesOnly": true,
+    "productionPayloadHashesReverified": false,
+    "equivalenceTupleSha256": "5390C06235CF8B71AF61FDFCBC562840BD10A1D0B4EC046E66D426F1C3F33A72"
+  },
+  "totals": {
+    "resourceCount": 255063,
+    "logicalBytes": 1086917697,
+    "uniquePayloadCount": 247477,
+    "uniquePayloadBytes": 1053193705,
+    "currentPackCount": 34,
+    "currentWholePackClosureBytes": 1069036665,
+    "currentClosureOverUniqueRatio": 1.015,
+    "repackedPayloadPlusIndexLowerBoundBytes": 1069032265,
+    "physicalPackBytes": 1069036665,
+    "catalogBytes": 68666544,
+    "packIndexAndHeaderBytes": 15839680,
+    "largestCatalogResourceCount": 255063,
+    "catalogAverageBytesPerLogicalResource": 269.214
+  },
+  "categories": {
+    "original-ui": {
+      "resourceCount": 198121,
+      "logicalBytes": 557426697,
+      "uniquePayloadCount": 191546,
+      "uniquePayloadBytes": 551391308,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 1.939,
+      "repackedPayloadPlusIndexLowerBoundBytes": 563650284
+    },
+    "generated": {
+      "resourceCount": 51496,
+      "logicalBytes": 420266350,
+      "uniquePayloadCount": 51494,
+      "uniquePayloadBytes": 408526545,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 2.617,
+      "repackedPayloadPlusIndexLowerBoundBytes": 411822193
+    },
+    "original-effects": {
+      "resourceCount": 3812,
+      "logicalBytes": 49813027,
+      "uniquePayloadCount": 3447,
+      "uniquePayloadBytes": 46254805,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 23.112,
+      "repackedPayloadPlusIndexLowerBoundBytes": 46475445
+    },
+    "crystal-map-pack": {
+      "resourceCount": 1620,
+      "logicalBytes": 42111309,
+      "uniquePayloadCount": 977,
+      "uniquePayloadBytes": 29720801,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 35.969,
+      "repackedPayloadPlusIndexLowerBoundBytes": 29783361
+    },
+    "bevy-entity-atlases": {
+      "resourceCount": 9,
+      "logicalBytes": 17282380,
+      "uniquePayloadCount": 9,
+      "uniquePayloadBytes": 17282380,
+      "currentPackCount": 8,
+      "currentWholePackClosureBytes": 268321253,
+      "currentClosureOverUniqueRatio": 15.526,
+      "repackedPayloadPlusIndexLowerBoundBytes": 17282988
+    },
+    "legal": {
+      "resourceCount": 5,
+      "logicalBytes": 17934,
+      "uniquePayloadCount": 5,
+      "uniquePayloadBytes": 17934,
+      "currentPackCount": 4,
+      "currentWholePackClosureBytes": 100564496,
+      "currentClosureOverUniqueRatio": 5607.477,
+      "repackedPayloadPlusIndexLowerBoundBytes": 18286
+    }
+  },
+  "originalUiFamilies": {
+    "original-ui/CArmour": {
+      "resourceCount": 37191,
+      "logicalBytes": 124130818,
+      "uniquePayloadCount": 37191,
+      "uniquePayloadBytes": 124130818,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 8.612,
+      "repackedPayloadPlusIndexLowerBoundBytes": 126511074
+    },
+    "original-ui/Monster": {
+      "resourceCount": 25475,
+      "logicalBytes": 106197814,
+      "uniquePayloadCount": 24561,
+      "uniquePayloadBytes": 102437094,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 10.436,
+      "repackedPayloadPlusIndexLowerBoundBytes": 104009030
+    },
+    "original-ui/ChrSel": {
+      "resourceCount": 238,
+      "logicalBytes": 47547930,
+      "uniquePayloadCount": 230,
+      "uniquePayloadBytes": 47547376,
+      "currentPackCount": 32,
+      "currentWholePackClosureBytes": 1035485029,
+      "currentClosureOverUniqueRatio": 21.778,
+      "repackedPayloadPlusIndexLowerBoundBytes": 47562128
+    },
+    "original-ui/AArmour": {
+      "resourceCount": 11275,
+      "logicalBytes": 40112382,
+      "uniquePayloadCount": 11275,
+      "uniquePayloadBytes": 40112382,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 26.651,
+      "repackedPayloadPlusIndexLowerBoundBytes": 40834014
+    },
+    "original-ui/Sound": {
+      "resourceCount": 113,
+      "logicalBytes": 36165108,
+      "uniquePayloadCount": 113,
+      "uniquePayloadBytes": 36165108,
+      "currentPackCount": 32,
+      "currentWholePackClosureBytes": 1035481041,
+      "currentClosureOverUniqueRatio": 28.632,
+      "repackedPayloadPlusIndexLowerBoundBytes": 36172372
+    },
+    "original-ui/ARArmour": {
+      "resourceCount": 7755,
+      "logicalBytes": 30962140,
+      "uniquePayloadCount": 7755,
+      "uniquePayloadBytes": 30962140,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 34.527,
+      "repackedPayloadPlusIndexLowerBoundBytes": 31458492
+    },
+    "original-ui/ARWeapon": {
+      "resourceCount": 19994,
+      "logicalBytes": 24422159,
+      "uniquePayloadCount": 19994,
+      "uniquePayloadBytes": 24422159,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 43.773,
+      "repackedPayloadPlusIndexLowerBoundBytes": 25701807
+    },
+    "original-ui/AWeapon": {
+      "resourceCount": 26650,
+      "logicalBytes": 23863818,
+      "uniquePayloadCount": 26650,
+      "uniquePayloadBytes": 23863818,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 44.797,
+      "repackedPayloadPlusIndexLowerBoundBytes": 25569450
+    },
+    "original-ui/CWeapon": {
+      "resourceCount": 21658,
+      "logicalBytes": 20797293,
+      "uniquePayloadCount": 19990,
+      "uniquePayloadBytes": 19783835,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 54.036,
+      "repackedPayloadPlusIndexLowerBoundBytes": 21063227
+    },
+    "original-ui/Mount": {
+      "resourceCount": 2604,
+      "logicalBytes": 20073393,
+      "uniquePayloadCount": 2604,
+      "uniquePayloadBytes": 20073393,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 53.256,
+      "repackedPayloadPlusIndexLowerBoundBytes": 20240081
+    },
+    "original-ui/MMap": {
+      "resourceCount": 228,
+      "logicalBytes": 16737007,
+      "uniquePayloadCount": 220,
+      "uniquePayloadBytes": 16653934,
+      "currentPackCount": 32,
+      "currentWholePackClosureBytes": 1061803049,
+      "currentClosureOverUniqueRatio": 63.757,
+      "repackedPayloadPlusIndexLowerBoundBytes": 16668046
+    },
+    "original-ui/CHair": {
+      "resourceCount": 14553,
+      "logicalBytes": 13237831,
+      "uniquePayloadCount": 14553,
+      "uniquePayloadBytes": 13237831,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 80.756,
+      "repackedPayloadPlusIndexLowerBoundBytes": 14169255
+    },
+    "original-ui/Pet": {
+      "resourceCount": 5330,
+      "logicalBytes": 11328108,
+      "uniquePayloadCount": 5201,
+      "uniquePayloadBytes": 11127197,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 96.074,
+      "repackedPayloadPlusIndexLowerBoundBytes": 11460093
+    },
+    "original-ui/AHair": {
+      "resourceCount": 9225,
+      "logicalBytes": 7682206,
+      "uniquePayloadCount": 9225,
+      "uniquePayloadBytes": 7682206,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 139.157,
+      "repackedPayloadPlusIndexLowerBoundBytes": 8272638
+    },
+    "original-ui/Prguse": {
+      "resourceCount": 733,
+      "logicalBytes": 7203363,
+      "uniquePayloadCount": 649,
+      "uniquePayloadBytes": 7192991,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 148.621,
+      "repackedPayloadPlusIndexLowerBoundBytes": 7234559
+    },
+    "original-ui/ARHair": {
+      "resourceCount": 6345,
+      "logicalBytes": 5782172,
+      "uniquePayloadCount": 6345,
+      "uniquePayloadBytes": 5782172,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 184.884,
+      "repackedPayloadPlusIndexLowerBoundBytes": 6188284
+    },
+    "original-ui/Help": {
+      "resourceCount": 43,
+      "logicalBytes": 5625180,
+      "uniquePayloadCount": 43,
+      "uniquePayloadBytes": 5625180,
+      "currentPackCount": 29,
+      "currentWholePackClosureBytes": 961151341,
+      "currentClosureOverUniqueRatio": 170.866,
+      "repackedPayloadPlusIndexLowerBoundBytes": 5627964
+    },
+    "original-ui/DNItems": {
+      "resourceCount": 5281,
+      "logicalBytes": 4352692,
+      "uniquePayloadCount": 2086,
+      "uniquePayloadBytes": 4081252,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 261.937,
+      "repackedPayloadPlusIndexLowerBoundBytes": 4214788
+    },
+    "original-ui/Prguse2": {
+      "resourceCount": 403,
+      "logicalBytes": 1970265,
+      "uniquePayloadCount": 396,
+      "uniquePayloadBytes": 1967813,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 543.259,
+      "repackedPayloadPlusIndexLowerBoundBytes": 1993189
+    },
+    "original-ui/Items": {
+      "resourceCount": 1004,
+      "logicalBytes": 1755052,
+      "uniquePayloadCount": 980,
+      "uniquePayloadBytes": 1749438,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 611.072,
+      "repackedPayloadPlusIndexLowerBoundBytes": 1812190
+    },
+    "original-ui/Title": {
+      "resourceCount": 360,
+      "logicalBytes": 1510955,
+      "uniquePayloadCount": 338,
+      "uniquePayloadBytes": 1478900,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 722.857,
+      "repackedPayloadPlusIndexLowerBoundBytes": 1500564
+    },
+    "original-ui/NPC": {
+      "resourceCount": 578,
+      "logicalBytes": 1469334,
+      "uniquePayloadCount": 573,
+      "uniquePayloadBytes": 1431189,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 746.954,
+      "repackedPayloadPlusIndexLowerBoundBytes": 1467893
+    },
+    "original-ui/frame-sets.generated.json": {
+      "resourceCount": 1,
+      "logicalBytes": 1375659,
+      "uniquePayloadCount": 1,
+      "uniquePayloadBytes": 1375659,
+      "currentPackCount": 1,
+      "currentWholePackClosureBytes": 33301852,
+      "currentClosureOverUniqueRatio": 24.208,
+      "repackedPayloadPlusIndexLowerBoundBytes": 1375755
+    },
+    "original-ui/StateItem": {
+      "resourceCount": 219,
+      "logicalBytes": 1314615,
+      "uniquePayloadCount": 215,
+      "uniquePayloadBytes": 1288473,
+      "currentPackCount": 32,
+      "currentWholePackClosureBytes": 1043014062,
+      "currentClosureOverUniqueRatio": 809.496,
+      "repackedPayloadPlusIndexLowerBoundBytes": 1302265
+    },
+    "original-ui/MagIcon2": {
+      "resourceCount": 225,
+      "logicalBytes": 489404,
+      "uniquePayloadCount": 225,
+      "uniquePayloadBytes": 489404,
+      "currentPackCount": 32,
+      "currentWholePackClosureBytes": 1061803049,
+      "currentClosureOverUniqueRatio": 2169.584,
+      "repackedPayloadPlusIndexLowerBoundBytes": 503836
+    },
+    "original-ui/Gate": {
+      "resourceCount": 72,
+      "logicalBytes": 479096,
+      "uniquePayloadCount": 66,
+      "uniquePayloadBytes": 444163,
+      "currentPackCount": 30,
+      "currentWholePackClosureBytes": 994694563,
+      "currentClosureOverUniqueRatio": 2239.481,
+      "repackedPayloadPlusIndexLowerBoundBytes": 448419
+    },
+    "original-ui/MagIcon": {
+      "resourceCount": 225,
+      "logicalBytes": 319496,
+      "uniquePayloadCount": 117,
+      "uniquePayloadBytes": 214650,
+      "currentPackCount": 31,
+      "currentWholePackClosureBytes": 1001925577,
+      "currentClosureOverUniqueRatio": 4667.718,
+      "repackedPayloadPlusIndexLowerBoundBytes": 222170
+    },
+    "original-ui/BuffIcon": {
+      "resourceCount": 266,
+      "logicalBytes": 286911,
+      "uniquePayloadCount": 211,
+      "uniquePayloadBytes": 283171,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 3775.219,
+      "repackedPayloadPlusIndexLowerBoundBytes": 296707
+    },
+    "original-ui/sound-index.generated.json": {
+      "resourceCount": 1,
+      "logicalBytes": 112907,
+      "uniquePayloadCount": 1,
+      "uniquePayloadBytes": 112907,
+      "currentPackCount": 1,
+      "currentWholePackClosureBytes": 33553588,
+      "currentClosureOverUniqueRatio": 297.179,
+      "repackedPayloadPlusIndexLowerBoundBytes": 113003
+    },
+    "original-ui/GuildSkill": {
+      "resourceCount": 49,
+      "logicalBytes": 95397,
+      "uniquePayloadCount": 48,
+      "uniquePayloadBytes": 94041,
+      "currentPackCount": 25,
+      "currentWholePackClosureBytes": 810215508,
+      "currentClosureOverUniqueRatio": 8615.556,
+      "repackedPayloadPlusIndexLowerBoundBytes": 97145
+    },
+    "original-ui/MapLinkIcon": {
+      "resourceCount": 18,
+      "logicalBytes": 17019,
+      "uniquePayloadCount": 18,
+      "uniquePayloadBytes": 17019,
+      "currentPackCount": 16,
+      "currentWholePackClosureBytes": 528723394,
+      "currentClosureOverUniqueRatio": 31066.655,
+      "repackedPayloadPlusIndexLowerBoundBytes": 18203
+    },
+    "original-ui/Cursors": {
+      "resourceCount": 4,
+      "logicalBytes": 7155,
+      "uniquePayloadCount": 4,
+      "uniquePayloadBytes": 7155,
+      "currentPackCount": 4,
+      "currentWholePackClosureBytes": 133788549,
+      "currentClosureOverUniqueRatio": 18698.609,
+      "repackedPayloadPlusIndexLowerBoundBytes": 7443
+    },
+    "original-ui/UI_32bit": {
+      "resourceCount": 5,
+      "logicalBytes": 2018,
+      "uniquePayloadCount": 5,
+      "uniquePayloadBytes": 2018,
+      "currentPackCount": 4,
+      "currentWholePackClosureBytes": 134094500,
+      "currentClosureOverUniqueRatio": 66449.207,
+      "repackedPayloadPlusIndexLowerBoundBytes": 2370
+    }
+  },
+  "packHeaders": [
+    {
+      "sha256": "03673D348D2B86BD8CD458E48E644D06059C825C7B376BEE2F02965DA8E1BEF2",
+      "sizeBytes": 33399504,
+      "uniquePayloadCount": 7190,
+      "indexBytes": 460160,
+      "payloadBytes": 32939312,
+      "headerSha256": "5B42780D35B6D548623A178C33D7E5E7840AFB53B3B324C0E0E2E4142109A8D9"
+    },
+    {
+      "sha256": "09E5614CDD8AC449636EF57D6C2D210A0E3B6AF9DC9DC0F7CEAFAA2C6C204EBB",
+      "sizeBytes": 33507204,
+      "uniquePayloadCount": 8273,
+      "indexBytes": 529472,
+      "payloadBytes": 32977700,
+      "headerSha256": "63B85BBC3DC5F9CDD4E862F48C2ED138192CEB7A0A5826A6E509C78518C792CA"
+    },
+    {
+      "sha256": "0B25B97026769A42E9B59599B3D5B0E56165FB79611757E719A0DE3D801DB089",
+      "sizeBytes": 33552365,
+      "uniquePayloadCount": 7939,
+      "indexBytes": 508096,
+      "payloadBytes": 33044237,
+      "headerSha256": "CAFCE5EAFA1953F947D4421F7E716D3FBD4A541CF94EFD0D2E744F2EE79E87EC"
+    },
+    {
+      "sha256": "0E82E0FC21777736E4330EE38CF8AD2C17FFF7285C4D771B03473563B277499C",
+      "sizeBytes": 33551829,
+      "uniquePayloadCount": 7733,
+      "indexBytes": 494912,
+      "payloadBytes": 33056885,
+      "headerSha256": "37D719E2E1781F31E2544FA310C9A82C1301620F855DDBA41C8813A52CF0312C"
+    },
+    {
+      "sha256": "1907EE58E10ADA0B9AD7F9EAD96B6AE6B82ADC17E9587611D508905ADE81ECE3",
+      "sizeBytes": 4084,
+      "uniquePayloadCount": 1,
+      "indexBytes": 64,
+      "payloadBytes": 3988,
+      "headerSha256": "A8815768D8C00955A9524AAD73716034C3A57EE9732A8BE3BCCC37BE562F872F"
+    },
+    {
+      "sha256": "1D6C4E1316DF97DF0FEBD85A3E3E99AE0B4FD8461A6FF8755EF117EE326A62C3",
+      "sizeBytes": 33553588,
+      "uniquePayloadCount": 8326,
+      "indexBytes": 532864,
+      "payloadBytes": 33020692,
+      "headerSha256": "059FB58BF40413B6AD41DD4F8C66B79078AC7FA96E4436F234880E588ACB806B"
+    },
+    {
+      "sha256": "338A7CE123DC6FE26CEBFF28D79E96266F502DAC2F351E24F1564520626DB8AD",
+      "sizeBytes": 26018519,
+      "uniquePayloadCount": 6382,
+      "indexBytes": 408448,
+      "payloadBytes": 25610039,
+      "headerSha256": "D779ED67C3AB0B5FC1B485877A6D45BA2CA7A02A08958D5ED9E00D4BDED5D64F"
+    },
+    {
+      "sha256": "38576C26C3339944FE37F6E532132CC336D75C71E35617969780A042997DE445",
+      "sizeBytes": 33553616,
+      "uniquePayloadCount": 8240,
+      "indexBytes": 527360,
+      "payloadBytes": 33026224,
+      "headerSha256": "35D4AAF420ABF6BAD69172F01BDF4300E02BAB900EF27574B452A99328F90C4A"
+    },
+    {
+      "sha256": "52E10D75FB58688B6F210481E94B15A663D178CD94CBD399CE239188A838AA50",
+      "sizeBytes": 33553196,
+      "uniquePayloadCount": 7778,
+      "indexBytes": 497792,
+      "payloadBytes": 33055372,
+      "headerSha256": "A986DD3A133FBE4819ADA7C92217FFA908BD0B39424190DC652C932CB1EB6DFD"
+    },
+    {
+      "sha256": "55FA67002392C549BD8540F120266AF66ED93FEBDE2B294B8DDE236734112180",
+      "sizeBytes": 33552198,
+      "uniquePayloadCount": 6890,
+      "indexBytes": 440960,
+      "payloadBytes": 33111206,
+      "headerSha256": "A4EE937C520EC8EC6BFC67237396FBBAD4C3A6B6CB638E18C2E18B79E0FF1207"
+    },
+    {
+      "sha256": "5B3CC24095753A595E0441A17D39E585D6EB5362C7F07B3ADFA0A90B2BA926B5",
+      "sizeBytes": 33554144,
+      "uniquePayloadCount": 7866,
+      "indexBytes": 503424,
+      "payloadBytes": 33050688,
+      "headerSha256": "1D78C9D145D21845C5411B8156173F03680071373856225A3269A29B84D7C40C"
+    },
+    {
+      "sha256": "655BF2EEA4427AD5FF17C8F345F282AB3D07C0086CD1D7301D48A7C800F7E502",
+      "sizeBytes": 33542087,
+      "uniquePayloadCount": 8017,
+      "indexBytes": 513088,
+      "payloadBytes": 33028967,
+      "headerSha256": "18898734E0C3A86DC217D64D4A80769443F96E37E245C658DE45D0A33B8351CE"
+    },
+    {
+      "sha256": "6EF3BF556AAADF51DCC7EDE34668951BBF17FAB9B401824E2D1E4056881F7331",
+      "sizeBytes": 33547552,
+      "uniquePayloadCount": 4540,
+      "indexBytes": 290560,
+      "payloadBytes": 33256960,
+      "headerSha256": "FCF63A075EFDDE6F66580E9C83280B52152954368598778CFBF2D31F991CC45B"
+    },
+    {
+      "sha256": "7A90A2CCCB1BE21D30F3F150AE158EED32979AD7F0F00AD915D94434E6534F4C",
+      "sizeBytes": 33554275,
+      "uniquePayloadCount": 7997,
+      "indexBytes": 511808,
+      "payloadBytes": 33042435,
+      "headerSha256": "0C1014F994F37B25B53A38AEB60DF6FEEEDB8A73823C7C4A9C48686189F31176"
+    },
+    {
+      "sha256": "8090A6E24A40C63603CD1FBFE93F8293136A7B2935E4FF453F861B36DA73FB6F",
+      "sizeBytes": 33553871,
+      "uniquePayloadCount": 8518,
+      "indexBytes": 545152,
+      "payloadBytes": 33008687,
+      "headerSha256": "D287AE88766DF1BA3A6B09D26109BB1035DD9E7DC24BA05EF9CFCB5BB087010C"
+    },
+    {
+      "sha256": "811106ACF7F1EC9E55C2A9F8AF2430DF97CC784EB778A3353E2B55F043478128",
+      "sizeBytes": 32204100,
+      "uniquePayloadCount": 7920,
+      "indexBytes": 506880,
+      "payloadBytes": 31697188,
+      "headerSha256": "AF027B1F038F41C592C765B93740D8382379D4527BBFEBFC5F3E2ABB26A7DF9E"
+    },
+    {
+      "sha256": "86327DD49A3054B208007CA6A5E49ECF5A8632EC004946E8965956910F0060E7",
+      "sizeBytes": 7229532,
+      "uniquePayloadCount": 1776,
+      "indexBytes": 113664,
+      "payloadBytes": 7115836,
+      "headerSha256": "DAE9C58D16B46C7B89D144D59F10C20BA94F832C6D877EB82D3D53652D4DEA96"
+    },
+    {
+      "sha256": "A799C2DEAD8719030A913D0E6FB7334BA458B22AD03A90BDBC205090CD513921",
+      "sizeBytes": 33525118,
+      "uniquePayloadCount": 8819,
+      "indexBytes": 564416,
+      "payloadBytes": 32960670,
+      "headerSha256": "B9F99EC38A2F702B155CA6AA038CB1BF3AF9A349062ED5C03F7E32429E891F63"
+    },
+    {
+      "sha256": "A8403F51DA61F4BA9CE0F9C79210B5359D42C0AD6DB449A99179B952AE82565C",
+      "sizeBytes": 33553067,
+      "uniquePayloadCount": 8962,
+      "indexBytes": 573568,
+      "payloadBytes": 32979467,
+      "headerSha256": "790FAFD0FC2B22881241581D6279D2821FFC382DA494E3CB0921454E69966733"
+    },
+    {
+      "sha256": "B79F3148DF814DB2B05B9118FCE266E9FF70CECE771DE6E848AB7C2012DA3F61",
+      "sizeBytes": 33554106,
+      "uniquePayloadCount": 8061,
+      "indexBytes": 515904,
+      "payloadBytes": 33038170,
+      "headerSha256": "0DD639AE1C259F0F287FE03993E12DB22A6DEC23CAD774D38AEC790A235B2338"
+    },
+    {
+      "sha256": "BE952A083876B9BC564E17BD247EBC07C720EC0B0FB2C55B199A6E6B00E2D78F",
+      "sizeBytes": 33553429,
+      "uniquePayloadCount": 9045,
+      "indexBytes": 578880,
+      "payloadBytes": 32974517,
+      "headerSha256": "CE86291CA519F32F43095FB3ADC6A73C5C28AE8F337753EA50C0CC585BF2FC85"
+    },
+    {
+      "sha256": "C09A998B21AFC5A720DC800816F019F6DC2B7541FD77C1C6AB01A68F4DC0AC14",
+      "sizeBytes": 33432408,
+      "uniquePayloadCount": 7980,
+      "indexBytes": 510720,
+      "payloadBytes": 32921656,
+      "headerSha256": "A117AEF740192C7841B8A872095638CD9368EE1158C3C27A6C66336B2D9FE47C"
+    },
+    {
+      "sha256": "C1384B5B198506CDC9EEE7159EB87700DA51A6B8E549316605D69E15A00008F8",
+      "sizeBytes": 33301852,
+      "uniquePayloadCount": 7658,
+      "indexBytes": 490112,
+      "payloadBytes": 32811708,
+      "headerSha256": "35CF344033A3008DD5F74DAEB996DD39DDF0224B092B3FC8332C16989B30F02D"
+    },
+    {
+      "sha256": "D361DC189887D7BB97E7F056F3CC68307AC3FF08EAF7146E8D6BB0171B83E84F",
+      "sizeBytes": 33247655,
+      "uniquePayloadCount": 8785,
+      "indexBytes": 562240,
+      "payloadBytes": 32685383,
+      "headerSha256": "B2C17B80AE83535682582EF97F4E3F491A7D904291A36C0B7B4CA163BBA66722"
+    },
+    {
+      "sha256": "D999ED1A18641F7CD0F7DD8352543E803EDB83CB4E337A6352425DDFE1E281B5",
+      "sizeBytes": 33454728,
+      "uniquePayloadCount": 9048,
+      "indexBytes": 579072,
+      "payloadBytes": 32875624,
+      "headerSha256": "65B33B3CEEC6F3BF607C76E937E1075D6DE5F7FA5EEF09A7D9F649FF1ECE4D81"
+    },
+    {
+      "sha256": "DC3D46B5C44E30E7E1FBDEC7CC895615C162B249652CD10B046EF78597CBE2E2",
+      "sizeBytes": 33552860,
+      "uniquePayloadCount": 6724,
+      "indexBytes": 430336,
+      "payloadBytes": 33122492,
+      "headerSha256": "69172F23A234AC5B3CF9C44528FBE9F1CBF6307B2BE9686CAF2776E10C14FDC0"
+    },
+    {
+      "sha256": "DD5AFCF6DD7DA2DC74AA0D85F8D9F5962ACA7FE90DE2359D26DB3D828540C97D",
+      "sizeBytes": 33554398,
+      "uniquePayloadCount": 6944,
+      "indexBytes": 444416,
+      "payloadBytes": 33109950,
+      "headerSha256": "701B7827B79551C74B9E22D2666DAD210D6710381FC788D3C16B321163F080FE"
+    },
+    {
+      "sha256": "DF2F3D2EA59DB1DE4E9FC9D26899905396DBC671A25F65BCA8BD9D338D6E1876",
+      "sizeBytes": 33553142,
+      "uniquePayloadCount": 7201,
+      "indexBytes": 460864,
+      "payloadBytes": 33092246,
+      "headerSha256": "DC47322DC685CA30456D7599295C58922DDD5271C182EF00C2235EC1801ACACF"
+    },
+    {
+      "sha256": "E1A423EBC589EA6B7D4AA4D26E861003E1BF9D012544E6B1CE27927ADDFF4BB3",
+      "sizeBytes": 31580065,
+      "uniquePayloadCount": 6926,
+      "indexBytes": 443264,
+      "payloadBytes": 31136769,
+      "headerSha256": "6C5886CCCC1905685A625121C7F55EFEEC31F1B0FCA5F263967101658AD95620"
+    },
+    {
+      "sha256": "E2488296712FAA90E35236A75672820C0117AED20C82A7C367EE1883153D7AC1",
+      "sizeBytes": 33554100,
+      "uniquePayloadCount": 7796,
+      "indexBytes": 498944,
+      "payloadBytes": 33055124,
+      "headerSha256": "7CD3BA7E81319D7AFF9B3EEA3BF297C93B4605B0CF7E6D0E1193F1AC740D4D66"
+    },
+    {
+      "sha256": "E967397064ACAD28A30D88671FDE8BF798A8FC3FA7743D2AF202BE556FDE8E11",
+      "sizeBytes": 33554088,
+      "uniquePayloadCount": 4201,
+      "indexBytes": 268864,
+      "payloadBytes": 33285192,
+      "headerSha256": "386EE1F85BA10FD32320CEAE471B701A2047DD675B14A77314E2304B84066A2B"
+    },
+    {
+      "sha256": "EF202D7D6650DF79E06EF48E766E4377A250A8D70E09FBF17FBC36F5ED260BC3",
+      "sizeBytes": 33551296,
+      "uniquePayloadCount": 7567,
+      "indexBytes": 484288,
+      "payloadBytes": 33066976,
+      "headerSha256": "5BA2973AB1E876BF44F7BAC5ADA4A0CE88DA199AB4A178D7A08C42E5962AEBB7"
+    },
+    {
+      "sha256": "F7B22E2C78C0153F165694160728549508A40E769CA9A2732BD8C48B3C75FEF7",
+      "sizeBytes": 33531149,
+      "uniquePayloadCount": 8468,
+      "indexBytes": 541952,
+      "payloadBytes": 32989165,
+      "headerSha256": "AA3A85E2A220512A2BED4EE52CA06E002B8FABD7DC599B4B8F4C780D090A7EF4"
+    },
+    {
+      "sha256": "FE492BA4C1D1DBDB27FEA0BCE307CE0E4007FFC673587E6C07E5FF782C335B60",
+      "sizeBytes": 33551540,
+      "uniquePayloadCount": 7907,
+      "indexBytes": 506048,
+      "payloadBytes": 33045460,
+      "headerSha256": "40A96EB68AFEA6547E18C3084F0E46F47AA63EC7EC4DEC6D95945DCDD5442B27"
+    }
+  ],
+  "packSemanticMix": {
+    "mixedPackCount": 33,
+    "distinctTopLevelCategoryCountDistribution": {
+      "1": 1,
+      "4": 23,
+      "5": 9,
+      "6": 1
+    },
+    "mechanism": "fresh BTreeMap is keyed by content SHA, not a random-number shuffle. Content hashes have no semantic locality. Counts attribute duplicate payloads to the first lexical logical path only."
+  },
+  "bootstrapScenarios": {
+    "sourceStartupGuardOnly": {
+      "resourceCount": 20,
+      "logicalBytes": 16643468,
+      "uniquePayloadCount": 20,
+      "uniquePayloadBytes": 16643468,
+      "currentPackCount": 16,
+      "currentWholePackClosureBytes": 532993731,
+      "currentClosureOverUniqueRatio": 32.024,
+      "repackedPayloadPlusIndexLowerBoundBytes": 16644780
+    },
+    "loginAndSafeKeyImagesOnly": {
+      "resourceCount": 36,
+      "logicalBytes": 2625024,
+      "uniquePayloadCount": 30,
+      "uniquePayloadBytes": 2618430,
+      "currentPackCount": 21,
+      "currentWholePackClosureBytes": 694287874,
+      "currentClosureOverUniqueRatio": 265.154,
+      "repackedPayloadPlusIndexLowerBoundBytes": 2620382
+    },
+    "commonUiBroad": {
+      "resourceCount": 8837,
+      "logicalBytes": 26438088,
+      "uniquePayloadCount": 5003,
+      "uniquePayloadBytes": 25541120,
+      "currentPackCount": 33,
+      "currentWholePackClosureBytes": 1069032581,
+      "currentClosureOverUniqueRatio": 41.855,
+      "repackedPayloadPlusIndexLowerBoundBytes": 25861344
+    },
+    "allCharacterSelectCreateFrames": {
+      "resourceCount": 238,
+      "logicalBytes": 47547930,
+      "uniquePayloadCount": 230,
+      "uniquePayloadBytes": 47547376,
+      "currentPackCount": 32,
+      "currentWholePackClosureBytes": 1035485029,
+      "currentClosureOverUniqueRatio": 21.778,
+      "repackedPayloadPlusIndexLowerBoundBytes": 47562128
+    },
+    "starterEntityAtlases": {
+      "resourceCount": 9,
+      "logicalBytes": 17282380,
+      "uniquePayloadCount": 9,
+      "uniquePayloadBytes": 17282380,
+      "currentPackCount": 8,
+      "currentWholePackClosureBytes": 268321253,
+      "currentClosureOverUniqueRatio": 15.526,
+      "repackedPayloadPlusIndexLowerBoundBytes": 17282988
+    },
+    "loginMusicAndClick": {
+      "resourceCount": 2,
+      "logicalBytes": 18440360,
+      "uniquePayloadCount": 2,
+      "uniquePayloadBytes": 18440360,
+      "currentPackCount": 2,
+      "currentWholePackClosureBytes": 67100412,
+      "currentClosureOverUniqueRatio": 3.639,
+      "repackedPayloadPlusIndexLowerBoundBytes": 18440520
+    },
+    "bootstrapViewportCandidate": {
+      "resourceCount": 9397,
+      "logicalBytes": 127918219,
+      "uniquePayloadCount": 5554,
+      "uniquePayloadBytes": 127020629,
+      "currentPackCount": 34,
+      "currentWholePackClosureBytes": 1069036665,
+      "currentClosureOverUniqueRatio": 8.416,
+      "repackedPayloadPlusIndexLowerBoundBytes": 127376117
+    },
+    "bootstrapLoginImagesCandidate": {
+      "resourceCount": 9160,
+      "logicalBytes": 82868030,
+      "uniquePayloadCount": 5326,
+      "uniquePayloadBytes": 81971062,
+      "currentPackCount": 34,
+      "currentWholePackClosureBytes": 1069036665,
+      "currentClosureOverUniqueRatio": 13.042,
+      "repackedPayloadPlusIndexLowerBoundBytes": 82311958
+    },
+    "bootstrapWholeMap0Candidate": {
+      "resourceCount": 16449,
+      "logicalBytes": 185575743,
+      "uniquePayloadCount": 12606,
+      "uniquePayloadBytes": 184678153,
+      "currentPackCount": 34,
+      "currentWholePackClosureBytes": 1069036665,
+      "currentClosureOverUniqueRatio": 5.789,
+      "repackedPayloadPlusIndexLowerBoundBytes": 185484969
+    }
+  },
+  "map0": {
+    "compressedBytes": 512762,
+    "decodedBytes": 12740008,
+    "startPoint": {
+      "x": 288,
+      "y": 616
+    },
+    "wholeMap": {
+      "viewport": "whole 700x700 map",
+      "requestedFrameKeys": 8757,
+      "resolvedImageStats": {
+        "resourceCount": 7352,
+        "logicalBytes": 62544109,
+        "uniquePayloadCount": 7352,
+        "uniquePayloadBytes": 62544109,
+        "currentPackCount": 33,
+        "currentWholePackClosureBytes": 1069032581,
+        "currentClosureOverUniqueRatio": 17.092,
+        "repackedPayloadPlusIndexLowerBoundBytes": 63014669
+      },
+      "missingIndexKeys": 274,
+      "missingSamples": [
+        {
+          "key": "WemadeMir2/Objects#0",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#1",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#10",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#11",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#1159",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#12",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#13",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#14",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#1488",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#1495",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#15",
+          "index": "native"
+        },
+        {
+          "key": "WemadeMir2/Objects#1500",
+          "index": "native"
+        }
+      ],
+      "scope": "Static superset of individually resolvable phases, including phases of incomplete families. Not a render/QA result; original family-base fallback/noDraw semantics are not changed."
+    },
+    "configuredStartViewport": {
+      "viewport": [
+        288,
+        616,
+        24,
+        18
+      ],
+      "requestedFrameKeys": 378,
+      "resolvedImageStats": {
+        "resourceCount": 300,
+        "logicalBytes": 4886585,
+        "uniquePayloadCount": 300,
+        "uniquePayloadBytes": 4886585,
+        "currentPackCount": 33,
+        "currentWholePackClosureBytes": 1069032581,
+        "currentClosureOverUniqueRatio": 218.769,
+        "repackedPayloadPlusIndexLowerBoundBytes": 4905817
+      },
+      "missingIndexKeys": 0,
+      "missingSamples": [],
+      "scope": "Static superset of individually resolvable phases, including phases of incomplete families. Not a render/QA result; original family-base fallback/noDraw semantics are not changed."
+    },
+    "starterFixtureViewport": {
+      "viewport": [
+        330,
+        270,
+        24,
+        18
+      ],
+      "requestedFrameKeys": 235,
+      "resolvedImageStats": {
+        "resourceCount": 161,
+        "logicalBytes": 5360035,
+        "uniquePayloadCount": 161,
+        "uniquePayloadBytes": 5360035,
+        "currentPackCount": 33,
+        "currentWholePackClosureBytes": 1069032581,
+        "currentClosureOverUniqueRatio": 199.445,
+        "repackedPayloadPlusIndexLowerBoundBytes": 5370371
+      },
+      "missingIndexKeys": 0,
+      "missingSamples": [],
+      "scope": "Static superset of individually resolvable phases, including phases of incomplete families. Not a render/QA result; original family-base fallback/noDraw semantics are not changed."
+    },
+    "warning": "Static source dependency sizing is not complete account/appearance/spell/NPC runtime closure or visual parity certification."
+  },
+  "budget": {
+    "20MbpsBytesPerSecond": 2500000,
+    "maxBytesFor300sWithNoOtherWork": 750000000,
+    "240sTransferPlus60sInstallAndLoginBudgetBytes": 600000000,
+    "180sTransferPlus120sInstallAndLoginBudgetBytes": 450000000,
+    "currentFullSetupBytes": 1040065902,
+    "currentFullSetupIdeal20MbpsSeconds": 416.0263608,
+    "targetRecommendation": "Use <=300,000,000 bytes as a first implementation ceiling including runtime, required packs and controls (<=120s ideal transfer at 20Mbps), and tighten toward250,000,000 by delaying unselected character-preview groups. The conservative viewport scenario is269.1MB; login-image-only223.98MB is a sizing floor, not a proven complete new-character path. Full map0 option329.5MB exceeds the proposed300MB ceiling. Measure real non-network time and delivery separately.",
+    "candidateRawEstimates": [
+      {
+        "scenario": "bootstrapViewportCandidate",
+        "rawRuntimeBytes": 139346850,
+        "resourceRepackLowerBoundBytes": 127376117,
+        "subsetCatalogSerializedEstimateBytes": 2385526,
+        "rawTotalBeforeNewControlsOrCompressionBytes": 269108493,
+        "withCurrentFullCatalogBytes": 335389511,
+        "idealAt20MbpsSeconds": 107.643,
+        "arithmeticAtObserved6p6809MbpsSeconds": 322.24,
+        "acceptanceClaim": false
+      },
+      {
+        "scenario": "bootstrapLoginImagesCandidate",
+        "rawRuntimeBytes": 139346850,
+        "resourceRepackLowerBoundBytes": 82311958,
+        "subsetCatalogSerializedEstimateBytes": 2325471,
+        "rawTotalBeforeNewControlsOrCompressionBytes": 223984279,
+        "withCurrentFullCatalogBytes": 290325352,
+        "idealAt20MbpsSeconds": 89.594,
+        "arithmeticAtObserved6p6809MbpsSeconds": 268.207,
+        "acceptanceClaim": false
+      },
+      {
+        "scenario": "bootstrapWholeMap0Candidate",
+        "rawRuntimeBytes": 139346850,
+        "resourceRepackLowerBoundBytes": 185484969,
+        "subsetCatalogSerializedEstimateBytes": 4688941,
+        "rawTotalBeforeNewControlsOrCompressionBytes": 329520760,
+        "withCurrentFullCatalogBytes": 393498363,
+        "idealAt20MbpsSeconds": 131.808,
+        "arithmeticAtObserved6p6809MbpsSeconds": 394.58,
+        "acceptanceClaim": false
+      }
+    ],
+    "noCompressionRatioOrWorldwideThroughputAssumed": true
+  },
+  "incremental": {
+    "algorithm": "Content SHA BTreeMap sorting within fresh groups. With trusted previous PackStore, unchanged content retains its old pack and extent; only novel payloads are appended and old packs remain while referenced.",
+    "examples": [
+      {
+        "path": "legal/README.zh-CN.txt",
+        "currentBytes": 3988,
+        "currentContainingPackBytes": 4084,
+        "editAssumption": "same-length novel content, only this logical path changed",
+        "withTrustedPreviousBuildNewPackBytes": 4084,
+        "catalogTransferCurrentBytes": 68666544,
+        "withTrustedPreviousTotalResourcePlusCatalogBytes": 68670628,
+        "freshRebuildCaution": "Without previous locators, a changed SHA changes sort order and pack boundaries; do not assume only one 32MiB object changes."
+      },
+      {
+        "path": "original-ui/Title/320.png",
+        "currentBytes": 5658,
+        "currentContainingPackBytes": 33552860,
+        "editAssumption": "same-length novel content, only this logical path changed",
+        "withTrustedPreviousBuildNewPackBytes": 5754,
+        "catalogTransferCurrentBytes": 68666544,
+        "withTrustedPreviousTotalResourcePlusCatalogBytes": 68672298,
+        "freshRebuildCaution": "Without previous locators, a changed SHA changes sort order and pack boundaries; do not assume only one 32MiB object changes."
+      },
+      {
+        "path": "original-ui/ChrSel/0.png",
+        "currentBytes": 2497741,
+        "currentContainingPackBytes": 33553142,
+        "editAssumption": "same-length novel content, only this logical path changed",
+        "withTrustedPreviousBuildNewPackBytes": 2497837,
+        "catalogTransferCurrentBytes": 68666544,
+        "withTrustedPreviousTotalResourcePlusCatalogBytes": 71164381,
+        "freshRebuildCaution": "Without previous locators, a changed SHA changes sort order and pack boundaries; do not assume only one 32MiB object changes."
+      },
+      {
+        "path": "crystal-map-pack/0.map.gz",
+        "currentBytes": 512762,
+        "currentContainingPackBytes": 33551296,
+        "editAssumption": "same-length novel content, only this logical path changed",
+        "withTrustedPreviousBuildNewPackBytes": 512858,
+        "catalogTransferCurrentBytes": 68666544,
+        "withTrustedPreviousTotalResourcePlusCatalogBytes": 69179402,
+        "freshRebuildCaution": "Without previous locators, a changed SHA changes sort order and pack boundaries; do not assume only one 32MiB object changes."
+      },
+      {
+        "path": "generated/native-map-keyed/manifest.json",
+        "currentBytes": 11320827,
+        "currentContainingPackBytes": 33554088,
+        "editAssumption": "same-length novel content, only this logical path changed",
+        "withTrustedPreviousBuildNewPackBytes": 11320923,
+        "catalogTransferCurrentBytes": 68666544,
+        "withTrustedPreviousTotalResourcePlusCatalogBytes": 79987467,
+        "freshRebuildCaution": "Without previous locators, a changed SHA changes sort order and pack boundaries; do not assume only one 32MiB object changes."
+      }
+    ],
+    "runtimeOnlyUpdateBytes": 133801984,
+    "fullCatalogCostRemainsEvenForTinyEdit": true,
+    "possibleFutureImprovement": "Signed per-group catalogs/root inventory can avoid shipping the entire 68.7MB catalog for a tiny change; keep full logical inventory equivalence and authenticated group membership."
+  },
+  "semanticRepackSimulation": {
+    "status": "size-only simulation, not emitted/hashed/signed pack objects",
+    "priority": "bootstrap/common -> all character selection -> first map view -> semantic deferred families; duplicate payload ownership goes to earliest group",
+    "groups": [
+      {
+        "group": "actors/AArmour",
+        "resourceCount": 11275,
+        "uniquePayloadCount": 11275,
+        "uniquePayloadBytes": 40112382,
+        "simulatedPackCount": 2,
+        "simulatedPackBytes": 40834046,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/AHair",
+        "resourceCount": 9225,
+        "uniquePayloadCount": 9225,
+        "uniquePayloadBytes": 7682206,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 8272638,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/ARArmour",
+        "resourceCount": 7755,
+        "uniquePayloadCount": 7755,
+        "uniquePayloadBytes": 30962140,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 31458492,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/ARHair",
+        "resourceCount": 6345,
+        "uniquePayloadCount": 6345,
+        "uniquePayloadBytes": 5782172,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 6188284,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/ARWeapon",
+        "resourceCount": 19994,
+        "uniquePayloadCount": 19994,
+        "uniquePayloadBytes": 24422159,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 25701807,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/AWeapon",
+        "resourceCount": 26650,
+        "uniquePayloadCount": 26650,
+        "uniquePayloadBytes": 23863818,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 25569450,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/CArmour",
+        "resourceCount": 37191,
+        "uniquePayloadCount": 37191,
+        "uniquePayloadBytes": 124130818,
+        "simulatedPackCount": 4,
+        "simulatedPackBytes": 126511170,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/CHair",
+        "resourceCount": 14553,
+        "uniquePayloadCount": 14553,
+        "uniquePayloadBytes": 13237831,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 14169255,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/CWeapon",
+        "resourceCount": 21658,
+        "uniquePayloadCount": 19990,
+        "uniquePayloadBytes": 19783835,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 21063227,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/Gate",
+        "resourceCount": 72,
+        "uniquePayloadCount": 66,
+        "uniquePayloadBytes": 444163,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 448419,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/Monster",
+        "resourceCount": 25475,
+        "uniquePayloadCount": 24561,
+        "uniquePayloadBytes": 102437094,
+        "simulatedPackCount": 4,
+        "simulatedPackBytes": 104009126,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/Mount",
+        "resourceCount": 2604,
+        "uniquePayloadCount": 2604,
+        "uniquePayloadBytes": 20073393,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 20240081,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/NPC",
+        "resourceCount": 578,
+        "uniquePayloadCount": 573,
+        "uniquePayloadBytes": 1431189,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 1467893,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "actors/Pet",
+        "resourceCount": 5328,
+        "uniquePayloadCount": 5199,
+        "uniquePayloadBytes": 11120638,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 11453406,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "bootstrap/character-select",
+        "resourceCount": 231,
+        "uniquePayloadCount": 229,
+        "uniquePayloadBytes": 47547308,
+        "simulatedPackCount": 7,
+        "simulatedPackBytes": 47562188,
+        "targetBytes": 8388608
+      },
+      {
+        "group": "bootstrap/common",
+        "resourceCount": 9046,
+        "uniquePayloadCount": 5025,
+        "uniquePayloadBytes": 74586736,
+        "simulatedPackCount": 11,
+        "simulatedPackBytes": 74908688,
+        "targetBytes": 8388608
+      },
+      {
+        "group": "bootstrap/initial-map-view",
+        "resourceCount": 300,
+        "uniquePayloadCount": 300,
+        "uniquePayloadBytes": 4886585,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 4905817,
+        "targetBytes": 8388608
+      },
+      {
+        "group": "effects/Effect",
+        "resourceCount": 35,
+        "uniquePayloadCount": 35,
+        "uniquePayloadBytes": 54547,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 56819,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/Lighting",
+        "resourceCount": 10,
+        "uniquePayloadCount": 10,
+        "uniquePayloadBytes": 1018706,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 1019378,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/Magic",
+        "resourceCount": 1309,
+        "uniquePayloadCount": 1186,
+        "uniquePayloadBytes": 9059587,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 9135523,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/Magic2",
+        "resourceCount": 1196,
+        "uniquePayloadCount": 1140,
+        "uniquePayloadBytes": 23075883,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 23148875,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/Magic3",
+        "resourceCount": 1023,
+        "uniquePayloadCount": 1012,
+        "uniquePayloadBytes": 12108285,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 12173085,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/MagicC",
+        "resourceCount": 17,
+        "uniquePayloadCount": 17,
+        "uniquePayloadBytes": 153429,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 154549,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/Monster",
+        "resourceCount": 37,
+        "uniquePayloadCount": 37,
+        "uniquePayloadBytes": 316906,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 319306,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "effects/Weather",
+        "resourceCount": 8,
+        "uniquePayloadCount": 8,
+        "uniquePayloadBytes": 313760,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 314304,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "scene/other-keyed-images",
+        "resourceCount": 50656,
+        "uniquePayloadCount": 50656,
+        "uniquePayloadBytes": 244778820,
+        "simulatedPackCount": 8,
+        "simulatedPackBytes": 248021060,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "scene/other-map-layouts",
+        "resourceCount": 1619,
+        "uniquePayloadCount": 976,
+        "uniquePayloadBytes": 29208039,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 29270535,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "scene/shared-floor-atlases",
+        "resourceCount": 536,
+        "uniquePayloadCount": 536,
+        "uniquePayloadBytes": 147121335,
+        "simulatedPackCount": 5,
+        "simulatedPackBytes": 147155799,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "ui-deferred/MMap",
+        "resourceCount": 226,
+        "uniquePayloadCount": 218,
+        "uniquePayloadBytes": 15755193,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 15769177,
+        "targetBytes": 33554432
+      },
+      {
+        "group": "ui-deferred/Sound",
+        "resourceCount": 111,
+        "uniquePayloadCount": 111,
+        "uniquePayloadBytes": 17724748,
+        "simulatedPackCount": 1,
+        "simulatedPackBytes": 17731884,
+        "targetBytes": 33554432
+      }
+    ],
+    "totalPacks": 64,
+    "withinCurrent256PackLimit": true,
+    "physicalBytes": 1069034281,
+    "all255063LogicalEntriesAssignedExactlyOnce": true,
+    "allUniquePayloadsAssignedExactlyOnce": true,
+    "doNotPublishAsCurrentCompatibleGeneration": "Current PackStore::open and updater demand all catalog packs before activation. Regrouping alone cannot enable bootstrap."
+  },
+  "recommendation": {
+    "priority": 1,
+    "approach": "Authenticated grouped bootstrap generation plus selected-scene prefetch, preserving the complete full inventory as deferred signed groups. Keep sequential pack files and content-addressed reuse; do not return to 255k extracted files.",
+    "requiredCodeBoundaries": [
+      "Resource builder: deterministic semantic ownership and stable incremental previous locators; keep per-group records sorted by SHA and original resource SHA/size.",
+      "Signed generation/group manifest and catalog: explicit required/optional group identity, union exactly equals the canonical 255063 tuple inventory; missing optional group is not reported as a complete full installation.",
+      "Updater/PackStore: verify whole downloaded pack, bounded safe create-only install and directory/handle lease before a group is mounted; existing all-pack eager verification cannot merely be skipped.",
+      "Asset reads and transitions: collect resource access across PackStore and Bevy; acquire and verify a complete dependency group before login/character scene/map movement/ability transition needs it. Preserve map animation families and source noDraw/fallback semantics.",
+      "First-map acceptance: real selected account map, outfit/NPC/UI/effect dependencies, textures decoded and input acknowledged; existing login Ready is not equivalent to operable map.",
+      "Incremental activation: atomic selected generation/group closure, sequence/CMS trust, rollback and exact old locators; no unsigned loose/R2 fallback."
+    ],
+    "notProven": [
+      "Exact minimal bootstrap for every existing character/outfit/locale/class/spell state",
+      "Cost and time of future compressed installer or catalog-shard format",
+      "Worldwide sustained effective throughput or <=300s real acceptance",
+      "Disposition of 274 unresolved whole-map frame keys; audit does not add or remove art"
+    ]
+  },
+  "availableTrace": {
+    "MIR2_NATIVE_TRACE_RENDER": "atlas sprite samples every 120 frames through frame720, missing standalone/incomplete-animation logs; not an exhaustive logical read list",
+    "timing": "startup and mapCacheMissReadDecompressParse/entityPngDecode CPU elapsed markers; not GPU-present acceptance",
+    "assetHitStats": "loose/local/R2 counters and _r2_hits.log belong to loose streaming path; packed reads bypass them",
+    "r19AndCommittedHeadGap": "R19 and committed baseline do not have a complete stage-tagged verified logical-read trace. PackStore::read/read_from/PackedAssetReader are the common authenticated boundaries.",
+    "parallelWorkingTreeDevelopment": {
+      "present": true,
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\read_profile.rs",
+        "sizeBytes": 2868,
+        "sha256": "6711C561174165A8124D712C4B8A56BA10533676F425E6A07154B39D6BF3B7F2"
+      },
+      "observedContract": "Other writer WIP adds opt-in open_profiled/read_profile_snapshot with successful verified logical paths, failure counts and overflow/poison flags; original complete pack validation retained. This is not a trace run or shipped R19 feature. Reuse it after its owner validates/integrates; add stage-boundary snapshots for login/character/start/map-ready."
+    }
+  },
+  "sourceAnchors": {
+    "builder": "resource-pack/src/lib.rs build: fresh keyed by SHA; prior locators retained; pack_bytes preserves original content and sorted records",
+    "trust": "resource-pack/src/lib.rs PackStore::open/read_pack/read: all packs whole-hashed and indexes cross-checked; read verifies each resource",
+    "updater": "windows-updater/src/generation.rs update: all control objects then download_packs then PackStore::open before selection",
+    "preload": "platform-windows/src/main.rs plus atlas.rs load_starter_entity_atlas: all8 entity pages loaded atomically",
+    "scene": "platform-windows/src/map_parser.rs resolve_map_tile_draws_in_bounds/build_map_render_state_with_indexes: alpha routing, phases, fallback, viewport lookahead",
+    "equivalence": "windows-updater/scripts/prepare-packed-generation.py resource_binding: exact all mir2-assets tuple equality"
+  },
+  "sourcePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\lib.rs",
+      "sizeBytes": 34674,
+      "sha256": "C4ED87266709A2E44CE4EA9147F33BEDF960D2413A4778FE0B8818F92D9FE56A"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\examples\\build.rs",
+      "sizeBytes": 2147,
+      "sha256": "7A8E988D71FB608979E695D00BDD7B848C7A110198AC64D8ACF69B644BCBF8D1"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\assets.rs",
+      "sizeBytes": 41700,
+      "sha256": "891E88FC80EC3A1761ECDE73880C620BE10E7435285D639C0BDFCA9F346D0CEF"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\packed_assets.rs",
+      "sizeBytes": 13141,
+      "sha256": "C03FE8262BFD84771066476AC5F53E69F6D7C9F0A6433A421009968858DB3F1B"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\atlas.rs",
+      "sizeBytes": 150495,
+      "sha256": "FBDAE2A4ED3E7D67E6247D46D2077A3AB66C80E533D2F6BAA4BBBD51834B21FF"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+      "sizeBytes": 106975,
+      "sha256": "339DCD947ED5E9105B1E2ED30CC290B1A895C481E4EDCC700B0D0B12897EDD7C"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\timing.rs",
+      "sizeBytes": 3565,
+      "sha256": "52E73B0F86F3DD8A485592509DD7ACDA4C3C65042BB5561673B6F50D59F4A968"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater\\src\\generation.rs",
+      "sizeBytes": 47582,
+      "sha256": "9A88550F137B0A93D704E6B9F113CE43691AD3654C1BC5F8BA2CDE56ADA62D79"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater\\scripts\\prepare-packed-generation.py",
+      "sizeBytes": 30944,
+      "sha256": "B274F935C4DC7EE29F83259D1CD0B58EF954BD900F2533697F4A49B0B6F647EB"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\spec.rs",
+      "sizeBytes": 17307,
+      "sha256": "F82ABFCC3F4B222224027C4004B0441273CAF771F150EA8002E57F8BFC336B55"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_respawn_manifest.json",
+      "sizeBytes": 6799671,
+      "sha256": "907DB052030A97036E404429373DD3AD3E0E838E279613080E92C3BE28BF3FF2"
+    }
+  ],
+  "selectedAssetPins": [
+    {
+      "path": "C:\\m2c17\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-19\\mir2-assets\\generated\\map-atlas\\manifest.json",
+      "sizeBytes": 418978,
+      "sha256": "0D7DF9F7D8D5C65B4A9FE92925AE9977F7FDED795E3DB92880228F7488507761"
+    },
+    {
+      "path": "C:\\m2c17\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-19\\mir2-assets\\generated\\native-map-keyed\\manifest.json",
+      "sizeBytes": 11320827,
+      "sha256": "38A27337924B65C8D08AC5BFBB6647926633AA8A8B8665D4293EBEEE6D0A1669"
+    },
+    {
+      "path": "C:\\m2c17\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-19\\mir2-assets\\bevy-entity-atlases\\manifest.json",
+      "sizeBytes": 3402450,
+      "sha256": "2FD6672CB975134374F59E7B688BE95090352B8C26AFD08FA543E3159F1C7185"
+    },
+    {
+      "path": "C:\\m2c17\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-19\\mir2-assets\\crystal-map-pack\\0.map.gz",
+      "sizeBytes": 512762,
+      "sha256": "BBD02C7D0125FE78983E2DEA5F4AECC73B53D4B91517BDE6FDBEE9853BB183A5"
+    }
+  ],
+  "reproduce": "python -I -S -B E:\\mir2-release\\windows-five-minute-20261101\\analyze-pack-layout.py --output FRESH-REPORT.json",
+  "limits": [
+    "No whole resource QA or new pack bytes were generated. Prior full payload verification is cited as historical evidence, not rerun.",
+    "Static map resolution counts each resolvable animation phase as a sizing superset; whole-family fallback can require fewer images, not necessarily every referenced phase.",
+    "Budgets include existing 133.8MB game plus existing launcher/updater raw bytes, not duplicate embedded fonts. No installer compression saving is assumed.",
+    "20Mbps is a cap/qualification baseline, not a proved lower bound on global delivery; finite byte budgets do not alone prove global300s."
+  ]
+}

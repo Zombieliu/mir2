@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source59-02 actual accepted strict original Next build",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 58988,
+    "kind": "Source59-02 original strict Next after generated route input freeze",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 106308,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/root-approved01/next-build02-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "callerExitCode": 0,
+  "inputCount": 19581,
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/preparation02/source-snapshot.json",
+    "bytes": 6601474,
+    "sha256": "6c4d8eb2415cd962a12b94d4e2288e16b65b156fb167d0c4bd0de6fa7142ca4f"
+  },
+  "strict": true,
+  "typeScriptElapsed": "12.9s",
+  "pagesGenerated": 13,
+  "rendererVersion": "bevy-cbaf32383ce0ff77",
+  "nodeTestsCarry": {
+    "passed": 66,
+    "failed": 0,
+    "skipped": 0,
+    "evidence": "web-source59-node-actual01.json",
+    "effectiveProductAndTestInputsUnchanged": true,
+    "broadOriginalSnapshotReclaimed": false
+  },
+  "mainTsconfigPreserved": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "firstBuildAccepted": false,
+  "firstBuildEvidence": "web-source59-next-first-unaccepted01.json",
+  "firstBuildGeneratedInputOnlyDifference": true,
+  "acceptedBuildDist": ".next-web-windows-catchup-source59-20261011-02",
+  "candidate100": false,
+  "goalComplete": false
+}

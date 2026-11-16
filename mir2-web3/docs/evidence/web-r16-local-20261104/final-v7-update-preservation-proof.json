@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.r16.runtime-preservation.v1",
+  "createdAt": "2026-11-04T05:07:06.033Z",
+  "stoppedBeforeCopy": true,
+  "oldPackagePreserved": true,
+  "backupName": "Numeron-Web-R16-20261104-before-all13-v7",
+  "directories": [
+    {
+      "directory": "private",
+      "files": 24,
+      "bytes": 394172,
+      "beforeTreeSha256": "d1856a7a520880059ae0d8ecbbdf97fe97fd8afc9c288f526136b6d07e88f7a1",
+      "afterTreeSha256": "d1856a7a520880059ae0d8ecbbdf97fe97fd8afc9c288f526136b6d07e88f7a1",
+      "everyFileMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "files": 6,
+      "bytes": 2074527070,
+      "beforeTreeSha256": "5060cec3ac836cc5fd1c37ec1f1131d89986cbfc2303dd19f0ef14ee493ad5a4",
+      "afterTreeSha256": "5060cec3ac836cc5fd1c37ec1f1131d89986cbfc2303dd19f0ef14ee493ad5a4",
+      "everyFileMatched": true
+    }
+  ],
+  "allMatched": true,
+  "originalWindowsInstallationTouched": false
+}

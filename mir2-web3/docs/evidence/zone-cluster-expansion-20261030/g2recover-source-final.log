@@ -1,0 +1,26 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+
+running 20 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test config::zone_source_recovery::tests::zone_source_recovery_cache_install_is_canonical_guarded_and_idempotent ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_cache_install_never_clears_the_shared_unknown_freeze ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_digest_covers_source_versions_and_full_personal_checkpoint ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_empty_read_set_still_retains_exact_successor_binding ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_never_overwrites_a_cache_advanced_after_prepare_or_install ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_opaque_binding_includes_full_dsn_fence_and_original_cache ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_rejects_unbound_file_mirror_and_replica_sources_before_connect ... ok
+test config::zone_source_recovery::tests::zone_source_recovery_retirement_requires_loaded_account_and_all_three_absences ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_installs_newer_assets_but_preserves_shared_transform_vitals_and_clock ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_preserves_same_session_skill_buff_queue_and_potion_deadlines ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_rebinding_retains_the_original_unknown_write_freeze ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_rejects_a_canonical_ban_without_rebinding_the_replica ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_rejects_equal_revision_economic_conflicts_before_runtime_mutation ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_rejects_older_private_revision_and_different_shared_map ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_rejects_stale_cache_wrong_actor_and_untrusted_runtime ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_restores_canonical_account_permissions_and_storage_metadata ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_runtime_validator_accepts_durable_skill_clock_and_reconstructable_private_image ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_runtime_validator_allows_only_refine_timing_and_structural_nested_carriers ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_runtime_validator_compares_json_carriers_structurally_and_rejects_malformed_values ... ok
+test runtime::zone_source_recovery::tests::zone_source_recovery_runtime_validator_rejects_all_nonclock_business_changes ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 3141 filtered out; finished in 5.51s

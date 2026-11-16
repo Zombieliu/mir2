@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.five-minute.g0-build-checkout-byte-normalization.v1",
+  "observedUtc": "2026-11-01T15:46:18.938927+00:00",
+  "ownedBuildCheckoutOnly": true,
+  "canonicalWorkingTreeChanged": false,
+  "sourceGuardRelaxed": false,
+  "committedTreeChanged": false,
+  "worktreeIndexRefreshedWithoutBlobChanges": true,
+  "exactCommittedBytesRestoredFor": [
+    "mir2-web3/Cargo.lock",
+    "mir2-web3/apps/game-client/client-bevy/Cargo.lock",
+    "mir2-web3/apps/game-client/client-core/Cargo.lock",
+    "mir2-web3/apps/game-client/client-wire/Cargo.lock",
+    "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+    "mir2-web3/apps/game-client/platform-web/Cargo.lock",
+    "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+    "mir2-web3/apps/game-client/resource-pack/Cargo.lock",
+    "mir2-web3/apps/game-client/runtime/Cargo.lock",
+    "mir2-web3/apps/game-client/windows-updater/Cargo.lock",
+    "mir2-web3/apps/game-client/windows-updater/assets/numeron.rc",
+    "mir2-web3/apps/mir2-launcher-tauri/src-tauri/Cargo.lock"
+  ],
+  "strictSourceSnapshotAfter": {
+    "root": "C:\\m2fg262cf6f9",
+    "revision": "262cf6f962eb72d2660fa81deb60639a402a7279",
+    "clean": true,
+    "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "sourceFilesChecked": 1489,
+    "sourceInventorySha256": "107F0C8AFE21ABB2072008E297823372C772C881147003D16446D92331B3F349"
+  }
+}

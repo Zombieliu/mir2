@@ -1,0 +1,117 @@
+{
+  "scope": "read-only public first-walk failure localization; no packet bodies or role identifiers",
+  "passed": false,
+  "source": "40be2972eaba27a69f77ffe6b961ce96326ae13c",
+  "wire": {
+    "type": "walk",
+    "direction": "Right",
+    "atMs": 58203
+  },
+  "ack": {
+    "x": 289,
+    "y": 616,
+    "packet": "UserLocation",
+    "atMs": 74116
+  },
+  "delayMs": 15913,
+  "monotonicTransportDelayMs": 15912.463999993633,
+  "receivedFramesBeforeAck": 666,
+  "bytesBeforeAck": 716395,
+  "labels": {
+    "NewQuestInfo": 156,
+    "NewItemInfo": 141,
+    "NewRecipeInfo": 79,
+    "other-packet": 93,
+    "GameShopInfo": 106,
+    "ObjectMonster": 59,
+    "ObjectNpc": 25,
+    "NPCResponse": 4,
+    "worldSnapshot": 1,
+    "unclassified-text": 2
+  },
+  "browserErrors": 0,
+  "consoleErrors": 0,
+  "rendererBootedDuringGap": false,
+  "nearbyKeepAlive": [
+    {
+      "kind": "sent",
+      "atMs": 60031,
+      "timestamp": 61237.118388,
+      "type": "keepAlive",
+      "time": 1794512844584
+    },
+    {
+      "kind": "received",
+      "atMs": 74116,
+      "timestamp": 61251.20296,
+      "packet": "KeepAlive",
+      "time": 1794512844584
+    },
+    {
+      "kind": "sent",
+      "atMs": 75031,
+      "timestamp": 61252.118253,
+      "type": "keepAlive",
+      "time": 1794512859584
+    },
+    {
+      "kind": "received",
+      "atMs": 75158,
+      "timestamp": 61252.24486,
+      "packet": "KeepAlive",
+      "time": 1794512859584
+    }
+  ],
+  "healthDuringGap": [
+    {
+      "start": 59986,
+      "elapsedMs": 62,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    },
+    {
+      "start": 61996,
+      "elapsedMs": 62,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    },
+    {
+      "start": 63999,
+      "elapsedMs": 401,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    },
+    {
+      "start": 66002,
+      "elapsedMs": 61,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    },
+    {
+      "start": 68009,
+      "elapsedMs": 72,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    },
+    {
+      "start": 70009,
+      "elapsedMs": 71,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    },
+    {
+      "start": 72020,
+      "elapsedMs": 61,
+      "status": 200,
+      "successes": 1,
+      "sumUs": 348
+    }
+  ],
+  "observation": "Browser transport kept receiving bootstrap definitions until just before owner correction. This establishes the gap before receipt, not a source of server/proxy delay or proof of causality."
+}

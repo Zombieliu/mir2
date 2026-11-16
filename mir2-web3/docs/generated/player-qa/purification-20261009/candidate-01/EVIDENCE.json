@@ -1,0 +1,193 @@
+{
+  "schema": "mir2.purification.actual-evidence.v1",
+  "createdUtc": "2026-10-09T07:30:23.569250+00:00",
+  "parentCommit": "97a942a66dc184aeb0731e02dbf59c22414a1513",
+  "archiveSize": 442661,
+  "archiveSha256": "c6a15fadfab0a771330646902b3d223fbfd58ba664b7d5000b0d021a4352f504",
+  "entries": [
+    {
+      "path": "source/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "size": 693194,
+      "sha256": "3507b641c303600add8d91868eb3bcfae9b0cedd58a1eb0928a8c3a1082718af"
+    },
+    {
+      "path": "source/mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "size": 199741,
+      "sha256": "183bda25420731b2b3e01bfa46469dd1266a99b606e137112f1e3c83402ded56"
+    },
+    {
+      "path": "source/mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "size": 107225,
+      "sha256": "6f60e76872c03179b793de0684798fb894a7f34989cf648ad68a78df815cb689"
+    },
+    {
+      "path": "source/mir2-web3/apps/simulation/src/runtime/zone/runtime/purification_tests.rs",
+      "size": 29847,
+      "sha256": "867bc572ab2b1838f9e085e1e90fcf7b95eb1c4e22b3e78f5620806af7e8343c"
+    },
+    {
+      "path": "source/mir2-web3/apps/simulation/tests/shared_zone.rs",
+      "size": 473124,
+      "sha256": "204d223fac425477436205f10089c3608820c41c279badc1825a397ac28e178e"
+    },
+    {
+      "path": "source/mir2-web3/apps/simulation/tests/shared_monster_hell_ai.rs",
+      "size": 29505,
+      "sha256": "bd445e7f4e0013d78c0456626fa2060fa29a6ec66adc050e1b3b06367ef64b22"
+    },
+    {
+      "path": "original-output/01-original-fixture-red.log",
+      "size": 36740,
+      "sha256": "6d7ffcde63ce1c2549c928632be6987b63f56b5c10089f56bd2550ae9f91451c"
+    },
+    {
+      "path": "original-output/02-original-clock-contract-red.log",
+      "size": 31939,
+      "sha256": "cec51f2a8a89ee61dc1314b56f38a967579d7670eb9f9eddc1999efab66004f0"
+    },
+    {
+      "path": "original-output/03-purification-source-tests.log",
+      "size": 43682,
+      "sha256": "bb2db01a52666e4abfe5cd2c8777ba2f7d6c0bcb215a4b117d4bd465d5c4ace7"
+    },
+    {
+      "path": "original-output/04-purification-source-tests.log",
+      "size": 43594,
+      "sha256": "aee091203071abcd5370bdbf31d2325dedb958e926eef6e602d145371c5e82ee"
+    },
+    {
+      "path": "original-output/05-purification-source-tests.log",
+      "size": 43259,
+      "sha256": "d4ca37ed997ce4caeb8698c2ce64df429a006a7f684557ef3afc2d4758fec7ca"
+    },
+    {
+      "path": "original-output/06-purification-source-tests.log",
+      "size": 40741,
+      "sha256": "465deaa190a51a52072ef0948de2aeb0497890f02e53fd6f978b58ba9a945a33"
+    },
+    {
+      "path": "original-output/07-purification-source-tests.log",
+      "size": 40692,
+      "sha256": "d698106a9101bad5df48ed98630499f28e066492bd86e4e3837a8d45119069f7"
+    },
+    {
+      "path": "original-output/08-purification-source-tests.log",
+      "size": 41000,
+      "sha256": "a55666e9e466d560c02393a817ad51ccc2bc63336f5752a0175dcda55991e196"
+    },
+    {
+      "path": "original-output/09-purification-source-tests.log",
+      "size": 40238,
+      "sha256": "e613e1b92f7a0e72c6b187894d6863785dbbff9a36291b0c286d471df102b697"
+    },
+    {
+      "path": "original-output/10-original-fixture-green.log",
+      "size": 31184,
+      "sha256": "f904cf043be392b32064eba790233cac72ca3a3d87a9f6c787253cd4eafd253d"
+    },
+    {
+      "path": "original-output/11-original-hell-fixture-red.log",
+      "size": 31903,
+      "sha256": "770b12777b5b989a498e1d964082feffbd05e718577f6bac091ef8643d69506f"
+    },
+    {
+      "path": "original-output/12-original-hell-fixture-green.log",
+      "size": 31225,
+      "sha256": "64ed7ee2984afd4a13ba86fb3ec2b72f3a17f493869d86b33ac3d115dfb70098"
+    },
+    {
+      "path": "original-output/13-purification-final-source-tests.log",
+      "size": 40475,
+      "sha256": "36e87525760d6e9f62d34e9485e548cc459bcd66ad3b984f524fa8b98f7c4342"
+    },
+    {
+      "path": "original-output/14-existing-pet-source-regressions.log",
+      "size": 34581,
+      "sha256": "a42166fd21ffef3cafaeaf6a2e032d1e3b5bd4501474a6aec9246c3831bddf00"
+    },
+    {
+      "path": "original-output/15-bounded-source-handoff.json",
+      "size": 7588,
+      "sha256": "172b046a9842998df2eb2b77c15c7c994e8fdd20cd7afa339edc987f3e29c73a"
+    },
+    {
+      "path": "original-output/16-root-original-shared-zone.log",
+      "size": 55626,
+      "sha256": "3ec14af907c49fcc5c4b09e785f4cb41bf922e084c27e7a59f48121793afb373"
+    },
+    {
+      "path": "original-output/17-root-original-hell-ai.log",
+      "size": 32256,
+      "sha256": "56252c405e562ba0fd961307f38bf12e31222f949904b6736b18462f01a8cc05"
+    },
+    {
+      "path": "original-output/18-root-test-receipts.json",
+      "size": 228,
+      "sha256": "204bf3e4d40f1fe914a20aadae9ad369d482f627572f16c640fbbde316b00f2e"
+    },
+    {
+      "path": "original-crystal/HumanObject.cs",
+      "size": 353159,
+      "sha256": "c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3"
+    },
+    {
+      "path": "original-crystal/PlayerObject.cs",
+      "size": 586620,
+      "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11"
+    },
+    {
+      "path": "source/.github/workflows/gateway-release.yml",
+      "size": 8007,
+      "sha256": "70b8fbce7c16c382e6b52d3c79e5cabfd8849e4c744d148ae12cc09ae5e98077"
+    },
+    {
+      "path": "root-reviewed/actual-tracked-diff.patch",
+      "size": 22382,
+      "sha256": "b96fe8e66e3c3e054216a6f0b039278467999c8ad268f26176e683576dff30d6"
+    },
+    {
+      "path": "root-reviewed/SOURCE-REVIEW.json",
+      "size": 1145,
+      "sha256": "795cc6825ad329145d617345b2e711594fca31134a9d97fdd7647f5ea05f6e89"
+    }
+  ],
+  "rootReview": {
+    "schema": "mir2.purification.candidate-root-review.v1",
+    "createdUtc": "2026-10-09T07:30:23.427671+00:00",
+    "parentCommit": "97a942a66dc184aeb0731e02dbf59c22414a1513",
+    "workerSourcePinsReverified": true,
+    "originalSource": [
+      "HumanObject.cs:4444/6249",
+      "PlayerObject.cs:4751"
+    ],
+    "castCompletionMs": 500,
+    "currentTypedCasterAndTargetLifeNodeRequired": true,
+    "currentFriendshipAndOriginalLevelChanceAtCompletion": true,
+    "sourceDebuffIds": [
+      12,
+      53,
+      57
+    ],
+    "clearsActualPoisonAndDelayedExplosion": true,
+    "beneficialBuffsPreserved": true,
+    "pendingQueueLiveOnlyNoCheckpointChange": true,
+    "onlyNamedLegacyFixtureClockCorrections": true,
+    "focusedPassed": 17,
+    "petRegressionPassed": 38,
+    "rootSharedZone": {
+      "passed": 201,
+      "failed": 8
+    },
+    "rootHellAi": {
+      "passed": 17,
+      "failed": 0
+    },
+    "fullZoneGreen": false,
+    "simultaneousSameDestinationMapTransfer": "open-conservative-cancellation",
+    "publicTcpWsGameplay": "not-run",
+    "nativeOrHumanAcceptance": "not-run",
+    "published": false,
+    "preparedDebuffTestsNotNaturalMonsterProducers": true,
+    "originalRedLogsRetained": true
+  }
+}

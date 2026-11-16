@@ -1,0 +1,3 @@
+import {assertFinalDriverBinding,DRIVER_BINDING}from'./driver-binding-contract.mjs';
+// Finalizer must wire a reviewed exact geometry-body compatibility proof; old validation stays historical6d70.
+export async function verifySceneContract(){assertFinalDriverBinding();throw Error('Probe14 static compatibility integration pending root committed driver and independent review; no scene rebinding or new A* claim yet');}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "startedAtUtc": "2026-10-25T20:41:42.5683565+00:00",
+  "endedAtUtc": "2026-10-25T20:41:44.9235643+00:00",
+  "runId": "1792959622496-365f0175",
+  "mode": "collect-after-owned-cleanup",
+  "script": "collect-public-current50-v2.mjs",
+  "independentReviewSha256": "b9973e5f2065b19a646407e326528958631f4a77b283099ff43942249b7decc1",
+  "exitCode": 0,
+  "stdout": {
+    "bytes": 132826,
+    "sha256": "221b99478b2fd446966a3f29fff4c90f42f39be7dd215897120f9a1734dac985",
+    "file": "C:/mir2-build/p01-completion-20261024/formal13-base-collection-stdout-v1.log"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "file": "C:/mir2-build/p01-completion-20261024/formal13-base-collection-stderr-v1.log"
+  }
+}

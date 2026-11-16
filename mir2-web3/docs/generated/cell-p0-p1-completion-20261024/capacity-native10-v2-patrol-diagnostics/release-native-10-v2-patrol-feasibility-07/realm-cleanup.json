@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "scope": "Owned non-accepting probe process cleanup only. Driver report and complete raw verifier adjudicate capacity separately; no forced normal-exit claim.",
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "sha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "capacityAccepted": false,
+  "capacityAcceptanceAdjudicated": false,
+  "formalStarted": false,
+  "checks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "pid": 59292,
+  "ownedExe": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\bin\\mir2-gateway.exe",
+  "processIdentityBefore": {
+    "created": "10/25/2026 05:52:20",
+    "pid": 59292,
+    "exe": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\bin\\mir2-gateway.exe"
+  },
+  "driverPlayableCapacityAccepted": false,
+  "report": {
+    "reportPath": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\reports\\1792878747018-da931241.report.json",
+    "runId": "1792878747018-da931241",
+    "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+    "ok": false,
+    "playableCapacityAccepted": false,
+    "error": "Soak failed fixed rolling activity or delivery gates"
+  },
+  "preStopCapacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "monitorExit": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorTerminal": {
+    "sampledAt": 1792879819683,
+    "stop": true,
+    "reason": "Operator requested load drain"
+  },
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "slowStageDiagnostics": {
+    "schemaVersion": 1,
+    "complete": true,
+    "reasons": [],
+    "stopRequested": false,
+    "stderrEnded": true,
+    "writerFinished": true,
+    "rowsQueued": 128,
+    "bytesQueued": 11008,
+    "maxBufferedLineBytes": 109,
+    "lineLimitBytes": 8192,
+    "totalLimitBytes": 33554432,
+    "writeLimitBytes": 1048576,
+    "writeHighWaterMarkBytes": 1048576,
+    "maxQueuedWriteBytes": 350,
+    "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label allowlist. observedAtMs is the launcher receive clock, not server span start/end. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall."
+  },
+  "remainingOwnedPortListeners": [],
+  "stoppedAtUtc": "2026-10-24T22:10:23.483Z"
+}

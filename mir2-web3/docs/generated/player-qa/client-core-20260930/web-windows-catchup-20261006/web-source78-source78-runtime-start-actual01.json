@@ -1,0 +1,43 @@
+{
+  "owner": "Root",
+  "kind": "original Source78 independent runtime start verified by public literal process/listener identity only",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3483,
+    "sha256": "2b330e1352ace707e41773ed6c6142c21bb597892ece67be485702fc701fbe0c"
+  },
+  "inputRuntime": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-runtime-snapshot01.json",
+    "bytes": 2274564,
+    "sha256": "4652afe16fda21290aadec545cfaf62576ced25d7925619da35dc65735122268"
+  },
+  "acceptedThin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-actual02.json",
+    "bytes": 5098,
+    "sha256": "747d61e54d169121d122c765306673420978666fddaec12c12e323bc5a102ed4"
+  },
+  "runtimeFiles": 5260,
+  "runtimeBytes": 313460426,
+  "runtimeCopyDifferences": 0,
+  "service": {
+    "owner": "Root",
+    "childPid": 99652,
+    "parentPid": 100340,
+    "localAddress": "127.0.0.1",
+    "localPort": 19205,
+    "uniqueListener": true,
+    "exactNodeAndSource78ServerVerified": true,
+    "originalCallerParentVerified": true,
+    "prohibitedPidsUntouched": true,
+    "activeLogsAndOuterUnread": true
+  },
+  "originalExecSession": 7082,
+  "originalExecOpen": true,
+  "activeLogsAndOuterUnread": true,
+  "source65GatewayUnchanged": true,
+  "privateGatewayConfigOrStateRead": false,
+  "ordinaryLoginAndStartGameConfirmed": true,
+  "firstSpellsRefusal": "baseline-missing",
+  "candidateAccepted": false,
+  "goalComplete": false
+}

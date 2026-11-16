@@ -1,0 +1,59 @@
+{
+  "schema": "mir2.r22.paired-public-aliases-postflight.v1",
+  "observedAtUtc": "2026-10-08T12:07:59.380919+00:00",
+  "passed": true,
+  "checks": [
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+      "status": 200,
+      "bytes": 1159,
+      "sha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+      "cacheControl": "no-store",
+      "tlsVerified": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.p7s",
+      "status": 200,
+      "bytes": 1614,
+      "sha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276",
+      "cacheControl": "no-store",
+      "tlsVerified": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "status": 200,
+      "bytes": 1159,
+      "sha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+      "cacheControl": "no-store",
+      "tlsVerified": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.p7s",
+      "status": 200,
+      "bytes": 1614,
+      "sha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276",
+      "cacheControl": "no-store",
+      "tlsVerified": true
+    }
+  ],
+  "invitedHealth": {
+    "revision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "ok": true
+  },
+  "cmsReverifiedByThisCheck": false,
+  "naturalCombatAndNativeHumanAcceptance": false
+}

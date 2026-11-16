@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source70 actual local original-caller Web startup",
+  "package": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source70-thin-actual01.json",
+    "bytes": 2400,
+    "sha256": "629662f9ef5ad0f1e5e00dd9b96c92e7caf5a8a056b00d3387e1ee62ffddf55a"
+  },
+  "runtimeReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\runtime-source-review01.json",
+    "bytes": 3658,
+    "sha256": "5d5ee0f3469e5ae08eb80f07fdf640b00a6e0b0d3980809e1226114466579328"
+  },
+  "publicStartupConfig": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3073,
+    "sha256": "71a4393270f06a9e2d6b61c66df7556ff43184275f24940a5c3ad955910d0463"
+  },
+  "originalCallerUtf8Bytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "webPid": 74724,
+  "parentPid": 81980,
+  "originalSession": 50385,
+  "listener": {
+    "address": "127.0.0.1",
+    "port": 19205,
+    "count": 1
+  },
+  "nodeExecutableAndServerArgumentMatched": true,
+  "originalParentPublicConfigAndHashMatched": true,
+  "ordinaryPackageFiles": 4182,
+  "ordinaryDirectoriesIncludingRoot": 517,
+  "packageBytes": 285112029,
+  "links": 0,
+  "rootIndependentSourceAndTargetHashesMatched": true,
+  "publicStartupEnvironmentPreservedExceptTempAndTmp": true,
+  "normalBrowserReload": true,
+  "browserCacheCleared": false,
+  "httpRootStatus": 200,
+  "actualCompiledClientChunk": {
+    "file": "page-98fd80d50cfd8e0c.js",
+    "status": 200,
+    "bytes": 2592961,
+    "sha256": "0a9c33ae32e6affaa56f5532ef8124cf6d2a7e1d3372fb1936e4870218ecf6b5"
+  },
+  "normalLoginAndStartGameObserved": true,
+  "runtimeRunning": true,
+  "originalCallerClosed": false,
+  "activeLogsRead": false,
+  "postExitGuardPendingUntilOwnedServerCloses": true,
+  "privateConfigurationRestored": false,
+  "candidateAccepted": false,
+  "humanAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,42 @@
+{
+  "observedAtUtc": "2026-10-29T06:24:59.581Z",
+  "label": "after-native-restart",
+  "schemaVersion": 13,
+  "characterIndex": 0,
+  "credit": 100,
+  "gold": 10000,
+  "revision": 35,
+  "stripeOrderCount": 0,
+  "usdcOrders": [
+    {
+      "id": "usdc_066575bf24e8ede6000e73d8d0fc2aaa9bdb475aa3e44d7faa72f1bff215fd7e",
+      "state": "applied",
+      "invoiceId": "0xfdb531141bf73b1affb010b1ef3fcf9dcc6b16777ed7027fde481dbb4f27b999",
+      "paymentDigest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ",
+      "applied": {
+        "characterIndex": 0,
+        "credits": 100,
+        "creditBefore": 0,
+        "creditAfter": 100,
+        "revision": 22,
+        "atMs": 1793221737053
+      }
+    },
+    {
+      "id": "usdc_28eee27795d35d6fae66536be320af4952fb0edcae6140144e526601e28b63f8",
+      "state": "prepared",
+      "invoiceId": null,
+      "paymentDigest": null,
+      "applied": null
+    },
+    {
+      "id": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "state": "invoiceBound",
+      "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+      "paymentDigest": null,
+      "applied": null
+    }
+  ],
+  "scope": "UI navigation only; no new payments or monthly card purchases",
+  "stableEconomyHash": "62075679239d8dd5370fc02c307c81f74d379548844ef2f061c66f10789b8a27"
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "mir2.independent-stone-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-09T11:54:37.8022630+00:00",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "work/slg-stonecutting-20261009/stone-rules-authored-source-01.json",
+  "authoredSourceSha256": "af616c5dc6d99982f753100f8f94319dee50172afeff4f37475cf7b4768a96fe",
+  "authors": [
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "sha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a",
+      "length": 1815
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "sha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d",
+      "length": 40474
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones_tests.rs",
+      "sha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c",
+      "length": 35603
+    }
+  ],
+  "rawFinal": "Accepted for one unchanged-original-CargoGuard serial pure-package compile/test of the pinned mir2-production stones module. No confirmed P0/P1 in this three-file preparation-only scope. This is not an actual test result or account/schema/runtime/client/public acceptance.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductDocsIndexWrites": true,
+  "confirmedBlockers": [],
+  "authoredTestCount": 19,
+  "authoredTestNames": [
+    "v1_distribution_and_every_interval_boundary_are_exact",
+    "canonical_catalog_rejects_changes_and_clue_conditioned_npc_arbitrage",
+    "mint_source_request_and_carrier_are_independent_and_do_not_reroll",
+    "mint_requires_valid_resource_grade_and_bounded_server_provenance",
+    "sealed_public_projection_is_identical_for_different_private_outcomes",
+    "appraisal_of_jade_and_a_gem_reveals_only_the_same_coarse_clue",
+    "catalog_reload_and_changed_generation_policy_cannot_change_frozen_fees_or_result",
+    "current_physical_holder_can_appraise_and_cut_after_transfer",
+    "full_binding_bitset_and_soul_binding_are_retained_on_the_actual_output",
+    "missing_forged_locked_and_duplicate_possessions_never_change_a_registry",
+    "replay_returns_the_original_receipt_after_reload_without_gold_or_possession",
+    "conflicting_requests_and_second_mutations_are_refused",
+    "failures_preserve_money_stones_and_hidden_results_before_commit",
+    "full_bag_can_replace_the_consumed_single_stone_but_extra_roots_need_space",
+    "consumed_physical_carrier_may_be_reclassified_with_a_new_serial_and_source",
+    "checkpoints_refuse_forged_records_receipts_and_missing_tombstones",
+    "durable_successor_comparison_detects_structurally_valid_whole_history_rewrites",
+    "exact_u64_projection_and_private_checkpoint_are_lossless_and_bounded",
+    "bounded_registry_reserves_action_history_and_never_evicts_consumed_records"
+  ],
+  "scope": [
+    "Only packages/production/src/lib.rs, stones.rs and stones_tests.rs",
+    "Frozen three-grade rule, lossless u64, pure staged mint/appraise/cut, immutable original outcome/fees/history, actual-holder witness contract, capacity/weight/binding planning, duplicate/conflicting request replay and private checkpoint validation.",
+    "Original CargoGuard/tool/policy/50GiB/2000ms/PolicyB/serial boundaries must remain unchanged and check current declared source pins."
+  ],
+  "observations": [
+    "No global store, database, NPC, network route, inventory publication or UI mutation exists in this pure package.",
+    "19 tests are authored and statically inspected; none were run by this reviewer and no pass count is claimed.",
+    "Physical one-instance UID is retained in delivery plans and stone serial is a separate monotonic registry identity. This is not new item issuance or a PG UID bypass.",
+    "Version1 canonical rows produce quantity1. Future catalogs in the generic pure module may plan quantity2..16; integrating strict reclassification must reject such catalogs/deliveries until a separately safe actual issuance/slot path exists.",
+    "Prepared next_registry/receipt remains uncommitted until outer authority persists money and exact carrier atomically; from-trusted-checkpoint structural validation is not proof of issuance.",
+    "Public projection excludes frozen selected result before Cut and contains only possibilities/coarse clue. Private Record/Registry implement serde and Debug; integrating route must use only whitelisted public_view/receipts, never whole registry.",
+    "Nominal gold-arbitrage bound in rules uses stated base template nominal price/2; actual full carrier/durability/stat/merchant pricing must be checked in integration. It does not constitute whole-economy/balance acceptance.",
+    "History count reserve is bounded to1024 records/3072 events and no tombstone removal; actual durable registry capacity/reconciliation/migration/archive remain separately reviewed."
+  ],
+  "excluded": [
+    "config.rs/config_stones.rs/db_projection.rs/migration and all account/schema changes",
+    "ItemState carriers/28 constructor changes",
+    "runtime/NPC/gateway/typed native or browser/client UI",
+    "actual mining/whole-account transaction/restart/concurrent trade acceptance",
+    "all-issuers/census/public activation/installer completion"
+  ],
+  "conditions": [
+    "Root binds the three exact source hashes below into unchanged original Guard run before execution.",
+    "Any modification to these three files after this receipt requires fresh source acceptance.",
+    "No broader authority or frontend acceptance is inferred from this permit."
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "owner": "Root",
+  "kind": "Source72 actual original Thin export and independent package acceptance",
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source72-storage-takeback-20261012-01/thin-preparation02/full-snapshot.json",
+    "bytes": 74675805,
+    "sha256": "784d38353e753ae61b3b3c7b99923511c1115b1bfe572adcfc15a638c4ac02c6"
+  },
+  "rootSourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\thin-source-review02.json",
+    "bytes": 15690,
+    "sha256": "f5ead2b8038e0f121c1517396c74f4b8cea65aa753d91a8bea95a7e36267646b"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\thin02-config.json",
+    "bytes": 6321,
+    "sha256": "312be355f3d966adbf92dca1081d3b30831a1016711bb835873b9e3886e70da6"
+  },
+  "nodeActualProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source72-node-actual01.json",
+    "bytes": 1305,
+    "sha256": "b3195b04c1f42cc27560d9949c5c38173d9e644535fb5b78915ef381b24ed5b7"
+  },
+  "nextActualProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source72-next-actual02.json",
+    "bytes": 2757,
+    "sha256": "848dc3ad388a7acf6659932e44ec372936237e70ba0aff5dcc1f3c158f3bd601"
+  },
+  "outer": {
+    "exitCode": 0,
+    "builderPid": 84624,
+    "elapsedMs": 20441,
+    "exited": true,
+    "disposed": true
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "allPreAndPostGuardsPassed": true,
+  "actualPackage": {
+    "files": 4182,
+    "directoriesIncludingRoot": 517,
+    "bytes": 285115179,
+    "links": 0
+  },
+  "originalInclusiveCapBytes": 377487360,
+  "capMarginBytes": 92372181,
+  "packageManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\thin-package-manifest02.json",
+    "bytes": 2014317,
+    "sha256": "75f218f58bbad3ed4c8261f74f13c738e548ec4702fb456390e0ba8b3180846e"
+  },
+  "warningCount": 59,
+  "warningFullMultisetEqualOriginalBaseline": true,
+  "onlyWarningNormalization": "slash, selected public build-root and dist-directory substitution",
+  "finiteLocalMapClosure": {
+    "files": 116,
+    "bytes": 204399,
+    "allPackageHashesMatched": true
+  },
+  "coreClosure": {
+    "files": 6,
+    "allPackageHashesMatched": true
+  },
+  "productionBuildAccepted": true,
+  "playerAcceptance": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "limits": [
+    "Local immutable media origin still required for omitted media.",
+    "Finite116 map closure does not establish all-map or remote-media coverage.",
+    "Runtime/normal UI validation remains a separate actual result."
+  ]
+}

@@ -1,0 +1,506 @@
+{
+  "schema": "mir2.web-r16-taoist-v22-retest-scoped/1",
+  "recordedAt": "2026-11-06T21:36:25.749Z",
+  "scope": "Isolated ordinary protocol and File persistence.",
+  "runtime": {
+    "gatewaySha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+    "configSha256": "59b4e1b8a0dcc9f95de7871a178f715d6ce1baefe96e263f38e5d4328d4dccf7",
+    "profile": "platinum_fiveclass",
+    "cadence": "newcomer-v2",
+    "port": 19235,
+    "fileStore": true
+  },
+  "ordinary": {
+    "passed": false,
+    "main": 19,
+    "growth": 3,
+    "level": 27,
+    "uniqueDeliveries": 22,
+    "q20": 0,
+    "revives": 0,
+    "normalLogout": true,
+    "startedAt": "2026-11-06T19:11:06.877Z",
+    "deadlineAt": "2026-11-06T21:11:06.877Z",
+    "logoutElapsedMs": 7202274,
+    "receipt": {
+      "file": "taoist-v22-retest-ordinary-final.json",
+      "sha256": "da81c2f0c863c6f58d6826627965ae21ab3441562f9bc8f7501c9e4912a88095"
+    }
+  },
+  "functional": {
+    "passed": true,
+    "ordinaryTimeQualified": false,
+    "uninterrupted": false,
+    "runId": "2026-11-06T21-26-11-230Z",
+    "startedAt": "2026-11-06T21:11:59.124Z",
+    "localBudgetMs": 2700000,
+    "logoutElapsedMs": 1365680,
+    "main": 22,
+    "growth": 4,
+    "level": 30,
+    "uniqueDeliveries": 26,
+    "itemRewardRows": 36,
+    "revives": 0,
+    "final": {
+      "level": 30,
+      "map": "0",
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "direction": "DownLeft",
+      "gold": 53295,
+      "experience": 18263,
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2110020,
+        2110021,
+        2110022,
+        2120015,
+        2120020,
+        2120025,
+        2120030
+      ],
+      "activeQuests": []
+    },
+    "learnedSkills": [
+      "Healing",
+      "Poisoning",
+      "SoulFireBall",
+      "SpiritSword",
+      "SummonSkeleton"
+    ],
+    "hp": 239,
+    "mp": 260,
+    "normalLogout": true,
+    "stableFileMatches": true,
+    "selectedQuestObjectives": [
+      {
+        "questId": 2110019,
+        "stage": "completed",
+        "objectives": [
+          {
+            "current": 3,
+            "required": 3,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110020,
+        "stage": "completed",
+        "objectives": [
+          {
+            "current": 3,
+            "required": 3,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110021,
+        "stage": "completed",
+        "objectives": [
+          {
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110022,
+        "stage": "completed",
+        "objectives": [
+          {
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120030,
+        "stage": "completed",
+        "objectives": []
+      }
+    ],
+    "receipt": {
+      "file": "taoist-v22-retest-functional-final.json",
+      "sha256": "158059d0dfc6208478d81ee3dab27ce80b34cf0afeef6ecae432df7cd5e5eb1d"
+    }
+  },
+  "D022": {
+    "fixedPointGroups": [
+      {
+        "group": 10019,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10020,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10021,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10022,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10023,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10024,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10025,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10026,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      },
+      {
+        "group": 10027,
+        "maxObservedConcurrent": 1,
+        "distinctObservedActors": 1
+      }
+    ],
+    "kills": [
+      {
+        "group": 10019,
+        "at": "2026-11-06T21:05:03.813Z",
+        "sequence": 4779,
+        "position": {
+          "x": 340,
+          "y": 355
+        },
+        "runId": "2026-11-06T20-56-45-407Z"
+      },
+      {
+        "group": 10022,
+        "at": "2026-11-06T21:05:51.932Z",
+        "sequence": 5283,
+        "position": {
+          "x": 355,
+          "y": 355
+        },
+        "runId": "2026-11-06T20-56-45-407Z"
+      },
+      {
+        "group": 10023,
+        "at": "2026-11-06T21:06:44.507Z",
+        "sequence": 5801,
+        "position": {
+          "x": 340,
+          "y": 375
+        },
+        "runId": "2026-11-06T20-56-45-407Z"
+      },
+      {
+        "group": 10020,
+        "at": "2026-11-06T21:32:13.826Z",
+        "sequence": 3631,
+        "position": {
+          "x": 367,
+          "y": 343
+        },
+        "runId": "2026-11-06T21-26-11-230Z"
+      },
+      {
+        "group": 10025,
+        "at": "2026-11-06T21:32:30.449Z",
+        "sequence": 3828,
+        "position": {
+          "x": 374,
+          "y": 329
+        },
+        "runId": "2026-11-06T21-26-11-230Z"
+      },
+      {
+        "group": 10024,
+        "at": "2026-11-06T21:33:07.641Z",
+        "sequence": 4167,
+        "position": {
+          "x": 324,
+          "y": 391
+        },
+        "runId": "2026-11-06T21-26-11-230Z"
+      },
+      {
+        "group": 10021,
+        "at": "2026-11-06T21:33:27.733Z",
+        "sequence": 4410,
+        "position": {
+          "x": 304,
+          "y": 389
+        },
+        "runId": "2026-11-06T21-26-11-230Z"
+      },
+      {
+        "group": 10027,
+        "at": "2026-11-06T21:34:17.938Z",
+        "sequence": 4904,
+        "position": {
+          "x": 305,
+          "y": 335
+        },
+        "runId": "2026-11-06T21-26-11-230Z"
+      },
+      {
+        "group": 10026,
+        "at": "2026-11-06T21:34:36.162Z",
+        "sequence": 5105,
+        "position": {
+          "x": 283,
+          "y": 337
+        },
+        "runId": "2026-11-06T21-26-11-230Z"
+      }
+    ],
+    "arrival": {
+      "stage": "arrived",
+      "startedAt": "2026-11-06T21:26:20.621Z",
+      "departure": {
+        "hp": 203,
+        "maxHp": 203,
+        "stock": {
+          "hp": 24,
+          "mp": 73,
+          "amulet": 137,
+          "poison": 99,
+          "townTeleport": 2,
+          "randomTeleport": 4
+        }
+      },
+      "arrival": {
+        "x": 339,
+        "y": 355,
+        "hp": 203,
+        "stock": {
+          "hp": 24,
+          "mp": 73,
+          "amulet": 137,
+          "poison": 99,
+          "townTeleport": 2,
+          "randomTeleport": 4
+        }
+      },
+      "visited": [
+        "1",
+        "D021",
+        "D022"
+      ]
+    }
+  },
+  "D401": {
+    "firstQ14AttemptAt": "2026-11-06T19:43:39.394Z",
+    "q16CompleteAt": "2026-11-06T20:59:25.542Z",
+    "wallMs": 4546148,
+    "traceActiveMs": 2545087,
+    "betweenSegmentsMs": 2001061,
+    "confirmedDeaths": 0,
+    "completedWithOrdinarySuppliesAndFocusedRangedCombat": true,
+    "initialV22RunHadThreeRecoveries": true,
+    "qualifier": "Trace-active windows include ordinary travel, shopping and combat; between-segment gaps include observation, natural wait and driver preparation."
+  },
+  "externalQaInputs": [
+    {
+      "file": "launch.mjs",
+      "sha256": "7fce7b9f59f899336cca2930d07d8f8e8b43cc1b7bc2ee81c2573230046b2310",
+      "bytes": 4236
+    },
+    {
+      "file": "run.mjs",
+      "sha256": "e0c1130a8cdab016b7ef2abb4feaeb8f1214ac9f55dac3721c55bd43510efb8c",
+      "bytes": 6042
+    },
+    {
+      "file": "strategy.mjs",
+      "sha256": "475eff87be544a59a1a7df0e515e9a38dff8dd43641a840af4b167443faf9f66",
+      "bytes": 6364
+    },
+    {
+      "file": "protocol-newcomer-v2-retest.mjs",
+      "sha256": "7c658129eda231cadcb68f2f16ee6be0b4fdd03d861a1b4051b5f4120fcd7b8c",
+      "bytes": 102768
+    },
+    {
+      "file": "run-mine-reentry.mjs",
+      "sha256": "16d7b130d16349d6598b0e2d2104569a3ebd9075b38f1e522fbbd334188e2a3a",
+      "bytes": 6337
+    },
+    {
+      "file": "strategy-mine-reentry.mjs",
+      "sha256": "d0f7a380c135654459bf1f5e8d2da1e8609220b5d2f17ee790771bcd0544c435",
+      "bytes": 6816
+    },
+    {
+      "file": "run-focused-mine.mjs",
+      "sha256": "f6379c278e58f3d0b6dbb79000fb5caee4df17cf3164b61d68c01e1baf7db199",
+      "bytes": 6663
+    },
+    {
+      "file": "focused-mine-target.mjs",
+      "sha256": "cefd731c4df8441f5ffcc93afc68cc91c1d313dace8cf22e5af1f12be4a85bbe",
+      "bytes": 7120
+    },
+    {
+      "file": "run-focused-mine-cadence.mjs",
+      "sha256": "cb7782f7958ce1754f394af43c27956f64f1eb89e693c016c91f6217659e9574",
+      "bytes": 6722
+    },
+    {
+      "file": "focused-mine-target-cadence.mjs",
+      "sha256": "594c1c2015514598ad4013971606c799ba168f791237307434c474bc5d9b3783",
+      "bytes": 7171
+    },
+    {
+      "file": "run-focused-mine-q15.mjs",
+      "sha256": "6ab3db7e4d6a067982ac743011e45efb784c0ac48bae5fdd14914410b51e90ec",
+      "bytes": 6647
+    },
+    {
+      "file": "focused-mine-target-q15.mjs",
+      "sha256": "23b9de178cb7a08ff62aa75b3516e90f398481a65c98209ccf748a0482e4e4a5",
+      "bytes": 7244
+    },
+    {
+      "file": "run-focused-mine-q15-reentry.mjs",
+      "sha256": "ba93dd9401da223888bb77ba066f29eb5bdc83fdac248bed56048bc294d2d04f",
+      "bytes": 6661
+    },
+    {
+      "file": "focused-mine-target-q15-reentry.mjs",
+      "sha256": "c8fcd280e59068ab7dc14f0ce372b095fbdec8008d8b5279e7c19510c777dd1d",
+      "bytes": 7345
+    },
+    {
+      "file": "run-focused-mine-q15-wounded.mjs",
+      "sha256": "517b25f68ade75d2010d4ee8213664639843208e1f927445d03af26bad41f767",
+      "bytes": 6672
+    },
+    {
+      "file": "focused-mine-target-q15-wounded.mjs",
+      "sha256": "3013ebfaf23fa34c72847f81345a3895ce66139cf46029de6df665e5208f81cf",
+      "bytes": 8034
+    },
+    {
+      "file": "protocol-newcomer-v2-retest-pet.mjs",
+      "sha256": "69ef6f0f778ef31aabcb21f0283a3004755e66b3a623c3eb43218b5fc909b2a9",
+      "bytes": 102799
+    },
+    {
+      "file": "run-focused-mine-q16.mjs",
+      "sha256": "a6fb80035529d060255fdf81a089544d8852d19555ca58631f3b08ecda2dadc3",
+      "bytes": 6663
+    },
+    {
+      "file": "focused-mine-target-q16.mjs",
+      "sha256": "ae437f2dd36fdec47df56f90d0d05783df7643684580fffaf31c5a765706125c",
+      "bytes": 9176
+    },
+    {
+      "file": "run-focused-mine-q16-western.mjs",
+      "sha256": "ea7c77d4ef65383d2cd349b36e6e764c003a06ac18cc06683aeee02a0f32bc77",
+      "bytes": 6674
+    },
+    {
+      "file": "focused-mine-target-q16-western.mjs",
+      "sha256": "e92147e6514f4a06dfe3df4565355aba772fb98a6f07580c1833d44bab7ff496",
+      "bytes": 9472
+    },
+    {
+      "file": "run-focused-mine-q16-weak-pair.mjs",
+      "sha256": "92c1dc48eacd9202f3c3db36e42d446390f6bc130dde79d1f2e98fb5bad08d1b",
+      "bytes": 6675
+    },
+    {
+      "file": "focused-mine-target-q16-weak-pair.mjs",
+      "sha256": "f1b50276555bcc192f4001b7f8033f4530bdc1e33ffac8138c1e87e19797b64f",
+      "bytes": 9480
+    },
+    {
+      "file": "run-functional-supplies.mjs",
+      "sha256": "4b694efe874dfc9cf8c7d3c74a6ac9d0561b3a3ee242c1aa0d9efcd6198d333d",
+      "bytes": 7056
+    },
+    {
+      "file": "strategy-functional.mjs",
+      "sha256": "a013b720a8bd59666e0c8e73654e5724f64e495192ff6931328847425211f0f8",
+      "bytes": 6615
+    },
+    {
+      "file": "run-functional-wooma-transit.mjs",
+      "sha256": "9b11e270ff65a3a308fc456929bdeadc7974f9a8eaa4acacc7bdb5a49646ea3f",
+      "bytes": 7468
+    },
+    {
+      "file": "functional-wooma-transit.mjs",
+      "sha256": "514ad87352756b2792e2ab11e29ce72265f570b2b8d5b476d8ee18cf6d80233b",
+      "bytes": 3833
+    },
+    {
+      "file": "run-functional-wooma-transit-exact.mjs",
+      "sha256": "082d170ca6989244b38f092cd76c4a77fbeb8b546740fb2bc8a3af5c65abe970",
+      "bytes": 7471
+    },
+    {
+      "file": "functional-wooma-transit-exact.mjs",
+      "sha256": "4b3faffec9e839e9d2eab571b39f545e0a34b34e14708cfdcb969e4cc2acf699",
+      "bytes": 4659
+    }
+  ],
+  "previousV22Ordinary": {
+    "passed": false,
+    "level": 24,
+    "main": 15,
+    "growth": 2,
+    "revives": 3,
+    "receiptSha256": "d7d9c29701926d63dabda7d336ca63f0882618b9e3710f09a6ef1ece545afd38"
+  },
+  "previousV20Ordinary": {
+    "receiptSha256": "122568cd81c46e70ddad023d06e8fb4097d9705265195f1ce5728f80e3037126",
+    "ordinaryPassed": false,
+    "main": 19,
+    "growth": 3,
+    "level": 27,
+    "q20": 1
+  },
+  "browserEvidenceIncluded": false
+}

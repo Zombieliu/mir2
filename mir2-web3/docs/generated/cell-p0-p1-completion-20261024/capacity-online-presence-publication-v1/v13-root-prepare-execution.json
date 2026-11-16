@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T17:19:45.888Z",
+  "finishedAt": "2026-10-26T17:20:05.642Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "prepare-episode.mjs",
+    "--prepare-diagnostic-episode",
+    "--actors=50",
+    "--manifest-sha256=41a42f7bec5e7a6e5625a2e5fb4de15769095cf9160778a53e49e12656514eaf"
+  ],
+  "cwd": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13",
+  "actors": 50,
+  "manifestSha256": "41a42f7bec5e7a6e5625a2e5fb4de15769095cf9160778a53e49e12656514eaf",
+  "passiveZoneDeliveryTrace": true,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourcePin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\prepare-episode.mjs",
+    "bytes": 4783,
+    "sha256": "bb90ce643a07fb1c26acf252f62c247e9e8dbe8fba47947671e4caacd5d62805"
+  },
+  "runnerPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\root-execution-runner-v1.mjs",
+    "bytes": 3028,
+    "sha256": "a8a889c4ccba416c06258e329612ce23fc3bd2e30eaa288be36f029f85663ecb"
+  },
+  "stdoutFile": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-stage50-root-prepare-stdout-v1.log",
+  "stderrFile": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-stage50-root-prepare-stderr-v1.log",
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-stage50-root-prepare-stdout-v1.log",
+    "bytes": 334,
+    "sha256": "e1c6b431a91a25b88fcc8eba5a55df4d10e8e91a3ed6fd936e3cc8b261905a5e"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-stage50-root-prepare-stderr-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

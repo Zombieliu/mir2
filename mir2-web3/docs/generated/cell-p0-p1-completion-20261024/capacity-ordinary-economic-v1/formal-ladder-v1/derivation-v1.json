@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 1,
+  "state": "AUTHORING_ONLY_PENDING_NO_EXECUTION",
+  "parentOwnedRunner": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\run-owned-prepare-v1.mjs",
+    "bytes": 26463,
+    "sha256": "9e2b1d2a9801962b82ae3eb0b711e6ad88f5b39de36c175d596d939fbe2a448a"
+  },
+  "ownedOutput": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\run-owned-formal-v1.mjs",
+    "bytes": 21497,
+    "sha256": "e95707e5ba9262fd57ded1032081e99de2ec28be2d728cff37758247712dae74"
+  },
+  "ownedLiteralRules": [
+    {
+      "before": "import {DIRECTORY,PACKAGE_ID,assert,pin,checked,same,verifyFrozen} from './source-lib-v1.mjs';",
+      "after": "import {DIRECTORY,PACKAGE_ID,assert,pin,checked,same} from './source-lib-v1.mjs';\nimport {verifyFormalFrozen} from './formal-contract-v1.mjs';\nimport {capturePublicDiagnostics} from './diagnostics-v1.mjs';"
+    },
+    {
+      "before": "import {copySourceBankExclusively,validateSourceBank,validateContinuationHistory} from './copy-source-bank-v1.mjs';",
+      "after": "import {copySourceBankExclusively,validateSourceBank,validateCompletedBank} from './copy-source-bank-v1.mjs';"
+    },
+    {
+      "before": "args[0]==='--execute-owned-preparation'",
+      "after": "args[0]==='--execute-owned-formal-ladder'"
+    },
+    {
+      "before": "const {manifest:m,manifestPin}=verifyFrozen(args[2]),config=JSON.parse(checked(m.configPin))",
+      "after": "const {manifest:m,manifestPin,config}=await verifyFormalFrozen(args[2])"
+    },
+    {
+      "before": "assert(config.preparationOnly===true&&config.actors===100&&config.workerCount===1&&config.maxPrepared===100&&config.options.maxPrepared===100&&config.options.finiteWallSeconds===18000&&config.options.targetHp===12&&config.options.attackResults==='v2'&&config.reusedPartialOrdinaryBank===true&&config.actualW16TwoGroupHistoricalContinuation===true&&config.continuationMode==='historical-prepared-index-v1'&&config.historicalPreparedCount===58&&config.expectedThisRun===42&&config.freshZeroCharacterPool===false&&!Object.hasOwn(config.options,'loginNotBefore')&&config.authOrigin.mode==='copiedExistingLedgerNoOverride'&&config.authOrigin.existingLedgerOverrideAllowed===false&&config.capacityAccepted===false&&config.p0Accepted===false,'Only the reviewed continued100 single-worker preparation is allowed');",
+      "after": "assert(config.formalStandardLadder===true&&config.preparationOnly===false&&config.sourceBankSavedCount===100&&config.sourceBankFreshAtStart===false&&config.options.profile==='standard'&&config.options.activityMode==='native'&&config.options.stages==='2,10,25,50,100'&&config.options.stageSeconds===300&&config.options.soakSeconds===7200&&config.options.combatActors===10&&config.options.resumeSamples===5&&config.options.saveSamples===5&&!Object.hasOwn(config.options,'loginNotBefore')&&config.authOrigin.existingLedgerOverrideAllowed===false,'Only the reviewed ordinary-bank original formal ladder is allowed');"
+    },
+    {
+      "before": "const {pool:sourcePool}=validateSourceBank(m.bankSourcePlanPin),historyBefore=await validateContinuationHistory(m.project,config,sourcePool);\nassert(m.continuationMode==='historical-prepared-index-v1'&&m.historicalPreparedCount===58&&m.expectedThisRun===42&&JSON.stringify(m.historicalPreparedIndex)===JSON.stringify(historyBefore.historicalPreparedIndex)&&JSON.stringify(m.continuationEvidencePins)===JSON.stringify(config.options.continuation.evidence.flatMap(g=>Object.values(g))),'Frozen continuation history differs');",
+      "after": "const {pool:sourcePool}=validateSourceBank(m.bankSourcePlanPin),bankBefore=await validateCompletedBank(m.project,config,sourcePool);assert(bankBefore.savedCount===100&&bankBefore.freshAtFormalStart===false,'Saved bank source validation failed');"
+    },
+    {
+      "before": "assert(bankCopyReceipt.actualW16TwoGroupHistoricalContinuation===true&&bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v16'",
+      "after": "assert(bankCopyReceipt.actualW17CompleteSavedBankSource===true&&bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v17'"
+    },
+    {
+      "before": "let gateway,monitor,driver,gatewayIdentity",
+      "after": "let gateway,monitor,driver,publicDiagnostics,gatewayIdentity"
+    },
+    {
+      "before": " gateway=track(spawn(m.backend.immutableExecutable.file,[],{cwd:m.project,env,windowsHide:true,stdio:['pipe','pipe','pipe']}),'gateway');",
+      "after": " gateway=track(spawn(m.backend.immutableExecutable.file,[],{cwd:m.project,env,windowsHide:true,stdio:['pipe','pipe','pipe']}),'gateway');\n publicDiagnostics=capturePublicDiagnostics(gateway.child.stderr,root,stopDriver);"
+    },
+    {
+      "before": " const options={...config.options,poolFile,monitor:path.join(root,'monitor-current.json'),output:path.join(root,'reports'),scenarioFile:m.scenarioPin.file,routeFile:m.routePin.file,mapRoot:path.join(m.project,'apps/web/lib/generated/crystal-map-pack')},driverFile=path.join(privateRoot,'driver-options.json');await write(driverFile,{project:m.project,options});await write(path.join(root,'run-intent-v1.json'),{schemaVersion:1,manifestPin,options,scope:'Explicit two-group continuation over actualW16 complete cold Store/pool/four secrets/latest ledger/control bytes. W15 original42 plus W16 current16 form historical58 normal saves/notFresh. Only original pool indices59..100 (expected42) normally login/recover/prepare/save. Failedready59 remains selected. W15 and W16 originalfalse, W16 history42/new16 and first4null remain unchanged. No seed/edits/origin reset/inherited fresh readiness or measurement.',historicalPreparedCount:58,expectedThisRun:42,historicalNotFresh:true,first4FreshReusePerformedThisRun:false,formalAcceptanceEligible:false,capacityAccepted:false,preparationSupplyDurationClaim:false});",
+      "after": " const options={...config.options,accountsFile:poolFile,monitor:path.join(root,'monitor-current.json'),output:path.join(root,'reports'),scenarioFile:m.scenarioPin.file,mapRoot:path.join(m.project,'apps/web/lib/generated/crystal-map-pack')},driverFile=path.join(privateRoot,'driver-options.json');await write(driverFile,{project:m.project,options,progressFile:path.join(root,'progress-current.json')});await write(path.join(root,'run-intent-v1.json'),{schemaVersion:1,manifestPin,options,sourceBankSavedCount:100,sourceBankFreshAtStart:false,ordinaryReloginPerCohort:true,noPreloginAll100:true,sourceOriginalFailuresRetained:true,sourceLedgerCopiedUnchanged:true,loginNotBeforeOverridden:false,capacityAccepted:false,p0Accepted:false,sustainableTwoHourSupplyProven:false,stageResupply:false,compactWirePatchApplied:false,compactWireDiagnosticCertificate:false,scope:'One canonical original standard native2,10,25,50,100x300 +100x7200 formal run from the complete saved ordinary W17 bank. The real measured2/10 gate25 in this same run; no oldProbe21 capacity gate borrowed. Current ordinary fresh login/readiness is per newly admitted cohort, not pre-login100. Existing actors remain active; no measurement pause, threshold/rate/death guard changes. Saved stock12 does not prove two-hour survival.'});"
+    },
+    {
+      "before": "(config.options.finiteWallSeconds+60)*1000",
+      "after": "(config.options.wallSeconds+60)*1000"
+    },
+    {
+      "before": "verifyFrozen(args[2]);const historyAfter=await validateContinuationHistory(m.project,config,sourcePool);assert(JSON.stringify(historyAfter)===JSON.stringify(historyBefore),'Historical public evidence changed during owned episode');",
+      "after": "await verifyFormalFrozen(args[2]);const bankAfter=await validateCompletedBank(m.project,config,sourcePool);assert(JSON.stringify(bankAfter)===JSON.stringify(bankBefore),'Complete saved bank source changed during owned episode');"
+    },
+    {
+      "before": " cleanup.logErrors=[];",
+      "after": " if(publicDiagnostics){try{cleanup.publicDiagnostics=await publicDiagnostics.finish(Boolean(gateway?.status))}catch(error){cleanup.publicDiagnostics={complete:false,error:error.message}}}else cleanup.publicDiagnostics={complete:false,error:'capture-not-created'};\n cleanup.logErrors=[];"
+    },
+    {
+      "before": "const preparedIndex=report?.preparedIndex??[],reportPin=report?.reportPath?pin(report.reportPath):null;\nconst preparedIndexPin=await write(path.join(root,'prepared-index-v1.json'),{schemaVersion:1,packageId:PACKAGE_ID,sourceOriginalReport:reportPin,records:preparedIndex,pointsAreActualSavedPositions:true,freshThisRunOnly:true,historicalPreparedCount:58,expectedThisRun:42,formalOrdinaryReloginVerified:false,capacityAccepted:false,p0Accepted:false}).then(()=>pin(path.join(root,'prepared-index-v1.json')));\nlet finalAccounts;try{finalAccounts=JSON.parse(await fs.readFile(poolFile,'utf8')).accounts}catch(error){executionError??='Final normally saved complete pool unreadable'}\nconst finalPoolIdentityValid=Array.isArray(finalAccounts)&&finalAccounts.length===100&&finalAccounts.every((a,i)=>a.accountId===accounts[i].accountId&&a.name===accounts[i].name);\nconst currentTupleValid=(row,i)=>{const a=accounts[i+58],saved=finalAccounts?.[i+58],proof=report?.actorResults?.[i];return finalPoolIdentityValid&&a&&saved.state==='ready'&&saved.characterIndex===row.characterIndex&&row.name===a.name&&row.originalPoolIndex===i+58&&row.origin==='current-run'&&row.freshThisRun===true&&row.map==='0'&&Number.isSafeInteger(row.characterIndex)&&row.characterIndex>0&&Number.isSafeInteger(row.x)&&Number.isSafeInteger(row.y)&&candidateCells.has(row.x+','+row.y)&&row.normalLogout===true&&row.inSafeZone===true&&proof?.name===row.name&&proof.characterIndex===row.characterIndex&&proof.normalLogout===true&&proof.finalNormalDrainPositionMatched===true&&[proof.after,proof.freshReadiness].every(p=>p?.ownerName===row.name&&p.map==='0'&&p.x===row.x&&p.y===row.y&&Number.isSafeInteger(p.hpStock)&&p.hpStock>=12)&&row.sequence===proof.freshReadiness.sequence&&row.monotonicMs===proof.freshReadiness.monotonicMs};\nconst currentPartialIndexValid=Array.isArray(preparedIndex)&&preparedIndex.length<=42&&report?.preparedCount===preparedIndex.length&&Array.isArray(report.actorResults)&&report.actorResults.length===preparedIndex.length&&preparedIndex.every(currentTupleValid)&&new Set(preparedIndex.map(r=>r.name)).size===preparedIndex.length;\nconst preparedIndexValid=currentPartialIndexValid&&preparedIndex.length===42;\nconst historyRecords=historyBefore.historicalPreparedIndex.map(row=>({...row,freshThisRun:false,origin:'historical'}));\nconst currentRecords=currentPartialIndexValid?preparedIndex.map(row=>({...row,origin:'current-run',freshThisRun:true,sourceReportPin:reportPin})):[];\nconst combinedRecords=[...historyRecords,...currentRecords];\nconst combinedSavedIndexValid=preparedIndexValid&&combinedRecords.length===100&&combinedRecords.every((r,i)=>r.name===accounts[i].name&&finalAccounts?.[i]?.state==='ready'&&finalAccounts[i].characterIndex===r.characterIndex&&r.originalPoolIndex===i&&r.normalLogout===true&&r.map==='0'&&r.sourceReportPin&&candidateCells.has(r.x+','+r.y))&&new Set(combinedRecords.map(r=>r.name)).size===100&&new Set(combinedRecords.map(r=>r.characterIndex)).size===100&&new Set(combinedRecords.map(r=>r.map+':'+r.x+','+r.y)).size===100;\nconst combinedPreparedIndexPin=await write(path.join(root,'combined-saved-index-v1.json'),{schemaVersion:1,packageId:PACKAGE_ID,mode:'historical-prepared-index-v1',historicalPreparedCount:58,newPreparedCount:report?.preparedCount??0,expectedThisRun:42,historicalNotFresh:true,records:combinedRecords,completeDistinctOriginal100Saved:combinedSavedIndexValid,sourceCurrentReport:reportPin,historicalEvidence:config.options.continuation.evidence,all100FreshPreparedThisRun:false,formalOrdinaryRelogin100Verified:false,capacityAccepted:false,p0Accepted:false}).then(()=>pin(path.join(root,'combined-saved-index-v1.json')));\nconst continuationProductionEvidence=report?.preparationOnly===true&&report?.mode==='ordinary-economic-continuation-only'&&report?.continuationMode==='historical-prepared-index-v1'&&report?.attackResults==='v2'&&report?.testExecution===false&&report?.continuationPreparationEvidenceEligible===true&&report?.ordinaryPreparationEvidenceEligible===false&&report?.historicalPreparedCount===58&&report?.expectedThisRun===42&&report?.newPreparedCount===report?.preparedCount&&report?.combinedSavedCount===58+report?.preparedCount&&JSON.stringify(report?.historicalPreparedIndex)===JSON.stringify(historyBefore.historicalPreparedIndex)&&report?.first4FreshReusePerformedThisRun===false&&report?.all100FreshPreparedThisRun===false&&report?.fullDurableReadinessVerified===false&&report?.measurementPerformed===false&&report?.cohortActivated===false&&report?.capacityAccepted===false&&report?.p0Accepted===false;\nconst selectedComplementComplete=continuationProductionEvidence&&preparedIndexValid&&combinedSavedIndexValid&&report?.preparedCount===42&&report?.ok===true&&!executionError;\nconst receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'historical-prepared-index-v1',actualW16TwoGroupHistoricalContinuation:true,sourceW15AndW16FailuresRetained:true,sourceBankPlan:m.bankSourcePlanPin,sourceBankCopyReceipt:pin(path.join(root,'source-bank-copy-receipt-v1.json')),sourceOriginalFailedVerdictRetained:true,sourcePreparedEligibilityInherited:false,sourceFirst4InventoryReuse:null,sourceFirst4InventoryReuseEvidence:{performedThisRun:false,historicalOnly:true,passed:null,scope:'Historical first4 were not logged in this run. No fresh reuse assertion is inherited.'},first4FreshReusePerformedThisRun:false,historicalPreparedCount:58,historicalNotFresh:true,newPreparedCount:report?.preparedCount??0,expectedThisRun:42,combinedSavedCount:combinedRecords.length,seederInvoked:false,loginNotBeforeOverridden:false,preparationOnly:true,workerCount:1,maxPrepared:100,manifestPin,driverSourceCommit:m.driver.driverSourceCommit,executionSourceCommit:m.driver.driverSourceCommit,backendSourceCommit:m.backend.backendSourceCommit,backendExecutable:m.backend.immutableExecutable,backendSourcesExact:55,newRustBuildPerformed:false,freshRustTestsPerformed:false,rawOriginalReport:reportPin,rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null,rawOriginalVerdict:{attackResults:report?.attackResults??null,ok:report?.ok??null,error:report?.error??null,preparedCount:report?.preparedCount??null,testExecution:report?.testExecution??null,ordinaryPreparationEvidenceEligible:report?.ordinaryPreparationEvidenceEligible??null},preparedIndexRecord:preparedIndexPin,preparedIndexValid,currentPartialIndexValid,finalPoolIdentityValid,combinedPreparedIndexRecord:combinedPreparedIndexPin,combinedSavedIndexValid,historicalEvidence:config.options.continuation.evidence,progressCheckpoints:report?.checkpoints??[],progressIsColdCheckpoint:false,productionPreparationEvidence:false,continuationProductionEvidence,selectedComplementComplete,preparationComplete:false,executionError,cleanupComplete,cleanupRecord:pin(path.join(root,'cleanup-v1.json')),coldBankEligible:false,coldContinuationBankEligible:cleanupComplete&&selectedComplementComplete,all100FreshPreparedThisRun:false,fullDurableReadinessVerified:false,formalOrdinaryRelogin100Verified:false,measurementPerformed:false,gameplayEngineActivated:false,nativeResumeExercisePerformed:false,sustainableTwoHourSupplyProven:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false};await write(path.join(root,'preparation-episode-receipt-v1.json'),receipt);console.log(JSON.stringify(receipt,null,2));process.exitCode=cleanupComplete&&selectedComplementComplete?0:1;\n",
+      "after": "const reportPin=report?.reportPath?pin(report.reportPath):null,canonicalPassed=report?.ok===true&&executionError===null&&cleanup.driverExit?.exitCode===0;\nconst receipt={schemaVersion:1,packageId:PACKAGE_ID,formalStandardLadder:true,manifestPin,sourceBankPlan:m.bankSourcePlanPin,sourceBankCopyReceipt:pin(path.join(root,'source-bank-copy-receipt-v1.json')),sourceSavedCount:100,sourceAll100FreshInherited:false,sourceOriginalFailuresRetained:true,preloginAll100Performed:false,ordinaryReloginPerCohort:true,loginNotBeforeOverridden:false,seederInvoked:false,driverSourceCommit:m.driver.driverSourceCommit,executionSourceCommit:m.driver.driverSourceCommit,backendSourceCommit:m.backend.backendSourceCommit,backendExecutable:m.backend.immutableExecutable,backendSourcesExact:55,newRustBuildPerformed:false,freshRustTestsPerformed:false,rawOriginalReport:reportPin,rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null,rawOriginalVerdict:{ok:report?.ok??null,error:report?.error??null,movementCapacityAccepted:report?.movementCapacityAccepted??null,combatCapacityAccepted:report?.combatCapacityAccepted??null,playableCapacityAccepted:report?.playableCapacityAccepted??null,acceptedControlledActors:report?.acceptedControlledActors??null},measuredStages:report?.stages??null,canonicalStandardRunPassed:canonicalPassed,executionError,cleanupComplete,cleanupRecord:pin(path.join(root,'cleanup-v1.json')),publicDiagnosticsComplete:cleanup.publicDiagnostics?.complete===true,compactWirePatchApplied:false,compactWireDiagnosticCertificate:false,canonicalAoiAndGameGatesUnchanged:true,diagnosticsAndGameConjoined:false,independentEndedVerificationPerformed:false,all100FreshPreparedThisRun:false,formalOrdinaryRelogin100IndependentlyVerified:false,sustainableTwoHourSupplyProven:false,stageResupply:false,capacityAccepted:false,p0Accepted:false,humanFrontendAccepted:false,scope:'Wrapper receipt retains canonical raw report; no independent capacity/P0 promotion. All100 saved source is not fresh100. Diagnostic completeness is separate from game acceptance.'};await write(path.join(root,'formal-episode-receipt-v1.json'),receipt);console.log(JSON.stringify(receipt,null,2));process.exitCode=cleanupComplete&&canonicalPassed&&cleanup.publicDiagnostics?.complete===true?0:1;\n"
+    }
+  ],
+  "forwardExact": true,
+  "inverseExact": true,
+  "rawCopies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\base\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\base\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\slow-stage-public.mjs",
+        "bytes": 15386,
+        "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\store\\slow-stage-public.mjs",
+        "bytes": 15386,
+        "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\account-store-public-validator.mjs",
+        "bytes": 5407,
+        "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\store\\account-store-public-validator.mjs",
+        "bytes": 5407,
+        "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+      },
+      "rawExact": true
+    }
+  ],
+  "policyPathCorrection": {
+    "preimage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\formal-contract-author-before-policy-path-fix-v1.mjs",
+      "bytes": 9155,
+      "sha256": "3a9f19665a01d9f95c7ecd4353949d6f8329aed2d81ea07504de5a22dbe2f5e3"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\formal-contract-v1.mjs",
+      "bytes": 9160,
+      "sha256": "29ab56d6de9ddbb5fa5d0047451e0deb76a52e8b88d0bb224356183a18d7bff1"
+    },
+    "before": "playtest-capacity-core.mjs",
+    "after": "playtest-capacity-soak-core.mjs",
+    "changesOnlyImportLiteral": true
+  },
+  "measurementScene": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\scenario-formal-v1.json",
+      "bytes": 3008397,
+      "sha256": "1109e64089150a39bf2b8f784604776874dd99cbabceda58c8db4e1b07bf1dca"
+    },
+    "measurementFieldsRawSemanticExact": true,
+    "addedOnlyPreparation": true,
+    "actualSavedPoints": 100,
+    "candidates": 335,
+    "authoritativeRouteInlined": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+      "bytes": 2661153,
+      "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+    }
+  },
+  "resource": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\resource-profile-v1.json",
+      "bytes": 1965,
+      "sha256": "925ea4dcd2148ad0f844143889f869bc84e3ce133fd0e889c52adda5950387a2"
+    },
+    "thresholdsExact": true,
+    "changedOnlyReusedStoreDescriptionAndOriginMetadata": true
+  },
+  "sourceBankVerification": {
+    "completePrivateFiles": 11,
+    "priorControlFiles": 4,
+    "checks": [
+      {
+        "relative": "accounts.json",
+        "bytes": 1254887,
+        "sha256": "563e8f823ad52ff4285b398bd6632adcaa9ccfdf3ef894895dba8e0c692af8f0",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "capacity-pool.json",
+        "bytes": 22859,
+        "sha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "capacity-auth-budget.json",
+        "bytes": 585,
+        "sha256": "f64074a8c907622f8306245760116592eb235cab3e590165f0022033a8f48918",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "save-recovery/.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "save-recovery/.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "save-recovery/.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "8ad20f7e41bd3dc9889d6bc30ab323d11531f38b35d5bd95100e9390b749686e",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "save-recovery/quarantine/.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": ".mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": ".mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": ".mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "0a2a96a16ce5b24840781dd1cfc7a78785c5ca67f3cea1cdd017ddacf7f62c42",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      },
+      {
+        "relative": "quarantine/.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "rawExact": true,
+        "privatePayloadPublished": false
+      }
+    ],
+    "privatePayloadCopied": false,
+    "privatePayloadPublished": false
+  },
+  "runtimeEntry": "Current canonical runCapacity once; no monkeypatch/game threshold changes",
+  "requiredPending": [
+    "sourceQualification.driverSourceCommit",
+    "sourceQualification.executionSourceCommit",
+    "sourceQualification.newRootJsReceipt",
+    "currentFull16ReuseProof",
+    "actualFreeze"
+  ],
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "testExecution": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

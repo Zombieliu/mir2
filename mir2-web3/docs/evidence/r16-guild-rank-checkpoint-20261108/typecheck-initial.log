@@ -1,0 +1,2 @@
+app/page.tsx(12565,60): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+app/page.tsx(16246,67): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.

@@ -1,0 +1,108 @@
+{
+  "schema": "mir2.slow20-calibration2.closed.v1",
+  "sourceRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "binarySha256": "c155bb789e3c37bb4b9ed5b003c74dacef68e13240cdd9a364703945d1393e51",
+  "diagnosticOnly": true,
+  "capacityQualified": false,
+  "controllerDriverServerExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "plannedDurationMs": 60000,
+  "actionsPassed": 64,
+  "actionsOffered": 64,
+  "timeout": 0,
+  "windowsPassed": 2,
+  "allActorFileReadbackPassed": true,
+  "fileSampleCount": 2,
+  "enhancedPassed": true,
+  "equipmentActorsPassed": 2,
+  "gearOperationRecords": 8,
+  "normalLogoutAndClose": 2,
+  "freshStatePreserved": 2,
+  "resourcesRows": 95,
+  "serverJobClose": {
+    "closed": true,
+    "allMembersExited": true,
+    "killAppliedByClose": false,
+    "rootExitCodes": {
+      "gameServer": 0
+    },
+    "failedLaunches": [],
+    "normalStopMustBeProvenByCaller": true
+  },
+  "injectorJobClose": {
+    "closed": true,
+    "allMembersExited": true,
+    "killAppliedByClose": false,
+    "rootExitCodes": {
+      "injector": 0
+    },
+    "failedLaunches": [],
+    "normalStopMustBeProvenByCaller": true
+  },
+  "slow20LabelCounts": {
+    "account_store.store_held": 8,
+    "account_store.driver_held": 3,
+    "snapshot.build_and_send": 21,
+    "shared_session.inner_execute": 36,
+    "zone_owner.in_process.execute_request": 48,
+    "session_action.execute": 45,
+    "socket_turn.input": 45,
+    "account_store.marker_begin_sync": 3,
+    "shared_session.tail": 20,
+    "session_action.flush": 20,
+    "flush.save": 2,
+    "socket_input.queue_residence": 17,
+    "account_store.store_wait": 5,
+    "zone_cadence.total": 5,
+    "account_store.marker_settle_sync": 1,
+    "runtime_tick.save_checkpoint": 2,
+    "runtime_tick.total": 6,
+    "serial_gate.zone_outbound_wait": 2,
+    "shared_session.experience.owner_publication": 4,
+    "shared_session.predrain.experience_context": 4,
+    "shared_session.predrain": 4,
+    "runtime_tick.execute": 4
+  },
+  "allGenericStagesLackPerSocketTraceIdentity": true,
+  "authHistoryPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v31.json",
+  "authHistorySha256": "77c8f2d7f45b744f026206bfaa80315bf4176d0bb0ab2c8a722b789a1d423917",
+  "authAttemptCount": 1551,
+  "previousPrefixRetained": 1539,
+  "newAuthAttempts": 12,
+  "inputs": {
+    "controller": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-functional2-v1\\runs\\calibration-2-v1\\controller-result.json",
+      "sha256": "27bd58c36507c79d122ef86ba6ae0a7c87e4aa52deedb8c303cae5ae793419d9",
+      "bytes": 4144
+    },
+    "summary": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-functional2-v1\\runs\\calibration-2-v1\\modern.report.json",
+      "sha256": "ccfb148d002a480e46395b2d04c231a2cb92373db7c8badf1f68f27c1c6b3300",
+      "bytes": 839954
+    },
+    "events": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-functional2-v1\\runs\\calibration-2-v1\\modern.events.jsonl",
+      "sha256": "8eaa196aa2abafac8c09c03c3a0643069fca0aad5132ffa97643a2fb8d850c05",
+      "bytes": 2790265
+    },
+    "file": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-factory-v1\\generated\\dense2\\disk-readback.v8.json",
+      "sha256": "897bd47cf98e6f41a553a155d52c990ec5d918b766c0f2a306c70e8763665b3b",
+      "bytes": 7002
+    },
+    "enhanced": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-factory-v1\\generated\\dense2\\independent-verification.v8.json",
+      "sha256": "0d56c4fc5b212ca3d2055ac051c366bb233b51ffcb911e6181293947c7aa10fc",
+      "bytes": 8105
+    },
+    "slowLog": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-functional2-v1\\runs\\calibration-2-v1\\game-stderr.log",
+      "sha256": "6dc46bb9c339e4b0617acaa5d0181eef8eb01b6b2fad9f3f79189af7ae4958f5",
+      "bytes": 43016
+    }
+  },
+  "fresh100ClaimValidatedButControllerNotStarted": true
+}

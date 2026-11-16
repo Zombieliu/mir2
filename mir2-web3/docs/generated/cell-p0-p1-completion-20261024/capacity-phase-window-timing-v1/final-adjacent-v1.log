@@ -1,0 +1,160 @@
+TAP version 13
+# Subtest: profile requires explicit measured resource envelope and distinguishes it from enforced quotas
+ok 1 - profile requires explicit measured resource envelope and distinguishes it from enforced quotas
+  ---
+  duration_ms: 1.1739
+  type: 'test'
+  ...
+# Subtest: monitor endpoint excludes remote hosts, credentials, redirection inputs and non-health paths
+ok 2 - monitor endpoint excludes remote hosts, credentials, redirection inputs and non-health paths
+  ---
+  duration_ms: 0.2088
+  type: 'test'
+  ...
+# Subtest: health projection emits only public finite capacity fields and fails closed on missing counters
+ok 3 - health projection emits only public finite capacity fields and fails closed on missing counters
+  ---
+  duration_ms: 0.2768
+  type: 'test'
+  ...
+# Subtest: resource sample binds PID, executable, full core inventory and monotonic cumulative counters
+ok 4 - resource sample binds PID, executable, full core inventory and monotonic cumulative counters
+  ---
+  duration_ms: 0.8421
+  type: 'test'
+  ...
+# Subtest: real cumulative counter deltas produce cores and I/O rates without inventing process network bytes
+ok 5 - real cumulative counter deltas produce cores and I/O rates without inventing process network bytes
+  ---
+  duration_ms: 0.285
+  type: 'test'
+  ...
+# Subtest: private-memory and host safety reserve violations stop immediately and cannot recover to pass
+ok 6 - private-memory and host safety reserve violations stop immediately and cannot recover to pass
+  ---
+  duration_ms: 0.5361
+  type: 'test'
+  ...
+# Subtest: transient CPU burst resets but sustained CPU oversubscription requests drain at the original threshold
+ok 7 - transient CPU burst resets but sustained CPU oversubscription requests drain at the original threshold
+  ---
+  duration_ms: 0.2968
+  type: 'test'
+  ...
+# Subtest: missing process identity, PID reuse, stale samples and NIC counter reset invalidate continuity
+ok 8 - missing process identity, PID reuse, stale samples and NIC counter reset invalidate continuity
+  ---
+  duration_ms: 0.2755
+  type: 'test'
+  ...
+# Subtest: NIC removal, addition, rename and duplicate identity cannot silently reduce host bandwidth rate
+ok 9 - NIC removal, addition, rename and duplicate identity cannot silently reduce host bandwidth rate
+  ---
+  duration_ms: 0.3539
+  type: 'test'
+  ...
+# Subtest: health endpoint provenance requires the pinned PID to own that exact loopback listener
+ok 10 - health endpoint provenance requires the pinned PID to own that exact loopback listener
+  ---
+  duration_ms: 0.3069
+  type: 'test'
+  ...
+# Subtest: CLI rejects duplicate arguments and credentials have no command-line option
+ok 11 - CLI rejects duplicate arguments and credentials have no command-line option
+  ---
+  duration_ms: 0.2079
+  type: 'test'
+  ...
+# Subtest: Windows CIM producer samples the owned test process and every host logical core
+ok 12 - Windows CIM producer samples the owned test process and every host logical core
+  ---
+  duration_ms: 1288.3413
+  type: 'test'
+  ...
+# Subtest: density classifies actual entity kinds and counts drops separately without serializing identities or payloads
+ok 13 - density classifies actual entity kinds and counts drops separately without serializing identities or payloads
+  ---
+  duration_ms: 1.6155
+  type: 'test'
+  ...
+# Subtest: density separates per-map admitted active cohorts from visible counts and excludes paused, closed, unready and absent owners
+ok 14 - density separates per-map admitted active cohorts from visible counts and excludes paused, closed, unready and absent owners
+  ---
+  duration_ms: 6.3153
+  type: 'test'
+  ...
+# Subtest: density accumulates bounded sampled independent maxima without rewriting prior samples or returned summaries
+ok 15 - density accumulates bounded sampled independent maxima without rewriting prior samples or returned summaries
+  ---
+  duration_ms: 0.5263
+  type: 'test'
+  ...
+# Subtest: phase raw boundaries and report windows use one explicit clock, and completed never claims assessment success
+ok 16 - phase raw boundaries and report windows use one explicit clock, and completed never claims assessment success
+  ---
+  duration_ms: 0.1775
+  type: 'test'
+  ...
+# Subtest: an aborted bootstrap closes its real interval as incomplete and invalid clocks cannot manufacture duration
+ok 17 - an aborted bootstrap closes its real interval as incomplete and invalid clocks cannot manufacture duration
+  ---
+  duration_ms: 0.1683
+  type: 'test'
+  ...
+# Subtest: old development endpoints explicitly lack telemetry; a required frozen profile fails closed
+ok 18 - old development endpoints explicitly lack telemetry; a required frozen profile fails closed
+  ---
+  duration_ms: 1.5616
+  type: 'test'
+  ...
+# Subtest: the complete fixed histogram and counters survive public whitelist projection
+ok 19 - the complete fixed histogram and counters survive public whitelist projection
+  ---
+  duration_ms: 0.6729
+  type: 'test'
+  ...
+# Subtest: window percentiles subtract raw bucket counts rather than lifetime percentile/max values
+ok 20 - window percentiles subtract raw bucket counts rather than lifetime percentile/max values
+  ---
+  duration_ms: 1.3435
+  type: 'test'
+  ...
+# Subtest: profile deltas keep failed completions and exact over-budget fractions
+ok 21 - profile deltas keep failed completions and exact over-budget fractions
+  ---
+  duration_ms: 0.1872
+  type: 'test'
+  ...
+# Subtest: empty windows and overflow retain null quantiles instead of passing as zero latency
+ok 22 - empty windows and overflow retain null quantiles instead of passing as zero latency
+  ---
+  duration_ms: 0.2852
+  type: 'test'
+  ...
+# Subtest: unknown versions, incomplete telemetry, saturation, unsafe integers and inconsistent buckets are rejected
+ok 23 - unknown versions, incomplete telemetry, saturation, unsafe integers and inconsistent buckets are rejected
+  ---
+  duration_ms: 0.3545
+  type: 'test'
+  ...
+# Subtest: movement admission has its own counters and never becomes proof of position application
+ok 24 - movement admission has its own counters and never becomes proof of position application
+  ---
+  duration_ms: 0.5564
+  type: 'test'
+  ...
+# Subtest: counter resets, bucket redistribution and process-lifetime reversal invalidate a profile delta
+ok 25 - counter resets, bucket redistribution and process-lifetime reversal invalidate a profile delta
+  ---
+  duration_ms: 0.3286
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1367.9382

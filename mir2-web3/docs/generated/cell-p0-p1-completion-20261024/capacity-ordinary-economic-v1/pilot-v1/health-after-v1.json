@@ -1,0 +1,18 @@
+{
+  "observedAt": "2026-10-26T18:31:00.283Z",
+  "capacity": {
+    "maxWsConnections": 128,
+    "maxActiveSessions": 100,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "sixCountersZero": true
+}

@@ -1,0 +1,57 @@
+{
+  "negativeControls": [
+    {
+      "name": "admission-before.txt",
+      "sha256": "f1e328e345291c559c8b405cda47e489b36fdcb4f25cbb7781316437263f38f3",
+      "summary": [
+        "not ok 1 - a renderer burst admits six logical images and starts queued deadlines only on dispatch",
+        "not ok 2 - queued critical HUD images precede runtime and background work, with FIFO within each tier",
+        "not ok 3 - a source fallback keeps its logical admission instead of rejoining a burst",
+        "not ok 4 - cancelling a queued direct image starts no fetch and leaves admitted readers alive",
+        "not ok 6 - a queued image retains its release sources across a later Worker configuration",
+        "# tests 6",
+        "# pass 1",
+        "# fail 5",
+        "# cancelled 0",
+        "# skipped 0"
+      ]
+    },
+    {
+      "name": "regressions.txt",
+      "sha256": "198e5957d70c0f9b980ea03c70b5589821a847d90682de8eb80ae846294bc129",
+      "summary": [
+        "not ok 104 - retiring the first HUD consumer cannot cancel a coalesced prewarm body",
+        "not ok 143 - a stalled shared image header retires before page retries keep joining it",
+        "not ok 144 - each static fallback gets its own bounded header attempt",
+        "not ok 145 - an exhausted static header deadline is transient and the next read is fresh",
+        "not ok 146 - static header expiry never truncates an already delivered image body",
+        "not ok 213 - browser dictionaries use the ten native languages in the native order",
+        "not ok 214 - zh-CN supplies every browser control without blank values",
+        "not ok 215 - zh-TW supplies every browser control without blank values",
+        "not ok 216 - en supplies every browser control without blank values",
+        "not ok 217 - pt-BR supplies every browser control without blank values",
+        "not ok 218 - ru supplies every browser control without blank values",
+        "not ok 219 - hi supplies every browser control without blank values",
+        "not ok 220 - id supplies every browser control without blank values",
+        "not ok 221 - vi supplies every browser control without blank values",
+        "not ok 222 - th supplies every browser control without blank values",
+        "not ok 223 - ar supplies every browser control without blank values",
+        "# tests 253",
+        "# pass 237",
+        "# fail 14",
+        "# cancelled 2",
+        "# skipped 0"
+      ]
+    }
+  ],
+  "initialChromeFixture": {
+    "passed": false,
+    "rawReceiptSha256": "2b9106cb982f2eb77fcd8445bac6f95306cedf4a09199c07775b23d865eaa3ce",
+    "reason": "Harness waited on MessagePort although actual Worker replies through event.source. Confirmed live owned browser stopped to settle the blocked caller. No image request occurred. Subsequent fixture uses actual message listener and a bounded 5s handshake; not a product-network failure.",
+    "forcedOwnedBrowserStop": true,
+    "ownedBrowserPid": 91368,
+    "browserClosed": true,
+    "serverClosed": true
+  },
+  "initialRegressionFix": "Three legacy header timing/coalescing checks failed and two cancelled because a newly added microtask deferred even idle admission. Immediate async source dispatch restored prior ordering without changing source timeouts. Eleven locale inventory assertions required the nine explicit new keys; all original keys remain checked."
+}

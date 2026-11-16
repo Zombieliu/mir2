@@ -1,0 +1,186 @@
+{
+  "distinctPassed": 89,
+  "failed": 0,
+  "selections": [
+    {
+      "log": "green-simulation-attempt-06.log",
+      "sha256": "6b134ae03ff5c3c704c1d8ccc207a03056ea846ed40db5bb61e427186c1fd91e",
+      "passed": 19,
+      "failed": 0,
+      "tests": [
+        "cancelled_claim_does_not_restart_original_protection",
+        "cold_manager_checkpoint_never_recreates_original_online_nodes",
+        "dead_online_owner_keeps_source_ground_protection_until_true_despawn",
+        "detached_custody_retains_deadline_ttl_and_stable_ledger_key",
+        "encoded_owner_binds_manager_epoch_account_character_object_and_session",
+        "expired_held_ground_ttl_never_resurrects_on_cancel",
+        "fresh_join_cannot_inherit_old_epoch_even_with_reused_ids",
+        "irregular_tick_cadence_does_not_replace_birth_with_latest_sync_or_tick",
+        "manual_unowned_drop_projection_never_invents_native_item_owner",
+        "owned_native_drop_has_strict_original_one_minute_boundary",
+        "owner_cross_map_retains_experience_and_source_drop",
+        "owner_return_to_source_does_not_revoke_claim",
+        "parallel_source_zone_tick_matches_sequential_cross_map_owner_and_payload",
+        "periodic_poison_renews_owner_after_caster_changed_map",
+        "repeated_sync_does_not_restart_original_protection",
+        "same_map_fresh_admission_releases_old_ground_owner_and_experience",
+        "source_issuance_binds_original_reward_before_and_after_map_membership_change",
+        "strict_expiration_can_be_renewed_only_by_source_legal_current_owner",
+        "true_leave_from_other_map_releases_original_ground_owner"
+      ]
+    },
+    {
+      "log": "gateway-tests-attempt-08.log",
+      "sha256": "ca636466643516d562bb8e1e1390b4de3484d08bd5b0d63ebee96a4f066ddd44",
+      "passed": 9,
+      "failed": 0,
+      "tests": [
+        "routing::tests::cross_map_drop_lifecycle_tests::cold_world_checkpoint_keeps_source_item_payload_and_ttl_but_revokes_all_online_owners",
+        "routing::tests::cross_map_drop_lifecycle_tests::fresh_login_never_accepts_a_replayed_previous_online_award",
+        "routing::tests::cross_map_drop_lifecycle_tests::known_reward_save_failure_keeps_source_epoch_for_one_exact_retry",
+        "routing::tests::cross_map_drop_lifecycle_tests::lost_proof_is_not_recreated_from_new_membership_or_fresh_login",
+        "routing::tests::cross_map_drop_lifecycle_tests::ordinary_pickup_with_a_prepared_full_bag_restores_exact_original_custody_clocks",
+        "routing::tests::cross_map_drop_lifecycle_tests::ordinary_walk_source_route_and_carried_poison_award_are_source_bound",
+        "routing::tests::cross_map_drop_lifecycle_tests::source_issued_award_rejects_every_identity_source_and_payload_substitution",
+        "routing::tests::cross_map_drop_lifecycle_tests::source_item_exact_payload_receives_one_uid_and_survives_normal_save_login",
+        "routing::tests::cross_map_drop_lifecycle_tests::unknown_publication_retains_exact_source_receipt_without_faked_exp_success"
+      ]
+    },
+    {
+      "log": "adjacent-same-map-attempt-02.log",
+      "sha256": "c8d6413fee4798176acbbca89a869f836b23a505eae21e83c85ab0dc3eb14541",
+      "passed": 21,
+      "failed": 0,
+      "tests": [
+        "armour_rejected_direct_hit_never_claims_or_renews",
+        "authenticated_cold_checkpoint_preserves_state_but_revokes_live_owner",
+        "checkpoint_exp_owner_tampering_cannot_bypass_root_authentication",
+        "competing_damage_neither_claims_nor_renews_current_owner",
+        "exact_five_second_deadline_keeps_original_owner",
+        "first_effective_player_hit_retains_exp_quest_and_drop_credit_on_rival_kill",
+        "fresh_monster_incarnation_does_not_inherit_previous_life_owner",
+        "fresh_same_map_join_revokes_old_claim_and_old_poison_identity",
+        "map_quake_lethal_damage_preserves_an_existing_player_claim",
+        "new_effective_attacker_replaces_dead_exp_owner",
+        "only_resolved_damage_claims_before_a_delayed_swing",
+        "owned_summon_first_hit_keeps_master_credit_and_actual_pet_attacker_id",
+        "pending_turn_undead_force_owner_flag_is_authenticated",
+        "pet_outside_sixteen_tile_master_range_clears_credit_without_losing_damage",
+        "pet_with_master_sixteen_tiles_away_cannot_steal_rival_claim",
+        "rival_periodic_poison_does_not_steal_living_melee_owner",
+        "same_owner_effective_hit_renews_five_seconds",
+        "solo_dead_poison_owner_keeps_source_kill_credit",
+        "strictly_after_five_seconds_next_effective_attacker_claims_owner",
+        "successful_turn_undead_forces_caster_ownership",
+        "wild_lethal_hit_on_real_master_pet_never_becomes_a_wild_kill_reward"
+      ]
+    },
+    {
+      "log": "simulation-checkpoint-attempt-02.log",
+      "sha256": "9cb051712f615643f48983564b5ba03c30b0b64678af28b30ae692797bbaf225",
+      "passed": 17,
+      "failed": 0,
+      "tests": [
+        "runtime::zone::runtime::checkpoint::tests::checkpoint_state_root_authenticates_removed_object_tombstones",
+        "runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_rejects_valid_json_with_changed_state",
+        "runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_restores_authoritative_and_derived_state",
+        "runtime::zone::runtime::checkpoint::tests::exact_ground_drop_identity_is_checkpointed_and_state_root_protected",
+        "runtime::zone::runtime::checkpoint::tests::ground_drop_authority_allocators_fail_closed_at_u64_exhaustion",
+        "runtime::zone::runtime::checkpoint::tests::legacy_checkpoint_missing_monster_disposition_fails_closed",
+        "runtime::zone::runtime::checkpoint::tests::legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only",
+        "runtime::zone::runtime::checkpoint::tests::legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields",
+        "runtime::zone::runtime::checkpoint::tests::legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key",
+        "runtime::zone::runtime::checkpoint::tests::legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy",
+        "runtime::zone::runtime::checkpoint::tests::legacy_v3_dead_monster_policy_hydration_never_revives_immediately",
+        "runtime::zone::runtime::checkpoint::tests::legacy_v5_authenticates_original_item_before_ignoring_unbound_forward_owner_fields",
+        "runtime::zone::runtime::checkpoint::tests::new_online_metadata_is_integrity_bound_but_cold_decode_never_grants_authority",
+        "runtime::zone::runtime::checkpoint::tests::online_player_receives_world_event_monster_spawn_packet",
+        "runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_keeps_v2_ground_drop_authority_validation",
+        "runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_reanchors_a_module_dependent_state_root",
+        "runtime::zone::runtime::checkpoint::tests::world_event_monster_without_player_is_authoritative_and_checkpointed"
+      ]
+    },
+    {
+      "log": "simulation-experience-owner-attempt-01.log",
+      "sha256": "fe9e0b1957bf4b2220b8ce0ebcfacbbdf16d81c2b0a31bd9d5a21f153dd04d7d",
+      "passed": 6,
+      "failed": 0,
+      "tests": [
+        "runtime::zone::runtime::experience_ownership::tests::legacy_v4_forward_claim_and_forced_impact_are_neutralized",
+        "runtime::zone::runtime::experience_ownership::tests::ordinary_unowned_source_retains_prior_exp_owner_rule",
+        "runtime::zone::runtime::experience_ownership::tests::source_ai113_clears_prior_exp_owner_rule",
+        "runtime::zone::runtime::experience_ownership::tests::source_ai58_clears_prior_exp_owner_rule",
+        "runtime::zone::runtime::experience_ownership::tests::source_ai6_clears_prior_exp_owner_rule",
+        "runtime::zone::runtime::experience_ownership::tests::zero_direct_damage_does_not_claim_but_periodic_poison_rule_claims_and_renews"
+      ]
+    },
+    {
+      "log": "simulation-online-identity-attempt-01.log",
+      "sha256": "563227d2673642b65252dc9b9a10818de973a54f4dd8bfc5c1b225a2637c2c7b",
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        "runtime::zone::online_identity::tests::online_epoch_exhaustion_fails_closed_without_recycling"
+      ]
+    },
+    {
+      "log": "gateway-adjacent-01-attempt-01.log",
+      "sha256": "5401644c15f74c2cff33aa025050c5c478820288d99947881315b5ce2c7a71de",
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        "routing::tests::shared_in_process_runtime_emits_gain_experience_after_kill_award_commit"
+      ]
+    },
+    {
+      "log": "gateway-adjacent-02-attempt-01.log",
+      "sha256": "841051ad4b18d9430cbf49681d97b1668918f620a53c5c6ea653a89ceefef49f",
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        "routing::tests::shared_in_process_runtime_uses_account_inventory_service_boundary"
+      ]
+    },
+    {
+      "log": "gateway-adjacent-03-attempt-01.log",
+      "sha256": "bb18b3114711060fe36831243d20d5ed277fa8bc2629b855a97cd716a9ff8002",
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        "routing::tests::gateway_kill_award_level_up_updates_zone_and_personal_vitals"
+      ]
+    },
+    {
+      "log": "gateway-adjacent-04-attempt-01.log",
+      "sha256": "c25b55d309435cbf2fa405467d77098430eccde9b39233c4439bedd90b88cdb8",
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        "routing::tests::shared_zone_state_rejects_unbound_legacy_monster_kill_awards"
+      ]
+    },
+    {
+      "log": "gateway-adjacent-05-attempt-01.log",
+      "sha256": "3939b6c5de0cee650ff3dc6c42e89345fcd6a44c63b08c7bb827ed83c59491d0",
+      "passed": 12,
+      "failed": 0,
+      "tests": [
+        "routing::tests::dead_experience_chain_tests::acknowledged_private_death_also_rejects_native_magic_before_zone_mirror_catches_up",
+        "routing::tests::dead_experience_chain_tests::dead_poison_fenced_teardown_saves_latest_level_pools",
+        "routing::tests::dead_experience_chain_tests::dead_poison_known_save_failure_preserves_life_then_retry_and_duplicate",
+        "routing::tests::dead_experience_chain_tests::dead_poison_level_refills_pools_without_online_revive",
+        "routing::tests::dead_experience_chain_tests::dead_poison_level_rejects_actions_and_town_revive_still_works",
+        "routing::tests::dead_experience_chain_tests::dead_poison_non_level_award_is_durable_and_does_not_revive",
+        "routing::tests::dead_experience_chain_tests::dead_poison_retained_bootstrap_preserves_online_life",
+        "routing::tests::dead_experience_chain_tests::full_hp_poison_level_corpse_blocks_normal_potion_but_scroll_explicitly_revives",
+        "routing::tests::dead_experience_chain_tests::genuine_dead_receipts_replayed_after_level_and_revive_do_not_repeat_penalty",
+        "routing::tests::dead_experience_chain_tests::native_zero_hp_death_rejects_valid_magic_without_spend_hit_or_turn",
+        "routing::tests::dead_experience_chain_tests::real_poison_logout_relogin_distinguishes_zero_hp_from_full_hp_dead_save",
+        "routing::tests::dead_experience_chain_tests::unknown_poison_award_publication_freezes_without_fake_success_or_revive"
+      ]
+    }
+  ],
+  "localOnly": true,
+  "target": "C:/mir2-build/gateway-tests-r50",
+  "jobs": 2
+}

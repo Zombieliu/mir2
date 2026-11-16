@@ -1,0 +1,19 @@
+{
+  "realm": "isolated",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "accountsFile": "C:/mir2-build/p01-completion-20261024/probe-natural-5/private/capacity-pool.json",
+  "monitor": "C:/mir2-build/p01-completion-20261024/probe-natural-5/monitor-current.json",
+  "output": "C:/mir2-build/p01-completion-20261024/probe-natural-5/reports",
+  "profile": "probe",
+  "activityMode": "native",
+  "stages": "2,5",
+  "stageSeconds": 30,
+  "soakSeconds": 360,
+  "combatActors": 1,
+  "resumeSamples": 0,
+  "saveSamples": 0,
+  "wallSeconds": 1200,
+  "scenarioFile": "C:/mir2-build/p01-completion-20261024/static-native-mixed-probe-5.json",
+  "loginNotBefore": "2026-10-24T14:39:42.5932830+00:00",
+  "purpose": "natural-supply/navigation-only; old-dev EXE; concurrent compilation; not capacity acceptance"
+}

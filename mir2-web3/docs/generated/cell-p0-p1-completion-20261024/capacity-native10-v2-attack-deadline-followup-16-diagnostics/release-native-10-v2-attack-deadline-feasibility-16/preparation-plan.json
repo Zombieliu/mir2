@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_PREREQUISITES_BOUND_PENDING_ROOT_SEAL",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16",
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverExecutionSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "actualNodeCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "backendInputCount": 44,
+  "manifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+  },
+  "release": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "driverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "full16Facts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+    "bytes": 10820,
+    "sha256": "4fd5867e421360dca4bb5cf0ec9f5bcd9b21a364f46f0bbb3bf97d53c571f1fa"
+  },
+  "full16Prerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\full16-actual-prerequisite-v1.json",
+    "bytes": 4869,
+    "sha256": "2a1eb6b8747caa988282bd7a68584351ba24625dc346283abd727e576c024e51"
+  },
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false,
+  "phaseContract": {
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "completeWindows": [
+      5,
+      5,
+      6
+    ],
+    "actualWindowSecondsMinimum": 60,
+    "wholePhaseRateDenominator": "actual measuredSeconds"
+  },
+  "ordinaryAccounts": 10,
+  "charactersCreatedByPreparation": 0,
+  "full16ActualSentCommands": 357,
+  "declaredHistorical354NotReused": true,
+  "originalPolicyAndScenarioPreserved": true,
+  "historicalWireIdentitySeparated": true
+}

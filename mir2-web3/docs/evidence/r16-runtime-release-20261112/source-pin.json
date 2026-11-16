@@ -1,0 +1,110 @@
+{
+  "source": "007c14c6fd4d618a6b90c5b0f64e60b510818baa",
+  "base": "ab50fd2cbfb8c2ccdf2c071665b1eac746025c8a",
+  "productionEquivalent": "958f5aca2a38128fb39b245b30ec7b8a6d3b0925",
+  "baseline": "dpl_B7mFuzdhnBcgPSrNHR3HBFehqq6y",
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "105bfeb9749be2ba6f33ad0a402fd194486cc613"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha": "577f2df4675cb89685a72c87b61069dd5470d62a"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
+      "sha": "f1f8c4eb3ec21f43ffbae66585f657105c26b5ec"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha": "cad13b48adaaf626c47e389d0991c7c98a157420"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "sha": "21b8b941717839e726394d7e8245be2cfa3fc606"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "02c8a55f61a48d491351447f3d8a3a4edc8baf71"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "516a6ed4d5d8ef699cd5147d7f096b824b009513"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "aa94705c56a3162b72302236453b9719d4b30ce4"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+      "sha": "d8e552007db635351213297280b7e725c1dee41c"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-readiness-20261112/README.md",
+      "sha": "234fdd5f4a161a20b59b26db8bf86aef98b34042"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-readiness-20261112/receipt.json",
+      "sha": "f1276ebfa7202f1e6eb67376032edd8e67182fa3"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-readiness-20261112/webgl2-quest.png",
+      "sha": "489aef8f78ab604a16c26f47135de6e6134bb4b7"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-readiness-20261112/webgpu-quest.png",
+      "sha": "ea3b74d284c4386af039940d494f9bed83bb6d18"
+    }
+  ],
+  "cumulativeWeb": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "ecbf1ec4d5804fecfc427fb5b1c28d1419b97da6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "105bfeb9749be2ba6f33ad0a402fd194486cc613"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha": "577f2df4675cb89685a72c87b61069dd5470d62a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
+      "sha": "f1f8c4eb3ec21f43ffbae66585f657105c26b5ec"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "cd3aa91671ef02712d058abc4d8f811953144247"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "9af2d78c0b8e60fe1c13c10bbc22d9dd95b7379a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha": "cad13b48adaaf626c47e389d0991c7c98a157420"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "sha": "21b8b941717839e726394d7e8245be2cfa3fc606"
+    }
+  ],
+  "workerSha256": "9b943d42b22a28d74d6a094fc35877c4be01b61dd3c856c0b5e7fec6af6207b0",
+  "workerBytes": 30226,
+  "sourceGuardSemanticsChanged": false
+}

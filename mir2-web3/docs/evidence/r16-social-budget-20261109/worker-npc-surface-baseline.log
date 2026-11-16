@@ -1,0 +1,306 @@
+TAP version 13
+# Subtest: actual compatibility shop missing quote or total reports unavailable and never invents a total or sends
+ok 1 - actual compatibility shop missing quote or total reports unavailable and never invents a total or sends
+  ---
+  duration_ms: 57.5724
+  type: 'test'
+  ...
+# Subtest: actual compatibility shop labels only explicit gold denial as insufficient funds
+ok 2 - actual compatibility shop labels only explicit gold denial as insufficient funds
+  ---
+  duration_ms: 18.6168
+  type: 'test'
+  ...
+# Subtest: actual compatibility shop preserves full inventory and pending reasons for both currencies
+ok 3 - actual compatibility shop preserves full inventory and pending reasons for both currencies
+  ---
+  duration_ms: 20.9056
+  type: 'test'
+  ...
+# Subtest: actual compatibility pearl shop distinguishes insufficient pearls from missing wallet or wrong quote currency
+ok 4 - actual compatibility pearl shop distinguishes insufficient pearls from missing wallet or wrong quote currency
+  ---
+  duration_ms: 11.6228
+  type: 'test'
+  ...
+# Subtest: actual compatibility Buy accepts a successful quote and rechecks authority on confirm and double click
+ok 5 - actual compatibility Buy accepts a successful quote and rechecks authority on confirm and double click
+  ---
+  duration_ms: 93.6566
+  type: 'test'
+  ...
+# Subtest: actual compatibility shop without a selected current row has no insufficient-funds feedback or purchase
+ok 6 - actual compatibility shop without a selected current row has no insufficient-funds feedback or purchase
+  ---
+  duration_ms: 19.5341
+  type: 'test'
+  ...
+# Subtest: actual combat NPC channel holds only the current opaque token and leaves other channels intact
+ok 7 - actual combat NPC channel holds only the current opaque token and leaves other channels intact
+  ---
+  duration_ms: 0.5877
+  type: 'test'
+  ...
+# Subtest: actual combat channel rejects unknown labels and retires old-owner NPC hold before publishing
+ok 8 - actual combat channel rejects unknown labels and retires old-owner NPC hold before publishing
+  ---
+  duration_ms: 0.2865
+  type: 'test'
+  ...
+# Subtest: actual Page read model carries full player raw inventory and readonly canonical Core without observing in final checks
+ok 9 - actual Page read model carries full player raw inventory and readonly canonical Core without observing in final checks
+  ---
+  duration_ms: 362.9768
+  type: 'test'
+  ...
+# Subtest: actual Page shared Buy uses common selected quantity and claims UI then exact Core body immediately before socket
+not ok 10 - actual Page shared Buy uses common selected quantity and claims UI then exact Core body immediately before socket
+  ---
+  duration_ms: 265.2284
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs:341:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-npc-shop-surface-integration.mjs:343:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page final synchronous listener rejects changed service raw inventory owner layout status and socket before entry
+ok 11 - actual Page final synchronous listener rejects changed service raw inventory owner layout status and socket before entry
+  ---
+  duration_ms: 2222.2156
+  type: 'test'
+  ...
+# Subtest: actual Page nonBuy two-phase local actions retire exact preentry before claim and never send a wire
+ok 12 - actual Page nonBuy two-phase local actions retire exact preentry before claim and never send a wire
+  ---
+  duration_ms: 1477.8528
+  type: 'test'
+  ...
+# Subtest: actual Page Close and Sell defer retirement before source or compatibility tab mutation
+ok 13 - actual Page Close and Sell defer retirement before source or compatibility tab mutation
+  ---
+  duration_ms: 507.9932
+  type: 'test'
+  ...
+# Subtest: actual Page entered socket exception reports Unknown plus exact unentered cleanup without inventing an ACK
+not ok 14 - actual Page entered socket exception reports Unknown plus exact unentered cleanup without inventing an ACK
+  ---
+  duration_ms: 248.0761
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs:380:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-npc-shop-surface-integration.mjs:382:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual final Page checkpoint rejects deferred UI withdraw or stop after all Core callbacks despite unchanged status
+not ok 15 - actual final Page checkpoint rejects deferred UI withdraw or stop after all Core callbacks despite unchanged status
+  ---
+  duration_ms: 241.7378
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs:388:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert(f.trace.includes("uiClaim"))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-npc-shop-surface-integration.mjs:392:5)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page hook and Shell props carry the same host without acquiring Bag ownership
+ok 16 - actual Page hook and Shell props carry the same host without acquiring Bag ownership
+  ---
+  duration_ms: 264.753
+  type: 'test'
+  ...
+# Subtest: actual shared Page denies naked legacy mixed DTO and stale current status before reservation
+ok 17 - actual shared Page denies naked legacy mixed DTO and stale current status before reservation
+  ---
+  duration_ms: 1490.4901
+  type: 'test'
+  ...
+# Subtest: actual Shell arming blocks synchronously before pointer context and clears keyboard direction combat intent
+ok 18 - actual Shell arming blocks synchronously before pointer context and clears keyboard direction combat intent
+  ---
+  duration_ms: 30.9712
+  type: 'test'
+  ...
+# Subtest: actual Shell routes shop origin with an exact combat hold and consumes world origin without a shop hold
+ok 19 - actual Shell routes shop origin with an exact combat hold and consumes world origin without a shop hold
+  ---
+  duration_ms: 56.8363
+  type: 'test'
+  ...
+# Subtest: actual Shell rejects wrong canvas invalid pointer and a competing panel without leaking to legacy gameplay
+ok 20 - actual Shell rejects wrong canvas invalid pointer and a competing panel without leaking to legacy gameplay
+  ---
+  duration_ms: 159.055
+  type: 'test'
+  ...
+# Subtest: actual Shell old nonce terminal cannot clear the new same-pointer lease or its combat hold
+ok 21 - actual Shell old nonce terminal cannot clear the new same-pointer lease or its combat hold
+  ---
+  duration_ms: 25.6247
+  type: 'test'
+  ...
+# Subtest: actual Shell refused RPC cleans its own lease but synchronous replacement cannot be canceled by the old finally
+ok 22 - actual Shell refused RPC cleans its own lease but synchronous replacement cannot be canceled by the old finally
+  ---
+  duration_ms: 53.3165
+  type: 'test'
+  ...
+# Subtest: actual gamepad and touch props evaluate arming active and synchronous blocker without relying on a React update
+ok 23 - actual gamepad and touch props evaluate arming active and synchronous blocker without relying on a React update
+  ---
+  duration_ms: 4.4778
+  type: 'test'
+  ...
+# Subtest: actual gamepad and touch render props use pure Hero and parity blockers without invoking their live methods
+ok 24 - actual gamepad and touch render props use pure Hero and parity blockers without invoking their live methods
+  ---
+  duration_ms: 4.463
+  type: 'test'
+  ...
+# Subtest: actual mobile menu close feedback always cleans up while opening remains blocked by the current NPC host
+ok 25 - actual mobile menu close feedback always cleans up while opening remains blocked by the current NPC host
+  ---
+  duration_ms: 3.63
+  type: 'test'
+  ...
+# Subtest: actual Shell refused current Up sends one exact cancel and the next manual Down is admitted
+ok 26 - actual Shell refused current Up sends one exact cancel and the next manual Down is admitted
+  ---
+  duration_ms: 25.5292
+  type: 'test'
+  ...
+# Subtest: actual Shell failed old terminal cannot cancel a synchronous new Down quarantine or new scene state
+ok 27 - actual Shell failed old terminal cannot cancel a synchronous new Down quarantine or new scene state
+  ---
+  duration_ms: 51.8259
+  type: 'test'
+  ...
+# Subtest: actual compatibility Buy final Core callback refuses synchronous shared arming or changed closed socket before entry
+not ok 28 - actual compatibility Buy final Core callback refuses synchronous shared arming or changed closed socket before entry
+  ---
+  duration_ms: 251.8288
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs:633:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    Object.sendRaw (eval at actualFunctions (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-npc-shop-surface-integration.mjs:23:10), <anonymous>:361:39)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-npc-shop-surface-integration.mjs:639:24)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page retires inventory availability before log-only gain, merge and extended item patch handlers
+ok 29 - actual Page retires inventory availability before log-only gain, merge and extended item patch handlers
+  ---
+  duration_ms: 2295.1333
+  type: 'test'
+  ...
+# Subtest: actual Page restores only a successful full current-owner snapshot and refuses reentrant invalidation
+ok 30 - actual Page restores only a successful full current-owner snapshot and refuses reentrant invalidation
+  ---
+  duration_ms: 1540.4037
+  type: 'test'
+  ...
+# Subtest: actual Page full snapshot and every Native inventory invalidator revoke Web availability at ingress
+ok 31 - actual Page full snapshot and every Native inventory invalidator revoke Web availability at ingress
+  ---
+  duration_ms: 268.1646
+  type: 'test'
+  ...
+# Subtest: NPC-only bag projection accepts attested cross-grid aliases and validates listed identity without weakening ordinary Bag
+ok 32 - NPC-only bag projection accepts attested cross-grid aliases and validates listed identity without weakening ordinary Bag
+  ---
+  duration_ms: 0.8306
+  type: 'test'
+  ...
+# Subtest: a successful nested full snapshot cannot authorize an older outer inventory during synchronous publication
+ok 33 - a successful nested full snapshot cannot authorize an older outer inventory during synchronous publication
+  ---
+  duration_ms: 252.0003
+  type: 'test'
+  ...
+# Subtest: actual Page collected mail barrier needs same physical receiver and a strictly later valid full snapshot
+ok 34 - actual Page collected mail barrier needs same physical receiver and a strictly later valid full snapshot
+  ---
+  duration_ms: 253.5129
+  type: 'test'
+  ...
+# Subtest: actual ordinary unqualified snapshot delegates readiness while stale physical owners stay blocked
+ok 35 - actual ordinary unqualified snapshot delegates readiness while stale physical owners stay blocked
+  ---
+  duration_ms: 1019.7046
+  type: 'test'
+  ...
+# Subtest: ordinary compatibility click diagnostic distinguishes existing local refusal from Page callback
+ok 36 - ordinary compatibility click diagnostic distinguishes existing local refusal from Page callback
+  ---
+  duration_ms: 60.8191
+  type: 'test'
+  ...
+# Subtest: main exposes retained action state independently of preview with no raw source fields
+ok 37 - main exposes retained action state independently of preview with no raw source fields
+  ---
+  duration_ms: 18.3108
+  type: 'test'
+  ...
+1..37
+# tests 37
+# suites 0
+# pass 33
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 14504.7205

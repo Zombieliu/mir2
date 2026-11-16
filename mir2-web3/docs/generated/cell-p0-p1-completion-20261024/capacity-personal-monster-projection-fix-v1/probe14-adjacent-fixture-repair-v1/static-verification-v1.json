@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "checks": [
+    {
+      "path": "apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "rawInversePassed": true,
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\live_aoi_order_tests.rs",
+        "bytes": 27740,
+        "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af"
+      }
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "rawInversePassed": true,
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\pending_zone_aoi_tests.rs",
+        "bytes": 13491,
+        "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+      }
+    }
+  ],
+  "gitDiffCheck": {
+    "command": "git diff --check -- apps/gateway/src/routing/tests/live_aoi_order_tests.rs apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+    "exitCode": 0
+  },
+  "cargoExecuted": false,
+  "rustfmtExecuted": false,
+  "testsRunByThisWorker": false,
+  "sourceWriteWindowReleased": true,
+  "scope": "Fixture maintenance plus one explicitly authorized FIFO expectation update. Parent owns actual focused/adjacent verification and final format."
+}

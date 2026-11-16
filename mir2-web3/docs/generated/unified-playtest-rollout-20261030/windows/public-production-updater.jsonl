@@ -1,0 +1,14 @@
+{"detail":{"cacheHits":0,"completed":255069,"copyFlushMs":0,"elapsedMs":90508,"outcome":"complete","payloadResolveMs":0,"phase":"checking-installed","total":255069,"writtenBytes":0},"event":"local-phase-end","time":1793303362}
+{"detail":{"cacheHits":0,"completed":0,"copyFlushMs":0,"elapsedMs":0,"outcome":"complete","payloadResolveMs":0,"phase":"staging","total":0,"writtenBytes":0},"event":"local-phase-end","time":1793303362}
+{"detail":{"completed":7,"elapsedMs":281,"outcome":"complete","phase":"preparing","total":7},"event":"local-phase-end","time":1793303364}
+{"detail":{"completed":7,"elapsedMs":105,"outcome":"complete","phase":"installing","total":7},"event":"local-phase-end","time":1793303364}
+{"detail":{"activated":true,"candidate":"WN-CANDIDATE-20261029-wallet-28","changedGameFiles":0,"delivery":{"bundles":0,"fallbacks":0,"patches":0},"downloadedBytes":2184192,"downloadedFiles":1,"sequence":32,"wireBytes":2188999},"event":"update","time":1793303365}
+{"detail":{"code":0},"event":"game-exit","time":1793303422}
+{"detail":{"globalFloor":32,"responseBodyBytes":2772,"sequence":32},"event":"engine-maintenance-stale","time":1793303442}
+{"detail":{"elapsedMs":2162,"outcome":"complete","phase":"discovery-and-metadata","responseBodyBytes":10614},"event":"packed-phase-end","time":1793303444}
+{"detail":{"elapsedMs":7928,"outcome":"complete","phase":"control-objects","responseBodyBytes":202510261},"event":"packed-phase-end","time":1793303452}
+{"detail":{"elapsedMs":12701,"outcome":"complete","phase":"pack-download-and-hash","responseBodyBytes":1069032581},"event":"packed-phase-end","time":1793303464}
+{"detail":{"elapsedMs":3916,"outcome":"complete","phase":"catalog-and-pack-validation","responseBodyBytes":0},"event":"packed-phase-end","time":1793303468}
+{"detail":{"elapsedMs":1018,"outcome":"complete","phase":"atomic-selector","responseBodyBytes":0},"event":"packed-phase-end","time":1793303469}
+{"detail":{"activated":true,"downloadedPacks":33,"elapsedMs":27745,"manifestSha256":"9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186","sequence":2026102912,"wireBytes":1271553456},"event":"packed-update","time":1793303469}
+{"detail":{"code":0,"generation":"9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186"},"event":"game-exit","time":1793303564}

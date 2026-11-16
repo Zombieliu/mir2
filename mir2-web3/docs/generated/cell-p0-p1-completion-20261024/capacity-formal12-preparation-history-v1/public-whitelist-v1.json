@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual Formal12 preparation history only; six completed public review/log originals omitted from the frozen108 collector closure. No active run/raw/report/monitor/private values read.",
+  "base": "C:\\mir2-build\\p01-completion-20261024",
+  "destination": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal12-preparation-history-v1",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-runtime-independent-review-v1\\prepared-review-v4.json",
+      "bytes": 3798,
+      "sha256": "1471510fc4e777ac832bc81d31e35078ce748df31f6253ba0e3d762084b8c591",
+      "target": "review/prepared-review-v4.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-runtime-independent-review-v1\\preseal-independent-review-v2.json",
+      "bytes": 6368,
+      "sha256": "67706397d6287bda86f099b2561f790f187edfc5ca4198548822f66b68767b9a",
+      "target": "review/preseal-independent-review-v2.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-seal-actual-v1.log",
+      "bytes": 346,
+      "sha256": "d1973a1d5938dbf78fd4d2d7083349ebf0f92f9a13fe0f11eabef7e5616c02c1",
+      "target": "execution/formal12-root-seal-actual-v1.log"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-source-guard-actual-v1.log",
+      "bytes": 412,
+      "sha256": "423a89ae6e1ddafd35ef70e13cd7e9fa826b330098e03253359729191f54507b",
+      "target": "execution/formal12-root-source-guard-actual-v1.log"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-prepare-actual-v1.log",
+      "bytes": 566,
+      "sha256": "519ca40147737d5e0152bda442f52faaa743b2041efb60136530332e13203b90",
+      "target": "execution/formal12-root-prepare-actual-v1.log"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-actual-preparation-independent-review-v1.json",
+      "bytes": 2768,
+      "sha256": "32e35b54d487aa8ac6f9a55238ecf933e6d2e705f2f93254fbb795c87ef849ba",
+      "target": "review/formal12-actual-preparation-independent-review-v1.json"
+    }
+  ],
+  "sourceCount": 6,
+  "totalBytes": 14258,
+  "collectorCoverage": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\collect-public.mjs",
+      "bytes": 43338,
+      "sha256": "0b42ec9ac66116cab7e2c32ed8e9f3ddf7dede63c1708de5036f14e0dafd1115"
+    },
+    "sourceSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\launcher-source-frozen-v1.json",
+      "bytes": 43855,
+      "sha256": "5e7aff7fe51751094bcd6c699c32ec8986bd80b8212561e0edb5811e5060face"
+    },
+    "sealedInputCount": 108,
+    "alreadyCoveredNotRecopied": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-inputs-finalized-v1.json",
+        "bytes": 27669,
+        "sha256": "60fcc220a8c208b2ebf44d1e6928862cead6709939d3f7895f2d7eba536c3912"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-inputs-finalized-v2.json",
+        "bytes": 29812,
+        "sha256": "0d30a6b4437336890f0af1eb64a8f314f0728527ec50c0c984100c29e8b1c455"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-state-correction-proof-v2.json",
+        "bytes": 2042,
+        "sha256": "385c5e565bda53c8649acdd4eabdca2002029d66c9dfb6da6f97318591089f79"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\actual-bind-v2-prewrite-rejection-v1.json",
+        "bytes": 740,
+        "sha256": "121407d8e3472524d123d1f000d124a7f1bff29fcbec31817f8418450220007a"
+      }
+    ],
+    "futureChild": "capacity-formal-native-v2-attack-deadline-ladder-12",
+    "futureResultLinkDeferred": true
+  },
+  "missingHistoricalOriginal": {
+    "file": "preseal-independent-review-v1.json",
+    "persisted": false,
+    "source": "Root and reviewer explicitly confirmed B1 was communicated only; no independent original v1 QA JSON exists.",
+    "newHistoricalReceiptFabricated": false
+  },
+  "formalResultKnown": false,
+  "formalPassed": null,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

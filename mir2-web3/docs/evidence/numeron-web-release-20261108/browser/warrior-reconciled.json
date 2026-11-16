@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "passed": true,
+  "originalOverallFalsePreserved": true,
+  "ordinal": 1,
+  "normalLogoutAck": true,
+  "returnedScreen": "select",
+  "ordinarySelectExitReturnedToLogin": true,
+  "realMovementSteps": 2,
+  "evidence": "ui-proof.json and after-logout-inspection.json",
+  "sourceCorrection": "Post-LogOutSuccess returns select, not login."
+}

@@ -1,0 +1,218 @@
+{
+  "privateRoot": "C:/r16-world-snapshot-gzip-20261114",
+  "rawInputs": [
+    {
+      "label": "browser-r4-receipt",
+      "bytes": 829671,
+      "sha256": "57eafb6cd629f2498f9e2cf66302b084daaf4c7cc79a94e6a2b908c66a00cbb5"
+    },
+    {
+      "label": "browser-r4-log",
+      "bytes": 3022,
+      "sha256": "c09a91019e3694c4aa20cd7f285991d7a3a1b6c3d6f6c36a6866e18e200c785b"
+    },
+    {
+      "label": "browser-r4-invocation",
+      "bytes": 632,
+      "sha256": "bd570472c9d9c10543ecb4fea9cbb1b53990b64ee3e9c7aab30fa902bc6a4dbf"
+    },
+    {
+      "label": "browser-r5-receipt",
+      "bytes": 842675,
+      "sha256": "6ceaef1b731002104368ee1291ab6f8f9308379a79c2de4cad9fa77c89cbb7de"
+    },
+    {
+      "label": "browser-r5-log",
+      "bytes": 3022,
+      "sha256": "a24fb9b4be619454eed8bb6c24f4b4fd56f8ba4e22d516a41768acabd725d330"
+    },
+    {
+      "label": "browser-r5-invocation",
+      "bytes": 627,
+      "sha256": "78e50ccc3cea8a0aab3840e7c4c7c78253557588a46e0e7b1cacb113697b7404"
+    },
+    {
+      "label": "paired-browser-build-receipt",
+      "bytes": 8301,
+      "sha256": "d26fb828d2b82fe5355cbd5a8f52ddb2ab9955141d9530db9d6c0cd3b0c38703"
+    },
+    {
+      "label": "paired-browser-build-log",
+      "bytes": 2474,
+      "sha256": "bf245b3094e727c0f5a8ecf407c96758b1875f77b7a71126156c85937ccab1ac"
+    },
+    {
+      "label": "browser-fixed-generated-inputs",
+      "bytes": 9967,
+      "sha256": "2bcd05ac1a0057fe3e1f9771d407c903433624296709580b8beee142a4d3b2bc"
+    },
+    {
+      "label": "fixture-initial-inputs",
+      "bytes": 4301,
+      "sha256": "fff40c2f575554555e2c5b7dfa24584d78a61124f270e53504a9f2b039cf6d36"
+    },
+    {
+      "label": "probe-adjustment",
+      "bytes": 597,
+      "sha256": "9172b3f7d67b4f383b5b153eba28a0c42eb5df479734e09b8bf4d50dfee07be7"
+    },
+    {
+      "label": "probe-retention",
+      "bytes": 600,
+      "sha256": "9cb0e342c114b4e995afa40cb272adb8cab50faeac62217c9ebda090232a26bb"
+    },
+    {
+      "label": "final-fixture-delayed-route-game.mjs",
+      "bytes": 6236,
+      "sha256": "759c627fd315c90dee01093ea2833470cb85907c52596f90f53184fdbd9d8f9e"
+    },
+    {
+      "label": "final-fixture-entry-player-probe.mjs",
+      "bytes": 6728,
+      "sha256": "6b83c0c355eb98fb36a99c634d1cd299f17d8da07b65b63dc35fab8bdaa1d4e5"
+    },
+    {
+      "label": "final-fixture-hunt-navigation-game.mjs",
+      "bytes": 8889,
+      "sha256": "c74db3f7558315b2389d8b75436cc6e40c548af4ab971b2caa45a49783ac428f"
+    },
+    {
+      "label": "final-fixture-npc-name-game.mjs",
+      "bytes": 7748,
+      "sha256": "74c1c73fd775949223804f0b915179ac9e667e7dd7345af5513be938868546ad"
+    },
+    {
+      "label": "final-fixture-observe-runtime-schedule.mjs",
+      "bytes": 1115,
+      "sha256": "790e0fe87d434726c256b194d5f2770249d630e95ee18990c4fdfcf9ecfba25f"
+    },
+    {
+      "label": "final-fixture-prepare-hunt-fixture.mjs",
+      "bytes": 5228,
+      "sha256": "262e92ba10ac355a84034b0c98c7f3cd34c5db2cb8ff692b0678a9e76f8ac14d"
+    },
+    {
+      "label": "final-fixture-profile.mjs",
+      "bytes": 2432,
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+    },
+    {
+      "label": "final-fixture-quest-navigation-game.mjs",
+      "bytes": 8906,
+      "sha256": "0123db0f17f4bd9a905ec5e0a72f511b865d00458832272341c645deceff4e31"
+    },
+    {
+      "label": "final-fixture-right-button-game.mjs",
+      "bytes": 7268,
+      "sha256": "874335b48b745e4907307288459f599384b32129bbf083f1868c1bd7b2b05584"
+    },
+    {
+      "label": "final-fixture-run.mjs",
+      "bytes": 93361,
+      "sha256": "3bdd6b06bace5cfaf231a9c8cf6a6fb19b20dba1961de177f422f33515de7b18"
+    },
+    {
+      "label": "final-fixture-standing-faces.mjs",
+      "bytes": 5719,
+      "sha256": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044"
+    },
+    {
+      "label": "final-fixture-target-switch-game.mjs",
+      "bytes": 6005,
+      "sha256": "65ead5533629748a43c137a89795be2ddc3fe6c7b05115ed18d82422a8705fcd"
+    },
+    {
+      "label": "final-fixture-ui-asset-fault.mjs",
+      "bytes": 5877,
+      "sha256": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51"
+    },
+    {
+      "label": "final-fixture-verify-prewarm-session.mjs",
+      "bytes": 3895,
+      "sha256": "1996e21c83b8559662b444d7ddd09f163a9c7c28698f52f4c82e4300d0f99415"
+    },
+    {
+      "label": "final-fixture-verify-public-quest.mjs",
+      "bytes": 4548,
+      "sha256": "775598cb6871214d554791386db6fe0a4f8a33678aff3fe298f1c46986df690f"
+    },
+    {
+      "label": "final-fixture-verify-scene-state-body.mjs",
+      "bytes": 13005,
+      "sha256": "0d2fccce9d7d4b22266db4fe0aba0ccbc1781ee883671c2d528037f52e830df3"
+    },
+    {
+      "label": "retained-failed-browser-r1",
+      "bytes": 314534,
+      "sha256": "503807a5fb138d0b90c73ee10ac7f5a6a836086914853c8c1ba845f37ba3488a"
+    },
+    {
+      "label": "retained-failed-browser-log-r1",
+      "bytes": 2056,
+      "sha256": "02470d2d81ab9bb7db86295f76445fc186098ea0d3523f196aa123edb5e074f8"
+    },
+    {
+      "label": "retained-failed-browser-r2",
+      "bytes": 567957,
+      "sha256": "653283952e24f1829459716821cc542f0f04b75e27463613356ced4cbe3635a0"
+    },
+    {
+      "label": "retained-failed-browser-log-r2",
+      "bytes": 2707,
+      "sha256": "e3c3517b23a2dc90494eaf96225ce9f2a1d002ba4b0513506d2a3ce87de525fb"
+    },
+    {
+      "label": "retained-failed-browser-r3",
+      "bytes": 512399,
+      "sha256": "154949f1c871303c3da24fb931a7152c739945e4689c0727b70ab19e21e553d0"
+    },
+    {
+      "label": "retained-failed-browser-log-r3",
+      "bytes": 1690,
+      "sha256": "9a0a22db2544ac795c53adf4a8d0f48327915d8fc37277964d4257ce9c4b5de1"
+    }
+  ],
+  "rawIdentitiesOrSnapshotsExported": false,
+  "failedRunsNeverReclassifiedAsPassed": true,
+  "failures": [
+    {
+      "runOrdinal": 1,
+      "passed": false,
+      "phase": "continuous-walk-with-every-PNG-over-one-second",
+      "message": "ENOENT: no such file or directory, open 'C:\\r16-world-snapshot-gzip-20261114\\fixture-browser-r1\\build-receipt.json'",
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "runOrdinal": 2,
+      "passed": false,
+      "phase": "stop-owned-asset-worker-with-game-running",
+      "message": "actual Page worldSnapshot consumer matches a compressed frame",
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "runOrdinal": 3,
+      "passed": false,
+      "phase": "stop-owned-asset-worker-with-game-running",
+      "message": "Observer newest-50 ring no longer contained earlier matched snapshots; added catch diagnostics also had a block-scope ReferenceError.",
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ]
+}

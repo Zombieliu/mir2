@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T23:35:51.044605+00:00",
+  "scope": "Independent read-only cross-check of actual new full16 small terminal/source/cleanup artifacts and Root command outputs; no trace replay or program rerun.",
+  "runId": "1792971074413-d1b0416a",
+  "realmStamp": "1792971063764-c4c81284",
+  "verdict": {
+    "actualFull16EvidenceConsistent": true,
+    "eligibleAsFreshFull16Prerequisite": true,
+    "blockingFindingIds": []
+  },
+  "facts": {
+    "fullLifecyclePassed": true,
+    "requiredChecks": 16,
+    "allRequiredChecksPassed": true,
+    "ordinarySentCommands": 349,
+    "ordinaryRegistrations": 2,
+    "ordinaryDriverSourcePins": 6,
+    "firstNoLootAttemptPreserved": true,
+    "boundedSecondDropAttemptPassed": true,
+    "gatewayPid": 57640,
+    "normalExitCode": 0,
+    "sixCountersZeroBeforeAndAfter": true,
+    "rootFreshOsGatewayAbsent": true,
+    "rootFreshOsRemainingListenerRows": 0
+  },
+  "identity": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendInputCount": 50,
+    "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "capacityDriverNodeTests": 226,
+    "capacityDriverSources": 9,
+    "ordinaryLifecycleDrivers": 6
+  },
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a.report.json",
+      "bytes": 109554,
+      "sha256": "8dad894a5dc664c2bea2167b0c7567e0653ac7f2acbe87e71196c64864ab30a6"
+    },
+    "realm": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.realm-evidence.json",
+      "bytes": 35104,
+      "sha256": "19b458eb00cf407fbc4ed66c10d88e05f4a38bf1fa0def5d3952ce6be97f5106"
+    },
+    "audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.independent-audit.json",
+      "bytes": 1904,
+      "sha256": "7ec58c2c91858dc9136018857cab96e6c024c00ea5341f45e0ed4bd52499c496"
+    },
+    "sourceVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.source-manifest-verification.json",
+      "bytes": 725,
+      "sha256": "cc1f71934903c55c0e0fbb1d56e8e8c1126c9bbd190a94c65889e18847be9407"
+    },
+    "rootCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-independent-cleanup-v1.json",
+      "bytes": 320,
+      "sha256": "be3b4ffa1bbef1e49a945829c6589e6668884458fddad340b9fe55b5461d9e71"
+    },
+    "finalBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\launcher-final-binding-v1.json",
+      "bytes": 2388,
+      "sha256": "8d84e6c31d5387199677a67fdd3907395a6c117c13647866553aa96ebe1f2c34"
+    },
+    "priorSourceReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-independent-review-v1.json",
+      "bytes": 4034,
+      "sha256": "531abf09346021153c35fafed3783a9c116160a3ae9e010f90b09173798287d3"
+    }
+  },
+  "rootCommandOutputs": {
+    "finalize_stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-finalize-stdout-v1.log",
+      "bytes": 328,
+      "sha256": "55289f22f28e069cfe1ba316d176390c780f8dc517ad78d0556c37dd46699d9b"
+    },
+    "finalize_stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-finalize-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run_stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-run-stdout-v1.log",
+      "bytes": 1823,
+      "sha256": "8ae8b0b8dd2f00ce811930b72f9ea770ae9c4a620e17d7e9186dce6f8d18eafd"
+    },
+    "run_stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-run-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "audit_stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-audit-stdout-v1.log",
+      "bytes": 1643,
+      "sha256": "c808f8b39df8512d6e48bb999212f88f007195b799a18e1c5211e179f64dc17c"
+    },
+    "audit_stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-audit-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "rootReportedActualExecution": {
+    "finalizerExitCode": 0,
+    "runSession": 77661,
+    "runSessionClosed": true,
+    "runExitCode": 0,
+    "auditExitCode": 0,
+    "exitCodeAuthority": "Root actual tool terminal results in this task; six raw stdout/stderr logs are pinned, no additional per-command execution wrapper receipt is fabricated."
+  },
+  "checks": {
+    "reportRealmAuditRunIdsAndOriginal16Agree": true,
+    "sourceProofCJJAndImmutable50Agree": true,
+    "rootFinalizerOutputMatchesFinalBinding": true,
+    "rootRunFinishedOutputMatchesRealmAndReport": true,
+    "rootAuditStdoutObjectEqualsActualAuditJson": true,
+    "rootCleanupNamesSameOwnedPidAndPostdatesFinishedRealm": true,
+    "ordinarySixSourcePinMapMatchesReviewedProfile": true,
+    "firstFailedDropAttemptNotErased": true
+  },
+  "limitations": [
+    "Root audit reports its paired raw receipt checks; this reviewer did not reread the six traces or execute the audit.",
+    "No binary hash, OS process query, test, runtime guard, service or gameplay was performed by this reviewer.",
+    "This is ordinary full16 proof, not playable capacity, GUI/frontend, two-computer or independent per-request900ms dual-packet replay acceptance.",
+    "Original backend C743 Release historical d240/210 build basis is retained separately from current J/226 capacity-driver source proof."
+  ],
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false
+}

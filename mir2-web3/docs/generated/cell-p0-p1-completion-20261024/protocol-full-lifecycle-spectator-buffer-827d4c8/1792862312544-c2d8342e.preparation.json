@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T17:10:32.617Z",
+  "preparedOnly": true,
+  "noServiceOrLoginStarted": true,
+  "noBinaryCopied": true,
+  "noPrivateDirectoryCreated": true,
+  "noConfiguredSecretOrAccountCreated": true,
+  "taskRoot": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-spectator-buffer-827d",
+  "plannedPublicOutput": "docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-spectator-buffer-827d4c8",
+  "releaseSha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "backendInputCount": 33,
+  "backendSourceAggregate": "d8936d2f2b77bfcf2f9b84c8ecc1d5c3ad37f095abe73836ed785ad852dcd5ea",
+  "driverPinsUnchangedCount": 6,
+  "expectedPorts": [
+    17600,
+    17610
+  ],
+  "executeOnlyAfterCoordinatorCpuWindowRelease": true,
+  "files": [
+    {
+      "file": "backend-source-frozen-33.json",
+      "bytes": 10050,
+      "sha256": "c6cd3a1cfa0a02bb1a709d937b85457be72def4a61c5fa50a3a7768a2b2ebc1f"
+    },
+    {
+      "file": "release-frozen-187775.json",
+      "bytes": 962,
+      "sha256": "1e4f76b7282885defa6ee1ba7c66b867a27561174281f3a64140150efa08b502"
+    },
+    {
+      "file": "full-lifecycle-profile.json",
+      "bytes": 2370,
+      "sha256": "84c0b58f6ab5a7a3db24e0f5aa46054c99d1b8f40adb8e6487c6748a6216152c"
+    },
+    {
+      "file": "release-input.json",
+      "bytes": 721,
+      "sha256": "a4ca806ea221f079e193cd15d01a9d276c0e804a24c247bc91e508c6e6b4b242"
+    },
+    {
+      "file": "initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "run-owned-full.mjs",
+      "bytes": 15052,
+      "sha256": "1e11eb3e28fb0fe548b02a868ef227ad45510032a6772955d5398a1765e8d254"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "bytes": 9083,
+      "sha256": "5b850e360dad1ce81aa3cc50b97e4b148c2f60d95dc3da651bdc14a4a2b999e3"
+    }
+  ],
+  "auditScope": "Pinned neutral full-lifecycle/ordinary-trace receipt checks plus independent33 backend/6driver raw pins; no old32 freeze claim."
+}

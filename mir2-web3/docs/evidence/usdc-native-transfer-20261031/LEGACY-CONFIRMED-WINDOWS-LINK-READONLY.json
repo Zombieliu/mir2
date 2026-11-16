@@ -1,0 +1,55 @@
+{
+  "schema": "mir2.legacy-confirmed-windows-invite.readonly.v1",
+  "observedAtUtc": "2026-10-30T19:33:28.611138+00:00",
+  "payerWalletMasked": "0xb99297\u20266cd282",
+  "currentWindowsAccountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+  "currentC7feOrderState": "applied",
+  "currentC7feAppliedCredits": 100,
+  "currentC7fePaidAtMs": 1793384620286,
+  "legacyCampaignId": "numeron-playtest-20261029",
+  "legacySuppliedLeader": {
+    "accountSha256": "db251364aa5524489da3ad7b6f3782423e348aafe620e8b91cd827de6f24e0cd",
+    "walletMasked": "0x8ced5e\u2026ef2f02",
+    "status": "approved",
+    "campaignTermsVersion": "numeron-playtest-20261029-v1"
+  },
+  "legacyPayerWalletAccountMatches": [
+    {
+      "accountSha256": "f82b2bb71d65c91f217ecece80e421e7af887b23a8c76f42a4bb777cc4a8e871",
+      "finalAttributions": [
+        {
+          "source": "invite_link",
+          "status": "bound",
+          "campaign_id": "numeron-playtest-20261029",
+          "reason_code": "authoritative_sources_pending",
+          "terms_version": "numeron-playtest-20261029-v1",
+          "confirmed_at_ms": 1793351088394,
+          "qualified_at_ms": null,
+          "registered_at_ms": 1793351062485,
+          "first_clicked_at_ms": 1793350421927,
+          "boundToSuppliedOldLeader": true,
+          "confirmedBeforeCurrentC7fePayment": true,
+          "isFinalConfirmedAttributionNotCandidate": true
+        }
+      ],
+      "candidateCountNotProofOfFinalBinding": 1
+    }
+  ],
+  "windowsCampaignId": "numeron-windows-playtest-20261030",
+  "oldLeaderWalletWindowsAccountMatchCount": 1,
+  "oldLeaderWalletWindowsLeaderRecords": [],
+  "windowsMemberAttributions": [],
+  "windowsMemberCandidateCount": 0,
+  "latestWindowsCharacterSave": {
+    "characterIndex": 36,
+    "saveVersion": 43,
+    "level": 3,
+    "updatedAt": "2026-10-30T19:23:14.992963+00:00"
+  },
+  "activeUtcDaysInWindowsCampaign": 1,
+  "canMigrateOrRetroactivelyRecognizeInferred": false,
+  "invitationOrAttributionCreated": false,
+  "financialOrFactOrCharacterOrConfigurationMutation": false,
+  "servicesStopped": false,
+  "dockerStarted": false
+}

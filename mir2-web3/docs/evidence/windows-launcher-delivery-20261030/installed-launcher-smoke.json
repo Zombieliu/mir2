@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.windows.installed-launcher-smoke.v1",
+  "passed": true,
+  "recordedAtUtc": "2026-10-30T11:01:18.149313+00:00",
+  "installerVersion": "2026.10.30.12",
+  "sourceRevision": "677e2ab56704660c4e93c14a1d29945f82b55f3e",
+  "launcher": {
+    "bootstrap": "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\Mir2Launcher.exe",
+    "engineSha256": "604B046F90E6BCEA2EF2576A7BFA8BCECE57F0E383A2BC415EDC3A088A477CDE",
+    "engineProcessId": 67124
+  },
+  "game": {
+    "path": "E:\\mir2-release\\windows-launcher-20261030\\qa-install\\game\\mir2-platform-windows.exe",
+    "processId": 55144,
+    "parentProcessId": 67124,
+    "sha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+    "loginScreenObserved": true,
+    "languageObserved": "zh-CN"
+  },
+  "startGameButtonClickedViaNativeAccessibility": true,
+  "optionalUpdateCheckUnavailableDidNotBlockStart": true,
+  "userConfirmedLoginScreen": true,
+  "authenticationAutomated": false,
+  "onlineGameplayAccepted": false,
+  "humanFrontendAccepted": false,
+  "protectedState": {
+    "filesAndPreferencesChecked": 20,
+    "ordinaryAndExistingValidationRegistrationUnchanged": true
+  },
+  "originalPlayerGameProcessPreserved": 90684,
+  "screenshot": "installed-game-login.png",
+  "earlierAutomationRecovery": "A minimized window rejected input; reopening exposed a fresh native window and the real Start game click succeeded."
+}

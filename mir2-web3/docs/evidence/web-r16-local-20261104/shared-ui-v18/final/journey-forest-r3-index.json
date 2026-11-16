@@ -1,0 +1,36 @@
+{
+  "phase": "journey-forest-r3",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 4,
+  "bytes": 3683001,
+  "entries": [
+    {
+      "path": "journey-forest-r3/forest-forest-v18-r3/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r3/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 1078520,
+      "sha256": "1f5383abb990d61cd7757b6191786bf1f82b6cc9bca42b23bd17615403ef48c0"
+    },
+    {
+      "path": "journey-forest-r3/forest-forest-v18-r3/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r3/02-fresh-v2-native-task-card.png",
+      "bytes": 1080581,
+      "sha256": "8cbdb411bc04ced7af77b752b985be3c6fe4b6e084238897fb1dc683630f27cd"
+    },
+    {
+      "path": "journey-forest-r3/forest-forest-v18-r3/03-failure-safe-masked.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r3/03-failure-safe-masked.png",
+      "bytes": 1193285,
+      "sha256": "a6a94908f64b920d258a10a1701a9ecb85570d4027f449cf1d72dc578a8051bf"
+    },
+    {
+      "path": "journey-forest-r3/forest-forest-v18-r3/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r3/onboarding-forest-browser-proof.json",
+      "bytes": 330615,
+      "sha256": "07f5fa6c63be6e8d76960fd1752a943d900de002d2f57cc3af4aa5eaedd5930a"
+    }
+  ]
+}

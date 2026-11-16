@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.r19.installer-recipe-source-lock.v1",
+  "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "installerSourceRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+  "installerSourceTree": "04afdc468d10a31468bd717780c60442673db811",
+  "recipeSha256": "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967",
+  "builderSha256": "92e668ec36b0789a13cb3ff65b8bf4507edb64d066c30e317638371c2c977093",
+  "changedPaths": [
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/README.md",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/build-packed-installer.ps1"
+  ],
+  "runtimeIsAncestor": true,
+  "recipeSourceRoot": "C:\\m2i19",
+  "physicalFileSha256": {
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss": "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/README.md": "a5cd61cca64dc53eae903487d724045301e7029346648e063964b43cb7adb0e8",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/build-packed-installer.ps1": "92e668ec36b0789a13cb3ff65b8bf4507edb64d066c30e317638371c2c977093"
+  },
+  "canonicalPhysicalFileSha256": {
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss": "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/README.md": "a5cd61cca64dc53eae903487d724045301e7029346648e063964b43cb7adb0e8",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/build-packed-installer.ps1": "a552e347ea3236cfc5fd7dbfcec244a161f3aaa06acabab8f58eca335e40e10d"
+  },
+  "frozenAtUtc": "2026-11-01T12:19:29.818456+00:00",
+  "canonicalRefMoved": false,
+  "runtimeArtifactsRebuiltForRecipe": false
+}

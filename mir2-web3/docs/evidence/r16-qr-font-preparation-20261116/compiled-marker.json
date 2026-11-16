@@ -1,0 +1,20 @@
+{
+  "candidate": "r16-qr-font-8515912b",
+  "buildId": "lj7I4rCtgpbaostdWbw5n",
+  "rows": [
+    {
+      "path": "static/chunks/2007-62bce6540bbf7140.js",
+      "bytes": 3007612,
+      "sha256": "a23b23988576baf2d0ab76949f0b17545e17a22730a583d65120c5c88a97f22c",
+      "hasPageMilestone": true,
+      "hasImageLifecycle": false
+    },
+    {
+      "path": "static/chunks/2506-d37610b802832424.js",
+      "bytes": 2830987,
+      "sha256": "1b16cd57b2583eb1ca11492f5f7c36998d774ce4f1cd5170c1b3c82f4ca8890a",
+      "hasPageMilestone": false,
+      "hasImageLifecycle": true
+    }
+  ]
+}

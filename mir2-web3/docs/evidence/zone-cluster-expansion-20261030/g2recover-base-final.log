@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 2 tests
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::character_handoff_rpc_tests::handoff_password_account_base_snapshot_restore_does_not_convert_credentials ... ok
+test zone_rpc::exact_ground_drop_snapshot_tests::zone_base_snapshot_roundtrip_retains_exact_identity_and_digest_covers_metadata ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1529 filtered out; finished in 1.31s

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ACTUAL_ENDED_IDENTITY_NOT_ELIGIBLE_FOR_SOURCE_SEAL",
+  "files": [
+    {
+      "path": "derivation-draft-v1.json",
+      "bytes": 24262,
+      "sha256": "7bf664866e8fb724b3c8c97a2dab15b1b15580a1e444c150491312a99e4519b9"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5860,
+      "sha256": "4248510a14558a606694faed7644485efb802cfc965e95ba545209893c8675cd"
+    },
+    {
+      "path": "run-ended-probe19-v1.mjs",
+      "bytes": 2257,
+      "sha256": "d9402bdd6e25accf2556f1a98291ded3564c5763bc34880e4e4f209762ef454f"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "verify-ended-probe19-draft-v1.mjs",
+      "bytes": 37467,
+      "sha256": "83f6d9d606645b6307ac88c0a092f4bd9114b13509785d2c37c6e3b15f923360"
+    }
+  ],
+  "sourceSha256": "6e823025169b6f75ac768862ff0fa6319d2e55df46ecd3fea53e84516e20db15",
+  "known": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverExecutionCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "driverNineSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+    "sourceConfig": "1225f83d8b2d5546c04dff9b152ba1c64acd71e35dffebb4b8642a5485d2d267",
+    "launcherFiles": 116
+  },
+  "unknown": {
+    "runId": null,
+    "ownedPids": null,
+    "rootCleanup": null,
+    "fourConsumerTerminalPins": null,
+    "actualProbeVerdict": null
+  },
+  "syntaxChecked": false,
+  "modulesImported": false,
+  "testsRun": false,
+  "replayRun": false,
+  "rootMustConfirmClosedCleanupAndConsumers": true,
+  "capacityAccepted": false
+}

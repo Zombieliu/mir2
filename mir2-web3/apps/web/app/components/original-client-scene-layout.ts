@@ -1,4 +1,5 @@
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { crystalObjectDepth } from "../../lib/crystal-world-depth";
 import type { DisplayEntity } from "./original-client-types";
 
 export const VIEWPORT_CELL_WIDTH = 48;
@@ -137,8 +138,6 @@ export const EMPTY_VIEWPORT_OFFSET: ViewportOffset = {
   y: 0,
 };
 
-const VIEWPORT_ROW_Z_STRIDE = 128;
-const VIEWPORT_BASE_Z = 4096;
 const VIEWPORT_FLOOR_LAYER_Z_STRIDE = 256;
 const VIEWPORT_FLOOR_ROW_Z_STRIDE = 4;
 
@@ -156,7 +155,7 @@ export function viewportDepthForCell(
   player: Pick<DisplayEntity, "x" | "y">,
   layerOffset = 0,
 ) {
-  return VIEWPORT_BASE_Z + (y - player.y) * VIEWPORT_ROW_Z_STRIDE + (x - player.x) * 2 + layerOffset;
+  return crystalObjectDepth(x, y, player) + layerOffset;
 }
 
 export function viewportFloorDepthForCell(

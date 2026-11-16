@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\episode-50\\reports\\1793024911630-059d730c.report.json",
+      "archived": "original-report.json",
+      "bytes": 50353,
+      "sha256": "184f2150d73520ddc9534ff094952f32fc7f0539057df1c219f0ef0f662bad48"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\episode-50\\episode-receipt.json",
+      "archived": "episode-receipt.json",
+      "bytes": 18762,
+      "sha256": "ad2e91ba15cc65c2869650e9e581240152b47c7c18465af879a68500f43e99c8"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9\\episode-50\\realm-cleanup.json",
+      "archived": "original-cleanup.json",
+      "bytes": 6529,
+      "sha256": "0e3e06debaa6552e8fc7a706f6a6329d7d2883eedd8fb931b02aa09ad2d5786d"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-stage50-root-independent-cleanup-v1.json",
+      "archived": "root-independent-cleanup.json",
+      "bytes": 7598,
+      "sha256": "f9d4cee33c9e90606ceb3b19cc223d85d0946cdb12275297cd50aaf132b6c6e0"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-delivery-trace-v9-analysis-v1\\findings-v1.json",
+      "archived": "initial-analyzer-findings.json",
+      "bytes": 55898,
+      "sha256": "d14dd35333c675732efe417041e8bc52d133fcee432dfe12ec883f944d153daf"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-delivery-trace-v9-analysis-v1\\selected-anonymous.jsonl",
+      "archived": "initial-analyzer-selected.jsonl",
+      "bytes": 72119,
+      "sha256": "5863740ce37d7480d993cf3c2cf24fa8f68232a53187d45806d4482103751744"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-delivery-trace-v9-recipient-followup-v1\\findings-v1.json",
+      "archived": "recipient-followup-findings.json",
+      "bytes": 90658,
+      "sha256": "1309f8d346e14b14cbf65350b1d2878009f4a53310fe4fb3dddc3394b5be9c2e"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-delivery-trace-v9-recipient-followup-v1\\selected-anonymous.jsonl",
+      "archived": "recipient-followup-selected.jsonl",
+      "bytes": 43265,
+      "sha256": "871eeb3d41a2b5e81b82b1866333312b1384fc2206b364d802e6a23f1233e326"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v1\\release-v1.json",
+      "archived": "release.json",
+      "bytes": 1664,
+      "sha256": "df46f4639fee873715700d9a32328fe3c8ad452d4874f919dfe1cee4cccec868"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v1\\backend-source-v1.json",
+      "archived": "backend-source.json",
+      "bytes": 48061,
+      "sha256": "ba082be9b981939e1cc64dd40d153b7d16e360611f695755700f9df6819eb04f"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-release-v1\\build-receipt-v1.json",
+      "archived": "build-receipt.json",
+      "bytes": 2253,
+      "sha256": "7c82a282c33ea62dd0d720540d454647c63c69f228ccac814c3ac3b9081badeb"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-root-guard-execution-v1.json",
+      "archived": "root-guard-execution.json",
+      "bytes": 866,
+      "sha256": "99a1a1e21b4e4838c5ea55a24ab4b52293c35f54cf730171a736a968d123614b"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-stage50-root-run-execution-v1.json",
+      "archived": "root-run-execution.json",
+      "bytes": 912,
+      "sha256": "cd8ec849ea2372a54d54cb87b9630ee96aab4407fb0cd4ab777e75c48536ff46"
+    }
+  ],
+  "privateStderrPublished": false,
+  "capacityAccepted": false
+}

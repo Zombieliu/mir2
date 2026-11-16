@@ -1,0 +1,587 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T04:48:58.390Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Independent explicit public allowlist for authentic non-accepting ordinary native span4-halo probe11. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.",
+  "files": [
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/gateway-build-pin.json",
+      "bytes": 1329,
+      "sha256": "039b0f6d60c2d80aa26fe461b6886d392df596ceb71f625f79987f04f3d78472",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/source-pins.json",
+      "bytes": 55433,
+      "sha256": "57a48e8807fb4fa7f8d76b048852d144ba3df6a65cdb36d783ae300327b05265",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/source-pins-admitted-v2.json",
+      "bytes": 55657,
+      "sha256": "1c17b169958ce32887c466aacfb1c6d5716160d38fbd6e46b7b8830b077a07b0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/realm-process.json",
+      "bytes": 1976,
+      "sha256": "14326f44d9cbcd202dd8b8ff87428c78b3dbce871df26ae7c37c5eb4c9ad8813",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/realm-cleanup.json",
+      "bytes": 3156,
+      "sha256": "23a52aa3296b36ad3c0eb996026f96dcfe5e4b3451ee8a23839239a7a061e680",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-public.jsonl",
+      "bytes": 10625,
+      "sha256": "98ed4e54ad54e6184b32b609e95cad29dc5badae734a59a95a04b15a1aa3b449",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-public-status.json",
+      "bytes": 1012,
+      "sha256": "a5927cd6c61131e704e414ef1f2e79465fad4da78d168ee6234d8a5d8871aa17",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/candidate-release-binding.json",
+      "bytes": 6272,
+      "sha256": "f7885180a04dfca1d44989e42c7948bba0de5757936610c860ea890e9c6ca737",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/full16-gate.json",
+      "bytes": 4772,
+      "sha256": "b3968f6e76216a278efa3401b8c233c41d13ed5fb1419ae65cdd2cfbe74cc623",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/scene-binding.json",
+      "bytes": 4346,
+      "sha256": "0b89bd5ec2b0438e562c1843c5ca28625b6530b9777064a2537d3a049d48a4eb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/scene-contract.mjs",
+      "bytes": 7883,
+      "sha256": "42842fca63f1e8cbe68f1f6c5a3bec069a8884d659383c128de68231b5559e12",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/run-options.json",
+      "bytes": 2933,
+      "sha256": "9e28884eb76f014bd64c2612f3e45e04f2058e059e4c1811520384c61d227180",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/run-options-admitted-v2.json",
+      "bytes": 3541,
+      "sha256": "c8bba280933ffc14f778526a93532b2c7b2d7cc11da94c0d92378d5f090a4627",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/scenario.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/scenario-prefix-readiness.json",
+      "bytes": 17974,
+      "sha256": "45e32703418639fd18d61c25a39ab3915a7de38a1458eb419169563b1cf049a8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/provisioning.json",
+      "bytes": 330,
+      "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/spectator-health-before.json",
+      "bytes": 655,
+      "sha256": "4a1aff47ae64f9be626f006f8784519982e5fefb36467871ce5b98ff54e22976",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/monitor-options.json",
+      "bytes": 700,
+      "sha256": "369149d30814eda7b7e3e07eeb677bba437f9fca17e074da5f5bed653eb973d4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/monitor-process.json",
+      "bytes": 223,
+      "sha256": "b404880f8eff76dde0d650e42bb0e004de13f18897c6837bc049eee081331524",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/launcher-source-frozen-v1.json",
+      "bytes": 13975,
+      "sha256": "9275ec784473fd3a542648c70ebcd595bf42fc854290711fe0ece31fd5161b55",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/launcher-source-prepared-v1.json",
+      "bytes": 833,
+      "sha256": "7ee2bb4c542da51e1297bfb1188cc59d390f5fe26bd5f423d3d0625280b7059c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/driver-report-contract.mjs",
+      "bytes": 9234,
+      "sha256": "a038e9c186893015ed386b4140cef3927a0ad8024d85e4f6ad01d2a798eba581",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/preparation-plan.json",
+      "bytes": 2275,
+      "sha256": "3a3d891baef232eb7da46c9a32b10b732262ebbce6b16dd8335934b7809b475d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/final-inputs-approved.json",
+      "bytes": 13023,
+      "sha256": "db2aaa2f350010f5cf77dbc8c0d4aed269ee971667201f3a9f12c98a896b0485",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/report-provenance.json",
+      "bytes": 4257,
+      "sha256": "39b7f48b923495b27eb593158319c8991213f0dab257aca2e11e586ebb41ea90",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/static-preparation-verification.json",
+      "bytes": 1156,
+      "sha256": "82d786549aed771050fceece5273ff171a9bd43b42a2c5a9f85dfa5841df76f7",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/source-guard-readonly-verification.json",
+      "bytes": 1505,
+      "sha256": "b3893b216c745d6642787074fc8001e38015e4ac3821b1d78a0970ae18a8e6ba",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/input-lib.mjs",
+      "bytes": 14677,
+      "sha256": "cc4ff27c65fa1b325ddc518b6229914faaadd8f4ef1092d1e0d11900df31228d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/prepare-inputs.mjs",
+      "bytes": 10669,
+      "sha256": "ab8fbb3d15dcd7e5d5fb6f03023020d915ad896fdd408701e7d64be9292201fe",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/run-owned.mjs",
+      "bytes": 17967,
+      "sha256": "76c7e4315db8d91a5ce4017a502d46bc5186fe834f1201a83680134db25d097c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.report.json",
+      "bytes": 190911,
+      "sha256": "b542764e07bf1b19aebb017443fd9b2a086b38fd3a64c19f82514ea0061ebac1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/launcher-syntax-check.log",
+      "bytes": 718,
+      "sha256": "82db52f9dc9cac77c19646b04d8c6b02a42971b91873579a0d3c095aa497ff64",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/spectator-health-after.json",
+      "bytes": 663,
+      "sha256": "d5380a43d30885234edc2d4b7672884bc34d827d12a181f0701a88fa50ad28a4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-socket-diagnostics-v1.json",
+      "bytes": 1920,
+      "sha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "backend-source-socket-diagnostics-v1.json",
+      "bytes": 14000,
+      "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "socket-diagnostics-v1-build-receipt.json",
+      "bytes": 2095,
+      "sha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-native-witness-approach-driver-frozen-v1.json",
+      "bytes": 41896,
+      "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-ordinary-two-name-span4-halo-10-v1.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-ordinary-two-name-span4-halo-100-v1.json",
+      "bytes": 5844,
+      "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span4-halo-static-validation-v4.json",
+      "bytes": 420078,
+      "sha256": "ea9fee31c5949ce78f76a87097d4c0af9c9520bdf22338a4def808b667878ed3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span4-halo-static-readiness-v4.json",
+      "bytes": 17974,
+      "sha256": "45e32703418639fd18d61c25a39ab3915a7de38a1458eb419169563b1cf049a8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-release-native-10-v2-halo-feasibility-11-recordings-metadata.json",
+      "bytes": 1230,
+      "sha256": "ee2da240ae64a1b87135dbc8c6bf120371238bd5a947fbc8f71608599b9bf5ba",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-release-native-10-v2-halo-feasibility-11-monitor-endpoints.json",
+      "bytes": 4701,
+      "sha256": "4722253b1e11d27363610a5a83186559b3a2aab2ff169273ea21605ea473b838",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/collect-public.mjs",
+      "bytes": 39358,
+      "sha256": "3e90c9a07267b60a1f460740f03cc61a940b9b7abaab9675fb5819f86a32dd4a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/verify-public.mjs",
+      "bytes": 17281,
+      "sha256": "feb671e72188b3a2eb7fd996f1c61a374d21ebb12a7ecb135786ca38adfb85d5",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.samples.jsonl",
+      "bytes": 12851216,
+      "sha256": "feade9aa051be0492b3264315da19a46aa4924b12e1d84ac35b88a6c726e983f",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/monitor-history.jsonl",
+      "bytes": 3343930,
+      "sha256": "c2af1c34e85c37f751ce7f12fe1996b6d39826f399a0557db8e198ce8bb3a824",
+      "rows": 374,
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-v2-halo-feasibility-11/recordings/0-498028.jsonl",
+      "bytes": 99205392,
+      "sha256": "17feeb1e529eecdb918ea31b6cd3d52afd7b2c06ba0e6f084b7f95ac856e1486",
+      "frames": 2630,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792902924884-3b7017e1",
+    "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "socketDiagnosticsReleaseUsed": true,
+    "sceneProfile": "ordinary-native-span4-seven-by-seven-static-halo-v1",
+    "sceneSourceSha256": "53a64e0d849592dc00e2d2bc0453f20ff4533c8ab81df0d46e992885472fc290",
+    "scene10Sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c",
+    "scene100Sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb",
+    "sceneStaticAnalysis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v4.json",
+      "bytes": 420078,
+      "sha256": "ea9fee31c5949ce78f76a87097d4c0af9c9520bdf22338a4def808b667878ed3"
+    },
+    "reportOk": false,
+    "driverPlayableCapacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "normalProcessCleanup": true,
+    "diagnosticsComplete": true,
+    "slowStageMetadata": {
+      "rows": 119,
+      "bytes": 10625,
+      "sha256": "98ed4e54ad54e6184b32b609e95cad29dc5badae734a59a95a04b15a1aa3b449",
+      "status": {
+        "schemaVersion": 1,
+        "complete": true,
+        "reasons": [],
+        "stopRequested": false,
+        "stderrEnded": true,
+        "writerFinished": true,
+        "rowsQueued": 119,
+        "bytesQueued": 10625,
+        "maxBufferedLineBytes": 148,
+        "lineLimitBytes": 8192,
+        "totalLimitBytes": 33554432,
+        "writeLimitBytes": 1048576,
+        "writeHighWaterMarkBytes": 1048576,
+        "maxQueuedWriteBytes": 528,
+        "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+        "thresholdMs": 50,
+        "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\slow-stage-public.jsonl"
+      }
+    },
+    "normalOwnedCleanup": true,
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "nativePatrolPlanning": {
+      "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+      "maximumFallbackCornerTargets": 4,
+      "pathExpansionLimit": 4000,
+      "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+      "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+    },
+    "measurementClock": {
+      "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+      "minimumCompleteWindowMs": 60000,
+      "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+      "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+      "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+    },
+    "nativeHpMaintenance": {
+      "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+      "hpThreshold": 0.6,
+      "reuseDelayMs": 6000,
+      "evidenceDeadlineMs": 2000,
+      "commandBudgetPerSecond": 3,
+      "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+      "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+    },
+    "nativeAttackWitness": {
+      "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+      "maximumOwnerAndTargetDistance": 6,
+      "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+      "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+      "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+    },
+    "gatewaySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+    "backendInputCount": 41,
+    "realGameplayAttempt": true,
+    "report": "release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.report.json",
+    "raw": "release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.samples.jsonl",
+    "peakControlledActors": 10,
+    "highestPassedStage": 2,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-2",
+        "kind": "bootstrap",
+        "targetActors": 2,
+        "startedAtMs": 1792902924919,
+        "endedAtMs": 1792902959360,
+        "completed": true
+      },
+      {
+        "name": "stage-2",
+        "kind": "measurement",
+        "targetActors": 2,
+        "startedAtMs": 1792902959360,
+        "endedAtMs": 1792903259675,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792903259677,
+        "endedAtMs": 1792903317308,
+        "completed": true
+      },
+      {
+        "name": "stage-10",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792903317308,
+        "endedAtMs": 1792903617638,
+        "completed": true
+      }
+    ],
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "measuredSeconds": 300.315,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792902959360,
+        "endedAtMs": 1792903259675,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "measuredSeconds": 300.33,
+        "completed": true,
+        "passed": false,
+        "startedAtMs": 1792903317308,
+        "endedAtMs": 1792903617638,
+        "minuteWindows": 5
+      }
+    ],
+    "soakIntervalSeconds": null,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 0,
+    "passed60SecondSoakWindows": 0,
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 3
+      }
+    },
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "failureWindow": null,
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true,
+    "normalGatewayExit": 0,
+    "normalMonitorExit": 0
+  },
+  "limitations": [
+    "The new span4 halo scene is independently bound; historical scene passes are not inherited and static geometry does not prove live navigation or supply.",
+    "Failure-window counters, if any, belong only to the recorded first failing continuous window, not the entire run.",
+    "Independent probe policy is measured2/10 cohorts each300s plus360s soak,0resume/0save and original gates. Passing requires5/5/6 complete windows; probe never becomes formal acceptance.",
+    "Typed Launched proves only this command launched a swing. The original driver still requires paired positive damage/health evidence for a hit.",
+    "The first/last monitor projection is a summary. Full raw monitor bytes and spectator payloads remain external and independently SHA-bound.",
+    "This File/loopback single-host formal profile does not certify production storage/RPO, TLS/NIC bandwidth, frontend acceptance or Cell scheduling."
+  ]
+}

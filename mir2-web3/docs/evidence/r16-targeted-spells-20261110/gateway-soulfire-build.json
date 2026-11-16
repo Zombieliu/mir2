@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.r16.targeted-spell-gateway-candidate.v1",
+  "baseCommit": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+  "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "gatewaySha256": "68287cb59058786dcdac6420a7ead59f997933cfa744e09f36d891696ecfdaa7",
+  "routingSourceSha256": "1b318a3b61323a8ada5c3a6a2f92c58daf7f601594229ff15dcff6577cac8b36",
+  "zoneSourceSha256": "2580b4f9ca5fef670539131f73fec8aa1db407613cb5b620e03a4f96a653c6df",
+  "zoneTestSha256": "dfe154a8c01aba2006c67c41608660cf1ce49e9942c8c2a8352a956a4ade4ac5",
+  "changedFiles": {
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs": {
+      "baselineGitBlob": "f73401736489145fc08219af452e868531b5ed97",
+      "sourceSha256": "2580b4f9ca5fef670539131f73fec8aa1db407613cb5b620e03a4f96a653c6df"
+    },
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs": {
+      "baselineGitBlob": "c32291475de4db83eed702b94c73e68a52fc04d0",
+      "sourceSha256": "dfe154a8c01aba2006c67c41608660cf1ce49e9942c8c2a8352a956a4ade4ac5"
+    }
+  },
+  "verifiedCommittedSourceBlobs": 1507,
+  "archiveLineEndingOnlyFiles": 107,
+  "profile": "Rust 1.95 dev debug=0; locked offline; isolated target",
+  "testLogs": [
+    "zone-soulfire-red-r4.log",
+    "zone-soulfire-green.log",
+    "zone-soulfire-adjacent.log",
+    "gateway-soulfire-build.log"
+  ]
+}

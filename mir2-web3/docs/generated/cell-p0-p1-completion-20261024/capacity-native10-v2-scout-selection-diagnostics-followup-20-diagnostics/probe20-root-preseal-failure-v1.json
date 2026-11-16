@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T01:45:00.237Z",
+  "scope": "Root actual first preseal attempt failed before source freeze, guard, provisioning and realm; preserved failure, no capacity result.",
+  "label": "seal-reviewed-inputs-attempt-1",
+  "exitCode": 1,
+  "signal": null,
+  "toolSessionCompleted": true,
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-seal-stdout-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-seal-stderr-v1.log",
+    "bytes": 2027,
+    "sha256": "38b13c7028a67f2324432cd2fde4d487aa28ee25361b8deba780c42245a8ccab"
+  },
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\runtime-prepared-v2.json",
+    "bytes": 50348,
+    "sha256": "cdb89bd41d5187dd7e68aab27f36b0e00e05f12d52e570a0d22a983e42179794"
+  },
+  "review": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-runtime-independent-review-v1\\preseal-independent-review-v1.json",
+    "bytes": 9165,
+    "sha256": "531e4611e67502479d23610b32fc4ab77ff93d77fa7514ab8dee43d50eac655b"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-seal-and-guard-v1.mjs",
+    "bytes": 17598,
+    "sha256": "06429d705d71cdf3af1062070648b146f95f6a2b4d4dd6f7171a2d96d3e6e12b"
+  },
+  "failure": "scene-contract.mjs:17 Compact scene approval/source binding is not final; active driver/execution/aggregate in scene-binding remain J while current DRIVER_BINDING is K.",
+  "actualRuntimeAbsence": [
+    {
+      "name": "launcher-source-frozen-v1.json",
+      "present": false
+    },
+    {
+      "name": "source-guard-readonly-verification.json",
+      "present": false
+    },
+    {
+      "name": "launcher-syntax-check.log",
+      "present": false
+    },
+    {
+      "name": "preparation.lock",
+      "present": false
+    },
+    {
+      "name": "execution.lock",
+      "present": false
+    },
+    {
+      "name": "private",
+      "present": false
+    },
+    {
+      "name": "bin",
+      "present": false
+    },
+    {
+      "name": "reports",
+      "present": false
+    },
+    {
+      "name": "realm-process.json",
+      "present": false
+    }
+  ],
+  "capacityAccepted": false
+}

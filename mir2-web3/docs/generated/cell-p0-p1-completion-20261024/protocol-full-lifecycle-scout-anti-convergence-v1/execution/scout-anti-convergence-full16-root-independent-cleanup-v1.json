@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-25T23:34:25.7257599Z",
+  "realmStamp": "1792971063764-c4c81284",
+  "ownedGatewayPid": 57640,
+  "ownedGatewayProcessPresent": false,
+  "remainingOwnedPortListeners": [],
+  "scope": "Fresh post-terminal OS observation by Root; no timestamps inferred or backdated"
+}

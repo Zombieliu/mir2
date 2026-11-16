@@ -1,0 +1,158 @@
+{
+  "status": "local-candidate",
+  "scope": "Ordinary Chrome and password login with a real production Next build and isolated File Gateway. The local transport delayed genuine HTTP 200 bodies on only the named routes. No session, map, asset, or gameplay state was injected.",
+  "publicVersionReadback": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+  "previousPublicObservation": "The released default-proxy QR flow reached the authoritative world packets; the prior 120s observation did not identify the exact stalled HTTP response.",
+  "baselineReproductionSha256": "ddf44af03f09422aaa0930066fc651467627c586987db4e9ef597c696782fc37",
+  "workerUpgradeSha256": "2a1e785052af313d0f4891cc9af6de59175757e933cca6bebacb7f414f74e2cd",
+  "intermediateCacheFailureSha256": "d2fca309f78411e7c1ac7d2364f49fb1e9245563cdb780a2759ce7b35ee5e5fc",
+  "workerSha256": "733faacf1ce5f547c6d2319de73b614a774283bf80adb6ffb6ffbce087fee3af",
+  "scenes": {
+    "automatic": {
+      "receiptSha256": "a6e51aa481206c7166f1bd4cfae7f63fbee2fd789adbb102a462273e5bcf07b3",
+      "buildSha256": "c00071ebc8d9044d69ff0e934d1a3ee277f791ebcc18ff9c4894d79fd567ee3b",
+      "gatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "baseCommit": "4d337d1a07e1eae2b7a35d86feae5b12beaf39f1",
+      "playerTile": {
+        "x": 342,
+        "y": 244
+      },
+      "map": "0",
+      "startGameResult": 4,
+      "waitUntilReadyFromBootstrapMs": 17067.797,
+      "exactRouteRecovery": {
+        "manifest": {
+          "url": "/api/asset-manifest",
+          "automaticRetryMs": 8203.223,
+          "headersThroughWorkerMs": 1.268,
+          "sameKey": true,
+          "firstManuallyReleased": false
+        },
+        "crystal": {
+          "url": "/api/scene/crystal?v=2026-08-14-v7-door-interaction&assetRelease=a377fdf93f713727&map=0&x=344&y=246&width=56&height=72",
+          "automaticRetryMs": 8200.468,
+          "headersThroughWorkerMs": 1.365,
+          "sameKey": true,
+          "firstManuallyReleased": false
+        }
+      },
+      "logout": {
+        "sent": 624,
+        "ack": 625,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "UpLeft"
+      },
+      "sourceSavesUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true,
+        "proxy": true
+      }
+    },
+    "manual": {
+      "receiptSha256": "2803d83aa147c134b353745786176f0c16b0aa934a0b3afeabba9048068e2589",
+      "buildSha256": "c00071ebc8d9044d69ff0e934d1a3ee277f791ebcc18ff9c4894d79fd567ee3b",
+      "gatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "baseCommit": "4d337d1a07e1eae2b7a35d86feae5b12beaf39f1",
+      "playerTile": {
+        "x": 342,
+        "y": 244
+      },
+      "map": "0",
+      "startGameResult": 4,
+      "waitUntilReadyFromBootstrapMs": 17704.066,
+      "exactRouteRecovery": {
+        "crystal": {
+          "url": "/api/scene/crystal?v=2026-08-14-v7-door-interaction&assetRelease=a377fdf93f713727&map=0&x=344&y=246&width=56&height=72",
+          "automaticRetryMs": 8195.187,
+          "headersThroughWorkerMs": 1.983,
+          "sameKey": true,
+          "firstManuallyReleased": false
+        },
+        "localizedRetry": {
+          "shownAt": 1794280018106.3784,
+          "label": "重试",
+          "failedAttempts": 2,
+          "requestAt": 1794280018293.7166,
+          "requestAfterButtonMs": 187.338
+        }
+      },
+      "logout": {
+        "sent": 624,
+        "ack": 625,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "UpLeft"
+      },
+      "sourceSavesUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true,
+        "proxy": true
+      }
+    },
+    "logoutDuringLoading": {
+      "receiptSha256": "b94cefabcaa82613b81affdf18d29fbe0aee188007035082703089739e418f82",
+      "buildSha256": "c00071ebc8d9044d69ff0e934d1a3ee277f791ebcc18ff9c4894d79fd567ee3b",
+      "logout": {
+        "sent": 618,
+        "ack": 619,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "UpLeft"
+      },
+      "postLogout": {
+        "leftTo": "select",
+        "logoutAckAt": 1794280128210.5107,
+        "releasedAt": 1794280128232.8823,
+        "checkedAt": 1794280131837.6848,
+        "sameKeyRequests": 1,
+        "after": {
+          "gate": {
+            "screen": "select",
+            "sceneInteractionReady": true,
+            "sceneSpriteLibrariesReady": true,
+            "pendingSceneSpriteLibraryCount": 0,
+            "pendingSceneSpriteLibraryKeys": [],
+            "desiredSceneSpriteLibraryCount": 0,
+            "preloadStatus": null,
+            "preloadInteractionReady": null,
+            "preloadReady": null,
+            "preloadFailed": null,
+            "hasRenderPlayer": false,
+            "hasMapRegion": false,
+            "gpuEntityRendererRuntimePending": false,
+            "useGpuEntityRenderer": false
+          },
+          "pending": false,
+          "screen": "select",
+          "serviceWorkerActive": true
+        }
+      },
+      "sourceSavesUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true,
+        "proxy": true
+      }
+    }
+  },
+  "localScreenshotSha256": {
+    "retry": "ebe8cacd7b0109bdb8c6cbdad65d6d52029df66557f6753078a6c669d89ab8fd",
+    "bichon": "14fd78f243d7fdf19b962451bb2852195d9e00b0dbd85f7dacc5614d96293f1b"
+  },
+  "outstanding": [
+    "Signed cold end-to-end test of the new release on the public default-network path",
+    "Physical phone camera confirmation"
+  ]
+}

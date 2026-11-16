@@ -1,0 +1,25 @@
+{
+  "executable": "C:/mir2-newcomer-v2-20260918/mir2-gateway-8cc4d1299.exe",
+  "sha256": "4D658C6C36FA221AB58C26393B7DA270F80CB6AEE8E613749C60DB4DD9309B91",
+  "launcherPid": 54960,
+  "sourceCommit": "8cc4d1299880f2e76cb9b67506579e4148d873f7",
+  "zoneProfileFixIncluded": true,
+  "visualAccepted": false,
+  "measuredTime": false,
+  "cargoExitCode": 0,
+  "cargoDuration": "14m03s",
+  "profile": "newcomer-v2",
+  "contentProfile": "platinum_176",
+  "verifiedAt": "2026-09-17T20:02:57.4631656Z",
+  "gatewayPid": 53504,
+  "rustSourceSha256": [
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "sha256": "F60EFCC5F059F5BB70AB30429F9CAB7FC2693FC14A306332C9DC97F74B100857"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "21BBFBC50F7FB12535DDFF999E9594E31613E954A2BB8BB271C2D7CF6F233767"
+    }
+  ]
+}

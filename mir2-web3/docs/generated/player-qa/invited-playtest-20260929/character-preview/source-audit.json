@@ -1,0 +1,3204 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-09-29T11:28:24.280Z",
+  "scope": "Read-only source/library/PNG audit; evidence files are the only writes. No GPU or live-client acceptance claimed.",
+  "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3",
+  "head": "96e6b4e29aca50fd18f9e7850866933318702d8c",
+  "nativeSourceMayContainParentInProgressFix": true,
+  "crystalRoot": "E:/mir2/Crystal",
+  "sourceLibrary": {
+    "path": "E:/mir2/Crystal/Build/Client/Debug/Data/ChrSel.Lib",
+    "sizeBytes": 53289233,
+    "sha256": "4be898a0dae083802959ee4b1d2c093320fbc0a46ec68b30ac5fc856744a8197",
+    "formatVersion": 2,
+    "totalFrameCount": 1146
+  },
+  "exportedMetadata": {
+    "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\ChrSel\\meta.json",
+    "sha256": "8ae576976c309f94ab176c21fd82f9ab6965f00f6b6014a19263aa5b6df56c82"
+  },
+  "sourceFiles": [
+    {
+      "path": "E:/mir2/Crystal/Client/MirScenes/Dialogs/NewCharacterDialog.cs",
+      "sha256": "263dd722fded070f186127d79c6c45dcd69becff084ec35d32e56be300ff6143",
+      "lineReferences": [
+        48,
+        50,
+        95,
+        106,
+        259,
+        290,
+        316,
+        321,
+        326,
+        331,
+        336
+      ]
+    },
+    {
+      "path": "E:/mir2/Crystal/Client/MirScenes/SelectScene.cs",
+      "sha256": "c72b0876f129619b21d66c62bc15df8b0e672cdf9af8e0e9fde5496ea17b5789",
+      "lineReferences": [
+        121,
+        126,
+        131,
+        136,
+        495,
+        511,
+        514,
+        517,
+        520,
+        523
+      ]
+    },
+    {
+      "path": "E:/mir2/Crystal/Client/MirControls/MirAnimatedControl.cs",
+      "sha256": "4837d9f0d8118c6175be0e4d18116fd0637f6fe00ca0be870cda7bd8db0b0c4e",
+      "lineReferences": [
+        11,
+        80,
+        149,
+        201,
+        209,
+        228
+      ]
+    },
+    {
+      "path": "E:/mir2/Crystal/Client/MirControls/MirImageControl.cs",
+      "sha256": "e0805305c2762f9b503a10cd052970a8af4a26ba0daddcf56fe70fe82d3569cc",
+      "lineReferences": [
+        7,
+        8,
+        174,
+        189
+      ]
+    },
+    {
+      "path": "E:/mir2/Crystal/Client/MirControls/MirControl.cs",
+      "sha256": "6356acf1fd91ad8f38bd9f2d25f1e33c62dab1d9072bcbfef60a8b2e5e82bd26",
+      "lineReferences": [
+        12,
+        389,
+        671,
+        674,
+        694,
+        731
+      ]
+    },
+    {
+      "path": "E:/mir2/Crystal/Client/MirGraphics/MLibrary.cs",
+      "sha256": "afda6ebb7a163d745d6398ea5c92ce80524daa6fb85c6167a09514867cf6f8c8",
+      "lineReferences": [
+        656,
+        692,
+        698,
+        704
+      ]
+    },
+    {
+      "path": "E:/mir2/Crystal/Client/MirGraphics/DXManager.cs",
+      "sha256": "8be0a26cbf3a0112d4602bbd864a5a5af12c2238a0ba4549fb05787bcd428484",
+      "lineReferences": [
+        353,
+        365,
+        378,
+        379
+      ]
+    }
+  ],
+  "nativeFiles": [
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\preview_data.rs",
+      "sha256": "892be3b94a0a9a3159c5184d56fdcdeb4a039097090282fac5cc74a98fa4ead1"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\select.rs",
+      "sha256": "9a1b18374da2472b0f0ddc932fa1303b0ade23c333a9c43d80ed96b6911d271e"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\spec.rs",
+      "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\native_shell_ui.rs",
+      "sha256": "b84dfdb0080ed5f97634667eab2813ece4d04e61e10299c87366967b35a34f45"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\crystal-library.mjs",
+      "sha256": "68f2893b237a652c3c7a685c486c8451f79b32bc3e2f1c4ff1e51fc7d8316a4b"
+    }
+  ],
+  "verifiedFrameCount": 192,
+  "mismatchCount": 0,
+  "mismatches": [],
+  "sets": [
+    {
+      "className": "Warrior",
+      "gender": "Male",
+      "base": 20,
+      "role": "body",
+      "frames": [
+        {
+          "index": 20,
+          "width": 196,
+          "height": 302,
+          "x": -83,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "bf0a0d44d69319e6972ab06ec905ab9cddfacf50a19d0cfb38e144d999df64d2",
+          "decodedRgbaSha256": "b14cbb34974346121465138c4ef73005eb73cad12239f748935bb461fa0c56d7"
+        },
+        {
+          "index": 21,
+          "width": 196,
+          "height": 302,
+          "x": -84,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9ecc55208fe962b77bb5b31bc9a08db9ef6d98dfa57932d6ba3630cbb7768d0e",
+          "decodedRgbaSha256": "c47c1422af4dc2410fd40a278d7ef3132e78bccfbf3f30db9a19dfc47c1e6c2d"
+        },
+        {
+          "index": 22,
+          "width": 196,
+          "height": 302,
+          "x": -84,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "4ec1682d8d15fbfcc7f5d1e4b259c90ec36f51f2c8e9b3b362b64ed1981b7c88",
+          "decodedRgbaSha256": "6e45c8634eb5054013f7e93def961a549acbb7fd93920998841a5e4c5db6ccaf"
+        },
+        {
+          "index": 23,
+          "width": 196,
+          "height": 302,
+          "x": -84,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "bea0a3786f76aa4462d13510f1085de3919ccb56e868f35f68137b373197f987",
+          "decodedRgbaSha256": "14e6f3fbc5ffed7ba554a1278f9d4469acc417240c2cd79d2fc32ee52ec39880"
+        },
+        {
+          "index": 24,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8ac21eea378cdd752cf04a4e3eb40e227641eb3b6d937475d7c78927b4e57e09",
+          "decodedRgbaSha256": "b81e419229d95b92dbbbe0293d0af6109cd2bb278f020bc5ae01471b44c2f9c0"
+        },
+        {
+          "index": 25,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "6c533a41535b51cae1d6bf012530432513eeb37f236650563d9867bd17ca785d",
+          "decodedRgbaSha256": "287c0b456085470b1becd5ec67b7a703bddf151d952e70706bdbc3332e1bfd59"
+        },
+        {
+          "index": 26,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5876f5ea74662f03e5c4ff641d598a4c51e98d63dc0c2d15efc036137b5281e8",
+          "decodedRgbaSha256": "47703ad3e6e4c99fbbdd2aa37dabdff4697dd43f8196d9cdf2b7663c4be9305d"
+        },
+        {
+          "index": 27,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8cd16a233204e74d4c6369f6f0f489490c587371522750c7facdb3b1ec4202f4",
+          "decodedRgbaSha256": "5e26a6b785fd535b2d246ea5d5fcb4a155da65b4366449bc70ff7691e9706a70"
+        },
+        {
+          "index": 28,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5d5a6a71fade851d6d59f8e1743fc2f71d30fbca247617a293d2567694bf0b07",
+          "decodedRgbaSha256": "35f2bbe2fbdd1b86e2554506fcf6e20e8ac365f6c25898614a28f7825cf7ceb1"
+        },
+        {
+          "index": 29,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e61b093e0b470d2b64e075c460e8f146c6bf6b7a497b6ec7c1ca59fc568ed494",
+          "decodedRgbaSha256": "53b455e99fb13c3baaf78ce55efee72c7c48afc36f9e8329476d75aa6e4ae4f7"
+        },
+        {
+          "index": 30,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "51b17e19656ca6c5482a6e89abaef8c096317d8abd58af44c0bdf5839f6c2568",
+          "decodedRgbaSha256": "3b6b41de25d8020fcbee75dfa01b4f9e90c11e6d8cee2951070c92c039ca2f90"
+        },
+        {
+          "index": 31,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "3269bb0db2149588e003ab933d6fbf2845943d778b65e48cbcac5d9836d483d9",
+          "decodedRgbaSha256": "15ae9f6e095eae21ed2875ace81c62c9f78af458bd8783628ee8461e5f48daa8"
+        },
+        {
+          "index": 32,
+          "width": 196,
+          "height": 303,
+          "x": -84,
+          "y": -151,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "36fbc75b4063e64a60056ca5482f725dd1f7c52133dfec793371a3de39cf22ef",
+          "decodedRgbaSha256": "9fe237723b08dfe2ba62d1844296b9e1ef770cb26342031c0fbf90611262ec9f"
+        },
+        {
+          "index": 33,
+          "width": 196,
+          "height": 302,
+          "x": -84,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "b9d6f703a8e020947fcdfd910764e655df75d9fb8e63a5832febf6f83598cc67",
+          "decodedRgbaSha256": "2bb2a5e36b81710afe8c25e598dec9037e2d3d2482dff2939e7fed96dcff2e81"
+        },
+        {
+          "index": 34,
+          "width": 196,
+          "height": 302,
+          "x": -84,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e77879483106cd3f85cb4a4080b6f40f512d77b414ac52cd813c29d19b412733",
+          "decodedRgbaSha256": "f670674711ec8dffc15b82297ee9df6a6c2a0c5c9d0bb99c9616c67c0950677a"
+        },
+        {
+          "index": 35,
+          "width": 196,
+          "height": 302,
+          "x": -84,
+          "y": -150,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "fe8a9776ab97e89b9c4d3055ae9f7a1ee065323495fa4b5e88ec78c692d531e4",
+          "decodedRgbaSha256": "91d9e30a325138961dddc3e9abe9ed60618fa96f0be59ed0ba4e439044dc38ed"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Warrior",
+      "gender": "Female",
+      "base": 300,
+      "role": "body",
+      "frames": [
+        {
+          "index": 300,
+          "width": 184,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e970c4c79ffc2f1c75eb0219c2cbc7839c04f31e496c2a60d6c8cf9a0e11fa99",
+          "decodedRgbaSha256": "eeefcef737543071c30b923f94a896848cf31d2fe253d61ab5d1381020f0bc08"
+        },
+        {
+          "index": 301,
+          "width": 188,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "0901aa9c62dd9c110e53542812736806f26b95c2f5f3dd3b21ce64d309965eae",
+          "decodedRgbaSha256": "b6912b89831582804b57f92dd0a2a3b132dc03aff156cfebb22b403cb047fd80"
+        },
+        {
+          "index": 302,
+          "width": 188,
+          "height": 299,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f2394b49f31c69a0573650866d7e512923af9ee0bb885706167ed89276a79480",
+          "decodedRgbaSha256": "2b32f71b3aa0b10801b6f26b5b1cb4e5171fdf53d74caedaa2d3b0cf2f2e8a06"
+        },
+        {
+          "index": 303,
+          "width": 188,
+          "height": 299,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "31eb9ba3f72490ffd30829ccbb53e6f6762dd9e6f898b00b7d811fcdf8bcf88e",
+          "decodedRgbaSha256": "fd76f3085d952f7583d905ae4837ae342727d2c9d8bda2dd146ea493b161a1c2"
+        },
+        {
+          "index": 304,
+          "width": 188,
+          "height": 299,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "0565b65d962aca7a65986a3889848e778e61891d8672a3483c277dad7d7ccd11",
+          "decodedRgbaSha256": "d04a31739ea767c79f36c92fdc38d7263dd4ffc70ee26a8af4709b55fac134a0"
+        },
+        {
+          "index": 305,
+          "width": 188,
+          "height": 299,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e4df853168640035580732ff6002ee18979068e19bc05473cdec1bf5f9cd48ad",
+          "decodedRgbaSha256": "10244188381ed8201460a24b689f4e355a4344b2d43be70bbf0740e1b449d797"
+        },
+        {
+          "index": 306,
+          "width": 184,
+          "height": 298,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "468e88627686f6b457266a0733a6ec3c1b904dc0d28f7ffa4c94e62113334284",
+          "decodedRgbaSha256": "a7322b2f5744b56ca428e8a7596bc1175400969a13734ed6cc6bc09d82396b42"
+        },
+        {
+          "index": 307,
+          "width": 184,
+          "height": 298,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "fd950350408fac917eeb8e1e22a5079e9c0fa1f6f842785f8491c00c80067920",
+          "decodedRgbaSha256": "b3f35ec1523147d7b0bdf19f34d8fb2e1196ea7b124c6d8ed623309e6f975230"
+        },
+        {
+          "index": 308,
+          "width": 184,
+          "height": 298,
+          "x": -73,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8651068293e0c568aad1e6e9ac09aa0bc29c8d4623389fe52f68ec95dbbc6901",
+          "decodedRgbaSha256": "2074c3a113c393de77cf8f2a0479fb146029353e27813e5bf985627cc9d75a5c"
+        },
+        {
+          "index": 309,
+          "width": 184,
+          "height": 298,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "1440482376c3459bf737ad53091b88cc01907df50f0672a17c047371fa1f79bd",
+          "decodedRgbaSha256": "960351aafc01869f76402e6755ab576c8d9c265d1126d76e3e5d8a53b1b5139e"
+        },
+        {
+          "index": 310,
+          "width": 184,
+          "height": 298,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5990537f6800f9509c1595e49902818b4458ada885a85ce53d4c329acb194eb8",
+          "decodedRgbaSha256": "cae545fb7c93e039313d0aabad6bb846c793359da966247d550d2619bddd4571"
+        },
+        {
+          "index": 311,
+          "width": 184,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "422bf58d6e359a4e21bef6d44d0271c83d0900e74f974b0ae07850391d632fbe",
+          "decodedRgbaSha256": "a6199ba95c6d1035e76ae6ff9d4b98ec634e5d09cbc0936a69be245cbdd54f58"
+        },
+        {
+          "index": 312,
+          "width": 184,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9a3bd58a45640bc7d4bd50a2cf11ec01cf5955aa6298d6107dab1366208401c5",
+          "decodedRgbaSha256": "984d24f5c70a29d788621a3b305fb3b7e38d56d622dd773a877ebfce1a762c31"
+        },
+        {
+          "index": 313,
+          "width": 184,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "abf146cc08eea1c4e2f34343d95c731835b6cd041b62277505898b004158d22f",
+          "decodedRgbaSha256": "c0ddd0c7d76feb85ae8c67ddb7f758fb6923b6e6cbe36cf86d68edbbd7bfb252"
+        },
+        {
+          "index": 314,
+          "width": 184,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "b6caaebe98e43b4bb0d378f46a3d1ee9f5d3377609c6a9db4942e43361b9b185",
+          "decodedRgbaSha256": "a0b7441990c81814856c747fa820b1ec3ede64de24933bffa85e8615b528b7ed"
+        },
+        {
+          "index": 315,
+          "width": 184,
+          "height": 299,
+          "x": -72,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "86fd3bb16c3d482c2cc42ec980041ea7bd683e274ee95288277e51300e877859",
+          "decodedRgbaSha256": "22d52daff5c04805b2d6a5bfed883c8db17fc2838f407241f9d32ff1fe802602"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Wizard",
+      "gender": "Male",
+      "base": 40,
+      "role": "body",
+      "frames": [
+        {
+          "index": 40,
+          "width": 176,
+          "height": 386,
+          "x": -77,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "274d191c3a5de4985233d00e35249fc4ae47f57cfc327e4982630c5b0cb23ee7",
+          "decodedRgbaSha256": "b88f391a7f902f4c900f8db99e8d11922bd011663896a7f8497c12cc46805bd1"
+        },
+        {
+          "index": 41,
+          "width": 172,
+          "height": 386,
+          "x": -78,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "7ca91bfdb49a6426e69400bb884562cba6c857bf5faca14e17b0183204faeda9",
+          "decodedRgbaSha256": "0ff4c6ddbb4378891f1aee258b2af4613b4dce8947fbbac9026f2ee667aa976a"
+        },
+        {
+          "index": 42,
+          "width": 172,
+          "height": 384,
+          "x": -79,
+          "y": -242,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "d4928b87344a6671c1d52cf7715e711d8427d0fb39f2e5ebeb1ae4accb952858",
+          "decodedRgbaSha256": "620b63d3736fea7e6289a4a2e9a1c8cdc19932eabc48ab4b3d858bb2c0b9567d"
+        },
+        {
+          "index": 43,
+          "width": 172,
+          "height": 385,
+          "x": -80,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "202ae00273bb7b11d8b436f9eb9cc376210b9b3406ce9598c5698cb522bd4336",
+          "decodedRgbaSha256": "427ab6c81b1656782959b2467b9ae554b4b26e4c2334eaa8b965f7e0aba67ed3"
+        },
+        {
+          "index": 44,
+          "width": 180,
+          "height": 385,
+          "x": -81,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "d537b9bae17f3fc226f072e4ba9b69b7c774cc4da4060fcca0758567e4987572",
+          "decodedRgbaSha256": "317acd47b4b58e4f8d926736b36ad32d9fa7d0d0b843b8c8f2b03ee3478b762d"
+        },
+        {
+          "index": 45,
+          "width": 180,
+          "height": 384,
+          "x": -82,
+          "y": -242,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "1075338bb9f97b79c477c69790056f2ce07729c5b67d828b2e14f9d113e0d239",
+          "decodedRgbaSha256": "638a8ecf8ef1de8c82771838b401ea956341eef76f43bbcb2a809d72ca54658e"
+        },
+        {
+          "index": 46,
+          "width": 180,
+          "height": 385,
+          "x": -83,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a668b9a58bf7d82aceb56748ca756e751e14c40421996dca9ae44dcf3f078d64",
+          "decodedRgbaSha256": "3f7d18f3cdf41c854b9cc36575dcaa2cf99dba497dc26d33df364dd26b2d7933"
+        },
+        {
+          "index": 47,
+          "width": 176,
+          "height": 384,
+          "x": -84,
+          "y": -242,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "de749c994e1c80c947423604daade741916e9fa79169b70c520872366a9268c1",
+          "decodedRgbaSha256": "6c52b4b0435d1d92eaefc462c162258b9958417e1fbcf022bb30431218685f87"
+        },
+        {
+          "index": 48,
+          "width": 180,
+          "height": 383,
+          "x": -86,
+          "y": -241,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2b94b16366852b9ddc28c85e3453df57750da2ac9cd15e71d239460eba74e35b",
+          "decodedRgbaSha256": "0a006636f26d9d6f3a4ab157139053502a93cac630e8ce176cd2f5419e637f09"
+        },
+        {
+          "index": 49,
+          "width": 192,
+          "height": 384,
+          "x": -84,
+          "y": -242,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "6dab3a37ccd5700b5921f62e472d977b002ab8a7cada4ca4fde883bab45a5049",
+          "decodedRgbaSha256": "f722c57f5484b6e6fb07ea48be2bc8a58cf89f19fd83bcae01947b1304cadea0"
+        },
+        {
+          "index": 50,
+          "width": 196,
+          "height": 385,
+          "x": -83,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "c7bb146f8aac2c62cc4d3b37e9f35cfea2709c4b0be7d6147920d8f793fec17d",
+          "decodedRgbaSha256": "d32acf48311da3de8aa1d0323cc35caa8796d718ab691894021c6d29738c41a9"
+        },
+        {
+          "index": 51,
+          "width": 192,
+          "height": 384,
+          "x": -82,
+          "y": -242,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "63877523a84785d045b659cac953403f741c8e2ae67c28f3484b5d548bd8873b",
+          "decodedRgbaSha256": "ac76089862b4de6b3dfd577913a0f38c097c9d5411218067f541d92574fcc70a"
+        },
+        {
+          "index": 52,
+          "width": 184,
+          "height": 385,
+          "x": -81,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "ae9f35ba24b66b151870c0e5639047efd2b314b83c3931bf7500d2725aa570e1",
+          "decodedRgbaSha256": "d58858253153f328f73bdb0634a86a53ff1aeeda00a7edf8b0cfb63313ef3bf7"
+        },
+        {
+          "index": 53,
+          "width": 184,
+          "height": 385,
+          "x": -80,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8d9acc0923a18e3288513fe1c0280a56e8820b96039c854372a833429dc9dd98",
+          "decodedRgbaSha256": "0b4ba05e530499b764607ffdbbe4692b498adcce96d20bcc261af3903429a631"
+        },
+        {
+          "index": 54,
+          "width": 180,
+          "height": 384,
+          "x": -79,
+          "y": -242,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "83279f5244fd3d7679248d6a952dfe8c52c41b7a88b11e6bce786e1c82fb5550",
+          "decodedRgbaSha256": "13db93adda1d1280983733f77a96b064b3c98f171a9424409f3db5e07228d5c9"
+        },
+        {
+          "index": 55,
+          "width": 180,
+          "height": 386,
+          "x": -78,
+          "y": -243,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9abe637414544917c14131f0270241fe7862197369cadd949d9f2ed10eb98d5d",
+          "decodedRgbaSha256": "d8d1ca0ebb467488fc563a314028ea187ce7951433350a8dc1c2e977269a9a18"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Wizard",
+      "gender": "Female",
+      "base": 320,
+      "role": "body",
+      "frames": [
+        {
+          "index": 320,
+          "width": 148,
+          "height": 351,
+          "x": -43,
+          "y": -218,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8a5a832a419b63ecc056ffbf9804bd81f09e49ea59281b4fa1d9bbfbfd2ebb19",
+          "decodedRgbaSha256": "da6270ab3a12349db1932353302aff634f7b5e5b4de7843236a51b0ab5308929"
+        },
+        {
+          "index": 321,
+          "width": 152,
+          "height": 351,
+          "x": -45,
+          "y": -218,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "7417605c8162391af4bdaa0f4981a0ebcb665fa4aba6c919b714c81373caced6",
+          "decodedRgbaSha256": "cd4dbc3bd556d167f7e2a35d9dabc3185983a2eede04ca102adea94f8f0966e7"
+        },
+        {
+          "index": 322,
+          "width": 152,
+          "height": 351,
+          "x": -47,
+          "y": -218,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a71fa2662be169e93ff45fd998998618742ae5a7c51bc3ea87ae12886a0efc63",
+          "decodedRgbaSha256": "5c06dda4eca5ea88b12b46aae5124e025098aa2d48e480f16570173922f52dcc"
+        },
+        {
+          "index": 323,
+          "width": 152,
+          "height": 352,
+          "x": -49,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a9c4db2e77ff28b4980bcbdd2a18e1bf8143816e3d37bcd48e6a43ba5ead7ae3",
+          "decodedRgbaSha256": "73b9c0a1e1d7a9832e04b3ef9b8981f2c85034f6afc4fa9884964ce87c808c3c"
+        },
+        {
+          "index": 324,
+          "width": 152,
+          "height": 352,
+          "x": -51,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "45749896d54bb4897d1e7253b1d04404bfdf4ea54f3e7d4a3c97947b1b1d0727",
+          "decodedRgbaSha256": "166cd1bcb7360b9ccb3ce3899a68d325d775734b810394344b5002d5bd4e7bc5"
+        },
+        {
+          "index": 325,
+          "width": 156,
+          "height": 353,
+          "x": -52,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "64a9f202421d402cc0317e88b71c11706ef4d9ce9f71b6b8dce1fdd87f7cd6cf",
+          "decodedRgbaSha256": "69468ce366ee4738cf154811e456f025415111925c61047bf324a5c976afdbeb"
+        },
+        {
+          "index": 326,
+          "width": 160,
+          "height": 353,
+          "x": -53,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "3177766929c6dc3c7ff56211c40bb05cf9b384a45b0759493caf388e59c9782a",
+          "decodedRgbaSha256": "84b7dbb890ed0d3026d84416ae25daf05f151c5b9822b87ad69624691e3f1ccd"
+        },
+        {
+          "index": 327,
+          "width": 160,
+          "height": 353,
+          "x": -54,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "1af63a42a18d0dfeb358b27e768787e6f2d4883fbd1f59e1516a389787087b88",
+          "decodedRgbaSha256": "09c77b1da55ed1d13802de3b16df3663446010f16edbc453b23194035aa33ba2"
+        },
+        {
+          "index": 328,
+          "width": 164,
+          "height": 353,
+          "x": -54,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "848d4b23378de41fd4d710895349c865b14a85b63b7851aa08ccf8571cf91d44",
+          "decodedRgbaSha256": "840ec005e1e5152c396af9a76c3d2cc06673ce2b41561a29ae8ff7ddd04c151f"
+        },
+        {
+          "index": 329,
+          "width": 168,
+          "height": 353,
+          "x": -54,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a175ec314384878cf9c6c619f58f423a22087d17ffb1585a8f4d24ffcd26caaf",
+          "decodedRgbaSha256": "5a0286b526cfeb80dc2b6fa56429923d924e5fa0d8faea7701bcc00d33357735"
+        },
+        {
+          "index": 330,
+          "width": 168,
+          "height": 353,
+          "x": -53,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "0af46bdab273cb2dc68c455275ebafc59c1ae2c7259292902aea4ab121924fc0",
+          "decodedRgbaSha256": "4b6081c95559fb6a03bf90cfaed3f76ebca7e18bca798c0e6bf005dfa6680dec"
+        },
+        {
+          "index": 331,
+          "width": 168,
+          "height": 353,
+          "x": -52,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "82814abde024a1111a664ffa42abc4112e085485ea0c37e1e5747aff040a91a6",
+          "decodedRgbaSha256": "886a942b87c61821432d67927dfba8ac4a8b1057e83af800b8c9f5378f6d518a"
+        },
+        {
+          "index": 332,
+          "width": 172,
+          "height": 352,
+          "x": -51,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5eff5deadc6313eb39c432a21ce40c4bf27cc86b019b6ed49ccf7ab55d942c36",
+          "decodedRgbaSha256": "b333950dceb0cc6d42828fb8182033bee6061d9bff28e460e4fa0990f840da95"
+        },
+        {
+          "index": 333,
+          "width": 172,
+          "height": 352,
+          "x": -49,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e89560c1a62f234cfac4c1e8588a986ade128d6dbf977f88a23c8f0b6d8e268c",
+          "decodedRgbaSha256": "59841cee6f8f52762d0faef66ad149c3e6866bd02d03c61a6ef7019760dd5bf1"
+        },
+        {
+          "index": 334,
+          "width": 164,
+          "height": 351,
+          "x": -47,
+          "y": -218,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "c623b85dccfb2bdefe7dfd7e0dbcb9f2ea7903a057ff9539bf3a3db76aae899e",
+          "decodedRgbaSha256": "3719f65276d07dc4297f4f2cb5a46a8df06e444423613110426b32c84c076076"
+        },
+        {
+          "index": 335,
+          "width": 152,
+          "height": 351,
+          "x": -45,
+          "y": -218,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "7ff7dfaeebf1c3fbecd336ab172bfeed291b1ab424bee3fe955031407cb3063a",
+          "decodedRgbaSha256": "db7f84ebb0a7195edeb03086a516bc3810f163e7b583f1dc98603e9abeb72dd0"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Taoist",
+      "gender": "Male",
+      "base": 60,
+      "role": "body",
+      "frames": [
+        {
+          "index": 60,
+          "width": 168,
+          "height": 298,
+          "x": -58,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5c2ff801774547c4a3be822e7424b576ad2c0398fdf6764eec397983da8bfe95",
+          "decodedRgbaSha256": "003285b48b83593d78cc60fb61ad4888e1e9fdc08bc2c6dc581560a475c160c4"
+        },
+        {
+          "index": 61,
+          "width": 164,
+          "height": 298,
+          "x": -56,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "81ddb7eb88f263215294ccc9b2a091ab224cc42a90bd73f91709969a78b369db",
+          "decodedRgbaSha256": "a64a3c44a8d4f41e88608e6a17ed585dc2a55635911445a315be1c3815dafe41"
+        },
+        {
+          "index": 62,
+          "width": 164,
+          "height": 298,
+          "x": -55,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "04730af473efa06dea19c6cbfc70299c1ed482e4c65de42080e6d2ecff4b6701",
+          "decodedRgbaSha256": "28d6685c484df15132a92360fb159fd5a7cd90cc29c46d480f313347c9c7f153"
+        },
+        {
+          "index": 63,
+          "width": 160,
+          "height": 298,
+          "x": -54,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8cb550f5b4ab87e38a881a93afc2f29754710e3fdfcd68b172f6ea4f62a2221b",
+          "decodedRgbaSha256": "d73b8e39d7b2148fd7c2e60224e454d7fba3391321e8b8902b0ab2c3c957249d"
+        },
+        {
+          "index": 64,
+          "width": 160,
+          "height": 298,
+          "x": -53,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "6155bcd1534f43fff804577a93c1426ff217f4d9c15473bec3cd7532b2e91c8c",
+          "decodedRgbaSha256": "9765ececf3b53d45260cf5bad6a3a0d2e27eaa05965b8ce9de135c8f9690955a"
+        },
+        {
+          "index": 65,
+          "width": 160,
+          "height": 297,
+          "x": -53,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2a3cf84109b1c0e65016fcc5dadd4c31c0d3a712fdcc14d0127cb8824c30ce4c",
+          "decodedRgbaSha256": "3cf215de3173dbbaf15e319208c7adcfbc96462250d07efeb028c0050fc8ad69"
+        },
+        {
+          "index": 66,
+          "width": 160,
+          "height": 297,
+          "x": -52,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f93431ea6aa8135665e9a9515379a4fcca661fc85a230276569a82019db0cbe0",
+          "decodedRgbaSha256": "09aa021a0e8982e122a42192e40740e002f778f50343f3248f1f398dbf41b0c9"
+        },
+        {
+          "index": 67,
+          "width": 160,
+          "height": 298,
+          "x": -51,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "09b942ca91126a1454acaf89a8e753cd1636a31d084f30201043a1c6e4ecb6f8",
+          "decodedRgbaSha256": "b8a2517319b268deb12080964b594d6d8a07b77b764e2480382dfe56053dc6c8"
+        },
+        {
+          "index": 68,
+          "width": 160,
+          "height": 298,
+          "x": -52,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "7b466bd3521920fdca2dda2647ec0ac80cba4de1e1200a077929f8e5e199c7fd",
+          "decodedRgbaSha256": "4e3a736904a2f985febb95f0146cd42cebf2d6295738a5467a6717cb618c398d"
+        },
+        {
+          "index": 69,
+          "width": 160,
+          "height": 298,
+          "x": -53,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "32415088eda540f52a74c2c5af8e68fecdda4a6e901e990bce7363d2588fef75",
+          "decodedRgbaSha256": "72fc1a90c2c6cb5a10c97203791dc00a2076c52a809a395138ab2479b0dc0015"
+        },
+        {
+          "index": 70,
+          "width": 160,
+          "height": 298,
+          "x": -53,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "45f4e74f7d3e0b784cfafa09b74349888aedda80e82aa7663f8040479abbd9d8",
+          "decodedRgbaSha256": "ec4d1c5c5599fe1f2f08d698d35e0e4f417b8e3938ae21b13ad6613376f7fc34"
+        },
+        {
+          "index": 71,
+          "width": 164,
+          "height": 298,
+          "x": -54,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a7093faecb485b2f5da5abe869501f2e542f29b02ada6a2636a6682313184d69",
+          "decodedRgbaSha256": "f74fc7e54a8fc8a06e70617544eb880070b959492d4d73006ed600ab3c1c7484"
+        },
+        {
+          "index": 72,
+          "width": 164,
+          "height": 297,
+          "x": -55,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5e641fc22ef8bbbc594e7ecf7c1ac811e02bc6b48265d805a7c35eb0f6b00d55",
+          "decodedRgbaSha256": "81a56ac6fe996c14da0837883ae2426fdef6f77db410e99df966418777c3816a"
+        },
+        {
+          "index": 73,
+          "width": 164,
+          "height": 298,
+          "x": -56,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9b46fbcf56bb2523ac7fab99058196553aa084b3c69b698e8f4e125d6773338f",
+          "decodedRgbaSha256": "906055e3a102dd67d1f842a52424721c604cbfd6158c4df6baada383f3a5213c"
+        },
+        {
+          "index": 74,
+          "width": 164,
+          "height": 298,
+          "x": -58,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "49b8839b742bbe625e5be6f2a633e3e985fba99bbfd8d4a14d6d507eaa59000a",
+          "decodedRgbaSha256": "92e2b8c711c608e0c64418f081787e38c43eb3a46f610d7be8b0432e60be6716"
+        },
+        {
+          "index": 75,
+          "width": 164,
+          "height": 297,
+          "x": -58,
+          "y": -160,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "ab8b6be41cb20841d3414d36a5d5323617f7d891582f6f625691fbbfb154af99",
+          "decodedRgbaSha256": "b9aef3b0ba6fe7b7688d3e9c117c83407ca095aeb908d5074f58d7edcbfcbee5"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Taoist",
+      "gender": "Female",
+      "base": 340,
+      "role": "body",
+      "frames": [
+        {
+          "index": 340,
+          "width": 156,
+          "height": 299,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e9116a9609b2326973421ec51b55d79ad48028a331323f9d1b055a0661872e35",
+          "decodedRgbaSha256": "8b66b03411716f3848b8c9b0f4161616abbc18a6086c584b0e69995e665ca5f9"
+        },
+        {
+          "index": 341,
+          "width": 152,
+          "height": 299,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "674a8fa56cfe1954fe12f07e2c4de91bfafa97137aa4b5388111e6d92aae1023",
+          "decodedRgbaSha256": "a7d962a7bb88dfa476f6fb33f7031f1161c99e15abc6699e573686bf37ca2c87"
+        },
+        {
+          "index": 342,
+          "width": 152,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f0c20774e788cfe8b4e15194e66d304f14adcb4c83068427ad80f002c0438bc3",
+          "decodedRgbaSha256": "b5fd8fd192aba3433a3b4bf21d0f51504f6a406ae9d1dea005737704c905f0ba"
+        },
+        {
+          "index": 343,
+          "width": 152,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "509d4940860dc290aeef50d794bf66c24c316988d57be197f44399296c8c09a0",
+          "decodedRgbaSha256": "2cdeaa851a3ec6ebcfb763bc73fa4049097de764da04dde9b9f7aa169104e47f"
+        },
+        {
+          "index": 344,
+          "width": 148,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "585f20db992f6a2e5a23228b1632b6449c2ace8ba27647308c77b1fdf65989f4",
+          "decodedRgbaSha256": "b855f63ee58094139619a60822042b882c8f1f432436660ced5002d6ecd5c5ae"
+        },
+        {
+          "index": 345,
+          "width": 148,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "24651cc0887926279184e01841ef0fba11f9aa455262c0c60cb16b44f55ead48",
+          "decodedRgbaSha256": "972aab858ce437f1321407176ab6a33b0db1f664677e9b9a589b61f104604621"
+        },
+        {
+          "index": 346,
+          "width": 148,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "fc1723ffbbf61e021c18435cf65f735bc567c91a593c83c6bb46116b7b4b22dc",
+          "decodedRgbaSha256": "bd9112460f774158545598145061c21255c6ea5e4e6b4ab847f7b05298b567b4"
+        },
+        {
+          "index": 347,
+          "width": 148,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "b6567a2a3db97f220842280e3a230fa63562a415bf283a6716bb785b2896f03b",
+          "decodedRgbaSha256": "b3f754cb3b859d88beaff85cccdec97efe540f43f7305d1fd149f6518c81df21"
+        },
+        {
+          "index": 348,
+          "width": 148,
+          "height": 300,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9b2d6f735ee509cfdea6c426339d171ab3ca8b13c5e2d79c14689424dc3762d8",
+          "decodedRgbaSha256": "869e3f51156742f358df3297b9e613d6f847006a2185bbaf7e4f5acdab8a185d"
+        },
+        {
+          "index": 349,
+          "width": 148,
+          "height": 300,
+          "x": -56,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e81a90270096c86788f34ff69485bd4a0d002223d0e34305e2defb68feb9f9fc",
+          "decodedRgbaSha256": "e24cfbe1ee470904d2826618b6a258ffec1fe7267af78344fbf95e334c8568e5"
+        },
+        {
+          "index": 350,
+          "width": 152,
+          "height": 300,
+          "x": -56,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "522b62977166bfe1df885631a2978adb837c85fb4e1fe963ce6ee3ae7b3f2412",
+          "decodedRgbaSha256": "ecfbdd8e08dcbd4ed456311e98698dcaaa829e3bb1207c1e20173b966fe16126"
+        },
+        {
+          "index": 351,
+          "width": 152,
+          "height": 300,
+          "x": -56,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "cccafe5c74a7eb52b17f4cc545ee60a400c5410f12b541e95437046acb7323dd",
+          "decodedRgbaSha256": "0221ef4621dde7916cb532f54a22e9a01890076ad9fea09f882f575f04a804e1"
+        },
+        {
+          "index": 352,
+          "width": 152,
+          "height": 300,
+          "x": -56,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e548f083df75ec60fef8400e36877e3ccd57e289f5aaa851da626bfab0960870",
+          "decodedRgbaSha256": "9c34a3613bf9aa266cf1fe0eab37c2843c90044349fd6301f781ae3bb32e24b3"
+        },
+        {
+          "index": 353,
+          "width": 152,
+          "height": 300,
+          "x": -56,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2e9b618d6e2a1995fd6e69c99f78754f9eb61d8c01e5834bca2ce36058afa8f9",
+          "decodedRgbaSha256": "2665782a5e7e71d4a4aa41e0a782e02e10c09bde6247511b074afc5835bf1675"
+        },
+        {
+          "index": 354,
+          "width": 152,
+          "height": 300,
+          "x": -56,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "52d818411e9b36e32a68316674368d78e800e9a70e76e91ccb881a65d1623ad8",
+          "decodedRgbaSha256": "6ad83a6d18a6e061ca50b9214d30a83b3dd0c6f309ac6262fb49c68f529e1bb8"
+        },
+        {
+          "index": 355,
+          "width": 152,
+          "height": 299,
+          "x": -55,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5341775bc4ec0628e51b898f19bace2922f61667f568b364bf2f6f161768b879",
+          "decodedRgbaSha256": "1810c608c79443bb434180dc75030a7d0c2d00b432da8d3f280eab718e61f343"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Assassin",
+      "gender": "Male",
+      "base": 80,
+      "role": "body",
+      "frames": [
+        {
+          "index": 80,
+          "width": 140,
+          "height": 307,
+          "x": -35,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "491c5ff14a3243870474b0a512076ec29bda788bf3679ac9bffe3a59ae621046",
+          "decodedRgbaSha256": "10e10ae2927a5e6dd29e1b748c5b264b89a0618f975c9a60925fa8bffce8d464"
+        },
+        {
+          "index": 81,
+          "width": 144,
+          "height": 306,
+          "x": -35,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "07a3bbc0370fb6d3cb669b08ca1be857037a1df6ee2fffcea716db308cf0ea0d",
+          "decodedRgbaSha256": "bd15fc74b58f4766335289e4a4ac0747f73dc85b9cb4339e9ee787cf79923136"
+        },
+        {
+          "index": 82,
+          "width": 144,
+          "height": 306,
+          "x": -35,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9844717a75953be3a1f4a3956db7c2d26c97e4890c170184a4cdd754ccf22737",
+          "decodedRgbaSha256": "6c1ee83c0a73a31f489d81d415cea9585a6080253057566634d10bf98374b52c"
+        },
+        {
+          "index": 83,
+          "width": 148,
+          "height": 306,
+          "x": -35,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "60d4893d7f22f515f3d88b6fe53d496180323b16c04bc84a1ce7be3c7b6d5adc",
+          "decodedRgbaSha256": "63d10054e0295e868109ec912712fcabcc0c0e66490da07640888e7c3cd19577"
+        },
+        {
+          "index": 84,
+          "width": 148,
+          "height": 307,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "1b61025ab1ca731d8d38824ba628600c5a8374ffd2314d110b2f8ae82983a23e",
+          "decodedRgbaSha256": "01ff233d1cf3c7e5de665eed7be071986fe1b589c5cebf931fcb85c2cd515d35"
+        },
+        {
+          "index": 85,
+          "width": 148,
+          "height": 307,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f19f49c000f85dfb2b23695c8206b390468ace3d1ef1cfe4b8d6a0afc70ae15e",
+          "decodedRgbaSha256": "76494d9358070ae0577c4d5cc372fd8f09eb3211bacc7e8d1c9c7c1ae650f74f"
+        },
+        {
+          "index": 86,
+          "width": 148,
+          "height": 307,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8cb3315346f62ee71c4a4a889f501ddbcc2c233f21fb1d9ecfae8805467e24f8",
+          "decodedRgbaSha256": "f9ce8e26ed92bdde3482a2762221244302b89d60708cdf70d973354b534fe401"
+        },
+        {
+          "index": 87,
+          "width": 152,
+          "height": 306,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "cf509744feabaab9e8a190556b91799f90c5ed6dfa7ce3687d803f23da31bf94",
+          "decodedRgbaSha256": "bb1eea8bbf7d2584007887a52bcaae810422723d9aec2ab22e16610775a3eb21"
+        },
+        {
+          "index": 88,
+          "width": 152,
+          "height": 306,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5aa38c1700be0e5c2cc2061a35e18f28c587a570affb7a101f499159bd5c3292",
+          "decodedRgbaSha256": "a91b4cd56cd79f32471ee6841d802a7fa3bd382487c0bb7fe65fbbfebbd04cbf"
+        },
+        {
+          "index": 89,
+          "width": 152,
+          "height": 306,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "59d74eb67dc3703c9fd70258b6ef673bee6956674c95571097305240e80536f3",
+          "decodedRgbaSha256": "3827c8b1b14c41f3ad580636e3a74fe7001d35dd1834f5d95445811232a4d204"
+        },
+        {
+          "index": 90,
+          "width": 148,
+          "height": 307,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5945c4ce81b0234d34508a4b9588da0135d204c160d966575cee2b9e3f1536f2",
+          "decodedRgbaSha256": "5a1af0f05a7fe2f84bf8ea61bafdb673c87792aff4c509b66f7318d905e35f23"
+        },
+        {
+          "index": 91,
+          "width": 148,
+          "height": 307,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9016d27dce086cdbfb1579b3753540185a8242568f2e000fa00da354a13592ef",
+          "decodedRgbaSha256": "c53ac59ed8117833856c40339014b493a73d51051c40f23df5736b87f937cb6f"
+        },
+        {
+          "index": 92,
+          "width": 148,
+          "height": 307,
+          "x": -34,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e6d1241410219ef5e0c9361d0502945d73c2c59939c75c3bb4bfae70260f7e73",
+          "decodedRgbaSha256": "a5227cf0e8e5f274ecf9cf87b3b23bc17aae18351af10b7a6c4e0dbab4be87e3"
+        },
+        {
+          "index": 93,
+          "width": 148,
+          "height": 307,
+          "x": -35,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "3d16d3233d588da6c788913e5133f8a3604d488be36fccc29f799ae3991ca14e",
+          "decodedRgbaSha256": "390a318283e7ebfa318f5ee0b1bb6fa59d64304876cdf226163f64c938b57eaa"
+        },
+        {
+          "index": 94,
+          "width": 144,
+          "height": 306,
+          "x": -35,
+          "y": -184,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "c6a7022629966c056a0a14bd335e910bd47223ba98ea580f29115b0c27662299",
+          "decodedRgbaSha256": "05a84785acfe28a17e96a112653d131a358394f13451a21c82a8c4056a85dfcf"
+        },
+        {
+          "index": 95,
+          "width": 144,
+          "height": 308,
+          "x": -35,
+          "y": -185,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "1e39d818e6bdf258ef3bbd2ede39eb242af43a96aacff5a5b831fff52777ade3",
+          "decodedRgbaSha256": "d79d0c233ce40ce3d10cc50c11c4b1efe83ece74a3124efdf48e139a17535327"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Assassin",
+      "gender": "Female",
+      "base": 360,
+      "role": "body",
+      "frames": [
+        {
+          "index": 360,
+          "width": 132,
+          "height": 282,
+          "x": -35,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "c35ec0b8c177ca798c7ad81d4b06b9959f5424f91b92b55a04691f2fbc380d4c",
+          "decodedRgbaSha256": "34f3d63db90a5f2fa59d609d110252314d2176cdb75977fc4db2c45a1314698f"
+        },
+        {
+          "index": 361,
+          "width": 132,
+          "height": 282,
+          "x": -35,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "3b48c0ced2e23d81b25eb2c6052a4080937a7ff57566e372998864e70d312fc8",
+          "decodedRgbaSha256": "de60637446fbad82e43e563766002566a9230ab8997b6f0ee8cdfe0ad788ff9c"
+        },
+        {
+          "index": 362,
+          "width": 132,
+          "height": 282,
+          "x": -34,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "dc8a9bccb4160802f0ed890653f7a1203a2bbbdedf73ad2831bca64034bba614",
+          "decodedRgbaSha256": "4c7376425ae71d494dcefbb558731dd0c345ec57d96843a0a29936a33bd0a0ff"
+        },
+        {
+          "index": 363,
+          "width": 132,
+          "height": 282,
+          "x": -33,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "098a039ca700432d8acd6df6e3178d12c8effd1bc493df2aa551f8199f85b12a",
+          "decodedRgbaSha256": "e0a38f3ad3c6b1380b81b865933881bda814a7f3bf70c86afc46402f52c5eeb1"
+        },
+        {
+          "index": 364,
+          "width": 132,
+          "height": 282,
+          "x": -32,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "99ef3823f428fc9a951f31f7bbe9fd4ed7629a4e8317b9dbd4294f26d9879746",
+          "decodedRgbaSha256": "384adb2a977b1d439e9d7564924c15335095608f411a3e9a14b635bc7703f09e"
+        },
+        {
+          "index": 365,
+          "width": 132,
+          "height": 282,
+          "x": -32,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "d4df5132ef0f0c8232aba3d312c166df9e59a5128fc627cc81740c107ee703ef",
+          "decodedRgbaSha256": "5edcd3d3eceb9a25a31af9067896b075c26a018da33c631612d4c9ba7648f176"
+        },
+        {
+          "index": 366,
+          "width": 132,
+          "height": 282,
+          "x": -32,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "61f7b44bc444efa69f677b010a4ab85c9bab2d0c312e82e0196b5ebd1ccc30e3",
+          "decodedRgbaSha256": "6e8d18a5a8fb83d0fd1c259adbff992e70c0f934bb32bdc3c2837edc34c014b2"
+        },
+        {
+          "index": 367,
+          "width": 132,
+          "height": 282,
+          "x": -32,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "08823fffc46dcd2d75c16694371036529c359f3ec6449a4079133c460583198b",
+          "decodedRgbaSha256": "36a522b214ede0f7ffe3a7d002dfaf652867b48995c6dacf0655899bb51d7b84"
+        },
+        {
+          "index": 368,
+          "width": 132,
+          "height": 283,
+          "x": -32,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "031bd4478dd9b2fc30066ac0a8af87091989f22137ed1016a023fde59c3914a5",
+          "decodedRgbaSha256": "aeb14705667125149b3c38aeaee933b4b4b6ebe93c95aa9dac8960f43538b288"
+        },
+        {
+          "index": 369,
+          "width": 132,
+          "height": 282,
+          "x": -32,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "38065c0ebb40be95c60d8bffe02ac89c8a9ebf05044534ffc7797b958cc9ae9b",
+          "decodedRgbaSha256": "8e2dd0fa2d3cfa3566e8b42f828552f43a4ff3853e95e2849137fd8b597423e1"
+        },
+        {
+          "index": 370,
+          "width": 132,
+          "height": 282,
+          "x": -33,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "756a3663616f26f5d617fd0d66d83bfa74b6e5c932c17b7c7f8a83b5ea8d192d",
+          "decodedRgbaSha256": "cf33df7d7582f57c389f4e953f292e4e80899ad36bf21b04da3af0b63a39c5ff"
+        },
+        {
+          "index": 371,
+          "width": 132,
+          "height": 282,
+          "x": -33,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "6246b87390327c203c07132f88bf8713c902b70d79145f246a0a3f0a33cd3e9f",
+          "decodedRgbaSha256": "ca0b404a4c17bee8f064dffe8f649a9bbb08e478cf43027b553e6a5e98f8fa13"
+        },
+        {
+          "index": 372,
+          "width": 132,
+          "height": 283,
+          "x": -34,
+          "y": -165,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "4d78be4c2344e9c70f5a33cd07d8fa0924e43320e35b072e89bd8ec27f7937f1",
+          "decodedRgbaSha256": "8db9ee975e6ad3e61d952524b69e6f6a7572415eb46d07b75a6cd26c6da0649f"
+        },
+        {
+          "index": 373,
+          "width": 132,
+          "height": 282,
+          "x": -34,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "0ca2e7d6d789acd7a63647fa5cae66c841cee7548de42b2c3cd6206a366387a4",
+          "decodedRgbaSha256": "722b4e77f9e44ab54d65d9489f6a467139d6640623989ecefc8767bb135358f7"
+        },
+        {
+          "index": 374,
+          "width": 132,
+          "height": 283,
+          "x": -35,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "4c8b11acd096302e311a4ac4bbbeebb32f7a5705c020fa7ff9d4fd379b1c0514",
+          "decodedRgbaSha256": "de4468a30276256c19ec54b2fd0d4507b050e56a8912d20e2838260f2ab57d7a"
+        },
+        {
+          "index": 375,
+          "width": 132,
+          "height": 282,
+          "x": -35,
+          "y": -164,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "13177ea8e572b2081a02c746e2f48fefe2f8f5e77b3c5a60456bc3dad9f5aa0c",
+          "decodedRgbaSha256": "44305dbafd51972b6d9c0a22a1802132f8147f2e6f79198ba9ef527b67d74672"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Archer",
+      "gender": "Male",
+      "base": 100,
+      "role": "body",
+      "frames": [
+        {
+          "index": 100,
+          "width": 164,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f10bb37a16f4c5dca0979f9346a4e6468d1a53615439f1911f6b8ecc5e5ee1ef",
+          "decodedRgbaSha256": "2c9d0a90a921e74726f5d87f8b6e1583c5276c09a95a8a369e095ace9f7d9e74"
+        },
+        {
+          "index": 101,
+          "width": 164,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a0caad59bff8e291fa484cdc6afc983f1398d12623379d0db645c282a461e84b",
+          "decodedRgbaSha256": "575cfdf52371d7662dd82d08ee008b61920c13e56bfe58f3df99f8f08ce4403e"
+        },
+        {
+          "index": 102,
+          "width": 160,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "26a9bfda047179fd28f9b9462c48bdc32e883f8bc871d5d94de4fa5ecb3edc76",
+          "decodedRgbaSha256": "ca7b6f9abaacf824405221344061dc1db24a979e2760b4e428a3b0380c46c650"
+        },
+        {
+          "index": 103,
+          "width": 160,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "0a3097b28e3b8e0b1400808d0361323aa8f84b50358db757b750af01e9b0decc",
+          "decodedRgbaSha256": "e7b18be46e6e68f61098006e0d104cfbd94cc45018b3416b52229a1d91f417db"
+        },
+        {
+          "index": 104,
+          "width": 160,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "056b6b4320784b39ff05ef59fb0ba03666753ede75681e8695650ebeb245a3be",
+          "decodedRgbaSha256": "f5da8d836a5067d5ea92773c59b041bac5423ac89a7aa8bf554546726ac9fe0a"
+        },
+        {
+          "index": 105,
+          "width": 164,
+          "height": 298,
+          "x": -39,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f5a97a48bf58b820412434c8a6cdb30b3cadc84e299c675d50a0f114cc7d8dfa",
+          "decodedRgbaSha256": "133dd36219c2c52030d75ebe0ef06dc8d0634dbe39d7ec615127d773d26a41f6"
+        },
+        {
+          "index": 106,
+          "width": 160,
+          "height": 298,
+          "x": -39,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "ef2efc7db3bd7f509886cd4492ad2173fadd84fa548476ecb120c9de7bc516eb",
+          "decodedRgbaSha256": "23bb95c08d4d4b8e0dd5eeba7a3dd0c2c38b86201ff7e89b1f8e2da887028a41"
+        },
+        {
+          "index": 107,
+          "width": 160,
+          "height": 297,
+          "x": -39,
+          "y": -152,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "8395aa35a0c3e50c5f37c62af6cc5c84421cc3ec50e63ce1bafe0588cc85307e",
+          "decodedRgbaSha256": "18da5fcef7a2decd7735861b6d3f64a459487bb51ac3b6bb6fdcdaae8b59d850"
+        },
+        {
+          "index": 108,
+          "width": 160,
+          "height": 297,
+          "x": -39,
+          "y": -152,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "344147f4ff6802a86196ac2f58ca7d0e900611c07c5c66f93c8ad820e11616f1",
+          "decodedRgbaSha256": "058c17be2bf6b95881c003aa655c865325794832a9edc51ffadde4921b1a8615"
+        },
+        {
+          "index": 109,
+          "width": 160,
+          "height": 297,
+          "x": -39,
+          "y": -152,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "802edd4747a6048daaf387e0a66ee7a98cad56e896b7492491699927c5f6d777",
+          "decodedRgbaSha256": "ba2a9a2d458c373bdecd4b1cda13d2915c312552069dbf275a2ad4ab10a07f7c"
+        },
+        {
+          "index": 110,
+          "width": 160,
+          "height": 297,
+          "x": -39,
+          "y": -152,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "3bc154d0cf6ceaebb957de8ae62cb1809d9cca41a02e51085d56942adc1f8b86",
+          "decodedRgbaSha256": "39fca1b9c5873dc5eb3329a84b7bb26d48a34de5ef093b06d39d5179c0dcf63d"
+        },
+        {
+          "index": 111,
+          "width": 160,
+          "height": 297,
+          "x": -39,
+          "y": -152,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e40be01405eff635ceeba076a6984b26956c9ca72fd6dc7caa6c8cb00c4d06d4",
+          "decodedRgbaSha256": "642f0277ccfb272e1d66bd0f48c1b6c8ed5d1c18339fcb77777be864306102d2"
+        },
+        {
+          "index": 112,
+          "width": 164,
+          "height": 297,
+          "x": -39,
+          "y": -152,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9f33168d0b7b1dcdf13ec976f9d1d74edeb92351dc081d00b07c2b1ec00d56f1",
+          "decodedRgbaSha256": "f2ea8944652255e46f5c4a0c277535ecee5ac693caf033da546872b092169577"
+        },
+        {
+          "index": 113,
+          "width": 160,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "7079c78fa590c6c6716b96e4a90f4d5950690941b99548330424766ddb8bbe1a",
+          "decodedRgbaSha256": "c813193b4b344dccc06cc4b00d7a0871aa776731f4b88a8fe28c9cd138e4cac3"
+        },
+        {
+          "index": 114,
+          "width": 160,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "cebf323b321cd141516c3676f0a1cfed56b343e1dc3edde6fe6c501324bc3c3b",
+          "decodedRgbaSha256": "24b059dfa9f7e18043925079c4c45a275d1482573b42258643020d7495f4b995"
+        },
+        {
+          "index": 115,
+          "width": 160,
+          "height": 298,
+          "x": -38,
+          "y": -153,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "fb94c2f0794e19e957ce82173ce4ad0ccecd0eb06babe96c3e76fb2b523623d2",
+          "decodedRgbaSha256": "eb53d7eafde15fbde3b41940b9d1b60ae2e97a146aa95aab05b760530901f4c5"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Archer",
+      "gender": "Female",
+      "base": 140,
+      "role": "body",
+      "frames": [
+        {
+          "index": 140,
+          "width": 116,
+          "height": 308,
+          "x": -25,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "695cab6c4b001a12d9e25ce27afe3ecddcfd42d6d1c61ecb67915481f16fd36a",
+          "decodedRgbaSha256": "777e841c66f40173c70ea2e85a74294a0c37ae4525150684a241c179b17fca9b"
+        },
+        {
+          "index": 141,
+          "width": 116,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "4067d693d5602063ed9cefad9977b6c8603acbfbb3738f0b9108de45c52a37c6",
+          "decodedRgbaSha256": "14d35785a8cadc05c16505e21dc4735baa357b0cea98a5b0384be2a45e14978f"
+        },
+        {
+          "index": 142,
+          "width": 116,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f39904a4bfdcc7c04f4686caf400a09657aa89ceb51c7d14971e5cb8f8b5ad7e",
+          "decodedRgbaSha256": "0e7f2788bc0e29c82318aa2f3cb20528acf1c5e54495803dfc72e1480916a9e4"
+        },
+        {
+          "index": 143,
+          "width": 116,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9e94ef565b85571e753a0f05c40f62f10ce58ad72f29a832488d73f40852abb9",
+          "decodedRgbaSha256": "a9f416babaac4d668ea992924c453e7b9c9b63640aee9ff1e6be116de3179d34"
+        },
+        {
+          "index": 144,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a3652dcc2903c399d318c196a7819e1f4415178242c7fe900ec022a1c1a4bb72",
+          "decodedRgbaSha256": "41209a56e9fe54649fcb5cc63ad7a54b5f21550b70fa3c0aef004d688d333fee"
+        },
+        {
+          "index": 145,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "d43f100a11d4ff6c795930e78bbf191559459137aadb49d19862d991a0b9164d",
+          "decodedRgbaSha256": "3dda72968329883d3e97cfcc881e679ad60483ccb0e12c078c8cef014004f5f8"
+        },
+        {
+          "index": 146,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e777beaa598cbf6f652f4904aeb0fa604b851996f1fdc82bfa17931b04b57d74",
+          "decodedRgbaSha256": "8449949c8be663b4aa8eec266c6977f25bebac1cc3e2aeedfdc140d6d608bd64"
+        },
+        {
+          "index": 147,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "774c2e560737df5bef33e9439c50f58703ce2253ef01a84e0f663ac36054a28d",
+          "decodedRgbaSha256": "c10e06687c55bda2d03675f186bdc756d856124c1490134d8dd76aba18884b0b"
+        },
+        {
+          "index": 148,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "6fc208bda1bd9ac3a7892edebb153e0b65093913112858d491d93526e394bfe1",
+          "decodedRgbaSha256": "89d610291eebce891bd4081653aaa1a808ebd6e0f05c454f1125a1397f4d9272"
+        },
+        {
+          "index": 149,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e7554e22fbb999d72c1efa7ed5ec6aa597708b564f13f291a071c1674760863e",
+          "decodedRgbaSha256": "3e3301447b5b0a9b568cc95cd37396e91d4a0ab616d37b0e0418a91b2686e7d5"
+        },
+        {
+          "index": 150,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "a8c98ec6eb4d1d4afc4c383f08eb32d3b778c9d76c8a6fb2e73bd3c98ea5a744",
+          "decodedRgbaSha256": "2b5e9f93374030f209cdac0a8095dbc9d4ace46296897e80cebc4ef611e6deb9"
+        },
+        {
+          "index": 151,
+          "width": 116,
+          "height": 308,
+          "x": -27,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "084f6e14cd6d1165130ab9ea74ac0c1e5624f19477bdf5c0a420811136e4c607",
+          "decodedRgbaSha256": "c291989e75a126ec29718d22ab8e531711a327f391175393d1995cec0f954bf4"
+        },
+        {
+          "index": 152,
+          "width": 112,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "9ca9f29de1f2b31b87e135757872e896af991a4c2faef3bab3dd0202e4e4b3d6",
+          "decodedRgbaSha256": "f669191791877af087277503ec53675ac266c2623403d8e0169f55275ff38c99"
+        },
+        {
+          "index": 153,
+          "width": 116,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2b38e797998d0caab01e6f0b9499842f32d96a118cbdaf646dd65f18d82dbc98",
+          "decodedRgbaSha256": "9d132b6d621be7f124d39e0c2e733da185baf953f2706472b22497f7700b7256"
+        },
+        {
+          "index": 154,
+          "width": 116,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "dcbd0c11afcabd223415226bb487e2d4feb8c029d6c5a8efb5ea7a8e657fc500",
+          "decodedRgbaSha256": "0ee7cb8f1deb02b3189b5ae646c7f25fdbb908e5fa9da025bdc478eb4c898e5c"
+        },
+        {
+          "index": 155,
+          "width": 116,
+          "height": 308,
+          "x": -26,
+          "y": -163,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "39a0417484069d920594c15505eff7de00b18209501c080031e076a6d885b413",
+          "decodedRgbaSha256": "ccd920d9d7fa41f54b35314aad452ba023b3a3940ebdae8c1409e3435c7538f9"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Wizard",
+      "gender": "Male",
+      "base": 600,
+      "role": "additive-effect",
+      "frames": [
+        {
+          "index": 600,
+          "width": 164,
+          "height": 392,
+          "x": -90,
+          "y": -244,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "03c6483551e1329db8a4f38f0d49cbc68055d6332a9e6d11a7c6e2366520f5c0",
+          "decodedRgbaSha256": "6a9d8947d8ca6893cfa66056970713138b3466ddc4bb97475aeeedb5d396ea78"
+        },
+        {
+          "index": 601,
+          "width": 168,
+          "height": 397,
+          "x": -91,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "d9d24f62e8f323b5cdc0f1a73c3e6ccbfbfcb986212fad885e8ec029b32d20f5",
+          "decodedRgbaSha256": "0645991e8edf123e03ade2e956019d541e68ea84557398872aad96538bdd26ad"
+        },
+        {
+          "index": 602,
+          "width": 172,
+          "height": 399,
+          "x": -94,
+          "y": -246,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5938a3e3d86fe044d91474d3ae053292bc2122bee2e3dd933c70e5dede82de81",
+          "decodedRgbaSha256": "2535bc85214ed1ef549c17f1cc853db5e0fca24d4419902f39b5678d0c85d291"
+        },
+        {
+          "index": 603,
+          "width": 184,
+          "height": 401,
+          "x": -96,
+          "y": -246,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "860bebdefb9de42b1b3ec7dfccc703c896dbda5e3ccac8f61ed5a3934eaec962",
+          "decodedRgbaSha256": "e4224fca7d96a52a296cfc4800cb7a367bb72ed2a631ca80ad6fca37c9dac1ab"
+        },
+        {
+          "index": 604,
+          "width": 192,
+          "height": 398,
+          "x": -97,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2f3b276ef6e3b9bef7d658705952aa4b54f7298ef17b9c77cf4432c54f6efd3b",
+          "decodedRgbaSha256": "a289ff9493158d039ad576a35c4dd052d397ec40870b206e7160159e9cffbdf3"
+        },
+        {
+          "index": 605,
+          "width": 204,
+          "height": 398,
+          "x": -99,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f3fdf8a3c32f8b260165b444e0161656c0c7d5f73483bedb9e65a18ceb7460ee",
+          "decodedRgbaSha256": "a193deac0f0d6beae79f1d7e633016ba030de73175a9f984535a2fc9a2b4d870"
+        },
+        {
+          "index": 606,
+          "width": 212,
+          "height": 402,
+          "x": -102,
+          "y": -247,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "03ef51006f21631a54a40f55927be959097034089eae5652094d50b628c2a0c2",
+          "decodedRgbaSha256": "605a6d52b366a70247b9fbf1674dd811155ed7801545dc8f7438e5f0418bbcb3"
+        },
+        {
+          "index": 607,
+          "width": 224,
+          "height": 402,
+          "x": -104,
+          "y": -247,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2813bd2caee0a75ef1b73fbc2040d51f87829e5c4e11d5c38b77d2fd2a036974",
+          "decodedRgbaSha256": "efff85e141da25bc22e0aab87842111efa9045ea2c8c2e3a3d6f21e0b47ec84b"
+        },
+        {
+          "index": 608,
+          "width": 224,
+          "height": 403,
+          "x": -106,
+          "y": -247,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "696fbef44461753302e27a1096b1e57f13f4d90906ab93ffea4a833014420014",
+          "decodedRgbaSha256": "58c9e495933e61bb0396e9d9da7f72bff818e30e4f8fca9ef8cfdb8a3e05fde5"
+        },
+        {
+          "index": 609,
+          "width": 220,
+          "height": 403,
+          "x": -104,
+          "y": -247,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "c5bb9f891713dcab275ac0d15327507ccd72263225e8cc77d8c4f469f6b563c4",
+          "decodedRgbaSha256": "0a4605bf34b7bad3393333b300a83658df421fc680ada76e7b85311981385d2e"
+        },
+        {
+          "index": 610,
+          "width": 200,
+          "height": 403,
+          "x": -101,
+          "y": -247,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "609ada470a265b3ddbff65f28b856c4b47c472a9dc4d60dfb3efd3867360a2d8",
+          "decodedRgbaSha256": "565a2d86f07456a0584db8579e6d74645dd6e3edabc5fefc9b9b2be56e6b18a5"
+        },
+        {
+          "index": 611,
+          "width": 200,
+          "height": 401,
+          "x": -99,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "19e11e485d4d5c82550c3883fa07ac5f02903119f0b9014f8d1b19ba48bd847f",
+          "decodedRgbaSha256": "4241d95799ddcaf2596f2d213accfae5d022eee498f4076d465ad94dbe421289"
+        },
+        {
+          "index": 612,
+          "width": 204,
+          "height": 402,
+          "x": -98,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "3e3a9d930c3a3d692b0daea10326a754f62701b44fdc31205834e9fcf5f396a8",
+          "decodedRgbaSha256": "8ca4d7c4e8b1c4c8b0aaaaf96910e8271e5b00b0a6fadd25f4624e8814ccb0f3"
+        },
+        {
+          "index": 613,
+          "width": 200,
+          "height": 397,
+          "x": -96,
+          "y": -246,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "7aadaf5ca645c0026caebc01f482804c909c541908cdacd7d9eb42eaa8890462",
+          "decodedRgbaSha256": "30e20094068e7eba0f05c8f4f581d8674629557bede68a764bcbda5437985a66"
+        },
+        {
+          "index": 614,
+          "width": 196,
+          "height": 400,
+          "x": -94,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "49278a787d05be753977dc29a3516ea0f1db7a1c6bee0762a48a5120c16e0015",
+          "decodedRgbaSha256": "98c3da519f0af7f6b91441116576dd1ae4e89c53d60cf5fef446dbef8107c1ed"
+        },
+        {
+          "index": 615,
+          "width": 168,
+          "height": 391,
+          "x": -91,
+          "y": -245,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "adfba362cf4730657176e70bc87843294135998a5c7b122e61855ce7cf22d05e",
+          "decodedRgbaSha256": "a57c569c33529ccbe754d6631ea117452ca7c5c8f6cec2d497bf3b83391d7e48"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    },
+    {
+      "className": "Wizard",
+      "gender": "Female",
+      "base": 880,
+      "role": "additive-effect",
+      "frames": [
+        {
+          "index": 880,
+          "width": 172,
+          "height": 355,
+          "x": -59,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "1aff487d6922b05a3509486b777cae972f070062c429c2069e6aa7c7aa1e231b",
+          "decodedRgbaSha256": "24e0c305dfc7e4b63cf80c72a9822a55a9c8c0db7708519c185eb216b63782cb"
+        },
+        {
+          "index": 881,
+          "width": 180,
+          "height": 356,
+          "x": -61,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "158fe400694abb04df0e7cd349c317a77d84621d60b33737eab6d953c8665808",
+          "decodedRgbaSha256": "8fa6c4cf4f98c42de667140e441f9f552d6b3f63eb04d58c8b4e84e05aeef489"
+        },
+        {
+          "index": 882,
+          "width": 176,
+          "height": 356,
+          "x": -62,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "27f2937d975b7728c31e0dadf6acfc1044746a5c9f3cf997eee583eb70cff16e",
+          "decodedRgbaSha256": "0eba21ec2ba142a277a19e29e7ef50927497deac5394699f094e349ae1bdcaea"
+        },
+        {
+          "index": 883,
+          "width": 188,
+          "height": 356,
+          "x": -65,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "4cba3824197a741f5db2015b5cf62554b555a49b54ff876c283c47ae142e60bf",
+          "decodedRgbaSha256": "64cb7fe5012575ebb0602c2bf16a132086e3551ed418cbc30ea7e8693c943482"
+        },
+        {
+          "index": 884,
+          "width": 184,
+          "height": 357,
+          "x": -67,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "e0f3800f2f288045d9a5625b356fcc0c43a00dee19bad741e0565663ca8e5ac2",
+          "decodedRgbaSha256": "f6e77d65f2144ef81974be741deeede5704e0341973d3e7c4cc87706af206504"
+        },
+        {
+          "index": 885,
+          "width": 192,
+          "height": 359,
+          "x": -67,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "bb8b5addd9e9fb3acc565ae820ef795aab7cc4526e1ca477830d305086bd92d4",
+          "decodedRgbaSha256": "252b01fdf86c09855a79c0f7d1f9a29bc1c4f96079d5b874badae1cabf0bf1e1"
+        },
+        {
+          "index": 886,
+          "width": 192,
+          "height": 358,
+          "x": -70,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "87faafd719fddfff2f750db974489c4879c37e285d70fea552078b92b7569179",
+          "decodedRgbaSha256": "bfb9a99ea64abf849be28572604b8c30958844d0c6064d61f8c0576f4e4441fe"
+        },
+        {
+          "index": 887,
+          "width": 200,
+          "height": 359,
+          "x": -70,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "2ed9824a430c48490f57dfccf705613cfdef90a2494a3869c0aadb22e5a57f8f",
+          "decodedRgbaSha256": "b9bc9e8377272c955e0b42e73f2d1eeccdb6cbe0ac4d1a18b355051308a987c4"
+        },
+        {
+          "index": 888,
+          "width": 208,
+          "height": 359,
+          "x": -71,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "46ebcb5f481c4ef6b06f4b988caef0478f224bf6963d5ce39322a97cb75e98df",
+          "decodedRgbaSha256": "4aa94f3b2ea7d4c70ae58a2b98c752d26b38805d3b899fd03a6c7006dfa5f3cf"
+        },
+        {
+          "index": 889,
+          "width": 208,
+          "height": 359,
+          "x": -70,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "4f0de4e8369a21adcb28555a1eb06ac646eee011cd14bc1d4b84d8fca7234f93",
+          "decodedRgbaSha256": "a18c650d22391c482d104a81c99c15fb3061c4990384dddb4033bef88611781d"
+        },
+        {
+          "index": 890,
+          "width": 208,
+          "height": 358,
+          "x": -69,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f7ba2edeb57d3799aa00490e8c914eba6dde60175e0968b1d9eb313d02fab486",
+          "decodedRgbaSha256": "a8ed21212b2948ce07242b550e1aa220fc42744a7f8fb98bb5f328575457368c"
+        },
+        {
+          "index": 891,
+          "width": 212,
+          "height": 359,
+          "x": -69,
+          "y": -221,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "af373c85db2f5e5ec274f7f57da3a1f4dcd90d3d6ca70b95b0de47ef3d05adb6",
+          "decodedRgbaSha256": "f374ad1f1055ae8008094e21dcf6420cee9912a465e45ddf32028310fb5f2cc0"
+        },
+        {
+          "index": 892,
+          "width": 212,
+          "height": 358,
+          "x": -67,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f60d4ca0db722bdfb010223775aeace28088ce713ea9fbf6704ae594c0048d52",
+          "decodedRgbaSha256": "95134a5996885c70495223e366082dfec17501f9f5d5b0348bffb058dde6493d"
+        },
+        {
+          "index": 893,
+          "width": 204,
+          "height": 357,
+          "x": -65,
+          "y": -220,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "de0ff5488d41a93e24e6fcb10496502e5ff0793e99019ed82327aa243bfdba9a",
+          "decodedRgbaSha256": "4e382d4ec7e1970f1119e4abe44aab4512d88ecaa5522cda0e760ee5a4d0e336"
+        },
+        {
+          "index": 894,
+          "width": 192,
+          "height": 355,
+          "x": -63,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "5554912e28403fd01f9847d49ed80ea1ee911516542f5bc6c12b8703b145f5c6",
+          "decodedRgbaSha256": "31667ab5159b2d16cdd559b317ee7c6d34f98c3888445166bfc25cbade1682b8"
+        },
+        {
+          "index": 895,
+          "width": 168,
+          "height": 355,
+          "x": -61,
+          "y": -219,
+          "nativeMetadataMatch": true,
+          "exportedMetadataMatch": true,
+          "pngPixelMatch": true,
+          "pngSha256": "f5f2c0ec3c999427eade95ddf1c0a134c41d0c9b3a95217cb39001eb563d9cba",
+          "decodedRgbaSha256": "a17852810d954bf9a365ec18787bb775ed88733f32fd716c4a36be8e27837933"
+        }
+      ],
+      "frameCount": 16,
+      "passed": true
+    }
+  ],
+  "nonWizardSelectionPlus560Effects": [
+    {
+      "className": "Warrior",
+      "gender": "Male",
+      "base": 580,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 0,
+      "nonTransparentPixelDetails": []
+    },
+    {
+      "className": "Warrior",
+      "gender": "Female",
+      "base": 860,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 10,
+      "nonTransparentPixelDetails": [
+        {
+          "index": 860,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 861,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 864,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 865,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 866,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 867,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 870,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 871,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 874,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 875,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "className": "Taoist",
+      "gender": "Male",
+      "base": 620,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 0,
+      "nonTransparentPixelDetails": []
+    },
+    {
+      "className": "Taoist",
+      "gender": "Female",
+      "base": 900,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 10,
+      "nonTransparentPixelDetails": [
+        {
+          "index": 900,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 901,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 904,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 905,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 908,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 909,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 910,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 911,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 914,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 915,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "className": "Assassin",
+      "gender": "Male",
+      "base": 640,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 0,
+      "nonTransparentPixelDetails": []
+    },
+    {
+      "className": "Assassin",
+      "gender": "Female",
+      "base": 920,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 8,
+      "nonTransparentPixelDetails": [
+        {
+          "index": 922,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 923,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 926,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 927,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 930,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 931,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 934,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 935,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "className": "Archer",
+      "gender": "Male",
+      "base": 660,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 3,
+      "nonTransparentPixelDetails": [
+        {
+          "index": 666,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 667,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        },
+        {
+          "index": 668,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "className": "Archer",
+      "gender": "Female",
+      "base": 700,
+      "frameCount": 16,
+      "presentFrames": 16,
+      "dimensions": [
+        "4x1"
+      ],
+      "nonTransparentPixels": 1,
+      "nonTransparentPixelDetails": [
+        {
+          "index": 715,
+          "frameOffset": [
+            15,
+            109
+          ],
+          "pixel": 0,
+          "rgba": [
+            144,
+            40,
+            0,
+            255
+          ]
+        }
+      ]
+    }
+  ],
+  "effectExamples": [
+    {
+      "gender": "Male",
+      "bodyBase": 40,
+      "overlayBase": 600,
+      "overlapOpaque": 4655,
+      "ordinaryAlphaDarkened": 3772
+    },
+    {
+      "gender": "Female",
+      "bodyBase": 320,
+      "overlayBase": 880,
+      "overlapOpaque": 5237,
+      "ordinaryAlphaDarkened": 3299
+    }
+  ],
+  "rendering": {
+    "framesPerSet": 16,
+    "nominalFrameDelayMs": 250,
+    "nominalCycleMs": 4000,
+    "originalAdvance": "At most one frame per UpdateOffSet call, then next=CMain.Time+250; no elapsed-time catch-up. Index getter is base+OffSet; effect uses same Index+560.",
+    "create": {
+      "modalAt1024x768": [
+        218,
+        154
+      ],
+      "modalSize": [
+        588,
+        460
+      ],
+      "localPreviewAnchor": [
+        120,
+        250
+      ],
+      "screenPreviewAnchor": [
+        338,
+        404
+      ],
+      "wizardOnlyAfterDraw": true,
+      "frameSets": "same as selection",
+      "fadeInConfigured": false
+    },
+    "select": {
+      "screenPreviewAnchor": [
+        260,
+        420
+      ],
+      "callsPlus560ForAllClasses": true,
+      "fadeInConfigured": true,
+      "fadeDelayMs": 75,
+      "fadeIncrement": 0.1,
+      "fadeCaveat": "MirControl starts Opacity=1; FadeIn setter does not reset it and SelectScene does not set Opacity. In this local source the configured fade saturates on its first update, so a visible fade-in is not established."
+    },
+    "scale": "Natural ChrSel width/height, one source pixel per logical UI pixel. No separate body/effect scale in the inspected preview renderers.",
+    "placement": "For each frame independently: topLeft=unoffsetPreviewAnchor+(frame.x,frame.y). Do not add body offset to effect offset.",
+    "blend": {
+      "body": "ordinary alpha",
+      "wizardEffect": "DXManager.SetBlend(true) NORMAL: source=SourceAlpha, destination=One, operation=Add, rate=1"
+    },
+    "clipping": "No preview-child or modal-inner scissor in inspected Crystal Draw/DrawChildControls/DrawBlend; off-screen bounds checks and framebuffer clipping remain. Effect must not be clipped to body rectangle."
+  },
+  "findings": [
+    {
+      "id": "wizard-blend",
+      "confidence": "confirmed source/pixel discrepancy in the originally observed renderer",
+      "text": "Original ordinary ImageNode on the effect layer overwrites weapon pixels with opaque dark effect RGB. Crystal requires additive SourceAlpha+One. Parent is separately implementing the shared renderer fix."
+    },
+    {
+      "id": "assets",
+      "confidence": "verified",
+      "text": "All 192 native metadata and exported PNG frames exactly match the original library dimensions, offsets, and decoded RGBA; changing sprite offsets or rebuilding art is not supported by this evidence."
+    },
+    {
+      "id": "typing-animation-reset",
+      "confidence": "confirmed source behavior, not live tested here",
+      "text": "native_shell_ui render_shell_ui rebuilds all content on any model/focus change, so name typing/focus recreates preview frame0/timer. Crystal TextChanged only validates name/button; its existing MirAnimatedControl and OffSet remain alive."
+    },
+    {
+      "id": "frame-stall-cadence",
+      "confidence": "source difference",
+      "text": "Native Timer consumes times_finished_this_tick; Crystal advances only once and schedules now+250. Nominal cadence agrees; behavior after long stalls differs."
+    },
+    {
+      "id": "all-class-scope",
+      "confidence": "verified source and assets only",
+      "text": "All five classes and both genders have audited assets; current native creation picker exposes only Warrior/Wizard/Taoist. Assassin/Archer audit does not enable them or claim gameplay acceptance."
+    },
+    {
+      "id": "non-wizard-selection-speck",
+      "confidence": "verified original RGBA",
+      "text": "Native preview_data comment says all non-Wizard +560 ranges are transparent, but several 4x1 frames contain a single [144,40,0,255] pixel at offset(15,109). Selection original unconditionally adds these, producing a one-pixel color at logical(275,529). Creation only invokes Wizard so these are irrelevant there. No extra full character effects or wrong body frames were found."
+    }
+  ]
+}

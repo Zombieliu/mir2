@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T07:11:01.815Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-adapter.test.mjs"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "tests": 8,
+  "passed": 8,
+  "failed": 0,
+  "sourceBefore": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    }
+  ],
+  "sourceUnchanged": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-adapter-synthetic-tests.log",
+    "bytes": 2205,
+    "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+  },
+  "scope": "External adapter/source-row-terminal fake-class tests only; actual game modules were not imported and no accounts, realm, monitor or load were created.",
+  "realmStarted": false
+}

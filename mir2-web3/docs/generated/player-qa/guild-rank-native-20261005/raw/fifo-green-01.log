@@ -1,0 +1,184 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling serde_core v1.0.228
+   Compiling quote v1.0.45
+   Compiling syn v2.0.117
+   Compiling indexmap v2.14.0
+   Compiling bitflags v2.11.1
+   Compiling crossbeam-utils v0.8.21
+   Compiling hashbrown v0.16.1
+   Compiling autocfg v1.5.0
+   Compiling winnow v1.0.1
+   Compiling serde_derive v1.0.228
+   Compiling bytemuck_derive v1.10.2
+   Compiling bytemuck v1.25.0
+   Compiling thiserror-impl v2.0.18
+   Compiling serde v1.0.228
+   Compiling thiserror v2.0.18
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling num-traits v0.2.19
+   Compiling concurrent-queue v2.5.0
+   Compiling toml_edit v0.25.11+spec-1.1.0
+   Compiling bevy_macro_utils v0.19.0
+   Compiling event-listener v5.4.1
+   Compiling event-listener-strategy v0.5.4
+   Compiling getrandom v0.4.2
+   Compiling arrayvec v0.7.6
+   Compiling futures-lite v2.6.1
+   Compiling unicode-segmentation v1.13.2
+   Compiling wgpu-types v29.0.4
+   Compiling encase_derive_impl v0.12.0
+   Compiling uuid v1.23.1
+   Compiling async-channel v2.5.0
+   Compiling encase_derive v0.12.0
+   Compiling convert_case v0.10.0
+   Compiling bevy_platform v0.19.0
+   Compiling derive_more-impl v2.1.1
+   Compiling encase v0.12.0
+   Compiling smol_str v0.2.2
+   Compiling glam v0.32.1
+   Compiling derive_more v2.1.1
+   Compiling bevy_utils v0.19.0
+   Compiling erased-serde v0.4.10
+   Compiling bevy_reflect_derive v0.19.0
+   Compiling variadics_please v1.1.0
+   Compiling assert_type_match v0.1.1
+   Compiling async-executor v1.14.0
+   Compiling bevy_ecs_macro_logic v0.19.0
+   Compiling crossbeam-queue v0.3.12
+   Compiling bevy_tasks v0.19.0
+   Compiling bevy_reflect v0.19.0
+   Compiling bevy_ecs_macros v0.19.0
+   Compiling bevy_derive v0.19.0
+   Compiling zerocopy v0.8.48
+   Compiling zerocopy-derive v0.8.48
+   Compiling either v1.15.0
+   Compiling bevy_ecs v0.19.0
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing v0.1.44
+   Compiling half v2.7.1
+   Compiling itertools v0.14.0
+   Compiling bevy_app v0.19.0
+   Compiling rand_distr v0.6.0
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+   Compiling memchr v2.8.0
+   Compiling windows-core v0.62.2
+   Compiling bevy_math v0.19.0
+   Compiling shlex v1.3.0
+   Compiling cc v1.2.60
+   Compiling aho-corasick v1.1.4
+   Compiling regex-syntax v0.8.10
+   Compiling regex-automata v0.4.14
+   Compiling blake3 v1.8.4
+   Compiling naga v29.0.4
+   Compiling piper v0.2.5
+   Compiling crossbeam-channel v0.5.15
+   Compiling windows-future v0.3.2
+   Compiling bevy_time v0.19.0
+   Compiling blocking v1.6.2
+   Compiling windows-collections v0.3.2
+   Compiling windows-numerics v0.3.1
+   Compiling async-lock v3.4.2
+   Compiling futures-macro v0.3.32
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling futures-task v0.3.32
+   Compiling simd-adler32 v0.3.9
+   Compiling futures-util v0.3.32
+   Compiling bevy_diagnostic v0.19.0
+   Compiling async-fs v2.2.0
+   Compiling windows v0.62.2
+   Compiling ron v0.12.1
+   Compiling async-broadcast v0.7.2
+   Compiling bevy_asset_macros v0.19.0
+   Compiling miniz_oxide v0.8.9
+   Compiling bevy_asset v0.19.0
+   Compiling flate2 v1.1.9
+   Compiling wgpu-naga-bridge v29.0.4
+   Compiling fdeflate v0.3.7
+   Compiling bevy_input v0.19.0
+   Compiling pxfm v0.1.28
+   Compiling bevy_window v0.19.0
+   Compiling moxcms v0.8.1
+   Compiling png v0.18.1
+   Compiling hexasphere v18.0.0
+   Compiling matchers v0.2.0
+   Compiling bevy_transform v0.19.0
+   Compiling tracing-log v0.2.0
+   Compiling wgpu-hal v29.0.4
+   Compiling bevy_encase_derive v0.19.0
+   Compiling euclid v0.22.14
+   Compiling gpu-descriptor-types v0.2.0
+   Compiling guillotiere v0.6.2
+   Compiling gpu-allocator v0.28.0
+   Compiling image v0.25.10
+   Compiling tracing-subscriber v0.3.23
+   Compiling gpu-descriptor v0.3.2
+   Compiling bevy_mesh v0.19.0
+   Compiling bevy_color v0.19.0
+   Compiling ordered-float v5.3.0
+   Compiling profiling v1.0.17
+   Compiling bevy_image v0.19.0
+   Compiling bevy_log v0.19.0
+   Compiling regex v1.12.3
+   Compiling wgpu-core v29.0.4
+   Compiling naga_oil v0.22.0
+   Compiling wgpu-core-deps-windows-linux-android v29.0.4
+   Compiling bevy_camera v0.19.0
+   Compiling wgpu v29.0.4
+   Compiling accesskit v0.24.1
+   Compiling bevy_shader v0.19.0
+   Compiling winit v0.30.13
+   Compiling bevy_material_macros v0.19.0
+   Compiling wasm-bindgen-shared v0.2.118
+   Compiling bevy_material v0.19.0
+   Compiling accesskit_consumer v0.35.0
+   Compiling offset-allocator v0.2.0
+   Compiling bevy_render_macros v0.19.0
+   Compiling rustversion v1.0.22
+   Compiling bevy_render v0.19.0
+   Compiling accesskit_windows v0.32.1
+   Compiling bevy_light v0.19.0
+   Compiling bevy_sprite v0.19.0
+   Compiling accesskit_winit v0.32.2
+   Compiling bevy_a11y v0.19.0
+   Compiling bevy_input_focus v0.19.0
+   Compiling bevy_core_pipeline v0.19.0
+   Compiling approx v0.5.1
+   Compiling bevy_winit v0.19.0
+   Compiling bevy_sprite_render v0.19.0
+   Compiling wasm-bindgen-macro-support v0.2.118
+   Compiling wasm-bindgen v0.2.118
+   Compiling wasm-bindgen-macro v0.2.118
+   Compiling serde_json v1.0.149
+   Compiling chrono v0.4.45
+   Compiling mir2-protocol v0.1.0 (C:\Users\Administrator\.codex\worktrees\gn\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling bevy_internal v0.19.0
+   Compiling bevy v0.19.0
+   Compiling mir2-ui-core v0.1.0 (C:\Users\Administrator\.codex\worktrees\gn\mir2-player-journey\mir2-web3\apps\game-client\ui-core)
+   Compiling mir2-client-bevy v0.1.0 (C:\Users\Administrator\.codex\worktrees\gn\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: method `normalize_bindings` is never used
+   --> C:\Users\Administrator\.codex\worktrees\gn\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mir2-client-bevy` (lib) generated 1 warning
+   Compiling console_error_panic_hook v0.1.7
+   Compiling js-sys v0.3.95
+   Compiling mir2-bevy-runtime v0.1.0 (C:\Users\Administrator\.codex\worktrees\gn\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 39s
+     Running unittests src\lib.rs (C:/mir2-build/gateway-tests-r51\debug\deps\mir2_bevy_runtime-688da33e1df7b293.exe)
+
+running 4 tests
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_fifo_retains_terminal_before_metadata_in_one_main_frame ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_metadata_only_does_not_ack_even_if_text_matches ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_scene_reset_retains_pending_and_ordinary_roster ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_session_reset_retires_old_queued_terminal_and_pending ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 279 filtered out; finished in 0.02s
+

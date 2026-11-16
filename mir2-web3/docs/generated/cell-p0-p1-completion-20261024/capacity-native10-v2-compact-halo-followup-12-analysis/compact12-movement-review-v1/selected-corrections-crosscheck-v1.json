@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T06:21:26.162Z",
+  "scope": "Independent source+small-selected-public-evidence crosscheck only; no raw/recording scan or gameplay module evaluation.",
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe12-independent-verification-v1\\selected-movement-events-v1.json",
+    "bytes": 103223,
+    "sha256": "96883d2b942c8be8360709e332bc7165e0d5043ff582f2054a4115696f76c463"
+  },
+  "rawBinding": {
+    "bytes": 1997617,
+    "sha256": "2c0e74dfb7c3ec6a074c8620dc91a41d0f0656cc6f06f2c4779bce582f516804"
+  },
+  "runId": "1792908575146-40a66fff",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    }
+  ],
+  "corrections": [
+    {
+      "rawActionLine": 1422,
+      "at": 1792908757455,
+      "kind": "run",
+      "origin": {
+        "x": 241,
+        "y": 596
+      },
+      "first": {
+        "x": 242,
+        "y": 596
+      },
+      "target": {
+        "x": 243,
+        "y": 596
+      },
+      "originSource": "same-action movementCorrection",
+      "derivedSentDirection": "Right",
+      "ackDirection": "Right",
+      "actual": {
+        "x": 241,
+        "y": 596
+      },
+      "latencyMs": 0.4078000000154134,
+      "previousActionSendGapMs": 744.5657999999821,
+      "diagonal": false,
+      "plannedCellsInsideStaticHalo": true,
+      "postReceiptVisibleLiveObjectsOnFirstOrDestination": [],
+      "postReceiptObservationIsSendTimeOccupancy": false,
+      "inFailedContinuousWindow": false
+    },
+    {
+      "rawActionLine": 1448,
+      "at": 1792908760473,
+      "kind": "run",
+      "origin": {
+        "x": 242,
+        "y": 595
+      },
+      "first": {
+        "x": 242,
+        "y": 596
+      },
+      "target": {
+        "x": 242,
+        "y": 597
+      },
+      "originSource": "same-action movementCorrection",
+      "derivedSentDirection": "Down",
+      "ackDirection": "Down",
+      "actual": {
+        "x": 242,
+        "y": 595
+      },
+      "latencyMs": 0.6878999999898952,
+      "previousActionSendGapMs": 769.9115999999922,
+      "diagonal": false,
+      "plannedCellsInsideStaticHalo": true,
+      "postReceiptVisibleLiveObjectsOnFirstOrDestination": [],
+      "postReceiptObservationIsSendTimeOccupancy": false,
+      "inFailedContinuousWindow": true
+    },
+    {
+      "rawActionLine": 1488,
+      "at": 1792908765717,
+      "kind": "walk",
+      "origin": {
+        "x": 241,
+        "y": 596
+      },
+      "first": {
+        "x": 242,
+        "y": 596
+      },
+      "target": {
+        "x": 242,
+        "y": 596
+      },
+      "originSource": "same-action movementCorrection",
+      "derivedSentDirection": "Right",
+      "ackDirection": "Up",
+      "actual": {
+        "x": 241,
+        "y": 596
+      },
+      "latencyMs": 0.4070999999821652,
+      "previousActionSendGapMs": 1490.7147000000114,
+      "diagonal": false,
+      "plannedCellsInsideStaticHalo": true,
+      "postReceiptVisibleLiveObjectsOnFirstOrDestination": [],
+      "postReceiptObservationIsSendTimeOccupancy": false,
+      "inFailedContinuousWindow": true
+    },
+    {
+      "rawActionLine": 1735,
+      "at": 1792908797964,
+      "kind": "run",
+      "origin": {
+        "x": 241,
+        "y": 597
+      },
+      "first": {
+        "x": 242,
+        "y": 597
+      },
+      "target": {
+        "x": 243,
+        "y": 597
+      },
+      "originSource": "same-action movementCorrection",
+      "derivedSentDirection": "Right",
+      "ackDirection": "Right",
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "latencyMs": 0.872399999992922,
+      "previousActionSendGapMs": 732.7792999999947,
+      "diagonal": false,
+      "plannedCellsInsideStaticHalo": true,
+      "postReceiptVisibleLiveObjectsOnFirstOrDestination": [],
+      "postReceiptObservationIsSendTimeOccupancy": false,
+      "inFailedContinuousWindow": true
+    },
+    {
+      "rawActionLine": 1739,
+      "at": 1792908798706,
+      "kind": "walk",
+      "origin": {
+        "x": 241,
+        "y": 597
+      },
+      "first": {
+        "x": 242,
+        "y": 597
+      },
+      "target": {
+        "x": 242,
+        "y": 597
+      },
+      "originSource": "preceding owner-location action actual; no new diagnostic row due streak suppression",
+      "derivedSentDirection": "Right",
+      "ackDirection": "Right",
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "latencyMs": 0.5355999999737833,
+      "previousActionSendGapMs": 740.8353000000061,
+      "diagonal": false,
+      "plannedCellsInsideStaticHalo": true,
+      "postReceiptVisibleLiveObjectsOnFirstOrDestination": null,
+      "postReceiptObservationIsSendTimeOccupancy": false,
+      "inFailedContinuousWindow": true
+    }
+  ],
+  "findings": [
+    "All five planned directions are cardinal; no diagonal-clearance mismatch is implicated. Actual corrected displacement is0 for every action, so none is the already-accepted1-cell Run intermediate.",
+    "Every planned first/destination remains inside actor00 known statically clear5x5halo; this does not prove authoritative dynamic clearance.",
+    "In each of four detail rows, no retained live client-snapshot occupant is on the first or destination tile. Nearby206607/206622 are adjacent, which alone is not a blocker in the server can_player_movement_occupy rule. The diagnostic is post-receipt, not send-time.",
+    "Source rechecks current navigation obstacles and claims synchronously immediately before send. All selected previous-send gaps exceed the ordinary600ms movement delay; there is no proof of a priming/cadence bug.",
+    "Zone consume_step_action checks canMove, computes effective1/2-cell path, then rejects if any tile fails can_player_movement_occupy; blocked Run applies requested direction while blocked Walk leaves direction unchanged. Selected directions are compatible with this path but no server branch or blocker is uniquely identified.",
+    "Client fresh UserLocation has cursor/time filtering and one pending action but no movement request ID/reason. Source/evidence do not rule out every other correction source.",
+    "Corrected detail suppression explains five corrected actions versus four detail rows; the prior passing continuous window includes first correction, failed window includes later four. Preserve true4/77=0.051948>0.05."
+  ],
+  "conclusion": {
+    "driverBugProven": false,
+    "initialMonsterTrapProven": false,
+    "authoritativeBlockerProven": false,
+    "reasonableProductFixEstablished": false,
+    "failed12Preserved": true,
+    "formal09GateMustReject": true
+  },
+  "boundedNextObservationIfRootAuthorizes": [
+    "Correlate exact authoritative occupancy/state at command consumption for these five tiles from already-authorized bounded public projections; global frame timing must remain explicit.",
+    "If existing evidence cannot distinguish causes, a separately authorized diagnostic should capture bounded send-time client obstacle keys/plan/owner transform and server correction reason at consumption. Keep original command order, protocol, cadence, counters and thresholds; do not classify reason by nearby post-receipt entities."
+  ],
+  "notPerformed": {
+    "fullRawScan": true,
+    "recordingScan": true,
+    "sourceOrFixtureChange": true,
+    "sceneSearch": true,
+    "astarOrModel": true,
+    "testOrBuild": true,
+    "realmOrLoad": true
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Authorized": false
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "unified-qa-server-process-ui-fixture.json",
+    "bytes": 594,
+    "sha256": "5b7dc06a6016565275677b1fcd9a4e7d9138c69304090492b05474a6933e6288"
+  },
+  "producerReport": {
+    "pid": 58680,
+    "exe": "F:/mir2-build/unified-20261029/server-target/debug/mir2-gateway.exe",
+    "sha256": "d4a06a03c50356856747c20fbf19c2fefda5d91ba295bafaeeddde28a33ebb15",
+    "sourceRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+    "profile": "platinum_fiveclass",
+    "endpoint": "ws://127.0.0.1:17931/ws",
+    "startedAtUtc": "2026-10-29T15:06:07.498Z",
+    "testOnly": true,
+    "accountStore": "private isolated copy",
+    "production": false,
+    "paymentProvidersEnabled": false,
+    "procurementDriverConfigured": false,
+    "networkBinding": "127.0.0.1 only",
+    "syntheticUiFixture": true
+  },
+  "phase": "loopback isolated UI server from e2c Gateway, unchanged backend by1875 UI source delta",
+  "gatewaySourceRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+  "noActualWindowsAcceptanceYet": true
+}

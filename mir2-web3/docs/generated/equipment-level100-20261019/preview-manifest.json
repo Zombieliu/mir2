@@ -1,0 +1,2334 @@
+{
+  "sourceAllocationSha256": "bc40a687d0ab08dfb1623796e5aef3e0610d3de01f16f38e24b9e5e88e330476",
+  "renderMethod": "Technical contact sheet of source sprites, nearest-neighbor scaling, no source changes.",
+  "sheets": [
+    {
+      "file": "weapon-male-40-100.png",
+      "sha256": "26fc85efbfe306c413ec87f531cd9cab5fc592233496b6ae59cdcce2a645432a",
+      "entries": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "weapon",
+          "sourceItemIndex": 248,
+          "sourceName": "DragonSlayer",
+          "frame": {
+            "library": "StateItem",
+            "index": 57,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 487,
+              "y": 3885,
+              "width": 52,
+              "height": 116
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "1230195663edcc02f3acc8d04894f2e4bbb372b8dfd5031e8e58e80cb4c6622c"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "weapon",
+          "sourceItemIndex": 249,
+          "sourceName": "SwordOfWarGod",
+          "frame": {
+            "library": "StateItem",
+            "index": 72,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 173,
+              "y": 3622,
+              "width": 68,
+              "height": 131
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "4682015f0e9a81323e9ac1657199c2f40990622787fd627ede3a852fea9de152"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "weapon",
+          "sourceItemIndex": 252,
+          "sourceName": "BlackTigerHammer",
+          "frame": {
+            "library": "StateItem",
+            "index": 1150,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 423,
+              "y": 2131,
+              "width": 72,
+              "height": 165
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "07ceb0b273f3f0e33ae2e6d39a2150b39edd8ed5dbd40894b597151f392bb3b8"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 233,
+          "sourceName": "HellYamaBlade1",
+          "frame": {
+            "library": "StateItem",
+            "index": 1153,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 487,
+              "y": 984,
+              "width": 160,
+              "height": 190
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "f8f5e53e43e69fd68e752e15a01ce3f7cab55e12a156997a4323b1f60b8f2491"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1372,
+          "sourceName": "BluishGreenBloodSlaughterPike",
+          "frame": {
+            "library": "StateItem",
+            "index": 2440,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 1,
+              "y": 2131,
+              "width": 100,
+              "height": 171
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "850bede94492726d2d60769ffefd3db598c60a15a7d0e03089c16bd64b43c097"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "weapon",
+          "sourceItemIndex": 1379,
+          "sourceName": "IceDragonSkyKnife",
+          "frame": {
+            "library": "StateItem",
+            "index": 3880,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 883,
+              "y": 1944,
+              "width": 60,
+              "height": 173
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "ce03dbc86577156d083c2d2b926a43e53bea67a04c6d51b59eae82d0f6da2e94"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "weapon",
+          "sourceItemIndex": 253,
+          "sourceName": "BarbarianSword",
+          "frame": {
+            "library": "StateItem",
+            "index": 1154,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 765,
+              "y": 3756,
+              "width": 52,
+              "height": 124
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "6af34e58e7509f1c204d98b17e1e8d3e6bee363474792e9e68f7d2b978e10fb7"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "weapon",
+          "sourceItemIndex": 262,
+          "sourceName": "DragonStaff",
+          "frame": {
+            "library": "StateItem",
+            "index": 58,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 587,
+              "y": 2131,
+              "width": 64,
+              "height": 161
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "340f0a5df72327a92193329a78fe4e3d717d1801368815cbd16335e02466a6af"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "weapon",
+          "sourceItemIndex": 263,
+          "sourceName": "BladeOfSorcery",
+          "frame": {
+            "library": "StateItem",
+            "index": 73,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 959,
+              "y": 3756,
+              "width": 60,
+              "height": 123
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "d67375794288bb61cd9743360018b7d49fb48da853db109da5561c5acd1a2b5c"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "weapon",
+          "sourceItemIndex": 266,
+          "sourceName": "StaffOfLotus",
+          "frame": {
+            "library": "StateItem",
+            "index": 1151,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 339,
+              "y": 1944,
+              "width": 76,
+              "height": 183
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "5cff807135f2e210388bec2d0ca3be8e49faa672f28702b6024202cf546365a0"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 234,
+          "sourceName": "HellYamaBlade2",
+          "frame": {
+            "library": "StateItem",
+            "index": 1153,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 487,
+              "y": 984,
+              "width": 160,
+              "height": 190
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "f8f5e53e43e69fd68e752e15a01ce3f7cab55e12a156997a4323b1f60b8f2491"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1412,
+          "sourceName": "GonRyunHolyLightSword(聖)2",
+          "frame": {
+            "library": "StateItem",
+            "index": 5131,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 423,
+              "y": 2766,
+              "width": 64,
+              "height": 146
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "f7fcb9d913a8c808efad563dd4aad859f9c6c2d1f84a03b1c6d29585fdd70d73"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "weapon",
+          "sourceItemIndex": 1381,
+          "sourceName": "IceDragonSkyRod",
+          "frame": {
+            "library": "StateItem",
+            "index": 3881,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 651,
+              "y": 479,
+              "width": 104,
+              "height": 198
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "d20f411404a7d56fa541c60eabb4d6e77d5a773541620cbbaa4eb2b944fe1464"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "weapon",
+          "sourceItemIndex": 267,
+          "sourceName": "RawSword",
+          "frame": {
+            "library": "StateItem",
+            "index": 1155,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 315,
+              "y": 3885,
+              "width": 36,
+              "height": 117
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "498bc9a8eb0080cc5c3afb38a0a956b4234480a202cdbaa74475cb6b19e5f8e7"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "weapon",
+          "sourceItemIndex": 275,
+          "sourceName": "SoulSabre",
+          "frame": {
+            "library": "StateItem",
+            "index": 56,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 353,
+              "y": 3885,
+              "width": 32,
+              "height": 117
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "7e2a39d82201d1d038ae4f8c6e81e0c95cec2c5033c71f9e1c1ddc2d52ec15f8"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "weapon",
+          "sourceItemIndex": 276,
+          "sourceName": "HeavenSword",
+          "frame": {
+            "library": "StateItem",
+            "index": 74,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 587,
+              "y": 3756,
+              "width": 60,
+              "height": 124
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "e8e5f433a8aa51b06d528b3adb7e445fcf480c5c5de69951050cd6a7fb4da4aa"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "weapon",
+          "sourceItemIndex": 279,
+          "sourceName": "FanOfCrane",
+          "frame": {
+            "library": "StateItem",
+            "index": 1152,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 499,
+              "y": 212,
+              "width": 56,
+              "height": 75
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "32e77644d7f1ae932935a0255b8a1e632cbd996d553950079db5b090bd048ec6"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 235,
+          "sourceName": "HellYamaBlade3",
+          "frame": {
+            "library": "StateItem",
+            "index": 1153,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 487,
+              "y": 984,
+              "width": 160,
+              "height": 190
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "f8f5e53e43e69fd68e752e15a01ce3f7cab55e12a156997a4323b1f60b8f2491"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1413,
+          "sourceName": "GonRyunHolyLightSword(聖)3",
+          "frame": {
+            "library": "StateItem",
+            "index": 5131,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 423,
+              "y": 2766,
+              "width": 64,
+              "height": 146
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "f7fcb9d913a8c808efad563dd4aad859f9c6c2d1f84a03b1c6d29585fdd70d73"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "weapon",
+          "sourceItemIndex": 1380,
+          "sourceName": "IceDragonSkySword",
+          "frame": {
+            "library": "StateItem",
+            "index": 3882,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 633,
+              "y": 2914,
+              "width": 40,
+              "height": 145
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "7da40e691c581e5da6620b8660d85c7618dca5ce960d890cd74e559cfd46e184"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "weapon",
+          "sourceItemIndex": 280,
+          "sourceName": "BoneCarvedFan",
+          "frame": {
+            "library": "StateItem",
+            "index": 1156,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 217,
+              "y": 212,
+              "width": 96,
+              "height": 85
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "faec0308aa99369405e3b45c77bb6e1f013069042601ade3a4b285d1c4a219a1"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "weapon",
+          "sourceItemIndex": 291,
+          "sourceName": "RoyalBlades",
+          "frame": {
+            "library": "StateItem",
+            "index": 2254,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 325,
+              "y": 1176,
+              "width": 160,
+              "height": 190
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "bafc5aba37556e0520f78e1bc87e7c9dfd2a3ffe1d3a5794e1551560934d38d4"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "weapon",
+          "sourceItemIndex": 292,
+          "sourceName": "BladesOfMagi",
+          "frame": {
+            "library": "StateItem",
+            "index": 2256,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 649,
+              "y": 1176,
+              "width": 160,
+              "height": 190
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "bcf2730977cf0f2e3a15b23d024276c500d0d061ef7637f796e2781706ef5188"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "weapon",
+          "sourceItemIndex": 295,
+          "sourceName": "ButcheringBlades",
+          "frame": {
+            "library": "StateItem",
+            "index": 2258,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 1,
+              "y": 1368,
+              "width": 160,
+              "height": 190
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "71f60d9e0868d6df6b7302842c65e255644071d97eec240580e7bc6204da4035"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 236,
+          "sourceName": "HellYamaBlade4",
+          "frame": {
+            "library": "StateItem",
+            "index": 3290,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 1,
+              "y": 303,
+              "width": 88,
+              "height": 64
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "94f0ec1ad67b7db3ad3854c087a5c1622e46200c34485809b977476ce2283d30"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1404,
+          "sourceName": "GonRyunHolyLightBlades(寶)",
+          "frame": {
+            "library": "StateItem",
+            "index": 5150,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 1,
+              "y": 212,
+              "width": 92,
+              "height": 89
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "5ccdea8263acc0db7ed827e51fd5e7da8623f80e2bbb1a0f6572cd8a5ed024c1"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "weapon",
+          "sourceItemIndex": 297,
+          "sourceName": "MadDragonBlades",
+          "frame": {
+            "library": "StateItem",
+            "index": 1157,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 857,
+              "y": 3756,
+              "width": 100,
+              "height": 123
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "307d78203856fbc7fd0038b6070a1d72124ab86089cccd37cbb88f5473eea488"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "weapon",
+          "sourceItemIndex": 1382,
+          "sourceName": "IceDragonSkyBayonet",
+          "frame": {
+            "library": "StateItem",
+            "index": 3888,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 719,
+              "y": 212,
+              "width": 92,
+              "height": 71
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "032142f602e14b746a223ded9f4600920a91f9ec0252010816ee5fc08e76ba9a"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "weapon",
+          "sourceItemIndex": 309,
+          "sourceName": "MaleficBow",
+          "frame": {
+            "library": "StateItem",
+            "index": 3400,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 679,
+              "y": 1,
+              "width": 52,
+              "height": 100
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "504da212557d06ad3335508060fc83710a2a4575ea08f4141163d09cb102dcd8"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "weapon",
+          "sourceItemIndex": 310,
+          "sourceName": "BowOfForce",
+          "frame": {
+            "library": "StateItem",
+            "index": 3401,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 91,
+              "y": 113,
+              "width": 48,
+              "height": 97
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "58bd56131224b3d9b94f5f5a5830af0bbe3a41053b943e3202f1b37bcad30696"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "weapon",
+          "sourceItemIndex": 313,
+          "sourceName": "LethalBow",
+          "frame": {
+            "library": "StateItem",
+            "index": 3403,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 939,
+              "y": 3885,
+              "width": 56,
+              "height": 110
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "e020826e66dfe767aa030c9030b271a2522b3abeda5cb42cb909054f97203ff5"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 315,
+          "sourceName": "DeathBow",
+          "frame": {
+            "library": "StateItem",
+            "index": 3406,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 421,
+              "y": 3885,
+              "width": 64,
+              "height": 116
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "a9de4739a4aad871ae79c4a84c3d6c6998b6826ea6c75e997402b82c58c13490"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1397,
+          "sourceName": "GonRyunHolyLightBow(寶)",
+          "frame": {
+            "library": "StateItem",
+            "index": 5140,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/95/955ea89ac7a05052df1aa8042eff7130af5ebd58f3f3d1ece94b8bd1a4e6954a.png",
+            "rect": {
+              "x": 249,
+              "y": 1,
+              "width": 68,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "fbca0e99d5146502a6e72893506fe42eed450b65e630a148b3e87cc442b03a26"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "weapon",
+          "sourceItemIndex": 316,
+          "sourceName": "BloodThirstyBow",
+          "frame": {
+            "library": "StateItem",
+            "index": 3407,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 633,
+              "y": 3885,
+              "width": 56,
+              "height": 114
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "49451d95a1eecf4087b06d34110386fb2c0c45e0409bfd1c8dfa4dcb7fbf8607"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "weapon",
+          "sourceItemIndex": 1369,
+          "sourceName": "IceDragonSkyBow",
+          "frame": {
+            "library": "StateItem",
+            "index": 3884,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/51/515c68978ee8198fda563848dcbba56c0562ec2ff22adc13785e3c0fa554f641.png",
+            "rect": {
+              "x": 725,
+              "y": 3348,
+              "width": 88,
+              "height": 134
+            }
+          },
+          "sameTierWeaponShapeForBodySample": null,
+          "samplePixelSha256": "0991c91418dbd98d300343ccca73ae781e061f7362740bf8fe3c0be20a852ce9"
+        }
+      ]
+    },
+    {
+      "file": "armour-male-40-100.png",
+      "sha256": "2eb53f19dbcd68d54e9c86d62f7605314fe5160f4c341e6f27e5dedd41f5694c",
+      "entries": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 343,
+          "sourceName": "SteelArmour(M)",
+          "frame": {
+            "library": "CArmour/06",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/40/40888364ac7a4c679f1f4e63f1dd3c9c3f8becd6fd38d8e13ccc2bee9c038c26.png",
+            "rect": {
+              "x": 1335,
+              "y": 3781,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 29,
+          "samplePixelSha256": "7a8e73b6a68f0d6f3ff9b3e263381163450b93dd420721b58da795d57c8dfc97"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 363,
+          "sourceName": "BlueDarkArmour(M)",
+          "frame": {
+            "library": "CArmour/15",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/48/487dc19fa987aeb158f7ac1b5032f1f1bd11361a7f8f1e430cd5ebba8a2927cb.png",
+            "rect": {
+              "x": 631,
+              "y": 1027,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 32,
+          "samplePixelSha256": "1225cc4d0e0729c013bd2d23359186860a68fac99c57d23167767ed4e11d6c9f"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 141,
+          "sourceName": "TarragonArmour(M)1",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/94/94fd45846239a73ce5bcae61d010e8a8999bd9c330725d675b9fd6693d0252c6.png",
+            "rect": {
+              "x": 1857,
+              "y": 3065,
+              "width": 72,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 51,
+          "samplePixelSha256": "c2c4f0c686965b0b2c75be72ed4e9ede184f3bb9a30dc4c2770641975b519df3"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 153,
+          "sourceName": "RaidersArmour(M)1",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 1231,
+              "y": 2087,
+              "width": 76,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 45,
+          "samplePixelSha256": "8ceae12778349d0c79fda5f382b1574ae8852acc8fe16eb185fefd0179ad0074"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1582,
+          "sourceName": "Gonryunyongdrama(寶)(M)1",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 447,
+              "y": 1461,
+              "width": 108,
+              "height": 91
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 60,
+          "samplePixelSha256": "32b069e23e2fad6cbf44284ce0609aa5073c973f0d10fca8616dac3f4000fd30"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1607,
+          "sourceName": "Gonryunyongdrama(聖)(M)1",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 55,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1607,
+          "sourceName": "Gonryunyongdrama(聖)(M)1",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 46,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 343,
+          "sourceName": "SteelArmour(M)",
+          "frame": {
+            "library": "CArmour/06",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/40/40888364ac7a4c679f1f4e63f1dd3c9c3f8becd6fd38d8e13ccc2bee9c038c26.png",
+            "rect": {
+              "x": 1335,
+              "y": 3781,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 30,
+          "samplePixelSha256": "7a8e73b6a68f0d6f3ff9b3e263381163450b93dd420721b58da795d57c8dfc97"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 363,
+          "sourceName": "BlueDarkArmour(M)",
+          "frame": {
+            "library": "CArmour/15",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/48/487dc19fa987aeb158f7ac1b5032f1f1bd11361a7f8f1e430cd5ebba8a2927cb.png",
+            "rect": {
+              "x": 631,
+              "y": 1027,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 33,
+          "samplePixelSha256": "1225cc4d0e0729c013bd2d23359186860a68fac99c57d23167767ed4e11d6c9f"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 142,
+          "sourceName": "TarragonArmour(M)2",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/94/94fd45846239a73ce5bcae61d010e8a8999bd9c330725d675b9fd6693d0252c6.png",
+            "rect": {
+              "x": 1857,
+              "y": 3065,
+              "width": 72,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 39,
+          "samplePixelSha256": "c2c4f0c686965b0b2c75be72ed4e9ede184f3bb9a30dc4c2770641975b519df3"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 154,
+          "sourceName": "RaidersArmour(M)2",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 1231,
+              "y": 2087,
+              "width": 76,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 45,
+          "samplePixelSha256": "8ceae12778349d0c79fda5f382b1574ae8852acc8fe16eb185fefd0179ad0074"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1583,
+          "sourceName": "Gonryunyongdrama(寶)(M)2",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 447,
+              "y": 1461,
+              "width": 108,
+              "height": 91
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 77,
+          "samplePixelSha256": "32b069e23e2fad6cbf44284ce0609aa5073c973f0d10fca8616dac3f4000fd30"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1608,
+          "sourceName": "Gonryunyongdrama(聖)(M)2",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 56,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1608,
+          "sourceName": "Gonryunyongdrama(聖)(M)2",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 47,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 343,
+          "sourceName": "SteelArmour(M)",
+          "frame": {
+            "library": "CArmour/06",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/40/40888364ac7a4c679f1f4e63f1dd3c9c3f8becd6fd38d8e13ccc2bee9c038c26.png",
+            "rect": {
+              "x": 1335,
+              "y": 3781,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 31,
+          "samplePixelSha256": "7a8e73b6a68f0d6f3ff9b3e263381163450b93dd420721b58da795d57c8dfc97"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 363,
+          "sourceName": "BlueDarkArmour(M)",
+          "frame": {
+            "library": "CArmour/15",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/48/487dc19fa987aeb158f7ac1b5032f1f1bd11361a7f8f1e430cd5ebba8a2927cb.png",
+            "rect": {
+              "x": 631,
+              "y": 1027,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 34,
+          "samplePixelSha256": "1225cc4d0e0729c013bd2d23359186860a68fac99c57d23167767ed4e11d6c9f"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 143,
+          "sourceName": "TarragonArmour(M)3",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/94/94fd45846239a73ce5bcae61d010e8a8999bd9c330725d675b9fd6693d0252c6.png",
+            "rect": {
+              "x": 1857,
+              "y": 3065,
+              "width": 72,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 40,
+          "samplePixelSha256": "c2c4f0c686965b0b2c75be72ed4e9ede184f3bb9a30dc4c2770641975b519df3"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 155,
+          "sourceName": "RaidersArmour(M)3",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 1231,
+              "y": 2087,
+              "width": 76,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 45,
+          "samplePixelSha256": "8ceae12778349d0c79fda5f382b1574ae8852acc8fe16eb185fefd0179ad0074"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1584,
+          "sourceName": "Gonryunyongdrama(寶)(M)3",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 447,
+              "y": 1461,
+              "width": 108,
+              "height": 91
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 77,
+          "samplePixelSha256": "32b069e23e2fad6cbf44284ce0609aa5073c973f0d10fca8616dac3f4000fd30"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1609,
+          "sourceName": "Gonryunyongdrama(聖)(M)3",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 57,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1609,
+          "sourceName": "Gonryunyongdrama(聖)(M)3",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 48,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 349,
+          "sourceName": "RoyalArmour(M)",
+          "frame": {
+            "library": "AArmour/22",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/38/38cc85a4e7b00a16fda92dd2d6d9a4fbeee9a43f3613a881db2486aff8a2efa4.png",
+            "rect": {
+              "x": 703,
+              "y": 3887,
+              "width": 72,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 106,
+          "samplePixelSha256": "52d27549d64102f6aa2e6050d7465de4d23e82c1a4562dcd127add688f2eeed6"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 369,
+          "sourceName": "GoldDarkArmour(M)",
+          "frame": {
+            "library": "AArmour/23",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f2/f2380a5e50e8bc27a1e4433fe5a98d9f4b724c2fa18ddb7c34aad81af41c0fb1.png",
+            "rect": {
+              "x": 165,
+              "y": 173,
+              "width": 80,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 107,
+          "samplePixelSha256": "164a513e51301bc8f361f1191a6ebf1929f00df095935a456a5e8ce91c954833"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 144,
+          "sourceName": "TarragonArmour(M)4",
+          "frame": {
+            "library": "AArmour/29",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/e6/e62a8213a52757ddd08cbb01ab0e27d2ac7d0c6e75bdf17ded5db04ced5bfd63.png",
+            "rect": {
+              "x": 1,
+              "y": 2589,
+              "width": 72,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 109,
+          "samplePixelSha256": "fc482cf80ea8d8c5afaf7c03dbc7838a0ddfe5570b14845fc66974f833bbd6ca"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 156,
+          "sourceName": "RaidersArmour(M)4",
+          "frame": {
+            "library": "AArmour/19",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/c0/c0ab1cffcb6448fcded355b67eab1a1075f2c3f715854231e709472029eddea8.png",
+            "rect": {
+              "x": 345,
+              "y": 2067,
+              "width": 80,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 111,
+          "samplePixelSha256": "60e8f14ab5350e0a9139a035f40e947158aaf75b645be9aabbeedfd5d5319a41"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1585,
+          "sourceName": "Gonryunyongdrama(寶)(M)4",
+          "frame": {
+            "library": "AArmour/57",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/d5/d553093aafb19cd11f3ec4651258dec35c625bda90e025db24b42b2db3088b94.png",
+            "rect": {
+              "x": 1915,
+              "y": 3676,
+              "width": 108,
+              "height": 91
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 116,
+          "samplePixelSha256": "b7156a233c8b256de8024465e3fd17c8320d236f1d0cecdcf2f485c3f3a6f169"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1610,
+          "sourceName": "Gonryunyongdrama(聖)(M)4",
+          "frame": {
+            "library": "AArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/81/8138d86d4afbecad96ded1d77116202cbfca0ebef586d25b4b9a366cc3d989d5.png",
+            "rect": {
+              "x": 405,
+              "y": 3987,
+              "width": 124,
+              "height": 107
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 110,
+          "samplePixelSha256": "4dc8829a6657fe712fd99d0d41863554a0eb7065aa16308d4827e0e66da39805"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1610,
+          "sourceName": "Gonryunyongdrama(聖)(M)4",
+          "frame": {
+            "library": "AArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/81/8138d86d4afbecad96ded1d77116202cbfca0ebef586d25b4b9a366cc3d989d5.png",
+            "rect": {
+              "x": 405,
+              "y": 3987,
+              "width": 124,
+              "height": 107
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 114,
+          "samplePixelSha256": "4dc8829a6657fe712fd99d0d41863554a0eb7065aa16308d4827e0e66da39805"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 351,
+          "sourceName": "StuddedArmour(M)",
+          "frame": {
+            "library": "CArmour/37",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/66/66d3bb00279d94518c2b2fe5bd3770577a60930674a4e08db3723eb96a5c5c81.png",
+            "rect": {
+              "x": 157,
+              "y": 2243,
+              "width": 72,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 210,
+          "samplePixelSha256": "10cc3e6d2a383b6e39683a8b1c9d2edf0215f9300e037996262b5d80bdff427e"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 371,
+          "sourceName": "ScaledArmour(M)",
+          "frame": {
+            "library": "CArmour/39",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/23/23dd601e69042c71d13f0b77b244494a16bfdb6c4a8bc16963a5076de3267ab8.png",
+            "rect": {
+              "x": 1445,
+              "y": 847,
+              "width": 84,
+              "height": 84
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 211,
+          "samplePixelSha256": "2714233add679b7f21c84b916195381d8026c6875046d45006e03109babf5d24"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 145,
+          "sourceName": "TarragonArmour(M)5",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/94/94fd45846239a73ce5bcae61d010e8a8999bd9c330725d675b9fd6693d0252c6.png",
+            "rect": {
+              "x": 1857,
+              "y": 3065,
+              "width": 72,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 213,
+          "samplePixelSha256": "c2c4f0c686965b0b2c75be72ed4e9ede184f3bb9a30dc4c2770641975b519df3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 157,
+          "sourceName": "RaidersArmour(M)5",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 1231,
+              "y": 2087,
+              "width": 76,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 216,
+          "samplePixelSha256": "8ceae12778349d0c79fda5f382b1574ae8852acc8fe16eb185fefd0179ad0074"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1586,
+          "sourceName": "Gonryunyongdrama(寶)(M)5",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 447,
+              "y": 1461,
+              "width": 108,
+              "height": 91
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 224,
+          "samplePixelSha256": "32b069e23e2fad6cbf44284ce0609aa5073c973f0d10fca8616dac3f4000fd30"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1611,
+          "sourceName": "Gonryunyongdrama(聖)(M)5",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 217,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1611,
+          "sourceName": "Gonryunyongdrama(聖)(M)5",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 16,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 495,
+              "y": 1560,
+              "width": 124,
+              "height": 106
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 219,
+          "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821"
+        }
+      ]
+    },
+    {
+      "file": "armour-female-40-100.png",
+      "sha256": "c4c3e24b3b4eb175e1acc2449a027dc20dbb5a113e17d989d82f01ff1d5d5a45",
+      "entries": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 344,
+          "sourceName": "SteelArmour(F)",
+          "frame": {
+            "library": "CArmour/06",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/40/40888364ac7a4c679f1f4e63f1dd3c9c3f8becd6fd38d8e13ccc2bee9c038c26.png",
+            "rect": {
+              "x": 1351,
+              "y": 1605,
+              "width": 88,
+              "height": 92
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 29,
+          "samplePixelSha256": "556866de778074dedf16ba13269ac3e738d17df7fc095c83215ccb163802f10e"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 364,
+          "sourceName": "BlueDarkArmour(F)",
+          "frame": {
+            "library": "CArmour/15",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/48/487dc19fa987aeb158f7ac1b5032f1f1bd11361a7f8f1e430cd5ebba8a2927cb.png",
+            "rect": {
+              "x": 643,
+              "y": 2297,
+              "width": 68,
+              "height": 80
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 32,
+          "samplePixelSha256": "8a17ff9c8ce0f2d86223a059cb55b8665a7756cf73ddb94545a8cc750e9d82ea"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 147,
+          "sourceName": "TarragonArmour(F)1",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/c4/c4a695f7b30722148c789a71d0b351e205d4c85a2e6c0c5a76a7a40db5f4a910.png",
+            "rect": {
+              "x": 351,
+              "y": 313,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 51,
+          "samplePixelSha256": "825adee09bfe4f4f444e3bd575445978d72c72ec75acf3d31a1db25f4fa3746f"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 159,
+          "sourceName": "RaidersArmour(F)1",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 71,
+              "y": 3197,
+              "width": 68,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 45,
+          "samplePixelSha256": "abc1657d12d1305bf699113453ca4c268d07bfbe700a2297fb5699a4ee846a61"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1576,
+          "sourceName": "Gonryunyongdrama(寶)(F)1",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 1181,
+              "y": 398,
+              "width": 108,
+              "height": 96
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 60,
+          "samplePixelSha256": "e54a6de27d6ef9b70e484247d3819859028723c87a7d4bfadafb652cc49ccd79"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1601,
+          "sourceName": "Gonryunyongdrama(聖)(F)1",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 55,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1601,
+          "sourceName": "Gonryunyongdrama(聖)(F)1",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 46,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 344,
+          "sourceName": "SteelArmour(F)",
+          "frame": {
+            "library": "CArmour/06",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/40/40888364ac7a4c679f1f4e63f1dd3c9c3f8becd6fd38d8e13ccc2bee9c038c26.png",
+            "rect": {
+              "x": 1351,
+              "y": 1605,
+              "width": 88,
+              "height": 92
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 30,
+          "samplePixelSha256": "556866de778074dedf16ba13269ac3e738d17df7fc095c83215ccb163802f10e"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 364,
+          "sourceName": "BlueDarkArmour(F)",
+          "frame": {
+            "library": "CArmour/15",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/48/487dc19fa987aeb158f7ac1b5032f1f1bd11361a7f8f1e430cd5ebba8a2927cb.png",
+            "rect": {
+              "x": 643,
+              "y": 2297,
+              "width": 68,
+              "height": 80
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 33,
+          "samplePixelSha256": "8a17ff9c8ce0f2d86223a059cb55b8665a7756cf73ddb94545a8cc750e9d82ea"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 148,
+          "sourceName": "TarragonArmour(F)2",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/c4/c4a695f7b30722148c789a71d0b351e205d4c85a2e6c0c5a76a7a40db5f4a910.png",
+            "rect": {
+              "x": 351,
+              "y": 313,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 39,
+          "samplePixelSha256": "825adee09bfe4f4f444e3bd575445978d72c72ec75acf3d31a1db25f4fa3746f"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 160,
+          "sourceName": "RaidersArmour(F)2",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 71,
+              "y": 3197,
+              "width": 68,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 45,
+          "samplePixelSha256": "abc1657d12d1305bf699113453ca4c268d07bfbe700a2297fb5699a4ee846a61"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1577,
+          "sourceName": "Gonryunyongdrama(寶)(F)2",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 1181,
+              "y": 398,
+              "width": 108,
+              "height": 96
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 77,
+          "samplePixelSha256": "e54a6de27d6ef9b70e484247d3819859028723c87a7d4bfadafb652cc49ccd79"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1602,
+          "sourceName": "Gonryunyongdrama(聖)(F)2",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 56,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1602,
+          "sourceName": "Gonryunyongdrama(聖)(F)2",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 47,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 344,
+          "sourceName": "SteelArmour(F)",
+          "frame": {
+            "library": "CArmour/06",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/40/40888364ac7a4c679f1f4e63f1dd3c9c3f8becd6fd38d8e13ccc2bee9c038c26.png",
+            "rect": {
+              "x": 1351,
+              "y": 1605,
+              "width": 88,
+              "height": 92
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 31,
+          "samplePixelSha256": "556866de778074dedf16ba13269ac3e738d17df7fc095c83215ccb163802f10e"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 364,
+          "sourceName": "BlueDarkArmour(F)",
+          "frame": {
+            "library": "CArmour/15",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/48/487dc19fa987aeb158f7ac1b5032f1f1bd11361a7f8f1e430cd5ebba8a2927cb.png",
+            "rect": {
+              "x": 643,
+              "y": 2297,
+              "width": 68,
+              "height": 80
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 34,
+          "samplePixelSha256": "8a17ff9c8ce0f2d86223a059cb55b8665a7756cf73ddb94545a8cc750e9d82ea"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 149,
+          "sourceName": "TarragonArmour(F)3",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/c4/c4a695f7b30722148c789a71d0b351e205d4c85a2e6c0c5a76a7a40db5f4a910.png",
+            "rect": {
+              "x": 351,
+              "y": 313,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 40,
+          "samplePixelSha256": "825adee09bfe4f4f444e3bd575445978d72c72ec75acf3d31a1db25f4fa3746f"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 161,
+          "sourceName": "RaidersArmour(F)3",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 71,
+              "y": 3197,
+              "width": 68,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 45,
+          "samplePixelSha256": "abc1657d12d1305bf699113453ca4c268d07bfbe700a2297fb5699a4ee846a61"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1578,
+          "sourceName": "Gonryunyongdrama(寶)(F)3",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 1181,
+              "y": 398,
+              "width": 108,
+              "height": 96
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 77,
+          "samplePixelSha256": "e54a6de27d6ef9b70e484247d3819859028723c87a7d4bfadafb652cc49ccd79"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1603,
+          "sourceName": "Gonryunyongdrama(聖)(F)3",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 57,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1603,
+          "sourceName": "Gonryunyongdrama(聖)(F)3",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 48,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 350,
+          "sourceName": "RoyalArmour(F)",
+          "frame": {
+            "library": "AArmour/22",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/38/38cc85a4e7b00a16fda92dd2d6d9a4fbeee9a43f3613a881db2486aff8a2efa4.png",
+            "rect": {
+              "x": 593,
+              "y": 3961,
+              "width": 72,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 106,
+          "samplePixelSha256": "732f13a89adf076a7958e8d3c17a57bb93cfad228d1dc5baddd31da0977cfbf5"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 370,
+          "sourceName": "GoldDarkArmour(F)",
+          "frame": {
+            "library": "AArmour/23",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/4c/4c20e7d78925da0c2549724054b66a6c10eabf0bec835f3569f57d6a4162b3bd.png",
+            "rect": {
+              "x": 425,
+              "y": 1811,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 107,
+          "samplePixelSha256": "57fa4f901c3634dd550c7aa8e870bcdbedc89a4c938b07c9c0465c82111c7e33"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 150,
+          "sourceName": "TarragonArmour(F)4",
+          "frame": {
+            "library": "AArmour/29",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/e6/e62a8213a52757ddd08cbb01ab0e27d2ac7d0c6e75bdf17ded5db04ced5bfd63.png",
+            "rect": {
+              "x": 211,
+              "y": 3135,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 109,
+          "samplePixelSha256": "05cf17f2a5e303e131f46efc46401aa03c37fc44eb8221586a3e53e685df204e"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 162,
+          "sourceName": "RaidersArmour(F)4",
+          "frame": {
+            "library": "AArmour/19",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/c0/c0ab1cffcb6448fcded355b67eab1a1075f2c3f715854231e709472029eddea8.png",
+            "rect": {
+              "x": 71,
+              "y": 2881,
+              "width": 68,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 111,
+          "samplePixelSha256": "60f753893a3fe950bc22fdf7f42029b4631b76e37786b80ab44a222611643f2a"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1579,
+          "sourceName": "Gonryunyongdrama(寶)(F)4",
+          "frame": {
+            "library": "AArmour/57",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/d5/d553093aafb19cd11f3ec4651258dec35c625bda90e025db24b42b2db3088b94.png",
+            "rect": {
+              "x": 1081,
+              "y": 3094,
+              "width": 108,
+              "height": 96
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 116,
+          "samplePixelSha256": "f069b30a2500066a0b3493095dc03e3cbaeec4c0e30521fe56540e23d8b9150f"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1604,
+          "sourceName": "Gonryunyongdrama(聖)(F)4",
+          "frame": {
+            "library": "AArmour/58",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/06/06db35db37912c36eb0c7be9ba977aeee2ccb91e3eebe0c1701c647bcbaddaf8.png",
+            "rect": {
+              "x": 1,
+              "y": 864,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 110,
+          "samplePixelSha256": "463e2a9dd927255f0a079cd090d5cef8874a2b594d04b3aa152d2bb1c97d4107"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1604,
+          "sourceName": "Gonryunyongdrama(聖)(F)4",
+          "frame": {
+            "library": "AArmour/58",
+            "index": 528,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/06/06db35db37912c36eb0c7be9ba977aeee2ccb91e3eebe0c1701c647bcbaddaf8.png",
+            "rect": {
+              "x": 1,
+              "y": 864,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 114,
+          "samplePixelSha256": "463e2a9dd927255f0a079cd090d5cef8874a2b594d04b3aa152d2bb1c97d4107"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 352,
+          "sourceName": "StuddedArmour(F)",
+          "frame": {
+            "library": "CArmour/37",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/66/66d3bb00279d94518c2b2fe5bd3770577a60930674a4e08db3723eb96a5c5c81.png",
+            "rect": {
+              "x": 1261,
+              "y": 2391,
+              "width": 68,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 210,
+          "samplePixelSha256": "6f0eeab8ec10ea082de5b1e1258e487f9f4058c99835d7c8169b1a6acba76c30"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 372,
+          "sourceName": "ScaledArmour(F)",
+          "frame": {
+            "library": "CArmour/39",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/23/23dd601e69042c71d13f0b77b244494a16bfdb6c4a8bc16963a5076de3267ab8.png",
+            "rect": {
+              "x": 1191,
+              "y": 2495,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 211,
+          "samplePixelSha256": "6c5d0834f6cec7cdb1d089e120ffce63018e38f4161ad8f446c8fabb482181be"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 151,
+          "sourceName": "TarragonArmour(F)5",
+          "frame": {
+            "library": "CArmour/29",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/c4/c4a695f7b30722148c789a71d0b351e205d4c85a2e6c0c5a76a7a40db5f4a910.png",
+            "rect": {
+              "x": 351,
+              "y": 313,
+              "width": 68,
+              "height": 76
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 213,
+          "samplePixelSha256": "825adee09bfe4f4f444e3bd575445978d72c72ec75acf3d31a1db25f4fa3746f"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 163,
+          "sourceName": "RaidersArmour(F)5",
+          "frame": {
+            "library": "CArmour/19",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/8e/8e8b41e350370e52cb7c5c35f8778cd444cf3d41e37713fb16cde60e9f728b83.png",
+            "rect": {
+              "x": 71,
+              "y": 3197,
+              "width": 68,
+              "height": 72
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 216,
+          "samplePixelSha256": "abc1657d12d1305bf699113453ca4c268d07bfbe700a2297fb5699a4ee846a61"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1580,
+          "sourceName": "Gonryunyongdrama(寶)(F)5",
+          "frame": {
+            "library": "CArmour/57",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/7e/7eb37f9b61ac081cc6fb4ed9aa8e7d943e4e6f487587f4f77d90091b782bf7af.png",
+            "rect": {
+              "x": 1181,
+              "y": 398,
+              "width": 108,
+              "height": 96
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 224,
+          "samplePixelSha256": "e54a6de27d6ef9b70e484247d3819859028723c87a7d4bfadafb652cc49ccd79"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1605,
+          "sourceName": "Gonryunyongdrama(聖)(F)5",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 217,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1605,
+          "sourceName": "Gonryunyongdrama(聖)(F)5",
+          "frame": {
+            "library": "CArmour/58",
+            "index": 824,
+            "status": "ok",
+            "imageUrl": "/generated/crystal-packs/full/pages/f5/f595927394dc77cd2d75867d5ce213e5af6be97fd31f8ba07eab7a4a55066556.png",
+            "rect": {
+              "x": 1367,
+              "y": 2099,
+              "width": 120,
+              "height": 104
+            }
+          },
+          "sameTierWeaponShapeForBodySample": 219,
+          "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491"
+        }
+      ]
+    }
+  ]
+}

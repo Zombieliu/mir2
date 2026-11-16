@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "phase": "coordinator public observation, no private store/log collected",
+  "source": "Root task message 2026-10-29",
+  "historicalStoreCloneWithThreeUsdcOrders": "Startup correctly rejected usdcRecoveryDriverRequired with recovery provider disabled",
+  "productionInvariantWeakened": false,
+  "syntheticFixtureHistoricalUsdcOrders": 0,
+  "syntheticCredit": 100,
+  "syntheticGold": 10000,
+  "originalStoreModified": false,
+  "liveChainAccess": false,
+  "realPaymentValidation": false,
+  "actualFinalUnifiedWindowsUiPending": true
+}

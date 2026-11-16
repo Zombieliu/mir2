@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.r16.character-create-ui.v1",
+  "branch": "codex/windows-player-journey",
+  "scope": "isolated File, real browser controls and Gateway",
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "primaryRealm": "platinum_fiveclass",
+  "passed": true,
+  "checks": {
+    "door": {
+      "pointerTargetReachedUnderArt": true,
+      "createModalMountedBeforeDoorFinished": true,
+      "validLogin": true
+    },
+    "layout": {
+      "classOverlaps": true,
+      "genderOverlaps": true,
+      "classCount": 5
+    }
+  },
+  "pageErrors": []
+}

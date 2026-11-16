@@ -1,0 +1,62 @@
+{
+  "scope": "Absolute pixels in captured Bichon screenshots compared to opaque, distinct, non-alpha-key native-export art at actual DOM boxes.",
+  "scott": {
+    "name": "Merchant_Scott",
+    "depthCase": "same",
+    "actorTile": [
+      291,
+      610
+    ],
+    "frontTile": [
+      291,
+      610
+    ],
+    "actorDepth": 1484625,
+    "frontDepth": 1478630,
+    "actorFrame": "/original-ui/NPC/03/20.png",
+    "frontFrame": "/original-map/WemadeMir2/Objects/7682.png",
+    "qualifyingOpaqueDifferingPixels": 130,
+    "baselineWebGPU": {
+      "actorRGB": 0,
+      "frontRGB": 130,
+      "otherRGB": 0
+    },
+    "candidateWebGPU": {
+      "actorRGB": 46,
+      "frontRGB": 7,
+      "otherRGB": 77
+    }
+  },
+  "ruben": {
+    "name": "Merchant_Ruben",
+    "depthCase": "later",
+    "actorTile": [
+      288,
+      608
+    ],
+    "frontTile": [
+      289,
+      610
+    ],
+    "actorDepth": 1460565,
+    "frontDepth": 1478590,
+    "actorFrame": "/original-ui/NPC/01/13.png",
+    "frontFrame": "/original-map/WemadeMir2/Objects/7680.png",
+    "qualifyingOpaqueDifferingPixels": 42,
+    "baselineWebGPU": {
+      "actorRGB": 0,
+      "frontRGB": 42,
+      "otherRGB": 0
+    },
+    "candidateWebGPU": {
+      "actorRGB": 0,
+      "frontRGB": 42,
+      "otherRGB": 0
+    }
+  },
+  "reese": null,
+  "screenSha256": [
+    "5733654b0509e45f68e83d18bae0920f04fccd967dd658f1fdc183d9c1ac0b23",
+    "88d2de4f35ee0d7be7ec25a32c1497db83da730653700803bbdd0a90c82055a9"
+  ]
+}

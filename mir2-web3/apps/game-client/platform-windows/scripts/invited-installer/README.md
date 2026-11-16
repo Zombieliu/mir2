@@ -1,0 +1,254 @@
+# Numeron - Legend of Rebirth: ten-language unified r11 installer
+
+This recipe consumes an already attested, strictly CMS-verified client-only
+Candidate. It neither builds the game nor changes player saves or servers.
+Earlier artifacts are immutable. Output for this version is
+`Numeron-Legend-of-Rebirth-20261029-unified-r11-Setup.exe`, version `2026.10.29.11`.
+This revision adds Simplified Chinese, reviewed game terminology, complete SC
+font coverage and separate Fiat/USDC/monthly-card pages. It retains the verified
+launcher/updater and login resolution selection. A client installer does not
+deploy its matching Gateway or enable any payment provider.
+Per-user display and language preferences survive ordinary updates.
+AppId, per-user installation directory and shortcut identity remain unchanged.
+The new game payload is Candidate `WN-CANDIDATE-20261029-unified-11`.
+Its engine2 updater retains packed health/rollback plus r10 locale and ROOT17
+compatibility. New v4 packages put the five exact SC legal documents under
+`mir2-assets/legal/` so ROOT12 clients can parse their complete manifest; the
+outer installer still carries README.zh-CN.txt. Historical r10 package bytes
+and its signed seed remain unchanged. No public feed is changed by this recipe.
+The r10 updater also admits its five exact Simplified Chinese guide, provenance
+and license filenames. The r9 installer compiled and installed correctly but
+its updater rejected those files before launching the game; it is not a usable
+final installer. Keep that failed launch evidence separately.
+
+The launcher enables Start game on its home screen after local verification of
+the installed version. Its background check of signed update information does
+not block that verified version. View update shows the estimated update data;
+the confirmation screen still offers Play current version alongside Update.
+Only choosing Update starts downloading changed files. The launcher shows
+download progress, speed and an estimate for the current download; the actual
+download size can vary with caching and transfer packages. The player starts
+the game explicitly, including after an update. A failed check or update can be
+retried, and a still-verified installed version can be played. A damaged or
+unverifiable installation disables launch and needs repair with the trusted
+installer. Server compatibility remains part of the game's sign-in flow.
+
+## Inputs and ordinary internal Candidate build
+
+Use a fresh external directory. Copy this recipe, `prepare-installer-input.py`,
+`languages/`, and the ten `README.*.txt` files from `../player-readme` into it.
+Supply `tools/vc_redist.x64.exe` from Microsoft and Inno Setup 7. Verify the
+compiler and runtime publisher signatures. The pinned runtime used here is
+14.51.36247.0, SHA256
+`843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C`.
+
+The setup uses the game's existing multi-resolution Numeron icon from
+`platform-windows/resources/numeron.ico`. When copying the recipe outside the
+source tree, also copy that exact file to the staging directory and compile
+with `/DMir2IconFile=numeron.ico` (or supply its absolute path). A missing icon
+stops compilation. The desktop/start-menu shortcuts use the embedded launcher
+icon, and the uninstall entry uses its selected launcher/game EXE icon. No loose
+icon is added to the signed payload.
+
+After `verify-windows-candidate.ps1` passes on the untouched Candidate:
+
+Build the separate updater from clean committed source using
+`windows-updater/scripts/build-updater-release.ps1`. Verify its signed bundle
+with `verify-updater-bundle.ps1`; generate the fresh literal
+`verified-updater-files.iss` using `prepare-updater-input.py`. Both literal file
+lists are required by this recipe. Use the same immutable game Candidate for
+the installer's game inputs and the authenticated update seed.
+
+A clean source checkout also needs the runtime asset inputs before packaging.
+Generate the base floor atlas from the committed original-map images with
+`node apps/web/scripts/build-map-atlas-pack.mjs --outDir apps/web/public/generated/map-atlas`
+(local asset-manifest mode). The package tool then creates and audits the full
+profile's native map images and completes every required floor from the pinned
+Crystal pack. Pass the pack's real physical directory as `FullCrystalPackRoot`;
+junctions and other reparse ancestors are rejected. Exported player-sprite PNGs
+must likewise satisfy their committed manifests before invoking the package
+tool. A clean Git status alone does not prove that ignored asset exports exist.
+
+Use a short physical build checkout on Windows. Include the temporary
+`.WN-CANDIDATE-....staging-<32-hex>` directory and the longest hashed manifest
+filename when checking the full path length; keep it below 260 characters.
+The mandatory ADS check also calls legacy Win32 stream enumeration, so ordinary
+file reads working at a longer path do not prove that this check will work.
+Move a clean worktree with `git worktree move` if necessary; keep the source,
+EXE and attestation identities intact and rerun the unchanged package gates.
+Do not use a junction or skip stream inspection to shorten the path.
+
+```text
+python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-commit>
+ISCC.exe /Qp /DMir2IconFile=numeron.ico Mir2-Invite.iss
+```
+
+The preparation tool requires `WN-CANDIDATE-20261029-unified-11`, exact clean
+source provenance, recursive file closure and matching hashes. It rejects logs,
+links, extra files and output overwrite. There is no default source revision.
+Its literal input list is supplementary byte evidence, not CMS verification.
+
+For an actual isolated local installation, compile the same verified payload
+with `/DMir2ValidationInstall=1`. This mode uses a separate application ID,
+`Mir2InviteValidation` directory, a `Local Validation` Start menu group and an `{app}/validation-profile/mir2-web3`
+locale directory. It cannot be combined with `Mir2PublicSign`. The silent
+acceptance run must use `/NOICONS /TASKS=""`, an explicit fresh `/DIR` and
+`/LANG=chinesesimplified`; it never starts the game. Point only the subsequent
+test client process's `APPDATA` at `{app}/validation-profile` to verify the
+installer's actual seed. The ordinary finish-page launch does not set this
+test-only environment variable, so it does not establish profile isolation.
+Existing installed games and user language preferences
+must retain their hashes and registration. This mode does not establish public
+publisher trust or a clean-PC/runtime installation result.
+
+The installer holds the same exclusive per-install file lock as the launcher
+for fresh and existing installations. After all verified files are installed,
+an older update journal/backup/staging is preserved under
+`.update/installer-retired/`; signed highest-release receipts remain in place.
+The installer releases its lock before its optional post-install action starts
+the launcher (the finish page for full/bootstrap, the directory-page choice for packed).
+An interrupted installer still requires repair; journaled automatic-update
+recovery is not a claim of whole-installer power-loss recovery.
+
+## Public publisher signing is a separate release gate
+
+An unsigned internal Candidate must not be called a trusted public release.
+No public publisher certificate is selected or generated by this recipe.
+Set `/DMir2PublicSign=1 /DMir2PublicSignerThumbprint=<explicit-40-hex-thumbprint>`
+only after the operator has a verified public publisher identity, and configure
+Inno's named `mir2Public` SignTool explicitly using its `/S` option. That command
+must invoke the repository `sign-publisher-binary.ps1` with the exact requested
+thumbprint, trusted SignTool path and HTTPS timestamp URL. Inno supplies the file
+as `$f`; quote the full path when defining the command. A missing named SignTool
+or missing thumbprint must stop compilation, never fall back to local self-signing.
+The setup and generated uninstaller use this same explicit signing step.
+
+The game EXE must already have been publisher-signed by `build-attested-windows-candidate.ps1`
+**before** its hash is recorded in the attestation and Candidate CMS closure.
+Do not sign or edit an EXE inside an already signed Candidate. Independently run
+`verify-publisher-signatures.ps1` on final setup and game EXE with the expected
+publisher thumbprint. Internal CMS integrity signing is not Authenticode and
+cannot be substituted for that gate. Signing alone is not proof that every
+organization's application-control policy admits the program.
+
+## Languages and font provenance
+
+Installer and initial game locale choices are `en`, `zh-CN`, `zh-TW`, `pt-BR`, `ru`,
+`hi`, `id`, `vi`, `th`, and `ar`. Existing preferences/seed always win. Arabic
+uses Inno's RTL translation. Russian, Thai, Arabic and the original three use
+current compiler language files, including Simplified Chinese. The other three derive from the official
+Inno repository's community `Unofficial` translations. Their pinned sources,
+licenses and precise Hindi/Vietnamese corrections are in `languages/`.
+Hindi's older upstream file is preserved; its 67 absent current messages and
+three incorrect messages were corrected locally. Vietnamese preserves the
+product-name placeholder in `SelectDirLabel3`. These are clearly marked project
+updates, not claims of an official new Inno translation. Do not silently fall
+back to English when a required localized message is missing.
+
+## Runtime and launch handling
+
+Windows 10+ x64, per-user installation and optional desktop shortcut remain.
+Only Microsoft runtime installation requests elevation. Runtime restart requests
+suppress game launch. Silent installation never starts the game or guide.
+The optional post-install choices execute via `ExecAsOriginalUser` /
+`ShellExecAsOriginalUser`.
+Windows error 4551/1260/577 gets localized application-protection guidance; other
+launch failures retain their error code. A single bounded ASCII failure record
+is saved under `%LOCALAPPDATA%/mir2-web3/installer-last-launch.txt` only when its
+ordinary, non-reparse per-user location is safe to write. No account, password,
+command line, packet or game state is recorded. Normal Inno logging also records
+the numeric result. Process creation success is not gameplay acceptance.
+
+The installer never disables Smart App Control, WDAC, Defender or other policies,
+never installs a trusted root, and never retries the game elevated. Client
+uninstallation preserves language preferences and never removes server accounts.
+A successful compiler-only fixture does not establish clean-PC installation,
+application-control acceptance, human ten-language gameplay or capacity.
+
+## Packed full installation (opt-in)
+
+`build-packed-installer.ps1` is the release entry point for `/DMir2Packed=1`.
+It runs the actual clean Candidate/CMS gate from an explicit Candidate source
+checkout, the signed updater-bundle gate and the full pinned-CMS/PackStore gate
+before generating literal inputs. `prepare-packed-installer-input.py` is only
+the supplementary byte/closure helper, not a signature verifier. The game and
+engine source revisions are explicit and may differ; both must match the
+signed packed generation and updater bundle. No key is selected and no package
+is signed or published by these tools.
+
+`InstallerSourceRevision` defaults to `EngineSourceRevision`. An explicitly
+different installer revision must be a clean descendant checkout of that exact
+engine commit, with game and engine revisions equal. The complete commit delta
+may change only this directory's `Mir2-Invite.iss`, `README.md` and
+`build-packed-installer.ps1`; every other path is rejected. The Candidate source
+checkout stays on its exact game/engine commit. Runtime verifiers are executed
+from that original engine checkout, and all full Candidate, resource, pack and
+pinned CMS checks remain mandatory. The build proof records the installer
+revision separately, both tree IDs, ancestry, changed paths and the three raw
+recipe file hashes. It rechecks clean checkouts and recipe bytes after building.
+This supports a reviewed recipe correction without relabelling existing game or
+engine artifacts as if they had been rebuilt from the recipe-only descendant.
+
+This layout installs the exact generation controls and content-addressed packs,
+the nine-file updater bundle, ten guides and their required licenses. Public
+signed feed bytes are copied unchanged to the generation's local `PACK-FEED.*`.
+`updater/packed-install.json` is an unsigned locator containing only the schema
+`mir2.windows.packed-install.v1` and the lowercase manifest SHA-256. The updater
+must verify and adopt its local signed generation; no selector, highest receipt
+or Healthy state is installed. Loose game EXE and asset files are not included.
+All four `game/` signature metadata files, the two updater seed files, generation
+files, packs and locator use `onlyifdoesntexist`.
+
+The initial guard admits fresh directories or retries whose existing managed
+files all match this exact input closure. Unlisted legacy gameplay, other
+generations, state, recovery or active game-lease files cause refusal and remain
+untouched. Existing managed files must be ordinary single-link files with no
+alternate streams. This conservative mode does not claim general in-place
+migration of a healthy older installation; existing players retain the ordinary
+launcher update and full repair modes. The original full and bootstrap defaults,
+production AppId, separate validation identity, icons, runtime handling and
+ten-language preference behavior remain unchanged. A packed install does not
+retire an old update transaction as if it had replaced a full loose game.
+
+Packed mode uses one directory/installation confirmation page. It retains the
+directory chooser and places the desktop shortcut, launch-after-installation and
+open-installed-guide choices there. Launch defaults to checked and may be
+disabled; the guide and desktop shortcut default to unchecked. Interactive packed
+desktop creation reads the confirmed checkbox directly, rather than Inno's
+TasksList, which is populated after this page. Silent mode retains the original
+`/TASKS` selection at icon-processing time and never starts the game or guide.
+The welcome, mandatory guide, tasks,
+ready and ordinary finish pages are omitted only in packed mode. The guide still
+ships in all ten languages and opens after installation when selected. The
+localized Install button makes the directory-page confirmation explicit.
+Its instruction uses Inno's complete, localized `ReadyLabel2b` ("Click Install
+to continue with the installation"), rather than the old Next-button wording.
+
+Only packed mode uses `ShowLanguageDialog=auto`: Inno shows the language dialog
+when it cannot match a language identifier; supported system-language detection
+and Inno's previous installer language remain in effect. Explicit `/LANG` is
+still supported. This does not remove any translation or overwrite game locale
+preferences. See the official [language-dialog semantics](https://jrsoftware.org/ishelp/topic_setup_showlanguagedialog.htm)
+and [previous-language preference](https://jrsoftware.org/ishelp/topic_setup_usepreviouslanguage.htm).
+
+After successful installation, the confirmed launch choice invokes the original
+user's `Mir2Launcher.exe --play-installed`, rather than asking for Start game a
+second time. That launcher operation must retain installed-content verification,
+game leases and the authenticated Ready plus ten-second liveness requirement; it
+does not authorize network installation or mark a generation Healthy. Ordinary
+launcher use retains its Home screen. Unchecked launch, cancellation, failure,
+silent mode and a required restart never automatically start the game. Inno
+still displays a necessary restart page even with `DisableFinishedPage=yes`.
+Full/bootstrap retain their existing wizard and finish-page behavior.
+
+Local supplementary regressions (synthetic signatures are never release proof):
+
+```text
+python -B apps/game-client/platform-windows/scripts/invited-installer/test-packed-installer-input.py
+python -B apps/game-client/windows-updater/scripts/test-bootstrap-installer.py
+```
+
+The ordinary empty-cache Windows download, actual installation, offline seed
+adoption and real game readiness must be timed separately before claiming the
+5–10 minute cold-start target. Reducing resource file count is not evidence of
+network speed or complete frontend acceptance.

@@ -1,0 +1,57 @@
+{
+  "wholeAttempts": [
+    {
+      "fixture": "fixture-r2",
+      "runName": "quest-after-r1",
+      "passed": false,
+      "originalSha256": "b42139024522879e5a3fdfabd053f253985ead0866d9cecb981506d27a7b7288",
+      "failure": {
+        "stage": "ordinary-q-with-original-native-fonts",
+        "message": "public diary observation failed"
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcDialoguePassed": false,
+      "reason": "Observer expected en; the real shared languageLocale is en-US. Native English diary was open.",
+      "productChangedForCorrection": false
+    },
+    {
+      "fixture": "fixture-r3",
+      "runName": "quest-after-r2",
+      "passed": false,
+      "originalSha256": "288acf100cb696a15b9efeb82e905cc379818cff1ab21715ebc1406c2de70ee6",
+      "failure": {
+        "stage": "native-hunt-region-zero-step-arrival",
+        "message": "page.waitForFunction: Timeout 30000ms exceeded."
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "npcDialoguePassed": true,
+      "reason": "Observer awaited Traditional Chinese hunt text in an English cohort. Actual exact source-defined English arrival and unchanged authoritative position were independently verified.",
+      "productChangedForCorrection": false
+    }
+  ],
+  "componentPreparationFailure": "First component fixture omitted Cursor resources and the visible shared canvas class. It failed before a receipt; screenshot/helper remain private. The corrected observer used the same product baseline and then the exact qualified source.",
+  "exportPreparationFailures": [
+    "PowerShell 7 Add-Type lacked System.Drawing.Common; supported Windows PowerShell 5.1 completed the two exports.",
+    "Initial identical-font-file guard failed; read-only comparison proved the original eight PNGs exact before an explicit new-font provenance decision.",
+    "Initial self-test rejected CRLF marker bytes introduced by checkout; exact marker/JSON LF policy fixed in b2dd6ac70b."
+  ],
+  "baselineTests": {
+    "source": "6e5abd6ddd",
+    "pass": 2,
+    "fail": 3,
+    "repairedHarness": "Existing chat test fixture lacked the already-imported OriginalCrystalItemTooltip stub; now restored without product changes.",
+    "remaining": "Existing fishing exported range [0,351] disagrees with expected [0,175]. It is unchanged by this round and not passed."
+  }
+}

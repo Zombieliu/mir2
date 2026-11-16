@@ -1,0 +1,9 @@
+# Classic map phase2 root integration — 2026-10-04
+
+The eleven reviewed source files admit208 runtime maps and package209 native resource maps. D71653 remains the exact source orphan resource room, without a fabricated player entrance. Native PNG/atlas coverage has67,993 drawable references with zero missing, omitted or unexpected drawable references; Monster049 matches224 original frames. Full physical manifests remain in the external phase2 directory at their receipt-bound hashes.
+
+Root integrated this with the twelve-file same-map EXP owner slice. Five scope plus three content metadata tests,21 ownership regressions,12 Node guard tests, PowerShell scope/bundle checks, Gateway test compilation and Windows host/client dependency checking pass. Worker64 adjacent Node and12 Rust checks retain their narrower original scope. These are source/resource checks, not executed normal late routes, Boss loot, installed-client or human acceptance.
+
+`implementation-receipt.json` is the original worker receipt. `integration.json` indexes exact raw copies; `ROOT-APPLY-01.json` retains the CRLF integration mismatch and exact-byte repair. `root-integration-01` keeps both initial command/environment failures and corrected successful invocations. Raw files are not newline-normalized. No new build artifact, update feed or service publication follows from this commit; R17 remains the published pair.
+
+Normal entry audit identifies the four conditional Ancient Stone rooms and the unbound NeedMove entrance to D10061.71 family maps are reachable in an unconditional metadata approximation, not yet a live/collision proof. Stone/BigTaoist named legacy conditions require a documented Candidate compatibility repair. Source Boss DropPath tables are present; actual ordinary combat/rare acquisition remains open. See the scoped [phase2 report](../../../../CLASSIC-MAP-CLOSURE-PHASE2-20261004.md).

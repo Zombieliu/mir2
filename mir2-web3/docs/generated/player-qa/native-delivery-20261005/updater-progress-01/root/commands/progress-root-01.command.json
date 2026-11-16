@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "--target-dir",
+    "C:/mir2-build/native-updater-progress-root-20261005",
+    "--lib",
+    "progress_trace_tests",
+    "--",
+    "--nocapture"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater",
+  "startedUtc": "2026-10-05T00:39:51.997952+00:00",
+  "pid": 62240,
+  "exitCode": 0,
+  "elapsedSeconds": 20.178807200019946,
+  "minimumCFreeBytes": 169784299520,
+  "networkRequested": false,
+  "ownedTemp": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-progress-root-01\\owned-temp",
+  "processExited": true,
+  "stdout": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-progress-root-01\\commands\\progress-root-01.stdout.log",
+    "bytes": 1210,
+    "sha256": "f9521e1a937ab61f580f756a25570dacb9002316b9d46b3d1ccc5b5998a7f224"
+  },
+  "stderr": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-progress-root-01\\commands\\progress-root-01.stderr.log",
+    "bytes": 2748,
+    "sha256": "88b4c8c43fd268c489df7bf7d9352939dd7aefd4884fb3801f3e2e0227499800"
+  }
+}

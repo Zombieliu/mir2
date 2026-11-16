@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_UNSEALED_NOT_RUNNABLE",
+  "files": [
+    {
+      "file": "run-owned-full.mjs",
+      "bytes": 14389,
+      "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "bytes": 9066,
+      "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "b715c67e7e0b3e764df11a885aff386b909d9f5dc81828eff89f51898660d395"
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "bytes": 2038,
+      "sha256": "df13d2a46fff49f21d147c24e4db366777ccf125338c374f1b780c7710bdc0d0"
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "bytes": 239,
+      "sha256": "a0cdb317c114f41ec51ba13e6682aaf77397399cfd314413d5af5b6ad304e309"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "full-lifecycle-profile.json",
+      "bytes": 4150,
+      "sha256": "f62d0655626e037be41fbf15a71b7fe64209b18feadfcc4db8aa6605248c71ba"
+    },
+    {
+      "file": "candidate-release-binding-v1.json",
+      "bytes": 552,
+      "sha256": "4cda885695452fe3a8e86fcc50c507b90b881d4bd1405c7868e43eae0a9d8471"
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "slow-scoped-allowlist-proof-v1.json",
+      "bytes": 2302,
+      "sha256": "fcc174582a8a4dd33909e07121bc97b2d807c84edb68994a729f224a72885e6d"
+    },
+    {
+      "file": "derivation-proof-v1.json",
+      "bytes": 9447,
+      "sha256": "d9647020eda5d334dc0f6e57a1f311806e0405091d439b1dd8878ea3da0a078e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 2026,
+      "sha256": "9e807ad6c55f01d870227a3446690765051f9a816d944e51d757e4eb0352f651"
+    },
+    {
+      "file": "prepare-template-v1.mjs",
+      "bytes": 12179,
+      "sha256": "4e2188bee53580a745bbac3f812ed58623d31cb525a128f47e914291185d5976"
+    }
+  ],
+  "sourceSha256": "d8aefee76a05ae079b4f5dd14c9a5dce7e3ccb2cd038b0824e5eda5fc1474c0f",
+  "driverPins": [
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "externalSourceLibrary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\source-lib-v1.mjs",
+    "bytes": 16541,
+    "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+  },
+  "expectedBackendInputCount": 44,
+  "expectedRustInputs": 39,
+  "expectedCargoInputs": 5,
+  "actualCandidateSourceCommit": null,
+  "actualCandidateManifest": null,
+  "actualCandidateRelease": null,
+  "actualCandidateBinary": null,
+  "actualCandidateBuildReceipt": null,
+  "actualRootFunctionalValidation": null,
+  "syntax": [
+    {
+      "file": "run-owned-full.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    },
+    {
+      "file": "prepare-template-v1.mjs",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; entrypoint not imported"
+    }
+  ],
+  "rawReusedDrivers": 6,
+  "neutralAuditAndAclRawExact": true,
+  "mechanicalSourcesInverseExact": true,
+  "actualHistoricalSentCommandCount": 354,
+  "newActualSentCommandCount": null,
+  "sourceCaptureExecuted": false,
+  "buildExecuted": false,
+  "finalizationExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "fullLifecyclePassed": false,
+  "humanFrontendAccepted": false,
+  "absentState": [
+    "private",
+    "public",
+    "bin",
+    "launcher-final-binding-v1.json"
+  ]
+}

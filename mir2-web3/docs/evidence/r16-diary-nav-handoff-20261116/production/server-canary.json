@@ -1,0 +1,31 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "passed": true,
+  "ordinaryRegistration": true,
+  "ordinaryPasswordLogin": true,
+  "normalNewCharacter": true,
+  "movementMs": 105.518,
+  "neutralMonsterWalkCount": 1,
+  "normalLogouts": 2,
+  "sameRoleReentry": true,
+  "existingRowsUnchanged": {
+    "accounts": {
+      "rows": 322,
+      "canonicalBytes": 2399289,
+      "sha256": "053be12f66071fb21e215224fb9a9f31f6707ce72d5e2b83a8fb47625ef97836"
+    },
+    "characters": {
+      "rows": 234,
+      "canonicalBytes": 79082,
+      "sha256": "b7bfc17c9549081600689b834955cc8d6b37d2235fd3cb78da655e5c2d2af270"
+    },
+    "character_saves": {
+      "rows": 234,
+      "canonicalBytes": 2711334,
+      "sha256": "5fa9f6d9c5ff0e141b7389fd9d0d828fbaed7649cc9f2be51370b18fa389d7f8"
+    }
+  },
+  "debugCommandsSent": 0,
+  "productionProcessUnchanged": true,
+  "isolatedServicesStopped": true
+}

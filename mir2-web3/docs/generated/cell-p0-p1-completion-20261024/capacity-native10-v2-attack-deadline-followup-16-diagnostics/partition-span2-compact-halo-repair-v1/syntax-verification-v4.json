@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "scope": "Parseronly externaltools, no game test/build/service",
+  "count": 10,
+  "files": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+        "bytes": 3222,
+        "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+        "bytes": 8728,
+        "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+        "bytes": 4795,
+        "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+        "bytes": 2887,
+        "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+        "bytes": 18581,
+        "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+        "bytes": 3000,
+        "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+        "bytes": 8094,
+        "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+        "bytes": 9199,
+        "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+        "bytes": 2240,
+        "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+        "bytes": 11508,
+        "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+      },
+      "exitCode": 0,
+      "diagnostic": null
+    }
+  ],
+  "passed": true
+}

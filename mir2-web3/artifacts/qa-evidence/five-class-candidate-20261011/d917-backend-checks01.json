@@ -1,0 +1,350 @@
+{
+  "schema": "mir2.five-class-d917-backend-checks.v1",
+  "createdUtc": "2026-10-11T19:16:27.969287+00:00",
+  "workingMerge": {
+    "head": "6e78b7ad3d57500a66a10e88ea28d65e13d41ca0",
+    "mergeHead": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf"
+  },
+  "checks": [
+    {
+      "run": "d917-merged-simulation-five01",
+      "exitCode": 101,
+      "groups": [
+        {
+          "passed": 120,
+          "failed": 4,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "6a18dfd4d5a66d3dc4055723ac4702c4140b8ff416b5f44a192e610fd81915bf",
+      "resultSha256": "8e730e1f27ef16c80a6a9c66a9d0778ea0da4275783ea4f4b51dd66825797865",
+      "sourceSnapshotSha256": "5b59ac24edeaae5ccb23b907aa4fce0813b4a1a3f6e5645419cf019ea10a89db",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-simulation-five02",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 124,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "c95d6f320b6d13dc7ac9d217b08b75ea112e4a5eba5ee59969e9a07413b88593",
+      "resultSha256": "934e08c307a094283baa901bc0faf5f1b60043c22340c516f4e6ee571d569979",
+      "sourceSnapshotSha256": "c605399bce07156d02324d80aa6c121e160cada348a7664e73a74decbf31668e",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-gateway-five01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "928a867334b783113613a6c19e457397fdb893bc89ca3818073d99712cbcbaad",
+      "resultSha256": "9ea9a3518c3df5c61752f13909b4b4ac650e0c05d680220748a3f930d3fb1295",
+      "sourceSnapshotSha256": "d44e274be8ab36b3a9025d52801b02bc33cd9cf3e7af0c5584ecb6be723b6043",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-simulation-billing01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--test",
+        "billing_monthly_card",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "20eaf3b61e020fdc8dfa954d0ead693761b38827be39dca439091e7d5a93ee76",
+      "resultSha256": "609f006177c3d57ae4397f600406e97560b79bc9a565385aaa4dcf60a7efac30",
+      "sourceSnapshotSha256": "a79c0210b34099ba3727e3f33cdfcf4157d5f412a83cc0b4f9dda74e7ed505fa",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-simulation-canmove01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "source_can_move_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "baa407558aa49b1b13092ca73d0aaaa2e0f9a31a242a4db1c299522ef5b2e44a",
+      "resultSha256": "564f8579249097163d02330044527ba6bd4bc3c109a842173fa418b153700896",
+      "sourceSnapshotSha256": "3bb890f36f9937999e5cb915331e1b98848810b570b16445ac2812e1230291ca",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-simulation-buffclock01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "session_zone_buff_clock_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "67e75e0191229258bd7f8097be13371b1f5f29e03d66d64142becc4020e15f61",
+      "resultSha256": "5947a2f8760cd92e29f03d40d7bd4bfda75e9649c72c78c2531f6aa0e6faa08f",
+      "sourceSnapshotSha256": "697103927ce357a33c281c85760b33330275fe0ccebda6a500ce484dc64fa8b9",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-simulation-health01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "owner_health_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "6d8b1b11b6bf9af828f61126439007f5f2e73bd7abe9ed7977fbbe8f1273c4cb",
+      "resultSha256": "84f67e9a821d9f3cc8f1d16e30cdb4fc47b39f73d7f86fd42b13ecd6bcae49fc",
+      "sourceSnapshotSha256": "70e8f617d9fc5dcdc53ab777559fa00dbff1096c6719d8f5e5bb03fb044bec38",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-gateway-health01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 32,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "owner_health_sync_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "68c34808cb149670827320d3403d9ed6b98257b4a36ce3f645d02a4985e5e45b",
+      "resultSha256": "ba1bf2093e309097723a2bf70bb933fd3854d35f8e7f9e02dd423aa0c7427f10",
+      "sourceSnapshotSha256": "f290875a3ed117cd361c9b916e1b9ce9f66556cb969adb478dd6e6fbb6813020",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-gateway-outcome01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "outcome_tick_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "d3780763a7633b70d840c2b8b31d9aae6cdaebb9d83a99b2166169da922bac1f",
+      "resultSha256": "9ffafe6e2584fd6102cbc2ee8b3853d8d30371cfc56dfa24157ba8afdf7bae31",
+      "sourceSnapshotSha256": "2bf97e40e986d379ab8014a0ddd5e455286834c51d4e1bd970e574e629685010",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-simulation-transfer01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "map_transfer_availability_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "c529f8ce4803ceaf8163826affb458d651cbb15e1e7ec69471dbaf3bee207475",
+      "resultSha256": "a7c14ce1228e1581453be0ca56cafdf4c736f9fda480c4b09a84617a598fe755",
+      "sourceSnapshotSha256": "78f7d69ca10d35d0adc48240f0259efd6745b17c508e565d4e0cb1821060a27b",
+      "sourceDrift": []
+    },
+    {
+      "run": "d917-merged-gateway-zero01",
+      "exitCode": 0,
+      "groups": [
+        {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "health_zero_authority_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cargoLogSha256": "84d242bba95cc099ff7360d5678513211d89a0a768e9304071c8ec599a06365a",
+      "resultSha256": "b4babf932e93d5245a8962f035a2d4b2cb73d7f785f829d8a09f471eb749f437",
+      "sourceSnapshotSha256": "3b459c3efcde356cb34b195eac4800fd8fa7386016124cc6f9e087ea634c530f",
+      "sourceDrift": []
+    }
+  ],
+  "distinctPassingNames": 220,
+  "overlapExcluded": true,
+  "billingDefaultFeatureCases": 8,
+  "twoOriginalTestSupportBillingCasesNotExecutedHere": true,
+  "schemaVersions": {
+    "zoneCanonical": 7,
+    "zoneRuntime": 7,
+    "gatewayShared": 3,
+    "sessionFactory": 2
+  },
+  "firstActualSimFailure120Pass4FailRetained": true,
+  "testPreparationFailuresRetained": true,
+  "nativeTestsPending": true,
+  "compiledRelease": false,
+  "published": false,
+  "humanAccepted": false,
+  "archive": {
+    "path": "d917-backend-original-evidence01.zip",
+    "sha256": "baa1de61b295fceea42d1504154d572c18fa1c0adb9c0d5984f114b013d5ff77",
+    "bytes": 587394
+  }
+}

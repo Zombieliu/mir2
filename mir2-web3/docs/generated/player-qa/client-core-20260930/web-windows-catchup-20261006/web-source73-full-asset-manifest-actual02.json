@@ -1,0 +1,56 @@
+{
+  "owner": "Root",
+  "kind": "Source73 actual full original index with complete warehouse16 closure",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 80844,
+    "kind": "Source73 original complete filesystem index all16genuine warehouse skins",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1309,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/full-asset-manifest02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "manifest": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/full-asset-manifest02/original-asset-manifest.generated.json",
+    "bytes": 7641947,
+    "sha256": "4712a424a65864670a0e5af866918e17e62dfee17e4b2ba7752eaffe8b42b273"
+  },
+  "assetHash": "aa18de0a2ce261cbac61ea32393a8741e17523151ed94e52c0faec6d7ae28920",
+  "stats": {
+    "assetCount": 41261,
+    "originalMapPngCount": 12131,
+    "originalUiPngCount": 29130,
+    "totalBytes": 192007242
+  },
+  "oldEntryCount": 41248,
+  "oldEntryDifferences": 0,
+  "newLogicalPaths": [
+    "/original-ui/Prguse/2443.png",
+    "/original-ui/Prguse/586.png",
+    "/original-ui/Title/0.png",
+    "/original-ui/Title/113.png",
+    "/original-ui/Title/114.png",
+    "/original-ui/Title/115.png",
+    "/original-ui/Title/483.png",
+    "/original-ui/Title/484.png",
+    "/original-ui/Title/485.png",
+    "/original-ui/Title/743.png",
+    "/original-ui/Title/744.png",
+    "/original-ui/Title/745.png",
+    "/original-ui/Title/746.png"
+  ],
+  "newGenuinePngFrames": 4,
+  "oldGenuinePngMissingLogicalEntries": 9,
+  "warehouse16EntriesAllActualHashSizeVerified": true,
+  "stderr": "exact two original-generator progress lines only",
+  "attempt01FinalAccepted": false,
+  "sharedWarehouseOwnerAccepted": false,
+  "networkUsed": false
+}

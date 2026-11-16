@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "base": "2b4b1731439fa046d0dd370b811ec112d5409aab",
+  "scope": {
+    "runtime": "Production-mode Next, Chrome WebGPU, actual ordinary Gateway WebSocket",
+    "fixture": "Separate copies of the same previously provisioned R16 Bichon File",
+    "runtimeVersion": "bevy-b27119c94bf94458",
+    "windowsWindowRendered": false,
+    "publicDeployment": false
+  },
+  "fixtureSha256": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+  "gatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+  "baseline": {
+    "physicalDirectionsTried": 2,
+    "actionPackets": 0,
+    "normalTwoClickControlsPassed": 2
+  },
+  "candidate": {
+    "quantity": 15,
+    "detach": { "sent": 618, "success": 619, "snapshot": 624, "reloadedSnapshot": 1245 },
+    "attach": { "sent": 1248, "success": 1249, "snapshot": 1254, "reloadedSnapshot": 1881 },
+    "sameItemUidInBothDirectionsAndRelogins": true,
+    "normalHookTwoClickDetachAndAttach": true,
+    "normalLogouts": [626, 1262, 1885],
+    "negativeGestures": 7,
+    "negativeGestureActionPackets": 0,
+    "unintendedWorldActionPackets": 0,
+    "sourceFixtureUnchanged": true,
+    "ownedProcessesClosed": true
+  },
+  "regression": {
+    "stage5GroupsPassed": 517,
+    "typescriptNoEmitPassed": true,
+    "chromiumDomKeyboardAndPointerPassed": true
+  },
+  "sha256": {
+    "pairedReceipt": "504d995393c0d3fe85581ce8b3f266dfd2e58e8b936465a0b5338af85a3161ad",
+    "baselineReceipt": "2e62be97d9f1448cb1c651fd30675665fa45bce60cab47f30ba510347210d139",
+    "candidateReceipt": "66cb3fdfa5ddc2c3f5fb1470eddb7bb06b85221452cba87e6de788cda7e1cd98",
+    "buildReceipt": "c831956727032c82d90da67337ccc59f61f6af7dfd3a820604757b09f0fd3d05",
+    "frozenSource": "d1d29261453bc19c91c55ba8049577156a340e8033b8366a59f23b941605bfcb",
+    "candidateDetachedScreenshot": "773319da60e9252cef8ac70eba7995f752be666eac3ae7eed7a96d2d6625f833",
+    "candidateReattachedScreenshot": "c31ea17603a2249050dd2b55921ee403e9fd125840d381b951b33aec2372ca4b"
+  }
+}

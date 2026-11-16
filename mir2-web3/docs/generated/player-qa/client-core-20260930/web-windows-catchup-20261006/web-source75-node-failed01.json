@@ -1,0 +1,81 @@
+{
+  "owner": "Root",
+  "kind": "Source75 actual original focused/adjacent Node01 failure preserved",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\node-tests01-config.json",
+    "bytes": 4202,
+    "sha256": "a403e2e3b6dd9d8b7c2c7e6c405f22dc48db8691052c690edbebe8fa2a3b3bc8"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-strict-snapshot01.json",
+    "bytes": 19908242,
+    "sha256": "bb95c715e3498dfd2fcee28380f1c512c025d1d52431fb99f7f0387d2ae726de"
+  },
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "unchanged": true
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 92092,
+    "kind": "Root approved original Source75 focused and adjacent pure Web tests",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1229,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source75-storage-prepare-paint-20261012-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "postGuardCompleted": true,
+  "tap": {
+    "tests": 83,
+    "pass": 81,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "storageTests": {
+    "tests": 50,
+    "pass": 50,
+    "original43AssertionsPreserved": true,
+    "new7Pass": true
+  },
+  "failures": [
+    {
+      "script": "test-bevy-hud-ui.mjs",
+      "reason": "existing extracted Shell fixture omitted cancelWorldFishingHeldPointer",
+      "failureType": "ReferenceError"
+    },
+    {
+      "script": "test-bevy-npc-shop-ui.mjs",
+      "reason": "existing pure graph fixture omitted bag-belt-gesture dependency",
+      "failureType": "test module admission assertion"
+    }
+  ],
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\node-tests01\\stdout.txt",
+    "bytes": 24648,
+    "sha256": "67f541ec412c927793755876c1dd89626e0717609372615fa4f3b00626311432"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\node-tests01\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\node-tests01\\outer.json",
+    "bytes": 531,
+    "sha256": "70e5149a8dafa29930c3c81b9743864671628a823f0c50ba73143529903a3849"
+  },
+  "accepted": false,
+  "readyForBuild": false,
+  "testsNotWeakened": true,
+  "goalComplete": false
+}

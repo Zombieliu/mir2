@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "state": "reused50-release-current-driver-and-fresh-full16-bound-not-executed",
+  "backendInputCount": 50,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "releaseRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "backendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-v1-build-receipt.json",
+    "bytes": 2453,
+    "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+  },
+  "buildLog": {
+    "file": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-account-store-wait-diagnostics-v1-release-build.log",
+    "bytes": 56033,
+    "sha256": "64e6c04e66681b8486cd29bd401faaec7d7cdd7fad61f3395b2defa7b9f0e864"
+  },
+  "binary": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/bin/mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "rootFunctionalValidation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-account-store-wait-diagnostics-functional-validation-v1.json",
+    "bytes": 12175,
+    "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57"
+  },
+  "full16": {
+    "state": "passed",
+    "audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.independent-audit.json",
+      "bytes": 1904,
+      "sha256": "7ec58c2c91858dc9136018857cab96e6c024c00ea5341f45e0ed4bd52499c496"
+    },
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.audit-source.mjs",
+        "bytes": 9481,
+        "sha256": "3f0c0d23caa445a38fe322ee9440fbfe712ae6c96a19617dbabe8382d9b00ab5"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.backend-source.json",
+        "bytes": 41831,
+        "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.independent-audit.json",
+        "bytes": 1904,
+        "sha256": "7ec58c2c91858dc9136018857cab96e6c024c00ea5341f45e0ed4bd52499c496"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.prepared-profile.json",
+        "bytes": 4777,
+        "sha256": "ee888450fe85cdb017a0575e74f43e13766594f7d994d0afed239a1f23105dd3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.realm-evidence.json",
+        "bytes": 35104,
+        "sha256": "19b458eb00cf407fbc4ed66c10d88e05f4a38bf1fa0def5d3952ce6be97f5106"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.release-input.json",
+        "bytes": 3343,
+        "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.runner-source.mjs",
+        "bytes": 14496,
+        "sha256": "150cd59619f1b964352f7da5cea1fe10984ae2653cb8c48aa6b769ac2f5f1366"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.source-manifest-verification.json",
+        "bytes": 725,
+        "sha256": "cc1f71934903c55c0e0fbb1d56e8e8c1126c9bbd190a94c65889e18847be9407"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.zone-metrics.json",
+        "bytes": 23591,
+        "sha256": "0cd4721452dc416d0904c1b804fe8ead28df5cb6b3b8f9bccda260bede988730"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-a.trace.jsonl",
+        "bytes": 977672,
+        "sha256": "4d98cd5eb04779f164ffc22f39fdaa216c3e7ae234229f6a80f4159bd8e523d6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-b.trace.jsonl",
+        "bytes": 902155,
+        "sha256": "33f325df131467214c8a3d273a9c097c04d7f1847127f525187fd2334741ba95"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-guard-newCharacter.trace.jsonl",
+        "bytes": 3486,
+        "sha256": "9f4b6e854ce7464f9b08a2deb9f02d2750a36a33a88170cbd675338eb649912c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-guard-startGame.trace.jsonl",
+        "bytes": 3450,
+        "sha256": "dcbd5e421984962390199673c3bf6435e120895c488be3f94860551b2558d78c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-relogin-0.trace.jsonl",
+        "bytes": 684278,
+        "sha256": "ac71379e99fe3dccbb73ce6965d4ccf26776800e729b3cf218deb4b70cfadc0f"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-relogin-1.trace.jsonl",
+        "bytes": 680216,
+        "sha256": "8fc06b841f72fda7a981ef1980d39e5de31351206a27e5e02a2aad9a20ff1f49"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a.report.json",
+        "bytes": 109554,
+        "sha256": "8dad894a5dc664c2bea2167b0c7567e0653ac7f2acbe87e71196c64864ab30a6"
+      }
+    ],
+    "rootIndependentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-root-independent-cleanup-v1.json",
+      "bytes": 320,
+      "sha256": "be3b4ffa1bbef1e49a945829c6589e6668884458fddad340b9fe55b5461d9e71"
+    },
+    "prerequisite": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+      "bytes": 9348,
+      "sha256": "9e21969af766c6a11983354af92b0c71722ae991719f15c80724f0aae8694b26"
+    },
+    "independentResultFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-actual-independent-facts-v1.json",
+      "bytes": 6348,
+      "sha256": "04f4cf042228d098e8d3fc910c3a1b9830dec4d052f03d0b2b89320372cbfdf9"
+    }
+  },
+  "rebuildPerformed": false,
+  "capacityAccepted": false,
+  "reason": "Immutable C743/50/dae1 reused under actual J/226 source. The new J ordinary full16 passed16/16 with349 ordinary commands. Complete actual fresh Probe19 independent source seal/executor/result/cleanup is bound separately; formal15 itself has not executed or passed.",
+  "actualRuntimeGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d8de777412955cb68dac020e84c8156bd792acc0fcb7bfe77cd74d884008a141"
+  },
+  "actualRuntimeGuardExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-readonly-guard-execution-v1.json",
+    "bytes": 2814,
+    "sha256": "1f76dc58190543287e6506ca5dbd7a9931d5c440b1600fcc483e7ef7303d3623"
+  }
+}

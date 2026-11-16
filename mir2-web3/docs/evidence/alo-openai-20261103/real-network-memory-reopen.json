@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "newNodeProcess": 52948,
+  "provider": "rules-no-http-reopen-probe",
+  "apiCallsMade": 0,
+  "priorDurableAttempts": 1,
+  "recoveredTaskStatus": "paused",
+  "observedObjectiveEpisodes": 3,
+  "policyVersion": 2,
+  "taughtHabits": {
+    "assistBeforeLoot": true,
+    "lootOnlyAfterCombat": true,
+    "askBeforeLeaving": true
+  },
+  "archiveIdentityHash": "0f54b3485355ade9c502350111cb8a16529b1582b4ece6198068499893403513",
+  "instructionHash": "b8deaccce770f4f62221a49e622da2656849eb6548138b2c9cb2da6188ef1dde",
+  "sourcePayloadHashes": [
+    "9b85ec97c4ca59fa6af6acb0f1b4bdcd6cf3916df947b0ec9cae58091aba3eca",
+    "8aa16113f07a95ac5094e27e8a0bab3683c1ce77b1ec756f22c1b99ef349c766",
+    "d5cbb01ba5f011b2ec68f48aeee28bc6844174cf13b4676cc3080c947150c525"
+  ]
+}

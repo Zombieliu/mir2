@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "owner": "Root",
+  "source": "Source66",
+  "attempt": "Thin04 same-byte accepted Next03 with complete ordinary standalone dependencies",
+  "actual": {
+    "pid": 52860,
+    "exitCode": 0,
+    "elapsedMs": 18556,
+    "exited": true,
+    "disposed": true
+  },
+  "originalCallerBodyBytes": 4569,
+  "originalCallerBodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source66-npc-visible-range-20261011-01\\root-approved01\\thin-build04-config.json",
+    "bytes": 5712,
+    "sha256": "f147902406709d99735d1e6ac5c6ac13980b4b58f524d1687dcdd3d089481279"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source66-npc-visible-range-20261011-01\\root-approved01\\thin-source-review04.json",
+    "bytes": 18292,
+    "sha256": "51c9c6a43fa1257837dccd124d178f9775a8fe83b75d906fac6c7357a68a6d00"
+  },
+  "sourceCount": 70550,
+  "sourceDifferences": 0,
+  "copiedNext03Scope": 57289,
+  "copiedSourceOrOutputDifferences": 0,
+  "ordinaryStandaloneDependencyAdditions": 13261,
+  "completeStandaloneDependencies": 15209,
+  "dependencyMirrorDifferences": 0,
+  "membershipDifferences": 0,
+  "nftTraces": 61,
+  "nftRawReferences": 129822,
+  "nftRegularTargets": 39100,
+  "uncoveredNftReferences": 0,
+  "ancestors": 5778,
+  "ancestorDifferences": 0,
+  "controlCount": 23,
+  "controlDifferences": 0,
+  "package": {
+    "files": 4066,
+    "ordinaryDirectoriesIncludingRoot": 513,
+    "links": 0,
+    "bytes": 284885459,
+    "capBytes": 377487360,
+    "capInclusive": true,
+    "capPassed": true,
+    "accepted": true
+  },
+  "report": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-build04/size-report.json",
+    "bytes": 36188,
+    "sha256": "4465d079ac8e658d90f9e93a09f99358256154f38e2cfd7b2c3edcc27a57e1ff"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-build04/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "atlasPages": 79,
+  "compiledOptionalAtlasFlagsEnabled": false,
+  "jsonCompaction": {
+    "files": 10,
+    "savedBytes": 20712325
+  },
+  "Next03ActualAccepted": true,
+  "Next04Executed": false,
+  "Node208CarriedIdenticalProductAndTestInputs": true,
+  "earlierFailedAttemptsPreserved": true,
+  "helperAndCapAndGatesUnchanged": true,
+  "uiOperated": false,
+  "runtimeStarted": false,
+  "storageLivePending": true,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

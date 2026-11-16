@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v11",
+  "sourceOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\episode\\reports\\1793060794633-f7c07302.preparation-report.json",
+    "bytes": 41635,
+    "sha256": "648a94b7ff766623df3b9893add65b75717f44feefd608dcdccf57aca61832cd"
+  },
+  "records": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "sequence": 726,
+      "monotonicMs": 3329.6675,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "sequence": 691,
+      "monotonicMs": 6847.2822,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "sequence": 683,
+      "monotonicMs": 10338.3898,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "sequence": 690,
+      "monotonicMs": 13823.9074,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "sequence": 690,
+      "monotonicMs": 17367.8612,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "sequence": 689,
+      "monotonicMs": 21850.0002,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "sequence": 688,
+      "monotonicMs": 26238.7506,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "map": "0",
+      "x": 286,
+      "y": 616,
+      "sequence": 758,
+      "monotonicMs": 37422.7197,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "map": "0",
+      "x": 290,
+      "y": 616,
+      "sequence": 1071,
+      "monotonicMs": 141924.9204,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "map": "0",
+      "x": 288,
+      "y": 618,
+      "sequence": 1125,
+      "monotonicMs": 249784.3566,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "map": "0",
+      "x": 287,
+      "y": 614,
+      "sequence": 1122,
+      "monotonicMs": 357526.6105,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true
+    }
+  ],
+  "pointsAreActualSavedPositions": true,
+  "formalOrdinaryReloginVerified": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

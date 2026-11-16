@@ -1,0 +1,509 @@
+{
+  "schema": "r16-newcomer-v2-complete-scoped-browser-receipt/1",
+  "passed": true,
+  "latestRunPassed": true,
+  "scope": {
+    "sameOrdinaryTestAccountAndRole": true,
+    "combinedEvidenceAcrossNormalSessions": true,
+    "singleFreshSessionForAllThreeClaimed": false,
+    "ordinaryUiActionsOnly": true,
+    "normalSharedGateway": true,
+    "qaAdminCommands": 0,
+    "saveOrWorldEdits": false,
+    "modelCallsRequestedByThisQa": 0,
+    "originalOwnerOrAloOpened": false,
+    "newAccountsInClosingRun": 0,
+    "newCharactersInClosingRun": 0,
+    "followingQuestActions": 0
+  },
+  "evidence": {
+    "nativeCardPointerAndFirstKit": "../onboarding-v12-browser-r3/onboarding-v11-browser-proof.json",
+    "weaponEquipAndSecondQuest": "../onboarding-v12-browser-r5/onboarding-v11-browser-proof.json",
+    "firstNpcNoDuplicateRewardProof": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "ordinaryThreePotionPurchase": "../onboarding-v13-browser-r7/onboarding-v11-browser-proof.json",
+    "firstNaturalCatAndThreeOfFourProgress": "../onboarding-v13-browser-r8/onboarding-v11-browser-proof.json",
+    "twoPotionClosingPurchase": "../onboarding-v13-browser-r9/onboarding-v11-browser-proof.json",
+    "lastNaturalCatDeliveryAndPersistence": "onboarding-v11-browser-proof.json"
+  },
+  "nativeSharedCard": {
+    "paintedAndCurrent": true,
+    "actualPointerOpensDetailsWithoutWalkRunOrPositionChange": true,
+    "repeatVerifiedRounds": 3,
+    "plainQDiaryObserved": true,
+    "oldThirteenCardTourVisible": false
+  },
+  "quests": [
+    {
+      "questId": 2110001,
+      "completed": true,
+      "normalJaneAcceptAndFinish": true,
+      "matchingAckAndCompleteQuest": true,
+      "reward": {
+        "goldDelta": 100,
+        "woodenSwordDelta": 1,
+        "smallHpMedicineDelta": 10,
+        "completeQuest": true
+      }
+    },
+    {
+      "questId": 2110002,
+      "completed": true,
+      "normalOwnedWeaponEquipAndFinish": true,
+      "matchingAckAndCompleteQuest": true,
+      "reward": {
+        "goldDelta": 100,
+        "equippedWoodenSword": true,
+        "completeQuest": true
+      }
+    },
+    {
+      "questId": 2110003,
+      "completed": true,
+      "objective": {
+        "Scarecrow": "2/2",
+        "RakingCat": "2/2"
+      },
+      "readyBeforeDelivery": "4/4",
+      "normalReturnToTownBeforeDelivery": true,
+      "matchingFinishAckAndCompleteQuest": true,
+      "reward": {
+        "goldDelta": 150,
+        "fencingBookDelta": 1,
+        "completeQuest": true
+      }
+    }
+  ],
+  "naturalKills": [
+    {
+      "run": "onboarding-v12-browser-r5",
+      "objectId": 206644,
+      "name": "Scarecrow",
+      "lastOwnHitSequence": 864,
+      "deathSequence": 867,
+      "assistedFinalHit": false
+    },
+    {
+      "run": "onboarding-v12-browser-r5",
+      "objectId": 206641,
+      "name": "Scarecrow",
+      "lastOwnHitSequence": 957,
+      "deathSequence": 960,
+      "assistedFinalHit": false
+    },
+    {
+      "run": "onboarding-v13-browser-r8",
+      "objectId": 206032,
+      "name": "RakingCat",
+      "lastOwnHitSequence": 1169,
+      "deathSequence": 1172,
+      "assistedFinalHit": false
+    },
+    {
+      "run": "onboarding-v13-browser-r11",
+      "objectId": 206032,
+      "name": "RakingCat",
+      "lastOwnHitSequence": 1122,
+      "deathSequence": 1125,
+      "assistedFinalHit": false
+    }
+  ],
+  "naturalLifeIdentityNote": "The two cat kills use a recurring server object ID in separate ordinary sessions after natural respawn; server quest progress advanced 2 to 3 to 4. Distinct static spawn IDs are not claimed.",
+  "purchases": [
+    {
+      "run": "onboarding-v13-browser-r7",
+      "itemName": "(HP)DrugSmall",
+      "bought": true,
+      "quantity": 3,
+      "observedUnitGold": 40,
+      "chargedGold": 120,
+      "goldBefore": 200,
+      "goldAfter": 80,
+      "quantityBefore": 0,
+      "quantityAfter": 3,
+      "ownedUidHashes": [
+        "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44"
+      ],
+      "onePurchaseCommand": true,
+      "matchingDurableReceipt": true,
+      "incomingUidHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+      "receiptSequence": 753
+    },
+    {
+      "run": "onboarding-v13-browser-r9",
+      "itemName": "(HP)DrugSmall",
+      "bought": true,
+      "quantity": 2,
+      "observedUnitGold": 40,
+      "chargedGold": 80,
+      "goldBefore": 80,
+      "goldAfter": 0,
+      "quantityBefore": 0,
+      "quantityAfter": 2,
+      "ownedUidHashes": [
+        "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44"
+      ],
+      "onePurchaseCommand": true,
+      "matchingDurableReceipt": true,
+      "incomingUidHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+      "receiptSequence": 748
+    }
+  ],
+  "purchaseTotals": {
+    "goldSpent": 200,
+    "hpMedicineBought": 5,
+    "committedNativeOperations": 2,
+    "closingOperationChargedGold": 80,
+    "closingOperationMedicine": 2
+  },
+  "closingRun": {
+    "startedAt": "2026-11-05T00:06:58.621Z",
+    "finishedAt": "2026-11-05T00:11:07.682Z",
+    "elapsedMs": 249061,
+    "checks": [
+      {
+        "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+        "passed": true
+      },
+      {
+        "name": "server-history-retains-completed-2110001-without-reclaim",
+        "passed": true
+      },
+      {
+        "name": "server-history-retains-completed-2110002-without-reclaim",
+        "passed": true
+      },
+      {
+        "name": "2110003-two-scarecrow-two-rakingcat-real-ui-completion",
+        "passed": true
+      },
+      {
+        "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+        "passed": true
+      }
+    ],
+    "commands": {
+      "clientCapabilities": 4,
+      "setLanguage": 2,
+      "clientVersion": 2,
+      "login": 2,
+      "startGame": 2,
+      "npcPurchaseOwner": 2,
+      "keepAlive": 15,
+      "walk": 132,
+      "attack": 11,
+      "tick": 22,
+      "useItem": 1,
+      "finishQuest": 1,
+      "logOut": 2
+    },
+    "medicine": [
+      {
+        "before": {
+          "hp": 14,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 598
+          }
+        },
+        "after": {
+          "hp": 24,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 598
+          }
+        },
+        "smallHpMedicineBefore": 2,
+        "smallHpMedicineAfter": 1,
+        "matchingUseItemAckSequence": 1096
+      }
+    ],
+    "beltKeyInputs": [
+      {
+        "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+        "slot": 0,
+        "chord": "Digit1",
+        "hpBefore": 14,
+        "quantityBefore": 2,
+        "visibleNpcShopWindows": 0
+      }
+    ],
+    "keyboardPanelChecks": [
+      {
+        "phase": "ordinary-remaining-village-hunt-2110003",
+        "visibleShopWindows": 0,
+        "nativeShop": null,
+        "bag": {
+          "active": false
+        },
+        "quest": {
+          "capturesPointer": false
+        }
+      },
+      {
+        "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+        "visibleShopWindows": 0,
+        "nativeShop": null,
+        "bag": {
+          "active": false
+        },
+        "quest": {
+          "capturesPointer": false
+        }
+      }
+    ],
+    "newPurchases": 0,
+    "deathOrReviveCommands": 0,
+    "quest3FinishOperation": {
+      "questId": 2110003,
+      "operation": "finishQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 1361,
+      "ackSequence": 1377,
+      "completeQuestObserved": true,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "finalKnownAuthoritativeState": {
+    "basis": "exact post-reward asset and quest-state comparison after ordinary fresh relogin, then final normal logout",
+    "gold": 150,
+    "hpSmallMedicine": 1,
+    "hpMedicineBeltSlot": 0,
+    "weapon": "WoodenSword",
+    "fencingBookQuantity": 1,
+    "hp": 60,
+    "maxHp": 60,
+    "position": {
+      "x": 289,
+      "y": 617
+    },
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003
+    ],
+    "notRequeriedAfterLogout": true
+  },
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003
+    ],
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "resources": {
+    "priorFourMonster016MissingPathsNow200": true,
+    "repairsRecordedIn": "../onboarding-v13-browser-r8/onboarding-v13-scoped-receipt.json",
+    "finalBrowserHttpErrors": 0,
+    "finalBrowserFailedRequests": 0,
+    "finalConsoleErrors": 0,
+    "finalConsoleWarnings": 10,
+    "finalPageOrDriverErrors": 0
+  },
+  "earlierResultsPreserved": [
+    {
+      "directory": "onboarding-v11-browser",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v11-browser-r2",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v11-browser-r3",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v11-browser-r4",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v12-browser",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r2",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r3",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r4",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r5",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r6",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r10",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r11",
+      "passed": true
+    },
+    {
+      "directory": "onboarding-v13-browser-r2",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r3",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r4",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r5",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r6",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r7",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r8",
+      "passed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r9",
+      "passed": false
+    }
+  ],
+  "limitations": [
+    "Evidence combines the same ordinary role across frozen releases and normal sessions; earlier failed and partial runs remain unchanged.",
+    "No arbitrary direct packet replay of completed quest rewards was attempted; ordinary Diary revisit produced no repeat reward.",
+    "Q1/Q2 NPC reward absence was proved in the referenced prior run, not repeated in the closing run.",
+    "Following quest became visible after delivery, but was not accepted or played."
+  ],
+  "publicSecretScan": {
+    "scope": "own QA account, password, answer, character name, and realm value; root private values were never read",
+    "proofFilesScanned": 21,
+    "totalMatches": 0
+  },
+  "screenshots": [
+    {
+      "file": "01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1206580,
+      "sha256": "52c072c22dadc8f450478b673f642a8df604ac5d19fa2004476ed4ad16f51fa2",
+      "fixedBlackIdentityMasks": true,
+      "gameplayAndQuestCardPreserved": true
+    },
+    {
+      "file": "02-fresh-village-native-task-card.png",
+      "bytes": 1208267,
+      "sha256": "2b204feaaaef664d7ae0b8ff2b72c0b8d07f850e53489cd61c96923c3d968483",
+      "fixedBlackIdentityMasks": true,
+      "gameplayAndQuestCardPreserved": true
+    },
+    {
+      "file": "03-before-finishQuest-2110003.png",
+      "bytes": 1076483,
+      "sha256": "cf5077de6411d0234a22bf1340725502d289a8a96d1e48cf093236934c810d33",
+      "fixedBlackIdentityMasks": true,
+      "gameplayAndQuestCardPreserved": true
+    },
+    {
+      "file": "04-village-hunt-completed.png",
+      "bytes": 1092278,
+      "sha256": "3fb353eda8aa23b8f95ac86ed4fa8d30a5964bac574048321d29d4f9a657d3f4",
+      "fixedBlackIdentityMasks": true,
+      "gameplayAndQuestCardPreserved": true
+    },
+    {
+      "file": "05-saved-progress-native-diary.png",
+      "bytes": 1130740,
+      "sha256": "5ecbd01275ce910569d76098323852a94c35611c723e4bd5cad0533f9baa6774",
+      "fixedBlackIdentityMasks": true,
+      "gameplayAndQuestCardPreserved": true
+    }
+  ],
+  "runnerSha256": "dc98458fed659b7bc1b93df268148356da76be850943c3b55c6c54fc887143dd"
+}

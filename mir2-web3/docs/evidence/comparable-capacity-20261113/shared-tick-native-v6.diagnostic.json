@@ -1,0 +1,139 @@
+{
+  "schema": "mir2.native-full-tick-v6-compact.v1",
+  "sourceRevision": "ebc5dd905a34cebabdc5f4499e4b25208746c464",
+  "exeSha256": "27da250a25dce69b678f323229f7886f1f7908a80cd533877a50aff6dd608500",
+  "gatewayPackageOptLevel": 0,
+  "simulationAndDependenciesOptLevel": 3,
+  "configurationDifferencesFromGame": [
+    "memory store",
+    "ordinary newcharacter level1",
+    "map0",
+    "12turns not full sustainedwalk load",
+    "noWebSocket/write gate",
+    "Gateway packageunoptimized"
+  ],
+  "capacityQualified": false,
+  "diagnosticOnly": true,
+  "actualExitCodes": [
+    0,
+    0
+  ],
+  "jobElapsedSeconds": 206.23380170000019,
+  "jobPeakCommitBytes": 298098688,
+  "allOwnedNormalNoKill": true,
+  "sourceLogSha256": "1b39f1c698a90ab6d1acd8550b92c133a7d0fd559f15774f15165c3db27e74f3",
+  "interpretation": "Fresh diagnostic100owner run completed, not defaultRelease/File/SDK CCU. Compare quantiles separately; initialization and cleanup timing differ; never add overlapping nested durations.",
+  "burst100": {
+    "actual_tick_calls": 100,
+    "callers_joined": 100,
+    "capacity_qualified": false,
+    "diagnostic_only": true,
+    "elapsed_since_test_start_ms": 186742,
+    "outer_tick": {
+      "count": 100,
+      "max_us": 146040,
+      "p50_us": 121836,
+      "p95_us": 144636
+    },
+    "personal_clock_advances": 100,
+    "population": 100,
+    "successful_tick_calls": 100
+  },
+  "fourCaller300": {
+    "actual_tick_calls": 300,
+    "artificial_lock_hold": false,
+    "backend": "memory",
+    "caller_workers": 4,
+    "caller_workers_joined": 4,
+    "capacity_qualified": false,
+    "content_profile": "crystal_full",
+    "deadline_failed": false,
+    "debug_assertions": false,
+    "diagnostic_only": true,
+    "failures": 0,
+    "initial_presence": 100,
+    "initialization_ms": 186591,
+    "level_equipment": "ordinary_new_character_defaults; differs fromL40/SharpBracelet fixture",
+    "map": "0",
+    "normal_logouts": 100,
+    "ordinary_turns": 12,
+    "outer_tick": {
+      "count": 300,
+      "max_us": 207205,
+      "p50_us": 2365,
+      "p95_us": 14027
+    },
+    "personal_clock_advances": 288,
+    "population": 100,
+    "preceding_burst_callers_joined": 100,
+    "preceding_burst_tick_calls": 100,
+    "remaining_presence": 0,
+    "rounds": 3,
+    "schema": "mir2.native-full-shared-tick-probe.v1",
+    "socket_write_gate_or_network_measured": false,
+    "whole_diagnostic_ms": 205817
+  },
+  "selectedSubstages": {
+    "shared_session.predrain.experience_context": {
+      "recordsAtOrAbove20ms": 101,
+      "maxMs": 186,
+      "maxLine": 702,
+      "sumMsNotWallTime": 5034
+    },
+    "shared_session.experience.admission_capture": {
+      "recordsAtOrAbove20ms": 48,
+      "maxMs": 184,
+      "maxLine": 701,
+      "sumMsNotWallTime": 1849
+    },
+    "shared_session.predrain.mentor_accounting": {
+      "recordsAtOrAbove20ms": 19,
+      "maxMs": 33,
+      "maxLine": 399,
+      "sumMsNotWallTime": 527
+    },
+    "shared_session.experience.owner_publication": {
+      "recordsAtOrAbove20ms": 23,
+      "maxMs": 74,
+      "maxLine": 594,
+      "sumMsNotWallTime": 704
+    },
+    "shared_session.reconcile.experience_profiles": {
+      "recordsAtOrAbove20ms": 22,
+      "maxMs": 74,
+      "maxLine": 595,
+      "sumMsNotWallTime": 684
+    },
+    "shared_session.reconcile.mentor_accounting": {
+      "recordsAtOrAbove20ms": 10,
+      "maxMs": 49,
+      "maxLine": 545,
+      "sumMsNotWallTime": 280
+    },
+    "shared_session.reconcile.player_kills": {
+      "recordsAtOrAbove20ms": 3,
+      "maxMs": 39,
+      "maxLine": 644,
+      "sumMsNotWallTime": 98
+    },
+    "shared_session.experience.peer_projection_and_wars": {
+      "recordsAtOrAbove20ms": 1,
+      "maxMs": 158,
+      "maxLine": 710,
+      "sumMsNotWallTime": 158
+    }
+  },
+  "comparisonWithV5": {
+    "baselineSourceRevision": "fd87d72d6d6c7a75174a6729aabb327781847e79",
+    "baselineExeSha256": "cf848bf733c5f9fd9e9b4d2e53409005a052bab8b2f10c1150d2a12002a512c2",
+    "sameProbe100Actors400Ticks12TurnsAnd100Logouts": true,
+    "same240s4Cpu8GiBAndSlow20": true,
+    "productionDeltaOnlyOverlapProjectionAndAuthorityIdentity": true,
+    "burstP95BeforeUs": 625506,
+    "burstP95AfterUs": 144636,
+    "burstP95ReductionPercent": 76.87696041284975,
+    "fourCallerP95BeforeUs": 27209,
+    "fourCallerP95AfterUs": 14027,
+    "notWholeGameOrCloudCausalProof": true
+  }
+}

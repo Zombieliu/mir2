@@ -1,0 +1,42 @@
+{
+  "phase": "journey-class-attempts",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 5,
+  "bytes": 394924,
+  "entries": [
+    {
+      "path": "journey-class-attempts/forest-class-v19-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r1/onboarding-forest-browser-proof.json",
+      "bytes": 117315,
+      "sha256": "6c1ab6dc24b49f05d3e481652dfb50dc72edca415021a812bd47437f8399b7a2"
+    },
+    {
+      "path": "journey-class-attempts/forest-class-v19-r2/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r2/onboarding-forest-browser-proof.json",
+      "bytes": 104036,
+      "sha256": "c47eeb95b67b665ea7f24a85c575b8db9ba7b63e2c0d9ac169edd613f0c7115c"
+    },
+    {
+      "path": "journey-class-attempts/forest-class-v19-r3/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r3/onboarding-forest-browser-proof.json",
+      "bytes": 67058,
+      "sha256": "9934747203d48501f2aa94a6c8ebab04447e23d99536c1c22ddad0be796ae52b"
+    },
+    {
+      "path": "journey-class-attempts/forest-class-v19-r4/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r4/onboarding-forest-browser-proof.json",
+      "bytes": 71830,
+      "sha256": "643319092834c9dce98c440ecd22a772cb494b5d455baa9e27b2e9e87a0ca6a2"
+    },
+    {
+      "path": "journey-class-attempts/forest-class-v19-r5/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-r5/onboarding-forest-browser-proof.json",
+      "bytes": 34685,
+      "sha256": "1bd3df2f36fcc22face4fabe271686052a1cea043f93a2617eba085113a71c19"
+    }
+  ]
+}

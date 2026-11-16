@@ -1,0 +1,394 @@
+{
+  "schema": "mir2.native.preview-five-file-freeze.v1",
+  "rootBaseline": "b87aa8a8ac94d569893a1ee653be49d857d2b063",
+  "updaterSource": "48454bba7623694ca7432613af52bee28e83970e",
+  "gameSource": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "sourceFiles": [
+    {
+      "path": "scripts/native_r17_r2_delivery.py",
+      "baselineSha256": "8fcb1f581fafe0cf254b256e66394397be436facec03d53d6fdb8d7bf83c601f",
+      "preparedSnapshotSha256": "51c8b8f8e6c2dcac9e3cd2ead7e65428f5755253a0e8b677ca37d9a0606a022b",
+      "finalSha256": "63b6a8c601551747a927f5bdbaced793ef2904ad36598ecb974cac944899014c",
+      "bytes": 49384
+    },
+    {
+      "path": "scripts/test_native_r17_r2_delivery.py",
+      "baselineSha256": "a820e757325bfc81e0a45971cba33151c81181964d962208a74411609a377714",
+      "preparedSnapshotSha256": "f9e6ec9dfe0fefc0f3349653062aa7c4f47e565b4a7296120301b53c097b0ef0",
+      "finalSha256": "e5d92cd09957f5d6b0bdc01bdcdbf46f98ce8fa91f7df6c8f3111fc00bb3cb6f",
+      "bytes": 74763
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+      "baselineSha256": "55a158a819feba4cb991682ef2dcc2c6aa7b4b1b6a22315e2d197cdcf1d9d400",
+      "preparedSnapshotSha256": "4c5132fd509a5c8e6f1d07f04fb5b3db4ef3cd209849a7bc4197c49495acad5d",
+      "finalSha256": "1dda156df3fa649fcd558558fd424e96dde6a741bdb2ed672a20f575094c70a2",
+      "bytes": 32625
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+      "baselineSha256": "4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc",
+      "preparedSnapshotSha256": "73620830ecca19a5acdbef44dad5cd21b3a8f17e0bf5bf5c66ac1593abb813e5",
+      "finalSha256": "9fd816a5fdf26a937d3d94a5b031c9e992fbb104f49832ba31a703587a0385f8",
+      "bytes": 64106
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs",
+      "baselineSha256": "cb0053d02cdf18b09bec3150678d46f41169cda8157e12016ce7691fc26a5a3d",
+      "preparedSnapshotSha256": "0c79edab4763e64bad75b2c2723c95064871e7a86c01b10c3a0d747bfcb29f0f",
+      "finalSha256": "d81cd54210f0d21db479adeefed7b9fa2d564f20873d45ca44bcd8a853f009db",
+      "bytes": 55389
+    }
+  ],
+  "rootFiveSourcesExactBaseline": true,
+  "rootSources": [
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\scripts\\native_r17_r2_delivery.py",
+      "bytes": 42140,
+      "sha256": "8fcb1f581fafe0cf254b256e66394397be436facec03d53d6fdb8d7bf83c601f"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\scripts\\test_native_r17_r2_delivery.py",
+      "bytes": 54908,
+      "sha256": "a820e757325bfc81e0a45971cba33151c81181964d962208a74411609a377714"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\src\\native-r17-publication.mjs",
+      "bytes": 23298,
+      "sha256": "55a158a819feba4cb991682ef2dcc2c6aa7b4b1b6a22315e2d197cdcf1d9d400"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\src\\native-r17-publication-plan.json",
+      "bytes": 42463,
+      "sha256": "4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\test\\native-r17-publication.test.mjs",
+      "bytes": 32904,
+      "sha256": "cb0053d02cdf18b09bec3150678d46f41169cda8157e12016ce7691fc26a5a3d"
+    }
+  ],
+  "unchangedRouterDependencies": [
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\src\\index.ts",
+      "bytes": 3291,
+      "sha256": "7aa43b7c6cffe6ff271fcd7199ed8be95bd30783dc5b72809d57688fadcd1f40"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\src\\native-r17-publication.mjs",
+      "bytes": 23298,
+      "sha256": "55a158a819feba4cb991682ef2dcc2c6aa7b4b1b6a22315e2d197cdcf1d9d400"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\src\\native-r17-publication-plan.json",
+      "bytes": 42463,
+      "sha256": "4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc"
+    }
+  ],
+  "actualRootIssuedProofCopies": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\PUBLICATION-PLAN.json",
+      "bytes": 14098,
+      "sha256": "335e80d1692c105e9423fb53a54d000fe3bffc6bc24ef71bfeedbdbe9a6f8a16"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\ROOT-VERIFICATION.json",
+      "bytes": 424,
+      "sha256": "00984e502e2bcbe3fd32d6f6cf14818f8f46b57a1ba6294f6c8c06621b1f8fff"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\PREPARE-PUBLICATION.json",
+      "bytes": 638,
+      "sha256": "21e6e422f51bacd6be411ad4508bd78d3f6507828d9943983d3e426d0068647f"
+    }
+  ],
+  "publicFixtureInventory": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\ADMITTED-NATIVE-PLAN.canonical.json",
+      "bytes": 60602,
+      "sha256": "aa29c7a79fc5196677228f7ed476a42db9eb4ce4ef9ad6e74292b72cde750f9e"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\PREPARE-PUBLICATION.json",
+      "bytes": 638,
+      "sha256": "21e6e422f51bacd6be411ad4508bd78d3f6507828d9943983d3e426d0068647f"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\PUBLICATION-PLAN.json",
+      "bytes": 14098,
+      "sha256": "335e80d1692c105e9423fb53a54d000fe3bffc6bc24ef71bfeedbdbe9a6f8a16"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\actual-cms13\\ROOT-VERIFICATION.json",
+      "bytes": 424,
+      "sha256": "00984e502e2bcbe3fd32d6f6cf14818f8f46b57a1ba6294f6c8c06621b1f8fff"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\predecessor12\\latest.json",
+      "bytes": 1159,
+      "sha256": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\predecessor12\\latest.p7s",
+      "bytes": 1614,
+      "sha256": "7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\artifacts\\BUILD-UPDATER.json",
+      "bytes": 617,
+      "sha256": "a54d5a00f9fda41af871ea006da4a0071ec6b16c33161f2ff14922c5b7be9127"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\artifacts\\engine-release\\ENGINE.json",
+      "bytes": 421,
+      "sha256": "74ceb55740d0cf6fa83d1d044092c967602b631fee68f88e0a5718b2b65af38e"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\artifacts\\engine-release\\ENGINE.p7s",
+      "bytes": 1614,
+      "sha256": "5f40d755fe824ddd0f530e93626289636ec44813589f5f9ea5436911c18ded24"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\artifacts\\feed\\latest.json",
+      "bytes": 1159,
+      "sha256": "5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\artifacts\\feed\\latest.p7s",
+      "bytes": 1614,
+      "sha256": "1227f6b40f103cbd4d29cdf989ddb1cb70f4d972b79c681ba7d0a2746493b003"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\bootstrap\\BUILD-BOOTSTRAP.json",
+      "bytes": 1812,
+      "sha256": "87110ecfaf4c2852e15304819807772a8112b07ab2110260ba272b9c821a6ce0"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\bootstrap\\canonical-verifier-source-closure.json",
+      "bytes": 2745,
+      "sha256": "807dc059b29cffe5aef7c6395533959731cc77c4978fd9690130b39199c145ff"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\bootstrap\\updater-bundle-verification.json",
+      "bytes": 592,
+      "sha256": "bd3c8099b1917eca9930d138b6d656df95a97b3524f430d2605700c91f42b6b0"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\PREPARED-NATIVE-PLAN.canonical.json",
+      "bytes": 41057,
+      "sha256": "fcbb13c08ff8c9f5d3ab1e7d4f7504914f2d01cfc5e7cd43a31e332fcdfd8ce4"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\fixtures\\preview\\PREPARED-OBJECT-CLOSURE.json",
+      "bytes": 6782,
+      "sha256": "1084f10c192a0f0751352898c9a8f2caab3a3f32e506a5fd1f0a7650713fcdaa"
+    }
+  ],
+  "rawTestAttempts": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\freeze-audit-01.py",
+      "bytes": 18175,
+      "sha256": "2ea00e1587692910cb54aa85dd35307b8f560a962233d97a376ef7a15738bbc1"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\freeze-data-audit-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\freeze-data-audit-01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-01.command.json",
+      "bytes": 4330,
+      "sha256": "52b5f6d7604c22054b8150922d82d5e46cfde1f5284ca0f96c654cf1ef0972b2"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-01.stdout.log",
+      "bytes": 29132,
+      "sha256": "4054ba0adcc66c8eaf790baea350c4c4e01200442558b8233559a1101e9bd4e7"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-02.command.json",
+      "bytes": 4330,
+      "sha256": "a8a930a6e1ac0e679f88692b71383670ab86147067a35462ae7fc02efa41dd98"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-02.stdout.log",
+      "bytes": 28965,
+      "sha256": "27b555af9204a23c2fbc5260dad4d9dcebf74bf044aa87b6a3010d9dfc0a27fa"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-03.command.json",
+      "bytes": 4331,
+      "sha256": "2d120df97b8e1a49450c21d9a29dfd6486a119023f1d94de42ac0ccda6ba3898"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-node-03.stdout.log",
+      "bytes": 28346,
+      "sha256": "7a3302a93514eaf2ef17e536856d786bc72edd6154b2c7ecca87d7678c43ca75"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-python-01.command.json",
+      "bytes": 4256,
+      "sha256": "21392a36ccd07c27d6c075be103750e61ccc975f0cd250b9c4f149388d548795"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-python-01.stderr.log",
+      "bytes": 12238,
+      "sha256": "7c2e5109c36f5647384af5889c9dc733bf4cf042ecba2aefdbc7e51ca0ceebec"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-python-01.stdout.log",
+      "bytes": 153,
+      "sha256": "76b059714c245aac67b0bb1766acf99c2e4f73960104eb7dccf0cb098dbf063d"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-python-02.command.json",
+      "bytes": 4256,
+      "sha256": "9aeb4b62cf972d2bba7c2ce85d447764cfd1f2f7013b1922b1ad00593178526d"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-python-02.stderr.log",
+      "bytes": 10197,
+      "sha256": "7e02e5d864985241e78ffbdc694c35711d385eefbcdfe103ab6bb0e4ec398391"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\full-python-02.stdout.log",
+      "bytes": 153,
+      "sha256": "769a394e69394ba5df415bef828fde11cde5dd4f5c25da67af8197d572f1447d"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-authority-late-01.command.json",
+      "bytes": 4446,
+      "sha256": "79fe352de2f770142e461ece2dd12a24a16d547e52e80fff4993391685e627f1"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-authority-late-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-authority-late-01.stdout.log",
+      "bytes": 2550,
+      "sha256": "a73d813d5f0deee1bb1fce5d3497e874babc124812429ba4f69850d6b3df9339"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-early-create-01.command.json",
+      "bytes": 4417,
+      "sha256": "18f18cdb5729a744c7d44e1007fa4a43e6717c3fdefe1aef5b8bad32eb31e686"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-early-create-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-early-create-01.stdout.log",
+      "bytes": 335,
+      "sha256": "a042640a6ef2b3c52e7c493e0dabf9b8be7af769acfa6025537d005be7310692"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-network-idle-01.command.json",
+      "bytes": 4239,
+      "sha256": "b3849312b7d7864e09db54615ebebfe9f0febcd0c8fa54f2c4eb8f52e65d2a3a"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-network-idle-01.stderr.log",
+      "bytes": 1877,
+      "sha256": "cdd7dd753e610d125d74e094ab2e23e75052fd2cf321d161ce071322db877838"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-network-idle-01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-network-idle-02.command.json",
+      "bytes": 4239,
+      "sha256": "70e7a134567a420e1f920a3c532e37d4fd5d36b8cd6dc64c5da62680bf544b44"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-network-idle-02.stderr.log",
+      "bytes": 106,
+      "sha256": "2c5c7da9cfd759eb604a89bd461f80d8e1a7129bcf91a5bc5b1eb303bc7b4b0b"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\green-network-idle-02.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-authority-late-01.interruption.json",
+      "bytes": 469,
+      "sha256": "82c7ff44f2c03ddff27c0eeb6ca0c44f8e9425ad7ef1c04d267dbe453ff826f7"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-authority-late-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-authority-late-01.stdout.log",
+      "bytes": 8192,
+      "sha256": "c037bfb4a18fdc41633a03bf2293630e1027e557d901c45cbf350fda95023b0c"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-authority-late-02.command.json",
+      "bytes": 447,
+      "sha256": "d8bde77973bc23831fd2a1cc299a5688e485e904a92f9350db3455f5a3c4af1a"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-authority-late-02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-authority-late-02.stdout.log",
+      "bytes": 9559,
+      "sha256": "80421d4fcfc6ebc1aa7c57f108f9af2f4f0b8fdb68d178f884e31c9ab5cabecf"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-network-idle-01.command.json",
+      "bytes": 500,
+      "sha256": "5a002dffa498f1df012cab007df0c59a06467191410021c6be216492babb6006"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-network-idle-01.stderr.log",
+      "bytes": 1671,
+      "sha256": "c8b4c31055a465916ba9c2b4b6a65190fa23df3c750a283709aa3eaf7b141a84"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\evidence\\red-network-idle-01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "patch": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\FINAL-FIVE-FILE.patch",
+    "bytes": 240034,
+    "sha256": "38d274aa52ce2839e913016a57224841e7b2e3c3f7bf72a9adfdf0ffd9a4edd9"
+  },
+  "coverage": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\FINAL-TEST-COVERAGE-01.json",
+    "bytes": 16315,
+    "sha256": "acd8e9356473e30104056d122b403ff7f521b616c5a3159190291ed40e9662d0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792852782794-f1476a1d",
+  "rawBytes": 291042,
+  "rawSha256": "efd4a99b904e9965f2bec7eb8ee5f19357b8f1dfc79fd17ee38faebb46c37bd7",
+  "rawRows": 488,
+  "monitorSummary": {
+    "count": 37,
+    "validCount": 0,
+    "invalidCount": 37,
+    "stoppedCount": 0,
+    "complete": false,
+    "firstSampledAtMs": null,
+    "lastSampledAtMs": null,
+    "maxGapMs": 0,
+    "maxRawLineBytes": 3589,
+    "first": null,
+    "last": null,
+    "phaseBrackets": []
+  },
+  "phaseEvents": [],
+  "failureEvents": [
+    {
+      "type": "safetyStop",
+      "at": 1792852857778,
+      "reason": "Actor Lf04f0600 died or lost presence; no automatic resurrection"
+    }
+  ],
+  "finishedEvents": [
+    {
+      "type": "finished",
+      "ok": false,
+      "playableCapacityAccepted": false
+    }
+  ]
+}

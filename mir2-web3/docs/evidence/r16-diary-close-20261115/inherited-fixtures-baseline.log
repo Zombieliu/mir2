@@ -1,0 +1,277 @@
+TAP version 13
+# Subtest: full anchor includes stage and HUD scaling, without a DPR multiplier
+ok 1 - full anchor includes stage and HUD scaling, without a DPR multiplier
+  ---
+  duration_ms: 1.6193
+  type: 'test'
+  ...
+# Subtest: safe values and optional support preserve old runtimes
+ok 2 - safe values and optional support preserve old runtimes
+  ---
+  duration_ms: 0.217
+  type: 'test'
+  ...
+# Subtest: packet provenance handles real max one, partial updates and generation changes
+ok 3 - packet provenance handles real max one, partial updates and generation changes
+  ---
+  duration_ms: 0.1919
+  type: 'test'
+  ...
+# Subtest: ownership requires current generation, revision, model, asset and post-layout crop
+ok 4 - ownership requires current generation, revision, model, asset and post-layout crop
+  ---
+  duration_ms: 0.4491
+  type: 'test'
+  ...
+# Subtest: known empty and over-maximum crops remain valid, including genuine max one
+ok 5 - known empty and over-maximum crops remain valid, including genuine max one
+  ---
+  duration_ms: 0.1136
+  type: 'test'
+  ...
+# Subtest: hook strips old DTO fields and leases only current painted frames across loss, reset and cleanup
+not ok 6 - hook strips old DTO fields and leases only current painted frames across loss, reset and cleanup
+  ---
+  duration_ms: 35.7252
+  type: 'test'
+  location: 'F:\\mir2-builds\\r16-primary-font-overlap-20261115\\source\\mir2-web3\\apps\\web\\scripts\\test-bevy-experience-bar.mjs:116:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected runtime dependency ./bevy-quest-world-context'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:14:11
+    eval (eval at load (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:12:3), <anonymous>:20:36)
+    load (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:12:53)
+    TestContext.<anonymous> (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-experience-bar.mjs:129:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:14
+#     throw new Error(`Unexpected dependency ${name}`);
+#           ^
+# Error: Unexpected dependency ./bevy-quest-world-context
+#     at file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:14:11
+#     at eval (eval at load (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:12:3), <anonymous>:20:36)
+#     at load (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:12:53)
+#     at file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hp-orb-ui.mjs:20:14
+#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26)
+#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+# Node.js v22.18.0
+# Subtest: scripts\\test-bevy-hp-orb-ui.mjs
+not ok 2 - scripts\\test-bevy-hp-orb-ui.mjs
+  ---
+  duration_ms: 438.7307
+  type: 'test'
+  location: 'F:\\mir2-builds\\r16-primary-font-overlap-20261115\\source\\mir2-web3\\apps\\web\\scripts\\test-bevy-hp-orb-ui.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: exact capability, bounded records, and independent applied tokens
+ok 8 - exact capability, bounded records, and independent applied tokens
+  ---
+  duration_ms: 1.8955
+  type: 'test'
+  ...
+# Subtest: known zero and floored-positive empty own a cleared native backing without an asset
+ok 9 - known zero and floored-positive empty own a cleared native backing without an asset
+  ---
+  duration_ms: 1.1213
+  type: 'test'
+  ...
+# Subtest: a Canvas2D acquisition exception withdraws only the affected output
+ok 10 - a Canvas2D acquisition exception withdraws only the affected output
+  ---
+  duration_ms: 0.2743
+  type: 'test'
+  ...
+# Subtest: precommit withdrawal retires an in-flight decode until a new own token arrives
+ok 11 - precommit withdrawal retires an in-flight decode until a new own token arrives
+  ---
+  duration_ms: 0.4562
+  type: 'test'
+  ...
+# Subtest: actual hook sends raw fields only behind exact plan capability and keeps sibling plan through movement
+not ok 12 - actual hook sends raw fields only behind exact plan capability and keeps sibling plan through movement
+  ---
+  duration_ms: 12.2963
+  type: 'test'
+  location: 'F:\\mir2-builds\\r16-primary-font-overlap-20261115\\source\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-bar-draw-plan.mjs:187:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected dependency ./r16-native-localization'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:22:11
+    eval (eval at loadTs (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:3), <anonymous>:21:35)
+    loadTs (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:57)
+    TestContext.<anonymous> (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:199:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: decode, sibling change, multiple moves, failure reuse and stale generation cleanup
+ok 13 - decode, sibling change, multiple moves, failure reuse and stale generation cleanup
+  ---
+  duration_ms: 1.3317
+  type: 'test'
+  ...
+# Subtest: production shell update retains same-identity successful and failed asset attempts across a modal gap
+ok 14 - production shell update retains same-identity successful and failed asset attempts across a modal gap
+  ---
+  duration_ms: 248.239
+  type: 'test'
+  ...
+# Subtest: production shell identity edges abort old loads and reject their late result
+ok 15 - production shell identity edges abort old loads and reject their late result
+  ---
+  duration_ms: 159.8102
+  type: 'test'
+  ...
+# Subtest: production source geometry needs a current full HUD plan and yields raw weight differences to its Rust sprite fallback
+ok 16 - production source geometry needs a current full HUD plan and yields raw weight differences to its Rust sprite fallback
+  ---
+  duration_ms: 50.1442
+  type: 'test'
+  ...
+# Subtest: raw-edge retirement survives a same-lifetime null-plan gap and pending old decode
+ok 17 - raw-edge retirement survives a same-lifetime null-plan gap and pending old decode
+  ---
+  duration_ms: 0.3807
+  type: 'test'
+  ...
+# Subtest: actual progression packet clauses withdraw synchronously, only for affected bars
+ok 18 - actual progression packet clauses withdraw synchronously, only for affected bars
+  ---
+  duration_ms: 306.281
+  type: 'test'
+  ...
+# Subtest: actual direct packet clauses preserve unchanged bars and retire partial or shrinking EXP
+ok 19 - actual direct packet clauses preserve unchanged bars and retire partial or shrinking EXP
+  ---
+  duration_ms: 603.7758
+  type: 'test'
+  ...
+# Subtest: real hook, shell mapping and controller validate host freshness and live own commit before late take
+not ok 20 - real hook, shell mapping and controller validate host freshness and live own commit before late take
+  ---
+  duration_ms: 12.4946
+  type: 'test'
+  location: 'F:\\mir2-builds\\r16-primary-font-overlap-20261115\\source\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-bar-draw-plan.mjs:543:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected dependency ./r16-native-localization'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:22:11
+    eval (eval at loadTs (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:3), <anonymous>:21:35)
+    loadTs (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:57)
+    TestContext.<anonymous> (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:564:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: an old hook cleanup cannot erase the successor's live plan reader
+not ok 21 - an old hook cleanup cannot erase the successor's live plan reader
+  ---
+  duration_ms: 13.5682
+  type: 'test'
+  location: 'F:\\mir2-builds\\r16-primary-font-overlap-20261115\\source\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-bar-draw-plan.mjs:639:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected dependency ./r16-native-localization'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:22:11
+    eval (eval at loadTs (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:3), <anonymous>:21:35)
+    loadTs (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:20:57)
+    TestContext.<anonymous> (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-hud-bar-draw-plan.mjs:652:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: raw u16 pair grants legitimate zero and rejects absent/default-like maxima
+ok 22 - raw u16 pair grants legitimate zero and rejects absent/default-like maxima
+  ---
+  duration_ms: 1.4824
+  type: 'test'
+  ...
+# Subtest: real movement shortcut guard fails for weight-only and max-only snapshots
+ok 23 - real movement shortcut guard fails for weight-only and max-only snapshots
+  ---
+  duration_ms: 0.1898
+  type: 'test'
+  ...
+# Subtest: raw packet projection preserves only a proven same-player pair through world and host
+ok 24 - raw packet projection preserves only a proven same-player pair through world and host
+  ---
+  duration_ms: 0.2465
+  type: 'test'
+  ...
+# Subtest: legacy capability strips both nested fields and the slot
+ok 25 - legacy capability strips both nested fields and the slot
+  ---
+  duration_ms: 0.1696
+  type: 'test'
+  ...
+# Subtest: full DOM slot is measured once through stage scale, including y 721
+ok 26 - full DOM slot is measured once through stage scale, including y 721
+  ---
+  duration_ms: 0.4527
+  type: 'test'
+  ...
+# Subtest: current image, crop, layout and live DOM pair gate ownership
+ok 27 - current image, crop, layout and live DOM pair gate ownership
+  ---
+  duration_ms: 0.6273
+  type: 'test'
+  ...
+# Subtest: threshold image and f32 crop validation cover zero, boundaries and overmax
+ok 28 - threshold image and f32 crop validation cover zero, boundaries and overmax
+  ---
+  duration_ms: 0.3721
+  type: 'test'
+  ...
+# Subtest: hook keeps old runtimes clean and retires a stale selected sprite
+not ok 29 - hook keeps old runtimes clean and retires a stale selected sprite
+  ---
+  duration_ms: 37.5738
+  type: 'test'
+  location: 'F:\\mir2-builds\\r16-primary-font-overlap-20261115\\source\\mir2-web3\\apps\\web\\scripts\\test-bevy-weight-bar.mjs:147:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected runtime dependency ./bevy-quest-world-context'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:14:11
+    eval (eval at load (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:12:3), <anonymous>:20:36)
+    load (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:12:53)
+    TestContext.<anonymous> (file:///F:/mir2-builds/r16-primary-font-overlap-20261115/source/mir2-web3/apps/web/scripts/test-bevy-weight-bar.mjs:160:18)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 23
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1938.7654

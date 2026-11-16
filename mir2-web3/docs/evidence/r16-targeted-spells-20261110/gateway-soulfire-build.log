@@ -1,0 +1,25 @@
+2053 |         action: mir2_client_wire::Action,
+     |         ^^^^^^
+     |
+     = note: `BrowserCommand` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: function `validate_and_prepare_native_resume` is never used
+     --> apps\gateway\src\web.rs:11449:4
+      |
+11449 | fn validate_and_prepare_native_resume<'a, PreparedZone>(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `revalidate_and_commit_prepared_native_resume_with_fence_hook` is never used
+     --> apps\gateway\src\web.rs:11562:4
+      |
+11562 | fn revalidate_and_commit_prepared_native_resume_with_fence_hook<PreparedZone>(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `revalidate_and_commit_prepared_native_resume_with_hooks` is never used
+     --> apps\gateway\src\web.rs:11595:4
+      |
+11595 | fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-gateway` (lib) generated 22 warnings (run `cargo fix --lib -p mir2-gateway` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized] target(s) in 1m 31s

@@ -1,0 +1,2085 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792867932194-8f125fe4",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\recordings\\0-498018.jsonl",
+    "bytes": 65400503,
+    "sha256": "f1a46f60a2dd52e56261519334d8a7cbd879ae06f5cf4da0a01643e378bbf186"
+  },
+  "recordingFramesTotal": 1232,
+  "scope": "Selected server spectator samples only. No chat, inventory, recording events or full entity/world dumps. Frame capture is sampled and not a per-request execution trace.",
+  "selectedAtRangeMs": [
+    1792868208330,
+    1792868219823
+  ],
+  "frames": [
+    {
+      "recordingLine": 1037,
+      "sequence": 1037,
+      "capturedAtMs": 1792868208401,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 239,
+          "y": 638,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 646,
+          "direction": "UpLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1038,
+      "sequence": 1038,
+      "capturedAtMs": 1792868208666,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 239,
+          "y": 638,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 646,
+          "direction": "UpLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1039,
+      "sequence": 1039,
+      "capturedAtMs": 1792868208930,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 648,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 241,
+          "y": 638,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 646,
+          "direction": "UpLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1040,
+      "sequence": 1040,
+      "capturedAtMs": 1792868209195,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 648,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 241,
+          "y": 638,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 646,
+          "direction": "UpLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1041,
+      "sequence": 1041,
+      "capturedAtMs": 1792868209459,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 648,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 241,
+          "y": 638,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 646,
+          "direction": "UpLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1042,
+      "sequence": 1042,
+      "capturedAtMs": 1792868209723,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 243,
+          "y": 640,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 246,
+          "y": 647,
+          "direction": "DownLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1043,
+      "sequence": 1043,
+      "capturedAtMs": 1792868209988,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 243,
+          "y": 640,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 246,
+          "y": 647,
+          "direction": "DownLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1044,
+      "sequence": 1044,
+      "capturedAtMs": 1792868210253,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 243,
+          "y": 640,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 246,
+          "y": 647,
+          "direction": "DownLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1045,
+      "sequence": 1045,
+      "capturedAtMs": 1792868210516,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 648,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 245,
+          "y": 640,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 246,
+          "y": 647,
+          "direction": "DownLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1046,
+      "sequence": 1046,
+      "capturedAtMs": 1792868210780,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 648,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 245,
+          "y": 640,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 246,
+          "y": 647,
+          "direction": "DownLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1047,
+      "sequence": 1047,
+      "capturedAtMs": 1792868211031,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 648,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 245,
+          "y": 640,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 246,
+          "y": 647,
+          "direction": "DownLeft",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1048,
+      "sequence": 1048,
+      "capturedAtMs": 1792868211293,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 246,
+          "y": 640,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1049,
+      "sequence": 1049,
+      "capturedAtMs": 1792868211558,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 246,
+          "y": 640,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1050,
+      "sequence": 1050,
+      "capturedAtMs": 1792868211821,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 246,
+          "y": 640,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1051,
+      "sequence": 1051,
+      "capturedAtMs": 1792868212087,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 642,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1052,
+      "sequence": 1052,
+      "capturedAtMs": 1792868212352,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 642,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1053,
+      "sequence": 1053,
+      "capturedAtMs": 1792868212616,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 644,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1054,
+      "sequence": 1054,
+      "capturedAtMs": 1792868212880,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 644,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1055,
+      "sequence": 1055,
+      "capturedAtMs": 1792868213144,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 648,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 644,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "direction": "DownRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1056,
+      "sequence": 1056,
+      "capturedAtMs": 1792868213409,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 644,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1057,
+      "sequence": 1057,
+      "capturedAtMs": 1792868213673,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 644,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1058,
+      "sequence": 1058,
+      "capturedAtMs": 1792868213938,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Up",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 248,
+          "y": 644,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1059,
+      "sequence": 1059,
+      "capturedAtMs": 1792868214203,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 645,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1060,
+      "sequence": 1060,
+      "capturedAtMs": 1792868214468,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 645,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1061,
+      "sequence": 1061,
+      "capturedAtMs": 1792868214731,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 645,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1062,
+      "sequence": 1062,
+      "capturedAtMs": 1792868214996,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 645,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1063,
+      "sequence": 1063,
+      "capturedAtMs": 1792868215260,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 645,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1064,
+      "sequence": 1064,
+      "capturedAtMs": 1792868215524,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 645,
+          "direction": "DownRight",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1065,
+      "sequence": 1065,
+      "capturedAtMs": 1792868215781,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1066,
+      "sequence": 1066,
+      "capturedAtMs": 1792868216038,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1067,
+      "sequence": 1067,
+      "capturedAtMs": 1792868216302,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "Down",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1068,
+      "sequence": 1068,
+      "capturedAtMs": 1792868216567,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1069,
+      "sequence": 1069,
+      "capturedAtMs": 1792868216832,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1070,
+      "sequence": 1070,
+      "capturedAtMs": 1792868217096,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 20,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1071,
+      "sequence": 1071,
+      "capturedAtMs": 1792868217362,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 16,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1072,
+      "sequence": 1072,
+      "capturedAtMs": 1792868217625,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 16,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1073,
+      "sequence": 1073,
+      "capturedAtMs": 1792868217889,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 16,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1074,
+      "sequence": 1074,
+      "capturedAtMs": 1792868218154,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 16,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1075,
+      "sequence": 1075,
+      "capturedAtMs": 1792868218418,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 16,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1076,
+      "sequence": 1076,
+      "capturedAtMs": 1792868218682,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 13,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1077,
+      "sequence": 1077,
+      "capturedAtMs": 1792868218948,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 13,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1078,
+      "sequence": 1078,
+      "capturedAtMs": 1792868219211,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 246,
+          "y": 646,
+          "direction": "Left",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 13,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1079,
+      "sequence": 1079,
+      "capturedAtMs": 1792868219462,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 13,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    },
+    {
+      "recordingLine": 1080,
+      "sequence": 1080,
+      "capturedAtMs": 1792868219725,
+      "mapFileName": "0",
+      "entities": [
+        {
+          "objectId": 50004,
+          "name": "Ldd155c04",
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "direction": "Right",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 50005,
+          "name": "Ldd155c05",
+          "kind": "player",
+          "x": 249,
+          "y": 646,
+          "direction": "DownLeft",
+          "hp": null,
+          "maxHp": null,
+          "dead": false,
+          "level": 1,
+          "disposition": "friendly"
+        },
+        {
+          "objectId": 206602,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "direction": "UpRight",
+          "hp": 13,
+          "maxHp": 20,
+          "dead": false,
+          "level": null,
+          "disposition": "hostile"
+        }
+      ]
+    }
+  ]
+}

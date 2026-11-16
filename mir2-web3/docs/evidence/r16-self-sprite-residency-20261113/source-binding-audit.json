@@ -1,0 +1,86 @@
+{
+  "base": "63977fd7e102682ce3fe08f9223a127f7bd6250a",
+  "head": "d269c56b33a4a1481622c022534d6b307277736b",
+  "checked": 11,
+  "owned": 7,
+  "rows": [
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "expectedSha256": "4b7745f5c76de9c76469593f142d957b51d8921563d2e6be01237b2003cbd1ad",
+      "actualSha256": "4b7745f5c76de9c76469593f142d957b51d8921563d2e6be01237b2003cbd1ad",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json",
+      "expectedSha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "actualSha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
+      "expectedSha256": "ad6009d407e1aa8f6f64cbf8ab475d57390295f1403cbde0d99abc0e8da233ed",
+      "actualSha256": "ad6009d407e1aa8f6f64cbf8ab475d57390295f1403cbde0d99abc0e8da233ed",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "expectedSha256": "efa3b08d696355960ee5e0715ee911519f89313bbdb6e81a26f99bcfe802c29c",
+      "actualSha256": "efa3b08d696355960ee5e0715ee911519f89313bbdb6e81a26f99bcfe802c29c",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
+      "expectedSha256": "350dadce53f8fa6c3b404418baffba9eb2c80d09f95be9ce2af52d37da692e75",
+      "actualSha256": "350dadce53f8fa6c3b404418baffba9eb2c80d09f95be9ce2af52d37da692e75",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/lib/production-asset-config.mjs",
+      "expectedSha256": "812d40691adbbdc333b44b3492455b2a9fdea86492b53e5a84f670f28cf6075d",
+      "actualSha256": "812d40691adbbdc333b44b3492455b2a9fdea86492b53e5a84f670f28cf6075d",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-runtime-r2-upload.mjs",
+      "expectedSha256": "7dcb651a471994bc61e885269f1dc14716ffb112085379928cc2c28db9953238",
+      "actualSha256": "7dcb651a471994bc61e885269f1dc14716ffb112085379928cc2c28db9953238",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-production-asset-config.mjs",
+      "expectedSha256": "36e79fa9e637df835172c3cdd8b3a4515e42c66b84f000f18e9d5dcbdd4d0f72",
+      "actualSha256": "36e79fa9e637df835172c3cdd8b3a4515e42c66b84f000f18e9d5dcbdd4d0f72",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
+      "expectedSha256": "619e876df03e06c5ad17849793462dcfedee9c14d6e6fc575fb98cce66d34b41",
+      "actualSha256": "619e876df03e06c5ad17849793462dcfedee9c14d6e6fc575fb98cce66d34b41",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "expectedSha256": "78188442505883ce17c6e25075f0a309d2bcd911dfe56d1413feb92fee985cbf",
+      "actualSha256": "78188442505883ce17c6e25075f0a309d2bcd911dfe56d1413feb92fee985cbf",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    },
+    {
+      "path": "mir2-web3/config/numeron-r16-web-assets.json",
+      "expectedSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+      "actualSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+      "matches": true,
+      "intentionallyPinnedGenerated": false
+    }
+  ],
+  "unexpectedDifferences": []
+}

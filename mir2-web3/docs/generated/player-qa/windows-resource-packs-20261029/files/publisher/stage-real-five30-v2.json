@@ -1,0 +1,93 @@
+{
+  "projectedReport": {
+    "candidate": {
+      "channel": "invited",
+      "feedSha256": "9998013b8e702bbdcac610859de19a371c8c1da9020d5f374a6157303c81cdfe",
+      "platform": "windows-x64",
+      "schema": "mir2.windows.r2-channel.v1",
+      "sequence": 30,
+      "signatureSha256": "46eb19bd252f538e8e2c9945a2c4c1fb2e8a133348dac8dc88f37ab05f7b132a",
+      "sourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe"
+    },
+    "downloadScope": "five-class",
+    "expectedCurrent": {
+      "channel": "invited",
+      "feedSha256": "0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91",
+      "platform": "windows-x64",
+      "schema": "mir2.windows.r2-channel.v1",
+      "sequence": 24,
+      "signatureSha256": "e691787d7ad8e69f7936573527c7a8650d4b5701aa46d6f9ae2f66cb098e90b6",
+      "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f"
+    },
+    "finishedUtc": "2026-10-29T08:11:24.065017+00:00",
+    "mode": "stage",
+    "passed": true,
+    "planSha256": "a9eaf4c3e1122248455c072db26d4e3c4c01a0994ff9669ea2861da24dea2dd5",
+    "pointerAttempted": false,
+    "pointerChanged": false,
+    "resumedObjects": [
+      "releases/game-WN-CANDIDATE-20261029-wallet-28/PACKAGE-MANIFEST.json",
+      "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.json",
+      "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.p7s",
+      "releases/game-WN-CANDIDATE-20261029-wallet-28/VERSION.json"
+    ],
+    "schema": "mir2.windows.r2-publication-receipt.v2",
+    "startedUtc": "2026-10-29T08:03:48.065139+00:00",
+    "transport": "fixed-expiring-packed-worker-v1",
+    "uploadedObjects": [
+      "releases/updater-343C5E52355E012A-s30/ENGINE.json",
+      "releases/updater-343C5E52355E012A-s30/ENGINE.p7s",
+      "releases/updater-343C5E52355E012A-s30/Mir2Updater.exe"
+    ],
+    "verifiedObjects": [
+      {
+        "sha256": "9998013b8e702bbdcac610859de19a371c8c1da9020d5f374a6157303c81cdfe",
+        "size": 1157
+      },
+      {
+        "sha256": "46eb19bd252f538e8e2c9945a2c4c1fb2e8a133348dac8dc88f37ab05f7b132a",
+        "size": 1614
+      },
+      {
+        "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/PACKAGE-MANIFEST.json",
+        "sha256": "bca71514a99e158eb583f48d3e81095219c81c0c122cb1ae498b081460f822c0",
+        "size": 49712342
+      },
+      {
+        "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.json",
+        "sha256": "fb23ee4aa828c74c4f350adf392d08a3619890003898993d672df7665477111e",
+        "size": 706
+      },
+      {
+        "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/RELEASE-STATEMENT.p7s",
+        "sha256": "715446e2e78efff3ea8fdeef8d99e5e2770a7f99a03352da6b873a5529cc6b5b",
+        "size": 1614
+      },
+      {
+        "path": "releases/game-WN-CANDIDATE-20261029-wallet-28/VERSION.json",
+        "sha256": "c54dc2c9d8301e1793b8316afe6cab554df19fc62468d6005f41c7897dbc802f",
+        "size": 1220
+      },
+      {
+        "path": "releases/updater-343C5E52355E012A-s30/ENGINE.json",
+        "sha256": "79f1e90e2125b8391343b7db549190f2c2ca8aa3e277f50f81b03a5ee391707c",
+        "size": 421
+      },
+      {
+        "path": "releases/updater-343C5E52355E012A-s30/ENGINE.p7s",
+        "sha256": "27542d96ae2320b08d363b9f810e9ab82a2791a5e9ef1b5a574f21affdbdc6f0",
+        "size": 1614
+      },
+      {
+        "path": "releases/updater-343C5E52355E012A-s30/Mir2Updater.exe",
+        "sha256": "343c5e52355e012a6e4cdabd81289a52c9d893114f378cd875ae3af70ac2bbe3",
+        "size": 2178560
+      }
+    ]
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "five30-r2-stage",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "C8248A89DD67DDCD2303E3A50B36B700CADC62246E26DAA80C849570EA6FD187",
+  "sourceSize": 3723
+}

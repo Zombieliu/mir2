@@ -1,0 +1,49 @@
+{
+  "schema": "mir2.p5a.native-rank.root-final-review.v1",
+  "rootBase": "513eb83db8b919899d3044258e4b1e9a215cd9de",
+  "frozenWorkerReceipt": "b43c6f12369fb9912541b8aeea83f0055defa7587c86feb829e4cf1a323e5a2f",
+  "exactTenImportedFilesAndCombinedRoutingRetained": true,
+  "protectedSourceAndLocksUnchanged": true,
+  "rootSelections": [
+    {
+      "name": "root-client-guild-01",
+      "passed": 83,
+      "ignored": 1
+    },
+    {
+      "name": "root-wire-rank-01",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "root-fifo-rank-01",
+      "passed": 4,
+      "ignored": 0
+    },
+    {
+      "name": "root-gateway-rank-terminal-01",
+      "passed": 3,
+      "ignored": 0
+    },
+    {
+      "name": "root-gateway-cross-map-after-rank-01",
+      "passed": 9,
+      "ignored": 0
+    }
+  ],
+  "countsOverlapWorkerAndAreNotParityPercent": true,
+  "knownRedAndHarnessFailuresRetained": true,
+  "nativeClicksOrScreenshotsOrHumanAcceptance": false,
+  "pairedNetworkOrRolloutAccepted": false,
+  "open": [
+    "native/GPU screenshot or human frontend acceptance",
+    "TCP/WSS paired real-server and binary/client rollout",
+    "UiReadModel own-character Guild/rank label",
+    "AOI ObjectPlayer Guild rank label",
+    "other rank commands including status6/status8 and option5 pending",
+    "kick/leave/war/Guild kill-EXP closure",
+    "protocol has no nonce; old same-content A/B/A replies cannot be uniquely distinguished"
+  ],
+  "r18FrozenSourceDoesNotContainThisLaterSlice": true,
+  "servicesOrPlayerSavesChanged": false
+}

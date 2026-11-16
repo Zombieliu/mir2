@@ -1,0 +1,430 @@
+TAP version 13
+# Subtest: read-only inspection, exact record proxy and rollback restore the DNS-only TTL
+ok 1 - read-only inspection, exact record proxy and rollback restore the DNS-only TTL
+  ---
+  duration_ms: 16.7659
+  type: 'test'
+  ...
+# Subtest: changed origin, wrong checkout, and unvalidated origin TLS fail before any write
+ok 2 - changed origin, wrong checkout, and unvalidated origin TLS fail before any write
+  ---
+  duration_ms: 0.9045
+  type: 'test'
+  ...
+# Subtest: explicit domain operation, CI identity and exact source fail before any network
+ok 3 - explicit domain operation, CI identity and exact source fail before any network
+  ---
+  duration_ms: 3.0119
+  type: 'test'
+  ...
+# Subtest: one exact move follows default alias body proofs and preserves all three production mappings
+ok 4 - one exact move follows default alias body proofs and preserves all three production mappings
+  ---
+  duration_ms: 12.5638
+  type: 'test'
+  ...
+# Subtest: download pages on the new game proxy and main alias both preserve the unavailable Windows baseline
+ok 5 - download pages on the new game proxy and main alias both preserve the unavailable Windows baseline
+  ---
+  duration_ms: 10.1191
+  type: 'test'
+  ...
+# Subtest: domain cannot match two empty Windows lists from SSO, 404, empty or incomplete HTML
+ok 6 - domain cannot match two empty Windows lists from SSO, 404, empty or incomplete HTML
+  ---
+  duration_ms: 12.1224
+  type: 'test'
+  ...
+# Subtest: domain refuses introduced, removed, changed or malformed Windows links before its first move
+ok 7 - domain refuses introduced, removed, changed or malformed Windows links before its first move
+  ---
+  duration_ms: 5.6897
+  type: 'test'
+  ...
+# Subtest: foreign/current project generations, candidate metadata and explicit wrong roots reject before mutation
+ok 8 - foreign/current project generations, candidate metadata and explicit wrong roots reject before mutation
+  ---
+  duration_ms: 3.7614
+  type: 'test'
+  ...
+# Subtest: wrong default alias and failed real public version/game/home/download proofs cannot move
+ok 9 - wrong default alias and failed real public version/game/home/download proofs cannot move
+  ---
+  duration_ms: 3.3654
+  type: 'test'
+  ...
+# Subtest: unverified, branch-bound, custom-environment or mismatched source ownership cannot move
+ok 10 - unverified, branch-bound, custom-environment or mismatched source ownership cannot move
+  ---
+  duration_ms: 5.4879
+  type: 'test'
+  ...
+# Subtest: inbound redirects are enumerated and refuse the possible implicit multi-domain move
+ok 11 - inbound redirects are enumerated and refuse the possible implicit multi-domain move
+  ---
+  duration_ms: 10.4761
+  type: 'test'
+  ...
+# Subtest: a changed source binding during final preflight is not overwritten
+ok 12 - a changed source binding during final preflight is not overwritten
+  ---
+  duration_ms: 2.8731
+  type: 'test'
+  ...
+# Subtest: lost forward response is reconciled through reads without a second POST
+ok 13 - lost forward response is reconciled through reads without a second POST
+  ---
+  duration_ms: 2.9924
+  type: 'test'
+  ...
+# Subtest: delayed alias convergence after a successful move is observed through reads
+ok 14 - delayed alias convergence after a successful move is observed through reads
+  ---
+  duration_ms: 3.1621
+  type: 'test'
+  ...
+# Subtest: unknown unapplied move requires manual reconciliation and never blindly retries
+ok 15 - unknown unapplied move requires manual reconciliation and never blindly retries
+  ---
+  duration_ms: 9.0853
+  type: 'test'
+  ...
+# Subtest: public failure reverses one owned domain move and restores source redirect configuration exactly
+ok 16 - public failure reverses one owned domain move and restores source redirect configuration exactly
+  ---
+  duration_ms: 2.84
+  type: 'test'
+  ...
+# Subtest: changed game generation, domain attributes or alias after move prevent rollback over another operator
+ok 17 - changed game generation, domain attributes or alias after move prevent rollback over another operator
+  ---
+  duration_ms: 9.3157
+  type: 'test'
+  ...
+# Subtest: reverse move refuses newly added inbound redirects instead of carrying another domain back
+ok 18 - reverse move refuses newly added inbound redirects instead of carrying another domain back
+  ---
+  duration_ms: 2.328
+  type: 'test'
+  ...
+# Subtest: lost reverse response uses GET reconciliation, not a repeated reverse mutation
+ok 19 - lost reverse response uses GET reconciliation, not a repeated reverse mutation
+  ---
+  duration_ms: 3.8843
+  type: 'test'
+  ...
+# Subtest: an already-correct target is read back without any mutation
+ok 20 - an already-correct target is read back without any mutation
+  ---
+  duration_ms: 2.362
+  type: 'test'
+  ...
+# Subtest: public redirects never carry the CI token or allow a different origin
+ok 21 - public redirects never carry the CI token or allow a different origin
+  ---
+  duration_ms: 2.2979
+  type: 'test'
+  ...
+# Subtest: paginated source redirects and denied target reads are never mistaken for an empty ownership scope
+ok 22 - paginated source redirects and denied target reads are never mistaken for an empty ownership scope
+  ---
+  duration_ms: 2.4209
+  type: 'test'
+  ...
+# Subtest: 404 is optional only for scoped domain and alias reads, never projects, candidates or domain lists
+ok 23 - 404 is optional only for scoped domain and alias reads, never projects, candidates or domain lists
+  ---
+  duration_ms: 5.2924
+  type: 'test'
+  ...
+# Subtest: a concurrent third-project generation plus 404 cannot be swallowed as missing domain or trigger rollback
+ok 24 - a concurrent third-project generation plus 404 cannot be swallowed as missing domain or trigger rollback
+  ---
+  duration_ms: 3.1634
+  type: 'test'
+  ...
+# Subtest: public root may redirect to same-origin en or zh-CN without altering the marketing baseline
+ok 25 - public root may redirect to same-origin en or zh-CN without altering the marketing baseline
+  ---
+  duration_ms: 4.5931
+  type: 'test'
+  ...
+# Subtest: import is inert; source, branch, team and original CI identity fail before I/O
+ok 26 - import is inert; source, branch, team and original CI identity fail before I/O
+  ---
+  duration_ms: 2.9211
+  type: 'test'
+  ...
+# Subtest: context reads only safe metadata and never requires Gateway/GitHub secrets
+ok 27 - context reads only safe metadata and never requires Gateway/GitHub secrets
+  ---
+  duration_ms: 3.0897
+  type: 'test'
+  ...
+# Subtest: stage creates two same-source production candidates with explicit roots, Node22 and no automatic domains
+ok 28 - stage creates two same-source production candidates with explicit roots, Node22 and no automatic domains
+  ---
+  duration_ms: 6.6406
+  type: 'test'
+  ...
+# Subtest: QR stage creates only the pinned game source, with the live alias left on its baseline
+ok 29 - QR stage creates only the pinned game source, with the live alias left on its baseline
+  ---
+  duration_ms: 2.4405
+  type: 'test'
+  ...
+# Subtest: QR stage rejects a deployment source beyond the exact release pin
+ok 30 - QR stage rejects a deployment source beyond the exact release pin
+  ---
+  duration_ms: 0.9513
+  type: 'test'
+  ...
+# Subtest: QR promotion proves protected and public routes and keeps intents out of the receipt
+ok 31 - QR promotion proves protected and public routes and keeps intents out of the receipt
+  ---
+  duration_ms: 35.6856
+  type: 'test'
+  ...
+# Subtest: QR promotion rejects a bad candidate before writing and rolls back a failed public check
+ok 32 - QR promotion rejects a bad candidate before writing and rolls back a failed public check
+  ---
+  duration_ms: 49.7671
+  type: 'test'
+  ...
+# Subtest: QR promotion verifies each entry asset before and after assigning traffic
+ok 33 - QR promotion verifies each entry asset before and after assigning traffic
+  ---
+  duration_ms: 426.8645
+  type: 'test'
+  ...
+# Subtest: QR rollback is limited to its promoted candidate and never touches a third-party alias
+ok 34 - QR rollback is limited to its promoted candidate and never touches a third-party alias
+  ---
+  duration_ms: 2.2207
+  type: 'test'
+  ...
+# Subtest: Windows links default to required; explicit empty mode accepts only a real download page
+ok 35 - Windows links default to required; explicit empty mode accepts only a real download page
+  ---
+  duration_ms: 2.666
+  type: 'test'
+  ...
+# Subtest: download identity follows the real website source markup and ignores serialized or commented markers
+ok 36 - download identity follows the real website source markup and ignores serialized or commented markers
+  ---
+  duration_ms: 1.7746
+  type: 'test'
+  ...
+# Subtest: Windows unavailable baseline cannot gain a link, and a previous real link cannot disappear
+ok 37 - Windows unavailable baseline cannot gain a link, and a previous real link cannot disappear
+  ---
+  duration_ms: 6.5578
+  type: 'test'
+  ...
+# Subtest: baseline and candidate download HTML must both be genuine, even with zero Windows links
+ok 38 - baseline and candidate download HTML must both be genuine, even with zero Windows links
+  ---
+  duration_ms: 9.0513
+  type: 'test'
+  ...
+# Subtest: empty Windows policy never tolerates missing, malformed or unsafe tracked hrefs
+ok 39 - empty Windows policy never tolerates missing, malformed or unsafe tracked hrefs
+  ---
+  duration_ms: 0.3963
+  type: 'test'
+  ...
+# Subtest: missing secret, old prefix, foreign asset run or skipped job cannot stage anything
+ok 40 - missing secret, old prefix, foreign asset run or skipped job cannot stage anything
+  ---
+  duration_ms: 3.5609
+  type: 'test'
+  ...
+# Subtest: all fixed asset receipt safety flags and hashes are mandatory
+ok 41 - all fixed asset receipt safety flags and hashes are mandatory
+  ---
+  duration_ms: 0.2655
+  type: 'test'
+  ...
+# Subtest: existing manifest revalidation requires all objects, gzip bodies and successful readback counts
+ok 42 - existing manifest revalidation requires all objects, gzip bodies and successful readback counts
+  ---
+  duration_ms: 1.7691
+  type: 'test'
+  ...
+# Subtest: public manifest missing, changed, old or oversized prevents writes
+ok 43 - public manifest missing, changed, old or oversized prevents writes
+  ---
+  duration_ms: 2.612
+  type: 'test'
+  ...
+# Subtest: project swaps and concurrent old/main/new production changes are rejected before staging
+ok 44 - project swaps and concurrent old/main/new production changes are rejected before staging
+  ---
+  duration_ms: 1.4833
+  type: 'test'
+  ...
+# Subtest: concurrent change after first stage prevents second write and never changes original site
+ok 45 - concurrent change after first stage prevents second write and never changes original site
+  ---
+  duration_ms: 0.9738
+  type: 'test'
+  ...
+# Subtest: promote verifies protected pages and promotes marketing before new game, without domain API
+ok 46 - promote verifies protected pages and promotes marketing before new game, without domain API
+  ---
+  duration_ms: 1.8267
+  type: 'test'
+  ...
+# Subtest: already QA-promoted own game candidate is accepted without another promotion
+ok 47 - already QA-promoted own game candidate is accepted without another promotion
+  ---
+  duration_ms: 2.1636
+  type: 'test'
+  ...
+# Subtest: promote permits an older immutable candidate source while keeping the current implementation identity
+ok 48 - promote permits an older immutable candidate source while keeping the current implementation identity
+  ---
+  duration_ms: 1.8136
+  type: 'test'
+  ...
+# Subtest: candidate source, ref, root, metadata, target and readiness mismatches prevent all writes
+ok 49 - candidate source, ref, root, metadata, target and readiness mismatches prevent all writes
+  ---
+  duration_ms: 7.7119
+  type: 'test'
+  ...
+# Subtest: modern Git snapshots without root still require exact staged metadata and every protected application proof
+ok 50 - modern Git snapshots without root still require exact staged metadata and every protected application proof
+  ---
+  duration_ms: 3.3478
+  type: 'test'
+  ...
+# Subtest: any explicitly returned incorrect deployment root rejects even when the other root field is absent
+ok 51 - any explicitly returned incorrect deployment root rejects even when the other root field is absent
+  ---
+  duration_ms: 2.6585
+  type: 'test'
+  ...
+# Subtest: missing API root never bypasses metaRoot or HTML/version/PWA/download failure
+ok 52 - missing API root never bypasses metaRoot or HTML/version/PWA/download failure
+  ---
+  duration_ms: 4.55
+  type: 'test'
+  ...
+# Subtest: failed HTML/version/PWA or changed Windows downloads cannot promote
+ok 53 - failed HTML/version/PWA or changed Windows downloads cannot promote
+  ---
+  duration_ms: 3.881
+  type: 'test'
+  ...
+# Subtest: concurrent change during protected page reads is caught before first promotion
+ok 54 - concurrent change during protected page reads is caught before first promotion
+  ---
+  duration_ms: 1.4885
+  type: 'test'
+  ...
+# Subtest: failed second promotion rolls back only the mapping still owned by this release
+ok 55 - failed second promotion rolls back only the mapping still owned by this release
+  ---
+  duration_ms: 1.8837
+  type: 'test'
+  ...
+# Subtest: a third-party production change during failure is never rolled back
+ok 56 - a third-party production change during failure is never rolled back
+  ---
+  duration_ms: 3.448
+  type: 'test'
+  ...
+# Subtest: an applied promotion with a lost response is rolled back only while still owned
+ok 57 - an applied promotion with a lost response is rolled back only while still owned
+  ---
+  duration_ms: 1.612
+  type: 'test'
+  ...
+# Subtest: failed uncertain staging still reads all baselines and never retries the create
+ok 58 - failed uncertain staging still reads all baselines and never retries the create
+  ---
+  duration_ms: 0.9599
+  type: 'test'
+  ...
+# Subtest: CLI transports receive only the relevant credential and never the Gateway signing secret
+ok 59 - CLI transports receive only the relevant credential and never the Gateway signing secret
+  ---
+  duration_ms: 0.1312
+  type: 'test'
+  ...
+# Subtest: workflow isolates Numeron operations, pins Node22, grants read-only artifacts and never invokes old release scripts for them
+ok 60 - workflow isolates Numeron operations, pins Node22, grants read-only artifacts and never invokes old release scripts for them
+  ---
+  duration_ms: 0.2293
+  type: 'test'
+  ...
+# Subtest: off/default retains every legacy job body byte-for-byte and the original job selection
+ok 61 - off/default retains every legacy job body byte-for-byte and the original job selection
+  ---
+  duration_ms: 32.1416
+  type: 'test'
+  ...
+# Subtest: each explicit Numeron operation selects only validation and the reusable website job
+ok 62 - each explicit Numeron operation selects only validation and the reusable website job
+  ---
+  duration_ms: 18.9581
+  type: 'test'
+  ...
+# Subtest: orphan Numeron inputs fail closed rather than dispatching legacy jobs
+ok 63 - orphan Numeron inputs fail closed rather than dispatching legacy jobs
+  ---
+  duration_ms: 48.7161
+  type: 'test'
+  ...
+# Subtest: ingress operations only select the guarded DNS job and keep deployment inputs separate
+ok 64 - ingress operations only select the guarded DNS job and keep deployment inputs separate
+  ---
+  duration_ms: 20.9048
+  type: 'test'
+  ...
+# Subtest: legacy publishing and wallet switches cannot be mixed into Numeron dispatch
+ok 65 - legacy publishing and wallet switches cannot be mixed into Numeron dispatch
+  ---
+  duration_ms: 11.8671
+  type: 'test'
+  ...
+# Subtest: both actual guards reject bad source identity, stale stage source and missing or confused inputs
+ok 66 - both actual guards reject bad source identity, stale stage source and missing or confused inputs
+  ---
+  duration_ms: 29.2134
+  type: 'test'
+  ...
+# Subtest: the reusable workflow declares all four optional inputs and forwards only the necessary secrets
+ok 67 - the reusable workflow declares all four optional inputs and forwards only the necessary secrets
+  ---
+  duration_ms: 0.342
+  type: 'test'
+  ...
+# Subtest: validation and context steps have no Gateway secret access and cannot interpolate input as code
+ok 68 - validation and context steps have no Gateway secret access and cannot interpolate input as code
+  ---
+  duration_ms: 0.1909
+  type: 'test'
+  ...
+# Subtest: domain move invokes only its separate helper and receipt; stage and promote never move the domain
+ok 69 - domain move invokes only its separate helper and receipt; stage and promote never move the domain
+  ---
+  duration_ms: 0.3348
+  type: 'test'
+  ...
+# Subtest: relay dispatches use only the website job and refuse source, asset or marketing overrides
+ok 70 - relay dispatches use only the website job and refuse source, asset or marketing overrides
+  ---
+  duration_ms: 23.632
+  type: 'test'
+  ...
+1..70
+# tests 70
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 700.0305

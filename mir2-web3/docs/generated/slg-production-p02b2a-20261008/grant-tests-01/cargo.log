@@ -1,0 +1,227 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling syn v2.0.117
+   Compiling typenum v1.19.0
+   Compiling serde_core v1.0.228
+   Compiling parking_lot_core v0.9.12
+   Compiling serde v1.0.228
+   Compiling crossbeam-utils v0.8.21
+   Compiling hybrid-array v0.4.10
+   Compiling serde_derive v1.0.228
+   Compiling generic-array v0.14.7
+   Compiling crypto-common v0.2.1
+   Compiling block-buffer v0.12.0
+   Compiling zmij v1.0.21
+   Compiling digest v0.11.2
+   Compiling parking_lot v0.12.5
+   Compiling concurrent-queue v2.5.0
+   Compiling getrandom v0.4.2
+   Compiling serde_json v1.0.149
+   Compiling bevy_macro_utils v0.17.3
+   Compiling hashbrown v0.16.1
+   Compiling typeid v1.0.3
+   Compiling derive_more-impl v2.1.1
+   Compiling bevy_platform v0.17.3
+   Compiling event-listener v5.4.1
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling erased-serde v0.4.10
+   Compiling thiserror v2.0.18
+   Compiling digest v0.10.7
+   Compiling event-listener-strategy v0.5.4
+   Compiling rand v0.10.1
+   Compiling derive_more v2.1.1
+   Compiling sha2 v0.11.0
+   Compiling md-5 v0.11.0
+   Compiling hmac v0.13.0
+   Compiling slotmap v1.1.1
+   Compiling thiserror-impl v2.0.18
+   Compiling async-executor v1.14.0
+   Compiling postgres-protocol v0.6.11
+   Compiling bevy_utils v0.17.3
+   Compiling async-channel v2.5.0
+   Compiling bevy_reflect_derive v0.17.3
+   Compiling crossbeam-queue v0.3.12
+   Compiling variadics_please v1.1.0
+   Compiling assert_type_match v0.1.1
+   Compiling crc32fast v1.5.0
+   Compiling bevy_reflect v0.17.3
+   Compiling bevy_tasks v0.17.3
+   Compiling postgres-types v0.2.13
+   Compiling bevy_ecs_macros v0.17.3
+   Compiling async-trait v0.1.89
+   Compiling libc v0.2.185
+   Compiling bevy_ecs v0.17.3
+   Compiling tokio-postgres v0.7.17
+   Compiling sha2 v0.10.9
+   Compiling blake2 v0.10.6
+   Compiling bevy_derive v0.17.3
+   Compiling mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling mir2-game-data v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\game-data)
+   Compiling bevy_app v0.17.3
+   Compiling argon2 v0.5.3
+   Compiling mir2-production v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\production)
+   Compiling flate2 v1.1.9
+   Compiling postgres v0.19.13
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+error[E0433]: cannot find `ItemGrade` in `crate`
+  --> apps\simulation\src\runtime\item_grants.rs:50:25
+   |
+50 |             1 => crate::ItemGrade::Common,
+   |                         ^^^^^^^^^ could not find `ItemGrade` in the crate root
+   |
+help: consider importing this enum
+   |
+ 4 + use crate::config::ItemGrade;
+   |
+help: if you import `ItemGrade`, refer to it directly
+   |
+50 -             1 => crate::ItemGrade::Common,
+50 +             1 => ItemGrade::Common,
+   |
+
+error[E0433]: cannot find `ItemGrade` in `crate`
+  --> apps\simulation\src\runtime\item_grants.rs:51:25
+   |
+51 |             2 => crate::ItemGrade::Rare,
+   |                         ^^^^^^^^^ could not find `ItemGrade` in the crate root
+   |
+help: consider importing this enum
+   |
+ 4 + use crate::config::ItemGrade;
+   |
+help: if you import `ItemGrade`, refer to it directly
+   |
+51 -             2 => crate::ItemGrade::Rare,
+51 +             2 => ItemGrade::Rare,
+   |
+
+error[E0433]: cannot find `ItemGrade` in `crate`
+  --> apps\simulation\src\runtime\item_grants.rs:52:25
+   |
+52 |             3 => crate::ItemGrade::Legendary,
+   |                         ^^^^^^^^^ could not find `ItemGrade` in the crate root
+   |
+help: consider importing this enum
+   |
+ 4 + use crate::config::ItemGrade;
+   |
+help: if you import `ItemGrade`, refer to it directly
+   |
+52 -             3 => crate::ItemGrade::Legendary,
+52 +             3 => ItemGrade::Legendary,
+   |
+
+error[E0433]: cannot find `ItemGrade` in `crate`
+  --> apps\simulation\src\runtime\item_grants.rs:53:25
+   |
+53 |             _ => crate::ItemGrade::None,
+   |                         ^^^^^^^^^ could not find `ItemGrade` in the crate root
+   |
+help: consider importing this enum
+   |
+ 4 + use crate::config::ItemGrade;
+   |
+help: if you import `ItemGrade`, refer to it directly
+   |
+53 -             _ => crate::ItemGrade::None,
+53 +             _ => ItemGrade::None,
+   |
+
+warning: unused import: `super::skills::crystal_magic_damage`
+  --> apps\simulation\src\runtime\hero_ai.rs:53:5
+   |
+53 | use super::skills::crystal_magic_damage;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `hero_registry_scan::validate_shared_hero_physical_custody`
+  --> apps\simulation\src\runtime\mod.rs:22:16
+   |
+22 | pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `HeroInventoryResource`
+  --> apps\simulation\src\runtime\items.rs:58:19
+   |
+58 |     BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
+   |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `merged_user_item_stats`
+  --> apps\simulation\src\runtime\npc.rs:38:72
+   |
+38 |     crystal_item_key_for_template, crystal_item_template_for_item_key, merged_user_item_stats,
+   |                                                                        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `hero_inventory_crystal_stat_total`
+  --> apps\simulation\src\runtime\packets.rs:72:22
+   |
+72 | use super::hero_ai::{hero_inventory_crystal_stat_total, hero_inventory_equipment_slots};
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crystal_quest_info_by_id`
+   --> apps\simulation\src\runtime\packets.rs:108:5
+    |
+108 |     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `intelligent_creature_default_rules`
+   --> apps\simulation\src\runtime\packets.rs:131:5
+    |
+131 |     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `ZoneExperienceProfile`
+ --> apps\simulation\src\runtime\zone\mod.rs:6:22
+  |
+6 | pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+  |                      ^^^^^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:61:22
+   |
+61 |     let target=world.iter_entities().find_map(|entry| {
+   |                      ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:99:27
+   |
+99 |         let monster=world.iter_entities().find(|e|e.get::<Monster>().is_some()).unwrap().id();
+   |                           ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7902:25
+     |
+7902 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\session.rs:760:14
+    |
+760 |             .iter_entities()
+    |              ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5013:10
+     |
+5013 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5096:10
+     |
+5096 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0433`.
+warning: `mir2-simulation` (lib test) generated 15 warnings
+error: could not compile `mir2-simulation` (lib test) due to 4 previous errors; 15 warnings emitted

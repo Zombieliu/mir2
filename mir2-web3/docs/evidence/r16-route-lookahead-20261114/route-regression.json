@@ -1,0 +1,82 @@
+{
+  "source": "e3d94f35ddde14372618b2bc83d2ecce961328c1",
+  "baselineFileSha256": "cbeb0096433b828fe1ab85d000638bbd5e2b47040f6b099a629ec55306330f7e",
+  "candidateFileSha256": "0aa7a3222dcc144b03c04408bc2069712bc5b8d441426d65bc169ee1b8fe0de0",
+  "nativeReference": {
+    "path": "mir2-web3/apps/game-client/platform-windows/src/big_map_input.rs",
+    "function": "advance",
+    "behavior": "remaining.iter().take(3).all(...auto_path_step_blocked...) before returning route prefix",
+    "sha256": "d741ad38a7508903e633df56eb15dbf96636d9e47f3edf96c2fe6df35c0a53f5"
+  },
+  "cases": [
+    {
+      "runDistance": 1,
+      "occupied": {
+        "x": 331,
+        "y": 261
+      },
+      "before": {
+        "type": "move",
+        "point": {
+          "x": 329,
+          "y": 263
+        },
+        "direction": "UpRight",
+        "mode": "walk"
+      },
+      "after": {
+        "type": "replan"
+      }
+    },
+    {
+      "runDistance": 2,
+      "occupied": {
+        "x": 331,
+        "y": 261
+      },
+      "before": {
+        "type": "move",
+        "point": {
+          "x": 330,
+          "y": 262
+        },
+        "direction": "UpRight",
+        "mode": "run"
+      },
+      "after": {
+        "type": "replan"
+      }
+    },
+    {
+      "runDistance": 3,
+      "occupied": {
+        "x": 331,
+        "y": 261
+      },
+      "before": {
+        "type": "move",
+        "point": {
+          "x": 329,
+          "y": 263
+        },
+        "direction": "UpRight",
+        "mode": "walk"
+      },
+      "after": {
+        "type": "replan"
+      }
+    }
+  ],
+  "tests": {
+    "before": {
+      "pass": 22,
+      "fail": 5
+    },
+    "after": {
+      "pass": 88,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "scope": "Offline actual executor and actual Page-callback regression only. Ordinary browser and online occupancy have separate receipts; no attribution of historical R15 stall."
+}

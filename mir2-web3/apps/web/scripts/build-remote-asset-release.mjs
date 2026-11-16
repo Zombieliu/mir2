@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readImmutableBevyRuntimeRelease } from "./lib/bevy-runtime-release-files.mjs";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -63,10 +64,14 @@ const EXTRA_ORIGINAL_ASSET_PATHS = [
   "/original-ui/Sound/100.wav",
   "/original-ui/Prguse/44.png",
   "/original-ui/Prguse/65.png",
+  "/original-ui/Prguse/361.png",
+  "/original-ui/Prguse/362.png",
+  "/original-ui/Prguse/363.png",
   "/original-ui/Prguse/920.png",
   "/original-ui/Prguse/940.png",
   "/original-ui/Title/40.png",
   "/original-ui/Title/57.png",
+  "/original-ui/Title/785.png",
   ...makeRange(0, 41).map((value) => `/original-ui/Help/${value}.png`),
   ...makeRange(340, 354).map((value) => `/original-ui/Title/${value}.png`),
   ...makeRange(360, 362).map((value) => `/original-ui/Title/${value}.png`),
@@ -195,18 +200,23 @@ async function main() {
     args.stageDir ?? process.env.MIR2_REMOTE_ASSET_STAGE_DIR ?? path.join(REPO_ROOT, ".mir2-remote-assets", version),
   );
 
-  const collected = await collectReleaseUrls(assetManifest, manifestUrl);
+  // Pin metadata and immutable bytes together before any asynchronous collection.
+  const runtimeRelease = includeBevyRuntime ? readBevyRuntimeReleaseRecord() : null;
+  const bevyRuntime = runtimeRelease?.metadata ?? { enabled: false, version: null, contentEncoding: null, files: [] };
+  const collected = await collectReleaseUrls(assetManifest, manifestUrl, runtimeRelease?.files ?? []);
   const staged = await stageStaticFiles({
     staticUrls: collected.staticUrls,
     stageDir,
     objectPrefix,
     allowMissing,
     concurrency: stageConcurrency,
+    runtimeFiles: runtimeRelease?.files ?? [],
   });
+  for (const expected of runtimeRelease?.files ?? []) {
+    const file = staged.files.find((item) => item.path === expected.path);
+    if (!file || file.sha256 !== expected.sha256) throw new Error("Incomplete pinned Bevy runtime release: " + expected.path);
+  }
   await annotateStoredRepresentations(staged.files);
-  const bevyRuntime = includeBevyRuntime
-    ? await readBevyRuntimeReleaseRecord()
-    : { enabled: false, version: null, contentEncoding: null, files: [] };
   const requiredManifestPaths = [
     ...REQUIRED_MANIFEST_PATHS,
     ...(includeFullCrystalPack ? [FULL_CRYSTAL_PACK_INDEX_PATH] : []),
@@ -354,7 +364,7 @@ function createOfflineAssetManifest() {
   };
 }
 
-async function collectReleaseUrls(assetManifest, manifestUrl) {
+async function collectReleaseUrls(assetManifest, manifestUrl, runtimeFiles) {
   const staticUrls = new Map();
   const packs = [];
   const scenes = [];
@@ -415,12 +425,12 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     sceneSpriteRootRecords.push(...(await collectSceneSpriteStaticUrls(staticUrls, sceneSpriteRoots)));
   }
 
-  if (includePublicAssetRoots || includeBevyRuntime) {
-    const roots = [...new Set([
-      ...(includePublicAssetRoots ? publicAssetRoots : []),
-      ...(includeBevyRuntime ? ["bevy-runtime"] : []),
-    ])];
+  if (includePublicAssetRoots) {
+    const roots = [...new Set(publicAssetRoots)].filter((root) => !/^bevy-runtime(?:-releases)?(?:\/|$)/.test(root));
     publicAssetRootRecords.push(...(await collectPublicAssetRootStaticUrls(staticUrls, roots)));
+  }
+  for (const file of runtimeFiles) {
+    addStaticUrl(staticUrls, file.path, "bevy-runtime:manifest", { expectedSha256: file.sha256 });
   }
 
   if (includeFullCrystalPack) {
@@ -588,6 +598,8 @@ function normalizeOriginalAssetManifestPath(value) {
 function addStaticUrl(staticUrls, value, source, integrity = {}) {
   const assetPath = normalizeStaticAssetPath(value);
   if (!assetPath) return false;
+  // Only the pinned manifest may supply runtime namespace entries.
+  if (/^\/bevy-runtime(?:-releases)?(?:\/|$)/.test(assetPath) && source !== "bevy-runtime:manifest") return false;
   const existing = staticUrls.get(assetPath);
   if (existing) {
     assertCompatibleIntegrity(existing, integrity, assetPath);
@@ -613,12 +625,13 @@ function assertCompatibleIntegrity(existing, integrity, assetPath) {
   }
 }
 
-async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissing, concurrency }) {
+async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissing, concurrency, runtimeFiles }) {
   await fs.mkdir(stageDir, { recursive: true });
+  const runtimeByPath = new Map(runtimeFiles.map((file) => [file.path, file]));
   const entries = [...staticUrls.values()].sort((a, b) => a.path.localeCompare(b.path));
   let completed = 0;
   const results = await mapWithConcurrency(entries, concurrency, async (entry) => {
-    const result = await stageOneStaticFile({ entry, stageDir, objectPrefix });
+    const result = await stageOneStaticFile({ entry, stageDir, objectPrefix, runtimeFile: runtimeByPath.get(entry.path) });
     completed += 1;
     if (completed % 25000 === 0 || completed === entries.length) {
       console.error(`[remote-asset-release] staged ${completed}/${entries.length}`);
@@ -648,7 +661,7 @@ async function annotateStoredRepresentations(files) {
         relativePath.startsWith("generated/crystal-packs/full/") &&
         relativePath.endsWith(".json")) ||
       (gzipBevyRuntimeWasm &&
-        relativePath.startsWith("bevy-runtime/pkg-") &&
+        /^bevy-runtime\/v\/bevy-[a-f0-9]{16}\/pkg-(?:webgpu|webgl2(?:-shared)?)\//.test(relativePath) &&
         relativePath.endsWith("_bg.wasm"))
     );
   });
@@ -666,31 +679,19 @@ async function annotateStoredRepresentations(files) {
   });
 }
 
-async function readBevyRuntimeReleaseRecord() {
-  const manifest = await readJsonFile(BEVY_RUNTIME_MANIFEST_PATH);
-  const version = String(manifest?.version ?? "").trim();
-  const files = Array.isArray(manifest?.files)
-    ? manifest.files.map((file) => ({
-        path: `/${String(file.path ?? "").replace(/^public\//, "").replace(/^\/+/, "")}`,
-        sha256: String(file.sha256 ?? ""),
-      }))
-    : [];
-  if (!/^bevy-[a-f0-9]{16}$/i.test(version) || files.length !== 4) {
-    throw new Error(`Invalid Bevy runtime manifest: ${BEVY_RUNTIME_MANIFEST_PATH}`);
-  }
-  for (const file of files) {
-    if (
-      !/^\/bevy-runtime\/pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(file.path) ||
-      !/^[a-f0-9]{64}$/i.test(file.sha256)
-    ) {
-      throw new Error(`Invalid Bevy runtime file entry: ${JSON.stringify(file)}`);
-    }
-  }
+function readBevyRuntimeReleaseRecord() {
+  const pinned = readImmutableBevyRuntimeRelease({ webRoot: WEB_ROOT, manifestPath: BEVY_RUNTIME_MANIFEST_PATH });
+  const manifest = pinned.normalized;
   return {
-    enabled: true,
-    version,
-    contentEncoding: gzipBevyRuntimeWasm ? "gzip" : null,
-    files,
+    files: pinned.files,
+    metadata: {
+      enabled: true,
+      version: manifest.version,
+      schemaVersion: manifest.schemaVersion,
+      packages: manifest.packages,
+      contentEncoding: gzipBevyRuntimeWasm ? "gzip" : null,
+      files: pinned.files.map((file) => ({ path: file.path, sha256: file.sha256 })),
+    },
   };
 }
 
@@ -708,9 +709,9 @@ async function gzipFileMetadata(filePath) {
   return { size, sha256: hash.digest("hex") };
 }
 
-async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
+async function stageOneStaticFile({ entry, stageDir, objectPrefix, runtimeFile }) {
   const relativePath = decodeAssetRelativePath(entry.path.replace(/^\/+/, ""));
-  const localPath = path.join(WEB_ROOT, "public", relativePath);
+  const localPath = runtimeFile?.localPath ?? path.join(WEB_ROOT, "public", relativePath);
   const stagePath = stageFileMode === "reference" ? localPath : path.join(stageDir, relativePath);
 
   let stats;
@@ -757,6 +758,9 @@ async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
   if (stageFileMode !== "reference") {
     await fs.mkdir(path.dirname(stagePath), { recursive: true });
     await stageFile(localPath, stagePath);
+    if (runtimeFile && await sha256File(stagePath) !== runtimeFile.sha256) {
+      throw new Error("Staged Bevy runtime bytes differ from the pinned version: " + entry.path);
+    }
   }
 
   return {
@@ -913,7 +917,8 @@ function normalizeStaticAssetPath(value) {
     !url.pathname.startsWith("/generated/original-map-blend/") &&
     !url.pathname.startsWith("/generated/map-atlas/") &&
     !url.pathname.startsWith("/generated/crystal-packs/full/") &&
-    !url.pathname.startsWith("/bevy-entity-atlases/")
+    !url.pathname.startsWith("/bevy-entity-atlases/") &&
+    !/^\/bevy-runtime\/v\/bevy-[a-f0-9]{16}\/pkg-(?:webgpu|webgl2(?:-shared)?)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(url.pathname)
   ) {
     return "";
   }

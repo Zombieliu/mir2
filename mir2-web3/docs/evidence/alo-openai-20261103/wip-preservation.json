@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-03T01:10:19.933Z",
+  "originalCanonicalWipFiles": 122,
+  "byteIdenticalToOriginal": 120,
+  "expectedPriorInsertionsRetained": [
+    "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/main.rs"
+  ],
+  "unexpectedChanges": [],
+  "secretsInspectedOrPrinted": false,
+  "method": "SHA256 equality only; no file contents disclosed"
+}

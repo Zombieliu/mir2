@@ -1,0 +1,17 @@
+{
+  "source": "715078944ac7a84a61b6d64901b80568a8e8d63b",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T15:56:36.3506700+00:00",
+  "complete": true,
+  "success": false,
+  "pid": 113420,
+  "phase": "package-client",
+  "buildReused": true,
+  "attempt": 2,
+  "previousAttemptReceipt": "C:\\mir2-playtest-releases\\20261001-native-r9\\build-package-process-attempt1.json",
+  "publicPublished": false,
+  "buildCompletedUtc": "2026-10-01T23:32:10.1824542+08:00",
+  "exeSha256": "D20A3B8CEE886F27F22A489AF2FD9B5F49848B0861420EE8E6C2960C0134B214",
+  "error": "reparse-point ancestor rejected: C:\\Users\\Administrator\\.codex\\worktrees\\native-shop-lifecycle-r9\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\generated\\map-atlas",
+  "finishedUtc": "2026-10-01T15:59:26.0204761+00:00"
+}

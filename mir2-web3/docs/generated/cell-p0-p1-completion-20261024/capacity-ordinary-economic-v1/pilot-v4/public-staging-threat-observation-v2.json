@@ -1,0 +1,1221 @@
+{
+  "schemaVersion": 1,
+  "kind": "ANONYMIZED_BOUNDED_PUBLIC_STAGING_THREAT_OBSERVATION",
+  "packageId": "ordinary-economic-preparation-pilot-v4",
+  "supersedes": {
+    "file": "public-staging-threat-observation-v1.json",
+    "reason": "V1 used absent capturedAt field; actual recording timestamp is capturedAtMs. Its empty-window result is invalid and supplies no threat evidence."
+  },
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\recordings\\0-498067.jsonl",
+    "bytes": 20108594,
+    "sha256": "397c33b6521bf43c7c34a771948476a165a27e6064a415db26f80181d5c163d0",
+    "hashMethod": "Exact original bytes hashed in initial single streaming pass",
+    "extractRead": {
+      "offset": 16962866,
+      "bytes": 3145728,
+      "method": "One bounded tail read after timestamp-field correction; no second full recording scan"
+    }
+  },
+  "stagingPoint": {
+    "x": 286,
+    "y": 616
+  },
+  "failedPreparation": {
+    "at": 1793042356623,
+    "status": "failed",
+    "elapsedMs": 138979.68449999997,
+    "failure": "ordinary supplies: hostile near staging",
+    "after": {
+      "x": 286,
+      "y": 616,
+      "hp": 24,
+      "maxHp": 24
+    }
+  },
+  "window": {
+    "start": 1793042351623,
+    "end": 1793042358623,
+    "matchedFrames": 21
+  },
+  "nearestBefore": {
+    "sequence": 524,
+    "capturedAtMs": 1793042356548,
+    "msBeforeFailure": 75,
+    "entities": [
+      {
+        "objectId": 1,
+        "kind": "npc",
+        "name": "Teleport_Gilbert",
+        "x": 287,
+        "y": 615,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 1
+      },
+      {
+        "objectId": 2,
+        "kind": "npc",
+        "name": "BorderVillage_Board",
+        "x": 284,
+        "y": 615,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 2
+      },
+      {
+        "objectId": 4,
+        "kind": "npc",
+        "name": "CraftsLady_Jude",
+        "x": 294,
+        "y": 619,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 8
+      },
+      {
+        "objectId": 8,
+        "kind": "npc",
+        "name": "Merchant_Ruben",
+        "x": 288,
+        "y": 608,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 8
+      },
+      {
+        "objectId": 42,
+        "kind": "npc",
+        "name": "Merchant_Scott",
+        "x": 291,
+        "y": 610,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 6
+      },
+      {
+        "objectId": 200716,
+        "kind": "monster",
+        "name": "Guard",
+        "x": 291,
+        "y": 620,
+        "disposition": "neutral",
+        "hp": 9999,
+        "dead": false,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 206302,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 287,
+        "y": 611,
+        "disposition": "neutral",
+        "hp": 0,
+        "dead": true,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 206339,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 280,
+        "y": 609,
+        "disposition": "neutral",
+        "hp": 0,
+        "dead": true,
+        "distanceToStaging": 7
+      },
+      {
+        "objectId": 206515,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 284,
+        "y": 611,
+        "disposition": "neutral",
+        "hp": 0,
+        "dead": true,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 206632,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 286,
+        "y": 623,
+        "disposition": "hostile",
+        "hp": 20,
+        "dead": false,
+        "distanceToStaging": 7
+      },
+      {
+        "objectId": 206641,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 287,
+        "y": 616,
+        "disposition": "hostile",
+        "hp": 20,
+        "dead": false,
+        "distanceToStaging": 1
+      },
+      {
+        "objectId": 206644,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 293,
+        "y": 614,
+        "disposition": "hostile",
+        "hp": 20,
+        "dead": false,
+        "distanceToStaging": 7
+      },
+      {
+        "objectId": 206717,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 288,
+        "y": 624,
+        "disposition": "neutral",
+        "hp": 25,
+        "dead": false,
+        "distanceToStaging": 8
+      },
+      {
+        "objectId": 271801,
+        "kind": "monster",
+        "name": "Hen",
+        "x": 291,
+        "y": 616,
+        "disposition": "neutral",
+        "hp": 5,
+        "dead": false,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 271806,
+        "kind": "monster",
+        "name": "Hen",
+        "x": 292,
+        "y": 613,
+        "disposition": "neutral",
+        "hp": 5,
+        "dead": false,
+        "distanceToStaging": 6
+      }
+    ],
+    "actorPositions": [],
+    "safeZoneBooleanFields": [
+      {
+        "path": ".world.inSafeZone",
+        "value": true
+      }
+    ]
+  },
+  "nearestAfter": {
+    "sequence": 525,
+    "capturedAtMs": 1793042356812,
+    "msBeforeFailure": -189,
+    "entities": [
+      {
+        "objectId": 1,
+        "kind": "npc",
+        "name": "Teleport_Gilbert",
+        "x": 287,
+        "y": 615,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 1
+      },
+      {
+        "objectId": 2,
+        "kind": "npc",
+        "name": "BorderVillage_Board",
+        "x": 284,
+        "y": 615,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 2
+      },
+      {
+        "objectId": 4,
+        "kind": "npc",
+        "name": "CraftsLady_Jude",
+        "x": 294,
+        "y": 619,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 8
+      },
+      {
+        "objectId": 8,
+        "kind": "npc",
+        "name": "Merchant_Ruben",
+        "x": 288,
+        "y": 608,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 8
+      },
+      {
+        "objectId": 42,
+        "kind": "npc",
+        "name": "Merchant_Scott",
+        "x": 291,
+        "y": 610,
+        "disposition": "neutral",
+        "hp": null,
+        "dead": false,
+        "distanceToStaging": 6
+      },
+      {
+        "objectId": 200716,
+        "kind": "monster",
+        "name": "Guard",
+        "x": 291,
+        "y": 620,
+        "disposition": "neutral",
+        "hp": 9999,
+        "dead": false,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 206302,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 287,
+        "y": 611,
+        "disposition": "neutral",
+        "hp": 0,
+        "dead": true,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 206339,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 280,
+        "y": 609,
+        "disposition": "neutral",
+        "hp": 0,
+        "dead": true,
+        "distanceToStaging": 7
+      },
+      {
+        "objectId": 206515,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 284,
+        "y": 611,
+        "disposition": "neutral",
+        "hp": 0,
+        "dead": true,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 206632,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 286,
+        "y": 623,
+        "disposition": "hostile",
+        "hp": 20,
+        "dead": false,
+        "distanceToStaging": 7
+      },
+      {
+        "objectId": 206641,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 287,
+        "y": 616,
+        "disposition": "hostile",
+        "hp": 20,
+        "dead": false,
+        "distanceToStaging": 1
+      },
+      {
+        "objectId": 206644,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 293,
+        "y": 614,
+        "disposition": "hostile",
+        "hp": 20,
+        "dead": false,
+        "distanceToStaging": 7
+      },
+      {
+        "objectId": 206717,
+        "kind": "monster",
+        "name": "Deer",
+        "x": 288,
+        "y": 624,
+        "disposition": "neutral",
+        "hp": 25,
+        "dead": false,
+        "distanceToStaging": 8
+      },
+      {
+        "objectId": 271801,
+        "kind": "monster",
+        "name": "Hen",
+        "x": 291,
+        "y": 616,
+        "disposition": "neutral",
+        "hp": 5,
+        "dead": false,
+        "distanceToStaging": 5
+      },
+      {
+        "objectId": 271806,
+        "kind": "monster",
+        "name": "Hen",
+        "x": 292,
+        "y": 613,
+        "disposition": "neutral",
+        "hp": 5,
+        "dead": false,
+        "distanceToStaging": 6
+      }
+    ],
+    "actorPositions": [],
+    "safeZoneBooleanFields": [
+      {
+        "path": ".world.inSafeZone",
+        "value": true
+      }
+    ]
+  },
+  "hostilesInWindow": [
+    {
+      "sequence": 506,
+      "capturedAtMs": 1793042351864,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 507,
+      "capturedAtMs": 1793042352124,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 508,
+      "capturedAtMs": 1793042352375,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 509,
+      "capturedAtMs": 1793042352626,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 510,
+      "capturedAtMs": 1793042352888,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 511,
+      "capturedAtMs": 1793042353150,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 512,
+      "capturedAtMs": 1793042353410,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 513,
+      "capturedAtMs": 1793042353670,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 514,
+      "capturedAtMs": 1793042353937,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 515,
+      "capturedAtMs": 1793042354199,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 516,
+      "capturedAtMs": 1793042354461,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 517,
+      "capturedAtMs": 1793042354723,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 518,
+      "capturedAtMs": 1793042354985,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 519,
+      "capturedAtMs": 1793042355247,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 520,
+      "capturedAtMs": 1793042355507,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 521,
+      "capturedAtMs": 1793042355758,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 522,
+      "capturedAtMs": 1793042356020,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 523,
+      "capturedAtMs": 1793042356283,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 524,
+      "capturedAtMs": 1793042356548,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 525,
+      "capturedAtMs": 1793042356812,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    },
+    {
+      "sequence": 526,
+      "capturedAtMs": 1793042357073,
+      "entities": [
+        {
+          "objectId": 206632,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        },
+        {
+          "objectId": 206641,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 1
+        },
+        {
+          "objectId": 206644,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "disposition": "hostile",
+          "hp": 20,
+          "dead": false,
+          "distanceToStaging": 7
+        }
+      ]
+    }
+  ],
+  "scope": "Actual public entity whitelist only; no raw player names, owner fields, tokens or private stores. Anonymous projections are not a cohort count. No authority flag is inferred from static safezone geometry."
+}

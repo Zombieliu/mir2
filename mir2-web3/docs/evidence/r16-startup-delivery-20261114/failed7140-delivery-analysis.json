@@ -1,0 +1,219 @@
+{
+  "schema": "mir2.startup-delivery-analysis.v1",
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "movement": {
+    "wireAtMs": 103404,
+    "ackAtMs": 116690,
+    "durationMs": 13286,
+    "originalEightSecondPassed": false,
+    "websocketFrameMs": 13283
+  },
+  "aggregateAdmission": {
+    "observed": true,
+    "actionIdentityBound": false,
+    "exactPlayerExecutionLatencyProven": false,
+    "sameRevisionAndMonotonicCounters": true,
+    "before": {
+      "status": 200,
+      "startedAt": 101687,
+      "finishedAt": 101751,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 6272531,
+      "count": 0,
+      "sumUs": 0
+    },
+    "after": {
+      "status": 200,
+      "startedAt": 103693,
+      "finishedAt": 103867,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 6274619,
+      "count": 1,
+      "sumUs": 524
+    },
+    "countDelta": 1,
+    "sumUsDelta": 524,
+    "observedAfterSendByMs": 463,
+    "limitation": "No instance ID, player ID or command ID is present in these aggregate samples."
+  },
+  "browser": {
+    "observed": true,
+    "mainThreadCauseExcluded": false,
+    "pageEpochOffsetMs": 1891.10009765625,
+    "callbackCoverage": true,
+    "callbacks": [
+      {
+        "observedAtMs": 100592,
+        "browserAtMs": 100589.50009763241,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 102594,
+        "browserAtMs": 102592.50009763241,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 104593,
+        "browserAtMs": 104591.60009765625,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 106595,
+        "browserAtMs": 106593.30009764433,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 108596,
+        "browserAtMs": 108594.60009765625,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 110596,
+        "browserAtMs": 110593.90009763837,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 112597,
+        "browserAtMs": 112593.80009764433,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 114596,
+        "browserAtMs": 114593.30009764433,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 116597,
+        "browserAtMs": 116594.20009765029,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 118598,
+        "browserAtMs": 118594.60009765625,
+        "booted": false,
+        "bootAttempted": false
+      }
+    ],
+    "maxObservedCallbackGapMs": 2002,
+    "longTasksInWindow": [],
+    "driftsInWindow": [],
+    "fullObservedTaskMaxMs": 194,
+    "taskCollectorMayBeCapped": false,
+    "driftCollectorMayBeCapped": false,
+    "limitation": "Recorded callbacks and task observations are evidence, not a complete renderer exclusion."
+  },
+  "server": {
+    "observed": true,
+    "exactCrossClockLatencyInferred": false,
+    "ackEgressBound": false,
+    "pins": {
+      "pid": 1193390,
+      "processStartTicks": 1552270986,
+      "invocationId": "391ec99506d8426d88a3cb457535fb0b",
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa"
+    },
+    "journalWindowUtc": [
+      "2026-11-14T06:54:50Z",
+      "2026-11-14T06:55:25Z"
+    ],
+    "rowsRead": 9,
+    "diagnosticFlags": {
+      "readComplete": true,
+      "zoneDeliveryTraceLiteral1": false,
+      "slowStagePositiveU64": true
+    },
+    "stageCounts": {
+      "socket_turn.input": 3,
+      "session_action.flush": 1,
+      "flush.save": 1,
+      "session_action.execute": 2,
+      "shared_session.inner_execute": 2
+    },
+    "maximumDurationMsByStage": {
+      "socket_turn.input": 3202,
+      "session_action.flush": 77,
+      "flush.save": 39,
+      "session_action.execute": 3117,
+      "shared_session.inner_execute": 2960
+    },
+    "events": [
+      {
+        "atUnixUs": 1794639296479326,
+        "stage": "socket_turn.input",
+        "durationMs": 30
+      },
+      {
+        "atUnixUs": 1794639295960533,
+        "stage": "socket_turn.input",
+        "durationMs": 3202
+      },
+      {
+        "atUnixUs": 1794639295951943,
+        "stage": "session_action.flush",
+        "durationMs": 77
+      },
+      {
+        "atUnixUs": 1794639295943487,
+        "stage": "flush.save",
+        "durationMs": 39
+      },
+      {
+        "atUnixUs": 1794639295874575,
+        "stage": "session_action.execute",
+        "durationMs": 3117
+      },
+      {
+        "atUnixUs": 1794639295720307,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 2960
+      },
+      {
+        "atUnixUs": 1794639292446871,
+        "stage": "socket_turn.input",
+        "durationMs": 42
+      },
+      {
+        "atUnixUs": 1794639292441249,
+        "stage": "session_action.execute",
+        "durationMs": 36
+      },
+      {
+        "atUnixUs": 1794639292441249,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 36
+      }
+    ],
+    "limitation": "A bounded journal projection lacks an independently bound per-ACK send/TCP identity; missing logs do not prove fast egress."
+  },
+  "rootCauseProven": false,
+  "inputs": [
+    {
+      "name": "receipt",
+      "bytes": 74305,
+      "sha256": "b33e61426085770b204f5e583dc33d039d7e16d45d72ad8af9f5fa46575a654b"
+    },
+    {
+      "name": "startupProbe",
+      "bytes": 265710,
+      "sha256": "b969745d8e3a18824fe6212e6ff4b95c253d9deafdde9c33e41ef92386e87a2d"
+    },
+    {
+      "name": "serverReadback",
+      "bytes": 9267,
+      "sha256": "1b78fb83061d21632ae2713049acc713778391aa351e78bb981e9a0859153bf4"
+    }
+  ],
+  "producerSha256": "e51dad87ae47e1c32a2ae470552f702dcebf637fdf6d3fce6b0611391d8c1d2f",
+  "analyzerSha256": "d657e65c885be4f4ef9317d1aa4b2140c9db9d96d5913e6a453a57a89c7532b6"
+}

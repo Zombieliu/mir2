@@ -1,0 +1,202 @@
+{
+  "owner": "Root",
+  "kind": "Root independent Source77 final code review including substantive public Trade classification repair",
+  "files": [
+    {
+      "relativePath": "apps/web/scripts/lib/portable-next-standalone.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\catalog-before\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 40949,
+        "sha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\catalog-final\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 63917,
+        "sha256": "903dc27909a5a43155ccacfb84dd114e8d1eab49fdaaea5142fe0ab7795a9bc8"
+      },
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 63917,
+        "sha256": "903dc27909a5a43155ccacfb84dd114e8d1eab49fdaaea5142fe0ab7795a9bc8"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\catalog-before\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 76389,
+        "sha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\portable-statistics-repair01\\after.mjs",
+        "bytes": 95989,
+        "sha256": "22ef9cb1ccbc5dac56f7fdebcc1b4a52ebada58ae4bd1531a24c19f2b3341f0d"
+      },
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 95989,
+        "sha256": "22ef9cb1ccbc5dac56f7fdebcc1b4a52ebada58ae4bd1531a24c19f2b3341f0d"
+      }
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\catalog-before\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+        "bytes": 35540,
+        "sha256": "6e08111983ccb64a6355033ed3abed00e8bb89c5932e6fede64e6593a72c65d8"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\catalog-final\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+        "bytes": 35590,
+        "sha256": "ff234383953efe949ef01637f5782d421c246544247e305ee866ff5213e8af89"
+      },
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+        "bytes": 35590,
+        "sha256": "ff234383953efe949ef01637f5782d421c246544247e305ee866ff5213e8af89"
+      }
+    },
+    {
+      "relativePath": "apps/web/app/globals.css",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\globals-before.css",
+        "bytes": 132105,
+        "sha256": "e66dcc06381e1b6794bff2d602c2c024ce48048f097be6b8594e05f6ac6a5401"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\globals-after.css",
+        "bytes": 132129,
+        "sha256": "67b519fb0947e87830e5a3c0100f36beb4c74cedfa2003c6d26dab5030878639"
+      },
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\globals.css",
+        "bytes": 132129,
+        "sha256": "67b519fb0947e87830e5a3c0100f36beb4c74cedfa2003c6d26dab5030878639"
+      }
+    }
+  ],
+  "codeCopies": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+      "bytes": 63917,
+      "sha256": "903dc27909a5a43155ccacfb84dd114e8d1eab49fdaaea5142fe0ab7795a9bc8",
+      "relativePath": "apps/web/scripts/lib/portable-next-standalone.mjs",
+      "sourceRole": "Root verified Source77 owned code",
+      "internal": true
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+      "bytes": 95989,
+      "sha256": "22ef9cb1ccbc5dac56f7fdebcc1b4a52ebada58ae4bd1531a24c19f2b3341f0d",
+      "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs",
+      "internal": true,
+      "sourceRole": "Root reviewed Source77 portable statistics repair; old31 byte prefix exact"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+      "bytes": 35590,
+      "sha256": "ff234383953efe949ef01637f5782d421c246544247e305ee866ff5213e8af89",
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "sourceRole": "Root verified Source77 owned code",
+      "internal": true
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\app\\globals.css",
+      "bytes": 132129,
+      "sha256": "67b519fb0947e87830e5a3c0100f36beb4c74cedfa2003c6d26dab5030878639",
+      "relativePath": "apps/web/app/globals.css",
+      "sourceRole": "Root verified Source77 owned code",
+      "internal": true
+    }
+  ],
+  "workerManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\source77-public-catalog-starter-manifest01.json",
+    "bytes": 302265,
+    "sha256": "74b90560afa449a710775704f78b8eea1563764c5c2914e4d31f1d77fa50b1d2"
+  },
+  "finiteApproval": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/source77-finite-png-approval01.json",
+    "bytes": 290283,
+    "sha256": "405106eaeca858f7612574a1b1c7008f39f45c7b707a880650c43220d458d61a"
+  },
+  "checks": {
+    "finiteUnionExact": true,
+    "retained151": true,
+    "selected860": true,
+    "genuineSelected857": true,
+    "legacyMissing3Retained": true,
+    "addedItems704": true,
+    "addedStarterStateItem5": true,
+    "addedPngBytes881070": true,
+    "selectorOutsideSetByteExact": true,
+    "old31TestsPrefixByteExact": true,
+    "appendedTests3": true,
+    "miniMapOnly50ByteGuard": true,
+    "miniMapPreferenceUntouched": true,
+    "cssOnly24ByteNamePointerEvents": true,
+    "productionHostReadinessUntouched": true,
+    "publicSharedSourceRulesReadOnly": true,
+    "mainForeignTsconfigUnchanged": true,
+    "noAccountSpecificAssets": true,
+    "old31BytePrefixRetained": true,
+    "referencedTradeSections131": true,
+    "usableTradeScripts128": true,
+    "goods2239": true,
+    "unresolvedTradeLines421": true,
+    "preciseUnusableSections3": true,
+    "union860AndNegativeCasesRetained": true,
+    "noDeletedSkippedOrWeakenedTests": true,
+    "nextApplicationCodeUnchanged": true
+  },
+  "neighborTestInput": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\public\\original-ui\\Items\\2.png",
+    "bytes": 364,
+    "sha256": "512c1232870cbb2dab808bd504827386a6245b4a6f6a79fad371ce3b367aebc0",
+    "relativePath": "apps/web/public/original-ui/Items/2.png",
+    "internal": true,
+    "sourceRole": "genuine public neighbor only portable negative-copy test; excluded from finite709 and Thin selection"
+  },
+  "controls": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\tsconfig.source73-build03.json",
+      "bytes": 5911,
+      "sha256": "70389cfc0452263a2ea3e601148c448eddb5fce1b9b20ad098175631d9f4613a",
+      "relativePath": "apps/web/tsconfig.source73-build03.json",
+      "sourceRole": "Root own build control only Source76 dist replaced with77",
+      "internal": true
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\next-env.d.ts",
+      "bytes": 294,
+      "sha256": "51d3253a8be630be118064944f026bec18f7037f84cb63e03c6b4de65d2bc41c",
+      "relativePath": "apps/web/next-env.d.ts",
+      "sourceRole": "Root own build control only Source76 dist replaced with77",
+      "internal": true
+    }
+  ],
+  "sourceExecution": false,
+  "testsExecuted": false,
+  "actualBrowserAcceptancePending": true,
+  "goalComplete": false,
+  "previousReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-code-review01.json",
+    "bytes": 8609,
+    "sha256": "5a83236512c8fa679b45f5c61d8fb2fc583b8bc2e5e5d9c85dd3a95591df5be8"
+  },
+  "firstActualTestFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-portable-first-failure01.json",
+    "bytes": 3614,
+    "sha256": "e43d6c94311a446be0beacbb6ddeb239a5e142dc069e87d3dd0fab67d6b47f94"
+  },
+  "repairManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\portable-statistics-repair01\\repair-manifest01.json",
+    "bytes": 4174,
+    "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+  },
+  "finalPortableTest": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+    "bytes": 95989,
+    "sha256": "22ef9cb1ccbc5dac56f7fdebcc1b4a52ebada58ae4bd1531a24c19f2b3341f0d"
+  },
+  "appBuildReusedOnlyForUnchangedApplication": true
+}

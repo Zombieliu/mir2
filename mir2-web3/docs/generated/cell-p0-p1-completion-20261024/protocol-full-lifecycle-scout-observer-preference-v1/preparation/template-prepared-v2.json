@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ROOT_FINALIZATION_NOT_EXECUTED",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\run-owned-full.mjs",
+      "bytes": 14494,
+      "sha256": "b1bf77146f5f6cdddc93198b2bf0d21ebc0ef0522ed47ec34a4a2755e2e65802"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\audit-owned-full.mjs",
+      "bytes": 9481,
+      "sha256": "da2636cb33f6ce11454f45e0f684c79e98173f591c7e62bfdc0c9324794723ce"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+      "bytes": 14002,
+      "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\finalize-launcher-inputs.mjs",
+      "bytes": 2416,
+      "sha256": "b7c9bca1ac42af49828b49163638f3f6dd1b005aea26d4f73a5ccd27ad343b33"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\projection-build-source-lib.mjs",
+      "bytes": 223,
+      "sha256": "4d8e456917179f8d516e39a0b6aad10be82bbd60da52ba60f1e606cc866038ce"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\full-lifecycle-profile.json",
+      "bytes": 4571,
+      "sha256": "8736f7c2f3c002a8a57b972cb9d5ba6be09d83a224ffcd444b277dd49f9ade98"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\candidate-release-binding-v1.json",
+      "bytes": 3130,
+      "sha256": "91ea704e2b7225a70d6469da82eca9f1878f21a0473ab85de86333279bb33929"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\derivation-proof-v2.json",
+      "bytes": 21974,
+      "sha256": "f9aae1e6d2b19d027bd748159ad1d955072021b1db8aa885984e80dc59b065c2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\syntax-check-v2.json",
+      "bytes": 2181,
+      "sha256": "7c83827fd66bfbd47f5d7c4e41ae7c6904e54fa53a54b6c0e67ac75bf027b9f7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\README.md",
+      "bytes": 1827,
+      "sha256": "f11efe3b8aae8eef3e285b7f2efc739e7441c7fccb8ac8e4bf6d55f1e6ae4ae8"
+    }
+  ],
+  "sourceSha256": "402256f9799a817b622f5f9f24f2baa360cee552b69dda5e1be51aabc033c7a5",
+  "syntax": {
+    "passed": true,
+    "nodeScripts": 6,
+    "powershellScripts": 1,
+    "newNodeChecks": 1,
+    "unchangedNodeChecksReused": 5,
+    "receipt": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\syntax-check-v2.json",
+      "bytes": 2181,
+      "sha256": "7c83827fd66bfbd47f5d7c4e41ae7c6904e54fa53a54b6c0e67ac75bf027b9f7"
+    }
+  },
+  "sixDriverPins": [
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "capacityDriverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "currentNodeSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "externalSourceLibrary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 33531,
+    "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+  },
+  "runtimeBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1404,
+    "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d"
+  },
+  "actualReadonlyRuntimeGuard": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "caa541b94ea55b725acba6d663583bd2222e1922c8a0a0d6adef8b88bb6bc4ce"
+  },
+  "currentDriverFrozen": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+    "bytes": 9465,
+    "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+  },
+  "currentNodeRegression": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+    "bytes": 5378,
+    "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+  },
+  "actualFull16Passed": null,
+  "actualSentCommandCount": null,
+  "launcherFinalized": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "oldPackagesChanged": false,
+  "preparedRevision": 2,
+  "priorPreparation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\template-prepared-v1.json",
+    "bytes": 6433,
+    "sha256": "a216b805bc24279644c7d3a5e25af4024fe7c39156cef03d7a79c0d1bcc4e09f"
+  }
+}

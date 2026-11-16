@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "source": "a4f99c21115f0c558f78914c120eb1ce12028bff",
+  "candidate": "7033a012bf39-hud-recovery-b26c3e87",
+  "buildReceiptSha256": "5f2cc4f8c3a2b8b3ab6c6e4bcbef9659417942c0cee28bcc2cb9c90fe08c03c2",
+  "matchingGitBlobs": 53,
+  "originalFilesUnchanged": 65
+}

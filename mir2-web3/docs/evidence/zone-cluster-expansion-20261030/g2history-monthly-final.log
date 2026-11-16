@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized] target(s) in 0.26s
+
+running 3 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test config::config_schema_integration_tests::schema9_migration_preserves_existing_billing_activities_monthly_card_and_stones ... ok
+test runtime::billing_monthly_card::tests::ordinary_allocation_and_mail_normalization_skip_permanent_card_namespace ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_monthly_card_authorization_keeps_deterministic_identity_without_ordinary_mint ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 3253 filtered out; finished in 0.86s

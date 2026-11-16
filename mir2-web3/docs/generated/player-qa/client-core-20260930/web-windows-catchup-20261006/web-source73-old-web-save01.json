@@ -1,0 +1,28 @@
+{
+  "owner": "Root",
+  "recordedAtUtc": "2026-10-11 20:34:34 UTC",
+  "source72Service": "http://127.0.0.1:19205/",
+  "before": {
+    "bagItemCards": 5,
+    "warehouseItemCards": 0,
+    "gold": 180,
+    "storageOwner": "react",
+    "storagePhase": "prepare",
+    "storageReason": "rendererAssetsFailed",
+    "canvas": {
+      "width": 644,
+      "height": 483
+    },
+    "sharedHudWitness": true
+  },
+  "ordinarySaveLogoutKey": "Alt+x",
+  "afterFullAx": {
+    "loginVisible": true,
+    "startGameVisible": false
+  },
+  "reloginReadbackPending": true,
+  "ownedProcessStopPending": true,
+  "originalCallerExitAndPostguardPending": true,
+  "noAdminCommands": true,
+  "noPrivateReads": true
+}

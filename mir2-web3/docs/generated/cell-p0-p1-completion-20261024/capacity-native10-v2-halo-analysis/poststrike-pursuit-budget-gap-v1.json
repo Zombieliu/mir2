@@ -1,0 +1,961 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792891029840-02155527",
+  "scope": "Historical source defect plus original public selected trace. No claim of a complete per-decision pursuit-state replay.",
+  "pins": {
+    "originalRaw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.samples.jsonl",
+      "bytes": 8938171,
+      "sha256": "0c7d4f33b2e0a50dfc9a16c5331e5a6b3b25feb150cda01972a7244bec96443f",
+      "rows": 14021
+    },
+    "selected": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\selected-events-v1.json",
+      "bytes": 293598,
+      "sha256": "40c77dd1f91cc4426e4b9da372c1701e3c723d69f6795a67e86f683265e4fff7"
+    }
+  },
+  "sourceProof": {
+    "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+    "gitPath": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "gitBlobSha1": "9ba2882051e22984a4a166a6f2b5a8f5f61f732f",
+    "gitBlobBytes": 132218,
+    "gitBlobSha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55",
+    "historicalRawInput": {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+    },
+    "driverAggregateSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+    "driverManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-phase-window-timing-driver-frozen-v1.json",
+      "bytes": 15970,
+      "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+    },
+    "currentWorkingSourceUsed": false
+  },
+  "sourceContract": {
+    "originalMovementBudget": 40,
+    "originalActiveTimeBudgetMs": 30000,
+    "routeLoopVisits": 3,
+    "nonProgress": "four moves, or two moves plus 6000ms",
+    "sourceSections": [
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 831,
+        "toLine": 864,
+        "text": "function rememberCombatTarget(client, target, now = Date.now()) {\n  const mapFileName = String(client.snapshot.mapFileName);\n  if (client.combatPursuit?.objectId !== target.objectId || client.combatPursuit.mapFileName !== mapFileName) {\n    client.combatPursuit = { objectId: target.objectId, name: target.name, mapFileName,\n      bestDistance: distance(self(client), target), lastProgressAt: now, nonImprovingMoves: 0,\n      lastReceiptSequence: client.sequence, attackSent: false, targetPoint: lifecyclePoint(target),\n      startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map() };\n  }\n}\n\n// Progress is measured only at a successful, nonzero authoritative movement\n// receipt. Selecting a plan, waiting, turning, or a corrected step proves none.\nexport function recordCombatPursuitMovement(client, context, plan, origin, receipt, status, now = Date.now()) {\n  recordCombatScoutMovement(client, context, plan, origin, receipt, status, now);\n  const pursuit = client.combatPursuit, actual = receipt?.payload, kind = plan.command.type;\n  if (context.policy?.activityMode !== 'native' || !pursuit || pursuit.attackSent || status !== 'success' ||\n      !['walk', 'run'].includes(kind) || pursuit.objectId !== plan.chaseTargetId ||\n      pursuit.mapFileName !== String(client.snapshot.mapFileName) || receipt.packet !== 'UserLocation' ||\n      receipt.sequence <= pursuit.lastReceiptSequence || !lifecyclePoint(actual) || distance(origin, actual) === 0 ||\n      !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;\n  const target = livePursuitTarget(client, context, pursuit, now);\n  if (!target) { client.combatPursuit = null; return; }\n  pursuit.lastReceiptSequence = receipt.sequence;\n  pursuit.confirmedMoves++;\n  pursuit.lastMovementAt = now;\n  const visitKey = `${actual.x},${actual.y}`, visits = (pursuit.visited.get(visitKey) ?? 0) + 1;\n  pursuit.visited.set(visitKey, visits);\n  const targetStable = distance(target, plan.chaseTargetPoint ?? {}) === 0 && distance(target, pursuit.targetPoint) === 0;\n  const navigation = plan.navigation;\n  let routeImproved = false;\n  if (targetStable && lifecyclePoint(navigation?.goal) && Number.isInteger(navigation.remainingSteps) && navigation.remainingSteps > 0) {\n    const consumed = kind === 'run' && distance(actual, plan.first) !== 0 ? 2 : 1;\n    const remaining = navigation.remainingSteps - consumed, key = `${target.x},${target.y}:${navigation.goal.x},${navigation.goal.y}`;\n    const prior = pursuit.routeProgress;"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 878,
+        "toLine": 900,
+        "text": "  pursuit.bestDistance = Math.min(pursuit.bestDistance, currentDistance);\n  if (improved) { pursuit.lastProgressAt = now; pursuit.nonImprovingMoves = 0; }\n  else pursuit.nonImprovingMoves++;\n  const elapsedMs = now - pursuit.lastProgressAt;\n  const pursuitMs = pursuit.activeElapsedMs + Math.max(0, now - pursuit.startedAt);\n  const reason = visits >= 3 ? 'route-loop' : pursuit.confirmedMoves >= COMBAT_CHASE_MAX_MOVES ? 'movement-budget' :\n    pursuitMs >= COMBAT_CHASE_MAX_MS ? 'time-budget' :\n    pursuit.nonImprovingMoves >= 2 && (pursuit.nonImprovingMoves >= 4 || elapsedMs >= 6000) ? 'no-progress' : null;\n  if (!reason) return;\n  const deferred = client.chaseDeferrals ??= new Map();\n  for (const [id, entry] of deferred) if (entry.until <= now || entry.mapFileName !== pursuit.mapFileName) deferred.delete(id);\n  if (deferred.size >= COMBAT_CHASE_DEFERRAL_LIMIT) deferred.delete(deferred.keys().next().value);\n  deferred.set(pursuit.objectId, { mapFileName: pursuit.mapFileName, until: now + COMBAT_CHASE_DEFERRAL_MS });\n  context.writer?.add({ type: 'combatChaseDeferred', actor: client.label, phase: context.phase, at: now,\n    targetId: pursuit.objectId, mapFileName: pursuit.mapFileName, nonImprovingMoves: pursuit.nonImprovingMoves,\n    elapsedMs, pursuitMs, confirmedMoves: pursuit.confirmedMoves, reason,\n    ttlMs: COMBAT_CHASE_DEFERRAL_MS, actual: lifecyclePoint(actual), target: lifecyclePoint(target), attacksSent: 0 });\n  client.combatPursuit = null;\n}\n\nexport function restoreCombatPursuit(original, restored, context, now = Date.now()) {\n  restored.combatCluster = original.combatCluster;\n  restored.chaseDeferrals = new Map([...(original.chaseDeferrals ?? [])].filter(([, entry]) =>"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 1158,
+        "toLine": 1165,
+        "text": "    if (v2Attack) { row.requestId = wireCommand.requestId; client.pendingAttackEvidence.requestId = wireCommand.requestId; }\n    client.send(wireCommand);\n    if (v2Attack) row.attackRequestSent = true;\n    if (native && kind === 'attack') {\n      rememberCombatTarget(client, plan.targetEntity);\n      if (!v2Attack) client.combatPursuit.attackSent = true;\n    }\n    if (native && kind === 'attack') recordHuntAttempt(client, owner, row.targetPosition);"
+      },
+      {
+        "file": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "commit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+        "fromLine": 1173,
+        "toLine": 1188,
+        "text": "      const rejection = own.find(event => event.type === 'error');\n      if (rejection) { const error = new Error('Public gameplay command rejected'); error.code = 'PUBLIC_COMMAND_REJECTED'; throw error; }\n      if (kind === 'attack') {\n        if (v2Attack) {\n          const result = matchAttackResultV2(own, wireCommand);\n          if (!result) return null;\n          row.attackResult = result.result;\n          if (['unavailable', 'unknown'].includes(result.result)) {\n            const error = new Error(`attackV2 ${result.result}: ${result.code}; no retry`);\n            error.terminalAttackResult = true; throw error;\n          }\n          if (result.result === 'notLaunched') return { ...result, notLaunched: true };\n          if (native && client.combatPursuit?.objectId === command.objectId) client.combatPursuit.attackSent = true;\n        }\n        return verifiedCombatHit(own, fresh(plan.observer, observerCursor, sentAt)\n          .filter(event => !v2Attack || event.monotonicMs <= sentAt + 900), command.objectId, owner.objectId, plan.peerAttackerId);"
+      }
+    ],
+    "defect": "rememberCombatTarget only rebuilds on objectId/map changes. A launched typed result marks attackSent=true, and subsequent recordCombatPursuitMovement returns immediately while it remains true. Thus continuing to chase the same retained target after a strike does not enforce the existing segment budgets."
+  },
+  "observedTargetAttacks": [
+    {
+      "line": 8548,
+      "at": 1792891487586,
+      "phase": "stage-10",
+      "requestId": "39",
+      "owner": {
+        "objectId": 1000,
+        "x": 286,
+        "y": 668,
+        "dead": false,
+        "hp": 22,
+        "maxHp": 24
+      },
+      "target": {
+        "objectId": 206715,
+        "x": 287,
+        "y": 669,
+        "dead": false,
+        "hp": 25,
+        "maxHp": 25
+      },
+      "outcome": "success"
+    },
+    {
+      "line": 9478,
+      "at": 1792891507017,
+      "phase": "stage-10",
+      "requestId": "40",
+      "owner": {
+        "objectId": 1000,
+        "x": 275,
+        "y": 656,
+        "dead": false,
+        "hp": 24,
+        "maxHp": 24
+      },
+      "target": {
+        "objectId": 206715,
+        "x": 275,
+        "y": 655,
+        "dead": false,
+        "hp": 21,
+        "maxHp": 25
+      },
+      "outcome": "success"
+    },
+    {
+      "line": 11499,
+      "at": 1792891548953,
+      "phase": "stage-10",
+      "requestId": "41",
+      "owner": {
+        "objectId": 1000,
+        "x": 275,
+        "y": 656,
+        "dead": false,
+        "hp": 24,
+        "maxHp": 24
+      },
+      "target": {
+        "objectId": 206715,
+        "x": 275,
+        "y": 655,
+        "dead": false,
+        "hp": 21,
+        "maxHp": 25
+      },
+      "outcome": "success"
+    }
+  ],
+  "betweenRequest40And41": {
+    "targetId": 206715,
+    "firstSuccessfulAttackSentAtMs": 1792891507017,
+    "nextSuccessfulAttackSentAtMs": 1792891548953,
+    "attackSentGapMs": 41936,
+    "successfulChaseMoves": 46,
+    "firstMovementAtMs": 1792891509223,
+    "lastMovementAtMs": 1792891547458,
+    "firstToLastMovementSpanMs": 38235,
+    "walks": 37,
+    "runs": 9,
+    "rows": [
+      {
+        "rawLine": 9578,
+        "at": 1792891509223,
+        "kind": "walk",
+        "sentAtMs": 487486,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 276,
+          "y": 656
+        },
+        "actual": {
+          "x": 276,
+          "y": 656
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9610,
+        "at": 1792891509970,
+        "kind": "walk",
+        "sentAtMs": 488228.9525,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 275,
+          "y": 656
+        },
+        "actual": {
+          "x": 275,
+          "y": 656
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9649,
+        "at": 1792891510722,
+        "kind": "run",
+        "sentAtMs": 488980.4091,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 275,
+          "y": 658
+        },
+        "actual": {
+          "x": 275,
+          "y": 658
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9685,
+        "at": 1792891511467,
+        "kind": "walk",
+        "sentAtMs": 489725.1598,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 276,
+          "y": 658
+        },
+        "actual": {
+          "x": 276,
+          "y": 658
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9724,
+        "at": 1792891512197,
+        "kind": "run",
+        "sentAtMs": 490465.9321,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 278,
+          "y": 660
+        },
+        "actual": {
+          "x": 278,
+          "y": 660
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9762,
+        "at": 1792891512956,
+        "kind": "walk",
+        "sentAtMs": 491214.6515,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 279,
+          "y": 661
+        },
+        "actual": {
+          "x": 279,
+          "y": 661
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9794,
+        "at": 1792891513708,
+        "kind": "walk",
+        "sentAtMs": 491966.607,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 280,
+          "y": 662
+        },
+        "actual": {
+          "x": 280,
+          "y": 662
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9829,
+        "at": 1792891514485,
+        "kind": "walk",
+        "sentAtMs": 492743.0978,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 663
+        },
+        "actual": {
+          "x": 281,
+          "y": 663
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9890,
+        "at": 1792891515979,
+        "kind": "walk",
+        "sentAtMs": 494237.5246,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 282,
+          "y": 664
+        },
+        "actual": {
+          "x": 282,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9923,
+        "at": 1792891516715,
+        "kind": "walk",
+        "sentAtMs": 494983.9855,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 665
+        },
+        "actual": {
+          "x": 283,
+          "y": 665
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 9994,
+        "at": 1792891518224,
+        "kind": "walk",
+        "sentAtMs": 496483.7898,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 284,
+          "y": 664
+        },
+        "actual": {
+          "x": 284,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10029,
+        "at": 1792891518969,
+        "kind": "walk",
+        "sentAtMs": 497227.9158,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 664
+        },
+        "actual": {
+          "x": 283,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10065,
+        "at": 1792891519717,
+        "kind": "walk",
+        "sentAtMs": 497975.1004,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 663
+        },
+        "actual": {
+          "x": 283,
+          "y": 663
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10100,
+        "at": 1792891520465,
+        "kind": "walk",
+        "sentAtMs": 498723.5835,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 664
+        },
+        "actual": {
+          "x": 283,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10137,
+        "at": 1792891521213,
+        "kind": "run",
+        "sentAtMs": 499472.8414,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 664
+        },
+        "actual": {
+          "x": 281,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10175,
+        "at": 1792891521958,
+        "kind": "walk",
+        "sentAtMs": 500220.2467,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 663
+        },
+        "actual": {
+          "x": 281,
+          "y": 663
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10216,
+        "at": 1792891522709,
+        "kind": "walk",
+        "sentAtMs": 500968.1613,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 664
+        },
+        "actual": {
+          "x": 281,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10256,
+        "at": 1792891523462,
+        "kind": "walk",
+        "sentAtMs": 501721.3592,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 282,
+          "y": 664
+        },
+        "actual": {
+          "x": 282,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10295,
+        "at": 1792891524214,
+        "kind": "walk",
+        "sentAtMs": 502474.1824,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 664
+        },
+        "actual": {
+          "x": 283,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10333,
+        "at": 1792891524963,
+        "kind": "run",
+        "sentAtMs": 503221.1441,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 664
+        },
+        "actual": {
+          "x": 281,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10372,
+        "at": 1792891525716,
+        "kind": "run",
+        "sentAtMs": 503975.1943,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 662
+        },
+        "actual": {
+          "x": 281,
+          "y": 662
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10445,
+        "at": 1792891527214,
+        "kind": "walk",
+        "sentAtMs": 505477.7604,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 282,
+          "y": 662
+        },
+        "actual": {
+          "x": 282,
+          "y": 662
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10516,
+        "at": 1792891528712,
+        "kind": "walk",
+        "sentAtMs": 506971.0265,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 662
+        },
+        "actual": {
+          "x": 281,
+          "y": 662
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10549,
+        "at": 1792891529455,
+        "kind": "run",
+        "sentAtMs": 507715.031,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 664
+        },
+        "actual": {
+          "x": 281,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10587,
+        "at": 1792891530205,
+        "kind": "walk",
+        "sentAtMs": 508463.752,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 282,
+          "y": 664
+        },
+        "actual": {
+          "x": 282,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10623,
+        "at": 1792891530962,
+        "kind": "run",
+        "sentAtMs": 509220.151,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 284,
+          "y": 666
+        },
+        "actual": {
+          "x": 284,
+          "y": 666
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10662,
+        "at": 1792891531711,
+        "kind": "walk",
+        "sentAtMs": 509970.1205,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 285,
+          "y": 667
+        },
+        "actual": {
+          "x": 285,
+          "y": 667
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10702,
+        "at": 1792891532457,
+        "kind": "walk",
+        "sentAtMs": 510716.7142,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 286,
+          "y": 668
+        },
+        "actual": {
+          "x": 286,
+          "y": 668
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10734,
+        "at": 1792891533205,
+        "kind": "walk",
+        "sentAtMs": 511464.9273,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 287,
+          "y": 667
+        },
+        "actual": {
+          "x": 287,
+          "y": 667
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10804,
+        "at": 1792891534706,
+        "kind": "walk",
+        "sentAtMs": 512964.4088,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 286,
+          "y": 667
+        },
+        "actual": {
+          "x": 286,
+          "y": 667
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10839,
+        "at": 1792891535455,
+        "kind": "run",
+        "sentAtMs": 513712.7435,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 284,
+          "y": 667
+        },
+        "actual": {
+          "x": 284,
+          "y": 667
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10869,
+        "at": 1792891536208,
+        "kind": "run",
+        "sentAtMs": 514466.7302,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 284,
+          "y": 665
+        },
+        "actual": {
+          "x": 284,
+          "y": 665
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10900,
+        "at": 1792891536955,
+        "kind": "walk",
+        "sentAtMs": 515213.0433,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 284,
+          "y": 664
+        },
+        "actual": {
+          "x": 284,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10935,
+        "at": 1792891537708,
+        "kind": "walk",
+        "sentAtMs": 515966.367,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 664
+        },
+        "actual": {
+          "x": 283,
+          "y": 664
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 10981,
+        "at": 1792891538456,
+        "kind": "walk",
+        "sentAtMs": 516714.0664,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 283,
+          "y": 663
+        },
+        "actual": {
+          "x": 283,
+          "y": 663
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11054,
+        "at": 1792891539982,
+        "kind": "walk",
+        "sentAtMs": 518241.3556,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 282,
+          "y": 663
+        },
+        "actual": {
+          "x": 282,
+          "y": 663
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11094,
+        "at": 1792891540732,
+        "kind": "walk",
+        "sentAtMs": 518990.6573,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 281,
+          "y": 662
+        },
+        "actual": {
+          "x": 281,
+          "y": 662
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11131,
+        "at": 1792891541454,
+        "kind": "walk",
+        "sentAtMs": 519713.0801,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 280,
+          "y": 661
+        },
+        "actual": {
+          "x": 280,
+          "y": 661
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11163,
+        "at": 1792891542232,
+        "kind": "walk",
+        "sentAtMs": 520490.414,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 280,
+          "y": 660
+        },
+        "actual": {
+          "x": 280,
+          "y": 660
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11206,
+        "at": 1792891542979,
+        "kind": "walk",
+        "sentAtMs": 521238.529,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 279,
+          "y": 659
+        },
+        "actual": {
+          "x": 279,
+          "y": 659
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11238,
+        "at": 1792891543728,
+        "kind": "walk",
+        "sentAtMs": 521987.446,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 278,
+          "y": 659
+        },
+        "actual": {
+          "x": 278,
+          "y": 659
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11276,
+        "at": 1792891544472,
+        "kind": "walk",
+        "sentAtMs": 522730.0527,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 278,
+          "y": 658
+        },
+        "actual": {
+          "x": 278,
+          "y": 658
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11310,
+        "at": 1792891545218,
+        "kind": "walk",
+        "sentAtMs": 523477.7009,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 277,
+          "y": 657
+        },
+        "actual": {
+          "x": 277,
+          "y": 657
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11351,
+        "at": 1792891545963,
+        "kind": "walk",
+        "sentAtMs": 524221.3637,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 276,
+          "y": 657
+        },
+        "actual": {
+          "x": 276,
+          "y": 657
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11391,
+        "at": 1792891546712,
+        "kind": "walk",
+        "sentAtMs": 524972.1441,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 276,
+          "y": 656
+        },
+        "actual": {
+          "x": 276,
+          "y": 656
+        },
+        "status": "success"
+      },
+      {
+        "rawLine": 11429,
+        "at": 1792891547458,
+        "kind": "walk",
+        "sentAtMs": 525715.8016,
+        "chaseTargetId": 206715,
+        "plannedTarget": {
+          "x": 275,
+          "y": 656
+        },
+        "actual": {
+          "x": 275,
+          "y": 656
+        },
+        "status": "success"
+      }
+    ]
+  },
+  "originalFailedWindow": {
+    "startedAtMs": 1792891488618,
+    "endedAtMs": 1792891548654,
+    "seconds": 60.036,
+    "sameTargetMoves": 68,
+    "passed": false,
+    "firstTargetHitBeforeWindow": {
+      "line": 8548,
+      "at": 1792891487586,
+      "phase": "stage-10",
+      "requestId": "39",
+      "owner": {
+        "objectId": 1000,
+        "x": 286,
+        "y": 668,
+        "dead": false,
+        "hp": 22,
+        "maxHp": 24
+      },
+      "target": {
+        "objectId": 206715,
+        "x": 287,
+        "y": 669,
+        "dead": false,
+        "hp": 25,
+        "maxHp": 25
+      },
+      "outcome": "success"
+    },
+    "singleWithinWindowTargetHit": [
+      {
+        "line": 9478,
+        "at": 1792891507017,
+        "phase": "stage-10",
+        "requestId": "40",
+        "owner": {
+          "objectId": 1000,
+          "x": 275,
+          "y": 656,
+          "dead": false,
+          "hp": 24,
+          "maxHp": 24
+        },
+        "target": {
+          "objectId": 206715,
+          "x": 275,
+          "y": 655,
+          "dead": false,
+          "hp": 21,
+          "maxHp": 25
+        },
+        "outcome": "success"
+      }
+    ]
+  },
+  "loggedDeferrals": {
+    "combatChaseDeferredCount": 0,
+    "source": "Original complete JSONL census already preserved in selected-events-v1.json"
+  },
+  "limits": [
+    "The source defect is deterministic under a retained same-target pursuit; the raw evidence is strongly consistent with that path.",
+    "Internal pursuit objects and target visibility were not logged for every decision. A transient AOI loss and unlogged pursuit rebuild cannot be excluded.",
+    "No actor map transition or native resume appears in this selected interval; temporary visibility changes are a separate limitation.",
+    "The observed 46 successful movements span 38.235 seconds and do not prove the old internal counter values, because that counter was not recorded.",
+    "This addendum preserves the original failed window and does not relax 40/30/route-loop/nonprogress, damage, cadence or acceptance thresholds."
+  ]
+}

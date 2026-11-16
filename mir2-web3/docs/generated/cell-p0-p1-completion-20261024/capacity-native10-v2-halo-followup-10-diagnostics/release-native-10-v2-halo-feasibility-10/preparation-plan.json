@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T02:36:07.546Z",
+  "state": "final-inputs-bound-pending-independent-review-and-seal",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "binarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "backendRebuildRequired": false,
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "driverSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-survival-pursuit-witness-driver-frozen-v1.json",
+    "bytes": 28714,
+    "sha256": "4bac2cca1a8cb6eca3432ebc22add873456ce38a7f33b81f39998d88befe3063"
+  },
+  "canonicalScene100": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-100-v1.json",
+    "bytes": 5844,
+    "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+  },
+  "canonicalScene10": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-10-v1.json",
+    "bytes": 804,
+    "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+  },
+  "staticValidation": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v3.json",
+  "staticReadiness": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v3.json",
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "policyUnchanged": true,
+  "resourceBytesUnchanged": true,
+  "canonicalSceneBytesUnchanged": true,
+  "full16HistoricalBackendGateRetained": true,
+  "newFormalRequiresProbe10": true,
+  "sourceConfigNotYet": true,
+  "finalFreezePending": true,
+  "currentSourceGuardExecuted": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "scripts": [
+    "backend-driver-source-guard.mjs",
+    "collect-public.mjs",
+    "driver-evidence-contract.mjs",
+    "driver-report-contract.mjs",
+    "initialize-private.ps1",
+    "input-lib.mjs",
+    "measured-phase-contract.mjs",
+    "monitor-owned.mjs",
+    "prepare-inputs.mjs",
+    "recover-drained-owned.ps1",
+    "request-stop.mjs",
+    "run-owned.mjs",
+    "scene-contract.mjs",
+    "slow-stage-public.mjs",
+    "slow-stage-public.test.mjs",
+    "slow-stage-row-contract.mjs",
+    "socket-build-source-lib.mjs",
+    "verify-full16-gate.mjs",
+    "verify-public.mjs"
+  ],
+  "checks": [
+    {
+      "file": "backend-driver-source-guard.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "collect-public.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "driver-evidence-contract.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "driver-report-contract.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "initialize-private.ps1",
+      "syntax": "Copied exact previously parsed PowerShell source; final AST parse pending"
+    },
+    {
+      "file": "input-lib.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "measured-phase-contract.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "monitor-owned.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "prepare-inputs.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "recover-drained-owned.ps1",
+      "syntax": "Copied exact previously parsed PowerShell source; final AST parse pending"
+    },
+    {
+      "file": "request-stop.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "run-owned.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "scene-contract.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "slow-stage-public.test.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "socket-build-source-lib.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "verify-full16-gate.mjs",
+      "syntax": "node --check passed"
+    },
+    {
+      "file": "verify-public.mjs",
+      "syntax": "node --check passed"
+    }
+  ],
+  "driverCommitAndManifestRawPinPending": true,
+  "observedPreFinalDriverAggregate": "e26e612b9e6493d5dc7d8340c5aa5ae4a3af507bbe812303bbdaa918d1dcf000",
+  "fullRegressionStatus": "173/175 on pre-final source failed; final fixture-only correction and full rerun pending",
+  "candidateAggregatePendingFullV2": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "fullV2ResultPending": true,
+  "scope": "Final native survival/pursuit/witness driver and unchanged canonical v1 halo scene with actual staticv3 rebinding; no accounts, locks or runtime prepared."
+}

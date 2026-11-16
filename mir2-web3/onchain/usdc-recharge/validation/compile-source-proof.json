@@ -1,0 +1,33 @@
+{
+  "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/onchain/usdc-recharge/src/mir2_usdc_recharge",
+  "target": "C:/mir2-build/usdc-recharge-20261029/compile-package",
+  "manifestOnlyLocalDependencyPaths": true,
+  "frameworkRevision": "3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33",
+  "dependencyProof": "C:/mir2-build/procurement-tools-20261028/dependency-source-proof.json",
+  "files": [
+    {
+      "path": "sources/recharge.move",
+      "sha256": "f02e2928b2751c03d87d81af701948d116d76dfde4b35b5471a164b05f33830f"
+    }
+  ],
+  "whitespaceRefresh": {
+    "verifiedAtUtc": "2026-10-28T21:40:20.588Z",
+    "previousRawSourceSha256": "838dc10c465d6d4c37ab8d75e476e5617320d0ef5f8986af3b915d58d43cb9ec",
+    "currentRawSourceSha256": "f02e2928b2751c03d87d81af701948d116d76dfde4b35b5471a164b05f33830f",
+    "change": "Removed exactly one final LF byte; every preceding source byte is unchanged.",
+    "compiledModuleSha256Before": "ab78b64920b248a59f8983dbab7ce0747eadb713dc3ea3398b31cb63add091d5",
+    "compiledModuleSha256After": "ab78b64920b248a59f8983dbab7ce0747eadb713dc3ea3398b31cb63add091d5",
+    "compiledModuleUnchanged": true,
+    "compilerVersion": "sui 1.68.1-3c0f387ebb40-dirty",
+    "compilerSha256": "62e27004b8414e829c650ca35b239c24a5d2a9e770d2dc6b611915c1d4fdc2d3",
+    "testsPassed": 14,
+    "testsFailed": 0,
+    "buildPassed": true,
+    "commands": [
+      "sui.exe move test --path C:/mir2-build/usdc-recharge-20261029/compile-package",
+      "sui.exe move build --path C:/mir2-build/usdc-recharge-20261029/compile-package"
+    ],
+    "keylessConfig": "C:/mir2-build/procurement-tools-20261028/compile-client",
+    "newChainOperations": 0
+  }
+}

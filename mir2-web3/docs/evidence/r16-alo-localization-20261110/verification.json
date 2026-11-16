@@ -1,0 +1,605 @@
+{
+  "schema": "mir2.r16.web-alo-localization-verification.v1",
+  "ordinaryGamePath": "/game",
+  "runtime": "bevy-0cd68510886134e0",
+  "gatewaySha256": "72d53d80e3b2a664ae01bfc38b96b997a86c1b184f8dc7c148e40b76e4572d62",
+  "frozenBaseline": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+  "companionInputs": {
+    "apps/web/lib/r16-companion-client.ts": "108ae5fa740d7f22b1e0fed1194ad2c3bf9c8a07c11c9d63842d31c11cd45ec5",
+    "apps/web/lib/r16-companion-localization.ts": "46bb0ef704e8a15de07e46801be6fed88974d04ed1c93c0181bd8b44222348d5",
+    "apps/web/app/components/r16-companion-window.tsx": "0bc38b7f103ae108c6e04e9d2ee4cac274cf7848528b828d63f4f84d129a301a",
+    "apps/web/scripts/test-r16-companion-window.mjs": "f7a04475e91a97a5e934e8b8b09242df125b86ba973e443f0c556d63bc52e168",
+    "apps/web/app/page.tsx": "17aa7996973bbbcafc07a2c428fc855902ebb76da2a5836832fed051f642edf2"
+  },
+  "integratedPageSha256": "8ebaf11873a73c7598618e1341821fc01eccc8e660043aafd0655ebb75a5c2d6",
+  "integratedWindowTestsSha256": "f7a04475e91a97a5e934e8b8b09242df125b86ba973e443f0c556d63bc52e168",
+  "chromiumReceiptSha256": "3f8b35d6defbfb55bcb89de8236ffde20d7bec7427e62753fb60db61929a62e8",
+  "scope": {
+    "production": false,
+    "nativeWindow": false,
+    "modelProvider": "rules"
+  },
+  "codeChecks": {
+    "nodeTestsPassed": 64,
+    "webTypesPassed": true
+  },
+  "coverage": [
+    {
+      "code": "zh-CN",
+      "keys": 216,
+      "total": 216,
+      "englishFallback": []
+    },
+    {
+      "code": "zh-TW",
+      "keys": 216,
+      "total": 216,
+      "englishFallback": []
+    },
+    {
+      "code": "en",
+      "keys": 216,
+      "total": 216,
+      "englishFallback": []
+    },
+    {
+      "code": "pt-BR",
+      "keys": 204,
+      "total": 216,
+      "englishFallback": [
+        "teachNote",
+        "historyExport",
+        "teachingScope",
+        "instructionScope",
+        "lifeGift",
+        "reasonMissing",
+        "trialNote",
+        "trialUnavailable",
+        "costValues",
+        "costRuntime",
+        "costOffer",
+        "costService"
+      ]
+    },
+    {
+      "code": "ru",
+      "keys": 204,
+      "total": 216,
+      "englishFallback": [
+        "teachNote",
+        "historyExport",
+        "teachingScope",
+        "instructionScope",
+        "lifeGift",
+        "reasonMissing",
+        "trialNote",
+        "trialUnavailable",
+        "costValues",
+        "costRuntime",
+        "costOffer",
+        "costService"
+      ]
+    },
+    {
+      "code": "hi",
+      "keys": 204,
+      "total": 216,
+      "englishFallback": [
+        "teachNote",
+        "historyExport",
+        "teachingScope",
+        "instructionScope",
+        "lifeGift",
+        "reasonMissing",
+        "trialNote",
+        "trialUnavailable",
+        "costValues",
+        "costRuntime",
+        "costOffer",
+        "costService"
+      ]
+    },
+    {
+      "code": "id",
+      "keys": 204,
+      "total": 216,
+      "englishFallback": [
+        "teachNote",
+        "historyExport",
+        "teachingScope",
+        "instructionScope",
+        "lifeGift",
+        "reasonMissing",
+        "trialNote",
+        "trialUnavailable",
+        "costValues",
+        "costRuntime",
+        "costOffer",
+        "costService"
+      ]
+    },
+    {
+      "code": "vi",
+      "keys": 204,
+      "total": 216,
+      "englishFallback": [
+        "teachNote",
+        "historyExport",
+        "teachingScope",
+        "instructionScope",
+        "lifeGift",
+        "reasonMissing",
+        "trialNote",
+        "trialUnavailable",
+        "costValues",
+        "costRuntime",
+        "costOffer",
+        "costService"
+      ]
+    },
+    {
+      "code": "th",
+      "keys": 204,
+      "total": 216,
+      "englishFallback": [
+        "teachNote",
+        "historyExport",
+        "teachingScope",
+        "instructionScope",
+        "lifeGift",
+        "reasonMissing",
+        "trialNote",
+        "trialUnavailable",
+        "costValues",
+        "costRuntime",
+        "costOffer",
+        "costService"
+      ]
+    },
+    {
+      "code": "ar",
+      "keys": 216,
+      "total": 216,
+      "englishFallback": []
+    }
+  ],
+  "operations": [
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "teach",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    }
+  ],
+  "live": [
+    {
+      "code": "en",
+      "entry": "Companion",
+      "direction": "ltr",
+      "fontFamily": "\"Noto Sans\", \"Noto Sans SC\", sans-serif",
+      "modelCalls": 0,
+      "normalLogout": true,
+      "checkedViews": [
+        {
+          "name": "growth",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "trial",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "memory",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "actions",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "costs",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "instruction",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "supply permission",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "life",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        }
+      ]
+    },
+    {
+      "code": "zh-CN",
+      "entry": "伙伴 Companion",
+      "direction": "ltr",
+      "fontFamily": "\"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "modelCalls": 0,
+      "normalLogout": true,
+      "checkedViews": [
+        {
+          "name": "growth",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "trial",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "memory",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "actions",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "costs",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "instruction",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "supply permission",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "life",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        }
+      ]
+    },
+    {
+      "code": "ar",
+      "entry": "الرفيق",
+      "direction": "rtl",
+      "fontFamily": "\"Noto Sans Arabic\", \"Noto Sans SC\", sans-serif",
+      "modelCalls": 0,
+      "normalLogout": true,
+      "checkedViews": [
+        {
+          "name": "growth",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "trial",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "memory",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "actions",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "costs",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "instruction",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "supply permission",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "name": "life",
+          "panelRect": [
+            268,
+            110,
+            744,
+            644
+          ],
+          "outside": 0,
+          "clipped": 0
+        }
+      ]
+    }
+  ],
+  "fixedButtonMatrix": [
+    {
+      "code": "zh-CN",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "zh-TW",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "en",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "pt-BR",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "ru",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "hi",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "id",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "vi",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "th",
+      "total": 27,
+      "clipped": []
+    },
+    {
+      "code": "ar",
+      "total": 27,
+      "clipped": []
+    }
+  ],
+  "fontAndPermissionLayout": {
+    "languages": 10,
+    "fonts": "Loaded local Windows R16 fonts",
+    "fixedButtonLabels": 270,
+    "clippedLabels": 0,
+    "permissionTexts": 30,
+    "clippedPermissions": 0
+  },
+  "previousLayout": [
+    {
+      "receiptSha256": "4a1ce161d77941fa29aa026f89a51390c25859eb9c82f8e2120d53045f5b202f",
+      "functionalResult": "pass",
+      "liveLayout": [
+        {
+          "code": "en",
+          "outside": 0,
+          "clipped": 25
+        },
+        {
+          "code": "zh-CN",
+          "outside": 0,
+          "clipped": 8
+        },
+        {
+          "code": "ar",
+          "outside": 0,
+          "clipped": 20
+        }
+      ],
+      "fixedLabelsClipped": null
+    },
+    {
+      "receiptSha256": "aae1cc05922ef3c3d89cefd3e848e7dc7cba2840232f07334005a8b9e1cc0cf7",
+      "functionalResult": "pass",
+      "liveLayout": [
+        {
+          "code": "en",
+          "outside": 0,
+          "clipped": 9
+        },
+        {
+          "code": "zh-CN",
+          "outside": 0,
+          "clipped": 0
+        },
+        {
+          "code": "ar",
+          "outside": 0,
+          "clipped": 0
+        }
+      ],
+      "fixedLabelsClipped": 27
+    }
+  ],
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "screenshots": [
+    {
+      "file": "en-growth.png",
+      "sha256": "ccad49acaa3fa34a8cad3fbcc2538d32c537312af31d50952357660e3512daf4"
+    },
+    {
+      "file": "zh-CN-memory.png",
+      "sha256": "76ffedf94486fbc934405c71ce620effaace67812482c0eb7d30b8567fb932d5"
+    },
+    {
+      "file": "ar-supply-permission.png",
+      "sha256": "ecd0f2298125d701f626c94e555cde02c5d7b934f752e6bf66fd13af407a63e6"
+    }
+  ]
+}

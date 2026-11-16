@@ -1,0 +1,328 @@
+{
+  "schema": "mir2.native-transfer-original-final-live-snapshot.v1",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "workflowRunId": "41093332871",
+  "observedAtUtc": "2026-10-30T18:03:59.959375+00:00",
+  "releaseAndFirstRecoveryPreviouslyPassed": true,
+  "snapshotReadOnlyCompleted": true,
+  "gatewaySourceMatches": true,
+  "workerSourceMatches": true,
+  "sameImmutableRuntime": {
+    "gateway": {
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "pid": 1177999,
+      "executable": "/opt/mir2-playtest/releases/868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3/mir2-gateway",
+      "binarySha256": "1b9acad145efd34d26b21a9e3659712921405479bb4b2782d1573f7cfa90b203",
+      "arguments": [],
+      "publicRuntime": {
+        "MIR2_DEPLOY_REVISION": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+        "MIR2_SUI_USDC_ENABLED": "1",
+        "MIR2_SUI_USDC_NODE": "/opt/mir2-playtest/releases/868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3/runtime/node",
+        "MIR2_SUI_USDC_DRIVER": "/opt/mir2-playtest/releases/868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3/usdc-recharge/service/cli.mjs",
+        "MIR2_SUI_USDC_DIRECT_ENABLED": "1"
+      },
+      "usdcNodeDriverRequired": true
+    },
+    "worker": {
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "pid": 1178052,
+      "executable": "/opt/mir2-playtest/releases/868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3/promotion_worker",
+      "binarySha256": "dfd4a0fc6b33e2aa9cd494574d80148ac7df5ec3539cfba3630966168830aca8",
+      "arguments": [
+        "--poll-ms",
+        "10000",
+        "--limit",
+        "50"
+      ],
+      "publicRuntime": {
+        "MIR2_SUI_USDC_DIRECT_ENABLED": "1"
+      },
+      "usdcNodeDriverRequired": false
+    }
+  },
+  "authenticatedNodeRuntimeMetadata": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "directEnabled": true,
+  "suiUsdcEnabled": true,
+  "gatewayDriverPathsMatchImmutableSource": true,
+  "chainNetwork": "testnet",
+  "chainIdentifier": "4c78adac",
+  "driverSha256": "855348ec1f2851b41a447cf0646654cde19e9235a32d824a48321b9162e73e2a",
+  "nodeBinarySha256": "e32e2d16081cf644f88392934288086e7662529d0d43277c34f7aad2207cfafb",
+  "capacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "counts": {
+    "accounts": 125,
+    "characters": 38,
+    "character_saves": 38,
+    "schema_migrations": 27
+  },
+  "currentOrderState": "applied",
+  "currentAppliedCredits": 100,
+  "currentTargetMatchesFirstVerifiedRecoveryReceipt": true,
+  "currentNetSavedCreditDeltaFromFirstBefore": 100,
+  "permanentClaims": {
+    "digestClaims": 1,
+    "boundOrderClaims": 1,
+    "closedPayerWindows": 1
+  },
+  "firstRecoveryStrictGuard": {
+    "immutableOrderTermsPreserved": true,
+    "existingFieldsPreserved": true,
+    "exactCreditDelta": true,
+    "credits": 100
+  },
+  "firstRecoveryStrictNormalizedProjectionGuard": {
+    "stateCreditMatchesAuthoritative": true,
+    "saveVersionMatchesAuthoritative": true,
+    "creditDelta": 100,
+    "saveVersionDelta": 3,
+    "itemsCount": 4,
+    "itemsBusinessAndUnknownFieldsPreserved": true,
+    "sameTransactionTimesMonotonic": true,
+    "emptyDerivedBusinessViewsPreserved": true
+  },
+  "offlineMigrationStrictRetentionPreviouslyPassed": true,
+  "liveWholeDatabaseIdenticalToBeforeRecovery": false,
+  "allLiveTableDriftsSinceVerifiedBeforeRecovery": {
+    "_billing": {
+      "before": {
+        "count": 6,
+        "sha256": "be89910625bb32c10766b1fb8d05f3bbff319d5c0761ba5eb5a8586a450383ab"
+      },
+      "after": {
+        "count": 6,
+        "sha256": "823a733c0c9d61158163d8552dd96ce5ceae310d04fe0a9bd82e89888c2e030a"
+      }
+    },
+    "_usdcOrders": {
+      "before": {
+        "count": 2,
+        "sha256": "a5383c939e349aff6a0e73f285a992df36e08020d72148523ced32446eb2a846"
+      },
+      "after": {
+        "count": 2,
+        "sha256": "941d0d231b4a389c3d7bc9f5a14f12820b0ef0b66afc5949d55ab00467846e8d"
+      }
+    },
+    "accounts": {
+      "before": {
+        "count": 125,
+        "sha256": "24151975702ca2bfb10ba8bd123f2b7751455da47ef41d1d6d62b93df20b6a68"
+      },
+      "after": {
+        "count": 125,
+        "sha256": "c2ef1ae796ac0d78d64d5ea93f42af4d37c0a0ad16164288c1ecd1ed00b3846f"
+      }
+    },
+    "character_items": {
+      "before": {
+        "count": 223,
+        "sha256": "e7445b814868d14c882a74aebcb2736cd9ea053bb5494949bccafacb59dc4ae1"
+      },
+      "after": {
+        "count": 223,
+        "sha256": "1b1c82fea7be17499ff05e2796ae1dcbc7e325f41711a6dc567ae0648e6a8a6a"
+      }
+    },
+    "character_saves": {
+      "before": {
+        "count": 38,
+        "sha256": "dcef2cb03bb54acd898826479f421ff57417b86f079eacef91c636cae1792552"
+      },
+      "after": {
+        "count": 38,
+        "sha256": "4b44b9fbf9c28323411e368ee0da4a75f4f57c72542327dc0f9383fb5296c6cc"
+      }
+    },
+    "character_state": {
+      "before": {
+        "count": 38,
+        "sha256": "65806b908f16b743263740e01bda8a595f0e500c5f0cc8b139d41b628bed4cd4"
+      },
+      "after": {
+        "count": 38,
+        "sha256": "367dba687b7f4efa173cddf553f4a06339c56753fbe7f73482cab77afb8453bc"
+      }
+    },
+    "characters": {
+      "before": {
+        "count": 38,
+        "sha256": "af0361f96092c6c02559903bc11e5f9c9ae7ce5267d79c9cc98bd34078c872c2"
+      },
+      "after": {
+        "count": 38,
+        "sha256": "aef7c9bbfaff29ebdc5ca7c6396465937b89194a634ea236776e9279eedd8b41"
+      }
+    },
+    "promotion_audit_log": {
+      "before": {
+        "count": 105,
+        "sha256": "6375906a895727b82d937bd269800b0f07140a07efdd793d8b25d4022fef6c72"
+      },
+      "after": {
+        "count": 109,
+        "sha256": "571790a60bb22e8b8ba81ed0beabdf2aa296ca4f9186dd915272cc445381aaaf"
+      }
+    },
+    "promotion_outbox": {
+      "before": {
+        "count": 11,
+        "sha256": "4c459d714364e3ab38ee773b39f2483c896eae8d547c338c6e554dc332231bd3"
+      },
+      "after": {
+        "count": 11,
+        "sha256": "021ecb982b10f12a83a877b46a5a9895cee385b507333e935dca5c05d78dd2b7"
+      }
+    },
+    "shared_conquests": {
+      "before": {
+        "count": 1,
+        "sha256": "7804377efca2ae02d07da23471363bc1572c8084886ff52a1626b2ef3f648a62"
+      },
+      "after": {
+        "count": 1,
+        "sha256": "cdd1c6e02241fca2638617aa9522b3f8234349c4b5b7ab16fbe644d2a4dc0c61"
+      }
+    },
+    "shared_guild_clock": {
+      "before": {
+        "count": 1,
+        "sha256": "9972f0f78fd5369e0991dfcb8f4c7161118ec4c9240e9e5170816b99ada43ac7"
+      },
+      "after": {
+        "count": 1,
+        "sha256": "89ed7048c41b8b7e68c97c6cf1d54ac0928bb7cb5f0c6de6ad53ef4d7c6a3679"
+      }
+    },
+    "sui_usdc_payer_windows": {
+      "before": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "after": {
+        "count": 1,
+        "sha256": "baac8c2ff1af30f9cf36407fc3b5a83aceb7e829c60ca4119150db3267f7f167"
+      }
+    },
+    "sui_usdc_transaction_claims": {
+      "before": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "after": {
+        "count": 1,
+        "sha256": "8fc7dbb8b5068f6a7df5855ee83c2954112dc69d1081ce11bd43b7483cddb493"
+      }
+    }
+  },
+  "preExistingAuditPKRows": {
+    "before": {
+      "count": 93,
+      "sha256": "1afc2b2ef786c4bc04f16b546022b9a30fc69167e7f031aca66cba60d5db2b20"
+    },
+    "current": {
+      "count": 93,
+      "sha256": "1afc2b2ef786c4bc04f16b546022b9a30fc69167e7f031aca66cba60d5db2b20"
+    },
+    "exactPreserved": true
+  },
+  "newAuditActions": [
+    {
+      "count": 16,
+      "action": "worker.internal_projection",
+      "last_at_ms": 1793383362550,
+      "first_at_ms": 1793381452873
+    }
+  ],
+  "currentOutboxEventStatusSummary": [
+    {
+      "count": 4,
+      "status": "completed",
+      "event_type": "admin.command",
+      "last_created_at_ms": 1793369484356,
+      "first_created_at_ms": 1793369484356
+    },
+    {
+      "count": 1,
+      "status": "completed",
+      "event_type": "attribution.candidate",
+      "last_created_at_ms": 1793374982094,
+      "first_created_at_ms": 1793374982094
+    },
+    {
+      "count": 1,
+      "status": "completed",
+      "event_type": "attribution.confirmed",
+      "last_created_at_ms": 1793374987062,
+      "first_created_at_ms": 1793374987062
+    },
+    {
+      "count": 1,
+      "status": "completed",
+      "event_type": "leader.test_wallet_enrolled",
+      "last_created_at_ms": 1793374894767,
+      "first_created_at_ms": 1793374894767
+    },
+    {
+      "count": 3,
+      "status": "failed",
+      "event_type": "payout.address.verified",
+      "last_created_at_ms": 1793374970485,
+      "first_created_at_ms": 1793372100306
+    },
+    {
+      "count": 1,
+      "status": "completed",
+      "event_type": "qualification.updated",
+      "last_created_at_ms": 1793374987062,
+      "first_created_at_ms": 1793374987062
+    }
+  ],
+  "outboxFieldLevelMetadataDeltaChecked": false,
+  "outboxLimitation": "Live worker can append/process outbox records. Current count/hash/status summaries are reported; no claim of frozen live outbox or field-level before/after equality is made.",
+  "runtimeClockBusinessComparisons": [
+    {
+      "passed": true,
+      "proof": {
+        "table": "shared_conquests",
+        "count": 1,
+        "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+        "metadataOnly": true
+      }
+    },
+    {
+      "passed": true,
+      "proof": {
+        "table": "shared_guild_clock",
+        "count": 1,
+        "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+        "metadataOnly": true
+      }
+    }
+  ],
+  "stripeOrderHistoryUnchanged": true,
+  "onlineBackupSha256": "b501df69eaf6273b0488f8ea8023300ddb5d1c455cd4d4b4585e4f638a4c16b1",
+  "offlineBackupSha256": "ed9963838a56ac5ab33f4fb92aab7327c4d29bc0024a4bfc44e44dfbc968a8a8",
+  "completeBackupsCloneAndDiagnosticDatabasesRetained": true,
+  "protectedStateUnchangedDuringSnapshot": true,
+  "originalOperatorInvokedThisVerification": false,
+  "serviceConfigurationOrDatabaseChangedByVerification": false,
+  "broadcastPerformed": false,
+  "dockerStarted": false,
+  "cloneRedisRetained": {
+    "unit": "mir2-usdc-native-868ef2d2b24d-redis.service",
+    "port": 6387,
+    "status": "active"
+  },
+  "initialVerifierCorrection": "Earlier verifier incorrectly required Node/driver/revision env on the promotion worker; it does not execute the USDC driver. Gateway paths and both binaries were correct; no service fix was made."
+}

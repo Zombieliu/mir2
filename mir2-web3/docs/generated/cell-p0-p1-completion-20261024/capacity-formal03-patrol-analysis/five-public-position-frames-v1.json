@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "projectedAt": "2026-10-24T20:57:49.030Z",
+  "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\recordings\\0-498020.jsonl",
+  "originalFileBytes": 40463458,
+  "originalFileModifiedAtMs": 1792873877624.8606,
+  "bounds": {
+    "minX": 249,
+    "maxX": 257,
+    "minY": 668,
+    "maxY": 676
+  },
+  "scope": "Exactly five selected public frame lines are JSON parsed. Binary seek reads headers and line-boundary blocks only for other frames; no other entity payloads are inspected or copied. Selected raw-line SHA/offset bind projections; the complete recording is neither copied nor hashed.",
+  "equivalenceLimitation": "Spectator merged world can include multiple sources/stale positions. These public frames are not the actor00 send-time AOI or complete navigation obstacle set, and cannot alone prove which entity blocked a plan.",
+  "bytesReadForBoundedSeeks": 9330688,
+  "headerProbes": 134,
+  "selectedPayloadFramesParsed": 5,
+  "frames": [
+    {
+      "walkAtMs": 1792873817398,
+      "targetAtMs": 1792873817390,
+      "originalFrame": {
+        "byteOffset": 31790100,
+        "bytesExcludingNewline": 25601,
+        "sha256": "834ac3fac16833dc1cda300a115545e60da32b6dac1a2752a7553a20b5e77e9c"
+      },
+      "capturedBeforeTargetByMs": 83,
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498020",
+        "sequence": 1148,
+        "capturedAtMs": 1792873817307,
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "digest": "dbbacf08a8b4d682bc47ed3567e7acd45cdecbf4003256c3a917416ae2af13f8"
+      },
+      "entities": [
+        {
+          "dead": false,
+          "hp": 18,
+          "kind": "selfPlayer",
+          "name": "Lc7785700",
+          "objectId": 1000,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785700",
+          "objectId": 50000,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785701",
+          "objectId": 50001,
+          "x": 256,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206639,
+          "x": 253,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206642,
+          "x": 253,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206648,
+          "x": 252,
+          "y": 672
+        }
+      ]
+    },
+    {
+      "walkAtMs": 1792873826390,
+      "targetAtMs": 1792873826380,
+      "originalFrame": {
+        "byteOffset": 32660018,
+        "bytesExcludingNewline": 25608,
+        "sha256": "bf715afc75d567bf3fe97ad9f6ace6a07855281e1dd837d9ec5956aaae739e59"
+      },
+      "capturedBeforeTargetByMs": 112,
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498020",
+        "sequence": 1182,
+        "capturedAtMs": 1792873826268,
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "digest": "0a13c0f3963fb127bc9a788b6d31d1c9314b5504b08b43e154bd4177de74c32f"
+      },
+      "entities": [
+        {
+          "dead": false,
+          "hp": 18,
+          "kind": "selfPlayer",
+          "name": "Lc7785700",
+          "objectId": 1000,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785700",
+          "objectId": 50000,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206639,
+          "x": 253,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206642,
+          "x": 254,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206648,
+          "x": 252,
+          "y": 672
+        }
+      ]
+    },
+    {
+      "walkAtMs": 1792873832410,
+      "targetAtMs": 1792873832400,
+      "originalFrame": {
+        "byteOffset": 33248805,
+        "bytesExcludingNewline": 25607,
+        "sha256": "4774578c4b76f40c3ef3b736a23c9d2e6a893af63187efa25b15146f4b0ad8f4"
+      },
+      "capturedBeforeTargetByMs": 66,
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498020",
+        "sequence": 1205,
+        "capturedAtMs": 1792873832334,
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "digest": "003e29ae5a7fb0b20285b22d2e8dc7f6bfa46983b62e741cdfec82aa67be063d"
+      },
+      "entities": [
+        {
+          "dead": false,
+          "hp": 18,
+          "kind": "selfPlayer",
+          "name": "Lc7785700",
+          "objectId": 1000,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785700",
+          "objectId": 50000,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785701",
+          "objectId": 50001,
+          "x": 256,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206639,
+          "x": 253,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206642,
+          "x": 254,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206648,
+          "x": 252,
+          "y": 672
+        }
+      ]
+    },
+    {
+      "walkAtMs": 1792873853390,
+      "targetAtMs": 1792873853380,
+      "originalFrame": {
+        "byteOffset": 35314587,
+        "bytesExcludingNewline": 45095,
+        "sha256": "d21096d94da573c63336cc0e3e2a6faab4cf88226f33379baf4fe3c3d815a1be"
+      },
+      "capturedBeforeTargetByMs": 205,
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498020",
+        "sequence": 1284,
+        "capturedAtMs": 1792873853175,
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "digest": "4035f611428fec07c763dae0ee693c1faf4660076ea9199b826fc5945190411a"
+      },
+      "entities": [
+        {
+          "dead": false,
+          "hp": 18,
+          "kind": "selfPlayer",
+          "name": "Lc7785700",
+          "objectId": 1000,
+          "x": 254,
+          "y": 673
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785700",
+          "objectId": 50000,
+          "x": 254,
+          "y": 673
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785701",
+          "objectId": 50001,
+          "x": 256,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206639,
+          "x": 252,
+          "y": 671
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206642,
+          "x": 254,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206648,
+          "x": 253,
+          "y": 673
+        }
+      ]
+    },
+    {
+      "walkAtMs": 1792873870655,
+      "targetAtMs": 1792873870645,
+      "originalFrame": {
+        "byteOffset": 38653965,
+        "bytesExcludingNewline": 57064,
+        "sha256": "79a4609718f7c085b7cc5d8efa6b43935120ac49bcb39a4cdd249299c1a66220"
+      },
+      "capturedBeforeTargetByMs": 81,
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498020",
+        "sequence": 1350,
+        "capturedAtMs": 1792873870564,
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "digest": "126fc27b7778aca0e8a0ac1573f5eb68e9f786f6fd6fbe5da0143c293e7a8bb7"
+      },
+      "entities": [
+        {
+          "dead": false,
+          "hp": 18,
+          "kind": "selfPlayer",
+          "name": "Lc7785700",
+          "objectId": 1000,
+          "x": 252,
+          "y": 673
+        },
+        {
+          "dead": false,
+          "hp": null,
+          "kind": "player",
+          "name": "Lc7785700",
+          "objectId": 50000,
+          "x": 252,
+          "y": 673
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206639,
+          "x": 252,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206642,
+          "x": 254,
+          "y": 672
+        },
+        {
+          "dead": false,
+          "hp": 20,
+          "kind": "monster",
+          "name": "Scarecrow",
+          "objectId": 206648,
+          "x": 253,
+          "y": 673
+        }
+      ]
+    }
+  ]
+}

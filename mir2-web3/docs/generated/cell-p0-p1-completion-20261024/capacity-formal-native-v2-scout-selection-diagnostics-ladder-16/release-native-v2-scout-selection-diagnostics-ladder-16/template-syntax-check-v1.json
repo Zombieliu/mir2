@@ -1,0 +1,559 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T02:12:41.470709+00:00",
+  "scope": "Actual syntax and PowerShell AST parsing only. No module evaluation, product regression, sourceguard, account, realm or independent ended verification. Formal16 remains PENDING actual independent ended20.",
+  "checks": [
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\backend-driver-source-guard.mjs",
+        "bytes": 2679,
+        "sha256": "beb01bc9f9811069d95771b010f36e101c459a3c2ae5418e622ccb3f675c7df2"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\backend-driver-source-guard.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\collect-public.mjs",
+        "bytes": 43270,
+        "sha256": "004256839915c9e92ab37cea82da12b9dd06c94af6cc196e90d4c232b5c5b247"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\collect-public.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\collect-store-public.mjs",
+        "bytes": 4954,
+        "sha256": "2bb2b7b858952443ad4a863aa664ef932915570355d29a56d5d3a6a82f0aa722"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\collect-store-public.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\driver-binding-contract.mjs",
+        "bytes": 1623,
+        "sha256": "682b561cdd384d54da0ff489b3c9baad860125a23e79132eed94a414c88a0a03"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\driver-binding-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\driver-evidence-contract.mjs",
+        "bytes": 827,
+        "sha256": "096869404e2447e8187176f950c6875a99f3efb5546c2a2b35de52332a16c327"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\driver-evidence-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\driver-report-contract.mjs",
+        "bytes": 9785,
+        "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\driver-report-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\formal-template-contract.mjs",
+        "bytes": 1595,
+        "sha256": "aa07b5fb2a3f3242230a32827b8b80ac36a5cf8778adca2c1b439fa935a0fb45"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\formal-template-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\hp-maintenance-status-schema.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\input-lib.mjs",
+        "bytes": 16970,
+        "sha256": "f84fd2460eb0cc26aef6fd8259ec42d264fc03beb2170332d689a300ae327cb8"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\input-lib.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\measured-phase-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\monitor-owned.mjs",
+        "bytes": 1283,
+        "sha256": "4b4030e21371f83970b39230f392c9e4d77faa41e0fcf0a7a8978ebbcd403cb0"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\monitor-owned.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\native-chase-report-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\phase-window-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\prepare-inputs.mjs",
+        "bytes": 14304,
+        "sha256": "2f6985c0ebde4f55de40a801eca921d8c10bc4cd1263f1dd845f2b9a4e9ffcf2"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\prepare-inputs.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\projection-build-source-lib.mjs",
+        "bytes": 174,
+        "sha256": "d07da1f1a885da5ce4bc9522469db149eb96030af51737cb3b6a16d053e1e607"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\projection-build-source-lib.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\request-stop.mjs",
+        "bytes": 1016,
+        "sha256": "d82ccd086db1550eeaded6158d88f5eb278700fb5eaa47441c61a65503721e30"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\request-stop.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-seal-and-guard-v1.mjs",
+        "bytes": 16525,
+        "sha256": "f9a7c26ccde23894bcca03213fdef587df323d4243c867db2eb72a3e9ddc7186"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-seal-and-guard-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\run-owned.mjs",
+        "bytes": 21610,
+        "sha256": "9367b1961ecbc66f186d906c1abf5f89d61dd349a4cd82ece69a934d841686e1"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\run-owned.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\scene-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\scene-driver-compatibility.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\slow-stage-public.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\slow-stage-row-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\store-diagnostics-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-feasibility-gate.mjs",
+        "bytes": 19754,
+        "sha256": "d120e6c2b69033856d39629a34320c8eb98f781100749efc7310e557e92871ed"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-feasibility-gate.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-full16-gate.mjs",
+        "bytes": 5651,
+        "sha256": "35e2a2f705d144711406864edda373c308855bb1e1f035230a290b0505ecc38a"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-full16-gate.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-probe20-collected-evidence.mjs",
+        "bytes": 17346,
+        "sha256": "de41e1bd3b4e2ed578a023ac0efed8037bf19085800259c3ad0edfcb8a06a60f"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-probe20-collected-evidence.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-public.mjs",
+        "bytes": 19090,
+        "sha256": "85952b5bffdb952952a56672545ace54c924a05482c93db841f7c19546a2dc38"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-public.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-store-public.mjs",
+        "bytes": 4776,
+        "sha256": "520aad34dec37abc4138247323315aff6472874053f19833ceb8ae73516511fc"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\verify-store-public.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\wire-diagnostics-adapter.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "node-syntax",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\wire-diagnostics-contract.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "powershell-ast",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\initialize-private.ps1",
+        "bytes": 2677,
+        "sha256": "488d31aa467f7f589a94fbabab9af6024d55e6e34438c633b43379b79bebb683"
+      },
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$e=$null;$t=$null;[System.Management.Automation.Language.Parser]::ParseFile('C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\initialize-private.ps1',[ref]$t,[ref]$e)|Out-Null;if($e.Count -gt 0){$e|ForEach-Object{[Console]::Error.WriteLine($_.Message)};exit 1};[Console]::WriteLine('PowerShell AST parse passed')"
+      ],
+      "exitCode": 0,
+      "stdout": "PowerShell AST parse passed\r\n",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "kind": "powershell-ast",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\recover-drained-owned.ps1",
+        "bytes": 3646,
+        "sha256": "40f474fa6c6f4f3c620a16fdc9e13f86954dbc8bce81f8e76f21ecaaf99c35a0"
+      },
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "$e=$null;$t=$null;[System.Management.Automation.Language.Parser]::ParseFile('C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\recover-drained-owned.ps1',[ref]$t,[ref]$e)|Out-Null;if($e.Count -gt 0){$e|ForEach-Object{[Console]::Error.WriteLine($_.Message)};exit 1};[Console]::WriteLine('PowerShell AST parse passed')"
+      ],
+      "exitCode": 0,
+      "stdout": "PowerShell AST parse passed\r\n",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    }
+  ],
+  "passed": 32,
+  "failed": 0,
+  "moduleImported": false,
+  "eligibleForSealNow": false
+}

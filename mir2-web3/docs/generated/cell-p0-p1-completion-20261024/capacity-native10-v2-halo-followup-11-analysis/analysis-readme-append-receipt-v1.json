@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T05:09:00.166Z",
+  "scope": "Root explicitly authorized a short explanation in this new analysis README after copying the final four-file analysis whitelist. Original source derivatives, original copy receipts, failed report and diagnostic subtree remain unchanged.",
+  "readme": {
+    "before": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\README.md",
+      "bytes": 888,
+      "sha256": "31e91d795203c2af869d12d10d3584e6c0ef57e43bfa18e98f4a827cd033c87b"
+    },
+    "after": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\README.md",
+      "bytes": 1656,
+      "sha256": "34cf725f25ab42a3a32284b452506864a6e5446a693cc9153c5c53498b8a2dc1"
+    }
+  },
+  "analysisCopyReceiptUnchanged": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\analysis-copy-receipt-v1.json",
+    "bytes": 4866,
+    "sha256": "48f665355e1c8bca77c4c9bd9061b332eaa027c9eff6cddd0feb6e9221e1461c"
+  },
+  "originalCopyReceipt": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\public-copy-receipt.json",
+    "bytes": 8628,
+    "sha256": "66c011adb739800ba6525dd4fbb13ae5f2d153cd0e1b7572d8ce82df822ac99e"
+  },
+  "rootReadmeOrBindingsModified": false,
+  "capacityAccepted": false
+}

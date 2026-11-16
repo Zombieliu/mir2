@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "mode": "offline-stopped-private-stderr-strict-whitelist",
+  "observedAtMsSemantics": "observedAtMs is the time this stopped-file offline extractor read a whitelisted line. It is NOT the original launcher/server receive time, span start/end, or an event-correlation timestamp. Row order is original stderr order only. No attribution to the earlier07 failure follows.",
+  "complete": true,
+  "rowCount": 47,
+  "scopedRows": 16,
+  "queueContextRows": 0,
+  "distinctOpaqueConnections": 4,
+  "byStage": {
+    "serial_gate.zone_outbound_wait": {
+      "count": 2,
+      "maxMs": 280,
+      "scopedCount": 2,
+      "queueContextCount": 0
+    },
+    "session_action.execute": {
+      "count": 11,
+      "maxMs": 968,
+      "scopedCount": 0,
+      "queueContextCount": 0
+    },
+    "shared_session.inner_execute": {
+      "count": 10,
+      "maxMs": 930,
+      "scopedCount": 0,
+      "queueContextCount": 0
+    },
+    "socket_turn.input": {
+      "count": 14,
+      "maxMs": 983,
+      "scopedCount": 14,
+      "queueContextCount": 0
+    },
+    "zone_owner.in_process.execute_request": {
+      "count": 10,
+      "maxMs": 966,
+      "scopedCount": 0,
+      "queueContextCount": 0
+    }
+  },
+  "queuedPhases": {},
+  "inputClasses": {},
+  "greaterThan500Ms": [
+    {
+      "rowNumber": 3,
+      "observedAtMs": 1792884914461,
+      "stage": "shared_session.inner_execute",
+      "durationMs": 915,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 4,
+      "observedAtMs": 1792884914461,
+      "stage": "zone_owner.in_process.execute_request",
+      "durationMs": 966,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 5,
+      "observedAtMs": 1792884914461,
+      "stage": "session_action.execute",
+      "durationMs": 968,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 6,
+      "observedAtMs": 1792884914461,
+      "stage": "socket_turn.input",
+      "durationMs": 983,
+      "connection": 3,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 8,
+      "observedAtMs": 1792884914461,
+      "stage": "shared_session.inner_execute",
+      "durationMs": 919,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 9,
+      "observedAtMs": 1792884914461,
+      "stage": "zone_owner.in_process.execute_request",
+      "durationMs": 927,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 10,
+      "observedAtMs": 1792884914461,
+      "stage": "session_action.execute",
+      "durationMs": 929,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 11,
+      "observedAtMs": 1792884914461,
+      "stage": "socket_turn.input",
+      "durationMs": 944,
+      "connection": 4,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 31,
+      "observedAtMs": 1792884914462,
+      "stage": "shared_session.inner_execute",
+      "durationMs": 929,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 32,
+      "observedAtMs": 1792884914462,
+      "stage": "zone_owner.in_process.execute_request",
+      "durationMs": 937,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 33,
+      "observedAtMs": 1792884914462,
+      "stage": "session_action.execute",
+      "durationMs": 939,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 34,
+      "observedAtMs": 1792884914462,
+      "stage": "socket_turn.input",
+      "durationMs": 950,
+      "connection": 5,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 40,
+      "observedAtMs": 1792884914462,
+      "stage": "shared_session.inner_execute",
+      "durationMs": 930,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 41,
+      "observedAtMs": 1792884914462,
+      "stage": "zone_owner.in_process.execute_request",
+      "durationMs": 939,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 42,
+      "observedAtMs": 1792884914462,
+      "stage": "session_action.execute",
+      "durationMs": 941,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    },
+    {
+      "rowNumber": 43,
+      "observedAtMs": 1792884914462,
+      "stage": "socket_turn.input",
+      "durationMs": 951,
+      "connection": 6,
+      "classification": "bootstrap-or-other-action-unknown; no original receive timestamp or request correlation"
+    }
+  ],
+  "nonBootstrapStaticBranchGreaterThan500Ms": [],
+  "scope": "Valid Some/scoped queue-context producer paths are observable if counts are nonzero. Static branch duration is not a root cause.50ms threshold left-censors output; absence of rows is not proof of no stall. No07 causal identification or new capacity acceptance.",
+  "source": {
+    "basename": "1792884512369-f0f261da.gateway.stderr.log",
+    "bytes": 13891,
+    "sha256": "8d720a006f345fdf1294b74a5e2ae7a6c44b5aa510b918471923789de9785e14",
+    "rawCopied": false,
+    "rawPrinted": false
+  },
+  "helper": {
+    "bytes": 10186,
+    "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+  },
+  "finalBinding": {
+    "bytes": 1360,
+    "sha256": "8590785f6d419e754dbf8fefda5abcccdbd80268166c00eed9cea2248c98a2da"
+  },
+  "rows": {
+    "file": "offline-read-whitelisted-slow-stage.jsonl",
+    "bytes": 4198,
+    "sha256": "98b51cd80e46188a5c9b0d9ba8567809cd58d25084dd017742f5fedee970c624"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-25T23:33:35.146Z",
+  "runId": "1792971074413-d1b0416a",
+  "realmStamp": "1792971063764-c4c81284",
+  "all16Passed": true,
+  "pairedDeathReceiptsMatchRawTrace": true,
+  "pairedReviveAndKillDropPickupReceiptsMatchRawTrace": true,
+  "onlyOrdinarySentCommands": true,
+  "sentCommandCount": 349,
+  "backendInputCount": 50,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "frozenDriverRawPinsMatched": 6,
+  "checkedPublicFileCount": 13,
+  "checkedPrivateValueCount": 6,
+  "credentialValuesAbsent": true,
+  "rawZoneMetricsVersion": 2,
+  "rawZoneMetricsComplete": true,
+  "nonzeroClassDeltas": {
+    "movementAdmissions": {
+      "count": 108,
+      "successCount": 108,
+      "failureCount": 0,
+      "sumUs": 638867,
+      "overBudgetCount": 2
+    },
+    "immediateRequests": {
+      "count": 144,
+      "successCount": 144,
+      "failureCount": 0,
+      "sumUs": 408914,
+      "overBudgetCount": 0
+    },
+    "lifecycleRequests": {
+      "count": 18,
+      "successCount": 16,
+      "failureCount": 2,
+      "sumUs": 4767654,
+      "overBudgetCount": 9
+    }
+  },
+  "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "sixCountersZeroBeforeAndAfter": true,
+  "normalExitCode": 0,
+  "firstNoLootAttemptPreserved": true,
+  "scope": "Reused c743 account-store server Release under current execution normal public protocol lifecycle; neutral receipt checks from pinned verifier snapshot only. Independent dynamically counted candidate-source proof; historical builds remain separate. No frontend/native UI, two-computer, capacity, Cell or global ghost census acceptance"
+}

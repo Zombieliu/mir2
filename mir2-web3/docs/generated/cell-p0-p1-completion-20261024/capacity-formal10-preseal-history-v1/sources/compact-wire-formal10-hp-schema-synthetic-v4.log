@@ -1,0 +1,76 @@
+TAP version 13
+# Subtest: zero observed HP events is a valid empty dictionary, without a survival claim
+ok 1 - zero observed HP events is a valid empty dictionary, without a survival claim
+  ---
+  duration_ms: 1.3556
+  type: 'test'
+  ...
+# Subtest: all ten actual producer statuses accept nonnegative safe integer counts unchanged
+ok 2 - all ten actual producer statuses accept nonnegative safe integer counts unchanged
+  ---
+  duration_ms: 0.2451
+  type: 'test'
+  ...
+# Subtest: actual verified status is accepted independently of any dose proof or game verdict
+ok 3 - actual verified status is accepted independently of any dose proof or game verdict
+  ---
+  duration_ms: 0.1251
+  type: 'test'
+  ...
+# Subtest: arrays and primitive values cannot substitute for the producer dictionary
+ok 4 - arrays and primitive values cannot substitute for the producer dictionary
+  ---
+  duration_ms: 0.0728
+  type: 'test'
+  ...
+# Subtest: unknown and prototype-shaped status keys fail closed
+ok 5 - unknown and prototype-shaped status keys fail closed
+  ---
+  duration_ms: 0.0798
+  type: 'test'
+  ...
+# Subtest: negative, noncanonical or unsafe counts cannot pass as observed events
+ok 6 - negative, noncanonical or unsafe counts cannot pass as observed events
+  ---
+  duration_ms: 0.0845
+  type: 'test'
+  ...
+# Subtest: only own data properties are accepted, without invoking accessor code
+ok 7 - only own data properties are accepted, without invoking accessor code
+  ---
+  duration_ms: 0.0795
+  type: 'test'
+  ...
+# Subtest: frozen and null-prototype JSON-shaped dictionaries remain valid without mutation
+ok 8 - frozen and null-prototype JSON-shaped dictionaries remain valid without mutation
+  ---
+  duration_ms: 0.0722
+  type: 'test'
+  ...
+# Subtest: zero verified doses is valid evidence with explicit absence of a dose-proof claim
+ok 9 - zero verified doses is valid evidence with explicit absence of a dose-proof claim
+  ---
+  duration_ms: 0.1987
+  type: 'test'
+  ...
+# Subtest: positive verified evidence requires the exact count and both consistent proof flags
+ok 10 - positive verified evidence requires the exact count and both consistent proof flags
+  ---
+  duration_ms: 0.2355
+  type: 'test'
+  ...
+# Subtest: missing or invalid verified proof counters and vacuous success claims are rejected
+ok 11 - missing or invalid verified proof counters and vacuous success claims are rejected
+  ---
+  duration_ms: 0.1333
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 53.4815

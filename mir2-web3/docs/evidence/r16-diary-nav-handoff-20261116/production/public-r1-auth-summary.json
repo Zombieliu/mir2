@@ -1,0 +1,104 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "deployment": "dpl_EsA9a7nDuU7ggAC2xBUqtdmCCasj",
+  "passed": false,
+  "failure": {
+    "phase": "in-memory-qr-ready",
+    "code": "APPROVED_WALLET_LOGIN_NOT_OBSERVED"
+  },
+  "qrRemainingMsAtHandoff": 119043,
+  "walletApproved": {
+    "approved": true,
+    "exactAppAndSession": true,
+    "loginOnlyConsent": true,
+    "noFunds": true,
+    "httpsRelayReadAndApprove": true,
+    "oneClick": true,
+    "oneRequest": true
+  },
+  "http": {
+    "create": [
+      200
+    ],
+    "pollResponses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "statesObserved": [
+      "pending"
+    ],
+    "pollCount": 17,
+    "pollErrors": 0,
+    "channelExchangeCount": 0
+  },
+  "ws": {
+    "gameSockets": 0,
+    "passkeyLogin": 0,
+    "loginSuccess": 0,
+    "newCharacter": 0,
+    "newCharacterSuccess": 0,
+    "startGame": 0,
+    "startGameResult": null,
+    "walk": 0,
+    "logOut": 0,
+    "logOutSuccess": 0,
+    "unexpectedMutation": 0
+  },
+  "phases": [
+    {
+      "name": "verify-exact-public-version-before-game-assets",
+      "at": "2026-11-16T10:34:56.712Z",
+      "elapsedMs": 290
+    },
+    {
+      "name": "desktop-loading",
+      "at": "2026-11-16T10:34:57.595Z",
+      "elapsedMs": 1173
+    },
+    {
+      "name": "desktop-click-ready",
+      "at": "2026-11-16T10:35:17.450Z",
+      "elapsedMs": 21028
+    },
+    {
+      "name": "ordinary-wallet-qr",
+      "at": "2026-11-16T10:35:30.181Z",
+      "elapsedMs": 33759
+    },
+    {
+      "name": "in-memory-qr-ready",
+      "at": "2026-11-16T10:35:32.267Z",
+      "elapsedMs": 35845
+    }
+  ],
+  "qaGameRoleCreated": false,
+  "movement": {
+    "attempted": false,
+    "passed": null,
+    "status": "not-reached"
+  },
+  "logout": {
+    "attempted": false,
+    "passed": false,
+    "returnedToSelect": false,
+    "sent": 0,
+    "acknowledged": 0
+  },
+  "bothBrowsersClosed": true,
+  "perPollResponseTimestampsRecorded": false,
+  "performanceGatesReached": false
+}

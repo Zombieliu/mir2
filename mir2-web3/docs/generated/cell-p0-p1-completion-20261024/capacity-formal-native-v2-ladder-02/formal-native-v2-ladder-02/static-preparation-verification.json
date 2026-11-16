@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T19:29:40.695Z",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02",
+  "sourceSha256": "6c048e3007222ab6d8ed01185fb75ab6c054dbd60379dd6bdd361aee151870b8",
+  "scripts": 8,
+  "syntax": [
+    "input-lib.mjs: node --check passed",
+    "monitor-owned.mjs: node --check passed",
+    "prepare-inputs.mjs: node --check passed",
+    "request-stop.mjs: node --check passed",
+    "run-owned.mjs: node --check passed",
+    "verify-feasibility-gate.mjs: node --check passed",
+    "initialize-private.ps1: PowerShell parse passed",
+    "recover-drained-owned.ps1: PowerShell parse passed"
+  ],
+  "originalScenarioResourceAndReadinessExact": true,
+  "originalFormalPolicyExact": true,
+  "originalRoleIndicesExact": true,
+  "sourceGuardExact06ExceptFormalCaps": true,
+  "navigationDeclarationExtractableFromPinnedSource": true,
+  "prior01And06LauncherPinsStillMatch": true,
+  "productModulesImported": false,
+  "prepareExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

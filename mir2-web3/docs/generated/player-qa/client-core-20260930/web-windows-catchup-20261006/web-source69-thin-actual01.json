@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "source": "Source69",
+  "scope": "Exact Warehouse 0140 local map resource closure, retaining Source68 strict Next compiled UI",
+  "actualExecution": {
+    "kind": "Original unchanged .NET caller",
+    "exitCode": 0,
+    "builderPid": 77300,
+    "elapsedMs": 38226,
+    "exited": true,
+    "disposed": true,
+    "sourcePrePostGuardPassed": true,
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source69-warehouse-map-local-20261011-01\\root-approved01\\thin01-config.json",
+      "bytes": 5815,
+      "sha256": "d702347805b34041ab477ca0a3aff7dc47388ac64614df8fba51bc69097d5cf3"
+    },
+    "logs": [
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/thin-build01/stdout.log",
+        "bytes": 80936,
+        "sha256": "4508ec71f2cac05472540c2d7d9098987c17a4e4c82b506dda8de330e3fc3222"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/thin-build01/size-report.json",
+        "bytes": 80936,
+        "sha256": "4508ec71f2cac05472540c2d7d9098987c17a4e4c82b506dda8de330e3fc3222"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/thin-build01/size-report.json-compaction-details.json",
+        "bytes": 2885,
+        "sha256": "5f81044a1a76089b5dd4d236a6c631ccdf69783ad2e47516fdff525f2fb4a83c"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/thin-build01/outer.json",
+        "bytes": 544,
+        "sha256": "a57a00ed9d898d32c3968caa7d87387ddd0d4860b4e3ea497526b819d3edb146"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/thin-build01/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "rootVerification": {
+    "ordinaryFiles": 4182,
+    "directoriesIncludingRoot": 517,
+    "bytes": 285106825,
+    "links": 0,
+    "capBytes": 377487360,
+    "capInclusive": true,
+    "fullHashManifest": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/root-approved01/thin-package-manifest01.json",
+      "bytes": 1553062,
+      "sha256": "b1c31e04018a86e18abfe861705566e2a467d4728402a26aeb31a40ac4dfc986"
+    },
+    "oldUnchangedLeaves": 4065,
+    "changedLeaves": [
+      "mir2-web3/apps/web/public/original-asset-manifest.generated.json"
+    ],
+    "addedPngs": 116,
+    "addedPngBytes": 204399,
+    "parsedFullManifestDataPreserved": true,
+    "assetCount": 41248,
+    "assetHash": "004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0",
+    "compiledPageChunk": {
+      "path": "E:/mir2-player-journey/work/web-source69-warehouse-map-full-deps01/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-source69-01/mir2-web3/apps/web/.next-web-windows-catchup-source64-20261011-01/static/chunks/app/page-cbd259b62216acfa.js",
+      "bytes": 2591987,
+      "sha256": "225529b25bb5c2de77018a33d39fefcc332cfc997b9d5725caeabb1ea8a71f2e"
+    },
+    "coreLeavesUnchanged": 6,
+    "dependencyWarnings": {
+      "count": 59,
+      "codes": {
+        "Error": 59
+      },
+      "truncated": 0,
+      "sameNormalizedMultisetAsSource68": true
+    },
+    "jsonCompaction": {
+      "files": 10,
+      "sourceBytes": 58673977,
+      "outputBytes": 37957592,
+      "savedBytes": 20716385,
+      "detailsPath": "C:\\mir2-cross-platform-storage-20261002\\web-source69-warehouse-map-local-20261011-01\\thin-build01\\size-report.json-compaction-details.json"
+    }
+  },
+  "buildBoundary": {
+    "Source69NextExecuted": false,
+    "strictNextCarriedFrom": "web-source68-next-actual01.json",
+    "isolatedDataOverlayOnly": true,
+    "rendererFlagsChanged": false,
+    "source68PackageModified": false,
+    "localClosureOptIn": true,
+    "defaultsChanged": false
+  },
+  "rootReaderCorrections": [
+    "Initial source-guard report guessed path did not exist; original caller pre/post guard is the actual verification boundary.",
+    "Compiled Page pin belongs to static client chunk, not server/app/page.js; complete old/new package comparison proves all compiled code leaves unchanged.",
+    "localMapSelection.selectedPaths are objects, not strings; exact path membership verified from packagedClosure frames.",
+    "Dependency warnings use concurrent traversal order; normalized complete 59-entry multiset is identical."
+  ],
+  "status": {
+    "thinPackageAccepted": true,
+    "runtimeStarted": false,
+    "browserVerified": false,
+    "sharedStorageOwnerAccepted": false,
+    "mobileAccepted": false,
+    "humanAccepted": false,
+    "overallPercentage": null,
+    "candidate100": false,
+    "goalComplete": false
+  }
+}

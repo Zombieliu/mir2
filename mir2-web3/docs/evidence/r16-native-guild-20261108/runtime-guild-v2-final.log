@@ -1,0 +1,80 @@
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: method `normalize_bindings` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `parse_guild_member` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\social.rs:1447:4
+     |
+1447 | fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 2 warnings
+   Compiling mir2-bevy-runtime v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+warning: unused imports: `CombatEdge` and `CombatOutput`
+ --> src\combat_input_host.rs:2:56
+  |
+2 | use mir2_client_bevy::combat_input::{CombatController, CombatEdge, CombatOutput, CombatSnapshot};
+  |                                                        ^^^^^^^^^^  ^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `npc_bundle` is never used
+    --> src\native_ingest.rs:1698:8
+     |
+1698 |     fn npc_bundle() -> (
+     |        ^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `owner_item` is never used
+   --> src\npc_purchase_economy.rs:260:4
+    |
+260 | fn owner_item(raw: &Value, container: u8, slot: u64) -> Result<ItemModel, NativeNpcEconomyError> {
+    |    ^^^^^^^^^^
+
+warning: function `prepare` is never used
+    --> src\npc_purchase_economy.rs:2298:8
+     |
+2298 |     fn prepare(
+     |        ^^^^^^^
+
+warning: function `source_equipment` is never used
+    --> src\npc_purchase_economy.rs:2310:8
+     |
+2310 |     fn source_equipment(uid: u64, slot: &str, name: &str) -> Value {
+     |        ^^^^^^^^^^^^^^^^
+
+warning: function `economic_conflict` is never used
+    --> src\npc_purchase_economy.rs:3349:8
+     |
+3349 |     fn economic_conflict(mut change: impl FnMut(&mut NativeNpcEconomyProjection, &mut Value)) {
+     |        ^^^^^^^^^^^^^^^^^
+
+warning: struct `WebGl2SharedUiPrototype` is never constructed
+ --> src\webgl2_shared_ui.rs:8:19
+  |
+8 | pub(crate) struct WebGl2SharedUiPrototype;
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-bevy-runtime` (lib test) generated 7 warnings (run `cargo fix --lib -p mir2-bevy-runtime --tests` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 27.52s
+     Running unittests src\lib.rs (F:/mir2-builds/canonical-companion-native\release\deps\mir2_bevy_runtime-35568c5ac034ac20.exe)
+
+running 6 tests
+test native_data_path_tests::guild_rank_ingest_tests::guild_permission_ingest_actual_fifo_keeps_viewer_and_releases_only_fresh_bit_result ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_fifo_retains_terminal_before_metadata_in_one_main_frame ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_metadata_only_does_not_ack_even_if_text_matches ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_scene_reset_retains_pending_and_ordinary_roster ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_rank_ingest_session_reset_retires_old_queued_terminal_and_pending ... ok
+test native_data_path_tests::guild_rank_ingest_tests::guild_read_ingest_retains_real_full_receipt_when_next_delta_needs_another_read ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 317 filtered out; finished in 0.01s
+

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-25T13:21:05.578Z",
+  "profile": "release",
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+  "backendInputCount": 44,
+  "sourceManifestSha256": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+  "sourceManifestFileSha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87363072,
+    "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+  },
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-personal-monster-projection-v1-release-build.log",
+    "bytes": 55865,
+    "sha256": "065a9fa0ad55a19fa38f846fb152b06c4a2053b819f2192ac930529fbb782eaa"
+  },
+  "buildReceipt": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-v1-build-receipt.json",
+    "bytes": 2373,
+    "sha256": "80e8f27189012cff6d4d594fc0f9af9dd4e194a6145559d3856e0e7f397d1f05"
+  },
+  "buildArguments": [
+    "+1.95.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ],
+  "toolchain": {
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)"
+  },
+  "visualStudio": {
+    "targetArch": "x64",
+    "linkExecutable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe"
+  },
+  "buildJobs": 4,
+  "sourceVerifiedBeforeAndAfterBuild": true,
+  "ignoredInclusiveUntrackedBackendCount": 0,
+  "scope": "Fresh personal/shared-monster projection Release candidate; readonly Zone ownership API and focused projection tests are explicitly source-bound. Fresh immutable executable, complete Cargo log/actual exit, explicit committed44-input source before/after binding including the three additional existing projection/AOI test files and preserved original four-None fixture proof; preserves468/a430 and older461f/855b evidence. Build success is not lifecycle or capacity acceptance."
+}

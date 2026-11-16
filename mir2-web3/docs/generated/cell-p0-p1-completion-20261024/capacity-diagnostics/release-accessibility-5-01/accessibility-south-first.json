@@ -1,0 +1,5071 @@
+{
+  "label": "south-first",
+  "at": 1792855372031,
+  "mapFileName": "0",
+  "owner": {
+    "x": 260,
+    "y": 640,
+    "hp": 18,
+    "dead": false
+  },
+  "observerHomes": [
+    {
+      "x": 252,
+      "y": 635
+    },
+    {
+      "x": 266,
+      "y": 634
+    },
+    {
+      "x": 252,
+      "y": 645
+    },
+    {
+      "x": 264,
+      "y": 646
+    }
+  ],
+  "plannedWitnessOnly": true,
+  "actualWitnesses": [],
+  "targets": [
+    {
+      "objectId": 206525,
+      "name": "Deer",
+      "x": 259,
+      "y": 655,
+      "hp": 25,
+      "disposition": "neutral",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 15,
+      "destinations": [
+        {
+          "goal": {
+            "x": 259,
+            "y": 654
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 14,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 260,
+              "y": 653
+            },
+            {
+              "x": 259,
+              "y": 654
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 260,
+            "y": 654
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 14,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 260,
+              "y": 653
+            },
+            {
+              "x": 260,
+              "y": 654
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 260,
+            "y": 655
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 15,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 260,
+              "y": 653
+            },
+            {
+              "x": 260,
+              "y": 654
+            },
+            {
+              "x": 260,
+              "y": 655
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 260,
+            "y": 656
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 16,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 260,
+              "y": 653
+            },
+            {
+              "x": 260,
+              "y": 654
+            },
+            {
+              "x": 260,
+              "y": 655
+            },
+            {
+              "x": 260,
+              "y": 656
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 259,
+            "y": 656
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 17,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 260,
+              "y": 653
+            },
+            {
+              "x": 260,
+              "y": 654
+            },
+            {
+              "x": 260,
+              "y": 655
+            },
+            {
+              "x": 260,
+              "y": 656
+            },
+            {
+              "x": 259,
+              "y": 656
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 258,
+            "y": 656
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 16,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 259,
+              "y": 653
+            },
+            {
+              "x": 258,
+              "y": 654
+            },
+            {
+              "x": 258,
+              "y": 655
+            },
+            {
+              "x": 258,
+              "y": 656
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 258,
+            "y": 655
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 15,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 259,
+              "y": 653
+            },
+            {
+              "x": 258,
+              "y": 654
+            },
+            {
+              "x": 258,
+              "y": 655
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 258,
+            "y": 654
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 14,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 260,
+              "y": 651
+            },
+            {
+              "x": 260,
+              "y": 652
+            },
+            {
+              "x": 259,
+              "y": 653
+            },
+            {
+              "x": 258,
+              "y": 654
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206528,
+      "name": "Deer",
+      "x": 273,
+      "y": 653,
+      "hp": 25,
+      "disposition": "neutral",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 13,
+      "destinations": [
+        {
+          "goal": {
+            "x": 273,
+            "y": 652
+          },
+          "staticWalkable": false,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": false,
+          "routeLength": null,
+          "first": null,
+          "next": null,
+          "firstCovered": false,
+          "nextCovered": false,
+          "allRouteCovered": false,
+          "allRouteAvoidsTransfers": false,
+          "sameDriverAdmissible": false,
+          "reason": "static-blocked"
+        },
+        {
+          "goal": {
+            "x": 274,
+            "y": 652
+          },
+          "staticWalkable": false,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": false,
+          "routeLength": null,
+          "first": null,
+          "next": null,
+          "firstCovered": false,
+          "nextCovered": false,
+          "allRouteCovered": false,
+          "allRouteAvoidsTransfers": false,
+          "sameDriverAdmissible": false,
+          "reason": "static-blocked"
+        },
+        {
+          "goal": {
+            "x": 274,
+            "y": 653
+          },
+          "staticWalkable": false,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": false,
+          "routeLength": null,
+          "first": null,
+          "next": null,
+          "firstCovered": false,
+          "nextCovered": false,
+          "allRouteCovered": false,
+          "allRouteAvoidsTransfers": false,
+          "sameDriverAdmissible": false,
+          "reason": "static-blocked"
+        },
+        {
+          "goal": {
+            "x": 274,
+            "y": 654
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 17,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 645
+            },
+            {
+              "x": 264,
+              "y": 646
+            },
+            {
+              "x": 265,
+              "y": 647
+            },
+            {
+              "x": 266,
+              "y": 648
+            },
+            {
+              "x": 267,
+              "y": 649
+            },
+            {
+              "x": 268,
+              "y": 650
+            },
+            {
+              "x": 269,
+              "y": 651
+            },
+            {
+              "x": 270,
+              "y": 652
+            },
+            {
+              "x": 271,
+              "y": 653
+            },
+            {
+              "x": 272,
+              "y": 654
+            },
+            {
+              "x": 273,
+              "y": 654
+            },
+            {
+              "x": 274,
+              "y": 654
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 273,
+            "y": 654
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 16,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 645
+            },
+            {
+              "x": 264,
+              "y": 646
+            },
+            {
+              "x": 265,
+              "y": 647
+            },
+            {
+              "x": 266,
+              "y": 648
+            },
+            {
+              "x": 267,
+              "y": 649
+            },
+            {
+              "x": 268,
+              "y": 650
+            },
+            {
+              "x": 269,
+              "y": 651
+            },
+            {
+              "x": 270,
+              "y": 652
+            },
+            {
+              "x": 271,
+              "y": 653
+            },
+            {
+              "x": 272,
+              "y": 654
+            },
+            {
+              "x": 273,
+              "y": 654
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 272,
+            "y": 654
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 15,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 645
+            },
+            {
+              "x": 264,
+              "y": 646
+            },
+            {
+              "x": 265,
+              "y": 647
+            },
+            {
+              "x": 266,
+              "y": 648
+            },
+            {
+              "x": 267,
+              "y": 649
+            },
+            {
+              "x": 268,
+              "y": 650
+            },
+            {
+              "x": 269,
+              "y": 651
+            },
+            {
+              "x": 270,
+              "y": 652
+            },
+            {
+              "x": 271,
+              "y": 653
+            },
+            {
+              "x": 272,
+              "y": 654
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 272,
+            "y": 653
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 15,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 644
+            },
+            {
+              "x": 264,
+              "y": 645
+            },
+            {
+              "x": 265,
+              "y": 646
+            },
+            {
+              "x": 266,
+              "y": 647
+            },
+            {
+              "x": 267,
+              "y": 648
+            },
+            {
+              "x": 268,
+              "y": 649
+            },
+            {
+              "x": 269,
+              "y": 650
+            },
+            {
+              "x": 270,
+              "y": 651
+            },
+            {
+              "x": 271,
+              "y": 652
+            },
+            {
+              "x": 272,
+              "y": 653
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 272,
+            "y": 652
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 15,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 644
+            },
+            {
+              "x": 264,
+              "y": 645
+            },
+            {
+              "x": 265,
+              "y": 646
+            },
+            {
+              "x": 266,
+              "y": 647
+            },
+            {
+              "x": 267,
+              "y": 648
+            },
+            {
+              "x": 268,
+              "y": 649
+            },
+            {
+              "x": 269,
+              "y": 650
+            },
+            {
+              "x": 270,
+              "y": 651
+            },
+            {
+              "x": 271,
+              "y": 652
+            },
+            {
+              "x": 272,
+              "y": 652
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206534,
+      "name": "Deer",
+      "x": 264,
+      "y": 649,
+      "hp": 25,
+      "disposition": "neutral",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 9,
+      "destinations": [
+        {
+          "goal": {
+            "x": 264,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 261,
+              "y": 645
+            },
+            {
+              "x": 262,
+              "y": 646
+            },
+            {
+              "x": 263,
+              "y": 647
+            },
+            {
+              "x": 264,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 265,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 645
+            },
+            {
+              "x": 263,
+              "y": 646
+            },
+            {
+              "x": 264,
+              "y": 647
+            },
+            {
+              "x": 265,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 265,
+            "y": 649
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 645
+            },
+            {
+              "x": 263,
+              "y": 646
+            },
+            {
+              "x": 264,
+              "y": 647
+            },
+            {
+              "x": 265,
+              "y": 648
+            },
+            {
+              "x": 265,
+              "y": 649
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 265,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 645
+            },
+            {
+              "x": 263,
+              "y": 646
+            },
+            {
+              "x": 264,
+              "y": 647
+            },
+            {
+              "x": 265,
+              "y": 648
+            },
+            {
+              "x": 265,
+              "y": 649
+            },
+            {
+              "x": 265,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 264,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 261,
+              "y": 647
+            },
+            {
+              "x": 262,
+              "y": 648
+            },
+            {
+              "x": 263,
+              "y": 649
+            },
+            {
+              "x": 263,
+              "y": 650
+            },
+            {
+              "x": 264,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 263,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 261,
+              "y": 647
+            },
+            {
+              "x": 262,
+              "y": 648
+            },
+            {
+              "x": 262,
+              "y": 649
+            },
+            {
+              "x": 263,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 263,
+            "y": 649
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 261,
+              "y": 647
+            },
+            {
+              "x": 262,
+              "y": 648
+            },
+            {
+              "x": 263,
+              "y": 649
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 263,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 261,
+              "y": 646
+            },
+            {
+              "x": 262,
+              "y": 647
+            },
+            {
+              "x": 263,
+              "y": 648
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206537,
+      "name": "Deer",
+      "x": 252,
+      "y": 647,
+      "hp": 25,
+      "disposition": "neutral",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 8,
+      "destinations": [
+        {
+          "goal": {
+            "x": 252,
+            "y": 646
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 641
+            },
+            {
+              "x": 256,
+              "y": 642
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 254,
+              "y": 644
+            },
+            {
+              "x": 253,
+              "y": 645
+            },
+            {
+              "x": 252,
+              "y": 646
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 253,
+            "y": 646
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 641
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 641
+            },
+            {
+              "x": 257,
+              "y": 642
+            },
+            {
+              "x": 256,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 644
+            },
+            {
+              "x": 254,
+              "y": 645
+            },
+            {
+              "x": 253,
+              "y": 646
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 253,
+            "y": 647
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 259,
+            "y": 641
+          },
+          "next": {
+            "x": 258,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 641
+            },
+            {
+              "x": 258,
+              "y": 642
+            },
+            {
+              "x": 257,
+              "y": 643
+            },
+            {
+              "x": 256,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 644
+            },
+            {
+              "x": 255,
+              "y": 645
+            },
+            {
+              "x": 254,
+              "y": 646
+            },
+            {
+              "x": 253,
+              "y": 647
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 253,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 259,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 259,
+              "y": 642
+            },
+            {
+              "x": 258,
+              "y": 643
+            },
+            {
+              "x": 257,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 645
+            },
+            {
+              "x": 255,
+              "y": 646
+            },
+            {
+              "x": 254,
+              "y": 647
+            },
+            {
+              "x": 253,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 252,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 259,
+            "y": 641
+          },
+          "next": {
+            "x": 258,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 641
+            },
+            {
+              "x": 258,
+              "y": 642
+            },
+            {
+              "x": 257,
+              "y": 643
+            },
+            {
+              "x": 257,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 645
+            },
+            {
+              "x": 255,
+              "y": 646
+            },
+            {
+              "x": 254,
+              "y": 647
+            },
+            {
+              "x": 253,
+              "y": 648
+            },
+            {
+              "x": 252,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 641
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 641
+            },
+            {
+              "x": 257,
+              "y": 642
+            },
+            {
+              "x": 256,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 254,
+              "y": 644
+            },
+            {
+              "x": 253,
+              "y": 645
+            },
+            {
+              "x": 252,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 647
+            },
+            {
+              "x": 251,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 647
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 641
+            },
+            {
+              "x": 256,
+              "y": 642
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 254,
+              "y": 644
+            },
+            {
+              "x": 253,
+              "y": 645
+            },
+            {
+              "x": 252,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 647
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 646
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 641
+            },
+            {
+              "x": 255,
+              "y": 642
+            },
+            {
+              "x": 254,
+              "y": 643
+            },
+            {
+              "x": 253,
+              "y": 644
+            },
+            {
+              "x": 252,
+              "y": 645
+            },
+            {
+              "x": 251,
+              "y": 646
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206602,
+      "name": "Scarecrow",
+      "x": 251,
+      "y": 649,
+      "hp": 20,
+      "disposition": "hostile",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 9,
+      "destinations": [
+        {
+          "goal": {
+            "x": 251,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 641
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 641
+            },
+            {
+              "x": 257,
+              "y": 642
+            },
+            {
+              "x": 256,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 254,
+              "y": 644
+            },
+            {
+              "x": 253,
+              "y": 645
+            },
+            {
+              "x": 252,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 647
+            },
+            {
+              "x": 251,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 252,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 259,
+            "y": 641
+          },
+          "next": {
+            "x": 258,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 641
+            },
+            {
+              "x": 258,
+              "y": 642
+            },
+            {
+              "x": 257,
+              "y": 643
+            },
+            {
+              "x": 257,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 645
+            },
+            {
+              "x": 255,
+              "y": 646
+            },
+            {
+              "x": 254,
+              "y": 647
+            },
+            {
+              "x": 253,
+              "y": 648
+            },
+            {
+              "x": 252,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 252,
+            "y": 649
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 259,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 259,
+              "y": 642
+            },
+            {
+              "x": 258,
+              "y": 643
+            },
+            {
+              "x": 257,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 645
+            },
+            {
+              "x": 255,
+              "y": 646
+            },
+            {
+              "x": 254,
+              "y": 647
+            },
+            {
+              "x": 253,
+              "y": 648
+            },
+            {
+              "x": 252,
+              "y": 649
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 252,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 259,
+              "y": 643
+            },
+            {
+              "x": 258,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 646
+            },
+            {
+              "x": 255,
+              "y": 647
+            },
+            {
+              "x": 254,
+              "y": 648
+            },
+            {
+              "x": 253,
+              "y": 649
+            },
+            {
+              "x": 252,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 259,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 259,
+              "y": 642
+            },
+            {
+              "x": 258,
+              "y": 643
+            },
+            {
+              "x": 257,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 646
+            },
+            {
+              "x": 255,
+              "y": 647
+            },
+            {
+              "x": 254,
+              "y": 648
+            },
+            {
+              "x": 253,
+              "y": 649
+            },
+            {
+              "x": 252,
+              "y": 650
+            },
+            {
+              "x": 251,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 250,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 12,
+          "first": {
+            "x": 259,
+            "y": 641
+          },
+          "next": {
+            "x": 258,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 641
+            },
+            {
+              "x": 258,
+              "y": 642
+            },
+            {
+              "x": 257,
+              "y": 643
+            },
+            {
+              "x": 257,
+              "y": 644
+            },
+            {
+              "x": 257,
+              "y": 645
+            },
+            {
+              "x": 256,
+              "y": 646
+            },
+            {
+              "x": 255,
+              "y": 647
+            },
+            {
+              "x": 254,
+              "y": 648
+            },
+            {
+              "x": 253,
+              "y": 649
+            },
+            {
+              "x": 252,
+              "y": 650
+            },
+            {
+              "x": 251,
+              "y": 650
+            },
+            {
+              "x": 250,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 250,
+            "y": 649
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 12,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 641
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 641
+            },
+            {
+              "x": 257,
+              "y": 642
+            },
+            {
+              "x": 256,
+              "y": 643
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 254,
+              "y": 644
+            },
+            {
+              "x": 253,
+              "y": 645
+            },
+            {
+              "x": 252,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 647
+            },
+            {
+              "x": 250,
+              "y": 648
+            },
+            {
+              "x": 250,
+              "y": 649
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 250,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 641
+            },
+            {
+              "x": 256,
+              "y": 642
+            },
+            {
+              "x": 255,
+              "y": 643
+            },
+            {
+              "x": 254,
+              "y": 644
+            },
+            {
+              "x": 253,
+              "y": 645
+            },
+            {
+              "x": 252,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 646
+            },
+            {
+              "x": 251,
+              "y": 647
+            },
+            {
+              "x": 250,
+              "y": 648
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206608,
+      "name": "Scarecrow",
+      "x": 262,
+      "y": 643,
+      "hp": 20,
+      "disposition": "hostile",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 3,
+      "destinations": [
+        {
+          "goal": {
+            "x": 262,
+            "y": 642
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 3,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 262,
+              "y": 642
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 263,
+            "y": 642
+          },
+          "staticWalkable": false,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": false,
+          "routeLength": null,
+          "first": null,
+          "next": null,
+          "firstCovered": false,
+          "nextCovered": false,
+          "allRouteCovered": false,
+          "allRouteAvoidsTransfers": false,
+          "sameDriverAdmissible": false,
+          "reason": "static-blocked"
+        },
+        {
+          "goal": {
+            "x": 263,
+            "y": 643
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 7,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 643
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 263,
+            "y": 644
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 6,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            },
+            {
+              "x": 263,
+              "y": 644
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 262,
+            "y": 644
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 5,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            },
+            {
+              "x": 262,
+              "y": 644
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 261,
+            "y": 644
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 4,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 261,
+              "y": 644
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 261,
+            "y": 643
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 3,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 261,
+              "y": 643
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 261,
+            "y": 642
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 2,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 261,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 261,
+              "y": 642
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206614,
+      "name": "Scarecrow",
+      "x": 254,
+      "y": 638,
+      "hp": 20,
+      "disposition": "hostile",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 6,
+      "destinations": [
+        {
+          "goal": {
+            "x": 254,
+            "y": 637
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 6,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 639
+            },
+            {
+              "x": 256,
+              "y": 638
+            },
+            {
+              "x": 255,
+              "y": 637
+            },
+            {
+              "x": 254,
+              "y": 637
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 255,
+            "y": 637
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 5,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 639
+            },
+            {
+              "x": 256,
+              "y": 638
+            },
+            {
+              "x": 255,
+              "y": 637
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 255,
+            "y": 638
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 5,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 639
+            },
+            {
+              "x": 255,
+              "y": 638
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 255,
+            "y": 639
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 5,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 639
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 254,
+            "y": 639
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 6,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 639
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 253,
+            "y": 639
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 7,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 639
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 253,
+            "y": 638
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 639
+            },
+            {
+              "x": 253,
+              "y": 639
+            },
+            {
+              "x": 253,
+              "y": 638
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 253,
+            "y": 637
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 7,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 639
+            },
+            {
+              "x": 256,
+              "y": 638
+            },
+            {
+              "x": 255,
+              "y": 637
+            },
+            {
+              "x": 254,
+              "y": 637
+            },
+            {
+              "x": 253,
+              "y": 637
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206701,
+      "name": "Deer",
+      "x": 261,
+      "y": 649,
+      "hp": 25,
+      "disposition": "neutral",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 9,
+      "destinations": [
+        {
+          "goal": {
+            "x": 261,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 261,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 262,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 261,
+              "y": 647
+            },
+            {
+              "x": 262,
+              "y": 648
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 262,
+            "y": 649
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 261,
+              "y": 647
+            },
+            {
+              "x": 262,
+              "y": 648
+            },
+            {
+              "x": 262,
+              "y": 649
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 262,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 261,
+              "y": 647
+            },
+            {
+              "x": 262,
+              "y": 648
+            },
+            {
+              "x": 262,
+              "y": 649
+            },
+            {
+              "x": 262,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 261,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            },
+            {
+              "x": 261,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 260,
+            "y": 650
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            },
+            {
+              "x": 260,
+              "y": 650
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 260,
+            "y": 649
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            },
+            {
+              "x": 260,
+              "y": 649
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 260,
+            "y": 648
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 8,
+          "first": {
+            "x": 260,
+            "y": 641
+          },
+          "next": {
+            "x": 260,
+            "y": 642
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 260,
+              "y": 641
+            },
+            {
+              "x": 260,
+              "y": 642
+            },
+            {
+              "x": 260,
+              "y": 643
+            },
+            {
+              "x": 260,
+              "y": 644
+            },
+            {
+              "x": 260,
+              "y": 645
+            },
+            {
+              "x": 260,
+              "y": 646
+            },
+            {
+              "x": 260,
+              "y": 647
+            },
+            {
+              "x": 260,
+              "y": 648
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "objectId": 206709,
+      "name": "Deer",
+      "x": 250,
+      "y": 638,
+      "hp": 25,
+      "disposition": "neutral",
+      "targetStaticWalkable": true,
+      "targetCovered": true,
+      "distance": 10,
+      "destinations": [
+        {
+          "goal": {
+            "x": 250,
+            "y": 637
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 639
+            },
+            {
+              "x": 252,
+              "y": 638
+            },
+            {
+              "x": 251,
+              "y": 637
+            },
+            {
+              "x": 250,
+              "y": 637
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 637
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 639
+            },
+            {
+              "x": 252,
+              "y": 638
+            },
+            {
+              "x": 251,
+              "y": 637
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 638
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 640
+            },
+            {
+              "x": 252,
+              "y": 639
+            },
+            {
+              "x": 251,
+              "y": 638
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 251,
+            "y": 639
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 9,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 640
+            },
+            {
+              "x": 252,
+              "y": 640
+            },
+            {
+              "x": 251,
+              "y": 639
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 250,
+            "y": 639
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 10,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 640
+            },
+            {
+              "x": 252,
+              "y": 640
+            },
+            {
+              "x": 251,
+              "y": 640
+            },
+            {
+              "x": 250,
+              "y": 639
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 249,
+            "y": 639
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 640
+            },
+            {
+              "x": 252,
+              "y": 640
+            },
+            {
+              "x": 251,
+              "y": 640
+            },
+            {
+              "x": 250,
+              "y": 640
+            },
+            {
+              "x": 249,
+              "y": 639
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 249,
+            "y": 638
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 12,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 640
+            },
+            {
+              "x": 252,
+              "y": 640
+            },
+            {
+              "x": 251,
+              "y": 640
+            },
+            {
+              "x": 250,
+              "y": 639
+            },
+            {
+              "x": 249,
+              "y": 639
+            },
+            {
+              "x": 249,
+              "y": 638
+            }
+          ]
+        },
+        {
+          "goal": {
+            "x": 249,
+            "y": 637
+          },
+          "staticWalkable": true,
+          "targetOccupied": false,
+          "goalCovered": true,
+          "goalTransfer": false,
+          "routeFound": true,
+          "routeLength": 11,
+          "first": {
+            "x": 259,
+            "y": 640
+          },
+          "next": {
+            "x": 258,
+            "y": 640
+          },
+          "firstCovered": true,
+          "nextCovered": true,
+          "allRouteCovered": true,
+          "allRouteAvoidsTransfers": true,
+          "sameDriverAdmissible": true,
+          "reason": "reachable",
+          "route": [
+            {
+              "x": 260,
+              "y": 640
+            },
+            {
+              "x": 259,
+              "y": 640
+            },
+            {
+              "x": 258,
+              "y": 640
+            },
+            {
+              "x": 257,
+              "y": 640
+            },
+            {
+              "x": 256,
+              "y": 640
+            },
+            {
+              "x": 255,
+              "y": 640
+            },
+            {
+              "x": 254,
+              "y": 640
+            },
+            {
+              "x": 253,
+              "y": 639
+            },
+            {
+              "x": 252,
+              "y": 638
+            },
+            {
+              "x": 251,
+              "y": 637
+            },
+            {
+              "x": 250,
+              "y": 637
+            },
+            {
+              "x": 249,
+              "y": 637
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reachableTargets": 9
+}

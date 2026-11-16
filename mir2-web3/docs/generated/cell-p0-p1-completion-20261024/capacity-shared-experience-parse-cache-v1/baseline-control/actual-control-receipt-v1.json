@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T09:50:41.503Z",
+  "endedAt": "2026-10-26T09:51:52.804Z",
+  "command": [
+    "rustup",
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "guild_kill_source_",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "baselineBackendCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "all50ControlInputsExactC": true,
+  "result": {
+    "exitCode": 101,
+    "signal": null,
+    "error": null
+  },
+  "error": null,
+  "candidateRestoredExactly": true,
+  "candidateRestoredPin": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+    "bytes": 94359,
+    "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea"
+  },
+  "preimage": {
+    "file": "C:/mir2-build/p01-completion-20261024/shared-experience-authority-parse-cache-v1/shared_experience_profile.rs.before-cache-v1.txt",
+    "bytes": 76309,
+    "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+  },
+  "logs": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-c-baseline-control-v1/control-stdout-v1.log",
+      "bytes": 700,
+      "sha256": "21a3149e44a66a26fde69de5e0692872bf1a5224e055224f0baeb56682dddb9f"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-c-baseline-control-v1/control-stderr-v1.log",
+      "bytes": 54609,
+      "sha256": "113674463c701f3219b79765c18b9fba0c09eadbe1be9caa638b71666e7c28bc"
+    }
+  ],
+  "testSummary": [
+    "test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 1251 filtered out; finished in 2.11s"
+  ],
+  "capacityAcceptance": false
+}

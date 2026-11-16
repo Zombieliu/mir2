@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T23:35:50.805Z",
+  "state": "template-only-source-finalized-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "slowStagePublicSchema": "socket-context-v1",
+  "originalSceneAndResourceBytesPreserved": true,
+  "originalGameplayPolicyPreserved": true,
+  "helperSyntheticEvidenceReusedWithoutRetest": true,
+  "helperSyntheticTests": 25,
+  "realmStarted": false,
+  "accountsProvisioned": false,
+  "capacityAccepted": false,
+  "scope": "2/10 each300s plus360s non-accepting probe; new41 backend and unchanged nine-input Node driver."
+}

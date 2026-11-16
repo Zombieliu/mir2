@@ -1,0 +1,81 @@
+{
+  "backendRollback": {
+    "observedAtUtc": "2026-11-15T18:04:02.999160+00:00",
+    "passed": true,
+    "source": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "rolledBackSource": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+    "pid": 1631255,
+    "binarySha256": "11fc151644ecb75ccb5a86789cefb2010a062ef48c3a9ddfd5ccf29b67dfe926",
+    "onlyOwnOverrideFilesRemoved": [
+      "/etc/systemd/system/mir2-playtest.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-r16-hud-ef6d20c095-paired.conf",
+      "/etc/mir2-playtest/r16-hud-ef6d20c095-production-revision.env"
+    ],
+    "databaseRestored": false,
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "ok": true
+  },
+  "readOnlyAfterRollback": {
+    "readOnly": true,
+    "passed": true,
+    "observedAtUtc": "2026-11-15T18:05:54.579712+00:00",
+    "pid": 1631255,
+    "source": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "ok": true,
+    "originalConfigurationFilesUnchanged": 22,
+    "oldRows": {
+      "accounts": {
+        "preexistingRows": 311,
+        "currentRows": 312,
+        "preexistingCanonicalBytes": 2310675,
+        "preexistingSha256": "c948617550505af7f3e0cdac48c1256ca1039c4d59a3a5004a9831dea7f8685f",
+        "preexistingRowsUnchanged": true
+      },
+      "characters": {
+        "preexistingRows": 223,
+        "currentRows": 224,
+        "preexistingCanonicalBytes": 75300,
+        "preexistingSha256": "8aaf0f7deb200c90ee47907fbdc1ff4fb7be2d5ed488ea765881311e38e1a6f9",
+        "preexistingRowsUnchanged": true
+      },
+      "character_saves": {
+        "preexistingRows": 223,
+        "currentRows": 224,
+        "preexistingCanonicalBytes": 2603560,
+        "preexistingSha256": "172d481b1ff21b3f9ab08686aa8e7824feba67f52d110f80fc2b7a69d89e49f6",
+        "preexistingRowsUnchanged": true
+      }
+    },
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "databaseRestored": false,
+    "credentialsRecorded": false
+  },
+  "sshClosed": true,
+  "localBrowsersClosed": true,
+  "canaryStoppedBeforeCutover": true
+}

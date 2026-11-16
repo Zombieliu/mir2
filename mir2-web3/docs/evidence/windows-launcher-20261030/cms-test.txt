@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running unittests src\lib.rs (mir2-web3\apps\game-client\windows-updater\target\debug\deps\mir2_windows_updater-45f04c9c198cc4c2.exe)
+
+running 1 test
+test platform::tests::cms_math_key_pin_usage_detached_and_renewal_contract ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s
+

@@ -1,0 +1,50 @@
+    Finished `test` profile [unoptimized] target(s) in 0.33s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 18 tests
+test routing::tests::five_class_receipt_tests::five_class_receipt_actual_logout_startgame_retires_old_online_object ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_actual_mp_eater_mana_order_is_independent_from_practice ... ok
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoFocus character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoFocus character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoFocus character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoFocus character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoFocus character_index=1
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test routing::tests::five_class_receipt_tests::five_class_receipt_focus_progress_uses_accepted_outcome_when_registered_fifo_is_full ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_invalid_identity_cannot_poison_valid_sequence ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_mana_old_life_rejected_and_new_life_real_result_accepted ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_mana_rejects_invalid_shape_life_and_online_owner_without_consuming_sequence ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_mana_teardown_fence_refuses_late_internal_result ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test routing::tests::five_class_receipt_tests::five_class_receipt_map_bootstrap_discards_stale_range_ack_but_keeps_skill_progress ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_normal_dark_body_explicit_self_target_rebases_to_shared_owner ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_normal_elemental_shot_gathers_without_target_in_shared_zone ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_normal_no_material_skills_do_not_commit_empty_consumption ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_old_life_is_rejected_after_real_zone_death_and_revive ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_out_of_order_earlier_outcome_cannot_advance_another_skill ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_real_assassin_and_archer_practice_is_owner_only_and_replay_safe ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_real_hp_watermark_does_not_consume_first_mp_settlement ... ok
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoHaste character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoHaste character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoHaste character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoHaste character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoHaste character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoHaste character_index=1
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=FcFifoConc character_index=1
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test routing::tests::five_class_receipt_tests::five_class_receipt_registered_full_fifo_cast_spends_once_before_magic_and_retries ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_teardown_saves_prior_queue_and_rejects_late_arrival ... ok
+test routing::tests::five_class_receipt_tests::five_class_receipt_unlearned_skill_rejected_without_consuming_server_receipt ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 1461 filtered out; finished in 34.97s

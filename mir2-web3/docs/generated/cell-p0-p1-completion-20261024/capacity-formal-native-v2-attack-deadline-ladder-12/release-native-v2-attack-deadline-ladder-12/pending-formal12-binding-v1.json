@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_PROBE16_TERMINAL_AND_TOOL_CLOSURE",
+  "finalized": false,
+  "backendInputCount": 44,
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "probe16": {
+    "runId": null,
+    "report": null,
+    "raw": null,
+    "collectedEvidence": null,
+    "independentVerification": null,
+    "independentVerifierSources": null,
+    "independentSourceClosureManifest": null,
+    "actualExecutionReceipt": null,
+    "independentVerifierRevision": null,
+    "preparedSourceConfigSha256": null,
+    "completePhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "capacityAccepted": false
+  },
+  "knownActualPrerequisites": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\known-actual-prerequisites-v2.json",
+    "bytes": 2279,
+    "sha256": "d1cccb177788b1adff608b93a0111134b1407135281dcaa57982618d4718d6a4"
+  },
+  "capacityAccepted": false
+}

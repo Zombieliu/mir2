@@ -1,0 +1,12 @@
+{
+  "schema": "mir2.r16.group.source.v1",
+  "pins": {
+    "app/page.tsx": "2e9a1cf1e10b911d587483e11e01cfdcffdb3452dfec4b76171fc7998df119f2",
+    "app/original-client-shell.tsx": "33e3e82f00bd9f2960ed70b89dc93e1ad4f9761b21b62dd6ce209b67b07cf521",
+    "app/components/original-client-group-window.tsx": "95230d7ee5f10b82b1e829670a0b17fd51cfd349b5244ef2a35db5c4aed91cd7",
+    "lib/group-operations.ts": "08fce78a67fef84c380bb4084aa052bfb86f7e9957f2104fbe1b9440ecc2c8ea",
+    "lib/stage5-window-adapters.ts": "b1a2ad8270db7e6e9f5f206a754e12f6ca577eb48934851a09abb73c299318a5",
+    "lib/use-window-keydown.ts": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce"
+  },
+  "createdAt": "2026-11-07T14:33:57.312Z"
+}

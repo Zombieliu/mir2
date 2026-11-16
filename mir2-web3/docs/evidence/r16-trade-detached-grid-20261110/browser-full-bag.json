@@ -1,0 +1,1241 @@
+{
+  "schema": 1,
+  "scope": "ordinary full-bag browser flow with a cloned File fixture seeded to forty bag cells and an equipped refill item",
+  "sourceHead": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+  "pageSha256": "b7094c92f66fda9aecd380e7f513dc108a322b48e3173146186bba36af31a651",
+  "gatewaySha256": "766287681c0e5e87652b1334c72339b3daf48edb8fa0e9b01731e0278f350668",
+  "runtime": "bevy-0cd68510886134e0",
+  "passed": true,
+  "checks": [
+    {
+      "name": "normal-keyboard-invitation-and-visible-acceptance",
+      "phase": "full-bag-invitation",
+      "mutualFacing": true,
+      "ordinaryPeerWalks": 2
+    },
+    {
+      "name": "full-bag-deposit-frees-the-carried-cell",
+      "startingSlots": 40,
+      "remaining": 39,
+      "offerSlot": 3
+    },
+    {
+      "name": "ordinary-unequip-refills-and-picker-has-no-return-cell",
+      "carriedCells": 40,
+      "detachedOffer": true
+    },
+    {
+      "name": "full-bag-explicit-unlock-retains-exact-detached-offer",
+      "carriedCells": 40
+    },
+    {
+      "name": "one-ordinary-equip-exposes-one-return-slot-and-exact-retrieval",
+      "carriedCells": 40,
+      "returnedTo": 3
+    }
+  ],
+  "screenshots": [
+    {
+      "role": "primary",
+      "file": "deposit-frees-cell-in-full-bag.png",
+      "sha256": "6f87625518ec9f47c7c33a894a8b61c8e89e0ed5219ebea08a7b2eb7f1b932b1"
+    },
+    {
+      "role": "primary",
+      "file": "full-bag-keeps-offer-and-no-return-slot.png",
+      "sha256": "a330850258a1c15c5195fdf5fcd3f48a59f3c6d27faeb7688558b047285192d0"
+    },
+    {
+      "role": "primary",
+      "file": "full-bag-unlocked-same-offer.png",
+      "sha256": "c32fa64eeff8fff1b6c1085425914356537a40cf70a8e4bb6853354f38e4445b"
+    },
+    {
+      "role": "primary",
+      "file": "exact-item-returned-to-ordinary-freed-cell.png",
+      "sha256": "6643b97f223bb6033c1e0ebb16b24eb3597bc019f1a2d30a8d05abd39340a2c0"
+    }
+  ],
+  "errors": [],
+  "modules": [
+    {
+      "role": "primary",
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "pinned": true
+    },
+    {
+      "role": "peer",
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "pinned": true
+    }
+  ],
+  "trace": [
+    {
+      "order": 1,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "navigation": "/game"
+    },
+    {
+      "order": 2,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "navigation": "/game"
+    },
+    {
+      "order": 3,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "navigation": "/game"
+    },
+    {
+      "order": 4,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 5,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 6,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "navigation": "/game"
+    },
+    {
+      "order": 7,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "42d723d7c411d580632a8fdb1fa8a1b3fec25193ba46fb50538a1148db3e4c93"
+    },
+    {
+      "order": 8,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "adf17e7c09ca144da5eff58982ed6607dae45c83d4b2f6691bf1f38abc5a5a53"
+    },
+    {
+      "order": 9,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "connection": "created"
+    },
+    {
+      "order": 10,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "packet": "StartGame",
+      "result": 4,
+      "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8"
+    },
+    {
+      "order": 11,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 12,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 13,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "37b72af3184db76943ad9e032e19011b5b5b48aeb81de134cfb53ec62674af04"
+    },
+    {
+      "order": 14,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "0a32b19cfc4d7f7897c476bd7c350d87844d224a83c94eab5653ad03095ba034"
+    },
+    {
+      "order": 15,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "connection": "created"
+    },
+    {
+      "order": 16,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 17,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 18,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "f3dc752fcf52202c595ffa0d1b5e6cb022e41dba15064ce04f554435fa4056a0"
+    },
+    {
+      "order": 19,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "f3dc752fcf52202c595ffa0d1b5e6cb022e41dba15064ce04f554435fa4056a0"
+    },
+    {
+      "order": 20,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 21,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "40254789ea96f1e7f6f470c8ea349a550fc061d54259408453c48d8f88fedfa7"
+    },
+    {
+      "order": 22,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "99879932db6590b9e7db02f71df20cd418a9a29b3e2e150bd1950e81c28b1d5c"
+    },
+    {
+      "order": 23,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "devReloadSignal": true,
+      "messageHash": "1ad4178b2adca80d62c996552da565381cdfdb982c30f29a1ccbe1e4f5e05a2e"
+    },
+    {
+      "order": 24,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "packet": "StartGame",
+      "result": 4,
+      "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8"
+    },
+    {
+      "order": 25,
+      "role": "peer",
+      "phase": "full-bag-invitation",
+      "command": {
+        "type": "walk",
+        "direction": "Down"
+      }
+    },
+    {
+      "order": 26,
+      "role": "peer",
+      "phase": "full-bag-invitation",
+      "packet": "UserLocation",
+      "sha256": "4ab2f82e545aa1028da103a3826f95b68a040f5e743158cdd7f4a7f228a8c857",
+      "position": {
+        "x": 288,
+        "y": 618
+      },
+      "direction": "Down"
+    },
+    {
+      "order": 27,
+      "role": "primary",
+      "phase": "full-bag-invitation",
+      "packet": "ObjectWalk",
+      "sha256": "bd791a5cfd5e2121641af47b0d7c58e289ef50c6c9f24e5e942472bfc09f8fa5",
+      "position": {
+        "x": 288,
+        "y": 618
+      },
+      "direction": "Down"
+    },
+    {
+      "order": 28,
+      "role": "peer",
+      "phase": "full-bag-invitation",
+      "command": {
+        "type": "walk",
+        "direction": "Up"
+      }
+    },
+    {
+      "order": 29,
+      "role": "primary",
+      "phase": "full-bag-invitation",
+      "packet": "ObjectWalk",
+      "sha256": "e8425f4fd3777fa9add88883e00b316606eb82940a95b1a3bd9cf45c3ef343da",
+      "position": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "Up"
+    },
+    {
+      "order": 30,
+      "role": "peer",
+      "phase": "full-bag-invitation",
+      "packet": "UserLocation",
+      "sha256": "7ee040d22c4b8fd7d9b5b85f7338bfc28f240e0a240c4eee0e887958270b1183",
+      "position": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "Up"
+    },
+    {
+      "order": 31,
+      "role": "peer",
+      "phase": "full-bag-invitation",
+      "command": {
+        "type": "tradeRequest"
+      }
+    },
+    {
+      "order": 32,
+      "role": "primary",
+      "phase": "full-bag-invitation",
+      "packet": "TradeRequest",
+      "sha256": "2349271a32f5afcc9e948ffd0e5d5a7a2f6120736be9c66d51f3004ad1e7aecd"
+    },
+    {
+      "order": 33,
+      "role": "primary",
+      "phase": "full-bag-invitation",
+      "command": {
+        "type": "tradeReply",
+        "acceptInvite": true
+      }
+    },
+    {
+      "order": 34,
+      "role": "primary",
+      "phase": "full-bag-invitation",
+      "packet": "TradeAccept",
+      "sha256": "47e9bea19c4eb4c706748ce314ab85853d1f304e3a76cdd336aebf3cb4da9156"
+    },
+    {
+      "order": 35,
+      "role": "peer",
+      "phase": "full-bag-invitation",
+      "packet": "TradeAccept",
+      "sha256": "ff7c91bb8e9f088cdedf3dc58f6ef3dcb20f242629f62c2939877ab3b81665c0"
+    },
+    {
+      "order": 36,
+      "role": "primary",
+      "phase": "deposit-from-a-full-bag",
+      "command": {
+        "type": "depositTradeItem",
+        "from": 3,
+        "to": 3
+      }
+    },
+    {
+      "order": 37,
+      "role": "peer",
+      "phase": "deposit-from-a-full-bag",
+      "packet": "TradeItem",
+      "sha256": "885ca8637e752490a3a423d391065c8c9f7503296a2303833c6a53ca8b22b67a",
+      "items": [
+        {
+          "itemIndex": 722,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "order": 38,
+      "role": "primary",
+      "phase": "deposit-from-a-full-bag",
+      "packet": "DepositTradeItem",
+      "from": 3,
+      "to": 3,
+      "success": true,
+      "sha256": "1e9331ae33f1fa6ecfe477f71cbd52e5838c9aff25d2cda5ecd2b110d923679b",
+      "wire": "{\"packet\":\"DepositTradeItem\",\"payload\":{\"from\":3,\"success\":true,\"to\":3},\"type\":\"packet\"}"
+    },
+    {
+      "order": 39,
+      "role": "primary",
+      "phase": "ordinary-unequip-refills-the-freed-cell",
+      "command": {
+        "type": "removeItem",
+        "uniqueId": 20550,
+        "grid": "inventory",
+        "to": 3
+      }
+    },
+    {
+      "order": 40,
+      "role": "primary",
+      "phase": "ordinary-unequip-refills-the-freed-cell",
+      "packet": "RemoveItem",
+      "to": 3,
+      "success": true,
+      "uidHash": "f2e4247854a19ebf9afbee572ca23adb354189a7a1faf86a4f135e2e5b3732a4",
+      "sha256": "52d4c03ed16a66298316f8c02df8abbe21571b6fdce59d682ea4bf62ae362ab1"
+    },
+    {
+      "order": 41,
+      "role": "primary",
+      "phase": "lock-and-unlock-while-carried-bag-is-full",
+      "command": {
+        "type": "tradeConfirm",
+        "locked": true
+      }
+    },
+    {
+      "order": 42,
+      "role": "primary",
+      "phase": "lock-and-unlock-while-carried-bag-is-full",
+      "command": {
+        "type": "tradeConfirm",
+        "locked": false
+      }
+    },
+    {
+      "order": 43,
+      "role": "primary",
+      "phase": "lock-and-unlock-while-carried-bag-is-full",
+      "packet": "TradeCancel",
+      "unlock": true,
+      "sha256": "07790238955488d918c3216a7422ef1dfe0c9ebb17679e7e1508c66ae09ed05b"
+    },
+    {
+      "order": 44,
+      "role": "primary",
+      "phase": "ordinary-equip-frees-one-cell-and-exact-retrieve",
+      "command": {
+        "type": "equipItem",
+        "uniqueId": 20550,
+        "grid": "inventory",
+        "to": 0
+      }
+    },
+    {
+      "order": 45,
+      "role": "primary",
+      "phase": "ordinary-equip-frees-one-cell-and-exact-retrieve",
+      "packet": "EquipItem",
+      "to": 0,
+      "success": true,
+      "uidHash": "f2e4247854a19ebf9afbee572ca23adb354189a7a1faf86a4f135e2e5b3732a4",
+      "sha256": "1d6641c12797b8eeb1bd2bef3eedf0664df05daefdb51d72eea8ee724cd9a77d"
+    },
+    {
+      "order": 46,
+      "role": "primary",
+      "phase": "ordinary-equip-frees-one-cell-and-exact-retrieve",
+      "command": {
+        "type": "retrieveTradeItem",
+        "from": 3,
+        "to": 3
+      }
+    },
+    {
+      "order": 47,
+      "role": "primary",
+      "phase": "ordinary-equip-frees-one-cell-and-exact-retrieve",
+      "packet": "RetrieveTradeItem",
+      "from": 3,
+      "to": 3,
+      "success": true,
+      "sha256": "5dbc6ad7981b0cfa09ae4371707517ceacedcbbf70c283a1ccbd2779911031c4"
+    },
+    {
+      "order": 48,
+      "role": "peer",
+      "phase": "ordinary-equip-frees-one-cell-and-exact-retrieve",
+      "packet": "TradeItem",
+      "sha256": "205f0162e5b07ef16c30f4896bb159a2309ce8276c2330672e866536e8d6acc8",
+      "items": []
+    },
+    {
+      "order": 49,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "command": {
+        "type": "tradeCancel"
+      }
+    },
+    {
+      "order": 50,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "TradeCancel",
+      "unlock": false,
+      "sha256": "43e8901bbea5fae8c61a66563163885b745c26c587f55196d4a05f7f14e2039e"
+    },
+    {
+      "order": 51,
+      "role": "peer",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "TradeCancel",
+      "unlock": false,
+      "sha256": "43e8901bbea5fae8c61a66563163885b745c26c587f55196d4a05f7f14e2039e"
+    },
+    {
+      "order": 52,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "command": {
+        "type": "logOut"
+      }
+    },
+    {
+      "order": 53,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "LogOutSuccess",
+      "sha256": "ee907241ac04894048b0e40f9faacb3e9ac8d49f52d9f431ecdf270d9d78fbe6"
+    },
+    {
+      "order": 54,
+      "role": "peer",
+      "phase": "ordinary-cancel-logout-reentry",
+      "command": {
+        "type": "logOut"
+      }
+    },
+    {
+      "order": 55,
+      "role": "peer",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "LogOutSuccess",
+      "sha256": "09fe4040b5da9720ffe90e00f438243905a37bc3c5dfffded5007b2220a1c9b7"
+    },
+    {
+      "order": 56,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "StartGame",
+      "result": 4,
+      "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8"
+    },
+    {
+      "order": 57,
+      "role": "peer",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "StartGame",
+      "result": 4,
+      "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8"
+    },
+    {
+      "order": 58,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "command": {
+        "type": "logOut"
+      }
+    },
+    {
+      "order": 59,
+      "role": "primary",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "LogOutSuccess",
+      "sha256": "82c1d3935a587aec97b878c0ebaa87ffc512f7bb39abd6d5dcf376850b88b603"
+    },
+    {
+      "order": 60,
+      "role": "peer",
+      "phase": "ordinary-cancel-logout-reentry",
+      "command": {
+        "type": "logOut"
+      }
+    },
+    {
+      "order": 61,
+      "role": "peer",
+      "phase": "ordinary-cancel-logout-reentry",
+      "packet": "LogOutSuccess",
+      "sha256": "0a0a1bc285c01e17360babe7a2d459ea7fa22be7f9929b8ba0015c1167d00652"
+    }
+  ],
+  "assetsBefore": {
+    "primary": {
+      "gold": 1000,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 10,
+          "uidHash": "971e28bfa6d58f307ceb7acaa4a7720c1b96029fe5a86dbd962a85ed90f7e69d",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 11,
+          "uidHash": "e4b8f2da99fd9407c758cd306f846562424ec5c38d320289f03c60b8437ed73d",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 12,
+          "uidHash": "b6167a59dbfdca3d716a326a015dd8a00f417590eb34e21f65eb430c97b9b903",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 13,
+          "uidHash": "0cee6209b0c56a616c829933c323c367f3f83eaefd0ee9e11215653fe732d173",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 14,
+          "uidHash": "5349fe856d453e366a1cb34b6dc42c3d2fd93299287648223966aebcc951e068",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 15,
+          "uidHash": "fa86611a10365c8c09d785c51e6f6ce1ad4f4daab366a62e29cb58de023dcb7c",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 16,
+          "uidHash": "bc2c79f33e3d8d71348247de0012a07917367d2d98f9af7c4ae3def3e6fc8e6b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 17,
+          "uidHash": "4dbfb70e2008ab9997f17dee8c0a0f41359744f142c4809d3d0afa24ebd0239b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 18,
+          "uidHash": "d7144d80be412e0380ee428606a71ad18a7e9490435a9152387f068fe0a11ef0",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 19,
+          "uidHash": "4e5faafe665df4b96a994121035930f08977483aad4285511aa479ec469137cb",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 20,
+          "uidHash": "3d53a85150dd6c2cf53d7413fe287ebc2dba06c3d6fb89df281e3837a05d383c",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 21,
+          "uidHash": "c291fe829d40dc63fc4fa578f6208f425064945d31ca8251d2821d2b4855380f",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 22,
+          "uidHash": "c2db217ea7a34191c8f55a2acd4ac37c35611dc1946a7c0fd81e0524bc3369b1",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 23,
+          "uidHash": "8b6d4c830d3a32839b2fa99f54e81969f2b7a2c9e6fa383a6a5da778ad2d8ca2",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 24,
+          "uidHash": "dd7270edf479d8779827cbe5d0e45fea44390dc9f0685b12e88ea98d49a3350e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 25,
+          "uidHash": "463f716c347831520004c0420af4baa376bce8ae70d82edc5b62231bf288d0ff",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 26,
+          "uidHash": "6c01b9f6a375679f1e1de93d29c82bf1963bda5aaa23accdf14c0fb0f990341e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 27,
+          "uidHash": "0597f171a594e02d5052e9df649923709c3bf0e1137b87ca4ab1edfceb934ad9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 28,
+          "uidHash": "a3c02c7b8b03e012b8d139f022c5edda4bb4389142da1635a7153ee71509f045",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 29,
+          "uidHash": "0dd1c3686e0d89e48b486d6798e1e6393e44e8fcb5f61bcef79de3f5744fd8d7",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 30,
+          "uidHash": "f4f41eee51646d44b0f223367cbb20e0c02619a8c9891b520a8ea783062924bf",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 31,
+          "uidHash": "5335faf37616961de2ca0d7493e78bd54539094f2fbe54cfaa66059c910b4412",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 32,
+          "uidHash": "ef0825aa83d176e856dbe4c1c8338fd0105a89cfe3caf107b556aa54406e365e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 33,
+          "uidHash": "7b71704afda2fa21436eb876da59292b45d058551f4aad47d4dc4056a8276b3e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 34,
+          "uidHash": "08f2c7a71012e86401eae4bb061bd3f1fdafdb07203728a2910004a0f17c26ba",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 35,
+          "uidHash": "aded3e8831d8cf33916b6d78371fc892e8d57b8d890e029484c2ea710507dc12",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 36,
+          "uidHash": "6be6aae6be3957dbbabd590642cadb5f09f97eacd8ac18eb3614c765b15ef13e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 37,
+          "uidHash": "aad5843fc5ac74befedd0e6c2d8379717812a1aa92a7d4311044aa6cd85409af",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 38,
+          "uidHash": "3a0ee86119a00f825971327eee22c61bd07bc8868596816c1d46409016d97c51",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 39,
+          "uidHash": "ebe98aee2a523ab77985104f5b94c8a985f6483338baa92fbec16baa47a7e7aa",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 4,
+          "uidHash": "41c0d64a0bbd56525a864df10fb9da28f9b7687abd797e4cb6c601f992195ce0",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 5,
+          "uidHash": "3efdc9dc584c5f2642959d2ea9329d01d7c7140f0c4d5c785ab3bcadf28040e1",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 6,
+          "uidHash": "cc3fefcee849473f708a87651606c36d3e4a6a9caab4e8ce974623cd742533c1",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 7,
+          "uidHash": "13f82987984a1794059ccc98d5330f37c246c1ec100e97f3e04637a01678d120",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 8,
+          "uidHash": "8ae6698730d03c96c85579a37393ded31deb9300973ede99e6e44729099bcb0d",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 9,
+          "uidHash": "e58800e32814171e0b56b749231f8511a406d45c338a4411c9a21abfba49e1eb",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": [
+        {
+          "slot": "weapon",
+          "uidHash": "eb045d78d273107348b0300c01d29b7552d622abbc6faf81b3ec55359aa9950c",
+          "quantity": 1,
+          "key": "crystal-item-221"
+        }
+      ]
+    },
+    "peer": {
+      "gold": 700,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    }
+  },
+  "finalLogouts": true,
+  "assetsAfter": {
+    "primary": {
+      "gold": 1000,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 10,
+          "uidHash": "971e28bfa6d58f307ceb7acaa4a7720c1b96029fe5a86dbd962a85ed90f7e69d",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 11,
+          "uidHash": "e4b8f2da99fd9407c758cd306f846562424ec5c38d320289f03c60b8437ed73d",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 12,
+          "uidHash": "b6167a59dbfdca3d716a326a015dd8a00f417590eb34e21f65eb430c97b9b903",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 13,
+          "uidHash": "0cee6209b0c56a616c829933c323c367f3f83eaefd0ee9e11215653fe732d173",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 14,
+          "uidHash": "5349fe856d453e366a1cb34b6dc42c3d2fd93299287648223966aebcc951e068",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 15,
+          "uidHash": "fa86611a10365c8c09d785c51e6f6ce1ad4f4daab366a62e29cb58de023dcb7c",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 16,
+          "uidHash": "bc2c79f33e3d8d71348247de0012a07917367d2d98f9af7c4ae3def3e6fc8e6b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 17,
+          "uidHash": "4dbfb70e2008ab9997f17dee8c0a0f41359744f142c4809d3d0afa24ebd0239b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 18,
+          "uidHash": "d7144d80be412e0380ee428606a71ad18a7e9490435a9152387f068fe0a11ef0",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 19,
+          "uidHash": "4e5faafe665df4b96a994121035930f08977483aad4285511aa479ec469137cb",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 20,
+          "uidHash": "3d53a85150dd6c2cf53d7413fe287ebc2dba06c3d6fb89df281e3837a05d383c",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 21,
+          "uidHash": "c291fe829d40dc63fc4fa578f6208f425064945d31ca8251d2821d2b4855380f",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 22,
+          "uidHash": "c2db217ea7a34191c8f55a2acd4ac37c35611dc1946a7c0fd81e0524bc3369b1",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 23,
+          "uidHash": "8b6d4c830d3a32839b2fa99f54e81969f2b7a2c9e6fa383a6a5da778ad2d8ca2",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 24,
+          "uidHash": "dd7270edf479d8779827cbe5d0e45fea44390dc9f0685b12e88ea98d49a3350e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 25,
+          "uidHash": "463f716c347831520004c0420af4baa376bce8ae70d82edc5b62231bf288d0ff",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 26,
+          "uidHash": "6c01b9f6a375679f1e1de93d29c82bf1963bda5aaa23accdf14c0fb0f990341e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 27,
+          "uidHash": "0597f171a594e02d5052e9df649923709c3bf0e1137b87ca4ab1edfceb934ad9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 28,
+          "uidHash": "a3c02c7b8b03e012b8d139f022c5edda4bb4389142da1635a7153ee71509f045",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 29,
+          "uidHash": "0dd1c3686e0d89e48b486d6798e1e6393e44e8fcb5f61bcef79de3f5744fd8d7",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 30,
+          "uidHash": "f4f41eee51646d44b0f223367cbb20e0c02619a8c9891b520a8ea783062924bf",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 31,
+          "uidHash": "5335faf37616961de2ca0d7493e78bd54539094f2fbe54cfaa66059c910b4412",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 32,
+          "uidHash": "ef0825aa83d176e856dbe4c1c8338fd0105a89cfe3caf107b556aa54406e365e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 33,
+          "uidHash": "7b71704afda2fa21436eb876da59292b45d058551f4aad47d4dc4056a8276b3e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 34,
+          "uidHash": "08f2c7a71012e86401eae4bb061bd3f1fdafdb07203728a2910004a0f17c26ba",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 35,
+          "uidHash": "aded3e8831d8cf33916b6d78371fc892e8d57b8d890e029484c2ea710507dc12",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 36,
+          "uidHash": "6be6aae6be3957dbbabd590642cadb5f09f97eacd8ac18eb3614c765b15ef13e",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 37,
+          "uidHash": "aad5843fc5ac74befedd0e6c2d8379717812a1aa92a7d4311044aa6cd85409af",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 38,
+          "uidHash": "3a0ee86119a00f825971327eee22c61bd07bc8868596816c1d46409016d97c51",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 39,
+          "uidHash": "ebe98aee2a523ab77985104f5b94c8a985f6483338baa92fbec16baa47a7e7aa",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 4,
+          "uidHash": "41c0d64a0bbd56525a864df10fb9da28f9b7687abd797e4cb6c601f992195ce0",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 5,
+          "uidHash": "3efdc9dc584c5f2642959d2ea9329d01d7c7140f0c4d5c785ab3bcadf28040e1",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 6,
+          "uidHash": "cc3fefcee849473f708a87651606c36d3e4a6a9caab4e8ce974623cd742533c1",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 7,
+          "uidHash": "13f82987984a1794059ccc98d5330f37c246c1ec100e97f3e04637a01678d120",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 8,
+          "uidHash": "8ae6698730d03c96c85579a37393ded31deb9300973ede99e6e44729099bcb0d",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        },
+        {
+          "slot": 9,
+          "uidHash": "e58800e32814171e0b56b749231f8511a406d45c338a4411c9a21abfba49e1eb",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": [
+        {
+          "slot": "weapon",
+          "uidHash": "eb045d78d273107348b0300c01d29b7552d622abbc6faf81b3ec55359aa9950c",
+          "quantity": 1,
+          "key": "crystal-item-221"
+        }
+      ]
+    },
+    "peer": {
+      "gold": 700,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    }
+  },
+  "sameRoleSavedGear": true,
+  "browserClosed": true,
+  "phase": "ordinary-cancel-logout-reentry"
+}

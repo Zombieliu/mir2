@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized] target(s) in 0.37s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 8 tests
+test zone_rpc::canonical_recovery_pg_tests::canonical_recovery_cold_host_without_original_session_reuses_durable_base_and_effect_identity ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test zone_rpc::canonical_recovery_pg_tests::canonical_recovery_host_post_commit_gap_recovers_source_world_and_reset_without_second_debit ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test zone_rpc::canonical_recovery_replay_tests::canonical_reset_is_server_only_and_rejects_session_dispatch ... ok
+test zone_rpc::canonical_recovery_replay_tests::empty_reset_creates_no_session_and_advances_from_n_to_n_plus_one ... ok
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::canonical_recovery_replay_tests::reset_installs_canonical_source_and_base_before_next_normal_mutation ... ok
+test zone_rpc::canonical_recovery_replay_tests::reset_rejects_semantically_tampered_entries_before_install_or_session_creation ... ok
+test zone_rpc::canonical_recovery_replay_tests::reset_requires_exact_base_anchor_and_digest_verified_batch ... ok
+test zone_rpc::player_drop_journal_tests::source_of_truth_promotion_requires_canonical_recovery_before_snapshot_or_seed ... ok
+
+test result: ok. 6 passed; 0 failed; 2 ignored; 0 measured; 1544 filtered out; finished in 1.03s

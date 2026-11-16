@@ -1,0 +1,12 @@
+{
+  "reviewer": "root agent",
+  "humanAccepted": false,
+  "defaultNpcImageReviewed": true,
+  "defaultRouteImageReviewed": true,
+  "findings": [
+    "NPC label visually clear above world sprites; ordinary interaction opens Gilbert dialogue.",
+    "Alchemist Samuel visible at displayed supplier location; actual player322293 is within the shared2-tile approach range."
+  ],
+  "scope": "Agent-reviewed current local screenshots only. Long English GDI bitmaps and global1:1/human acceptance remain open.",
+  "sharedWebGl2NpcImageReviewed": true
+}

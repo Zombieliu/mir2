@@ -1,0 +1,102 @@
+{
+  "schema": "mir2.source62.tooltip-wire-tests.actual.v1",
+  "owner": "Root",
+  "accepted": true,
+  "tests": {
+    "passed": 3,
+    "failed": 0,
+    "ignored": 0,
+    "names": [
+      "tooltip_wire_emits_explicit_empty_socket_arrays",
+      "tooltip_wire_legacy_omitted_socket_arrays_still_deserialize_empty",
+      "tooltip_wire_preserves_nonempty_socket_positions_and_template_rows"
+    ]
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 48312,
+    "kind": "simulation-tooltip-wire-test03 Root accepted actual922 Source62 generation03",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 54726,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/root-approved01/simulation-tooltip-wire-test03-config03.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "guardBefore": {
+    "schemaVersion": 1,
+    "mode": "real-cargo",
+    "nonce": "765214b7c1544c75b56a091682a3aa6b",
+    "policyPath": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/root-approved01/simulation-tooltip-wire-test03-policy03.json",
+    "policySha": "0a030d66ddd5dc5605db6980d95584baac4ca54a7bb90f12c6809ae5ee736470",
+    "args": [
+      "+1.95.0",
+      "test",
+      "--manifest-path",
+      "apps/simulation/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--jobs",
+      "1",
+      "--test",
+      "item_tooltip_wire",
+      "--",
+      "--test-threads=1"
+    ],
+    "cwd": "C:\\mir2-cross-platform-storage-20261002\\web-source62-tooltip-wire-20261011-01\\preparation03\\mir2-web3",
+    "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+    "sample": {
+      "schemaVersion": "1",
+      "driveLetter": "C",
+      "sampleBeginUtc": "2026-10-11T06:25:28.0744218Z",
+      "sampleEndUtc": "2026-10-11T06:25:28.8242064Z",
+      "remainingBytes": "170306674688",
+      "requiredBytes": "53687091200"
+    },
+    "probePid": 55180,
+    "probeLaunchMs": 88.387,
+    "probeEndMs": 1045.5251,
+    "decision": "FORWARD",
+    "thresholdBytes": "53687091200",
+    "sampleProof": "actualGetVolumeC"
+  },
+  "guardAfter": {
+    "childPid": 19260,
+    "childStartedUtc": "/Date(1791699928888)/",
+    "childStartMs": 1067.3914,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 0,
+    "exitBits": "0",
+    "completedUtc": "/Date(1791699982507)/",
+    "completionMs": 54685.955400000006,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/preparation03/source62-isolated-snapshot03.json",
+    "bytes": 513681,
+    "sha256": "6a2166a192bc9f721b29992a33ed5c5657c937065d6743152e4fc34b48419e50"
+  },
+  "declaredInputs": 922,
+  "callerSourceBytes": 4569,
+  "callerSourceSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "sourceScope": "accepted frozen Rust baseline plus only two socket Vec serde attribute changes, separate wire regression test, three unchanged committed workspace entry files and one exact unchanged public compile catalog; not full current dirty backend",
+  "unrelatedCatalogModified": false,
+  "catalogTrackedInHEAD": false,
+  "frontendPurchaseVerified": false,
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false,
+  "priorActualCompileFailuresRetained": [
+    "rust01-historical-failure01.json",
+    "rust02-historical-failure01.json"
+  ]
+}

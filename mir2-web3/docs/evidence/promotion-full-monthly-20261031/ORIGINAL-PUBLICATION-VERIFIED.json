@@ -1,0 +1,32 @@
+{
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "batchId": "36398409984517bc",
+  "healthy": true,
+  "preservedServices": true,
+  "migrationCount": 28,
+  "publicationPreservation": {
+    "allMigrationRowsPreserved": true,
+    "allOldBusinessRowsPreserved": true,
+    "clockProofs": {
+      "shared_conquests": {
+        "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+        "count": 1,
+        "metadataOnly": true,
+        "table": "shared_conquests"
+      },
+      "shared_guild_clock": {
+        "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+        "count": 1,
+        "metadataOnly": true,
+        "table": "shared_guild_clock"
+      }
+    },
+    "financialWritePerformed": false,
+    "migrationCount": 28,
+    "policyApplyPerformed": false
+  },
+  "liveRowsMayAdvanceNormally": true,
+  "operatorInvoked": false,
+  "policyApplyPerformed": false,
+  "docker": false
+}

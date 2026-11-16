@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { registerHooks } from "node:module";
 import { after, test } from "node:test";
 
 import { GET } from "../app/version/route.ts";
@@ -72,10 +73,28 @@ test("Next config captures the Vercel revision at build time", async () => {
   clearRevisionVariables();
   process.env.VERCEL_GIT_COMMIT_SHA = "vercel-build-sha";
 
-  const { default: nextConfig } = await import(
-    `../next.config.ts?version-test=${Date.now()}`
+  const configUrl = new URL(
+    `../next.config.ts?version-test=${Date.now()}`,
+    import.meta.url,
   );
-  assert.equal(nextConfig.env?.MIR2_BUILD_REVISION, "vercel-build-sha");
+  const helperUrl = new URL("../lib/standalone-full-pack-tracing.ts", import.meta.url);
+  const hooks = registerHooks({
+    resolve(specifier, context, nextResolve) {
+      if (
+        context.parentURL === configUrl.href &&
+        specifier === "./lib/standalone-full-pack-tracing"
+      ) {
+        return nextResolve(helperUrl.href, context);
+      }
+      return nextResolve(specifier, context);
+    },
+  });
+  try {
+    const { default: nextConfig } = await import(configUrl.href);
+    assert.equal(nextConfig.env?.MIR2_BUILD_REVISION, "vercel-build-sha");
+  } finally {
+    hooks.deregister();
+  }
 });
 
 test("returns an explicit local marker when the revision is unset", async () => {

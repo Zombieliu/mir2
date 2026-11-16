@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "mode": "ordinary-economic-preparation-functional-pilot",
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\frozen-source-v1.json",
+    "bytes": 78569,
+    "sha256": "6529be41d213e4a2b0d26b02bab3a7db78c7bd39a897cc8893390f30b758730d"
+  },
+  "driverSourceCommit": "d926d5bcd2058c1da1a2a98563689e8a1fbe5f89",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\reports\\1793039455345-4130b3d1.report.json",
+    "bytes": 14101,
+    "sha256": "4762a6fbb7c1837b9aa6f0b9cda5b10c6cff2e0f09887ae3f8daaa42ba7ed514"
+  },
+  "rawOriginalVerdict": {
+    "ok": false,
+    "error": "Cannot read properties of null (reading 'npcObjectId')",
+    "safetyStopped": false,
+    "highestPassedStage": null
+  },
+  "ordinaryPreparationEvidence": {
+    "originalSamples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\reports\\1793039455345-4130b3d1.samples.jsonl",
+      "bytes": 30867,
+      "sha256": "a91e7bdcd23cf05f4100e0ac992c63db12f259d2365418dbc58de8ad9fb417c8"
+    },
+    "preparedActors": 0,
+    "closedLoops": 0,
+    "cohortActivations": []
+  },
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\cleanup-v1.json",
+    "bytes": 984,
+    "sha256": "19724b1c4e03c2eca906079e1e4b08e4e446c330dd21f56743a7c59e198e1323"
+  },
+  "functionalPilotDurationOnly": true,
+  "sustainableTwoHourSupplyProven": false,
+  "formalFiveMinuteStagePerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

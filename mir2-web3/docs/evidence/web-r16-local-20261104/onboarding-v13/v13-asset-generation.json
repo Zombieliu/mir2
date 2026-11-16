@@ -1,0 +1,36 @@
+{
+  "output": "F:\\mir2-builds\\web-r16-20261104\\r16-playable-assets-v13.json",
+  "manifestSha256": "e7e13ea2aeb9cde489f6bc2a3d23927bcb72e0e4eb0a0ddfdbdc2289a7fdeb18",
+  "assetRoot": "F:\\mir2-builds\\web-r16-20261104\\r16-playable-assets-v13.json.public",
+  "files": 21056,
+  "bytes": 281159572,
+  "materialized": {
+    "files": 21056,
+    "bytes": 281159572,
+    "verified": true
+  },
+  "categories": {
+    "ui": 4274,
+    "map0": 8483,
+    "map0141": 8,
+    "monsters": 2624,
+    "firstplay": 5667
+  },
+  "diagnostics": {
+    "maps": {
+      "0": {
+        "drawable": 8483,
+        "noDraw": 242,
+        "invalidSlots": 32
+      },
+      "0141": {
+        "drawable": 307,
+        "noDraw": 0,
+        "invalidSlots": 0
+      }
+    },
+    "monsterRawFrames": 636,
+    "monsterAtlasFrames": 1966,
+    "firstplayMonsterRawAdditions": 1966
+  }
+}

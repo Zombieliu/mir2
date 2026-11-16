@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "remaining-two-existing-QA-roles-same-browser-normal-UI-login-city-Q-logout",
+  "roles": [
+    {
+      "ordinal": 2,
+      "className": "Wizard",
+      "passed": true,
+      "moved": [],
+      "authority": {
+        "className": "Wizard",
+        "level": 2,
+        "map": "0",
+        "position": {
+          "x": 288,
+          "y": 615
+        },
+        "gold": 100,
+        "experience": 0,
+        "hp": 17,
+        "maxHp": 17,
+        "q1": {
+          "stage": "completed",
+          "current": 1,
+          "required": 1
+        },
+        "assetsDigest": "3be378d6ee748770d2c28cdeda90645073e94ca86c448aa87685e3f3ab4e714a",
+        "otherPlayersObserved": 0
+      },
+      "loginWireMatched": true,
+      "startWireMatched": true,
+      "entryUi": {
+        "screen": "game",
+        "quest": {
+          "ready": true,
+          "error": false,
+          "questLogOpen": false,
+          "capturesPointer": false,
+          "frame": 83424,
+          "generation": 5,
+          "revision": 17
+        },
+        "runtimeBackend": "webgpu",
+        "frame": {
+          "x": 128,
+          "y": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "assetsPending": false,
+          "owner": "bevy"
+        },
+        "sceneCanvasVisible": true
+      },
+      "openQuest": {
+        "screen": "game",
+        "quest": {
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 83437,
+          "generation": 5,
+          "revision": 18
+        },
+        "runtimeBackend": "webgpu",
+        "frame": {
+          "x": 128,
+          "y": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "assetsPending": false,
+          "owner": "bevy"
+        },
+        "sceneCanvasVisible": true
+      },
+      "finalPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "motionCommands": [],
+      "normalLogoutAck": true
+    },
+    {
+      "ordinal": 3,
+      "className": "Taoist",
+      "passed": true,
+      "moved": [],
+      "authority": {
+        "className": "Taoist",
+        "level": 2,
+        "map": "0",
+        "position": {
+          "x": 288,
+          "y": 615
+        },
+        "gold": 100,
+        "experience": 0,
+        "hp": 19,
+        "maxHp": 19,
+        "q1": {
+          "stage": "completed",
+          "current": 1,
+          "required": 1
+        },
+        "assetsDigest": "3be378d6ee748770d2c28cdeda90645073e94ca86c448aa87685e3f3ab4e714a",
+        "otherPlayersObserved": 0
+      },
+      "loginWireMatched": true,
+      "startWireMatched": true,
+      "entryUi": {
+        "screen": "game",
+        "quest": {
+          "ready": true,
+          "error": false,
+          "questLogOpen": false,
+          "capturesPointer": false,
+          "frame": 85274,
+          "generation": 8,
+          "revision": 28
+        },
+        "runtimeBackend": "webgpu",
+        "frame": {
+          "x": 128,
+          "y": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "assetsPending": false,
+          "owner": "bevy"
+        },
+        "sceneCanvasVisible": true
+      },
+      "openQuest": {
+        "screen": "game",
+        "quest": {
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 85294,
+          "generation": 8,
+          "revision": 29
+        },
+        "runtimeBackend": "webgpu",
+        "frame": {
+          "x": 128,
+          "y": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "assetsPending": false,
+          "owner": "bevy"
+        },
+        "sceneCanvasVisible": true
+      },
+      "finalPosition": {
+        "x": 288,
+        "y": 615
+      },
+      "motionCommands": [],
+      "normalLogoutAck": true
+    }
+  ],
+  "commands": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "logOut": 2,
+    "keepAlive": 1
+  },
+  "packets": [
+    {
+      "ordinal": 2,
+      "method": "LoginSuccess",
+      "sequence": 8
+    },
+    {
+      "ordinal": 2,
+      "method": "StartGame",
+      "sequence": 11,
+      "result": 4
+    },
+    {
+      "ordinal": 2,
+      "method": "LogOutSuccess",
+      "sequence": 692
+    },
+    {
+      "ordinal": 3,
+      "method": "LoginSuccess",
+      "sequence": 700
+    },
+    {
+      "ordinal": 3,
+      "method": "StartGame",
+      "sequence": 703,
+      "result": 4
+    },
+    {
+      "ordinal": 3,
+      "method": "LogOutSuccess",
+      "sequence": 1384
+    }
+  ],
+  "errors": [],
+  "sockets": [
+    {
+      "ordinal": 2,
+      "id": 1,
+      "closed": true,
+      "realmMatchesProfile": true
+    },
+    {
+      "ordinal": 3,
+      "id": 2,
+      "closed": false,
+      "realmMatchesProfile": true
+    }
+  ],
+  "normalLogouts": 2,
+  "privateInputUnchanged": true,
+  "phase": {
+    "name": "ordinary-ui-logout",
+    "ordinal": 3,
+    "className": "Taoist",
+    "atMs": 29851
+  },
+  "bootstrapCustodyBegins": 2
+}

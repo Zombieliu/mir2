@@ -1,0 +1,388 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-09-02T22:59:27Z",
+  "checkpoint": "native-ui-parity-20260903-guild-storage",
+  "implementation": {
+    "baselineCommit": "970532ec7ac23fbc09e1b4501607d62a705c3828",
+    "branch": "codex/windows-player-journey",
+    "pullRequest": "https://github.com/Zombieliu/mir2/pull/250",
+    "baseBranch": "codex/windows-visual-parity",
+    "draft": true,
+    "scope": "source, original-asset and headless logic evidence; no current-code application EXE or GUI acceptance",
+    "hashes": [
+      {
+        "path": "apps/game-client/client-bevy/Cargo.toml",
+        "localFileSha256": "5fc4b3b0ec856b4034264de9a5495807d085a799f051eaba39b6e1a43b6c4adc",
+        "lfNormalizedSha256": "5fc4b3b0ec856b4034264de9a5495807d085a799f051eaba39b6e1a43b6c4adc"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+        "localFileSha256": "a5348d050382943cbe90b41893d81ce1815499fa5883dce19368ae824a069a43",
+        "lfNormalizedSha256": "a5348d050382943cbe90b41893d81ce1815499fa5883dce19368ae824a069a43"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "localFileSha256": "f87e013ab672392312eaaabef198896e16ee31635759553655cb4b17c9844cba",
+        "lfNormalizedSha256": "f87e013ab672392312eaaabef198896e16ee31635759553655cb4b17c9844cba"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+        "localFileSha256": "c86f084b1edf19d399268948b2b42ef8a14e9e1be168d40f0bf558ead8f2431e",
+        "lfNormalizedSha256": "c86f084b1edf19d399268948b2b42ef8a14e9e1be168d40f0bf558ead8f2431e"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+        "localFileSha256": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce",
+        "lfNormalizedSha256": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+        "localFileSha256": "bd193397f90a1ec95848bb0fd343fb0d792aea33d14281578f9aca66b68fb1bf",
+        "lfNormalizedSha256": "bd193397f90a1ec95848bb0fd343fb0d792aea33d14281578f9aca66b68fb1bf"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/inventory.rs",
+        "localFileSha256": "7d0efb91e123ee4add3020885de669f8335984d789fde989a4e7fe08f048d962",
+        "lfNormalizedSha256": "7d0efb91e123ee4add3020885de669f8335984d789fde989a4e7fe08f048d962"
+      },
+      {
+        "path": "apps/game-client/ui-core/src/registry.rs",
+        "localFileSha256": "f3e9fe138cb0e73f1d79b90f85b223676c2060f8918575b0d427fa3f0400e801",
+        "lfNormalizedSha256": "f3e9fe138cb0e73f1d79b90f85b223676c2060f8918575b0d427fa3f0400e801"
+      },
+      {
+        "path": "packages/protocol/src/item_image.rs",
+        "localFileSha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72",
+        "lfNormalizedSha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+      },
+      {
+        "path": "packages/protocol/src/lib.rs",
+        "localFileSha256": "469da5e493dcb9f0e31f75e5bfbfd8c165d6c0bf9f04b40f7f6224dd3dc823d3",
+        "lfNormalizedSha256": "469da5e493dcb9f0e31f75e5bfbfd8c165d6c0bf9f04b40f7f6224dd3dc823d3"
+      },
+      {
+        "path": "packages/game-data/src/lib.rs",
+        "localFileSha256": "d6b39d2f75affa23e256ecc8b0e2deb5fe9bea21b94823791e2c3f016d9e6e41",
+        "lfNormalizedSha256": "d6b39d2f75affa23e256ecc8b0e2deb5fe9bea21b94823791e2c3f016d9e6e41"
+      },
+      {
+        "path": "packages/game-data/src/crystal_item_image.rs",
+        "localFileSha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e",
+        "lfNormalizedSha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+      },
+      {
+        "path": "apps/game-client/platform-windows/Cargo.lock",
+        "localFileSha256": "7f87b554e5a3a3fd0edec3a35ce1d56f006b9421896f6e1912d9cd30154be7f0",
+        "lfNormalizedSha256": "7f87b554e5a3a3fd0edec3a35ce1d56f006b9421896f6e1912d9cd30154be7f0"
+      },
+      {
+        "path": "apps/game-client/runtime/Cargo.lock",
+        "localFileSha256": "e34a556107377e4eb90265f63b8f9487c48c35fa54dd7005ff2de1274707efb5",
+        "lfNormalizedSha256": "e34a556107377e4eb90265f63b8f9487c48c35fa54dd7005ff2de1274707efb5"
+      },
+      {
+        "path": "apps/game-client/platform-android/Cargo.lock",
+        "localFileSha256": "9366989ec6f8e644ae92b37be12806f31edb8998329b8f41a909b101ef1a194b",
+        "lfNormalizedSha256": "9366989ec6f8e644ae92b37be12806f31edb8998329b8f41a909b101ef1a194b"
+      },
+      {
+        "path": "apps/web/scripts/verify-guild-storage-assets.mjs",
+        "localFileSha256": "0e3e2c002521dc75e93e7c8c31632f769921691651d04e939c8aeeac9d4b3992",
+        "lfNormalizedSha256": "0e3e2c002521dc75e93e7c8c31632f769921691651d04e939c8aeeac9d4b3992"
+      }
+    ],
+    "hashSemantics": {
+      "localFileSha256": "SHA-256 of exact local working-tree bytes after the final implementation and formatting checks",
+      "lfNormalizedSha256": "UTF-8 text with CRLF normalized to LF, matching this repository's staged text content"
+    }
+  },
+  "crystalSource": {
+    "revision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+    "scopedStatusClean": true,
+    "files": [
+      {
+        "path": "Client/MirScenes/Dialogs/GuildDialog.cs",
+        "sha256": "5a4f5e7e55ee83c20492a06d8f3216be4938be06ff7c782263ea8be4907eac5e"
+      },
+      {
+        "path": "Client/MirControls/MirAmountBox.cs",
+        "sha256": "d2f1cf4032bcbfb235138eece1d5a0dca94355d10a1bfaa44c3e75a086873b65"
+      },
+      {
+        "path": "Client/MirControls/MirItemCell.cs",
+        "sha256": "01d650b790e82f7d591ebb6162157672debe1df7a743e61b0d624bdf98ce3e84"
+      },
+      {
+        "path": "Client/MirControls/MirControl.cs",
+        "sha256": "6356acf1fd91ad8f38bd9f2d25f1e33c62dab1d9072bcbfef60a8b2e5e82bd26"
+      },
+      {
+        "path": "Client/MirControls/MirTextBox.cs",
+        "sha256": "ee6fac00ee5c5a321d8ae015d1a97d3e145f65a9b8738502e09bc2424bb1bcec"
+      },
+      {
+        "path": "Client/MirControls/MirButton.cs",
+        "sha256": "b92e24159d2578b8ed4dd3895b943d66d08c40bc20cdba242a346f24e4c0e904"
+      },
+      {
+        "path": "Client/MirControls/MirImageControl.cs",
+        "sha256": "e0805305c2762f9b503a10cd052970a8af4a26ba0daddcf56fe70fe82d3569cc"
+      },
+      {
+        "path": "Client/MirGraphics/MLibrary.cs",
+        "sha256": "afda6ebb7a163d745d6398ea5c92ce80524daa6fb85c6167a09514867cf6f8c8"
+      },
+      {
+        "path": "Shared/Data/ItemData.cs",
+        "sha256": "8d0d549f299edd9c9379a3876f04ea2f9e827f0f703e7bca1eecfd8379fbf9f0"
+      }
+    ]
+  },
+  "tests": {
+    "environment": {
+      "toolchain": "1.95.0",
+      "targetDirectory": "C:/Users/Administrator/AppData/Local/Temp/mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f",
+      "cargoBuildJobs": 2,
+      "cargoIncremental": 0,
+      "cargoProfileTestDebug": 0,
+      "cargoProfileDevDebug": 0,
+      "rustTestThreads": 1,
+      "locked": true,
+      "offline": true
+    },
+    "focusedGuild": {
+      "passed": 44,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 507,
+      "finalSource": true,
+      "partOfFullNativeUi": true,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui guild -- --quiet"
+    },
+    "nativeUi": {
+      "passed": 551,
+      "failed": 0,
+      "ignored": 0,
+      "doctests": 0,
+      "finalSource": true,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui -- --quiet"
+    },
+    "windows": {
+      "passed": 527,
+      "failed": 0,
+      "ignored": 0,
+      "finalSource": true,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml -- --quiet"
+    },
+    "runtime": {
+      "passed": 212,
+      "failed": 0,
+      "ignored": 0,
+      "doctests": 0,
+      "finalSource": true,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/runtime/Cargo.toml -- --quiet"
+    },
+    "uiCore": {
+      "passed": 43,
+      "failed": 0,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/ui-core/Cargo.toml"
+    },
+    "protocol": {
+      "passed": 40,
+      "failed": 0,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline -p mir2-protocol"
+    },
+    "gameData": {
+      "passed": 39,
+      "failed": 0,
+      "exhaustiveShapeCountCombinations": 196608,
+      "catalogueRows": 1628,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline -p mir2-game-data"
+    },
+    "stackIntegration": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline -p mir2-simulation --test item_stack_images"
+    },
+    "itemIcons": {
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "requiredImages": 924,
+      "catalogueBaseImages": 913,
+      "quantityDerivedImages": 11,
+      "catalogueRows": 1628,
+      "reproduceCommand": "npm.cmd --prefix apps/web run test:item-icons"
+    },
+    "android": {
+      "lockedOfflineMetadata": "passed",
+      "packageCount": 450,
+      "buildPerformed": false,
+      "deviceUsed": false,
+      "reproduceCommand": "cargo +1.95.0 metadata --locked --offline --manifest-path apps/game-client/platform-android/Cargo.toml --format-version 1"
+    },
+    "sourceAssets": {
+      "rerunAt": "2026-09-02T22:58:46.633Z",
+      "matchesSavedReportExceptTimestamp": true,
+      "frameCount": 41,
+      "mismatchCount": 0,
+      "exportedItems": 1003,
+      "sizeDifferences": 550,
+      "centeringDifferences": 478,
+      "reportSha256": "a057e7a2c08a98d587b2da2e6055d8eb508698052282960b4de0ce201e59159d",
+      "originalUiAssetsUnchanged": true,
+      "report": "source-assets.json",
+      "reproduceCommand": "node apps/web/scripts/verify-guild-storage-assets.mjs <Crystal-client-Data-directory>"
+    },
+    "formatting": {
+      "clientBevy": "passed",
+      "uiCore": "passed",
+      "workspace": "passed",
+      "gitDiffCheck": "passed",
+      "verifierSyntax": "passed"
+    },
+    "newNativeTestBreakdown": {
+      "headlessEcs": 22,
+      "guildPureState": 6,
+      "imageInfoAdapter": 2,
+      "alphaTrueSize": 2,
+      "previousTotal": 519,
+      "currentTotal": 551,
+      "actualOriginalPngsDecodedInEcs": 13
+    },
+    "warningsRemain": true,
+    "earlierFailedBuildOrTestAttemptsCountedAsPass": false,
+    "fullSimulationRerunThisRound": false,
+    "fullGatewayRerunThisRound": false,
+    "historicalFullServerRegression": {
+      "implementationCommit": "2cb9098407e21c47fbd43863aea6b3655a609c8b",
+      "simulationPassed": 1491,
+      "gatewayPassed": 667,
+      "gatewayIgnored": 1,
+      "currentRoundEvidence": false
+    }
+  },
+  "alphaCenteringFinding": {
+    "exportedItemFrames": 1003,
+    "differentFrameAndAlphaSizes": 550,
+    "different35PixelCellOffsets": 478,
+    "affectedIndexLists": "source-assets.json:itemCenteringAudit",
+    "correctedThisRound": [
+      "new Guild storage original-item helper",
+      "Guild gold amount-box coin"
+    ],
+    "notCorrectedThisRound": [
+      "primary inventory",
+      "belt",
+      "equipment",
+      "personal storage",
+      "NPC goods"
+    ],
+    "rule": "Centre using nonzero-alpha bounds size, draw the unchanged full bitmap, subtract neither the alpha origin nor library offset",
+    "earlierPngFrameGeometryChecksProveOriginalTrueSizeCentering": false,
+    "findingsNotWholeClientFixCount": true
+  },
+  "denominator": {
+    "before": 33,
+    "after": 33,
+    "preserved": true,
+    "ids": [
+      "WN-ACTOR-001",
+      "WN-ACTOR-002",
+      "WN-AUDIO-001",
+      "WN-BOOT-001",
+      "WN-BOOT-002",
+      "WN-CHAR-001",
+      "WN-CHAR-002",
+      "WN-CHAT-001",
+      "WN-CHAT-002",
+      "WN-CHAT-003",
+      "WN-HUD-001",
+      "WN-HUD-002",
+      "WN-HUD-003",
+      "WN-HUD-004",
+      "WN-INPUT-001",
+      "WN-INPUT-002",
+      "WN-INPUT-003",
+      "WN-ITEM-001",
+      "WN-ITEM-002",
+      "WN-ITEM-003",
+      "WN-ITEM-004",
+      "WN-QA-001",
+      "WN-QA-002",
+      "WN-QUEST-001",
+      "WN-QUEST-002",
+      "WN-QUEST-003",
+      "WN-QUEST-004",
+      "WN-UI-001",
+      "WN-WORLD-001",
+      "WN-WORLD-002",
+      "WN-WORLD-003",
+      "WN-WORLD-004",
+      "WN-WORLD-005"
+    ],
+    "backlog": "docs/generated/player-qa/windows-visual-parity/VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md",
+    "typedControlCountBefore": 177,
+    "typedControlCountAfter": 181,
+    "priorGuildControlIdsPreserved": true
+  },
+  "foreground": {
+    "computerUsePaused": true,
+    "reason": "User stopped Computer Use with Escape before this round; no explicit resumption",
+    "computerUseCalled": false,
+    "applicationGuiLaunched": false,
+    "windowActivated": false,
+    "inputInjected": false,
+    "screenshotsCaptured": 0,
+    "headlessWindowMetadataOnly": true,
+    "windowPluginInstalledInTests": false
+  },
+  "openLeaves": [
+    "Primary item/NPC GetTrueSize centring and legitimate Items/0 handling",
+    "Guild item drag/store/retrieve/merge UI and source state overlays",
+    "Full WinForms caret/selection/clipboard and GDI text",
+    "Movable Guild window and overlapping-window topmost pointer dispatch",
+    "Cross-plugin closing-frame input ordering",
+    "Shared cross-action LastGuildMsg throttle; implemented gate remains gold-local",
+    "Pixel-unit touchpad mapping and real original-input parity",
+    "Trade/other concrete-item surfaces and ground FloorItems",
+    "Source base-image exceptions for GameShop, QuestCell, craft shadows and mail-list thumbnails",
+    "Final-source native EXE, isolated authorized live fixture and original same-state pairs",
+    "Trusted executable/build/package/light identity, actual 100/125/150 percent DPI, human visual/audio/feel acceptance",
+    "Earlier missing local WebGPU WASM artifact; no full-frontend green claim"
+  ],
+  "safety": {
+    "wireProtocolChanged": false,
+    "serverAuthorityChanged": false,
+    "schemaChanged": false,
+    "saveDataChanged": false,
+    "zoneBehaviorChanged": false,
+    "optimisticGoldMutation": false,
+    "originalUiAssetsChanged": false,
+    "credentialsOrStoresIncluded": false,
+    "unrelatedProcessesStopped": false,
+    "recoverableGeneratedSymbolRelocation": {
+      "source": "E:\\mir2-player-journey\\mir2-web3\\target\\debug\\deps\\mir2_gateway-23e520f2c94d8714.pdb",
+      "backup": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-guild-ui-symbol-backup-55f779c43b494709b51afbf8e54eb080\\mir2_gateway-23e520f2c94d8714.pdb",
+      "bytes": 539758592,
+      "sha256": "95fe292cbd337d3eee4def59039f050a999df27eea6696ed7f3a1f4e716d59e0",
+      "sourceAbsent": true,
+      "freeWorkVolumeBytes": 652890112,
+      "recovery": "Move the verified PDB back to the recorded source path if debugging the old test executable is needed."
+    }
+  },
+  "acceptance": {
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "goalStatus": "active",
+    "sameFinalExeOriginalPairClosed": false,
+    "realDpiClosed": false,
+    "humanAccepted": false,
+    "packagedCandidateClaimed": false,
+    "fullGreenCiClaimed": false,
+    "merged": false,
+    "deployed": false
+  }
+}

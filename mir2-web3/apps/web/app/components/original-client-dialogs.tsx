@@ -5,6 +5,7 @@ import { Fragment, useEffect, useState } from "react";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
 import { parseCrystalColourSpans, stripCrystalDialogMarkup } from "../../lib/crystal-dialog-markup";
+import { nativeNpcDisplayText, type R16NativeLanguage } from "../../lib/r16-native-localization";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -267,6 +268,7 @@ export function ReportPanel({ t, logs, onClose }: ReportPanelProps) {
 }
 
 export type NpcDialogPanelProps = {
+  displayLanguage?: R16NativeLanguage;
   t: TranslateFn;
   dialog: DisplayNpcDialogLike;
   onClose: () => void;
@@ -332,14 +334,19 @@ export function NpcDialogPanel({
   onSubmitInput,
   portrait,
   playerClass,
+  displayLanguage,
 }: NpcDialogPanelProps) {
   const [inputValue, setInputValue] = useState("");
+  const display = (text: string) => stripCrystalDialogMarkup(displayLanguage ? nativeNpcDisplayText(displayLanguage, text) : text);
   const bodyLines = dialog.body
-    .map(stripCrystalDialogMarkup)
-    .map((line) => classAwareObjectiveLine(line, playerClass))
+    .map((line) => {
+      const stripped = stripCrystalDialogMarkup(line);
+      const objective = classAwareObjectiveLine(stripped, playerClass);
+      return display(objective === stripped ? line : objective);
+    })
     .filter((line) => line.trim().length > 0);
-  const title = stripCrystalDialogMarkup(dialog.title || dialog.npcName);
-  const footer = stripCrystalDialogMarkup(dialog.footer);
+  const title = dialog.title ? display(dialog.title) : stripCrystalDialogMarkup(dialog.npcName);
+  const footer = display(dialog.footer);
 
   return (
     <section className="npc-dialog-panel">
@@ -389,7 +396,7 @@ export function NpcDialogPanel({
                   <span aria-hidden style={{ display: "inline-block", width: 14, color: "#caa64a" }}>
                     {npcLinkGlyph(kind)}
                   </span>
-                  {label}
+                  {display(link.text)}
                   {gold !== null ? (
                     <span style={{ marginLeft: 6, color: "#f0d98a" }}>{`(${gold.toLocaleString("en-US")} ${t("client.Gold", [], "Gold")})`}</span>
                   ) : null}
@@ -412,7 +419,7 @@ export function NpcDialogPanel({
           }}
         >
           <label>
-            <span>{stripCrystalDialogMarkup(dialog.input.prompt)}</span>
+            <span>{display(dialog.input.prompt)}</span>
             <input
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}

@@ -1,0 +1,856 @@
+{
+  "kind": "r16-large-font-first-production-release",
+  "source": "df7aace1692ccbd28291a917b7e74eafe6942940",
+  "implementation": "7a7e428abed58a4a19f7adc5496238f094738043",
+  "deployment": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+  "url": "https://numeron.obelisk.build/game",
+  "releasePublished": true,
+  "fullPublicSmokePassed": false,
+  "stage": {
+    "run": "43222240745",
+    "passed": true,
+    "trafficBefore": {
+      "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+    },
+    "trafficAfter": {
+      "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+    }
+  },
+  "promote": {
+    "run": "43223308299",
+    "passed": true,
+    "trafficBefore": {
+      "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+    },
+    "trafficAfter": {
+      "target": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+      "alias": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ"
+    },
+    "protectedQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "publicQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "rollbacks": [],
+    "checkedEntryAssets": 11
+  },
+  "sourceBinding": {
+    "passed": true,
+    "source": "df7aace1692ccbd28291a917b7e74eafe6942940",
+    "candidate": "99110428632b-font-critical-29aef945",
+    "buildReceiptSha256": "6bdf88a5e38c0471a00337660d2bf92d3def0d20736809f4aab509db9c5487e9",
+    "matchingGitBlobs": 53,
+    "originalFilesUnchanged": 65
+  },
+  "publicReadback": {
+    "passed": true,
+    "checkedAt": "2026-11-12T13:05:22.300Z",
+    "source": "df7aace1692ccbd28291a917b7e74eafe6942940",
+    "origin": "https://numeron.obelisk.build",
+    "workerMatchesCandidate": true,
+    "networkAttempts": [
+      {
+        "round": 1,
+        "failures": []
+      }
+    ],
+    "routes": [
+      {
+        "path": "/version",
+        "status": 200,
+        "bytes": 55,
+        "sha256": "deea1ac1bdf96749e1d33b3f1fc15e96bccb25c42a07ce6f2fa06c34d0b2e69e"
+      },
+      {
+        "path": "/game",
+        "status": 200,
+        "bytes": 11167,
+        "sha256": "053c3aaf168ae673c094db272cf44776388eb9c59290ee41af2bac928adc3828"
+      },
+      {
+        "path": "/mir2-asset-worker.js",
+        "status": 200,
+        "bytes": 31615,
+        "sha256": "d86af7087c4701e020847fff0e22d9014b0deef4175d3dd81b69c48ad5688005"
+      },
+      {
+        "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 26425,
+        "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
+      },
+      {
+        "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 252454,
+        "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+      },
+      {
+        "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 22689,
+        "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
+      },
+      {
+        "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 259326,
+        "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+      },
+      {
+        "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 8332,
+        "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+      },
+      {
+        "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 164087,
+        "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+      }
+    ]
+  },
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "phases": [
+        {
+          "phase": "verify-revision",
+          "atMs": 189
+        },
+        {
+          "phase": "plain-game",
+          "atMs": 1121
+        },
+        {
+          "phase": "one-qr-click",
+          "atMs": 20692
+        },
+        {
+          "phase": "same-intent-pending",
+          "atMs": 29732
+        },
+        {
+          "phase": "normal-cancel",
+          "atMs": 29733
+        },
+        {
+          "phase": "passed",
+          "atMs": 33064
+        }
+      ],
+      "failure": null
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "phases": [
+        {
+          "phase": "verify-revision",
+          "atMs": 179
+        },
+        {
+          "phase": "plain-game",
+          "atMs": 1012
+        },
+        {
+          "phase": "one-qr-click",
+          "atMs": 15793
+        },
+        {
+          "phase": "same-intent-pending",
+          "atMs": 23281
+        },
+        {
+          "phase": "normal-cancel",
+          "atMs": 24363
+        },
+        {
+          "phase": "passed",
+          "atMs": 27692
+        }
+      ],
+      "failure": null
+    }
+  ],
+  "signed": {
+    "passed": false,
+    "failure": {
+      "phase": "inspect-world-paint",
+      "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-monster-standing"
+    },
+    "checks": {
+      "exactRevision": true,
+      "publicEdgeAndTlsVerified": true,
+      "normalLoginVisible": true,
+      "quietLoginResources": true,
+      "realQrImage": true,
+      "emptyQaRoster": true,
+      "createOnApprovedSocket": true,
+      "oneDedicatedQaRoleCreated": true,
+      "startMatchesCreatedRole": true,
+      "visibleReadyGameStage": true,
+      "exactVersionedStarterRegion": true,
+      "returnedToSelect": true
+    },
+    "walletApproval": {
+      "passed": true,
+      "relayApprovedExactSession": true
+    },
+    "normalTestnetWalletCreated": true,
+    "authorizedApprovalOnly": {
+      "approved": true,
+      "exactAppAndSession": true,
+      "loginOnlyConsent": true,
+      "noFunds": true,
+      "httpsRelayReadAndApprove": true,
+      "oneClick": true,
+      "oneRequest": true
+    },
+    "createdQaRole": true,
+    "returnedToSelect": true,
+    "walletNetwork": {
+      "forbiddenCount": 0,
+      "operations": {
+        "http-read": 172,
+        "testnet-grpc-read": 2,
+        "testnet-graphql-query": 2,
+        "exact-login-session-read": 1,
+        "signed-login-approval": 1
+      },
+      "browserClosed": true
+    },
+    "coreLoginToGamePassed": true,
+    "timing": {
+      "clockEpochMs": 1794489009123,
+      "authoritativeLoginSuccessMs": 46990,
+      "startIntentMs": 78062,
+      "startAckMs": 85547,
+      "authoritativeStarterMapMs": 85550,
+      "authoritativeSelfMs": 85551,
+      "firstPlayableObservedMs": 94172,
+      "logoutIntentMs": 350079,
+      "logoutAckMs": 351193,
+      "manifestAttemptsBeforeStart": 1,
+      "manifestAttemptsAtOrAfterStart": 0,
+      "starterRegionRequestMs": 46994,
+      "starterRegionWireHeadersMs": 48522.801,
+      "starterRegionResponseEventMs": 48523,
+      "starterRegionBodyMs": 49702,
+      "starterRegionCommitMs": 85666,
+      "sceneSpritesReadyMs": 85688,
+      "localeRequestMs": 46995,
+      "localeBodyMs": 92387,
+      "localeReadyMs": 92407,
+      "firstPlayableFrameMs": 94057,
+      "rendererBodyMs": null
+    },
+    "movement": {
+      "attempted": true,
+      "passed": true,
+      "status": "one-authoritative-walk",
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "geometry": {
+        "source": "sha256-pinned-local-release-reference",
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+      },
+      "physical": {
+        "input": "trusted-playwright-keyboard-pulse",
+        "key": "ArrowRight",
+        "atMs": 94293
+      },
+      "wire": {
+        "type": "walk",
+        "direction": "Right",
+        "atMs": 94295
+      },
+      "ack": {
+        "x": 289,
+        "y": 616,
+        "packet": "UserLocation",
+        "atMs": 99563
+      },
+      "ackWithinEightSeconds": true,
+      "rendered": {
+        "x": 289,
+        "y": 616,
+        "atMs": 99708
+      }
+    },
+    "prewarm": {
+      "passed": false,
+      "waitMs": 1773,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 108,
+            "failed": 5,
+            "failedUrls": [
+              "/original-ui/Prguse/1.png",
+              "/original-ui/Prguse/4.png",
+              "/original-ui/Prguse/6.png",
+              "/original-ui/Prguse/12.png",
+              "/original-ui/Prguse/13.png"
+            ],
+            "durationMs": 109448.19999999553,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done",
+            "requestFailures": [
+              {
+                "url": "/original-ui/Prguse/1.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10000,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/4.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10000,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/6.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10000,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/1.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/4.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/6.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10000,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/1.png",
+                "attempt": 3,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/4.png",
+                "attempt": 3,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10002,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/6.png",
+                "attempt": 3,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10002,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/12.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/13.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/8.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/12.png",
+                "attempt": 2,
+                "phase": "http",
+                "status": 504,
+                "bytes": 0,
+                "durationMs": 12
+              },
+              {
+                "url": "/original-ui/Prguse/13.png",
+                "attempt": 2,
+                "phase": "http",
+                "status": 504,
+                "bytes": 0,
+                "durationMs": 12
+              },
+              {
+                "url": "/original-ui/Prguse/8.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10000,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/12.png",
+                "attempt": 3,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/13.png",
+                "attempt": 3,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/76.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/UI_32bit/473.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/UI_32bit/472.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10004,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/76.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10002,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/UI_32bit/473.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10002,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/UI_32bit/472.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10000,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/1909.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10003,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/1910.png",
+                "attempt": 1,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10001,
+                "errorName": "TimeoutError"
+              },
+              {
+                "url": "/original-ui/Prguse/1909.png",
+                "attempt": 2,
+                "phase": "headers",
+                "bytes": 0,
+                "durationMs": 10012,
+                "errorName": "TimeoutError"
+              }
+            ]
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 108,
+          "failed": 5
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ]
+      ],
+      "staleRequests": []
+    },
+    "sharedHud": {
+      "optional": true,
+      "passed": false,
+      "status": "not-observed",
+      "gateReady": false,
+      "runtimeDelivered": false,
+      "failure": {
+        "phase": "ordinary-shared-hud-optional",
+        "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+      }
+    },
+    "questUi": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-react-fallback",
+      "questId": 2110001,
+      "stage": "available",
+      "objective": "向助理簡報告",
+      "counter": "0/1",
+      "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+      "journey": "當前主線 0/26",
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    },
+    "visualCity": {
+      "passed": false,
+      "failure": {
+        "phase": "inspect-world-paint",
+        "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-monster-standing"
+      }
+    },
+    "runtimeDelivery": [
+      {
+        "scope": "expectedBevyRuntime",
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "status": 200,
+        "failure": "net::ERR_ABORTED",
+        "headersMs": 117165,
+        "bodyCompleteMs": null,
+        "decodedBytes": 10391576
+      }
+    ],
+    "officialWalletPreflightCommit": "c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b"
+  },
+  "firstSignedAttempt": {
+    "passed": false,
+    "failure": {
+      "phase": "in-memory-qr-ready",
+      "code": "MOBILE_ONBOARDING_FAILED"
+    },
+    "qaGameRoleCreated": false,
+    "walletCreateClicks": 0,
+    "walletNetwork": {
+      "schema": 1,
+      "requestInterception": false,
+      "operations": {
+        "http-read": 18
+      },
+      "forbiddenCount": 0,
+      "forbidden": [],
+      "browserClosed": true
+    },
+    "rawSha256": "4551eb8022ba4399aacf17c0569a71bd68af49fdd07cea4bf2cf4817b66c5f1a"
+  },
+  "retry": {
+    "lane": "signed-public-r2",
+    "reason": "first official wallet navigation timed out before any create/approval click; same acceptance gates and all 14 unchanged runner hashes",
+    "rationaleSha256": "92b5963d7093e7732a417fe96ad01995b7be756cf76c00acc51f16041f383abf"
+  },
+  "rawReceipts": [
+    {
+      "label": "stage",
+      "path": "C:\\r16-font-release-20261112\\stage\\numeron-r16-release.json",
+      "sha256": "65188c2bdcd9751d04b60e810b29c34c92e0521107902edf8f047d991bf66166"
+    },
+    {
+      "label": "promote",
+      "path": "C:\\r16-font-release-20261112\\promote\\numeron-r16-release.json",
+      "sha256": "bd7eaf4a49f8bb4b26b96b4b0236ad6a0ff2e4ebbaca98093ab4a53b269d2c7c"
+    },
+    {
+      "label": "signed",
+      "path": "C:\\r16-font-release-20261112\\signed-public-r2\\first-party-signed-summary.json",
+      "sha256": "e948c704315372cad6538f1901d0a493b465a022d92fcdcfe13868868a67f922"
+    }
+  ],
+  "limits": [
+    "physical phone camera not tested; official mobile-sized browser uses disposable Testnet virtual passkey",
+    "network latency and full 1:1 remain open; no Gateway/DNS/marketing/save migration"
+  ],
+  "currentlyServingCandidate": false,
+  "rollback": {
+    "run": "43226868995",
+    "passed": true,
+    "trafficBefore": {
+      "target": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+      "alias": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ"
+    },
+    "trafficAfter": {
+      "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+    },
+    "sourceAfterRollback": "72c00d20aeb82a9f87c79c2a8567a3146d9a2cfc",
+    "sourceAndAliasReadBackAt": "2026-11-12T13:27:08.585Z",
+    "reason": "extended public smoke failed visual body, runtime/HUD and 108/113 prewarm; candidate not accepted as playable release"
+  }
+}

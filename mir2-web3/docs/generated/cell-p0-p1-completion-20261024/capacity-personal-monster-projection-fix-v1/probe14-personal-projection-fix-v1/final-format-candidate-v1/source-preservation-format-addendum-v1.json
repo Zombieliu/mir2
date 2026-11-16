@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-25T12:19:33.881Z",
+  "state": "FORMATTED_SOURCE_CAPTURE_PENDING_ROOT_FINAL_VALIDATION",
+  "baseCodeCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "sourceCopies": [
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      "copy": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\routing.rs.txt",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\personal_monster_projection_tests.rs",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      "copy": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\personal_monster_projection_tests.rs.txt",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      },
+      "copy": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\zone-runtime.rs.txt",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      }
+    }
+  ],
+  "originalBehavioralInverseProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-source-preservation-v1.json",
+    "bytes": 4477,
+    "sha256": "5c87e0a9c704b0cce8a129b8e0077745485651dd493e5139bc52b432ced82b2f"
+  },
+  "unchangedProductionPinsReuseOriginalInverseProof": true,
+  "formatterPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\preparation-v1.json",
+    "bytes": 1518,
+    "sha256": "aa4a38eea46f39abe5525254403c7e2438c57384a24d3d23b8876f9a8411f3cc"
+  },
+  "formatterApplication": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-application-v1\\application-receipt-v1.json",
+    "bytes": 2137,
+    "sha256": "d4e00f6990fc5679f9fc26e4db3a2d0498f9cb43bf0ec1a172f3a5b950755785"
+  },
+  "preFormatTest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-application-v1\\personal_monster_projection_tests-before.rs.txt",
+    "bytes": 30640,
+    "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+  },
+  "appliedTestMatchesActualFormatterCandidateRaw": true,
+  "originalTestPrefixBytes": 12555,
+  "originalTestPrefixRawExact": true,
+  "newTestNamesUnchanged": [
+    "personal_journey_immediate_spawn_keeps_native_owner_position",
+    "personal_journey_immediate_remove_keeps_zone_visible_owner_monster",
+    "personal_journey_predrain_spawn_keeps_native_owner_position",
+    "personal_journey_predrain_remove_keeps_zone_visible_owner_monster",
+    "personal_journey_checkpoint_spawn_keeps_native_owner_position",
+    "personal_journey_checkpoint_remove_keeps_zone_visible_owner_monster",
+    "personal_journey_remove_filter_reads_actual_owned_unowned_and_unknown_state",
+    "personal_journey_filter_preserves_true_zone_aoi_leave_and_reentry",
+    "personal_journey_generic_filter_preserves_authoritative_aoi_remove"
+  ],
+  "validationHistory": {
+    "behavioralFocused9": {
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-green-v2.log",
+        "bytes": 56423,
+        "sha256": "a923f1b9e4efb4d3e8908b1985d4d5213ba9fd5b4053ef145d64ca47e4469a3c"
+      },
+      "actualLogCounts": {
+        "passed": 9,
+        "failed": 0
+      },
+      "sourceTestSha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0",
+      "preFormat": true
+    },
+    "firstRustfmt37": {
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-rustfmt37-v1.log",
+        "bytes": 9871,
+        "sha256": "8c5b900335f13312c37c622a000752fd4108dccdb0cc2f7af581705d844a44ce"
+      },
+      "exitCodeReportedByRoot": 1,
+      "preservedFailure": true
+    },
+    "adjacent186": {
+      "executionOwnedBy": "/root",
+      "rootReported": {
+        "passed": 177,
+        "failed": 5,
+        "ignored": 4
+      },
+      "claim": "not passing"
+    },
+    "baselineFive": {
+      "executionOwnedBy": "/root",
+      "rootReported": {
+        "passed": 0,
+        "failed": 5
+      },
+      "interpretation": "Same five failures on the original b84d preimages; detailed root receipts remain separate."
+    },
+    "finalFormattingAndModuleTests": "pending root execution after the separately assigned fixture work is frozen"
+  },
+  "limitation": "Formatting provenance is actual rustfmt output equality, not an asserted whitespace-only character transform; rustfmt can also normalize optional trailing commas. No final focused or adjacent pass is inferred from the pre-format log.",
+  "testsRunByThisScript": false,
+  "trackedFilesWrittenByThisScript": false,
+  "archiveExecuted": false,
+  "capacityAccepted": false,
+  "p0Status": "pending",
+  "p2Status": "frozen"
+}

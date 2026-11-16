@@ -1,0 +1,50 @@
+{
+  "schema": "mir2.r16.v13.final-journey-evidence.v1",
+  "copies": [
+    {
+      "source": "onboarding-v13-browser-r9/onboarding-v11-browser-proof.json",
+      "path": "v13-r9-second-purchase.json",
+      "bytes": 61673,
+      "sha256": "78f911c06a7ac3fcb5045119f28831fdb887ec45d0c5c65b71549b03152f3a92"
+    },
+    {
+      "source": "onboarding-v13-browser-r10/onboarding-v11-browser-proof.json",
+      "path": "v13-r10-waypoint-diagnostic.json",
+      "bytes": 29462,
+      "sha256": "d66a5a3929a2ec2813ddf155fcd127d4fd1e5b798e53a323c1ec9069e9686e0f"
+    },
+    {
+      "source": "onboarding-v13-browser-r11/onboarding-v11-browser-proof.json",
+      "path": "v13-r11-third-quest-complete.json",
+      "bytes": 121717,
+      "sha256": "1de01ba7ade11927acb9f000cf16d29eeab8696d21d6054fcc2eb099cdbde77f"
+    },
+    {
+      "source": "onboarding-v13-browser-r11/onboarding-v13-complete-receipt.json",
+      "path": "v13-complete-receipt.json",
+      "bytes": 14207,
+      "sha256": "3d893e2f057bd1b3958fd5d7240bc0d7ee8836d80bf75fa337a96bc49e647a13"
+    },
+    {
+      "source": "onboarding-v13-browser-r11/03-before-finishQuest-2110003.png",
+      "path": "native-third-quest-ready.png",
+      "bytes": 1076483,
+      "sha256": "cf5077de6411d0234a22bf1340725502d289a8a96d1e48cf093236934c810d33"
+    },
+    {
+      "source": "onboarding-v13-browser-r11/04-village-hunt-completed.png",
+      "path": "native-third-quest-completed.png",
+      "bytes": 1092278,
+      "sha256": "3fb353eda8aa23b8f95ac86ed4fa8d30a5964bac574048321d29d4f9a657d3f4"
+    },
+    {
+      "source": "onboarding-v13-browser-r11/05-saved-progress-native-diary.png",
+      "path": "native-three-quests-after-relogin.png",
+      "bytes": 1130740,
+      "sha256": "5ecbd01275ce910569d76098323852a94c35611c723e4bd5cad0533f9baa6774"
+    }
+  ],
+  "secretValueMatches": 0,
+  "imagesVisuallyInspectedByRoot": true,
+  "combinedScope": "Same ordinary role across multiple authentic UI sessions; raw prior failure/partial flags unchanged. Final R11 is the successful last-cat/turn-in/reentry continuation, not a replacement for the earlier Q1/Q2 receipts."
+}

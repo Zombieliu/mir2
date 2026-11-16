@@ -1,0 +1,1555 @@
+{
+  "schemaVersion": 1,
+  "mode": "single-stage-diagnostic",
+  "zoneDeliveryTrace": {
+    "enabled": true,
+    "passiveDiagnosticOnly": true,
+    "gatewayChildEnvironment": {
+      "MIR2_GATEWAY_ZONE_DELIVERY_TRACE": "1"
+    },
+    "recipientScope": "all player recipients",
+    "rawOutput": "private/gateway.stderr.log",
+    "formalCapacityEligible": false,
+    "capacityAccepted": false,
+    "scope": "V13 online presence exact-borrow reuse diagnostic; same held-only supply/no purchase/no revive gameplay profile and Gateway-only passive MIR2_GATEWAY_ZONE_DELIVERY_TRACE=1. New actual backend/execution HEAD after b24 requires fresh Root Rust checks/immutable V5 Release; canonical657/nav4ecd/obs+frontendc6 preserved, c6 Node242/focused39/typecheck13/16 explicitly reused. Fresh V13 50 must complete measurement/normal cleanup without hardstop before any100; V12 failed50 grants no eligibility. Original300s measured game SLO record-only and all safety stops retained. No capacity/P0 acceptance."
+  },
+  "canonicalDriverCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "currentBackendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "currentExecutionSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "currentBackendValidation": {
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-v1/root-focused-receipt-v1.json",
+      "bytes": 45742,
+      "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+    },
+    "selectedRustTestsPassed": 116,
+    "sourceUnchanged": true,
+    "allSelectedTestsPassed": true,
+    "fresh": true,
+    "reused": false,
+    "rustReexecuted": true,
+    "executionSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+    "sourceInputCount": 55,
+    "results": [
+      {
+        "name": "format",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "rustfmt",
+          "--check",
+          "--edition",
+          "2021",
+          "--config",
+          "skip_children=true",
+          "apps/gateway/src/shared_experience_profiles.rs",
+          "apps/simulation/src/runtime/zone/manager.rs",
+          "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+          "apps/simulation/src/runtime/zone/manager_presence_publication_tests.rs",
+          "apps/simulation/src/runtime/zone/runtime/presence_publication_fixtures.rs",
+          "apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stdout-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "actualTotals": []
+      },
+      {
+        "name": "manager-and-presence",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::zone::manager::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stdout-v1.log",
+          "bytes": 3404,
+          "sha256": "f4bed587dc106f5c0367aeecd1c329d5270d7812aad46250f50fbc7c6b386133"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stderr-v1.log",
+          "bytes": 43251,
+          "sha256": "60bbf7d160043efdd45de5c49c62e8b5d274112ad04d63f9bf8ea11ae754dad0"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 26,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2930
+          }
+        ]
+      },
+      {
+        "name": "zone_partition_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_partition_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stdout-v1.log",
+          "bytes": 595,
+          "sha256": "e21dc1cabc50a8547e7278910a041f14d5e12b436fe2ebad56166b7bf8a14008"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stderr-v1.log",
+          "bytes": 50825,
+          "sha256": "20865a27954dd6d1db7d9503166169bf1a665b6b18ff45f941d3b16071fca232"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "zone_partition_identity_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_partition_identity_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stdout-v1.log",
+          "bytes": 726,
+          "sha256": "39631f063b5d1768f1f2d4ff846d28df524777f231576e52fcec444e9070b401"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stderr-v1.log",
+          "bytes": 50325,
+          "sha256": "169bebb7548a1383e1cb8ab35252b36775fee4835178febfbf1aa9ae1b87427c"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "zone_manager_admission_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_manager_admission_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stdout-v1.log",
+          "bytes": 860,
+          "sha256": "db9ef951c368d2d9231035f6c97a85b1da01d78b65b9584ad0e7ac41100e3ad5"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stderr-v1.log",
+          "bytes": 50323,
+          "sha256": "bb0e56ad15840ccce482ad8c3ba0e31208ac1178b0ee9bfd65a07c3e2e828e7d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 9,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "experience-profile",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::shared_experience_profile::tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stdout-v1.log",
+          "bytes": 2798,
+          "sha256": "426afa70fddbaefba4b85be3788abc48972a1d29b06e8727193c6793c5f9c5f4"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stderr-v1.log",
+          "bytes": 43459,
+          "sha256": "6d0e18c6167b8412988e26b590d685a5e1a4be7ab245f0036391435fda5009c5"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 21,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2935
+          }
+        ]
+      },
+      {
+        "name": "owner-health-live-fork",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owner_health_transaction_fork_carries_fifo_but_checkpoint_never_replays_it",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stdout-v1.log",
+          "bytes": 246,
+          "sha256": "3cb716c470b8f752d514331c5af3e16a135df36943e3431f42aaeea1b9975e0a"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-modes",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_pmode_moves_attacks_searches_and_clears_targets_independently",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stdout-v1.log",
+          "bytes": 248,
+          "sha256": "cb5296f3109ad723bc3eece757951ec7843bd8b664402abe427c7a871d0c54be"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "7a2ca59942737ca0c12988b7184289dea241c1d9d34d94c2b5f4dde7026f722e"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-brown-clock",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_last_hitter_and_brown_have_distinct_strict_deadlines",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stdout-v1.log",
+          "bytes": 239,
+          "sha256": "e72e4dc519717f704a6bd3d7eb143bd06267740967ab91f052ae9c5e2ea8292b"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-owner-death",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_owner_death_kills_pets_and_cancels_all_pending_authority",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stdout-v1.log",
+          "bytes": 243,
+          "sha256": "e6c434507f1a871758cfcd15e9303ba5ce192a2557a660061716210bed4e12fc"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "vampire-death",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "vampire_ai::death_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stdout-v1.log",
+          "bytes": 914,
+          "sha256": "3bd646a4e8620d06541a3a4b2857ae3062254726d015bb1306aac2ed99c56bb7"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "web-live-overflow",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_live_overflow_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stdout-v1.log",
+          "bytes": 2907,
+          "sha256": "a530f1a36ebf60a4a35b602a710c7cd785d592f3eba2565166f736aed30347a6"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stderr-v1.log",
+          "bytes": 63970,
+          "sha256": "74cb9a4452be50ae0eafdb7e581e3d7c01a1d267cba0df27eba9240e3de18b64"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 25,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1244
+          }
+        ]
+      },
+      {
+        "name": "web-transport-close",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_transport_close_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stdout-v1.log",
+          "bytes": 531,
+          "sha256": "a56156b8c1dfaa36ebec71bbf5e81cfe2d302665e9145e7fc08f0fc8928ea580"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1265
+          }
+        ]
+      },
+      {
+        "name": "store-durability",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "config::config_account_store_durability_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stdout-v1.log",
+          "bytes": 368,
+          "sha256": "12b4a52631343b15bdaa40906ddcbf24a8cd0880063a751b9b334c20d3080d1d"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2954
+          }
+        ]
+      },
+      {
+        "name": "guild-clock-store",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stdout-v1.log",
+          "bytes": 218,
+          "sha256": "657ac7bd4e4584655a9d1ef0118e670b49dbad85bee0c6030896efde251564d1"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2955
+          }
+        ]
+      },
+      {
+        "name": "admission-lock-order",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stdout-v1.log",
+          "bytes": 253,
+          "sha256": "239ee64cc20316d10a533755b1ed095a47af9eeedb11155885aee3627c88a5dd"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stderr-v1.log",
+          "bytes": 53576,
+          "sha256": "52f0fb4e55ce584b2b4e3e9b908cff337419dadca14f36e01ad30aa8a133b986"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1268
+          }
+        ]
+      },
+      {
+        "name": "kill-award-commit",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stdout-v1.log",
+          "bytes": 215,
+          "sha256": "1e6b3e4ff4e591d16d9f85586363aea12209e17f6d9d8e6aa974706667e79c5b"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "eaf453d26d61452cf83bb1f46267978c7c2d5ef1d4229233f44e84ce1fb44d0c"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1268
+          }
+        ]
+      },
+      {
+        "name": "guild-kill-source",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "guild_kill_source_",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stdout-v1.log",
+          "bytes": 394,
+          "sha256": "c44ce87fbfe7842247c3a556c93732fa442d15795e8efd5755a93ff69b1df534"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "bcc9be1c088e27675c29460d7dcbc46776513d74b9bd58d083b15eb94886869d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1267
+          }
+        ]
+      }
+    ],
+    "scope": "Fresh V5 Root-selected Rust checks and actual build; exact unchanged c6 JS/TS validation reused without rerunning. No fresh ordinary lifecycle or capacity acceptance.",
+    "reusedNodeValidation": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-receipt-v1.json",
+        "bytes": 6449,
+        "sha256": "714a32dad7c2db920db7ecb938b0d0f438d4ffea32ec09b6157c5f5866381eb8"
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stdout-v1.log",
+        "bytes": 65261,
+        "sha256": "bc642fdc2391da64ea29d5cc5bd10c38f07ece625b08d9a86ff24e5a5b28bb19"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+      ],
+      "sourceInputCount": 13,
+      "actualPassed": 242,
+      "actualCounts": {
+        "tests": 242,
+        "pass": 242,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "sourceUnchanged": true,
+      "fresh": false,
+      "reused": true,
+      "reexecutedForV5": false,
+      "reusedFromObservationFrontendCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+      "scope": "Previously executed validation on exact unchanged identified JS/TS inputs only; no fresh V5 Node run, lifecycle or capacity claim."
+    },
+    "reusedObservationFrontendValidation": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-receipt-v1.json",
+        "bytes": 7372,
+        "sha256": "552c91e2bd67232bf3ba17e06d18698d6ae98bb57197ff6da4cf08c9e2455169"
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stdout-v1.log",
+        "bytes": 8360,
+        "sha256": "5086ba7d8288fa086d0955e155b7938faf3d1ad437c7cb833dbde72adc2c22f7"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "apps/web/scripts/quest-agent/test-protocol-observation.mjs",
+        "apps/web/scripts/test-owner-action-pose.mjs"
+      ],
+      "sourceInputCount": 16,
+      "actualPassed": 39,
+      "actualCounts": {
+        "tests": 39,
+        "pass": 39,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "sourceUnchanged": true,
+      "fresh": false,
+      "reused": true,
+      "reexecutedForV5": false,
+      "reusedFromObservationFrontendCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+      "scope": "Previously executed validation on exact unchanged identified JS/TS inputs only; no fresh V5 Node run, lifecycle or capacity claim."
+    },
+    "reusedTypecheckValidation": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-receipt-v1.json",
+        "bytes": 7108,
+        "sha256": "666662841a185b690908750cd73f216ab91469d5e4f9209deaafc87f80329cb1"
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stdout-v1.log",
+        "bytes": 265,
+        "sha256": "6c39edda24bb15155abef1f38fcc1d13dd257d4e36164329bc87e376af3ef6bf"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "command": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "npm.cmd run typecheck"
+      ],
+      "sourceInputCount": 16,
+      "actualPassed": null,
+      "actualCounts": null,
+      "sourceUnchanged": true,
+      "fresh": false,
+      "reused": true,
+      "reexecutedForV5": false,
+      "reusedFromObservationFrontendCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+      "scope": "Previously executed validation on exact unchanged identified JS/TS inputs only; no fresh V5 Node run, lifecycle or capacity claim."
+    },
+    "freshOrdinaryLifecyclePerformed": false
+  },
+  "historicalFull16": {
+    "passed": true,
+    "runId": "1792989329251-1a7f71f3",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "executionSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "appliesToCurrentBackend": false
+  },
+  "historicalProbe21": {
+    "feasibilityPassed": true,
+    "runId": "1792990526387-b0d2ecc9",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "executionSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "capacityAccepted": false,
+    "appliesToCurrentBackend": false,
+    "scope": "Historical actual L/C Probe21; current V5 online presence reuse backend has fresh Root-selected Rust/build evidence plus exact unchanged c6 Node242/focused39/typecheck source reuse, without a fresh lifecycle or raw replay claim"
+  },
+  "derivedExecutorSourcePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\prepare-episode.mjs",
+      "bytes": 4783,
+      "sha256": "bb90ce643a07fb1c26acf252f62c247e9e8dbe8fba47947671e4caacd5d62805"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\run-episode.mjs",
+      "bytes": 26085,
+      "sha256": "e2a9705fc80cef42a2b45f353f80f4f6f60a457f8b0e9322eca0b76432125104"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-capacity.mjs",
+      "bytes": 159174,
+      "sha256": "58a12f1246cfa646d424e23d2cd9cead6fee06b39cb5e32db881887b30ad07f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-connect.mjs",
+      "bytes": 2536,
+      "sha256": "2a8ed66172c47384f903c2f4586ac4fcf593fabf3ad88e4c6db1409702327490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\diagnostic-policy.mjs",
+      "bytes": 5786,
+      "sha256": "3e25651096f4ac0d33843a946852203672d9b8e9963254ed54cc029aeb82058a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\monitor-episode.mjs",
+      "bytes": 1174,
+      "sha256": "b0de573783b84d0fbfff081ca007fa85c117772db7512515234d896d1340d982"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\current-report-contract.mjs",
+      "bytes": 1123,
+      "sha256": "576ca52dbe7c8ac077bdb2dde8ce684f4425d8b494b56946da494838e8e7bd48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-input.mjs",
+      "bytes": 7824,
+      "sha256": "c4c9e754709a936b8504e32d1f44fcfa8674d5d6f753d7f396e7fb96e8f37eda"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\store-diagnostics-current-backend.mjs",
+      "bytes": 3761,
+      "sha256": "d78690f017d85c036608de29062934cd1fe34b5e10439b76e25431c450d9a90c"
+    }
+  ],
+  "formalAcceptanceEligible": false,
+  "networkGenerator": "multi-source-local-generator",
+  "sourceAddresses": [
+    "127.0.0.2",
+    "127.0.0.3"
+  ],
+  "wholeRunContinuityAccepted": false,
+  "bootstrapContinuousAcceptance": {
+    "passed": false,
+    "failureCount": 8,
+    "firstFailure": {
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "La0d32307",
+        "role": "movement",
+        "phases": [
+          "settle"
+        ],
+        "seconds": 60.2636384,
+        "final": false,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 79,
+          "gaps": 5,
+          "moves": 72,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1793035575392,
+          "runs": 57,
+          "cells": 129,
+          "nativeOpportunities": 79,
+          "nativeCompleted": 74,
+          "offeredDurationMs": 59250,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": false,
+          "completionRatio": 0.9367088607594937,
+          "runRatio": 0.7916666666666666,
+          "cellsPerMinute": 128.435657147445,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 59250,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": false,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "metrics": {
+          "walk": {
+            "count": 20,
+            "status": {
+              "navigation-blocked": 5,
+              "success": 15
+            },
+            "fromSend": {
+              "count": 15,
+              "p50Ms": 6,
+              "p95Ms": 29,
+              "p99Ms": 29,
+              "maxMs": 28.98629999998957
+            },
+            "fromPlan": {
+              "count": 15,
+              "p50Ms": 30,
+              "p95Ms": 57,
+              "p99Ms": 57,
+              "maxMs": 56.225299999990966
+            }
+          },
+          "fanout-walk": {
+            "count": 190,
+            "status": {
+              "success": 190
+            },
+            "fromSend": {
+              "count": 190,
+              "p50Ms": 8,
+              "p95Ms": 29,
+              "p99Ms": 43,
+              "maxMs": 50.08299999998417
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 4,
+              "p95Ms": 8,
+              "p99Ms": 8,
+              "maxMs": 7.714700000011362
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 17,
+              "p95Ms": 17,
+              "p99Ms": 17,
+              "maxMs": 16.303099999960978
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 4,
+              "p95Ms": 8,
+              "p99Ms": 8,
+              "maxMs": 7.714700000011362
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 35,
+            "status": {
+              "success": 35
+            },
+            "fromSend": {
+              "count": 35,
+              "p50Ms": 9,
+              "p95Ms": 24,
+              "p99Ms": 45,
+              "maxMs": 44.382400000002235
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "run": {
+            "count": 57,
+            "status": {
+              "success": 57
+            },
+            "fromSend": {
+              "count": 57,
+              "p50Ms": 6,
+              "p95Ms": 34,
+              "p99Ms": 41,
+              "maxMs": 40.70219999999972
+            },
+            "fromPlan": {
+              "count": 57,
+              "p50Ms": 23,
+              "p95Ms": 55,
+              "p99Ms": 73,
+              "maxMs": 72.2216999999946
+            }
+          },
+          "fanout-run": {
+            "count": 252,
+            "status": {
+              "success": 252
+            },
+            "fromSend": {
+              "count": 252,
+              "p50Ms": 13,
+              "p95Ms": 36,
+              "p99Ms": 48,
+              "maxMs": 52.038400000019465
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      }
+    },
+    "assessedWindows": 100,
+    "shortSegments": 0,
+    "shortSegmentRule": "Under 20 active seconds: protocol/latency/error gates still apply; no activity-rate claim",
+    "actors": [
+      {
+        "name": "La0d32300",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32301",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32302",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32303",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32304",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32305",
+        "role": "combat",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32306",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32307",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32308",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32309",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230a",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230b",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230c",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230d",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230e",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230f",
+        "role": "combat",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230g",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230h",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230i",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230j",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230k",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230l",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230m",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230n",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230o",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230p",
+        "role": "combat",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230q",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230r",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230s",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230t",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230u",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230v",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230w",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230x",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230y",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3230z",
+        "role": "combat",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32310",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32311",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32312",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32313",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32314",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32315",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32316",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32317",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32318",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d32319",
+        "role": "combat",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3231a",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3231b",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3231c",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      },
+      {
+        "name": "La0d3231d",
+        "role": "movement",
+        "activeSeconds": 110.83706799999997,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 2
+      }
+    ]
+  },
+  "diagnosticSteadyOnline": {
+    "samples": 55,
+    "declaredActors": 50,
+    "minimumOnlineActors": 50,
+    "maximumOnlineActors": 50,
+    "lastOnlineActors": 50
+  },
+  "measuredSloFailuresRecordOnly": true,
+  "quiescentOrdinaryAdmission": true,
+  "retainedActivityOnlyContinuityFailure": false,
+  "actors": 50,
+  "runId": "1793035283410-2a81573b",
+  "wrapperError": null,
+  "stage": null,
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\reports\\1793035283410-2a81573b.report.json",
+    "ok": false,
+    "error": "Actor La0d3230t died or lost presence; no automatic resurrection",
+    "highestMeasuredStage": null,
+    "highestPassedStage": null
+  },
+  "declaredButUnexecuted": {
+    "soakSeconds": 3600,
+    "resumeSamples": 1,
+    "saveSamples": 1
+  },
+  "successCallbackSentinel": false,
+  "originalFailedVerdictRetained": false,
+  "expectedFullyMeasuredGameFailure": false,
+  "classification": "partial-or-unsafe-error",
+  "cleanupComplete": true,
+  "eligibleForNextIndependentEpisode": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "productionAccepted": false,
+  "scope": "External derived executor; original L reference declarations, L/C ordinary full16 and Probe21 retained only as historical source basis; current V5 online presence reuse backend has fresh Root-selected Rust/build validation and exact unchanged c6 Node242/focused39/typecheck source reuse and no claimed fresh lifecycle pass. Quiescent ordinary admission; original native settle starts after the full roster. All measured game SLO verdicts, including timeouts, remain original false and record-only; actual safety stops remain fatal. Fresh measured assessor and online counts are separate; no whole-run continuity acceptance. No report rewrite. No automatic next episode. Root must independently check OS absence/ports and safety before launching100."
+}

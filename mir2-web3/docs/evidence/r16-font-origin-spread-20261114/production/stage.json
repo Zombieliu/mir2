@@ -1,0 +1,48 @@
+{
+  "workflow": {
+    "run": 43567414882,
+    "head": "de7129b61d7704699207fa6f09fd7bc44cbb45cc",
+    "passed": true
+  },
+  "operation": "numeron-qr-stage",
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "candidate": {
+    "id": "dpl_iYGHW7kJ219kFfwWYjdSFeiek4xu",
+    "state": "READY",
+    "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+    "ref": "codex/windows-player-journey",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "target": "production",
+    "url": "numeron-r16-ebbyt23tz-obelisk-labs.vercel.app",
+    "checkedAt": "2026-11-14T06:48:13.339Z"
+  },
+  "stageArtifactSha256": "048c8f587e12202aae640a69ce4b9e3e33c7e6f507a5c546dd975e4b4ed1e356",
+  "writes": [
+    {
+      "operation": "stage",
+      "site": "game"
+    }
+  ],
+  "trafficAfter": {
+    "target": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+    "alias": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+  },
+  "publicUiPassed": false,
+  "sourceClosure": {
+    "base": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "ref": "codex/windows-player-journey",
+    "changedFiles": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha": "a97ea7d52378b70dbcd80337ac41495cd04eec67"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+        "sha": "54a151f68c09844d6154d9a7f65bb6ec4dc5887f"
+      }
+    ]
+  }
+}

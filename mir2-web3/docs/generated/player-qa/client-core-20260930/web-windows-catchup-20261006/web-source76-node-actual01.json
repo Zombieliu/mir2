@@ -1,0 +1,58 @@
+{
+  "owner": "Root",
+  "kind": "source76 actual original focused/adjacent Node01",
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/node-tests01-config.json",
+    "bytes": 4112,
+    "sha256": "b37f612a8fe036c5992b25c8cb007e7771c45cb63c883925b2078e1607772a36"
+  },
+  "strictSnapshotPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-strict-snapshot01.json",
+    "bytes": 19419965,
+    "sha256": "322eaf1f064bb3c68c68563085c94c5df7b2371345e091fa03841a9c92c2a238"
+  },
+  "codeReviewPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-code-review01.json",
+    "bytes": 3167,
+    "sha256": "43151f1815b0e7f1664381ed0516fbd9108a2a672df7a9270eb6ab409642e255"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 88588,
+    "kind": "Root approved original Source76 focused and adjacent Node01 on independently frozen strict input",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1441,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stats": {
+    "tests": 107,
+    "pass": 107,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "closedStdoutPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/node-tests01/stdout.txt",
+    "bytes": 27261,
+    "sha256": "ffada64a74d0e9cc2a3dff4e37902509c4c29340ce9e61660b5bfeb9ba6cf61c"
+  },
+  "closedStderrPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/node-tests01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "originalPostGuardReturned": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

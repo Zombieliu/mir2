@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "sourceRevision": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "gatewayRegressionTests": 38,
+  "releaseGuardTests": 75,
+  "mergedGatewaySessions": 4,
+  "legacyGatewaySessions": 2,
+  "matchingPrivateInputs": 31,
+  "matchingCiInputs": 16,
+  "matchingScreenshots": 3,
+  "sourceClosureCommits": 5,
+  "sourceClosureFiles": 23,
+  "webProtocolAndCoreIdentical": true,
+  "linuxZipAndElfVerified": true,
+  "readmeLinks": 26,
+  "startupLineCounts": {
+    "AGENT-CURRENT.md": 118,
+    "AGENT-TASK-QUEUE.md": 88
+  },
+  "existingWipPreserved": true,
+  "publicReleasePerformed": false,
+  "publicLatencyOrColdLoadingFixedClaimed": false,
+  "wholeParityCandidateOrAccepted": false
+}

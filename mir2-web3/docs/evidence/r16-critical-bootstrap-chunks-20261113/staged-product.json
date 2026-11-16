@@ -1,0 +1,78 @@
+{
+  "parent": "bfbee701891748d7897ea228677165fa0fed0d46",
+  "files": [
+    {
+      "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+      "blob": "09aa098598b8ad8cfa138d9ac4fd2891a415bd09",
+      "buildBytes": 1860,
+      "buildSha256": "03d1360370f6064c23a3d2078659c42dd7708fdbb947c0d82fc38ea6b457b421",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+      "blob": "dc68afd8d4b2e405f4a6f2ac7d1b1e7ea01ebb74",
+      "buildBytes": 5353,
+      "buildSha256": "48b852251d28cd592dec31706c4f8309ae284cd21626b220d2d65fcef994e691",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "blob": "bc87b6f721ebff752cb06fcff43d1b77ae7284bd",
+      "buildBytes": 11968,
+      "buildSha256": "950b89252300de474150c793269e6d6d59d3dbedd13c0302e9bfd611257ac1d0",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-native-localization.ts",
+      "blob": "6c493030b4a3bde8f8b178c0312db232d270d2c0",
+      "buildBytes": 16751,
+      "buildSha256": "97b84013a21157a310e48c4d8a9475ebf2b69ef357c72b4df393e431253f1909",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "blob": "d83aa75dd0d64a641c232f61e433b9bddafd7b6b",
+      "buildBytes": 874,
+      "buildSha256": "d8679fc9154ae7bfaa64ee2b6ca44de338e3eb43327be1bbe24da4239eab90b3",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "blob": "0a02079df607dcf75f0c5e230e53dd25f21fed66",
+      "buildBytes": 2412,
+      "buildSha256": "a257ff2f97a9251562bdf3189c6ce9432ebb58394bbcd4eebbf28e5864b49fc8",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "blob": "0a0363f551d1b259264131979b94d561653c1e27",
+      "buildBytes": 8575,
+      "buildSha256": "4edb7382891c02f9f804a1a7e056f14b7c27f9dbdca7673a1f1b76e002ca18fb",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+      "blob": "0af27631012b74be65a84eb8929d1a0b00d270b7",
+      "buildBytes": 24551,
+      "buildSha256": "3b61bbf237d493c120ed568f2d6642d1ba408aa2e801c738a74c016265923643",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "blob": "f2a9b6042d9986e78c67beb02467c3cc988e829a",
+      "buildBytes": 59810,
+      "buildSha256": "024b949c7c6da1c1f18cf8ce97f8420dbbab80fe92d1fded89637aaba00fb926",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "blob": "755bd2411173ef54763f1abc9e1e812ca8e6cf11",
+      "buildBytes": 23742,
+      "buildSha256": "78aaba367f7695c558beb1283363533ef7482767f6b9b77c32bf723b27217015",
+      "lineEndingOnly": false
+    }
+  ],
+  "sourceMatchesQualifiedBuild": true,
+  "foreignWriteSetOverlap": 0,
+  "foreignShellExcluded": true
+}

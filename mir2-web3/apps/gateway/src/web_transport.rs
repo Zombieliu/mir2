@@ -1,0 +1,818 @@
+//! A socket failure ends transport work, never authoritative persistence.
+use std::io;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex as SyncMutex};
+use std::time::Duration;
+
+use axum::extract::ws::Message;
+use futures_util::{Sink, SinkExt};
+use tokio::sync::{watch, Mutex, Notify};
+
+pub(super) const WRITE_TIMEOUT: Duration = Duration::from_secs(10);
+// One shared lock/flush budget, leaving headroom inside the client's 5s Close
+// allowance without extending the ordinary application-write deadline.
+const PEER_CLOSE_REPLY_GRACE: Duration = Duration::from_secs(4);
+pub(super) const MAX_BATCH_MESSAGES: usize = 32;
+pub(super) const MAX_BATCH_BYTES: usize = 64 * 1024;
+
+pub(super) fn low_latency_listener(
+    listener: tokio::net::TcpListener,
+) -> axum::serve::TapIo<tokio::net::TcpListener, fn(&mut tokio::net::TcpStream)> {
+    use axum::serve::ListenerExt;
+    listener.tap_io(configure_accepted_stream as fn(&mut tokio::net::TcpStream))
+}
+
+fn configure_accepted_stream(stream: &mut tokio::net::TcpStream) {
+    if let Err(error) = stream.set_nodelay(true) {
+        eprintln!("[gateway-transport] failed to set accepted TCP_NODELAY: {error}");
+    }
+}
+
+#[derive(Debug, Default)]
+pub(super) struct BatchWriteTimings {
+    pub(super) lock_wait: Duration,
+    pub(super) feed: Duration,
+    pub(super) flush: Duration,
+}
+
+/// Cancellation must fence the socket before releasing its writer lock. A
+/// partially fed batch is never safe for a waiting producer to reuse.
+struct InFlightBatch<'a, S> {
+    sink: tokio::sync::MutexGuard<'a, S>,
+    terminal: &'a TransportSignal,
+    completed: bool,
+}
+
+impl<S> Drop for InFlightBatch<'_, S> {
+    fn drop(&mut self) {
+        if !self.completed {
+            self.terminal.end(TransportEnd::WriteError);
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum TransportEnd {
+    Closed,
+    ReadError,
+    ReaderStopped,
+    WriteError,
+    WriteTimeout,
+    ZoneOverload(u64),
+}
+
+#[derive(Clone)]
+pub(super) struct TransportSignal(watch::Sender<Option<TransportEnd>>);
+
+impl TransportSignal {
+    pub(super) fn new() -> Self {
+        Self(watch::channel(None).0)
+    }
+
+    pub(super) fn subscribe(&self) -> watch::Receiver<Option<TransportEnd>> {
+        self.0.subscribe()
+    }
+
+    pub(super) fn end(&self, reason: TransportEnd) {
+        self.0.send_if_modified(|current| {
+            if current.is_some() {
+                return false;
+            }
+            *current = Some(reason);
+            true
+        });
+    }
+
+    pub(super) fn ended(&self) -> bool {
+        self.0.borrow().is_some()
+    }
+
+    pub(super) fn reason(&self) -> Option<TransportEnd> {
+        *self.0.borrow()
+    }
+}
+
+pub(super) async fn wait_for_end(
+    mut receiver: watch::Receiver<Option<TransportEnd>>,
+) -> TransportEnd {
+    loop {
+        if let Some(reason) = *receiver.borrow_and_update() {
+            return reason;
+        }
+        if receiver.changed().await.is_err() {
+            // A dropped producer is not evidence that a live session should
+            // be discarded. The owner work future still controls its lifetime.
+            return std::future::pending().await;
+        }
+    }
+}
+
+/// Signals abnormal reader completion even on an early return or panic. This
+/// bypasses the bounded gameplay queue; no Disconnect/LogOut is fabricated.
+pub(super) struct ReaderLifetime(pub(super) TransportSignal);
+
+impl Drop for ReaderLifetime {
+    fn drop(&mut self) {
+        self.0.end(TransportEnd::ReaderStopped);
+    }
+}
+
+pub(super) struct SocketSender<S> {
+    sink: Mutex<S>,
+    terminal: TransportSignal,
+    timeout: Duration,
+    world_snapshot_gzip: AtomicBool,
+    input_gate_diagnostics: super::SocketDiagnostics,
+    input_gate_frames: std::sync::atomic::AtomicU64,
+    #[cfg(test)]
+    peer_close_started: AtomicBool,
+    #[cfg(test)]
+    peer_close_gate: Mutex<()>,
+}
+
+impl<S> SocketSender<S>
+where
+    S: Sink<Message, Error = axum::Error> + Unpin,
+{
+    pub(super) fn new(sink: S, terminal: TransportSignal) -> Self {
+        Self {
+            sink: Mutex::new(sink),
+            terminal,
+            timeout: WRITE_TIMEOUT,
+            world_snapshot_gzip: AtomicBool::new(false),
+            input_gate_diagnostics: None,
+            input_gate_frames: std::sync::atomic::AtomicU64::new(0),
+            #[cfg(test)]
+            peer_close_started: AtomicBool::new(false),
+            #[cfg(test)]
+            peer_close_gate: Mutex::new(()),
+        }
+    }
+
+    pub(super) fn with_input_gate_diagnostics(mut self, value: super::SocketDiagnostics) -> Self {
+        self.input_gate_diagnostics = value; self
+    }
+    pub(super) fn input_gate_context(&self) -> Option<super::InputGateTraceContext> {
+        super::input_gate_socket_context(&self.input_gate_diagnostics, 0, "owner_write", u8::MAX)
+    }
+    fn input_gate_reserve_frames(&self, count: usize) -> u64 {
+        if super::input_gate_trace_ids().is_none() || count == 0 { return 0; }
+        self.input_gate_frames.fetch_update(std::sync::atomic::Ordering::Relaxed, std::sync::atomic::Ordering::Relaxed,
+            |n| n.checked_add(count as u64).filter(|v| *v < super::SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER))
+            .ok().map(|n| n + 1).unwrap_or(0)
+    }
+    pub(super) async fn send(&self, message: Message) -> Result<(), axum::Error> {
+        self.send_traced(message, None).await
+    }
+    pub(super) async fn send_traced(&self, message: Message, trace: Option<super::InputGateTraceContext>) -> Result<(), axum::Error> {
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let deadline = tokio::time::Instant::now() + self.timeout;
+        let trace = if matches!(&message, Message::Close(_)) {
+            let context = super::input_gate_lifecycle_context(&self.input_gate_diagnostics);
+            drop(super::InputGateTraceSpan::start(context, "writer_close_send", 0));
+            context
+        } else { trace };
+        let count = usize::from(matches!(&message, Message::Text(_) | Message::Binary(_)));
+        let mut trace_lock = super::InputGateTraceSpan::start(trace, "writer_lock", 0);
+        let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
+            Ok(sink) => sink,
+            Err(_) => {
+                self.terminal.end(TransportEnd::WriteTimeout);
+                return Err(timeout_error());
+            }
+        };
+        let first = self.input_gate_reserve_frames(count);
+        if let Some(span) = trace_lock.as_mut() { span.frames(first, count); }
+        drop(trace_lock);
+        let trace = trace.map(|mut c| { c.frame_first = first; c.frame_count = count; c });
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let mut write = InFlightBatch {
+            sink,
+            terminal: &self.terminal,
+            completed: false,
+        };
+        // Latch a failed/partial write while still holding the sink guard.
+        // A waiting producer must not acquire and reuse a partially flushed
+        // sink in the interval between cancellation and the terminal signal.
+        let _trace_send = super::InputGateTraceSpan::start(trace, "writer_sink_send", 0);
+        match tokio::time::timeout_at(deadline, write.sink.send(message)).await {
+            Ok(Ok(())) => {
+                write.completed = true;
+                Ok(())
+            }
+            Ok(Err(error)) => {
+                flush_rejected_peer_close(&mut *write.sink, &error, deadline).await;
+                self.terminal.end(TransportEnd::WriteError);
+                Err(error)
+            }
+            Err(_) => {
+                self.terminal.end(TransportEnd::WriteTimeout);
+                Err(timeout_error())
+            }
+        }
+    }
+
+    pub(super) fn set_world_snapshot_gzip(&self, enabled: bool) {
+        self.world_snapshot_gzip.store(enabled, Ordering::Release);
+    }
+
+    pub(super) async fn send_world_snapshot(&self, text: String) -> Result<(), axum::Error> {
+        self.send(super::world_snapshot_transport::frame(text,
+            self.world_snapshot_gzip.load(Ordering::Acquire))).await
+    }
+
+    /// Reading Close only queues tungstenite's automatic reply. Flush it before
+    /// ending the reader, but do not let an occupied writer delay teardown for
+    /// the full ordinary write deadline.
+    pub(super) async fn flush_peer_close_reply(&self) -> Result<(), axum::Error> {
+        #[cfg(test)]
+        let _close_gate = {
+            self.peer_close_started.store(true, Ordering::Release);
+            self.peer_close_gate.lock().await
+        };
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let deadline = tokio::time::Instant::now() + self.timeout.min(PEER_CLOSE_REPLY_GRACE);
+        let close_trace = super::input_gate_lifecycle_context(&self.input_gate_diagnostics);
+        let close_lock_trace = super::InputGateTraceSpan::start(close_trace, "peer_close_writer_lock", 0);
+        let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
+            Ok(sink) => sink,
+            Err(_) => {
+                self.terminal.end(TransportEnd::Closed);
+                return Err(timeout_error());
+            }
+        };
+        drop(close_lock_trace);
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let mut write = InFlightBatch {
+            sink,
+            terminal: &self.terminal,
+            completed: false,
+        };
+        let close_flush_trace = super::InputGateTraceSpan::start(close_trace, "peer_close_flush", 0);
+        let result = tokio::time::timeout_at(deadline, write.sink.flush()).await;
+        // Fence while still holding the sink, including a failed/partial Close
+        // flush. A waiting producer must never reuse that closing transport.
+        self.terminal.end(TransportEnd::Closed);
+        drop(close_flush_trace);
+        match result {
+            Ok(Ok(())) => {
+                write.completed = true;
+                Ok(())
+            }
+            Ok(Err(error)) => Err(error),
+            Err(_) => Err(timeout_error()),
+        }
+    }
+
+    pub(super) async fn send_batch(
+        &self,
+        messages: Vec<Message>,
+    ) -> Result<BatchWriteTimings, axum::Error> {
+        if messages.is_empty() {
+            return Ok(BatchWriteTimings::default());
+        }
+        let bytes = messages.iter().map(message_bytes).sum::<usize>();
+        if messages.len() > MAX_BATCH_MESSAGES || (messages.len() > 1 && bytes > MAX_BATCH_BYTES) {
+            return Err(axum::Error::new(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "WebSocket batch exceeds message/byte bound",
+            )));
+        }
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let deadline = tokio::time::Instant::now() + self.timeout;
+        let trace = self.input_gate_context().map(|mut c| { c.kind = "batch"; c });
+        let count = messages.iter().filter(|m| matches!(m, Message::Text(_) | Message::Binary(_))).count();
+        let mut trace_lock = super::InputGateTraceSpan::start(trace, "writer_lock", 0);
+        let lock_started = std::time::Instant::now();
+        let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
+            Ok(sink) => sink,
+            Err(_) => {
+                self.terminal.end(TransportEnd::WriteTimeout);
+                return Err(timeout_error());
+            }
+        };
+        let first = self.input_gate_reserve_frames(count);
+        if let Some(span) = trace_lock.as_mut() { span.frames(first, count); }
+        drop(trace_lock);
+        let trace = trace.map(|mut c| { c.frame_first = first; c.frame_count = count; c });
+        let mut timings = BatchWriteTimings {
+            lock_wait: lock_started.elapsed(),
+            ..BatchWriteTimings::default()
+        };
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let mut write = InFlightBatch {
+            sink,
+            terminal: &self.terminal,
+            completed: false,
+        };
+        // The same ten-second deadline covers lock, readiness, feed and final
+        // flush. Every message remains an individual WebSocket frame.
+        let result = tokio::time::timeout_at(deadline, async {
+            let trace_feed = super::InputGateTraceSpan::start(trace, "writer_batch_feed", 0);
+            let feed_started = std::time::Instant::now();
+            for message in messages {
+                if self.terminal.ended() {
+                    return Err(ended_error());
+                }
+                write.sink.feed(message).await?;
+            }
+            timings.feed = feed_started.elapsed();
+            drop(trace_feed);
+            if self.terminal.ended() {
+                return Err(ended_error());
+            }
+            let _trace_flush = super::InputGateTraceSpan::start(trace, "writer_batch_flush", 0);
+            let flush_started = std::time::Instant::now();
+            write.sink.flush().await?;
+            timings.flush = flush_started.elapsed();
+            Ok(())
+        })
+        .await;
+        match result {
+            Ok(Ok(())) => {
+                write.completed = true;
+                Ok(timings)
+            }
+            Ok(Err(error)) => {
+                flush_rejected_peer_close(&mut *write.sink, &error, deadline).await;
+                self.terminal.end(TransportEnd::WriteError);
+                Err(error)
+            }
+            Err(_) => {
+                self.terminal.end(TransportEnd::WriteTimeout);
+                Err(timeout_error())
+            }
+        }
+    }
+
+    #[cfg(test)]
+    pub(super) async fn lock_for_test(&self) -> tokio::sync::MutexGuard<'_, S> {
+        self.sink.lock().await
+    }
+
+    #[cfg(test)]
+    pub(super) async fn pause_peer_close_reply_for_test(&self) -> tokio::sync::MutexGuard<'_, ()> {
+        self.peer_close_gate.lock().await
+    }
+
+    #[cfg(test)]
+    pub(super) fn peer_close_reply_started_for_test(&self) -> bool {
+        self.peer_close_started.load(Ordering::Acquire)
+    }
+}
+
+/// A split reader has already queued the automatic Close reply when this exact
+/// protocol refusal occurs. No frame from the rejected write was accepted.
+/// Complete only that control flush while retaining the writer lock, before
+/// publishing WriteError: publishing first lets the owner abort the reader and
+/// drop both socket halves before its reply can run. All other errors, write
+/// cancellation and timeouts retain their ordinary partial-write fence.
+async fn flush_rejected_peer_close<S>(
+    sink: &mut S,
+    error: &axum::Error,
+    write_deadline: tokio::time::Instant,
+) where
+    S: Sink<Message, Error = axum::Error> + Unpin,
+{
+    use std::error::Error;
+    use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as WebSocketError};
+
+    if !matches!(
+        error
+            .source()
+            .and_then(|source| source.downcast_ref::<WebSocketError>()),
+        Some(WebSocketError::Protocol(ProtocolError::SendAfterClosing))
+    ) {
+        return;
+    }
+    let deadline = write_deadline.min(tokio::time::Instant::now() + PEER_CLOSE_REPLY_GRACE);
+    match tokio::time::timeout_at(deadline, sink.flush()).await {
+        Ok(Ok(())) => {}
+        Ok(Err(error)) => {
+            eprintln!("[gateway-transport] rejected-write Close reply flush failed: {error}")
+        }
+        Err(_) => eprintln!("[gateway-transport] rejected-write Close reply flush timed out"),
+    }
+}
+
+fn message_bytes(message: &Message) -> usize {
+    match message {
+        Message::Text(text) => text.len(),
+        Message::Binary(bytes) | Message::Ping(bytes) | Message::Pong(bytes) => bytes.len(),
+        Message::Close(frame) => frame.as_ref().map_or(0, |frame| 2 + frame.reason.len()),
+    }
+}
+
+#[cfg(test)]
+#[path = "web_transport_batch_tests.rs"]
+mod batch_tests;
+
+fn ended_error() -> axum::Error {
+    axum::Error::new(io::Error::new(
+        io::ErrorKind::BrokenPipe,
+        "WebSocket transport has ended",
+    ))
+}
+
+fn timeout_error() -> axum::Error {
+    axum::Error::new(io::Error::new(
+        io::ErrorKind::TimedOut,
+        "WebSocket lock/write deadline exceeded",
+    ))
+}
+
+#[derive(Default)]
+struct MovementDrainState {
+    closed: bool,
+    pending: usize,
+}
+
+/// Abort does not cancel spawn_blocking work. Stop admission and let already
+/// submitted calls finish before fencing/saving the shared owner's checkpoint.
+#[derive(Default)]
+pub(super) struct MovementDrain {
+    state: SyncMutex<MovementDrainState>,
+    completed: Notify,
+}
+
+impl MovementDrain {
+    pub(super) fn begin(self: &Arc<Self>) -> Option<MovementCall> {
+        let mut state = self.state.lock().expect("movement drain state poisoned");
+        if state.closed {
+            return None;
+        }
+        state.pending += 1;
+        Some(MovementCall(Arc::clone(self)))
+    }
+
+    pub(super) async fn close_and_wait(&self) {
+        loop {
+            {
+                let mut state = self.state.lock().expect("movement drain state poisoned");
+                state.closed = true;
+                if state.pending == 0 {
+                    return;
+                }
+            }
+            // notify_one retains a permit if completion races this await.
+            self.completed.notified().await;
+        }
+    }
+}
+
+pub(super) struct MovementCall(Arc<MovementDrain>);
+
+impl Drop for MovementCall {
+    fn drop(&mut self) {
+        let mut state = self.0.state.lock().expect("movement drain state poisoned");
+        state.pending -= 1;
+        if state.pending == 0 {
+            self.0.completed.notify_one();
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::pin::Pin;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
+    use std::task::{Context, Poll};
+
+    struct ProbeSink {
+        ready: bool,
+        flush: bool,
+        fail: bool,
+        sent: Arc<AtomicUsize>,
+    }
+
+    impl Sink<Message> for ProbeSink {
+        type Error = axum::Error;
+
+        fn poll_ready(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            if self.fail {
+                Poll::Ready(Err(axum::Error::new(io::Error::other("closed sink"))))
+            } else if self.ready {
+                Poll::Ready(Ok(()))
+            } else {
+                Poll::Pending
+            }
+        }
+
+        fn start_send(self: Pin<&mut Self>, _: Message) -> Result<(), Self::Error> {
+            self.sent.fetch_add(1, Ordering::SeqCst);
+            Ok(())
+        }
+
+        fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            if self.flush {
+                Poll::Ready(Ok(()))
+            } else {
+                Poll::Pending
+            }
+        }
+
+        fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.poll_flush(cx)
+        }
+    }
+
+    fn sender(ready: bool, flush: bool, fail: bool) -> (SocketSender<ProbeSink>, Arc<AtomicUsize>) {
+        let sent = Arc::new(AtomicUsize::new(0));
+        let mut sender = SocketSender::new(
+            ProbeSink {
+                ready,
+                flush,
+                fail,
+                sent: Arc::clone(&sent),
+            },
+            TransportSignal::new(),
+        );
+        sender.timeout = Duration::from_millis(10);
+        (sender, sent)
+    }
+
+    fn message() -> Message {
+        Message::Text("test".into())
+    }
+
+    struct CloseRefusalSink {
+        typed: bool,
+        flush_ready: bool,
+        flushes: Arc<AtomicUsize>,
+    }
+
+    impl Sink<Message> for CloseRefusalSink {
+        type Error = axum::Error;
+
+        fn poll_ready(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            Poll::Ready(Ok(()))
+        }
+
+        fn start_send(self: Pin<&mut Self>, _: Message) -> Result<(), Self::Error> {
+            if self.typed {
+                Err(axum::Error::new(
+                    tokio_tungstenite::tungstenite::Error::Protocol(
+                        tokio_tungstenite::tungstenite::error::ProtocolError::SendAfterClosing,
+                    ),
+                ))
+            } else {
+                // The same text from another error is deliberately insufficient.
+                Err(axum::Error::new(io::Error::other(
+                    "WebSocket protocol error: Sending after closing is not allowed",
+                )))
+            }
+        }
+
+        fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.flushes.fetch_add(1, Ordering::SeqCst);
+            if self.flush_ready {
+                Poll::Ready(Ok(()))
+            } else {
+                Poll::Pending
+            }
+        }
+
+        fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.poll_flush(cx)
+        }
+    }
+
+    #[tokio::test]
+    async fn transport_close_refusal_requires_typed_protocol_error_and_never_reopens_sender() {
+        for typed in [false, true] {
+            let flushes = Arc::new(AtomicUsize::new(0));
+            let sender = SocketSender::new(
+                CloseRefusalSink {
+                    typed,
+                    flush_ready: true,
+                    flushes: Arc::clone(&flushes),
+                },
+                TransportSignal::new(),
+            );
+            assert!(sender.send(message()).await.is_err());
+            assert_eq!(sender.terminal.reason(), Some(TransportEnd::WriteError));
+            assert_eq!(flushes.load(Ordering::SeqCst), usize::from(typed));
+            assert!(sender.send(message()).await.is_err());
+            assert_eq!(flushes.load(Ordering::SeqCst), usize::from(typed));
+        }
+    }
+
+    #[tokio::test]
+    async fn transport_close_refusal_flush_shares_original_deadline_and_preserves_write_error() {
+        let flushes = Arc::new(AtomicUsize::new(0));
+        let mut sender = SocketSender::new(
+            CloseRefusalSink {
+                typed: true,
+                flush_ready: false,
+                flushes: Arc::clone(&flushes),
+            },
+            TransportSignal::new(),
+        );
+        sender.timeout = Duration::from_millis(10);
+        assert!(
+            tokio::time::timeout(Duration::from_secs(1), sender.send(message()))
+                .await
+                .expect("the refused-write reply must remain bounded")
+                .is_err()
+        );
+        assert!(flushes.load(Ordering::SeqCst) > 0);
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::WriteError));
+        let count = flushes.load(Ordering::SeqCst);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(flushes.load(Ordering::SeqCst), count);
+        assert_eq!(PEER_CLOSE_REPLY_GRACE, Duration::from_secs(4));
+        assert_eq!(WRITE_TIMEOUT, Duration::from_secs(10));
+    }
+
+    #[tokio::test]
+    async fn transport_single_write_cancellation_fences_sink_before_unlock() {
+        let (mut sender, sent) = sender(true, false, false);
+        sender.timeout = Duration::from_secs(1);
+        assert!(
+            tokio::time::timeout(Duration::from_millis(5), sender.send(message()))
+                .await
+                .is_err()
+        );
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::WriteError));
+        assert_eq!(sent.load(Ordering::SeqCst), 1);
+        assert!(sender.flush_peer_close_reply().await.is_err());
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_flushes_without_sending_gameplay_and_fences_later_writes() {
+        let (sender, sent) = sender(true, true, false);
+        sender.flush_peer_close_reply().await.unwrap();
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_pending_flush_is_bounded_and_fenced() {
+        let (sender, sent) = sender(true, false, false);
+        let result = tokio::time::timeout(Duration::from_secs(1), sender.flush_peer_close_reply())
+            .await
+            .expect("Close flush must retain its finite writer deadline");
+        assert!(result.is_err());
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_production_budget_includes_lock_wait_and_pending_flush() {
+        let (mut sender, sent) = sender(true, false, false);
+        sender.timeout = WRITE_TIMEOUT;
+        assert_eq!(WRITE_TIMEOUT, Duration::from_secs(10));
+        let occupied = sender.sink.lock().await;
+        let started = tokio::time::Instant::now();
+        let result = tokio::time::timeout(Duration::from_secs(5), async {
+            let (_, result) = tokio::join!(
+                async {
+                    tokio::time::sleep(Duration::from_millis(1500)).await;
+                    drop(occupied);
+                },
+                sender.flush_peer_close_reply(),
+            );
+            result
+        })
+        .await
+        .expect("lock wait must not give a pending flush a second grace period");
+        assert!(result.is_err());
+        assert!(started.elapsed() >= Duration::from_secs(4));
+        assert!(started.elapsed() < Duration::from_secs(5));
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_lock_wait_is_bounded_and_prior_terminal_reason_survives() {
+        let (sender, _) = sender(true, true, false);
+        let occupied = sender.sink.lock().await;
+        assert!(sender.flush_peer_close_reply().await.is_err());
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        drop(occupied);
+        for reason in [TransportEnd::ReadError, TransportEnd::WriteTimeout] {
+            let (write, _) = super::tests::sender(true, true, false);
+            write.terminal.end(reason);
+            assert!(write.flush_peer_close_reply().await.is_err());
+            assert_eq!(write.terminal.reason(), Some(reason));
+        }
+    }
+
+    #[tokio::test]
+    async fn transport_ready_and_flush_complete_without_ending_socket() {
+        let (sender, sent) = sender(true, true, false);
+        sender.send(message()).await.unwrap();
+        sender.send(message()).await.unwrap();
+        assert_eq!(sent.load(Ordering::SeqCst), 2);
+        assert!(!sender.terminal.ended());
+    }
+
+    #[tokio::test]
+    async fn transport_pending_readiness_expires_before_start_send() {
+        let (sender, sent) = sender(false, true, false);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+        assert_eq!(
+            wait_for_end(sender.terminal.subscribe()).await,
+            TransportEnd::WriteTimeout
+        );
+    }
+
+    #[tokio::test]
+    async fn transport_partial_flush_expires_and_never_reuses_sink() {
+        let (sender, sent) = sender(true, false, false);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 1);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 1);
+        assert_eq!(
+            wait_for_end(sender.terminal.subscribe()).await,
+            TransportEnd::WriteTimeout
+        );
+    }
+
+    #[tokio::test]
+    async fn transport_lock_wait_shares_write_deadline() {
+        let (sender, sent) = sender(true, true, false);
+        let guard = sender.sink.lock().await;
+        assert!(sender.send(message()).await.is_err());
+        drop(guard);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+        assert_eq!(
+            wait_for_end(sender.terminal.subscribe()).await,
+            TransportEnd::WriteTimeout
+        );
+    }
+
+    #[tokio::test]
+    async fn transport_sink_error_ends_all_other_producers() {
+        let (sender, sent) = sender(true, true, true);
+        assert!(sender.send(message()).await.is_err());
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+        assert_eq!(
+            wait_for_end(sender.terminal.subscribe()).await,
+            TransportEnd::WriteError
+        );
+    }
+
+    #[tokio::test]
+    async fn transport_close_bypasses_full_gameplay_queue_and_preserves_first_reason() {
+        let (tx, _rx) = tokio::sync::mpsc::channel(1);
+        tx.try_send("unconsumed action").unwrap();
+        let terminal = TransportSignal::new();
+        let receiver = terminal.subscribe();
+        terminal.end(TransportEnd::Closed);
+        terminal.end(TransportEnd::WriteError);
+        assert_eq!(wait_for_end(receiver).await, TransportEnd::Closed);
+        assert!(tx.try_send("close notification would block").is_err());
+    }
+
+    #[tokio::test]
+    async fn transport_reader_early_return_is_terminal() {
+        let terminal = TransportSignal::new();
+        let receiver = terminal.subscribe();
+        drop(ReaderLifetime(terminal));
+        assert_eq!(wait_for_end(receiver).await, TransportEnd::ReaderStopped);
+    }
+
+    #[tokio::test]
+    async fn transport_movement_drain_waits_for_blocking_work_and_rejects_new_calls() {
+        let drain = Arc::new(MovementDrain::default());
+        let call = drain.begin().unwrap();
+        let waiting = drain.close_and_wait();
+        tokio::pin!(waiting);
+        assert!(
+            tokio::time::timeout(Duration::from_millis(10), &mut waiting)
+                .await
+                .is_err()
+        );
+        assert!(drain.begin().is_none());
+        drop(call);
+        tokio::time::timeout(Duration::from_secs(1), waiting)
+            .await
+            .unwrap();
+        assert!(drain.begin().is_none());
+    }
+}

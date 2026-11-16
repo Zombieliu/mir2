@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "producerReceipt": {
+    "filename": "unified-updater-pipeline-result.json",
+    "bytes": 705,
+    "sha256": "cdf9e9712453abf24a5c00b017e465b849e1a2b1d4743373f359a5f9391d125c"
+  },
+  "producerReport": {
+    "passed": true,
+    "bundleRoot": "C:\\mir2-build\\unified-20261029\\updater-release-r11\\bundle",
+    "sequence": 2026102911,
+    "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "candidateRoot": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-20261029-unified-11.staging-de076792a7ca4016a4e9259a2e25f932",
+    "producerPackagePending": true,
+    "installOrPublishAllowed": false,
+    "archive": "F:/mir2-build/unified-20261029/unified-update-r11.tar.gz",
+    "archiveSha256": "119F90395F0D8C7CEBB444A14F1E81E53722288BEEA25F2F696446E1A00C5D55",
+    "publicRelease": false,
+    "remoteDeployment": false
+  },
+  "phase": "Real Engine77 local TEST-CMS bundle/archive pipeline; complete Game producer postmove gate remains separate pending",
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "producerPackageOverallPassed": false,
+  "installationOrPublicationAllowed": false
+}

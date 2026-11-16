@@ -1,0 +1,122 @@
+{
+  "schema": "mir2.background-default-closed-case.v1",
+  "case": "dense100",
+  "sourceRevision": "32eb62774dc8ac1a49876808f6118948f137d5b6",
+  "codeIntegrationRevision": "362ea11c2498ffb7dda28d38299ed4aa6ca6c425",
+  "binarySha256": "a930e11764211d50230fdc61e79f2bc781b8abf2766838261a8e405efe0a3222",
+  "actualExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "normalBothOwnedJobsClosedNoKill": true,
+  "strictPassed": true,
+  "promotableAsNew100Predecessor": false,
+  "rootReviewStillRequiredBeforeNextCase": true,
+  "approvedNextCaseClaimCreated": false,
+  "capacityQualified": false,
+  "controllerSha256": "07f3f84cf3bbebd8261c5d07527047e75d067d61091f2a7ac9ae04a4e27d705f",
+  "inheritanceReceiptSha256": "87c4bfc5b183f4d1281b3f30da55be06496783b592248f8365154814f9664fe1",
+  "reportSha256": "d9aa423217d520b8138aec9ea61d1054aee5c073b0eb18c01565dfc050b7c684",
+  "publicReportScalars": {
+    "runCompleted": true,
+    "ok": true,
+    "evidenceValid": true,
+    "measurementSloPassed": true,
+    "offered": 16000,
+    "completedOnTime": 16000,
+    "timeouts": 0,
+    "notSent": 0,
+    "passedActorMinuteWindows": 500,
+    "totalActorMinuteWindows": 500,
+    "gearActorRecords": 3,
+    "gearActorRecordsPassed": 3,
+    "cleanupRecords": 100,
+    "normalLogoutCount": 100,
+    "transportCloseCount": 100,
+    "freshRecords": 2,
+    "freshPassedCount": 2,
+    "freshNormalLogoutCount": 2,
+    "freshTransportCloseCount": 2,
+    "measurementStartedAtUtc": "2026-11-15T09:56:36.509Z",
+    "measurementPlannedEndAtUtc": "2026-11-15T10:01:36.509Z",
+    "measurementEndedAtUtc": "2026-11-15T10:01:38.490Z"
+  },
+  "runtimeBudgetObservation": {
+    "status": "observed",
+    "qualified": true,
+    "proofSha256": "1f6e40f0e7d965bdfb54d0630c4d4d39309fc4acca158c2fc6a9b8cfc8fd18d1",
+    "observedRuntimeBudgetSlots": 4,
+    "matchingStartupLinesCount": 1,
+    "gamePid": 86776,
+    "serviceStartedSha256": "b396d46533cf96f3dc85a89d805c32efa5b42a1e83b19a567a964e74b08727c4",
+    "gameStderr": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\game-stderr.log",
+      "bytes": 159031,
+      "sha256": "ffc96715e8b1a5c31d3c4dc9ef0d30512baf122577d876228e15b333f2d4ed48"
+    }
+  },
+  "publicErrors": [],
+  "previousCase": null,
+  "history": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v44.json",
+    "sha256": "bfde0206cfea47e1dc7ab926bd4977230ceb850256400a1122834830a71526d4",
+    "attemptCount": 2398,
+    "previousPrefixCount": 2284,
+    "newAttempts": 114,
+    "completeV42PrefixRetained": true,
+    "expectedTotalCaseReservations": 114,
+    "expectedCaseAttemptCountObserved": true,
+    "expectedCountIsNotSubstituteForActualLedger": true
+  },
+  "closedProof": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-default-factory-bound-v1\\generated\\dense100\\CLOSED-STRICT.json",
+    "bytes": 2818,
+    "sha256": "5571737981d739e852d76481b5685b15f592acf4bd67643fe0909f34c0358de5"
+  },
+  "independentVerification": {
+    "5": {
+      "result": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-default-factory-bound-v1\\generated\\dense100\\disk-readback.v8.json",
+        "bytes": 176584,
+        "sha256": "b8eb0a429f6a0d7765ae1525cd5e0c0a96d79f94478312bbab64e2873949ec79"
+      },
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-default-factory-bound-v1\\generated\\dense100\\ROOT-step5-job\\job-result.json",
+        "bytes": 2800,
+        "sha256": "1567347df007935da89acacab9d50be0908cf4c27ea992c0aec055334e17bbb4"
+      },
+      "passed": true,
+      "readerSourceSha256": "b22ce21a3c7d62796465e6a3845df88b56b79e915a522a86d15088f1f63fbd59",
+      "actualExitCodes": [
+        0,
+        0
+      ],
+      "normalClosedNoKill": true,
+      "sampleCount": 100
+    },
+    "6": {
+      "result": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-default-factory-bound-v1\\generated\\dense100\\independent-verification.v8.json",
+        "bytes": 183238,
+        "sha256": "ecd74b74079ceab2722aa32d1040170a42e69d637e742331f76bec4d44d9b73c"
+      },
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-default-factory-bound-v1\\generated\\dense100\\ROOT-step6-job\\job-result.json",
+        "bytes": 2989,
+        "sha256": "6991f79cd9e07dbb68451bfcaf1958e40707d2cbad1e80ce633cc2bcbf247b29"
+      },
+      "passed": true,
+      "verifierSourceSha256": "94c0b5f79decf66e7c05ed16f27ce9d958debafc14dd663ce39aa7c12a60516f",
+      "actualExitCodes": [
+        0,
+        0
+      ],
+      "normalClosedNoKill": true
+    }
+  },
+  "qualificationScope": "Local game-core, one shared Zone, fixed100/300s workload. Not maximum CCU, cloud hardware, full combat or physical tri-client rendering qualification.",
+  "cloud100Qualified": false,
+  "publicServiceDeployed": false,
+  "physicalWebWindowsAndroidQualified": false
+}

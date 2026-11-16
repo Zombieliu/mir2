@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T19:44:55.120Z",
+  "runId": "1792870589933-af9ef086",
+  "method": "Independent read-only public inventory, explicit-copy raw SHA, external raw/monitor/recording SHA, structural credential-field scan and frozen verifier status/projection round trip.",
+  "originalCopiesVerified": 34,
+  "publicFilesVerifiedBeforeThisReceipt": 38,
+  "publicJsonFilesStructurallyChecked": 30,
+  "externalArchivesVerified": 3,
+  "rawBytes": 9395564,
+  "rawSha256": "6ede64425f5fe435ba343ddfc74fbb824e38db280f2ca1161cb90ea8b6a0b473",
+  "rawRows": 16032,
+  "invalidRawMonitorRows": 0,
+  "originalVerdictPreserved": true,
+  "reportOk": true,
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "capacityAccepted": false,
+  "privateSecretValuesReadOrClaimedChecked": false,
+  "finalIndexCreated": false,
+  "existingTopicsModified": false
+}

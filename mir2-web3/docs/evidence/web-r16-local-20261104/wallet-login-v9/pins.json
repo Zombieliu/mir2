@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.r16.wallet-evidence-pins.v1",
+  "files": [
+    {
+      "path": "wallet-v9-browser-proof.json",
+      "bytes": 1497,
+      "sha256": "680d5583e0a15cecc5fecfa7ba2d279685ff2dca8af46673bf849166b1210d8a"
+    },
+    {
+      "path": "wallet-v9-package-integrity-proof.json",
+      "bytes": 28483,
+      "sha256": "366e1599b0e8d7b1884b9f704e2484a8b7681971dc7cd73fdd8b6ba52040e686"
+    },
+    {
+      "path": "wallet-v9-runtime-preservation-proof.json",
+      "bytes": 836,
+      "sha256": "dba168c479d3f91076bad09e45fad83f6528f43e7576e4ebbd849fc2bf062afc"
+    },
+    {
+      "path": "wallet-v9-account-return.png",
+      "bytes": 1686246,
+      "sha256": "9378aad82fbb76801416dd691c81d2848686be5f4609cadead10a319b0b4e0e4"
+    },
+    {
+      "path": "wallet-v9-original-alo-memory.png",
+      "bytes": 581611,
+      "sha256": "69050bc3a1934be6cbb490054bb5f4e008d9ea1417df18038f75c9363150e0f5"
+    }
+  ],
+  "privateQrNotPublished": true,
+  "credentialsNotCopied": true
+}

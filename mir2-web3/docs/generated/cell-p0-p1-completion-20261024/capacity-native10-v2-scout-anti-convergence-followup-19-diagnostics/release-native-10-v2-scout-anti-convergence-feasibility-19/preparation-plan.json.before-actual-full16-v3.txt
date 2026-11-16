@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_FULL16_SOURCE_APPROVAL_AND_ROOT_SEAL",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "sourceFrozen": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "document": "preparation-plan.json",
+  "purpose": "Pending fresh J full16 and Root source approval; no sealing, provisioning or run is authorized by this template."
+}

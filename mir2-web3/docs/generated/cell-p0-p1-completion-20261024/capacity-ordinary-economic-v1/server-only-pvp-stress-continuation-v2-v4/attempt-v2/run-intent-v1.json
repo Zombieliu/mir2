@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T19:15:33.191Z",
+  "profile": "server-only-preconfigured-pvp-full-combat-v1",
+  "backend": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v2/bin/mir2-gateway.exe",
+    "bytes": 87439360,
+    "sha256": "e55d15eef60e2ee289a92bc17a72ce3731376b5ed8b06bd36831807b99bb0a7b"
+  },
+  "driver": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-pvp-stress.mjs",
+    "bytes": 30173,
+    "sha256": "131a4b638709606376bdbad51a66a5b128f6336d50f685df38f1840a46deeedb"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v2\\fixture\\public\\fixture-manifest-v1.json",
+    "bytes": 135980,
+    "sha256": "ec8d3fb2d08db857c5598ef76e6a9f613e42e76accc655a36040c55d9f946dd0"
+  },
+  "normalPasswordLogin": true,
+  "authenticationBucket": "new isolated functional probe process; prior probe-v1 same-endpoint auth ledger copied unchanged; ordinary-run ledger and auth controls unchanged",
+  "normalCombatAndHealing": true,
+  "legalPreconfiguredLevel40EquipmentAndLargeHp194": true,
+  "ordinarySupplyAccepted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

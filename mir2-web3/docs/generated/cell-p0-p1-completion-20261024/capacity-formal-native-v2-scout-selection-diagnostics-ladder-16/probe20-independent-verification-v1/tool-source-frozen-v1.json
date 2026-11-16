@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_REVIEWED_ENDED_ONLY_NOT_EXECUTED",
+  "sealedAt": "2026-10-26T02:16:48.699Z",
+  "files": [
+    {
+      "path": "verify-ended-probe20-v1.mjs",
+      "bytes": 44400,
+      "sha256": "335e2121bc24ad616061e829ed5e352f9658f431ef36571b1aae662eb61ad149"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5860,
+      "sha256": "70da9fbc95c66e06dde5402ac159ccba4870c5695be9f556e8eb5c3396b0c455"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe20-v1.mjs",
+      "bytes": 2257,
+      "sha256": "0665b467d2553f4355309b29b813620e6454942deee50f668ea2a7e566e7c4e9"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-v1.json",
+      "bytes": 20091,
+      "sha256": "e0b1c0558f39f7a581cba7c767e09fd2572d42fc082c65dc0c20466c0913ac38"
+    },
+    {
+      "path": "root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b"
+    },
+    {
+      "path": "syntax-check-v1.log",
+      "bytes": 673,
+      "sha256": "ce69536a9b7903892566bc52d06022b35137d40107ad452a08345b57c4a665ab"
+    },
+    {
+      "path": "preparation-v1.json",
+      "bytes": 9766,
+      "sha256": "318e3852ee8259d63058f21c04efdf75b917f81c8dd8e2c926f9a13933f0ca4a"
+    },
+    {
+      "path": "independent-review-v1.json",
+      "bytes": 6909,
+      "sha256": "844102d4cc3de34127d0c1feb0cb1762761e5f0cd2bc2c49c379cd321ebf67ce"
+    }
+  ],
+  "sourceSha256": "b36fb1ac72e5226b28f002c3916da82d3914edf379cd33ed644aa3fd18a79c8a",
+  "sourceReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/probe20-ended-tool-independent-review-v1/review-v1.json",
+    "bytes": 6909,
+    "sha256": "844102d4cc3de34127d0c1feb0cb1762761e5f0cd2bc2c49c379cd321ebf67ce"
+  },
+  "actualVerificationExecuted": false,
+  "capacityAccepted": false
+}

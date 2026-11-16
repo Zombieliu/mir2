@@ -1,0 +1,171 @@
+{
+  "schema": "mir2.shared-projection-normal-release-dense100.closed.v1",
+  "recordedAtUtc": "2026-11-14T16:32:53.277712+00:00",
+  "sourceRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "codeIntegrationRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "binarySha256": "c155bb789e3c37bb4b9ed5b003c74dacef68e13240cdd9a364703945d1393e51",
+  "planSha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+  "qualificationLayer": "game-core-local",
+  "population": 100,
+  "measurementStartedAtUtc": "2026-11-14T16:16:06.015Z",
+  "measurementPlannedEndAtUtc": "2026-11-14T16:21:06.015Z",
+  "measurementEndedAtUtc": "2026-11-14T16:21:08.009Z",
+  "plannedDurationMs": 300000,
+  "totals": {
+    "offered": 16000,
+    "completed": 15398,
+    "timeout": 71,
+    "notSent": 531
+  },
+  "passedWindows": 159,
+  "totalWindows": 500,
+  "controllerDriverServerExitCodes": [
+    1,
+    1,
+    0
+  ],
+  "normalStopProven": true,
+  "abnormalCleanup": false,
+  "serverJobClose": {
+    "closed": true,
+    "allMembersExited": true,
+    "killAppliedByClose": false,
+    "rootExitCodes": {
+      "gameServer": 0
+    },
+    "failedLaunches": [],
+    "normalStopMustBeProvenByCaller": true
+  },
+  "injectorJobClose": {
+    "closed": true,
+    "allMembersExited": true,
+    "killAppliedByClose": false,
+    "rootExitCodes": {
+      "injector": 1
+    },
+    "failedLaunches": [],
+    "normalStopMustBeProvenByCaller": true
+  },
+  "resourceRows": 3611,
+  "resourceEvidenceCompleteReportedByController": true,
+  "resourceBudgetsObservedByVerifier": {
+    "server": {
+      "samples": 3611,
+      "maximumGapMs": 1050.4827999975532,
+      "peakReportedJobCommitBytes": 2647486464,
+      "affinityMaskHex": "0xf",
+      "commitLimitBytes": 8589934592,
+      "logicalCpus": 4
+    },
+    "injector": {
+      "samples": 3609,
+      "maximumGapMs": 1062.1626999927685,
+      "peakReportedJobCommitBytes": 817881088,
+      "affinityMaskHex": "0xff0",
+      "commitLimitBytes": 4294967296,
+      "logicalCpus": 8
+    }
+  },
+  "protocolLifecycleReported": {
+    "gearActorsPassed": 3,
+    "gearOperationRecords": 12,
+    "primaryNormalLogoutAndClose": 100,
+    "maxLogoutAckMs": 1181.4591000000946,
+    "maxTransportCloseMs": 24.45449999999255,
+    "freshStatePreservedAndNormalClose": 2,
+    "fullIndependentLifecycleCertified": false
+  },
+  "diskGate": {
+    "passed": false,
+    "sampleCount": 0,
+    "failureCode": "public_protocol_or_resource_prerequisite_failed",
+    "privateStoreReadAttempted": false
+  },
+  "independentVerificationPassed": false,
+  "hardFailures": [
+    {
+      "code": "modern_all_actor_dense_File_v3_proof_missing"
+    },
+    {
+      "code": "controller_or_producer_actual_exit_failed"
+    },
+    {
+      "code": "job_exit_or_close_not_normal"
+    }
+  ],
+  "verifierNonzeroExitIsRetainedDespiteNaturalProcessShutdown": true,
+  "capacityQualified": false,
+  "productionStackQualified": false,
+  "physicalTriClientQualified": false,
+  "fullCombatQualified": false,
+  "inputs": {
+    "controller": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-dense100-v1\\runs\\dense100-v1\\controller-result.json",
+      "bytes": 4150,
+      "sha256": "8a7915253bff42feb75839e2f748f5cbfc43967b9d632b206b99a4abdf743082"
+    },
+    "summary": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-dense100-v1\\runs\\dense100-v1\\modern.report.json",
+      "bytes": 29533411,
+      "sha256": "7df529f719ad8569f1f4ddd4f0dc8920c658ec8c314ebd64523be0fb91c019af"
+    },
+    "events": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-dense100-v1\\runs\\dense100-v1\\modern.events.jsonl",
+      "bytes": 545502075,
+      "sha256": "273503d30f3c88ac383279dcc20c9a3dc2b1bfe6d6ad6c231f6de3ea80297d56"
+    },
+    "resources": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-dense100-v1\\runs\\dense100-v1\\resources.jsonl",
+      "bytes": 8141937,
+      "sha256": "06e52a91fd1c22cbf1d995bd6b745396d1241b719597b812fde0538acfdd2f85"
+    },
+    "injectorResources": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-dense100-v1\\runs\\dense100-v1\\injector-resources.jsonl",
+      "bytes": 5670909,
+      "sha256": "88e1194f2032444fb74fa9975c2c3cf87c740990512562f9408b26448309df77"
+    },
+    "disk": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-factory-bound-v1\\generated\\dense100\\disk-readback.v8.json",
+      "bytes": 449,
+      "sha256": "daa7a3ec0823a138105560b82e9bcb847ae10223113dd2424625f30fdb7fb2e1"
+    },
+    "enhanced": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-factory-bound-v1\\generated\\dense100\\independent-verification.v8.json",
+      "bytes": 183109,
+      "sha256": "1f1fb7df57013a7afc1060963db6a44c05066ba99284a8d3222ee6eb419f2c0f"
+    }
+  },
+  "verificationJobs": [
+    {
+      "receipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-factory-bound-v1\\dense100-05-file-reader-job\\job-result.json",
+        "bytes": 2841,
+        "sha256": "48885e102ce037c43375a761bfcce8dd52af5f53b4639e2ecbd4602e6884bb3f"
+      },
+      "actualExitCode": 1,
+      "wrapperExitCode": 1,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false
+    },
+    {
+      "receipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-factory-bound-v1\\dense100-06-verifier-job\\job-result.json",
+        "bytes": 3023,
+        "sha256": "8e6243edee40303d706a50a5d12ea24fdacf611a55bb0d0e2f2247494ee6c197"
+      },
+      "actualExitCode": 1,
+      "wrapperExitCode": 1,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false
+    }
+  ],
+  "authExport": {
+    "historyPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v30.json",
+    "sha256": "3e001b71e9271510b5a50b3761e4e35fad3a4377425fe02ee9e855751ba79686",
+    "attemptCount": 1539,
+    "previousAttemptsRetained": 1425,
+    "caseAttemptsAdded": 114,
+    "failedCaseNotUsedAsPassedPredecessor": true
+  },
+  "next": "Read-only failure/resource analysis before selecting a fresh bounded causal diagnostic; no cloud rollout inferred."
+}

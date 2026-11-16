@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 1 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 4.2213
+  type: 'test'
+  ...
+# Subtest: navigation coordination is native-only and preserves the baseline obstacle and send path
+ok 2 - navigation coordination is native-only and preserves the baseline obstacle and send path
+  ---
+  duration_ms: 0.8948
+  type: 'test'
+  ...
+# Subtest: navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+ok 3 - navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+  ---
+  duration_ms: 1.2794
+  type: 'test'
+  ...
+# Subtest: navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+ok 4 - navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+  ---
+  duration_ms: 2.3422
+  type: 'test'
+  ...
+# Subtest: navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+ok 5 - navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+  ---
+  duration_ms: 1.8778
+  type: 'test'
+  ...
+# Subtest: navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+ok 6 - navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+  ---
+  duration_ms: 0.6533
+  type: 'test'
+  ...
+# Subtest: navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+ok 7 - navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+  ---
+  duration_ms: 0.7711
+  type: 'test'
+  ...
+# Subtest: native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+ok 8 - native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+  ---
+  duration_ms: 2.1579
+  type: 'test'
+  ...
+# Subtest: native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+ok 9 - native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+  ---
+  duration_ms: 2.4422
+  type: 'test'
+  ...
+# Subtest: native hunt movement hook keeps all corrected and successful actions in the original denominator
+ok 10 - native hunt movement hook keeps all corrected and successful actions in the original denominator
+  ---
+  duration_ms: 2.8211
+  type: 'test'
+  ...
+# Subtest: native navigation diagnostics retain the first blocked streak with bounded occupants while every failed opportunity still fails load gates
+ok 11 - native navigation diagnostics retain the first blocked streak with bounded occupants while every failed opportunity still fails load gates
+  ---
+  duration_ms: 38.6871
+  type: 'test'
+  ...
+# Subtest: native corrected Walk detours around the refused first cell until expiry without hiding the correction
+ok 12 - native corrected Walk detours around the refused first cell until expiry without hiding the correction
+  ---
+  duration_ms: 0.6479
+  type: 'test'
+  ...
+# Subtest: native correction avoidance never guesses a Run blocker and keeps a bounded private-safe diagnostic
+ok 13 - native correction avoidance never guesses a Run blocker and keeps a bounded private-safe diagnostic
+  ---
+  duration_ms: 26.2576
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 183.8423

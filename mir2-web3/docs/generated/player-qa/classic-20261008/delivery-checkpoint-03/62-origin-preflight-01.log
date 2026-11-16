@@ -1,0 +1,177 @@
+{
+  "schema": "mir2.origin-r22-s17.fixed-closure.v1",
+  "operation": "preflight",
+  "gameSource": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "engineSource": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "sequence": 17,
+  "objects": 40,
+  "rootProofSha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf",
+  "createdUnix": 1791440105,
+  "changedCurrentFeed": false,
+  "gameServiceRestart": false,
+  "targets": [
+    {
+      "path": "feeds/s17-e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f/latest.json",
+      "status": "absent"
+    },
+    {
+      "path": "feeds/s17-e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f/latest.p7s",
+      "status": "absent"
+    },
+    {
+      "path": "installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe",
+      "status": "exact-existing"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/BUILD-ATTESTATION.json",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/CONTROLS.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/DELIVERY.json",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/DELIVERY.p7s",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/KNOWN-ISSUES.md",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/MULTILINGUAL-SOURCES.json",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/NotoSansTC-OFL.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSans.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSansArabic.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSansDevanagari.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSansThai.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/PACKAGE-MANIFEST.json",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/README-START.txt",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/RELEASE-STATEMENT.json",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/RELEASE-STATEMENT.p7s",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/VERSION.json",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/14ef04552aadc72ca06e5c4d647a70d617eecd702c367e3d7dda706bedeecd79.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/55b88966ccf36fa9fe27ae9eb44eb3f152beed009aaa21eb9c1ed4ff51eddbba.m2d.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/7b758caf2f5a63fee7832ea243066a1cdf24bddf9c840e248418cc6f473301ba.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/a20cd5f826b0430029b0bbb9498a24ff0e473086680db0483cca3ce46321db2b.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/aac8b63b1cf9e65f6143ebbaaa0c7598fd93d8ff8da145049b0d29689682f151.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/cbeaa575d8596522b34b20157cb4024c6e61e3b937110999cda3414d44605587.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/mir2-client.toml",
+      "status": "absent"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/mir2-platform-windows.exe",
+      "status": "absent"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.json",
+      "status": "exact-existing"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.p7s",
+      "status": "exact-existing"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/Mir2Updater.exe",
+      "status": "exact-existing"
+    }
+  ],
+  "passed": true,
+  "feed16FingerprintPreserved": true,
+  "allServicePidsPreserved": true
+}

@@ -1,0 +1,713 @@
+{
+  "recordedAt": "2026-11-11T18:50:04.262Z",
+  "source": "ab50fd2cbfb8c2ccdf2c071665b1eac746025c8a",
+  "candidate": "ab50fd2cbfb8-r16-runtime-readiness-79d2acc4",
+  "buildReceiptSha256": "bf494a1f05353e61f141d70fc700f8019ba16683cff452db7550d0cd6205de0e",
+  "buildId": "tbrTdxuK_lO0gjqW2pagN",
+  "sourceFiles": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha256": "a70e3419c774372d91692017c8a38bbf2799dcd903aba218bb92a73892567baa",
+      "gitBlob": "ecbf1ec4d5804fecfc427fb5b1c28d1419b97da6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+      "sha256": "2cdec232b9e043879dfa11951f1e1f8899d75260ebb17af9d90a0fe7e3de82e1",
+      "gitBlob": "c104b9e005b39d6384ce31192a70d58c825befd6"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+      "sha256": "f4a07e1bf403062896f564f466118c41cadebea8ac0f963690429ff4433de42b",
+      "gitBlob": "29a1ac6e3dc7f0792f7ce67e62a82a449bc35d6f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "be204ab94a9c156cd7313f44c9b79e788e256b2deb0cd22347344ff940d6538b",
+      "gitBlob": "5e6de817c931153b1d66a1751c350803876974ab"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "1e0c68054dcf47597f2584830aeb6ebea3b213222b98dd69c82beba33c5440c7",
+      "gitBlob": "105bfeb9749be2ba6f33ad0a402fd194486cc613"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha256": "55c19495f636efb3cd8a7ff573ce0c8ae42d9482dba37ea26606e28b7d379b51",
+      "gitBlob": "577f2df4675cb89685a72c87b61069dd5470d62a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
+      "sha256": "c90805cb1979e915db825dc14ff51f8963db4b3f2e95f8fb63446e53750cd8fb",
+      "gitBlob": "f1f8c4eb3ec21f43ffbae66585f657105c26b5ec"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+      "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+      "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+      "sha256": "6eb91c281c98cf1ef9e120c4e2204b44eba805e83f2698c709976ae417c1ab18",
+      "gitBlob": "4d702deee9894bbc789d1a12faeeebd832d651c7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "2ef7f93a848eab806cb51ce7efd3198745445714cc5d1932f876a6f504412757",
+      "gitBlob": "84abf6349c210535ee66f87d7df85bbe802c447f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-bootstrap-race.ts",
+      "sha256": "95c0bbbbd6b02bf2992d3a3f5a45e9a95dfa55501a1b9b8092aca4583d65ae5e",
+      "gitBlob": "0c8914c74b60e0916d27d197a939bcd2eb4fb54f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha256": "9b943d42b22a28d74d6a094fc35877c4be01b61dd3c856c0b5e7fec6af6207b0",
+      "gitBlob": "cd3aa91671ef02712d058abc4d8f811953144247"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha256": "8b93f89611773ca46c7c321f94659bd9574da93b22d381bb19b61eda23d906d8",
+      "gitBlob": "9af2d78c0b8e60fe1c13c10bbc22d9dd95b7379a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs",
+      "sha256": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+      "gitBlob": "d3eb2215de8feb20cd61f7dbfdb3dc61cf44f377"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha256": "701ef29e8f7b8bcad39bd96eab128f2cc2e5cb515aa944da2325439e068feffe",
+      "gitBlob": "cad13b48adaaf626c47e389d0991c7c98a157420"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "sha256": "b8274be68e4e3db03c64ab8bb9c6cbcf8917ce61b0ba3915eaa1514d67db60c1",
+      "gitBlob": "21b8b941717839e726394d7e8245be2cfa3fc606"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-newcomer-v2-journey.mjs",
+      "sha256": "26b4ffb843ac0dcf524542aca620fb7a1e37e0968495d7fb8ad098c9c97a5d95",
+      "gitBlob": "f25f94561799231bef7afae98b124a95ecc598b2"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-belt-shortcut-diagnostics.mjs",
+      "sha256": "e1ed3f52aa8b9e2c1674d3bb32e48e13937c68066b38726dccc07ff59ff1becb",
+      "gitBlob": "eb8e2d0c1bf161ae8f7b0e4b4cd24d70beb0aa65"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-group-hover.mjs",
+      "sha256": "b28529983e1195bde2c47f7406af4ee40e531e7453f1c78b70f2ba88a97776c2",
+      "gitBlob": "fa4f30eda5912770a582dbd6de77441d25228bee"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-language-parity.mjs",
+      "sha256": "51395153080a33985df3632fe286ffb85d36e821d95147043fa6717d169e8995",
+      "gitBlob": "b7f907871cb96a889588cae5da2320e711a213b7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+      "sha256": "ab05b17ad0763186079eabc97288b11080c1595db006e1ddf0926a85545bc7dc",
+      "gitBlob": "6abdf0aa794f891528aeacd3113cbf17ede85696"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha256": "c0f4d3966e4b66ce05dc2c1200a41e5b8a61fcf9138acd9f3286847311891a81",
+      "gitBlob": "ff7983341e0fcadd3aad4a95629ceae129107aca"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-bootstrap-race.mjs",
+      "sha256": "439cf1a6c90fd47b0d8bba09b9852799a939a2edfeef26c78ade1c0057fdcbd2",
+      "gitBlob": "4d34c16993eb07ef5f704de40e47f1261d0f76d6"
+    }
+  ],
+  "generatedInputCount": 27,
+  "runtime": "bevy-84ef836460a84e03",
+  "assetVersion": "20261108-r16-08ec86d5105c",
+  "checks": {
+    "runtimeAndAdjacent": 27,
+    "productionAndTypeScriptBuild": true,
+    "reactLifecycleReviewed": true
+  },
+  "routes": {
+    "scope": "Serial ordinary Chrome raw production-route probes, no service worker, interception, proxy override, or TLS bypass. Not full gameplay acceptance.",
+    "rows": [
+      {
+        "label": "app",
+        "passed": false,
+        "startedAt": 1794419858603,
+        "status": 200,
+        "headersAt": 1794419859370,
+        "protocol": "h2",
+        "loopbackProxy": true,
+        "fromServiceWorker": false,
+        "contentType": "font/otf",
+        "contentEncoding": "br",
+        "contentLength": null,
+        "edgeCache": "BYPASS",
+        "platformCache": "HIT",
+        "decodedBytes": 14576956,
+        "encodedBytes": 12910486,
+        "lastDataAt": 1794419978449,
+        "failure": {
+          "name": "Error",
+          "message": "page.evaluate: TimeoutError: signal timed out"
+        },
+        "contextClosed": true
+      },
+      {
+        "label": "current-mirror",
+        "passed": true,
+        "startedAt": 1794419984432,
+        "status": 200,
+        "headersAt": 1794419985132,
+        "protocol": "h2",
+        "loopbackProxy": true,
+        "fromServiceWorker": false,
+        "contentType": "font/otf",
+        "contentEncoding": "gzip",
+        "contentLength": null,
+        "edgeCache": "HIT",
+        "platformCache": null,
+        "decodedBytes": 16437364,
+        "encodedBytes": 13613585,
+        "lastDataAt": 1794420100349,
+        "bytes": 16437364,
+        "elapsedMs": 115949.59999990463,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+        "contextClosed": true
+      },
+      {
+        "label": "app-repeat",
+        "passed": true,
+        "startedAt": 1794420101055,
+        "status": 200,
+        "headersAt": 1794420101570,
+        "protocol": "h2",
+        "loopbackProxy": true,
+        "fromServiceWorker": false,
+        "contentType": "font/otf",
+        "contentEncoding": "br",
+        "contentLength": null,
+        "edgeCache": "BYPASS",
+        "platformCache": "HIT",
+        "decodedBytes": 16437364,
+        "encodedBytes": 14167173,
+        "lastDataAt": 1794420148708,
+        "bytes": 16437364,
+        "elapsedMs": 47701.09999990463,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+        "contextClosed": true
+      }
+    ],
+    "passed": false,
+    "browserClosed": true
+  },
+  "scriptImportCache": {
+    "scope": "Ordinary browser script-cache boundary, tiny anonymous HTTP fixture; not full gameplay acceptance.",
+    "rows": [
+      {
+        "path": "/runtime.js",
+        "loaded": false,
+        "errorName": "TypeError",
+        "serverRequests": 1
+      },
+      {
+        "path": "/runtime.js",
+        "loaded": true,
+        "serverRequests": 2
+      },
+      {
+        "path": "/runtime.js?mir2RuntimeRetry=1",
+        "loaded": true,
+        "serverRequests": 3
+      }
+    ],
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "browserContract": {
+    "scope": "Source-based ordinary Chrome resource-initialization contract; actual helper, page loader and retry guard with a tiny real WASM fixture. Not a Bevy App or full-game acceptance.",
+    "sourceSha256": {
+      "initializer": "55c19495f636efb3cd8a7ff573ce0c8ae42d9482dba37ea26606e28b7d379b51",
+      "policy": "c90805cb1979e915db825dc14ff51f8963db4b3f2e95f8fb63446e53750cd8fb",
+      "page": "1e0c68054dcf47597f2584830aeb6ebea3b213222b98dd69c82beba33c5440c7"
+    },
+    "lanes": [
+      {
+        "mode": "503",
+        "first": {
+          "ok": false,
+          "errorName": "TypeError",
+          "metrics": {
+            "canvasCalls": 0,
+            "initCalls": 0,
+            "evaluated": 0,
+            "retryMarks": 0
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": false,
+            "__mir2BevyRuntimeFailed": true,
+            "__mir2BevyRuntimeRetryable": true
+          }
+        },
+        "second": {
+          "ok": true,
+          "metrics": {
+            "canvasCalls": 1,
+            "initCalls": 1,
+            "evaluated": 1,
+            "retryMarks": 1
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": false,
+            "__mir2BevyRuntimeFailed": false,
+            "__mir2BevyRuntimeRetryable": false
+          }
+        },
+        "third": {
+          "ok": true,
+          "metrics": {
+            "canvasCalls": 1,
+            "initCalls": 1,
+            "evaluated": 1,
+            "retryMarks": 1
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": false,
+            "__mir2BevyRuntimeFailed": false,
+            "__mir2BevyRuntimeRetryable": false
+          }
+        },
+        "unsafe": {
+          "ok": false,
+          "errorName": "Error",
+          "metrics": {
+            "canvasCalls": 1,
+            "initCalls": 1,
+            "evaluated": 1,
+            "retryMarks": 1
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": true,
+            "__mir2BevyRuntimeFailed": true,
+            "__mir2BevyRuntimeRetryable": false
+          }
+        },
+        "requests": {
+          "documents": 2,
+          "scripts": 2,
+          "binaries": 2
+        },
+        "sameDocument": true
+      },
+      {
+        "mode": "stall",
+        "first": {
+          "ok": false,
+          "errorName": "AbortError",
+          "metrics": {
+            "canvasCalls": 0,
+            "initCalls": 0,
+            "evaluated": 0,
+            "retryMarks": 0
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": false,
+            "__mir2BevyRuntimeFailed": true,
+            "__mir2BevyRuntimeRetryable": true
+          }
+        },
+        "second": {
+          "ok": true,
+          "metrics": {
+            "canvasCalls": 1,
+            "initCalls": 1,
+            "evaluated": 1,
+            "retryMarks": 1
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": false,
+            "__mir2BevyRuntimeFailed": false,
+            "__mir2BevyRuntimeRetryable": false
+          }
+        },
+        "third": {
+          "ok": true,
+          "metrics": {
+            "canvasCalls": 1,
+            "initCalls": 1,
+            "evaluated": 1,
+            "retryMarks": 1
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": false,
+            "__mir2BevyRuntimeFailed": false,
+            "__mir2BevyRuntimeRetryable": false
+          }
+        },
+        "unsafe": {
+          "ok": false,
+          "errorName": "Error",
+          "metrics": {
+            "canvasCalls": 1,
+            "initCalls": 1,
+            "evaluated": 1,
+            "retryMarks": 1
+          },
+          "state": {
+            "__mir2BevyRuntimeBootAttempted": true,
+            "__mir2BevyRuntimeFailed": true,
+            "__mir2BevyRuntimeRetryable": false
+          }
+        },
+        "requests": {
+          "documents": 2,
+          "scripts": 1,
+          "binaries": 2
+        },
+        "sameDocument": true
+      }
+    ],
+    "passed": true,
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "runs": [
+    {
+      "name": "quest-after-r1",
+      "passed": false,
+      "mode": "compatibility",
+      "gamePath": "/game",
+      "browserLanguage": "zh-TW",
+      "publicAuth": false,
+      "isolatedFile": true,
+      "coldFailure": {
+        "stage": "verify-hosted-font-policy-and-wait-native-hud",
+        "code": "NATIVE_READINESS_EXCEEDED_120_SECONDS"
+      },
+      "recovery": {
+        "flagsBefore": {
+          "booted": true,
+          "attempted": true,
+          "failed": false,
+          "retryable": false
+        },
+        "passed": true,
+        "extraObservationBudgetMs": 180000,
+        "kind": "observe-existing-app"
+      },
+      "nativeReadyWaitMs": 52814,
+      "native": {
+        "hudReady": true,
+        "questReady": true,
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "finalTile": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": true,
+      "logout": {
+        "sentAt": 1794421794383,
+        "acknowledgedAt": 1794421797971,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "sourceDelivery": {
+        "sc": {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestedAt": 1794421724938,
+          "dataEvents": 10,
+          "decodedBytes": 16437364,
+          "encodedDataBytes": 0,
+          "maxDataGapMs": 23,
+          "headersAt": 1794421792026,
+          "status": 200,
+          "protocol": "http/1.1",
+          "serviceWorker": true,
+          "firstDataAt": 1794421792049,
+          "lastDataAt": 1794421792049,
+          "finishedAt": 1794421792089,
+          "totalEncodedBytes": 0
+        },
+        "selectedSource": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "sourceEvidence": "exact current release selection; cold ordinary Chrome worker body; zero SC app-origin requests; six exact cache bodies"
+      },
+      "runtimeDelivery": {
+        "script": {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+          "requestedAt": 1794421619534,
+          "dataEvents": 3,
+          "decodedBytes": 141747,
+          "encodedDataBytes": 20718,
+          "maxDataGapMs": 0,
+          "headersAt": 1794421668367,
+          "status": 200,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "firstDataAt": 1794421668367,
+          "lastDataAt": 1794421668367,
+          "finishedAt": 1794421668367,
+          "totalEncodedBytes": 20866
+        },
+        "wasm": {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestedAt": 1794421619534,
+          "dataEvents": 447,
+          "decodedBytes": 31441753,
+          "encodedDataBytes": 6439105,
+          "maxDataGapMs": 651,
+          "headersAt": 1794421668366,
+          "status": 200,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "firstDataAt": 1794421668576,
+          "lastDataAt": 1794421724038,
+          "finishedAt": 1794421724395,
+          "totalEncodedBytes": 6439223
+        },
+        "requestGapMs": 0
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "name": "quest-after-r2",
+      "passed": true,
+      "mode": "webgl2",
+      "gamePath": "/game?bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1",
+      "browserLanguage": "zh-TW",
+      "publicAuth": false,
+      "isolatedFile": true,
+      "coldFailure": null,
+      "recovery": null,
+      "nativeReadyWaitMs": 76005,
+      "native": {
+        "hudReady": true,
+        "questReady": true,
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgl2",
+          "packageId": "webgl2-shared"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "finalTile": {
+        "x": 289,
+        "y": 616
+      },
+      "saved": true,
+      "logout": {
+        "sentAt": 1794422241786,
+        "acknowledgedAt": 1794422245226,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "sourceDelivery": {
+        "sc": {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestedAt": 1794422189337,
+          "dataEvents": 9,
+          "decodedBytes": 16437364,
+          "encodedDataBytes": 0,
+          "maxDataGapMs": 20,
+          "headersAt": 1794422239670,
+          "status": 200,
+          "protocol": "http/1.1",
+          "serviceWorker": true,
+          "firstDataAt": 1794422239690,
+          "lastDataAt": 1794422239690,
+          "finishedAt": 1794422239726,
+          "totalEncodedBytes": 0
+        },
+        "selectedSource": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "sourceEvidence": "exact current release selection; cold ordinary Chrome worker body; zero SC app-origin requests; six exact cache bodies"
+      },
+      "runtimeDelivery": {
+        "script": {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "requestedAt": 1794422164054,
+          "dataEvents": 4,
+          "decodedBytes": 139721,
+          "encodedDataBytes": 18414,
+          "maxDataGapMs": 0,
+          "headersAt": 1794422180976,
+          "status": 200,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "firstDataAt": 1794422180976,
+          "lastDataAt": 1794422180976,
+          "finishedAt": 1794422180977,
+          "totalEncodedBytes": 18560
+        },
+        "wasm": {
+          "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "requestedAt": 1794422164054,
+          "dataEvents": 358,
+          "decodedBytes": 32369572,
+          "encodedDataBytes": 6776676,
+          "maxDataGapMs": 174,
+          "headersAt": 1794422180982,
+          "status": 200,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "firstDataAt": 1794422180982,
+          "lastDataAt": 1794422188493,
+          "finishedAt": 1794422188818,
+          "totalEncodedBytes": 6776793
+        },
+        "requestGapMs": 0
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    }
+  ],
+  "production": {
+    "revision": "cd6410be749412d608a538e2db442b7e4d519de0",
+    "changedThisRound": false
+  },
+  "originalWip": {
+    "files": 62,
+    "statusRows": 38,
+    "verifiedSeparately": true
+  },
+  "goalStatus": "active",
+  "globalCandidateClaim": false,
+  "limits": [
+    "The strict initial Native 120-second gate failed in default WebGPU and remains failed.",
+    "Default WebGPU passed only the separately labelled late-recovery observation; this does not prove latency resolved.",
+    "The actual game recovery observed an already-booted App waiting for fonts, so it did not exercise the network-before-boot normal-logout/reentry branch. That branch has a source-based browser contract, not a full-game negative test.",
+    "The contract uses tiny real WASM, not a Bevy App; route probes are not gameplay tests.",
+    "Public wallet phone approval, public first-Walk latency, all current three-class 1-30 and other goal requirements remain separate."
+  ]
+}

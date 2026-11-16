@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.download-mirror-preparation.v1",
+  "enabled": false,
+  "deployed": false,
+  "newPaidServiceOpened": false,
+  "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "installerRecipeSourceRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+  "artifact": {
+    "version": "2026.11.1.19",
+    "bytes": 1040065902,
+    "sha256": "859f18bd68f3968fd24af3aead32a6ab53ca1d12b72fcce380a5a90782fafe8e"
+  },
+  "provider": null,
+  "accountConfigPath": null,
+  "acceleratedDomain": null,
+  "accountRegion": null,
+  "approvedBudget": null,
+  "minimumQualifiedMbps": 20,
+  "acceptancePayloadCapBytesPerSecond": 2500000,
+  "acceptanceMaximumSeconds": 600,
+  "requireNormalTls": true,
+  "permitPartialExecution": false,
+  "defaultSwitchAllowed": false,
+  "requiresActualWholePublicShaAndCms": true,
+  "requiresActualWindowsColdAcceptance": true
+}

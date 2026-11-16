@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "source_sha": "e397fdc90404b13e827aa4e5dc89078421d9851a",
+  "workflow_run_id": 37510943095,
+  "runner_platform": "Linux",
+  "run": {
+    "conclusion": "success",
+    "headSha": "e397fdc90404b13e827aa4e5dc89078421d9851a",
+    "jobs": [
+      {
+        "completedAt": "2026-10-06T18:42:31Z",
+        "conclusion": "success",
+        "databaseId": 112431604139,
+        "name": "original-mining",
+        "startedAt": "2026-10-06T18:23:33Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-06T18:23:34Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-06T18:23:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:24:06Z",
+            "conclusion": "success",
+            "name": "Checkout exact source and original fixtures",
+            "number": 2,
+            "startedAt": "2026-10-06T18:23:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:24:13Z",
+            "conclusion": "success",
+            "name": "Install Rust",
+            "number": 3,
+            "startedAt": "2026-10-06T18:24:06Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:24:45Z",
+            "conclusion": "success",
+            "name": "Source tables and content scope",
+            "number": 4,
+            "startedAt": "2026-10-06T18:24:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:30:18Z",
+            "conclusion": "success",
+            "name": "Shared wall rules and checkpoint compatibility",
+            "number": 5,
+            "startedAt": "2026-10-06T18:24:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:42:28Z",
+            "conclusion": "success",
+            "name": "Three classes, durable inventory and real WebSocket",
+            "number": 6,
+            "startedAt": "2026-10-06T18:30:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:42:29Z",
+            "conclusion": "success",
+            "name": "Rejected cold restore preserves the entire live authority",
+            "number": 7,
+            "startedAt": "2026-10-06T18:42:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:42:29Z",
+            "conclusion": "success",
+            "name": "Post Checkout exact source and original fixtures",
+            "number": 14,
+            "startedAt": "2026-10-06T18:42:29Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-06T18:42:29Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-06T18:42:29Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/Zombieliu/mir2/actions/runs/37510943095/job/112431604139"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/37510943095"
+  },
+  "raw_log": {
+    "path": "raw/mining-linux-ci-37510943095.log",
+    "bytes": 591310,
+    "sha256": "0ee3deed93ecda8b2ae2c060f86a7b1beea1de9f70b8f400a20940462e9a9d89",
+    "capture": "gh run view --log; original CLI output bytes retained"
+  },
+  "nonzero_test_results": [
+    {
+      "passed": 61,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "packaged": false,
+  "published": false,
+  "native_human_acceptance": false
+}

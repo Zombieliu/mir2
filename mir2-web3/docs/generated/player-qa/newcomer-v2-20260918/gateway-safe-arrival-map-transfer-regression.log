@@ -1,0 +1,9 @@
+
+running 4 tests
+test routing::tests::cadence_map_transfer_tests::deferred_zone_movement_away_from_a_source_does_not_transfer ... ok
+test routing::tests::cadence_map_transfer_tests::deferred_zone_movement_onto_mage_house_source_transfers_on_session_tick_once ... ok
+test routing::tests::cadence_map_transfer_tests::idle_tick_on_a_transfer_source_does_not_transfer_spawned_player ... ok
+test routing::tests::cadence_map_transfer_tests::third_request_can_complete_previous_step_and_leave_newer_step_queued_at_source ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 792 filtered out; finished in 8.47s
+

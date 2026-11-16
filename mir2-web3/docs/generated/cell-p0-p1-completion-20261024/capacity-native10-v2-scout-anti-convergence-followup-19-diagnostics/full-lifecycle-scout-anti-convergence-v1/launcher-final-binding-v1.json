@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "state": "final-50-input-release-bound-not-executed",
+  "boundAt": "2026-10-25T23:30:55.047Z",
+  "expectedSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendInputCount": 50,
+  "review": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-independent-review-v1.json",
+    "bytes": 4034,
+    "sha256": "531abf09346021153c35fafed3783a9c116160a3ae9e010f90b09173798287d3"
+  },
+  "preparation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\template-prepared-v2.json",
+    "bytes": 8273,
+    "sha256": "39fb6913fc5aef1b112dc316173181df04a81ee331a7e3f9ce04c72d3cacdd8c"
+  },
+  "profile": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\full-lifecycle-profile.json",
+    "bytes": 4777,
+    "sha256": "ee888450fe85cdb017a0575e74f43e13766594f7d994d0afed239a1f23105dd3"
+  },
+  "candidateReleaseBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\candidate-release-binding-v1.json",
+    "bytes": 3305,
+    "sha256": "c797618b26276b058bc11cf208a1376b00818bc8f57eeccc15037db295e09631"
+  },
+  "releaseRecord": {
+    "path": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "backendSourceManifest": {
+    "path": "C:/mir2-build/p01-completion-20261024/backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "scope": "Explicit reused c743/50 Release and current J Node/execution binding with unchanged six-driver ordinary full16; no account, service or gameplay execution."
+}

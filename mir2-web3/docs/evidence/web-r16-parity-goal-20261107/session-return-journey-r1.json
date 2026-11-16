@@ -1,0 +1,111 @@
+{
+  "schema": "mir2.r16.session-return.browser.v1",
+  "mode": "journey",
+  "locale": "zh-CN",
+  "passed": false,
+  "renderer": "bevy-db5e53a91f4d11de",
+  "startedAt": "2026-11-07T07:33:23.396Z",
+  "phases": [
+    "normal-login",
+    "cold-entry-single-q",
+    "normal-logout-to-selection",
+    "ordinary-second-character",
+    "same-connection-entry"
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 2,
+    "npcPurchaseOwner": 2,
+    "keepAlive": 2,
+    "logOut": 1,
+    "newCharacter": 1
+  },
+  "sockets": [
+    {
+      "id": 1,
+      "closed": false
+    }
+  ],
+  "coldKeys": [
+    {
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null
+    }
+  ],
+  "entries": [
+    {
+      "role": "original",
+      "index": 1,
+      "level": 30,
+      "completedMainAndGrowth": 26,
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "stamp": {
+        "generation": 2,
+        "revision": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    }
+  ],
+  "returns": [
+    {
+      "index": 1,
+      "selectedPosition": 0,
+      "roster": [
+        1
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    }
+  ],
+  "screenshots": [
+    "01-first-q-native-diary.png",
+    "02-logout-selection.png"
+  ],
+  "network": {
+    "errors": [],
+    "failed": []
+  },
+  "pageErrors": [],
+  "releases": [
+    "bevy-db5e53a91f4d11de"
+  ],
+  "errors": [
+    {
+      "phase": "same-connection-entry",
+      "code": "TimeoutError"
+    }
+  ],
+  "coldOpen": {
+    "singlePhysicalQ": true,
+    "before": {
+      "questReady": false,
+      "hudReady": false,
+      "questOpen": false
+    },
+    "after": {
+      "questReady": true,
+      "hudReady": true,
+      "questOpen": true,
+      "locale": "zh-CN"
+    },
+    "elapsedMs": 3995
+  },
+  "finishedAt": "2026-11-07T07:34:18.124Z"
+}

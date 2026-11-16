@@ -1,0 +1,1047 @@
+TAP version 13
+# Subtest: actual Shell UI-down dragged out and released never reaches the world helper
+ok 1 - actual Shell UI-down dragged out and released never reaches the world helper
+  ---
+  duration_ms: 6.6528
+  type: 'test'
+  ...
+# Subtest: actual Shell outside-world down/click and hold work while compatibility mouse cannot duplicate
+ok 2 - actual Shell outside-world down/click and hold work while compatibility mouse cannot duplicate
+  ---
+  duration_ms: 2.6383
+  type: 'test'
+  ...
+# Subtest: actual Shell lost layout cancels an outstanding world pulse and never releases it as a click
+ok 3 - actual Shell lost layout cancels an outstanding world pulse and never releases it as a click
+  ---
+  duration_ms: 1.2764
+  type: 'test'
+  ...
+# Subtest: actual Shell touch down requests compatibility without granting a world or Bevy gesture
+ok 4 - actual Shell touch down requests compatibility without granting a world or Bevy gesture
+  ---
+  duration_ms: 1.1347
+  type: 'test'
+  ...
+# Subtest: actual Shell wide touch uses the Bag lease, swallows second finger and never emits world input
+ok 5 - actual Shell wide touch uses the Bag lease, swallows second finger and never emits world input
+  ---
+  duration_ms: 1.1962
+  type: 'test'
+  ...
+# Subtest: fixed stage UI canvas keeps Bag touch lease, second-finger exclusion, and world-canvas isolation
+ok 6 - fixed stage UI canvas keeps Bag touch lease, second-finger exclusion, and world-canvas isolation
+  ---
+  duration_ms: 3.5844
+  type: 'test'
+  ...
+# Subtest: opt-in primary canvas retains mouse world origin and blur quarantine without stale click
+ok 7 - opt-in primary canvas retains mouse world origin and blur quarantine without stale click
+  ---
+  duration_ms: 1.5662
+  type: 'test'
+  ...
+# Subtest: actual Shell terminal pointercancel immediately frees its pointerId for the next real gesture
+ok 8 - actual Shell terminal pointercancel immediately frees its pointerId for the next real gesture
+  ---
+  duration_ms: 2.4411
+  type: 'test'
+  ...
+# Subtest: actual Shell retired proactive cancel cannot clear the next pointer lease
+ok 9 - actual Shell retired proactive cancel cannot clear the next pointer lease
+  ---
+  duration_ms: 1.4717
+  type: 'test'
+  ...
+# Subtest: actual Shell blur without old up accepts a new down with the reused touch pointerId
+ok 10 - actual Shell blur without old up accepts a new down with the reused touch pointerId
+  ---
+  duration_ms: 1.8825
+  type: 'test'
+  ...
+# Subtest: actual Page compatibility interaction stays latched across tabs, resets on close, and is opt-in only
+ok 11 - actual Page compatibility interaction stays latched across tabs, resets on close, and is opt-in only
+  ---
+  duration_ms: 186.2464
+  type: 'test'
+  ...
+# Subtest: actual Page touch Quest switch closes foreground Bag before opening the retained Quest view
+ok 12 - actual Page touch Quest switch closes foreground Bag before opening the retained Quest view
+  ---
+  duration_ms: 139.3032
+  type: 'test'
+  ...
+# Subtest: actual root JSX lost capture traverses Mail Spells Bag Character owners exactly once and preserves successor lease
+ok 13 - actual root JSX lost capture traverses Mail Spells Bag Character owners exactly once and preserves successor lease
+  ---
+  duration_ms: 4.4145
+  type: 'test'
+  ...
+# Subtest: actual Shell skill DOM up and cancel retire the old Quest pointer before yielding new DOM gestures
+ok 14 - actual Shell skill DOM up and cancel retire the old Quest pointer before yielding new DOM gestures
+  ---
+  duration_ms: 1.6508
+  type: 'test'
+  ...
+# Subtest: actual Shell modal Quest owns its closing gesture while foreground geometry is missing
+ok 15 - actual Shell modal Quest owns its closing gesture while foreground geometry is missing
+  ---
+  duration_ms: 3.6715
+  type: 'test'
+  ...
+# Subtest: actual Quest capture preserves uncovered Native HUD surfaces and blocks covered ones
+ok 16 - actual Quest capture preserves uncovered Native HUD surfaces and blocks covered ones
+  ---
+  duration_ms: 0.7926
+  type: 'test'
+  ...
+# Subtest: actual Shell skill DOM terminals reach existing Bag Mail Spells and Character canvas leases
+ok 17 - actual Shell skill DOM terminals reach existing Bag Mail Spells and Character canvas leases
+  ---
+  duration_ms: 3.7316
+  type: 'test'
+  ...
+# Subtest: actual Shell new skill DOM down cannot borrow a canvas router or create a world gesture
+ok 18 - actual Shell new skill DOM down cannot borrow a canvas router or create a world gesture
+  ---
+  duration_ms: 1.4526
+  type: 'test'
+  ...
+# Subtest: actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates
+ok 19 - actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates
+  ---
+  duration_ms: 230.6289
+  type: 'test'
+  ...
+# Subtest: actual hook ingests a late current baseline once, retains proof gates and never replays a select
+ok 20 - actual hook ingests a late current baseline once, retains proof gates and never replays a select
+  ---
+  duration_ms: 12.88
+  type: 'test'
+  ...
+# Subtest: actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges
+ok 21 - actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges
+  ---
+  duration_ms: 304.9727
+  type: 'test'
+  ...
+# Subtest: actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data
+ok 22 - actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data
+  ---
+  duration_ms: 1240.4402
+  type: 'test'
+  ...
+# Subtest: actual learned-skill packets retire the physical combat source while cast timing preserves it
+ok 23 - actual learned-skill packets retire the physical combat source while cast timing preserves it
+  ---
+  duration_ms: 401.3705
+  type: 'test'
+  ...
+# Subtest: actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners
+ok 24 - actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners
+  ---
+  duration_ms: 111.2551
+  type: 'test'
+  ...
+# Subtest: cached combat diagnostics never poll, send, withdraw or consume a proof
+ok 25 - cached combat diagnostics never poll, send, withdraw or consume a proof
+  ---
+  duration_ms: 1.011
+  type: 'test'
+  ...
+# Subtest: diagnostics record disabled facts and a real rejected snapshot without bypassing either gate
+ok 26 - diagnostics record disabled facts and a real rejected snapshot without bypassing either gate
+  ---
+  duration_ms: 0.2628
+  type: 'test'
+  ...
+# Subtest: independent exact combat caps preserve old fallback and recognize compiled startup waiting
+ok 27 - independent exact combat caps preserve old fallback and recognize compiled startup waiting
+  ---
+  duration_ms: 0.3436
+  type: 'test'
+  ...
+# Subtest: combat capabilities explicitly distinguish forced-player input v2 from ordinary v1
+ok 28 - combat capabilities explicitly distinguish forced-player input v2 from ordinary v1
+  ---
+  duration_ms: 1.4771
+  type: 'test'
+  ...
+# Subtest: new host omits forced input for strict v1 runtimes and preserves monster dispatch
+ok 29 - new host omits forced input for strict v1 runtimes and preserves monster dispatch
+  ---
+  duration_ms: 0.7801
+  type: 'test'
+  ...
+# Subtest: v2 receives held and released forced input while downgrade removes the field
+ok 30 - v2 receives held and released forced input while downgrade removes the field
+  ---
+  duration_ms: 0.3155
+  type: 'test'
+  ...
+# Subtest: actual setter and event capture preserve raw null/zero and explicit slot16
+ok 31 - actual setter and event capture preserve raw null/zero and explicit slot16
+  ---
+  duration_ms: 0.1943
+  type: 'test'
+  ...
+# Subtest: pure repeated peek then one claim allows exactly one actual dispatch
+ok 32 - pure repeated peek then one claim allows exactly one actual dispatch
+  ---
+  duration_ms: 0.261
+  type: 'test'
+  ...
+# Subtest: definitelyUnsent burns sequence without automatic replay
+ok 33 - definitelyUnsent burns sequence without automatic replay
+  ---
+  duration_ms: 0.2884
+  type: 'test'
+  ...
+# Subtest: outcomeUnknown burns sequence without automatic replay
+ok 34 - outcomeUnknown burns sequence without automatic replay
+  ---
+  duration_ms: 0.3166
+  type: 'test'
+  ...
+# Subtest: synchronous owner/runtime/skill/target/map mutations prevent final claim
+ok 35 - synchronous owner/runtime/skill/target/map mutations prevent final claim
+  ---
+  duration_ms: 0.8419
+  type: 'test'
+  ...
+# Subtest: nested synchronous same-proof listener cannot claim or resend twice
+ok 36 - nested synchronous same-proof listener cannot claim or resend twice
+  ---
+  duration_ms: 0.2755
+  type: 'test'
+  ...
+# Subtest: serialization binds plain exact command and rejects extra or malformed wire
+ok 37 - serialization binds plain exact command and rejects extra or malformed wire
+  ---
+  duration_ms: 0.5547
+  type: 'test'
+  ...
+# Subtest: raw exact local row/spell survives only actual unique current binding
+ok 38 - raw exact local row/spell survives only actual unique current binding
+  ---
+  duration_ms: 0.6071
+  type: 'test'
+  ...
+# Subtest: bad current nonarray stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+ok 39 - bad current nonarray stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+  ---
+  duration_ms: 0.2598
+  type: 'test'
+  ...
+# Subtest: bad current oversize stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+ok 40 - bad current oversize stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke
+  ---
+  duration_ms: 0.3767
+  type: 'test'
+  ...
+# Subtest: actual cast clock uses current connection observation and exact nonzero actor delay
+ok 41 - actual cast clock uses current connection observation and exact nonzero actor delay
+  ---
+  duration_ms: 0.3526
+  type: 'test'
+  ...
+# Subtest: combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session
+ok 42 - combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session
+  ---
+  duration_ms: 0.4511
+  type: 'test'
+  ...
+# Subtest: delay before first cast is metadata; repeated delay never resets real start
+ok 43 - delay before first cast is metadata; repeated delay never resets real start
+  ---
+  duration_ms: 0.3187
+  type: 'test'
+  ...
+# Subtest: confirmed owner packet metadata survives before the first complete raw model
+ok 44 - confirmed owner packet metadata survives before the first complete raw model
+  ---
+  duration_ms: 0.2044
+  type: 'test'
+  ...
+# Subtest: same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover
+ok 45 - same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover
+  ---
+  duration_ms: 0.2618
+  type: 'test'
+  ...
+# Subtest: failed sink setup burns global namespace; clock rollback and throwing providers withdraw
+ok 46 - failed sink setup burns global namespace; clock rollback and throwing providers withdraw
+  ---
+  duration_ms: 0.3271
+  type: 'test'
+  ...
+# Subtest: clear and same owner reopen preserve edge highwater; frozen frame withdraws ready
+ok 47 - clear and same owner reopen preserve edge highwater; frozen frame withdraws ready
+  ---
+  duration_ms: 0.2813
+  type: 'test'
+  ...
+# Subtest: production integration captures raw before coalescing and final event proof claim is adjacent to socket send
+ok 48 - production integration captures raw before coalescing and final event proof claim is adjacent to socket send
+  ---
+  duration_ms: 145.7921
+  type: 'test'
+  ...
+# Subtest: synchronous cancel retires in-flight proof; replay fails and fresh tick output works
+ok 49 - synchronous cancel retires in-flight proof; replay fails and fresh tick output works
+  ---
+  duration_ms: 1.2615
+  type: 'test'
+  ...
+# Subtest: synchronous clear retires in-flight proof; replay fails and fresh tick output works
+ok 50 - synchronous clear retires in-flight proof; replay fails and fresh tick output works
+  ---
+  duration_ms: 0.5633
+  type: 'test'
+  ...
+# Subtest: enabled false synchronously withdraws proof and held work, with valid re-enable and no replay
+ok 51 - enabled false synchronously withdraws proof and held work, with valid re-enable and no replay
+  ---
+  duration_ms: 0.8268
+  type: 'test'
+  ...
+# Subtest: actual Page HP overlay callback and combat producer block immediately before React render
+ok 52 - actual Page HP overlay callback and combat producer block immediately before React render
+  ---
+  duration_ms: 196.6117
+  type: 'test'
+  ...
+# Subtest: UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently
+ok 53 - UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently
+  ---
+  duration_ms: 0.7761
+  type: 'test'
+  ...
+# Subtest: UI hold retired owner/runtime and stale release cannot unblock a new token
+ok 54 - UI hold retired owner/runtime and stale release cannot unblock a new token
+  ---
+  duration_ms: 0.348
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof
+ok 55 - actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof
+  ---
+  duration_ms: 414.9919
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints
+ok 56 - actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints
+  ---
+  duration_ms: 565.2592
+  type: 'test'
+  ...
+# Subtest: actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag
+ok 57 - actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag
+  ---
+  duration_ms: 550.3975
+  type: 'test'
+  ...
+# Subtest: actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture
+ok 58 - actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture
+  ---
+  duration_ms: 343.8311
+  type: 'test'
+  ...
+# Subtest: actual Shell bag UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 59 - actual Shell bag UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 298.2205
+  type: 'test'
+  ...
+# Subtest: actual Shell character UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 60 - actual Shell character UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 310.0658
+  type: 'test'
+  ...
+# Subtest: actual Shell hud UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 61 - actual Shell hud UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 279.4057
+  type: 'test'
+  ...
+# Subtest: actual Shell spells UI-origin lease blocks timer; terminal and cleanup restore fresh input
+ok 62 - actual Shell spells UI-origin lease blocks timer; terminal and cleanup restore fresh input
+  ---
+  duration_ms: 333.9777
+  type: 'test'
+  ...
+# Subtest: actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold
+ok 63 - actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold
+  ---
+  duration_ms: 213.5974
+  type: 'test'
+  ...
+# Subtest: actual bag rejected or throwing terminal releases captured hold after router lease cleared
+ok 64 - actual bag rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 387.3143
+  type: 'test'
+  ...
+# Subtest: actual character rejected or throwing terminal releases captured hold after router lease cleared
+ok 65 - actual character rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 316.8628
+  type: 'test'
+  ...
+# Subtest: actual spells rejected or throwing terminal releases captured hold after router lease cleared
+ok 66 - actual spells rejected or throwing terminal releases captured hold after router lease cleared
+  ---
+  duration_ms: 433.1223
+  type: 'test'
+  ...
+# Subtest: actual bag no-lease cleanup releases orphan captured token
+ok 67 - actual bag no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 91.6614
+  type: 'test'
+  ...
+# Subtest: actual character no-lease cleanup releases orphan captured token
+ok 68 - actual character no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 98.3523
+  type: 'test'
+  ...
+# Subtest: actual hud no-lease cleanup releases orphan captured token
+ok 69 - actual hud no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 91.4187
+  type: 'test'
+  ...
+# Subtest: actual spells no-lease cleanup releases orphan captured token
+ok 70 - actual spells no-lease cleanup releases orphan captured token
+  ---
+  duration_ms: 96.0735
+  type: 'test'
+  ...
+# Subtest: actual bag old rejected terminal cannot cancel synchronously new lease or token
+ok 71 - actual bag old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 104.4811
+  type: 'test'
+  ...
+# Subtest: actual character old rejected terminal cannot cancel synchronously new lease or token
+ok 72 - actual character old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 96.8898
+  type: 'test'
+  ...
+# Subtest: actual spells old rejected terminal cannot cancel synchronously new lease or token
+ok 73 - actual spells old rejected terminal cannot cancel synchronously new lease or token
+  ---
+  duration_ms: 92.2081
+  type: 'test'
+  ...
+# Subtest: actual Shell stale painted Quest button swallows one gesture before Bag/HUD world leases and compatibility mouse dispatch
+ok 74 - actual Shell stale painted Quest button swallows one gesture before Bag/HUD world leases and compatibility mouse dispatch
+  ---
+  duration_ms: 413.9553
+  type: 'test'
+  ...
+# Subtest: actual Shell painted Bag and Character own overlapping stale Quest paint while HUD foreground and modal swallow world gestures
+ok 75 - actual Shell painted Bag and Character own overlapping stale Quest paint while HUD foreground and modal swallow world gestures
+  ---
+  duration_ms: 685.8731
+  type: 'test'
+  ...
+# Subtest: actual Shell captured Quest terminal survives newly appearing NPC owner without cancelling that new owner
+ok 76 - actual Shell captured Quest terminal survives newly appearing NPC owner without cancelling that new owner
+  ---
+  duration_ms: 169.3607
+  type: 'test'
+  ...
+# Subtest: actual Shell window blur, resize and cleanup clear captured Quest gestures through the real effect
+ok 77 - actual Shell window blur, resize and cleanup clear captured Quest gestures through the real effect
+  ---
+  duration_ms: 263.987
+  type: 'test'
+  ...
+# Subtest: actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile
+ok 78 - actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile
+  ---
+  duration_ms: 80.429
+  type: 'test'
+  ...
+# Subtest: actual shared canvas routes drop labels to pickup and empty world to original tile action
+ok 79 - actual shared canvas routes drop labels to pickup and empty world to original tile action
+  ---
+  duration_ms: 49.9506
+  type: 'test'
+  ...
+# Subtest: actual surface router refuses world-target lookup under HUD, modal and foreground owners
+ok 80 - actual surface router refuses world-target lookup under HUD, modal and foreground owners
+  ---
+  duration_ms: 155.8301
+  type: 'test'
+  ...
+# Subtest: actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target
+ok 81 - actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target
+  ---
+  duration_ms: 51.2205
+  type: 'test'
+  ...
+# Subtest: independent capability is exact, old bundle and lean retain compatibility
+ok 82 - independent capability is exact, old bundle and lean retain compatibility
+  ---
+  duration_ms: 32.9595
+  type: 'test'
+  ...
+# Subtest: HUD geometry chooses owner before movement, foreground priority and crossing drags
+ok 83 - HUD geometry chooses owner before movement, foreground priority and crossing drags
+  ---
+  duration_ms: 1.22
+  type: 'test'
+  ...
+# Subtest: hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+ok 84 - hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+  ---
+  duration_ms: 56.7224
+  type: 'test'
+  ...
+# Subtest: cold Page Q diary survives a HUD tick before React commits and the first Native projection
+ok 85 - cold Page Q diary survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 458.9218
+  type: 'test'
+  ...
+# Subtest: cold Page Bag survives a HUD tick before React commits and the first Native projection
+ok 86 - cold Page Bag survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 208.0289
+  type: 'test'
+  ...
+# Subtest: cold Page Character survives a HUD tick before React commits and the first Native projection
+ok 87 - cold Page Character survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 170.581
+  type: 'test'
+  ...
+# Subtest: cold Page Character Skills tab survives a HUD tick before React commits and the first Native projection
+ok 88 - cold Page Character Skills tab survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 148.2018
+  type: 'test'
+  ...
+# Subtest: actual hook opens Bag once during dirty HP and again during a pending cosmetic ingest without relaxing readCurrent
+ok 89 - actual hook opens Bag once during dirty HP and again during a pending cosmetic ingest without relaxing readCurrent
+  ---
+  duration_ms: 8.9358
+  type: 'test'
+  ...
+# Subtest: a native ready baseline must first be fully ingested for this hook owner
+ok 90 - a native ready baseline must first be fully ingested for this hook owner
+  ---
+  duration_ms: 11.6392
+  type: 'test'
+  ...
+# Subtest: a new runtime generation cannot inherit its predecessor's ready baseline before its fresh ingest
+ok 91 - a new runtime generation cannot inherit its predecessor's ready baseline before its fresh ingest
+  ---
+  duration_ms: 8.9257
+  type: 'test'
+  ...
+# Subtest: pending source identity/realm/world/context/scene must ingest a new revision even with the same HUD projection
+ok 92 - pending source identity/realm/world/context/scene must ingest a new revision even with the same HUD projection
+  ---
+  duration_ms: 72.4155
+  type: 'test'
+  ...
+# Subtest: pending layout, explicit navigation and player identity changes cannot borrow the cosmetic baseline
+ok 93 - pending layout, explicit navigation and player identity changes cannot borrow the cosmetic baseline
+  ---
+  duration_ms: 103.4661
+  type: 'test'
+  ...
+# Subtest: hidden, inactive, absent player/source, unknown capability, native loss/error and expired/regressed frame reject
+ok 94 - hidden, inactive, absent player/source, unknown capability, native loss/error and expired/regressed frame reject
+  ---
+  duration_ms: 105.5203
+  type: 'test'
+  ...
+# Subtest: Native false/throw is final, diagnostics stay bounded and cleanup cannot authorize or replay
+ok 95 - Native false/throw is final, diagnostics stay bounded and cleanup cannot authorize or replay
+  ---
+  duration_ms: 16.1106
+  type: 'test'
+  ...
+# Subtest: source/runtime/visibility/capability or cleanup changes while reading Native are rechecked before the single dispatch
+ok 96 - source/runtime/visibility/capability or cleanup changes while reading Native are rechecked before the single dispatch
+  ---
+  duration_ms: 52.3366
+  type: 'test'
+  ...
+# Subtest: actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+ok 97 - actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+  ---
+  duration_ms: 44.5319
+  type: 'test'
+  ...
+# [mir2] equipment send outcome is unknown Error: transport outcome unknown
+#     at page.scope.socketRef.current.send (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:577:101)
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:586:16)
+#     at send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:191:26)
+#     at Object.dispatchBevyCharacterIntent (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:221:21), <anonymous>:737:31)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:578:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+# Subtest: ordinary medicine Use reaches socket with a complete session even if equipment WASM is unavailable
+ok 98 - ordinary medicine Use reaches socket with a complete session even if equipment WASM is unavailable
+  ---
+  duration_ms: 139.1249
+  type: 'test'
+  ...
+# Subtest: unknown bag metadata refuses Use, and Equip refuses a missing ledger
+ok 99 - unknown bag metadata refuses Use, and Equip refuses a missing ledger
+  ---
+  duration_ms: 2.3742
+  type: 'test'
+  ...
+# Subtest: weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot
+ok 100 - weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot
+  ---
+  duration_ms: 7.7116
+  type: 'test'
+  ...
+# Subtest: React Use and native Equip/Use all choose the current free ring hand through the real send gate
+ok 101 - React Use and native Equip/Use all choose the current free ring hand through the real send gate
+  ---
+  duration_ms: 5.7447
+  type: 'test'
+  ...
+# Subtest: mount Use proves the current instance but emits only Crystal wire slot 13
+ok 102 - mount Use proves the current instance but emits only Crystal wire slot 13
+  ---
+  duration_ms: 0.5995
+  type: 'test'
+  ...
+# Subtest: a replaced mount, non-mount item, or missing instance proof cannot issue mount Use
+ok 103 - a replaced mount, non-mount item, or missing instance proof cannot issue mount Use
+  ---
+  duration_ms: 0.4127
+  type: 'test'
+  ...
+# Subtest: synchronous action listener logout prevents outer Equip bytes and releases its proven-unsent reservation
+ok 104 - synchronous action listener logout prevents outer Equip bytes and releases its proven-unsent reservation
+  ---
+  duration_ms: 2.1354
+  type: 'test'
+  ...
+# Subtest: synchronous action listener logout also prevents outer Move bytes
+ok 105 - synchronous action listener logout also prevents outer Move bytes
+  ---
+  duration_ms: 0.7038
+  type: 'test'
+  ...
+# Subtest: cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells
+ok 106 - cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells
+  ---
+  duration_ms: 1.3999
+  type: 'test'
+  ...
+# Subtest: cross-page move rechecks the socket, connection, session, and logout gate after the synchronous action event
+ok 107 - cross-page move rechecks the socket, connection, session, and logout gate after the synchronous action event
+  ---
+  duration_ms: 1.5363
+  type: 'test'
+  ...
+# Subtest: a captured render identity from another connection or session cannot send item commands
+ok 108 - a captured render identity from another connection or session cannot send item commands
+  ---
+  duration_ms: 0.9275
+  type: 'test'
+  ...
+# Subtest: late WASM installation cannot establish a baseline across a pre-existing logout gate
+ok 109 - late WASM installation cannot establish a baseline across a pre-existing logout gate
+  ---
+  duration_ms: 0.5131
+  type: 'test'
+  ...
+# Subtest: actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK
+ok 110 - actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK
+  ---
+  duration_ms: 0.9903
+  type: 'test'
+  ...
+# Subtest: actual raw send rechecks the original Bevy token and live host after synchronous action listeners
+ok 111 - actual raw send rechecks the original Bevy token and live host after synchronous action listeners
+  ---
+  duration_ms: 0.5819
+  type: 'test'
+  ...
+# Subtest: retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations
+ok 112 - retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations
+  ---
+  duration_ms: 5.0142
+  type: 'test'
+  ...
+# Subtest: storage compatibility callbacks require a storage proof for current and stale owners
+ok 113 - storage compatibility callbacks require a storage proof for current and stale owners
+  ---
+  duration_ms: 0.8612
+  type: 'test'
+  ...
+# Subtest: actual Bevy intent adapter preserves UID0 and global bag cells through shared Equip/Use/Move gates
+ok 114 - actual Bevy intent adapter preserves UID0 and global bag cells through shared Equip/Use/Move gates
+  ---
+  duration_ms: 1.7319
+  type: 'test'
+  ...
+# Subtest: actual close wrapper revokes ownership before a same-frame queued Use can submit
+ok 115 - actual close wrapper revokes ownership before a same-frame queued Use can submit
+  ---
+  duration_ms: 0.3823
+  type: 'test'
+  ...
+# Subtest: actual Character dispatch rechecks UID0, hidden Bag and first empty second-page slot through one real ledger
+ok 116 - actual Character dispatch rechecks UID0, hidden Bag and first empty second-page slot through one real ledger
+  ---
+  duration_ms: 0.9085
+  type: 'test'
+  ...
+# Subtest: actual Character source replacement, full bag and final synchronous logout cannot send
+ok 117 - actual Character source replacement, full bag and final synchronous logout cannot send
+  ---
+  duration_ms: 1.0434
+  type: 'test'
+  ...
+# Subtest: actual Character unknown send keeps the existing pending reservation
+ok 118 - actual Character unknown send keeps the existing pending reservation
+  ---
+  duration_ms: 1.2601
+  type: 'test'
+  ...
+# Subtest: confirmed StartGame and complete valid baseline are required before equipment sends
+ok 119 - confirmed StartGame and complete valid baseline are required before equipment sends
+  ---
+  duration_ms: 1.1937
+  type: 'test'
+  ...
+# Subtest: owner changes guard new selections without erasing pending; unknown send cannot be cancelled
+ok 120 - owner changes guard new selections without erasing pending; unknown send cannot be cancelled
+  ---
+  duration_ms: 0.5256
+  type: 'test'
+  ...
+# Subtest: only a definitely unsent ticket can release, and a sent ticket survives renderer cleanup
+ok 121 - only a definitely unsent ticket can release, and a sent ticket survives renderer cleanup
+  ---
+  duration_ms: 0.3131
+  type: 'test'
+  ...
+# Subtest: invalid snapshot blocks sends but preserves locks; valid same-session snapshot restores readiness
+ok 122 - invalid snapshot blocks sends but preserves locks; valid same-session snapshot restores readiness
+  ---
+  duration_ms: 0.2646
+  type: 'test'
+  ...
+# Subtest: socket close cannot be resumed by a snapshot or stale ACK; new confirmed session may use same or newer socket
+ok 123 - socket close cannot be resumed by a snapshot or stale ACK; new confirmed session may use same or newer socket
+  ---
+  duration_ms: 0.3623
+  type: 'test'
+  ...
+# Subtest: failed logout on the same live socket resumes its pending ledger without a new snapshot
+ok 124 - failed logout on the same live socket resumes its pending ledger without a new snapshot
+  ---
+  duration_ms: 0.2375
+  type: 'test'
+  ...
+# Subtest: missing additive WASM equipment capability fails closed without changing Quest runtime
+ok 125 - missing additive WASM equipment capability fails closed without changing Quest runtime
+  ---
+  duration_ms: 0.216
+  type: 'test'
+  ...
+# Subtest: browser auth hit rectangles match the independent R16 native source
+ok 126 - browser auth hit rectangles match the independent R16 native source
+  ---
+  duration_ms: 3.0617
+  type: 'test'
+  ...
+# Subtest: login opening follows the native 18-frame clock and keeps login music
+ok 127 - login opening follows the native 18-frame clock and keeps login music
+  ---
+  duration_ms: 0.4353
+  type: 'test'
+  ...
+# Subtest: localized create captions, slots and notice match the Native bounds without overlap
+ok 128 - localized create captions, slots and notice match the Native bounds without overlap
+  ---
+  duration_ms: 1.2234
+  type: 'test'
+  ...
+# Subtest: bounded English/Simplified/Portuguese captions remain exact native catalog projections
+ok 129 - bounded English/Simplified/Portuguese captions remain exact native catalog projections
+  ---
+  duration_ms: 20.2576
+  type: 'test'
+  ...
+# Subtest: registration and change-password helpers preserve the actual native fields, bounds and Title art
+ok 130 - registration and change-password helpers preserve the actual native fields, bounds and Title art
+  ---
+  duration_ms: 2.4784
+  type: 'test'
+  ...
+# Subtest: SafeKey uses the native 10-then-26 split and all 36 hit boxes clear its tools
+ok 131 - SafeKey uses the native 10-then-26 split and all 36 hit boxes clear its tools
+  ---
+  duration_ms: 6.3517
+  type: 'test'
+  ...
+# Subtest: four-slot availability never starts synthetic characters or exceeds the native cap
+ok 132 - four-slot availability never starts synthetic characters or exceeds the native cap
+  ---
+  duration_ms: 0.6239
+  type: 'test'
+  ...
+# Subtest: Wizard additive frames use the canonical R16 offsets and local source art
+ok 133 - Wizard additive frames use the canonical R16 offsets and local source art
+  ---
+  duration_ms: 7.6556
+  type: 'test'
+  ...
+# Subtest: actual auxiliary forms place all 8/4 fields and action hit boxes at Native stage coordinates
+ok 134 - actual auxiliary forms place all 8/4 fields and action hit boxes at Native stage coordinates
+  ---
+  duration_ms: 275.1684
+  type: 'test'
+  ...
+# Subtest: actual registration Enter advances, change-password Enter waits, and both Tab boundaries wrap
+ok 135 - actual registration Enter advances, change-password Enter waits, and both Tab boundaries wrap
+  ---
+  duration_ms: 162.4271
+  type: 'test'
+  ...
+# Subtest: actual SafeKey stays beside the original login, preserves shared key order and routes physical keys
+ok 136 - actual SafeKey stays beside the original login, preserves shared key order and routes physical keys
+  ---
+  duration_ms: 71.939
+  type: 'test'
+  ...
+# Subtest: auxiliary pending gates and IME cannot dispatch while Escape can retire an auth surface
+ok 137 - auxiliary pending gates and IME cannot dispatch while Escape can retire an auth surface
+  ---
+  duration_ms: 177.6903
+  type: 'test'
+  ...
+# Subtest: actual login fields use R16 geometry and Enter advances focus without authenticating
+ok 138 - actual login fields use R16 geometry and Enter advances focus without authenticating
+  ---
+  duration_ms: 53.0531
+  type: 'test'
+  ...
+# Subtest: actual R16 login Tab order, F8 and Escape obey pending and modal gates
+ok 139 - actual R16 login Tab order, F8 and Escape obey pending and modal gates
+  ---
+  duration_ms: 51.935
+  type: 'test'
+  ...
+# Subtest: actual select buttons and localized slot preserve native availability and opaque player names
+ok 140 - actual select buttons and localized slot preserve native availability and opaque player names
+  ---
+  duration_ms: 55.7374
+  type: 'test'
+  ...
+# Subtest: actual create dialog uses R16 modal, 18-character field and distinct class/gender choices
+ok 141 - actual create dialog uses R16 modal, 18-character field and distinct class/gender choices
+  ---
+  duration_ms: 49.205
+  type: 'test'
+  ...
+# Subtest: character creation policy and success receipts match the R16 and classic Gateway contracts
+ok 142 - character creation policy and success receipts match the R16 and classic Gateway contracts
+  ---
+  duration_ms: 1.0804
+  type: 'test'
+  ...
+# Subtest: actual create form holds the draft while pending and permits editing after a rejection
+ok 143 - actual create form holds the draft while pending and permits editing after a rejection
+  ---
+  duration_ms: 57.1351
+  type: 'test'
+  ...
+# Subtest: character creation shows shared name and slot notices in all ten languages
+ok 144 - character creation shows shared name and slot notices in all ten languages
+  ---
+  duration_ms: 388.6161
+  type: 'test'
+  ...
+# Subtest: native caption rendering is opt-in and disabled controls cannot activate
+ok 145 - native caption rendering is opt-in and disabled controls cannot activate
+  ---
+  duration_ms: 32.2794
+  type: 'test'
+  ...
+# Subtest: auth language footer uses native geometry and all ten Windows choices, leaving the game default inline
+ok 146 - auth language footer uses native geometry and all ten Windows choices, leaving the game default inline
+  ---
+  duration_ms: 41.8007
+  type: 'test'
+  ...
+# Subtest: browser-only login actions and diagnostics mount only inside the collapsed footer without losing callbacks
+ok 147 - browser-only login actions and diagnostics mount only inside the collapsed footer without losing callbacks
+  ---
+  duration_ms: 32.973
+  type: 'test'
+  ...
+# Subtest: select footer clears Start/Exit hit targets and Escape closes browser settings before logout
+ok 148 - select footer clears Start/Exit hit targets and Escape closes browser settings before logout
+  ---
+  duration_ms: 31.4912
+  type: 'test'
+  ...
+# Subtest: language popup closes on an outside capture event and releases its listener
+ok 149 - language popup closes on an outside capture event and releases its listener
+  ---
+  duration_ms: 33.4161
+  type: 'test'
+  ...
+# Subtest: stacked auth audio bounds sliders and supplies missing Chinese labels without changing channel updates
+ok 150 - stacked auth audio bounds sliders and supplies missing Chinese labels without changing channel updates
+  ---
+  duration_ms: 3.57
+  type: 'test'
+  ...
+# Subtest: actual capture uses current authenticated StartGame, role, physical socket, realm and context only
+ok 151 - actual capture uses current authenticated StartGame, role, physical socket, realm and context only
+  ---
+  duration_ms: 507.2443
+  type: 'test'
+  ...
+# Subtest: actual private sender bypasses generic state/logging and distinguishes entered throw from not-sent
+ok 152 - actual private sender bypasses generic state/logging and distinguishes entered throw from not-sent
+  ---
+  duration_ms: 16.6332
+  type: 'test'
+  ...
+# Subtest: every captured source dimension is rechecked after serialization and never upgraded to a new source
+ok 153 - every captured source dimension is rechecked after serialization and never upgraded to a new source
+  ---
+  duration_ms: 155.585
+  type: 'test'
+  ...
+# Subtest: actual lifecycle functions erase owner-private memory and Blob before unrelated teardown
+ok 154 - actual lifecycle functions erase owner-private memory and Blob before unrelated teardown
+  ---
+  duration_ms: 77.3992
+  type: 'test'
+  ...
+# Subtest: actual successful StartGame and logout packet branches invoke retirement before replacing the role
+ok 155 - actual successful StartGame and logout packet branches invoke retirement before replacing the role
+  ---
+  duration_ms: 36.5291
+  type: 'test'
+  ...
+# Subtest: actual realm changes and feature revocation retire private data and never revive an old Source
+ok 156 - actual realm changes and feature revocation retire private data and never revive an old Source
+  ---
+  duration_ms: 46.3019
+  type: 'test'
+  ...
+# Subtest: actual open callback requires authority and cancels existing world intent before exposing the window
+ok 157 - actual open callback requires authority and cancels existing world intent before exposing the window
+  ---
+  duration_ms: 10.0095
+  type: 'test'
+  ...
+# Subtest: actual message handler consumes private/invalid envelopes before Hero, raw ingress, world/history and logs
+ok 158 - actual message handler consumes private/invalid envelopes before Hero, raw ingress, world/history and logs
+  ---
+  duration_ms: 78.908
+  type: 'test'
+  ...
+# Subtest: escaped JSON type names are still private before the actual generic handler
+ok 159 - escaped JSON type names are still private before the actual generic handler
+  ---
+  duration_ms: 29.4046
+  type: 'test'
+  ...
+# Subtest: actual private receive drops foreign sockets/generations and absorbs decoder exceptions
+ok 160 - actual private receive drops foreign sockets/generations and absorbs decoder exceptions
+  ---
+  duration_ms: 13.4167
+  type: 'test'
+  ...
+# Subtest: actual party invitation repeats lease/character/source checks between SwitchGroup and AddMember
+ok 161 - actual party invitation repeats lease/character/source checks between SwitchGroup and AddMember
+  ---
+  duration_ms: 84.0391
+  type: 'test'
+  ...
+# Subtest: actual sendRaw rejects all three private command kinds before evaluating any generic globals
+ok 162 - actual sendRaw rejects all three private command kinds before evaluating any generic globals
+  ---
+  duration_ms: 9.6932
+  type: 'test'
+  ...
+# Subtest: current logout returns to authenticated selection and reuses the active role ID
+ok 163 - current logout returns to authenticated selection and reuses the active role ID
+  ---
+  duration_ms: 65.1391
+  type: 'test'
+  ...
+# Subtest: logout selects the first remaining role when the active ID disappeared, and preserves an empty roster
+ok 164 - logout selects the first remaining role when the active ID disappeared, and preserves an empty roster
+  ---
+  duration_ms: 37.6695
+  type: 'test'
+  ...
+# Subtest: foreign, stale, unrequested and malformed logout packets never grant a selection owner
+ok 165 - foreign, stale, unrequested and malformed logout packets never grant a selection owner
+  ---
+  duration_ms: 114.6852
+  type: 'test'
+  ...
+# Subtest: a duplicate logout cannot replace the returned selection or retire a newer game session
+ok 166 - a duplicate logout cannot replace the returned selection or retire a newer game session
+  ---
+  duration_ms: 5.699
+  type: 'test'
+  ...
+# Subtest: selection authority expires with its socket or connection generation
+ok 167 - selection authority expires with its socket or connection generation
+  ---
+  duration_ms: 13.2734
+  type: 'test'
+  ...
+# Subtest: real server Vec stat and u32 weights survive without estimates, omissions stay missing
+ok 168 - real server Vec stat and u32 weights survive without estimates, omissions stay missing
+  ---
+  duration_ms: 2.8966
+  type: 'test'
+  ...
+# Subtest: confirmed movement ACK only keeps fast path when authoritative stats and all weight fields match
+ok 169 - confirmed movement ACK only keeps fast path when authoritative stats and all weight fields match
+  ---
+  duration_ms: 413.8233
+  type: 'test'
+  ...
+# Subtest: source geometry Canvas2D paints without anchors and stale async loads cannot retake ownership
+ok 170 - source geometry Canvas2D paints without anchors and stale async loads cannot retake ownership
+  ---
+  duration_ms: 66.1283
+  type: 'test'
+  ...
+# Subtest: hook checks captured runtime identity and cleanup retires it despite ref replacement
+ok 171 - hook checks captured runtime identity and cleanup retires it despite ref replacement
+  ---
+  duration_ms: 95.6273
+  type: 'test'
+  ...
+1..171
+# tests 171
+# suites 0
+# pass 171
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10421.4212

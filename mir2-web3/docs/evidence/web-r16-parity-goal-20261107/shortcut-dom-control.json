@@ -1,0 +1,294 @@
+{
+  "schema": "mir2.real-dom.window-keydown-control.v1",
+  "startedAt": "2026-11-07T12:21:33.925Z",
+  "passed": true,
+  "sourcePath": "E:/mir2-player-journey/mir2-web3/apps/web/lib/use-window-keydown.ts",
+  "sourceSha256": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce",
+  "compiledSha256": "dd51f687675b7c53c3285c52498ae84096d92f47ecee387f85fc531108139aa6",
+  "node": "v22.18.0",
+  "fixtureBoundary": "Actual hook source; React render/layout phases modeled; native Chrome DOM dispatch and trusted physical key input.",
+  "networkRequests": [],
+  "pageErrors": [],
+  "cases": [
+    {
+      "mode": "legacy-rebind",
+      "url": "about:blank",
+      "log": [
+        "preceding-listener",
+        "microtask-before-commit",
+        "microtask-after-commit"
+      ],
+      "calls": [],
+      "keyEvents": [
+        {
+          "key": "Alt",
+          "code": "AltLeft",
+          "alt": true,
+          "trusted": true,
+          "repeat": false,
+          "phase": 1,
+          "focused": true,
+          "visible": "visible",
+          "target": "target"
+        },
+        {
+          "key": "x",
+          "code": "KeyX",
+          "alt": true,
+          "trusted": true,
+          "repeat": false,
+          "phase": 1,
+          "focused": true,
+          "visible": "visible",
+          "target": "target"
+        }
+      ],
+      "registrations": [
+        {
+          "id": "precedingListener:1",
+          "capture": true,
+          "phase": "setup"
+        },
+        {
+          "id": "oldHandler:2",
+          "capture": true,
+          "phase": "setup"
+        },
+        {
+          "id": "newHandler:3",
+          "capture": true,
+          "phase": "dispatch"
+        }
+      ],
+      "removals": [
+        {
+          "id": "oldHandler:2",
+          "capture": true,
+          "phase": "dispatch"
+        }
+      ],
+      "focusBefore": {
+        "focused": true,
+        "visible": "visible",
+        "active": "target"
+      },
+      "afterCleanup": {
+        "mode": "legacy-rebind",
+        "url": "about:blank",
+        "log": [
+          "preceding-listener",
+          "microtask-before-commit",
+          "microtask-after-commit"
+        ],
+        "calls": [],
+        "keyEvents": [
+          {
+            "key": "Alt",
+            "code": "AltLeft",
+            "alt": true,
+            "trusted": true,
+            "repeat": false,
+            "phase": 1,
+            "focused": true,
+            "visible": "visible",
+            "target": "target"
+          },
+          {
+            "key": "x",
+            "code": "KeyX",
+            "alt": true,
+            "trusted": true,
+            "repeat": false,
+            "phase": 1,
+            "focused": true,
+            "visible": "visible",
+            "target": "target"
+          }
+        ],
+        "registrations": [
+          {
+            "id": "precedingListener:1",
+            "capture": true,
+            "phase": "setup"
+          },
+          {
+            "id": "oldHandler:2",
+            "capture": true,
+            "phase": "setup"
+          },
+          {
+            "id": "newHandler:3",
+            "capture": true,
+            "phase": "dispatch"
+          }
+        ],
+        "removals": [
+          {
+            "id": "oldHandler:2",
+            "capture": true,
+            "phase": "dispatch"
+          },
+          {
+            "id": "newHandler:3",
+            "capture": true,
+            "phase": "cleanup"
+          },
+          {
+            "id": "precedingListener:1",
+            "capture": true,
+            "phase": "cleanup"
+          }
+        ]
+      },
+      "trustedChordOnce": true,
+      "passed": true
+    },
+    {
+      "mode": "actual-stable-hook",
+      "url": "about:blank",
+      "log": [
+        "preceding-listener",
+        "microtask-before-commit",
+        "microtask-after-commit",
+        "new-handler"
+      ],
+      "calls": [
+        {
+          "handler": "new",
+          "key": "x",
+          "code": "KeyX",
+          "alt": true,
+          "trusted": true,
+          "repeat": false,
+          "phase": 1,
+          "focused": true,
+          "visible": "visible",
+          "target": "target"
+        }
+      ],
+      "keyEvents": [
+        {
+          "key": "Alt",
+          "code": "AltLeft",
+          "alt": true,
+          "trusted": true,
+          "repeat": false,
+          "phase": 1,
+          "focused": true,
+          "visible": "visible",
+          "target": "target"
+        },
+        {
+          "key": "x",
+          "code": "KeyX",
+          "alt": true,
+          "trusted": true,
+          "repeat": false,
+          "phase": 1,
+          "focused": true,
+          "visible": "visible",
+          "target": "target"
+        }
+      ],
+      "registrations": [
+        {
+          "id": "precedingListener:1",
+          "capture": true,
+          "phase": "setup"
+        },
+        {
+          "id": "listener:2",
+          "capture": true,
+          "phase": "setup"
+        }
+      ],
+      "removals": [],
+      "focusBefore": {
+        "focused": true,
+        "visible": "visible",
+        "active": "target"
+      },
+      "afterCleanup": {
+        "mode": "actual-stable-hook",
+        "url": "about:blank",
+        "log": [
+          "preceding-listener",
+          "microtask-before-commit",
+          "microtask-after-commit",
+          "new-handler"
+        ],
+        "calls": [
+          {
+            "handler": "new",
+            "key": "x",
+            "code": "KeyX",
+            "alt": true,
+            "trusted": true,
+            "repeat": false,
+            "phase": 1,
+            "focused": true,
+            "visible": "visible",
+            "target": "target"
+          }
+        ],
+        "keyEvents": [
+          {
+            "key": "Alt",
+            "code": "AltLeft",
+            "alt": true,
+            "trusted": true,
+            "repeat": false,
+            "phase": 1,
+            "focused": true,
+            "visible": "visible",
+            "target": "target"
+          },
+          {
+            "key": "x",
+            "code": "KeyX",
+            "alt": true,
+            "trusted": true,
+            "repeat": false,
+            "phase": 1,
+            "focused": true,
+            "visible": "visible",
+            "target": "target"
+          }
+        ],
+        "registrations": [
+          {
+            "id": "precedingListener:1",
+            "capture": true,
+            "phase": "setup"
+          },
+          {
+            "id": "listener:2",
+            "capture": true,
+            "phase": "setup"
+          }
+        ],
+        "removals": [
+          {
+            "id": "listener:2",
+            "capture": true,
+            "phase": "cleanup"
+          },
+          {
+            "id": "precedingListener:1",
+            "capture": true,
+            "phase": "cleanup"
+          }
+        ]
+      },
+      "trustedChordOnce": true,
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "browser": {
+    "version": "156.0.8078.80",
+    "executable": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "headless": true
+  },
+  "finishedAt": "2026-11-07T12:21:34.734Z"
+}

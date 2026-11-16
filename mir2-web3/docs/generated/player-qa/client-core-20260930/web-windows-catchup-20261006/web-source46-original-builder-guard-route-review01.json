@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "preparedBy": "/root/source30_native_client",
+  "kind": "Source46 supplemental original full-builder/CargoGuard route review; ordinary read-only data, not config/policy/manifest/helper/receipt",
+  "generatedAtUtc": "2026-10-08T15:27:31.769Z",
+  "readyToExecute": false,
+  "userWasmStaticApiAnswerObserved": false,
+  "commandsRun": false,
+  "pidsInspected": false,
+  "locksRead": false,
+  "productWritten": false,
+  "parentNativeBuild": "Parent reported session46316 still live. This review does not inspect it; next builder must await Root actual completed/exited/disposed verification, never overlap.",
+  "originalEntrypoints": {
+    "renderer": {
+      "executable": "C:/Program Files/nodejs/node.exe",
+      "args": [
+        "scripts/build-bevy-runtime.mjs",
+        "release"
+      ],
+      "recommendedCwd": "E:/mir2-player-journey/mir2-web3/apps/web",
+      "rootSelection": "scriptDir from import.meta.url, webRoot=script parent, runtimeDir=../game-client/runtime. No --manifest-path/--repo/--output override. Absolute script invocation from another cwd still uses that script-relative product tree.",
+      "cargoCwd": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime",
+      "manifestSelection": "Cargo implicit Cargo.toml in fixed runtimeDir; runtime has its own [workspace].",
+      "expectedNormalCargoCalls": 4,
+      "callOrder": [
+        "--version (pinned1.95.0)",
+        "build GPU",
+        "build leanGL2",
+        "build sharedGL2"
+      ],
+      "noNewHelper": true
+    },
+    "small": {
+      "executable": "C:/Program Files/nodejs/node.exe",
+      "args": [
+        "scripts/build-client-core.mjs"
+      ],
+      "recommendedCwd": "E:/mir2-player-journey/mir2-web3/apps/web",
+      "rootSelection": "crateRoot and webRoot derived from original script location; no repo/manifest/public-output override.",
+      "cargoCwd": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web",
+      "manifestSelection": "Cargo implicit local Cargo.toml; platform-web has its own [workspace].",
+      "expectedNormalCargoCalls": 3,
+      "callOrder": [
+        "+1.95.0 build Core",
+        "+1.95.0 build --features presentation-ui",
+        "+1.95.0 build --features npc-purchase-policy"
+      ],
+      "noNewHelper": true
+    },
+    "qualification": "Normal counts exclude retries. The existing MIR2_BEVY_CARGO_BUILD_ATTEMPTS=1 and MIR2_WASM_BINDGEN_ATTEMPTS=1 can bound original retry settings without rewriting helpers. Source build branch requires prebuilt flags absent/not1; prebuilt is not this full route."
+  },
+  "guard": {
+    "pins": [
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+        "bytes": 20309,
+        "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.exe",
+        "bytes": 37376,
+        "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/LICENSE.0BSD.txt",
+        "bytes": 661,
+        "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d"
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "bytes": 772,
+        "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      }
+    ],
+    "CARGO_BIN": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.exe",
+    "directCompatibility": true,
+    "requiredEnvironment": [
+      "QA_CARGO_GUARD_POLICY=<Root current immutable ordinary real-cargo policy>",
+      "QA_CARGO_GUARD_POLICY_SHA256=<actual policy bytes hash>"
+    ],
+    "behavior": [
+      "No argv special case or --version bypass; every Guard invocation validates immutable policy/source/authority/tool pins, generates Guid nonce and runs actual Get-Volume C probe",
+      "Threshold exactly53687091200, probeTimeout≤15000ms, freshness≤2000ms, native final freshness immediately before CreateProcessW; no stale preflight sample substitute",
+      "Original lexical cargo.exe and matching rustup proxy byte/SHA bound; original cwd/quoted argv/inherited environment forwarded unchanged",
+      "Owned child actual WaitForExit/Exited/Dispose and signed exit bits PolicyB; no timeout-kill pretending completion; serial spawnSync builder waits each guard return",
+      "Version probe uses same reviewed policy/receiptRoot but new nonce; each actual build/retry also new nonce",
+      "Builder exit0 is insufficient if any nonce after evidence fails: guard intentionally preserves child exit bits even after-error, so Root must audit all per-call receipts"
+    ],
+    "policyScope": "A newly reviewed Root policy/authority/source acceptance must pin full actual current builder + production inputs. Existing historical Source45 policy is evidence only, not authority for main current repo. No new policy or authority written here.",
+    "sourceVerificationLimit": "Guard pins declaration JSON and acceptance receipt; it does not hash every repository source during Cargo. Root before/after exact source comparisons remain mandatory.",
+    "historicalExampleConfigPin": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-renderer-source45-webgpu-build01.policy01.json",
+      "bytes": 2338,
+      "sha256": "f11083370014b7c9ee00e05bc09137efdaf6978f09a80fcc3e5180daecaf79bd"
+    },
+    "historicalThresholds": {
+      "thresholdBytes": "53687091200",
+      "probeTimeoutMs": "15000",
+      "freshnessMs": "2000",
+      "postChildPolicy": "B"
+    },
+    "references": "CargoGuard.cs64-105,124-146,148-158,186-213; original builders spawnSync48-51/415-416/1316-1370"
+  },
+  "environmentRoute": {
+    "common": {
+      "CARGO_BIN": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.exe",
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_NET_OFFLINE": "true",
+      "RUSTUP_TOOLCHAIN": "1.95.0",
+      "CARGO_HOME": "original pinned C:/Users/Administrator/.cargo",
+      "RUSTUP_HOME": "original pinned C:/Users/Administrator/.rustup",
+      "WASM_BINDGEN_BIN": "C:/Users/Administrator/.cargo/bin/wasm-bindgen.exe",
+      "RUST_MIN_STACK": "67108864"
+    },
+    "renderer": {
+      "MIR2_BEVY_QUEST_UI": "1",
+      "MIR2_SKIP_RUSTUP_TARGET_CHECK": "1",
+      "MIR2_BEVY_CARGO_BUILD_ATTEMPTS": "1",
+      "MIR2_WASM_BINDGEN_ATTEMPTS": "1",
+      "MIR2_BEVY_CARGO_TARGET_ROOT": "<Root new ordinary absolute dedicated renderer target base; NOT current Native windows target and NOT old Source45 target>",
+      "MIR2_BEVY_WASM_OPT_BIN": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-mail-combined-build-01/binaryen131-tool01/bin/wasm-opt.exe",
+      "MIR2_BEVY_WASM_OPT_SHA256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    "small": {
+      "MIR2_CLIENT_CORE_TARGET_DIR": "<Root new ordinary absolute dedicated small-product target; shared sequential only among this original3-mode build>",
+      "MIR2_CLIENT_CORE_WASM_OPT_BIN": "same original Binaryen131 absolute path",
+      "MIR2_CLIENT_CORE_WASM_OPT_SHA256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    "important": [
+      "Set target paths ABSOLUTE; renderer appends mir2-bevy-runtime/backend. Do not set base already ending in backend or expect no append.",
+      "No existing target deletion/clean required; fresh targets preserve Source31/45 intermediates and isolate current Native.",
+      "Original builder args already --locked. CARGO_NET_OFFLINE=true supplies offline behavior without argv/helper edits; do not let rustup target add run (skip check plus installed-target/toolchain path evidence).",
+      "No optimizer source environment QA_CARGO_* is forwarded to its child because original helper forwards only SYSTEM_ENV_NAMES+BINARYEN_CORES1; optimizer does not invoke Cargo.",
+      "Capture system/tool/environment as Root ordinary config data; this review does not create executable/template/config/policy."
+    ]
+  },
+  "workspace": {
+    "currentRoot": {
+      "path": "E:/mir2-player-journey/mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    "rootManifestObservation": "External packages/production added to server root workspace. runtime/platform-web/client-bevy/client-core each declare independent [workspace]; original builders never run root Cargo workspace build. Root server member addition alone is not a requested renderer/Core target.",
+    "runtimeLocalPathClosure": [
+      "runtime",
+      "client-bevy",
+      "client-core",
+      "ui-core",
+      "packages/game-data",
+      "packages/protocol"
+    ],
+    "smallLocalPathClosure": [
+      "platform-web",
+      "client-core",
+      "client-wire(optional NPC; also dev tests, not product default)"
+    ],
+    "manifestObservation": "Read actual path manifests: explicit versions/path dependencies, no workspace=true inherited dependency/version/profile fields for these products. No simulation/gateway/production dependency from those renderer/small manifests. game-data/protocol/ui-core root membership does not cause all server members to compile as path dependencies.",
+    "protection": [
+      "Freeze current root Cargo.toml/Cargo.lock and external user files as protected inputs rather than overwrite them with an old snapshot.",
+      "Freeze complete current actual enabled production closure and compile-time data, original builder/helper/metadata reader files, lock/toolchain/config, tools/registry source; current source acceptance must cover the same tree that builder actually discovers.",
+      "--locked refuses needed lock resolution/update but does not freeze sources, disable network by itself, prevent build.rs outputs, or make an obsolete declaration current.",
+      "If a current lock would need updating, original --locked invocation must fail and be retained; do not resolve/mutate/replace it to old semantics.",
+      "No private Cargo settings/credential files read by this review. Reuse only already-authorized pinned installed homes/toolchain; repository .cargo/config contains only RUST_TEST_THREADS=1."
+    ]
+  },
+  "beforeRunFilesystemConditions": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/.bevy-runtime-build.lock",
+      "condition": "lstat must return ENOENT immediately before launch. If present at all (ordinary/link/malformed), DO NOT start original builder, do not open owner/takeover files and do not query any PID. No automatic removal or stale takeover.",
+      "reason": "acquireBuildLock805 then inspect/read owner/checkProcessAlive→process.kill(pid,0). No original disable-takeover/no-PID-check flag."
+    },
+    {
+      "path": "all new target/receipt/temp/Next/Thin ordinary output roots",
+      "condition": "Absent or explicit new empty Root-owned directories, ordinary ancestors; do not reuse live Native or old08 paths. Policy receiptRoot must preexist ordinary."
+    },
+    {
+      "path": "original script/product manifests/locks/toolchain and declared tools/registry source",
+      "condition": "Regular files/ordinary ancestors plus pinned bytes; installed Rust1.95.0/wasm target evidence already available, no installer fallback."
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime + public/bevy-runtime-releases + lib/generated/bevy_runtime_version.json",
+      "condition": "Existing source25 publication and immutable directories regular/ordinary, original known exact file identities retained. Existing valid old immutable version must remain; file existence/stat alone is not full hash/schema/ABI proof."
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/client-core + lib/generated/client_core_runtime.json",
+      "condition": "Existing versions ordinary and exact known bytes; new version collision must be absent or byte-identical. Immutable old leaves not rewritten."
+    },
+    {
+      "path": "old Next08/Thin08 trees",
+      "condition": "Read-only preserved; choose new outputs only. Original full Rust builders do not touch these trees."
+    }
+  ],
+  "statCaveat": "fs.stat follows links and cannot establish ordinary ancestry; use no-follow fs.lstat data inspection for reparse/link exclusion. Absence check does not eliminate a lock-creation race: exclusive coordinated build launch is necessary. If another builder can create the lock between check and mkdir, original code can inspect its PID; there is no absolute no-PID-query route under uncoordinated concurrency. This review did not stat or read any current lock.",
+  "publication": {
+    "noInPlaceOldHardlinkWrite": true,
+    "renderer": [
+      "bindgen/opt modify only current exclusive .bevy-runtime-staging-<nonce>/bevy-runtime tree, not old flat files",
+      "immutable version hardlinks staged/current valid source files; all source and saved entries/hashes verified",
+      "old valid flat version seeded before swap; original validates old flat and warns/skips seed if invalid, so historical immutable closure must be preserved independently",
+      "old flat directory rename→this transaction backup; new staged flat directory rename→formal path; new manifest copied to new temp then rename, never old inode write",
+      "successful manifest commit removes old-flat backup (old data) and this transaction journal; old immutable versions remain and old08 copied package remains",
+      "failure before manifest commit rolls back flat backup; incomplete rollback retains backup; already-created immutable new version may remain, not public pointer success"
+    ],
+    "small": [
+      "new mkdtemp staging for each mode; local WASM optimizer staged rename; bytes captured then owned staging removed",
+      "existing immutable version leaf is only read/compared; any differing/link/nonfile collision fails; absent leaf written wx",
+      "generated new manifest temp then rename replaces pointer; no old immutable file overwrite; no old version pruning"
+    ],
+    "limits": "Publication atomicity is pointer/file replacement, not one global atomic transaction across renderer and three small bundles. Next must run only after all genuine full gates and publication identities verified. No hand-assembled fresh manifest, helper import/eval, or static candidate admission proposed."
+  },
+  "cleanup": [
+    {
+      "kind": "new owned data",
+      "paths": [
+        "current nonce stagingParentDir",
+        "current nonce generated manifest temporary",
+        "own token matched lock",
+        "current optimizer exclusive temporary output",
+        "each Core mkdtemp staging"
+      ],
+      "normalBehavior": "remove only owned paths after final ordinary-ancestry/token checks (Core/optimizer) or current layout; original files unchanged."
+    },
+    {
+      "kind": "old data removed by original normal publication",
+      "paths": [
+        "renamed old flat bevy-runtime backup in this transaction after successful new manifest commit"
+      ],
+      "normalBehavior": "This is intentional old-flat cleanup. Old immutable historical version dirs and old08 output dirs are not removed. Requires genuine known old immutable closure; not all cleanup is new data."
+    },
+    {
+      "kind": "old stale transaction data, forbidden in this proposed route",
+      "paths": [
+        "another lock owner/takeover",
+        "stale transaction staging/backup/temp files"
+      ],
+      "normalBehavior": "Existing-lock path can inspect PID/recover old backup/delete old staging. Abort preflight instead; cannot authorize blanket cleanup or query forbiddenPIDs."
+    },
+    {
+      "kind": "not cleaned",
+      "paths": [
+        "old/current Cargo target caches",
+        "old08 Next/Thin packages",
+        "old immutable renderer/Core versions",
+        "outsideQA Source33/45 raw/bindgen/optimized candidates"
+      ],
+      "normalBehavior": "Keep intact. No cargo clean, runner copying, manifest fabrication or helper patch."
+    }
+  ],
+  "blockingConditions": [
+    "Await actual current Native owned lifecycle completion; no parallel Cargo/CLI.",
+    "Await explicit user permission for original static WebAssembly.validate/Module API. Current answer not observed; no API performed.",
+    "If original fixed lock exists, cannot safely run original builder without entering old-owner/PID recovery path; there is no permitted relocation/output override or no-takeover switch.",
+    "If exclusive startup cannot be guaranteed, absence precheck alone cannot guarantee no prohibited PID inspection.",
+    "If current source/registry/tool/old publication identity is not genuinely frozen or immutable closure unavailable, route not accepted.",
+    "Original normal publication intentionally replaces fixed public flat/generated pointers and deletes transaction old-flat backup; if user scope forbids these writes, no original fresh-output-only release entrypoint exists."
+  ],
+  "sourcePins": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/build-bevy-runtime.mjs",
+      "bytes": 51952,
+      "sha256": "b4039cdbf075857b4cb4a649bb114d4af20abeb513bcb94d8ee6ba62994daf22",
+      "relativePath": "apps/web/scripts/build-bevy-runtime.mjs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/build-client-core.mjs",
+      "bytes": 9980,
+      "sha256": "638cb158792fa09329965ff1deadc9cd1f42f709bc2dbd1535865c27ba1622d1",
+      "relativePath": "apps/web/scripts/build-client-core.mjs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/renderer-wasm-opt.mjs",
+      "bytes": 14946,
+      "sha256": "b26db9e19ebccb8358afbd7f2048b5970689bc5c4c4f31744d65c1c052a3e7bb",
+      "relativePath": "apps/web/scripts/lib/renderer-wasm-opt.mjs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/immutable-bevy-runtime-bundle.mjs",
+      "bytes": 7591,
+      "sha256": "35bd55776262085f008b32d0adcb73f3dd17f89d070cf7a633e0d4f47b527f63",
+      "relativePath": "apps/web/scripts/lib/immutable-bevy-runtime-bundle.mjs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+      "relativePath": "Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/Cargo.lock",
+      "bytes": 240650,
+      "sha256": "54f4c64476586de50687a24c145581c12b86dd0d5a545fd627ef7b56e03ddbe2",
+      "relativePath": "Cargo.lock"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+      "relativePath": ".cargo/config.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/Cargo.toml",
+      "bytes": 1447,
+      "sha256": "a4ca9a1ae0890ede3214ee5196dad415414f815dc47d0c6abcef2a3b25436c26",
+      "relativePath": "apps/game-client/runtime/Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/Cargo.lock",
+      "bytes": 125951,
+      "sha256": "e92a1a1f64aff9031e840a03bd1a81ad677d2079c9e60fbe92b00ae17d2e69dd",
+      "relativePath": "apps/game-client/runtime/Cargo.lock"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/Cargo.toml",
+      "bytes": 710,
+      "sha256": "ef797825e86c499ece3528c8bcea25b3cb2ec564f4c4b2633bdf757b5ab49b7b",
+      "relativePath": "apps/game-client/platform-web/Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/Cargo.lock",
+      "bytes": 5041,
+      "sha256": "c8e1fda2fa320f180a1d5252962034f61266b2375f052198e717e40ab6e85155",
+      "relativePath": "apps/game-client/platform-web/Cargo.lock"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+      "bytes": 1485,
+      "sha256": "b7ac37faa72c3355fab43d12100386deade12dab932d31221ee8f603cbe83670",
+      "relativePath": "apps/game-client/client-bevy/Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/Cargo.toml",
+      "bytes": 390,
+      "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a",
+      "relativePath": "apps/game-client/client-core/Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/ui-core/Cargo.toml",
+      "bytes": 421,
+      "sha256": "781a69888a9a50d5d2b1a8a490871c53076cb1269fcf57265f47992574a08a30",
+      "relativePath": "apps/game-client/ui-core/Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/packages/game-data/Cargo.toml",
+      "bytes": 327,
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091",
+      "relativePath": "packages/game-data/Cargo.toml"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/packages/protocol/Cargo.toml",
+      "bytes": 378,
+      "sha256": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3",
+      "relativePath": "packages/protocol/Cargo.toml"
+    }
+  ],
+  "sourceAnchors": [
+    "CargoGuard.cs68-105 fresh policy+nonce;124-146 probe/freshness/PolicyB;148-158 preserve child exits",
+    "build-bevy-runtime.mjs31-71 fixed layout/env;86-109 lock before both branches;399-448 Cargo version through CARGO_BIN",
+    "build-bevy-runtime.mjs187-201 --locked cwd/runtime;360-396 target isolation/env;1316-1355 serial retries",
+    "build-bevy-runtime.mjs573-663 old/new immutable and atomic manifest/flat swaps;705-754 stale cleanup;782-859 existing lock path;993-1002 process.kill(pid,0)",
+    "build-client-core.mjs15-18 script-relative fixed tree;48-51 fixed cargo cwd;72-103 three modes/owned cleanup;115-129 immutable leaf wx;137-174 three-mode and manifest-last",
+    "immutable-bevy-runtime-bundle.mjs112-172 hardlink and source rename-only invariant"
+  ],
+  "qualification": "Conditional feasibility from actual immutable source only. No actual builder call, user permission, current C sample, source gate, publication, ABI/init/Ready, player acceptance or new receipt is supplied."
+}

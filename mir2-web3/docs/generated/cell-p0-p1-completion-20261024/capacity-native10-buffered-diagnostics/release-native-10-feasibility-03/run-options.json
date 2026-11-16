@@ -1,0 +1,15 @@
+{
+  "realm": "isolated",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "profile": "probe",
+  "activityMode": "native",
+  "stages": "10",
+  "stageSeconds": 30,
+  "soakSeconds": 360,
+  "combatActors": 1,
+  "resumeSamples": 0,
+  "saveSamples": 0,
+  "wallSeconds": 1800,
+  "scenarioFile": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-03/scenario.json",
+  "scope": "Frozen buffered-spectator Release187775 / source827d4c8 and original native driver plus narrowly authorized probe cap10 boundary; unique independent ten ordinary fresh account/character natural-supply feasibility run. No grants, teleports, Butcher or server content changes. Original18/12 and six60s windows unchanged. Not formal capacity acceptance."
+}

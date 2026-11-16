@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 6,
+  "nextCharacterIndex": 2,
+  "gameShopGlobalPurchases": {},
+  "sharedGuilds": {},
+  "sharedConquests": {},
+  "sharedHeroes": {},
+  "heroIdHighWatermark": 0,
+  "accounts": {
+    "CrossUnknown": {
+      "password": "$argon2id$v=19$m=19456,t=2,p=1$M4ZHip2p6J9aYuXnTuwQLg$6AiIdBEzuPQGoqsRbWdA6TqR9hVgcn9oRecMLzVJIes",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "gm_level": 0,
+      "character_last_access_binary_datetimes": {},
+      "characters": [
+        {
+          "index": 1,
+          "name": "CrossUnknown",
+          "level": 14,
+          "class": "Taoist",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "1": {
+          "guild_experience_journal": {
+            "nextSequence": 0,
+            "appliedKillReceipts": {
+              "[\"test-shared-zone\",false,\"CrossUnknown:1:monster-kill-award:401001:1791130052997:Skeleton:20\"]": "ff862efb4787538fa103cf3203d51ed0654f49912895a1bfaf0ed7be94be8bbb"
+            },
+            "killOutcomes": {
+              "[\"test-shared-zone\",false,\"CrossUnknown:1:monster-kill-award:401001:1791130052997:Skeleton:20\"]": {
+                "outcome": "legacyNoCapture"
+              }
+            }
+          },
+          "revision": 1,
+          "character": {
+            "index": 1,
+            "name": "CrossUnknown",
+            "level": 14,
+            "class": "Taoist",
+            "gender": "Male"
+          },
+          "map_file_name": "D002",
+          "map_title": "OmaCave_2F",
+          "position": {
+            "x": 34,
+            "y": 323
+          },
+          "direction": "Down",
+          "bind_point": {
+            "map_file_name": "0",
+            "position": {
+              "x": 328,
+              "y": 264
+            }
+          },
+          "hp": 16,
+          "max_hp": 81,
+          "mp": 61,
+          "max_mp": 66,
+          "experience": 20,
+          "max_experience": 10000,
+          "gold": 0,
+          "credit": 0,
+          "city_currencies": {},
+          "pk_points": 0,
+          "chat_banned": false,
+          "chat_ban_until_ms": null,
+          "inventory_capacity": 46,
+          "inventory_items_json": [
+            "{\"key\":\"crystal-item-710\",\"name\":\"GreenPoison\",\"icon\":259,\"slot\":1,\"unique_id\":71001,\"container\":\"bag1\",\"quantity\":2,\"description\":\"prepared lawful source poison carrier\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":\"amulet\",\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"socketed\":[],\"user_item_metadata\":{\"item_index\":710,\"awake_type\":0,\"awake_values\":[],\"refined_value\":0,\"refine_added\":0,\"refine_success_chance\":0,\"wedding_ring\":-1,\"expire_info\":null,\"rental_information\":null,\"sealed_info\":null,\"slots\":[],\"is_shop_item\":false,\"gm_made\":false,\"live_socketed_at_capture\":false,\"socket_layout_hydrated\":false,\"captured_socket_positions\":null,\"captured_socket_position\":null},\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"rental_owner_name\":\"\",\"rental_expiry_binary_datetime\":0,\"rental_locked\":false,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "belt_items_json": [],
+          "hero_inventory_items_json": [],
+          "hero_equipment_items_json": [],
+          "hero_inventory_capacity": 10,
+          "hero_inventory_legacy_40": false,
+          "hero_vitals": null,
+          "hero_registry_attachment": null,
+          "storage_items_json": [],
+          "equipment_items_json": [
+            "{\"key\":\"crystal-item-221\",\"slot\":\"weapon\",\"quantity\":1,\"name\":\"WoodenSword\",\"icon\":30,\"shape\":0,\"description\":\"Crystal start item: WoodenSword.\",\"durability_current\":4000,\"durability_max\":4000,\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"socketed\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"awake_type\":0,\"awake_values\":[],\"user_item_metadata\":null,\"user_item_unique_id\":null,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"rental_owner_name\":\"\",\"rental_expiry_binary_datetime\":0,\"rental_locked\":false,\"attack\":4,\"defence\":0}",
+            "{\"key\":\"crystal-item-317\",\"slot\":\"armour\",\"quantity\":1,\"name\":\"BaseDress(M)\",\"icon\":60,\"shape\":1,\"description\":\"Crystal start item: BaseDress(M).\",\"durability_current\":5000,\"durability_max\":5000,\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"socketed\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"awake_type\":0,\"awake_values\":[],\"user_item_metadata\":null,\"user_item_unique_id\":null,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"rental_owner_name\":\"\",\"rental_expiry_binary_datetime\":0,\"rental_locked\":false,\"attack\":0,\"defence\":2}"
+          ],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [],
+          "skill_states_json": [
+            "{\"_runtimeCooldownClock\":{\"remainingMs\":0,\"savedAtUnixMs\":0,\"schema\":1},\"cast_time_ms\":4000,\"cooldown_ends_at\":6,\"cooldown_ticks\":2,\"delay_ms\":1800,\"description\":\"prepared learned skill\",\"experience\":0,\"hotkey\":0,\"key\":\"poisoning\",\"level\":3,\"name\":\"Poisoning\"}"
+          ],
+          "buff_states_json": [],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "item_rental_records_json": [],
+          "has_rented_item": false,
+          "stage5_systems_json": "{\"group\":{\"allowGroup\":true,\"members\":[],\"lootMode\":\"free\"},\"guild\":{\"name\":\"\",\"members\":[],\"rank\":\"\",\"permissions\":[],\"chatLog\":[],\"knownGuilds\":[],\"activeWars\":[],\"activeWarTicksRemaining\":{},\"alliedGuilds\":[],\"allyCount\":0,\"allianceBroadcasts\":[],\"warBroadcasts\":[],\"notice\":[],\"storageGold\":0,\"storageItems\":{},\"storageItemStates\":{},\"storageItemUsers\":{}},\"social\":{\"friends\":[],\"blocked\":[],\"memos\":{},\"friendIdentities\":{}},\"relationship\":{\"partnerIdentity\":null,\"authorityRevision\":0,\"allowLoverRecall\":false,\"marriedAtMs\":0,\"cooldownUntilMs\":0,\"allowMarriage\":false,\"partnerName\":\"\",\"marriedDateBinaryDatetime\":0,\"mapName\":\"\",\"marriedDays\":0,\"pendingRequestFrom\":null,\"pendingDivorceFrom\":null},\"mentor\":{\"ledger\":{\"relationshipEpoch\":0,\"bankEarned\":0,\"bankSettled\":0,\"localEventSequence\":0,\"bankEvents\":[],\"levelingCredit\":0,\"levelingApplied\":0,\"balanceCredit\":0,\"balanceApplied\":0},\"partnerIdentity\":null,\"isMentor\":false,\"establishedAtMs\":0,\"cooldownUntilMs\":0,\"authorityRevision\":0,\"allowMentor\":false,\"name\":\"\",\"level\":0,\"online\":false,\"menteeExp\":0,\"pendingRequestFrom\":null,\"pendingRequestLevel\":0},\"mail\":[],\"gameShopIndividualPurchases\":{},\"economyProjectionEventIds\":[],\"trade\":null,\"auction\":[],\"refine\":{\"ovenItemStateJson\":null,\"remainingMs\":0,\"clockEpoch\":null,\"collectDeadlineMs\":null,\"itemStates\":{},\"slots\":{},\"currentItem\":null,\"refining\":false,\"ready\":false,\"pendingUniqueId\":0,\"pendingChance\":0,\"pendingStat\":0},\"conquest\":{\"castleOwner\":\"\",\"activeWars\":[],\"eventLog\":[],\"taxRatePercent\":0,\"gold\":0,\"guards\":[],\"walls\":[],\"gates\":[],\"openGates\":[]},\"guildTerritory\":{\"owned\":false,\"mapFileName\":\"GA0\",\"owner\":\"\",\"leader\":\"\",\"leader2\":\"\",\"price\":0,\"rentalDaysLeft\":0,\"begin\":0,\"recallLog\":[]},\"hero\":null,\"heroLearnedMagics\":[],\"profession\":{\"miningLevel\":0,\"ore\":0,\"craftedItems\":[]},\"appearance\":{\"hair\":0},\"nameLists\":[],\"intelligentCreatures\":[],\"summonedIntelligentCreatureType\":99,\"intelligentCreatureStateVersion\":1,\"intelligentCreaturePearls\":0,\"intelligentCreatureOperations\":0,\"intelligentCreatureOperationReceipts\":[],\"itemRental\":{\"partnerName\":null,\"fee\":0,\"days\":0,\"hasDepositedItem\":false,\"depositedItemName\":null,\"goldLocked\":false,\"itemLocked\":false,\"recordCount\":0,\"rentedItems\":[]},\"attackMode\":0,\"petMode\":0,\"pkDecayElapsedTicks\":0}"
+        }
+      }
+    },
+    "demo": {
+      "password": "demo",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "gm_level": 0,
+      "character_last_access_binary_datetimes": {},
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "class": "Warrior",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "0": {
+          "revision": 0,
+          "character": {
+            "index": 0,
+            "name": "Scout",
+            "level": 7,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "",
+          "map_title": "",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "Down",
+          "hp": 60,
+          "max_hp": 60,
+          "mp": 35,
+          "max_mp": 35,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1280,
+          "credit": 0,
+          "city_currencies": {},
+          "pk_points": 0,
+          "chat_banned": false,
+          "chat_ban_until_ms": null,
+          "inventory_capacity": 46,
+          "inventory_items_json": [],
+          "belt_items_json": [],
+          "hero_inventory_items_json": [],
+          "hero_equipment_items_json": [],
+          "hero_inventory_capacity": null,
+          "hero_inventory_legacy_40": false,
+          "hero_vitals": null,
+          "hero_registry_attachment": null,
+          "storage_items_json": [],
+          "equipment_items_json": [],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [],
+          "skill_states_json": [],
+          "buff_states_json": [],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "item_rental_records_json": [],
+          "has_rented_item": false,
+          "stage5_systems_json": null
+        }
+      }
+    }
+  }
+}

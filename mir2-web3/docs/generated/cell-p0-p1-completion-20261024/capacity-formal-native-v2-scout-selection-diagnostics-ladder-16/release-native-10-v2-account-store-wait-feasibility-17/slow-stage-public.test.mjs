@@ -1,0 +1,285 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import { PassThrough, Writable } from 'node:stream';
+import { createSyntheticSlowStageCapture, createSlowStagePublicCapture, ALLOWED_STAGES, LEGACY_STAGES,
+  CONTEXT_STAGES, ALLOWED_SCOPED_STAGES, ALLOWED_QUEUED_PHASES, ALLOWED_INPUT_CLASSES,
+  MAX_LINE_BYTES, MAX_PUBLIC_BYTES, MAX_WRITE_BUFFER_BYTES } from './slow-stage-public.mjs';
+
+const clock = 1792873000000, stage = 'session_action.execute';
+const wire = (duration = '50', label = stage) => `[gateway-slow-stage] stage=${label} duration_ms=${duration}`;
+function fixture({ lineLimit, byteLimit, writeLimit, highWaterMark = 1024 * 1024, final, delayWrite = 0, finishWaitMs = 100 } = {}) {
+  const input = new PassThrough(), chunks = [], stops = [];
+  // The real launcher independently pipes all original stderr to its private log.
+  input.on('data', () => {});
+  const sink = new Writable({ highWaterMark,
+    write(chunk, encoding, done) { chunks.push(Buffer.from(chunk)); if (delayWrite) setTimeout(done, delayWrite); else done(); },
+    final: final ?? (done => done()) });
+  const capture = createSyntheticSlowStageCapture({ input, sink, requestStop: reason => stops.push(reason),
+    ...(lineLimit ? { lineLimit } : {}), ...(byteLimit ? { byteLimit } : {}), ...(writeLimit ? { writeLimit } : {}), finishWaitMs, now: () => clock });
+  return { input, sink, stops, capture, text: () => Buffer.concat(chunks).toString('utf8'),
+    rows: () => Buffer.concat(chunks).toString('utf8').trim().split('\n').filter(Boolean).map(JSON.parse) };
+}
+
+test('frozen public labels equal every current static Rust GatewaySlowStage label', async () => {
+  const project = 'C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3';
+  const labels = new Set();
+  for (const file of ['apps/gateway/src/web.rs', 'apps/gateway/src/routing.rs']) {
+    const source = await fs.readFile(project + '/' + file, 'utf8');
+    for (const match of source.matchAll(/GatewaySlowStage::(?:start|since|for_socket)\(\s*"([^"]+)"/g)) labels.add(match[1]);
+    if (file.endsWith('web.rs')) {
+      for (const match of source.matchAll(/Some\("((?:socket_turn|runtime_tick)\.[a-z_]+)"\)/g)) labels.add(match[1]);
+    }
+  }
+  assert.equal(LEGACY_STAGES.length, 27); assert.equal(CONTEXT_STAGES.length, 13);
+  assert.equal(ALLOWED_STAGES.length, 40);
+  assert.deepEqual([...ALLOWED_STAGES].sort(), [...labels].sort());
+});
+
+test('split chunks and CRLF emit only the three declared metadata fields at receive time', async () => {
+  const f = fixture(), line = wire();
+  f.input.write(Buffer.from(line.slice(0, 19))); assert.equal(f.text(), '');
+  f.input.write(Buffer.from(line.slice(19) + '\r')); assert.equal(f.text(), '');
+  f.input.end(Buffer.from('\n' + wire('0') + '\n'));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, true); assert.equal(result.writerFinished, true); assert.equal(f.stops.length, 0);
+  assert.deepEqual(f.rows(), [{ observedAtMs: clock, stage, durationMs: 50 }, { observedAtMs: clock, stage, durationMs: 0 }]);
+  assert.equal(result.bytesQueued, Buffer.byteLength(f.text()));
+});
+
+test('private account/token lines, non-ASCII, prefix/suffix injections and unknown labels never reach public output', async () => {
+  const f = fixture();
+  f.input.end(Buffer.from(['account=synthetic-account token=synthetic-token', wire('50', 'synthetic_account'),
+    wire() + ' token=synthetic-token', 'prefix ' + wire(), wire('50', stage + 'é'), wire() + '\u0000', wire()].join('\n') + '\n'));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, true); assert.equal(f.rows().length, 1);
+  assert.ok(!/synthetic|account|token|é|\\u0000/.test(f.text()));
+  assert.deepEqual(Object.keys(f.rows()[0]), ['observedAtMs', 'stage', 'durationMs']);
+});
+
+test('an unterminated matching EOF is not published and is explicitly incomplete', async () => {
+  const f = fixture(); f.input.end(Buffer.from(wire()));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(f.text(), ''); assert.equal(result.complete, false);
+  assert.ok(result.reasons.includes('partial-line-at-eof')); assert.equal(f.stops.length, 1);
+});
+
+test('canonical integer validation rejects leading zero and unsafe digits without publishing them', async () => {
+  for (const duration of ['050', '9007199254740992']) {
+    const f = fixture(); f.input.end(Buffer.from(wire(duration) + '\n'));
+    const result = await f.capture.finish({ gatewayExited: true });
+    assert.equal(f.text(), ''); assert.equal(result.complete, false); assert.equal(f.stops.length, 1);
+  }
+  const f = fixture(); f.input.end(Buffer.from(['+1', '-1', '1.5', '1e3'].map(value => wire(value)).join('\n') + '\n'));
+  assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true); assert.equal(f.text(), '');
+});
+
+test('overlong input is bounded at8KiB and asks for safe stop exactly once', async () => {
+  const f = fixture(); f.input.end(Buffer.alloc(MAX_LINE_BYTES + 100, 97));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, false); assert.ok(result.reasons.includes('line-byte-cap'));
+  assert.equal(result.maxBufferedLineBytes, MAX_LINE_BYTES); assert.equal(f.text(), ''); assert.equal(f.stops.length, 1);
+});
+
+test('the32MiB ceiling is fixed and lower synthetic byte limits stop without buffering a large string', async () => {
+  assert.equal(MAX_LINE_BYTES, 8192); assert.equal(MAX_PUBLIC_BYTES, 33554432); assert.equal(MAX_WRITE_BUFFER_BYTES, 1048576);
+  const one = Buffer.byteLength(JSON.stringify({ observedAtMs: clock, stage, durationMs: 50 }) + '\n');
+  const f = fixture({ byteLimit: one * 2 - 1 }); f.input.end(Buffer.from((wire() + '\n').repeat(3)));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, false); assert.ok(result.reasons.includes('public-byte-cap'));
+  assert.equal(f.rows().length, 1); assert.ok(result.bytesQueued <= result.totalLimitBytes); assert.equal(f.stops.length, 1);
+  assert.throws(() => createSyntheticSlowStageCapture({ input: new PassThrough(), sink: new PassThrough(), requestStop() {}, byteLimit: MAX_PUBLIC_BYTES + 1 }));
+  assert.throws(() => createSyntheticSlowStageCapture({ input: new PassThrough(), sink: new PassThrough(), requestStop() {}, lineLimit: MAX_LINE_BYTES + 1 }));
+  assert.throws(() => createSyntheticSlowStageCapture({ input: new PassThrough(), sink: new PassThrough(), requestStop() {}, writeLimit: MAX_WRITE_BUFFER_BYTES + 1 }));
+  assert.throws(() => createSlowStagePublicCapture({ input: new PassThrough(), outputFile: 'never-created.jsonl', requestStop() {}, lineLimit: 1 }));
+});
+
+test('the independent1MiB write-buffer ceiling stops before queue overflow with a lower synthetic limit', async () => {
+  const one = Buffer.byteLength(JSON.stringify({ observedAtMs: clock, stage, durationMs: 50 }) + '\n');
+  const f = fixture({ writeLimit: one + 1, delayWrite: 5 }); f.input.end(Buffer.from((wire() + '\n').repeat(3)));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, false); assert.ok(result.reasons.includes('write-buffer-cap'));
+  assert.equal(f.rows().length, 1); assert.ok(result.maxQueuedWriteBytes <= result.writeLimitBytes); assert.equal(f.stops.length, 1);
+});
+
+test('writer backpressure marks incomplete and flushes its one bounded queued record before finish returns', async () => {
+  const f = fixture({ highWaterMark: 1, delayWrite: 5 }); f.input.end(Buffer.from((wire() + '\n').repeat(3)));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, false); assert.ok(result.reasons.includes('write-backpressure'));
+  assert.equal(result.rowsQueued, 1); assert.equal(f.rows().length, 1); assert.equal(f.sink.writableFinished, true); assert.equal(f.stops.length, 1);
+});
+
+test('finish waits for the actual metadata writer final callback and is idempotent', async () => {
+  let finishWriter; const f = fixture({ final: done => { finishWriter = done; } });
+  f.input.end(Buffer.from(wire() + '\n'));
+  const first = f.capture.finish({ gatewayExited: true }), second = f.capture.finish({ gatewayExited: true });
+  assert.equal(first, second); let returned = false; first.then(() => { returned = true; });
+  await new Promise(resolve => setImmediate(resolve)); assert.equal(returned, false); assert.equal(typeof finishWriter, 'function');
+  finishWriter(); assert.equal((await first).complete, true);
+});
+
+test('writer final error stays incomplete and cannot disclose its private error text', async () => {
+  const f = fixture({ final: done => done(new Error('token=synthetic-final-secret')) });
+  f.input.end(Buffer.from(wire() + '\n'));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, false); assert.equal(result.writerFinished, false);
+  assert.ok(result.reasons.includes('metadata-write-error')); assert.equal(f.stops.length, 1);
+  assert.ok(!JSON.stringify(result).includes('synthetic-final-secret'));
+});
+
+test('a stalled writer finish has a bounded deadline and never claims a complete stream', async () => {
+  const f = fixture({ final() {}, finishWaitMs: 10 }); f.input.end(Buffer.from(wire() + '\n'));
+  const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, false); assert.ok(result.reasons.includes('metadata-finish-timeout'));
+  assert.equal(f.stops.length, 1); assert.equal(f.sink.destroyed, true);
+});
+
+test('empty complete stderr is a valid empty projection and says nothing about uncaptured server stages', async () => {
+  const f = fixture(); f.input.end(); const result = await f.capture.finish({ gatewayExited: true });
+  assert.equal(result.complete, true); assert.equal(result.rowsQueued, 0); assert.equal(f.text(), '');
+  assert.ok(result.scope.includes('missing rows do not prove absence of a stall'));
+});
+
+test('closed stderr or an unexited Gateway cannot be called complete', async () => {
+  const closed = fixture(); closed.input.destroy(new Error('account=synthetic-input-secret'));
+  const first = await closed.capture.finish({ gatewayExited: true });
+  assert.equal(first.complete, false); assert.equal(closed.stops.length, 1); assert.ok(!JSON.stringify(first).includes('synthetic-input-secret'));
+  const alive = fixture(); const second = await alive.capture.finish({ gatewayExited: false });
+  assert.equal(second.complete, false); assert.ok(second.reasons.includes('gateway-not-exited')); assert.equal(alive.stops.length, 1);
+});
+
+const contextWire = (label = 'runtime_tick.total', connection = '17', duration = '50') => `${wire(duration, label)} connection=${connection}`;
+const queueWire = ({ connection = '17', duration = '3356', phase = 'spectator', age = '55', input = 'attack_v2' } = {}) =>
+  `${contextWire('socket_input.queue_residence', connection, duration)} queued_phase=${phase} phase_elapsed_ms=${age} input_class=${input}`;
+
+test('all40 labels retain the exact legacy three-key fallback, including13 new labels', async () => {
+  const f = fixture(); f.input.end(Buffer.from(ALLOWED_STAGES.map(label => wire('50', label)).join('\n') + '\n'));
+  assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true);
+  assert.equal(f.rows().length, 40); assert.equal(new Set(ALLOWED_STAGES).size, 40);
+  for (const row of f.rows()) assert.deepEqual(Object.keys(row), ['observedAtMs', 'stage', 'durationMs']);
+});
+
+test('the13 original contextual and seven existing scoped labels normalize only four declared keys', async () => {
+  assert.equal(ALLOWED_SCOPED_STAGES.length, 20);
+  assert.deepEqual(ALLOWED_SCOPED_STAGES.filter(label => LEGACY_STAGES.includes(label)).sort(), ['runtime_tick.execute', 'runtime_tick.flush', 'runtime_tick.save_checkpoint', 'serial_gate.input_wait', 'serial_gate.zone_outbound_wait', 'session_action.execute', 'session_action.flush']);
+  const f = fixture(); f.input.end(Buffer.from(ALLOWED_SCOPED_STAGES.map(label => contextWire(label, '9007199254740991', '0')).join('\n') + '\n'));
+  assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true); assert.equal(f.rows().length, 20);
+  for (const row of f.rows()) { assert.deepEqual(Object.keys(row), ['observedAtMs', 'stage', 'durationMs', 'connection']); assert.equal(row.connection, Number.MAX_SAFE_INTEGER); assert.equal(row.durationMs, 0); }
+});
+
+test('producer golden queue line survives split chunks and CRLF with exactly seven normalized keys', async () => {
+  const line = queueWire();
+  for (const split of [1, 18, 59, 91, line.indexOf('queued_phase'), line.indexOf('phase_elapsed_ms'), line.length - 1]) {
+    const f = fixture(); f.input.write(Buffer.from(line.slice(0, split))); assert.equal(f.text(), '');
+    f.input.write(Buffer.from(line.slice(split) + '\r')); assert.equal(f.text(), ''); f.input.end(Buffer.from('\n'));
+    assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true);
+    assert.deepEqual(f.rows(), [{ observedAtMs: clock, stage: 'socket_input.queue_residence', durationMs: 3356, connection: 17, queuedPhase: 'spectator', phaseElapsedMs: 55, inputClass: 'attack_v2' }]);
+  }
+});
+
+test('all15 producer phases and three input classes are exact frozen static allowlists', async () => {
+  const project = 'C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3';
+  const source = await fs.readFile(project + '/apps/gateway/src/web.rs', 'utf8');
+  const phaseBody = source.slice(source.indexOf('impl SocketDiagnosticPhase {'), source.indexOf('    fn unpack(value: u64)'));
+  const producerPhases = [...phaseBody.matchAll(/Self::[A-Za-z]+ => "([a-z_]+)"/g)].map(match => match[1]);
+  assert.equal(ALLOWED_QUEUED_PHASES.length, 15); assert.deepEqual([...ALLOWED_QUEUED_PHASES].sort(), producerPhases.sort());
+  assert.deepEqual(ALLOWED_INPUT_CLASSES, ['move', 'attack_v2', 'other']);
+  const f = fixture(); f.input.end(Buffer.from(ALLOWED_QUEUED_PHASES.flatMap(phase => ALLOWED_INPUT_CLASSES.map(input => queueWire({ phase, input, age: '0' }))).join('\n') + '\n'));
+  assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true); assert.equal(f.rows().length, 45);
+  for (const row of f.rows()) { assert.equal(Object.keys(row).length, 7); assert.equal(row.phaseElapsedMs, 0); }
+});
+
+test('scoped metadata cannot be attached to the other20 old labels or a bare queue line', async () => {
+  const rejected = LEGACY_STAGES.filter(label => !ALLOWED_SCOPED_STAGES.includes(label)).map(label => contextWire(label));
+  const f = fixture(); f.input.end(Buffer.from([...rejected, contextWire('socket_input.queue_residence'), wire()].join('\n') + '\n'));
+  assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true); assert.equal(f.rows().length, 1);
+  assert.deepEqual(f.rows()[0], { observedAtMs: clock, stage, durationMs: 50 });
+});
+
+test('partial, reordered, repeated or extra context fields never publish a downgraded row', async () => {
+  const q = queueWire(), c = contextWire();
+  const rejected = [q.replace(' connection=17', ''), q.replace(' queued_phase=spectator', ''), q.replace(' phase_elapsed_ms=55', ''), q.replace(' input_class=attack_v2', ''),
+    q.replace('queued_phase=spectator phase_elapsed_ms=55', 'phase_elapsed_ms=55 queued_phase=spectator'), q + ' connection=18', c + ' connection=18',
+    q.replace('queued_phase=spectator', 'queued_phase=unknown'), q.replace('input_class=attack_v2', 'input_class=login'),
+    contextWire('runtime_tick.total') + ' queued_phase=input phase_elapsed_ms=0 input_class=move',
+    q + ' account=synthetic-account token=synthetic-token', c + ' request_id=42', q + ' actionId=42', 'prefix ' + q, q + '\u0000', q + '\t', q.replace(' connection=', '  connection=')];
+  const f = fixture(); f.input.end(Buffer.from(rejected.join('\n') + '\n'));
+  assert.equal((await f.capture.finish({ gatewayExited: true })).complete, true); assert.equal(f.text(), ''); assert.equal(f.stops.length, 0);
+});
+
+test('connection is a positive canonical JS-safe integer and never a rounded or zero identifier', async () => {
+  for (const connection of ['0', '00', '017', '9007199254740992', '999999999999999999999999999999999999']) {
+    const f = fixture(); f.input.end(Buffer.from(contextWire('runtime_tick.total', connection) + '\n' + queueWire({ connection }) + '\n'));
+    const result = await f.capture.finish({ gatewayExited: true });
+    assert.equal(f.text(), ''); assert.equal(result.complete, false); assert.equal(f.stops.length, 1);
+    assert.ok(result.reasons.some(reason => ['noncanonical-connection', 'unsafe-connection'].includes(reason)));
+  }
+  for (const connection of ['-1', '+1', '1.0', '1e3', '1;token=synthetic-secret', '１']) {
+    const f = fixture(); f.input.end(Buffer.from(contextWire('runtime_tick.total', connection) + '\n'));
+    await f.capture.finish({ gatewayExited: true }); assert.equal(f.text(), '');
+  }
+});
+
+test('queue elapsed and duration accept zero and MAX_SAFE but reject leading-zero and unsafe numbers', async () => {
+  const valid = fixture(); valid.input.end(Buffer.from(queueWire({ connection: '1', age: '9007199254740991', duration: '9007199254740991' }) + '\n'));
+  assert.equal((await valid.capture.finish({ gatewayExited: true })).complete, true);
+  assert.equal(valid.rows()[0].phaseElapsedMs, Number.MAX_SAFE_INTEGER); assert.equal(valid.rows()[0].durationMs, Number.MAX_SAFE_INTEGER);
+  for (const age of ['055', '00', '9007199254740992']) {
+    const f = fixture(); f.input.end(Buffer.from(queueWire({ age }) + '\n'));
+    const result = await f.capture.finish({ gatewayExited: true }); assert.equal(f.text(), ''); assert.equal(result.complete, false); assert.equal(f.stops.length, 1);
+    assert.ok(result.reasons.some(reason => ['noncanonical-phase-elapsed', 'unsafe-phase-elapsed'].includes(reason)));
+  }
+  for (const duration of ['050', '9007199254740992']) {
+    const f = fixture(); f.input.end(Buffer.from(queueWire({ duration }) + '\n')); assert.equal((await f.capture.finish({ gatewayExited: true })).complete, false); assert.equal(f.text(), '');
+  }
+  const f = fixture(); f.input.end(Buffer.from(['-1', '+1', '1.5', '1e3'].map(age => queueWire({ age })).join('\n') + '\n'));
+  await f.capture.finish({ gatewayExited: true }); assert.equal(f.text(), '');
+});
+
+test('context captures reject unknown labels, non-ASCII phases/classes and private payload impersonation', async () => {
+  const lines = [contextWire('synthetic_secret'), queueWire({ phase: 'spectatör' }), queueWire({ input: 'attäck_v2' }),
+    queueWire({ phase: 'account_synthetic_account' }), queueWire({ input: 'token_synthetic_secret' }),
+    queueWire().replace(' connection=17', ' connection=synthetic-account'), queueWire() + ' password=synthetic-password'];
+  const f = fixture(); f.input.end(Buffer.from(lines.join('\n') + '\n'));
+  const result = await f.capture.finish({ gatewayExited: true }); assert.equal(result.complete, true); assert.equal(f.text(), '');
+  assert.ok(!JSON.stringify(result).includes('synthetic-'));
+});
+
+test('larger seven-key context rows retain total/prewrite limits and safe stop exactly once', async () => {
+  const expected = { observedAtMs: clock, stage: 'socket_input.queue_residence', durationMs: 3356, connection: 17, queuedPhase: 'spectator', phaseElapsedMs: 55, inputClass: 'attack_v2' };
+  const one = Buffer.byteLength(JSON.stringify(expected) + '\n');
+  for (const limits of [{ byteLimit: one * 2 - 1 }, { writeLimit: one + 1, delayWrite: 5 }, { highWaterMark: 1, delayWrite: 5 }]) {
+    const f = fixture(limits); f.input.end(Buffer.from((queueWire() + '\n').repeat(3)));
+    const result = await f.capture.finish({ gatewayExited: true }); assert.equal(result.complete, false); assert.equal(f.rows().length, 1); assert.equal(f.stops.length, 1);
+    assert.ok(result.bytesQueued <= result.totalLimitBytes && result.maxQueuedWriteBytes <= result.writeLimitBytes);
+  }
+});
+
+test('a truncated context line is not published and production cannot replace immutable allowlists', async () => {
+  for (const line of [contextWire(), queueWire(), queueWire().slice(0, -4)]) {
+    const f = fixture(); f.input.end(Buffer.from(line));
+    const result = await f.capture.finish({ gatewayExited: true }); assert.equal(result.complete, false); assert.equal(f.text(), ''); assert.equal(f.stops.length, 1);
+  }
+  assert.throws(() => createSlowStagePublicCapture({ input: new PassThrough(), outputFile: 'never-created-context.jsonl', requestStop() {}, allowedStages: ['synthetic'] }));
+  assert.ok(Object.isFrozen(ALLOWED_STAGES) && Object.isFrozen(ALLOWED_SCOPED_STAGES) && Object.isFrozen(ALLOWED_QUEUED_PHASES) && Object.isFrozen(ALLOWED_INPUT_CLASSES));
+});
+
+test('diagnostic16 only approved existing label session_action.execute gains scoped connection', async () => {
+ const f=fixture();f.input.end(Buffer.from(contextWire('session_action.execute','6','50')+'\n'));const result=await f.capture.finish({gatewayExited:true});assert.equal(result.complete,true);assert.deepEqual(f.rows(),[{observedAtMs:clock,stage:'session_action.execute',durationMs:50,connection:6}]);
+});
+
+test('diagnostic16 only approved existing label session_action.flush gains scoped connection', async () => {
+ const f=fixture();f.input.end(Buffer.from(contextWire('session_action.flush','6','50')+'\n'));const result=await f.capture.finish({gatewayExited:true});assert.equal(result.complete,true);assert.deepEqual(f.rows(),[{observedAtMs:clock,stage:'session_action.flush',durationMs:50,connection:6}]);
+});
+
+test('diagnostic16 only approved existing label runtime_tick.execute gains scoped connection', async () => {
+ const f=fixture();f.input.end(Buffer.from(contextWire('runtime_tick.execute','6','50')+'\n'));const result=await f.capture.finish({gatewayExited:true});assert.equal(result.complete,true);assert.deepEqual(f.rows(),[{observedAtMs:clock,stage:'runtime_tick.execute',durationMs:50,connection:6}]);
+});
+
+test('diagnostic16 only approved existing label runtime_tick.save_checkpoint gains scoped connection', async () => {
+ const f=fixture();f.input.end(Buffer.from(contextWire('runtime_tick.save_checkpoint','6','50')+'\n'));const result=await f.capture.finish({gatewayExited:true});assert.equal(result.complete,true);assert.deepEqual(f.rows(),[{observedAtMs:clock,stage:'runtime_tick.save_checkpoint',durationMs:50,connection:6}]);
+});
+
+test('diagnostic16 only approved existing label runtime_tick.flush gains scoped connection', async () => {
+ const f=fixture();f.input.end(Buffer.from(contextWire('runtime_tick.flush','6','50')+'\n'));const result=await f.capture.finish({gatewayExited:true});assert.equal(result.complete,true);assert.deepEqual(f.rows(),[{observedAtMs:clock,stage:'runtime_tick.flush',durationMs:50,connection:6}]);
+});

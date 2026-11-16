@@ -1,0 +1,10 @@
+{
+  "startedUtc": "2026-10-04T15:04:54.1204937Z",
+  "completedUtc": "2026-10-04T15:15:44.9581229Z",
+  "cargoExitCode": 101,
+  "testSource": "frozen updater 4c60 with test-only exact signed download and deletion set adaptation",
+  "gameSource": "321316b791120a6fe549e4006623e63333a5543f",
+  "gameLaunched": false,
+  "protectedInstallationTouched": false,
+  "originalFailedAttemptPreserved": true
+}

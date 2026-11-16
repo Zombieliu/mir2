@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v16",
+  "mode": "historical-prepared-index-v1",
+  "actualV15HistoricalPrefixContinuation": true,
+  "sourceW15FundingFailureRetained": true,
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-bank-plan-pending-v1.json",
+    "bytes": 18226,
+    "sha256": "d05a78dc7930a4dfc49a77e0545f64de8c3ba74d1ccd49d67fdd69b1f6813be4"
+  },
+  "sourceBankCopyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\source-bank-copy-receipt-v1.json",
+    "bytes": 14234,
+    "sha256": "8e3dafa26dade59754f46ce5943c73a4e1d11f0d2e255eee7dc1199afcee1fb4"
+  },
+  "sourceOriginalFailedVerdictRetained": true,
+  "sourcePreparedEligibilityInherited": false,
+  "sourceFirst4InventoryReuse": null,
+  "sourceFirst4InventoryReuseEvidence": {
+    "performedThisRun": false,
+    "historicalOnly": true,
+    "passed": null,
+    "scope": "Historical first4 were not logged in this run. No fresh reuse assertion is inherited."
+  },
+  "first4FreshReusePerformedThisRun": false,
+  "historicalPreparedCount": 42,
+  "historicalNotFresh": true,
+  "newPreparedCount": 16,
+  "expectedThisRun": 58,
+  "combinedSavedCount": 58,
+  "seederInvoked": false,
+  "loginNotBeforeOverridden": false,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "maxPrepared": 100,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\frozen-source-v1.json",
+    "bytes": 134360,
+    "sha256": "4252ff13f253c9f5e98f41cc11f5eee560ef5652d9ee65ada7f62bf9375ce31c"
+  },
+  "driverSourceCommit": "05dad48ee5f6e8592598691db7b07f26a155febc",
+  "executionSourceCommit": "05dad48ee5f6e8592598691db7b07f26a155febc",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+    "bytes": 92721,
+    "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+  },
+  "rawOriginalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation.jsonl",
+    "bytes": 9699582,
+    "sha256": "811f1b8af81f6c150c6b4bc90b68e535e814add76eb0b258a896d5c25e28a268"
+  },
+  "rawOriginalVerdict": {
+    "attackResults": "v2",
+    "ok": false,
+    "error": "No walk path on 0 from 330,603 to 288,608",
+    "preparedCount": 16,
+    "testExecution": false,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "preparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\prepared-index-v1.json",
+    "bytes": 6439,
+    "sha256": "e515646b164eefea54ef546ced556b5a71f4c688f551d9f3e3c2cf470f110601"
+  },
+  "preparedIndexValid": false,
+  "currentPartialIndexValid": true,
+  "finalPoolIdentityValid": true,
+  "combinedPreparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\combined-saved-index-v1.json",
+    "bytes": 40688,
+    "sha256": "5fde0db82f2d68dbc3454d6c513bdfd30963f39f5348f2e68417468dda670f01"
+  },
+  "combinedSavedIndexValid": false,
+  "historicalEvidence": [
+    {
+      "report": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "preparedIndex": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\prepared-index-v1.json",
+        "bytes": 11953,
+        "sha256": "922fd2339adea01799c35e0ef99fa511266666ad1168eb332aeab06392cb3bab"
+      },
+      "cleanup": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\cleanup-v1.json",
+        "bytes": 1037,
+        "sha256": "19ad8a7a3f017563c283cccfa152828cff4afb847ae5da996d480fa41eff2970"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\preparation-episode-receipt-v1.json",
+        "bytes": 6144,
+        "sha256": "6e9505f8812fc3eb53fdd69fa2bacb4b780ba7684680be0d99d9f937142d1b67"
+      }
+    }
+  ],
+  "progressCheckpoints": [],
+  "progressIsColdCheckpoint": false,
+  "productionPreparationEvidence": false,
+  "continuationProductionEvidence": false,
+  "selectedComplementComplete": false,
+  "preparationComplete": false,
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\cleanup-v1.json",
+    "bytes": 1037,
+    "sha256": "c49b2b6e87f110873065df41b3dd178525a208c7e8c88d7902ff10e5ef33479a"
+  },
+  "coldBankEligible": false,
+  "coldContinuationBankEligible": false,
+  "all100FreshPreparedThisRun": false,
+  "fullDurableReadinessVerified": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "gameplayEngineActivated": false,
+  "nativeResumeExercisePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

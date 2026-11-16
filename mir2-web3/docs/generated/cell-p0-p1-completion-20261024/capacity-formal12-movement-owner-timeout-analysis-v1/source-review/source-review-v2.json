@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:12:46.416Z",
+  "state": "READ_ONLY_LOCK_SCOPE_ADDENDUM_NO_PROVEN_ROOT_CAUSE",
+  "runId": "1792951023370-34757a8d",
+  "priorReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal12-movement-owner-wait-source-review-v1/source-review-v1.json",
+    "bytes": 9064,
+    "sha256": "b34eef666cf491189180ac5187d452b1a10c5f9012026cff6662d3318e7989e4"
+  },
+  "sourcePins": [
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 857503,
+      "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+    },
+    {
+      "path": "apps/gateway/src/shared_experience_profiles.rs",
+      "bytes": 14157,
+      "sha256": "b708dae35e005998bec260ea146b905c3d53ada676565b98429b9f12a7a1add9"
+    },
+    {
+      "path": "apps/gateway/src/shared_mentor_accounting.rs",
+      "bytes": 7981,
+      "sha256": "bb375b5e5599107a497894bb15f6073a64364494d6e26f5723cd0638f963652c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 75946,
+      "sha256": "fe7767bec9d255e9fbf6e727bc7ab9a380f29166417f3c2a50085e0083ace190"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "bytes": 422139,
+      "sha256": "d79c9be38e901fda92ff74a14133e853d7092527b58adb098ac9d4a18a8e86b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 41797,
+      "sha256": "7b6af065dd8ec529bfd4010b4f85ecf223c1ca04c76b00afb99427f8aaa6d182"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53032,
+      "sha256": "9271257ce0c800e337d3f53a3d07844bef071002854b58132a3a484757fb96a5"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 342825,
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 23763,
+      "sha256": "fa853f265b936b7a552dd9a3284dc8185456ebe57186dace7f0d1f947729d0c2"
+    }
+  ],
+  "boundedEvidence": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/formal12-movement-rejection-analysis-v1/slow-monitor-correlation-v1.json",
+      "bytes": 24478,
+      "sha256": "77b7448a2eb334ca388ff6cac1e91958e7ef86edb4e6a2f030139996409f1b19",
+      "role": "Capacity peer bounded closed-evidence selection; no raw replay by this reviewer"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/formal12-movement-rejection-analysis-v1/summary-v1.json",
+      "bytes": 21871,
+      "sha256": "428d120c06c5b88d15c62b848db149b3d9211bb2b9f0c9c90cb00a638a941cc8",
+      "role": "Capacity peer bounded closed-evidence selection; no raw replay by this reviewer"
+    }
+  ],
+  "recordedCorrelation": {
+    "providedBy": "Root/capacity; exact small evidence SHA bound above",
+    "zoneCadenceTotalMs": 6500,
+    "ownerMovementAdmissionsApproxMs": [
+      5012,
+      5012
+    ],
+    "spectatorDurationsReportedMs": [
+      781,
+      600,
+      3157,
+      3324,
+      4899
+    ],
+    "zoneWorkAndOwnerTickNoProgressApproximatelyMs": 4857,
+    "gateWaitAbove50msObserved": false,
+    "causalAttribution": false
+  },
+  "lockGraph": [
+    {
+      "path": "owner maintenance admission",
+      "sources": [
+        "routing.rs10188–10210",
+        "runtime/shared_experience_profile.rs500–539"
+      ],
+      "order": "initial Zone discovery released → writable-state check released → AccountStore held → writable-state check released → callback Zone held → callback returns/releases Zone → AccountStore released",
+      "proved": true,
+      "scope": "No persistent initial Zone guard across Store acquisition in this path. AccountStore guard covers the callback."
+    },
+    {
+      "path": "spectator snapshot",
+      "sources": [
+        "web.rs7174–7182",
+        "routing.rs18588–18765",
+        "runtime/session.rs732–734",
+        "runtime/packets.rs7142",
+        "runtime/shared_guilds.rs500–516",
+        "config_shared_guilds.rs1298–1313"
+      ],
+      "order": "inner snapshot → if SharedGuildSession enabled, writable-state check then AccountStore query/clone released → current presence snapshot → Zone projection held → explicit drop Zone18749 → return snapshot → SpectatorHub.publish",
+      "proved": true,
+      "scope": "No held Zone→AccountStore edge was established along this examined spectator path. No guild membership is needed to wait on the guild query Store mutex; enabled+identity is sufficient."
+    },
+    {
+      "path": "refresh shared experience projections",
+      "sources": [
+        "shared_experience_profiles.rs203–229"
+      ],
+      "order": "Zone capture previous profile released at220 → config authority lookup → Zone compare/recheck/write",
+      "proved": true,
+      "scope": "Explicit blocks separate Zone and authority lookup; no reverse edge in this inspected branch."
+    },
+    {
+      "path": "mentor accounting",
+      "sources": [
+        "shared_mentor_accounting.rs18–34,86–174"
+      ],
+      "order": "Store profiles/settlement returns → Zone participant projection; current actor with no partner returns at111–114 before bank settlement",
+      "proved": true,
+      "scope": "Inspected participant projection reads Store profile before Zone. Arbitrary other config callbacks/whole application are not exhaustively certified."
+    }
+  ],
+  "persistenceScopes": [
+    {
+      "id": "P1",
+      "source": "config.rs4898–4977",
+      "fact": "save_account_store_with_plan_writer holds persist mutex, clones AccountStore in4916–4922 lexical block, then writes the cloned snapshot. The live AccountStore guard is released before ordinary file/repository IO.",
+      "doesNotProve": "Ordinary save cannot be described as universally holding Store through its file write."
+    },
+    {
+      "id": "P2",
+      "source": "config.rs5146–5552",
+      "fact": "commit_account_store_transaction_authorized_post_inner acquires persist mutex5190, then live AccountStore5196; clones and executes transaction/post callbacks, validates, serializes and persists, then publishes live_store5547. The named live_store guard remains held across file-only write5497–5505 and ends when function returns.",
+      "doesNotProve": "No evidence yet identifies an actual transaction owner or write attempt during this run interval."
+    },
+    {
+      "id": "P3",
+      "source": "config.rs337–360,1636–1752",
+      "fact": "File account snapshot uses full pretty JSON, temporary file write+sync_all, then Windows MoveFileExW with REPLACE_EXISTING|WRITE_THROUGH. Retry sleeps5+10+20+40+80+160+320ms total635ms at most; synchronous syscall/serialization time is additional and not bounded by that sleep sum.",
+      "doesNotProve": "No observed disk/AV/child-process cause is asserted."
+    },
+    {
+      "id": "P4",
+      "source": "config_file_authority.rs51–82 and config.rs4704–4714",
+      "fact": "PublicationGuard.settle takes marker_lock then a named write_state mutex guard, and keeps write_state while truncating and syncing the publication marker. ensure_account_store_writable waits on that same write_state mutex. Both admission and snapshot authority queries call it before Store.lock.",
+      "doesNotProve": "A delayed settle/fsync could block both reader paths even when ordinary save released Store, but no current trace proves this was the delayed stage."
+    },
+    {
+      "id": "P5",
+      "source": "config_file_authority.rs219–250",
+      "fact": "begin_publication holds marker_lock through marker write+sync. Its if-let write_state check completes before marker IO; no named write_state guard is retained across that following sync.",
+      "doesNotProve": "Do not merge this different guard scope with settle."
+    },
+    {
+      "id": "P6",
+      "source": "config.rs4716–4743; config_file_authority.rs205–216",
+      "fact": "freeze_account_store_writes calls persist_freeze first; that function releases marker lock on return, then caller takes write_state. The inspected freeze path does not retain marker while later write_state is acquired.",
+      "doesNotProve": "No marker/write-state inverse deadlock is proven by this path."
+    }
+  ],
+  "windowsSubprocessScope": {
+    "productionFilePersistencePathsRead": [
+      "config.rs337–360,1636–1752,4785–4799,5497–5505",
+      "config_file_authority.rs production impl through owns"
+    ],
+    "powerShellOrIcaclsSpawnFound": false,
+    "commandsAtFileAuthority396And543AreTestModuleOnly": true,
+    "limitation": "Bounded read of these production paths, not a whole-process inventory. No private logs or process telemetry read."
+  },
+  "conclusion": "A common AccountStore or write-state waiter can explain concurrent spectator and owner-admission delays without a Zone↔Store cycle. The source supports this mechanism, but neither the6500ms total span nor source alone proves which lock, holder, callback or syscall caused this run. No business fix or timeout change is justified yet.",
+  "minimumDiagnosticProposal": {
+    "implementationAuthorized": false,
+    "firstNarrowWriterSet": [
+      "apps/gateway/src/routing.rs"
+    ],
+    "gatewaySpans": [
+      "owner opening deadline Zone-lock wait (before cadence.total)",
+      "tick authority discovery Zone-lock wait",
+      "experience admission wait from before config.with_shared_zone_experience_admission until first callback entry; covers writable-state+Store acquisition together",
+      "callback Zone-lock wait",
+      "owner movement execute Zone-lock/session-lock waits and queue enqueue→dequeue residence"
+    ],
+    "reason": "Existing GatewaySlowStage can distinguish the major owner wait boundaries without changing simulation persistence or scheduling. If the combined admission span is long, a second explicitly scoped Simulation writer could separate writable-state and Store waits plus actual persistence phases.",
+    "optionalSecondScopedWriterSet": [
+      "apps/simulation/src/config.rs",
+      "apps/simulation/src/config_file_authority.rs",
+      "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "apps/simulation/src/config_shared_guilds.rs"
+    ],
+    "mustNotIntroduce": "No general trace framework, account/name/path/payload logging, new durable ledger, lock release/reordering, IO suppression, wider timeouts, queue expansion or acceptance changes.",
+    "focusedRegressionRecommendations": [
+      "Deterministic held-Store/barrier fixture verifies admission and snapshot query wait then resume with exact same gameplay/state result; no long sleeps or realm.",
+      "Deterministic held-Zone fixture distinguishes owner pre-lock wait from locked ZoneWork; current timing metrics remain original.",
+      "Existing file transaction atomic publication/fail-closed tests and live-owner movement ordering/epoch retirement regressions must remain intact.",
+      "Diagnostics disabled path and static public field grammar should be verified separately; diagnostics are not new ACK or game credit."
+    ],
+    "finalWriterScopeAssigned": false,
+    "rootRequiredDiscrimination": [
+      "writable-state wait",
+      "AccountStore wait",
+      "transaction held-store duration",
+      "File persistence phases",
+      "publication marker settlement"
+    ],
+    "scopeClarification": "Gateway-only spans are an initial coarse localization option; they do not independently distinguish writable-state from Store wait. Root requested both plus persistence/settlement; capacity is preparing reusable timing API and Root must assign the implementation writer."
+  },
+  "actualTestsExecuted": false,
+  "actualRawRescan": false,
+  "privateRead": false,
+  "sourceOrSceneChanged": false,
+  "capacityAccepted": false,
+  "rootP0Accepted": false,
+  "P2ImplementationStarted": false,
+  "revision": 2,
+  "sourceAddendumPreserved": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal12-movement-owner-wait-source-review-v1/account-store-lock-scope-addendum-v1.json",
+    "bytes": 11605,
+    "sha256": "8c7a6675b5c9ae5a4ddf202c1cda9684597c1a3e0876191c7bf09d0912a96a9e"
+  },
+  "originalRequestAndOwnerResponseBoundaryReviewStillValid": true
+}

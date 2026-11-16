@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/scripts/test-map-render-routing.mjs",
+      "unchangedFromHead": true
+    },
+    {
+      "path": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "unchangedFromHead": true
+    }
+  ],
+  "failedTest": "test-map-render-routing.mjs",
+  "assertion": "browser-safe R2 fallbacks must be attempted before the canonical CDN",
+  "scope": "Old exact-source regex mismatch; worker and test unchanged from HEAD. No waiver of applicable runtime behavior."
+}

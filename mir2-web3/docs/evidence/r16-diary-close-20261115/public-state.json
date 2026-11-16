@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-11-15T02:40:01.114Z",
+  "publicAlias": "numeron.obelisk.build",
+  "id": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "readyState": "READY",
+  "target": "production",
+  "url": "numeron-r16-cm65ll2xj-obelisk-labs.vercel.app",
+  "versionHttp": 200,
+  "versionRevision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "gateway": {
+    "http": 200,
+    "ok": true,
+    "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5"
+  },
+  "newSourceDeployed": false
+}

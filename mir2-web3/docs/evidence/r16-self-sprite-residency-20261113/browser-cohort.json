@@ -1,0 +1,378 @@
+{
+  "kind": "controlled full game qualification; not WAN results",
+  "sessions": [
+    {
+      "run": "quest-after-r4",
+      "gender": "male",
+      "mode": "compatibility",
+      "passed": true,
+      "receipt": "quest-after-r4.json",
+      "rawReceiptSha256": "4b6ac797722e62c12dc3bc0550e5835d36e8e10f41e12ff96cce0b85d1f123e2",
+      "completedPng": 39,
+      "minPngTtfbMs": 1200,
+      "everySampleDecoded": true,
+      "steps": 16,
+      "coldNativeWaitMs": 26439,
+      "warmNativeWaitMs": 1368,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "run": "quest-after-r5",
+      "gender": "female",
+      "mode": "webgl2",
+      "passed": true,
+      "receipt": "quest-after-r5.json",
+      "rawReceiptSha256": "a956e20ebb81159a559231a6f22b278fdd66c433c76896452b23195e419664ed",
+      "completedPng": 38,
+      "minPngTtfbMs": 1199,
+      "everySampleDecoded": true,
+      "steps": 16,
+      "coldNativeWaitMs": 26558,
+      "warmNativeWaitMs": 1350,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    }
+  ],
+  "failed": [
+    {
+      "run": "quest-after-r1",
+      "passed": false,
+      "rawReceiptSha256": "d41d29d088df8612f01ecc1243f170e9901f53a5587ed0c6189cefe300682027",
+      "failure": {
+        "stage": "continuous-walk-with-every-PNG-over-one-second",
+        "message": "continuous physical walks reach destination",
+        "readiness": {
+          "visible": true,
+          "pending": false,
+          "hasPlayer": true,
+          "hasRegion": true,
+          "ready": true,
+          "serviceWorkerControlled": true,
+          "marks": [
+            {
+              "name": "sceneAssetsReady",
+              "atMs": 334.20000000298023,
+              "epochMs": 1794542056102,
+              "sceneCache": null
+            },
+            {
+              "name": "gameplayLocaleStart",
+              "atMs": 3911.0999999940395,
+              "epochMs": 1794542059679,
+              "sceneCache": null
+            },
+            {
+              "name": "gameplayLocaleReady",
+              "atMs": 3966.7999999970198,
+              "epochMs": 1794542059734,
+              "sceneCache": null
+            },
+            {
+              "name": "startGamePacket",
+              "atMs": 14724.39999999106,
+              "epochMs": 1794542070492,
+              "sceneCache": null
+            },
+            {
+              "name": "userInformationReady",
+              "atMs": 14731.09999999404,
+              "epochMs": 1794542070498,
+              "sceneCache": null
+            },
+            {
+              "name": "sceneBlueprintStart",
+              "atMs": 14970.20000000298,
+              "epochMs": 1794542070738,
+              "sceneCache": null
+            },
+            {
+              "name": "sceneBlueprintReady",
+              "atMs": 22959.79999999702,
+              "epochMs": 1794542078727,
+              "sceneCache": "r16-entry-static"
+            },
+            {
+              "name": "sceneSpritesReady",
+              "atMs": 22992.79999999702,
+              "epochMs": 1794542078760,
+              "sceneCache": null
+            },
+            {
+              "name": "firstPlayableFrame",
+              "atMs": 29007.29999999702,
+              "epochMs": 1794542084775,
+              "sceneCache": null
+            }
+          ],
+          "applied": {
+            "mapFileName": "0.map",
+            "cellCount": 6819,
+            "spriteCount": 957,
+            "doorCellCount": 57,
+            "closedDoorCellCount": 57,
+            "regionBounds": {
+              "minX": 244,
+              "maxX": 348,
+              "minY": 580,
+              "maxY": 681
+            },
+            "playBounds": {
+              "minX": 272,
+              "maxX": 320,
+              "minY": 602,
+              "maxY": 638
+            }
+          },
+          "first": {
+            "x": 288,
+            "y": 616,
+            "map": "0"
+          }
+        }
+      },
+      "stage": {
+        "name": "continuous-walk-with-every-PNG-over-one-second",
+        "at": 1794542085493
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "run": "quest-after-r2",
+      "passed": false,
+      "rawReceiptSha256": "769d80add67fc16d5018179b51a725422ba052d834dff031eb57b5d6df334060",
+      "failure": {
+        "stage": "continuous-walk-with-every-PNG-over-one-second",
+        "message": "repeated physical walk emitted",
+        "readiness": {
+          "visible": true,
+          "pending": false,
+          "hasPlayer": true,
+          "hasRegion": true,
+          "ready": true,
+          "serviceWorkerControlled": true,
+          "marks": [
+            {
+              "name": "sceneAssetsReady",
+              "atMs": 335.29999999701977,
+              "epochMs": 1794542159133,
+              "sceneCache": null
+            },
+            {
+              "name": "gameplayLocaleStart",
+              "atMs": 3960.2000000029802,
+              "epochMs": 1794542162758,
+              "sceneCache": null
+            },
+            {
+              "name": "gameplayLocaleReady",
+              "atMs": 4014.2999999970198,
+              "epochMs": 1794542162812,
+              "sceneCache": null
+            },
+            {
+              "name": "startGamePacket",
+              "atMs": 14794,
+              "epochMs": 1794542173592,
+              "sceneCache": null
+            },
+            {
+              "name": "userInformationReady",
+              "atMs": 14801.70000000298,
+              "epochMs": 1794542173599,
+              "sceneCache": null
+            },
+            {
+              "name": "sceneBlueprintStart",
+              "atMs": 15072.59999999404,
+              "epochMs": 1794542173870,
+              "sceneCache": null
+            },
+            {
+              "name": "sceneBlueprintReady",
+              "atMs": 23024.29999999702,
+              "epochMs": 1794542181822,
+              "sceneCache": "r16-entry-static"
+            },
+            {
+              "name": "sceneSpritesReady",
+              "atMs": 23057.70000000298,
+              "epochMs": 1794542181855,
+              "sceneCache": null
+            },
+            {
+              "name": "firstPlayableFrame",
+              "atMs": 29104.09999999404,
+              "epochMs": 1794542187902,
+              "sceneCache": null
+            }
+          ],
+          "applied": {
+            "mapFileName": "0.map",
+            "cellCount": 6819,
+            "spriteCount": 957,
+            "doorCellCount": 57,
+            "closedDoorCellCount": 57,
+            "regionBounds": {
+              "minX": 244,
+              "maxX": 348,
+              "minY": 580,
+              "maxY": 681
+            },
+            "playBounds": {
+              "minX": 272,
+              "maxX": 320,
+              "minY": 602,
+              "maxY": 638
+            }
+          },
+          "first": {
+            "x": 288,
+            "y": 616,
+            "map": "0"
+          }
+        }
+      },
+      "stage": {
+        "name": "continuous-walk-with-every-PNG-over-one-second",
+        "at": 1794542188604
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    },
+    {
+      "run": "quest-after-r3",
+      "passed": false,
+      "rawReceiptSha256": "1c97712670cf19d0023f6db8f1c596f4a6c88ccf0f6fe43274d5cd2f42813b81",
+      "failure": {
+        "stage": "continuous-walk-with-every-PNG-over-one-second",
+        "message": "self body stays decoded across standing/walking targets",
+        "readiness": {
+          "visible": true,
+          "pending": false,
+          "hasPlayer": true,
+          "hasRegion": true,
+          "ready": true,
+          "serviceWorkerControlled": true,
+          "marks": [
+            {
+              "name": "sceneAssetsReady",
+              "atMs": 335,
+              "epochMs": 1794542262037,
+              "sceneCache": null
+            },
+            {
+              "name": "gameplayLocaleStart",
+              "atMs": 3989.9000000059605,
+              "epochMs": 1794542265692,
+              "sceneCache": null
+            },
+            {
+              "name": "gameplayLocaleReady",
+              "atMs": 4047,
+              "epochMs": 1794542265749,
+              "sceneCache": null
+            },
+            {
+              "name": "startGamePacket",
+              "atMs": 14720.90000000596,
+              "epochMs": 1794542276423,
+              "sceneCache": null
+            },
+            {
+              "name": "userInformationReady",
+              "atMs": 14729,
+              "epochMs": 1794542276431,
+              "sceneCache": null
+            },
+            {
+              "name": "sceneBlueprintStart",
+              "atMs": 14960.20000000298,
+              "epochMs": 1794542276662,
+              "sceneCache": null
+            },
+            {
+              "name": "sceneBlueprintReady",
+              "atMs": 23051.70000000298,
+              "epochMs": 1794542284754,
+              "sceneCache": "r16-entry-static"
+            },
+            {
+              "name": "sceneSpritesReady",
+              "atMs": 23088.60000000894,
+              "epochMs": 1794542284791,
+              "sceneCache": null
+            },
+            {
+              "name": "firstPlayableFrame",
+              "atMs": 29115.40000000596,
+              "epochMs": 1794542290818,
+              "sceneCache": null
+            }
+          ],
+          "applied": {
+            "mapFileName": "0.map",
+            "cellCount": 6819,
+            "spriteCount": 957,
+            "doorCellCount": 57,
+            "closedDoorCellCount": 57,
+            "regionBounds": {
+              "minX": 244,
+              "maxX": 348,
+              "minY": 580,
+              "maxY": 681
+            },
+            "playBounds": {
+              "minX": 272,
+              "maxX": 320,
+              "minY": 602,
+              "maxY": 638
+            }
+          },
+          "first": {
+            "x": 288,
+            "y": 616,
+            "map": "0"
+          }
+        }
+      },
+      "stage": {
+        "name": "continuous-walk-with-every-PNG-over-one-second",
+        "at": 1794542291539
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true
+    }
+  ],
+  "knownEarlierFailures": [
+    "r1: Playwright down does not synthesize OS key repeat",
+    "r2: rapid key-up cancels movement waiting for action interval",
+    "r3: genuine transient blank when decoded URL was copied into another img; fixed by preserving and attaching the exact decoded Image element"
+  ]
+}

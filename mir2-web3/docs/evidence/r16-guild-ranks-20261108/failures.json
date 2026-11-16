@@ -1,0 +1,23 @@
+[
+  {
+    "run": "webgl-first",
+    "description": "Invalid fixture stable guild ID was rejected before authenticated selection; fixture corrected with original failed bytes retained.",
+    "unresolved": false,
+    "message": "locator.waitFor: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-overlay') to be visible\u001b[22m\n",
+    "stackSha256": "32e88fb662f47788639356ad0e9a50a6b68fd0634821c6a4e4ca8315db8973de"
+  },
+  {
+    "run": "webgl-qualified",
+    "description": "Owner unexpectedly returned to login during first officer/browser cold entry; original run lacks close/protocol trace. Subsequent instrumented/final runs passed; original cause remains open.",
+    "unresolved": true,
+    "message": "locator.inputValue: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-guild-name=\"RankQA\"]').locator('[data-rank-index=\"1\"]').locator('input:not([type=\"checkbox\"])')\u001b[22m\n",
+    "stackSha256": "a616924de161a066ed01ac00023559ad0305b5b84cdaaa6f948121c6555b8b57"
+  },
+  {
+    "run": "webgl-diagnostic",
+    "description": "Functional steps and final reentry reached; fixture dereferenced the intentionally cleared player after logout. Final fixture checks actual transform before logout.",
+    "unresolved": false,
+    "message": "Cannot read properties of null (reading 'x')",
+    "stackSha256": "7d6f16d432170f2a5ab2603b5eb4da5d0f45405a2809495d2f8e2880e66a0a73"
+  }
+]

@@ -1,0 +1,243 @@
+{
+  "schema": "r16-isolated-trade-cancel-ui/1",
+  "passed": true,
+  "scope": "Two separately evidenced ordinary UI scenarios; not a single uninterrupted full journey.",
+  "source": {
+    "pageSha256": "97f600cb65f604b9e928077d8ec6a365126aae9376b7cf8d1ded95480b9fab77",
+    "canonicalAndExternalPageEqual": true,
+    "bevyVersion": "bevy-a46905128c316656",
+    "localRuntimeSixFilesMatch": true,
+    "gatewayExeSha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+    "gatewayBuildBase": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+    "gatewayExactCurrentSourceClaimed": false
+  },
+  "isolation": {
+    "origin": "http://127.0.0.1:19472",
+    "gateway": "ws://127.0.0.1:19471/ws",
+    "freshFileStore": true,
+    "ordinaryAccountsCreated": 2,
+    "subsequentRegistrationCount": 0,
+    "publicTestUsed": false,
+    "oldWorldUsed": false,
+    "modelsStarted": false,
+    "modelCalls": 0,
+    "gmOrGrantCommands": 0,
+    "finalDeliveryOrGoldOfferTested": false
+  },
+  "deposit": {
+    "proof": "browser-r3/proof.json",
+    "name": "deposit-pending-cancel-real-server-restores-assets",
+    "passed": true,
+    "heldPacket": "DepositTradeItem",
+    "heldMs": 744,
+    "realSuccess": true,
+    "terminalUnlock": false,
+    "exactUidSlotQuantityAndGoldRestored": true,
+    "lateAckReleasedUnmodified": true,
+    "noResurrection": true,
+    "noRepeatedEconomicCommands": true
+  },
+  "retrieve": {
+    "proof": "browser-r4/proof.json",
+    "name": "retrieve-pending-cancel-real-server-restores-assets",
+    "passed": true,
+    "heldPacket": "RetrieveTradeItem",
+    "from": 0,
+    "to": 4,
+    "heldMs": 661,
+    "realSuccess": true,
+    "terminalUnlock": false,
+    "exactUidSlotQuantityAndGoldRestored": true,
+    "retrievalSlotMoveExpected": true,
+    "lateAckReleasedUnmodified": true,
+    "noResurrection": true,
+    "noRepeatedEconomicCommands": true
+  },
+  "preservedFalseRuns": [
+    {
+      "proof": "browser-r1/proof.json",
+      "cause": "External Next stale realpath module identity; fixed with a new owned distDir."
+    },
+    {
+      "proof": "browser-r2/proof.json",
+      "cause": "QA peer alignment did not respect primary facing; no trade request or item command was sent."
+    },
+    {
+      "proof": "browser-r3/proof.json",
+      "cause": "QA interpreted observation ownItems string summary as objects after successful second deposit; retrieve was not sent."
+    }
+  ],
+  "transport": {
+    "actualServerConnected": true,
+    "fabricatedPackets": 0,
+    "onlyOneMatchingLegacyAckHeldPerScenario": true,
+    "ackIdentity": "Actual type/from/to within the sole active physical UI operation; final retrieve records exact from/to.",
+    "originalAckReleasedUnmodified": true,
+    "terminalCancelFalseBeforeRelease": true,
+    "noLateReopenOrRepeatedEconomicCommands": true
+  },
+  "inventory": {
+    "starterCandleOnly": true,
+    "peerAssetsUnchanged": true,
+    "allUidQuantityAndGoldPreserved": true,
+    "retrieveExpectedPhysicalSlotMove": {
+      "from": 3,
+      "to": 4
+    },
+    "rewardOrGiftUsed": false
+  },
+  "finish": {
+    "normalPrimaryLogoutAck": true,
+    "normalPeerLogoutAck": true,
+    "browserClosed": true,
+    "ownGatewayStopped": true,
+    "ownNextStopped": true,
+    "allFourOwnedPortsReleased": true,
+    "cleanupProof": "cleanup-verified.json",
+    "originalShutdownNextStatusWasTransient": true,
+    "pageSourceUnchanged": true
+  },
+  "browserErrors": {
+    "depositRun": {
+      "http": 0,
+      "page": 0,
+      "console": 0
+    },
+    "retrieveRun": {
+      "http": 0,
+      "page": 0,
+      "console": 0
+    }
+  },
+  "privacy": {
+    "publicTextFilesScanned": 19,
+    "forbiddenValueMatches": 0,
+    "screenshotsCount": 10,
+    "credentialFieldsBlackMasked": true,
+    "screenshotReview": "QA role display names visible; account/password/auth fields fixed black masks. No QR, owner, or model UI."
+  },
+  "safeImages": [
+    "browser-r3/deposit-pending-cancel-enabled.png",
+    "browser-r3/deposit-cancelled-after-old-ack.png",
+    "browser-r4/retrieve-pending-cancel-enabled.png",
+    "browser-r4/retrieve-cancelled-after-old-ack.png"
+  ],
+  "artifacts": [
+    {
+      "path": "browser-r1/browser-closed.json",
+      "sha256": "0c99589225be4b32dca8c51eb1ec2ed93ec2cfd8149ddde8e9d9bb647531e4c6"
+    },
+    {
+      "path": "browser-r1/failure.png",
+      "sha256": "2bd66278f0fec699147bab93aa437572a6a954b26a3262461801e91d85e680b5"
+    },
+    {
+      "path": "browser-r1/proof.json",
+      "sha256": "8db4382e90dd2a9373913085f972ae8aea7ff0823c480baf41cb4ac58c375c80"
+    },
+    {
+      "path": "browser-r2/01-primary-in-town.png",
+      "sha256": "ae3699085704146de7c7e9f129df1d549517d016cc98f0cc22e1d448d9b91ba8"
+    },
+    {
+      "path": "browser-r2/browser-closed.json",
+      "sha256": "f601729c75d5b539baf389e03a2840fe8b83032c3d0a0831b7f7afdfd64e6d84"
+    },
+    {
+      "path": "browser-r2/failure.png",
+      "sha256": "2a89fafbe3f50d60e6122ae46b147f6260453755fecc1ce7a1432e81edfacb4d"
+    },
+    {
+      "path": "browser-r2/normal-ui-logout.json",
+      "sha256": "ec3660287c706614a3215d8cbbfec557ec3e209aa736249912ff22973ec758cd"
+    },
+    {
+      "path": "browser-r2/proof.json",
+      "sha256": "27d90b79e5341e279baa59c252e072c63c99fc4d35f429a8e4b89a73d6e0a5e6"
+    },
+    {
+      "path": "browser-r3/01-primary-in-town.png",
+      "sha256": "176d346453e3013734be651c3cc2b4ceac92c7ea3c6bab136d8599ab9c5cad78"
+    },
+    {
+      "path": "browser-r3/browser-closed.json",
+      "sha256": "9863ecf7516d4916df8fdfa32db07ce9dd8db0e8046129a498b3b9e61247f112"
+    },
+    {
+      "path": "browser-r3/deposit-cancelled-after-old-ack.png",
+      "sha256": "95feddb5ca505d78abcd0894e7102cc56c34f1bb263451ad31f70b499e9eebaa"
+    },
+    {
+      "path": "browser-r3/deposit-pending-cancel-enabled.png",
+      "sha256": "1a2f8422d38a0a95a4f96f332bc7343c3cc612299c5526da4368bc1fa6bcf384"
+    },
+    {
+      "path": "browser-r3/failure.png",
+      "sha256": "f40c281ffd6077e50cca0b912be394422c9fcfe60e39298afbc62594e50fc936"
+    },
+    {
+      "path": "browser-r3/normal-ui-logout.json",
+      "sha256": "944cecae383c29ad9c37461f7898b75a26367a0c2cb0bb858cce217881a4a044"
+    },
+    {
+      "path": "browser-r3/proof.json",
+      "sha256": "6ae2a88c40d094ff574af78292c732666670958020bfcb46660b1d13fc948665"
+    },
+    {
+      "path": "browser-r4/01-primary-in-town.png",
+      "sha256": "dd359c09371805d855b59bd84dcc9b84896cdb292b973754ab596d6ee2daf28c"
+    },
+    {
+      "path": "browser-r4/browser-closed.json",
+      "sha256": "5c2974f103075f88815181548a61d466038e69d51de3bc7c30a6fd55c29173a7"
+    },
+    {
+      "path": "browser-r4/proof.json",
+      "sha256": "4cbc7adab12b0b59096247dea28d26ea074be977641da7c33ec2668905e3dd61"
+    },
+    {
+      "path": "browser-r4/retrieve-cancelled-after-old-ack.png",
+      "sha256": "a41043183fc63d302b3d8cc5577a40cd22e7cbf1282b58b8fd497380364e3d33"
+    },
+    {
+      "path": "browser-r4/retrieve-pending-cancel-enabled.png",
+      "sha256": "e2f9cd9f9e463b06c4a05416f939977afe7a8d4bc08f53a996966f209b99d336"
+    },
+    {
+      "path": "cleanup-verified.json",
+      "sha256": "e263cddafd789e9f7a5039b2500663064e8a862c9777c90048d7a0f76e2c377c"
+    },
+    {
+      "path": "launch-isolated.mjs",
+      "sha256": "7b5cbf6f40ceb6fadb5bff7e0516262fadd554161cf46a9cc58f7c11a36cfe5f"
+    },
+    {
+      "path": "logout-current.mjs",
+      "sha256": "a6c7ea772f9fb9f2db9c898c4d721f55b3949f7b39519c1b0add27ccd33f6120"
+    },
+    {
+      "path": "public-config.json",
+      "sha256": "fcb15b8070bc06aad54d44b99835c326a248d330c640b77a7d88eb660e8816dc"
+    },
+    {
+      "path": "seal-receipt.mjs",
+      "sha256": "63999c4ce8796ac8835963b601a0703bf2a0565b7d1299d59b21ddc62132feab"
+    },
+    {
+      "path": "shutdown.json",
+      "sha256": "42ebaed5e577e2645d023e3cb45a8b357f75f34fb9531f75f39ca74206127ff8"
+    },
+    {
+      "path": "startup-1794169989797.json",
+      "sha256": "f42da7ec9e6bf5a971e545af0d5bf5f82b1e73b30df3e461a6f9d0864a6c00c0"
+    },
+    {
+      "path": "startup.json",
+      "sha256": "41149d917c99aea6cdedadde0337dbfa17311ee9963d0234d799aa22e1288522"
+    },
+    {
+      "path": "trade-cancel-ui.mjs",
+      "sha256": "5191b9f7c8a61dec7a60cfd7024c3d7f6eb4a80211c41eef6d2325a9a69d7a65"
+    }
+  ]
+}

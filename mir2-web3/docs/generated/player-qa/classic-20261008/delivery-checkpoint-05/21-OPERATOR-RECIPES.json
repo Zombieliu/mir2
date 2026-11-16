@@ -1,0 +1,10 @@
+{
+  "sourceRevision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+  "previousRevision": "c6c32381a646dae1067dafdeec57691f606b1779",
+  "manifestSha256": "28fb721846bff9982ef9f1cbd16b7b8114560ca002746af2a784d32f408bf13b",
+  "operatorSha256": "ce9523d7533bb0d7a8a0b8515142d86db4fbcabc79cd70b6c80217d868d79782",
+  "binarySha256": "1ba51402a76f4c454674836f869751d63848b5370083a4cf7b71e0654fbf10d3",
+  "source": "/home/ubuntu/mir2-playtest-preflight-20260929/capacity-verified-a41dfe72d7e5858f11169adf88673dc44ed24200",
+  "sealedOperator": "/srv/.mir2-classic-gateway-20261008-01/upgrade-classic-gateway-02.py",
+  "actualRollout": false
+}

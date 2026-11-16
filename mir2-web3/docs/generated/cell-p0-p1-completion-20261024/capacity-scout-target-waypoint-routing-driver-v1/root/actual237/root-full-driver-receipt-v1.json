@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T03:51:57.848Z",
+  "endedAt": "2026-10-26T03:57:08.684Z",
+  "elapsedMs": 310832.43470000004,
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "nodeVersion": "v22.18.0",
+  "cwd": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "args": [
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 286361,
+      "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 286361,
+      "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceSha256": "30863fa8e8b0af6f5588cddafb43ec7355e83bd2c3f9a792fb8c4ebc6f3f1750",
+  "sourcePinsUnchangedAfterRun": true,
+  "fullNineInputRegressionPassed": true,
+  "counts": {
+    "tests": 237,
+    "passed": 237,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-v1.stdout.log",
+    "bytes": 63934,
+    "sha256": "f83d0f8989c8757a7f3b698788ca15f6483dd0d7d8a76336e824b998a54d529c"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-v1.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "prior232Receipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-scout-selection-diagnostics-validation-v1/root-full-driver-receipt-v1.json",
+    "bytes": 5162,
+    "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+  },
+  "sourcePreservationReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-v1/source-preservation-and-focused-receipt-v1.json",
+    "bytes": 11450,
+    "sha256": "3f073e4cf97dcd1d85ccefe24d37263477e5f63ef341c23273e7d864f0d082cc"
+  },
+  "existingTestMaintenance": {
+    "file": "C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-v1/existing-test-search-count-maintenance-v1.json",
+    "bytes": 2777,
+    "sha256": "1119032c4e1b5acab94158ba006d6affc5f30cf1aeffe71bf57afab74be6c1df"
+  },
+  "capacityAccepted": false,
+  "realCapacityRunPerformed": false,
+  "p2ImplementationPermitted": false
+}

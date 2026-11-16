@@ -1,0 +1,9 @@
+
+running 4 tests
+test config::tests::postgres_source_mode_account_scoped_save_does_not_rewrite_other_accounts ... ok
+test config::tests::postgres_source_mode_rejects_stale_account_store_writer ... ok
+test config::tests::postgres_source_mode_rejects_stale_character_save_writer ... ok
+test config::tests::postgres_source_mode_reload_can_save_after_version_refresh ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 2952 filtered out; finished in 0.90s
+

@@ -1,0 +1,859 @@
+{
+  "scope": "Local DOM component painting smoke; not full game, input, GDI AutoSize, parity or deployment acceptance",
+  "passed": true,
+  "visualReview": {
+    "status": "pending-local-screenshot-review",
+    "performed": false
+  },
+  "sourcePinsSha256": "7f29648628fef5fa9c3f3a0c03d6e5964ac2d9f3c5b72e1fa7e3a870313e0182",
+  "scriptSha256": "d91588a4477960f877b56b3a7ace8438115d4b2d36c43aefd43118beea5898cb",
+  "sourcePins": {
+    "kind": "prepared-local-NPC-name-layer-component-smoke",
+    "preparedAtUtc": "2026-11-13T23:10:59.441401+00:00",
+    "notExecuted": true,
+    "baselineRevision": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+    "normalizedCSSDifferenceOnlyReviewedNameZ": true,
+    "snapshots": [
+      {
+        "snapshot": true,
+        "label": "baseline-globals.css",
+        "path": "inputs/baseline-globals.css",
+        "bytes": 137606,
+        "sha256": "e6becfc82ef9f2fcf097c093cb0a54032f743ff3fe6c1420692c5f045585e3ac",
+        "originalSource": {
+          "repository": "E:\\mir2-player-journey",
+          "gitRevision": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+          "path": "mir2-web3/apps/web/app/globals.css"
+        }
+      },
+      {
+        "snapshot": true,
+        "label": "candidate-globals.css",
+        "path": "inputs/candidate-globals.css",
+        "bytes": 137696,
+        "sha256": "de93c78177e4e23a775ac8ae73805967e6ab598dcbd9b60df2f542956a58e4cd",
+        "originalSource": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\globals.css",
+          "kind": "root-owned working candidate"
+        }
+      },
+      {
+        "snapshot": true,
+        "label": "crystal-world-depth.ts",
+        "path": "inputs/crystal-world-depth.ts",
+        "bytes": 3072,
+        "sha256": "1b2436b59d268838c2738d267c7028a2ebfd72ecae559b9a3b2c082d8c5cc5ee",
+        "originalSource": {
+          "path": "C:\\r16-ui-asset-recovery-20261113\\source\\mir2-web3\\apps\\web\\lib\\crystal-world-depth.ts"
+        }
+      },
+      {
+        "snapshot": true,
+        "label": "npc-15-meta.json",
+        "path": "inputs/npc-15-meta.json",
+        "bytes": 11962,
+        "sha256": "d26801e8be1bb9aaf33befa8e7e21228a14d16f0ff108f2dede935c0390a1096",
+        "originalSource": {
+          "path": "C:\\r16-ui-asset-recovery-20261113\\source\\mir2-web3\\apps\\web\\public\\original-ui\\NPC\\15\\meta.json"
+        }
+      },
+      {
+        "snapshot": true,
+        "label": "npc-15-3.png",
+        "path": "inputs/npc-15-3.png",
+        "bytes": 2814,
+        "sha256": "178cd3b6e1b20402ad106a6757d28d800377cfde020620aee2bd1f45c90ecda2",
+        "originalSource": {
+          "path": "C:\\r16-ui-asset-recovery-20261113\\source\\mir2-web3\\apps\\web\\public\\original-ui\\NPC\\15\\3.png"
+        }
+      }
+    ],
+    "liveInputs": [
+      {
+        "snapshot": false,
+        "label": "reviewed-root-candidate-CSS",
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/globals.css",
+        "bytes": 137696,
+        "sha256": "de93c78177e4e23a775ac8ae73805967e6ab598dcbd9b60df2f542956a58e4cd"
+      },
+      {
+        "snapshot": false,
+        "label": "installed-Chrome-executable",
+        "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        "bytes": 4149912,
+        "sha256": "19349f9d510cb374be6d9e77568fa456b11f2e3e9b011660b63dc99d27c52a3a"
+      },
+      {
+        "snapshot": false,
+        "label": "installed-playwright",
+        "path": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright/index.js",
+        "bytes": 648,
+        "sha256": "4e98f65f0a9d9bcab8cffc0c5cfdd87fd3f5b0be74fc494ff166a466b204cd44"
+      },
+      {
+        "snapshot": false,
+        "label": "installed-playwrightPackage",
+        "path": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright/package.json",
+        "bytes": 2012,
+        "sha256": "5cb33bf4a5f7971e28d395f625af147eb42cc14423d204c61e02d14ba9014de8"
+      },
+      {
+        "snapshot": false,
+        "label": "installed-core",
+        "path": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright-core/package.json",
+        "bytes": 1550,
+        "sha256": "5ad804ce5343706c6ef7d29d8a97821c8e4fa780c9bfdf8488dc5d36aea2e8a7"
+      },
+      {
+        "snapshot": false,
+        "label": "installed-typescript",
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+        "bytes": 9112572,
+        "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+      },
+      {
+        "snapshot": false,
+        "label": "installed-typescriptPackage",
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/package.json",
+        "bytes": 3620,
+        "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+      },
+      {
+        "snapshot": false,
+        "label": "prepared-smoke-script",
+        "path": "C:/r16-npc-name-layer-20261114/smoke.mjs",
+        "bytes": 13602,
+        "sha256": "d91588a4477960f877b56b3a7ace8438115d4b2d36c43aefd43118beea5898cb"
+      }
+    ],
+    "qualifiedSourceReferences": [
+      {
+        "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+        "bytes": 62331,
+        "sha256": "8365cdd41569c95329ad509b581e6bb64b2af757afeffcd9d1c6cfe766b4dbab"
+      },
+      {
+        "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/app/components/original-client-scene-rendering.tsx",
+        "bytes": 40881,
+        "sha256": "1008f840eca9c29d3dedc6f926547ff2bab65d17d2bf6854c42521189a2fab35"
+      },
+      {
+        "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/lib/crystal-world-depth.ts",
+        "bytes": 3072,
+        "sha256": "1b2436b59d268838c2738d267c7028a2ebfd72ecae559b9a3b2c082d8c5cc5ee"
+      },
+      {
+        "path": "C:/r16-ui-asset-recovery-20261113/source/mir2-web3/apps/web/lib/scene-effect-runtime.ts",
+        "bytes": 9979,
+        "sha256": "f4d96acd45883a6b210ca01437d5f112cc844129ee25571eac4ee6e0f7ca4ee8"
+      }
+    ],
+    "chrome": {
+      "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      "sha256": "19349f9d510cb374be6d9e77568fa456b11f2e3e9b011660b63dc99d27c52a3a"
+    },
+    "playwright": {
+      "packageContext": "F:/mir2-builds/web-r16-20261104/tools/package.json",
+      "entry": "F:\\mir2-builds\\web-r16-20261104\\tools\\node_modules\\playwright\\index.js",
+      "packageVersion": "1.55.1"
+    },
+    "typescript": {
+      "packageContext": "E:/mir2-player-journey/mir2-web3/apps/web/package.json",
+      "entry": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\typescript.js"
+    },
+    "fixture": {
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "deviceScaleFactor": 1,
+      "actorAnchor": {
+        "x": 300,
+        "y": 160
+      },
+      "nameAnchor": {
+        "x": 300,
+        "y": 142
+      },
+      "text": "守卫",
+      "frameMeta": {
+        "width": 84,
+        "height": 88,
+        "x": 6,
+        "y": -48
+      },
+      "bodyZ": "computed by the pinned actual depth module, not a CSS override"
+    },
+    "networkPolicy": "Future execution serves only loopback CSS/HTML/PNG, blocks any non-loopback page request and installs no Service Worker. No public site or credentials.",
+    "acceptanceScope": "Component structural/pixel-comparison smoke plus pending local screenshot review; not full game, input, font/GDI AutoSize, deployment or parity acceptance"
+  },
+  "layouts": {
+    "viewport": {
+      "width": 640,
+      "height": 360
+    },
+    "actor": {
+      "left": 300,
+      "top": 160
+    },
+    "name": {
+      "left": 300,
+      "top": 142
+    },
+    "bodyFrame": {
+      "index": 3,
+      "width": 84,
+      "height": 88,
+      "x": 6,
+      "y": -48,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/NPC/15/3.png",
+      "maskPath": null
+    }
+  },
+  "bodyZ": 1544565,
+  "cases": [
+    {
+      "which": "before",
+      "observation": {
+        "devicePixelRatio": 1,
+        "fontsStatus": "loaded",
+        "text": "守卫",
+        "textRange": {
+          "x": 313,
+          "y": 142,
+          "width": 22,
+          "height": 12,
+          "top": 142,
+          "right": 335,
+          "bottom": 154,
+          "left": 313
+        },
+        "facts": {
+          "frame": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "1",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "hidden",
+            "isolation": "auto",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "world": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "1",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "hidden",
+            "isolation": "isolate",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "drops": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "4000000",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "spriteOverlay": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "auto",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "stack": {
+            "rect": {
+              "x": 300,
+              "y": 160,
+              "width": 0,
+              "height": 0,
+              "top": 160,
+              "right": 300,
+              "bottom": 160,
+              "left": 300
+            },
+            "zIndex": "1544565",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "body": {
+            "rect": {
+              "x": 306,
+              "y": 112,
+              "width": 84,
+              "height": 88,
+              "top": 112,
+              "right": 390,
+              "bottom": 200,
+              "left": 306
+            },
+            "zIndex": "auto",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "clip",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "names": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "32761",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "button": {
+            "rect": {
+              "x": 300,
+              "y": 142,
+              "width": 48,
+              "height": 12,
+              "top": 142,
+              "right": 348,
+              "bottom": 154,
+              "left": 300
+            },
+            "zIndex": "auto",
+            "position": "absolute",
+            "display": "grid",
+            "pointerEvents": "auto",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px Arial, Helvetica, sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(255, 255, 255)"
+          },
+          "text": {
+            "rect": {
+              "x": 300,
+              "y": 142,
+              "width": 48,
+              "height": 12,
+              "top": 142,
+              "right": 348,
+              "bottom": 154,
+              "left": 300
+            },
+            "zIndex": "auto",
+            "position": "static",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "11px / 12px Arial, Helvetica, sans-serif",
+            "lineHeight": "12px",
+            "whiteSpace": "normal",
+            "color": "rgb(0, 255, 0)"
+          }
+        },
+        "image": {
+          "complete": true,
+          "naturalWidth": 84,
+          "naturalHeight": 88
+        },
+        "fullyOpaqueImagePixelsUnderTextRange": 230,
+        "witnesses": [
+          {
+            "imageX": 7,
+            "imageY": 30,
+            "stageX": 313.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 8,
+            "imageY": 30,
+            "stageX": 314.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 9,
+            "imageY": 30,
+            "stageX": 315.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 10,
+            "imageY": 30,
+            "stageX": 316.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 11,
+            "imageY": 30,
+            "stageX": 317.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 12,
+            "imageY": 30,
+            "stageX": 318.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 13,
+            "imageY": 30,
+            "stageX": 319.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 14,
+            "imageY": 30,
+            "stageX": 320.5,
+            "stageY": 142.5
+          }
+        ]
+      },
+      "htmlSha256": "494eab4c36602ba31417d9a3daa9115265954eadbd26538d0d52b2efbad9e8e8",
+      "cssSha256": "e6becfc82ef9f2fcf097c093cb0a54032f743ff3fe6c1420692c5f045585e3ac",
+      "screenshot": {
+        "file": "before.png",
+        "bytes": 5659,
+        "sha256": "43db50cb5d7a21ff3ba1cd33f12e0723fb6d9ba689562fa6b316c35543bfe041"
+      }
+    },
+    {
+      "which": "after",
+      "observation": {
+        "devicePixelRatio": 1,
+        "fontsStatus": "loaded",
+        "text": "守卫",
+        "textRange": {
+          "x": 313,
+          "y": 142,
+          "width": 22,
+          "height": 12,
+          "top": 142,
+          "right": 335,
+          "bottom": 154,
+          "left": 313
+        },
+        "facts": {
+          "frame": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "1",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "hidden",
+            "isolation": "auto",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "world": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "1",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "hidden",
+            "isolation": "isolate",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "drops": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "4000000",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "spriteOverlay": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "auto",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "stack": {
+            "rect": {
+              "x": 300,
+              "y": 160,
+              "width": 0,
+              "height": 0,
+              "top": 160,
+              "right": 300,
+              "bottom": 160,
+              "left": 300
+            },
+            "zIndex": "1544565",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "body": {
+            "rect": {
+              "x": 306,
+              "y": 112,
+              "width": 84,
+              "height": 88,
+              "top": 112,
+              "right": 390,
+              "bottom": 200,
+              "left": 306
+            },
+            "zIndex": "auto",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "clip",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "names": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 640,
+              "height": 360,
+              "top": 0,
+              "right": 640,
+              "bottom": 360,
+              "left": 0
+            },
+            "zIndex": "3500000",
+            "position": "absolute",
+            "display": "block",
+            "pointerEvents": "none",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px \"Noto Sans CJK SC\", sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(232, 219, 194)"
+          },
+          "button": {
+            "rect": {
+              "x": 300,
+              "y": 142,
+              "width": 48,
+              "height": 12,
+              "top": 142,
+              "right": 348,
+              "bottom": 154,
+              "left": 300
+            },
+            "zIndex": "auto",
+            "position": "absolute",
+            "display": "grid",
+            "pointerEvents": "auto",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "16px Arial, Helvetica, sans-serif",
+            "lineHeight": "normal",
+            "whiteSpace": "normal",
+            "color": "rgb(255, 255, 255)"
+          },
+          "text": {
+            "rect": {
+              "x": 300,
+              "y": 142,
+              "width": 48,
+              "height": 12,
+              "top": 142,
+              "right": 348,
+              "bottom": 154,
+              "left": 300
+            },
+            "zIndex": "auto",
+            "position": "static",
+            "display": "block",
+            "pointerEvents": "auto",
+            "overflow": "visible",
+            "isolation": "auto",
+            "transform": "none",
+            "font": "11px / 12px Arial, Helvetica, sans-serif",
+            "lineHeight": "12px",
+            "whiteSpace": "normal",
+            "color": "rgb(0, 255, 0)"
+          }
+        },
+        "image": {
+          "complete": true,
+          "naturalWidth": 84,
+          "naturalHeight": 88
+        },
+        "fullyOpaqueImagePixelsUnderTextRange": 230,
+        "witnesses": [
+          {
+            "imageX": 7,
+            "imageY": 30,
+            "stageX": 313.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 8,
+            "imageY": 30,
+            "stageX": 314.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 9,
+            "imageY": 30,
+            "stageX": 315.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 10,
+            "imageY": 30,
+            "stageX": 316.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 11,
+            "imageY": 30,
+            "stageX": 317.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 12,
+            "imageY": 30,
+            "stageX": 318.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 13,
+            "imageY": 30,
+            "stageX": 319.5,
+            "stageY": 142.5
+          },
+          {
+            "imageX": 14,
+            "imageY": 30,
+            "stageX": 320.5,
+            "stageY": 142.5
+          }
+        ]
+      },
+      "htmlSha256": "83560246520671bf1b7ae2665ce9a9ebe12b6f249b6561d459128eff20c965c8",
+      "cssSha256": "de93c78177e4e23a775ac8ae73805967e6ab598dcbd9b60df2f542956a58e4cd",
+      "screenshot": {
+        "file": "after.png",
+        "bytes": 5726,
+        "sha256": "f6484b5b0d210cd3a79bede67183d3ea45472fe2664c2fd0e414e24c8853df85"
+      }
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/before"
+    },
+    {
+      "method": "GET",
+      "path": "/before/globals.css"
+    },
+    {
+      "method": "GET",
+      "path": "/original-ui/NPC/15/3.png"
+    },
+    {
+      "method": "GET",
+      "path": "/original-ui/Cursors/Cursor_Default.CUR"
+    },
+    {
+      "method": "GET",
+      "path": "/original-ui/Cursors/Cursor_Npc.cur"
+    },
+    {
+      "method": "GET",
+      "path": "/after"
+    },
+    {
+      "method": "GET",
+      "path": "/after/globals.css"
+    },
+    {
+      "method": "GET",
+      "path": "/original-ui/NPC/15/3.png"
+    },
+    {
+      "method": "GET",
+      "path": "/original-ui/Cursors/Cursor_Default.CUR"
+    },
+    {
+      "method": "GET",
+      "path": "/original-ui/Cursors/Cursor_Npc.cur"
+    }
+  ],
+  "externalAttempts": [],
+  "origin": "http://127.0.0.1:50434",
+  "browser": {
+    "implementation": "installed Google Chrome",
+    "version": "157.0.8103.78",
+    "ownedPid": 89004,
+    "executableSha256": "19349f9d510cb374be6d9e77568fa456b11f2e3e9b011660b63dc99d27c52a3a"
+  },
+  "cleanupErrors": [],
+  "closed": {
+    "browser": true,
+    "ownedChrome": true,
+    "http": true
+  },
+  "structuralSmokePassed": true,
+  "finishedAtUtc": "2026-11-13T23:13:18.018Z"
+}

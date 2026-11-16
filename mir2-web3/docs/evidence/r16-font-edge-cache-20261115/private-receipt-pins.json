@@ -1,0 +1,156 @@
+[
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/baseline.json",
+    "bytes": 5135,
+    "sha256": "7fbdf6b7af54b4d55cca8a9ac36ce53ba9eabac432af3876216ce4e1ae20c96b"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/before-worker.ts",
+    "bytes": 12055,
+    "sha256": "51134aab7f98be67295c9ec34134d81cdd7ded4d4977367233787ccc5e9b2e7e"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/before-ranges.test.mjs",
+    "bytes": 8217,
+    "sha256": "0978cfbde3d36530b69b1742ba5a927507db6bee7b527d72f5479264bc597b21"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/before-cache-tests.tap.txt",
+    "bytes": 3887,
+    "sha256": "93355747a06c1cbb82d398f34fa59952c18c8a114f018f1c8e3e6e81bf4de2ea"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cache-tests-r1.tap.txt",
+    "bytes": 8967,
+    "sha256": "c8be24aab86ab6efd97815b12156ed8d8e22b5bac1cf29cbf2ab14251e1e392d"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cache-tests-r2.tap.txt",
+    "bytes": 8965,
+    "sha256": "a96bb1eb094274d514eaa8bfde09c414a9214ab6b4a64d44b4954fe1eef28738"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/adjacent-tests-r1.tap.txt",
+    "bytes": 28852,
+    "sha256": "5679a66432ee786c000915c3c59fc46000ee2e50d785eb7e0b4d3b1a266b53e5"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/types-r1.txt",
+    "bytes": 834,
+    "sha256": "39ef1ad387611e0ace1b3eaf768fd3dd9a42fd1f837bb00acb3a1c58c53b6928"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/typecheck-r2.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/dry-run-r1.txt",
+    "bytes": 968,
+    "sha256": "7479fcb395aeebd222dfc7a5fd40a56e5c0268446b39c1e2534225124f18870a"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/dry-run-r2.txt",
+    "bytes": 1076,
+    "sha256": "f8b5a87f54ec1dbcc4c186949119489804752cdf07e445788570fef703500a06"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/bundle-r2/index.js",
+    "bytes": 13039,
+    "sha256": "7f4bfbd4f8d77dcfaebfeb8a9febc6bf87a2a6e448ea7f9098d6bc36a326888a"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/workerd-r1.json",
+    "bytes": 1110,
+    "sha256": "49400198205f066cead339610a00554e41fd120029b530c7f31841e7b50f9adf"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/workerd-r1.log",
+    "bytes": 785,
+    "sha256": "e0376274b588e86e2c26ca3301a95b3e3c71460514a46cc8907a4f986363bac3"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/live-before.json",
+    "bytes": 1069,
+    "sha256": "62d7c0faf7cc867496d89fa7538d59f8e9f03e8eb52f3906cba1f864b9cdea62"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/live-recheck.json",
+    "bytes": 1069,
+    "sha256": "b94534f351093af83504d961f4403bf00a8a31c5aaacdbb0651caec6c2315bed"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/deployment-preflight.json",
+    "bytes": 1463,
+    "sha256": "be15f743811bd6723d07c2bacad23cc81bfc270e60e8b25ac13f5d9d3fcf82f0"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/deploy-r1.txt",
+    "bytes": 1258,
+    "sha256": "8b5505bb2596d5dbea6b73786ee37185ceeb239bd07530e7d7e9be88e1141fc4"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/live-after.json",
+    "bytes": 1069,
+    "sha256": "14d17322061067502d4c2ac9867ae4baf6d6be0e6a7c9dbe6e60832b7667c42d"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/worker-code-readback.json",
+    "bytes": 260,
+    "sha256": "a8e299b496c68a90f16a3ce1905339d91faa407aadacc1a8328fbfcff4118a1d"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/public-cache-readback-r1.json",
+    "bytes": 2997,
+    "sha256": "2edc0248bb537f0d322d3953941029f4bc6cfd837edc25989c37843e133be698"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/public-readback.json",
+    "bytes": 432,
+    "sha256": "9c3dd0202232e69b7c9f3061b795f177d58040319963ada8b0ca5b308c049890"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r1/preparation.json",
+    "bytes": 4593,
+    "sha256": "1ac9c74e6eb354abdebc0300a26ccdecfc319cfe808da2d7a891afaec4ea1ef0"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r1/run-1/receipt.json",
+    "bytes": 43154,
+    "sha256": "8959bf9a870ac6244c62d5824d2e6b21f6c0f01296ea085a2e533c0dcef5273f"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r2/preparation.json",
+    "bytes": 4593,
+    "sha256": "1ac9c74e6eb354abdebc0300a26ccdecfc319cfe808da2d7a891afaec4ea1ef0"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r2/run-2/receipt.json",
+    "bytes": 43201,
+    "sha256": "417a60f42c8a7f70001fcc9d7755a80007f1ee3e8e76fe7d51479fd8bb1060de"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r1/run-1/first-entry-diary-open.png",
+    "bytes": 1353952,
+    "sha256": "8f2a97693e96ada4ee0acfa457f04b1b59a82af95fb60c75413cfb12d5122499",
+    "exportedAs": "default-diary-open.png"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r1/run-1/reopened-diary-closed.png",
+    "bytes": 1426215,
+    "sha256": "b0dd190b5d27425f9d0f317a2d9623bc1991b1299b7126cf8197d38c4ff7470b",
+    "exportedAs": "default-reopened-diary-closed.png"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r2/run-2/first-entry-diary-open.png",
+    "bytes": 1355973,
+    "sha256": "60e1626164a023eaad4d75a6c7cd218e0107c1df697dc17bc9cc4fb2801bc9ad",
+    "exportedAs": "shared-tw-diary-open.png"
+  },
+  {
+    "path": "E:/mir2-builds/r16-font-edge-cache-20261115/cold-r2/run-2/reopened-diary-closed.png",
+    "bytes": 1413247,
+    "sha256": "604225ff0b94e754005c467e7f3282c8d5438d632c2c876bedc2b474781e6d18",
+    "exportedAs": "shared-tw-reopened-diary-closed.png"
+  }
+]

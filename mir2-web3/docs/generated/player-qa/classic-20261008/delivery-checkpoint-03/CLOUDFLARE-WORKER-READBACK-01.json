@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.worker.r22.readback.v1",
+  "passed": true,
+  "bytes": 508704,
+  "sha256": "7a82fc2cb251e726923fb8cb2eb392d199f368586e1cfd8f3acb3d32f15e9a74",
+  "settings": {
+    "placement": {},
+    "compatibility_date": "2026-05-18",
+    "compatibility_flags": [],
+    "usage_model": "standard",
+    "tags": [],
+    "tail_consumers": [],
+    "logpush": false,
+    "annotations": {
+      "workers/message": "R22 s17 fixed authenticated publication route; existing feed remains s16",
+      "workers/triggered_by": "upload"
+    },
+    "bindings": [
+      {
+        "bucket_name": "mir2-web3-assets",
+        "name": "MIR2_ASSETS",
+        "type": "r2_bucket"
+      },
+      {
+        "name": "MIR2_R2_UPLOAD_SECRET",
+        "type": "secret_text"
+      }
+    ]
+  },
+  "secretValueRead": false,
+  "publicFeedPromoted": false,
+  "createdUtc": "2026-10-08T06:19:10.384Z"
+}

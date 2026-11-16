@@ -1,0 +1,82 @@
+{
+  "schema": "mir2.promotion-attribution-migration.local-regression.v1",
+  "passed": true,
+  "docker": false,
+  "nativePostgres": true,
+  "sourceFiles": {
+    "mir2-web3/apps/simulation/examples/promotion_attribution_migration.rs": "9f528e97815c10791844f8347df7fde68a7125c1eff8d7b83b525e501cced71d",
+    "mir2-web3/apps/simulation/src/promotion/attribution_migration.rs": "47dcc74c5d04125d9b816bedf3ab25cb1c674cf95a11d0f3f4e07b7e91fbbe90",
+    ".github/workflows/web-assets-r2-release.yml": "85d8a6bdb670efa813458e0dd548cd2179da8f2158db3e68ae6777179319cbf2"
+  },
+  "results": [
+    {
+      "log": "CLI-TESTS-GREEN.log",
+      "command": [
+        "cargo",
+        "+1.89.0",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "mir2-web3/Cargo.toml",
+        "-p",
+        "mir2-simulation",
+        "--offline",
+        "--target-dir",
+        "E:/mir2-bridge-check-target",
+        "--example",
+        "promotion_attribution_migration",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "seconds": 0.38,
+      "testsExecuted": 5,
+      "failed": 0,
+      "ignored": 0,
+      "groups": 1,
+      "logSha256": "4aa6d65a6b75515064a212fbd325ccb84dcba09ce2d420c946a4fd8f337048c1"
+    },
+    {
+      "log": "ADJACENT-PG-TESTS-GREEN.log",
+      "command": [
+        "cargo",
+        "+1.89.0",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "mir2-web3/Cargo.toml",
+        "-p",
+        "mir2-simulation",
+        "--offline",
+        "--target-dir",
+        "E:/mir2-bridge-check-target",
+        "--test",
+        "sui_usdc_native_transfer_postgres",
+        "--test",
+        "promotion_live_revenue",
+        "--test",
+        "promotion_postgres",
+        "--test",
+        "promotion_revenue_share",
+        "--test",
+        "promotion_wallet_enrollment",
+        "--test",
+        "promotion_backend_compat",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "seconds": 16.65,
+      "testsExecuted": 16,
+      "failed": 0,
+      "ignored": 0,
+      "groups": 6,
+      "logSha256": "358e9c6977faf24a8b2a58edd1d3270e032a7d3adba03095b4fdb6dd485afeb7"
+    }
+  ],
+  "testsExecuted": 21,
+  "liveRealmTouched": false,
+  "migrationStaged": false
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "state": "PARTIAL_PENDING_SOURCE_INDEX_NOT_EXECUTION_EVIDENCE",
+  "createdAt": "2026-10-26T01:22:41.142352+00:00",
+  "baselineRoot": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19",
+  "staticIdentityDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\static-working-derivation-v1.json",
+    "bytes": 37311,
+    "sha256": "b780e12bca1d6c1435f44685dad0f8d30a55949cd50e5f205048211434c4ca2b"
+  },
+  "currentDriverEvidenceDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\driver-evidence-derivation-v1.json",
+    "bytes": 13628,
+    "sha256": "8b9e9c9fdd015c9cb6abf5fe82cad023dae8df62c9f7f3516523f224476fa6de"
+  },
+  "currentControllerDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-controller-derivation-v1.json",
+    "bytes": 4690,
+    "sha256": "1a3ef6b83af432f9d524aee478ae45f7dfc8b64392ce3c48f9e81bad2f2918b3"
+  },
+  "geometryCompatibility": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2563,
+    "sha256": "1e03413bc5a3133e2b44f4a8ebb334cafa07600c48a964186567f59d1c7eaaee"
+  },
+  "policySemanticallyExactToPriorProbe": true,
+  "resourceScenarioAndOriginalWindowHelpersRawExact": true,
+  "newGameplayResultKnown": false,
+  "oldExecutionOutputsCopied": false,
+  "moduleImported": false,
+  "modeExecuted": false,
+  "capacityAccepted": false
+}

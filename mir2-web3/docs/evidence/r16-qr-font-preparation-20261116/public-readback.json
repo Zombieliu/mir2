@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-11-15T19:54:39.414Z",
+  "deploymentMutation": false,
+  "reads": [
+    {
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+      "bodySha256": "945caa675b0e9bc83712ec68f003b15a20a9c84051ab396b7a4ec43eec1ad7d3",
+      "passed": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+      "bodySha256": "d4afc2baf6d07448f32c2b455ff1cb7602e4ba2941a9607024c898dbc2058ade",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

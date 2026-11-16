@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T13:59:00.3537402Z",
+  "state": "FINAL_PRESEAL_READ_ONLY_REVIEW_COMPLETE",
+  "preseal": {
+    "sha256": "2a3fae294ff10271702d708d6f76015d68886b02ed83018df5413e9bebaf2186",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\preseal-inputs-finalized-v1.json",
+    "bytes": 21362
+  },
+  "verdict": {
+    "eligibleForAccountPreparationNow": false,
+    "eligibleForRealmExecutionNow": false,
+    "fixedCellStarted": false,
+    "presealContractPassed": true,
+    "capacityAccepted": false,
+    "blockingFindingIds": [],
+    "eligibleForSealNow": true
+  },
+  "scope": "Only final pending-to-actual15 metadata, current77-source closure and Root-only seal/readonly controller. The already-reviewed stable launcher code and historical core tests were not rerun.",
+  "previousPreparedReview": {
+    "sha256": "bd95e500d5ddc83beb11e9efa61ec2c84b25c50fdc4efd873d1e8714525c12f5",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-prepared-independent-review-v1.json",
+    "bytes": 7029
+  },
+  "actualBindingProof": {
+    "sha256": "32b40ff986b011892dae5d3abb32128dbea723f1fdbc729c517ae3d7531a0a79",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-proof-v1.json",
+    "bytes": 42659
+  },
+  "rootFinalizationAuthorizationRecord": {
+    "sha256": "5cb5bd5fa84bb78f78151a058187c4c1fead17b8e91baeb3d25f9822cbce37ed",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\final-inputs-approved.json",
+    "bytes": 991
+  },
+  "rootSealController": {
+    "sha256": "058462385fe2aab8fc27925e3a8fa9f52bb2db94f8d44757ba38823a4ea50688",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-seal-source-control-v1.mjs",
+    "bytes": 5140
+  },
+  "controllerDerivation": {
+    "sha256": "a54d8443db7862fb44ef280cba2fe987a5f8597ccc2e23e492b4962c0fda55a3",
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-seal-controller-derivation-v1.json",
+    "bytes": 3218
+  },
+  "identities": {
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "nodeNineAggregate": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "actualFull16RunId": "1792934546937-58ce6147",
+    "backendSourceAggregate": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+    "actualFull16RealmStamp": "1792934538996-4d1caf58",
+    "backendInputCount": 44,
+    "activeBackendAndExecutionCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "nodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd"
+  },
+  "currentClosure": {
+    "writerPowerShellAstChecks": 2,
+    "futureSealedInputsAtMost": 80,
+    "collectorSourceCap": 128,
+    "stablePreparedFilesAfterFourMetadataChangesRawMatched": 51,
+    "writerSyntaxChecks": 26,
+    "reviewerExecutedSyntaxOrSourceGuard": false,
+    "aggregateIndependentlyRecomputed": true,
+    "noExecutablePrivateRecordingOrCapacityRawPayload": true,
+    "uniqueInputPaths": 77,
+    "rawInputsMatched": 77,
+    "sourceBytes": 580860,
+    "sourceListAggregate": "423beb15c1387b7e09146985f8fba5aec345433d0f8d21e629dacefb3838dffb",
+    "allInputsPublicCopyCompatibleInsideBase": true,
+    "original73UntouchedFromPreparedReview": true
+  },
+  "metadataMutationReview": {
+    "pendingPreimagesAllExactOriginalPreparedPins": true,
+    "policySceneResourcesThresholdsOrDiagnosticsUnchanged": true,
+    "embeddedBeforeAfterExactWithActualJson": true,
+    "changesOnly": {
+      "plan": [
+        "activeBackendSourceCommit",
+        "activeExecutionSourceCommit",
+        "futureRequired",
+        "state"
+      ],
+      "driver": [
+        "backendBinarySha256",
+        "backendSourceCommit",
+        "driverSourceCommit",
+        "state"
+      ],
+      "scene": [
+        "activeBackendSourceCommit",
+        "activeDriverSourceCommit"
+      ],
+      "candidate": [
+        "backendRebuildPerformed",
+        "backendSourceAggregate",
+        "backendSourceCommit",
+        "backendSourceManifest",
+        "binary",
+        "buildLog",
+        "buildReceipt",
+        "driverSourceCommit",
+        "full16",
+        "releaseRecord",
+        "rootFunctionalValidation",
+        "state"
+      ]
+    },
+    "files": [
+      "current-driver-binding.json",
+      "candidate-release-binding.json",
+      "scene-binding.json",
+      "preparation-plan.json"
+    ],
+    "historicalNodeEvidencePreserved": true
+  },
+  "actualPrerequisiteReview": {
+    "binaryNotRehashedByThisDeltaReview": true,
+    "candidatePublicFull16PinsRawMatched": 16,
+    "sourceGuardWillRehashBinaryBeforeAccounts": true,
+    "priorActualBinaryHashReview": {
+      "sha256": "6984d9cadcb3e7e734341e1ab6f687ed2ce3b7f777e14c57757b2eb64a900d44",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-actual-independent-review-v1.json",
+      "bytes": 5968
+    },
+    "candidatePublicFull16Bytes": 3495517,
+    "rootReleaseManifestBuildLogReceiptRustValidationOsCleanupNodeFreezeRawRefsMatched": true,
+    "priorActualFinalFull16FactsReview": {
+      "sha256": "01e4a5c4df86595593fdb87ae5cbcffb4bb9cfc3522b6d555c5f25865f7010ff",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-full16-final-independent-facts-v1.json",
+      "bytes": 3706
+    }
+  },
+  "controllerReview": {
+    "readonlyModeChecksFrozenClosureThenActual44ReleaseNode9SceneFull16": true,
+    "outputWritesUseWx": true,
+    "sealingRequiresReviewRawShaAndTruePresealVerdict": true,
+    "sourceListEachRawPinAndRealpathChecked": true,
+    "onlyExplicitModes": [
+      "--seal-source-after-final-review",
+      "--verify-sealed-source-no-execution"
+    ],
+    "noDefaultExecutionMode": true,
+    "derivedFromRoot14ControllerByExactRules": 10,
+    "reviewMustBindExactCurrentPresealFileAndSha": true,
+    "selfPinUsesStringImportMetaFilename": true,
+    "noCargoCaptureBuildAccountSeedAclOrServiceSpawn": true
+  },
+  "sourceStateObserved": {
+    "readonlySourceGuardAbsent": true,
+    "privateBinRecordingReportsSourcePinsAndRealmStateAbsent": true,
+    "launcherSourceFreezeAbsent": true,
+    "preparationAndExecutionLocksAbsent": true
+  },
+  "requiredNextActions": [
+    "Root alone may execute the reviewed source seal with this exact review file and raw SHA.",
+    "Root then separately executes the controller readonly guard; its actual successful receipt is still required.",
+    "Only after those actual steps and Root authorization may account preparation or the owned probe run execute."
+  ],
+  "actionsByReviewer": {
+    "realmStarted": false,
+    "sourceGuardExecuted": false,
+    "targetModulesImported": false,
+    "testsExecuted": false,
+    "cargoExecuted": false,
+    "sealExecuted": false,
+    "accountsCreated": 0,
+    "trackedOrFrozenInputsWritten": false
+  },
+  "limits": [
+    "EligibleForSealNow concerns source sealing only. No actual sourceguard, account preparation, probe15 gameplay, formal capacity or P0/P2 acceptance is claimed.",
+    "The prior Node13/200 validation is b84d/db4e; historical187/28/8 wrapper evidence remains separate. The current actual backend/execution identity is5c2e/44/d879.",
+    "Root15 diagnostics and full16 public facts are pinned; this delta review did not decode/replay raw protocol traces or inspect private inputs. Existing constraints and unresolved compact supply/long-soak risks remain."
+  ]
+}

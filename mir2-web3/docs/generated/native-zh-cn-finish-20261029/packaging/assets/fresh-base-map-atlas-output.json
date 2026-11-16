@@ -1,0 +1,36 @@
+{
+  "schema": "mir2.windows.fresh-map-atlas-output.v1",
+  "capturedAtUtc": "2026-10-29T08:41:42.633Z",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "freshBuilderExecutedBy": "root",
+  "outputPinCapturedBy": "usdc_payment_onchain_audit",
+  "manifest": {
+    "bytes": 68969,
+    "sha256": "5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5",
+    "schemaVersion": 2,
+    "edgeExtrusion": 1
+  },
+  "pages": 79,
+  "sourceFrames": 2952,
+  "imageBytes": 25025532,
+  "pageClosureSha256": "c87dfb3123bb73c92c9698a4eafc78e8caec5a64d89060db9af2d268d0383fcd",
+  "pixelAudit": {
+    "passed": true,
+    "command": "node apps/web/scripts/audit-map-atlas-gutters.mjs",
+    "sourcePixelsPreserved": 13148168,
+    "edgeAndCornerPixelsVerified": 783028,
+    "sourceImagesModified": false,
+    "liveVisualAccepted": false,
+    "log": "fresh-base-map-atlas-gutter-audit.log",
+    "logSha256": "16df0a91ab9586f06f4676e1a66eaf26d90435f673196e3dafae606e62450462"
+  },
+  "buildLog": {
+    "path": "fresh-base-map-atlas-build.log",
+    "sha256": "3ce3c8fdd219de8f3e49c624a44681b8e461de8369306aad18fc133ab8b4c3c1"
+  },
+  "inputProof": {
+    "path": "map-atlas-input-provenance.json",
+    "sha256": "d3226dee665df30ea57bada4639cb6282f6c7032530d3494b5e2f523e230e5b3"
+  },
+  "scope": "Fresh owned-gutter base seed only. Full-pack floor completion and full209-map Candidate coverage are subsequent coordinator gates."
+}

@@ -1,0 +1,789 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-11T08:46:59.093Z",
+  "source": "603e68a352e626b92210dd0582a106a35d2f34e2",
+  "releasePinCommit": "84135d9fadea00883be5370faa363b7bd7fbeff9",
+  "deploymentId": "dpl_7WcvAiCUgoY7z3ddHqNM3gJVGb7D",
+  "origin": "https://numeron.obelisk.build/game",
+  "deploymentPassed": true,
+  "combinedSingleRunAcceptancePassed": false,
+  "authenticated": {
+    "checkedAt": "2026-11-11T08:24:05.048Z",
+    "alias": {
+      "kind": "alias",
+      "alias": "numeron.obelisk.build",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "deploymentId": "dpl_7WcvAiCUgoY7z3ddHqNM3gJVGb7D",
+      "redirect": null
+    },
+    "deployment": {
+      "kind": "deployment",
+      "id": "dpl_7WcvAiCUgoY7z3ddHqNM3gJVGb7D",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "readyState": "READY",
+      "target": "production",
+      "source": "603e68a352e626b92210dd0582a106a35d2f34e2",
+      "branch": "codex/windows-player-journey",
+      "buildDurationMs": 293509
+    }
+  },
+  "workflows": {
+    "stage": {
+      "id": "42984852341",
+      "conclusion": "success",
+      "headSha": "84135d9fadea00883be5370faa363b7bd7fbeff9",
+      "status": "completed"
+    },
+    "promote": {
+      "id": "42986049010",
+      "conclusion": "success",
+      "headSha": "84135d9fadea00883be5370faa363b7bd7fbeff9",
+      "status": "completed"
+    }
+  },
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "normalSystemNetwork": true,
+      "realMatrix": true,
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "normalSystemNetwork": true,
+      "realMatrix": true,
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    }
+  ],
+  "signedRuns": [
+    {
+      "run": "signed-public",
+      "overallPassed": false,
+      "rawReceiptSha256": "0e90810ba30ec8a283612ccecc35977ff7e10965514fd15c82ffd5a2c63f6d62",
+      "failure": {
+        "phase": "ordinary-public-quest-locale",
+        "code": "BROWSER_TIMEOUT"
+      },
+      "phoneScope": "Official mobile-sized PWA, disposable virtual-authenticator Testnet wallet; no physical phone camera",
+      "approvedLoginOnly": true,
+      "publicDns": true,
+      "customBrowserNetworkSettings": false,
+      "tlsVerificationBypass": false,
+      "gameProtocol": {
+        "gameSockets": 1,
+        "passkeyLogin": 1,
+        "loginSuccess": 1,
+        "newCharacter": 1,
+        "newCharacterSuccess": 1,
+        "startGame": 1,
+        "startGameResult": 4,
+        "walk": 1,
+        "logOut": 1,
+        "logOutSuccess": 1,
+        "unexpectedMutation": 0
+      },
+      "authExchange": [
+        200
+      ],
+      "staticEntryPassed": true,
+      "cityRendered": true,
+      "diary": {
+        "passed": false,
+        "status": "not-reached",
+        "failure": {
+          "phase": "ordinary-public-quest-locale",
+          "code": "BROWSER_TIMEOUT"
+        }
+      },
+      "movement": {
+        "attempted": true,
+        "passed": true,
+        "status": "one-authoritative-walk",
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 289,
+          "y": 616,
+          "direction": "Right"
+        },
+        "geometry": {
+          "source": "sha256-pinned-local-release-reference",
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "physical": {
+          "input": "trusted-playwright-keyboard-pulse",
+          "key": "ArrowRight",
+          "atMs": 92365
+        },
+        "wire": {
+          "type": "walk",
+          "direction": "Right",
+          "atMs": 92371
+        },
+        "ack": {
+          "x": 289,
+          "y": 616,
+          "packet": "UserLocation",
+          "atMs": 95422
+        },
+        "ackWithinEightSeconds": true,
+        "rendered": {
+          "x": 289,
+          "y": 616,
+          "atMs": 95472
+        }
+      },
+      "firstWalkTransport": {
+        "websocketFrameMs": 3051,
+        "keepAlives": [
+          {
+            "sentRelativeToWalkMs": -23785,
+            "rttMs": 124
+          },
+          {
+            "sentRelativeToWalkMs": -8787,
+            "rttMs": 125
+          },
+          {
+            "sentRelativeToWalkMs": 6214,
+            "rttMs": 123
+          },
+          {
+            "sentRelativeToWalkMs": 21216,
+            "rttMs": 125
+          },
+          {
+            "sentRelativeToWalkMs": 36213,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": 51215,
+            "rttMs": 123
+          },
+          {
+            "sentRelativeToWalkMs": 66213,
+            "rttMs": 124
+          },
+          {
+            "sentRelativeToWalkMs": 81213,
+            "rttMs": 124
+          },
+          {
+            "sentRelativeToWalkMs": 96216,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 111213,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 126216,
+            "rttMs": 131
+          }
+        ],
+        "gatewayHealthBefore": {
+          "status": 200,
+          "startedAt": 85394,
+          "finishedAt": 85802,
+          "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+          "complete": true,
+          "sinceInitializationMs": 226904377,
+          "successes": 556,
+          "failures": 0,
+          "count": 556,
+          "sumUs": 7740443
+        },
+        "gatewayHealthAfter": {
+          "status": 200,
+          "startedAt": 95468,
+          "finishedAt": 95652,
+          "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+          "complete": true,
+          "sinceInitializationMs": 226914231,
+          "successes": 557,
+          "failures": 0,
+          "count": 557,
+          "sumUs": 7741313
+        },
+        "admissionCounterDelta": {
+          "successes": 1,
+          "failures": 0,
+          "count": 1,
+          "sumUs": 870,
+          "oneObservedAdmission": true
+        }
+      },
+      "normalLogout": {
+        "attempted": true,
+        "passed": true,
+        "returnedToSelect": true,
+        "sent": 1,
+        "acknowledged": 1
+      },
+      "returnedToSelect": true,
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-observed",
+        "gateReady": false,
+        "runtimeDelivered": true,
+        "failure": {
+          "phase": "ordinary-shared-hud-optional",
+          "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+        }
+      },
+      "browserClosed": true,
+      "observations": [
+        {
+          "label": "before-q",
+          "owner": "react",
+          "canvasSelector": null,
+          "focus": {
+            "tag": "DIV",
+            "id": ""
+          },
+          "keyboard": null,
+          "quest": {},
+          "hud": {},
+          "package": {}
+        },
+        {
+          "label": "after-q",
+          "owner": "react",
+          "canvasSelector": null,
+          "focus": {
+            "tag": "DIV",
+            "id": ""
+          },
+          "keyboard": {
+            "at": 1794385614878,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "quest": {},
+          "hud": {},
+          "package": {}
+        },
+        {
+          "label": "failure",
+          "owner": "react",
+          "canvasSelector": null,
+          "focus": {
+            "tag": "BUTTON",
+            "id": ""
+          },
+          "keyboard": {
+            "at": 1794385614878,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "quest": {},
+          "hud": {},
+          "package": {}
+        }
+      ]
+    },
+    {
+      "run": "signed-public-r2",
+      "overallPassed": false,
+      "rawReceiptSha256": "ad062d68729245245128708a77e9a61c0d58cea2951dc6a2f51a4bef321aab97",
+      "failure": {
+        "phase": "one-ordinary-adjacent-walk",
+        "code": "ORDINARY_WALK_WIRE_OR_ACK_MISSING"
+      },
+      "phoneScope": "Official mobile-sized PWA, disposable virtual-authenticator Testnet wallet; no physical phone camera",
+      "approvedLoginOnly": true,
+      "publicDns": true,
+      "customBrowserNetworkSettings": false,
+      "tlsVerificationBypass": false,
+      "gameProtocol": {
+        "gameSockets": 1,
+        "passkeyLogin": 1,
+        "loginSuccess": 1,
+        "newCharacter": 1,
+        "newCharacterSuccess": 1,
+        "startGame": 1,
+        "startGameResult": 4,
+        "walk": 1,
+        "logOut": 1,
+        "logOutSuccess": 1,
+        "unexpectedMutation": 0
+      },
+      "authExchange": [
+        200
+      ],
+      "staticEntryPassed": true,
+      "cityRendered": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-react-fallback",
+        "questId": 2110001,
+        "stage": "available",
+        "objective": "向助理簡報告",
+        "counter": "0/1",
+        "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+        "journey": "當前主線 0/26",
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "movement": {
+        "attempted": true,
+        "passed": false,
+        "status": "attempted",
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 289,
+          "y": 616,
+          "direction": "Right"
+        },
+        "geometry": {
+          "source": "sha256-pinned-local-release-reference",
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "physical": {
+          "input": "trusted-playwright-keyboard-pulse",
+          "key": "ArrowRight",
+          "atMs": 88581
+        },
+        "wire": {
+          "type": "walk",
+          "direction": "Right",
+          "atMs": 88584
+        },
+        "failure": {
+          "phase": "one-ordinary-adjacent-walk",
+          "code": "ORDINARY_WALK_WIRE_OR_ACK_MISSING"
+        },
+        "ack": {
+          "x": 289,
+          "y": 616,
+          "packet": "UserLocation",
+          "atMs": 123658
+        }
+      },
+      "firstWalkTransport": {
+        "websocketFrameMs": 35073,
+        "keepAlives": [
+          {
+            "sentRelativeToWalkMs": -29663,
+            "rttMs": 124
+          },
+          {
+            "sentRelativeToWalkMs": -14663,
+            "rttMs": 124
+          },
+          {
+            "sentRelativeToWalkMs": 337,
+            "rttMs": 34737
+          },
+          {
+            "sentRelativeToWalkMs": 15337,
+            "rttMs": 19750
+          },
+          {
+            "sentRelativeToWalkMs": 30338,
+            "rttMs": 4749
+          },
+          {
+            "sentRelativeToWalkMs": 45340,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": 60340,
+            "rttMs": 126
+          },
+          {
+            "sentRelativeToWalkMs": 75339,
+            "rttMs": 124
+          }
+        ],
+        "gatewayHealthBefore": {
+          "status": 200,
+          "startedAt": 80629,
+          "finishedAt": 80892,
+          "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+          "complete": true,
+          "sinceInitializationMs": 227846126,
+          "successes": 557,
+          "failures": 0,
+          "count": 557,
+          "sumUs": 7741313
+        },
+        "gatewayHealthAfter": null,
+        "admissionCounterDelta": null
+      },
+      "normalLogout": {
+        "attempted": true,
+        "passed": true,
+        "returnedToSelect": true,
+        "sent": 1,
+        "acknowledged": 1
+      },
+      "returnedToSelect": true,
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-observed",
+        "gateReady": false,
+        "runtimeDelivered": true,
+        "failure": {
+          "phase": "ordinary-shared-hud-optional",
+          "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+        }
+      },
+      "browserClosed": true,
+      "observations": [
+        {
+          "label": "before-q",
+          "owner": "react",
+          "canvasSelector": "#mir2-web3-canvas",
+          "focus": {
+            "tag": "CANVAS",
+            "id": "mir2-web3-canvas"
+          },
+          "keyboard": null,
+          "quest": {
+            "ready": false,
+            "open": false,
+            "generation": 2,
+            "error": null
+          },
+          "hud": {
+            "ready": false,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            }
+          },
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "fonts": {
+            "status": "loading",
+            "faces": [
+              {
+                "family": "Noto Sans TC",
+                "status": "loading"
+              }
+            ]
+          }
+        },
+        {
+          "label": "after-q",
+          "owner": "react",
+          "canvasSelector": "#mir2-web3-canvas",
+          "focus": {
+            "tag": "DIV",
+            "id": ""
+          },
+          "keyboard": {
+            "at": 1794386544378,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "quest": {
+            "ready": false,
+            "open": true,
+            "generation": 2,
+            "error": null
+          },
+          "hud": {
+            "ready": false,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            }
+          },
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "fonts": {
+            "status": "loading",
+            "faces": [
+              {
+                "family": "Noto Sans TC",
+                "status": "loading"
+              }
+            ]
+          }
+        },
+        {
+          "label": "task-text-verified",
+          "owner": "react",
+          "canvasSelector": "#mir2-web3-canvas",
+          "focus": {
+            "tag": "BUTTON",
+            "id": ""
+          },
+          "keyboard": {
+            "at": 1794386544378,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "quest": {
+            "ready": false,
+            "open": true,
+            "generation": 2,
+            "error": null
+          },
+          "hud": {
+            "ready": false,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "fonts": {
+            "status": "loading",
+            "faces": [
+              {
+                "family": "Noto Sans TC",
+                "status": "loading"
+              }
+            ]
+          }
+        },
+        {
+          "label": "pixels-captured",
+          "owner": "react",
+          "canvasSelector": "#mir2-web3-canvas",
+          "focus": {
+            "tag": "BUTTON",
+            "id": ""
+          },
+          "keyboard": {
+            "at": 1794386544378,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "quest": {
+            "ready": false,
+            "open": true,
+            "generation": 2,
+            "error": null
+          },
+          "hud": {
+            "ready": false,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "fonts": {
+            "status": "loading",
+            "faces": [
+              {
+                "family": "Noto Sans TC",
+                "status": "loading"
+              }
+            ]
+          }
+        },
+        {
+          "label": "after-close",
+          "owner": "react",
+          "canvasSelector": "#mir2-web3-canvas",
+          "focus": {
+            "tag": "BODY",
+            "id": ""
+          },
+          "keyboard": {
+            "at": 1794386544664,
+            "actions": [
+              "quests"
+            ],
+            "stage": "dispatch",
+            "reason": "window-action",
+            "accepted": true,
+            "repeat": false,
+            "focused": true,
+            "visible": true,
+            "editable": false,
+            "sceneInteractionReady": true,
+            "gameplayCallbackPresent": true,
+            "defaultPrevented": false,
+            "heroActive": false,
+            "heroTransitioning": false,
+            "heroWorldBlocked": false,
+            "heroLeaseHeld": false
+          },
+          "quest": {
+            "ready": false,
+            "open": false,
+            "generation": 2,
+            "error": null
+          },
+          "hud": {
+            "ready": false,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "fonts": {
+            "status": "loading",
+            "faces": [
+              {
+                "family": "Noto Sans TC",
+                "status": "loading"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "releaseTests": 68,
+    "localTests": 66,
+    "localProductionAndTypeScript": true,
+    "localPaths": [
+      "default /game React diary",
+      "actual shared WebGL2 Native diary"
+    ],
+    "protectedAndPublicAssets": 11,
+    "noRollback": true
+  },
+  "screenshot": {
+    "filename": "public-task.png",
+    "sha256": "5506ba7b011f700a6ce4f6d892b785d598fe9d302a2757b54919d385593953af",
+    "visuallyReviewed": true,
+    "capture": "Chromium Page.captureScreenshot of actual stage pixels; no DOM/font changes or request interception"
+  },
+  "captureFinding": {
+    "pendingFont": {
+      "status": "loading",
+      "faces": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loading"
+        }
+      ]
+    },
+    "playwrightWaitSource": "F:/mir2-builds/web-r16-20261104/tools/node_modules/playwright-core/lib/server/screenshotter.js:219",
+    "explanation": "Playwright locator.screenshot waits document.fonts.ready. The public font remained loading. Direct browser pixel capture preserves the rendered page and all text/protocol assertions."
+  },
+  "remaining": [
+    "approximately 35-second public first-walk long tail; source/renderer/network cause not yet isolated",
+    "public shared HUD boot remains not observed ready",
+    "public existing-role cold restart",
+    "full current frontend three-class level1–30",
+    "shared runtime source comparison",
+    "physical phone and final human Windows acceptance"
+  ],
+  "originalWip": {
+    "unchangedFiles": 62,
+    "unchangedRows": 38
+  }
+}

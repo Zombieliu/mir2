@@ -1,0 +1,14 @@
+diff --git a/D:/mir2-builds/r16-native-resume-wait-20261108/web-pre-clock-fix.rs b/E:/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs
+index 1bd7313db..30f302d59 100644
+--- a/D:/mir2-builds/r16-native-resume-wait-20261108/web-pre-clock-fix.rs
++++ b/E:/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs
+@@ -1854,6 +1854,9 @@ impl ReconnectSessionStore {
+             drop(reservation);
+             return Err(ReconnectSessionCommitError::TransportEnded);
+         }
++        // The locked purge protects mutex contention. Refresh again here so
++        // scheduling after that purge cannot consume a now-expired credential.
++        let now_ms = gateway_unix_ms().max(now_ms);
+         let Some(binding) =
+             state
+                 .credentials

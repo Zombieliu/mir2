@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source71 original six-script Node actual closed run after prepared output parents",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01\\node-tests02-config.json",
+    "bytes": 5732,
+    "sha256": "5c956cc672a958c0afde359adcb22c0d73b78982a70a4d91c726cf9bffa0fdcf"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01\\source71-final-source-snapshot01.json",
+    "bytes": 21041113,
+    "sha256": "2fb133cc718308cde419f063e8d5b1ff6559cd4ae72ca2d8521b53c6a2a3b96a"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\node-tests02\\outer.json",
+    "bytes": 552,
+    "sha256": "d9eba2af2ad6a0b6aae0ea635f34178a9c0b3fefacec225c55cf281ddd15aa21"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\node-tests02\\stdout.log",
+    "bytes": 70440,
+    "sha256": "02dc778cc11b7ec8e4f0dbe5bfd5d2e8cc2a5565b28500eded5c62bc6cfb4add"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\node-tests02\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualExit": 0,
+  "builderPid": 83680,
+  "elapsedMs": 36304,
+  "exited": true,
+  "disposed": true,
+  "callerReturnedExit0": true,
+  "originalPostExitSourceAndToolGuardPassed": true,
+  "tests": 274,
+  "pass": 274,
+  "fail": 0,
+  "cancelled": 0,
+  "skipped": 0,
+  "todo": 0,
+  "storageTests": 39,
+  "newSource71Tests": [
+    "Source71 actual Page reader records the first eligible gate without evaluating later gates",
+    "Source71 actual tick ABI refusal precedes its reader and adds no runtime diagnostic reads",
+    "Source71 actual host input failures retain the first reason and exclude diagnostics from the wire snapshot",
+    "Source71 actual host status failures and enabled handoff preserve their original admission gates",
+    "Source71 actual hook deduplicates diagnostic state and compatibility retires the prepare reason",
+    "Source71 actual hook ignores retired callbacks and cleanup cannot overwrite the replacement state",
+    "Source71 actual main diagnostic attribute serializes only owner phase and finite reason"
+  ],
+  "sceneTests": 10,
+  "customAdapterGroupsSeparate": 506,
+  "original32StorageTestBodiesPreserved": true,
+  "preservedFirstPreparationFailure": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source71-node-preparation-failed01.json",
+    "bytes": 927,
+    "sha256": "03087377c512c34b29be58702aae060249b3897e6a36c368d07cb86ca4ae57f3"
+  },
+  "firstRunActualTestOutcomeUnknown": true,
+  "mainTypeUnchanged": true,
+  "noAdditionalProductCallsForDiagnostics": true,
+  "productionBuildAccepted": false,
+  "sharedStorageOwnerAccepted": false,
+  "candidateAccepted": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

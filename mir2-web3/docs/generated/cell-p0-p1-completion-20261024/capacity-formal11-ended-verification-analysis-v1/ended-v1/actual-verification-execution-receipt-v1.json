@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T15:57:16.217Z",
+  "endedAt": "2026-10-25T15:57:16.270Z",
+  "runId": "1792942371568-1e322224",
+  "exitCode": 1,
+  "signal": null,
+  "checkedInputs": 9,
+  "sourceBeforeAfterIdentical": true,
+  "seal": {
+    "path": "tool-source-frozen-v1.json",
+    "bytes": 1955,
+    "sha256": "798799c298c188d98cf7d8bd2f9399591ead9f6fae7e1bd521edc1b2ec36aade"
+  },
+  "log": {
+    "path": "actual-verification.log",
+    "bytes": 1435,
+    "sha256": "3c86c7718d4889eade40d0bb70c5a0d19104bc9a93ae3bbcd2f28bcf86c76ee5"
+  },
+  "finalVerification": null,
+  "actualVerificationExitedSuccessfully": false,
+  "originalGameVerdictChanged": false
+}

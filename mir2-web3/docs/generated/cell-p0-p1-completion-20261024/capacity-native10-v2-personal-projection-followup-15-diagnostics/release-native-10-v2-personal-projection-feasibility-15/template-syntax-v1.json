@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "nodeCheckPassed": 26,
+  "powerShellAstPassed": 2,
+  "commandTypes": [
+    "node --check <26 local mjs>",
+    "System.Management.Automation.Language.Parser.ParseFile <2 local ps1>"
+  ],
+  "targetImportsExecuted": false,
+  "testsExecuted": false,
+  "cargoExecuted": false,
+  "sourceGuardExecuted": false,
+  "runtimeExecuted": false
+}

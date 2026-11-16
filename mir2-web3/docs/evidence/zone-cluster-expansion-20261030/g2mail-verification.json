@@ -1,0 +1,148 @@
+{
+  "groups": [
+    {
+      "passed": 120,
+      "label": "g2mail-sim-final",
+      "filter": "mail",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": 33,
+      "label": "g2mail-save-final",
+      "filter": "save_fail_closed_tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": 2,
+      "label": "g2mail-store-final",
+      "filter": "config_account_store_durability_tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": 4,
+      "label": "g2mail-pg-final",
+      "filter": "mail_transfer_pg_tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": 11,
+      "label": "g2mail-shared-uid-pg-final",
+      "filter": "shared_uid_pg_tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": 12,
+      "label": "g2mail-fence-final",
+      "filter": "zone_save_fence::tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": null,
+      "label": "g2mail-gateway-check-final",
+      "filter": "zone_lease::tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": null,
+      "label": "g2mail-admin-check-final",
+      "filter": "zone_lease::tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    },
+    {
+      "passed": null,
+      "label": "g2mail-sim-targets-check-final",
+      "filter": "zone_lease::tests::",
+      "sourceUnchangedDuringRun": true,
+      "exitCode": 0
+    }
+  ],
+  "baselineCommit": "e9f0990989859901556ebe3d975bda1ee179f6cb",
+  "sourceSha256": {
+    "apps/gateway/src/economy/zone_fence_pg_tests.rs": "1170ce19dd8352dd883338c0762ebc698f18338f70ad907d8b2de6a0d41ec59c",
+    "apps/simulation/src/config/zone_save_operation.rs": "141f2a188b4fc283c7c327bb379d73b3ff0d1e63614835e5d10f17e2416a6ae9",
+    "apps/gateway/src/save_recovery.rs": "bc91565f4d8eafd66f1977f33f4d6f18df67e9beb3fdd80c5e1c38d014436bfa",
+    "apps/simulation/src/config/mail_transfer_items_tests.rs": "e4170a934a822e92088205c1971c5bddd3e05b7a028fec1f230136e93650c664",
+    "apps/gateway/src/zone_rpc/stable_owner_poll_tests.rs": "ad389632019299a99aecf97585458c2b096731f5d5b4ed0817e792b84bd3bf93",
+    "apps/simulation/src/world_runtime.rs": "4b8e6fe945ec13db57290f7b16c0d4c4f3d03ddfe95f206dbafbb641b0f641f6",
+    "apps/gateway/src/routing/tests/zone_economy_adapter_tests.rs": "b0fc6855f04b6173d4cbf2b9e0822c402a762cbe91861124cd23151271c8175d",
+    "apps/gateway/src/zone_rpc.rs": "215f46e8c7e05456999eed224f6a394a1b5da4f8850373fc49b24e2cd5024d3a",
+    "apps/gateway/src/economy/zone_fence.rs": "8c65714bfbcebc27ea9a56f48709dc625ac8833bc06a33ae6a097fd455de1a45",
+    "apps/simulation/src/config/zone_save_fence_tests.rs": "2bd6b3cfaa567d2fd04b71ab100b28a4d14c5e1c757e118865e3401363218e02",
+    "apps/gateway/src/zone_lease.rs": "b08d2b36c082cac240c596623c6de6e02213312122e81a747a96c35a7f6464e5",
+    "apps/gateway/src/routing/zone_economy_guard.rs": "cac7426a4fb516fd13fea7570b0f79514a14f0463f5a4e9bbdd1d131d4d8a823",
+    "apps/simulation/src/runtime/packets.rs": "59fe12251070ac007a49c5e0647bb740c0453e72ef54f1aba229afd75c42681e",
+    "apps/simulation/src/config/mail_transfer.rs": "e7e1f5f7f3237deff00eb2661031b69d718b47d7012baf1903711a3861115347",
+    "apps/gateway/src/save_recovery/zone_save_operation_tests.rs": "b91664a795b836d0cdb137541be57458e0ba6501ac7b983fe31070249493b583",
+    "apps/gateway/src/zone_owner_resolver.rs": "9da9e5d25513a1970d8015fcf821febb4adc7417b72f28c1a4aa12cbcb3e50c2",
+    "apps/simulation/src/runtime/zone_save_fence_tests.rs": "5b4f8800512bd1cd680e5032055d892fe65eeac30270c2bb3f412d0062599d99",
+    "apps/simulation/src/config/zone_save_operation_tests.rs": "a969f06705cd4c23cfe7cfdaa759fe3552fe36989087d93f45bfbf75b4c33dc2",
+    "apps/simulation/src/config/zone_save_fence.rs": "cb73f021285b94698e104f4c7a84bc82eb64e9f5f623d43fa06d3c5a5898d9d2",
+    "apps/simulation/src/config/zone_economy_fence.rs": "d6345b8c7b4f4432c18e9c99ede39dbf7b4c183185eeeff339386bf811c6239b",
+    "apps/gateway/src/zone_owner_resolver/transport_tests.rs": "09ecb1b165c0b40fe5e47ab1edf93f930de63d43751cdda7ba14ceb512eff39b",
+    "apps/simulation/src/runtime/zone_save_operation_tests.rs": "869f5150f2553a49952bda9898b20488d0b55e32dfb69aff40a75c54ea1d48fc",
+    "apps/simulation/src/runtime/save.rs": "4d481975d39f50b656b0c3b474e78b2e09ea3ece230d8ea4415c42bb34d13b7a",
+    "apps/gateway/src/routing/procurement_owner.rs": "5575cff468dc9ff7ef51a8051c64dc216422e47b40e64bc6d9f1a1a3f4726bcb",
+    "apps/gateway/src/zone_owner_resolver/postgres.rs": "8dfc3ce600c304c1f622c339552eb564666fb8d84f871dc9df72a9745f3010be",
+    "apps/gateway/src/web.rs": "54aae3b32007f9e6e149ed5846333dd76915023fa52d86be6e64a191c3d71a62",
+    "apps/gateway/src/session.rs": "f6254255f589d651374c413c27e979e943c823d3730bc937a06e0e235264a5a2",
+    "infra/postgres/migrations/0020_zone_character_save_operations.sql": "cb3c2496a63a402842ab3b148efb81b5817e2679ea23d93e790283e55a734d9e",
+    "apps/simulation/src/config_prepared_kill.rs": "fe5cacef703115d74282c503961ff4f0c353555276a590e52222897c0dcfa9e5",
+    "apps/gateway/src/routing/zone_save_fence_tests.rs": "36c8b9113e404f4df5478d3a0662470edd931cc45e1fd71061cdd4701a598c9f",
+    "apps/simulation/src/config.rs": "d0f760481b415b7f5e557c560b1f09d3f235bced68a8a846756263f0e4c0c13d",
+    "apps/simulation/src/config/mail_transfer_source_tests.rs": "733544866ad7a90993c4e09581eec331c8dd7df8d98aabf8e1cab54a6a76acb4",
+    "apps/simulation/src/db_projection.rs": "d2b6f510dc8ec030dfbdb4e15c17bbcf09fa1e8ba133d1de4f2cb4fe43d7ba2b",
+    "apps/gateway/src/economy/prepared_kill.rs": "9be6153c020befae9b609e2943fa6e771654b8ed217a002912f531445ba617b6",
+    "apps/simulation/src/config/mail_transfer_items.rs": "4a83d9182949f0fe3b586679809f59a24904cca5aad3c6bb2e255b80bcfd987f",
+    "apps/gateway/src/zone_owner_resolver/runtime_tests.rs": "c323c6d3d1f27c480e66ae0c5e08d465148c3abdf56ca239a6a44fef3643840f",
+    "apps/simulation/src/runtime/mod.rs": "6be07076c60a90fb116d6face6939121f82c6d750179dda6f9880f2497335685",
+    "apps/gateway/src/zone_rpc/zone_save_operation_tests.rs": "9fc891918da07e55e407605302d2d834ebc1694fc576be508bc8da371192a445",
+    "apps/gateway/src/zone_owner_resolver/postgres_tests.rs": "32bf11f66ccc6d3c32b50dcd68139382e310ed017271038d6a6ee5f5fd03b648",
+    "apps/simulation/src/lib.rs": "32fd86307b92d6663c367b11d720d1bd6e2c50b3ce88ad24345f6bfb3170e831",
+    "apps/gateway/src/routing/owner_health.rs": "00341a11bb9e7af0023b41ab7c4b61a2f9612485001075f6ea0987d604aabbbe",
+    "apps/gateway/src/routing.rs": "913d2d1b3ce76729e38d483ca3adf41486176908ba82830c07eceaeb6a77221a",
+    "apps/simulation/src/runtime/mail_send_publication_tests.rs": "c85759dc7f516da7197ade458243661baeea52009d6191e8fa71160fe9124fee",
+    "infra/postgres/migrations/0024_mail_item_transfer_receipts.sql": "7f5c64d1dcd3881eb6366e2042865f662df293be29fd47c161277a0bf9e3cc82",
+    "apps/gateway/src/routing/zone_save_operation_pg_tests.rs": "9e5654da68930b509f4c0afc76504fd0e4748ba760540db40180598fbf0fa900",
+    "apps/gateway/src/zone_owner_resolver/runtime.rs": "10f0f97706160a5a3fa136a90114c5108ff6895b1f726f36def30976c0ba30f8",
+    "apps/gateway/src/main.rs": "a390f6a0706404a9a4162e6de8346901d2cdb8ab6686b6a20f07ec4cfee7b928",
+    "apps/simulation/src/config/zone_economy_fence_tests.rs": "682ca26dc0aced2d8563cb4b627e7d318cde34402e1d126a6d50ae7f849149fb",
+    "apps/gateway/src/npc_purchase_owner_route_tests.rs": "b13257b80ea781a49999633b41969b5bf3fd3f686f022a3fec547271e7856772",
+    "apps/simulation/src/config/mail_transfer_tests.rs": "3504104c8ce37b83e2d44ef7a3893fa18d3540c1aa2f56864247d62e4923cc3c",
+    "apps/gateway/src/zone_owner_resolver/transport.rs": "0a5504e293adf4568f9a26dc381b107ee29f3b2c87f830eea21d06f74c24a148",
+    "apps/gateway/src/zone_rpc/lease_failure_tests.rs": "b810bee32d6ea1e744a0ffa8d7a3526bca88a094eb26a8141c84f967b1f2a476",
+    "apps/gateway/src/economy/prepared_kill/runtime_bridge.rs": "4350cfbf97441ea16f6c1005745c480fb02040a9b3fffdcff3fd977437d09048",
+    "apps/gateway/src/economy/player_drop/mail_transfer_pg_tests.rs": "493803986b8a867c2d91bf56fd18b4c329a4337c27fe4e2935283ad9af539cc4",
+    "apps/gateway/src/routing/zone_save_operation.rs": "1f8283bb59f1f4213f003fda7d22e856da4f32b223994d443071b1b91a6fc144",
+    "apps/gateway/src/economy/player_drop/pg_tests.rs": "1b6faddfd6e6c9a685c559b2034cb6eb228ab516679274f41b9dd7808b254fcc",
+    "apps/gateway/src/lib.rs": "bf18270408d3bee0135358006a8c18bc854f34d8f4b68bbf3ffa72acbf9ebd1f",
+    "apps/gateway/src/economy.rs": "07560584963a07b760e3bcf70ead79061a85bf7f7f871c4300a5cf655c67af6c",
+    "apps/gateway/src/tcp.rs": "4e40ab80833956bb5e5bf0f5d036967ad57473cac07a4add9c8d0d35b0af4f31",
+    "apps/gateway/src/web_live_overflow_tests.rs": "7076f1f14f30734169181eb56593a47414b75cf08b7f55218b9f37de75fb3bd0",
+    "apps/gateway/src/economy/prepared_kill/tests.rs": "022518e7f7dfb99f4131c69e3ce1046212e79af0f065ab9306644227f5a60bdd",
+    "apps/gateway/src/zone_rpc/unknown_economy_freeze_tests.rs": "27265d467c44338e1706f360360bfa6f9b281eecf337101ac7d32ef9e4f48d7e"
+  },
+  "migrationsAppliedOnlyToOwnedLoopbackFixtures": [
+    "0024_mail_item_transfer_receipts"
+  ],
+  "selectedPassingExecutions": 182.0,
+  "limits": [
+    "filters may overlap; execution count is not unique coverage or CCU",
+    "public packet paths execute in process, not TCP or Windows UI",
+    "failed COMMIT injection is a real deferred constraint error, not native network loss",
+    "source callback Unknown classification is simulated",
+    "PG ExistingCustody claims and public multi-host issuers remain closed",
+    "no global per-UID current-holder proof, capacity or cost qualification",
+    "remote TEST, public updater, Docker and production charging unchanged"
+  ],
+  "selectedSourceCount": 62,
+  "explicitIgnoredPostgresFunctions": 15,
+  "atUtc": "2026-10-30T20:23:55.0247374Z"
+}

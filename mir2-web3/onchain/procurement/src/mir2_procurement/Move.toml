@@ -1,0 +1,18 @@
+[package]
+name = "mir2_procurement"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33", override = true }
+Dubhe = { git = "https://github.com/0xobelisk/dubhe.git", subdir = "framework/src/dubhe", rev = "04700a9a13e6f279be3709e84bf4ad24b4349af3" }
+
+[addresses]
+sui = "0x2"
+mir2_procurement = "0x0"
+
+[environments]
+testnet = "4c78adac"
+mainnet = "35834a8a"
+localnet = "d3e1a0e6"

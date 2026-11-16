@@ -1,0 +1,75 @@
+{
+  "schema": "mir2.r16.character-create-ui.v1",
+  "branch": "codex/windows-player-journey",
+  "scope": "isolated File, real browser controls and Gateway",
+  "gatewaySha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+  "primaryRealm": "platinum_fiveclass",
+  "classicRealm": "platinum_176",
+  "passed": true,
+  "checks": {
+    "rejection": {
+      "code": 1,
+      "draftHeld": true,
+      "generic": "请求失败，服务器未提供具体原因。",
+      "oldSelectionKept": true,
+      "fiveChoices": true
+    },
+    "retry": {
+      "twoTotalRequests": true,
+      "oldSlotRetained": true,
+      "selectedByServerIndex": true,
+      "actualWorldAndLogout": true
+    },
+    "lostReply": {
+      "serverCommit": true,
+      "timeoutReturnsToLogin": true,
+      "visibleNotice": true,
+      "reloginExactlyOnce": true
+    },
+    "cancel": {
+      "networkLeaseKept": true,
+      "lateSuccessSelected": true,
+      "fourUiSlots": true
+    },
+    "classic": {
+      "threeChoices": true,
+      "createdAndSelected": true
+    },
+    "disconnect": {
+      "serverCommit": true,
+      "oldSocketClosed": true,
+      "reloginExactlyOnce": true
+    }
+  },
+  "pageErrors": [],
+  "replyShape": {
+    "keys": [
+      "class",
+      "gender",
+      "index",
+      "lastAccessBinaryDatetime",
+      "level",
+      "name"
+    ],
+    "className": "Wizard",
+    "gender": "Female",
+    "level": 0,
+    "indexKind": "number",
+    "replyNameMatches": true,
+    "wireClass": "wizard",
+    "wireGender": "female",
+    "heldMs": 507
+  },
+  "afterReply": {
+    "login": false,
+    "select": true,
+    "game": false,
+    "slots": 2,
+    "selected": 1,
+    "loginNotice": false
+  },
+  "sharedServerAudit": {
+    "duplicateConfirmed": true,
+    "fifthConfirmed": true
+  }
+}

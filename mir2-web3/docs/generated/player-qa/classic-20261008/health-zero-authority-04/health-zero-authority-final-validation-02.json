@@ -1,0 +1,125 @@
+{
+  "baseline": "724e64dcf50e1119bf0d142f99274d96b6f38cd3",
+  "previous_source_receipt": "C:/mir2-build/health-zero-authority-final-source-hashes.json",
+  "previous_validation_receipt": "C:/mir2-build/health-zero-authority-final-validation.json",
+  "previous_receipts_unchanged": true,
+  "project": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3",
+  "target": "C:/mir2-build/health-zero-authority-20261008/native",
+  "files": [
+    {
+      "prior_sha256": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "changed_this_followup": false,
+      "sha256": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42"
+    },
+    {
+      "prior_sha256": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\packets.rs",
+      "changed_this_followup": false,
+      "sha256": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f"
+    },
+    {
+      "prior_sha256": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "changed_this_followup": false,
+      "sha256": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b"
+    },
+    {
+      "prior_sha256": "dd809bd54fb2941e6c7baa1dd348e5c27554163124591dfae438b220dc9b1edc",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gameplay_bridge.rs",
+      "changed_this_followup": true,
+      "sha256": "1cf229df6e333c4d0dce9861c2adebbba01424a52d80a63ba2a21398130cf213"
+    },
+    {
+      "prior_sha256": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\entity_health.rs",
+      "changed_this_followup": false,
+      "sha256": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce"
+    },
+    {
+      "prior_sha256": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\shared_zone.rs",
+      "changed_this_followup": false,
+      "sha256": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1"
+    },
+    {
+      "prior_sha256": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\health_zero_authority_tests.rs",
+      "changed_this_followup": false,
+      "sha256": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70"
+    },
+    {
+      "prior_sha256": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\health_zero_authority_tests.rs",
+      "changed_this_followup": false,
+      "sha256": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952"
+    },
+    {
+      "prior_sha256": "73838fa8f7727e49031c7d1d19b72765ed662b2f1518677f8ffa5b1d2456b467",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\health_zero_authority_tests.rs",
+      "changed_this_followup": true,
+      "sha256": "19c149b3b05361fc0e5c891dfa24a1bb051de447661f0e07c1d175ddeaf8d612"
+    },
+    {
+      "prior_sha256": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\health_zero_display_tests.rs",
+      "changed_this_followup": false,
+      "sha256": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098"
+    }
+  ],
+  "allowed_changed_files": 2,
+  "all_eight_other_round1_files_unchanged": true,
+  "health_from_percent_unchanged": true,
+  "source_contract": [
+    "Crystal Client/MirScenes/GameScene.cs:5103 ObjectHealth sets PercentHealth and HealthTime only",
+    "Crystal Client/MirScenes/GameScene.cs:3597 HealthChanged supplies absolute HP",
+    "Crystal Client/MirScenes/GameScene.cs:5031 Revived calls SetAction and sets User.Dead false"
+  ],
+  "behavior": [
+    "Typed snapshot exact root/self HP0 is captured before percentage normalization and remains0 absent an actual alive/new-life packet",
+    "Typed dead:true reaches both self and HUD HP0 without requiring accompanying Death/ObjectDied",
+    "Typed dead:false plus HP0 remains dead:false; exact zero does not synthesize death events",
+    "Explicit Revived, ObjectRevived and fresh live ObjectPlayer retain existing life precedence over stale old typed snapshot",
+    "Explicit current-owner Revived updates its old ObjectDied overlay using existing revive helper, so subsequent health is not discarded",
+    "Generation boundaries discard old revive authority"
+  ],
+  "test_runs": [
+    {
+      "log": "C:/mir2-build/health-zero-authority-02-01-native-snapshot-red.log",
+      "status": "retained_red_before_fix",
+      "passed": 7,
+      "failed": 6,
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml gameplay_bridge::health_zero_authority_tests -- --test-threads=1",
+      "sha256": "e88fce77f0cc4057198537cac95b045b3a3a016811fe021c0246afee237dce2d"
+    },
+    {
+      "log": "C:/mir2-build/health-zero-authority-02-02-native-snapshot-green.log",
+      "status": "green",
+      "passed": 13,
+      "failed": 0,
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml gameplay_bridge::health_zero_authority_tests -- --test-threads=1",
+      "sha256": "bb884dc1507ce8b431f7355bd08b27b746f028d7e14d9f52f3e9fbd173cc4541"
+    },
+    {
+      "log": "C:/mir2-build/health-zero-authority-02-03-native-bridge-adjacent.log",
+      "status": "green",
+      "passed": 102,
+      "failed": 0,
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml gameplay_bridge::tests -- --test-threads=1",
+      "sha256": "d28680db2d1fd427a3325cb04060027913caee37d97599a04e28bccfcd081944"
+    },
+    {
+      "log": "C:/mir2-build/health-zero-authority-02-04-native-display-adjacent.log",
+      "status": "green",
+      "passed": 7,
+      "failed": 0,
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml entity_health:: -- --test-threads=1",
+      "sha256": "a25549c444e57fae6fcf78c4ba7739e312b7404096a068e73f327b2e517abf5f"
+    }
+  ],
+  "limits": [
+    "Known baseline sleep fixture failure from Round1 remains unchanged",
+    "No source percentage formula/recipient/schema/signing change",
+    "No docs/commit/push/service/account/userclient or native app launch"
+  ]
+}

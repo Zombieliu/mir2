@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:37:32.189Z",
+  "scope": "Unsealed formal10 pure public HP status-count schema correction; no proof or game outcome is invented.",
+  "oldPreseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v2.json",
+    "bytes": 23401,
+    "sha256": "e8a7844e1c8dcf7279ebf464dd85c01372784e0919a0094d9a969399363a8c01"
+  },
+  "originalSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 12790,
+    "sha256": "d3deb53c016ddf206f6f003d31be83ce6f9970d67c359c3915841dddb0855f11"
+  },
+  "preservedPreimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-helper-v2.mjs.txt",
+    "bytes": 12790,
+    "sha256": "d3deb53c016ddf206f6f003d31be83ce6f9970d67c359c3915841dddb0855f11"
+  },
+  "newSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 12808,
+    "sha256": "724036a7f52f6c223519e5af7e4695df6586db846bc3097a2d0d41042e55c8ae"
+  },
+  "newSchema": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\hp-maintenance-status-schema.mjs",
+    "bytes": 1509,
+    "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+  },
+  "syntheticTest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-hp-status-schema.test.mjs",
+    "bytes": 4621,
+    "sha256": "6ee740d98b171f1080dbceebf400ccd1002bd1212df73dd7aeb95413d6b339fa"
+  },
+  "logicalChange": "Actual hp.observedStatuses is a finite status-to-nonnegative-safeint dictionary, including empty {}; verifiedEventsChecked equals verified count, successProofChecked means n>0, and noVerifiedDoseObserved means n===0.",
+  "sourceChanges": [
+    {
+      "kind": "new-pure-schema-import",
+      "text": "import {isHpMaintenanceEvidence} from './hp-maintenance-status-schema.mjs';\n"
+    },
+    {
+      "kind": "replace-predicate",
+      "before": "!Array.isArray(receipt.hp.observedStatuses)||typeof receipt.hp.successProofChecked!=='boolean'",
+      "after": "!isHpMaintenanceEvidence(receipt.hp)"
+    }
+  ],
+  "exactInverseRestoresOriginalBytes": true,
+  "otherPreviousLocalInputsUnchanged": 44,
+  "originalPolicyUnchanged": true,
+  "originalGameplayThresholdsUnchanged": true,
+  "zeroVerifiedDosesAllowed": true,
+  "doesNotReplayMissingSendCursorOrDeadline": true,
+  "diagnosticCompletenessNotGameplayGate": true,
+  "sourceGuardExecuted": false,
+  "gateInvoked": false,
+  "liveProbeRawRead": false,
+  "realmStarted": false,
+  "sealed": false
+}

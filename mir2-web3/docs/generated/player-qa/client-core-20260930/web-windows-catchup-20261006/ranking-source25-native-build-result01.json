@@ -1,0 +1,99 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T06:43:22.649Z",
+  "kind": "Source25 Native static build actual finite result",
+  "parentCommit": "6562c474a67cf1c377a600ae254997be744879b4",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-client-rust02-snapshot.json",
+    "bytes": 140262,
+    "sha256": "0bd80763db4840087ef60d30d0cde4488684a84e80d4bde899ed4db8393fee29"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-client-rust02-review.json",
+    "bytes": 1067,
+    "sha256": "f11146890072d12123488bf14150b79ea77af8b9ee3c489f0f7ec4a577c17000"
+  },
+  "postInputCount": 436,
+  "postInputDrift": 0,
+  "actual": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-build01.config.json",
+      "bytes": 4004,
+      "sha256": "b2b4605f2b92b4491c679a5a33339bac01fab6ae00e096558fa569959c2a4350"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-build01.outer.json",
+      "bytes": 449,
+      "sha256": "5492e7f06263dc5039912ca6bea3818d89329646089ad94ea1aefcd618838324"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-build01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-build01.stderr.log",
+      "bytes": 53558,
+      "sha256": "626fdc23fd4829bf915dc476c7c739d81a766ded5781d89bfb6b3d9bd6d947f1"
+    },
+    "outerData": {
+      "owner": "Root",
+      "exitCode": 0,
+      "guardPid": 126048,
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 709714,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-build01.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "artifact": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows/debug/mir2-platform-windows.exe",
+      "bytes": 104700416,
+      "sha256": "3c1924e53bc9f549360d2eb5faf29b6852ead96b9fa6621d6b40eddafc0316eb"
+    }
+  },
+  "toolReturn": {
+    "chunk_id": "332ff9",
+    "wall_time_seconds": 0.0000079,
+    "exit_code": 0,
+    "original_token_count": 663,
+    "output": "{\r\n  \"owner\": \"Root\",\r\n  \"exitCode\": 0,\r\n  \"guardPid\": 126048,\r\n  \"exited\": true,\r\n  \"disposed\": true,\r\n  \"elapsedMs\": 709714,\r\n  \"configPath\": \"C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-native-build01.config.json\",\r\n  \"uiOperated\": false,\r\n  \"runtimeLaunched\": false,\r\n  \"networkUsed\": false,\r\n  \"productionBuildAccepted\": false,\r\n  \"candidateAccepted\": false,\r\n  \"goalComplete\": false\r\n}\r\nc\\input.rs:1086:8\n     |\n1086 | pub fn is_pointer_captured_for_movement(\n     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `direction_to_delta` is never used\n    --> src\\input.rs:3892:4\n     |\n3892 | fn direction_to_delta(direction: &str) -> (i32, i32) {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: method `cell_blocks_movement` is never used\n   --> src\\map_parser.rs:137:8\n    |\n119 | impl ParsedMapCache {\n    | ------------------- method in this implementation\n...\n137 |     fn cell_blocks_movement(&mut self, key: &str, x: i32, y: i32) -> Option<bool> {\n    |        ^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `resolve_map_tile_draws` is never used\n   --> src\\map_parser.rs:613:8\n    |\n613 | pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {\n    |        ^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: method `retains_cell` is never used\n    --> src\\map_parser.rs:1169:19\n     |\n1125 | impl MapViewport {\n     | ---------------- method in this implementation\n...\n1169 |     pub(crate) fn retains_cell(self, x: i32, y: i32) -> bool {\n     |                   ^^^^^^^^^^^^\n\nwarning: function `map_cell_blocks_movement` is never used\n    --> src\\map_parser.rs:1557:8\n     |\n1557 | pub fn map_cell_blocks_movement(map_file_name: &str, x: i32, y: i32) -> Option<bool> {\n     |        ^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `fishing_attribute` is never used\n    --> src\\map_parser.rs:2822:15\n     |\n2822 | pub(crate) fn fishing_attribute(map_file_name: &str, x: i32, y: i32) -> Option<u8> {\n     |               ^^^^^^^^^^^^^^^^^\n\nwarning: function `capture_light_state_for_map` is never used\n   --> src\\lighting.rs:165:15\n    |\n165 | pub(crate) fn capture_light_state_for_map(map_file_name: &str) -> Option<String> {\n    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `capture_light_state_slug` is never used\n   --> src\\lighting.rs:175:4\n    |\n175 | fn capture_light_state_slug(\n    |    ^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: `mir2-platform-windows` (bin \"mir2-platform-windows\") generated 39 warnings (run `cargo fix --bin \"mir2-platform-windows\" -p mir2-platform-windows` to apply 4 suggestions)\n    Finished `dev` profile [optimized + debuginfo] target(s) in 11m 48s\n\r\n"
+  },
+  "independentActualReview": {
+    "reviewer": "/root/source24_actual_result_review",
+    "accepted": true,
+    "confirmedBlockers": 0,
+    "input436Matched": true,
+    "artifactMatched": true,
+    "guardPinsMatched": true,
+    "actualVolumeCBytes": 458840973312,
+    "thresholdBytes": 53687091200,
+    "conservativeFreshnessMs": 75,
+    "maxFreshnessMs": 2000,
+    "postChildPolicy": "B",
+    "childExitCode": 0,
+    "exited": true,
+    "disposed": true
+  },
+  "limitations": [
+    "Static native compilation only, artifact not launched.",
+    "Source25 Gateway/renderer/Next/Thin final package not yet complete.",
+    "No UI, HTTP/socket, WASM API/instance, real login/combat/save/relogin, mobile or player acceptance.",
+    "Bounded317 audit rows are not a full-goal percentage denominator."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkGameUsed": false,
+  "wasmApiUsed": false,
+  "staticNativeBuildAccepted": true,
+  "productionDeploymentAccepted": false,
+  "candidate100": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

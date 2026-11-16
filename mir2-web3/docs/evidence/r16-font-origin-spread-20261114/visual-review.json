@@ -1,0 +1,37 @@
+{
+  "reviewedAt": "2026-11-14T06:34:22.749717+00:00",
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "passedForScope": true,
+  "images": [
+    {
+      "name": "default-en-hud.png",
+      "sha256": "a1508bd762e284e0e3e5e494a879f56ec7761fba5eb51587660776f4d956ed47",
+      "bytes": 1385532,
+      "reviewed": true
+    },
+    {
+      "name": "default-en-vendor-arrival.png",
+      "sha256": "1d9e58ff071ea02590e335f56e58007be066d604462335434b1de2b743bd33ac",
+      "bytes": 1397167,
+      "reviewed": true
+    },
+    {
+      "name": "shared-gl2-tw-hud.png",
+      "sha256": "920106a0308ad2f1884ef5d8b9119d4cb79e803c1a05dd7babc5ac49d018abcd",
+      "bytes": 1389667,
+      "reviewed": true
+    },
+    {
+      "name": "shared-gl2-tw-vendor-arrival.png",
+      "sha256": "61cab893664f669365fd361c1d5f61797b62c827469fa9f6cfd4d4c7ad266baf",
+      "bytes": 1423120,
+      "reviewed": true
+    }
+  ],
+  "scope": "Root viewed all four actual screenshots. Shared HUD and route/vendor endpoint render in English and Traditional Chinese. Complete font bytes retained; text/pixel1:1 with Windows is still open.",
+  "remainingVisible": [
+    "English attack-mode overlay and supply currency row still include Chinese",
+    "NPC raw titles and Traditional Chinese alias line wrapping need Windows comparison"
+  ],
+  "notHumanAcceptance": true
+}

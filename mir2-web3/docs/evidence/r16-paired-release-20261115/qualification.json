@@ -1,0 +1,461 @@
+{
+  "schema": "mir2.r16-paired-release-qualification.v1",
+  "source": "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+  "controller": "39832d328e40406257942f1b9385a823effd8c07",
+  "candidate": "dpl_CKPpQfDV7GJsWDvdZ5tWtyUvoHzj",
+  "sourceClosure": {
+    "base": "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+    "commits": 15,
+    "files": 105
+  },
+  "releaseGuard": {
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0
+  },
+  "linux": {
+    "source": "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+    "workflowRun": 43677385790,
+    "artifact": 14147367864,
+    "downloadCompleted": true,
+    "artifactZipDigestDeclaredByGitHub": "684244643bee401e763185f8dbbbf342e4f6b6f7d3b99df3f56fe0b89d19980e",
+    "artifactZipDigestLocallyChecked": false,
+    "allPackageFilesShaVerified": 1841,
+    "sharedZoneTests": 303,
+    "gatewaySharedZoneTests": 33,
+    "nativePostgresTests": 216,
+    "docker": false,
+    "gateway": {
+      "bytes": 93454400,
+      "sha256": "ce04a5ce3525700616aa7f8d18aa15d9eeea79d254f5c62d473d42bfc1513808",
+      "elf": "64-bit little-endian x86_64"
+    },
+    "productionInstalled": false,
+    "publicBrowserAcceptance": false,
+    "temporaryProductionInstallationPassed": true,
+    "productionRetained": false,
+    "scope": "Selected shared Zone and native PostgreSQL/billing checks, not a whole-workspace or CCU qualification."
+  },
+  "web": {
+    "stageRun": 43677749313,
+    "checkRun": 43678298342,
+    "promoteRun": 43682171174,
+    "stageAndIndependentCheckPassed": true,
+    "protectedEntryGroups": 15,
+    "publicEntryGroups": 15,
+    "publicPendingQr": true,
+    "originalResourcePinsChanged": false
+  },
+  "isolation": {
+    "cloneRestored": true,
+    "ordinaryRegistration": true,
+    "ordinaryPasswordLogin": true,
+    "normalNewCharacter": true,
+    "map": "0",
+    "initialLocation": {
+      "x": 288,
+      "y": 616
+    },
+    "authoritativeMovedLocation": {
+      "x": 288,
+      "y": 617
+    },
+    "movementMs": 99.704,
+    "neutralMonsterWalkCount": 1,
+    "normalLogouts": 2,
+    "sameRoleReentry": true,
+    "savedLocationPreserved": true,
+    "originalRowsUnchanged": {
+      "accounts": {
+        "rows": 307,
+        "canonicalBytes": 2278456,
+        "sha256": "24aa9f1452cb576235ebabfb407cb0eb95bf26e86df495621195e58908cbf04f"
+      },
+      "characters": {
+        "rows": 219,
+        "canonicalBytes": 73925,
+        "sha256": "36f7a9d849f77fc83411d33e6562870c65d5afeeef89fc3a1f2433732a5ed5cf"
+      },
+      "character_saves": {
+        "rows": 219,
+        "canonicalBytes": 2564373,
+        "sha256": "5cc9c8c2d68dbc1600fe9dfd17f93f6db73579e82d9daeb8136cf2f96b6cd050"
+      }
+    },
+    "debugCommandsSent": 0,
+    "canaryServicesStopped": true
+  },
+  "deployment": {
+    "backendChangedOnlyEnvironmentKeys": [
+      "MIR2_DEPLOY_REVISION"
+    ],
+    "originalConfigurationFilesUnchanged": 22,
+    "originalRowsUnchangedAtSwitch": {
+      "accounts": {
+        "rows": 307,
+        "canonicalBytes": 2278456,
+        "sha256": "24aa9f1452cb576235ebabfb407cb0eb95bf26e86df495621195e58908cbf04f"
+      },
+      "characters": {
+        "rows": 219,
+        "canonicalBytes": 73925,
+        "sha256": "36f7a9d849f77fc83411d33e6562870c65d5afeeef89fc3a1f2433732a5ed5cf"
+      },
+      "character_saves": {
+        "rows": 219,
+        "canonicalBytes": 2564373,
+        "sha256": "5cc9c8c2d68dbc1600fe9dfd17f93f6db73579e82d9daeb8136cf2f96b6cd050"
+      }
+    },
+    "frontendTemporarilyPromoted": true,
+    "backendTemporarilyInstalled": true,
+    "finalPublicAcceptance": false
+  },
+  "publicR1": {
+    "classification": {
+      "kind": "r16-original-public-acceptance",
+      "accepted": false,
+      "checks": {
+        "exactSource": true,
+        "completeFunctionalRun": false,
+        "walletLoginOnly": true,
+        "movementOriginalEightSeconds": true,
+        "sixCompleteFonts": true,
+        "complete113": false,
+        "sharedNativeQuest": false,
+        "originalNative120": false,
+        "originalRuntimeBody120": false,
+        "workerRestart": true,
+        "normalLogout": true,
+        "bothBrowsersClosed": true
+      },
+      "source": "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+      "deploymentId": "dpl_CKPpQfDV7GJsWDvdZ5tWtyUvoHzj",
+      "originalMoveBudgetMs": 8000,
+      "originalNativeBudgetMs": 120000,
+      "nativeAfterFirstFrameMs": null,
+      "runtimeBodyAfterFirstFrameMs": 138163,
+      "supplementary180ObservationChangesOriginalBudget": false,
+      "wholeParityAccepted": false
+    },
+    "firstFailure": {
+      "phase": "inspect-world-paint",
+      "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-monster-walking"
+    },
+    "movement": {
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "ackMs": 571,
+      "originalEightSecondGate": true
+    },
+    "firstPlayableFrameMs": 90036,
+    "walkingDelivery": {
+      "passed": false,
+      "source": "not-observed",
+      "originalJsonBodyObserved": false,
+      "originalJsonAttempts": [
+        {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "kind": "entry-monster-walking",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 90033,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 530467,
+          "redirected": false,
+          "status": 200,
+          "mime": "application/json",
+          "headersAfterMs": 1192,
+          "fromServiceWorker": false,
+          "fromDiskCache": false,
+          "protocol": "h2",
+          "cache": "DYNAMIC",
+          "vercelCache": "MISS",
+          "cors": "wildcard",
+          "lastDataAfterMs": 11400,
+          "failAfterMs": 19401,
+          "failed": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "corsError": null
+        },
+        {
+          "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+          "kind": "entry-monster-walking",
+          "lane": "game-origin",
+          "queryless": true,
+          "requestMs": 109634,
+          "initiator": "script",
+          "priority": "High",
+          "bytes": 0,
+          "redirected": false,
+          "failAfterMs": 20005,
+          "failed": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "corsError": null
+        }
+      ],
+      "compiledVerified": false,
+      "livePackedWalkingObserved": false,
+      "compiledWalkingQualified": false,
+      "expectedJsonBytes": 764724,
+      "expectedPayloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "compiled": null,
+      "publication": {
+        "status": "not-started",
+        "frames": [],
+        "qualificationBeforeMs": 158517
+      },
+      "scope": "Equivalent full walking payload plus>=1 live visible exact-PNG DOM frame only for the compiled alternative; original JSON failures retained; no pure-GPU/all-directions/authoritative-animation claim."
+    },
+    "completeCompiledFallbackObservedLater": [
+      {
+        "kind": "walking",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.3fa6bc4ce2b84e3d.js",
+        "queryless": false,
+        "requestedMs": 129637,
+        "bytes": 764839,
+        "redirected": false,
+        "status": 200,
+        "protocol": "h2",
+        "mime": "application/javascript",
+        "diskCache": false,
+        "serviceWorker": false,
+        "networkCompleteMs": 234215,
+        "finishedMs": 234226,
+        "encodedBytes": 529746,
+        "passed": true,
+        "scriptBytes": 764839,
+        "scriptSha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+        "jsonBytes": 764724,
+        "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "uniquePayloads": 1,
+        "counts": {
+          "pngs": 240,
+          "libraries": 5,
+          "frames": 240,
+          "directions": 8,
+          "framesPerDirection": 6
+        },
+        "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+        "verifiedMs": 234270
+      }
+    ],
+    "runtimeRows": [
+      {
+        "scope": "expectedBevyRuntime",
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "requestOrdinal": 4,
+        "requestedMs": 90138,
+        "decodedBytes": 0,
+        "encodedBytes": 0,
+        "failure": "net::ERR_ABORTED",
+        "failureMs": 98139
+      },
+      {
+        "scope": "expectedBevyRuntime",
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "requestOrdinal": 5,
+        "requestedMs": 98139,
+        "decodedBytes": 0,
+        "encodedBytes": 0,
+        "failure": "net::ERR_ABORTED",
+        "failureMs": 106142
+      },
+      {
+        "scope": "expectedBevyRuntime",
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "requestOrdinal": 6,
+        "requestedMs": 106142,
+        "decodedBytes": 31452436,
+        "encodedBytes": 6026630,
+        "status": 200,
+        "ttfbMs": 81765,
+        "headersMs": 187907,
+        "responseEventMs": 187907,
+        "responseTiming": {
+          "scope": "browser-network-response",
+          "connectionReused": true,
+          "requestTimeFromRequestEventMs": 0.466,
+          "offsetsMs": {
+            "proxyStart": null,
+            "proxyEnd": null,
+            "dnsStart": null,
+            "dnsEnd": null,
+            "connectStart": null,
+            "connectEnd": null,
+            "sslStart": null,
+            "sslEnd": null,
+            "workerStart": null,
+            "workerReady": null,
+            "workerFetchStart": null,
+            "workerRespondWithSettled": null,
+            "sendStart": 0.098,
+            "sendEnd": 0.148,
+            "receiveHeadersStart": 81763.867,
+            "receiveHeadersEnd": 81763.933
+          },
+          "firstHeadersAfterRequestMs": 81764.333,
+          "completeHeadersAfterRequestMs": 81764.399,
+          "beforeSendAfterRequestMs": 0.564,
+          "sendToHeadersMs": 81763.719,
+          "firstHeadersMs": 187906.333,
+          "completeHeadersMs": 187906.399
+        },
+        "protocol": "h2",
+        "serviceWorker": false,
+        "diskCache": false,
+        "contentEncoding": "br",
+        "edgeCache": "DYNAMIC",
+        "functionCache": "HIT",
+        "firstDataMs": 188106,
+        "lastDataMs": 228201,
+        "transferMs": 122057,
+        "bodyCompleteMs": 228199,
+        "totalEncodedBytes": 6026763
+      }
+    ],
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    },
+    "browserClosed": true,
+    "secondCohort": {
+      "prepared": true,
+      "executed": false,
+      "reason": "The first full cohort failed its original gates; no unchanged reissue."
+    },
+    "scope": "Internal Testnet QA wallet in ordinary desktop Chrome plus phone-sized official wallet browser; not a physical phone, independent customer, all-renderer, or all-gameplay acceptance."
+  },
+  "finalProduction": {
+    "webSource": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "webDeployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "gatewaySource": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "rollbackRun": 43683010083,
+    "oldGatewayBinarySha256": "11fc151644ecb75ccb5a86789cefb2010a062ef48c3a9ddfd5ccf29b67dfe926",
+    "databaseRestored": false,
+    "postRollbackData": {
+      "accounts": {
+        "originalRows": 307,
+        "currentRows": 308,
+        "additionalRows": 1,
+        "missingOriginalRows": 0,
+        "changedOriginalRows": 0,
+        "originalSubsetSha256": "24aa9f1452cb576235ebabfb407cb0eb95bf26e86df495621195e58908cbf04f",
+        "baselineSha256": "24aa9f1452cb576235ebabfb407cb0eb95bf26e86df495621195e58908cbf04f"
+      },
+      "characters": {
+        "originalRows": 219,
+        "currentRows": 220,
+        "additionalRows": 1,
+        "missingOriginalRows": 0,
+        "changedOriginalRows": 0,
+        "originalSubsetSha256": "36f7a9d849f77fc83411d33e6562870c65d5afeeef89fc3a1f2433732a5ed5cf",
+        "baselineSha256": "36f7a9d849f77fc83411d33e6562870c65d5afeeef89fc3a1f2433732a5ed5cf"
+      },
+      "character_saves": {
+        "originalRows": 219,
+        "currentRows": 220,
+        "additionalRows": 1,
+        "missingOriginalRows": 0,
+        "changedOriginalRows": 0,
+        "originalSubsetSha256": "5cc9c8c2d68dbc1600fe9dfd17f93f6db73579e82d9daeb8136cf2f96b6cd050",
+        "baselineSha256": "5cc9c8c2d68dbc1600fe9dfd17f93f6db73579e82d9daeb8136cf2f96b6cd050"
+      }
+    },
+    "configurationFilesUnchanged": 22,
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "canaryActive": {
+      "mir2-r16-aa524edc76-canary-gateway": false,
+      "mir2-r16-aa524edc76-canary-redis": false
+    },
+    "readback": {
+      "checkedAt": "2026-11-15T06:02:51.566Z",
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "rollbackQr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+      "realMatrix": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "creates": 1,
+      "normalCancel": true,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+      "realMatrix": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "creates": 1,
+      "normalCancel": true,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    }
+  ],
+  "preservedForeignWip": {
+    "checkedAt": "2026-11-15T06:10:25.692Z",
+    "baselineSource": "e9aa44751e4ffc1d91a926f22fb8175f585be088",
+    "checked": 30,
+    "preserved": 29,
+    "changes": [
+      "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md"
+    ],
+    "scope": "The capacity evidence document has continued independent edits; it was not overwritten or reverted by this release work."
+  },
+  "overallCandidate100": false,
+  "overallAccepted100": false,
+  "physicalPhoneAccepted": false,
+  "ccuQualification": false,
+  "remaining": [
+    "First walking HTTP body stalls and slow complete fallback delivery",
+    "Native response-header wait and full original font scheduling",
+    "More quest/hunt targets, maps and disconnections",
+    "Three classes natural level 1–30",
+    "Alo cross-platform/model lifecycle",
+    "Loading overlay over HP, mixed language and other known visual gaps",
+    "Windows window and physical phone acceptance"
+  ]
+}

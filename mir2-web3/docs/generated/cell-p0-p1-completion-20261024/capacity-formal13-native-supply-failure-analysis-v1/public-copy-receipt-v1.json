@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T20:50:17.442Z",
+  "scope": "Explicit ended public originals only, byte copies; metadata README additions do not change any original catalog or verification.",
+  "runId": "1792959622496-365f0175",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-native-supply-failure-public-archive-v1\\public-whitelist-v1.json",
+    "bytes": 14767,
+    "sha256": "4ab1f3a2b02b74d928934695e5356e820ef6892e9c71353158128cab95393508"
+  },
+  "copyHelper": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-native-supply-failure-public-archive-v1\\copy-public-v1.mjs",
+    "bytes": 6791,
+    "sha256": "fa674cfaada7659576441386feda72e3b7bfffb09550fb4085a2c55beca7f518"
+  },
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1",
+  "originalFiles": 18,
+  "originalBytes": 308864,
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-actual-terminal-independent-facts-v1.json",
+        "bytes": 10026,
+        "sha256": "0db4c38c85153d170de995989451495ea853d491b3e7c11125a3909b465751f0"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\facts\\formal13-actual-terminal-independent-facts-v1.json",
+        "bytes": 10026,
+        "sha256": "0db4c38c85153d170de995989451495ea853d491b3e7c11125a3909b465751f0"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-root-independent-cleanup-v1.json",
+        "bytes": 409,
+        "sha256": "1daaa6cb91e6554da86bed13a977bc2f75f59fb27f2e70b41ca4be80cff3d1e1"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\facts\\formal13-root-independent-cleanup-v1.json",
+        "bytes": 409,
+        "sha256": "1daaa6cb91e6554da86bed13a977bc2f75f59fb27f2e70b41ca4be80cff3d1e1"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-report-failure-analysis-v1\\analysis-v1.json",
+        "bytes": 42280,
+        "sha256": "a71c159e87ed0fd1b88c94d69d768addd233aa589ef236369815d7e48fa8af1e"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\report-analysis\\analysis-v1.json",
+        "bytes": 42280,
+        "sha256": "a71c159e87ed0fd1b88c94d69d768addd233aa589ef236369815d7e48fa8af1e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-wait-analysis-v1\\analysis-v1.json",
+        "bytes": 24819,
+        "sha256": "8d7ff05c9f0ace2a05a00b0871fa50beeacb811c275005caebda6bfed565eaf5"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\store-analysis\\analysis-v1.json",
+        "bytes": 24819,
+        "sha256": "8d7ff05c9f0ace2a05a00b0871fa50beeacb811c275005caebda6bfed565eaf5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public.mjs",
+        "bytes": 43271,
+        "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public.mjs",
+        "bytes": 43271,
+        "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2.mjs",
+        "bytes": 43374,
+        "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public-current50-v2.mjs",
+        "bytes": 43374,
+        "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2-derivation-v1.json",
+        "bytes": 2392,
+        "sha256": "a08201cea196ca8434195201a11f5f05bfc42fb277aae7f42cc5be9a6c56418f"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public-current50-v2-derivation-v1.json",
+        "bytes": 2392,
+        "sha256": "a08201cea196ca8434195201a11f5f05bfc42fb277aae7f42cc5be9a6c56418f"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-post-collector-independent-review-v1\\review-v2.json",
+        "bytes": 1994,
+        "sha256": "b9973e5f2065b19a646407e326528958631f4a77b283099ff43942249b7decc1"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\review-v2.json",
+        "bytes": 1994,
+        "sha256": "b9973e5f2065b19a646407e326528958631f4a77b283099ff43942249b7decc1"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-post-collector-independent-review-v1\\review-v1.json",
+        "bytes": 6,
+        "sha256": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\review-v1.json",
+        "bytes": 6,
+        "sha256": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-execution-v1.json",
+        "bytes": 813,
+        "sha256": "1455f843604b6a826f2e461667e1ebf6b82afdc44e6c19d19e5cde0fd3d14813"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-execution-v1.json",
+        "bytes": 813,
+        "sha256": "1455f843604b6a826f2e461667e1ebf6b82afdc44e6c19d19e5cde0fd3d14813"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-stdout-v1.log",
+        "bytes": 132826,
+        "sha256": "221b99478b2fd446966a3f29fff4c90f42f39be7dd215897120f9a1734dac985"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-stdout-v1.log",
+        "bytes": 132826,
+        "sha256": "221b99478b2fd446966a3f29fff4c90f42f39be7dd215897120f9a1734dac985"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-verification-stdout-v1.log",
+        "bytes": 5017,
+        "sha256": "ea47fbbe35c0de602731cabfa393e0ad6b6a3ef6388b17d45cd973b457cb8cfc"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-verification-stdout-v1.log",
+        "bytes": 5017,
+        "sha256": "ea47fbbe35c0de602731cabfa393e0ad6b6a3ef6388b17d45cd973b457cb8cfc"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-collection-stdout-v1.log",
+        "bytes": 393,
+        "sha256": "77a89f6c51729ddd5684ce2be25c1426c372bb3e4c0c3c601729b606f0f95a78"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-collection-stdout-v1.log",
+        "bytes": 393,
+        "sha256": "77a89f6c51729ddd5684ce2be25c1426c372bb3e4c0c3c601729b606f0f95a78"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "cd7acecf0ded42bbdda38c20b29b991db8df106bb579eac55a5bc62d3ced6eef"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "cd7acecf0ded42bbdda38c20b29b991db8df106bb579eac55a5bc62d3ced6eef"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "whitelistCopy": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\public-whitelist-v1.json",
+    "bytes": 14767,
+    "sha256": "4ab1f3a2b02b74d928934695e5356e820ef6892e9c71353158128cab95393508"
+  },
+  "generatedReadmes": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "bytes": 2200,
+      "sha256": "55a63080a5467fd3e9bc0669c1a59e20b02e267bd193078156828194d8aae4a9"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "bytes": 1233,
+      "sha256": "821c4e15234d35411d0ee9ba2e15d3af36ce8d57ebc14a27fbd878c6fb04757b"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "bytes": 1066,
+      "sha256": "d71dda666d58b98ff032bc29519480b227752dbd563d1176f8008b32ef54cfeb"
+    }
+  ],
+  "linkChecks": 27,
+  "existingPublicRefsVerified": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json",
+      "bytes": 65388,
+      "sha256": "f96df32acb661959bd36c402710b4f7cac2ea91bfb6f634be977cd5cad6fbe44"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\public-verification.json",
+      "bytes": 7105,
+      "sha256": "392c37e6d3035bb35717fd1668f581e0cb6c68447a59e1a7d351109da8445389"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-public-verification.json",
+      "bytes": 1426,
+      "sha256": "e4a7c66ff54fe439b230036389843705c8cc753260aee44c40fa0400b94cf081"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-artifact-catalog.json",
+      "bytes": 5157,
+      "sha256": "98037f21748c1d866764a94ba6574d1d2ee240eb936abd8e1a389075e1a2315e"
+    }
+  ],
+  "sourceBeforeAfterRawEqual": true,
+  "gameplayVerdictModified": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "rawMonitorRecordingPrivateOrExecutableCopied": false
+}

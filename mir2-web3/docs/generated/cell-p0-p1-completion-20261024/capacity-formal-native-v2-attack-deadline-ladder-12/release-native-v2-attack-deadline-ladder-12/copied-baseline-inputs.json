@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "scope": "Frozen Formal11 original146 policy/resource/scene/window/HP body plus Probe16 new44/current210 shared modules. No actual Probe16 PASS or source compatibility beyond the existing three-function proof is inferred.",
+  "policyBasis": "policy-basis-v1.json",
+  "runtimeDerivation": "runtime-derivation-v2.json",
+  "pendingSafety": "pending-safety-adjustment-v3.json",
+  "sceneNamespace": "scene-evidence-namespace-inverse-v4.json",
+  "scenarioReadinessRawCopy": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    "target": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    "rawExact": true
+  },
+  "knownActualPrerequisites": "known-actual-prerequisites-v2.json",
+  "futureProbe16Pending": true,
+  "capacityAccepted": false
+}

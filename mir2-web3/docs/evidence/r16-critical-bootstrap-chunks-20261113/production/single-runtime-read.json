@@ -1,0 +1,80 @@
+{
+  "kind": "one-fixed-cdn-runtime-read-without-game",
+  "startedAt": "2026-11-13T09:48:35.754Z",
+  "origin": "https://numeron.obelisk.build",
+  "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+  "runtime": "bevy-0c553a754308e5b8",
+  "expectedBytes": 31452436,
+  "expectedSha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+  "passed": true,
+  "removedProxyEnvironmentNames": [
+    "ALL_PROXY",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "NO_PROXY"
+  ],
+  "scope": "One intentional immutable WASM GET in a fresh default-network Chrome context after plain /version; no game, wallet, bootstrap, fonts, Worker registration, glue, compilation or App. Isolated transport viability only, not game qualification or proof of an HTTP2 cause.",
+  "budgets": {
+    "totalMs": 120000,
+    "positiveByteIdleMs": 15000,
+    "maxBytes": 33554432
+  },
+  "requests": [
+    {
+      "atMs": 2123,
+      "initialPriority": "High",
+      "bytes": 31452436,
+      "encodedDataBytes": 6443034,
+      "status": 200,
+      "headersMs": 2561,
+      "protocol": "h2",
+      "cache": false,
+      "serviceWorker": false,
+      "timing": {
+        "requestTime": 111710.412124,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": 0.068,
+        "connectEnd": 312.334,
+        "sslStart": 0.565,
+        "sslEnd": 312.329,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 312.42,
+        "sendEnd": 312.467,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 437.048,
+        "receiveHeadersEnd": 437.111
+      },
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "gzip",
+        "cache-control": "public, max-age=31536000",
+        "age": "30678",
+        "cf-cache-status": "HIT",
+        "access-control-allow-origin": "*"
+      },
+      "firstDataMs": 2591,
+      "maxDataGapMs": 718,
+      "lastDataMs": 57885,
+      "finishMs": 57930,
+      "encodedTotalBytes": 6443516
+    }
+  ],
+  "browserClosed": true,
+  "applicationVersion": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "read": {
+    "passed": true,
+    "bytes": 31452436,
+    "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "headerAfterMs": 438.20000000298023,
+    "durationMs": 55806.5
+  },
+  "workersObserved": 0,
+  "finishedAt": "2026-11-13T09:49:33.789Z"
+}

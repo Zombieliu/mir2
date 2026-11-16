@@ -1,0 +1,72 @@
+{
+  "owner": "Root",
+  "kind": "Source73 normal saved logout and exact-owned stop before Source74 replacement",
+  "oldConfig": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3006,
+    "sha256": "3991ef8fae4161f3577962b07b6a28d84570f55e10fd4fa642da14eb1ba8f3df"
+  },
+  "oldRuntimeSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/runtime-preparation01/runtime-snapshot01.json",
+    "bytes": 3621648,
+    "sha256": "458cc89933ae6ec26bf76da85726c5902aad0efe98992c08d4927924ca73645d"
+  },
+  "normalUiBeforeStop": {
+    "visibleBagIcons": 5,
+    "visibleWarehouseIcons": 0,
+    "visibleGold": 180,
+    "ordinaryWindowsClose": true,
+    "normalAltXSaveLogout": true,
+    "loginScreenObserved": true,
+    "credentialsHidden": true
+  },
+  "exactOwnedStop": {
+    "childPid": 84876,
+    "parentPid": 55916,
+    "publicServerArgumentMatched": true,
+    "originalCallerConfigMatched": true,
+    "gatewayStopped": false
+  },
+  "originalCaller": {
+    "sessionId": 55613,
+    "closed": true,
+    "callerExitCode": -1,
+    "expectedOwnedStopExit": true,
+    "postExitFullInputGuardCompleted": true,
+    "inputs": 4419
+  },
+  "actualProduct": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 84876,
+    "kind": "Source73 actual original caller local Web canonical warehouse skins and portable default roots",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 3892898,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/web-start01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "outer": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/runtime-start01/outer.json",
+    "bytes": 561,
+    "sha256": "706ddb6e0099ce7c64e73688874647c719f07088566d3c4de61ff3f67a8fb42a"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/runtime-start01/stdout.log",
+    "bytes": 117,
+    "sha256": "274297c61c29155ff784e9ab9cbe5cf1e002c600d7d2045746d64c76c1997de5"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/runtime-start01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "activeProductLogsRead": false,
+  "noPrivateGatewayConfigurationRead": true,
+  "noCredentialFileRestored": true
+}

@@ -1,0 +1,14 @@
+{
+  "pid": 1603447,
+  "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "privateBackup": "/var/backups/mir2-playtest/r16-hud-ef6d20c095-20261115T172524Z",
+  "dumpSha256": "aaf8b8190e7732c4566f93f5e1e05cbfc1cadaa190c8ae997c73882df0eb9f2c",
+  "rows": {
+    "accounts": 311,
+    "characters": 223,
+    "character_saves": 223
+  },
+  "configFiles": 22,
+  "sameExportedSnapshot": true,
+  "productionServiceRestarted": false
+}

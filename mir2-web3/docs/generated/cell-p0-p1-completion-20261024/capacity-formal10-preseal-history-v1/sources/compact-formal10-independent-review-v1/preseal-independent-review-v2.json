@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T07:34:37.1561233Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Independent read-only static formal10 preseal v2 review. No target imports, tests, sourceguard, fresh gate, live probe raw, account provisioning, process or realm was executed/read.",
+  "targetDirectory": "C:/mir2-build/p01-completion-20261024/formal-native-v2-compact-wire-ladder-10",
+  "preseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v2.json",
+    "bytes": 23401,
+    "sha256": "e8a7844e1c8dcf7279ebf464dd85c01372784e0919a0094d9a969399363a8c01"
+  },
+  "schemaNormalization": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-schema-normalization-v2.json",
+    "bytes": 2294,
+    "sha256": "f11264385096e5029e4460d71be2546c910010b654c20a91dd625425a6898808"
+  },
+  "successHelper": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 12790,
+    "sha256": "d3deb53c016ddf206f6f003d31be83ce6f9970d67c359c3915841dddb0855f11"
+  },
+  "producerSchemaSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\verify-ended-probe13.mjs",
+    "bytes": 23135,
+    "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+  },
+  "coreProductSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+    "bytes": 144416,
+    "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+  },
+  "checklist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal10-independent-review-v1\\preseal-review-checklist-v1.json",
+    "bytes": 8915,
+    "sha256": "c303e843cc61f2e8065202a2cecc9cb5f33fdf98e3f133c1d7b34c8f1e348a9b"
+  },
+  "rawClosure": {
+    "localFiles": 45,
+    "verifiedLocalRawPins": 45,
+    "rawMismatches": 0,
+    "reviewedSourceSha256": "d8ea365be731c47e79241f73a4e19d7e8dc74a654fdd19464c88b37833f0bd44",
+    "comparedToPresealV1": {
+      "unchangedFiles": 44,
+      "changedFiles": [
+        "verify-probe13-collected-evidence.mjs"
+      ]
+    },
+    "normalizationForwardAndInverseExact": true,
+    "replacementCounts": [
+      3,
+      1
+    ],
+    "originalHelperBytes": 12722,
+    "originalHelperSha256": "ec35d95b35565f0082434e1c76e4b795c356264f43dde1978c4272cc8b96caf1",
+    "onlyChanges": [
+      "receipt.HP -> receipt.hp, exactly three occurrences",
+      "independent terminal object equality -> fixed realm-relative path and exact bytes/SHA, exactly one occurrence"
+    ]
+  },
+  "checks": {
+    "hpLowerCamelMatchesActualProducer": true,
+    "terminalRelativePathExact": true,
+    "terminalRelativePath": "release-native-10-v2-compact-wire-feasibility-13/compact-navigation-wire-terminal.json",
+    "terminalBytesAndShaExact": true,
+    "terminalDoesNotUseEndsWith": true,
+    "catalogAbsoluteTerminalPinRemainsExact": true,
+    "independentTerminalCannotSubstituteOtherDirectory": true,
+    "originalPolicyJsonAndResourceRawUnchanged": true,
+    "formalStageOrder": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "configuredStageSeconds": 300,
+    "configuredSoakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "wallSeconds": 18000,
+    "admissionCaps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "softCpuLogical": 24,
+    "softPrivateGiB": 32,
+    "softWorkingSetGiB": 40,
+    "originalGameThresholdsUnchanged": true,
+    "freshGateOnlyRunId": "1792912711217-e7ea81f2",
+    "preparedSourceAggregate": "f80a5894c1d47ad02016ab8116bfb2404ba99398f5b4f667b3981a8066486cbb",
+    "requiredProbePhases": [
+      "stage-2:300s/5 complete >=60s windows",
+      "stage-10:300s/5 complete >=60s windows",
+      "soak:360s/6 complete >=60s windows"
+    ],
+    "gateRequiresOriginalSuccessRawMonitorCollectionIndependentProofAndNormalCleanup": true,
+    "gateBeforeProvisioningAndExecutionLocks": true,
+    "diagnosticTerminalSourceCountAndUninstallProofRequired": true,
+    "boundedDiagnosticTruncationIsNotNewGameplayFailure": true,
+    "adapterAndEvidenceFiveFilesExactProbe13": true,
+    "adapter8AndWrapper28AndCore187ScopesSeparate": true,
+    "formalRuntimeStateAbsent": true
+  },
+  "findings": [
+    {
+      "id": "B1",
+      "severity": "blocking",
+      "scope": "formal10 success-only helper",
+      "file": "formal-native-v2-compact-wire-ladder-10/verify-probe13-collected-evidence.mjs",
+      "line": 51,
+      "description": "Consumer requires Array.isArray(receipt.hp.observedStatuses), but the exact pinned producer emits a status-count object. Every genuine producer output, including an empty object when there were no HP events, fails the success-only gate.",
+      "producerFile": "probe13-independent-verification-v1/verify-ended-probe13.mjs",
+      "producerLines": [
+        67,
+        86,
+        102
+      ],
+      "evidence": [
+        "hpStatuses={} initial state",
+        "hpStatuses[r.status]=(hpStatuses[r.status]??0)+1",
+        "hp:{observedStatuses:hpStatuses,...}"
+      ],
+      "suggestedBoundedRepair": "A new unsealed helper revision should validate the actual plain status-count object using fixed known statuses and nonnegative safe integer counts. Preserve v2 and producer originals; never accept arbitrary primitive/array shape or weaken source/hash/game gates."
+    },
+    {
+      "id": "B2",
+      "severity": "independent-evidence-correctness-gap",
+      "scope": "separate independent producer, not a product or formal10 scheduling change",
+      "file": "probe13-independent-verification-v1/verify-ended-probe13.mjs",
+      "line": 86,
+      "description": "Producer checks consumed/hpIncreaseObserved only for status success, while frozen ordinary HP code emits verified for proof-bearing success. Its successProofChecked:true does not establish that actual verified rows were checked.",
+      "productFile": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "productLine": 1434,
+      "productStatus": "verified",
+      "reviewerDidNotReadLiveHpRows": true,
+      "impact": "Conditional on real verified HP events. Zero observed events still cannot prove continuous health/survival. Root/capacity must decide an explicitly preserved verifier revision or no-event boundary before final proof is trusted.",
+      "suggestedBoundedRepair": "Preserve original verifier and any original receipt. If separately authorized, check actual verified rows with true consumed or hpIncreaseObserved; do not modify raw statuses or gameplay credit."
+    }
+  ],
+  "verdict": {
+    "staticRawClosureVerified": true,
+    "presealContractPassed": false,
+    "blockingFindingIds": [
+      "B1"
+    ],
+    "additionalEvidenceGapIds": [
+      "B2"
+    ],
+    "eligibleForSealNow": false,
+    "authorizesPrepareOrRun": false,
+    "feasibilityActualPassed": null,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "limitations": [
+    "Only static source and small metadata were read; actual probe13 was still running per root at review dispatch. No actual fresh gate or final outcome was evaluated.",
+    "Original 25-actor stall cause, 886-step tour/24ACK20s leg behavior, 100-actor180launch/120hit supply and two-hour progression remain unknown/pending.",
+    "No old v1/v2 metadata, product source, templates or evidence were written. This new receipt records a blocking review and cannot be used as authorization to seal or start formal10."
+  ]
+}

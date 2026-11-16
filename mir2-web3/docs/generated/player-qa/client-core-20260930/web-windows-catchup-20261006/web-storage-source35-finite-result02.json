@@ -1,0 +1,2174 @@
+{
+  "owner": "Root",
+  "kind": "Source35 exact shared Storage i64 carrier: actual finite regressions, strict TSC and three static renderer pipelines; full Web delivery pending; post-result data archive selection correction recorded",
+  "generatedAtUtc": "2026-10-07T23:49:05.294Z",
+  "parentCommit": "64b2d675c83a22fb2c54f2d1a8753272ea87c94c",
+  "windowsFunctionalBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "source": {
+    "rust": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-rust01-snapshot.json",
+      "bytes": 273911,
+      "sha256": "4593484ab7ca3d4797585587f87c3ddb2552f147ae9d8c7e7443c39668470ef2"
+    },
+    "web": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web01-snapshot.json",
+      "bytes": 5965092,
+      "sha256": "65c44293e39c5837227f29d5c4498229438683316a7af3f07db96399f71d4baf"
+    },
+    "sourceReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+      "bytes": 2566,
+      "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+    },
+    "authority": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-authority.json",
+      "bytes": 522,
+      "sha256": "3bff1fc0499e6e04181029ce951fc9458180c92d0f2f74bc043c94b2d1416fbc"
+    },
+    "change": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-change01.json",
+      "bytes": 759265,
+      "sha256": "2cb54c1153503319a868449e2653b0c54d9c96ad9cce431f9289845b29fe2861"
+    },
+    "plan": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-verification-plan01.json",
+      "bytes": 7856,
+      "sha256": "70145ea2a81259a141e6ef1efc882d569462ea6d27b9929d3568d0c0123bc3cd"
+    }
+  },
+  "changedFiles": [
+    {
+      "relativePath": "apps/game-client/client-bevy/src/storage.rs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\storage.rs",
+        "bytes": 20289,
+        "sha256": "04207db0d6156dc7f032cc5cb76dce4d847def9400825cc90b07ad014a6e7367"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\storage.rs",
+        "bytes": 22109,
+        "sha256": "75270d6ce809b83f74eea10d4ec3eb2a1679bef198e7c0272d3d85f7dca292a8"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\storage_ui_host_tests.rs",
+        "bytes": 13692,
+        "sha256": "1d8d9ee4c7fc6efde5903038312be7563743e91eff1638264e0146a04ba137ce"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\storage_ui_host_tests.rs",
+        "bytes": 15058,
+        "sha256": "0cd276641985a9719e0be2dba1f290d2acb6cc5aac586a4b0eb283a1443ec3a8"
+      }
+    },
+    {
+      "relativePath": "apps/web/lib/bevy-storage-model.ts",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-storage-model.ts",
+        "bytes": 2449,
+        "sha256": "e686df2719a6858f6f70ee33588333cb2744f74f78d269c5cb34937cdbd15529"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-storage-model.ts",
+        "bytes": 2560,
+        "sha256": "52dc48156d41c082c21bbd1273d6446ddc2acc6183ce735dcabdc575328551ea"
+      }
+    },
+    {
+      "relativePath": "apps/web/lib/bevy-storage-ui.ts",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-storage-ui.ts",
+        "bytes": 20634,
+        "sha256": "0812ff673fa4fad35f75b0095be41c3aead76c758f6b8294d2843e8ee21da7bc"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-storage-ui.ts",
+        "bytes": 20620,
+        "sha256": "ae025e725b38610056ee31e2d65479ff57ae0fd7438711921db85079c76b7044"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-storage-ui.mjs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+        "bytes": 30428,
+        "sha256": "79d9e6e52cf68aaeb05ef9bfa295cc49e9b36b7335e0b11bc43a538fe0ed5f45"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+        "bytes": 32653,
+        "sha256": "d2a938fad254989ceae25d649230a034c06bc0d7e8f912942a012412516027b8"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-storage-surface-integration.mjs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs",
+        "bytes": 45373,
+        "sha256": "6a09d5d940343f970818c84dfbfc8df9c8d0a218733a6ecd15a330f086bdad91"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-surface-integration.mjs",
+        "bytes": 46749,
+        "sha256": "ece2566fba2e0e244a5f5f0506a823cd949a3dd8e1434e32de04efd51b124a65"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs",
+        "bytes": 228587,
+        "sha256": "d00bf97e0e6a17fe9d6d74386a11650e655152097f05f0de5a63d5fe7f450751"
+      },
+      "after": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs",
+        "bytes": 229025,
+        "sha256": "7b6e05d21f560d5c078728019e0b9c9e681fbaf14dc00259bede8bc2297e66dc"
+      }
+    }
+  ],
+  "implementation": "Storage Rust uses existing item_expiry_json deserializer while retaining i64 numeric serialization/default0/alias; Web projector and direct host preserve exact canonical signed i64 strings and safe legacy Number using one original predicate. UID/authority/calendar guards unchanged.",
+  "protectedDeclaredInputs": {
+    "rust": {
+      "count": 897,
+      "changed": 2,
+      "protected": 895
+    },
+    "web": {
+      "count": 17120,
+      "changed": 7,
+      "protected": 17113
+    },
+    "unique": 17121,
+    "finalActualRehashMatched": true,
+    "qualification": "Declared ordinary files only, not whole workspace/toolchain; later documentation additions are outside these data snapshots."
+  },
+  "actualCargoCalls": [
+    {
+      "id": "runtime-storage-test01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.config.json",
+        "bytes": 4238,
+        "sha256": "ab029d4dcf7d9f2cc745409dfdeb82c516f5d176afb35788a7f8ea3736efbc43"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.policy.json",
+        "bytes": 2338,
+        "sha256": "64b1738bb32874688d329a05f5d6d7bcba5222027246ab79f13bbb1aa85b7cf8"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-rust01-snapshot.json",
+        "bytes": 273911,
+        "sha256": "4593484ab7ca3d4797585587f87c3ddb2552f147ae9d8c7e7443c39668470ef2"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.stdout.log",
+        "bytes": 1690,
+        "sha256": "79b8f47ff68717a7eda1ed2ca657bd8c1614134e39bae076a7c19345bf403f57"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.stderr.log",
+        "bytes": 15450,
+        "sha256": "df598f6854c9e862b2a6ce064ab87014f396d627fcdd3d0f318eaf0dc22a2ca2"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.outer.json",
+        "bytes": 459,
+        "sha256": "276f19bd5906b744fd47e22d5b04e93c99686b1dd361e15cf2402635be1bd46c"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01-cargo-receipts\\c1be35654c56443ca68640fdaa8b4f89\\after.json",
+          "bytes": 320,
+          "sha256": "498057e8951a408ba130c245a51d4e8a02348c1139dd1d56ab103c475abf47f8"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01-cargo-receipts\\c1be35654c56443ca68640fdaa8b4f89\\before.json",
+          "bytes": 1066,
+          "sha256": "1a348120af245dd5de5d10a6b57652b95d797fec36eae67a6d5b287179396732"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01-cargo-receipts\\c1be35654c56443ca68640fdaa8b4f89\\probe-process.json",
+          "bytes": 443,
+          "sha256": "67fd70960af97062ace533dbef326529d849430054bfc2a14c3ff2130cd8a864"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01-cargo-receipts\\c1be35654c56443ca68640fdaa8b4f89\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01-cargo-receipts\\c1be35654c56443ca68640fdaa8b4f89\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "1cfd81f4ff5d4ce0c9bdcd8319579cbb62a25b7f79426a9fabd3e231eeef5f89"
+        }
+      ],
+      "guard": {
+        "id": "runtime-storage-test01",
+        "nonce": "c1be35654c56443ca68640fdaa8b4f89",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "c1be35654c56443ca68640fdaa8b4f89",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.policy.json",
+          "policySha": "64b1738bb32874688d329a05f5d6d7bcba5222027246ab79f13bbb1aa85b7cf8",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--features",
+            "web-quest-ui",
+            "--lib",
+            "storage_ui_host::tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-07T23:19:33.2324598Z",
+            "sampleEndUtc": "2026-10-07T23:19:34.1164725Z",
+            "remainingBytes": "318984650752",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 151132,
+          "probeLaunchMs": 95.46180000000001,
+          "probeEndMs": 1322.3323,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 147936,
+          "childStartedUtc": "/Date(1791415174211)/",
+          "childStartMs": 1354.6727,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791415259118)/",
+          "completionMs": 86261.7479,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 151132,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791415172952)/",
+          "probeEndUtc": "/Date(1791415174179)/",
+          "probeLaunchMs": 95.46180000000001,
+          "probeEndMs": 1322.3323,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 157636,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 86311,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-runtime-storage-test01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 96
+      },
+      "actualPassed": 15,
+      "passingNames": [
+        "storage_ui_host::tests::storage_contract_accepts_snake_storage_camel_item_and_physical_bag2",
+        "storage_ui_host::tests::storage_contract_exact_i64_text_reaches_ingress_without_loosening_uid_bounds",
+        "storage_ui_host::tests::storage_contract_presentation_language_and_closed_input_fail_closed",
+        "storage_ui_host::tests::storage_contract_preserves_large_and_negative_datetime_not_uid_rules",
+        "storage_ui_host::tests::storage_contract_rejects_duplicate_json_before_legacy_models_collapse_it",
+        "storage_ui_host::tests::storage_contract_rejects_duplicate_uid_cells_unsafe_numbers_and_capacity",
+        "storage_ui_host::tests::storage_contract_rejects_malformed_or_out_of_range_expiry_text",
+        "storage_ui_host::tests::storage_contract_rejects_oversized_arrays_before_truncation_and_bad_locks",
+        "storage_ui_host::tests::storage_ingress_monotonic_owner_and_three_revision_clocks",
+        "storage_ui_host::tests::storage_intent_whole_contract_preserves_physical_cells_and_both_merge_grids",
+        "storage_ui_host::tests::storage_pointer_capacity_and_grammar_are_bounded",
+        "storage_ui_host::tests::storage_pointer_old_model_service_owner_and_duplicate_edges_do_not_poison_sequence",
+        "storage_ui_host::tests::storage_runtime_exact_down_nonce_and_world_origin_are_preserved",
+        "storage_ui_host::tests::storage_status_disable_never_turns_setter_acceptance_into_ready",
+        "storage_ui_host::tests::storage_withdraw_exact_identity_never_retires_new_run_and_keeps_watermark"
+      ],
+      "artifact": null,
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "bevy-storage-test01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.config.json",
+        "bytes": 4174,
+        "sha256": "24d82b3b87f5ad39befebc5e10df697d7a8248a8a51051863563c6c86c08eff9"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.policy.json",
+        "bytes": 2335,
+        "sha256": "33180004868641a54c5f87816ef5616c6187d93633868d9d3f6d5f16d3e877fe"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-rust01-snapshot.json",
+        "bytes": 273911,
+        "sha256": "4593484ab7ca3d4797585587f87c3ddb2552f147ae9d8c7e7443c39668470ef2"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.stdout.log",
+        "bytes": 959,
+        "sha256": "61e23ff408ecafd304d8b25d1288b6e38fbac6b13f91a5b95c6cff31e1697692"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.stderr.log",
+        "bytes": 720,
+        "sha256": "94ab6253afa224d8449c598a4a03cf44847824cac0841ff9e8b1083073ac979a"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.outer.json",
+        "bytes": 456,
+        "sha256": "1a7d775ffc574bbe04c9210532911b4d7e13dded3226c13355340f48af6efb56"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01-cargo-receipts\\af888818e17c471a8fd46d0d1ab5c28d\\after.json",
+          "bytes": 329,
+          "sha256": "8fe95213631c39096b24c817242442b3b31a07f9d9ebd0aa6d275da755573c05"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01-cargo-receipts\\af888818e17c471a8fd46d0d1ab5c28d\\before.json",
+          "bytes": 1030,
+          "sha256": "9bdc03e425d3fdd13571e2d76a3390144fd000e814e384cba000f7f6dd07db2d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01-cargo-receipts\\af888818e17c471a8fd46d0d1ab5c28d\\probe-process.json",
+          "bytes": 442,
+          "sha256": "b2ba2886db03237346649c6a2935571951f296a543e614dbbbf7159cf47cc3e4"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01-cargo-receipts\\af888818e17c471a8fd46d0d1ab5c28d\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01-cargo-receipts\\af888818e17c471a8fd46d0d1ab5c28d\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "2b3229b4ba77cf40678704c518469c2c0631be17ee03da5dd392b7e8d289454e"
+        }
+      ],
+      "guard": {
+        "id": "bevy-storage-test01",
+        "nonce": "af888818e17c471a8fd46d0d1ab5c28d",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "af888818e17c471a8fd46d0d1ab5c28d",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.policy.json",
+          "policySha": "33180004868641a54c5f87816ef5616c6187d93633868d9d3f6d5f16d3e877fe",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/client-bevy/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--lib",
+            "storage::tests::",
+            "--",
+            "--test-threads=1"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-07T23:22:26.3375148Z",
+            "sampleEndUtc": "2026-10-07T23:22:27.0180721Z",
+            "remainingBytes": "317443018752",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 150920,
+          "probeLaunchMs": 91.26190000000001,
+          "probeEndMs": 980.3277,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 160644,
+          "childStartedUtc": "/Date(1791415347087)/",
+          "childStartMs": 1001.5400000000001,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791415362145)/",
+          "completionMs": 16058.9303,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 150920,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791415346176)/",
+          "probeEndUtc": "/Date(1791415347066)/",
+          "probeLaunchMs": 91.26190000000001,
+          "probeEndMs": 980.3277,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 158892,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 16099,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-bevy-storage-test01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 70
+      },
+      "actualPassed": 11,
+      "passingNames": [
+        "storage::tests::crystal_storage_is_two_real_ten_by_eight_pages",
+        "storage::tests::deposit_requires_unlocked_and_free_slot",
+        "storage::tests::serde_roundtrip",
+        "storage::tests::storage_capacity_uses_crystal_80_and_160_slot_boundaries",
+        "storage::tests::storage_expansion_revocation_invalidates_selected_second_page_slot",
+        "storage::tests::storage_expiry_reads_exact_i64_text_and_legacy_numbers",
+        "storage::tests::storage_expiry_rejects_noncanonical_or_out_of_range_json",
+        "storage::tests::storage_keeps_smaller_authoritative_capacity_and_locks_second_page",
+        "storage::tests::storage_occupied_and_free",
+        "storage::tests::storage_selection_requires_exact_slot_and_unique_id",
+        "storage::tests::storage_serde_defaults_and_bounds_legacy_payloads"
+      ],
+      "artifact": null,
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgpu-build01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.config.json",
+        "bytes": 4199,
+        "sha256": "b4da6e45df1492bce9cab8b3cf47d0668aef026de135937bb60e4df8bdbb521a"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.policy.json",
+        "bytes": 2330,
+        "sha256": "b33ba7827285990df8276f5468f0fbd007a6a5903b409609a06deff32272879b"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-rust01-snapshot.json",
+        "bytes": 273911,
+        "sha256": "4593484ab7ca3d4797585587f87c3ddb2552f147ae9d8c7e7443c39668470ef2"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.stderr.log",
+        "bytes": 9588,
+        "sha256": "1ae9727c47c826d3f4ea1398414fa22e695bf524a4f29d9bc123df96a4c0fb3e"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.outer.json",
+        "bytes": 451,
+        "sha256": "0768494f666d934c0d0ea83d5e65064619f3eaa7bbffc763001c09d5c59ad711"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01-cargo-receipts\\7782580e06904310b742e50fd552174f\\after.json",
+          "bytes": 319,
+          "sha256": "c2c99aab6d32648c98d27c76c3d8e0434975960ca54a82d04d22c6ae10d15865"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01-cargo-receipts\\7782580e06904310b742e50fd552174f\\before.json",
+          "bytes": 1019,
+          "sha256": "1aa88c356acf06907c3708d0f0aec995c4458e3596dd26775b9089b6707ec556"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01-cargo-receipts\\7782580e06904310b742e50fd552174f\\probe-process.json",
+          "bytes": 431,
+          "sha256": "f6e8b564513920d8e355c122ee4f0626c40fded8d0f19f1fd5c6b0118aeb0c07"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01-cargo-receipts\\7782580e06904310b742e50fd552174f\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01-cargo-receipts\\7782580e06904310b742e50fd552174f\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "6acfea6a2a32d2a16362173343ee291b0cfaa04e70c74ecdea6ee08e882b4373"
+        }
+      ],
+      "guard": {
+        "id": "webgpu-build01",
+        "nonce": "7782580e06904310b742e50fd552174f",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "7782580e06904310b742e50fd552174f",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.policy.json",
+          "policySha": "b33ba7827285990df8276f5468f0fbd007a6a5903b409609a06deff32272879b",
+          "args": [
+            "build",
+            "--locked",
+            "--target",
+            "wasm32-unknown-unknown",
+            "--profile",
+            "wasm-release",
+            "--no-default-features",
+            "--features",
+            "webgpu,web-quest-ui"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-07T23:28:13.0502545Z",
+            "sampleEndUtc": "2026-10-07T23:28:13.7119152Z",
+            "remainingBytes": "316231467008",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 150036,
+          "probeLaunchMs": 86.5865,
+          "probeEndMs": 943.7055,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 160284,
+          "childStartedUtc": "/Date(1791415693775)/",
+          "childStartMs": 964.8848,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791415783320)/",
+          "completionMs": 90510.3821,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 150036,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791415692897)/",
+          "probeEndUtc": "/Date(1791415693754)/",
+          "probeLaunchMs": 86.5865,
+          "probeEndMs": 943.7055,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 148028,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 90554,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-build01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 65
+      },
+      "actualPassed": null,
+      "passingNames": [],
+      "artifact": {
+        "id": "webgpu",
+        "raw": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\bevy-ui-release\\mir2-bevy-runtime\\webgpu\\wasm32-unknown-unknown\\wasm-release\\mir2_bevy_runtime.wasm",
+          "bytes": 54694368,
+          "sha256": "f72c68005d23cd56d70d3a03ec696183a3d899a89d36926b2c731a6ec22aa3e9"
+        },
+        "saved": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\raw-webgpu-mir2_bevy_runtime.wasm",
+          "bytes": 54694368,
+          "sha256": "f72c68005d23cd56d70d3a03ec696183a3d899a89d36926b2c731a6ec22aa3e9"
+        }
+      },
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgl2-build01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.config.json",
+        "bytes": 4203,
+        "sha256": "34c60a7c34b7507a4c3e9fff2e02c31254c1841046ebe333f07fbe44fd9c9869"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.policy.json",
+        "bytes": 2330,
+        "sha256": "2d0ca257274bad861382513bc01994cb39b1de8cbbf049fbbafa4826eca43a51"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-rust01-snapshot.json",
+        "bytes": 273911,
+        "sha256": "4593484ab7ca3d4797585587f87c3ddb2552f147ae9d8c7e7443c39668470ef2"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.stderr.log",
+        "bytes": 2789,
+        "sha256": "3ea50f5d43e20f5699f77b94d11b2bc1e7d3b3ab69c6c00aeb795710a4d50e73"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.outer.json",
+        "bytes": 451,
+        "sha256": "3a80d47b64dec71d8e05fec0c6f00792f9ac476b649f6039213932841e31e626"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01-cargo-receipts\\f75632a7315d4612bbd3264779e36b68\\after.json",
+          "bytes": 320,
+          "sha256": "005d4299b9c316f085fb7bc29c2865aa3d5c5d765300009696c2bbb06bef759a"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01-cargo-receipts\\f75632a7315d4612bbd3264779e36b68\\before.json",
+          "bytes": 1033,
+          "sha256": "4dd5c017069cbd27d00d56afce0a0963c1e421c16eb4e4791074bed75fcd07df"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01-cargo-receipts\\f75632a7315d4612bbd3264779e36b68\\probe-process.json",
+          "bytes": 441,
+          "sha256": "4851b12c2794c22747dd046ff83b1b4335b5e3462f129aa2e33598dad8a3c5b6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01-cargo-receipts\\f75632a7315d4612bbd3264779e36b68\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01-cargo-receipts\\f75632a7315d4612bbd3264779e36b68\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "acf05e5f83e345d2b3b6a90ba9d839b173f8fddd472e366eed32febf9c5fb5be"
+        }
+      ],
+      "guard": {
+        "id": "webgl2-build01",
+        "nonce": "f75632a7315d4612bbd3264779e36b68",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "f75632a7315d4612bbd3264779e36b68",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.policy.json",
+          "policySha": "2d0ca257274bad861382513bc01994cb39b1de8cbbf049fbbafa4826eca43a51",
+          "args": [
+            "build",
+            "--locked",
+            "--target",
+            "wasm32-unknown-unknown",
+            "--profile",
+            "wasm-release",
+            "--no-default-features",
+            "--features",
+            "webgl2,web-item-tooltip"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-07T23:31:45.8169513Z",
+            "sampleEndUtc": "2026-10-07T23:31:46.5255758Z",
+            "remainingBytes": "316152680448",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 151372,
+          "probeLaunchMs": 90.8674,
+          "probeEndMs": 1003.2796000000001,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 158200,
+          "childStartedUtc": "/Date(1791415906590)/",
+          "childStartMs": 1024.9591,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791415938124)/",
+          "completionMs": 32559.5364,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 151372,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791415905656)/",
+          "probeEndUtc": "/Date(1791415906569)/",
+          "probeLaunchMs": 90.8674,
+          "probeEndMs": 1003.2796000000001,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 151660,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 32603,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-build01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 66
+      },
+      "actualPassed": null,
+      "passingNames": [],
+      "artifact": {
+        "id": "webgl2",
+        "raw": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\bevy-ui-release\\mir2-bevy-runtime\\webgl2\\wasm32-unknown-unknown\\wasm-release\\mir2_bevy_runtime.wasm",
+          "bytes": 36255992,
+          "sha256": "34431bba1907c77ab71e8bdbb036bae7477a46e2e84622ae5c28d927d0a4992a"
+        },
+        "saved": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\raw-webgl2-mir2_bevy_runtime.wasm",
+          "bytes": 36255992,
+          "sha256": "34431bba1907c77ab71e8bdbb036bae7477a46e2e84622ae5c28d927d0a4992a"
+        }
+      },
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgl2-shared-build01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.config.json",
+        "bytes": 4279,
+        "sha256": "879682de70c67243b94dbb9d0a4fc56844b32e769f53f7a1a992b7ed1bff1a19"
+      },
+      "policy": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.policy.json",
+        "bytes": 2337,
+        "sha256": "894ef5fb6c07d92c3bb5804b2c86ec17b52aed48d0dba9712a3ecce8f84341fb"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-rust01-snapshot.json",
+        "bytes": 273911,
+        "sha256": "4593484ab7ca3d4797585587f87c3ddb2552f147ae9d8c7e7443c39668470ef2"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.stderr.log",
+        "bytes": 9393,
+        "sha256": "268fb0831378f8cfd15f22904eb85aebd2b5b449eba8b7ad332ec55378e8acf7"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.outer.json",
+        "bytes": 458,
+        "sha256": "86bd1dda4ecac48cd5698a6f2876ece2bcee3c409adcd97ecf17f409a9bbc7eb"
+      },
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01-cargo-receipts\\bab9aeb0dc7b4200bb0100b50d6d5155\\after.json",
+          "bytes": 320,
+          "sha256": "778617c8ca38e18c05fe499205af525c4ca5f6b665b5863b387c6fb6c0d1d887"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01-cargo-receipts\\bab9aeb0dc7b4200bb0100b50d6d5155\\before.json",
+          "bytes": 1044,
+          "sha256": "f589611ec2525084b38c92acfa60e3e925a685e9254509e9ef6f5a89754e8e7f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01-cargo-receipts\\bab9aeb0dc7b4200bb0100b50d6d5155\\probe-process.json",
+          "bytes": 432,
+          "sha256": "c15dbfdf6a63c9f595a98430f202ddd62f94f94dc00a3df9b97e63dacc8442d3"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01-cargo-receipts\\bab9aeb0dc7b4200bb0100b50d6d5155\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01-cargo-receipts\\bab9aeb0dc7b4200bb0100b50d6d5155\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "302343c56709ceeee6c5762c99094147770c82d4c989a0c13a13992aeba991e4"
+        }
+      ],
+      "guard": {
+        "id": "webgl2-shared-build01",
+        "nonce": "bab9aeb0dc7b4200bb0100b50d6d5155",
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "bab9aeb0dc7b4200bb0100b50d6d5155",
+          "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.policy.json",
+          "policySha": "894ef5fb6c07d92c3bb5804b2c86ec17b52aed48d0dba9712a3ecce8f84341fb",
+          "args": [
+            "build",
+            "--locked",
+            "--target",
+            "wasm32-unknown-unknown",
+            "--profile",
+            "wasm-release",
+            "--no-default-features",
+            "--features",
+            "webgl2,web-quest-ui,webgl2-shared-ui"
+          ],
+          "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-07T23:35:15.9266618Z",
+            "sampleEndUtc": "2026-10-07T23:35:16.6063894Z",
+            "remainingBytes": "316050837504",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 144992,
+          "probeLaunchMs": 89.3957,
+          "probeEndMs": 1031.7147,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 151312,
+          "childStartedUtc": "/Date(1791416116674)/",
+          "childStartMs": 1053.7274,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791416206818)/",
+          "completionMs": 91197.3698,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "probe": {
+          "probePid": 144992,
+          "probeKilled": false,
+          "probeCode": 0,
+          "probeLaunchUtc": "/Date(1791416115710)/",
+          "probeEndUtc": "/Date(1791416116652)/",
+          "probeLaunchMs": 89.3957,
+          "probeEndMs": 1031.7147,
+          "probeMode": "actual",
+          "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+          "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 151368,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 91238,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-build01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "freshnessUpperMs": 69
+      },
+      "actualPassed": null,
+      "passingNames": [],
+      "artifact": {
+        "id": "webgl2-shared",
+        "raw": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\bevy-ui-release\\mir2-bevy-runtime\\webgl2-shared\\wasm32-unknown-unknown\\wasm-release\\mir2_bevy_runtime.wasm",
+          "bytes": 56224348,
+          "sha256": "a015942cf7dc98491cf657932ad8d4ba2f5dd472fc510bae75fdb3e85ee89e89"
+        },
+        "saved": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\raw-webgl2-shared-mir2_bevy_runtime.wasm",
+          "bytes": 56224348,
+          "sha256": "a015942cf7dc98491cf657932ad8d4ba2f5dd472fc510bae75fdb3e85ee89e89"
+        }
+      },
+      "sourceBeforeAfterAtCallMatched": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  ],
+  "actualNodeCalls": [
+    {
+      "id": "web-test01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web-test01.config.json",
+        "bytes": 4504,
+        "sha256": "95edb239aeb0ddef2f76b63d811dfe25d4158cbbed5894059afa82b3cf4aa8be"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web01-snapshot.json",
+        "bytes": 5965092,
+        "sha256": "65c44293e39c5837227f29d5c4498229438683316a7af3f07db96399f71d4baf"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "tools": [
+        {
+          "path": "C:\\Program Files\\nodejs\\node.exe",
+          "bytes": 85202416,
+          "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\typescript.js",
+          "bytes": 9112572,
+          "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\package.json",
+          "bytes": 3620,
+          "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+        }
+      ],
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web-test01.stdout.log",
+        "bytes": 22192,
+        "sha256": "a32a0537dc1777331e50d246f2942793b8a16eada1f773b4a9541b8a9c416696"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web-test01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web-test01.outer.json",
+        "bytes": 548,
+        "sha256": "a05115e9e3378e5ca65db4348bb03252d14d7594f795c9a3d98dd4f8507f2a24"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 159948,
+        "kind": "Source35 original three finite NPC/Storage scripts after exact signed Storage carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 7804,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web-test01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "actualPassed": 204,
+      "passingNames": [
+        "Source30 durable receiver and retained facade pass strict no-emit type checking",
+        "quote calls the actual runtime hook with exact full request and preserves Rust values",
+        "blocked Rust quotes retain computed amounts and never create a sending proof",
+        "response and wire shapes fail closed without rounding or transport extension",
+        "caller capture must match the live snapshot before the first Rust call",
+        "returned DTO and opaque token reject mutation, forgery and a foreign dispatcher",
+        "final listener changes to every bound owner, model, raw item, wallet or layout reject the send",
+        "altered or extended mutable wire is rejected and consumes its token",
+        "runtime refusal, throw, replacement and unavailable source fail at the final claim",
+        "runtime mutation during preparation or final revalidation cannot authorize a stale command",
+        "read and Rust synchronous reentry cannot claim or prepare a second command",
+        "a recursive final listener cannot reserve a second proof before the first Core flight enters",
+        "spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal",
+        "same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA",
+        "an unclaimed old proof cannot revive after an observed model ABA",
+        "socket throw after claim retains the Core pending barrier without replaying a command",
+        "non-JSON transport values are refused rather than silently coerced or invoking user callbacks",
+        "missing raw purchase rate stays null and delegates invalidRate to Rust",
+        "actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust",
+        "actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener",
+        "actual Page final listener catalogue replacement rejects even a same-template selected UID",
+        "actual Page NPC service retirement during action withdraws current source before final claim",
+        "actual Page synchronous action reentry is refused by the existing reserved Core flight",
+        "actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade",
+        "actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound",
+        "actual Page unmarked legacy final listener cannot send through changed catalogue service or owner",
+        "actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket",
+        "actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence",
+        "actual Core facade forwards all nine exact operations and retains u64 decimal precision",
+        "actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry",
+        "actual Core result validator rejects noncanonical malformed contradictory or imprecise responses",
+        "persistent document version facade survives module reevaluation without a second Core bridge",
+        "missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable",
+        "producer handoff prevents stale cleanup commands while forwarding only exact old receipts",
+        "actual facade transport identities bind current open object and retain decimal socket tickets",
+        "dispatcher requires exact body and exact socket at entry and never exposes a token on the wire",
+        "failed bind retires only the exact unpublished token and a later manual attempt gets a new token",
+        "ownerRevision invalidates a gesture proof but cannot change the entered Core authority",
+        "player object identity is required and authority changes bind the actual selected player",
+        "two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer",
+        "actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token",
+        "actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup",
+        "actual Page enter is directly before socket send and all terminal receipts keep exact token ticket",
+        "actual Page malformed receipt result poisons the slot without replaying an already sent purchase",
+        "actual NPCResponse clause synchronously retires old preentry proof before any later rendered service",
+        "actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings",
+        "temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof",
+        "shared UI status reads only an already attached producer and cannot discover or observe a Core",
+        "shared UI status preserves canonical full-u64 data and does not manufacture receipt history",
+        "shared UI exact revision withdrawal rejects malformed and stale strings before availability",
+        "shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK",
+        "shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease",
+        "shared UI availability refusal throw and mismatched post-status cannot certify withdrawal",
+        "final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter",
+        "last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof",
+        "capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged",
+        "evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response",
+        "inventory readiness retires stale projection stages and owner replacements synchronously",
+        "canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority",
+        "old unsafe expiry uses actual source while no-source null is retained through the NPC transport",
+        "expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority",
+        "trusted socket connection is observed before complete authority availability and reserve",
+        "public connection forgery and malformed trusted epoch fields never reach the Core bridge",
+        "only entered flushed and unknown results may retain a canonical old authority revision",
+        "connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve",
+        "preparation read and planner socket changes cannot publish a stale or replacement-socket proof",
+        "postproof planner Core allows and final callback socket changes produce zero entry",
+        "same socket close reopen HMR and dual producers retain every unresolved phase",
+        "new actual socket requires fresh complete observation and a new explicit manual token",
+        "returning to a known older socket refuses without any Core operation on the new flight",
+        "connection and Core model callbacks cannot admit an old full model on the current socket",
+        "final beforeEntry sees same-socket last-read source changes before any Core entry",
+        "same-content old72 holder is poisoned and rejected without returning its pre-connection facade",
+        "matching connection facade contract reuses the immutable holder and socket epoch across HMR",
+        "Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price",
+        "Pearl actual Page final claim enters the existing Core immediately before exact four-key send",
+        "Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods",
+        "Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID",
+        "Pearl actual Page missing or invalid wallet never admits a free host quote",
+        "Pearl actual Page wallet catalog and service ABA invalidate exact captured source",
+        "Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration",
+        "Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade",
+        "Pearl actual Page action and final Core entry reentrancy cannot publish a second flight",
+        "Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement",
+        "Pearl actual Page own parcel hero and storage reservations reject before Core entry",
+        "Pearl actual Page retires catalog while retaining personal wallet on service close",
+        "Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount",
+        "Pearl full snapshot wallet observation remains inside completed owner inventory projection",
+        "Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry",
+        "Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0",
+        "Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows",
+        "Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row",
+        "Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read",
+        "Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof",
+        "Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation",
+        "receipt_facade_document_remount_retains_one_host_and_original_operation",
+        "receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host",
+        "receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket",
+        "receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket",
+        "receipt_facade_operation_accessor_is_rejected_without_invocation",
+        "receipt_facade_nested_nondata_and_lossy_values_never_enter_abi",
+        "receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition",
+        "receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection",
+        "receipt_facade_bound_bridge_method_survives_old_instance_method_replacement",
+        "receipt_facade_invalid_output_poison_keeps_original_host_unavailable",
+        "receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer",
+        "receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector",
+        "Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings",
+        "Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow",
+        "Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields",
+        "Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view",
+        "Source30 paired Begin applies frozen full source before exact complete witness",
+        "Source30 partial application unsafe original integer and omitted bundle never issue complete witness",
+        "Source30 actual gold trade explicit gesture Quote Reserve Enter sends once",
+        "Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once",
+        "Source30 actual gold used explicit gesture Quote Reserve Enter sends once",
+        "Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once",
+        "Source30 quote rejects changed source currency request and stale physical owner before reserve",
+        "Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only",
+        "Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry",
+        "Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody",
+        "Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody",
+        "Source30 dispatcher malformed extra fields or accessor decisions cannot send",
+        "Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays",
+        "Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors",
+        "Source30 terminal frame applies its entire same revision economic source before complete witness",
+        "Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase",
+        "Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance",
+        "Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves",
+        "Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes",
+        "Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict",
+        "Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness",
+        "Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry",
+        "Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority",
+        "Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments",
+        "Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values",
+        "Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model",
+        "Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves",
+        "Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads",
+        "Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable",
+        "Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase",
+        "Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source",
+        "Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter",
+        "Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops",
+        "Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown",
+        "Source31 packet refresh final fences reject reentrant connection change or service withdrawal",
+        "Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application",
+        "Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody",
+        "Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter",
+        "Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws",
+        "Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder",
+        "Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement",
+        "Source31 exact integer consumers pass bounded strict no-emit type checking",
+        "Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding",
+        "Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates",
+        "storage source projection preserves Bag2 physical slots, UID0 and binary expiry without deriving identity",
+        "Source35 storage controller safe expiry preserves custody and unsafe numeric dates fail closed",
+        "Source35 exact storage expiry text survives projection publication and applied owner handoff",
+        "Source35 malformed dates and unsafe direct host numbers withdraw an active storage owner",
+        "storage source projection rejects duplicate cells/UIDs, cross-pane UID collisions and invalid accessible inputs",
+        "independent ABI1 requires compiled/startup and every storage function; missing capability keeps fallback",
+        "prepare then arming never accepts input; exact enabled echo establishes one owner revision",
+        "every applied revision and identity must match before an intent can reach Page",
+        "unapplied arming timeout releases transition despite advancing renderer frames",
+        "false or throwing Page sink retains the admitted proof but never replays its sequence",
+        "successful dispatch claims exactly once and replacement intent cannot authorize an older DTO",
+        "live model, service, session, owner and layout changes invalidate admitted proof before polling",
+        "own transport reservations do not pretend to replace the model; handoff preserves pending data",
+        "stopped renderer frame expires synchronously at final allows/claim",
+        "invalid layout/model and rejected snapshot setters keep React rather than exposing an input owner",
+        "storage pointer origin stays fixed across both panes and world crossings",
+        "quarantined old terminal retains its identity and cannot clear a distinct new pointer lease",
+        "stale cancel/blur clean only the old renderer epoch and preserve a newly admitted proof",
+        "same-runtime HMR replacement owns sink and snapshot; old stop/withdraw cannot retire it",
+        "intent parser preserves physical UID0 while rejecting malformed identities and grid directions",
+        "late startup attaches the independent sink and capability withdrawal retires the accepted surface",
+        "admitted renderer tuple is frozen before callback and cannot be rewritten for a final claim",
+        "the common bag pane and storage pane both accept same-container moves with exact source identities",
+        "desktop and touch admission use their declared geometry thresholds without claiming actual device layout",
+        "actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture",
+        "actual Shell old cancellation cannot release a synchronously established replacement UI lease/token",
+        "actual Shell old cancel or up cannot clear a synchronously established replacement world hold",
+        "actual Page close returns ownership to normal Bag without closing the bag or sending a command",
+        "actual Page password handoff invokes the existing set/change/unlock panel once per service",
+        "actual Page rent confirms exactly one existing command after handoff; retired owner sends none",
+        "actual Page source Bag2 mapping and its own reserved empty target pass the final fence once",
+        "actual Page final listener owner retirement burns the unsent request ID and clears only its reservation",
+        "actual Page replacement source/target or edited DTO after mir2:action cannot enter socket",
+        "actual Page socket throw after irreversible claim retains outcome-unknown reservation",
+        "actual Storage RPC captured same-clock/same-pointer terminals cannot revoke a newer gesture proof",
+        "actual Storage new Down during final listener revokes the old intent before socket entry",
+        "actual Page service lifecycle requests only Storage until close then requests the normal Bag host",
+        "actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture",
+        "actual Shell old cancellation cannot release a synchronously established replacement UI lease/token",
+        "actual Shell old cancel or up cannot clear a synchronously established replacement world hold",
+        "actual Shell active or arming storage stops held keyboard movement even without a ready pointer context",
+        "actual Shell keyboard effects include storage transitions in their dependency roster",
+        "actual Shell window blur/resize/unmount withdraw Storage and remove its own terminal listeners",
+        "actual Shell layout owner/geometry replacement cancels Storage before clearing world holds",
+        "actual Bag hook first construction publishes its initial owner without a TDZ and retired cleanup cannot rewrite replacement",
+        "actual Storage hook obsolete cleanup leaves the replacement sink/host/owner intact",
+        "Source35 storage integration safe expiry preserves custody and unsafe numeric dates fail closed",
+        "Source35 actual Page wide storage dates retain one-shot physical Bag2 transfer custody",
+        "actual Shell arming shortcut listener swallows combat/item keys before their callbacks"
+      ],
+      "uniquePassingNames": 201,
+      "duplicatePassingNames": [
+        {
+          "name": "actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture",
+          "occurrences": 2
+        },
+        {
+          "name": "actual Shell old cancellation cannot release a synchronously established replacement UI lease/token",
+          "occurrences": 2
+        },
+        {
+          "name": "actual Shell old cancel or up cannot clear a synchronously established replacement world hold",
+          "occurrences": 2
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "strictNoEmitTsc": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "tsc01",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-tsc01.config.json",
+        "bytes": 5046,
+        "sha256": "23259afc01c9b56064be849eba1cd671cd603a6772d03827878c6a0d64b45f4f"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-web01-snapshot.json",
+        "bytes": 5965092,
+        "sha256": "65c44293e39c5837227f29d5c4498229438683316a7af3f07db96399f71d4baf"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-source01-review.json",
+        "bytes": 2566,
+        "sha256": "4f192688f474165d240cb918e9bb16309b94ba83660c220bc055096dcec29d67"
+      },
+      "tools": [
+        {
+          "path": "C:\\Program Files\\nodejs\\node.exe",
+          "bytes": 85202416,
+          "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\typescript.js",
+          "bytes": 9112572,
+          "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\package.json",
+          "bytes": 3620,
+          "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\bin\\tsc",
+          "bytes": 45,
+          "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\tsc.js",
+          "bytes": 267,
+          "sha256": "2cffde0b8c6760dfb0b5b0382bbb7e00ba6a8b2d981b9205b256a700a481d983"
+        },
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\_tsc.js",
+          "bytes": 6213092,
+          "sha256": "e8f349eabd48486bdb2bf9dc1a00c89d58297270c54b745838879e2859194419"
+        }
+      ],
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-tsc01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-tsc01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-tsc01.outer.json",
+        "bytes": 532,
+        "sha256": "1bde1560abd788da41b1d99452b9c7b4928b8c86740c472880ef2c0ba78d750b"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 158296,
+        "kind": "Source35 original strict TSC no-emit nonincremental actual current inputs",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 11573,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-tsc01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "actualPassed": null,
+      "passingNames": [],
+      "uniquePassingNames": 0,
+      "duplicatePassingNames": [],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "strictNoEmitTsc": true,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "wasmApiUsed": false,
+      "fullProductionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  ],
+  "actualStaticCliCalls": [
+    {
+      "id": "webgpu-bindgen01",
+      "rendererId": "webgpu",
+      "kind": "bindgen",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-bindgen01.config.json",
+        "bytes": 3805,
+        "sha256": "b1ef75ffaec0703e46dd4677039a00785607d9d94dd4eb70f7f1bee237f70dcc"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-bindgen01-snapshot.json",
+        "bytes": 274131,
+        "sha256": "b6794c7f111681775cf4feadf67fee918719fb7883a65e118605e9d8b362b97e"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-bindgen01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-bindgen01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-bindgen01.outer.json",
+        "bytes": 546,
+        "sha256": "6eaa72e52c01f9135addf87f333be32f99da1bb736d96aad6714a2f0845d0cd7"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 160312,
+        "kind": "Source35 webgpu-bindgen01 original static CLI after exact Storage i64 carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 2625,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-bindgen01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "originalArgs": [
+        "--target",
+        "web",
+        "--out-dir",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgpu",
+        "--out-name",
+        "mir2_bevy_runtime",
+        "--remove-name-section",
+        "C:/mir2-cross-platform-storage-20261002/bevy-ui-release/mir2-bevy-runtime/webgpu/wasm32-unknown-unknown/wasm-release/mir2_bevy_runtime.wasm"
+      ],
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864"
+      },
+      "tools": [
+        {
+          "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+          "bytes": 5551616,
+          "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "actualOptimizerElapsedUnder600000": null,
+      "templateDeadlineEnforced": false,
+      "fullProductionBuildAccepted": false,
+      "wasmApiUsed": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgpu-opt01",
+      "rendererId": "webgpu",
+      "kind": "opt",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-opt01.config.json",
+        "bytes": 3451,
+        "sha256": "517929a237d4d30eb5bffdbb24f368430c48081c5bc6a1a0cbc57baf020c56c4"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-opt01-snapshot.json",
+        "bytes": 275693,
+        "sha256": "1f11c6e2e9ed0cf8d1bd85b86f922c4919a5d4575b6ed8829a20507032fb5b9f"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-opt01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-opt01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-opt01.outer.json",
+        "bytes": 539,
+        "sha256": "2c4dee89cfbbd695a262e70d3f17fa3d48b07aa175152209268341756d0141c7"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 153592,
+        "kind": "Source35 webgpu-opt01 original static CLI after exact Storage i64 carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 52811,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgpu-opt01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "-O1",
+        "--strip-debug",
+        "-o",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgpu/optimized-mir2_bevy_runtime_bg.wasm"
+      ],
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "BINARYEN_CORES": "1"
+      },
+      "tools": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+          "bytes": 10061312,
+          "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "actualOptimizerElapsedUnder600000": true,
+      "templateDeadlineEnforced": false,
+      "fullProductionBuildAccepted": false,
+      "wasmApiUsed": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgl2-bindgen01",
+      "rendererId": "webgl2",
+      "kind": "bindgen",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-bindgen01.config.json",
+        "bytes": 3805,
+        "sha256": "312aeb4823e14fe1986e7337961bca7514c392533e6dd8592a9e5cee19611dab"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-bindgen01-snapshot.json",
+        "bytes": 274131,
+        "sha256": "3c4f24bcb99531e66394ee998775f5eb2706703516644b251903c9335b021ee3"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-bindgen01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-bindgen01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-bindgen01.outer.json",
+        "bytes": 546,
+        "sha256": "880847516282c0ba6f14729cd5232f523ce05b7526ea0ee306b038997eaaa4e0"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 156632,
+        "kind": "Source35 webgl2-bindgen01 original static CLI after exact Storage i64 carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 1746,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-bindgen01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "originalArgs": [
+        "--target",
+        "web",
+        "--out-dir",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgl2",
+        "--out-name",
+        "mir2_bevy_runtime",
+        "--remove-name-section",
+        "C:/mir2-cross-platform-storage-20261002/bevy-ui-release/mir2-bevy-runtime/webgl2/wasm32-unknown-unknown/wasm-release/mir2_bevy_runtime.wasm"
+      ],
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864"
+      },
+      "tools": [
+        {
+          "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+          "bytes": 5551616,
+          "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "actualOptimizerElapsedUnder600000": null,
+      "templateDeadlineEnforced": false,
+      "fullProductionBuildAccepted": false,
+      "wasmApiUsed": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgl2-opt01",
+      "rendererId": "webgl2",
+      "kind": "opt",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-opt01.config.json",
+        "bytes": 3451,
+        "sha256": "c1ccc5c4e66020917d4a740dc2b73037b0d8f5fa97710ee41bec14c68ec9c408"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-opt01-snapshot.json",
+        "bytes": 275693,
+        "sha256": "facde2055ff25bb9e91034f45b667fad0dda60675140a03e064ee11292ba2802"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-opt01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-opt01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-opt01.outer.json",
+        "bytes": 539,
+        "sha256": "de26f332b55cc4ec64327da041aa383dda6808e5e63579650cf08185d0aea4e2"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 158328,
+        "kind": "Source35 webgl2-opt01 original static CLI after exact Storage i64 carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 38258,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-opt01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "-O1",
+        "--strip-debug",
+        "-o",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgl2/optimized-mir2_bevy_runtime_bg.wasm"
+      ],
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "BINARYEN_CORES": "1"
+      },
+      "tools": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+          "bytes": 10061312,
+          "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "actualOptimizerElapsedUnder600000": true,
+      "templateDeadlineEnforced": false,
+      "fullProductionBuildAccepted": false,
+      "wasmApiUsed": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgl2-shared-bindgen01",
+      "rendererId": "webgl2-shared",
+      "kind": "bindgen",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-bindgen01.config.json",
+        "bytes": 3854,
+        "sha256": "15d4a253cdb290af0047feb4347bf63ab27e0fcffb285ace9a620dc56c3b17c7"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-bindgen01-snapshot.json",
+        "bytes": 274180,
+        "sha256": "22c20fab8fd881589867ac43d1ee4dcfc91261944cfa56dabcad7b07ce4b969c"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-bindgen01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-bindgen01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-bindgen01.outer.json",
+        "bytes": 560,
+        "sha256": "bb66875a8f3b49665400ea4def482b3ae387564b6b3eb03afd1d105bf541dd24"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 150392,
+        "kind": "Source35 webgl2-shared-bindgen01 original static CLI after exact Storage i64 carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 2781,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-bindgen01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "originalArgs": [
+        "--target",
+        "web",
+        "--out-dir",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgl2-shared",
+        "--out-name",
+        "mir2_bevy_runtime",
+        "--remove-name-section",
+        "C:/mir2-cross-platform-storage-20261002/bevy-ui-release/mir2-bevy-runtime/webgl2-shared/wasm32-unknown-unknown/wasm-release/mir2_bevy_runtime.wasm"
+      ],
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864"
+      },
+      "tools": [
+        {
+          "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+          "bytes": 5551616,
+          "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "actualOptimizerElapsedUnder600000": null,
+      "templateDeadlineEnforced": false,
+      "fullProductionBuildAccepted": false,
+      "wasmApiUsed": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    {
+      "id": "webgl2-shared-opt01",
+      "rendererId": "webgl2-shared",
+      "kind": "opt",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-opt01.config.json",
+        "bytes": 3500,
+        "sha256": "7691114b967f1001ffc0a2393cc0f0388f6d87031448a42c20b0f2a364dfeadc"
+      },
+      "snapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-opt01-snapshot.json",
+        "bytes": 275784,
+        "sha256": "90396e978c3fa4fa996d205547cac16be21e19bca24621c47c524fd2a0b7711e"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-opt01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-opt01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-opt01.outer.json",
+        "bytes": 553,
+        "sha256": "98d553f568fc025c0e85c807a65b5a0fa9f371ce0bd3b7470d86fc8c96230c5e"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 160400,
+        "kind": "Source35 webgl2-shared-opt01 original static CLI after exact Storage i64 carrier",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 55882,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-webgl2-shared-opt01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "-O1",
+        "--strip-debug",
+        "-o",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-storage-source35-staging01/pkg-webgl2-shared/optimized-mir2_bevy_runtime_bg.wasm"
+      ],
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "BINARYEN_CORES": "1"
+      },
+      "tools": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+          "bytes": 10061312,
+          "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "sourceAndToolsBeforeAfterAtCallMatched": true,
+      "actualOptimizerElapsedUnder600000": true,
+      "templateDeadlineEnforced": false,
+      "fullProductionBuildAccepted": false,
+      "wasmApiUsed": false,
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  ],
+  "renderers": [
+    {
+      "rendererId": "webgpu",
+      "leaves": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgpu\\mir2_bevy_runtime.js",
+          "bytes": 134346,
+          "sha256": "63962140b96513f006c697251efedfc638e6438d7b5a8bf5c582dc5bab9ca10e"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 32683068,
+          "sha256": "9cf6692cec0e5005f31ea3a482fdd23f51de75abe8fc3199c0de1c4ca6129282"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgpu\\mir2_bevy_runtime.d.ts",
+          "bytes": 19937,
+          "sha256": "1e5218264646ed23a270d38ee0585a8444f2082a5d2e29b7d341f0a8a52143ed"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 9846,
+          "sha256": "a590fd1c7cd55ec549749dfc09c488cd40a58228bfb078dde922e9065ebb2e9a"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgpu\\optimized-mir2_bevy_runtime_bg.wasm",
+          "bytes": 30889189,
+          "sha256": "0763d80014e4090b80be083c3f2c977d1fdf56fd5e5ee58e6dab810f17af07bf"
+        }
+      ],
+      "optimizedWasmByteCapInclusive": 32505856,
+      "jsByteCapInclusive": 204800,
+      "byteCapsPassed": true,
+      "sharedStoragePathCompiled": true,
+      "metadataAbiGzipPublication": "not-run"
+    },
+    {
+      "rendererId": "webgl2",
+      "leaves": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2\\mir2_bevy_runtime.js",
+          "bytes": 117176,
+          "sha256": "62113a4dcd4f4782f714775094785dff723498242c3700f3fcdb08e391731644"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 19135851,
+          "sha256": "4ff7b11a00ae4fc23c14b4592341d11f9c0494a21e91b7ae20634e1f9cbdcb50"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2\\mir2_bevy_runtime.d.ts",
+          "bytes": 12717,
+          "sha256": "cfc8adf01fa51053ed34b88518e92a252389935b2c7fd50f81c3557929727107"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 6056,
+          "sha256": "470c0238d591f1e760cf06a4d6776603dc00fdb0f25d0418959ddfcb46734fd8"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2\\optimized-mir2_bevy_runtime_bg.wasm",
+          "bytes": 17749024,
+          "sha256": "db673a9181f6584067d2f9d9eb3a0c2f14fd560c9765fb0f5c90114317539bfd"
+        }
+      ],
+      "optimizedWasmByteCapInclusive": 32505856,
+      "jsByteCapInclusive": 204800,
+      "byteCapsPassed": true,
+      "sharedStoragePathCompiled": false,
+      "metadataAbiGzipPublication": "not-run"
+    },
+    {
+      "rendererId": "webgl2-shared",
+      "leaves": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2-shared\\mir2_bevy_runtime.js",
+          "bytes": 132320,
+          "sha256": "7f74ac926f27e11318a93d7ad79b00ffa7bd1ec27fef1c6fba843ca0d05d338f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 33700543,
+          "sha256": "a1fc0ea9ba0ed2033434f466bc0ec3f488a68213955a1e0a51fc5d11d86637d4"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2-shared\\mir2_bevy_runtime.d.ts",
+          "bytes": 19701,
+          "sha256": "30de3280231dd56ed0c9bc0e261477c108973306a203b525b0764831f164438b"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 9610,
+          "sha256": "3b9dd388de611a024015c003f0cf2504467729c49d18b714335646e09b8bc547"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-staging01\\pkg-webgl2-shared\\optimized-mir2_bevy_runtime_bg.wasm",
+          "bytes": 31851030,
+          "sha256": "3433223de8aa3763051f50a263b485f88d318f40efce738c6719e1500f155e6f"
+        }
+      ],
+      "optimizedWasmByteCapInclusive": 32505856,
+      "jsByteCapInclusive": 204800,
+      "byteCapsPassed": true,
+      "sharedStoragePathCompiled": true,
+      "metadataAbiGzipPublication": "not-run"
+    }
+  ],
+  "actualTests": {
+    "rust": 26,
+    "webExecutions": 204,
+    "webUniqueNames": 201,
+    "totalExecutions": 230,
+    "totalUniqueNames": 227,
+    "newMeaningfulNames": 7,
+    "newRustNames": 4,
+    "newWebNames": 3,
+    "renamedExistingWebCases": 3,
+    "failed": 0,
+    "ignored": 0,
+    "skipped": 0,
+    "duplicateWebNames": [
+      {
+        "name": "actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture",
+        "occurrences": 2
+      },
+      {
+        "name": "actual Shell old cancellation cannot release a synchronously established replacement UI lease/token",
+        "occurrences": 2
+      },
+      {
+        "name": "actual Shell old cancel or up cannot clear a synchronously established replacement world hold",
+        "occurrences": 2
+      }
+    ],
+    "qualification": "Execution counts and unique name counts are distinct; duplicated Shell cases are not additional unique tests."
+  },
+  "typescript": {
+    "actualExitCode": 0,
+    "strict": true,
+    "version": "5.9.3",
+    "noEmit": true,
+    "incremental": false,
+    "stdoutEmpty": true,
+    "stderrEmpty": true,
+    "userTsconfig": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    }
+  },
+  "guardSummary": {
+    "actualCalls": 5,
+    "nonceFiles": 25,
+    "allActualSamplesAtLeast53687091200": true,
+    "maxFreshnessUpperMs": 96,
+    "allPolicyBCompletedExitedDisposed": true
+  },
+  "sourceBeforeAfterAtCallsMatched": true,
+  "originalTemplatesAndHelpersChanged": false,
+  "optimizerDeadlineEnforced": false,
+  "publishedWeb": "Source25 Next08/Thin08 still public; Source26-35 source edits are not in the latest accepted public Web package",
+  "publishedManifests": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\bevy_runtime_version.json",
+      "bytes": 1711,
+      "sha256": "a2dc7560bebacdabe990e54c226122da738a678fecdc3b443cb1e0f85d0075d3"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\client_core_runtime.json",
+      "bytes": 1039,
+      "sha256": "0a15a8d436cd660d171762d2c0558f05ebfb6ad868b86de97b3760baf3e486e5"
+    }
+  ],
+  "featureMatrix": {
+    "records": 317,
+    "shared": 103,
+    "legacy": 206,
+    "common": 8,
+    "rawOpen": 0,
+    "implementedRecordCoverage": 0.9747634069400631,
+    "overallPercentage": null,
+    "candidate100": false,
+    "allRowsPlayerVerification": "not-run",
+    "pin": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.json",
+      "bytes": 3228933,
+      "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+    }
+  },
+  "remaining": [
+    "Original full-module validation/name/normalized imports-exports and renderer default-gzip gates not-run; original helper WASM API remains prohibited, no bypass/publication.",
+    "Matching latest-source complete Web Next/Thin package pending.",
+    "Shared SkillModel same count but changed content validation; Native whole write deadline; wide UID mutation ABI remain open.",
+    "WASM Hero adapter drain/setter ABI not established; old engines without reviver source cannot recover unsafe packet-only dates.",
+    "Transport-valid i64 is not calendar-valid: original DOM calendar validation retained.",
+    "webgl2 ABI0 output is unchanged and does not compile shared Storage; GPU and webgl2-shared ABI1 do.",
+    "Actual resources/WASM initialization, login/combat/save/relogin/mobile and player acceptance not-run."
+  ],
+  "dataReaderCorrections": [
+    {
+      "kind": "Root data-only JS parse error",
+      "message": "Expected ')' while preparing display summary; corrected parentheses with sequential data reads.",
+      "productChanged": false,
+      "processStarted": false,
+      "testFailure": false
+    },
+    {
+      "kind": "Root ordinary archive selector assertion",
+      "message": "Visitor encountered a saved WASM artifact pin, correctly refused to archive binary bytes before any archive/document write. Final selector explicitly records omitted artifact pins and retains all25 nonce files.",
+      "productChanged": false,
+      "processStarted": false,
+      "testFailure": false
+    }
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "fullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "goalStatus": "active",
+  "supersededResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-finite-result01.json",
+    "bytes": 112293,
+    "sha256": "fdaf604f339f3e9b33effe7efad2c3c9572f994fbf04c7dd931dcfbbb8231c28"
+  },
+  "actualIndependentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-independent-review01.json",
+    "bytes": 1329,
+    "sha256": "698f6a356b79024324aef7f6719413e3251bec45db1fcfdc7be728b431737b8b"
+  },
+  "qualification": "Result01 actual execution facts accepted independently and unchanged; result02 adds actual review and later Root data-only selector correction. No repeated tests or strengthened execution claims."
+}

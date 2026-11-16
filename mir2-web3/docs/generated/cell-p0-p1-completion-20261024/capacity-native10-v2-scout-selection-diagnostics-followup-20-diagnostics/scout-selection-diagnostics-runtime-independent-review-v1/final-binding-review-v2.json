@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T01:19:08.545148+00:00",
+  "scope": "Independent bounded source/binding review only. No library import, readonly guard, Git capture, source50 scan, binary hash, test, build or game mode executed.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\preparation-v2.json",
+    "bytes": 7062,
+    "sha256": "a3dc58fb8d65c36c239de32f1453a2615cac482c79d1e65ccc358e64fc02b9c2"
+  },
+  "sourceLibrary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 57227,
+    "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+  },
+  "readonlyGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\readonly-source-guard-v1.mjs",
+    "bytes": 724,
+    "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+  },
+  "currentBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1429,
+    "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+  },
+  "pendingBeforeImage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-before-K-v1.json",
+    "bytes": 1291,
+    "sha256": "0d1c3c7322166eb6ce8371689f2f258e29b53d6e93ff2609e1b072d95a20d365"
+  },
+  "bindingDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\root-final-binding-derivation-v1.json",
+    "bytes": 2491,
+    "sha256": "4ed60d7e4267632af1145470841b96e802cdc1c987fd8f5becdd497db264e493"
+  },
+  "sourceDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-derivation-proof-v1.json",
+    "bytes": 15652,
+    "sha256": "e671c58ce6bc94ff29c29912b5cce70b0487dc840739d91e2892a6ee2fca2d13"
+  },
+  "actualDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "checks": {
+    "eightCurrentRawPinsAndOrderedAggregateMatch": true,
+    "allSourceEvidenceReferenceRawPinsMatch": true,
+    "fourSourceRulesForwardInverseRawExactPriorJ43452Library": true,
+    "historicalJReaderAndC50RawGitLfFullclosureFixedCargoFourNoneIgnoredInclusiveCleanGuardsPreserved": true,
+    "onlyFiveBindingLeavesChanged": [
+      "currentExecutionHead",
+      "driverFrozenManifest.bytes",
+      "driverFrozenManifest.sha256",
+      "driverSourceCommit",
+      "state"
+    ],
+    "pending1291RawBeforeImageExactHistoricalPin": true,
+    "fiveOtherInitialPreparedFilesRemainRawExact": true,
+    "library57227AndGuard724UnchangedForBinding": true,
+    "actualKBackendCDriverKExecutionKNamespacesExact": true,
+    "actualFreezeNineRawAndGitBindingEntriesMatch232BeforeAfterReceipt": true,
+    "diagnosticFiveHunksAndJ270311TestPrefixSourceEvidenceBound": true,
+    "sixNewAndFocused22IncludedInActual232NotAdded": true,
+    "actualSourceAndFullRegressionReviewShapesMatchConsumer": true,
+    "priorJ9472H9465D6759And19099HistoricalChainKept": true,
+    "oldCurrentExportsAreHistoricalJOnlyNewReturnUsesK": true,
+    "returnedManifestAndManifestBytesRemainOriginalC50": true,
+    "noRebuildOrNewRustReleasePaths": true,
+    "independentSixOrdinaryDriversStillRequireFutureActualFull16": true,
+    "rootMustActuallyRunReadonlyGuard": true
+  },
+  "identity": {
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "currentExecutionHead": "b5374083d257d375437af3de42bead159cd2b917",
+    "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "nodeNineSourceAggregate": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+    "backendInputs": 50,
+    "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "actualNodeFullTests": 232,
+    "rebuildPerformed": false
+  },
+  "verdict": {
+    "runtimeSourceContractPassed": true,
+    "eligibleForRootReadOnlyGuard": true,
+    "blockingFindingIds": []
+  },
+  "limitations": [
+    "Root owns the actual readonly guard, including the source50 current raw/GitLF and immutable executable checks not performed by this reviewer.",
+    "No new K ordinary full16, Probe20/formal16 gameplay or capacity/P0/P2 acceptance is inferred.",
+    "Historical J current exports and earlier PENDING preparation remain preserved; neither is relabeled as K execution evidence."
+  ]
+}

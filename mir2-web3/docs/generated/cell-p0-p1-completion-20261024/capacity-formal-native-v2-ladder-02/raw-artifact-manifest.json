@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792871143682-f3d8c161",
+      "report": "capacity-formal-native-v2-ladder-02/formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.report.json",
+      "path": "formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.samples.jsonl",
+      "bytes": 23491464,
+      "sha256": "a392e3ea07cec4a5d39ade40988d6675afdb7ce1d3486741b51a946e0bcc8b8e",
+      "projection": "capacity-formal-native-v2-ladder-02/formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.raw-projection.json"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "schema": "mir2.usdc-direct-card-local-candidate.v1",
+  "observedAtUtc": "2026-10-30T15:57:04.9748254Z",
+  "parentSourceSha": "e62f71ae4273c9b9d339578a14ca221169dbbe3f",
+  "testsOnUncommittedSnapshot": true,
+  "sourceHashes": {
+    "apps/gateway/src/sui_usdc_checkout.html": "9dc42c5136536ae95ad89bde99f37b8379be15028581ce5882c0f7b578dcfab2",
+    "apps/gateway/src/sui_usdc_checkout.js": "2c39c73e014269044e782674a60cd38fbdd1ee98be5e636176e8c58384edfaee",
+    "apps/gateway/src/sui_usdc_direct_card.js": "117c854c4d573c7b4149b378c748597f73de3f31d49baf62e640245182bca219",
+    "apps/gateway/src/sui_usdc_dubhe_wallet_entry.js": "dbc7cd2f9e16d43c20476cfcd8853dbd26f3286e2ccc59b6795acf058e988e3c",
+    "apps/gateway/src/sui_usdc_dubhe_wallet.bundle.js": "09dff44b9c46b53258550328391657e46be1365213ba85735e896bc0407b454a",
+    "apps/gateway/src/sui_usdc_dubhe_wallet.bundle.json": "142ad157f9a65d749eb361355260809bb6c6b479d4f287d8b6d5a5a7fce00722",
+    "scripts/test-sui-usdc-direct-card.mjs": "6f3ba4539985658b22dfbc579af03ac5b315b52a7362d5f398faf16b28df895c",
+    "scripts/test-sui-usdc-checkout-browser.mjs": "05af39daf961e3fc6eac798d73898620ebabfde0a15ef4dc3aef406786c6d614"
+  },
+  "rustFocused": {
+    "toolchain": "1.89.0-windows-msvc",
+    "failed": 0,
+    "passed": 19,
+    "logSha256": "699b9c322d04b8932af3fd50d9d9e60ff65fa016c04e83645110202a32739421"
+  },
+  "nodeWalletTests": {
+    "checkoutController": 14,
+    "directCardController": 10,
+    "failed": 0,
+    "passed": 40,
+    "adapter": 16
+  },
+  "browser": {
+    "results": [
+      {
+        "mode": "invoice-wallet-connect",
+        "viewport": "desktop",
+        "passed": true,
+        "directTransferDisabled": true,
+        "qrPreviewText": "MIR2_UI_PREVIEW_NOT_A_PAYMENT",
+        "realWalletSignature": false
+      },
+      {
+        "mode": "invoice-wallet-connect",
+        "viewport": "mobile",
+        "passed": true,
+        "directTransferDisabled": true,
+        "qrPreviewText": "MIR2_UI_PREVIEW_NOT_A_PAYMENT",
+        "realWalletSignature": false
+      },
+      {
+        "configuration": "missing",
+        "noFakeQr": true,
+        "passed": true
+      },
+      {
+        "mode": "direct_transfer",
+        "viewport": "desktop",
+        "passed": true,
+        "clipboardMock": true,
+        "addressCopied": true,
+        "manualCopyFallback": true,
+        "compatibilityPaymentDisabled": true,
+        "paymentRequestInput": "https://wallet.dubhe.obelisk.build/send?recipient=0x9999999999999999999999999999999999999999999999999999999999999999&coinType=0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29%3A%3Ausdc%3A%3AUSDC&amount=1.000000&requestId=usdc_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&request=1",
+        "qrPreviewText": "MIR2_UI_PREVIEW_NOT_A_PAYMENT",
+        "realPayment": false
+      },
+      {
+        "mode": "direct_transfer",
+        "viewport": "mobile",
+        "passed": true,
+        "clipboardMock": true,
+        "addressCopied": true,
+        "manualCopyFallback": true,
+        "compatibilityPaymentDisabled": true,
+        "paymentRequestInput": "https://wallet.dubhe.obelisk.build/send?recipient=0x9999999999999999999999999999999999999999999999999999999999999999&coinType=0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29%3A%3Ausdc%3A%3AUSDC&amount=1.000000&requestId=usdc_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&request=1",
+        "qrPreviewText": "MIR2_UI_PREVIEW_NOT_A_PAYMENT",
+        "realPayment": false
+      },
+      {
+        "mode": "direct_transfer",
+        "statusQueryFailed": true,
+        "stalePaymentQrRemoved": true,
+        "copyDisabled": true,
+        "passed": true
+      },
+      {
+        "mode": "direct_transfer",
+        "automaticExpiryDisabled": true,
+        "qrRemoved": true,
+        "addressCleared": true,
+        "passed": true
+      }
+    ],
+    "fixturesOnly": true,
+    "realPayment": false,
+    "qrPreviewText": "MIR2_UI_PREVIEW_NOT_A_PAYMENT",
+    "clipboardIsMock": true,
+    "serverOperations": [
+      "status",
+      "status",
+      "status",
+      "status",
+      "status",
+      "status",
+      "status",
+      "status"
+    ]
+  },
+  "bundle": {
+    "schema": "mir2.checkout-wallet-bundle.v1",
+    "bundleSha256": "09dff44b9c46b53258550328391657e46be1365213ba85735e896bc0407b454a",
+    "bytes": 492776,
+    "lockSha256": "f2c4cf0fdafe7bba4331dc51da15433a69ab8243f3278118aae088ec2a784273",
+    "inputs": 746,
+    "externalImports": []
+  },
+  "directBackendImplemented": false,
+  "directReadyContract": "future-only; current invoice orders remain disabled",
+  "realWalletSignature": false,
+  "realPayment": false,
+  "remoteDeploymentPerformed": false,
+  "dockerStarted": false,
+  "updaterPublished": false
+}

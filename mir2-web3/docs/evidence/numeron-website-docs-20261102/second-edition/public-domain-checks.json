@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-11-02T00:31:13.732042+00:00",
+  "httpsVerification": "default certificate verification enabled",
+  "publicRoutes": {
+    "/zh-CN": {
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    "/zh-CN/guide": {
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    "/zh-CN/developers": {
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    "/zh-CN/download": {
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "installerPreserved": true
+    },
+    "/zh-CN/docs-examples/read-status.mjs": {
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "sourceMatches": true
+    }
+  }
+}

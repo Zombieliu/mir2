@@ -1,0 +1,33 @@
+
+running 14 tests
+test runtime::quests::newcomer_v2::newcomer_v2_tests::growth_claims_are_gated_after_the_required_main_nodes ... ok
+test runtime::quests::newcomer_v2::newcomer_v2_tests::mode_is_explicit_and_v1_profile_or_claims_are_incompatible ... ok
+test runtime::quests::newcomer_v2::newcomer_v2_tests::multi_kill_and_class_practice_nodes_preserve_distinct_objectives ... ok
+test runtime::quests::newcomer_v2::newcomer_v2_tests::rewards_are_manifest_backed_and_gender_specific_armour_is_selected_safely ... ok
+test runtime::quests::newcomer_v2::newcomer_v2_tests::v2_defines_exactly_twenty_two_main_nodes_and_four_growth_claims ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_between_attacks_requires_damage_move_damage_in_order ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_board_uses_loaded_object_id_and_public_claim_flow ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_final_report_advances_through_the_public_interact_command ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_growth_capacity_failure_retains_claim_and_currency ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_initial_report_requires_a_successful_real_acceptance_result ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_jane_public_packet_flow_completes_once_and_awards_the_real_starter_items ... FAILED
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_kill_and_reposition_evidence_cannot_cross_regions ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_saved_progress_cannot_switch_back_and_claim_v1_or_legacy_rewards ... ok
+test runtime::quests::newcomer_v2_events::tests::newcomer_v2_training_requires_post_acceptance_damage_and_the_correct_map ... ok
+
+failures:
+
+---- runtime::quests::newcomer_v2_events::tests::newcomer_v2_jane_public_packet_flow_completes_once_and_awards_the_real_starter_items stdout ----
+
+thread 'runtime::quests::newcomer_v2_events::tests::newcomer_v2_jane_public_packet_flow_completes_once_and_awards_the_real_starter_items' (55492) panicked at apps\simulation\src\runtime\newcomer_v2_event_tests.rs:139:9:
+assertion `left == right` failed: reward quantity for (HP)DrugSmall
+  left: 0
+ right: 10
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    runtime::quests::newcomer_v2_events::tests::newcomer_v2_jane_public_packet_flow_completes_once_and_awards_the_real_starter_items
+
+test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 1840 filtered out; finished in 79.56s
+

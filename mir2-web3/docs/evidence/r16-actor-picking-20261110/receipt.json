@@ -1,0 +1,801 @@
+{
+  "base": "bc7e7dd39c08550d06f925f40057df72833a3d64",
+  "candidate": {
+    "buildId": "0puQ0ETDdWjWbABkfsVR1",
+    "buildReceiptSha256": "2ae01dacaceb1bb3fc11c2df77127b033dbe048a4bfd67707ecd76e1e7ce5901",
+    "runtime": "bevy-48c1f266331da4cb",
+    "paths": {
+      "apps/web/app/page.tsx": "84261b555a54f2369d1bbe33546471b5d8d3d8891748adc04680da2c63af878d",
+      "apps/web/app/original-client-shell.tsx": "fe1a2dbe1467ca1beff4032d47143d5c35f66966f70278db2d6ae9b0a3fb78e7",
+      "apps/web/app/components/original-client-scene-visual-layers.tsx": "e9c5a5623e1558e9d863016266ab5df9de67e6ee059d6a5104e9977e7e30743f",
+      "apps/web/lib/crystal-actor-hit.ts": "784f42692b0db4df1657cc0551ba7a85ce89fd52a7a410f2059551a14d6294c0"
+    },
+    "sourceArchiveSha256": "dd550ad584d8f58c36666666c3cf332f89ed5d63d6bf2a2673055930fccbc9cf"
+  },
+  "originalCrystal": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "sourcePixelEvidence": [
+    {
+      "file": "baseline-source-pixels.json",
+      "sha256": "7b1d5a0e76bd006c9c91f8ea66893e6984b96838bc365a3e8806a9b22edc8065"
+    },
+    {
+      "file": "candidate-source-pixels.json",
+      "sha256": "2ec555b1a851f1ab8f49ebd024b5f9abf4cd831017cf290536d51aa93ccc8763"
+    }
+  ],
+  "picks": [
+    {
+      "run": "baseline-webgpu-transparent-r3",
+      "rawSha256": "e83988508d10a96a75cb1675c5d57dc89bfd80c17ac2d17d9d1382d778b20363",
+      "renderer": "webgpu",
+      "backendBodySource": "DOM IMG committed frame",
+      "mode": "baseline",
+      "kind": "transparent",
+      "screenPoint": {
+        "x": 903,
+        "y": 432
+      },
+      "cursorTile": {
+        "x": 259,
+        "y": 405
+      },
+      "positions": {
+        "tree": {
+          "x": 261,
+          "y": 407
+        },
+        "oma": {
+          "x": 258,
+          "y": 406
+        },
+        "self": {
+          "x": 253,
+          "y": 406
+        },
+        "names": {
+          "tree": "ChestnutTree1",
+          "oma": "Oma"
+        }
+      },
+      "tree": {
+        "frame": "/original-ui/Monster/013/3.png",
+        "frameSha256": "baff26c5499dba56b271db048b28fe93ed9efe54ce056121691902c489634123",
+        "pixel": {
+          "sourceX": 25,
+          "sourceY": 176,
+          "alpha": 0,
+          "halo1": {
+            "min": 0,
+            "max": 0,
+            "nonZero": 0
+          },
+          "halo2": {
+            "min": 0,
+            "max": 0,
+            "nonZero": 0
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 292,
+          "height": 288
+        }
+      },
+      "oma": {
+        "frame": "/original-ui/Monster/009/62.png",
+        "frameSha256": "69d6d52d9fcc5d7f9e82bd8ba4b5a7163cfccf4c6fc69a6bd553f8df5514cae1",
+        "pixel": {
+          "sourceX": 29,
+          "sourceY": 56,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 0,
+            "max": 255,
+            "nonZero": 24
+          }
+        },
+        "action": "walking",
+        "size": {
+          "width": 84,
+          "height": 84
+        }
+      },
+      "picked": "213601",
+      "naturalWalks": [
+        {
+          "seq": 660,
+          "x": 260,
+          "y": 406
+        },
+        {
+          "seq": 661,
+          "x": 259,
+          "y": 405
+        },
+        {
+          "seq": 672,
+          "x": 258,
+          "y": 406
+        }
+      ],
+      "hit": null,
+      "saved": {
+        "position": {
+          "x": 255,
+          "y": 404
+        },
+        "level": 30,
+        "logout": 680
+      }
+    },
+    {
+      "run": "baseline-webgpu-solid-r2",
+      "rawSha256": "995dd36c06c0b7722a717acf43ba28fca525b2aac8b73ffb1fdf044abd321d17",
+      "renderer": "webgpu",
+      "backendBodySource": "DOM IMG committed frame",
+      "mode": "baseline",
+      "kind": "solid",
+      "screenPoint": {
+        "x": 1126,
+        "y": 639
+      },
+      "cursorTile": {
+        "x": 261,
+        "y": 405
+      },
+      "positions": {
+        "tree": {
+          "x": 261,
+          "y": 407
+        },
+        "oma": {
+          "x": 261,
+          "y": 406
+        },
+        "self": {
+          "x": 251,
+          "y": 400
+        },
+        "names": {
+          "tree": "ChestnutTree1",
+          "oma": "Oma"
+        }
+      },
+      "tree": {
+        "frame": "/original-ui/Monster/013/3.png",
+        "frameSha256": "baff26c5499dba56b271db048b28fe93ed9efe54ce056121691902c489634123",
+        "pixel": {
+          "sourceX": 152,
+          "sourceY": 191,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 0,
+            "max": 255,
+            "nonZero": 23
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 292,
+          "height": 288
+        }
+      },
+      "oma": {
+        "frame": "/original-ui/Monster/009/27.png",
+        "frameSha256": "6643f1604b5f663349bf22a24a8a5907f906793a32e1f8c6f3124ade0c62cbd7",
+        "pixel": {
+          "sourceX": 46,
+          "sourceY": 44,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 25
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 92,
+          "height": 84
+        }
+      },
+      "picked": "213601",
+      "naturalWalks": [],
+      "hit": null,
+      "saved": {
+        "position": {
+          "x": 253,
+          "y": 399
+        },
+        "level": 30,
+        "logout": 649
+      }
+    },
+    {
+      "run": "candidate-webgpu-transparent-r4",
+      "rawSha256": "ef9546eb61054b025b3704338224640f738664f6d7ec6ca19e93b88e961a63f1",
+      "renderer": "webgpu",
+      "backendBodySource": "DOM IMG committed frame",
+      "mode": "candidate",
+      "kind": "transparent",
+      "screenPoint": {
+        "x": 903,
+        "y": 432
+      },
+      "cursorTile": {
+        "x": 259,
+        "y": 405
+      },
+      "positions": {
+        "tree": {
+          "x": 261,
+          "y": 407
+        },
+        "oma": {
+          "x": 258,
+          "y": 406
+        },
+        "self": {
+          "x": 253,
+          "y": 406
+        },
+        "names": {
+          "tree": "ChestnutTree1",
+          "oma": "Oma"
+        }
+      },
+      "tree": {
+        "frame": "/original-ui/Monster/013/0.png",
+        "frameSha256": "44a5dae8c46f4889cae3ef9e0d61f142226b633bdc6b56538f9b1e6e0ce0a8a5",
+        "pixel": {
+          "sourceX": 25,
+          "sourceY": 176,
+          "alpha": 0,
+          "halo1": {
+            "min": 0,
+            "max": 0,
+            "nonZero": 0
+          },
+          "halo2": {
+            "min": 0,
+            "max": 0,
+            "nonZero": 0
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 292,
+          "height": 288
+        }
+      },
+      "oma": {
+        "frame": "/original-ui/Monster/009/62.png",
+        "frameSha256": "69d6d52d9fcc5d7f9e82bd8ba4b5a7163cfccf4c6fc69a6bd553f8df5514cae1",
+        "pixel": {
+          "sourceX": 37,
+          "sourceY": 50,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 25
+          }
+        },
+        "action": "walking",
+        "size": {
+          "width": 84,
+          "height": 84
+        }
+      },
+      "picked": "205606",
+      "naturalWalks": [
+        {
+          "seq": 662,
+          "x": 260,
+          "y": 406
+        },
+        {
+          "seq": 671,
+          "x": 259,
+          "y": 405
+        },
+        {
+          "seq": 672,
+          "x": 258,
+          "y": 406
+        }
+      ],
+      "hit": {
+        "seq": 689,
+        "at": 40546.658,
+        "packet": "ObjectStruck",
+        "objectId": "205606",
+        "attackerId": "1000",
+        "targetId": null,
+        "x": 257,
+        "y": 405,
+        "direction": "UpLeft"
+      },
+      "saved": {
+        "position": {
+          "x": 256,
+          "y": 404
+        },
+        "level": 30,
+        "logout": 694
+      }
+    },
+    {
+      "run": "candidate-shared-transparent-r4",
+      "rawSha256": "69fe01cb5179c5d9d60e0d07c84af425c6a63103d0822ab41c1f9ad08a777414",
+      "renderer": "shared",
+      "backendBodySource": "DOM IMG committed frame",
+      "mode": "candidate",
+      "kind": "transparent",
+      "screenPoint": {
+        "x": 896,
+        "y": 423
+      },
+      "cursorTile": {
+        "x": 259,
+        "y": 405
+      },
+      "positions": {
+        "tree": {
+          "x": 261,
+          "y": 407
+        },
+        "oma": {
+          "x": 258,
+          "y": 406
+        },
+        "self": {
+          "x": 253,
+          "y": 406
+        },
+        "names": {
+          "tree": "ChestnutTree1",
+          "oma": "Oma"
+        }
+      },
+      "tree": {
+        "frame": "/original-ui/Monster/013/1.png",
+        "frameSha256": "dec232c10d3caf857ef3ed2e667a648dec73f204a6c360fd37e8d7cc7a7895a4",
+        "pixel": {
+          "sourceX": 18,
+          "sourceY": 167,
+          "alpha": 0,
+          "halo1": {
+            "min": 0,
+            "max": 0,
+            "nonZero": 0
+          },
+          "halo2": {
+            "min": 0,
+            "max": 0,
+            "nonZero": 0
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 292,
+          "height": 288
+        }
+      },
+      "oma": {
+        "frame": "/original-ui/Monster/009/62.png",
+        "frameSha256": "69d6d52d9fcc5d7f9e82bd8ba4b5a7163cfccf4c6fc69a6bd553f8df5514cae1",
+        "pixel": {
+          "sourceX": 30,
+          "sourceY": 41,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 25
+          }
+        },
+        "action": "walking",
+        "size": {
+          "width": 84,
+          "height": 84
+        }
+      },
+      "picked": "205606",
+      "naturalWalks": [
+        {
+          "seq": 662,
+          "x": 260,
+          "y": 406
+        },
+        {
+          "seq": 671,
+          "x": 259,
+          "y": 405
+        },
+        {
+          "seq": 672,
+          "x": 258,
+          "y": 406
+        }
+      ],
+      "hit": {
+        "seq": 689,
+        "at": 40883.755,
+        "packet": "ObjectStruck",
+        "objectId": "205606",
+        "attackerId": "1000",
+        "targetId": null,
+        "x": 257,
+        "y": 405,
+        "direction": "UpLeft"
+      },
+      "saved": {
+        "position": {
+          "x": 256,
+          "y": 404
+        },
+        "level": 30,
+        "logout": 694
+      }
+    },
+    {
+      "run": "candidate-webgpu-solid-r4",
+      "rawSha256": "87c76231e698dea357225a7bf188e35e33a80fd6fc9c8976cc76368011d6c725",
+      "renderer": "webgpu",
+      "backendBodySource": "DOM IMG committed frame",
+      "mode": "candidate",
+      "kind": "solid",
+      "screenPoint": {
+        "x": 1126,
+        "y": 639
+      },
+      "cursorTile": {
+        "x": 261,
+        "y": 405
+      },
+      "positions": {
+        "tree": {
+          "x": 261,
+          "y": 407
+        },
+        "oma": {
+          "x": 261,
+          "y": 406
+        },
+        "self": {
+          "x": 251,
+          "y": 400
+        },
+        "names": {
+          "tree": "ChestnutTree1",
+          "oma": "Oma"
+        }
+      },
+      "tree": {
+        "frame": "/original-ui/Monster/013/0.png",
+        "frameSha256": "44a5dae8c46f4889cae3ef9e0d61f142226b633bdc6b56538f9b1e6e0ce0a8a5",
+        "pixel": {
+          "sourceX": 152,
+          "sourceY": 191,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 0,
+            "max": 255,
+            "nonZero": 23
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 292,
+          "height": 288
+        }
+      },
+      "oma": {
+        "frame": "/original-ui/Monster/009/25.png",
+        "frameSha256": "2d38d6259f8eda284b04ac51d6324a9a2029c3362c11781d20557fcf0e5dd95d",
+        "pixel": {
+          "sourceX": 49,
+          "sourceY": 45,
+          "alpha": 255,
+          "halo1": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 9
+          },
+          "halo2": {
+            "min": 255,
+            "max": 255,
+            "nonZero": 25
+          }
+        },
+        "action": "standing",
+        "size": {
+          "width": 96,
+          "height": 84
+        }
+      },
+      "picked": "213601",
+      "naturalWalks": [],
+      "hit": null,
+      "saved": {
+        "position": {
+          "x": 253,
+          "y": 399
+        },
+        "level": 30,
+        "logout": 651
+      }
+    }
+  ],
+  "busy": [
+    {
+      "run": "baseline-r4-busy-webgpu",
+      "rawSha256": "5f826fe64f4c554bd30e7a33756bcb85b4cefb5ba35bb320fa33ef25307f8b23",
+      "renderer": "webgpu",
+      "scenario": "classic-busy-tap",
+      "holdMs": 55.3,
+      "releaseUpperAfterPriorSendMs": 461.528,
+      "cadenceMs": 600,
+      "canSendAtRelease": null,
+      "remainingAtReleaseMs": null,
+      "observeMs": 1650,
+      "afterRelease": [
+        {
+          "send": "run",
+          "msAfterReleaseUpperBound": 150.913
+        }
+      ],
+      "saved": {
+        "position": {
+          "x": 296,
+          "y": 267
+        },
+        "level": 30,
+        "logout": 640
+      }
+    },
+    {
+      "run": "baseline-r4-busy-shared",
+      "rawSha256": "6be5f4635bda18d15a0f4fa77e16c116b9753795f9268af4e6aeae850391fbf6",
+      "renderer": "shared",
+      "scenario": "classic-busy-tap",
+      "holdMs": 49.7,
+      "releaseUpperAfterPriorSendMs": 392.721,
+      "cadenceMs": 600,
+      "canSendAtRelease": null,
+      "remainingAtReleaseMs": null,
+      "observeMs": 1650,
+      "afterRelease": [
+        {
+          "send": "run",
+          "msAfterReleaseUpperBound": 211.338
+        }
+      ],
+      "saved": {
+        "position": {
+          "x": 296,
+          "y": 267
+        },
+        "level": 30,
+        "logout": 640
+      }
+    },
+    {
+      "run": "candidate-r3-classic-busy-webgpu",
+      "rawSha256": "18a05f0343539501871164678a5deb0c9ab44f9d04afd7ba81459f23e7d977ac",
+      "renderer": "webgpu",
+      "scenario": "classic-busy-tap",
+      "holdMs": 63.8,
+      "releaseUpperAfterPriorSendMs": 442.024,
+      "cadenceMs": 600,
+      "canSendAtRelease": false,
+      "remainingAtReleaseMs": 140,
+      "observeMs": 1650,
+      "afterRelease": [],
+      "saved": {
+        "position": {
+          "x": 298,
+          "y": 269
+        },
+        "level": 30,
+        "logout": 637
+      }
+    },
+    {
+      "run": "candidate-r3-classic-busy-shared",
+      "rawSha256": "fb018139866309f0f8490ac6d76dc2fa4197f7bbe49a815bf7e8c823ed68eb2a",
+      "renderer": "shared",
+      "scenario": "classic-busy-tap",
+      "holdMs": 60.2,
+      "releaseUpperAfterPriorSendMs": 398.112,
+      "cadenceMs": 600,
+      "canSendAtRelease": false,
+      "remainingAtReleaseMs": 192,
+      "observeMs": 1650,
+      "afterRelease": [],
+      "saved": {
+        "position": {
+          "x": 298,
+          "y": 269
+        },
+        "level": 30,
+        "logout": 637
+      }
+    },
+    {
+      "run": "candidate-r3-new-move-busy-webgpu",
+      "rawSha256": "3453b1ec492c51a8e7f8f3073085c7e834a4a47d6509dc3468928900767ff0d8",
+      "renderer": "webgpu",
+      "scenario": "new-move-busy",
+      "holdMs": 59,
+      "releaseUpperAfterPriorSendMs": 448.261,
+      "cadenceMs": 600,
+      "canSendAtRelease": false,
+      "remainingAtReleaseMs": 144,
+      "observeMs": 5200,
+      "afterRelease": [
+        {
+          "send": "run",
+          "msAfterReleaseUpperBound": 153.379
+        },
+        {
+          "send": "run",
+          "msAfterReleaseUpperBound": 758.91
+        },
+        {
+          "send": "walk",
+          "msAfterReleaseUpperBound": 1367.443
+        }
+      ],
+      "saved": {
+        "position": {
+          "x": 294,
+          "y": 266
+        },
+        "level": 30,
+        "logout": 647
+      }
+    }
+  ],
+  "idleControl": {
+    "rawSha256": "5a9d2006d980f1f65516e103bb2249ef6896a7454c34f88780ca473b8977ad35",
+    "buildId": "feM39CLB3fN_T6p-RSxk2",
+    "saved": {
+      "position": {
+        "x": 297,
+        "y": 270
+      },
+      "level": 30,
+      "logout": 639
+    }
+  },
+  "publicQr": [
+    {
+      "mode": "cold-public-zh-cn",
+      "rawSha256": "9829e0c79683b77c79cea004f4172c438e13a7874ee74fb7869f7b53d8eced96",
+      "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+      "status": 200,
+      "visibleMs": 7457,
+      "create": 200,
+      "poll": 200,
+      "pending": true,
+      "canceled": true
+    },
+    {
+      "mode": "cold-public-zh-tw",
+      "rawSha256": "d897c91ba1451f8c479f1471a37ab7c000d7d9eb708d1659bcfc7a448f0acc70",
+      "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+      "status": 200,
+      "visibleMs": 8474,
+      "create": 200,
+      "poll": 200,
+      "pending": true,
+      "canceled": true
+    }
+  ],
+  "checks": {
+    "focused": {
+      "passed": 241,
+      "logSha256": "f354aaf3c945be6abe5eae24766162917b5ad2a9458ad4d7497641fc1b4a7a85"
+    },
+    "stage5": {
+      "passed": 520,
+      "logSha256": "64f68c11cd84bcab7f28c49cf045c922d09a6fd4f0048e6906addd16ea0e6721"
+    },
+    "windowsFocused": {
+      "passed": 19,
+      "filter": "hover_",
+      "binarySha256": "f73b99c02718c00a00959752f0b38586916bc94b7053ebf41ca180149b2c73b1"
+    }
+  },
+  "screenshots": [
+    {
+      "file": "old-transparent-click.png",
+      "run": "baseline-webgpu-transparent-r3",
+      "sha256": "0bd8d60c53101fafe37e1ac08eeb8a178ed796436a993f310d2ae0bf93f02565"
+    },
+    {
+      "file": "transparent-click.png",
+      "run": "candidate-webgpu-transparent-r4",
+      "sha256": "e12503d46998c9034b909102f726e6f529e22b2a7bf3b3ae295715910e93dbd6"
+    },
+    {
+      "file": "solid-click.png",
+      "run": "candidate-webgpu-solid-r4",
+      "sha256": "b98f8075466d0d040926e5f66977eb1a7f990c83a8aacf4fdbbf187d90934aa6"
+    },
+    {
+      "file": "busy-short-tap.png",
+      "run": "candidate-r3-classic-busy-shared",
+      "sha256": "730b406c36bc27984a3a2dcd9e2284b33d4a871fcdf33d6fdf69b23008ebc4ec"
+    }
+  ],
+  "publicResourceProbe": {
+    "rawSha256": "e8d90f6207273880a651f955a1cbd3e4a55537e7d4998ad3b309fb51c42c9b67",
+    "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "scope": "Fresh browser, public static resource probe at login. No sign-in, rendering or playable-scene measurement.",
+    "serviceWorker": false,
+    "manifest": {
+      "status": 200,
+      "headerMs": 158,
+      "bodyMs": 4,
+      "bytes": 10005,
+      "cacheControl": "public, max-age=60",
+      "edgeCache": "STALE",
+      "cacheSource": null,
+      "transferBytes": 2513,
+      "version": "20261108-r16-08ec86d5105c"
+    },
+    "coldScene": {
+      "status": 200,
+      "headerMs": 2613,
+      "bodyMs": 2541,
+      "bytes": 368843,
+      "cacheControl": "public, max-age=300",
+      "edgeCache": "MISS",
+      "cacheSource": "miss",
+      "transferBytes": 28935
+    },
+    "repeatScene": {
+      "status": 200,
+      "headerMs": 1,
+      "bodyMs": 1,
+      "bytes": 368843,
+      "cacheControl": "public, max-age=300",
+      "edgeCache": "MISS",
+      "cacheSource": "miss",
+      "transferBytes": 0
+    }
+  }
+}

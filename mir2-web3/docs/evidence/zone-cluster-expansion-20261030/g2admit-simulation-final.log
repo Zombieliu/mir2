@@ -1,0 +1,49 @@
+    Finished `test` profile [unoptimized] target(s) in 59.28s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 39 tests
+test player_drop::tests::player_drop_complete_operation_and_receipt_reject_rebound_checkpoints ... ok
+test player_drop::tests::player_drop_effect_identity_is_epoch_scoped_and_domain_separated ... ok
+test player_drop::tests::player_drop_intent_detects_expiry_placement_payload_and_binding_tampering ... ok
+test player_drop::tests::player_drop_journal_binds_complete_receipt_and_original_source_placement ... ok
+test player_drop::tests::player_drop_journal_requires_and_binds_exact_recorded_request ... ok
+test player_drop::tests::player_drop_ordinary_uid_successor_never_wraps ... ok
+test runtime::drops::ground_drop_identity_tests::partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication ... ok
+test runtime::drops::ground_drop_identity_tests::whole_player_drop_roundtrip_preserves_assigned_uid_tree ... ok
+test runtime::prepared_player_drop::tests::player_drop_checkpoint_installer_cannot_overwrite_newer_private_source ... ok
+test runtime::prepared_player_drop::tests::player_drop_false_written_receipt_is_unknown_and_never_installs_checkpoint ... ok
+test runtime::prepared_player_drop::tests::player_drop_full_stack_preserves_exact_existing_uid_without_reservation ... ok
+test runtime::prepared_player_drop::tests::player_drop_hero_inventory_rejection_matches_existing_runtime_drop_policy ... ok
+
+thread 'runtime::prepared_player_drop::tests::player_drop_publisher_panic_freezes_without_private_asset_changes' panicked at apps\simulation\src\runtime\prepared_player_drop_tests.rs:222:13:
+worker lost before return
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test runtime::prepared_player_drop::tests::player_drop_publisher_panic_freezes_without_private_asset_changes ... ok
+test runtime::prepared_player_drop::tests::player_drop_recorded_request_binds_original_split_uid_count_and_owner_inventory ... ok
+test runtime::prepared_player_drop::tests::player_drop_rejection_stages_full_debit_without_private_spawn_or_live_debit ... ok
+test runtime::prepared_player_drop::tests::player_drop_replica_source_installs_frozen_checkpoint_and_ack_without_debit_replay ... ok
+test runtime::prepared_player_drop::tests::player_drop_replica_source_rejects_live_and_plain_memory_configs ... ok
+test runtime::prepared_player_drop::tests::player_drop_replica_source_rejects_newer_isolated_save_without_installing_old_checkpoint ... ok
+test runtime::prepared_player_drop::tests::player_drop_retains_actual_durable_preimage_and_exact_working_source ... ok
+test runtime::prepared_player_drop::tests::player_drop_source_requires_original_trusted_postgres_authority ... ok
+test runtime::prepared_player_drop::tests::player_drop_split_freezes_exact_assigned_item_and_keeps_source_uid_on_remainder ... ok
+test runtime::prepared_player_drop::tests::player_drop_split_rejects_missing_identity_and_changed_attributes_before_publisher ... ok
+test runtime::prepared_player_drop::tests::player_drop_unknown_freezes_source_without_live_debit_or_compensation ... ok
+test runtime::zone::runtime::checkpoint::player_drop_checkpoint_tests::player_drop_checkpoint_v9_commits_identity_registry_and_requires_complete_custody ... ok
+test runtime::zone::runtime::checkpoint::player_drop_checkpoint_tests::player_drop_legacy_v8_strips_all_forward_custody_even_malformed_and_preserves_random_cursor ... ok
+test runtime::zone::runtime::checkpoint::player_drop_checkpoint_tests::player_drop_old_checkpoint_cannot_revive_a_canonically_consumed_effect ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_cancel_at_absolute_expiry_boundary_cannot_restore_ground_object ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_cold_retained_player_has_no_claim_authority_until_fresh_join ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_committed_apply_needs_no_session_replays_once_and_rejects_changed_payload ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_exact_item_and_embedded_instances_recover_without_attribute_loss ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_fresh_host_counter_reuse_cannot_reuse_old_claimant_incarnation ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_held_claim_expiry_and_terminal_reconciliation_prevent_snapshot_resurrection ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_recovery_renews_presentation_but_pickup_key_is_effect_based_and_old_claim_is_revoked ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_replica_installs_frozen_placement_without_selecting_a_new_cell ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_replica_mode_is_explicit_and_checkpoint_cannot_grant_it ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_reservation_enforces_occupancy_item_and_gold_ranges_and_five_slot_capacity ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_reservation_excludes_transfer_sources ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_reservation_rejection_is_transient_and_unresolved_slots_block_checkpoint_export ... ok
+test runtime::zone::runtime::player_drop_custody::tests::player_drop_reservation_replays_exactly_and_frozen_location_mismatch_rejects_without_minting ... ok
+
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 3122 filtered out; finished in 5.42s

@@ -1,0 +1,424 @@
+{
+  "passed": true,
+  "policy": {
+    "enabled": false,
+    "assetVersion": "20261108-r16-08ec86d5105c",
+    "mirrorCode": true,
+    "bodyIdleMs": 15000,
+    "bodyLimit": 33554432
+  },
+  "native": {
+    "hud": {
+      "version": 1,
+      "frame": 2547,
+      "ready": true,
+      "characterStatsReady": false,
+      "generation": 2,
+      "revision": 1,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "plan": {
+        "hp": "HP 18/18",
+        "mp": "",
+        "name": "SpawnSmoke",
+        "level": "1",
+        "gold": "0",
+        "experience": "0%",
+        "weight": "39",
+        "hpOnly": true,
+        "main": {
+          "left": 0,
+          "top": 616,
+          "width": 1024,
+          "height": 152
+        },
+        "orb": {
+          "left": 0,
+          "top": 646,
+          "width": 104,
+          "height": 80
+        },
+        "experienceBar": {
+          "left": 9,
+          "top": 759,
+          "width": 1004,
+          "height": 8
+        },
+        "weightBar": {
+          "left": 919,
+          "top": 719,
+          "width": 76,
+          "height": 12
+        },
+        "buttons": [
+          {
+            "action": "character",
+            "rect": {
+              "left": 905,
+              "top": 692,
+              "width": 20,
+              "height": 20
+            },
+            "normal": "original-ui/Prguse/1900.png",
+            "hover": "original-ui/Prguse/1901.png",
+            "pressed": "original-ui/Prguse/1902.png"
+          },
+          {
+            "action": "bag",
+            "rect": {
+              "left": 928,
+              "top": 692,
+              "width": 20,
+              "height": 20
+            },
+            "normal": "original-ui/Prguse/1903.png",
+            "hover": "original-ui/Prguse/1904.png",
+            "pressed": "original-ui/Prguse/1905.png"
+          },
+          {
+            "action": "skill",
+            "rect": {
+              "left": 951,
+              "top": 692,
+              "width": 20,
+              "height": 20
+            },
+            "normal": "original-ui/Prguse/1906.png",
+            "hover": "original-ui/Prguse/1907.png",
+            "pressed": "original-ui/Prguse/1908.png"
+          },
+          {
+            "action": "quest",
+            "rect": {
+              "left": 974,
+              "top": 692,
+              "width": 20,
+              "height": 20
+            },
+            "normal": "original-ui/Prguse/1909.png",
+            "hover": "original-ui/Prguse/1910.png",
+            "pressed": "original-ui/Prguse/1911.png"
+          },
+          {
+            "action": "option",
+            "rect": {
+              "left": 997,
+              "top": 692,
+              "width": 20,
+              "height": 20
+            },
+            "normal": "original-ui/Prguse/1912.png",
+            "hover": "original-ui/Prguse/1913.png",
+            "pressed": "original-ui/Prguse/1914.png"
+          },
+          {
+            "action": "menu",
+            "rect": {
+              "left": 969,
+              "top": 651,
+              "width": 40,
+              "height": 40
+            },
+            "normal": "original-ui/Prguse/1960.png",
+            "hover": "original-ui/Prguse/1961.png",
+            "pressed": "original-ui/Prguse/1962.png"
+          },
+          {
+            "action": "gameShop",
+            "rect": {
+              "left": 919,
+              "top": 651,
+              "width": 40,
+              "height": 38
+            },
+            "normal": "original-ui/Prguse/826.png",
+            "hover": "original-ui/Prguse/827.png",
+            "pressed": "original-ui/Prguse/828.png"
+          }
+        ],
+        "characterRect": {
+          "left": 760,
+          "top": 0,
+          "width": 264,
+          "height": 380
+        },
+        "characterHits": [
+          {
+            "action": {
+              "type": "selectCharacterPage",
+              "page": "character"
+            },
+            "rect": {
+              "left": 768,
+              "top": 70,
+              "width": 64,
+              "height": 20
+            }
+          },
+          {
+            "action": {
+              "type": "selectCharacterPage",
+              "page": "stats1"
+            },
+            "rect": {
+              "left": 830,
+              "top": 70,
+              "width": 64,
+              "height": 20
+            }
+          },
+          {
+            "action": {
+              "type": "selectCharacterPage",
+              "page": "stats2"
+            },
+            "rect": {
+              "left": 892,
+              "top": 70,
+              "width": 64,
+              "height": 20
+            }
+          },
+          {
+            "action": {
+              "type": "selectCharacterPage",
+              "page": "spells"
+            },
+            "rect": {
+              "left": 954,
+              "top": 70,
+              "width": 64,
+              "height": 20
+            }
+          },
+          {
+            "action": {
+              "type": "closeCharacter"
+            },
+            "rect": {
+              "left": 1001,
+              "top": 3,
+              "width": 24,
+              "height": 21
+            }
+          }
+        ],
+        "experienceSprite": {
+          "current": 0,
+          "maximum": 100,
+          "image": null,
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 0,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 0,
+            "height": 8
+          }
+        },
+        "weightSprite": {
+          "current": 11,
+          "maximum": 50,
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 16,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 16,
+            "height": 12
+          }
+        }
+      },
+      "error": null,
+      "foregroundRects": [],
+      "modal": false
+    },
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "en",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-TW",
+      "ready": true,
+      "error": null,
+      "capturesPointer": false,
+      "questLogOpen": false,
+      "frame": 2547,
+      "generation": 2,
+      "revision": 2,
+      "openRevision": 1,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 2,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "known-empty",
+          "current": 0,
+          "maximum": 100,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": null,
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 0,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 0,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 11,
+          "maximum": 50,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 16,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 16,
+            "height": 12
+          }
+        }
+      }
+    },
+    "backend": "webgpu",
+    "packageId": "webgpu"
+  },
+  "nativeReadyWaitMs": 52097,
+  "fontCache": [
+    {
+      "name": "NotoSansTC.ttf",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "name": "NotoSansCJKsc-Regular.otf",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "name": "NotoSans-Regular.ttf",
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "name": "NotoSansDevanagari-Regular.ttf",
+      "bytes": 243520,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "name": "NotoSansThai-Regular.ttf",
+      "bytes": 37780,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "name": "NotoSansArabic-Regular.ttf",
+      "bytes": 234892,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    }
+  ],
+  "fontTimings": [
+    {
+      "url": "http://127.0.0.1:20631/original-ui/fonts/NotoSansTC.ttf",
+      "durationMs": 15002,
+      "decodedBodySize": 0
+    },
+    {
+      "url": "http://localhost:20631/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "durationMs": 85.5,
+      "decodedBodySize": 0
+    }
+  ],
+  "stalledAppFontRequests": 0
+}

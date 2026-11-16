@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "scope": "offline owned fixture output guards only",
+  "sourceSha256": "06336AD1A8A79067A5213B50D2A3F0771640712E3C1BE104684BB9E0AA6FB6F0",
+  "executableSha256": "26DAE8933B34386C10B85CE50C9DB21AC412198C91A3AE8E443B557EA0B37959",
+  "cases": [
+    {
+      "case": "existing",
+      "exitCode": 2,
+      "credentialsRedacted": true,
+      "output": "seed_periodic_qa: refusing existing store, receipt or nonempty scenario directory; use fresh owned QA outputs"
+    },
+    {
+      "case": "outside-owned-root",
+      "exitCode": 2,
+      "credentialsRedacted": true,
+      "output": "seed_periodic_qa: store output is outside the exclusively owned periodic QA roots"
+    },
+    {
+      "case": "outside-isolated-gateway",
+      "exitCode": 2,
+      "credentialsRedacted": true,
+      "output": "seed_periodic_qa: offline seeder scenarios must target the isolated loopback 7290 gateway"
+    },
+    {
+      "case": "weak-private-input",
+      "exitCode": 2,
+      "credentialsRedacted": true,
+      "output": "seed_periodic_qa: private fixture password must have 20–64 nonwhitespace characters and at least eight distinct characters"
+    },
+    {
+      "case": "missing-private-input",
+      "exitCode": 2,
+      "credentialsRedacted": true,
+      "output": "seed_periodic_qa: private random password environment input is required"
+    },
+    {
+      "case": "reparse-ancestor",
+      "exitCode": 2,
+      "credentialsRedacted": true,
+      "output": "seed_periodic_qa: store output has a symlink ancestor"
+    }
+  ],
+  "existingStoreHashBefore": "55A801711D130ACBE1BFADDDE9D845D69CC1792083BACC8A27030F23BEFE7E23",
+  "existingStoreHashAfter": "55A801711D130ACBE1BFADDDE9D845D69CC1792083BACC8A27030F23BEFE7E23",
+  "existingStoreUnchanged": true,
+  "allRefused": true,
+  "credentialsRedacted": true
+}

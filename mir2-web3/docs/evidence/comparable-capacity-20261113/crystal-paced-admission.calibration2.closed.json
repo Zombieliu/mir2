@@ -1,0 +1,101 @@
+{
+  "schema": "mir2.root-paced-original-closed-strict.v1",
+  "case": "functional2",
+  "population": 2,
+  "strictPassed": true,
+  "capacityQualified": false,
+  "controllerSha256": "543c935cd2217c093a6ae2a6360a9235c37f5335515daa56335a6f2176f4a5b9",
+  "reportSha256": "603f598deff9060774286939fe9a363c4a11f2ae857c5a619fc85946d43ca6c2",
+  "diskSha256": "1ddbd5353ca0498f16076d5f7709c9e6334d667084aa46d330f259f203b8139b",
+  "enhancedSha256": "15d5a8cb228948a7db4a592bdcfaf94a411e6d47752c9395f8bce363bebd704c",
+  "actualExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "normalBothGameJobsClosedNoKill": true,
+  "closedGateJobs": [
+    {
+      "phase": "disk",
+      "actualExitCode": 0,
+      "normalClosedNoKill": true
+    },
+    {
+      "phase": "verify",
+      "actualExitCode": 0,
+      "normalClosedNoKill": true
+    }
+  ],
+  "allActorDiskSamples": 2,
+  "normalAdapterSha256": "60e4bd4c2721c8ca3d0b8505124ae01a9e488647cc26635a7715c72df61a2bba",
+  "scheduleSha256": "5967a300fcd0bff9ddc68199af87dd0c43db2f5a4e53c2cfcf804dd4ed42608b",
+  "offered": 64,
+  "completed": 64,
+  "timeouts": 0,
+  "notSent": 0,
+  "measurementStartedAtUtc": "2026-11-15T06:27:23.6951513+00:00",
+  "pacing": {
+    "schema": "mir2.comparable.original-paced-admission.v1",
+    "scheduleSha256": "5967a300fcd0bff9ddc68199af87dd0c43db2f5a4e53c2cfcf804dd4ed42608b",
+    "boundary": "normal-login-reservation-before-saveLedger-and-login",
+    "sourceReference": {
+      "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+      "codeIntegrationRevision": "1cac973aa7dfc5a563a05012182341cd0fa22a49",
+      "binarySha256": "6ea6b90f67f8ab0225baf60fc978a0a794088d06f59861e51d1cf25ae926a0db",
+      "controllerSha256": "e2b065b3aa95fcf5b7d086766d144174a93e31a36c91cbb4359a0c9e5b0184b9",
+      "reportSha256": "c208309a91a9ccd508710480c972002070dd12308ee8643711c239133c0ca895",
+      "ownedLedgerSha256": "f28ed7632c77396398a19529fd3cee4d72bad37c82dd03b682745718f633c219",
+      "sdkManifestSha256": "3fbe7649ff36946c4e7979307ee8e1d0b7dd223987b287e3b1d4582a846a9e50",
+      "modernCaseClosed": true,
+      "controllerExitCode": 0,
+      "driverExitCode": 0,
+      "serverExitCode": 0,
+      "allJobsNormalClosedNoKill": true,
+      "rootDerivedInitialAttemptsOnly": true,
+      "rootVerifiedValidatedCohortOrdinalOrder": true
+    },
+    "firstNativeAttemptBoundaryOriginMs": 272415457.8573,
+    "firstNativeAttemptBoundaryOriginUtc": "2026-11-15T06:27:07.3495728+00:00",
+    "sourceFirstReservationUnixMs": 1794716515445,
+    "sourceMeasurementStartedUnixMs": 1794716531784,
+    "sourceMinimumFirstReservationToSteadyMs": 16339,
+    "actualFirstAttemptToSteadyMs": 16345.578500032425,
+    "notEarlierSteadyFloorSatisfied": true,
+    "sourceReadinessEvidence": {
+      "scope": "controller-readiness-not-simulation-clock-age",
+      "status": "Unknown",
+      "rootReviewedMapping": false,
+      "controllerSha256": null,
+      "resourcesSha256": null,
+      "controllerReadyUnixMsLower": null,
+      "controllerReadyUnixMsUpper": null
+    },
+    "originalControllerReadyToFirstAttemptMatched": false,
+    "originalControllerReadinessComparison": "Unknown_not_controlled_by_this_adapter",
+    "initialAttemptInvocations": [
+      {
+        "kind": "pacedInitialAdmissionAttempt",
+        "actorOrdinal": 0,
+        "plannedConnectNotBeforeMs": 272415457.8573,
+        "actualInitialAttemptBoundaryAtMs": 272415458.3912,
+        "deviationMs": 0.5339000225067139,
+        "sourceReservationOffsetMs": 0,
+        "nativeLoginOrStartCompletedAtBoundary": false
+      },
+      {
+        "kind": "pacedInitialAdmissionAttempt",
+        "actorOrdinal": 1,
+        "plannedConnectNotBeforeMs": 272416610.8573,
+        "actualInitialAttemptBoundaryAtMs": 272416617.3749,
+        "deviationMs": 6.517599999904633,
+        "sourceReservationOffsetMs": 1153,
+        "nativeLoginOrStartCompletedAtBoundary": false
+      }
+    ],
+    "keepAliveAndReceiveTasksUnchanged": true,
+    "noExtraGameActions": true,
+    "capacityQualifiedByPacingAlone": false
+  },
+  "fullReportAndPrivateFixtureNotExported": true,
+  "sourceRootRecordSha256": "4cfc2eb436cf5b62cb8109cf41fdaeebe270d2c1bedfc88eeb861199f9dc537b"
+}

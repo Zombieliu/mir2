@@ -1,0 +1,535 @@
+   Compiling unicode-ident v1.0.24
+    Checking windows-link v0.2.1
+    Checking cfg-if v1.0.4
+    Checking foldhash v0.2.0
+    Checking pin-project-lite v0.2.17
+    Checking equivalent v1.0.2
+    Checking allocator-api2 v0.2.21
+    Checking parking v2.2.1
+    Checking log v0.4.33
+    Checking smallvec v1.15.2
+    Checking futures-core v0.3.33
+    Checking arrayvec v0.7.8
+    Checking futures-io v0.3.33
+    Checking raw-window-handle v0.6.2
+    Checking fastrand v2.5.0
+    Checking typewit v1.15.2
+    Checking once_cell v1.21.4
+    Checking rand_core v0.10.1
+   Compiling unicode-segmentation v1.13.3
+    Checking spin v0.10.1
+    Checking serde_core v1.0.229
+    Checking libm v0.2.16
+    Checking crossbeam-utils v0.8.22
+    Checking typeid v1.0.3
+    Checking async-task v4.7.1
+    Checking disqualified v1.0.0
+    Checking atomic-waker v1.1.2
+    Checking slab v0.4.12
+    Checking inventory v0.3.24
+    Checking downcast-rs v2.0.2
+    Checking bevy_ptr v0.19.0
+    Checking windows-sys v0.61.2
+   Compiling proc-macro2 v1.0.107
+    Checking slotmap v1.1.1
+   Compiling indexmap v2.14.0
+    Checking getrandom v0.4.3
+    Checking thread_local v1.1.10
+    Checking event-listener v5.4.2
+    Checking hashbrown v0.17.1
+    Checking nonmax v0.5.5
+    Checking bumpalo v3.20.3
+    Checking fixedbitset v0.5.7
+    Checking either v1.17.0
+    Checking rand v0.10.2
+    Checking memchr v2.8.3
+    Checking stable_deref_trait v1.2.1
+    Checking regex-syntax v0.8.11
+    Checking windows-result v0.4.1
+    Checking windows-strings v0.5.1
+    Checking cpufeatures v0.3.0
+    Checking unicode-width v0.2.2
+    Checking simd-adler32 v0.3.10
+    Checking writeable v0.6.3
+    Checking futures-task v0.3.33
+    Checking tracing-core v0.1.36
+    Checking const-fnv1a-hash v1.1.0
+    Checking constant_time_eq v0.4.2
+    Checking futures-lite v2.6.1
+    Checking piper v0.2.5
+    Checking const_panic v0.2.15
+    Checking arrayref v0.3.9
+    Checking windows-threading v0.2.1
+    Checking atomicow v1.2.0
+    Checking adler2 v2.0.1
+    Checking itertools v0.14.0
+    Checking bit-vec v0.9.1
+    Checking crc32fast v1.5.0
+    Checking rustc-hash v1.1.0
+    Checking event-listener-strategy v0.5.4
+    Checking lazy_static v1.5.0
+    Checking hexf-parse v0.2.1
+    Checking litemap v0.8.2
+    Checking fdeflate v0.3.7
+    Checking utf8_iter v1.0.4
+    Checking blake3 v1.8.6
+    Checking pxfm v0.1.30
+    Checking concurrent-queue v2.5.0
+    Checking crossbeam-queue v0.3.13
+    Checking crossbeam-channel v0.5.16
+    Checking const_soft_float v0.1.4
+    Checking byteorder-lite v0.1.0
+    Checking svg_fmt v0.4.5
+   Compiling convert_case v0.10.0
+    Checking miniz_oxide v0.8.9
+    Checking async-lock v3.4.2
+    Checking async-broadcast v0.7.2
+    Checking sharded-slab v0.1.7
+   Compiling quote v1.0.47
+    Checking bit-set v0.9.1
+    Checking libloading v0.8.9
+    Checking foldhash v0.1.5
+    Checking rectangle-pack v0.4.2
+    Checking tracing-log v0.2.0
+    Checking async-channel v2.5.0
+    Checking scopeguard v1.2.0
+    Checking parking_lot_core v0.9.12
+    Checking aho-corasick v1.1.5
+    Checking presser v0.3.1
+    Checking constgebra v0.1.4
+    Checking icu_properties_data v2.2.0
+    Checking hashbrown v0.15.5
+    Checking icu_locale_data v2.2.0
+    Checking lock_api v0.4.14
+    Checking range-alloc v0.1.5
+    Checking ash v0.38.0+1.3.281
+    Checking static_assertions v1.1.0
+    Checking profiling v1.0.18
+    Checking renderdoc-sys v1.1.0
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+    Checking stackfuture v0.3.1
+    Checking icu_segmenter_data v2.2.0
+    Checking icu_normalizer_data v2.2.0
+    Checking linebender_resource_handle v0.1.1
+    Checking parlance v0.1.0
+    Checking memmap2 v0.9.11
+   Compiling toml_edit v0.25.13+spec-1.1.0
+    Checking data-encoding v2.11.1
+    Checking zeno v0.3.3
+    Checking yazi v0.2.1
+    Checking windows_x86_64_msvc v0.52.6
+    Checking sys-locale v0.3.2
+    Checking offset-allocator v0.2.0
+    Checking weak-table v0.3.2
+    Checking radsort v0.1.1
+    Checking cursor-icon v1.2.0
+    Checking parking_lot v0.12.5
+    Checking dpi v0.1.2
+    Checking grid v1.0.1
+    Checking flate2 v1.1.9
+    Checking zmij v1.0.23
+    Checking windows-targets v0.52.6
+    Checking itoa v1.0.18
+    Checking mir2-client-core v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-core)
+    Checking num-traits v0.2.19
+    Checking core_maths v0.1.1
+    Checking async-executor v1.14.0
+    Checking blocking v1.6.2
+    Checking web-time v1.1.0
+    Checking windows-sys v0.52.0
+    Checking taffy v0.10.1
+    Checking async-fs v2.2.0
+    Checking rand_distr v0.6.0
+    Checking euclid v0.22.14
+    Checking ordered-float v5.3.0
+    Checking approx v0.5.1
+    Checking chrono v0.4.45
+    Checking regex-automata v0.4.18
+    Checking bitflags v2.13.1
+    Checking hashbrown v0.16.1
+    Checking uuid v1.24.0
+    Checking erased-serde v0.4.10
+    Checking serde_json v1.0.151
+    Checking spirv v0.4.0+sdk-1.4.341.0
+    Checking png v0.18.1
+    Checking gpu-descriptor-types v0.2.0
+    Checking ctrlc v3.5.2
+    Checking winapi-util v0.1.11
+    Checking nu-ansi-term v0.50.3
+    Checking guillotiere v0.6.2
+    Checking gpu-descriptor v0.3.2
+    Checking termcolor v1.4.1
+    Checking accesskit v0.24.1
+    Checking codespan-reporting v0.13.1
+    Checking codespan-reporting v0.12.0
+   Compiling bytemuck_derive v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.20
+   Compiling displaydoc v0.2.7
+    Checking moxcms v0.8.1
+    Checking accesskit_consumer v0.35.0
+    Checking thiserror v2.0.20
+    Checking bytemuck v1.25.2
+    Checking font-types v0.11.3
+    Checking font-types v0.12.2
+    Checking read-fonts v0.39.2
+    Checking matchers v0.2.0
+    Checking regex v1.13.1
+    Checking read-fonts v0.41.0
+   Compiling bevy_macro_utils v0.19.0
+   Compiling encase_derive_impl v0.12.0
+   Compiling synstructure v0.13.2
+   Compiling bevy_ecs_macro_logic v0.19.0
+   Compiling encase_derive v0.12.0
+   Compiling derive_more-impl v2.1.1
+   Compiling bevy_reflect_derive v0.19.0
+   Compiling assert_type_match v0.1.1
+   Compiling variadics_please v1.1.0
+   Compiling bevy_derive v0.19.0
+   Compiling zerocopy-derive v0.8.56
+   Compiling tracing-attributes v0.1.31
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling windows-implement v0.60.2
+   Compiling zerovec-derive v0.11.3
+   Compiling windows-interface v0.59.3
+   Compiling futures-macro v0.3.33
+   Compiling bevy_asset_macros v0.19.0
+   Compiling bevy_encase_derive v0.19.0
+   Compiling bevy_material_macros v0.19.0
+   Compiling bevy_render_macros v0.19.0
+    Checking serde v1.0.229
+   Compiling bevy_ecs_macros v0.19.0
+    Checking encase v0.12.0
+    Checking glam v0.32.1
+    Checking wgpu-types v29.0.4
+    Checking smol_str v0.2.2
+    Checking bevy_platform v0.19.0
+    Checking ron v0.12.2
+    Checking mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+    Checking image v0.25.10
+    Checking futures-util v0.3.33
+    Checking windows-core v0.62.2
+    Checking bevy_utils v0.19.0
+    Checking zerofrom v0.1.8
+    Checking tracing v0.1.44
+    Checking yoke v0.8.3
+    Checking tracing-subscriber v0.3.23
+    Checking winit v0.30.13
+    Checking zerocopy v0.8.56
+    Checking windows-collections v0.3.2
+    Checking windows-numerics v0.3.1
+    Checking windows-future v0.3.2
+    Checking zerovec v0.11.6
+    Checking zerotrie v0.2.4
+    Checking windows v0.62.2
+    Checking tinystr v0.8.3
+    Checking potential_utf v0.1.5
+    Checking derive_more v2.1.1
+    Checking icu_collections v2.2.0
+    Checking bevy_tasks v0.19.0
+    Checking icu_locale_core v2.2.0
+    Checking icu_provider v2.2.0
+    Checking icu_locale v2.2.0
+    Checking icu_properties v2.2.0
+    Checking icu_normalizer v2.2.0
+    Checking icu_segmenter v2.2.0
+    Checking fontique v0.9.0
+    Checking harfrust v0.6.2
+    Checking skrifa v0.42.1
+    Checking parley_data v0.9.0
+    Checking skrifa v0.44.0
+    Checking half v2.7.1
+    Checking naga v29.0.4
+    Checking mir2-game-data v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\game-data)
+    Checking parley v0.9.0
+    Checking swash v0.2.10
+    Checking bevy_reflect v0.19.0
+    Checking hexasphere v18.0.0
+    Checking wgpu-naga-bridge v29.0.4
+    Checking naga_oil v0.22.0
+    Checking bevy_ecs v0.19.0
+    Checking bevy_math v0.19.0
+    Checking bevy_color v0.19.0
+    Checking gpu-allocator v0.28.0
+    Checking accesskit_windows v0.32.1
+    Checking wgpu-hal v29.0.4
+    Checking accesskit_winit v0.32.2
+    Checking wgpu-core-deps-windows-linux-android v29.0.4
+    Checking wgpu-core v29.0.4
+    Checking bevy_app v0.19.0
+    Checking bevy_time v0.19.0
+    Checking bevy_input v0.19.0
+    Checking bevy_transform v0.19.0
+    Checking bevy_log v0.19.0
+    Checking bevy_a11y v0.19.0
+    Checking bevy_clipboard v0.19.0
+    Checking bevy_diagnostic v0.19.0
+    Checking bevy_asset v0.19.0
+    Checking bevy_window v0.19.0
+    Checking wgpu v29.0.4
+    Checking bevy_input_focus v0.19.0
+    Checking bevy_winit v0.19.0
+    Checking bevy_image v0.19.0
+    Checking bevy_mesh v0.19.0
+    Checking bevy_shader v0.19.0
+    Checking bevy_text v0.19.0
+    Checking bevy_camera v0.19.0
+    Checking bevy_material v0.19.0
+    Checking bevy_render v0.19.0
+    Checking bevy_sprite v0.19.0
+    Checking bevy_light v0.19.0
+    Checking bevy_ui v0.19.0
+    Checking bevy_core_pipeline v0.19.0
+    Checking bevy_sprite_render v0.19.0
+    Checking bevy_ui_render v0.19.0
+    Checking bevy_internal v0.19.0
+    Checking bevy v0.19.0
+    Checking mir2-ui-core v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\ui-core)
+    Checking mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around type
+  --> src\crystal_ui\skill_page_shared.rs:67:20
+   |
+67 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+67 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+67 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: unused imports: `NativeShellModel` and `NativeShellScreen`
+ --> src\native_billing.rs:9:27
+  |
+9 | use crate::native_shell::{NativeShellModel, NativeShellScreen};
+  |                           ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary parentheses around method argument
+   --> src\portable_character_ui.rs:514:25
+    |
+514 |                         (Node {
+    |                         ^
+...
+523 |                         }),
+    |                          ^
+    |
+help: remove these parentheses
+    |
+514 ~                         Node {
+515 |                             position_type: PositionType::Absolute,
+...
+522 |                             ..default()
+523 ~                         },
+    |
+
+warning: variable does not need to be mutable
+  --> src\crystal_ui\item_tooltip.rs:75:22
+   |
+75 | fn localize_document(mut document: CrystalItemTooltipDocument) -> CrystalItemTooltipDocument {
+   |                      ----^^^^^^^^
+   |                      |
+   |                      help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `native_stage`
+    --> src\crystal_ui\widget.rs:1047:5
+     |
+1047 |     native_stage: bool,
+     |     ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_native_stage`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:2674:5
+     |
+2674 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: constant `TEXT` is never used
+ --> src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:17:18
+   |
+17 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple methods are never used
+   --> src\crystal_ui\mail_editor.rs:312:19
+    |
+ 80 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+312 |     pub(crate) fn bind_draft_clock(
+    |                   ^^^^^^^^^^^^^^^^
+...
+609 |     pub(crate) fn set_selecting(&mut self, selecting: bool) {
+    |                   ^^^^^^^^^^^^^
+...
+613 |     pub(crate) fn selecting(&self) -> bool {
+    |                   ^^^^^^^^^
+...
+620 |     pub(crate) fn scroll_wheel_lines(&mut self, upward_lines: f32) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^
+...
+644 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+648 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+...
+859 |     fn visible_line_height(&self) -> Option<f32> {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: function `item` is never used
+  --> src\crystal_ui\hero_cross_inventory.rs:44:4
+   |
+44 | fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Option<&'a ItemModel> {
+   |    ^^^^
+
+warning: method `actions` is never used
+   --> src\native_billing.rs:467:8
+    |
+202 | impl BillingPanel {
+    | ----------------- method in this implementation
+...
+467 |     fn actions(&self) -> Vec<BillingAction> {
+    |        ^^^^^^^
+
+warning: associated function `from_quest` is never used
+   --> src\quest_journey.rs:679:8
+    |
+678 | impl JourneyStep {
+    | ---------------- associated function in this implementation
+679 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+    |        ^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:88:7
+   |
+88 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> src\quest_ui.rs:932:8
+    |
+913 | impl QuestStageFilter {
+    | --------------------- method in this implementation
+...
+932 |     fn display_label(self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> src\quest_ui.rs:1530:5
+     |
+1481 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1530 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1533 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `map` and `big_map` are never read
+    --> src\quest_ui.rs:2382:5
+     |
+2368 | pub(crate) struct QuestInputModels<'w> {
+     |                   ---------------- fields in this struct
+...
+2382 |     map: Option<Res<'w, MapModel>>,
+     |     ^^^
+...
+2390 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
+     |     ^^^^^^^
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> src\quest_ui.rs:6155:4
+     |
+6155 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:7147:4
+     |
+7147 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_detail_lines` is never used
+    --> src\quest_ui.rs:7281:4
+     |
+7281 | fn quest_detail_lines(
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_list_message_lines` is never used
+    --> src\quest_ui.rs:7452:4
+     |
+7452 | fn quest_list_message_lines(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+     --> src\quest_ui.rs:10075:4
+      |
+10075 | fn tracker_quest_block(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+     --> src\quest_ui.rs:10316:4
+      |
+10316 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+     --> src\quest_ui.rs:10326:4
+      |
+10326 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+     --> src\quest_ui.rs:10340:4
+      |
+10340 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+     --> src\quest_ui.rs:10494:4
+      |
+10494 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `destination` is never used
+  --> src\quest_turn_in.rs:54:15
+   |
+54 | pub(super) fn destination(quest: &Quest) -> Option<QuestNpcDestination> {
+   |               ^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `avoiding_bag_origin` is never used
+   --> src\stone_workshop_ui.rs:113:15
+    |
+113 | pub(crate) fn avoiding_bag_origin(sidebar: QuestLogRect, p: QuestUiPresentation,
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 28 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 6 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 56.87s

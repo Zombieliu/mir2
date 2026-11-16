@@ -1,0 +1,49 @@
+{
+  "phase": "guild-adjacent-01",
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "-p",
+    "mir2-gateway",
+    "--test",
+    "shared_guild_management",
+    "--test",
+    "guild_shared_lifecycle",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "cwd": "C:/Users/Administrator/.codex/worktrees/p5/mir2-player-journey/mir2-web3",
+  "target": "C:/mir2-build/gateway-tests-r51",
+  "jobs": 2,
+  "started_utc": "2026-10-04T13:56:39.877198+00:00",
+  "inputs": {
+    "apps/simulation/src/runtime/shared_guilds.rs": {
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356",
+      "bytes": 40196
+    },
+    "apps/simulation/src/runtime/shared_guild_management.rs": {
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26",
+      "bytes": 3246
+    },
+    "apps/gateway/src/shared_guilds.rs": {
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22",
+      "bytes": 19369
+    },
+    "apps/simulation/tests/shared_guild_rank_management.rs": {
+      "sha256": "be8e42a9fd37bf2accc6f150c76f92fea2742123d80a8e4904107fc92d530291",
+      "bytes": 9539
+    },
+    "apps/gateway/tests/shared_guild_rank_management.rs": {
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e",
+      "bytes": 16260
+    }
+  },
+  "exit_code": 0,
+  "ended_utc": "2026-10-04T14:02:57.892363+00:00",
+  "log_sha256": "5371b109f9ae5d0fb1e7dc19b0fc944741f66fdaa8b209f4327ce215822a7d55",
+  "source_unchanged_during_run": true
+}

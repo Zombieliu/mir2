@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-26T22:00:48.659Z",
+  "sourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "driverSourceCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "navigationDependencyCommit": "4ecd237e25858a2080456a2e52d64b9ba0c167cd",
+  "observationDependencyCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+  "frontendSourceCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\root-final-config-v6.json",
+    "bytes": 11485,
+    "sha256": "fc7dca18b93d42180e96e89be6a46f1ea94d108077bbd4382f75aab8e52722c0"
+  },
+  "backendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\backend-source-v6.json",
+    "bytes": 50669,
+    "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970"
+  },
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+    "bytes": 2241,
+    "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59"
+  },
+  "rustValidation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+    "bytes": 28585,
+    "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+  },
+  "immutableRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "selectedRustTestsPassed": 32,
+  "rustTestsReexecuted": true,
+  "freshNodeTestsPassed": 0,
+  "reusedNodeTestsPassed": 0,
+  "reusedFocusedTestsPassed": 0,
+  "typecheckReexecuted": false,
+  "allSelectedTestsPassed": true,
+  "diagnosticOnly": true,
+  "diagnosticCandidateOnly": true,
+  "P0Eligible": false,
+  "p0Eligible": false,
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "freshOrdinaryLifecyclePerformed": false,
+  "realCapacityRunPerformed": false
+}

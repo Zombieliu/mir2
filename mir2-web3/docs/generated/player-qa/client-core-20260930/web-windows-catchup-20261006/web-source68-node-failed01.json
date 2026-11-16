@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "source": "Source68",
+  "kind": "actual original five-script Node generation01 failure preserved",
+  "capturedAt": "2026-10-11T13:01:32.529Z",
+  "originalCaller": {
+    "utf8Bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "execution": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 63456,
+    "kind": "Source68 actual original Node four existing scripts plus stage5 adapter checks",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 33776,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source68-storage-tooltip-20261011-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "tests": {
+    "tests": 257,
+    "pass": 256,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "scripts": [
+    "scripts/test-npc-shop-surface-integration.mjs",
+    "scripts/test-bevy-npc-shop-buy.mjs",
+    "scripts/test-bevy-storage-ui.mjs",
+    "scripts/test-bevy-bag-shell.mjs",
+    "scripts/test-stage5-adapters.mjs"
+  ],
+  "failure": {
+    "script": "scripts/test-stage5-adapters.mjs",
+    "errorClass": "ReferenceError",
+    "missingDependency": "rejectNpcPurchaseSendGate",
+    "sourceLocation": "parityPageFixture / parityFinal",
+    "rootCauseAssessment": "Old extracted actual Page callback fixture lacks the Source61–67 diagnostic dependency; fixture dependency review and rerun pending.",
+    "newStorageGroupsReached": false,
+    "adapterGroupsCompleted": null,
+    "adapterGroups506Accepted": false
+  },
+  "pins": {
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\root-approved01\\node-tests01-config.json",
+      "bytes": 5374,
+      "sha256": "6452af750ff398d4ed76fb0ce348eed76b4c3e843b7c13c8b0c8f1fdd45aa31a"
+    },
+    "review": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\root-approved01\\source-review01.json",
+      "bytes": 9407,
+      "sha256": "cbd8f23f727c6385a287707d1d1a55a4b1bfb70c84986f8e20c862540eb9a7bc"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\preparation01\\source68-isolated-source-snapshot01.json",
+      "bytes": 21656307,
+      "sha256": "77213509073402fecb84e5bd4206bc6fa5f830a054b5d614ac8297f476441a34"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\node-tests01\\outer.json",
+      "bytes": 537,
+      "sha256": "41c66a6c216e8fe822ffa2c1cb1c3d9af7af706c4e1556ff4fd8e7b31634e299"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\node-tests01\\stdout.log",
+      "bytes": 67462,
+      "sha256": "79d53b088c51963312e14f02bc012c9211db4a333a08efa18c400ac07f577031"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\node-tests01\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "preparation": {
+    "completeSourceHashes": 36369,
+    "completeTargetHashes": 36369,
+    "hashDifferences": 0,
+    "membershipDifferences": 0,
+    "ordinaryAncestors": 7454,
+    "ancestorDifferences": 0,
+    "controls": 10,
+    "controlDifferences": 0,
+    "priorDataToolTimeoutPreserved": true
+  },
+  "acceptance": {
+    "nodePassed": false,
+    "strictNextPassed": false,
+    "runtimeChanged": false,
+    "normalStorageTooltipUnitsAccepted": false,
+    "candidate100": false,
+    "humanFrontendAccepted": false,
+    "goalComplete": false
+  }
+}

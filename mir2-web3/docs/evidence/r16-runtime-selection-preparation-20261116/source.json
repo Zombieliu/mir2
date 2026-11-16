@@ -1,0 +1,46 @@
+{
+  "parent": "71a7bf898d1855c4c4a45bbb0a80b51e2a8f2065",
+  "candidate": "r16-selection-aef8e659",
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "7f41ee130d70013bed68294a8c9ae084ed12ef37dc77516ed70b7d1f8567c7f0"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha256": "4330b17d64fbbe3dcf5743726f05f5d867f65a369b9792a6f884a669c903fcbf"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/bevy-runtime-preparation.ts",
+      "sha256": "5ae850d347d216233b7cde54b1f132eca97d9c61ce09b7cf1acdb81cca9b8c54"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "b76e4f9355d14c5fa7974eaa41849e30f4e28a8c90abef20b42cf441965db6ea"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs",
+      "sha256": "710e7cbbabe2dc4f1065555400e37fc8f9d1a3024ce233501eb6c5e8b1251573"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-runtime-preparation.mjs",
+      "sha256": "684baf49fb4509b04c6203c38eb44636672548231d5b7891e9d05228a4abbc75"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-preparation.mjs",
+      "sha256": "8b4bcd8522c57b72bb701497ef752c2b3762ce8d6281d52018b7dff4bea4db69"
+    }
+  ],
+  "compileCorePreserved": {
+    "sourceSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+    "unchangedCompileCoreSha256": "765503b4d410b231d440efafd1f7b9e1b905231a8125e85610e8bebeac74a437",
+    "compileCorePreserved": true
+  },
+  "foreignWipExcluded": true,
+  "testEntryPointFollowup": {
+    "path": "mir2-web3/apps/web/package.json",
+    "sha256": "18fbfbe9b97284a5c3d20ed210fd5f8d43a47a098b98e08bbb9d3fdd8a31e904",
+    "onlyChange": "Append preparation test to test:bevy-runtime-startup; dependencies, lock and application inputs unchanged",
+    "builtApplicationCommit": "18449b7aa204f07e00627558aa26e9a4f95bfee2"
+  }
+}

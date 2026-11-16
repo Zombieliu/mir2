@@ -1,0 +1,1554 @@
+{
+  "schemaVersion": 1,
+  "mode": "single-stage-diagnostic",
+  "zoneDeliveryTrace": {
+    "enabled": true,
+    "passiveDiagnosticOnly": true,
+    "gatewayChildEnvironment": {
+      "MIR2_GATEWAY_ZONE_DELIVERY_TRACE": "1"
+    },
+    "recipientScope": "all player recipients",
+    "rawOutput": "private/gateway.stderr.log",
+    "formalCapacityEligible": false,
+    "capacityAccepted": false,
+    "scope": "V12 presence publication performance diagnostic; Gateway-only passive MIR2_GATEWAY_ZONE_DELIVERY_TRACE=1, new actual backend/execution HEAD and fresh Root Rust receipt/immutable V4 Release; canonical Node9/nav2/observation2/frontend3 unchanged at their original identities, c6 13-input Node242/16-input focused39/typecheck reused by exact source proof. Fresh V12 50 is required for any100 eligibility; original300s measured game SLO record-only and all safety stops retained. No capacity/P0 acceptance."
+  },
+  "canonicalDriverCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "currentBackendSourceCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+  "currentExecutionSourceCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+  "currentBackendValidation": {
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/root-presence-publication-validation-v1/root-focused-receipt-v1.json",
+      "bytes": 45890,
+      "sha256": "5ab9ec343004c176868c98d906d7d96fa91149680ace4e1f9c3636aa7c6a57b5"
+    },
+    "selectedRustTestsPassed": 111,
+    "sourceUnchanged": true,
+    "allSelectedTestsPassed": true,
+    "fresh": true,
+    "reused": false,
+    "rustReexecuted": true,
+    "executionSourceCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+    "sourceInputCount": 55,
+    "results": [
+      {
+        "name": "format",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "rustfmt",
+          "--check",
+          "--edition",
+          "2021",
+          "--config",
+          "skip_children=true",
+          "apps/gateway/src/shared_experience_profiles.rs",
+          "apps/simulation/src/runtime/zone/manager.rs",
+          "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+          "apps/simulation/src/runtime/zone/manager_presence_publication_tests.rs",
+          "apps/simulation/src/runtime/zone/runtime/presence_publication_fixtures.rs"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\format-stdout-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "actualTotals": []
+      },
+      {
+        "name": "manager-and-presence",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::zone::manager::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\manager-and-presence-stdout-v1.log",
+          "bytes": 2709,
+          "sha256": "d1212f29065891fd8ff584f1de8c3a28ab174ef040f459462853af14652f23d9"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\manager-and-presence-stderr-v1.log",
+          "bytes": 43251,
+          "sha256": "80442da0a20b2f9949d535a1303599727d94b75f6363946876848d2f86f99f8c"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 21,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2930
+          }
+        ]
+      },
+      {
+        "name": "zone_partition_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_partition_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_contract-stdout-v1.log",
+          "bytes": 595,
+          "sha256": "e21dc1cabc50a8547e7278910a041f14d5e12b436fe2ebad56166b7bf8a14008"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_contract-stderr-v1.log",
+          "bytes": 50825,
+          "sha256": "d9c1b9ee8bb59926a810636e15fad937ecff1a820bfc0056f7b36b04a03eb31b"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "zone_partition_identity_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_partition_identity_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_identity_contract-stdout-v1.log",
+          "bytes": 726,
+          "sha256": "78f5ba4ffee7c2593b40428cbc0bb78a8638ec404635a5009936a76eac511995"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_identity_contract-stderr-v1.log",
+          "bytes": 50325,
+          "sha256": "191d984cc72a0c0159bd7291bd05dea83dfa712246b10ec2db6a54602b09dbb6"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "zone_manager_admission_contract",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--test",
+          "zone_manager_admission_contract",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_manager_admission_contract-stdout-v1.log",
+          "bytes": 860,
+          "sha256": "d7c3e4e9245b3b3ea5e92964cb06d9caa5fda8b45d7f9093a88a86e309d861fb"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_manager_admission_contract-stderr-v1.log",
+          "bytes": 50323,
+          "sha256": "bc53a2cabcc03c0a60213b16aab5366345d6106897d508c7024db57899adfb1b"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 9,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 0
+          }
+        ]
+      },
+      {
+        "name": "experience-profile",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "runtime::shared_experience_profile::tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\experience-profile-stdout-v1.log",
+          "bytes": 2798,
+          "sha256": "159ad39f489d8a344f8abc3ce99dc651ba79f60e3af3446d8846b51b9651579c"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\experience-profile-stderr-v1.log",
+          "bytes": 43459,
+          "sha256": "80f28cddda61c9015420bff9cd6c86f697b5e4995a15b0e49534a19217b270ab"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 21,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2930
+          }
+        ]
+      },
+      {
+        "name": "owner-health-live-fork",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owner_health_transaction_fork_carries_fifo_but_checkpoint_never_replays_it",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owner-health-live-fork-stdout-v1.log",
+          "bytes": 246,
+          "sha256": "b0ec4c315886a859b44094a5472b6485ee253f52299db98db9863fb001556278"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owner-health-live-fork-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-modes",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_pmode_moves_attacks_searches_and_clears_targets_independently",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-modes-stdout-v1.log",
+          "bytes": 248,
+          "sha256": "1b45eb02c72c16fea9ddc40bf9f1dfc4364cd183b2cc69ce4220e0732f137174"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-modes-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-brown-clock",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_last_hitter_and_brown_have_distinct_strict_deadlines",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-brown-clock-stdout-v1.log",
+          "bytes": 239,
+          "sha256": "c2f9f3b34b12153ed947ddca2368bfb8d9fc533be41042bde67d5a2fb55c6ec7"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-brown-clock-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "owned-pet-owner-death",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "owned_pet_owner_death_kills_pets_and_cancels_all_pending_authority",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-owner-death-stdout-v1.log",
+          "bytes": 243,
+          "sha256": "7a691c46c72c53beb733d1d1233310286dbaaa40500e96704bb0c98b21006442"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-owner-death-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "vampire-death",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "vampire_ai::death_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\vampire-death-stdout-v1.log",
+          "bytes": 914,
+          "sha256": "9aafd92d35e60ec51d153de7b7b53d64ea97b70a786746ff20174e4513b15f8d"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\vampire-death-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2945
+          }
+        ]
+      },
+      {
+        "name": "web-live-overflow",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_live_overflow_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-live-overflow-stdout-v1.log",
+          "bytes": 2907,
+          "sha256": "df8ba1f085ded24861871b0b481f5ca53f908249428b05e0d85e8248aeaa2658"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-live-overflow-stderr-v1.log",
+          "bytes": 63970,
+          "sha256": "53db79c1d946c6c57dc60c898736c781059c1a4d89d21b623a2b6f7591c5a5e3"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 25,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1244
+          }
+        ]
+      },
+      {
+        "name": "web-transport-close",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "web_transport_close_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-transport-close-stdout-v1.log",
+          "bytes": 531,
+          "sha256": "a56156b8c1dfaa36ebec71bbf5e81cfe2d302665e9145e7fc08f0fc8928ea580"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-transport-close-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 4,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1265
+          }
+        ]
+      },
+      {
+        "name": "store-durability",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "config::config_account_store_durability_tests::",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\store-durability-stdout-v1.log",
+          "bytes": 368,
+          "sha256": "a455f9039a05a53443d51f053ff83dfacf5b8c7cfa046f404138aea42d3f92be"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\store-durability-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2949
+          }
+        ]
+      },
+      {
+        "name": "guild-clock-store",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-clock-store-stdout-v1.log",
+          "bytes": 218,
+          "sha256": "6a8384ff4e2d16d86f7fc8904d6ccdcb0202468a2028308982287905b7704b1a"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-clock-store-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 2950
+          }
+        ]
+      },
+      {
+        "name": "admission-lock-order",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\admission-lock-order-stdout-v1.log",
+          "bytes": 253,
+          "sha256": "239ee64cc20316d10a533755b1ed095a47af9eeedb11155885aee3627c88a5dd"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\admission-lock-order-stderr-v1.log",
+          "bytes": 53576,
+          "sha256": "cdf7ea07c257c1269badb888285dc03bf36a62fbd86f31e6563af805f9e2a31d"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1268
+          }
+        ]
+      },
+      {
+        "name": "kill-award-commit",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\kill-award-commit-stdout-v1.log",
+          "bytes": 215,
+          "sha256": "e7440edffb647763336877002af3b59e1cdbc074c2b52d0e82404ba296c3f417"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\kill-award-commit-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1268
+          }
+        ]
+      },
+      {
+        "name": "guild-kill-source",
+        "command": [
+          "rustup",
+          "run",
+          "1.95.0",
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "4",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "guild_kill_source_",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-kill-source-stdout-v1.log",
+          "bytes": 394,
+          "sha256": "3bb9fa09f5121269677fce5a8856eeb6e5d019a9f47b10bfc6abc1a639a9b3db"
+        },
+        "stderr": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-kill-source-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+        },
+        "actualTotals": [
+          {
+            "status": "ok",
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 1267
+          }
+        ]
+      }
+    ],
+    "scope": "Fresh V4 Root-selected Rust checks and actual build; exact unchanged c6 JS/TS validation reused without rerunning. No fresh ordinary lifecycle or capacity acceptance.",
+    "reusedNodeValidation": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-receipt-v1.json",
+        "bytes": 6449,
+        "sha256": "714a32dad7c2db920db7ecb938b0d0f438d4ffea32ec09b6157c5f5866381eb8"
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stdout-v1.log",
+        "bytes": 65261,
+        "sha256": "bc642fdc2391da64ea29d5cc5bd10c38f07ece625b08d9a86ff24e5a5b28bb19"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+      ],
+      "sourceInputCount": 13,
+      "actualPassed": 242,
+      "actualCounts": {
+        "tests": 242,
+        "pass": 242,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "sourceUnchanged": true,
+      "fresh": false,
+      "reused": true,
+      "reexecutedForV4": false,
+      "reusedFromObservationFrontendCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+      "scope": "Previously executed validation on exact unchanged identified JS/TS inputs only; no fresh V4 Node run, lifecycle or capacity claim."
+    },
+    "reusedObservationFrontendValidation": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-receipt-v1.json",
+        "bytes": 7372,
+        "sha256": "552c91e2bd67232bf3ba17e06d18698d6ae98bb57197ff6da4cf08c9e2455169"
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stdout-v1.log",
+        "bytes": 8360,
+        "sha256": "5086ba7d8288fa086d0955e155b7938faf3d1ad437c7cb833dbde72adc2c22f7"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "apps/web/scripts/quest-agent/test-protocol-observation.mjs",
+        "apps/web/scripts/test-owner-action-pose.mjs"
+      ],
+      "sourceInputCount": 16,
+      "actualPassed": 39,
+      "actualCounts": {
+        "tests": 39,
+        "pass": 39,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "sourceUnchanged": true,
+      "fresh": false,
+      "reused": true,
+      "reexecutedForV4": false,
+      "reusedFromObservationFrontendCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+      "scope": "Previously executed validation on exact unchanged identified JS/TS inputs only; no fresh V4 Node run, lifecycle or capacity claim."
+    },
+    "reusedTypecheckValidation": {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-receipt-v1.json",
+        "bytes": 7108,
+        "sha256": "666662841a185b690908750cd73f216ab91469d5e4f9209deaafc87f80329cb1"
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stdout-v1.log",
+        "bytes": 265,
+        "sha256": "6c39edda24bb15155abef1f38fcc1d13dd257d4e36164329bc87e376af3ef6bf"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "command": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "npm.cmd run typecheck"
+      ],
+      "sourceInputCount": 16,
+      "actualPassed": null,
+      "actualCounts": null,
+      "sourceUnchanged": true,
+      "fresh": false,
+      "reused": true,
+      "reexecutedForV4": false,
+      "reusedFromObservationFrontendCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+      "scope": "Previously executed validation on exact unchanged identified JS/TS inputs only; no fresh V4 Node run, lifecycle or capacity claim."
+    },
+    "freshOrdinaryLifecyclePerformed": false
+  },
+  "historicalFull16": {
+    "passed": true,
+    "runId": "1792989329251-1a7f71f3",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "executionSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "appliesToCurrentBackend": false
+  },
+  "historicalProbe21": {
+    "feasibilityPassed": true,
+    "runId": "1792990526387-b0d2ecc9",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "executionSourceCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+    "capacityAccepted": false,
+    "appliesToCurrentBackend": false,
+    "scope": "Historical actual L/C Probe21; current V4 presence publication backend has fresh Root-selected Rust/build evidence plus exact unchanged c6 Node242/focused39/typecheck source reuse, without a fresh lifecycle or raw replay claim"
+  },
+  "derivedExecutorSourcePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\prepare-episode.mjs",
+      "bytes": 4783,
+      "sha256": "bb90ce643a07fb1c26acf252f62c247e9e8dbe8fba47947671e4caacd5d62805"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\run-episode.mjs",
+      "bytes": 26084,
+      "sha256": "98cbe8f9bf9fa4d97015f37c2a082c5a724ac43443cb7f54490dbc5ddf7f56d2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\diagnostic-capacity.mjs",
+      "bytes": 159174,
+      "sha256": "58a12f1246cfa646d424e23d2cd9cead6fee06b39cb5e32db881887b30ad07f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\diagnostic-connect.mjs",
+      "bytes": 2536,
+      "sha256": "2a8ed66172c47384f903c2f4586ac4fcf593fabf3ad88e4c6db1409702327490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\diagnostic-policy.mjs",
+      "bytes": 5786,
+      "sha256": "3e25651096f4ac0d33843a946852203672d9b8e9963254ed54cc029aeb82058a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\monitor-episode.mjs",
+      "bytes": 1174,
+      "sha256": "b0de573783b84d0fbfff081ca007fa85c117772db7512515234d896d1340d982"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\current-report-contract.mjs",
+      "bytes": 1123,
+      "sha256": "576ca52dbe7c8ac077bdb2dde8ce684f4425d8b494b56946da494838e8e7bd48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-input.mjs",
+      "bytes": 7763,
+      "sha256": "9d2ffa7f666333b1c77cc15544871a3968a71f56e186d2b9c20f2f22f7fbd95c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\store-diagnostics-current-backend.mjs",
+      "bytes": 3761,
+      "sha256": "4a98302085674ada07962bfbf6a9aa7fdbc8655f2fcbc255974e66690c7ef073"
+    }
+  ],
+  "formalAcceptanceEligible": false,
+  "networkGenerator": "multi-source-local-generator",
+  "sourceAddresses": [
+    "127.0.0.2",
+    "127.0.0.3"
+  ],
+  "wholeRunContinuityAccepted": false,
+  "bootstrapContinuousAcceptance": {
+    "passed": false,
+    "failureCount": 65,
+    "firstFailure": {
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "L3571cf0e",
+        "role": "movement",
+        "phases": [
+          "settle"
+        ],
+        "seconds": 60.02398170000001,
+        "final": false,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 79,
+          "gaps": 6,
+          "moves": 71,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1793032411900,
+          "runs": 42,
+          "cells": 113,
+          "nativeOpportunities": 79,
+          "nativeCompleted": 73,
+          "offeredDurationMs": 59250,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": false,
+          "completionRatio": 0.9240506329113924,
+          "runRatio": 0.5915492957746479,
+          "cellsPerMinute": 112.9548525102259,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 59250,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": false,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "metrics": {
+          "walk": {
+            "count": 35,
+            "status": {
+              "navigation-blocked": 6,
+              "success": 29
+            },
+            "fromSend": {
+              "count": 29,
+              "p50Ms": 172,
+              "p95Ms": 383,
+              "p99Ms": 432,
+              "maxMs": 431.3188000000082
+            },
+            "fromPlan": {
+              "count": 29,
+              "p50Ms": 206,
+              "p95Ms": 403,
+              "p99Ms": 450,
+              "maxMs": 449.648199999996
+            }
+          },
+          "fanout-walk": {
+            "count": 451,
+            "status": {
+              "success": 451
+            },
+            "fromSend": {
+              "count": 451,
+              "p50Ms": 115,
+              "p95Ms": 325,
+              "p99Ms": 422,
+              "maxMs": 469.39569999999367
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 175,
+              "p95Ms": 256,
+              "p99Ms": 256,
+              "maxMs": 255.42820000002393
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 194,
+              "p95Ms": 283,
+              "p99Ms": 283,
+              "maxMs": 282.3632000000216
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 175,
+              "p95Ms": 256,
+              "p99Ms": 256,
+              "maxMs": 255.42820000002393
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 54,
+            "status": {
+              "success": 54
+            },
+            "fromSend": {
+              "count": 54,
+              "p50Ms": 248,
+              "p95Ms": 412,
+              "p99Ms": 464,
+              "maxMs": 463.15969999996014
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "run": {
+            "count": 42,
+            "status": {
+              "success": 42
+            },
+            "fromSend": {
+              "count": 42,
+              "p50Ms": 104,
+              "p95Ms": 306,
+              "p99Ms": 363,
+              "maxMs": 362.3720999999787
+            },
+            "fromPlan": {
+              "count": 42,
+              "p50Ms": 129,
+              "p95Ms": 337,
+              "p99Ms": 369,
+              "maxMs": 368.15769999998156
+            }
+          },
+          "fanout-run": {
+            "count": 464,
+            "status": {
+              "success": 464
+            },
+            "fromSend": {
+              "count": 464,
+              "p50Ms": 105,
+              "p95Ms": 317,
+              "p99Ms": 362,
+              "maxMs": 494.19839999999385
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      }
+    },
+    "assessedWindows": 150,
+    "shortSegments": 50,
+    "shortSegmentRule": "Under 20 active seconds: protocol/latency/error gates still apply; no activity-rate claim",
+    "actors": [
+      {
+        "name": "L3571cf00",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf01",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf02",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf03",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf04",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf05",
+        "role": "combat",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf06",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf07",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf08",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf09",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0a",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0b",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0c",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0d",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0e",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0f",
+        "role": "combat",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0g",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0h",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0i",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0j",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0k",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0l",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0m",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0n",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0o",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0p",
+        "role": "combat",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0q",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0r",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0s",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0t",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0u",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0v",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0w",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0x",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0y",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf0z",
+        "role": "combat",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf10",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf11",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf12",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf13",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf14",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf15",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf16",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf17",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf18",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf19",
+        "role": "combat",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf1a",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf1b",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf1c",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      },
+      {
+        "name": "L3571cf1d",
+        "role": "movement",
+        "activeSeconds": 126.3379682,
+        "plannedPauseSeconds": 0,
+        "assessedWindows": 3
+      }
+    ]
+  },
+  "diagnosticSteadyOnline": {
+    "samples": 15,
+    "declaredActors": 50,
+    "minimumOnlineActors": 50,
+    "maximumOnlineActors": 50,
+    "lastOnlineActors": 50
+  },
+  "measuredSloFailuresRecordOnly": true,
+  "quiescentOrdinaryAdmission": true,
+  "retainedActivityOnlyContinuityFailure": false,
+  "actors": 50,
+  "runId": "1793032111555-953c3a1b",
+  "wrapperError": null,
+  "stage": null,
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-50\\reports\\1793032111555-953c3a1b.report.json",
+    "ok": false,
+    "error": "Actor L3571cf19 died or lost presence; no automatic resurrection",
+    "highestMeasuredStage": null,
+    "highestPassedStage": null
+  },
+  "declaredButUnexecuted": {
+    "soakSeconds": 3600,
+    "resumeSamples": 1,
+    "saveSamples": 1
+  },
+  "successCallbackSentinel": false,
+  "originalFailedVerdictRetained": false,
+  "expectedFullyMeasuredGameFailure": false,
+  "classification": "partial-or-unsafe-error",
+  "cleanupComplete": true,
+  "eligibleForNextIndependentEpisode": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "productionAccepted": false,
+  "scope": "External derived executor; original L reference declarations, L/C ordinary full16 and Probe21 retained only as historical source basis; current V4 presence publication backend has fresh Root-selected Rust/build validation and exact unchanged c6 Node242/focused39/typecheck source reuse and no claimed fresh lifecycle pass. Quiescent ordinary admission; original native settle starts after the full roster. All measured game SLO verdicts, including timeouts, remain original false and record-only; actual safety stops remain fatal. Fresh measured assessor and online counts are separate; no whole-run continuity acceptance. No report rewrite. No automatic next episode. Root must independently check OS absence/ports and safety before launching100."
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "mir2-windows-life-control/1",
+  "passed": true,
+  "nativeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "gatewaySha256": "3cadee8d70793892b01db654a88c6e6f5b1ca1d5ac4f163d6ca83c31854febbf",
+  "authorizedSeconds": 1200,
+  "budgetGold": 50,
+  "maxPurchasedQuantity": 1,
+  "actualSpentGold": 0,
+  "purchasedQuantity": 0,
+  "finalStatus": "cancelled",
+  "realModelCalls": 1,
+  "knownUsage": {
+    "inputTokens": 971,
+    "outputTokens": 80
+  },
+  "screenshots": [
+    {
+      "path": "life-activated.png",
+      "sha256": "e4fb29e5179f71f8b6de7b13f178fee4a3aac15c6a408b083cb8aad48149a082"
+    },
+    {
+      "path": "life-cancelled.png",
+      "sha256": "3bba9d42ceb984140cb04587c935dffcce8c43d08c20f01f183e55a5d071b7d4"
+    }
+  ],
+  "manualActorTick": true,
+  "automaticActorLoop": false,
+  "actualAdventureInThisWindow": false,
+  "syntheticPrivateWorld": true,
+  "observedHomeCancellation": true,
+  "ownedProcessesStopped": true,
+  "limitation": "This window verifies actual control activation and cancellation. The separate timed loop verifies ordinary action execution. A terminal attack selection found here was subsequently blocked by the focused Node regression."
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "stoppedAtUtc": "2026-10-24T17:15:54.9423604+00:00",
+  "pid": 49420,
+  "ownedExe": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-03/bin/mir2-gateway.exe",
+  "sha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "stopReason": "Actual10 admitted; stage30s failed original actor4 minimum Run fraction, no soak measured; preserve failure and release CPU for root full16",
+  "preStopCapacity": {
+    "maxWsConnections": 24,
+    "maxActiveSessions": 10,
+    "maxReconnectLeases": 10,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "capacityAccepted": false,
+  "formalStarted": false,
+  "report": "reports/1792861674728-9774b6b8.report.json",
+  "spectatorDirectory": "recordings",
+  "monitor": "External CtrlC immediately after normal drain and final dedicated recording health snapshot; raw history preserved; terminal marker may be absent"
+}

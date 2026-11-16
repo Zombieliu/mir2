@@ -1,0 +1,51 @@
+    Finished `test` profile [unoptimized] target(s) in 0.36s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 33 tests
+test economy::player_drop::pg_tests::admission_commit_pg_tests::player_drop_postgres_admission_commit_lost_ack_has_no_continuation_and_successor_aborts ... ok
+test economy::player_drop::pg_tests::admission_commit_pg_tests::player_drop_postgres_admission_deferred_commit_rollback_freezes_and_certifies_empty_successor ... ok
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_admission_recovery_link_requires_its_exact_prepared_digest ... ok
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_admission_recovery_reads_every_page_and_blocks_unresolved_admissions ... ok
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_admission_recovery_rejects_changed_sets_and_only_retires_audited_terminal_actors ... ok
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_recovery_rejects_unattributed_legacy_uid_batches_without_reissuing_them ... ok
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_gold_gaps_before_and_after_bootstrap_are_query_only_and_successor_audited ... ok
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_linked_prepared_gap_aborts_without_source_debit_or_uid_refund ... ok
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_missing_uid_authority_is_audited_known_rejection_without_freeze ... ok
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_reserved_split_gap_survives_restart_and_never_reuses_retired_uids ... ok
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_success_links_gold_and_exact_split_once ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_abort_unknown_freezes_successor_and_only_queries_original_operation ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_complete_source_ledger_ack_restart_and_terminal_pickup ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_namespace_cannot_adopt_prepared_operation_or_uid_authority ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_service_gold_exact_retry_and_successor_terminal_preserve_newer_canonical ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_service_split_preserves_exact_nested_attributes_and_reserves_uids_once ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_successor_abort_retires_old_prepared_source_without_assets_or_uid_reuse ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_uid_requires_census_idempotent_full_u64_fenced_and_exhaustion ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_unknown_commit_keeps_prepared_and_freezes_absent_receipt_retry ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_accepts_deleted_terminal_actors_only_with_completed_delivery_and_roster_absence ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_certifies_successor_abort_and_database_expiry_without_asset_mutation ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_commit_unknown_keeps_durable_base_but_freezes_all_new_writes ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_reads_all_pages_and_never_certifies_truncated_or_changed_prepared_set ... ok
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_retains_exact_base_without_original_session_and_rejects_stale_source_or_head ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_actual_runtime_stack_split_uses_and_persists_shared_authority ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_committed_lost_ack_burns_uid_and_freezes_all_source_clones ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_full_u64_and_monthly_reserved_boundaries_are_atomic ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_independent_issuers_drop_batches_and_restart_share_one_floor ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_live_fence_and_source_configuration_cannot_be_substituted ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_missing_census_never_initializes_or_falls_back ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_namespace_isolation_and_matching_census_audit_are_required ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_queued_issuer_rechecks_shared_freeze_after_uid_row_lock ... ok
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::admission_recovery_pg_tests::player_drop_admission_host_pg_recovers_prepared_and_preparedless_gaps_without_asset_replay ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 1527 filtered out; finished in 157.90s

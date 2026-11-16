@@ -1,0 +1,93 @@
+{
+  "artifact": "taoist-r141-q89-ready-proof",
+  "generatedAt": "2026-09-16T00:40:10.3198994Z",
+  "trace": "C:\\mir2-protocol-journey-20260911\\Taoist.2026-09-16T00-28-55-830Z.trace.jsonl",
+  "boundedCutoff": {
+    "sequence": 6875,
+    "at": "2026-09-16T00:38:25.713Z",
+    "traceBytes": 44188999
+  },
+  "requiredPriestKill": {
+    "sequence": 3748,
+    "at": "2026-09-16T00:34:20.672Z",
+    "packet": "ObjectDied",
+    "objectId": 339200,
+    "name": "CursedPriest",
+    "location": {
+      "x": 271,
+      "y": 78
+    }
+  },
+  "authoritativeQuestCredit": {
+    "sequence": 3750,
+    "at": "2026-09-16T00:34:20.672Z",
+    "packet": "ChangeQuest",
+    "questId": 89,
+    "completed": true,
+    "current": 9,
+    "required": 9,
+    "objectives": [
+      {
+        "current": 3,
+        "required": 3,
+        "text": "Kill CursedPriest 3/3",
+        "done": true
+      },
+      {
+        "current": 3,
+        "required": 3,
+        "text": "Kill ShiZombie 3/3",
+        "done": true
+      },
+      {
+        "current": 3,
+        "required": 3,
+        "text": "Kill CursedZombie 3/3",
+        "done": true
+      }
+    ]
+  },
+  "firstReadySnapshot": {
+    "sequence": 3754,
+    "at": "2026-09-16T00:34:20.741Z",
+    "type": "worldSnapshot",
+    "map": "D2031",
+    "stage": "readyToTurnIn",
+    "questCurrent": 9,
+    "questRequired": 9,
+    "self": {
+      "x": 271,
+      "hp": 114,
+      "level": 25,
+      "y": 79,
+      "name": "JT3f4a4e1f",
+      "dead": false,
+      "maxHp": 180
+    }
+  },
+  "latestReadySnapshot": {
+    "sequence": 6875,
+    "at": "2026-09-16T00:38:25.713Z",
+    "type": "worldSnapshot",
+    "map": "0",
+    "stage": "readyToTurnIn",
+    "questCurrent": 9,
+    "questRequired": 9,
+    "self": {
+      "x": 287,
+      "hp": 180,
+      "level": 25,
+      "y": 607,
+      "name": "JT3f4a4e1f",
+      "dead": false,
+      "maxHp": 180
+    }
+  },
+  "completionObservation": {
+    "q89NpcTurnInObserved": false,
+    "completedStageObserved": false,
+    "denominator": "45/55 mandatory, 3/4 milestones",
+    "interpretation": "q89 is readyToTurnIn with all 9/9 objective credit; this is not NPC turn-in or 55/4 completion."
+  },
+  "sensitiveDataExcluded": true
+}

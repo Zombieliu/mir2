@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "preparedAtUtc": "2026-10-10T02:28:47.2099182Z",
+  "codeCommit": "0399bbdddb0c83bd922235260a80b56c47ef3dc8",
+  "product": {
+    "gameShopIndex": 1000001,
+    "days": 30,
+    "itemIndex": 1000001,
+    "currency": "Credits",
+    "activation": "Exact item UID, only on use",
+    "configuredTestCreditPrice": 1000
+  },
+  "change": "Native All page-one visibility for the exact custom product; original catalog sorting and filters preserved",
+  "tests": {
+    "retainedInitialFilter": {
+      "filtered": 1299,
+      "passed": 0,
+      "countedAsAcceptance": false,
+      "filter": "crystal_ui::game_shop_dialog::tests"
+    },
+    "nativeShop": {
+      "failed": 0,
+      "passed": 14,
+      "command": "cargo +1.95.0 test --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui --lib game_shop_dialog::tests --locked --offline --target-dir C:/mir2-build/p1-native-20261007"
+    },
+    "sourceCardFixture": {
+      "failed": 0,
+      "passed": 9,
+      "command": "cargo +1.95.0 test -p mir2-simulation --test billing_monthly_card --features test-support --locked --offline --target-dir C:/mir2-build/shared-classic-target"
+    }
+  },
+  "nativeBuild": {
+    "command": "cargo +1.95.0 build --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline --target-dir C:/mir2-build/p1-native-20261007",
+    "bytes": 127557120,
+    "exitCode": 0,
+    "durationSeconds": 145,
+    "sha256": "36155e065c73075c31a0402514399dd822cfaf2c985b678f01c846da3e6f46ac"
+  },
+  "delivery": {
+    "gatewayRestarted": false,
+    "localNativePrepared": true,
+    "publicGateway": "a41",
+    "publicGame": "R22",
+    "publicFeed": 17,
+    "observedActiveNativePids": [
+      244488
+    ],
+    "activeClientReplaced": false,
+    "publicChanged": false
+  },
+  "limitations": [
+    "Source monthly-card tests use a prepared wallet, not a new Stripe payment",
+    "Human native GameShop Buy/Mail/Claim/Use acceptance remains open",
+    "No new public installer, feed promotion or financial backend deployment"
+  ]
+}

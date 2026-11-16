@@ -1,0 +1,117 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "producerReceipt": {
+    "filename": "unified-updater-signed-artifact-fingerprints.json",
+    "bytes": 3867,
+    "sha256": "2f7f0250105d4658c98cb22d01487c471a87d95106003185cbcdc59b18ad767b"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.unified-updater-signed-fingerprints.v1",
+    "recordedAtUtc": "2026-10-29T16:38:34.8823044Z",
+    "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "sequence": 2026102911,
+    "producerPackagePending": true,
+    "installOrPublishAllowed": false,
+    "cmsSignerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+    "publicAuthenticode": "NotSigned",
+    "bundleFileCount": 9,
+    "artifacts": [
+      {
+        "relativePath": "bundle/Mir2Launcher.exe",
+        "bytes": 512512,
+        "sha256": "E6442339EC5786F4350F694FA058C0E9D4363D0E3D50BDB27F2C3AE65FCA6D96"
+      },
+      {
+        "relativePath": "bundle/UPDATER-BUNDLE.json",
+        "bytes": 1286,
+        "sha256": "BF4AEB9F8C9AC947463086F2A6F77FED3279909A373997E7266DFA17C540A7D1"
+      },
+      {
+        "relativePath": "bundle/UPDATER-BUNDLE.p7s",
+        "bytes": 1614,
+        "sha256": "864522368739102A17CE1D2E2B99F53D7DBF75020849E19AAB1C9F7AC24C3386"
+      },
+      {
+        "relativePath": "bundle/updater/active.txt",
+        "bytes": 64,
+        "sha256": "2F670777E0918E4D33E94BCCB1145D2FB2CCC66568484B9738D58D4436CF55A3"
+      },
+      {
+        "relativePath": "bundle/updater/seed-feed.json",
+        "bytes": 1175,
+        "sha256": "91663F8B4BF8EE013FDBE3F39DAEEA172C7A6589FDB98182E7E1C09DFB4C82F3"
+      },
+      {
+        "relativePath": "bundle/updater/seed-feed.p7s",
+        "bytes": 1614,
+        "sha256": "B484E2FCB11ACADE70E041537963BABFD65B048F3DD1F20EBBCBC2A7973D0289"
+      },
+      {
+        "relativePath": "bundle/updater/engines/C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB/ENGINE.json",
+        "bytes": 421,
+        "sha256": "C31C8167BFE937C3992BD2DAB0D4999A0F6098863EADE66D692231A7ADE086E3"
+      },
+      {
+        "relativePath": "bundle/updater/engines/C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB/ENGINE.p7s",
+        "bytes": 1614,
+        "sha256": "2EEAAC713F21345D343F0137BF1220B232B629530D3CD56B8EA76D33270358C6"
+      },
+      {
+        "relativePath": "bundle/updater/engines/C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB/Mir2Updater.exe",
+        "bytes": 2184192,
+        "sha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB"
+      },
+      {
+        "relativePath": "engine-release/ENGINE.json",
+        "bytes": 421,
+        "sha256": "C31C8167BFE937C3992BD2DAB0D4999A0F6098863EADE66D692231A7ADE086E3"
+      },
+      {
+        "relativePath": "engine-release/ENGINE.p7s",
+        "bytes": 1614,
+        "sha256": "2EEAAC713F21345D343F0137BF1220B232B629530D3CD56B8EA76D33270358C6"
+      },
+      {
+        "relativePath": "engine-release/Mir2Updater.exe",
+        "bytes": 2184192,
+        "sha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB"
+      },
+      {
+        "relativePath": "feed/latest.json",
+        "bytes": 1175,
+        "sha256": "91663F8B4BF8EE013FDBE3F39DAEEA172C7A6589FDB98182E7E1C09DFB4C82F3"
+      },
+      {
+        "relativePath": "feed/latest.p7s",
+        "bytes": 1614,
+        "sha256": "B484E2FCB11ACADE70E041537963BABFD65B048F3DD1F20EBBCBC2A7973D0289"
+      }
+    ],
+    "unchangedRepositoryGates": [
+      {
+        "name": "build-updater-release.ps1",
+        "sha256": "40DDDE9E1AD38642440AFB4961BEAC78B029DFEB26004FF7C8C0D7DB6CE22D22"
+      },
+      {
+        "name": "archive-update-release.py",
+        "sha256": "2CF8E5363897779352CF3B3B8E58D07DAF9EE832F4365C77E5D6634176412A9C"
+      },
+      {
+        "name": "verify-updater-bundle.ps1",
+        "sha256": "EE1E4D373D38DA4473DA339E96007327538A7E9F6944D42699D14406186B8D88"
+      }
+    ],
+    "notes": [
+      "Fingerprints preserve exact already signed bytes if producer path is renamed during archive; no rebuild or re-sign authorized.",
+      "Detached CMS is internal TEST signing and is not public publisher Authenticode."
+    ]
+  },
+  "phase": "Real Engine77 local TEST-CMS bundle/archive pipeline; complete Game producer postmove gate remains separate pending",
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "producerPackageOverallPassed": false,
+  "installationOrPublicationAllowed": false
+}

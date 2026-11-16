@@ -1,0 +1,119 @@
+{
+  "schema": "mir2.yc-website-canonical-sync.v1",
+  "verifiedAt": "2026-11-02T21:39:42.406511+00:00",
+  "branch": "codex/windows-player-journey",
+  "sourceCommit": "0bbc4caeafff3a4fa1c4aaed3f92d4a26ed303de",
+  "sourceParent": "aecf01a81d1a3552bb15283e06859e5a9f59d169",
+  "publishedWebsiteCommit": "369e99d7a97f4c9c15994c412bb675e9e5a462dd",
+  "mainCommit": "29da1af9c06efaa96937bc688d6a4642a5ab6e78",
+  "websiteTree": "65d977085c3bdf306f79b5aa14755de102218a81",
+  "websiteTreeMatchesPublishedAndMain": true,
+  "syncedFiles": [
+    "mir2-web3/apps/website/YC-MINIMAL-REVIEW.md",
+    "mir2-web3/apps/website/app/[locale]/[section]/page.tsx",
+    "mir2-web3/apps/website/app/[locale]/account/page.tsx",
+    "mir2-web3/apps/website/app/[locale]/download/page.tsx",
+    "mir2-web3/apps/website/app/[locale]/layout.tsx",
+    "mir2-web3/apps/website/app/[locale]/page.tsx",
+    "mir2-web3/apps/website/app/[locale]/play/page.tsx",
+    "mir2-web3/apps/website/app/[locale]/watch/page.tsx",
+    "mir2-web3/apps/website/app/components/gameplay-proof.tsx",
+    "mir2-web3/apps/website/app/components/highlight-gallery.tsx",
+    "mir2-web3/apps/website/app/globals.css",
+    "mir2-web3/apps/website/app/robots.ts",
+    "mir2-web3/apps/website/app/sitemap.ts",
+    "mir2-web3/apps/website/lib/download-copy.ts",
+    "mir2-web3/apps/website/lib/guide-content.ts",
+    "mir2-web3/apps/website/lib/market-copy.ts",
+    "mir2-web3/apps/website/lib/product-copy.ts",
+    "mir2-web3/apps/website/lib/release-facts.ts",
+    "mir2-web3/apps/website/lib/site-copy.ts",
+    "mir2-web3/apps/website/scripts/check-minimal-content.mjs"
+  ],
+  "mergeSimulation": {
+    "beforeConflicts": 17,
+    "afterConflicts": 0,
+    "exitCode": 0,
+    "workingTreeModifiedBySimulation": false
+  },
+  "checks": {
+    "build": {
+      "command": "npm run build -- --webpack",
+      "exitCode": 0,
+      "durationSeconds": 28.9,
+      "log": "External local evidence: build.log"
+    },
+    "static": [
+      {
+        "name": "i18n",
+        "exitCode": 0,
+        "output": "\n> mir2-website@0.1.0 i18n:check\n> node scripts/check-i18n.mjs\n\nWebsite i18n check passed: 16 locales, localized sitemap, no binary zh-CN fallback.\n"
+      },
+      {
+        "name": "content",
+        "exitCode": 0,
+        "output": "Content verified across16 locales; development-start field separated from current undated internal validation.\n"
+      },
+      {
+        "name": "docs",
+        "exitCode": 0,
+        "output": "\n> mir2-website@0.1.0 docs:check\n> node scripts/check-documentation.mjs\n\n{\n  \"passed\": true,\n  \"articles\": 19,\n  \"sections\": 62,\n  \"contentLinks\": 44,\n  \"checkedRoutes\": 0,\n  \"checkedAnchors\": 0,\n  \"publicBuildFiles\": 114,\n  \"externalLinks\": [\n    \"https://dubhe-docs.obelisk.build/\",\n    \"http://127.0.0.1:3080/zh-CN/guide\",\n    \"http://127.0.0.1:3080/zh-CN/developers\",\n    \"https://dubhe-docs.obelisk.build/dubhe/sui/quick-start/prerequisites\",\n    \"https://dubhe-docs.obelisk.build/dubhe/sui/contracts/session-keys\",\n    \"https://dubhe-docs.obelisk.build/dubhe/sui/client\",\n    \"https://github.com/0xobelisk/dubhe-docs\",\n    \"https://wallet.dubhe.obelisk.build/\"\n  ]\n}\n"
+      },
+      {
+        "name": "docs-example",
+        "exitCode": 0,
+        "output": "\n> mir2-website@0.1.0 docs:example:test\n> node --test scripts/test-documentation-example.mjs\n\nTAP version 13\n# Subtest: real CLI reads healthy without credentials or writes\nok 1 - real CLI reads healthy without credentials or writes\n  ---\n  duration_ms: 73.4308\n  type: 'test'\n  ...\n# Subtest: real CLI reads degraded without credentials or writes\nok 2 - real CLI reads degraded without credentials or writes\n  ---\n  duration_ms: 60.6679\n  type: 'test'\n  ...\n# Subtest: CLI rejects non-success HTTP\nok 3 - CLI rejects non-success HTTP\n  ---\n  duration_ms: 55.3113\n  type: 'test'\n  ...\n# Subtest: CLI rejects redirects instead of following to a different service\nok 4 - CLI rejects redirects instead of following to a different service\n  ---\n  duration_ms: 58.4475\n  type: 'test'\n  ...\n# Subtest: CLI rejects incompatible schema\nok 5 - CLI rejects incompatible schema\n  ---\n  duration_ms: 56.7517\n  type: 'test'\n  ...\n# Subtest: CLI rejects non-JSON\nok 6 - CLI rejects non-JSON\n  ---\n  duration_ms: 58.1798\n  type: 'test'\n  ...\n# Subtest: CLI has a bounded timeout\nok 7 - CLI has a bounded timeout\n  ---\n  duration_ms: 6040.0718\n  type: 'test'\n  ...\n1..7\n# tests 7\n# suites 0\n# pass 7\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 6462.4611\n"
+      }
+    ],
+    "final": [
+      {
+        "name": "typecheck",
+        "exitCode": 0,
+        "output": "\n> mir2-website@0.1.0 typecheck\n> next typegen && tsc --noEmit --pretty false\n\nGenerating route types...\n✓ Types generated successfully\n"
+      },
+      {
+        "name": "built-content",
+        "exitCode": 0,
+        "output": "Content verified across16 locales; development-start field separated from current undated internal validation.\nFinal build checked on641 localized pages.\n"
+      },
+      {
+        "name": "built-docs",
+        "exitCode": 0,
+        "output": "{\n  \"passed\": true,\n  \"articles\": 19,\n  \"sections\": 62,\n  \"contentLinks\": 44,\n  \"checkedRoutes\": 0,\n  \"checkedAnchors\": 0,\n  \"publicBuildFiles\": 138,\n  \"externalLinks\": [\n    \"https://dubhe-docs.obelisk.build/\",\n    \"http://127.0.0.1:3080/zh-CN/guide\",\n    \"http://127.0.0.1:3080/zh-CN/developers\",\n    \"https://dubhe-docs.obelisk.build/dubhe/sui/quick-start/prerequisites\",\n    \"https://dubhe-docs.obelisk.build/dubhe/sui/contracts/session-keys\",\n    \"https://dubhe-docs.obelisk.build/dubhe/sui/client\",\n    \"https://github.com/0xobelisk/dubhe-docs\",\n    \"https://wallet.dubhe.obelisk.build/\"\n  ]\n}\n"
+      }
+    ],
+    "unifiedCodeline": {
+      "passed": true,
+      "head": "0bbc4caeafff3a4fa1c4aaed3f92d4a26ed303de"
+    }
+  },
+  "preservation": {
+    "preexistingWorkingTreeFilesMatchedImmediatelyAfterRestore": 171,
+    "preexistingWorkingTreeFilesStillMatchingSnapshot": 161,
+    "nonOwnedFilesObservedChangingDuringTask": [
+      "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "mir2-web3/apps/ai-player/scripts/local-gateway.mjs",
+      "mir2-web3/apps/ai-player/scripts/run-local-acceptance.mjs",
+      "mir2-web3/apps/ai-player/scripts/run-local-companion-acceptance.mjs",
+      "mir2-web3/apps/ai-player/scripts/run-local-experience-acceptance.mjs",
+      "mir2-web3/apps/ai-player/src/gateway-client.mjs",
+      "mir2-web3/apps/ai-player/src/resident-actor.mjs",
+      "mir2-web3/apps/ai-player/tests/gateway-client.test.mjs",
+      "mir2-web3/docs/COMPANION-CONTROL-CONTRACT.md"
+    ],
+    "nonOwnedFilesRestoredByTask": false,
+    "unrelatedIndexEntriesUnchangedAtSourceCommit": true,
+    "websiteReadmeAndEnvPreserved": true,
+    "gameClientAndDownloaderTouchedByTask": false
+  },
+  "scopeLimits": {
+    "productionDeployed": false,
+    "newInstallerPackaged": false,
+    "newScreenshotsCaptured": false,
+    "gameBehaviorChanged": false,
+    "r16TradeIssuesFixedByThisTask": false,
+    "externalTestingStatusChanged": false,
+    "r16InternalOrExternalQaAwaitingClarification": true
+  }
+}

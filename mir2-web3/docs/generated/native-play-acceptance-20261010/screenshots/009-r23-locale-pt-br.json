@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/009-r23-locale-pt-br.jpg",
+  "purpose": "Portuguese Brazil basic labels render and remain inside visible controls; no full NPC/task translation acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 319282,
+  "sha256": "bd56c3d7e2e6bebfe074ca8458e96442f2f92f65856cb426022b02270086aba0",
+  "recordedUtc": "2026-10-09T18:32:57.787Z"
+}

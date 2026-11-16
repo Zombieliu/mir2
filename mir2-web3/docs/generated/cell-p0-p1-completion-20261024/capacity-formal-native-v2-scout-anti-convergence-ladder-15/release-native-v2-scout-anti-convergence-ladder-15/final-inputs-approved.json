@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "state": "reviewed-formal15-fresh19-bound-not-executed",
+  "preparedReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\runtime-prepared-v2.json",
+    "bytes": 49520,
+    "sha256": "701176d111267435b82408b10c44ad1d46b255a929edf53dd88cf98b58b94dbf"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-runtime-independent-review-v1\\preseal-independent-review-v2.json",
+    "bytes": 9577,
+    "sha256": "dbd1965c856b84ee13df73656e95448c2fb20327c3e62cf2307bf77417df1629"
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendInputCount": 50,
+  "freshProbe19RunId": "1792971941351-af013515",
+  "freshProbe19Passed": true,
+  "formalCompleteMinuteWindows": 146,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "approved": true,
+  "rootExecutionRequired": true
+}

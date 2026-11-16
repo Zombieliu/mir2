@@ -1,0 +1,66 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 45 tests
+test config::tests::account_store_scoping_and_source_merge_preserve_shared_game_shop_state ... ok
+test runtime::game_shop_gift::tests::external_mail_merge_conflict_does_not_publish_unrelated_earlier_mail ... ok
+test runtime::game_shop_gift::tests::external_mail_merge_preserves_gift_union_and_rekeys_ordinary_collision ... ok
+test runtime::game_shop_gift::tests::gift_history_visitor_rejects_wrong_owner_or_invalid_monthly_binding_before_visiting ... ok
+test runtime::game_shop_gift::tests::gift_history_visitor_retains_retired_monthly_uids_and_ignores_all_ordinary_mail_bodies ... ok
+test runtime::game_shop_gift::tests::gift_ledger_conflicts_and_duplicate_client_binding_fail_without_mutating_local ... ok
+test runtime::game_shop_gift::tests::gift_ledger_union_is_canonical_and_does_not_erase_older_receipts ... ok
+test runtime::game_shop_gift::tests::gift_name_accepts_only_crystal_ascii_and_bmp_chinese_range ... ok
+test runtime::packets::game_shop_start_stock_tests::checked_in_unlimited_start_packets_remain_byte_identical ... ok
+test runtime::packets::game_shop_start_stock_tests::reloaded_start_world_projects_individual_and_global_finite_stock ... ok
+test runtime::session::tests::crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery ... ok
+test runtime::session::tests::game_shop_balance_mail_capacity_and_world_phase_rejections_are_atomic ... ok
+test runtime::session::tests::game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent ... ok
+test runtime::session::tests::game_shop_disabled_authoritative_payment_flags_have_zero_side_effects ... ok
+test runtime::session::tests::game_shop_five_stack_boundary_claims_exact_total_and_sixth_stack_rejects ... ok
+test runtime::session::tests::game_shop_invalid_packet_and_stage5_quantities_have_zero_side_effects ... ok
+test runtime::session::tests::game_shop_packet_credit_and_gold_mail_product_count_times_quantity ... ok
+game-shop transaction failed: injected account-store persistence failure
+mail transaction failed: injected account-store persistence failure
+test runtime::session::tests::online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status ... ok
+simulation packet execution rejected; details suppressed
+test runtime::session::tests::stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::concurrent_accounts_do_not_oversell_global_stock ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::concurrent_same_character_sessions_do_not_oversell_individual_stock ... ok
+game-shop transaction failed: injected account-store persistence failure
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::finite_stock_persist_failure_and_counter_overflow_are_atomic ... ok
+test runtime::stage5::game_shop_validation_tests::finite_stock_uses_purchase_quantity_and_handles_overflow ... ok
+test runtime::stage5::game_shop_validation_tests::game_shop_class_filter_is_explicit_and_unknown_values_fail_closed ... ok
+test runtime::stage5::game_shop_validation_tests::game_shop_payment_flags_are_enforced_for_the_selected_currency ... ok
+test runtime::stage5::game_shop_validation_tests::generated_game_shop_manifest_matches_all_authoritative_payloads ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:1
+test runtime::stage5::game_shop_validation_tests::individual_finite_stock_consumes_purchase_quantity_and_survives_reload ... ok
+test runtime::stage5::game_shop_validation_tests::legacy_packet_wrapper_matches_typed_execution_packets ... ok
+test runtime::stage5::game_shop_validation_tests::legacy_store_and_character_systems_default_stock_counters_to_empty ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_business_failure_is_durable_and_not_re_evaluated ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_duplicate_key_returns_original_outcome_without_second_mutation ... ok
+mail status transaction rejected: mail status request targets deleted mail
+mail status transaction rejected: mail status request targets deleted mail
+test runtime::stage5::game_shop_validation_tests::native_game_shop_hidden_ledger_is_not_player_mail_or_mutable ... ok
+game-shop transaction failed: native GameShop idempotency key was reused with another request
+test runtime::stage5::game_shop_validation_tests::native_game_shop_key_binding_and_new_connection_scope_are_exact ... ok
+game-shop transaction failed: native GameShop durable ledger is full for this character
+game-shop transaction failed: native GameShop durable ledger is full for this character
+test runtime::stage5::game_shop_validation_tests::native_game_shop_ledger_capacity_blocks_complete_purchase_transaction ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_ledger_capacity_fails_closed_without_evicting_old_keys ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_ledger_merge_conflict_fails_closed ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_stale_session_mail_merge_preserves_all_replay_keys ... ok
+test runtime::stage5::game_shop_validation_tests::production_game_shop_path_selects_exact_transaction_scope_and_preserves_behavior ... ok
+game-shop transaction failed: injected account-store persistence failure
+test runtime::stage5::game_shop_validation_tests::typed_failures_cover_currency_mail_capacity_and_persist_failure ... ok
+test runtime::stage5::game_shop_validation_tests::typed_failures_cover_request_and_authoritative_product_validation ... ok
+test runtime::stage5::game_shop_validation_tests::typed_outcome_constructors_enforce_success_failure_shape_and_stable_codes ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::typed_stock_outcomes_report_post_commit_and_current_levels ... ok
+test runtime::stage5::game_shop_validation_tests::typed_success_uses_the_committed_mail_id_for_gold_and_credit ... ok
+test runtime::stage5::game_shop_validation_tests::unlimited_catalog_purchase_does_not_create_stock_counters_or_patch ... ok
+test world_runtime::tests::in_process_world_runtime_propagates_typed_game_shop_outcome_only_for_purchase ... ok
+
+test result: ok. 45 passed; 0 failed; 0 ignored; 0 measured; 3211 filtered out; finished in 15.59s

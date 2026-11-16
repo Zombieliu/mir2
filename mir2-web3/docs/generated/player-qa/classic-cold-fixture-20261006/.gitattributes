@@ -1,0 +1,4 @@
+* -text whitespace=cr-at-eol
+*.log -diff
+*.md text eol=lf
+.gitattributes text eol=lf

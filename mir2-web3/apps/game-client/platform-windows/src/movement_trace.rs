@@ -106,6 +106,12 @@ pub(crate) fn initialize() {
 
 /// Offer one event to the background trace without ever blocking the caller.
 pub(crate) fn record(mut value: Value) {
+    // Keep command/ACK disposition on the render diagnostic timeline even
+    // when the separate movement-only log is disabled. The runtime sink is
+    // opt-in and bounded; never wait for its disk writer on the input thread.
+    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+        mir2_bevy_runtime::record_native_render_marker("movement", value.clone());
+    }
     let Some(sink) = MOVEMENT_TRACE.get_or_init(initialize_sink).as_ref() else {
         return;
     };

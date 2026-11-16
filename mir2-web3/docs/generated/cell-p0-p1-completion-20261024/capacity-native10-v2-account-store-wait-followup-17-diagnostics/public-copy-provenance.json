@@ -1,0 +1,959 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T19:58:03.069Z",
+  "hashMode": "raw-bytes",
+  "scope": "Exact explicit public allowlist only. Full capacity raw, monitor raw and recording payload remain external. No private/store/credentials/EXE payload copied.",
+  "files": [
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/collect-public-current50-v2.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/collect-public-current50-v2.mjs",
+      "bytes": 43753,
+      "sha256": "c9f20b36990fb2ed92462360bfad9df4a9798c5f96bc5ab31f36037c5baf473c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/collect-public-current50-v2-derivation-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/collect-public-current50-v2-derivation-v1.json",
+      "bytes": 5732,
+      "sha256": "1419117bfdf61dbb57d1bebe8c3c742463a42149266f1f8cfd626819853b953c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "source": "compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "source": "compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/README.md",
+      "source": "compact-navigation-wire-diagnostics-v2/README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "source": "compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "source": "compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "source": "compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/gateway-build-pin.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/gateway-build-pin.json",
+      "bytes": 1387,
+      "sha256": "0d4f3e16b41c944df429ffb2d73c8021ad87e854b5d9023d7d5cc54b4b474ae0"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/source-pins.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/source-pins.json",
+      "bytes": 54912,
+      "sha256": "d7478820adbcf4bc3e10cad61c104f746af870816be0662c891651588a9a9b9e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/source-pins-admitted-v2.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/source-pins-admitted-v2.json",
+      "bytes": 54109,
+      "sha256": "9315678926a2219194d5002f3283da27060c9cd12c2378be2eec9c92ddf112a8"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/realm-process.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/realm-process.json",
+      "bytes": 4300,
+      "sha256": "302efef450acbb4889013c430b9c214a5923f97749998b2478b8001d04f7d7ca"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/realm-cleanup.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/realm-cleanup.json",
+      "bytes": 6355,
+      "sha256": "e7b9a7e80c80ea0104772ce0f7ddc6b6ffda10f046742067ed58247c9f441e9d"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.jsonl",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.jsonl",
+      "bytes": 10392,
+      "sha256": "fa2c7b855a030d702f3645db3e410f15183593cb44b8966cf4798859a57a4de0"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public-status.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public-status.json",
+      "bytes": 1026,
+      "sha256": "4aa2747f08027abe22c4757591301ff6f50acb410dfc300a90ebfec7afe0671b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-diagnostics-config.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-diagnostics-config.json",
+      "bytes": 4315,
+      "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.test.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/synthetic-tests-v1.log",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/synthetic-tests-v1.log",
+      "bytes": 7579,
+      "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-helper-freeze-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-helper-freeze-v1.json",
+      "bytes": 2314,
+      "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-schema-contract.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/legacy14-original.mjs.txt",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/candidate-release-binding.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/candidate-release-binding.json",
+      "bytes": 6758,
+      "sha256": "3e545c5206ca8cf4a7605b5578a98691e6342c016b7cc2c794f4b76ce16eb611"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/backend-library-binding.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/backend-library-binding.json",
+      "bytes": 346,
+      "sha256": "55a7e8475c2ce8b178c4ecd89274a0e29718c08deef44e00ee73729447808883"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/full16-gate.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/full16-gate.json",
+      "bytes": 4883,
+      "sha256": "c880330fd34451c6be5760a5d4acce0e644258339c4f6fea06388004795c6995"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-row-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/verify-full16-gate.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/verify-full16-gate.mjs",
+      "bytes": 5262,
+      "sha256": "8d370a0819bf9fec3b0de57c25769ff84cac5bf5134cf4327630c76113ae8055"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/projection-build-source-lib.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/projection-build-source-lib.mjs",
+      "bytes": 156,
+      "sha256": "5793e909eb1c552e01c3ee24b95992e921d5efb6bb1fe6702780badfac5d753b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/driver-evidence-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/driver-evidence-contract.mjs",
+      "bytes": 4579,
+      "sha256": "8aca8c26abcd4f3def242a73068ff2ed00a48f92e4ca42627d092970a9582469"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/scene-binding.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/scene-binding.json",
+      "bytes": 6572,
+      "sha256": "8e5d1042f9c57b0ce4d83df57815d6b94808e2260ce77e556b20be500f3aa68a"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/scene-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/backend-driver-source-guard.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/backend-driver-source-guard.mjs",
+      "bytes": 1876,
+      "sha256": "7e768af2eca2e5fdd56ad8d2783595fb9bc0767594aacf04ffe884158433df24"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/measured-phase-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/resource-profile.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/run-options.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/run-options.json",
+      "bytes": 2786,
+      "sha256": "c5e15eaf1b41ab8228d27931a59b927d03c5d4ca4f962f13d42f7dc275b674f4"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/run-options-admitted-v2.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/run-options-admitted-v2.json",
+      "bytes": 3408,
+      "sha256": "2fcf54d6ddf5ecfa5e6f14fe306296e86f98f8f6ec30de7bed91124ddd5cf632"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/scenario.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/scenario.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/scenario-prefix-readiness.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/provisioning.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/spectator-health-before.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/spectator-health-before.json",
+      "bytes": 669,
+      "sha256": "72b07149b53c8fed5741f3c20440f77ef45e1b08a1cbb8474b0468e48ecea037"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/monitor-options.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/monitor-options.json",
+      "bytes": 756,
+      "sha256": "bb6954910260c81885f09140a8fa70f50e6d12471326d662debca26c447c46a9"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/monitor-process.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/monitor-process.json",
+      "bytes": 223,
+      "sha256": "4988069cdace9b6ba038c9d43116e0549a324b45606b7a2e6cd1611a79096924"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/launcher-source-frozen-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/launcher-source-frozen-v1.json",
+      "bytes": 33193,
+      "sha256": "6c5610464c3ddf69c607ad882b36e42b316fbe1f8dab17c38c0457b591db5b16"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/launcher-source-prepared-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/launcher-source-prepared-v1.json",
+      "bytes": 1183,
+      "sha256": "2d359018ad351d16acb0d454b76e5780dcc71d142c726d4805240b07717fc04e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/driver-report-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/driver-report-contract.mjs",
+      "bytes": 9783,
+      "sha256": "dd024929a405d4d1eb62557c0e06ad14d852ec5a15e8dbee99d5083e6559b7b2"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/preparation-plan.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/preparation-plan.json",
+      "bytes": 2078,
+      "sha256": "9eb6b726621d23e1afc4e000311b77614177c0a0e4d5dae26e6da2dceb909a23"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/final-inputs-approved.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/final-inputs-approved.json",
+      "bytes": 1183,
+      "sha256": "2d359018ad351d16acb0d454b76e5780dcc71d142c726d4805240b07717fc04e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/report-provenance.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/report-provenance.json",
+      "bytes": 7632,
+      "sha256": "b4fc463c825621ed5953c4cd6d1e1cfca6a1df554017a04aab4aa144c539d11f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/static-preparation-verification.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/static-preparation-verification.json",
+      "bytes": 1183,
+      "sha256": "2d359018ad351d16acb0d454b76e5780dcc71d142c726d4805240b07717fc04e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/source-guard-readonly-verification.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/source-guard-readonly-verification.json",
+      "bytes": 2293,
+      "sha256": "5ae389a82ec9b3349239de4fcc6a94ea93b7c7f0842c55c7ea4d9d372e46ce6f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/initialize-private.ps1",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/initialize-private.ps1",
+      "bytes": 2226,
+      "sha256": "12fa31e59cfc1729a8d9b332cdd2cb0f044281a1910bcd388386a479b78bc9bf"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/input-lib.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/input-lib.mjs",
+      "bytes": 16656,
+      "sha256": "f35186d28950b8aa67f84a15c63dd04e9c917426b06045783ee95aa8f1a3d11a"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/prepare-inputs.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/prepare-inputs.mjs",
+      "bytes": 13716,
+      "sha256": "633e416ec0942820553464ff71c24829e3d3b5bbb081183fa2fbdc69d2ae8fc1"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/run-owned.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/run-owned.mjs",
+      "bytes": 21125,
+      "sha256": "5c55f9eb67ec768fd5fe79cfa0b23eaadc9afa774cd291e766e2372fe30389cf"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/monitor-owned.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/monitor-owned.mjs",
+      "bytes": 1182,
+      "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/request-stop.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/request-stop.mjs",
+      "bytes": 915,
+      "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/recover-drained-owned.ps1",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/recover-drained-owned.ps1",
+      "bytes": 3195,
+      "sha256": "92345903964b600be994b59874ccd953ae3d4e70c0b88987665edcac48c31583"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/reports/1792956759820-08151b82.report.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/reports/1792956759820-08151b82.report.json",
+      "bytes": 325325,
+      "sha256": "1a8b82ad6c0d6d0971382a473cbb57a4bb1e677cee00a452d195c64c4d305d60"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/launcher-syntax-check.log",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/launcher-syntax-check.log",
+      "bytes": 9741,
+      "sha256": "aea96852e609145c54cebc2f82cffbcec0a02824256e12ce20a62afee53cfeb6"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/spectator-health-after.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/spectator-health-after.json",
+      "bytes": 677,
+      "sha256": "244d732bb6be456407136adbcabb12195e4bc47ae37bf29c672eb3360ef62e91"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/copied-baseline-inputs.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/copied-baseline-inputs.json",
+      "bytes": 87557,
+      "sha256": "d7e2a644fd0397f7c3a5292eb9d0e3c3260d9043cfb838ed966a79c148b2bfde"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/driver-binding-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/driver-binding-contract.mjs",
+      "bytes": 1303,
+      "sha256": "f2f2cf8371a2b67c23a1e9353edd3a51a8e6e4d44c3239290aef5164c9ec0378"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/current-driver-binding.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/current-driver-binding.json",
+      "bytes": 2361,
+      "sha256": "a2f953249edb7b08c7a12d1ae0fd64b6343f45638e31e6ebdbd159264ca1d4ed"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+      "bytes": 4074,
+      "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/native-chase-report-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.test.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.test.mjs",
+      "bytes": 3366,
+      "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.test.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.log",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/compact-navigation-wire-terminal.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/compact-navigation-wire-terminal.json",
+      "bytes": 5089,
+      "sha256": "ef1d194ea7d1eba1a254553787f9f436ea6d4d2be6188ae896d821fbb2f6ec3f"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-account-store-wait-diagnostics-v1.json",
+      "source": "release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/backend-source-account-store-wait-diagnostics-v1.json",
+      "source": "backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-wait-diagnostics-v1-build-receipt.json",
+      "source": "account-store-wait-diagnostics-v1-build-receipt.json",
+      "bytes": 2453,
+      "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/capacity-attack-deadline-driver-frozen-v1.json",
+      "source": "capacity-attack-deadline-driver-frozen-v1.json",
+      "bytes": 6759,
+      "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "source": "partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "source": "partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "source": "partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/compact-halo-repair-summary-review-addendum-v1.json",
+      "source": "compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/collect-release-native-10-v2-account-store-wait-feasibility-17-recordings-metadata.json",
+      "source": "collect-release-native-10-v2-account-store-wait-feasibility-17-recordings-metadata.json",
+      "bytes": 1246,
+      "sha256": "89bbe36bf850752d856020b5fd80c12d2d63138d28061602b69581c987fe6207"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/collect-release-native-10-v2-account-store-wait-feasibility-17-monitor-endpoints.json",
+      "source": "collect-release-native-10-v2-account-store-wait-feasibility-17-monitor-endpoints.json",
+      "bytes": 4718,
+      "sha256": "eaa9264ca3f996c48d272118b211a8a9f5cda67d597c38fee7ec90f20b76f321"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/collect-public.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/collect-public.mjs",
+      "bytes": 43717,
+      "sha256": "fa890d028335d38b7bce79806e88f379522723031806dd263fbf8feade55513b"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/verify-public.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/verify-public.mjs",
+      "bytes": 19237,
+      "sha256": "94b074563023476224a68bd05bd86c93696c7d4b8ab51e2fb01ee57beaae9328"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json",
+      "source": "attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json",
+      "bytes": 4758,
+      "sha256": "c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-poll-fix-v1/frozen-full-driver-v1.log",
+      "source": "attack-deadline-poll-fix-v1/frozen-full-driver-v1.log",
+      "bytes": 56491,
+      "sha256": "537f26b4a6037136470083a6a90acbf9ccc432f47f38cdeb82aace539b65dfb0"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/root-attack-deadline-functional-validation-v1.json",
+      "source": "root-attack-deadline-functional-validation-v1.json",
+      "bytes": 7819,
+      "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/formal11-correlated-slow-stage-validation-v1/focused-v1.log",
+      "source": "formal11-correlated-slow-stage-validation-v1/focused-v1.log",
+      "bytes": 64266,
+      "sha256": "43ab5289f35aeea4e9ad34e89321409695662c450441fec06259e86127c0e2a6"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/formal11-correlated-slow-stage-validation-v1/focused-execution-v1.json",
+      "source": "formal11-correlated-slow-stage-validation-v1/focused-execution-v1.json",
+      "bytes": 1744,
+      "sha256": "1874a8243344494a7a65ceef06a263a3cf1b7eacd898010636caae510cda91c6"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-poll-fix-v1/integration-rustfmt-v1.log",
+      "source": "attack-deadline-poll-fix-v1/integration-rustfmt-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-poll-fix-v1/integration-rustfmt-execution-v1.json",
+      "source": "attack-deadline-poll-fix-v1/integration-rustfmt-execution-v1.json",
+      "bytes": 1063,
+      "sha256": "dd9246da118a1afb860c0d54aca11c9e6ed304eca1c033d1d09c1b319f6dd99d"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-poll-fix-v1/freeze-committed-driver-v1.mjs",
+      "source": "attack-deadline-poll-fix-v1/freeze-committed-driver-v1.mjs",
+      "bytes": 5319,
+      "sha256": "da92d1c931bb833e934d35e07fb13120b862ec52a6d0af1a3390e1762f155b99"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/capacity-native-chase-preference-driver-frozen-v1.json",
+      "source": "capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/native-chase-preference-main-before-v1.mjs.txt",
+      "source": "native-chase-preference-main-before-v1.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/collect-store-public.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/collect-store-public.mjs",
+      "bytes": 4693,
+      "sha256": "b35acb37bbca1fff58c15f0594e83d2ad58eda11bbb7b87091e02426583358d0"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/store-diagnostics-contract.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/verify-store-public.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/verify-store-public.mjs",
+      "bytes": 4609,
+      "sha256": "742bdeb41c432286c6885b912d7ee4c9e4fce38da7ad48667ab19647b99b3924"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-slow-stage-diagnostics-v1/account-store-public-validator.mjs",
+      "source": "account-store-slow-stage-diagnostics-v1/account-store-public-validator.mjs",
+      "bytes": 5407,
+      "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-slow-stage-diagnostics-v1/protocol-contract-v1.json",
+      "source": "account-store-slow-stage-diagnostics-v1/protocol-contract-v1.json",
+      "bytes": 5971,
+      "sha256": "02852a5ab77ec2c8f5944bdbd2d907fdb39be3b5fb22722db0d47cf1f9cfc800"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+      "source": "account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-slow-stage-diagnostics-v1/source-freeze-v1.json",
+      "source": "account-store-slow-stage-diagnostics-v1/source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-slow-stage-independent-review-v1/review-v1.json",
+      "source": "account-store-slow-stage-independent-review-v1/review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+      "source": "account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+      "bytes": 23031,
+      "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-diagnostics-release-independent-review-v1.json",
+      "source": "attack-deadline-diagnostics-release-independent-review-v1.json",
+      "bytes": 5278,
+      "sha256": "bc3a99cdc61021a4de94e20939081328c1f0f9c8c0e3c24428b5a32accd64be1"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+      "source": "attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+      "bytes": 10820,
+      "sha256": "4fd5867e421360dca4bb5cf0ec9f5bcd9b21a364f46f0bbb3bf97d53c571f1fa"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/backend-source-attack-deadline-diagnostics-v1.json",
+      "source": "backend-source-attack-deadline-diagnostics-v1.json",
+      "bytes": 35581,
+      "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-attack-deadline-diagnostics-v1.json",
+      "source": "release-attack-deadline-diagnostics-v1.json",
+      "bytes": 3146,
+      "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/runtime-prepared-v4.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/runtime-prepared-v4.json",
+      "bytes": 31015,
+      "sha256": "c988176e9409357eee0b0101851a8197ca0ab25d913d1224ab01dd1a2b50b6a1"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/root-seal-and-guard-v1.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/root-seal-and-guard-v1.mjs",
+      "bytes": 13790,
+      "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/root-controller-preparation-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/root-controller-preparation-v1.json",
+      "bytes": 985,
+      "sha256": "53d3bee0c58706a1f5261aa0952eff604eb06550c8a4417b13278ce9183415ee"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/ROOT-CONTROLLER.md",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/ROOT-CONTROLLER.md",
+      "bytes": 3383,
+      "sha256": "1d1fd11da7f170e77251bf366aa0492f9bf878d69d7a53ae607f9dae0e819336"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/full-lifecycle-account-store-wait-diagnostics-v1/verify-inputs.mjs",
+      "source": "full-lifecycle-account-store-wait-diagnostics-v1/verify-inputs.mjs",
+      "bytes": 9407,
+      "sha256": "5960387fcf51d6d4b3be202839861727fcc44209a7eda9e8460804f080d9f8bd"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/probe17-runtime-independent-review-v1/review-v3.json",
+      "source": "probe17-runtime-independent-review-v1/review-v3.json",
+      "bytes": 5833,
+      "sha256": "fcb913b89653a491c0a2f3acb6d26bbc2c6081f353fcc597e82a2776e5d09244"
+    },
+    {
+      "path": "capacity-native10-v2-account-store-wait-followup-17-diagnostics/collect-release-native-10-v2-account-store-wait-feasibility-17-public-artifact-catalog.json",
+      "source": "collect-release-native-10-v2-account-store-wait-feasibility-17-public-artifact-catalog.json",
+      "bytes": 59337,
+      "sha256": "7e3c023a20a45bf2d9179a7b2a065db54b8e3a5801bcc9b64734255bd33cba9f"
+    }
+  ],
+  "allOriginalCopiesByteEqual": true,
+  "structurallyUnredactedSensitiveJsonFields": 0,
+  "privateSecretValuesReadOrClaimedChecked": false
+}

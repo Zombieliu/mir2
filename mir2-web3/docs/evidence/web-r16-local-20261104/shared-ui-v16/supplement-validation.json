@@ -1,0 +1,153 @@
+{
+  "schema": "mir2.web-r16-public-evidence-supplement-validation/1",
+  "createdAt": "2026-11-05T16:25:33.575Z",
+  "supplementArchiveValidationPassed": true,
+  "baseArchive": {
+    "files": 45,
+    "bytes": 2105667,
+    "mappingFile": "mapping.json",
+    "mappingSha256": "223ef0a9cb7fc58c68197ec574723e3c47a36cc91fa8aec9b4580cb023a5fb09",
+    "validationFile": "validation.json",
+    "validationSha256": "11adbc258e2cda555d44711eace610e26d589742054ebb8c4c8d33370b60ca87",
+    "allPinsVerified": true,
+    "unchanged": true
+  },
+  "copiedFiles": 10,
+  "copiedBytes": 608843,
+  "approvedPngCount": 6,
+  "scannedSourceTextCount": 4,
+  "mappingFile": "supplement-mapping.json",
+  "mappingSha256": "a968aaaeae8f3cf4dd6abadb394fa75bb0f4d935ff1f0adc9e594dba1a4888a5",
+  "copyScript": {
+    "source": "tools/supplement-shared-ui-v16-evidence-20261106.mjs",
+    "bytes": 12006,
+    "sha256": "d6ca04e5f095d36d18205aeed9e1f12f9223a0fab9700af3e70f0bda81e49034"
+  },
+  "secretScan": {
+    "privateSourcesReadOnlyInsideNode": true,
+    "exactSensitiveStringCount": 19,
+    "exactValueMatches": 0,
+    "knownKeyPatternMatches": 0,
+    "privateValuesEmitted": false
+  },
+  "sourceAndTargetHashesVerified": true,
+  "original45FilesOverwritten": false,
+  "sourceFilesChangedOrRemoved": false,
+  "sourceRuns": [
+    {
+      "file": "supplement/display-v16-skills-browser-r1/display-v16-skills-browser-proof.json",
+      "originalOverallPassed": false,
+      "ordinaryLogouts": 2,
+      "browserClosed": true,
+      "chineseRestored": false,
+      "scope": "Chinese and Hindi completed; Arabic timed out; original overall false retained"
+    },
+    {
+      "file": "supplement/display-v16-skills-browser-r2/display-v16-skills-browser-proof.json",
+      "originalOverallPassed": true,
+      "ordinaryLogouts": 1,
+      "browserClosed": true,
+      "chineseRestored": true,
+      "scope": "Arabic continuation completed"
+    }
+  ],
+  "scopedLanguageMatrix": [
+    {
+      "language": "zh-CN",
+      "sourceProof": "supplement/display-v16-skills-browser-r1/display-v16-skills-browser-proof.json",
+      "sourceRunOverallPassed": false,
+      "scopedChecksPassed": true,
+      "authoritativeLearnedFencingKnownBeforeUi": true,
+      "visibleFirstPageRowObserved": true,
+      "ownerStableAcrossFrames": true,
+      "companionEntryHiddenWhileCharacterOpen": true,
+      "companionClientRemainedMounted": true,
+      "sourceNameVisualReviewPendingFlagPreserved": true,
+      "sharedDescriptionHoverImplemented": false,
+      "descriptionVerified": false,
+      "rootViewedScopedPngs": true,
+      "fullLanguageAcceptanceClaimed": false,
+      "screenshots": [
+        "supplement/display-v16-skills-browser-r1/01-quest-diary-zh-CN.png",
+        "supplement/display-v16-skills-browser-r1/02-skills-body-zh-CN.png"
+      ]
+    },
+    {
+      "language": "hi",
+      "sourceProof": "supplement/display-v16-skills-browser-r1/display-v16-skills-browser-proof.json",
+      "sourceRunOverallPassed": false,
+      "scopedChecksPassed": true,
+      "authoritativeLearnedFencingKnownBeforeUi": true,
+      "visibleFirstPageRowObserved": true,
+      "ownerStableAcrossFrames": true,
+      "companionEntryHiddenWhileCharacterOpen": true,
+      "companionClientRemainedMounted": true,
+      "sourceNameVisualReviewPendingFlagPreserved": true,
+      "sharedDescriptionHoverImplemented": false,
+      "descriptionVerified": false,
+      "rootViewedScopedPngs": true,
+      "fullLanguageAcceptanceClaimed": false,
+      "screenshots": [
+        "supplement/display-v16-skills-browser-r1/03-quest-diary-hi.png",
+        "supplement/display-v16-skills-browser-r1/04-skills-body-hi.png"
+      ]
+    },
+    {
+      "language": "ar",
+      "sourceProof": "supplement/display-v16-skills-browser-r2/display-v16-skills-browser-proof.json",
+      "sourceRunOverallPassed": true,
+      "scopedChecksPassed": true,
+      "authoritativeLearnedFencingKnownBeforeUi": true,
+      "visibleFirstPageRowObserved": true,
+      "ownerStableAcrossFrames": true,
+      "companionEntryHiddenWhileCharacterOpen": true,
+      "companionClientRemainedMounted": true,
+      "sourceNameVisualReviewPendingFlagPreserved": true,
+      "sharedDescriptionHoverImplemented": false,
+      "descriptionVerified": false,
+      "rootViewedScopedPngs": true,
+      "fullLanguageAcceptanceClaimed": false,
+      "screenshots": [
+        "supplement/display-v16-skills-browser-r2/01-quest-diary-ar.png",
+        "supplement/display-v16-skills-browser-r2/02-skills-body-ar.png"
+      ]
+    }
+  ],
+  "quest4Partials": {
+    "potion": {
+      "file": "supplement/display-v16-quest4-r2/quest4-belt-persisted-gear-partial-receipt.json",
+      "originalOverallPassed": false,
+      "verifiedWithinScope": true
+    },
+    "normalRevive": {
+      "file": "supplement/display-v16-quest4-r3/quest4-normal-revive-eight-neighbour-partial-receipt.json",
+      "originalOverallPassed": false,
+      "scopedRecoveryAndPersistencePassed": true,
+      "normalUiReviveObserved": true,
+      "exactAssetsRetained": true,
+      "exactProgressRetained": true,
+      "normalLogoutAndFreshLogin": true,
+      "arbitraryProtocolReplayTested": false
+    }
+  },
+  "boundaries": {
+    "finalQuest4TwoOmaKillsAndReward": "Open; partial receipts do not establish the two kills or reward completion.",
+    "fullGameplayPassed": false,
+    "threeScopedLanguagesAreNotFullTenLanguageAcceptance": true,
+    "fencingDescriptionVerified": false,
+    "wholeGlyphMatrixAccepted": false,
+    "originalFailedAndPartialResultsRetained": true,
+    "thin360MiBGatePassed": false,
+    "nativeSharedClientPassed": false,
+    "englishBitmapAndResidualChineseRemainOutsideFullTranslationAcceptance": true,
+    "candidate100Claimed": false
+  },
+  "binaryPolicy": "Only the six fixed crops reported as viewed by Root, each checked against its own sealed source proof SHA; no other PNGs.",
+  "excluded": [
+    "raw dumps",
+    "unsealed quest4-r5 or other live runs",
+    "executed drivers",
+    "other screenshots",
+    "private data and credentials"
+  ]
+}

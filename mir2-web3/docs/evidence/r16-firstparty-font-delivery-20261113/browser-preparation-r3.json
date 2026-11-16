@@ -1,0 +1,24 @@
+{
+  "candidate": "e10a84e12923-firstparty-fonts-c84e5706",
+  "scripts": {
+    "entry-player-probe.mjs": "6b83c0c355eb98fb36a99c634d1cd299f17d8da07b65b63dc35fab8bdaa1d4e5",
+    "invoke.mjs": "08adc884d4c884fc3c9a7d333d8e0777c8ee569ce85749d7778437a9771e4b2e",
+    "profile.mjs": "3c40d2cb928b0799a4f59b7d621997f2e906572473591a45fe990a5f88b32930",
+    "run.mjs": "e63d0cc8dcc5c39beb0553fae7a59f025a5c41554d6d79cf3b3c798ec34e2aad",
+    "standing-faces.mjs": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+    "ui-asset-fault.mjs": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "9ba0458dfa5c7be2d206cfd8495ae87a9d95d329781094c47c075da67e9c9a4d",
+    "observe-runtime-schedule.mjs": "790e0fe87d434726c256b194d5f2770249d630e95ee18990c4fdfcf9ecfba25f"
+  },
+  "previousPreparationSha256": "3d717a4776be1046f580166ec4c6876a7d948595488a5a61c29ec99a3c241962",
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "originalFirstPlayableObservationMs": 60000,
+  "addedFault": "Real app TC prefix stalls15s then complete same-pin CDN replacement. Existing JSON2x20s, NPC2x20s, binary8s headers+2x15s idle, Native recovery, full6-fontSHA, 113/113, realWorkerrestart and complete-browser-close warm session retained.",
+  "evidenceChange": "Expected hosted font source is now app-first. Replace prior deliberate font/binary overlap assertion with actual completion→font-prewarm→ready milestones, matching this change. No gameplay gate changed.",
+  "noPublicResources": true,
+  "noUserStateInjection": true,
+  "correction": "R1 failed because the real metrics API retains first call per name, so the completed binary state was absent. Both epochMs and atMs exist. R2 clock-only correction was inspected and superseded BEFORE replay; no extra game session. A read-only wrapper now observes every diagnostic call while forwarding original receiver/arguments/return unchanged. No production bytes, game state or original timeout changed."
+}

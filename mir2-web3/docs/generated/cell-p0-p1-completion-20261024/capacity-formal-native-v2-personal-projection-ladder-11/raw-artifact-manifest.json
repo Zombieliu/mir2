@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792942371568-1e322224",
+      "report": "capacity-formal-native-v2-personal-projection-ladder-11/release-native-v2-personal-projection-ladder-11/reports/1792942371568-1e322224.report.json",
+      "path": "release-native-v2-personal-projection-ladder-11/reports/1792942371568-1e322224.samples.jsonl",
+      "bytes": 68831794,
+      "sha256": "2a0a9def47282a9c02c3b46500782cb09dcf7ee0684c3638e862ecaf331cdc78",
+      "projection": "capacity-formal-native-v2-personal-projection-ladder-11/release-native-v2-personal-projection-ladder-11/reports/1792942371568-1e322224.raw-projection.json"
+    }
+  ]
+}

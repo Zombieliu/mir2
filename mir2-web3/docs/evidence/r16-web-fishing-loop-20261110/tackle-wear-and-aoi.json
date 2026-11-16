@@ -1,0 +1,377 @@
+{
+  "schema": "mir2.r16.fishing-tackle-wear-and-aoi.v1",
+  "base": "cea1c4d4f36507823d9dc4567b809574949a6bf4",
+  "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "sourceInputs": {
+    "apps/simulation/src/runtime/fishing.rs": {
+      "compiledSourceSha256": "bc9ccec90d654e1fc063500bb96c640fe3c6455e74e0e8c0224327c8a6fdcdc6",
+      "gitLfSha256": "bc9ccec90d654e1fc063500bb96c640fe3c6455e74e0e8c0224327c8a6fdcdc6"
+    },
+    "apps/gateway/src/routing.rs": {
+      "compiledSourceSha256": "2728a3209d5e75acfb78d7c7cb2bc2668973a837e26e57311199565992800604",
+      "gitLfSha256": "b9ce2a644e2fa95e8f65f4419c2ab54773c200a7a683bd8103c5783fa6e17ebb"
+    },
+    "apps/gateway/src/web.rs": {
+      "compiledSourceSha256": "32ff1c7719afe879fe8dce98465e0c906d738ef59198bb63c776cbb463b2df69",
+      "gitLfSha256": "cd7caedbb88b034a0a87ec9cca49843abf9fc4cfec57f771aacc07cdb80a2815"
+    }
+  },
+  "crystalSources": {
+    "Server/MirObjects/PlayerObject.cs": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11",
+    "Server/MirObjects/HumanObject.cs": "c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3",
+    "Server/MirObjects/MapObject.cs": "f465ee5fe84bc9fe6ab3ef9dd0c138c8c6b1dee83d1ea5b007cc5cb3afe53f7f",
+    "Client/MirObjects/PlayerObject.cs": "e4eacf5249d41aaf35c4cd6a905cae9ab1ef0edb68379a5dee2fcfe4b1f9c20a",
+    "Client/MirScenes/GameScene.cs": "935d1ca35ddf4800bccdac4cd1675fcb59a269560a57bf98c2b952a459ffb504",
+    "Shared/ServerPackets.cs": "12a81d64c9d1ce1d5c2245f8fc6da5fa9aba9f3b83281603df0117ebd8a004e2"
+  },
+  "gatewayCandidate": {
+    "label": "R3",
+    "sha256": "982ded92ad245cf99165d2845f823abb931c788032c362155fb45db7d566650a"
+  },
+  "web": {
+    "base": "735c0d8ed9550dbdc7e6c31b56d61d3e4da4d20c",
+    "buildReceiptSha256": "d58e7b4539a52680b9baa6f2b8bfb8d637f75359b923f7f560c54755af47b2fa",
+    "zeroWebGpu": {
+      "receiptSha256": "a9ae546526ae58d249d3de51c5e3fb541111145a0cb8ba8247fc2849765674dd",
+      "firstWear": 0,
+      "visibleAtZero": true,
+      "deletedOnNextReel": true,
+      "liveSlotEmpty": true,
+      "relog": {
+        "snapshot": 1242,
+        "hook": null,
+        "rod": 9999,
+        "bait": 14
+      },
+      "screenshots": [
+        {
+          "file": "tackle-wear-hook-zero.png",
+          "sha256": "eed10a9e70437010c875f1b570755b25b968f1edc5c5ac2afb3d415252584014"
+        },
+        {
+          "file": "tackle-wear-hook-removed.png",
+          "sha256": "4e9f85cc353d416f10d2d4d0c1fed8f10de27f4c265d7c3d74e02aa2842cdaf8"
+        }
+      ]
+    },
+    "webGl2": {
+      "receiptSha256": "b40c96e1290b2ab9990a8209f63f59b2399cae51afc0a7ac68fa0838ce436cc3",
+      "castCount": 4,
+      "automaticSnapshots": [
+        {
+          "seq": 670,
+          "hookDura": 7997,
+          "baitCount": 13
+        },
+        {
+          "seq": 710,
+          "hookDura": 7995,
+          "baitCount": 12
+        },
+        {
+          "seq": 750,
+          "hookDura": 7993,
+          "baitCount": 11
+        }
+      ],
+      "manualHookDura": 7992,
+      "relog": {
+        "rod": 9996,
+        "hook": 7992,
+        "bait": 11,
+        "reel": 5999
+      }
+    }
+  },
+  "aoI": {
+    "sealSha256": "6aefc1757bed67fda5f27deb20a6ca1522d3801e59ad69fdabdc090a2d5c8189",
+    "baseline": {
+      "receiptSha256": "463e8577507e65e9f61e41fa3f9eab0d6ee459e3cf666cd416c90f818e434738",
+      "gatewaySha256": "559270ec2f98f32a401d5ecebde3779d550dbb2556228a8c13fe3e578bb4793b",
+      "requestToColdPeerMs": 12042,
+      "ownerReceiptToColdPeerMs": 11930,
+      "peerStartToColdReelMs": 15297,
+      "appearances": 3,
+      "removals": 2,
+      "liveEdges": [
+        {
+          "fishing": false,
+          "progress": 36,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        },
+        {
+          "fishing": true,
+          "progress": 0,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        },
+        {
+          "fishing": false,
+          "progress": 26,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        }
+      ],
+      "privateAttemptPackets": 0,
+      "saved": {
+        "rod": 9998,
+        "hook": 7998,
+        "bait": 13,
+        "reel": 6000,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft"
+      }
+    },
+    "previousCandidate": {
+      "receiptSha256": "3924b7e57bc0cd33d0c0663294d7436f9d7e2ecd527668ff420ed0593e0dd208",
+      "gatewaySha256": "6bbbc779ea731b792ae1a61c6273156d0920c35d921b2aa7a112250e310539db",
+      "requestToColdPeerMs": 3,
+      "ownerReceiptToColdPeerMs": -108,
+      "peerStartToColdReelMs": 3252,
+      "appearances": 3,
+      "removals": 2,
+      "liveEdges": [
+        {
+          "fishing": false,
+          "progress": 36,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        },
+        {
+          "fishing": true,
+          "progress": 0,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        },
+        {
+          "fishing": false,
+          "progress": 26,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        }
+      ],
+      "privateAttemptPackets": 0,
+      "saved": {
+        "rod": 9998,
+        "hook": 7996,
+        "bait": 13,
+        "reel": 6000,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft"
+      }
+    },
+    "candidate": {
+      "receiptSha256": "110c35277529069051c5c6faa8c0f73da5a58ca97013c25356352f8d13cbb70a",
+      "gatewaySha256": "982ded92ad245cf99165d2845f823abb931c788032c362155fb45db7d566650a",
+      "requestToColdPeerMs": 4,
+      "ownerReceiptToColdPeerMs": -115,
+      "peerStartToColdReelMs": 3305,
+      "appearances": 3,
+      "removals": 2,
+      "liveEdges": [
+        {
+          "fishing": false,
+          "progress": 36,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        },
+        {
+          "fishing": true,
+          "progress": 0,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        },
+        {
+          "fishing": false,
+          "progress": 26,
+          "point": {
+            "x": 339,
+            "y": 247
+          },
+          "foundFish": false
+        }
+      ],
+      "privateAttemptPackets": 0,
+      "saved": {
+        "rod": 9998,
+        "hook": 7996,
+        "bait": 13,
+        "reel": 5999,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft"
+      }
+    }
+  },
+  "wire": {
+    "closureSha256": "ae7e2a20cc4bc5090c5dfca10f75547f54d7b587a5dde0f9e3ab28593ca72d1a",
+    "receiptSha256": {
+      "websocketWear": "49d71fd88fafa8e0febc3af5ac9edbdb06eac5bb631a27e5da1464dc44e9dc37",
+      "websocketZero": "bb841f871a7b222d38fafc706b9b0759d17f271da0c0559abd1426e03cd0cbb6",
+      "tcpWear": "f5d6ce4771bfe847803887f7f24063687278e714bf8ec2e2f5023385ae54bf2d",
+      "tcpZero": "c2550d64f55d4617fda73dc1f35d303126eaa8e5f0950e178c7d328735cc30af"
+    },
+    "detectorFixture": {
+      "derivedSha": "770c580427bd84afddd9d90b05bf7901c9d2b488eb7b1f70b50c8b0c3d5f0b91",
+      "slot": 3,
+      "template": 800,
+      "condition": "Isolated File copy with codec-validated capture and distinct UID. Earlier fixture/provision attempts are preserved outside the working tree."
+    },
+    "healthy": {
+      "websocket": {
+        "rod": 9997,
+        "hook": 7994,
+        "bait": 12,
+        "finder": 4998,
+        "reel": 6000
+      },
+      "tcp": {
+        "rod": 9997,
+        "hook": 7994,
+        "bait": 12,
+        "finder": 4998,
+        "reel": 6000
+      },
+      "baseline": {
+        "rod": 9997,
+        "hook": 7997,
+        "bait": 12,
+        "finder": 4999,
+        "reel": 6000
+      },
+      "baselineWebSocketReceiptSha256": "f8fae3db08ae5dab3cc513a860010beec689951de138dfad59fdbac031358362",
+      "baselineTcpReceiptSha256": "2ca9a64470e8dabb969efb1eb9ca0da27f5e129e39f84a5c8189c730e144d7b2",
+      "websocketReentry": true
+    },
+    "zeroReplacement": {
+      "websocket": {
+        "rod": 9998,
+        "hook": 7998,
+        "bait": 13,
+        "finder": null,
+        "reel": 6000
+      },
+      "tcp": {
+        "rod": 9998,
+        "hook": 7998,
+        "bait": 13,
+        "finder": null,
+        "reel": 6000
+      },
+      "websocketReentry": true
+    }
+  },
+  "native": {
+    "base": "cea1c4d4f36507823d9dc4567b809574949a6bf4",
+    "sourceArchiveSha256": "2c365c83df9e695b9859e8d398fbb6a0f1fffec210e768d5e4d5ed5f23c298fa",
+    "testSourceSha256": "52bebea5883dd0143c63a195792d6b19fc94be9bcd27b3df135268b98ad6d108",
+    "scope": "Frozen optimized tests and GPU offscreen rendering. Desktop window and Hosted are pending."
+  },
+  "checks": {
+    "simulationFishing": {
+      "passed": 40,
+      "sha256": "34aebe68acaece228a687a68ef17b10cabfe132201b756520e025332e8d6365c"
+    },
+    "gatewayFishing": {
+      "passed": 11,
+      "sha256": "882db12573f00706a7e97fa3e622aa6dc54aba35c99b9d33030c6104e19d6e47"
+    },
+    "sharedZone": {
+      "passed": 210,
+      "sha256": "9baeaf8d65dfcebef2682a31aab25ddd46353cebdc83f110ead3ba27fbb3aa6a"
+    },
+    "liveAoi": {
+      "passed": 15,
+      "sha256": "3c5fbaa32919bcafe203c2bb0e7725563eb182706e5118b8bc43f61615690bcf"
+    },
+    "securityLifecycle": {
+      "passed": 21,
+      "sha256": "de46c6bd6b4b0f77238014867563fc97f8fa86f4c34a7b6c9875e233812f286a"
+    },
+    "webPresentation": {
+      "passed": 12,
+      "sha256": "037a69ddbe138e75f5d667e7e028e036045f949f73713d4b7dc0e2c90486d870"
+    },
+    "nativeOptimizedFishing": {
+      "passed": 7,
+      "sha256": "20f5d61d37b11f660b357d9e5e39a536c44fffb76553afc6c91307731614a396"
+    },
+    "nativeGpuOffscreen": {
+      "passed": 1,
+      "sha256": "bdd40dcce0917506b31d5bcd7e9d73dd880b56549bc4c74f7b605ad6e840f7a1"
+    },
+    "nativeWaterOffsets": {
+      "passed": 1,
+      "sha256": "605ab4129ffdccfe01a386d2c3f116b7eeda1007c55747b25577c28b6c9effe7"
+    }
+  },
+  "publicQr": {
+    "gameHttp": 200,
+    "relayHttp": 200,
+    "readback": [
+      {
+        "language": "zh-cn",
+        "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+        "utc": "2026-11-10T04:13:51.151Z",
+        "createTtfbMs": 6275,
+        "createStatus": 200,
+        "pollStatus": 200,
+        "receiptSha256": "0cb024976f53c22b79a6a93348f2b17b4a1f43354c3671579af853a6daf41d81"
+      },
+      {
+        "language": "zh-tw",
+        "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+        "utc": "2026-11-10T04:14:24.643Z",
+        "createTtfbMs": 5668,
+        "createStatus": 200,
+        "pollStatus": 200,
+        "receiptSha256": "e9ff846f1f020d8ed12c7f4103829fa25db592a76a52d63f18382f3884fd47ce"
+      }
+    ],
+    "releaseReview": {
+      "candidateRevision": "c52ea9abb63cc016a736c856e4d9d5db3c0abb90",
+      "reviewedPinLocalCommit": "f05051d5ccf04d8426b0f74547a54f3a57fe48b0",
+      "reviewEnvironmentLocalCommit": "cf4832810449cb0fb96cbd15384e06787d3382ba",
+      "reviewedPinSha256": "f63132a235fb54229de381753f5cd016bc1b4aa922ca7edf93a2710bf3f92a5e",
+      "reviewEnvironmentSha256": "f9a5889b8d1d722dd4a01f42c037c0502ab8a15cc7c262b0e2f9af44b3268b21",
+      "gateLogSha256": "f87b112200f7f96b223e8f0ab16ae97dd7925ab9e0e998b46b23af04cb83a93f",
+      "mockedGateChecksPassed": 74,
+      "credentialBearingRunPerformed": false,
+      "stageOrPromotionPerformed": false,
+      "signedPhoneJourneyInThisRun": false
+    }
+  }
+}

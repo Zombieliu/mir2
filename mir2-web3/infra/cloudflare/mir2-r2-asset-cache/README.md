@@ -17,7 +17,26 @@ mir2/v/37596e16d64fde7c/original-ui/Monster/003/52.png
 
 The Worker keeps immutable game assets cached at the edge, supports CORS for
 the Player Web Service Worker, stamps CORS headers on both fresh R2 responses
-and Cache API hits, and bypasses the cache for byte-range requests.
+and Cache API hits. Single-range requests for original `.otf`/`.ttf` fonts can
+reuse an already cached complete font through Cloudflare's Cache API. The lookup
+has a 500 ms budget; a miss, cache failure or inconsistent partial response falls
+back to R2. Other byte-range requests continue to bypass the cache.
+
+Cached font ranges must be unencoded 206 responses with a valid, matching
+`Content-Range` and `Content-Length`. This path streams the cached slice without
+buffering the complete font and never stores a 206 response. It does not warm a
+missing complete font or imply that caches in other Cloudflare locations are warm.
+
+Single closed/open byte ranges use R2's returned `offset` and `length`, clamped
+to the object size. The Worker checks this metadata against the requested range
+before streaming a 206 response with an exact `Content-Range` and `Content-Length`.
+Inconsistent range metadata is rejected with an uncached 502. HEAD ignores Range;
+stored gzip still returns a complete decoded 200 without a compressed length.
+Unsupported Range syntax retains the complete-response fallback. This is not a
+complete implementation of suffix, multipart, or unsatisfiable HTTP ranges.
+
+Run the focused transport checks with `npm run test:asset-cdn-ranges` from
+`apps/web`; the command uses Node 22's type stripping and no remote R2 access.
 
 External origins (local development, Vercel previews, itch.io, CrazyGames, and
 other distribution channels) must use the browser-safe alias:

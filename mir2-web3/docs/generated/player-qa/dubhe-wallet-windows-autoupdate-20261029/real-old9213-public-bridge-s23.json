@@ -1,0 +1,115 @@
+{
+  "schema": "mir2.windows.real-old-engine-bridge23.v1",
+  "passed": true,
+  "installation": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\e2e-old23-installation",
+  "beforeSequence": 20,
+  "sequence": 23,
+  "beforeEngineSha256": "9213EC3FE1A992F757EA48C53981AFA661765B42E637C1AD811E326060B170B8",
+  "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+  "engineSourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+  "actualOriginalLauncherExecuted": true,
+  "launcherSha256": "7404CDF744D1FD89C90AB67B088A0972F8059B25F0E311331CC11B6BC07A6B9E",
+  "actualOldEngineExecuted": true,
+  "outcome": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261011-invited-25",
+    "changedGameFiles": 0,
+    "delivery": {
+      "bundles": 0,
+      "fallbacks": 0,
+      "patches": 0
+    },
+    "downloadedBytes": 1959936,
+    "downloadedFiles": 1,
+    "sequence": 23,
+    "wireBytes": 1964744
+  },
+  "gameLaunched": true,
+  "gameCandidate": "WN-CANDIDATE-20261011-invited-25",
+  "gameExeSha256": "901C47188259B5F2A6B73070B12456D4ECC13AAB02C68B975E1843FFFC507348",
+  "gamePid": 68464,
+  "gameObservedAliveSeconds": 10.94,
+  "gameClosedByThisTest": true,
+  "healthSimulated": false,
+  "healthAcceptedByActualOldUpdater": true,
+  "transactionPhase": "accepted",
+  "loginOrAccountActionsSubmitted": false,
+  "mir2EnvironmentRemoved": true,
+  "gatewayWsUrl": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "personalAndLogsPreserved": true,
+  "feedSha256": "CFC78A45E30C8079857CFFB2BF6C02C8266A1C9C85FEF4022368B43E8D11317C",
+  "baselineProofSha256": "10B3AADCA973C8387A204255E6C5EC4BE033CEE1C209075188589FF5C9CBE685",
+  "elapsedSeconds": 104.79,
+  "events": [
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 154579,
+        "copyFlushMs": 0,
+        "elapsedMs": 80990,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "checking-installed",
+        "total": 154579,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793220843
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 0,
+        "copyFlushMs": 0,
+        "elapsedMs": 0,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "staging",
+        "total": 0,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1793220843
+    },
+    {
+      "detail": {
+        "completed": 7,
+        "elapsedMs": 175,
+        "outcome": "complete",
+        "phase": "preparing",
+        "total": 7
+      },
+      "event": "local-phase-end",
+      "time": 1793220844
+    },
+    {
+      "detail": {
+        "completed": 7,
+        "elapsedMs": 87,
+        "outcome": "complete",
+        "phase": "installing",
+        "total": 7
+      },
+      "event": "local-phase-end",
+      "time": 1793220844
+    },
+    {
+      "detail": {
+        "activated": true,
+        "candidate": "WN-CANDIDATE-20261011-invited-25",
+        "changedGameFiles": 0,
+        "delivery": {
+          "bundles": 0,
+          "fallbacks": 0,
+          "patches": 0
+        },
+        "downloadedBytes": 1959936,
+        "downloadedFiles": 1,
+        "sequence": 23,
+        "wireBytes": 1964744
+      },
+      "event": "update",
+      "time": 1793220845
+    }
+  ]
+}

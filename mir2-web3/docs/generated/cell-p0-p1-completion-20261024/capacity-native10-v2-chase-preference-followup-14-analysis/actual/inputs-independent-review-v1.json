@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T10:20:52.2556319Z",
+  "scope": "Bounded read-only check of actual probe14 source seal, actual readonly guard receipt and account-only preparation metadata while the parent owns the running realm. No live raw, recording, private store, credentials, binary payload, service or tests were accessed or executed.",
+  "actualProducts": {
+    "sourceSeal": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/launcher-source-frozen-v1.json",
+      "bytes": 19769,
+      "sha256": "0d994e2c1d097de3b732543f06c3cf9787dcc56b1c3b74fa497b4b2c2cca65d7"
+    },
+    "readonlyGuard": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/source-guard-readonly-verification.json",
+      "bytes": 1230,
+      "sha256": "d6d42d7c68757d4f881d11c4215865e44572c92625a0ca1cf2ab58cd71330db3"
+    },
+    "preparedSourcePins": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/source-pins.json",
+      "bytes": 51893,
+      "sha256": "f9a4e1c3d7941f65d396a6f01c2c7a65e0259d45fc73ef0707b6053ae245a31f"
+    },
+    "buildMetadata": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/gateway-build-pin.json",
+      "bytes": 1341,
+      "sha256": "4ec5896ecbf4002bc0396fc9a76432a3226d0e6b2e6a6e311a0fe1795ea7d0de"
+    },
+    "accountOnlyProvisioningMetadata": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/provisioning.json",
+      "bytes": 330,
+      "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4"
+    }
+  },
+  "governingReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-preseal-independent-review-v1/review-v3.json",
+    "bytes": 12243,
+    "sha256": "6c74fce12255419c952d9f8d1af2dec92527d89e648157a761017c85a7093398"
+  },
+  "checks": {
+    "sourceSeal": {
+      "state": "final-source-bound-not-executed",
+      "rawSizeAndSha256MatchRootAnnouncedPin": true,
+      "sealedFiles": 73,
+      "all73CurrentRawBytesAndHashesMatch": true,
+      "sourceAggregateRecomputedAndMatched": true,
+      "reviewed70EntriesAllPresentExact": true,
+      "additionalEntriesExactly": [
+        "preseal-inputs-finalized-v3.json",
+        "probe14-preseal-independent-review-v1/review-v3.json",
+        "probe14-root-seal-source-control-v1.mjs"
+      ],
+      "presealReference": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/preseal-inputs-finalized-v3.json",
+        "bytes": 28492,
+        "sha256": "565fe291e06beb93f43a3780228070984d8737c8e394890e27c8c9b73d1888ba"
+      },
+      "reviewReference": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe14-preseal-independent-review-v1/review-v3.json",
+        "bytes": 12243,
+        "sha256": "6c74fce12255419c952d9f8d1af2dec92527d89e648157a761017c85a7093398"
+      },
+      "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+      "driverSourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+      "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7"
+    },
+    "readonlyGuard": {
+      "passed": true,
+      "sourceManifestPinMatchesActualSeal": true,
+      "controllerRawPinMatchesReviewedHelper": true,
+      "backendInputs": 41,
+      "gatewaySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+      "full16RunId": "1792884517374-04264602",
+      "sealedSourceFilesChecked": 73,
+      "driverImportAndEvidencePinCount": 47,
+      "sceneSourceSha256": "17183144a708188fe24a138e7a7c9b79f7382f0c6a8e985d765c3798a9da44bb",
+      "identityMatchesFinalPreseal": true
+    },
+    "preparation": {
+      "publicSourcePinRecords": 189,
+      "orderedFilePinAggregateRecomputedAndMatched": true,
+      "preparedAggregate": "bfdaf0110da83d9e89699b13d02f421ed2f66c903d987e498dbeea09d9881cd6",
+      "sealAndGuardActualRawPinsPresentInPreparedSources": true,
+      "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+      "actualCurrentDriverAndCoreCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+      "historicalStaticCodeCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+      "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+      "sceneSourceSha256": "17183144a708188fe24a138e7a7c9b79f7382f0c6a8e985d765c3798a9da44bb",
+      "declaredOrdinaryAccounts": 10,
+      "actualAccountOnlyProvisioningCreated": 10,
+      "charactersCreated": 0,
+      "gameplayGrants": 0,
+      "existingStoreModified": false,
+      "networkRequests": 0,
+      "registrationLoadTested": false,
+      "ordinaryLoginBudget": {
+        "admission": 25,
+        "reservedVerification": 5,
+        "total": 30,
+        "windowMs": 901000,
+        "persistentLedger": true,
+        "resetOrBypass": false
+      },
+      "ownedBuildMetadataMatchesExpected87370240A430": true
+    }
+  },
+  "creationOrder": {
+    "seal": "2026-10-25T10:17:45.416Z",
+    "readonlyGuard": "2026-10-25T10:18:11.616Z",
+    "prepare": "2026-10-25T10:18:31.83Z",
+    "chronological": true
+  },
+  "verdict": {
+    "actualSealGuardAndPrepareMatchFinalReview": true,
+    "blockingFindingIds": [],
+    "runtimeTouchedByReviewer": false,
+    "liveRawScannedByReviewer": false,
+    "sourceOrInputChangedByReviewer": false,
+    "testsOrGuardsRepeatedByReviewer": false,
+    "currentProbePassedAdjudicated": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2ImplementationPermitted": false
+  },
+  "limitations": [
+    "The false realmStarted/accountPrepared markers inside seal/guard are historical snapshots before preparation/launch. They are not claims that the parent-owned realm is currently absent.",
+    "Prepared189-record sourceConfig digest was independently recomputed as metadata. This review did not reread all data/binary/import payloads or repeat the actual41-source guard; it did hash the73small sealed source/metadata entries and checked their links.",
+    "The owned executable SHA/size were checked as public build metadata against the reviewed release identity; the87MB executable was not rehashed during the live load.",
+    "Account-only provisioning is not an ordinary registration stress result, gameplay grant, character creation or a performance acceptance.",
+    "This receipt does not inspect or classify current actions, monitor samples, raw health-dose receipts or any passing/failed workload result. Those require the later ended-run verifier and normal cleanup."
+  ]
+}

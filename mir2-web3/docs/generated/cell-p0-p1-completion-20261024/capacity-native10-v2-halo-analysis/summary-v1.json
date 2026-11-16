@@ -1,0 +1,643 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792891029840-02155527",
+  "actor": "L26466205",
+  "status": "FAILED unchanged",
+  "capacityAccepted": false,
+  "evidence": {
+    "selected": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\selected-events-v1.json",
+      "bytes": 293598,
+      "sha256": "40c77dd1f91cc4426e4b9da372c1701e3c723d69f6795a67e86f683265e4fff7"
+    },
+    "sameThreePublicFrames": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\spectator-three-frame-projection-v2.json",
+      "bytes": 17690,
+      "sha256": "b1a25ffbd9a8f5c410c76f52995a939cdca36a0363d33f0ff35676c7fa9f6556"
+    },
+    "witnessLoss": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\request49-witness-loss-v1.json",
+      "bytes": 7778,
+      "sha256": "1596d9217b6028c18725f56df96bba859094b55839194da609ac0c81aa4674bb"
+    },
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.samples.jsonl",
+      "bytes": 8938171,
+      "sha256": "0c7d4f33b2e0a50dfc9a16c5331e5a6b3b25feb150cda01972a7244bec96443f",
+      "rows": 14021
+    },
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.report.json",
+      "bytes": 75433,
+      "sha256": "1cb07e72c7341b1d200c3145e4799604c0737c4a59c38f48ebf7100046106819"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\realm-cleanup.json",
+      "bytes": 3149,
+      "sha256": "4923d6553ba68c1e54020a89b226a09e6749506ae7c98aec83f90b8b1a360f08"
+    },
+    "sourcePins": {
+      "soak": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 132218,
+        "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+      },
+      "observation": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+        "bytes": 14376,
+        "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+      },
+      "gear": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+        "bytes": 46278,
+        "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+      },
+      "passiveAi": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\passive_ai.rs",
+        "bytes": 7779,
+        "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145"
+      },
+      "zone": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+        "bytes": 748912,
+        "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+      },
+      "spectator": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\spectator.rs",
+        "bytes": 58692,
+        "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+      },
+      "staticAuthor": {
+        "file": "C:/mir2-build/p01-completion-20261024/partition-span4-halo-static-author-v1.mjs",
+        "bytes": 20655,
+        "sha256": "41316723c8dbc1010a1e9e643dea7616b6088bf8611a9f3dd4fc461538c07167"
+      }
+    },
+    "helper": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-probe09-death-analysis-v1.mjs",
+      "bytes": 12669,
+      "sha256": "334991928a3d0f27d4f4c1404e7a562a099a9b1c398d5acbb270e43d5729fe6d"
+    }
+  },
+  "verdict": {
+    "actualDeathStateObserved": true,
+    "wireFatalPacketRetained": false,
+    "fatalAttackerKnown": false,
+    "presenceOnlyTransientProven": false,
+    "explanation": "Matchingactor public server-snapshot-derived self1000 events at1792891599088 showHPto0/deadtrue, corroborating genuine observeddeath state aroundguard1792891599013. This is stronger than the mergedcheckOwner error, but not an originalfatalwirepacket or proof of exactexecutionorder. Lateridentity presence cannot establishalive.",
+    "originalGate": "Only stage2 completed300.301s/five truewindows andpassed. Stage10 incomplete170.484s; no completedstage10 orsoak. ContinuousfirstFailure null does not cancel actualdeath or the independently failed completewhole-cohortwindow."
+  },
+  "deathTimeline": {
+    "guardAtMs": 1792891599013,
+    "lastAttack": {
+      "requestId": "66",
+      "sentAtMs": 1792891597237,
+      "ownerAtSend": {
+        "objectId": 1000,
+        "x": 265,
+        "y": 649,
+        "hp": 3,
+        "maxHp": 24,
+        "dead": false
+      },
+      "targetDied": {
+        "objectId": 206534,
+        "name": "Deer",
+        "atMs": 1792891597301
+      }
+    },
+    "lastActualOwnerMovement": {
+      "atMs": 1792891598671,
+      "source": "UserLocation",
+      "x": 264,
+      "y": 649
+    },
+    "ownerHealthBeforeGuard": [
+      {
+        "rawLine": 4608,
+        "at": 1792891412862,
+        "requestId": "1",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 669,
+          "dead": false,
+          "hp": 18,
+          "maxHp": 18
+        }
+      },
+      {
+        "rawLine": 5162,
+        "at": 1792891423661,
+        "requestId": "8",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 669,
+          "dead": false,
+          "hp": 17,
+          "maxHp": 18
+        }
+      },
+      {
+        "rawLine": 5531,
+        "at": 1792891430276,
+        "requestId": "10",
+        "owner": {
+          "objectId": 1000,
+          "x": 272,
+          "y": 673,
+          "dead": false,
+          "hp": 18,
+          "maxHp": 18
+        }
+      },
+      {
+        "rawLine": 6950,
+        "at": 1792891457110,
+        "requestId": "24",
+        "owner": {
+          "objectId": 1000,
+          "x": 275,
+          "y": 663,
+          "dead": false,
+          "hp": 16,
+          "maxHp": 18
+        }
+      },
+      {
+        "rawLine": 7072,
+        "at": 1792891460006,
+        "requestId": "26",
+        "owner": {
+          "objectId": 1000,
+          "x": 275,
+          "y": 663,
+          "dead": false,
+          "hp": 17,
+          "maxHp": 18
+        }
+      },
+      {
+        "rawLine": 7195,
+        "at": 1792891462195,
+        "requestId": "27",
+        "owner": {
+          "objectId": 1000,
+          "x": 275,
+          "y": 663,
+          "dead": false,
+          "hp": 18,
+          "maxHp": 18
+        }
+      },
+      {
+        "rawLine": 7975,
+        "at": 1792891475982,
+        "requestId": "34",
+        "owner": {
+          "objectId": 1000,
+          "x": 281,
+          "y": 663,
+          "dead": false,
+          "hp": 24,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 8086,
+        "at": 1792891478156,
+        "requestId": "35",
+        "owner": {
+          "objectId": 1000,
+          "x": 281,
+          "y": 663,
+          "dead": false,
+          "hp": 22,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 8224,
+        "at": 1792891480986,
+        "requestId": "37",
+        "owner": {
+          "objectId": 1000,
+          "x": 281,
+          "y": 663,
+          "dead": false,
+          "hp": 21,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 8548,
+        "at": 1792891487586,
+        "requestId": "39",
+        "owner": {
+          "objectId": 1000,
+          "x": 286,
+          "y": 668,
+          "dead": false,
+          "hp": 22,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 9478,
+        "at": 1792891507017,
+        "requestId": "40",
+        "owner": {
+          "objectId": 1000,
+          "x": 275,
+          "y": 656,
+          "dead": false,
+          "hp": 24,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 11884,
+        "at": 1792891556352,
+        "requestId": "42",
+        "owner": {
+          "objectId": 1000,
+          "x": 274,
+          "y": 654,
+          "dead": false,
+          "hp": 23,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 11969,
+        "at": 1792891557784,
+        "requestId": "43",
+        "owner": {
+          "objectId": 1000,
+          "x": 274,
+          "y": 654,
+          "dead": false,
+          "hp": 22,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 12102,
+        "at": 1792891560618,
+        "requestId": "45",
+        "owner": {
+          "objectId": 1000,
+          "x": 274,
+          "y": 654,
+          "dead": false,
+          "hp": 23,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 12179,
+        "at": 1792891562042,
+        "requestId": "46",
+        "owner": {
+          "objectId": 1000,
+          "x": 274,
+          "y": 654,
+          "dead": false,
+          "hp": 21,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 12344,
+        "at": 1792891564902,
+        "requestId": "48",
+        "owner": {
+          "objectId": 1000,
+          "x": 274,
+          "y": 654,
+          "dead": false,
+          "hp": 17,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 12720,
+        "at": 1792891572238,
+        "requestId": "50",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 651,
+          "dead": false,
+          "hp": 11,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 12783,
+        "at": 1792891573665,
+        "requestId": "51",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 651,
+          "dead": false,
+          "hp": 12,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 12935,
+        "at": 1792891576510,
+        "requestId": "53",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 651,
+          "dead": false,
+          "hp": 13,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13069,
+        "at": 1792891579353,
+        "requestId": "55",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 651,
+          "dead": false,
+          "hp": 12,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13122,
+        "at": 1792891580755,
+        "requestId": "56",
+        "owner": {
+          "objectId": 1000,
+          "x": 267,
+          "y": 651,
+          "dead": false,
+          "hp": 10,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13358,
+        "at": 1792891585851,
+        "requestId": "58",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 11,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13483,
+        "at": 1792891588694,
+        "requestId": "60",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 9,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13545,
+        "at": 1792891590128,
+        "requestId": "61",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 8,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13620,
+        "at": 1792891591556,
+        "requestId": "62",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 7,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13696,
+        "at": 1792891592978,
+        "requestId": "63",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 6,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13764,
+        "at": 1792891594399,
+        "requestId": "64",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 4,
+          "maxHp": 24
+        }
+      },
+      {
+        "rawLine": 13827,
+        "at": 1792891595802,
+        "requestId": "65",
+        "owner": {
+          "objectId": 1000,
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": 3,
+          "maxHp": 24
+        }
+      }
+    ],
+    "publicDeathStateDeltas": [
+      {
+        "frameSequence": 2108,
+        "capturedAtMs": 1792891599094,
+        "kind": "death",
+        "atMs": 1792891599088,
+        "objectId": 1000,
+        "name": "L26466205",
+        "payload": {
+          "dead": true
+        }
+      },
+      {
+        "frameSequence": 2110,
+        "capturedAtMs": 1792891599608,
+        "kind": "death",
+        "atMs": 1792891599594,
+        "objectId": 1000,
+        "name": "L26466205",
+        "payload": {
+          "dead": true
+        }
+      }
+    ],
+    "identityAfterGuard": "Drainlifecycle at1599451/1599512 retains ownself1000 at264649; this carries identity/position only, notaliveHP. The firstself=null fullsnapshot at1599885 accompaniesordinarylogout, afterstop.",
+    "remoteProjectionCaveat": "Sameactor remote50005 hasnullHP/deadfalse/level1 inselectedframes; those incomplete/olderremote fields cannot override matchingownstate eventHP0/deadtrue. ID1000 is reused betweenpersonal snapshots, so eventfrom18 is not asserted to be thisactorpreviousHP."
+  },
+  "earlierIndependentWindowFailure": {
+    "startedAtMs": 1792891488618,
+    "endedAtMs": 1792891548654,
+    "actualSeconds": 60.036,
+    "passed": false,
+    "nativeOpportunities": 79,
+    "nativeCompleted": 79,
+    "moves": 68,
+    "runs": 11,
+    "cells": 79,
+    "attacks": 1,
+    "positiveHits": 1,
+    "positiveDamage": 3,
+    "chaseMovementByTarget": {
+      "206715": 68
+    },
+    "combatCoverage": "scenario-insufficient",
+    "movementPassed": true,
+    "chatPassed": true,
+    "timeoutRatio": 0,
+    "correctionRatio": 0,
+    "interpretation": "68 successfulchase moves toDeer206715 andonly1attack/positivehit in60.036s fail18/12. Movingtarget/timid behavior is compatible, but its exacttimid flag is not present inraw and is not claimed. This failure precedesdeathguard by50.359s."
+  },
+  "injuryEvidence": {
+    "knownEarlierAttacker": {
+      "objectId": 206528,
+      "name": "Deer",
+      "ownerObjectStruckAtMs": 1792891566899,
+      "ownerDamage": 2,
+      "pairedOwnerObserverObjectStruckAtMs": 1792891577996,
+      "pairedDamage": 1
+    },
+    "request49WitnessFailure": {
+      "sentAtMs": 1792891566304,
+      "typedLaunchedAtMs": 1792891566317,
+      "observerActorAndTargetRemovedAtMs": 1792891566340,
+      "ownerTargetStruckDamage2Health8AtMs": 1792891566402,
+      "ownerRetaliatoryDeerDamage2AtMs": 1792891566899,
+      "originalMissFinalizedAtMs": 1792891567213,
+      "observerTargetDamageIndicatorCaptured": false,
+      "ownerTargetPositiveDamageCaptured": true,
+      "receiptTimeout": false,
+      "physicalRandomMissProven": false,
+      "fatalAttackerProven": false
+    },
+    "laterPublicNearby": "Threeframes show liveDeer206528 at266649HP2,Deer206704 at266650HP10, otherDeer/Hen andScarecrow206608 corpse. Proximity does not identify thefatalattacker. No unseenCat/extraenemy is inferred.",
+    "mechanismLimit": "Request49 positiveownerhit withoutobserverdamage remainsmiss/quarantined byoriginalstrictproof. A survivingprovokedDeer can continue ordinaryretaliation afterthetool stops selectingit; this is a workloadsurvival risk, not proof thatitdeliveredthefatalhit."
+  },
+  "sourceFindings": {
+    "checkOwner": {
+      "reference": {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "line": 1103
+      },
+      "meaning": "Missingstrictself OR authoritativeexactHP<=0/self.dead; error alone cannot distinguish."
+    },
+    "deathPredicate": {
+      "reference": {
+        "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+        "line": 140
+      },
+      "meaning": "self.dead or exactsnapshot.playerHp/exactself.hp<=0; percent0alone is notdeath."
+    },
+    "deerRetaliation": {
+      "reference": {
+        "file": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+        "line": 53
+      },
+      "attackReference": {
+        "file": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+        "line": 127
+      },
+      "meaning": "AI2 normalDeer records apositive directattacker, pursues thatliveeligibleplayer andattacks whenadjacent. Timid1/7 subtypeflees. Neutral doesnotmean immune fromretaliation."
+    },
+    "scarecrowThreat": {
+      "reference": {
+        "file": "apps/simulation/src/runtime/zone/runtime.rs",
+        "line": 13401
+      },
+      "aggroReference": {
+        "file": "apps/simulation/src/runtime/zone/runtime.rs",
+        "line": 13941
+      },
+      "meaning": "ScarecrowAI0withHostile disposition follows ordinarygenericnearesteligibleplayer aggro8x6 andadjacentattack. Notshown asthefatalattackerhere."
+    },
+    "runtimeChaseScope": {
+      "reference": {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "line": 1048
+      },
+      "meaning": "Currentruntimechase enforcescollision,activeobservercoverage andnotransfer. ItdoesnotapplytheauthorinitialdangerMask; astaticclearhome/bootstrap isnotachasecorridorsafetyguarantee."
+    },
+    "initialDangerScope": {
+      "reference": {
+        "file": "C:/mir2-build/p01-completion-20261024/partition-span4-halo-static-author-v1.mjs",
+        "line": 65
+      },
+      "meaning": "Originalinitial8x6dangerexclusion andinitialmonster exclusions applytoauthorbody/bootstrap only. DeerAI2isnotmarked hostilehighDCdanger bythismask."
+    },
+    "ordinaryGear": {
+      "reference": {
+        "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+        "line": 46
+      },
+      "meaning": "Singleordinaryattempttoequip availableweapon/armour/torch/necklace/ringLeftbefore ready; norun-levelrepair,additionalgrants orguaranteeofallgear."
+    },
+    "healing": {
+      "reference": {
+        "file": "apps/simulation/src/runtime/zone/runtime.rs",
+        "line": 2796
+      },
+      "meaning": "Passive3%+1 HPpulse each3s, gated3safterdamage; driver offersnouseItem/heal/supply/repair action. Level2maxHP24 cannotbeassumed sustainableagainstseveralretaliatingenemies."
+    },
+    "spectator": {
+      "reference": {
+        "file": "apps/gateway/src/spectator.rs",
+        "line": 858
+      },
+      "meaning": "Eventhealth/death arederivedfromsnapshots, notprotocolreceipts; source1000name interleavinglimitsfromvalueinterpretation."
+    }
+  },
+  "comparison08": {
+    "observed": "08had349positivehits andattackplanninglevels1to5 over11.318minwithoutrecordeddeath;09observedlevel2,maxHP24 andprolongedmovingprey/retaliation. Scenegeometry/AIclocks/target selectiondiffer;08survivalisnot09safetyproof.",
+    "sourceRiskReport": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\halo-natural-progression-risk-summary-v2.json",
+      "bytes": 14916,
+      "sha256": "a60506cfbee21423c91f2469594f2daacc87aa01ab500a2f24737cce73ccfae5"
+    }
+  },
+  "limits": [
+    "Only3 authorizedpublicJSONframes wereprojected, withcompletefileSHA/sequence/byteoffset; novideo/private payloadread.",
+    "NooriginalownerfatalHealthChanged/ObjectDiedpacketwaspersistedinpendingtrace; fatalattacker/preciseexecutiontimeunknown.",
+    "The3sameframeswerere-readonlytoexplainselfID1000aliasing; noplannedextra snapshotsselected.",
+    "Noautomaticresurrection,healinggrant,scenechange,gatechange,sourceedit,tests,realm orcapacitypass."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.r16.reconnect.candidate.v1",
+  "createdAt": "2026-11-07T17:31:33.090Z",
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "build",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway",
+    "--offline",
+    "--locked",
+    "--target-dir",
+    "D:/mir2-builds/web-newcomer-30-20261107/cargo-gateway-fresh"
+  ],
+  "exitCode": 0,
+  "sourceBeforeAfterStable": true,
+  "sourcePins": {
+    "Cargo.lock": "4569349e470d448c645eeecef8fc6219d9e3e525d8c7d355a784ee694398291f",
+    "apps/gateway/Cargo.toml": "6fc8840d0ae4682d4ed5c9e949511bf20d882be63384793219045700c83f2b0f",
+    "apps/gateway/src/web.rs": "39efad29cedd60c372ea42f1f84c8084b315945db267d67e28b4028ead2a45d2",
+    "apps/gateway/src/session.rs": "c4f7a6dc2aca6297ca0fbbfec18401eda47c865d18dd9633a180eb3efc059baf",
+    "apps/gateway/src/web_transport.rs": "dc8c7ac981d937e252b9d9f9b0ab3f4563215deb652a4c15444bf96df536d496",
+    "apps/gateway/src/web_reconnect_handoff.rs": "860cd0ee203454c5ee80310d32fe00d2195288ea816473d398ccb50d6ba515cf",
+    "apps/gateway/src/web_reconnect_handoff_tests.rs": "943fbba9398149a4d678992b1078c96e8034c768b8ce3fd1fdc4bace6852fd4f",
+    "apps/gateway/src/web_reconnect_handoff_store_tests.rs": "3c2a07d076d74f1540a9d70bcf59b7feaad78a97d7f3e0430d7bfcf5ccf4bc61",
+    "apps/gateway/src/web_reconnect_persistence_wait_tests.rs": "44958acf058303cd190a0de77e7c9972801725358809cc103805b70621523ba1"
+  },
+  "profile": "dev/debug",
+  "exeSha256": "e519dc7a6d0eb3f399fcb20c1145bb260418ec0c13e3d7ad44327610fc987c55",
+  "exeBytes": 144653824,
+  "originalGatewayCopiesAndWindowsExeUntouched": true,
+  "fullReleaseBuild": false
+}

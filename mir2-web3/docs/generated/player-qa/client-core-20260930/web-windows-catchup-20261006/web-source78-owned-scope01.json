@@ -1,0 +1,791 @@
+{
+  "owner": "Root",
+  "round": "Source78",
+  "parent": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "branch": "codex/windows-player-journey",
+  "code": [
+    {
+      "repositoryPath": "mir2-web3/apps/web/lib/bevy-spells-ui.ts",
+      "relativePath": "apps/web/lib/bevy-spells-ui.ts",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 22960,
+        "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 22960,
+        "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 22960,
+        "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+      },
+      "preservedMainLineEndings": false,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/lib/use-bevy-spells-ui.ts",
+      "relativePath": "apps/web/lib/use-bevy-spells-ui.ts",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 3383,
+        "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 2823,
+        "sha256": "780e587c8d87bb50cc280e29b90d9a1467e03c723e58cbf4719bf6e1f0dbec94"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 3383,
+        "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 3383,
+        "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+      },
+      "preservedMainLineEndings": false,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/scripts/test-bevy-spells-ui.mjs",
+      "relativePath": "apps/web/scripts/test-bevy-spells-ui.mjs",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 23504,
+        "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 12404,
+        "sha256": "68ef1d3e4304c39eeda5e105517eef8f0a7ff6145043ffe3f17221bf80631a29"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 23504,
+        "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 23504,
+        "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+      },
+      "preservedMainLineEndings": false,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "relativePath": "apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 6853,
+        "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 2790,
+        "sha256": "27efb2dd14c35fde07264019ecd22ce7b940b369a3bbc3c4214d57016059edae"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 6853,
+        "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 6853,
+        "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+      },
+      "preservedMainLineEndings": false,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/app/page.tsx",
+      "relativePath": "apps/web/app/page.tsx",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 1099365,
+        "sha256": "cbd8de41a129c5f50549d22da364fa91bf483300d3d4c1ca89099f85ffbcfe07"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\app\\page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\app\\page.tsx",
+        "bytes": 1099365,
+        "sha256": "cbd8de41a129c5f50549d22da364fa91bf483300d3d4c1ca89099f85ffbcfe07"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\app\\page.tsx",
+        "bytes": 1077152,
+        "sha256": "39028baef512cdf0c1304ac91c3787cc36e6bedcdf09d1c5d6490902463eec6d"
+      },
+      "preservedMainLineEndings": true,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 335016,
+        "sha256": "e82fe9a79838ae9e76b4af88811169d3da2bbc0a8e9f40ebe5fd77bc7905e6c3"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      },
+      "testedAfter": {
+        "path": "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/root-after/apps/web/app/original-client-shell.tsx",
+        "bytes": 335016,
+        "sha256": "e82fe9a79838ae9e76b4af88811169d3da2bbc0a8e9f40ebe5fd77bc7905e6c3"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 335014,
+        "sha256": "e4bc1f7161667d3e0cbe11c793d84e24f5da767a066f4c02fb7be0e5da3ca8e2"
+      },
+      "preservedMainLineEndings": true,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/scripts/test-spells-page-gate.mjs",
+      "relativePath": "apps/web/scripts/test-spells-page-gate.mjs",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15829,
+        "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 9600,
+        "sha256": "d10cad9061efccc7d55a8e3902cecf763f2fffcd54787fd40e2ac48972921c3e"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\after\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15829,
+        "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15829,
+        "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+      },
+      "preservedMainLineEndings": false,
+      "stageIsExactLfOfTestedCode": true
+    },
+    {
+      "repositoryPath": "mir2-web3/apps/web/scripts/test-spells-raw-ingress.mjs",
+      "relativePath": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 16039,
+        "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+      },
+      "immutableBefore": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\before\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 6550,
+        "sha256": "2da5b3773f58bedcb16b005083eaa6cf5063e51864d128a50229ae294ac49a58"
+      },
+      "testedAfter": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 16039,
+        "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 16039,
+        "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+      },
+      "preservedMainLineEndings": false,
+      "stageIsExactLfOfTestedCode": true
+    }
+  ],
+  "docs": [
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "repositoryPath": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "mainBefore": {
+        "bytes": 361531,
+        "sha256": "9ae111b0c5b37d4e3c1d7aa26234c82b99887883d631f39a9b8c843cb9dccd99"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 364864,
+        "sha256": "91f12de8ca2484cfad69e38e86e758138b027dc4f00de75ed0a2780eb764c2b2"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__AGENT-ORCHESTRATION.md",
+        "bytes": 361531,
+        "sha256": "9ae111b0c5b37d4e3c1d7aa26234c82b99887883d631f39a9b8c843cb9dccd99"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 364864,
+        "sha256": "91f12de8ca2484cfad69e38e86e758138b027dc4f00de75ed0a2780eb764c2b2"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "repositoryPath": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mainBefore": {
+        "bytes": 993271,
+        "sha256": "a1c6d5cf50239f92d6584c25833607e2ed443502a4556dcac9595d12994d96a8"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 996623,
+        "sha256": "760b25ca22ec495eecd4a218cd177d36084cf535892a88269ac176605ab5bdce"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__AGENT-TASK-QUEUE.md",
+        "bytes": 979644,
+        "sha256": "3f64415dc15e0e98e6d50f8d4d1267b5146327c2d97168b062f5de691e73d281"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 982996,
+        "sha256": "5ec50b73337032e1b785d2bf0f3d1e64f7ff81a456ceeb5697e78bc740fc02e4"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "repositoryPath": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mainBefore": {
+        "bytes": 1111575,
+        "sha256": "ff4d119da0cab86eab88f378c5a5ef5a30d6d55cc807a76726518e619f4ac945"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1114799,
+        "sha256": "975d6b42ff486893f11ae97ae9b409e2e10b50f06d65b5ab9dc255f8529ad79c"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1099368,
+        "sha256": "a2dcd422378ef2d8cd1a52f79655f655e19be5deac921e5733beed7cedd01d1c"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1102592,
+        "sha256": "a9f9b73394d76814c6a5b55529562f0a781c3baa54a8e44fc75587a6bd4e475c"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "repositoryPath": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "mainBefore": {
+        "bytes": 610017,
+        "sha256": "ea41e48b74000237cf5185b6ff7161b48f32a693f52dfab514f2a85cdce56d17"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 613222,
+        "sha256": "bafe4400776e93a40e10062e4aee74d63dcdcd38832e3ecb96c5e349a60d3039"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__BACKEND-1TO1-PROGRESS.md",
+        "bytes": 598131,
+        "sha256": "5b44f83341be2c3dfc0f93be6fa27225a3dbdd1303af3434c715f89a23fa8113"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 601336,
+        "sha256": "91cb235235e90b050bc58d0cb7ce5353893864f2bf786f122a18236c7bd47341"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "repositoryPath": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "mainBefore": {
+        "bytes": 552492,
+        "sha256": "484e4ba905b92529ea4ca22b979b4e069c5ae77be35ee1d74788b2f51292a81a"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 555701,
+        "sha256": "d2e3ba8150541ef6ce8603f313470d4b0d02232b9e28d091f565b6cfc4b9bcc2"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__CRYSTAL-SERVER-PARITY.md",
+        "bytes": 540608,
+        "sha256": "b645fc7d9fde3cc29b47f2b59ae1658aa9cd65149da7a2fc1ab51532fd2e34a5"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 543817,
+        "sha256": "dcaa50bfe6c37e2cd0a03e7839aa1280e30482e0ed24dfe6ed576dcafd33a771"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "repositoryPath": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "mainBefore": {
+        "bytes": 721457,
+        "sha256": "573adca195559f110e2a975adcdb5e11a8a7112d3e14b8d3a68e623aea1f8b5d"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 724763,
+        "sha256": "9d52309129eb82a1114b04a6a008648b4afc373811c09a073ead78470280d674"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__FRONTEND-1TO1-GAPS.md",
+        "bytes": 721457,
+        "sha256": "573adca195559f110e2a975adcdb5e11a8a7112d3e14b8d3a68e623aea1f8b5d"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 724763,
+        "sha256": "9d52309129eb82a1114b04a6a008648b4afc373811c09a073ead78470280d674"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    },
+    {
+      "relativePath": "docs/PLAYER-QA-PLAYTHROUGH.md",
+      "repositoryPath": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+      "mainBefore": {
+        "bytes": 116504,
+        "sha256": "61e6c7e4966f2affbdbfbe40e0274d4741881140f504719c67dcbaa489cd954d"
+      },
+      "mainAfter": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 119890,
+        "sha256": "2ba1170779b0d24510a56e9e049726fc7bac82aa330dd76b1a2270ed7d5f5dd1"
+      },
+      "rawParent": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\git-parent-raw02\\docs__PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 116504,
+        "sha256": "61e6c7e4966f2affbdbfbe40e0274d4741881140f504719c67dcbaa489cd954d"
+      },
+      "stage": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\git-stage-owned01\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 119890,
+        "sha256": "2ba1170779b0d24510a56e9e049726fc7bac82aa330dd76b1a2270ed7d5f5dd1"
+      },
+      "mainForeignBodyPreserved": true,
+      "stageParentBodyByteExact": true
+    }
+  ],
+  "qa": [
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source77-runtime-closure-for-source78-01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source77-runtime-closure-for-source78-01.json",
+        "bytes": 2010,
+        "sha256": "63931cb8109f1f0bbe55b9a111aaedb5f151cfa0cb33a9904c16422fd30aa867"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-baseline-copy-result01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-baseline-copy-result01.json",
+        "bytes": 296,
+        "sha256": "d007d38885b7c4995b145c81f6929a31b9f8991b7b51be5163135cef2bfb9614"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-code-review03.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-code-review03.json",
+        "bytes": 12754,
+        "sha256": "9cb2a7d64e108fcd51e8f32483b214e2df24218e45fe62fa4132d83b33a35df0"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-diagnostic-runtime-closure01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-diagnostic-runtime-closure01.json",
+        "bytes": 1167,
+        "sha256": "e92061394618e52c9994149c3f7c65e337befcee121667d89c6d5999eb1069d9"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-full-input-acceptance03.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-full-input-acceptance03.json",
+        "bytes": 3049,
+        "sha256": "0bb4f4684a063a091ead0cbf6bdc843616ae790600c2c21d00a9428ad22ef6f8"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-git-parent-preservation01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-git-parent-preservation01.json",
+        "bytes": 5370,
+        "sha256": "4ee8ec8975f3f6750de1b66a7edcdbc5ea2d1ff97f576875f417a97a163aff91"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-input-display-case-repair01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-input-display-case-repair01.json",
+        "bytes": 986,
+        "sha256": "e04e90cc70dcbb561a7d76056180d86ff4a2aecaba02d633eeddbf6854f32404"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-next-actual01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-next-actual01.json",
+        "bytes": 2619,
+        "sha256": "e040b6c20868be3c70e78d414dca1724ec538c5659bd3b00ae40161d13193c1c"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-next-actual02.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-next-actual02.json",
+        "bytes": 2632,
+        "sha256": "16455ab926a82e5aa1e765a7862aad3cda907250d281d61b34e5841fc7abdb6b"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-node-actual02.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-node-actual02.json",
+        "bytes": 3039,
+        "sha256": "827442f56b1ebe9004846117f5baf7a295d7262503480e96c8bb7b44232145d4"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-node-actual03.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-node-actual03.json",
+        "bytes": 3332,
+        "sha256": "91be454659a13e81ff6f5c563264be9ee5d66732b65624e82334c2e7fd8dabd7"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-node-failure01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-node-failure01.json",
+        "bytes": 2321,
+        "sha256": "1fedbde77c7a02bb5b3cdeeb1997d779038497edad8a15582f0ac857fc704b52"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-owned-baseline01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-owned-baseline01.json",
+        "bytes": 4325,
+        "sha256": "3347e7c116624a80596b3425a1ad526219c7fd7d5c4054e661d3168b373371fd"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-portable-actual01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-portable-actual01.json",
+        "bytes": 2801,
+        "sha256": "6794334be0f9d7ca2523d5293d328c2a365ca60992c245203509bfaa4da8dd2a"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-runtime-start-actual01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-runtime-start-actual01.json",
+        "bytes": 1687,
+        "sha256": "9343293fca07627d263ca766e2902eb4874910a82bc14ea561980c017ec2e66a"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-runtime-start-actual02.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-runtime-start-actual02.json",
+        "bytes": 1430,
+        "sha256": "dfc1b322e708c4de7f6247a12a68868598938aa21f0b9f9391925da7ec366a1a"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-standalone-ordinary-dependencies02.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-standalone-ordinary-dependencies02.json",
+        "bytes": 428,
+        "sha256": "b049dcd6f25a327b9f8c626f6683df2fda4d31606a82f9e5672777ec05de0501"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-thin-actual02.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-thin-actual02.json",
+        "bytes": 5098,
+        "sha256": "747d61e54d169121d122c765306673420978666fddaec12c12e323bc5a102ed4"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-thin-actual03.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-thin-actual03.json",
+        "bytes": 5110,
+        "sha256": "8f8ad67d9d635575c725d80df302c60fc4353fbadd4f37f0c25b72fc8440fa29"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-thin-failure01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-thin-failure01.json",
+        "bytes": 1882,
+        "sha256": "d6337fa44eb51aedb942ce2e27b1b0806329be788288950e97d7db9c3cfe0031"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-bag-native01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-bag-native01.png",
+        "bytes": 62071,
+        "sha256": "22c6eb5999ccfa49fad9606acceb565a1d0d5b3ecec57be877385a1a4394ec30"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-character-native01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-character-native01.png",
+        "bytes": 66375,
+        "sha256": "7f6d03508a9400062e5494649c118f3be8ba0ebf97055166ba1d27dcab3d8fa9"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-native-qa01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-native-qa01.json",
+        "bytes": 2938,
+        "sha256": "eba61449365bfd9d83a1916a646f731b9c4d0715ca8d1e26cc3b0d1ac67ccc20"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-relogin-bag-spells01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-relogin-bag-spells01.png",
+        "bytes": 61380,
+        "sha256": "e8d10810855bc79fb2fec54f4c2f2f0bfe7659fc89d7fae807d397667935ea4c"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-relogin-character01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-relogin-character01.png",
+        "bytes": 66343,
+        "sha256": "23a869722ede02261f71d73806bd8f9b2f0e1eb1d10a1ed9a93cb0815de0fc43"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-relogin-spells-native01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-relogin-spells-native01.png",
+        "bytes": 63663,
+        "sha256": "f52bb40fcb821349209953c745d6660b7c0f3949420366e221f9c821b78b4f7b"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-spells-after-bag-toggle01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-spells-after-bag-toggle01.png",
+        "bytes": 63098,
+        "sha256": "fd5a98cd9334d17afc907b559e11848cec197c8f606a00e5042f33f34684106c"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-spells-after-bag01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-spells-after-bag01.png",
+        "bytes": 61358,
+        "sha256": "ad315e2188a1a358b8d0c5b63560d96600085f12a8f70514e523352e005240e6"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-spells-native01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-bootstrap-spells-native01.png",
+        "bytes": 63630,
+        "sha256": "a8fd19641aef751ee34aa917d726e1e02cf18422d7565e915e892a6248979bea"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-character-native01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-character-native01.png",
+        "bytes": 66363,
+        "sha256": "58bfc7deaf1238518c131d24756f689c5beacb074fdd4669c69c7758766710e5"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-spells-baseline-missing01.png",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-spells-baseline-missing01.png",
+        "bytes": 64414,
+        "sha256": "d9170ea81c173b4ad3fb8d33d14334cbca80301217349967c334bc82bcea0559"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-spells-first-refusal01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-source78-spells-first-refusal01.json",
+        "bytes": 425,
+        "sha256": "1bfefd0e3ab25506370767e5d8e676ccd4efcc8631ba5b76e4633189ac0843ae"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-bootstrap-repair01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-bootstrap-repair01.json",
+        "bytes": 1450,
+        "sha256": "a2fda5016015e2c812a6a2754afd655ae7e48790bf96a2b595ac7f6e4a2a35da"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-fixture-repair01.json",
+        "bytes": 7713,
+        "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-worker-diagnostic-manifest01.json",
+        "bytes": 7155,
+        "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-node-first-failure01.stdout.txt",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-node-first-failure01.stdout.txt",
+        "bytes": 38793,
+        "sha256": "a2f6528ae6b89a810c7906723e63696d5277856a589612b9dcf91b416329a5c7"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-node-actual03.stdout.txt",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-node-actual03.stdout.txt",
+        "bytes": 36399,
+        "sha256": "e2f635df90ac058011b7a9e38258b9eb9efa5cc72fe2457bdcd9399ad4313116"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-next-actual02.stdout.txt",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-next-actual02.stdout.txt",
+        "bytes": 2026,
+        "sha256": "4e153cafcf2f816c53e551bac24e15c668c472eb90a42978babd61e7be765f43"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-portable-actual01.stdout.txt",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-portable-actual01.stdout.txt",
+        "bytes": 8863,
+        "sha256": "c3506d2b4398bc35a73592cbe67e2b5f624255a0c85931ef8ffb659eb35993ed"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-thin-report-actual03.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-thin-report-actual03.json",
+        "bytes": 82890,
+        "sha256": "261cefbfaad9dc1785dcb1604834d81ca8b6ec7f3c5129939aaf5a462b70c26d"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-thin-first-failure01.stdout.txt",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-thin-first-failure01.stdout.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "kind": "byte-exact Root source78 evidence"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-outcome01.json",
+      "stage": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source78-outcome01.json",
+        "bytes": 8517,
+        "sha256": "ad2adc388af11fde6f8c7979d9ea92fb192918c1b68eff3c012b1acb05ce1215"
+      },
+      "kind": "Root round outcome"
+    },
+    {
+      "repositoryPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-publication01.json",
+      "stage": {
+        "path": "e:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-publication01.json",
+        "bytes": 1290,
+        "sha256": "24cc03754e03eea8b6c27cb52f741d68131461ec691d0529391eab88469e70b8"
+      },
+      "kind": "Source77 prior normal publication proof"
+    }
+  ],
+  "mainTsGuard": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "docInsertionOnly": true,
+  "foreignCodeAndDocBodiesPreserved": true,
+  "ordinaryEmptySpellsAndReentryAccepted": true,
+  "goalComplete": false
+}

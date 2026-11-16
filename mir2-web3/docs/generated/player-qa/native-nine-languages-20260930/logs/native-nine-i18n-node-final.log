@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: six additional locales preserve gameplay numbers, opaque arguments and displayed commands
+ok 1 - six additional locales preserve gameplay numbers, opaque arguments and displayed commands
+  ---
+  duration_ms: 1.6403
+  type: 'test'
+  ...
+# Subtest: every additional native locale has the exact source key closure and safe substitutions
+ok 2 - every additional native locale has the exact source key closure and safe substitutions
+  ---
+  duration_ms: 228.9611
+  type: 'test'
+  ...
+# Subtest: three-language validation preserves named/numbered parameters and rejects dropped/repeated parameters
+ok 3 - three-language validation preserves named/numbered parameters and rejects dropped/repeated parameters
+  ---
+  duration_ms: 0.686
+  type: 'test'
+  ...
+# Subtest: empty translations and duplicate stable keys fail; equivalent aliases across domains do not
+ok 4 - empty translations and duplicate stable keys fail; equivalent aliases across domains do not
+  ---
+  duration_ms: 0.2725
+  type: 'test'
+  ...
+# Subtest: alias ambiguity is reported with both keys and context rather than silently accepted
+ok 5 - alias ambiguity is reported with both keys and context rather than silently accepted
+  ---
+  duration_ms: 0.2674
+  type: 'test'
+  ...
+# Subtest: displayed command tokens remain byte-identical; email examples are not commands
+ok 6 - displayed command tokens remain byte-identical; email examples are not commands
+  ---
+  duration_ms: 0.7028
+  type: 'test'
+  ...
+# Subtest: NPC extraction matches runtime link removal and preserves executable targets outside text
+ok 7 - NPC extraction matches runtime link removal and preserves executable targets outside text
+  ---
+  duration_ms: 0.4156
+  type: 'test'
+  ...
+# Subtest: NPC runtime values become named opaque captures before colour/link stripping
+ok 8 - NPC runtime values become named opaque captures before colour/link stripping
+  ---
+  duration_ms: 0.1268
+  type: 'test'
+  ...
+# Subtest: actual raw colour aliases coexist with plain labels without erasing player captures
+ok 9 - actual raw colour aliases coexist with plain labels without erasing player captures
+  ---
+  duration_ms: 0.3534
+  type: 'test'
+  ...
+# Subtest: original quest text is bounds checked and retains real newlines after colour removal
+ok 10 - original quest text is bounds checked and retains real newlines after colour removal
+  ---
+  duration_ms: 6.3582
+  type: 'test'
+  ...
+# Subtest: consumable medium is not male; armour/costume gender and quantity are preserved
+ok 11 - consumable medium is not male; armour/costume gender and quantity are preserved
+  ---
+  duration_ms: 1.119
+  type: 'test'
+  ...
+# Subtest: translation vocabulary has no duplicate source term within each curated dictionary
+ok 12 - translation vocabulary has no duplicate source term within each curated dictionary
+  ---
+  duration_ms: 0.3472
+  type: 'test'
+  ...
+# Subtest: authored proper names and legitimate same-form Portuguese are distinct from missing prose
+ok 13 - authored proper names and legitimate same-form Portuguese are distinct from missing prose
+  ---
+  duration_ms: 0.1296
+  type: 'test'
+  ...
+# Subtest: released canonical name and all nonempty original quest field IDs have translations
+ok 14 - released canonical name and all nonempty original quest field IDs have translations
+  ---
+  duration_ms: 40.3868
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 350.0157

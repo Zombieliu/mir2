@@ -1,0 +1,85 @@
+{
+  "at": "2026-11-16T05:14:27.041Z",
+  "goal": "active",
+  "localCandidate": "r16-auth-body-56c223a0",
+  "sourceParent": "7c50e19e8152ef172bf877073657356eaa0a0efe",
+  "sourceFiles": [
+    {
+      "filename": "mir2-web3/apps/web/lib/server/dubhe-connect-auth.ts",
+      "sha256": "b3a20a2d76390068ec7f18bf404cbf46b5766c515166eaa496e24a0d9764045f",
+      "gitBlob": "9f5ff78fb8fa33cbfe812dc4e965f798f06f59f3"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/dubhe-wallet-login.ts",
+      "sha256": "9c68d89878ca61181cb23ef7d5579630a5fd49c8d11e8176ca861f8feb244f6d",
+      "gitBlob": "aead9ca323d34f139811d1ca08dd9ffdb22d5bea"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-dubhe-connect-auth.mjs",
+      "sha256": "e8c1c5f4927600d1b3ddb0450c965d6679fdd9e963c31ef3aac0200de528ccc9",
+      "gitBlob": "d84c38c6b90d5b5d78dd5bf336a9e5b178a74f81"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-dubhe-wallet-login.mjs",
+      "sha256": "3e03f37afc1bb2a1be4f4600f1901204ac0b864b0030f8bcd4f2a37a3a519c30",
+      "gitBlob": "d277501614ece5d9270e4ad679ac87aa2b2dfe7d"
+    }
+  ],
+  "authTests": {
+    "command": "node --test scripts/test-dubhe-connect-auth.mjs scripts/test-dubhe-wallet-login.mjs",
+    "passed": 28,
+    "failed": 0,
+    "cancelled": 0,
+    "durationMs": 10671.0125,
+    "source": "Observed final tool result; no copied synthetic TAP log."
+  },
+  "adjacentWorkingTreeTests": {
+    "command": "node --test scripts/test-r16-auth-layout.mjs scripts/test-route-authority-wait.mjs",
+    "passed": 50,
+    "scope": "Working-tree adjacent check reads preserved foreign Native/shell WIP. Not claimed as isolated candidate or full R16 qualification."
+  },
+  "observerSafetyTests": {
+    "passed": 2,
+    "scope": "Earlier private redaction/interruption tests; not product behavior coverage."
+  },
+  "browserLocalR2": {
+    "passed": true,
+    "incompletePostMs": 2014,
+    "actualLoginSuccess": 1,
+    "realGatewayReplayStatus": 401,
+    "exactReplayReason": true,
+    "rawCdpScreenshot": true,
+    "allOwnedClosed": true
+  },
+  "productionChanged": false,
+  "currentProduction": {
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN"
+  },
+  "preservation": {
+    "rawWipFiles": 29,
+    "privateOverlaysRestored": 19,
+    "noDatabaseRestore": true,
+    "publicControlCreatedQaAccountAndRole": true,
+    "preexistingRowHashesNotRereadThisTurn": true
+  },
+  "knownLimits": [
+    "Original public auth failures remain unexplained; bounded-read fix does not establish their cause.",
+    "Local r1 remains failed; its next=false termination flag has a later no-listener supplement, not an overwritten original.",
+    "Local r2 is supplemental raw CDP capture and auth-only qualification. Character background and Native visual/texture completeness not accepted.",
+    "No new public candidate rollout or physical phone test. All original 8/65/120 and full-six-font/113 gates unchanged.",
+    "Do not serve isolated build against restored source; reapply exact guarded overlays first."
+  ],
+  "files": {
+    "control-findings.json": "7443722a6b244ece47307685881791e205396e16dfe84b95f36ad8044ada8fc2",
+    "control-api-probe.json": "72f7450b0f55002f3d30a94b2f12d114ebb42cb6dfcd1d9424bf675c22c97a0b",
+    "control-loaded-auth.json": "5f4ce2e8c4e71c8444b37b339173af4271507c223d1ffd8320da7c47d13366cb",
+    "local-auth-r1.json": "6138f30f871e7f7c82a8dac9556f8bd355761d6f8f5d896068ba097bdf12b835",
+    "local-auth-r2.json": "37d67558831dabec7113608fb93b1fb779a3ae7f6f826939ca65f66a2d5bfbd8",
+    "isolated-build.json": "2cbd1b839960e935248a52eb80c65949d29eb90590a26ca7555eb05ab53a8a0b",
+    "restoration.json": "ef9a18d1192446fa8013319a48324da9180263b6540edc2d080a82f638d15fca",
+    "control-loaded-summary.json": "619d1d1d756928d981b31771d1c43571dacbc1704bf4e9e6c470da4a3ff22151",
+    "pending.png": "dee12f60f655bc3594e852d119ca9d18343201d990181583af15c99622614366",
+    "select-raw-cdp.png": "7a427c286e95304e30b67f2ceb27d0937533dc1c53c55a2ffea69ab5f0a8c477"
+  }
+}

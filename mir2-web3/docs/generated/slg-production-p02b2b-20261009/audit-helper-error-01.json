@@ -1,0 +1,12 @@
+{
+  "schema": "mir2.production-audit-helper-history.v1",
+  "createdUtc": "2026-10-08T22:40:57.2417291Z",
+  "helper": "audit-results-01.ps1",
+  "observedError": "Get-Content at line42 attempted runtime/e because PowerShell flattened a singleton nested array",
+  "cargoStarted": false,
+  "testsExecuted": 0,
+  "finalAuditWritten": false,
+  "resultQualificationRun": false,
+  "evidencePackagingRun": false,
+  "repair": "Use one explicit source path and test namespace for this single source test module; no product/test assertion changes"
+}

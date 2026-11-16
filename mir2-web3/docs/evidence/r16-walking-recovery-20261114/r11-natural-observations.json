@@ -1,0 +1,64 @@
+{
+  "kind": "preserved-r11-natural-deer-before-hit",
+  "oldResult": "FAILED_AND_PRESERVED",
+  "candidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+  "selectedObjectId": 206324,
+  "compiledFinishedAt": 1794601723405,
+  "selectionAt": 1794601753288,
+  "ordinaryApproachFinalAccepted": {
+    "x": 288,
+    "y": 605,
+    "at": 1794601759560,
+    "seq": 251
+  },
+  "firstReceivedSelectedWalk": {
+    "at": 1794601759694,
+    "afterFinalAckMs": 134
+  },
+  "exactDecodedVisibleWalkingRows": [
+    {
+      "at": 1794601759798,
+      "path": "/original-ui/Monster/004/38.png",
+      "incarnation": "1"
+    },
+    {
+      "at": 1794601759985,
+      "path": "/original-ui/Monster/004/39.png",
+      "incarnation": "1"
+    }
+  ],
+  "oldAttacks": 0,
+  "interpretation": "The original one-hit-only fixture failed after a successful ordinary UI approach because the selected live full-health timid Deer naturally moved before the proposed hit. Compiled transfer and actual target Walking PNGs were recorded, but old failure is not relabeled as a passed complete flow. The new contract explicitly distinguishes a zero-attack natural reaction after successful approach from the unchanged guarded one-hit/damage/retreat scenario.",
+  "newNaturalBound": "max(original selection, complete compiled transfer, original final approach UserLocation ACK, trusted approach input and first accepted progress); actual ObjectWalk or ObjectRun from same selected actor, later sequence, actual coordinate change. No full-snapshot-only substitute.",
+  "runCoverage": "R11 recorded ObjectWalk. ObjectRun is allowed formal authority but has not been demonstrated by this GUI run.",
+  "mandatoryUnchanged": "Two distinct same-ID/same-incarnation exact decoded visible packed Walking PNGs plus pixel hashes correlated to real authority; lifecycle and final live health/action safety; original2200ms four-phase,8s movement,20s import,120s Native, all resource/return-town/File/browser-restart gates.",
+  "evidence": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r8/game-full/quest-after-r11/ordinary-deer-movement-trigger.json",
+      "sha256": "cd4e39216b7dc4d311c8b946cf012d43efd9719b24330b9c225e492762cc8761"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r8/game-full/quest-after-r11/walking-compiled-recovery.json",
+      "sha256": "ab3e968de4ad4d7879052e4bdf254bd7b2c158b6b1095cec4152c2b9a9e0a67e"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r8/game-full/quest-after-r11/cold-outside-approach-ordinary-ground-route.json",
+      "sha256": "9364e7f61400f87fdd54aa053941ac6b0a9c8bd49eb3d5eb783c17d9f33f6ff7"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r8/game-full/quest-after-r11/cold-outside-melee-plan.json",
+      "sha256": "a784bd26e13d36f17eefbf912d4e025e03ba5d173ebdc774f40d4c4a7e0a9485"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r8/game-full/quest-after-r11/entry-visual-receipt.json",
+      "sha256": "25e27f0704bc2e3005d86905d68379c730250ff1f01cbb027171106ff6286ca2"
+    }
+  ],
+  "sourceSerialization": {
+    "path": "C:/r16-walking-recovery-20261114/fixture-r9/r11-natural-evidence.json",
+    "bytes": 2942,
+    "sha256": "6d72ad75768b432b49791c95bf97629f9a60144102ef260f80c6147a8a57b536",
+    "transform": "JSON text serialized with LF; old artifacts untouched"
+  }
+}

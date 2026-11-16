@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "requestInterception": false,
+  "operations": {
+    "http-read": 177,
+    "testnet-grpc-read": 2,
+    "testnet-graphql-query": 2,
+    "exact-login-session-read": 1,
+    "signed-login-approval": 1
+  },
+  "forbiddenCount": 0,
+  "forbidden": [],
+  "browserClosed": true
+}

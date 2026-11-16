@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-11-02T22:37:41.634883+00:00",
+  "scope": "canonical-only",
+  "canonicalEntries": 122,
+  "verifiedBackups": 122,
+  "unchangedCurrent": 120,
+  "missingCurrent": 0,
+  "unexpectedChanged": [],
+  "expectedOverlaps": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "backupSha256": "e9311701d36ce7a90f7523ec6ad218e03b8b73d3b15798fdc9ce7a83740d24e7",
+      "currentSha256": "e16b60a7129cc2b9313b6952f5ef4a6381e898c77da31a3d3a3988e08817eb66",
+      "insertOnly": true,
+      "allBackupLinesRetained": true,
+      "newHunkCount": 3,
+      "newLineCount": 51,
+      "allNewHunksContainCompanionIdentifier": true,
+      "originalWipHunks": 6,
+      "originalWipAddedOrChangedLines": 84,
+      "originalWipLinesPreservedVerbatim": 84,
+      "originalWipLinesRemovedOrReplaced": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "backupSha256": "4271665945e6bad392c236a028526b9e1d1f33e9225660cb1c4f62fff27135dc",
+      "currentSha256": "49f7f5ac3684a8fcd7f40670366fe4d160810a4f1e0259ef1c9f0e231ac8a6f0",
+      "insertOnly": true,
+      "allBackupLinesRetained": true,
+      "newHunkCount": 2,
+      "newLineCount": 2,
+      "allNewHunksContainCompanionIdentifier": true,
+      "originalWipHunks": 2,
+      "originalWipAddedOrChangedLines": 2,
+      "originalWipLinesPreservedVerbatim": 2,
+      "originalWipLinesRemovedOrReplaced": 0
+    }
+  ],
+  "conclusion": "PASS: all canonical backups verified; 120 current files identical; two expected companion-only insertion overlaps retain every backup line and original resource WIP.",
+  "finalCurrentHashCheck": {
+    "at": "2026-11-02T22:54:51.918681+00:00",
+    "unchanged": 120,
+    "expectedOverlaps": [
+      "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "mir2-web3/apps/game-client/platform-windows/src/main.rs"
+    ],
+    "unexpectedChanges": 0
+  }
+}

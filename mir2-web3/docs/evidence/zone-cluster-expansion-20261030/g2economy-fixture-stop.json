@@ -1,0 +1,11 @@
+{
+  "verifiedBinary": "C:\\mir2-build\\hunting-permit-postgres\\pgsql\\bin\\postgres.exe",
+  "dockerChanged": false,
+  "postmasterPidFileAbsent": true,
+  "pgCtlExitCode": 0,
+  "stopMode": "fast",
+  "atUtc": "2026-10-30T14:38:06.3142462Z",
+  "verifiedPostmasterPid": 67312,
+  "verifiedDataDirectory": "E:\\mir2-capacity-goal-20261030\\pgdata",
+  "remoteServicesChanged": false
+}
